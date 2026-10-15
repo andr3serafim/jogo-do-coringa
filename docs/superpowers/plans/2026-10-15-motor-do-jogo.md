@@ -4040,7 +4040,7 @@ git commit -m "test(engine): propriedades (conservação, sigilo, determinismo, 
 | §1.9 resolução do ataque | 6 |
 | §1.10 iniciativa e Escolha da iniciativa | 5, 7 |
 | §1.11 Pressão da mesa, anti-travamento, fim de jogo | 4, 6, 7 |
-| §1.12 TIMEOUT (os timers ficam no servidor, Plano 3) | 5, 7 |
+| §1.12 TIMEOUT (os timers ficam no sub-projeto 2, servidor) | 5, 7 |
 | §1.13 exemplos 1 a 7 | 3, 6, 7, 9 |
 | §2 API, estado, fases, ações, eventos, informação oculta, config | 1–13 |
 | §5 testes de cenário e invariantes | todas; propriedades na 13 |
