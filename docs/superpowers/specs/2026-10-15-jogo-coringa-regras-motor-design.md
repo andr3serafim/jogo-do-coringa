@@ -36,13 +36,13 @@ Alternativas descartadas: Node + Colyseus (custo de servidor; sincronização de
 
 ## 1. Regras v2
 
-Legenda das marcações: **[O]** original · **[I]** interpretação aprovada · **[M]** mudança aprovada · **[N]** regra nova aprovada (com chave liga/desliga na config, §2.7) .
+Legenda das marcações: **[O]** original · **[I]** interpretação aprovada · **[M]** mudança aprovada · **[N]** regra nova aprovada (com chave liga/desliga na config, §2.7).
 
 ### 1.0 Pendências resolvidas
 
 Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **[I]** no texto.
 
-1. **Reflect × K (leitura do item 2):** quem ataca um Reflect ativo tem **todos os K quebrados** e **leva o dano refletido inteiro** — o K não absorve. (Leitura alternativa: os K quebram juntos e absorvem o dano, e o atacante leva 0.)
+1. **Reflect × K (leitura do item 2):** quem ataca um Reflect ativo tem **todos os K quebrados** e **leva o dano refletido inteiro** — o K não absorve.
 2. **Reflect × atacante sob Defesa Absoluta:** os K do atacante quebram (o Reflect sempre quebra K), mas ele leva **0** de dano e **não perde os Q** — coerente com "imune a qualquer dano" da Defesa Absoluta.
 3. **Pressão da mesa × K:** dano absorvido por K **não** conta como dano — a pressão continua subindo enquanto os K quebram. Risco: um líder com Ataque vazio e alguns K tentar ganhar no anti-travamento; como só há 6 K e 1 quebra por ataque, eles não seguram 5 rodadas sozinhos. O bot `turtle` também joga K para medir isso.
 4. **Pressão da mesa fixa na rodada:** o bônus vale para a rodada inteira, mesmo que alguém tome dano no primeiro turno. Se zerasse na hora, atacar primeiro sob pressão dominaria a Escolha da iniciativa.
