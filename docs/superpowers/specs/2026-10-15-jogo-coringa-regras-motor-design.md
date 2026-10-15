@@ -36,7 +36,23 @@ Alternativas descartadas: Node + Colyseus (custo de servidor; sincronização de
 
 ## 1. Regras v2
 
-Legenda das marcações: **[O]** original · **[I]** interpretação aprovada · **[M]** mudança aprovada.
+Legenda das marcações: **[O]** original · **[I]** interpretação aprovada · **[M]** mudança aprovada · **[P]** proposta feita nesta spec — **aguardando confirmação**.
+
+### 1.0 Decisões novas para confirmar ([P])
+
+Surgiram ao fechar casos de borda durante a escrita; não foram discutidas em conversa.
+
+1. **Reflect e a fila:** o dono do Reflect também perde a 1ª carta de Defesa quando o Reflect dispara (regra uniforme: todo ataque remove as duas cartas).
+2. **K contra dano refletido:** o K do atacante absorve o dano refletido; atacante sob Defesa Absoluta leva 0 e não perde os Q.
+3. **A contra Reflect:** o Ás não pode mirar as cartas de um Reflect ativo (ele só cai pelas contra-jogadas próprias).
+4. **Defesa Absoluta contra Sacrifício:** a Defesa Absoluta também bloqueia Sacrifício.
+5. **Ataque Absoluto contra Reflect:** o Reflect intercepta tudo — os K do dono do Reflect não quebram; o ×5 volta para o atacante.
+6. **Um Reflect por vez:** máximo de 1 Reflect ativo por jogador; Reflect que expira sem disparar vai para o cemitério.
+7. **Dano refletido conta** como dano causado pelo dono do Reflect (iniciativa e anti-travamento).
+8. **Distribuição:** cartas dadas uma a uma, alternando, começando por quem tem a iniciativa.
+9. **Monte e cemitério vazios:** a compra para (o jogador recebe menos cartas).
+10. **Quadra refeita:** se uma quadra se desfaz e se forma de novo, gera nova Ressurreição.
+11. **Timeout no Equipar:** com as duas fileiras do mesmo tamanho, a carta vai para a Defesa.
 
 ### 1.1 Componentes
 
@@ -70,14 +86,14 @@ Legenda das marcações: **[O]** original · **[I]** interpretação aprovada ·
 
 ### 1.4 Rodada de Equipar
 
-1. Cada jogador recebe **4 cartas**, distribuídas alternadamente uma a uma, começando por quem tem a iniciativa.
+1. Cada jogador recebe **4 cartas**, distribuídas alternadamente uma a uma, começando por quem tem a iniciativa **[P]**.
 2. **Especiais** (J, Q, K, A) vão para a **mão**.
 3. **Numéricas vão obrigatoriamente para o campo [I]**, **na ordem em que foram compradas** — o jogador **não organiza** a ordem **[O]**. Para cada numérica ele escolhe apenas o destino:
    - Fileira de Ataque ou de Defesa (só pode escolher uma fileira que não esteja cheia);
    - se **as duas estiverem cheias** **[O]**: substituir a **última carta** (a do fim da fila) de qualquer fileira — a carta antiga vai para o cemitério — **ou** descartar a nova no cemitério **[I]**.
 4. Os dois jogadores montam **ao mesmo tempo, em segredo**; o resultado é revelado junto quando ambos confirmam (ou o tempo acaba) **[M]**.
 5. Especiais **não** podem ser jogados na rodada de Equipar **[O]**.
-6. **Monte vazio [O]:** ao precisar comprar com o monte vazio, o **cemitério inteiro é embaralhado e vira o novo monte**. Se monte e cemitério estiverem vazios, a compra para (o jogador recebe menos cartas).
+6. **Monte vazio [O]:** ao precisar comprar com o monte vazio, o **cemitério inteiro é embaralhado e vira o novo monte**. Se monte e cemitério estiverem vazios, a compra para (o jogador recebe menos cartas) **[P]**.
 7. Após a revelação, verificam-se as quadras (Fallen is Back, §1.8).
 
 ### 1.5 Rodada de Ataque
@@ -109,30 +125,30 @@ Legenda das marcações: **[O]** original · **[I]** interpretação aprovada ·
 **K — Guarda do Coringa [M]**
 - Vai para a Guarda. Quando um ataque causaria dano (> 0) ao Coringa, **1 K absorve todo o dano e quebra** (vai para o cemitério; quebra o K mais antigo).
 - Se o dano líquido for 0, nenhum K é consumido.
-- Absorve também dano refletido (Reflect) **[I]** — "bloqueia qualquer dano" **[O]**.
+- Absorve também dano refletido (Reflect) **[P]** — "bloqueia qualquer dano" **[O]**.
 - Podem ser jogados **vários K por turno** **[M aprovado]**; cada jogada de K abre a janela de reação do oponente.
 
 **A — Armadilha [M]**
 - **Destrói 1 J, Q ou K** do campo do oponente (buff ou guarda) → cemitério.
 - Pode ser usado na **fase principal do seu turno** ou na **janela de reação** quando o oponente **declara ataque** ou **joga K**.
-- **Não** pode mirar as cartas de um Reflect ativo **[I]** (o Reflect tem contra-jogadas próprias).
+- **Não** pode mirar as cartas de um Reflect ativo **[P]** (o Reflect tem contra-jogadas próprias).
 - **Não** pode mirar um jogador sob Defesa Absoluta **[O]**.
 
 **Sacrifício (regra nova do autor) [M]**
 - Na **fase principal do seu turno** (nunca como reação), descarte um **J** da mão para destruir 1 **J** do oponente, ou um **Q** da mão para destruir 1 **Q** do oponente. Ambos vão para o cemitério.
-- **Não** funciona contra jogador sob Defesa Absoluta **[I]**.
+- **Não** funciona contra jogador sob Defesa Absoluta **[P]**.
 
 **Reflect — K + J + Q jogados juntos da mão [O, refinado]**
-- Lançado na fase principal do seu turno. Fica **ativo até o fim do próximo turno de ataque do oponente**. Máximo de 1 Reflect ativo por jogador.
+- Lançado na fase principal do seu turno. Fica **ativo até o fim do próximo turno de ataque do oponente**. Máximo de 1 Reflect ativo por jogador **[P]**.
 - **Se o oponente atacar enquanto o Reflect estiver ativo:**
   1. Todos os **Q** do atacante quebram (cemitério) **[O]**;
   2. o atacante recebe **dano refletido = max(0, ATK_atacante − ⌊DEF_base_atacante / 2⌋)** **[O]**, onde ATK é o ataque completo (com multiplicador de J) e DEF_base é a soma da Defesa do atacante + bônus de quadra, **sem multiplicador**;
-  3. o defensor (dono do Reflect) recebe **0**; nenhum efeito do ataque se aplica a ele (nem quebra de K por Ataque Absoluto);
-  4. remoção de cartas da fila ocorre normalmente (§1.9 passo 8);
+  3. o defensor (dono do Reflect) recebe **0**; nenhum efeito do ataque se aplica a ele (nem quebra de K por Ataque Absoluto) **[P]**;
+  4. remoção de cartas da fila ocorre normalmente (§1.9 passo 8) — inclusive a 1ª da Defesa do dono do Reflect **[P]**;
   5. as 3 cartas do Reflect vão para o cemitério.
-- O dano refletido pode ser absorvido por um **K** do atacante; contra atacante sob **Defesa Absoluta** o dano é 0 e seus Q não quebram **[I]**.
-- O dano refletido **conta como dano causado pelo dono do Reflect** para iniciativa e anti-travamento.
-- Se o oponente não atacar (Fileira de Ataque vazia), o Reflect expira ao fim do turno dele e vai para o cemitério.
+- O dano refletido pode ser absorvido por um **K** do atacante; contra atacante sob **Defesa Absoluta** o dano é 0 e seus Q não quebram **[P]**.
+- O dano refletido **conta como dano causado pelo dono do Reflect** para iniciativa e anti-travamento **[P]**.
+- Se o oponente não atacar (Fileira de Ataque vazia), o Reflect expira ao fim do turno dele e vai para o cemitério **[P]**.
 - **Contra-jogadas:**
   - **Anular [O]:** na janela de reação aberta quando o Reflect é lançado, o oponente joga **K+J+Q da mão** → os dois conjuntos (6 cartas) vão para o cemitério.
   - **Proteção por sacrifício [O do autor]:** o oponente que tiver **1 J, 1 Q e 1 K equipados** pode sacrificá-los para anular o Reflect — na janela de reação do lançamento **ou** na fase principal do próprio turno, antes de declarar o ataque **[I]**. O Reflect e as 3 cartas sacrificadas vão para o cemitério.
@@ -156,11 +172,11 @@ Legenda das marcações: **[O]** original · **[I]** interpretação aprovada ·
 - **Bônus [O]:** enquanto a quadra existir, a fileira soma **+ valor da carta** antes do multiplicador **[I]** (quadra de 10 → +10). Cada quadra dá bônus uma única vez, mesmo com 5+ cartas iguais. Com limite de 7 cartas cabe no máximo uma quadra por fileira; se o limite subir, cada quadra conta separadamente.
 - **Ressurreição [M]:** ao formar uma quadra, o jogador ganha **1 Ressurreição**: na fase principal de um turno seu, pega **1 carta numérica** do cemitério **[O do autor: só numéricas]** e a coloca no **fim de uma fileira à escolha** (que tenha espaço).
   - Validade: enquanto a quadra existir, com **garantia mínima de 3 rodadas** após a formação **[O]**.
-  - Uso único por quadra. Se a quadra se desfizer e se formar de novo depois, gera nova Ressurreição.
+  - Uso único por quadra. Se a quadra se desfizer e se formar de novo depois, gera nova Ressurreição **[P]**.
 
 **Defesa Absoluta — 4 Q nos Buffs de Defesa**
 - Ativa ao colocar o 4º Q. Dura **até o fim do próximo turno de ataque do oponente** ("1 rodada") **[O]**.
-- Enquanto ativa **[O]**: imune a dano, a **A**, a **Sacrifício** **[I]** e à quebra de Q do Reflect **[I]**; **nenhuma carta da Fileira de Defesa vai para o cemitério**.
+- Enquanto ativa **[O]**: imune a dano, a **A**, a **Sacrifício** **[P]** e à quebra de Q do Reflect **[P]**; **nenhuma carta da Fileira de Defesa vai para o cemitério**.
 - Ao terminar: **apenas 1 Q** (o mais antigo) vai para o cemitério **[O do autor]**; os outros 3 continuam (multiplicador 4×). Novo Q → nova Defesa Absoluta.
 
 **Ataque Absoluto — 4 J nos Buffs de Ataque**
@@ -168,7 +184,7 @@ Legenda das marcações: **[O]** original · **[I]** interpretação aprovada ·
 - **Quebra todos os K** do alvo e o dano é calculado **normalmente**: ATK − DEF **[O do autor]**.
 - Após o ataque: **apenas 1 J** (o mais antigo) vai para o cemitério **[O do autor]**.
 - **Absoluto contra Absoluto [I]:** se o alvo estiver sob Defesa Absoluta, os K dele quebram e o dano é a conta normal (ATK×5 − DEF×5). A fileira de Defesa dele continua protegida.
-- Contra Reflect ativo: o Reflect intercepta tudo (o ×5 volta para o atacante).
+- Contra Reflect ativo: o Reflect intercepta tudo (o ×5 volta para o atacante; os K do dono do Reflect não quebram **[P]**).
 
 **Exódia — 4 K na Guarda [O + contra-jogo M]**
 - Após a janela de reação da jogada de K, se a Guarda tiver **4 ou mais K**, **o jogo acaba na hora** e quem a montou vence.
@@ -211,7 +227,7 @@ DEF = (soma(Defesa do defensor) + bônus) × (1 + nQ)
 
 | Momento | Tempo | Se estourar |
 |---|---|---|
-| Equipar (simultâneo) | 40 s | cada numérica restante vai para a fileira com menos cartas (empate → Defesa); ambas cheias → cemitério |
+| Equipar (simultâneo) | 40 s | cada numérica restante vai para a fileira com menos cartas (empate → Defesa **[P]**); ambas cheias → cemitério |
 | Turno de ataque | 30 s | declara o ataque sem jogar mais especiais (ou passa, se Ataque vazio) |
 | Janela de reação | 8 s (mínimo 2 s) | passa |
 | Reconexão | 60 s | W.O. |
