@@ -40,7 +40,10 @@ Legenda das marcações: **[O]** original · **[I]** interpretação aprovada ·
 
 ### 1.0 Pendências ([P])
 
-1. **Reflect × atacante sob Defesa Absoluta:** os K do atacante quebram (o Reflect sempre quebra K), mas ele leva **0** de dano e **não perde os Q** — coerente com "imune a qualquer dano" da Defesa Absoluta.
+1. **Reflect × K (leitura do item 2):** quem ataca um Reflect ativo tem **todos os K quebrados** e **leva o dano refletido inteiro** — o K não absorve. (Leitura alternativa: os K quebram juntos e absorvem o dano, e o atacante leva 0.)
+2. **Reflect × atacante sob Defesa Absoluta:** os K do atacante quebram (o Reflect sempre quebra K), mas ele leva **0** de dano e **não perde os Q** — coerente com "imune a qualquer dano" da Defesa Absoluta.
+3. **Pressão da mesa × K:** dano absorvido por K **não** conta como dano — a pressão continua subindo enquanto os K quebram. Risco: um líder com Ataque vazio e alguns K tentar ganhar no anti-travamento; como só há 6 K e 1 quebra por ataque, eles não seguram 5 rodadas sozinhos. O bot `turtle` também joga K para medir isso.
+4. **Pressão da mesa fixa na rodada:** o bônus vale para a rodada inteira, mesmo que alguém tome dano no primeiro turno. Se zerasse na hora, atacar primeiro sob pressão dominaria a Escolha da iniciativa.
 
 ### 1.1 Componentes
 
@@ -115,7 +118,7 @@ Legenda das marcações: **[O]** original · **[I]** interpretação aprovada ·
 **K — Guarda do Coringa [M]**
 - Vai para a Guarda. Quando um ataque causaria dano (> 0) ao Coringa, **1 K absorve todo o dano e quebra** (vai para o cemitério; quebra o K mais antigo).
 - Se o dano líquido for 0, nenhum K é consumido.
-- **Não protege contra Reflect [I]:** quem ataca um Reflect ativo tem **todos os K quebrados** e leva o dano refletido inteiro (§1.6, Reflect).
+- **Não protege contra Reflect [P]:** quem ataca um Reflect ativo tem **todos os K quebrados** e leva o dano refletido inteiro (§1.6, Reflect).
 - Podem ser jogados **vários K por turno** **[M]**; cada jogada de K abre a janela de reação do oponente.
 
 **A — Armadilha [M]**
@@ -138,7 +141,7 @@ Legenda das marcações: **[O]** original · **[I]** interpretação aprovada ·
 - Lançado na fase principal do seu turno. Fica **ativo até o fim do próximo turno de ataque do oponente**. Máximo de 1 Reflect ativo por jogador **[I]**.
 - **Se o oponente atacar enquanto o Reflect estiver ativo:**
   1. todos os **Q** do atacante quebram **[O]**;
-  2. todos os **K** do atacante quebram **[I]**;
+  2. todos os **K** do atacante quebram **[P]**;
   3. o atacante recebe **dano refletido = max(0, ATK_atacante − ⌊DEF_base_atacante / 2⌋)** **[O]**, onde ATK é o ataque completo (com multiplicador) e DEF_base é a soma da Defesa do atacante + bônus de quadra, **sem multiplicador**;
   4. o dono do Reflect recebe **0**; nenhum outro efeito do ataque se aplica a ele (nem quebra de K por Ataque Absoluto) **[I]**;
   5. a remoção de cartas da fila ocorre normalmente (§1.9 passo 8) — inclusive a 1ª da Defesa do dono do Reflect **[I]**;
@@ -218,8 +221,8 @@ DEF = (soma(Defesa do defensor) + bônus) × (1 + nQ)
 
 ### 1.11 Pressão, anti-travamento e fim de jogo
 
-- **"Rodada sem dano":** rodada de Ataque em que **nenhum Coringa perdeu vida** (dano absorvido por K não conta como dano).
-- **Pressão da mesa [N]:** cada rodada de Ataque **seguida** sem dano dá **+1 no multiplicador de ataque dos dois jogadores**, acumulando (1 rodada sem dano → +1; 2 → +2; …). O bônus é fixado no início de cada rodada de Ataque e vale para a rodada inteira; volta a 0 ao fim de uma rodada em que alguém perdeu vida.
+- **"Rodada sem dano":** rodada de Ataque em que **nenhum Coringa perdeu vida** (dano absorvido por K não conta como dano **[P]**).
+- **Pressão da mesa [N]:** cada rodada de Ataque **seguida** sem dano dá **+1 no multiplicador de ataque dos dois jogadores**, acumulando (1 rodada sem dano → +1; 2 → +2; …). O bônus é fixado no início de cada rodada de Ataque e vale para a rodada inteira **[P]**; volta a 0 ao fim de uma rodada em que alguém perdeu vida.
   - Objetivo: fechar a brecha da "tartaruga" — quem está na frente põe tudo na Defesa, deixa o Ataque vazio e espera o anti-travamento.
 - **Anti-travamento [M]:** **5 rodadas de Ataque seguidas** sem dano (3 se a Pressão da mesa estiver desligada) → vence quem tiver mais vida; vida igual → **empate**.
 - **Vida ≤ 0** → perde na hora, mesmo no meio da rodada **[O]**.
@@ -360,7 +363,7 @@ RulesConfig {
 - **Bots:**
   - `random` — qualquer ação legal;
   - `greedy` — heurísticas: destino da numérica que maximiza ATK−DEF esperado; A na maior ameaça; Reflect quando o ATK do oponente é alto; Sacrifício quando o buff do oponente vale mais que o próprio; escolha de ordem pela situação de vida;
-  - `turtle` — quando está na frente em vida, põe tudo na Defesa e deixa o Ataque vazio (testa a brecha que a Pressão da mesa fecha).
+  - `turtle` — quando está na frente em vida, põe tudo na Defesa, deixa o Ataque vazio e joga todos os K que tiver (testa a brecha que a Pressão da mesa fecha, inclusive via K).
 - Interface: `Bot = (view: PlayerView, legal: Action[], rng) => Action`.
 - **Runner:** N partidas por configuração com sementes reprodutíveis; varredura de parâmetros (`hp`, `rowLimit`, composição do baralho); **comparação liga/desliga de cada regra [N]**; saída em tabela no terminal + JSON em `packages/sim/reports/`.
 - **Métricas e metas iniciais:**
