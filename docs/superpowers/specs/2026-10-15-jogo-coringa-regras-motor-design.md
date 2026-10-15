@@ -1,7 +1,7 @@
 # Jogo do Coringa — Regras v2 + Motor + Simulador (Sub-projeto 1)
 
 - **Data:** 2026-10-15
-- **Status:** design e regras novas aprovados em conversa; aguardando revisão desta spec
+- **Status:** **aprovada** pelo autor em 2026-10-15
 - **Origem:** regras originais em `JOGO DO CORINGA 2.0.txt` (criado pelo autor quando mais novo)
 
 ---
@@ -36,9 +36,11 @@ Alternativas descartadas: Node + Colyseus (custo de servidor; sincronização de
 
 ## 1. Regras v2
 
-Legenda das marcações: **[O]** original · **[I]** interpretação aprovada · **[M]** mudança aprovada · **[N]** regra nova aprovada (com chave liga/desliga na config, §2.7) · **[P]** proposta — **aguardando confirmação**.
+Legenda das marcações: **[O]** original · **[I]** interpretação aprovada · **[M]** mudança aprovada · **[N]** regra nova aprovada (com chave liga/desliga na config, §2.7) .
 
-### 1.0 Pendências ([P])
+### 1.0 Pendências resolvidas
+
+Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **[I]** no texto.
 
 1. **Reflect × K (leitura do item 2):** quem ataca um Reflect ativo tem **todos os K quebrados** e **leva o dano refletido inteiro** — o K não absorve. (Leitura alternativa: os K quebram juntos e absorvem o dano, e o atacante leva 0.)
 2. **Reflect × atacante sob Defesa Absoluta:** os K do atacante quebram (o Reflect sempre quebra K), mas ele leva **0** de dano e **não perde os Q** — coerente com "imune a qualquer dano" da Defesa Absoluta.
@@ -118,7 +120,7 @@ Legenda das marcações: **[O]** original · **[I]** interpretação aprovada ·
 **K — Guarda do Coringa [M]**
 - Vai para a Guarda. Quando um ataque causaria dano (> 0) ao Coringa, **1 K absorve todo o dano e quebra** (vai para o cemitério; quebra o K mais antigo).
 - Se o dano líquido for 0, nenhum K é consumido.
-- **Não protege contra Reflect [P]:** quem ataca um Reflect ativo tem **todos os K quebrados** e leva o dano refletido inteiro (§1.6, Reflect).
+- **Não protege contra Reflect [I]:** quem ataca um Reflect ativo tem **todos os K quebrados** e leva o dano refletido inteiro (§1.6, Reflect).
 - Podem ser jogados **vários K por turno** **[M]**; cada jogada de K abre a janela de reação do oponente.
 
 **A — Armadilha [M]**
@@ -141,12 +143,12 @@ Legenda das marcações: **[O]** original · **[I]** interpretação aprovada ·
 - Lançado na fase principal do seu turno. Fica **ativo até o fim do próximo turno de ataque do oponente**. Máximo de 1 Reflect ativo por jogador **[I]**.
 - **Se o oponente atacar enquanto o Reflect estiver ativo:**
   1. todos os **Q** do atacante quebram **[O]**;
-  2. todos os **K** do atacante quebram **[P]**;
+  2. todos os **K** do atacante quebram **[I]**;
   3. o atacante recebe **dano refletido = max(0, ATK_atacante − ⌊DEF_base_atacante / 2⌋)** **[O]**, onde ATK é o ataque completo (com multiplicador) e DEF_base é a soma da Defesa do atacante + bônus de quadra, **sem multiplicador**;
   4. o dono do Reflect recebe **0**; nenhum outro efeito do ataque se aplica a ele (nem quebra de K por Ataque Absoluto) **[I]**;
   5. a remoção de cartas da fila ocorre normalmente (§1.9 passo 8) — inclusive a 1ª da Defesa do dono do Reflect **[I]**;
   6. as 3 cartas do Reflect vão para o cemitério.
-- Atacante sob Defesa Absoluta: ver pendência §1.0 **[P]**.
+- Atacante sob Defesa Absoluta: os K quebram, mas ele leva 0 de dano e não perde os Q (§1.0 item 2) **[I]**.
 - O dano refletido **conta como dano causado pelo dono do Reflect** para iniciativa, Pressão da mesa e anti-travamento **[I]**.
 - Se o oponente não atacar (Fileira de Ataque vazia), o Reflect expira ao fim do turno dele e vai para o cemitério **[I]**.
 - **Contra-jogadas:**
@@ -221,8 +223,8 @@ DEF = (soma(Defesa do defensor) + bônus) × (1 + nQ)
 
 ### 1.11 Pressão, anti-travamento e fim de jogo
 
-- **"Rodada sem dano":** rodada de Ataque em que **nenhum Coringa perdeu vida** (dano absorvido por K não conta como dano **[P]**).
-- **Pressão da mesa [N]:** cada rodada de Ataque **seguida** sem dano dá **+1 no multiplicador de ataque dos dois jogadores**, acumulando (1 rodada sem dano → +1; 2 → +2; …). O bônus é fixado no início de cada rodada de Ataque e vale para a rodada inteira **[P]**; volta a 0 ao fim de uma rodada em que alguém perdeu vida.
+- **"Rodada sem dano":** rodada de Ataque em que **nenhum Coringa perdeu vida** (dano absorvido por K não conta como dano **[I]**).
+- **Pressão da mesa [N]:** cada rodada de Ataque **seguida** sem dano dá **+1 no multiplicador de ataque dos dois jogadores**, acumulando (1 rodada sem dano → +1; 2 → +2; …). O bônus é fixado no início de cada rodada de Ataque e vale para a rodada inteira **[I]**; volta a 0 ao fim de uma rodada em que alguém perdeu vida.
   - Objetivo: fechar a brecha da "tartaruga" — quem está na frente põe tudo na Defesa, deixa o Ataque vazio e espera o anti-travamento.
 - **Anti-travamento [M]:** **5 rodadas de Ataque seguidas** sem dano (3 se a Pressão da mesa estiver desligada) → vence quem tiver mais vida; vida igual → **empate**.
 - **Vida ≤ 0** → perde na hora, mesmo no meio da rodada **[O]**.
