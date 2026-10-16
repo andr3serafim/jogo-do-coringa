@@ -1,6 +1,8 @@
-import type { RoomMessage, SeatInfo } from '@coringa/protocol';
+import { viewEvents, viewFor } from '@coringa/engine';
+import type { GameEvent } from '@coringa/engine';
+import type { RoomMessage, SeatInfo, StateMessage } from '@coringa/protocol';
 import { TIMERS } from './timers.ts';
-import type { RoomRecord, SocketInfo } from './types.ts';
+import type { RoomRecord, SeatId, SocketInfo } from './types.ts';
 
 /**
  * Mensagem `room` com os dados públicos da sala. `connected` = há socket autenticado naquele assento;
@@ -40,4 +42,29 @@ export function roomMessage(record: RoomRecord, sockets: SocketInfo[], now: numb
   };
   if (record.outcome) message.outcome = record.outcome;
   return message;
+}
+
+/**
+ * Mensagem `state` de um assento: `viewFor` e `viewEvents` são tudo o que sai do jogo (nada de semente, monte
+ * ou mão do oponente). Os prazos ficam `null` até a Tarefa 7. `flags` marca a volta à sala (`catchUp`, `resync`).
+ */
+export function stateFor(
+  record: RoomRecord,
+  seat: SeatId,
+  events: GameEvent[],
+  now: number,
+  flags?: { catchUp?: true; resync?: true },
+): StateMessage {
+  const game = record.game;
+  if (!game) throw new Error('stateFor chamado sem partida');
+  return {
+    t: 'state',
+    seq: record.seq,
+    epoch: record.epoch,
+    view: viewFor(game.state, seat),
+    events: viewEvents(events, seat),
+    deadline: null,
+    serverNow: now,
+    ...flags,
+  };
 }
