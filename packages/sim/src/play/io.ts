@@ -6,9 +6,41 @@ export interface Io {
   print(text: string): void;
 }
 
+/** Quem joga saiu no meio da partida (Ctrl+C ou fim da entrada). */
+export class QuitSignal extends Error {
+  constructor() {
+    super('partida interrompida');
+    this.name = 'QuitSignal';
+  }
+}
+
+/** Terminal de verdade. Ctrl+C ou fim da entrada viram `QuitSignal` na pergunta pendente. */
 export function consoleIo(): Io & { close(): void } {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
-  return { ask: (q) => rl.question(q), print: (t) => console.log(t), close: () => rl.close() };
+  let closed = false;
+  let quit: (reason: QuitSignal) => void = () => {};
+  const quitting = new Promise<never>((_, reject) => {
+    quit = reject;
+  });
+  quitting.catch(() => {});
+  rl.once('close', () => {
+    closed = true;
+    quit(new QuitSignal());
+  });
+  rl.on('SIGINT', () => rl.close());
+  return {
+    ask: async (q) => {
+      if (closed) throw new QuitSignal();
+      try {
+        return await Promise.race([rl.question(q), quitting]);
+      } catch (e) {
+        if (closed) throw new QuitSignal();
+        throw e;
+      }
+    },
+    print: (t) => console.log(t),
+    close: () => rl.close(),
+  };
 }
 
 /** Respostas fixas, na ordem; acabar as respostas é erro (o teste pediu menos do que o jogo perguntou). */

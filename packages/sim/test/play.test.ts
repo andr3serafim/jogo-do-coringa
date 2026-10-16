@@ -1,13 +1,15 @@
-import { mkdtempSync, readFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { applyAction, createGame, legalActions, makeConfig, viewFor, type GameEvent } from '@coringa/engine';
 // Dívida: trocar por um subpath `@coringa/engine/testing` quando a interface chegar (acopla os pacotes).
 import { P1, P2, setup } from '../../engine/test/helpers.ts';
 import { renderBoard } from '../src/play/board.ts';
-import { BOT, HUMAN, playGame } from '../src/play/game.ts';
-import { askChoice, scriptedIo } from '../src/play/io.ts';
+import { BOT, HUMAN, playGame, REPLAYS_DIR } from '../src/play/game.ts';
+import { askChoice, QuitSignal, scriptedIo } from '../src/play/io.ts';
 import { actionText, cardText, eventText, namesFor } from '../src/play/text.ts';
 
 const names = namesFor(P1, 'Bot');
@@ -97,5 +99,27 @@ describe('partida no terminal (roteirizada)', () => {
     const text = io.output.join('\n');
     expect(text).toMatch(/Carta 1\/\d: /);
     expect(text).toContain('Fileira de Defesa');
+  });
+
+  it('sair no meio (Ctrl+C ou fim da entrada) encerra sem erro e salva a partida até ali', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'coringa-sair-'));
+    let n = 0;
+    const io = scriptedIo(() => {
+      if (n++ >= 10) throw new QuitSignal();
+      return '1';
+    });
+    const outcome = await playGame({ io, seed: 'sair', bot: 'greedy', config: makeConfig(), saveDir: dir });
+    expect(outcome.result).toBeNull();
+    expect(io.output.join('\n')).toContain('Partida interrompida');
+    expect(JSON.parse(readFileSync(outcome.savedTo!, 'utf8')).steps.length).toBeGreaterThan(0);
+  });
+
+  it('no terminal de verdade, o fim da entrada encerra com código 0', () => {
+    const cli = fileURLToPath(new URL('../src/cli/play.ts', import.meta.url));
+    const r = spawnSync(process.execPath, [cli, '--semente', 'teste-fim-da-entrada'], { input: '', encoding: 'utf8' });
+    rmSync(join(REPLAYS_DIR, 'teste-fim-da-entrada.json'), { force: true });
+    expect(r.stderr).toBe('');
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain('Partida interrompida');
   });
 });

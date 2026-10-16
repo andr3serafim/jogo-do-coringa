@@ -13,4 +13,4 @@ const report = calibrate({ games: 3, orderGames: 2, rollouts: 2, sections: SECTI
 if (report.base.some((s) => s.metrics.terminated !== 1)) throw new Error('smoke: partida que não terminou');
 if (recordGolden().length === 0) throw new Error('smoke: sem partidas de referência');
 const { result } = await playGame({ io: scriptedIo(() => '1'), seed: 'smoke', bot: 'greedy', config: makeConfig(), saveDir: null });
-console.log(`smoke do simulador ok: calibração mínima, partidas de referência e jogo no terminal (${result.kind}) em ${((performance.now() - started) / 1000).toFixed(1)} s`);
+console.log(`smoke do simulador ok: calibração mínima, partidas de referência e jogo no terminal (${result?.kind ?? 'interrompida'}) em ${((performance.now() - started) / 1000).toFixed(1)} s`);

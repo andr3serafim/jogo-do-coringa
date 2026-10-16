@@ -20,7 +20,7 @@ import type { ReplayStep } from '../match.ts';
 import type { Replay } from '../replay.ts';
 import { createRng } from '../rng.ts';
 import { renderBoard } from './board.ts';
-import { askChoice, type Io } from './io.ts';
+import { askChoice, QuitSignal, type Io } from './io.ts';
 import { actionText, cardText, DESTINATION_TEXT, eventText, namesFor, resultText } from './text.ts';
 
 export const HUMAN: PlayerId = 'voce';
@@ -37,7 +37,8 @@ export interface PlayOptions {
 }
 
 export interface PlayOutcome {
-  result: GameResult;
+  /** null = quem joga saiu no meio (Ctrl+C ou fim da entrada). */
+  result: GameResult | null;
   replay: Replay;
   savedTo: string | null;
 }
@@ -92,22 +93,30 @@ export async function playGame(options: PlayOptions): Promise<PlayOutcome> {
   for (const p of state.players) {
     if (p.id === HUMAN) io.print(`Você recebeu: ${[...p.hand, ...p.pending].map(cardText).join(' ')}`);
   }
-  while (state.phase.kind !== 'GAME_OVER') {
-    const actor = actingPlayers(state)[0];
-    const view = viewFor(state, actor);
-    const legal = legalActions(view);
-    const action = actor === HUMAN ? await askHuman(io, view, legal, names) : bot(view, legal, rng);
-    const result = applyAction(state, actor, action);
-    if (!result.ok) throw new Error(`${result.error.code}: ${result.error.message}`);
-    steps.push({ player: actor, action });
-    for (const e of viewEvents(result.events, HUMAN)) {
-      const line = eventText(e, names);
-      if (line !== null) io.print(line);
+  try {
+    while (state.phase.kind !== 'GAME_OVER') {
+      const actor = actingPlayers(state)[0];
+      const view = viewFor(state, actor);
+      const legal = legalActions(view);
+      const action = actor === HUMAN ? await askHuman(io, view, legal, names) : bot(view, legal, rng);
+      const result = applyAction(state, actor, action);
+      if (!result.ok) throw new Error(`${result.error.code}: ${result.error.message}`);
+      steps.push({ player: actor, action });
+      for (const e of viewEvents(result.events, HUMAN)) {
+        const line = eventText(e, names);
+        if (line !== null) io.print(line);
+      }
+      state = result.state;
     }
-    state = result.state;
+  } catch (e) {
+    if (!(e instanceof QuitSignal)) throw e;
   }
-  const finalResult = state.phase.result;
-  io.print(`\n${renderBoard(viewFor(state, HUMAN), names)}\n${resultText(finalResult, names)}`);
+  const finalResult = state.phase.kind === 'GAME_OVER' ? state.phase.result : null;
+  io.print(
+    finalResult
+      ? `\n${renderBoard(viewFor(state, HUMAN), names)}\n${resultText(finalResult, names)}`
+      : `\nPartida interrompida na rodada ${state.round}.`,
+  );
   const replay: Replay = { name: `play-${seed}`, config, seed, players: [HUMAN, BOT], steps };
   const dir = options.saveDir === undefined ? REPLAYS_DIR : options.saveDir;
   const savedTo = dir === null ? null : save(replay, dir);
