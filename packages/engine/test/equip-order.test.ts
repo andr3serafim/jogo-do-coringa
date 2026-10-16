@@ -119,6 +119,19 @@ describe('entradas inválidas (review focus 1, 2 e 5)', () => {
     expect(actErr(s, P1, { type: 'HACK' } as unknown as Action)).toBe('INVALID_ACTION');
   });
 
+  it('ação nula, indefinida ou sem type vira INVALID_ACTION, sem exceção (revisão final I1)', () => {
+    const s = setup();
+    expect(actErr(s, P1, null as unknown as Action)).toBe('INVALID_ACTION');
+    expect(actErr(s, 'system', undefined as unknown as Action)).toBe('INVALID_ACTION');
+    expect(actErr(s, P1, { type: 5 } as unknown as Action)).toBe('INVALID_ACTION');
+  });
+
+  it('CHOOSE_ORDER exige first booleano (revisão final M1)', () => {
+    const s = setup({ phase: { kind: 'ORDER_CHOICE', player: P1 }, initiative: P1 });
+    expect(actErr(s, P1, { type: 'CHOOSE_ORDER', first: 'true' } as unknown as Action)).toBe('INVALID_ACTION');
+    expect(actErr(s, P1, { type: 'CHOOSE_ORDER' } as unknown as Action)).toBe('INVALID_ACTION');
+  });
+
   it('FORFEIT encerra a partida e nada mais é aceito', () => {
     const r = act(setup(), 'system', { type: 'FORFEIT', loser: P1 });
     expect(r.state.phase).toEqual({ kind: 'GAME_OVER', result: { kind: 'WIN', winner: P2, reason: 'FORFEIT' } });

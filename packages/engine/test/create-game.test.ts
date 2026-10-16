@@ -14,6 +14,11 @@ describe('createGame', () => {
     expect(same.ok ? null : same.error.code).toBe('INVALID_PLAYERS');
   });
 
+  it("rejeita 'system' como id de jogador (revisão final M2)", () => {
+    const reserved = createGame(makeConfig(), 's', ['system', P2]);
+    expect(reserved.ok ? null : reserved.error.code).toBe('INVALID_PLAYERS');
+  });
+
   it('começa na rodada 1 de Equipar com 4 cartas para cada', () => {
     const result = createGame(makeConfig(), 'abc', [P1, P2]);
     if (!result.ok) throw new Error(result.error.message);

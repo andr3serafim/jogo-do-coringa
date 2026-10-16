@@ -12,5 +12,6 @@ export function handleChooseOrder(s: GameState, playerId: PlayerId, first: boole
   const phase = s.phase;
   if (phase.kind !== 'ORDER_CHOICE') fail('WRONG_PHASE', 'não há escolha de ordem pendente');
   if (phase.player !== playerId) fail('NOT_YOUR_TURN', 'só quem tem a iniciativa escolhe a ordem');
-  chooseOrder(s, first === true, ev);
+  if (typeof first !== 'boolean') fail('INVALID_ACTION', 'first deve ser verdadeiro ou falso');
+  chooseOrder(s, first, ev);
 }

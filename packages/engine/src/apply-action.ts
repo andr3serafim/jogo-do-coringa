@@ -21,6 +21,9 @@ import type { Action, ActionResult, GameEvent, GameState, PlayerId } from './typ
 
 /** Ponto único de entrada. Nunca muta `state`; erros de regra viram `{ ok: false }`. */
 export function applyAction(state: GameState, player: PlayerId | 'system', action: Action): ActionResult {
+  if (typeof action !== 'object' || action === null || typeof (action as { type?: unknown }).type !== 'string') {
+    return { ok: false, error: { code: 'INVALID_ACTION', message: 'ação malformada' } };
+  }
   if (state.phase.kind === 'GAME_OVER') {
     return { ok: false, error: { code: 'GAME_OVER', message: 'a partida já terminou' } };
   }

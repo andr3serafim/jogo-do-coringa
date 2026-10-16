@@ -30,8 +30,11 @@ export function createGame(config: RulesConfig, seed: string, players: [PlayerId
   const configError = validateConfig(config);
   if (configError) return { ok: false, error: configError };
   const [a, b] = players;
-  if (!a || !b || a === b) {
-    return { ok: false, error: { code: 'INVALID_PLAYERS', message: 'são necessários dois jogadores com ids diferentes' } };
+  if (!a || !b || a === b || a === 'system' || b === 'system') {
+    return {
+      ok: false,
+      error: { code: 'INVALID_PLAYERS', message: "são necessários dois jogadores com ids diferentes (e diferentes de 'system')" },
+    };
   }
   const rng = seedRng(seed);
   const deck = shuffle(rng, buildDeck(config));
