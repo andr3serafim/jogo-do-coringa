@@ -367,28 +367,32 @@ RulesConfig {
 - **Bots:**
   - `random` — qualquer ação legal;
   - `greedy` — heurísticas: destino da numérica que maximiza ATK−DEF esperado; A na maior ameaça; Reflect quando o ATK do oponente é alto; Sacrifício quando o buff do oponente vale mais que o próprio; escolha de ordem pela situação de vida;
-  - `turtle` — quando está na frente em vida, põe tudo na Defesa, deixa o Ataque vazio e joga todos os K que tiver (testa a brecha que a Pressão da mesa fecha, inclusive via K).
-- Interface: `Bot = (view: PlayerView, legal: Action[], rng) => Action`.
-- **Runner:** N partidas por configuração com sementes reprodutíveis; varredura de parâmetros (`hp`, `rowLimit`, composição do baralho); **comparação liga/desliga de cada regra [N]**; saída em tabela no terminal + JSON em `packages/sim/reports/`.
-- **Métricas e metas iniciais:**
+  - `turtle` — quando está na frente em vida, põe tudo na Defesa, deixa o Ataque vazio e joga todos os K que tiver (testa a brecha que a Pressão da mesa fecha, inclusive via K). O Equipar só permite trocar/descartar com as duas fileiras cheias (§1.4): com a Defesa cheia e espaço no Ataque, a numérica vai para o Ataque à força e o ataque passa a ser obrigatório. A própria regra já limita a tartaruga; o relatório separa as vitórias dela por motivo (vida, anti-travamento, Exódia).
+- Interface: `Bot = (view: PlayerView, legal: Action[], rng) => Action`. O `rng` é do bot, com semente própria — nunca o da partida, nunca `Math.random`.
+- **Runner:** N partidas por configuração com sementes reprodutíveis; varredura de parâmetros (`hp`, `rowLimit`, composição do baralho); **comparação liga/desliga de cada regra [N]**, uma por vez a partir do padrão e com as mesmas sementes; saída em tabela no terminal + JSON em `packages/sim/reports/`.
+- **Métricas e metas iniciais** (medidas em partidas `greedy` × `greedy`, salvo indicação; `random` × `random` e `turtle` × `greedy` aparecem no relatório para comparação):
 
 | Métrica | Meta |
 |---|---|
-| Duração | 8–14 rodadas de Ataque (~10–15 min) |
-| Vitória de quem começa com a iniciativa | 45–55% |
-| Escolha da ordem | nenhuma opção dominante (cada uma entre 30% e 70%) |
-| Vitória do `turtle` quando está na frente | não maior que a do `greedy` na mesma situação |
+| Duração | 8–14 rodadas de Ataque (~10–15 min), pela mediana |
+| Vitória de quem começa com a iniciativa | 45–55% (iniciativa sorteada pelo motor ao criar a partida; empate não conta como vitória) |
+| Escolha da ordem | nenhuma opção dominante — métrica contrafactual, abaixo |
+| Vitória do `turtle` quando está na frente | não maior que a do `greedy` na mesma situação — desenho pareado, abaixo |
 | Exódia | 1–3% das partidas |
 | Fallen is Back | aparece em 10–25% das partidas |
 | Fim por anti-travamento | < 5% |
 | Partidas que terminam | 100% |
 
+- **Escolha da ordem (contrafactual):** em cada partida `greedy` × `greedy` sorteia-se um ponto de Escolha da iniciativa. Dali, o simulador joga o resto da partida K vezes indo primeiro e K vezes indo segundo, com as mesmas sementes de rollout para as duas opções (comparação pareada). Cada rollout reamostra a informação oculta para quem escolhe (mão do oponente e ordem do monte), com semente própria, para não espiar o monte real. O ponto é **decisivo** quando a diferença média de pontos (vitória 1, empate 0,5) passa de 2 erros padrão. Metas: entre os pontos decisivos, ir primeiro é melhor em **30–70%**; e pelo menos **20%** dos pontos são decisivos (se a diferença some em quase todo lugar, a escolha não importa, o que também falha a intenção da regra). O relatório traz a direção e o tamanho da diferença. A frequência com que o `greedy` escolhe ir primeiro mede a heurística do bot, não a regra: fica só como informação. É job de calibração; nunca entra no `pnpm check`.
+- **Turtle na mesma situação (pareado):** partidas `greedy` × `greedy` até alguém abrir **10 ou mais** de vida de vantagem ao fim de uma rodada de Ataque. Desse estado, a partida continua duas vezes com as mesmas sementes: num ramo o líder vira `turtle`, no outro segue `greedy`. Meta: pontos do líder `turtle` ≤ pontos do líder `greedy`, com a Pressão ligada. Repete-se com vantagem de 20+ (sensibilidade) e com a Pressão desligada (a brecha que a regra fecha).
+
 Bots não jogam como humanos: as metas guiam a calibração inicial; o ajuste fino vem do playtest.
 
 ## 4. Jogo no terminal (`pnpm play`)
 
-- Partida contra o bot `greedy` no terminal, sem timers.
-- Mostra vida, guarda, buffs, fileiras, quantidade de cartas na mão do oponente, monte, cemitério e pressão atual; lista as ações legais numeradas; escolha de ordem e janelas de reação aparecem como prompts.
+- Partida contra o bot `greedy` no terminal, sem timers (`--bot` troca o bot; `--semente` repete uma partida).
+- Mostra vida, guarda, buffs, fileiras, quantidade de cartas na mão do oponente, monte, cemitério e pressão atual; lista as ações legais numeradas; escolha de ordem e janelas de reação aparecem como prompts. O Equipar é perguntado carta a carta (com as duas fileiras cheias seriam até 81 combinações).
+- Ao terminar, salva a partida (semente + ações) em `packages/sim/replays/`, para reproduzir bugs.
 - Objetivo: validar o "feeling" das regras antes da interface.
 
 ## 5. Testes e qualidade
@@ -402,7 +406,10 @@ Bots não jogam como humanos: as metas guiam a calibração inicial; o ajuste fi
   - `viewFor`/`viewEvents` nunca expõem mão do oponente, ordem do monte nem semente;
   - determinismo (mesma semente + ações → mesmo estado);
   - toda partida termina.
-- **Comando único `pnpm check`:** lint + typecheck + testes com cobertura (meta ≥ 90% de linhas e branches no motor).
+- **Comando único `pnpm check`:** lint + typecheck + testes com cobertura (meta ≥ 90% de linhas e branches no motor) + smoke no Node puro (motor e simulador carregados sem bundler).
+- **Portão automático contra regressões:** hooks versionados (pre-commit e pre-push) rodam o `pnpm check`; a CI roda o mesmo comando em push e PR, e precisa estar verde antes do merge. Quando o check passar de ~45 s, o pre-commit vira a versão rápida (lint, typecheck e testes relacionados) e o pre-push mantém o completo.
+- **Partidas de referência:** replays gravados (semente + ações) reexecutados no motor, com snapshot de um resumo de cada partida. Mudança de regra que torna uma ação ilegal falha no passo exato; mudança de resultado só entra aceitando o snapshot de propósito.
+- **Playouts enviesados:** políticas que forçam Exódia, Absolutos e Reflect expirado, com as invariantes checadas a cada passo; o teste falha se o evento-alvo não acontecer em nenhuma das sementes fixas.
 
 ## 6. Critérios de pronto (sub-projeto 1)
 
