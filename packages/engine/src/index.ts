@@ -4,3 +4,4 @@ export { buildDeck, totalCards } from './deck';
 export { createGame } from './create-game';
 export { applyAction } from './apply-action';
 export { viewEvents, viewFor } from './view';
+export { legalActions } from './legal-actions';
