@@ -414,12 +414,12 @@ O `deadline.at` enviado é o que a interface mostra; o servidor só injeta o `TI
 ### 8.5 Token e origem
 
 - Token só no corpo da resposta HTTP e na primeira mensagem do WebSocket; no objeto, só o hash.
-- Upgrade com cabeçalho `Origin` fora da lista `ALLOWED_ORIGINS` (variável do Worker: o domínio publicado e `http://localhost:*`) → 403. Sem `Origin` (cliente de terminal) é aceito: a proteção contra sequestro de WebSocket entre sites só importa para navegadores, que sempre mandam `Origin`.
+- Upgrade com cabeçalho `Origin` fora da lista `ALLOWED_ORIGINS` (variável do Worker: o domínio publicado e `http://localhost:*`) → fechamento 4003 logo depois de aceitar (§3). Sem `Origin` (cliente de terminal) é aceito: a proteção contra sequestro de WebSocket entre sites só importa para navegadores, que sempre mandam `Origin`.
 
 ### 8.6 Logs
 
 - Nunca registrar token, mão, visão, pendentes nem apelido.
-- **Exceção aprovada** [A]: depois do `GAME_OVER`, uma linha `game.replay` com semente e passos, só nos logs da conta Cloudflare do autor, para reproduzir bugs (§10.4).
+- **Exceção aprovada** [A]: depois do fim da partida (`GAME_OVER` ou abandono), uma linha `game.replay` com semente e passos, só nos logs da conta Cloudflare do autor, para reproduzir bugs (§10.4).
 
 ---
 
