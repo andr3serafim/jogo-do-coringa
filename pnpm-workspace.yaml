@@ -5,3 +5,6 @@ packages:
 # pelo `prepare` da raiz, então o postinstall do simple-git-hooks fica desligado.
 allowBuilds:
   simple-git-hooks: false
+  # esbuild é o bundler do wrangler; workerd é o runtime local (wrangler dev e testes).
+  esbuild: true
+  workerd: true

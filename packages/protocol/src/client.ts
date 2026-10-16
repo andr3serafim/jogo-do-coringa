@@ -52,6 +52,17 @@ export interface RoomConnection {
   remainingMs(deadline: Deadline): number;
 }
 
+/**
+ * O que o cliente usa de um WebSocket. Os handlers `on*` são declarados aqui porque os tipos do
+ * workerd (que o `@coringa/server` usa para checar o núcleo) não os trazem; nos tipos DOM e no
+ * `ws` do Node eles existem.
+ */
+type EventSocket = Omit<WebSocket, 'onopen' | 'onmessage' | 'onclose'> & {
+  onopen: (() => void) | null;
+  onmessage: ((ev: { data: unknown }) => void) | null;
+  onclose: ((ev: { code: number }) => void) | null;
+};
+
 export interface RoomClientOptions {
   /** Origem do servidor, `http(s)://host[:porta]`. */
   server: string;
@@ -85,7 +96,7 @@ export class RoomClient implements RoomConnection {
   readonly #listeners = new Set<(e: ConnectionEvent) => void>();
   readonly #pending = new Map<string, (ack: AckMessage) => void>();
 
-  #ws: WebSocket | null = null;
+  #ws: EventSocket | null = null;
   #pingTimer: unknown = null;
   #reconnectTimer: unknown = null;
   #attempt = 0;
@@ -202,7 +213,7 @@ export class RoomClient implements RoomConnection {
 
   #openSocket(): void {
     const Impl = this.#options.WebSocketImpl ?? globalThis.WebSocket;
-    const ws = new Impl(this.#wsUrl());
+    const ws = new Impl(this.#wsUrl()) as EventSocket;
     this.#ws = ws;
     ws.onopen = () => {
       if (this.#ws !== ws) return;

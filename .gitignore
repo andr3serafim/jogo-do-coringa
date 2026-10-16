@@ -4,3 +4,5 @@ dist/
 *.log
 packages/sim/reports/sim-*.json
 packages/sim/replays/
+.wrangler/
+worker-configuration.d.ts

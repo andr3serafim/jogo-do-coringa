@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint';
 const relativeWithoutTs = String.raw`[source.value=/^\./]:not([source.value=/\.ts$/])`;
 
 export default defineConfig(
-  { ignores: ['**/node_modules/**', '**/coverage/**', '**/dist/**'] },
+  { ignores: ['**/node_modules/**', '**/coverage/**', '**/dist/**', '**/worker-configuration.d.ts', '**/.wrangler/**'] },
   {
     files: ['**/*.ts'],
     extends: [js.configs.recommended, tseslint.configs.recommended],
@@ -17,6 +17,17 @@ export default defineConfig(
           selector: `${node}${relativeWithoutTs}`,
           message: 'Imports relativos precisam terminar em .ts (o Node carrega o código sem bundler).',
         })),
+      ],
+    },
+  },
+  {
+    files: ['packages/server/src/core/**/*.ts', 'packages/protocol/src/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [{ group: ['cloudflare:*'], message: 'O núcleo e o protocolo rodam no Node puro: nada de cloudflare:*.' }],
+        },
       ],
     },
   },
