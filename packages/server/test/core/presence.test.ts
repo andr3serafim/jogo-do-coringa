@@ -170,6 +170,33 @@ describe('queda silenciosa e varredura', () => {
     expect(effects.send.some((entry) => entry.socketId === p1.id && entry.message.t === 'room')).toBe(true);
   });
 
+  it('os dois mudos com 10 s de diferença: o primeiro reconnect vence com o outro já sem sinal → abandono, não W.O.', async () => {
+    const { h, p1, p2 } = await Harness.playing();
+    const rec = h.core.record!;
+    // Varreduras a cada 20 s da largada (T0): p1 fica mudo em T0 + 10 s e p2 em T0 + 20 s.
+    h.advance(10_000);
+    h.silent(p1);
+    h.advance(10_000);
+    h.silent(p2);
+    // A varredura dos 60 s pega só p1 (50 s sem sinal; p2 tem 40 s). O reconnect de p1 vence em T0 + 70 s,
+    // quando p2 já passou dos 45 s sem sinal embora a varredura dos 80 s ainda não tenha rodado.
+    h.advance(40_000);
+    expect(p1.closed).toEqual({ code: 4008, reason: 'sem sinal' });
+    expect(rec.seats[1]!.offlineSince).toBeNull();
+    expect(rec.status).toBe('PLAYING');
+    h.advance(10_000);
+    expect(p2.closed).toEqual({ code: 4008, reason: 'sem sinal' });
+    expect(rec.status).toBe('FINISHED');
+    expect(rec.outcome).toEqual({ gameNo: 1, result: null, cause: 'ABANDONED' });
+    expect(rec.score).toEqual({ p1: 0, p2: 0, draws: 0 });
+    expect(rec.game!.steps.some((step) => step.action.type === 'FORFEIT')).toBe(false);
+    expect(h.logs.some((line) => line.evt === 'wo.applied')).toBe(false);
+    expect(h.logs.filter((line) => line.evt === 'player.disconnected').map((line) => (line.evt === 'player.disconnected' ? line.playerId : ''))).toEqual(['p1', 'p2']);
+    expect(h.logs).toContainEqual(expect.objectContaining({ evt: 'game.ended', result: null, cause: 'ABANDONED' }));
+    // Cada socket é fechado uma vez só, mesmo com a conferência e a varredura no mesmo alarme.
+    expect(h.closed.filter((entry) => entry.socketId === p2.id)).toHaveLength(1);
+  });
+
   it('sockets sem hello há mais de 10 s caem com 4008 na varredura da partida', async () => {
     const { h } = await Harness.playing();
     const stray = h.open();
@@ -202,12 +229,12 @@ describe('queda silenciosa e varredura', () => {
     expect(done.p2.open).toBe(true);
   });
 
-  it('varredura obsoleta (fora de PLAYING ou de outra partida) é consumida sem fechar nada', async () => {
+  it('varredura obsoleta (fora de PLAYING ou de outra partida) é consumida, não reagenda e fora de PLAYING não fecha ninguém', async () => {
     const { h, p1, p2 } = await Harness.playing();
     const rec = h.core.record!;
-    h.silent(p2);
     h.now += 100_000;
     p1.lastSeenAt = h.now;
+    p2.lastSeenAt = h.now;
     rec.agenda = rec.agenda.filter((item) => item.kind !== 'presenceSweep' && item.kind !== 'phase');
     rec.agenda.push({ kind: 'presenceSweep', at: h.now, gameNo: 7 });
     const wrongGame = h.core.onAlarm(h.sockets, h.now);
@@ -215,6 +242,9 @@ describe('queda silenciosa e varredura', () => {
     expect(kinds(rec)).not.toContain('presenceSweep');
 
     await h.send(p1, { t: 'concede', id: 'c' });
+    h.silent(p2);
+    h.now += 100_000;
+    p1.lastSeenAt = h.now;
     rec.agenda.push({ kind: 'presenceSweep', at: h.now, gameNo: 1 });
     const finished = h.core.onAlarm(h.sockets, h.now);
     expect(finished.close).toEqual([]);

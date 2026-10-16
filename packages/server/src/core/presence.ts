@@ -83,6 +83,23 @@ export function sweep(record: RoomRecord, sockets: SocketInfo[], now: number): {
   return { close, logs };
 }
 
+/**
+ * Aplica a varredura nos efeitos: fechamentos (sem repetir socket já fechado nesta rodada), logs e, se algum assento
+ * saiu, o `room` para quem segue aberto. O alarme a roda antes de decidir qualquer prazo (W.O. incluído): quem passou
+ * de 45 s sem sinal já está fora naquele momento, mesmo que a próxima varredura ainda não tenha vencido (spec §7.1, §7.2).
+ */
+export function applySweep(record: RoomRecord, sockets: SocketInfo[], now: number, effects: Effects): void {
+  const swept = sweep(record, sockets, now);
+  const closing = new Set(effects.close.map((entry) => entry.socketId));
+  effects.close.push(...swept.close.filter((entry) => !closing.has(entry.socketId)));
+  effects.logs.push(...swept.logs);
+  if (swept.logs.length > 0) {
+    effects.persist = true;
+    const gone = new Set(effects.close.map((entry) => entry.socketId));
+    sendRoom(effects, record, sockets.filter((socket) => !gone.has(socket.socketId)), now);
+  }
+}
+
 /** Item `presenceSweep` vencido: varre, reagenda a próxima e avisa a sala se alguém saiu. Obsoleto: só some. */
 export function sweepDue(
   record: RoomRecord,
@@ -92,14 +109,8 @@ export function sweepDue(
   effects: Effects,
 ): void {
   if (record.status !== 'PLAYING' || item.gameNo !== record.gameNo) return;
-  const swept = sweep(record, sockets, now);
-  effects.close.push(...swept.close);
-  effects.logs.push(...swept.logs);
+  applySweep(record, sockets, now, effects);
   record.agenda = withItem(record.agenda, { kind: 'presenceSweep', at: now + TIMERS.presenceSweepMs, gameNo: record.gameNo });
-  if (swept.logs.length > 0) {
-    const closing = new Set(swept.close.map((entry) => entry.socketId));
-    sendRoom(effects, record, sockets.filter((socket) => !closing.has(socket.socketId)), now);
-  }
 }
 
 /**

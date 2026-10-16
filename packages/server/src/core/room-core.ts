@@ -392,6 +392,10 @@ export class RoomCore {
     try {
       const record = this.#record;
       if (!record) return effects;
+      // Antes de decidir qualquer prazo, quem passou de 45 s sem sinal já está fora (o W.O. confere o outro jogador).
+      if (record.status === 'PLAYING' && dueItems(record.agenda, now).length > 0) {
+        presence.applySweep(record, sockets, now, effects);
+      }
       for (;;) {
         const item = dueItems(record.agenda, now)[0];
         if (!item) return effects;
