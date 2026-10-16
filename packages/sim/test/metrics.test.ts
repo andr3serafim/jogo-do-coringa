@@ -51,6 +51,12 @@ describe('summarize', () => {
     expect(summarize([rec(win('p1'), 3)]).orderFirst).toBeNull();
   });
 
+  it('Ressurreições por partida: média, p90, máximo e fração com 3 ou mais', () => {
+    const counts = [0, 0, 1, 2, 3, 0, 5, 1, 0, 4];
+    const rs = counts.map((n) => rec(win('p1'), 10, { eventCounts: n > 0 ? { Resurrected: n } : {} }));
+    expect(summarize(rs).resurrections).toEqual({ mean: 1.6, p90: 5, max: 5, atLeast3: 0.3 });
+  });
+
   it('recusa lista vazia', () => {
     expect(() => summarize([])).toThrow();
   });

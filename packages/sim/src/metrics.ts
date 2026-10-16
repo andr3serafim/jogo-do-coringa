@@ -35,6 +35,8 @@ export interface Metrics {
   orderFirst: number | null;
   /** Média por partida de cada evento de MECHANICS. */
   perGame: Partial<Record<GameEvent['type'], number>>;
+  /** Ressurreições por partida (informativo: risco do laço quadra → Ressurreição → quadra). */
+  resurrections: { mean: number; p90: number; max: number; atLeast3: number };
 }
 
 export function endReason(r: GameRecord): EndReason {
@@ -50,6 +52,7 @@ export function summarize(records: GameRecord[]): Metrics {
   if (n === 0) throw new Error('summarize sem partidas');
   const frac = (pred: (r: GameRecord) => boolean) => records.filter(pred).length / n;
   const rounds = records.map((r) => r.attackRounds).sort((a, b) => a - b);
+  const revived = records.map((r) => r.eventCounts.Resurrected ?? 0).sort((a, b) => a - b);
   const endReasons = { HP: 0, EXODIA: 0, ANTI_STALL: 0, FORFEIT: 0, DRAW: 0, UNFINISHED: 0 };
   for (const r of records) endReasons[endReason(r)] += 1 / n;
   const first = records.reduce((acc, r) => acc + r.orderChoices.first, 0);
@@ -65,6 +68,12 @@ export function summarize(records: GameRecord[]): Metrics {
     quads: frac((r) => (r.eventCounts.QuadFormed ?? 0) > 0),
     orderFirst: first + second === 0 ? null : first / (first + second),
     perGame,
+    resurrections: {
+      mean: revived.reduce((a, b) => a + b, 0) / n,
+      p90: percentile(revived, 0.9),
+      max: revived[revived.length - 1],
+      atLeast3: frac((r) => (r.eventCounts.Resurrected ?? 0) >= 3),
+    },
   };
 }
 

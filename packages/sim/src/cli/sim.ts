@@ -1,5 +1,6 @@
 /** `pnpm sim`: uma série de partidas bot × bot com métricas e metas da spec §3. */
 import { makeConfig, validateConfig } from '@coringa/engine';
+import { resurrectionsText } from '../calibrate.ts';
 import { checkTargets, summarize } from '../metrics.ts';
 import { pct, textTable, writeReport } from '../report.ts';
 import { runSeries } from '../series.ts';
@@ -22,6 +23,7 @@ const seconds = ((performance.now() - started) / 1000).toFixed(1);
 const targets = checkTargets(metrics);
 console.log(`${bots[0]} × ${bots[1]} · ${games} partidas · ${seconds} s · regras ${JSON.stringify(overrides)}`);
 console.log(textTable(['Métrica', 'Valor', 'Meta', 'Ok'], targets.map((t) => [t.metric, t.metric.startsWith('Duração') ? t.value : pct(t.value), t.target, t.ok ? 'sim' : 'NÃO'])));
+console.log(`\nRessurreições por partida (méd · p90 · máx · ≥3): ${resurrectionsText(metrics)}`);
 console.log(`\nMotivos de fim: ${Object.entries(metrics.endReasons).map(([k, v]) => `${k} ${pct(v)}`).join(' · ')}`);
 const paths = writeReport(`sim-${Date.now()}`, { bots, games, overrides, metrics, targets });
 console.log(`\nJSON: ${paths[0]}`);

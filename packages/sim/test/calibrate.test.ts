@@ -16,6 +16,7 @@ describe('calibração (miniatura)', () => {
   it('o Markdown traz todas as seções', () => {
     const md = renderMarkdown(report);
     for (const title of ['Séries base', 'Regras novas liga/desliga', 'Turtle na mesma situação', 'Escolha da ordem', 'Varredura']) expect(md).toContain(title);
+    expect(md).toContain('Ressurreições por partida');
   });
 
   it('só roda as seções pedidas', () => {
