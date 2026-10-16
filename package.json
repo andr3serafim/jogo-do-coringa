@@ -12,7 +12,8 @@
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "smoke": "pnpm -r smoke",
-    "check": "pnpm lint && pnpm typecheck && pnpm -r test:coverage && pnpm smoke"
+    "check": "pnpm lint && pnpm typecheck && pnpm -r test:coverage && pnpm smoke",
+    "sim": "node packages/sim/src/cli/sim.ts"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm check",
