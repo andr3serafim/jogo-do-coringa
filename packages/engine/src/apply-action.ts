@@ -1,7 +1,18 @@
 import { handleEquip, timeoutEquip } from './actions/equip';
-import { declareAttack, endTurnAction, playJ, playK, playQ, requireMain, sacrifice, useTrap } from './actions/main';
+import {
+  castReflect,
+  declareAttack,
+  endTurnAction,
+  playJ,
+  playK,
+  playQ,
+  protectFromReflect,
+  requireMain,
+  sacrifice,
+  useTrap,
+} from './actions/main';
 import { chooseOrder, handleChooseOrder } from './actions/order';
-import { closeReaction, pass, reactTrap } from './actions/reaction';
+import { cancelReflect, closeReaction, pass, reactProtect, reactTrap } from './actions/reaction';
 import { fail, RuleViolation } from './errors';
 import { endTurn } from './flow';
 import { finishGame, getPlayer, opponentOf } from './state';
@@ -74,6 +85,13 @@ function applyPlayer(s: GameState, player: PlayerId, action: Action, ev: GameEve
     case 'TRAP':
       if (s.phase.kind === 'REACTION') return reactTrap(s, player, action.cardId, action.targetId, ev);
       return useTrap(s, requireMain(s, player), action.cardId, action.targetId, ['attackBuffs', 'defenseBuffs', 'guard'], ev);
+    case 'REFLECT':
+      return castReflect(s, requireMain(s, player), action.kId, action.jId, action.qId, ev);
+    case 'CANCEL_REFLECT':
+      return cancelReflect(s, player, action.kId, action.jId, action.qId, ev);
+    case 'PROTECT_FROM_REFLECT':
+      if (s.phase.kind === 'REACTION') return reactProtect(s, player, action.jId, action.qId, action.kId, ev);
+      return protectFromReflect(s, requireMain(s, player), action.jId, action.qId, action.kId, ev);
     case 'PASS':
       return pass(s, player, ev);
     case 'TIMEOUT':

@@ -1,9 +1,9 @@
 import { resolveAttack } from '../combat';
 import { fail } from '../errors';
 import { endTurn } from '../flow';
-import { finishGame, getPlayer, isGameOver, opponentOf } from '../state';
+import { finishGame, getPlayer, isGameOver, opponentOf, toGraveyard } from '../state';
 import type { GameEvent, GameState, PlayerId, PlayerState, ReactionTrigger } from '../types';
-import { useTrap, type TargetZone } from './main';
+import { protectFromReflect, takeReflectCards, useTrap, type TargetZone } from './main';
 
 export function requireReaction(
   s: GameState,
@@ -43,4 +43,24 @@ export function reactTrap(s: GameState, playerId: PlayerId, cardId: string, targ
   if (trigger === 'REFLECT_PLAYED') fail('WRONG_PHASE', 'o Ás não responde a um Reflect');
   const zones: TargetZone[] = trigger === 'K_PLAYED' ? ['guard'] : ['attackBuffs', 'defenseBuffs', 'guard'];
   useTrap(s, responder, cardId, targetId, zones, ev);
+}
+
+/** Anular (spec §1.6): K+J+Q da mão, só na janela aberta pelo lançamento do Reflect. */
+export function cancelReflect(s: GameState, playerId: PlayerId, kId: string, jId: string, qId: string, ev: GameEvent[]): void {
+  const { responder, actor, trigger } = requireReaction(s, playerId);
+  if (trigger !== 'REFLECT_PLAYED') fail('WRONG_PHASE', 'só dá para anular um Reflect logo após ele ser lançado');
+  const reflect = actor.reflect;
+  if (!reflect) fail('NO_REFLECT', 'o oponente não tem Reflect ativo');
+  const mine = takeReflectCards(responder, kId, jId, qId);
+  actor.reflect = null;
+  toGraveyard(s, [mine.k, mine.j, mine.q, reflect.k, reflect.j, reflect.q]);
+  ev.push({ type: 'ReflectCanceled', player: responder.id, owner: actor.id });
+  closeReaction(s, ev);
+}
+
+export function reactProtect(s: GameState, playerId: PlayerId, jId: string, qId: string, kId: string, ev: GameEvent[]): void {
+  const { responder, trigger } = requireReaction(s, playerId);
+  if (trigger !== 'REFLECT_PLAYED') fail('WRONG_PHASE', 'não há Reflect sendo lançado');
+  protectFromReflect(s, responder, jId, qId, kId, ev);
+  closeReaction(s, ev);
 }
