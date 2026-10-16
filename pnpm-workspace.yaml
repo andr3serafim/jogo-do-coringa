@@ -1,2 +1,7 @@
 packages:
   - packages/*
+
+# pnpm 11 recusa scripts de instalação não revisados (strictDepBuilds). Os hooks são instalados
+# pelo `prepare` da raiz, então o postinstall do simple-git-hooks fica desligado.
+allowBuilds:
+  simple-git-hooks: false
