@@ -56,7 +56,7 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
   - naipes são apenas visuais.
 - **Coringas:** 2 coringas são os **avatares** dos jogadores (fora do monte) **[I]**. Os outros 2 entram no monte como **Coringas Selvagens** (§1.6) **[N]** → **98 cartas** no monte com a regra ligada.
 - **Monte** único compartilhado. **Cemitério** único compartilhado, público (face para cima).
-- **Vida:** **100** por jogador **[M]** (original: 1000 — partidas longas demais com cartas 2–10). Valor final calibrado pelo simulador.
+- **Vida:** **300** por jogador **[M]** (original: 1000 — partidas longas demais com cartas 2–10). Calibrado pelo simulador em 2026-10-16: mediana de 9 rodadas de Ataque (com 100, eram 4).
 
 ### 1.2 Zonas de cada jogador
 
@@ -258,7 +258,7 @@ DEF = (soma(Defesa do defensor) + bônus) × (1 + nQ)
 
 | Tema | Original | v2 |
 |---|---|---|
-| Vida | 1000 | 100 (calibrável) |
+| Vida | 1000 | 300 (calibrado pelo simulador) |
 | Coringas | nome do jogo; sem função nas regras | 2 avatares + 2 Coringas Selvagens no monte (J, Q ou A) |
 | Fileiras | sem limite | 7 numéricas cada (calibrável) |
 | Equipar | — | simultâneo e secreto; numéricas obrigatórias, na ordem de compra |
@@ -345,7 +345,7 @@ Lista ordenada por ação, base para animações e histórico: `CardsDealt`, `De
 
 ```ts
 RulesConfig {
-  hp: 100, rowLimit: 7, buffLimit: 4, cardsPerEquip: 4,
+  hp: 300, rowLimit: 7, buffLimit: 4, cardsPerEquip: 4,
   antiStallRounds: 5, // 3 quando tablePressure = false
   exodiaGuard: 4, resurrectMinRounds: 3,
   deck: { numericCopies: 8, faceCopies: 6 },

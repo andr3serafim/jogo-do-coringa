@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { makeConfig } from '../src/config.ts';
+import { DEFAULT_CONFIG, makeConfig } from '../src/config.ts';
 import { createGame } from '../src/create-game.ts';
 import { totalCards } from '../src/deck.ts';
 import { startRound } from '../src/flow.ts';
@@ -27,7 +27,7 @@ describe('createGame', () => {
     expect(s.roundKind).toBe('EQUIP');
     expect(s.phase).toEqual({ kind: 'EQUIP' });
     for (const p of s.players) {
-      expect(p.hp).toBe(100);
+      expect(p.hp).toBe(DEFAULT_CONFIG.hp);
       expect(p.hand.length + p.pending.length).toBe(4);
       expect(p.hand.some((c) => (c as { kind: string }).kind === 'NUM')).toBe(false);
       expect(p.pending.every((c) => c.kind === 'NUM')).toBe(true);

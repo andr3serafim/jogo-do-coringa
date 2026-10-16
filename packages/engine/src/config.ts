@@ -1,7 +1,7 @@
 import type { ConfigError, RulesConfig } from './types.ts';
 
 export const DEFAULT_CONFIG: RulesConfig = {
-  hp: 100,
+  hp: 300,
   rowLimit: 7,
   buffLimit: 4,
   cardsPerEquip: 4,

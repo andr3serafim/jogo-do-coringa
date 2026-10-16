@@ -5,7 +5,7 @@ describe('config', () => {
   it('makeConfig sem argumentos devolve o padrão da spec', () => {
     expect(makeConfig()).toEqual(DEFAULT_CONFIG);
     expect(DEFAULT_CONFIG).toEqual({
-      hp: 100,
+      hp: 300,
       rowLimit: 7,
       buffLimit: 4,
       cardsPerEquip: 4,
