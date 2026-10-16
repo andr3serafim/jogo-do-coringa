@@ -81,7 +81,8 @@ function expireEffects(s: GameState, owner: PlayerState, ev: GameEvent[]): void 
   }
   if (owner.absoluteDefense) {
     owner.absoluteDefense = false;
-    const consumed = owner.defenseBuffs.splice(0, 1);
+    // Um Q sacrificado na proteção contra Reflect já conta como o Q consumido (spec §1.8): sobram 3.
+    const consumed = owner.defenseBuffs.length >= s.config.buffLimit ? owner.defenseBuffs.splice(0, 1) : [];
     toGraveyard(s, consumed);
     ev.push({ type: 'AbsoluteDefenseEnded', player: owner.id });
     if (consumed.length > 0) ev.push({ type: 'BuffRemoved', player: owner.id, cards: consumed });

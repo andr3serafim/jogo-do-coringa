@@ -134,3 +134,43 @@ describe('contra-jogadas', () => {
     expect(actErr(a.state, P2, { type: 'TRAP', cardId: handId(s, P2, 'A'), targetId: target })).toBe('WRONG_PHASE');
   });
 });
+
+describe('Defesa Absoluta × proteção contra Reflect (decisão do autor, 2026-10-16)', () => {
+  it('a imunidade da rodada continua e o Q sacrificado conta como o Q consumido', () => {
+    const s = setup({
+      p1: { hand: ['K', 'J', 'Q'], attack: [10, 10] },
+      p2: { attackBuffs: ['J'], defenseBuffs: ['Q', 'Q', 'Q', 'Q'], absoluteDefense: true, guard: 1 },
+    });
+    const p2 = player(s, P2);
+    const r = steps(s, [
+      [P1, reflectOf(s, P1)],
+      [P2, { type: 'PROTECT_FROM_REFLECT', jId: p2.attackBuffs[0].id, qId: p2.defenseBuffs[0].id, kId: p2.guard[0].id }],
+      [P1, { type: 'DECLARE_ATTACK' }],
+      [P2, { type: 'PASS' }],
+    ]);
+    expect(player(r.state, P2).hp).toBe(100);
+    expect(r.events).toContainEqual({ type: 'AbsoluteDefenseEnded', player: P2 });
+    expect(player(r.state, P2).absoluteDefense).toBe(false);
+    expect(player(r.state, P2).defenseBuffs).toHaveLength(3);
+    expect(r.events.filter((e) => e.type === 'BuffRemoved' && e.player === P2)).toHaveLength(0);
+  });
+
+  it('se o Q for reposto depois da proteção, o fim da Defesa Absoluta consome 1 e sobram 3', () => {
+    const s = setup({
+      p1: { reflect: true },
+      p2: { hand: ['Q', 'Q'], attackBuffs: ['J'], defenseBuffs: ['Q', 'Q', 'Q'], guard: 1 },
+      turnOrder: [P2, P1],
+      phase: { kind: 'ATTACK_MAIN', player: P2 },
+    });
+    const p2 = player(s, P2);
+    const r = steps(s, [
+      [P2, { type: 'PLAY_Q', cardId: handId(s, P2, 'Q', 0) }],
+      [P2, { type: 'PROTECT_FROM_REFLECT', jId: p2.attackBuffs[0].id, qId: p2.defenseBuffs[0].id, kId: p2.guard[0].id }],
+      [P2, { type: 'PLAY_Q', cardId: handId(s, P2, 'Q', 1) }],
+      [P2, { type: 'END_TURN' }],
+      [P1, { type: 'END_TURN' }],
+    ]);
+    expect(player(r.state, P2).absoluteDefense).toBe(false);
+    expect(player(r.state, P2).defenseBuffs).toHaveLength(3);
+  });
+});

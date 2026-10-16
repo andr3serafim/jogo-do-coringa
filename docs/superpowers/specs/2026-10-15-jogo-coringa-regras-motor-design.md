@@ -46,6 +46,7 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
 2. **Reflect × atacante sob Defesa Absoluta:** os K do atacante quebram (o Reflect sempre quebra K), mas ele leva **0** de dano e **não perde os Q** — coerente com "imune a qualquer dano" da Defesa Absoluta.
 3. **Pressão da mesa × K:** dano absorvido por K **não** conta como dano — a pressão continua subindo enquanto os K quebram. Risco: um líder com Ataque vazio e alguns K tentar ganhar no anti-travamento; como só há 6 K e 1 quebra por ataque, eles não seguram 5 rodadas sozinhos. O bot `turtle` também joga K para medir isso.
 4. **Pressão da mesa fixa na rodada:** o bônus vale para a rodada inteira, mesmo que alguém tome dano no primeiro turno. Se zerasse na hora, atacar primeiro sob pressão dominaria a Escolha da iniciativa.
+5. **Defesa Absoluta × proteção contra Reflect (decidido em 2026-10-16):** quem está sob Defesa Absoluta e sacrifica 1 Q do campo para se proteger de um Reflect **mantém a imunidade da rodada inteira** — ela é garantida. O Q sacrificado **conta como o Q consumido** no fim da Defesa Absoluta: ao terminar, sobram 3 Q. A exceção continua sendo o Ataque Absoluto, que segue a conta normal (§1.8).
 
 ### 1.1 Componentes
 
@@ -180,7 +181,8 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
 **Defesa Absoluta — 4 Q nos Buffs de Defesa**
 - Ativa ao colocar o 4º Q. Dura **até o fim do próximo turno de ataque do oponente** ("1 rodada") **[O]**.
 - Enquanto ativa: imune a dano **[O]**, a **A** **[O]** e a **Sacrifício** **[I]**; **nenhuma carta da Fileira de Defesa vai para o cemitério** **[O]**.
-- Ao terminar: **apenas 1 Q** (o mais antigo) vai para o cemitério **[O do autor]**; os outros 3 continuam (multiplicador 4×). Novo Q → nova Defesa Absoluta.
+- A imunidade da rodada é garantida mesmo que o próprio jogador sacrifique 1 Q para se proteger de um Reflect **[I]** (§1.0 item 5).
+- Ao terminar: **apenas 1 Q** (o mais antigo) vai para o cemitério **[O do autor]**; os outros 3 continuam (multiplicador 4×). Se um Q já foi sacrificado na proteção contra Reflect durante a Defesa Absoluta, ele conta como esse Q e nenhum outro é consumido **[I]**. Novo Q → nova Defesa Absoluta.
 
 **Ataque Absoluto — 4 J nos Buffs de Ataque**
 - Vale no ataque declarado com 4 J (multiplicador 1 + 4 = **5×**, mais a Pressão da mesa).
