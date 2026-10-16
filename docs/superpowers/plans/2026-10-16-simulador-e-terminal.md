@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-10-15-jogo-coringa-regras-motor-design.md` — leia §1 (regras), §3 (simulador, metas e definições das métricas), §4 (terminal) e §5 (testes e portão). Plano anterior, já executado: `docs/superpowers/plans/2026-10-15-motor-do-jogo.md`.
 
-**Onde executar:** branch `feat/sim`, na pasta à parte `D:\andr3\jogo-coringa-sim` (worktree já criado; este plano é o primeiro commit dela). Nunca trabalhe direto na `main` nem troque de branch em `D:\andr3\jogo-coringa`, que é compartilhada com outras sessões. Push, abertura de PR, merge e configuração do GitHub só com confirmação do autor, ação por ação.
+**Onde executar:** branch `feat/sim`, na pasta à parte `D:\andr3\jogo-coringa-sim` (worktree já criado; este plano é o primeiro commit dela). Nunca trabalhe direto na `main` nem troque de branch em `D:\andr3\jogo-coringa`, que é compartilhada com outras sessões. Push e PR estão autorizados aos agentes até o MVP (palavras do autor em 2026-10-16: "pode fazer esses push, autorizado a você fazer até o mvp ficar pronto"). Merge na `main` só com `pnpm check` verde e a CI verde no PR, por squash no GitHub ou fast-forward. Configuração do repositório (proteção da `main`) continua com o autor. Decisões novas de regra ou de design de jogo sobem para ele.
 
 ## Decisões (brainstorming de 2026-10-16)
 
@@ -348,7 +348,7 @@ jobs:
 
 - Rode `pnpm check` antes de commitar: lint, typecheck, testes com cobertura e o smoke no Node puro. Os hooks de pre-commit e pre-push (simple-git-hooks) rodam o mesmo comando.
 - **Nunca** use `git commit --no-verify`, `git push --no-verify` nem `SKIP_SIMPLE_GIT_HOOKS=1`. Se o check falhar, corrija a causa.
-- Trabalho em branch própria com PR para a `main`. A CI (`.github/workflows/check.yml`) roda `pnpm check` e tem que estar verde antes do merge.
+- Trabalho em branch própria com PR para a `main`. A CI (`.github/workflows/check.yml`) roda `pnpm check` e tem que estar verde antes do merge, que é feito por squash no GitHub ou fast-forward (histórico limpo).
 - Regra de evolução: quando o `pnpm check` passar de ~45 s, o pre-commit vira a versão rápida (lint, typecheck e `vitest related --run` nos arquivos alterados) e o pre-push mantém o check completo.
 - Calibração (`pnpm sim:calibrate`) é job à parte e nunca entra no `pnpm check`.
 
@@ -380,9 +380,9 @@ git commit -m "chore: portão de testes (hooks, CI e regras do repositório)"
 ```
 Expected: o hook roda `pnpm check` (verde) e o commit entra.
 
-- [ ] **Step 8: Validar a CI de verdade (com confirmação do autor)**
+- [ ] **Step 8: Validar a CI de verdade**
 
-Pergunte ao autor se pode enviar a branch e abrir um PR **draft** para a `main`. Com o ok:
+Envie a branch e abra um PR **draft** para a `main` (autorizado até o MVP):
 ```bash
 git push -u origin feat/sim
 gh pr create --draft --base main --title "Simulador, bots e jogo no terminal (Plano 2)" --body "Plano: docs/superpowers/plans/2026-10-16-simulador-e-terminal.md"
@@ -1922,6 +1922,8 @@ export function summarizeReplay(replay: Replay): object {
 ```
 
 - [ ] **Step 5: Gravar as fixtures e os snapshots**
+
+Antes de gravar, confirme que a branch tem a `main` atual (a regra da Defesa Absoluta com autoproteção, c40097c, já está nela); se a `main` andou desde o Step 0 da Tarefa 1, rode `git merge --no-edit main` e `pnpm check` primeiro, para não congelar um comportamento antigo.
 
 ```bash
 mkdir -p packages/engine/test/fixtures
@@ -3608,9 +3610,13 @@ git commit -m "docs(sim): relatório de calibração com a config padrão"
 
 Mande ao autor, em lote numerado: cada meta da §3 fora da faixa, o valor medido, a causa provável e uma proposta (por exemplo, o valor de vida da varredura que coloca a duração em 8–14), mais o que o turtle pareado e a métrica da ordem mostraram. **Não mude `DEFAULT_CONFIG` nem a spec sem a aprovação dele.** Uma mudança aprovada vira tarefa nova: altera o padrão, atualiza `config.test.ts`, regrava as partidas de referência (`record-golden` + `vitest run -u`, com o diff revisado) e registra a decisão na spec (§6, item 2).
 
-- [ ] **Step 4: PR pronto para revisão (com confirmação do autor)**
+- [ ] **Step 4: PR pronto e merge**
 
-Com o ok do autor: `git push`, marcar o PR como pronto para revisão e confirmar que o job `check` está verde. Recomende ao autor ligar a proteção da `main` exigindo o `check` verde (Settings → Branches no GitHub); quem liga é ele, ou você via `gh`, se ele autorizar na hora. O merge também só com a confirmação dele.
+`git push`, marque o PR como pronto para revisão e confirme que o job `check` está verde. Com o `pnpm check` local e a CI verdes, faça o merge na `main` por squash no GitHub (`gh pr merge --squash`) ou fast-forward, mantendo o histórico limpo. Não use `--delete-branch`: o `gh` tenta trocar o worktree para a `main` antes de apagar a branch local. Apague a branch remota pelo GitHub.
+
+- [ ] **Step 5: Proteção da `main` (decisão do autor)**
+
+Leve ao autor, como passo explícito, a recomendação de ligar a proteção da `main` exigindo o job `check` verde antes do merge (Settings → Branches no GitHub). É configuração do repositório: quem liga é ele, ou você via `gh`, se ele autorizar na hora.
 
 ---
 
