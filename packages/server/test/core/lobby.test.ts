@@ -393,7 +393,8 @@ describe('alarme', () => {
       await h.core.onMessage(p2.id, raw({ t: 'leave' }), h.sockets, h.now),
     ];
     for (const effects of results) expect(effects.alarm).toBe(expected());
-    expect(expected()).toBe(h.now + TIMERS.idleExpiryMs);
+    // Os dois conectados: o `hello` tirou o `idleExpiry`, e a criação foi em `h.now` (o relógio não andou).
+    expect(expected()).toBe(h.now + TIMERS.hardExpiryMs);
   });
 });
 
@@ -434,7 +435,7 @@ describe('game: startGame, makeStep e stateFor', () => {
     const first = startGame(record, deps, 10);
     expect(first.seq).toBe(1);
     expect(first.events).toEqual([]);
-    expect(Object.keys(first.messages)).toEqual(['p1', 'p2']);
+    expect(Object.keys(first.messages!)).toEqual(['p1', 'p2']);
 
     record.status = 'FINISHED';
     record.outcome = { gameNo: 1, result: null, cause: 'ABANDONED' };
@@ -450,13 +451,13 @@ describe('game: startGame, makeStep e stateFor', () => {
     const record = await lobbyRecord();
     startGame(record, Harness.deps(), 10);
     const step = makeStep(record, [], 10);
-    const p1View = structuredClone(step.messages.p1.view);
+    const p1View = structuredClone(step.messages!.p1.view);
     record.game!.state.round += 5;
     record.seq += 1;
-    expect(step.messages.p1.view).toEqual(p1View);
-    expect(step.messages.p1.seq).toBe(1);
-    expect(step.messages.p1.view.me).toBe('p1');
-    expect(step.messages.p2.view.me).toBe('p2');
+    expect(step.messages!.p1.view).toEqual(p1View);
+    expect(step.messages!.p1.seq).toBe(1);
+    expect(step.messages!.p1.view.me).toBe('p1');
+    expect(step.messages!.p2.view.me).toBe('p2');
   });
 
   it('stateFor: flags só aparecem quando pedidas, e sem partida dá erro', async () => {

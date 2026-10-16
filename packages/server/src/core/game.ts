@@ -13,12 +13,13 @@ export { schedulePhase } from './timing.ts';
 
 /**
  * Um passo do jogo: o `seq` dele, os eventos sem redação, a mensagem `state` de cada assento (montada na hora) e
- * as linhas de log que ele gerou (o fim da partida).
+ * as linhas de log que ele gerou (o fim da partida). O abandono (spec §7.2) não é passo do motor: vem como um passo
+ * sem `state` (`messages: null`), que só carrega os logs e faz quem entrega mandar o `room` FINISHED.
  */
 export interface StateStep {
   seq: number;
   events: GameEvent[];
-  messages: Record<SeatId, StateMessage>;
+  messages: Record<SeatId, StateMessage> | null;
   logs: LogLine[];
 }
 
@@ -77,6 +78,12 @@ export function startGame(record: RoomRecord, deps: CoreDeps, now: number): Stat
     cause: null,
   };
   schedulePhase(record, { key: '', phase: created.state.phase, deadlineAt: null }, [], now);
+  // A varredura de presença existe só em PLAYING (spec §7.1); `finishGame` a tira.
+  record.agenda = withItem(record.agenda, {
+    kind: 'presenceSweep',
+    at: now + TIMERS.presenceSweepMs,
+    gameNo: record.gameNo,
+  });
   return makeStep(record, [], now);
 }
 
@@ -156,6 +163,13 @@ export function finishGame(record: RoomRecord, cause: OutcomeCause, now: number)
 
 const SEATS: readonly SeatId[] = ['p1', 'p2'];
 
+export const otherSeat = (seat: SeatId): SeatId => (seat === 'p1' ? 'p2' : 'p1');
+
+/** Conectado = sem saída marcada. A presença sai dos sockets vivos (`onClose`, varredura e `reconcile`), nunca de uma marca antiga. */
+export function isConnected(record: RoomRecord, seat: SeatId): boolean {
+  return record.seats.find((candidate) => candidate.id === seat)?.offlineSince === null;
+}
+
 /**
  * Aplica no motor uma ação que o servidor mesmo injeta (`TIMEOUT`, `FORFEIT`, o `PASS` guardado, o Equipar
  * automático) e registra o passo. O motor nunca deve recusá-la: se recusar, é defeito do servidor e o erro sobe.
@@ -173,9 +187,29 @@ function injectStep(
 }
 
 /**
+ * Abandono (spec §7.2): status `FINISHED`, `result: null`, placar igual. O estado do motor fica como está (sem
+ * `GAME_OVER`, sem passo, `seq` igual), então o passo devolvido não leva `state`: só os logs do fim.
+ */
+export function abandon(record: RoomRecord, now: number): StateStep {
+  return { seq: record.seq, events: [], messages: null, logs: finishGame(record, 'ABANDONED', now) };
+}
+
+/**
+ * W.O. (spec §7.2): `FORFEIT { loser }` como passo do sistema, com a causa e o log `wo.applied`. Só vale se o OUTRO
+ * jogador está conectado neste momento; senão, os dois estão fora e a partida é abandonada.
+ */
+export function walkover(record: RoomRecord, loser: SeatId, cause: 'AFK' | 'RECONNECT_TIMEOUT', now: number): StateStep {
+  if (!isConnected(record, otherSeat(loser))) return abandon(record, now);
+  requireGame(record).cause = cause;
+  const step = injectStep(record, 'system', { type: 'FORFEIT', loser }, now);
+  step.logs.unshift({ evt: 'wo.applied', code: record.code, gameNo: record.gameNo, loser, cause });
+  return step;
+}
+
+/**
  * Passos automáticos (spec §5), cada um como passo próprio, repetidos até nada mais disparar:
  * - W.O. por estouros (§7.3): quem chegou a 3 perde (`FORFEIT`, causa `AFK`, log `wo.applied`). Com o outro fora,
- *   o caso vira abandono: isso é da Tarefa 8.
+ *   ou com os dois chegando a 3 no mesmo passo, não há vencedor: a partida é abandonada (§7.2).
  * - Equipar sem numéricas: quem recebeu zero tem `EQUIP { destinations: [] }` aplicado em seu nome. A quantidade
  *   de pendentes já é pública, então nada se revela. Não conta como jogada voluntária (os estouros ficam como estão).
  */
@@ -185,12 +219,9 @@ export function autoSteps(record: RoomRecord, now: number): StateStep[] {
   for (;;) {
     const state = game.state;
     if (state.phase.kind === 'GAME_OVER') return steps;
-    const loser = SEATS.find((seat) => game.strikes[seat] >= TIMERS.afkStrikes);
-    if (loser) {
-      game.cause = 'AFK';
-      const step = injectStep(record, 'system', { type: 'FORFEIT', loser }, now);
-      step.logs.unshift({ evt: 'wo.applied', code: record.code, gameNo: record.gameNo, loser, cause: 'AFK' });
-      steps.push(step);
+    const afk = SEATS.filter((seat) => game.strikes[seat] >= TIMERS.afkStrikes);
+    if (afk.length > 0) {
+      steps.push(afk.length === SEATS.length ? abandon(record, now) : walkover(record, afk[0]!, 'AFK', now));
       return steps;
     }
     if (state.phase.kind !== 'EQUIP') return steps;

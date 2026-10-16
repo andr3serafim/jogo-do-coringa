@@ -96,11 +96,13 @@ export function sendRoom(effects: Effects, record: RoomRecord, live: SocketInfo[
 
 /**
  * Entrega os passos em ordem: cada um vira a mensagem `state` montada na hora (a visão daquele instante)
- * para todo socket autenticado, e as linhas de log do passo (fim de partida) entram nos efeitos.
+ * para todo socket autenticado, e as linhas de log do passo (fim de partida) entram nos efeitos. O abandono
+ * só traz o log.
  */
 export function deliverSteps(effects: Effects, steps: StateStep[], live: SocketInfo[]): void {
   for (const step of steps) {
     effects.logs.push(...step.logs);
+    if (step.messages === null) continue; // abandono: não há `state` novo
     for (const socket of live) {
       if (socket.seat !== null) effects.send.push({ socketId: socket.socketId, message: step.messages[socket.seat] });
     }

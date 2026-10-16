@@ -323,7 +323,8 @@ describe('fim de partida', () => {
     expect(rec.outcome).toEqual({ gameNo: 1, result: { kind: 'DRAW', reason: 'ANTI_STALL' }, cause: 'NORMAL' });
     expect(logs.map((l) => l.evt)).toEqual(['game.ended', 'game.replay']);
     expect(logs[0]).toMatchObject({ durationMs: 5_000, steps: 0, rounds: 3 });
-    expect(rec.agenda.map((item) => item.kind)).toEqual(['idleExpiry', 'hardExpiry']);
+    // Os dois estão conectados (o `hello` tira o `idleExpiry`): sobra só o teto.
+    expect(rec.agenda.map((item) => item.kind)).toEqual(['hardExpiry']);
 
     const win2 = await Harness.fromState(
       setup({ phase: { kind: 'GAME_OVER', result: { kind: 'WIN', winner: 'p2', reason: 'HP' } } }),

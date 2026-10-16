@@ -1,6 +1,7 @@
 import { CLOSE, LIMITS, PROTOCOL_VERSION } from '@coringa/protocol';
 import { autoSteps, startGame } from './game.ts';
 import { TokenBucket } from './limiter.ts';
+import { markOffline, markOnline, missedEvents, syncIdle } from './presence.ts';
 import { ROOM_LIMITS, TIMERS } from './timers.ts';
 import type { CoreDeps, Effects, RoomRecord, SeatId, SeatRecord, SocketInfo } from './types.ts';
 import { deliverSteps, sendRoom, stateFor } from './views.ts';
@@ -54,6 +55,7 @@ export function hello(
   attachedSeats: Map<string, SeatId>,
   deps: CoreDeps,
   now: number,
+  lastSeq?: number,
 ): void {
   const seatOf = (socket: SocketInfo): SeatId | null => socket.seat ?? attachedSeats.get(socket.socketId) ?? null;
   const attached = sockets.map((socket) => ({
@@ -75,30 +77,31 @@ export function hello(
   attachedSeats.set(socketId, owner.id);
 
   effects.attach.push({ socketId, seat: owner.id });
-  owner.offlineSince = null;
+  effects.logs.push(...markOnline(record, owner.id, now));
   effects.persist = true;
   effects.send.push({
     socketId,
     message: { t: 'welcome', protocol: PROTOCOL_VERSION, playerId: owner.id, serverNow: now },
   });
   let live = attached.filter((socket) => !replaced.has(socket.socketId));
-  // Quem pediu a revanche e voltou: se os dois pedem e estão conectados, a largada sai agora (a Tarefa 8
-  // cuida das demais voltas no meio da partida).
+  // Quem pediu a revanche e voltou: se os dois pedem e estão conectados, a largada sai agora.
   if (record.status === 'FINISHED') {
     const begun = beginGame(effects, record, live, deps, now, 'wantsRematch');
     if (begun.started) return;
     live = begun.live;
   }
   sendRoom(effects, record, live, now);
-  // A volta com eventos perdidos (catch-up) é da Tarefa 8; aqui o jogador recebe o retrato inteiro.
+  // Volta com eventos perdidos (spec §4.7): `catchUp` com os passos que faltam ou, fora do anel, `resync`.
   if (record.game) {
-    effects.send.push({ socketId, message: stateFor(record, owner.id, [], now, { resync: true }) });
+    const missed = missedEvents(record, lastSeq);
+    effects.send.push({ socketId, message: stateFor(record, owner.id, missed.events, now, missed.flags) });
   }
 }
 
 /** `leave` libera o assento e fecha o socket com 1000; só no lobby (spec §2.3). */
 export function leave(effects: Effects, record: RoomRecord, seat: SeatId, sockets: SocketInfo[], now: number): void {
   record.seats = record.seats.filter((candidate) => candidate.id !== seat);
+  syncIdle(record, now);
   for (const socket of sockets.filter((candidate) => candidate.seat === seat)) {
     effects.close.push({ socketId: socket.socketId, code: CLOSE.LEAVE, reason: 'saiu da sala' });
   }
@@ -130,7 +133,7 @@ export function beginGame(
       if (owned.length > 0 && silent.length === 0) continue;
       start = false;
       if (silent.length > 0 || flag === 'ready') candidate[flag] = false;
-      if (silent.length > 0) candidate.offlineSince = now;
+      if (silent.length > 0) markOffline(record, candidate.id, now, now);
       for (const socket of silent) {
         effects.close.push({ socketId: socket.socketId, code: CLOSE.HELLO, reason: 'sem sinal' });
       }

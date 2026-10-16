@@ -13,6 +13,7 @@ import { emptyEffects } from './effects.ts';
 import * as game from './game.ts';
 import type { StateStep } from './game.ts';
 import * as lobby from './lobby.ts';
+import * as presence from './presence.ts';
 import { peekMessageId, SEAT_IDS } from './lobby.ts';
 import type { Connection } from './lobby.ts';
 import { ROOM_LIMITS, STATE_SCHEMA, TIMERS } from './timers.ts';
@@ -152,7 +153,15 @@ export class RoomCore {
       return effects;
     };
     if (!this.#record) return close(CLOSE.ROOM_GONE, 'sala inexistente');
-    const others = sockets.filter((other) => other.socketId !== socket.socketId);
+    // Quem não mandou `hello` em 10 s cai agora (spec §7.1) e deixa de contar para o limite.
+    const stale = presence.staleUnauthenticated(
+      sockets.filter((other) => other.socketId !== socket.socketId),
+      now,
+    );
+    effects.close.push(...stale);
+    const others = sockets.filter(
+      (other) => other.socketId !== socket.socketId && !stale.some((entry) => entry.socketId === other.socketId),
+    );
     const unauthenticated = others.filter((other) => other.seat === null).length;
     if (others.length + 1 > ROOM_LIMITS.sockets || unauthenticated + 1 > ROOM_LIMITS.unauthSockets) {
       return close(CLOSE.LIMITED, 'conexões demais na sala');
@@ -164,27 +173,30 @@ export class RoomCore {
   /**
    * `sockets` traz os sockets abertos; o que fechou pode ou não estar nela. A presença sai dos assentos
    * sem socket autenticado, então a aba derrubada com 4009 (o assento já tem a aba nova) não conta como queda.
-   * A presença completa em PLAYING vem na Tarefa 8; aqui só marca `offlineSince` e desmarca o pronto no lobby.
+   * Queda limpa (spec §7.1): marca a saída na hora, agenda o W.O. em PLAYING e a expiração ociosa de quem sai por último.
    */
   onClose(socketId: string, sockets: SocketInfo[], now: number): Effects {
     this.#connections.delete(socketId);
     this.#attachedSeats.delete(socketId);
-    const effects = this.#effects();
-    const record = this.#record;
-    if (!record) return effects;
-    const live = sockets.filter((socket) => socket.socketId !== socketId);
-    let changed = false;
-    for (const seat of record.seats) {
-      if (seat.offlineSince !== null || live.some((socket) => socket.seat === seat.id)) continue;
-      seat.offlineSince = now;
-      if (record.status === 'LOBBY') seat.ready = false;
-      changed = true;
+    const effects = emptyEffects();
+    try {
+      const record = this.#record;
+      if (!record) return effects;
+      const live = sockets.filter((socket) => socket.socketId !== socketId);
+      let changed = false;
+      for (const seat of record.seats) {
+        if (seat.offlineSince !== null || live.some((socket) => socket.seat === seat.id)) continue;
+        effects.logs.push(...presence.markOffline(record, seat.id, now, now));
+        changed = true;
+      }
+      if (changed) {
+        effects.persist = true;
+        sendRoom(effects, record, live, now);
+      }
+      return effects;
+    } finally {
+      this.#setAlarm(effects);
     }
-    if (changed) {
-      effects.persist = true;
-      sendRoom(effects, record, live, now);
-    }
-    return effects;
   }
 
   /**
@@ -197,7 +209,7 @@ export class RoomCore {
     const pending = this.#receive(effects, socketId, raw, sockets, now);
     if (pending !== null) {
       const tokenHash = await sha256Hex(pending.token);
-      this.#authenticate(effects, socketId, pending.view, tokenHash, now);
+      this.#authenticate(effects, socketId, pending.view, tokenHash, now, pending.lastSeq);
     }
     return effects;
   }
@@ -231,7 +243,7 @@ export class RoomCore {
     raw: string | ArrayBuffer,
     sockets: SocketInfo[],
     now: number,
-  ): { token: string; view: SocketInfo[] } | null {
+  ): { token: string; lastSeq?: number; view: SocketInfo[] } | null {
     try {
       const close = (code: number, reason: string): null => {
         this.#close(effects, socketId, code, reason);
@@ -275,7 +287,9 @@ export class RoomCore {
           reply({ t: 'error', code: 'PROTOCOL_MISMATCH', message: 'versão do protocolo incompatível' });
           return close(CLOSE.PROTOCOL, 'protocolo incompatível');
         }
-        return { token: message.token, view };
+        return message.lastSeq === undefined
+          ? { token: message.token, view }
+          : { token: message.token, lastSeq: message.lastSeq, view };
       }
 
       if (message === null) {
@@ -293,13 +307,20 @@ export class RoomCore {
   }
 
   /** Trecho síncrono depois do hash: relê o registro, acha o dono do token e autentica. */
-  #authenticate(effects: Effects, socketId: string, view: SocketInfo[], tokenHash: string, now: number): void {
+  #authenticate(
+    effects: Effects,
+    socketId: string,
+    view: SocketInfo[],
+    tokenHash: string,
+    now: number,
+    lastSeq?: number,
+  ): void {
     try {
       const record = this.#record;
       if (!record) return this.#close(effects, socketId, CLOSE.ROOM_GONE, 'sala inexistente');
       const owner = record.seats.find((candidate) => candidate.tokenHash === tokenHash);
       if (!owner) return this.#violation(effects, socketId, 'AUTH', CLOSE.AUTH, 'token inválido');
-      lobby.hello(effects, record, owner, socketId, view, this.#attachedSeats, this.#deps, now);
+      lobby.hello(effects, record, owner, socketId, view, this.#attachedSeats, this.#deps, now, lastSeq);
     } finally {
       this.#setAlarm(effects);
     }
@@ -359,28 +380,102 @@ export class RoomCore {
   }
 
   /**
-   * Alarme da plataforma (spec §6.5). Processa, em ordem de instante, os itens vencidos da agenda: confere a chave
-   * de cada um, descarta os obsoletos sem efeito e devolve o alarme do próximo. Só trata `phase` e `reactionMin`;
-   * os demais tipos (presença, expiração) entram nas Tarefas 8 e 9 e ficam na agenda. Síncrono de ponta a ponta: o
-   * alarme pode ser repetido, e o que já foi consumido não vale de novo. `sockets` só serve para entregar os passos.
+   * Alarme da plataforma (spec §6.5). Processa, em ordem de instante, os itens vencidos da agenda: consome cada um,
+   * confere a chave dele, descarta os obsoletos sem efeito e devolve o alarme do próximo. O item mais cedo é
+   * escolhido de novo a cada volta, porque um item pode criar outro já vencido (a varredura que acha uma queda antiga
+   * cria o `reconnect` que já venceu: o W.O. sai no mesmo alarme). Todo tipo sai da agenda ao ser tratado, senão o
+   * alarme ficaria no passado. Síncrono de ponta a ponta: o alarme pode ser repetido, e o consumido não vale de novo.
+   * `sockets` serve para entregar os passos, varrer a presença e fechar a sala que expira.
    */
   onAlarm(sockets: SocketInfo[], now: number): Effects {
     const effects = this.#effects();
     try {
       const record = this.#record;
       if (!record) return effects;
-      for (const item of dueItems(record.agenda, now)) {
-        // Um item anterior pode ter tirado este da agenda (fim de partida, época nova): então não vale mais.
-        if (!record.agenda.includes(item)) continue;
-        if (item.kind !== 'phase' && item.kind !== 'reactionMin') continue;
+      for (;;) {
+        const item = dueItems(record.agenda, now)[0];
+        if (!item) return effects;
         record.agenda = record.agenda.filter((other) => other !== item);
         effects.persist = true;
-        // `phase` e `reactionMin` só valem na época em que nasceram (spec §6.4): o `TIMEOUT` do motor não diz a que fase se refere.
-        if (record.status !== 'PLAYING' || item.epoch !== record.epoch) continue;
-        const steps = item.kind === 'phase' ? game.applyTimeout(record, now) : game.applyHeldPass(record, now);
-        deliverSteps(effects, steps, sockets);
-        if (steps.length > 0 && isFinished(record)) sendRoom(effects, record, sockets, now);
+        switch (item.kind) {
+          case 'idleExpiry':
+          case 'hardExpiry':
+            // O `idleExpiry` vale só se ninguém voltou; o teto vale sempre.
+            if (item.kind === 'idleExpiry' && record.seats.some((seat) => seat.offlineSince === null)) break;
+            this.#expire(effects, record, item.kind === 'idleExpiry' ? 'IDLE' : 'HARD', sockets, now);
+            return effects;
+          case 'presenceSweep':
+            presence.sweepDue(record, item, sockets, now, effects);
+            break;
+          case 'reconnect':
+            this.#deliver(effects, record, presence.reconnectDue(record, item, now), sockets, now);
+            break;
+          case 'phase':
+          case 'reactionMin':
+            // Só valem na época em que nasceram (spec §6.4): o `TIMEOUT` do motor não diz a que fase se refere.
+            if (record.status !== 'PLAYING' || item.epoch !== record.epoch) break;
+            this.#deliver(
+              effects,
+              record,
+              item.kind === 'phase' ? game.applyTimeout(record, now) : game.applyHeldPass(record, now),
+              sockets,
+              now,
+            );
+            break;
+        }
       }
+    } finally {
+      this.#setAlarm(effects);
+    }
+  }
+
+  /** Entrega os passos do alarme a quem segue aberto (os fechados nesta rodada não recebem) e avisa a sala se a partida acabou. */
+  #deliver(effects: Effects, record: RoomRecord, steps: StateStep[], sockets: SocketInfo[], now: number): void {
+    const closing = new Set(effects.close.map((entry) => entry.socketId));
+    const live = sockets.filter((socket) => !closing.has(socket.socketId));
+    deliverSteps(effects, steps, live);
+    if (steps.length > 0 && isFinished(record)) sendRoom(effects, record, live, now);
+  }
+
+  /** Apaga a sala por expiração (spec §2.5). */
+  #expire(effects: Effects, record: RoomRecord, reason: 'IDLE' | 'HARD', sockets: SocketInfo[], now: number): void {
+    const expired = presence.expire(record, reason, sockets, now);
+    effects.close.push(...expired.close);
+    effects.logs.push(...expired.logs);
+    this.#drop(effects);
+  }
+
+  /** Esquece a sala: `deleteAll` na casca, nada a gravar, sem alarme e sem estado de conexão em memória. */
+  #drop(effects: Effects): void {
+    this.#record = null;
+    this.#connections.clear();
+    this.#attachedSeats.clear();
+    effects.deleteAll = true;
+    effects.persist = false;
+    effects.send = [];
+  }
+
+  /**
+   * Chamado pela casca ao acordar, antes da primeira entrada (spec §7.1, §9.2, §9.3). Esquema diferente do atual:
+   * a sala é encerrada (4000, `room.reset`). Senão, confere os assentos contra os sockets que existem de fato.
+   */
+  reconcile(sockets: SocketInfo[], now: number): Effects {
+    const effects = emptyEffects();
+    try {
+      const record = this.#record;
+      if (!record) return effects;
+      if (record.schema !== STATE_SCHEMA) {
+        effects.close.push(...presence.closeAll(sockets, 'sala reiniciada'));
+        effects.logs.push({
+          evt: 'room.reset',
+          code: record.code,
+          status: record.status,
+          reason: `esquema ${record.schema} no storage, ${STATE_SCHEMA} no código`,
+        });
+        this.#drop(effects);
+        return effects;
+      }
+      presence.reconcile(record, sockets, now, effects);
       return effects;
     } finally {
       this.#setAlarm(effects);

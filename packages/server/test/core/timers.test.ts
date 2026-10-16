@@ -105,7 +105,9 @@ describe('prazo mostrado e margem de rede (§6.6)', () => {
     const { h, p1 } = await Harness.playing();
     const at = lastState(h, p1).deadline!.at;
     expect(at).toBe(h.now + 40_000);
-    expect(h.alarm).toBe(at + TIMERS.graceMs);
+    // O prazo da fase é o `at` mais a margem; a varredura (20 s) vem antes, então o alarme é o dela.
+    expect(h.core.record!.agenda).toContainEqual({ kind: 'phase', at: at + TIMERS.graceMs, epoch: h.core.record!.epoch });
+    expect(h.alarm).toBe(h.now + TIMERS.presenceSweepMs);
     h.advance(40_400);
     expect(h.core.record!.game!.state.phase.kind).toBe('EQUIP');
     expect(h.core.record!.game!.state.round).toBe(1);
@@ -129,7 +131,8 @@ describe('prazo mostrado e margem de rede (§6.6)', () => {
     expect(h.alarm).toBe(h.now + TIMERS.turnMs + TIMERS.graceMs);
     await h.send(p1, { t: 'concede', id: 'c' });
     expect(h.core.record!.game!.phaseDeadlineAt).toBeNull();
-    expect(h.core.record!.agenda.map((item) => item.kind)).toEqual(['idleExpiry', 'hardExpiry']);
+    // Fim de partida: sem prazo de fase nem varredura; os dois conectados, então só o teto fica.
+    expect(h.core.record!.agenda.map((item) => item.kind)).toEqual(['hardExpiry']);
   });
 });
 
@@ -184,7 +187,7 @@ describe('alarme: chave de época (§6.4)', () => {
     expect(again.alarm).toBe(rec.game!.phaseDeadlineAt! + TIMERS.graceMs);
   });
 
-  it('item de partida acabada, de época velha e PASS guardado inexistente não fazem nada; tipos ainda sem tratamento ficam', async () => {
+  it('item de partida acabada, de época velha e PASS guardado inexistente não fazem nada; a varredura vencida é consumida e a próxima agendada', async () => {
     const empty = new Harness();
     expect(empty.core.onAlarm([], 5)).toMatchObject({ alarm: null, persist: false, send: [] });
 
@@ -197,7 +200,10 @@ describe('alarme: chave de época (§6.4)', () => {
     const effects = h.core.onAlarm(h.sockets, h.now);
     expect(JSON.stringify(rec.game)).toBe(snapshot);
     expect(effects.send).toEqual([]);
-    expect(rec.agenda.some((item) => item.kind === 'presenceSweep')).toBe(true);
+    // A varredura vencida saiu da agenda e a próxima foi agendada daqui a 20 s (nenhum tipo fica vencido).
+    expect(rec.agenda.filter((item) => item.kind === 'presenceSweep')).toEqual([
+      { kind: 'presenceSweep', at: h.now + TIMERS.presenceSweepMs, gameNo: 1 },
+    ]);
     expect(rec.agenda.some((item) => item.kind === 'reactionMin')).toBe(false);
 
     await h.send(p1, { t: 'concede', id: 'c' });
@@ -559,7 +565,7 @@ describe('nenhum TIMEOUT injetado é recusado pelo motor', () => {
     for (const seed of ['t-1', 't-2', 't-3']) {
       const { h, p1, p2 } = await Harness.playing(undefined, seed);
       const rec = h.core.record!;
-      // As expirações de sala são da Tarefa 9: o relógio aqui passa de 30 min de partida.
+      // O relógio aqui passa de 30 min de partida: sem as expirações da sala (testadas em presence.test.ts), só os estouros.
       rec.agenda = rec.agenda.filter((item) => item.kind !== 'idleExpiry' && item.kind !== 'hardExpiry');
       h.alarm = Math.min(...rec.agenda.map((item) => item.at));
       let timeouts = 0;
