@@ -26,10 +26,12 @@ Decididas pela sessão principal por delegação do autor; o plano não as redis
 8. **Portão automático:** simple-git-hooks (pre-commit e pre-push rodam `pnpm check`), CI no GitHub (validada de verdade no PR da `feat/sim`), `.gitattributes` com LF, `CLAUDE.md` do projeto com as regras, e **partidas de referência como replays gravados** (semente + ações) reexecutados no motor, com snapshot de um resumo.
 9. **`pnpm play`** salva a partida (semente + ações) e aceita `--bot` e `--semente`.
 
-Calls tomadas na escrita do plano (o autor pode vetar na revisão):
+Calls tomadas na escrita do plano (o autor pode vetar na revisão; as três primeiras estão marcadas **[P]** na §3 da spec):
 
 - As metas da §3 são medidas em `greedy` × `greedy`; `random` × `random` e `turtle` × `greedy` aparecem para comparação.
-- Na métrica da ordem, "decisivo" = diferença média maior que 2 erros padrão; e exige-se que ao menos 20% dos pontos sejam decisivos.
+- Na métrica da ordem, "decisivo" = diferença média maior que 2 erros padrão.
+- Na métrica da ordem, exige-se que ao menos 20% dos pontos sejam decisivos.
+- Os testes de cenário do simulador importam o builder `setup` de `packages/engine/test/helpers.ts`, para montar estados reais sem inventar cartas.
 - Varredura: vida 60, 150, 200, 300 e 400; fileira 5, 6, 8 e 9; 4 ou 8 de cada figura; 6 ou 7 de cada numérica. Partidas por série: 1000 (margem de cerca de ±3 pp numa taxa de 50%).
 - As fixtures das partidas de referência guardam a config completa: mudar o `DEFAULT_CONFIG` (calibração) não as quebra; o `config.test.ts` do motor já trava o padrão.
 - Os hooks do simple-git-hooks ficam no `.git/hooks` comum: valem para **todas** as pastas deste repositório (inclusive `D:\andr3\jogo-coringa`) a partir do `pnpm install` da Tarefa 2. Na `main`, o hook roda o `pnpm check` que existir lá.
@@ -119,6 +121,16 @@ Convenções: `PLAYERS = ['p1', 'p2']` nas simulações (`bots[0]` joga como p1)
 **Interfaces:**
 - Consumes: API pública atual do motor.
 - Produces: o motor carrega com `node arquivo.ts`; scripts `smoke` (motor) e `pnpm smoke` (raiz, roda o `smoke` de cada pacote); `pnpm check` termina com o smoke.
+
+- [ ] **Step 0: Trazer a `main` atual e instalar**
+
+O worktree nasce sem `node_modules`, e a `main` pode ter andado desde o plano (já andou uma vez: c40097c). Os playouts enviesados e as partidas de referência só valem contra o motor em que rodam. Na pasta `D:\andr3\jogo-coringa-sim`:
+```bash
+git merge --no-edit main
+pnpm install --frozen-lockfile
+pnpm check
+```
+Expected: merge sem conflito (ou conflito resolvido), instalação sem erro e `pnpm check` verde, ainda sem as mudanças deste plano. O sync de branch do app não serve aqui: este worktree não foi criado pelo app.
 
 - [ ] **Step 1: Escrever o smoke (o "teste" que falha)**
 
@@ -233,7 +245,7 @@ Em `package.json` (raiz), acrescente `"smoke": "pnpm -r smoke"` e troque o `chec
 - [ ] **Step 7: Rodar tudo**
 
 Run: `pnpm check`
-Expected: lint e typecheck limpos, todos os testes do motor verdes (128 na `main` de 2026-10-16), cobertura ≥ 90%, e a última linha `smoke do motor ok: 3 partidas no Node puro`.
+Expected: lint e typecheck limpos, todos os testes do motor verdes (eram 128 na `main` de 2026-10-16), cobertura ≥ 90%, e a última linha `smoke do motor ok: 3 partidas no Node puro`.
 
 - [ ] **Step 8: Commit**
 
