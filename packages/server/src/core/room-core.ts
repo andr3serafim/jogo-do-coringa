@@ -1,5 +1,6 @@
 import { CLOSE, LIMITS, PROTOCOL_VERSION, normalizeNickname } from '@coringa/protocol';
 import type {
+  AckMessage,
   ClientMessage,
   CreateRoomResponse,
   JoinRoomResponse,
@@ -9,11 +10,14 @@ import type {
 import { parseClientMessage } from '@coringa/protocol/schemas';
 import { nextAlarm } from './agenda.ts';
 import { emptyEffects } from './effects.ts';
+import * as game from './game.ts';
+import type { StateStep } from './game.ts';
 import * as lobby from './lobby.ts';
-import { ackFail, peekMessageId, SEAT_IDS } from './lobby.ts';
+import { peekMessageId, SEAT_IDS } from './lobby.ts';
 import type { Connection } from './lobby.ts';
 import { ROOM_LIMITS, STATE_SCHEMA, TIMERS } from './timers.ts';
 import { base64url, sha256Hex } from './tokens.ts';
+import { ackFail, deliverSteps, sendRoom } from './views.ts';
 import type { CoreDeps, CoreResult, Effects, RoomRecord, SeatId, SeatRecord, SocketInfo } from './types.ts';
 
 /**
@@ -124,7 +128,7 @@ export class RoomCore {
     const effects = this.#effects();
     effects.persist = true;
     effects.logs.push({ evt: 'room.joined', code: record.code, playerId: free });
-    lobby.sendRoom(effects, record, sockets, now);
+    sendRoom(effects, record, sockets, now);
     return { ok: true, value: { token, playerId: free }, effects };
   }
 
@@ -175,7 +179,7 @@ export class RoomCore {
     }
     if (changed) {
       effects.persist = true;
-      lobby.sendRoom(effects, record, live, now);
+      sendRoom(effects, record, live, now);
     }
     return effects;
   }
@@ -323,15 +327,38 @@ export class RoomCore {
         if (record.status !== 'LOBBY') return wrongStatus();
         return lobby.leave(effects, record, seat, sockets, now);
       case 'act':
+        return this.#play(effects, record, socketId, sockets, now, game.playerAct(record, seat, message, now));
       case 'concede':
-        if (record.status !== 'PLAYING') return reply(ackFail(message.id, 'NOT_PLAYING', 'não há partida em andamento'));
-        // A jogada e a desistência entram na Tarefa 6.
-        return reply(ackFail(message.id, 'BAD_MESSAGE', 'ainda não suportado'));
-      case 'rematch':
+        return this.#play(effects, record, socketId, sockets, now, game.concede(record, seat, message.id, now));
+      case 'rematch': {
         if (record.status !== 'FINISHED') return wrongStatus();
-        // A revanche entra na Tarefa 6.
-        return reply({ t: 'error', code: 'BAD_MESSAGE', message: 'ainda não suportado' });
+        effects.persist = true;
+        const first = game.rematch(record, seat, message.want, sockets, this.#deps, now);
+        if (!first) return sendRoom(effects, record, sockets, now);
+        effects.logs.push({ evt: 'game.started', code: record.code, gameNo: record.gameNo });
+        // `room` (já PLAYING) antes do `state` de largada, como na primeira partida.
+        sendRoom(effects, record, sockets, now);
+        return deliverSteps(effects, [first, ...game.autoSteps(record, now)], sockets);
+      }
     }
+  }
+
+  /**
+   * Resposta a `act` e `concede`: os `state` de cada passo para os dois, depois o `ack` a quem enviou e, se a
+   * partida acabou, o `room` com o desfecho. Uma recusa ou um `id` repetido não traz passo e não grava nada.
+   */
+  #play(
+    effects: Effects,
+    record: RoomRecord,
+    socketId: string,
+    sockets: SocketInfo[],
+    now: number,
+    outcome: { ack: AckMessage; steps: StateStep[] },
+  ): void {
+    if (outcome.steps.length > 0) effects.persist = true;
+    deliverSteps(effects, outcome.steps, sockets);
+    effects.send.push({ socketId, message: outcome.ack });
+    if (outcome.steps.length > 0 && record.status === 'FINISHED') sendRoom(effects, record, sockets, now);
   }
 
   /** Dados públicos para a tela de convite; `null` se a sala não existe. */

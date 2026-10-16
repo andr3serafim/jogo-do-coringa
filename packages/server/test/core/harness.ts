@@ -1,6 +1,13 @@
-import { nextInt, seedRng } from '@coringa/engine';
+import { actingPlayers, legalActions, nextInt, seedRng, viewFor } from '@coringa/engine';
+import type { GameEvent, GameState } from '@coringa/engine';
 import { PROTOCOL_VERSION } from '@coringa/protocol';
-import type { ClientMessage, CreateRoomResponse, JoinRoomResponse, ServerMessage } from '@coringa/protocol';
+import type {
+  ClientMessage,
+  CreateRoomResponse,
+  JoinRoomResponse,
+  PlayerAction,
+  ServerMessage,
+} from '@coringa/protocol';
 import { RoomCore } from '../../src/core/room-core.ts';
 import type { CoreDeps, Effects, LogLine, SeatId, SocketInfo } from '../../src/core/types.ts';
 
@@ -40,8 +47,11 @@ export class Harness {
   readonly fakes: FakeSocket[] = [];
   #nextSocket = 1;
 
-  constructor(seed?: string) {
-    this.core = new RoomCore(null, Harness.deps(seed));
+  /** `gameSeed` fixa a semente de toda partida (padrão: `semente-1`, `semente-2`, …). */
+  constructor(seed?: string, gameSeed?: string) {
+    const deps = Harness.deps(seed);
+    if (gameSeed !== undefined) deps.newSeed = () => gameSeed;
+    this.core = new RoomCore(null, deps);
   }
 
   /** Dependências determinísticas: bytes do PRNG do motor e sementes `semente-1`, `semente-2`, … */
@@ -152,8 +162,8 @@ export class Harness {
   }
 
   /** Sala com os dois assentos ocupados e os dois sockets autenticados. */
-  static async lobby(seed?: string): Promise<Room> {
-    const h = new Harness(seed);
+  static async lobby(seed?: string, gameSeed?: string): Promise<Room> {
+    const h = new Harness(seed, gameSeed);
     const ana = await h.create('Ana');
     const bia = await h.join('Bia');
     const p1 = h.open();
@@ -164,10 +174,67 @@ export class Harness {
   }
 
   /** O lobby com os dois prontos: a partida já começou. */
-  static async playing(seed?: string): Promise<Room> {
-    const room = await Harness.lobby(seed);
+  static async playing(seed?: string, gameSeed?: string): Promise<Room> {
+    const room = await Harness.lobby(seed, gameSeed);
     await room.h.send(room.p1, { t: 'ready', ready: true });
     await room.h.send(room.p2, { t: 'ready', ready: true });
     return room;
+  }
+
+  /**
+   * Sala já em PLAYING com o estado dado, os dois sockets autenticados e o registro coerente
+   * (`seq: 1`, `epoch: 1`, `recent: [{ seq: 1, events: [] }]`). Parte do lobby real para ter tokens e hashes de verdade.
+   */
+  static async fromState(state: GameState, seed?: string): Promise<Room> {
+    const room = await Harness.lobby(seed);
+    const record = room.h.core.record!;
+    record.status = 'PLAYING';
+    record.gameNo = 1;
+    record.seq = 1;
+    record.epoch = 1;
+    record.game = {
+      gameNo: 1,
+      seed: 'semente-fixa',
+      state,
+      startedAt: room.h.now,
+      steps: [],
+      recent: [{ seq: 1, events: [] }],
+      phaseStartedAt: room.h.now,
+      phaseDeadlineAt: null,
+      pausedTurnMs: null,
+      heldPass: null,
+      strikes: { p1: 0, p2: 0 },
+      acks: { p1: [], p2: [] },
+      cause: null,
+    };
+    return room;
+  }
+
+  /** Eventos (sem redação) do último passo guardado no anel. */
+  lastStepEvents(): GameEvent[] {
+    return this.core.record!.game!.recent.at(-1)!.events;
+  }
+
+  /**
+   * Manda a primeira ação legal de quem age até a sala chegar a FINISHED (no máximo 5 000 passos).
+   * O relógio anda 200 ms por jogada (o balde da conexão repõe 10 fichas por segundo) e os dois
+   * sockets seguem com sinal.
+   */
+  async playToEnd(): Promise<void> {
+    for (let i = 0; i < 5_000; i += 1) {
+      const record = this.core.record!;
+      if (record.status === 'FINISHED') return;
+      const state = record.game!.state;
+      const seat = actingPlayers(state)[0] as SeatId;
+      const action = legalActions(viewFor(state, seat))[0];
+      if (!action) throw new Error(`sem ação legal para ${seat}`);
+      const sock = this.fakes.find((fake) => fake.open && fake.seat === seat)!;
+      this.now += 200;
+      for (const fake of this.fakes) if (fake.open && !fake.muted) fake.lastSeenAt = this.now;
+      const before = record.seq;
+      await this.send(sock, { t: 'act', id: `auto-${i}`, epoch: record.epoch, action: action as PlayerAction });
+      if (record.seq === before && record.status === 'PLAYING') throw new Error(`jogada recusada: ${JSON.stringify(sock.inbox.at(-1))}`);
+    }
+    throw new Error('a partida não terminou em 5 000 passos');
   }
 }

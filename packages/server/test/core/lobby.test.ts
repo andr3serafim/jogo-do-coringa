@@ -360,7 +360,7 @@ describe('lobby', () => {
   });
 });
 
-describe('fora do lobby e mensagens ainda sem tratamento', () => {
+describe('fora do lobby', () => {
   it('act e concede fora de PLAYING → ack NOT_PLAYING; rematch fora de FINISHED → WRONG_STATUS', async () => {
     const { h, p1 } = await Harness.lobby();
     await h.send(p1, JSON.stringify({ t: 'act', id: 'a1', epoch: 0, action: { type: 'PASS' } }));
@@ -371,15 +371,6 @@ describe('fora do lobby e mensagens ainda sem tratamento', () => {
       { t: 'ack', id: 'c1', ok: false, code: 'NOT_PLAYING', message: expect.any(String) },
       { t: 'error', code: 'WRONG_STATUS', message: expect.any(String) },
     ]);
-  });
-
-  it('jogada, desistência e revanche entram na Tarefa 6: até lá, resposta explícita', async () => {
-    const { h, p1 } = await Harness.playing();
-    await h.send(p1, JSON.stringify({ t: 'act', id: 'a1', epoch: 1, action: { type: 'PASS' } }));
-    expect(p1.inbox.at(-1)).toMatchObject({ t: 'ack', id: 'a1', ok: false, code: 'BAD_MESSAGE' });
-    h.core.record!.status = 'FINISHED';
-    await h.send(p1, { t: 'rematch', want: true });
-    expect(p1.inbox.at(-1)).toMatchObject({ t: 'error', code: 'BAD_MESSAGE' });
   });
 });
 

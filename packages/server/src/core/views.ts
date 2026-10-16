@@ -1,8 +1,9 @@
 import { viewEvents, viewFor } from '@coringa/engine';
 import type { GameEvent } from '@coringa/engine';
-import type { RoomMessage, SeatInfo, StateMessage } from '@coringa/protocol';
+import type { AckCode, AckMessage, RoomMessage, SeatInfo, StateMessage } from '@coringa/protocol';
+import type { StateStep } from './game.ts';
 import { TIMERS } from './timers.ts';
-import type { RoomRecord, SeatId, SocketInfo } from './types.ts';
+import type { Effects, RoomRecord, SeatId, SocketInfo } from './types.ts';
 
 /**
  * Mensagem `room` com os dados públicos da sala. `connected` = há socket autenticado naquele assento;
@@ -67,4 +68,29 @@ export function stateFor(
     serverNow: now,
     ...flags,
   };
+}
+
+/** Manda a mesma mensagem `room` a todo socket autenticado da lista. */
+export function sendRoom(effects: Effects, record: RoomRecord, live: SocketInfo[], now: number): void {
+  const message = roomMessage(record, live, now);
+  for (const socket of live) {
+    if (socket.seat !== null) effects.send.push({ socketId: socket.socketId, message });
+  }
+}
+
+/**
+ * Entrega os passos em ordem: cada um vira a mensagem `state` montada na hora (a visão daquele instante)
+ * para todo socket autenticado, e as linhas de log do passo (fim de partida) entram nos efeitos.
+ */
+export function deliverSteps(effects: Effects, steps: StateStep[], live: SocketInfo[]): void {
+  for (const step of steps) {
+    effects.logs.push(...step.logs);
+    for (const socket of live) {
+      if (socket.seat !== null) effects.send.push({ socketId: socket.socketId, message: step.messages[socket.seat] });
+    }
+  }
+}
+
+export function ackFail(id: string, code: AckCode, message: string): AckMessage {
+  return { t: 'ack', id, ok: false, code, message };
 }

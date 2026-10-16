@@ -1,10 +1,9 @@
 import { CLOSE, LIMITS, PROTOCOL_VERSION } from '@coringa/protocol';
-import type { ServerMessage } from '@coringa/protocol';
-import { startGame } from './game.ts';
+import { autoSteps, startGame } from './game.ts';
 import { TokenBucket } from './limiter.ts';
 import { ROOM_LIMITS, TIMERS } from './timers.ts';
 import type { CoreDeps, Effects, RoomRecord, SeatId, SeatRecord, SocketInfo } from './types.ts';
-import { roomMessage, stateFor } from './views.ts';
+import { deliverSteps, sendRoom, stateFor } from './views.ts';
 
 /**
  * Lobby e conexões: funções sobre `effects` e `record`, sem estado próprio. O `RoomCore` decide a ordem das
@@ -28,14 +27,6 @@ export function newConnection(now: number): Connection {
   };
 }
 
-export function ackFail(
-  id: string,
-  code: 'RATE_LIMITED' | 'NOT_PLAYING' | 'BAD_MESSAGE',
-  message: string,
-): ServerMessage {
-  return { t: 'ack', id, ok: false, code, message };
-}
-
 /** `id` de um `act`/`concede`, lido sem validar o resto, para responder o descarte com `ack` em vez de `error`. */
 export function peekMessageId(raw: string): string | null {
   try {
@@ -46,14 +37,6 @@ export function peekMessageId(raw: string): string | null {
     return hasId && typeof id === 'string' && id.length >= 1 && id.length <= LIMITS.idLength ? id : null;
   } catch {
     return null;
-  }
-}
-
-/** Manda a mesma mensagem `room` a todo socket autenticado da lista. */
-export function sendRoom(effects: Effects, record: RoomRecord, live: SocketInfo[], now: number): void {
-  const message = roomMessage(record, live, now);
-  for (const socket of live) {
-    if (socket.seat !== null) effects.send.push({ socketId: socket.socketId, message });
   }
 }
 
@@ -149,11 +132,11 @@ export function ready(
   }
 
   if (!start) return sendRoom(effects, record, live, now);
-  const step = startGame(record, deps, now);
+  const steps = [startGame(record, deps, now)];
   effects.logs.push({ evt: 'game.started', code: record.code, gameNo: record.gameNo });
+  // Quem recebeu só figuras já tem o Equipar aplicado: cada passo automático vai logo depois da largada.
+  steps.push(...autoSteps(record, now));
   // `room` (já PLAYING) antes do `state` inicial de cada um.
   sendRoom(effects, record, live, now);
-  for (const socket of live) {
-    if (socket.seat !== null) effects.send.push({ socketId: socket.socketId, message: step.messages[socket.seat] });
-  }
+  deliverSteps(effects, steps, live);
 }
