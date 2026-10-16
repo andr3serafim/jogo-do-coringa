@@ -1,6 +1,9 @@
 import { handleEquip, timeoutEquip } from './actions/equip';
+import { declareAttack, endTurnAction, playJ, playQ, requireMain } from './actions/main';
 import { chooseOrder, handleChooseOrder } from './actions/order';
+import { closeReaction, pass } from './actions/reaction';
 import { fail, RuleViolation } from './errors';
+import { endTurn } from './flow';
 import { finishGame, getPlayer, opponentOf } from './state';
 import type { Action, ActionResult, GameEvent, GameState, PlayerId } from './types';
 
@@ -38,10 +41,15 @@ function applySystem(s: GameState, action: Action, ev: GameEvent[]): void {
       return timeoutEquip(s, ev);
     case 'ORDER_CHOICE':
       return chooseOrder(s, true, ev);
-    case 'ATTACK_MAIN':
+    case 'ATTACK_MAIN': {
+      const p = getPlayer(s, phase.player);
+      if (p.attackRow.length > 0) return declareAttack(s, p, ev);
+      return endTurn(s, ev);
+    }
     case 'REACTION':
+      return closeReaction(s, ev);
     case 'GAME_OVER':
-      return fail('WRONG_PHASE', 'TIMEOUT desta fase entra na Tarefa 7');
+      return;
   }
 }
 
@@ -51,6 +59,16 @@ function applyPlayer(s: GameState, player: PlayerId, action: Action, ev: GameEve
       return handleEquip(s, player, action.destinations, ev);
     case 'CHOOSE_ORDER':
       return handleChooseOrder(s, player, action.first, ev);
+    case 'PLAY_J':
+      return playJ(s, requireMain(s, player), action.cardId, ev);
+    case 'PLAY_Q':
+      return playQ(s, requireMain(s, player), action.cardId, ev);
+    case 'DECLARE_ATTACK':
+      return declareAttack(s, requireMain(s, player), ev);
+    case 'END_TURN':
+      return endTurnAction(s, requireMain(s, player), ev);
+    case 'PASS':
+      return pass(s, player, ev);
     case 'TIMEOUT':
     case 'FORFEIT':
       return fail('SYSTEM_ONLY', 'apenas o sistema envia esta ação');
