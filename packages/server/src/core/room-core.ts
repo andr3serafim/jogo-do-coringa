@@ -9,38 +9,12 @@ import type {
 import { parseClientMessage } from '@coringa/protocol/schemas';
 import { nextAlarm } from './agenda.ts';
 import { emptyEffects } from './effects.ts';
-import { startGame } from './game.ts';
-import { TokenBucket } from './limiter.ts';
+import * as lobby from './lobby.ts';
+import { ackFail, peekMessageId, SEAT_IDS } from './lobby.ts';
+import type { Connection } from './lobby.ts';
 import { ROOM_LIMITS, STATE_SCHEMA, TIMERS } from './timers.ts';
 import { base64url, sha256Hex } from './tokens.ts';
 import type { CoreDeps, CoreResult, Effects, RoomRecord, SeatId, SeatRecord, SocketInfo } from './types.ts';
-import { roomMessage, stateFor } from './views.ts';
-
-const SEAT_IDS: readonly SeatId[] = ['p1', 'p2'];
-
-/** Estado de uma conexão que só existe em memória: se o objeto hibernar, recomeça cheio (spec §8.2). */
-interface Connection {
-  bucket: TokenBucket;
-  drops: number;
-  malformed: number;
-}
-
-function ackFail(id: string, code: 'RATE_LIMITED' | 'NOT_PLAYING' | 'BAD_MESSAGE', message: string): ServerMessage {
-  return { t: 'ack', id, ok: false, code, message };
-}
-
-/** `id` de um `act`/`concede`, lido sem validar o resto, para responder o descarte com `ack` em vez de `error`. */
-function peekMessageId(raw: string): string | null {
-  try {
-    const value: unknown = JSON.parse(raw);
-    if (typeof value !== 'object' || value === null) return null;
-    const { t, id } = value as { t?: unknown; id?: unknown };
-    const hasId = t === 'act' || t === 'concede';
-    return hasId && typeof id === 'string' && id.length >= 1 && id.length <= LIMITS.idLength ? id : null;
-  } catch {
-    return null;
-  }
-}
 
 /**
  * Núcleo da sala: recebe entradas com `now` e devolve `Effects`. Não lê relógio, não sorteia e não
@@ -53,6 +27,8 @@ export class RoomCore {
   #record: RoomRecord | null;
   readonly #deps: CoreDeps;
   readonly #connections = new Map<string, Connection>();
+  /** Assentos que esta instância ligou a sockets; vazio depois de hibernar (a casca traz o instantâneo novo). */
+  readonly #attachedSeats = new Map<string, SeatId>();
 
   constructor(record: RoomRecord | null, deps: CoreDeps) {
     this.#record = record;
@@ -148,21 +124,14 @@ export class RoomCore {
     const effects = this.#effects();
     effects.persist = true;
     effects.logs.push({ evt: 'room.joined', code: record.code, playerId: free });
-    const message = roomMessage(record, sockets, now);
-    for (const socket of sockets) {
-      if (socket.seat !== null) effects.send.push({ socketId: socket.socketId, message });
-    }
+    lobby.sendRoom(effects, record, sockets, now);
     return { ok: true, value: { token, playerId: free }, effects };
   }
 
   #connection(socketId: string, now: number): Connection {
     let connection = this.#connections.get(socketId);
     if (!connection) {
-      connection = {
-        bucket: new TokenBucket(ROOM_LIMITS.bucketCapacity, ROOM_LIMITS.bucketRefillPerSec, now),
-        drops: 0,
-        malformed: 0,
-      };
+      connection = lobby.newConnection(now);
       this.#connections.set(socketId, connection);
     }
     return connection;
@@ -192,6 +161,7 @@ export class RoomCore {
    */
   onClose(socketId: string, sockets: SocketInfo[], now: number): Effects {
     this.#connections.delete(socketId);
+    this.#attachedSeats.delete(socketId);
     const effects = this.#effects();
     const record = this.#record;
     if (!record) return effects;
@@ -205,7 +175,7 @@ export class RoomCore {
     }
     if (changed) {
       effects.persist = true;
-      this.#sendRoom(effects, record, live, now);
+      lobby.sendRoom(effects, record, live, now);
     }
     return effects;
   }
@@ -217,11 +187,26 @@ export class RoomCore {
   async onMessage(socketId: string, raw: string | ArrayBuffer, sockets: SocketInfo[], now: number): Promise<Effects> {
     const effects = emptyEffects();
     await this.#handle(effects, socketId, raw, sockets, now);
-    effects.alarm = this.#record ? nextAlarm(this.#record.agenda) : null;
     return effects;
   }
 
   async #handle(
+    effects: Effects,
+    socketId: string,
+    raw: string | ArrayBuffer,
+    sockets: SocketInfo[],
+    now: number,
+  ): Promise<void> {
+    try {
+      await this.#process(effects, socketId, raw, sockets, now);
+    } finally {
+      // O alarme sai no fim do trecho síncrono, no mesmo trecho que mexeu na agenda: nenhuma outra continuação
+      // (outro `hello` esperando o hash) pode mudar a agenda entre o trabalho e esta leitura.
+      effects.alarm = this.#record ? nextAlarm(this.#record.agenda) : null;
+    }
+  }
+
+  async #process(
     effects: Effects,
     socketId: string,
     raw: string | ArrayBuffer,
@@ -274,7 +259,7 @@ export class RoomCore {
       if (!record) return close(CLOSE.ROOM_GONE, 'sala inexistente');
       const owner = record.seats.find((candidate) => candidate.tokenHash === tokenHash);
       if (!owner) return violation('AUTH', CLOSE.AUTH, 'token inválido');
-      return this.#hello(effects, record, owner, socketId, view, now);
+      return lobby.hello(effects, record, owner, socketId, view, this.#attachedSeats, now);
     }
 
     if (message === null) {
@@ -285,41 +270,6 @@ export class RoomCore {
       return reply({ t: 'error', code: 'BAD_MESSAGE', message: 'mensagem inválida' });
     }
     this.#dispatch(effects, this.#record, seat, socketId, message, view, now);
-  }
-
-  /** Autentica o socket no assento: a aba nova vence e a antiga cai com 4009 (spec §2.6). */
-  #hello(
-    effects: Effects,
-    record: RoomRecord,
-    owner: SeatRecord,
-    socketId: string,
-    sockets: SocketInfo[],
-    now: number,
-  ): void {
-    const attached = sockets.map((socket) => (socket.socketId === socketId ? { ...socket, seat: owner.id } : socket));
-    const replaced = attached.filter((socket) => socket.socketId !== socketId && socket.seat === owner.id);
-    for (const old of replaced) {
-      effects.close.push({ socketId: old.socketId, code: CLOSE.OTHER_TAB, reason: 'aberta em outra aba' });
-    }
-    effects.attach.push({ socketId, seat: owner.id });
-    owner.offlineSince = null;
-    effects.persist = true;
-    effects.send.push({
-      socketId,
-      message: { t: 'welcome', protocol: PROTOCOL_VERSION, playerId: owner.id, serverNow: now },
-    });
-    this.#sendRoom(effects, record, attached.filter((socket) => !replaced.includes(socket)), now);
-    // A volta com eventos perdidos (catch-up) é da Tarefa 8; aqui o jogador recebe o retrato inteiro.
-    if (record.game) {
-      effects.send.push({ socketId, message: stateFor(record, owner.id, [], now, { resync: true }) });
-    }
-  }
-
-  #sendRoom(effects: Effects, record: RoomRecord, live: SocketInfo[], now: number): void {
-    const message = roomMessage(record, live, now);
-    for (const socket of live) {
-      if (socket.seat !== null) effects.send.push({ socketId: socket.socketId, message });
-    }
   }
 
   #dispatch(
@@ -342,10 +292,10 @@ export class RoomCore {
         return reply({ t: 'error', code: 'BAD_MESSAGE', message: 'hello repetido' });
       case 'ready':
         if (record.status !== 'LOBBY') return wrongStatus();
-        return this.#ready(effects, record, seat, message.ready, sockets, now);
+        return lobby.ready(effects, record, seat, message.ready, sockets, this.#deps, now);
       case 'leave':
         if (record.status !== 'LOBBY') return wrongStatus();
-        return this.#leave(effects, record, seat, sockets, now);
+        return lobby.leave(effects, record, seat, sockets, now);
       case 'act':
       case 'concede':
         if (record.status !== 'PLAYING') return reply(ackFail(message.id, 'NOT_PLAYING', 'não há partida em andamento'));
@@ -355,59 +305,6 @@ export class RoomCore {
         if (record.status !== 'FINISHED') return wrongStatus();
         // A revanche entra na Tarefa 6.
         return reply({ t: 'error', code: 'BAD_MESSAGE', message: 'ainda não suportado' });
-    }
-  }
-
-  /** `leave` libera o assento e fecha o socket com 1000; só no lobby (spec §2.3). */
-  #leave(effects: Effects, record: RoomRecord, seat: SeatId, sockets: SocketInfo[], now: number): void {
-    record.seats = record.seats.filter((candidate) => candidate.id !== seat);
-    for (const socket of sockets.filter((candidate) => candidate.seat === seat)) {
-      effects.close.push({ socketId: socket.socketId, code: CLOSE.LEAVE, reason: 'saiu da sala' });
-    }
-    effects.persist = true;
-    this.#sendRoom(effects, record, sockets.filter((socket) => socket.seat !== seat), now);
-  }
-
-  /**
-   * Marca o pronto e, com os dois prontos, confere a presença antes de largar (spec §7.1): assento sem socket
-   * ou com socket sem sinal há mais de 45 s perde o pronto (o socket sem sinal cai com 4008) e a partida não começa.
-   */
-  #ready(
-    effects: Effects,
-    record: RoomRecord,
-    seat: SeatId,
-    ready: boolean,
-    sockets: SocketInfo[],
-    now: number,
-  ): void {
-    const mine = record.seats.find((candidate) => candidate.id === seat);
-    if (mine) mine.ready = ready;
-    effects.persist = true;
-
-    let live = sockets;
-    let start = record.seats.length === SEAT_IDS.length && record.seats.every((candidate) => candidate.ready);
-    if (start) {
-      for (const candidate of record.seats) {
-        const owned = live.filter((socket) => socket.seat === candidate.id);
-        const silent = owned.filter((socket) => socket.lastSeenAt < now - TIMERS.silentDropMs);
-        if (owned.length > 0 && silent.length === 0) continue;
-        start = false;
-        candidate.ready = false;
-        if (silent.length > 0) candidate.offlineSince = now;
-        for (const socket of silent) {
-          effects.close.push({ socketId: socket.socketId, code: CLOSE.HELLO, reason: 'sem sinal' });
-        }
-        live = live.filter((socket) => !silent.includes(socket));
-      }
-    }
-
-    if (!start) return this.#sendRoom(effects, record, live, now);
-    const step = startGame(record, this.#deps, now);
-    effects.logs.push({ evt: 'game.started', code: record.code, gameNo: record.gameNo });
-    // `room` (já PLAYING) antes do `state` inicial de cada um.
-    this.#sendRoom(effects, record, live, now);
-    for (const socket of live) {
-      if (socket.seat !== null) effects.send.push({ socketId: socket.socketId, message: step.messages[socket.seat] });
     }
   }
 

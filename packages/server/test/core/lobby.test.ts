@@ -66,6 +66,37 @@ describe('hello', () => {
     expect(h.messages(again, 'room')[0]!.seats.map((s) => s.connected)).toEqual([true, true]);
   });
 
+  it('dois hello simultâneos com o mesmo token: uma aba cai com 4009 e o assento fica com uma só', async () => {
+    const { h, p1, tokens } = await Harness.lobby();
+    h.close(p1);
+    const a = h.open();
+    const b = h.open();
+    await Promise.all([h.send(a, h.hello(tokens.p1)), h.send(b, h.hello(tokens.p1))]);
+    const codes = [a, b].map((s) => s.closed?.code ?? null);
+    expect(codes.filter((c) => c === 4009)).toHaveLength(1);
+    expect(codes.filter((c) => c === null)).toHaveLength(1);
+    const alive = [a, b].find((s) => s.open)!;
+    expect(h.sockets.filter((s) => s.seat === 'p1')).toHaveLength(1);
+    expect(alive.seat).toBe('p1');
+    expect(h.core.record!.seats[0]!.offlineSince).toBeNull();
+    // Fechar a aba que sobrou volta a marcar o assento como fora.
+    h.close(alive);
+    expect(h.core.record!.seats[0]!.offlineSince).not.toBeNull();
+  });
+
+  it('instantâneo velho sem a aba que acabou de entrar: ela também perde o assento', async () => {
+    const { h, tokens } = await Harness.lobby();
+    const a = h.open();
+    await h.send(a, h.hello(tokens.p2));
+    // Um instantâneo tirado antes do `hello` de `a` só conhece o recém-chegado.
+    const b = h.open();
+    const stale: SocketInfo[] = [socketInfo(b.id, null)];
+    const effects = await h.core.onMessage(b.id, JSON.stringify(h.hello(tokens.p2)), stale, h.now);
+    expect(effects.close.map((c) => c.socketId)).toContain(a.id);
+    expect(effects.close.find((c) => c.socketId === a.id)).toMatchObject({ code: 4009 });
+    expect(effects.send.every((m) => m.socketId === b.id)).toBe(true);
+  });
+
   it('hello durante a partida: state com resync e a visão do próprio jogador', async () => {
     const { h, p1, tokens } = await Harness.playing();
     const again = h.open();
