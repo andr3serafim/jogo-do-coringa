@@ -1,11 +1,9 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { applyAction } from '../src/apply-action.ts';
-import { totalCards } from '../src/deck.ts';
 import { legalActions } from '../src/legal-actions.ts';
-import { viewEvents, viewFor } from '../src/view.ts';
-import type { GameEvent, GameState } from '../src/types.ts';
-import { allCards } from './helpers.ts';
+import { viewFor } from '../src/view.ts';
+import { checkInvariants } from './invariants.ts';
 import { actingPlayers, playout } from './playout.ts';
 
 const arbConfig = fc.record({
@@ -14,28 +12,6 @@ const arbConfig = fc.record({
   wildJokers: fc.boolean(),
 });
 const arbChoices = fc.array(fc.nat(), { minLength: 1, maxLength: 64 });
-
-/** Invariantes da spec §5. Usa checagens simples (sem `expect`) porque roda em todo passo. */
-function checkInvariants(before: GameState, after: GameState, events: GameEvent[]): void {
-  const cards = allCards(after);
-  if (cards.length !== totalCards(after.config)) throw new Error(`cartas: ${cards.length}`);
-  if (new Set(cards.map((c) => c.id)).size !== cards.length) throw new Error('carta duplicada');
-  after.players.forEach((p, i) => {
-    if (p.hp > before.players[i].hp) throw new Error('a vida aumentou');
-  });
-  for (const viewer of after.players) {
-    const opponent = after.players.find((p) => p.id !== viewer.id);
-    if (!opponent) throw new Error('sem oponente');
-    const json = JSON.stringify(viewFor(after, viewer.id));
-    if (json.includes('"rng"')) throw new Error('a visão expõe a semente');
-    for (const c of [...opponent.hand, ...opponent.pending, ...after.deck]) {
-      if (json.includes(`"${c.id}"`)) throw new Error(`vazamento na visão de ${viewer.id}: ${c.id}`);
-    }
-    for (const e of viewEvents(events, viewer.id)) {
-      if (e.type === 'CardsDealt' && e.player !== viewer.id && e.cards) throw new Error('vazamento em CardsDealt');
-    }
-  }
-}
 
 describe('propriedades do motor (spec §5)', () => {
   it('partidas aleatórias terminam e respeitam conservação, vida e sigilo', () => {
