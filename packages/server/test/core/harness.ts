@@ -360,6 +360,8 @@ export interface MatchTrace {
   /** Quantas vezes cada perturbação aconteceu (para o teste conferir que ela rodou). */
   chaos: { drops: number; stale: number; duplicates: number; idles: number };
   oracle: OracleProbe[];
+  /** Tudo o que o núcleo mandou a qualquer socket, inclusive os que já tinham fechado (`h.sent`). */
+  wire: ServerMessage[];
 }
 
 /**
@@ -453,9 +455,14 @@ async function simulate(options: SimulateOptions): Promise<MatchTrace> {
   const startSeq = record().seq - (record().game?.steps.length ?? fail('a partida não começou'));
   const stepsDone = (): number => record().seq - startSeq;
 
-  /** Jogadas com id escondido de X contra o mesmo formato com um id inexistente (spec §8.4). */
+  /**
+   * Jogadas com id escondido de X contra o mesmo formato com um id inexistente (spec §8.4). Os modelos dependem da
+   * fase e das cartas de X, para a jogada chegar à checagem do id e não morrer antes (fase errada, carta própria
+   * de tipo errado, limite de J/Q, Defesa Absoluta): só entram os que a precondição permite neste momento.
+   */
   const probe = async (c: SimClient): Promise<void> => {
     const state = record().game!.state;
+    const phase = state.phase;
     const me = state.players.find((player) => player.id === c.seat)!;
     const opponent = state.players.find((player) => player.id !== c.seat)!;
     const hidden: Array<{ in: OracleProbe['hiddenIn']; id: string }> = [];
@@ -463,19 +470,53 @@ async function simulate(options: SimulateOptions): Promise<MatchTrace> {
     if (opponent.pending[0]) hidden.push({ in: 'pending', id: opponent.pending[0].id });
     if (state.deck.length > 0) hidden.push({ in: 'deck', id: state.deck[probeRng.int(state.deck.length)]!.id });
     if (hidden.length === 0) return;
-    const ownCard = me.hand[0]?.id ?? MISSING;
-    const publicTarget = opponent.attackBuffs[0]?.id ?? opponent.defenseBuffs[0]?.id ?? opponent.guard[0]?.id ?? MISSING;
-    const templates: Array<{ slot: string; build: (id: string) => PlayerAction }> = [
-      { slot: 'cardId', build: (id) => ({ type: 'PLAY_J', cardId: id }) },
-      { slot: 'cardId', build: (id) => ({ type: 'PLAY_Q', cardId: id }) },
-      { slot: 'cardIds', build: (id) => ({ type: 'PLAY_K', cardIds: [id] }) },
-      { slot: 'cardId', build: (id) => ({ type: 'TRAP', cardId: id, targetId: publicTarget }) },
-      { slot: 'targetId', build: (id) => ({ type: 'TRAP', cardId: ownCard, targetId: id }) },
-      { slot: 'cardId', build: (id) => ({ type: 'SACRIFICE', cardId: id, targetId: publicTarget }) },
-      { slot: 'targetId', build: (id) => ({ type: 'SACRIFICE', cardId: ownCard, targetId: id }) },
-      { slot: 'cardId', build: (id) => ({ type: 'RESURRECT', cardId: id, row: 'ATK' }) },
-      { slot: 'kId', build: (id) => ({ type: 'REFLECT', kId: id, jId: 'nao-existe-j', qId: 'nao-existe-q' }) },
-    ];
+
+    const main = phase.kind === 'ATTACK_MAIN' && phase.player === c.seat;
+    const reaction = phase.kind === 'REACTION' && phase.responder === c.seat;
+    const own = (...kinds: string[]): string | undefined => me.hand.find((card) => kinds.includes(card.kind))?.id;
+    const limit = state.config.buffLimit;
+    const open = !opponent.absoluteDefense;
+    const opponentBuff = opponent.attackBuffs[0] ?? opponent.defenseBuffs[0];
+    const trapTarget = opponent.attackBuffs[0] ?? opponent.defenseBuffs[0] ?? opponent.guard[0];
+    const ace = own('A', 'WILD');
+    const buff = own('J', 'Q', 'WILD');
+    const row = me.attackRow.length < state.config.rowLimit ? 'ATK' : 'DEF';
+
+    type Template = { slot: string; build: (id: string) => PlayerAction };
+    const templates: Template[] = [];
+    if (main && me.attackBuffs.length < limit) templates.push({ slot: 'cardId', build: (id) => ({ type: 'PLAY_J', cardId: id }) });
+    if (main && me.defenseBuffs.length < limit) templates.push({ slot: 'cardId', build: (id) => ({ type: 'PLAY_Q', cardId: id }) });
+    if (main) templates.push({ slot: 'cardIds', build: (id) => ({ type: 'PLAY_K', cardIds: [id] }) });
+    // O Ás da reação não responde a um Reflect; contra K só mira K (o alvo escondido continua inválido).
+    const trapPhase = (main || (reaction && phase.kind === 'REACTION' && phase.trigger !== 'REFLECT_PLAYED')) && open;
+    if (trapPhase && trapTarget) templates.push({ slot: 'cardId', build: (id) => ({ type: 'TRAP', cardId: id, targetId: trapTarget.id }) });
+    if (trapPhase && ace) templates.push({ slot: 'targetId', build: (id) => ({ type: 'TRAP', cardId: ace, targetId: id }) });
+    if (main && open && opponentBuff && buff) {
+      templates.push({ slot: 'cardId', build: (id) => ({ type: 'SACRIFICE', cardId: id, targetId: opponentBuff.id }) });
+    }
+    if (main && open && buff) templates.push({ slot: 'targetId', build: (id) => ({ type: 'SACRIFICE', cardId: buff, targetId: id }) });
+    if (main && c.latest!.view.self.resurrections.length > 0 && me[row === 'ATK' ? 'attackRow' : 'defenseRow'].length < state.config.rowLimit) {
+      templates.push({ slot: 'cardId', build: (id) => ({ type: 'RESURRECT', cardId: id, row }) });
+    }
+    if (main && !me.reflect) {
+      templates.push({ slot: 'kId', build: (id) => ({ type: 'REFLECT', kId: id, jId: 'nao-existe-j', qId: 'nao-existe-q' }) });
+    }
+    const king = own('K');
+    if (main && !me.reflect && king) {
+      templates.push({ slot: 'jId', build: (id) => ({ type: 'REFLECT', kId: king, jId: id, qId: 'nao-existe-q' }) });
+    }
+    if (!main && !reaction) {
+      // Fora da vez de X (Equipar, por exemplo) toda jogada de cartas é fora de fase: é o único lugar onde existem
+      // pendentes do oponente, e a resposta tem que ser a mesma para o id escondido e o inexistente.
+      templates.push(
+        { slot: 'cardId', build: (id) => ({ type: 'PLAY_J', cardId: id }) },
+        { slot: 'cardId', build: (id) => ({ type: 'TRAP', cardId: id, targetId: MISSING }) },
+        { slot: 'targetId', build: (id) => ({ type: 'SACRIFICE', cardId: MISSING, targetId: id }) },
+        { slot: 'cardId', build: (id) => ({ type: 'RESURRECT', cardId: id, row: 'ATK' }) },
+      );
+    }
+    if (templates.length === 0) return;
+
     const seqBefore = record().seq;
     for (let round = 0; round < 4; round += 1) {
       const template = probeRng.pick(templates);
@@ -594,5 +635,6 @@ async function simulate(options: SimulateOptions): Promise<MatchTrace> {
     logs: h.logs,
     chaos: counts,
     oracle,
+    wire: h.sent.map((entry) => entry.message),
   };
 }

@@ -31,31 +31,63 @@ const idleMatch = (seed: string): Promise<MatchTrace> =>
 const states = (trace: MatchTrace, seat: (typeof SEATS)[number]): StateMessage[] =>
   trace.outbox.get(seat)!.filter((m): m is StateMessage => m.t === 'state');
 
+const FAMILIES = [
+  ['com caos', chaosMatch],
+  ['com estouros', idleMatch],
+] as const;
+
+/** O que cada jogador recebeu é a redação exata do motor sobre a reexecução independente do registro. */
+function checkRedaction(trace: MatchTrace): void {
+  expect(['GAME_OVER', 'ABANDONED']).toContain(trace.ended);
+  expect(trace.finalRecord.status).toBe('FINISHED');
+  const game = trace.finalRecord.game!;
+  const replayed = replaySteps(game, trace.startSeq);
+  for (const seat of SEATS) {
+    const outbox = trace.outbox.get(seat)!;
+    expect(outbox.some((m) => m.t === 'state')).toBe(true);
+    for (const m of outbox) {
+      expect(JSON.stringify(m)).not.toContain(game.seed);
+      if (m.t !== 'state') continue;
+      const at = replayed.get(m.seq);
+      expect(at, `seq ${m.seq} existe no registro`).toBeDefined();
+      expect(m.view).toEqual(viewFor(at!.state, seat));
+      if (!m.catchUp && !m.resync) expect(m.events).toEqual(viewEvents(at!.events, seat));
+    }
+    // O que o jogador viu na largada é o estado inicial, sem eventos.
+    expect(states(trace, seat)[0]!.seq).toBe(trace.startSeq);
+  }
+  // A semente também não vai a socket nenhum, nem aos que fecharam (tudo o que o núcleo mandou).
+  expect(trace.wire.length).toBeGreaterThan(0);
+  for (const m of trace.wire) expect(JSON.stringify(m)).not.toContain(game.seed);
+}
+
+/** Reexecutar o registro dá o estado final e o replay do log é o próprio registro. */
+function checkDeterminism(trace: MatchTrace): void {
+  const game = trace.finalRecord.game!;
+  const replayed = replaySteps(game, trace.startSeq);
+  expect(game.steps.length).toBe(trace.finalRecord.seq - trace.startSeq);
+  expect(replayed.get(trace.finalRecord.seq)!.state).toEqual(game.state);
+  const line = trace.logs.find((entry) => entry.evt === 'game.replay');
+  expect(line).toMatchObject({ evt: 'game.replay', replay: { seed: game.seed, steps: game.steps } });
+}
+
 describe('partidas com bots pelo núcleo', () => {
-  it.each(SEEDS)(
-    'partida %s termina e o que sai para cada jogador é exatamente a redação do motor',
-    async (seed) => {
-      const trace = await chaosMatch(seed);
-      expect(['GAME_OVER', 'ABANDONED']).toContain(trace.ended);
-      expect(trace.finalRecord.status).toBe('FINISHED');
-      const game = trace.finalRecord.game!;
-      const replayed = replaySteps(game, trace.startSeq);
-      for (const seat of SEATS) {
-        const outbox = trace.outbox.get(seat)!;
-        expect(outbox.some((m) => m.t === 'state')).toBe(true);
-        for (const m of outbox) {
-          expect(JSON.stringify(m)).not.toContain(game.seed);
-          if (m.t !== 'state') continue;
-          const at = replayed.get(m.seq);
-          expect(at, `seq ${m.seq} existe no registro`).toBeDefined();
-          expect(m.view).toEqual(viewFor(at!.state, seat));
-          if (!m.catchUp && !m.resync) expect(m.events).toEqual(viewEvents(at!.events, seat));
-        }
-      }
-      // O que o jogador viu na largada é o estado inicial, sem eventos.
-      for (const seat of SEATS) expect(states(trace, seat)[0]!.seq).toBe(trace.startSeq);
-    },
-  );
+  describe.each(FAMILIES)('partidas %s', (_name, run) => {
+    it.each(SEEDS)('partida %s termina e o que sai para cada jogador é exatamente a redação do motor', async (seed) => {
+      checkRedaction(await run(seed));
+    });
+
+    it.each(SEEDS)('reexecutar o registro no motor dá o mesmo estado final (%s)', async (seed) => {
+      checkDeterminism(await run(seed));
+    });
+  });
+
+  it('as partidas com estouros têm passos do sistema: TIMEOUT e Equipar automático', async () => {
+    const traces = await Promise.all(SEEDS.map(idleMatch));
+    const steps = traces.flatMap((t) => t.finalRecord.game!.steps);
+    expect(steps.filter((step) => step.player === 'system' && step.action.type === 'TIMEOUT').length).toBeGreaterThan(SEEDS.length);
+    expect(traces.reduce((sum, t) => sum + t.chaos.idles, 0)).toBeGreaterThan(SEEDS.length);
+  });
 
   it('as perturbações rodaram de verdade: quedas, época velha e id repetido', async () => {
     const traces = await Promise.all(SEEDS.map(chaosMatch));
@@ -68,19 +100,8 @@ describe('partidas com bots pelo núcleo', () => {
     expect(flagged.length).toBeGreaterThan(0);
   });
 
-  it.each(SEEDS)('reexecutar o registro no motor dá o mesmo estado final (%s)', async (seed) => {
-    const trace = await chaosMatch(seed);
-    const game = trace.finalRecord.game!;
-    const replayed = replaySteps(game, trace.startSeq);
-    expect(game.steps.length).toBe(trace.finalRecord.seq - trace.startSeq);
-    expect(replayed.get(trace.finalRecord.seq)!.state).toEqual(game.state);
-    // O replay que vai para o log (`game.replay`) é esse mesmo registro.
-    const line = trace.logs.find((entry) => entry.evt === 'game.replay');
-    expect(line).toMatchObject({ evt: 'game.replay', replay: { seed: game.seed, steps: game.steps } });
-  });
-
   it('seq e epoch nunca decrescem por cliente; nenhum TIMEOUT recusado', async () => {
-    const traces = [...(await Promise.all(SEEDS.map(chaosMatch))), ...(await Promise.all(SEEDS.slice(0, 6).map(idleMatch)))];
+    const traces = [...(await Promise.all(SEEDS.map(chaosMatch))), ...(await Promise.all(SEEDS.map(idleMatch)))];
     let timeouts = 0;
     for (const trace of traces) {
       for (const seat of SEATS) {
@@ -99,7 +120,7 @@ describe('partidas com bots pelo núcleo', () => {
     }
     // As partidas com cliente ocioso estouram prazos de verdade: há TIMEOUT injetado e o motor o aceitou.
     expect(timeouts).toBeGreaterThan(0);
-    const idles = (await Promise.all(SEEDS.slice(0, 6).map(idleMatch))).reduce((sum, t) => sum + t.chaos.idles, 0);
+    const idles = (await Promise.all(SEEDS.map(idleMatch))).reduce((sum, t) => sum + t.chaos.idles, 0);
     expect(idles).toBeGreaterThan(0);
   });
 
@@ -116,14 +137,22 @@ describe('partidas com bots pelo núcleo', () => {
       expect(probe.hiddenCode).not.toBe('OK');
       expect(probe.hiddenCode).not.toBe('RATE_LIMITED');
     }
-    // As sondas chegam às checagens de carta do motor (não morrem todas em fase errada) e cobrem as três origens.
-    const codes = new Set(probes.map((p) => p.hiddenCode));
-    expect(codes).toContain('CARD_NOT_IN_HAND');
-    expect(codes).toContain('INVALID_TARGET');
-    expect(new Set(probes.map((p) => p.hiddenIn))).toEqual(new Set(['hand', 'pending', 'deck']));
-    for (const action of ['PLAY_J', 'TRAP', 'SACRIFICE', 'RESURRECT'] as const) {
-      expect(probes.some((p) => p.action === action), action).toBe(true);
+    // Uma sonda só prova algo se chegou à checagem do id: fase errada, carta própria de tipo errado e ressurreição
+    // indisponível respondem antes de olhar o id, igual nos dois lados. Cada (jogada, campo) precisa de pares informativos.
+    const shallow = new Set(['WRONG_PHASE', 'NOT_YOUR_TURN', 'INVALID_CARD', 'NO_RESURRECTION']);
+    const deep = new Map<string, Set<string>>();
+    for (const p of probes.filter((probe) => !shallow.has(probe.hiddenCode))) {
+      const key = `${p.action}.${p.slot}`;
+      deep.set(key, (deep.get(key) ?? new Set()).add(`${p.hiddenCode}/${p.hiddenIn}`));
     }
+    for (const key of ['PLAY_J.cardId', 'PLAY_Q.cardId', 'PLAY_K.cardIds', 'TRAP.cardId', 'TRAP.targetId', 'SACRIFICE.cardId', 'SACRIFICE.targetId']) {
+      expect(deep.has(key), `${key} chegou à checagem do id`).toBe(true);
+    }
+    // Os ids escondidos na mão do oponente e no monte chegam fundo; os pendentes só existem no Equipar, onde toda jogada de cartas é fora de fase.
+    const origins = new Set([...deep.values()].flatMap((set) => [...set].map((entry) => entry.split('/')[1])));
+    expect(origins).toContain('hand');
+    expect(origins).toContain('deck');
+    expect(new Set(probes.map((p) => p.hiddenIn))).toEqual(new Set(['hand', 'pending', 'deck']));
   });
 
   it('cada chave gravada fica < 100 KiB na maior partida', async () => {
