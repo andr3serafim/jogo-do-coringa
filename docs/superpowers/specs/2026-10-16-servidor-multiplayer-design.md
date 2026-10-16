@@ -1,7 +1,7 @@
 # Jogo do Coringa — Servidor multiplayer (Sub-projeto 2)
 
 - **Data:** 2026-10-16
-- **Status:** rascunho para revisão do autor
+- **Status:** **aprovada** pelo autor em 2026-10-16 (inclusive as mudanças pós-lote: abandono com os dois fora, 50 passos na reconexão, `pnpm deploy:server`)
 - **Depende de:** spec do sub-projeto 1, `docs/superpowers/specs/2026-10-15-jogo-coringa-regras-motor-design.md` (§1.7 janela de reação, §1.11 W.O., §1.12 tempos, §2 API do motor)
 
 ---
