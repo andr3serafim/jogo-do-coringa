@@ -260,13 +260,16 @@ describe('storage-layout', () => {
     expect(lobbyParts.room.hasGame).toBe(false);
   });
 
-  it('joinRecord: sem a chave game ou com hasGame falso dá game null; peças faltando viram vazias', () => {
+  it('joinRecord recusa partida sem game ou sem log; recent faltando vira []; sem partida, game null', () => {
     const parts = splitRecord(makeRecord(true, 2, 2));
-    expect(joinRecord({ room: parts.room })?.game).toBeNull();
-    const semRecent = joinRecord({ room: parts.room, game: parts.game });
+    expect(joinRecord({ room: parts.room, recent: parts.recent, log: parts.log })).toBeNull(); // sem game
+    expect(joinRecord({ room: parts.room })).toBeNull();
+    expect(joinRecord({ room: parts.room, game: parts.game, recent: parts.recent })).toBeNull(); // sem log
+    const semRecent = joinRecord({ room: parts.room, game: parts.game, log: parts.log });
     expect(semRecent?.game?.recent).toEqual([]);
-    expect(semRecent?.game?.steps).toEqual([]);
+    expect(semRecent?.game?.steps).toEqual(parts.log);
     const lobby = splitRecord(makeRecord(false));
+    expect(joinRecord({ room: lobby.room })?.game).toBeNull();
     expect(joinRecord({ room: lobby.room, game: parts.game })?.game).toBeNull();
   });
 });

@@ -30,11 +30,15 @@ export function splitRecord(record: RoomRecord): RecordParts {
   };
 }
 
-/** Remonta o registro; `null` sem a chave `room`. Peças que faltam viram vazias. */
+/**
+ * Remonta o registro. Devolve `null` (registro ausente ou corrompido) sem a chave `room`, ou quando
+ * `room.hasGame` é verdadeiro e falta `game` ou `log`: um `game: null` ou um log vazio em silêncio
+ * recarregaria a sala em PLAYING sem partida, ou truncaria o replay. Só `recent` pode faltar (vira `[]`).
+ */
 export function joinRecord(parts: Partial<RecordParts>): RoomRecord | null {
   if (!parts.room) return null;
   const { hasGame, ...room } = parts.room;
-  const game: GameRecord | null =
-    hasGame && parts.game ? { ...parts.game, steps: parts.log ?? [], recent: parts.recent ?? [] } : null;
-  return { ...room, game };
+  if (!hasGame) return { ...room, game: null };
+  if (!parts.game || !parts.log) return null;
+  return { ...room, game: { ...parts.game, steps: parts.log, recent: parts.recent ?? [] } };
 }
