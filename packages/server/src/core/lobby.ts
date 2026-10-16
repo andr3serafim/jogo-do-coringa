@@ -52,6 +52,7 @@ export function hello(
   socketId: string,
   sockets: SocketInfo[],
   attachedSeats: Map<string, SeatId>,
+  deps: CoreDeps,
   now: number,
 ): void {
   const seatOf = (socket: SocketInfo): SeatId | null => socket.seat ?? attachedSeats.get(socket.socketId) ?? null;
@@ -80,7 +81,15 @@ export function hello(
     socketId,
     message: { t: 'welcome', protocol: PROTOCOL_VERSION, playerId: owner.id, serverNow: now },
   });
-  sendRoom(effects, record, attached.filter((socket) => !replaced.has(socket.socketId)), now);
+  let live = attached.filter((socket) => !replaced.has(socket.socketId));
+  // Quem pediu a revanche e voltou: se os dois pedem e estão conectados, a largada sai agora (a Tarefa 8
+  // cuida das demais voltas no meio da partida).
+  if (record.status === 'FINISHED') {
+    const begun = beginGame(effects, record, live, deps, now, 'wantsRematch');
+    if (begun.started) return;
+    live = begun.live;
+  }
+  sendRoom(effects, record, live, now);
   // A volta com eventos perdidos (catch-up) é da Tarefa 8; aqui o jogador recebe o retrato inteiro.
   if (record.game) {
     effects.send.push({ socketId, message: stateFor(record, owner.id, [], now, { resync: true }) });
@@ -98,9 +107,47 @@ export function leave(effects: Effects, record: RoomRecord, seat: SeatId, socket
 }
 
 /**
- * Marca o pronto e, com os dois prontos, confere a presença antes de largar (spec §7.1): assento sem socket
- * ou com socket sem sinal há mais de 45 s perde o pronto (o socket sem sinal cai com 4008) e a partida não começa.
+ * Largada única, da primeira partida e da revanche (spec §7.1). Com os dois assentos pedindo (`flag`), confere a
+ * presença: assento sem socket não larga (o `ready` se perde, o `wantsRematch` fica para quando ele voltar) e
+ * socket sem sinal há mais de 45 s cai com 4008, perde o pedido e também impede a largada. Com tudo em ordem,
+ * começa a partida: `game.started`, o Equipar automático de quem só recebeu figuras, `room` (já PLAYING) e o
+ * `state` de cada passo. Sem largar, devolve os sockets que seguem vivos para o chamador mandar o `room`.
  */
+export function beginGame(
+  effects: Effects,
+  record: RoomRecord,
+  sockets: SocketInfo[],
+  deps: CoreDeps,
+  now: number,
+  flag: 'ready' | 'wantsRematch',
+): { started: boolean; live: SocketInfo[] } {
+  let live = sockets;
+  let start = record.seats.length === SEAT_IDS.length && record.seats.every((candidate) => candidate[flag]);
+  if (start) {
+    for (const candidate of record.seats) {
+      const owned = live.filter((socket) => socket.seat === candidate.id);
+      const silent = owned.filter((socket) => socket.lastSeenAt < now - TIMERS.silentDropMs);
+      if (owned.length > 0 && silent.length === 0) continue;
+      start = false;
+      if (silent.length > 0 || flag === 'ready') candidate[flag] = false;
+      if (silent.length > 0) candidate.offlineSince = now;
+      for (const socket of silent) {
+        effects.close.push({ socketId: socket.socketId, code: CLOSE.HELLO, reason: 'sem sinal' });
+      }
+      live = live.filter((socket) => !silent.includes(socket));
+    }
+  }
+  if (!start) return { started: false, live };
+
+  const steps = [startGame(record, deps, now)];
+  effects.logs.push({ evt: 'game.started', code: record.code, gameNo: record.gameNo });
+  steps.push(...autoSteps(record, now));
+  sendRoom(effects, record, live, now);
+  deliverSteps(effects, steps, live);
+  return { started: true, live };
+}
+
+/** Marca o pronto e tenta largar a partida (os dois prontos, conectados e com sinal). */
 export function ready(
   effects: Effects,
   record: RoomRecord,
@@ -113,30 +160,23 @@ export function ready(
   const mine = record.seats.find((candidate) => candidate.id === seat);
   if (mine) mine.ready = isReady;
   effects.persist = true;
+  const begun = beginGame(effects, record, sockets, deps, now, 'ready');
+  if (!begun.started) sendRoom(effects, record, begun.live, now);
+}
 
-  let live = sockets;
-  let start = record.seats.length === SEAT_IDS.length && record.seats.every((candidate) => candidate.ready);
-  if (start) {
-    for (const candidate of record.seats) {
-      const owned = live.filter((socket) => socket.seat === candidate.id);
-      const silent = owned.filter((socket) => socket.lastSeenAt < now - TIMERS.silentDropMs);
-      if (owned.length > 0 && silent.length === 0) continue;
-      start = false;
-      candidate.ready = false;
-      if (silent.length > 0) candidate.offlineSince = now;
-      for (const socket of silent) {
-        effects.close.push({ socketId: socket.socketId, code: CLOSE.HELLO, reason: 'sem sinal' });
-      }
-      live = live.filter((socket) => !silent.includes(socket));
-    }
-  }
-
-  if (!start) return sendRoom(effects, record, live, now);
-  const steps = [startGame(record, deps, now)];
-  effects.logs.push({ evt: 'game.started', code: record.code, gameNo: record.gameNo });
-  // Quem recebeu só figuras já tem o Equipar aplicado: cada passo automático vai logo depois da largada.
-  steps.push(...autoSteps(record, now));
-  // `room` (já PLAYING) antes do `state` inicial de cada um.
-  sendRoom(effects, record, live, now);
-  deliverSteps(effects, steps, live);
+/** Pede ou retira a revanche (spec §2.3) e tenta largar outra partida na mesma sala. */
+export function requestRematch(
+  effects: Effects,
+  record: RoomRecord,
+  seat: SeatId,
+  want: boolean,
+  sockets: SocketInfo[],
+  deps: CoreDeps,
+  now: number,
+): void {
+  const mine = record.seats.find((candidate) => candidate.id === seat);
+  if (mine) mine.wantsRematch = want;
+  effects.persist = true;
+  const begun = beginGame(effects, record, sockets, deps, now, 'wantsRematch');
+  if (!begun.started) sendRoom(effects, record, begun.live, now);
 }

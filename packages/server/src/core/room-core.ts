@@ -296,7 +296,7 @@ export class RoomCore {
       if (!record) return this.#close(effects, socketId, CLOSE.ROOM_GONE, 'sala inexistente');
       const owner = record.seats.find((candidate) => candidate.tokenHash === tokenHash);
       if (!owner) return this.#violation(effects, socketId, 'AUTH', CLOSE.AUTH, 'token inválido');
-      lobby.hello(effects, record, owner, socketId, view, this.#attachedSeats, now);
+      lobby.hello(effects, record, owner, socketId, view, this.#attachedSeats, this.#deps, now);
     } finally {
       this.#setAlarm(effects);
     }
@@ -330,16 +330,9 @@ export class RoomCore {
         return this.#play(effects, record, socketId, sockets, now, game.playerAct(record, seat, message, now));
       case 'concede':
         return this.#play(effects, record, socketId, sockets, now, game.concede(record, seat, message.id, now));
-      case 'rematch': {
+      case 'rematch':
         if (record.status !== 'FINISHED') return wrongStatus();
-        effects.persist = true;
-        const first = game.rematch(record, seat, message.want, sockets, this.#deps, now);
-        if (!first) return sendRoom(effects, record, sockets, now);
-        effects.logs.push({ evt: 'game.started', code: record.code, gameNo: record.gameNo });
-        // `room` (já PLAYING) antes do `state` de largada, como na primeira partida.
-        sendRoom(effects, record, sockets, now);
-        return deliverSteps(effects, [first, ...game.autoSteps(record, now)], sockets);
-      }
+        return lobby.requestRematch(effects, record, seat, message.want, sockets, this.#deps, now);
     }
   }
 

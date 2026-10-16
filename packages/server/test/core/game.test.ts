@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { setup } from '../../../engine/test/helpers.ts';
 import { autoSteps, commitStep, finishGame } from '../../src/core/game.ts';
 import { phaseKey } from '../../src/core/epoch.ts';
-import { ROOM_LIMITS } from '../../src/core/timers.ts';
+import { ROOM_LIMITS, TIMERS } from '../../src/core/timers.ts';
 import { CODE, Harness } from './harness.ts';
 
 /** Fase de Equipar da rodada 1, cada um com duas numéricas pendentes. */
@@ -424,6 +424,68 @@ describe('revanche', () => {
     await h.send(p2, { t: 'rematch', want: true });
     expect(rec.status).toBe('FINISHED');
     expect(h.messages(p2, 'room').at(-1)!.seats[0]).toMatchObject({ connected: false, wantsRematch: true });
+  });
+
+  it('socket sem sinal há mais de 45 s no pedido de revanche: cai com 4008, perde o pedido e a partida não larga', async () => {
+    const { h, p1, p2 } = await finished();
+    const rec = h.core.record!;
+    await h.send(p1, { t: 'rematch', want: true });
+    h.silent(p1);
+    h.now += TIMERS.silentDropMs + 1_000;
+    p2.lastSeenAt = h.now;
+    await h.send(p2, { t: 'rematch', want: true });
+    expect(rec.status).toBe('FINISHED');
+    expect(p1.closed).toEqual({ code: 4008, reason: 'sem sinal' });
+    expect(rec.seats.map((seat) => seat.wantsRematch)).toEqual([false, true]);
+    expect(rec.seats[0]!.offlineSince).toBe(h.now);
+    expect(h.messages(p2, 'room').at(-1)!.seats).toMatchObject([{ connected: false, wantsRematch: false }, { wantsRematch: true }]);
+    expect(rec.gameNo).toBe(1);
+  });
+
+  it('pedido guardado na queda: A pede, A cai, B pede e A volta → a revanche larga no hello de A', async () => {
+    const { h, p1, p2, tokens } = await finished();
+    const rec = h.core.record!;
+    const firstSeed = rec.game!.seed;
+    await h.send(p1, { t: 'rematch', want: true });
+    h.close(p1);
+    expect(rec.seats[0]!.wantsRematch).toBe(true);
+    await h.send(p2, { t: 'rematch', want: true });
+    expect(rec.status).toBe('FINISHED');
+
+    const back = h.open();
+    await h.send(back, h.hello(tokens.p1));
+    expect(rec).toMatchObject({ status: 'PLAYING', gameNo: 2, outcome: null, score: { p1: 1, p2: 0, draws: 0 } });
+    expect(rec.game!.seed).not.toBe(firstSeed);
+    expect(rec.seats.every((seat) => !seat.wantsRematch)).toBe(true);
+    expect(back.inbox.map((m) => m.t)).toEqual(['welcome', 'room', 'state']);
+    expect(h.messages(back, 'state')[0]!.view).toEqual(viewFor(rec.game!.state, 'p1'));
+    expect(h.messages(back, 'state')[0]!.resync).toBeUndefined();
+    expect(p2.inbox.slice(-2).map((m) => m.t)).toEqual(['room', 'state']);
+    expect(h.logs.filter((l) => l.evt === 'game.started')).toHaveLength(2);
+  });
+
+  it('hello em FINISHED sem os dois pedidos só manda o retrato; com sinal velho do outro, derruba o outro', async () => {
+    const { h, p1, p2, tokens } = await finished();
+    const rec = h.core.record!;
+    h.close(p1);
+    const back = h.open();
+    await h.send(back, h.hello(tokens.p1));
+    expect(rec.status).toBe('FINISHED');
+    expect(back.inbox.map((m) => m.t)).toEqual(['welcome', 'room', 'state']);
+    expect(h.messages(back, 'state')[0]!.resync).toBe(true);
+
+    // Os dois pedem; p2 fica mudo por mais de 45 s e p1 volta: p2 cai com 4008 e nada larga.
+    await h.send(back, { t: 'rematch', want: true });
+    rec.seats[1]!.wantsRematch = true;
+    h.silent(p2);
+    h.now += TIMERS.silentDropMs + 1_000;
+    back.lastSeenAt = h.now;
+    h.close(back);
+    const again = h.open();
+    await h.send(again, h.hello(tokens.p1));
+    expect(rec.status).toBe('FINISHED');
+    expect(p2.closed).toEqual({ code: 4008, reason: 'sem sinal' });
+    expect(rec.seats[1]!.wantsRematch).toBe(false);
   });
 
   it('revanche fora de FINISHED → WRONG_STATUS', async () => {

@@ -5,7 +5,7 @@ import { withoutKinds } from './agenda.ts';
 import { phaseKey } from './epoch.ts';
 import { ROOM_LIMITS } from './timers.ts';
 import { hex } from './tokens.ts';
-import type { CoreDeps, GameRecord, LogLine, Replay, RoomRecord, SeatId, SocketInfo } from './types.ts';
+import type { CoreDeps, GameRecord, LogLine, Replay, RoomRecord, SeatId } from './types.ts';
 import { ackFail, stateFor } from './views.ts';
 
 /**
@@ -230,25 +230,4 @@ export function concede(
   const ack: AckMessage = { t: 'ack', id, ok: true, seq: step.seq };
   rememberAck(game, seat, ack);
   return { ack, steps: [step] };
-}
-
-/**
- * Pede ou retira a revanche (spec §2.3). Com os dois pedindo e cada um com socket autenticado, larga outra
- * partida na mesma sala (semente nova, placar mantido) e devolve o passo de largada; senão, só muda o pedido
- * e devolve `null` (o `RoomCore` manda `room`).
- */
-export function rematch(
-  record: RoomRecord,
-  seat: SeatId,
-  want: boolean,
-  sockets: SocketInfo[],
-  deps: CoreDeps,
-  now: number,
-): StateStep | null {
-  const mine = record.seats.find((candidate) => candidate.id === seat);
-  if (mine) mine.wantsRematch = want;
-  const both =
-    record.seats.length === 2 &&
-    record.seats.every((candidate) => candidate.wantsRematch && sockets.some((socket) => socket.seat === candidate.id));
-  return both ? startGame(record, deps, now) : null;
 }
