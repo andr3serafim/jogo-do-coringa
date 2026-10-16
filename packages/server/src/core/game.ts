@@ -1,12 +1,15 @@
-import { DEFAULT_CONFIG, applyAction, createGame } from '@coringa/engine';
+import { DEFAULT_CONFIG, actingPlayers, applyAction, createGame } from '@coringa/engine';
 import type { Action, GameEvent, GameResult, GameState } from '@coringa/engine';
 import type { AckMessage, OutcomeCause, PlayerAction, StateMessage } from '@coringa/protocol';
-import { withoutKinds } from './agenda.ts';
+import { withItem, withoutKinds } from './agenda.ts';
 import { phaseKey } from './epoch.ts';
-import { ROOM_LIMITS } from './timers.ts';
+import { schedulePhase } from './timing.ts';
+import { ROOM_LIMITS, TIMERS } from './timers.ts';
 import { hex } from './tokens.ts';
 import type { CoreDeps, GameRecord, LogLine, Replay, RoomRecord, SeatId } from './types.ts';
 import { ackFail, stateFor } from './views.ts';
+
+export { schedulePhase } from './timing.ts';
 
 /**
  * Um passo do jogo: o `seq` dele, os eventos sem redação, a mensagem `state` de cada assento (montada na hora) e
@@ -73,6 +76,7 @@ export function startGame(record: RoomRecord, deps: CoreDeps, now: number): Stat
     acks: { p1: [], p2: [] },
     cause: null,
   };
+  schedulePhase(record, { key: '', phase: created.state.phase, deadlineAt: null }, [], now);
   return makeStep(record, [], now);
 }
 
@@ -80,7 +84,8 @@ export function startGame(record: RoomRecord, deps: CoreDeps, now: number): Stat
  * Passo do jogo (spec §5, itens 1 a 6): `seq` sobe; a `epoch` sobe se a chave da fase mudou; o passo entra no
  * registro da partida e o anel de recentes é cortado em 50. Jogada voluntária de um jogador zera os estouros dele
  * (`automatic` marca o Equipar feito pelo servidor, que não conta como jogada). Em GAME_OVER, fecha a partida com
- * a causa guardada em `game.cause` (`NORMAL` se não houver). A contagem de estouros e os prazos são da Tarefa 7.
+ * a causa guardada em `game.cause` (`NORMAL` se não houver). Os prazos da fase nova entram pelo `schedulePhase`;
+ * a contagem de estouros é de quem injeta o `TIMEOUT` (`applyTimeout`).
  */
 export function commitStep(
   record: RoomRecord,
@@ -92,6 +97,7 @@ export function commitStep(
 ): StateStep {
   const game = requireGame(record);
   const keyBefore = phaseKey(game.state);
+  const before = { key: keyBefore, phase: game.state.phase, deadlineAt: game.phaseDeadlineAt };
   record.seq += 1;
   game.state = result.state;
   if (phaseKey(result.state) !== keyBefore) record.epoch += 1;
@@ -99,6 +105,7 @@ export function commitStep(
   game.recent.push({ seq: record.seq, events: result.events });
   if (game.recent.length > ROOM_LIMITS.recentSteps) game.recent.splice(0, game.recent.length - ROOM_LIMITS.recentSteps);
   if (actor !== 'system' && !options.automatic) game.strikes[actor] = 0;
+  schedulePhase(record, before, result.events, now);
   const logs = result.state.phase.kind === 'GAME_OVER' ? finishGame(record, game.cause ?? 'NORMAL', now) : [];
   return makeStep(record, result.events, now, logs);
 }
@@ -147,25 +154,83 @@ export function finishGame(record: RoomRecord, cause: OutcomeCause, now: number)
   ];
 }
 
+const SEATS: readonly SeatId[] = ['p1', 'p2'];
+
 /**
- * Equipar automático (spec §5): no começo de cada rodada de Equipar, quem recebeu zero numéricas tem
- * `EQUIP { destinations: [] }` aplicado em seu nome, cada um como passo próprio. A quantidade de pendentes já é
- * pública, então nada se revela. Não conta como jogada voluntária (os estouros ficam como estão). A Tarefa 7
- * acrescenta o W.O. por estouros.
+ * Aplica no motor uma ação que o servidor mesmo injeta (`TIMEOUT`, `FORFEIT`, o `PASS` guardado, o Equipar
+ * automático) e registra o passo. O motor nunca deve recusá-la: se recusar, é defeito do servidor e o erro sobe.
+ */
+function injectStep(
+  record: RoomRecord,
+  actor: SeatId | 'system',
+  action: Action,
+  now: number,
+  options: { automatic?: boolean } = {},
+): StateStep {
+  const result = applyAction(requireGame(record).state, actor, action);
+  if (!result.ok) throw new Error(`${action.type} recusado pelo motor: ${result.error.code}`);
+  return commitStep(record, actor, action, result, now, options);
+}
+
+/**
+ * Passos automáticos (spec §5), cada um como passo próprio, repetidos até nada mais disparar:
+ * - W.O. por estouros (§7.3): quem chegou a 3 perde (`FORFEIT`, causa `AFK`, log `wo.applied`). Com o outro fora,
+ *   o caso vira abandono: isso é da Tarefa 8.
+ * - Equipar sem numéricas: quem recebeu zero tem `EQUIP { destinations: [] }` aplicado em seu nome. A quantidade
+ *   de pendentes já é pública, então nada se revela. Não conta como jogada voluntária (os estouros ficam como estão).
  */
 export function autoSteps(record: RoomRecord, now: number): StateStep[] {
   const game = requireGame(record);
   const steps: StateStep[] = [];
   for (;;) {
     const state = game.state;
+    if (state.phase.kind === 'GAME_OVER') return steps;
+    const loser = SEATS.find((seat) => game.strikes[seat] >= TIMERS.afkStrikes);
+    if (loser) {
+      game.cause = 'AFK';
+      const step = injectStep(record, 'system', { type: 'FORFEIT', loser }, now);
+      step.logs.unshift({ evt: 'wo.applied', code: record.code, gameNo: record.gameNo, loser, cause: 'AFK' });
+      steps.push(step);
+      return steps;
+    }
     if (state.phase.kind !== 'EQUIP') return steps;
     const idle = state.players.find((player) => !player.equipSubmitted && player.pending.length === 0);
     if (!idle) return steps;
-    const action: Action = { type: 'EQUIP', destinations: [] };
-    const result = applyAction(state, idle.id, action);
-    if (!result.ok) throw new Error(`Equipar automático recusado: ${result.error.code}`);
-    steps.push(commitStep(record, idle.id as SeatId, action, result, now, { automatic: true }));
+    steps.push(injectStep(record, idle.id as SeatId, { type: 'EQUIP', destinations: [] }, now, { automatic: true }));
   }
+}
+
+/**
+ * Estouro da fase (spec §6.2 e §7.3): soma 1 nos estouros de quem deixou o tempo acabar (no Equipar, quem ainda
+ * não confirmou e tem pendentes; no turno, o dono dele; a Escolha da ordem e a janela de reação não contam),
+ * injeta o `TIMEOUT` como passo do sistema e roda os passos automáticos (que incluem o W.O. por estouros).
+ * Quem chama confere antes que o prazo é da época atual (spec §6.4): o `TIMEOUT` do motor não diz a que fase se refere.
+ */
+export function applyTimeout(record: RoomRecord, now: number): StateStep[] {
+  const game = requireGame(record);
+  const phase = game.state.phase;
+  if (phase.kind === 'EQUIP') {
+    for (const id of actingPlayers(game.state)) {
+      const player = game.state.players.find((candidate) => candidate.id === id);
+      if (player && player.pending.length > 0) game.strikes[id as SeatId] += 1;
+    }
+  } else if (phase.kind === 'ATTACK_MAIN') {
+    game.strikes[phase.player as SeatId] += 1;
+  }
+  return [injectStep(record, 'system', { type: 'TIMEOUT' }, now), ...autoSteps(record, now)];
+}
+
+/**
+ * Aplica o PASS guardado quando o piso da janela de reação vence (spec §6.3), em nome do respondente: é jogada
+ * dele, então zera os estouros dele. Sem PASS guardado na época atual, não faz nada.
+ */
+export function applyHeldPass(record: RoomRecord, now: number): StateStep[] {
+  const game = requireGame(record);
+  const phase = game.state.phase;
+  const held = game.heldPass;
+  if (!held || held.epoch !== record.epoch || phase.kind !== 'REACTION') return [];
+  game.heldPass = null;
+  return [injectStep(record, phase.responder as SeatId, { type: 'PASS' }, now), ...autoSteps(record, now)];
 }
 
 /** Guarda o ack de uma jogada aplicada; só os 64 últimos de cada jogador (spec §4.6, item 3). */
@@ -189,20 +254,37 @@ function earlyAck(record: RoomRecord, seat: SeatId, id: string): AckMessage | nu
 
 /**
  * Jogada de um jogador (spec §4.6, etapas 3 a 8; as etapas 1 e 2 são do `RoomCore`). Recusa sem mudar nada:
- * `NOT_PLAYING`, `STALE_EPOCH`, erro do motor (o `ALREADY_PASSED` da janela de reação vem na Tarefa 7). Aplicada,
- * devolve o `ack` com o `seq` do passo do jogador e os passos (o dele e os automáticos que ele provocou).
+ * `NOT_PLAYING`, `STALE_EPOCH`, `ALREADY_PASSED`, erro do motor. Um PASS do respondente antes do piso de 2 s da
+ * janela fica guardado (`held`, sem passo e sem mudança para o oponente). Aplicada, devolve o `ack` com o `seq` do
+ * passo do jogador e os passos (o dele e os automáticos que ele provocou).
  */
 export function playerAct(
   record: RoomRecord,
   seat: SeatId,
   msg: { id: string; epoch: number; action: PlayerAction },
   now: number,
-): { ack: AckMessage; steps: StateStep[] } {
+): { ack: AckMessage; steps: StateStep[]; held?: true } {
   const early = earlyAck(record, seat, msg.id);
   if (early) return { ack: early, steps: [] };
   const game = requireGame(record);
   if (msg.epoch !== record.epoch) {
     return { ack: ackFail(msg.id, 'STALE_EPOCH', 'a mesa mudou, decida de novo'), steps: [] };
+  }
+  const phase = game.state.phase;
+  if (phase.kind === 'REACTION' && phase.responder === seat) {
+    if (game.heldPass) return { ack: ackFail(msg.id, 'ALREADY_PASSED', 'você já passou nesta janela'), steps: [] };
+    if (msg.action.type === 'PASS' && now < game.phaseStartedAt + TIMERS.reactionMinMs) {
+      // Piso da janela (spec §6.3): o PASS espera os 2 s e só então vale; o oponente não vê nada até lá.
+      game.heldPass = { epoch: record.epoch, id: msg.id };
+      record.agenda = withItem(record.agenda, {
+        kind: 'reactionMin',
+        at: game.phaseStartedAt + TIMERS.reactionMinMs,
+        epoch: record.epoch,
+      });
+      const held: AckMessage = { t: 'ack', id: msg.id, ok: true, held: true };
+      rememberAck(game, seat, held);
+      return { ack: held, steps: [], held: true };
+    }
   }
   const result = applyAction(game.state, seat, msg.action);
   if (!result.ok) return { ack: ackFail(msg.id, result.error.code, result.error.message), steps: [] };

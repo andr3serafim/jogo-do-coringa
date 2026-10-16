@@ -1,6 +1,6 @@
-import { viewEvents, viewFor } from '@coringa/engine';
+import { actingPlayers, viewEvents, viewFor } from '@coringa/engine';
 import type { GameEvent } from '@coringa/engine';
-import type { AckCode, AckMessage, RoomMessage, SeatInfo, StateMessage } from '@coringa/protocol';
+import type { AckCode, AckMessage, Deadline, DeadlineKind, RoomMessage, SeatInfo, StateMessage } from '@coringa/protocol';
 import type { StateStep } from './game.ts';
 import { TIMERS } from './timers.ts';
 import type { Effects, RoomRecord, SeatId, SocketInfo } from './types.ts';
@@ -45,9 +45,18 @@ export function roomMessage(record: RoomRecord, sockets: SocketInfo[], now: numb
   return message;
 }
 
+const DEADLINE_KINDS: Record<string, DeadlineKind> = {
+  EQUIP: 'EQUIP',
+  ORDER_CHOICE: 'ORDER',
+  ATTACK_MAIN: 'TURN',
+  REACTION: 'REACTION',
+};
+
 /**
  * Mensagem `state` de um assento: `viewFor` e `viewEvents` são tudo o que sai do jogo (nada de semente, monte
- * ou mão do oponente). Os prazos ficam `null` até a Tarefa 7. `flags` marca a volta à sala (`catchUp`, `resync`).
+ * ou mão do oponente). O prazo é o `phaseDeadlineAt` (o instante que a interface mostra; o `TIMEOUT` vem 500 ms
+ * depois), com quem age; `pausedTurnMs` acompanha a janela de reação aberta no meio do turno do oponente.
+ * `flags` marca a volta à sala (`catchUp`, `resync`).
  */
 export function stateFor(
   record: RoomRecord,
@@ -58,16 +67,23 @@ export function stateFor(
 ): StateMessage {
   const game = record.game;
   if (!game) throw new Error('stateFor chamado sem partida');
-  return {
+  const kind = DEADLINE_KINDS[game.state.phase.kind];
+  const deadline: Deadline | null =
+    game.phaseDeadlineAt === null || kind === undefined
+      ? null
+      : { kind, at: game.phaseDeadlineAt, players: actingPlayers(game.state) };
+  const message: StateMessage = {
     t: 'state',
     seq: record.seq,
     epoch: record.epoch,
     view: viewFor(game.state, seat),
     events: viewEvents(events, seat),
-    deadline: null,
+    deadline,
     serverNow: now,
     ...flags,
   };
+  if (game.state.phase.kind === 'REACTION' && game.pausedTurnMs !== null) message.pausedTurnMs = game.pausedTurnMs;
+  return message;
 }
 
 /** Manda a mesma mensagem `room` a todo socket autenticado da lista. */

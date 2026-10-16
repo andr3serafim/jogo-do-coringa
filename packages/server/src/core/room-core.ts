@@ -8,7 +8,7 @@ import type {
   ServerMessage,
 } from '@coringa/protocol';
 import { parseClientMessage } from '@coringa/protocol/schemas';
-import { nextAlarm } from './agenda.ts';
+import { dueItems, nextAlarm } from './agenda.ts';
 import { emptyEffects } from './effects.ts';
 import * as game from './game.ts';
 import type { StateStep } from './game.ts';
@@ -19,6 +19,9 @@ import { ROOM_LIMITS, STATE_SCHEMA, TIMERS } from './timers.ts';
 import { base64url, sha256Hex } from './tokens.ts';
 import { ackFail, deliverSteps, sendRoom } from './views.ts';
 import type { CoreDeps, CoreResult, Effects, RoomRecord, SeatId, SeatRecord, SocketInfo } from './types.ts';
+
+/** Função à parte para o TypeScript não fixar o `status` depois de um `continue` no laço do alarme. */
+const isFinished = (record: RoomRecord): boolean => record.status === 'FINISHED';
 
 /**
  * Núcleo da sala: recebe entradas com `now` e devolve `Effects`. Não lê relógio, não sorteia e não
@@ -338,7 +341,8 @@ export class RoomCore {
 
   /**
    * Resposta a `act` e `concede`: os `state` de cada passo para os dois, depois o `ack` a quem enviou e, se a
-   * partida acabou, o `room` com o desfecho. Uma recusa ou um `id` repetido não traz passo e não grava nada.
+   * partida acabou, o `room` com o desfecho. Uma recusa ou um `id` repetido não traz passo e não grava nada;
+   * um PASS guardado (`held`) não traz passo, mas grava o que ficou guardado.
    */
   #play(
     effects: Effects,
@@ -346,12 +350,41 @@ export class RoomCore {
     socketId: string,
     sockets: SocketInfo[],
     now: number,
-    outcome: { ack: AckMessage; steps: StateStep[] },
+    outcome: { ack: AckMessage; steps: StateStep[]; held?: true },
   ): void {
-    if (outcome.steps.length > 0) effects.persist = true;
+    if (outcome.steps.length > 0 || outcome.held) effects.persist = true;
     deliverSteps(effects, outcome.steps, sockets);
     effects.send.push({ socketId, message: outcome.ack });
     if (outcome.steps.length > 0 && record.status === 'FINISHED') sendRoom(effects, record, sockets, now);
+  }
+
+  /**
+   * Alarme da plataforma (spec §6.5). Processa, em ordem de instante, os itens vencidos da agenda: confere a chave
+   * de cada um, descarta os obsoletos sem efeito e devolve o alarme do próximo. Só trata `phase` e `reactionMin`;
+   * os demais tipos (presença, expiração) entram nas Tarefas 8 e 9 e ficam na agenda. Síncrono de ponta a ponta: o
+   * alarme pode ser repetido, e o que já foi consumido não vale de novo. `sockets` só serve para entregar os passos.
+   */
+  onAlarm(sockets: SocketInfo[], now: number): Effects {
+    const effects = this.#effects();
+    try {
+      const record = this.#record;
+      if (!record) return effects;
+      for (const item of dueItems(record.agenda, now)) {
+        // Um item anterior pode ter tirado este da agenda (fim de partida, época nova): então não vale mais.
+        if (!record.agenda.includes(item)) continue;
+        if (item.kind !== 'phase' && item.kind !== 'reactionMin') continue;
+        record.agenda = record.agenda.filter((other) => other !== item);
+        effects.persist = true;
+        // `phase` e `reactionMin` só valem na época em que nasceram (spec §6.4): o `TIMEOUT` do motor não diz a que fase se refere.
+        if (record.status !== 'PLAYING' || item.epoch !== record.epoch) continue;
+        const steps = item.kind === 'phase' ? game.applyTimeout(record, now) : game.applyHeldPass(record, now);
+        deliverSteps(effects, steps, sockets);
+        if (steps.length > 0 && isFinished(record)) sendRoom(effects, record, sockets, now);
+      }
+      return effects;
+    } finally {
+      this.#setAlarm(effects);
+    }
   }
 
   /** Dados públicos para a tela de convite; `null` se a sala não existe. */

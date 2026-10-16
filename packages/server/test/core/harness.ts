@@ -9,6 +9,9 @@ import type {
   ServerMessage,
 } from '@coringa/protocol';
 import { RoomCore } from '../../src/core/room-core.ts';
+import { nextAlarm } from '../../src/core/agenda.ts';
+import { schedulePhase } from '../../src/core/timing.ts';
+import { TIMERS } from '../../src/core/timers.ts';
 import type { CoreDeps, Effects, LogLine, SeatId, SocketInfo } from '../../src/core/types.ts';
 
 export const CODE = 'K7M2QX';
@@ -210,6 +213,39 @@ export class Harness {
     return room;
   }
 
+  /**
+   * Arma o prazo da fase do estado montado por `fromState` (que nasce sem prazo): como se a fase tivesse
+   * acabado de começar agora. Atualiza `h.alarm` com o da agenda.
+   */
+  arm(): void {
+    const record = this.core.record!;
+    const game = record.game!;
+    schedulePhase(record, { key: '', phase: game.state.phase, deadlineAt: null }, [], this.now);
+    this.alarm = nextAlarm(record.agenda);
+  }
+
+  /**
+   * Avança o relógio em `ms`. Enquanto o alarme está vencido (`alarm <= alvo`), o relógio vai até o instante dele
+   * e chama `onAlarm` ali, para que prazos encadeados disparem na ordem certa. Os sockets abertos e não mudos
+   * seguem dando sinal. Um alarme que não anda depois de tratado (item de outra tarefa, ainda sem tratamento) falha alto.
+   */
+  advance(ms: number): void {
+    const target = this.now + ms;
+    for (let guard = 0; this.alarm !== null && this.alarm <= target; guard += 1) {
+      if (guard > 10_000) throw new Error('o alarme não anda: item vencido que ninguém trata');
+      const at = this.alarm;
+      this.now = Math.max(this.now, at);
+      for (const fake of this.fakes) if (fake.open && !fake.muted) fake.lastSeenAt = this.now;
+      const before = JSON.stringify(this.core.record?.agenda);
+      this.apply(this.core.onAlarm(this.sockets, this.now));
+      if (this.alarm !== null && this.alarm <= at && JSON.stringify(this.core.record?.agenda) === before) {
+        throw new Error(`o alarme em ${at} não foi tratado`);
+      }
+    }
+    this.now = target;
+    for (const fake of this.fakes) if (fake.open && !fake.muted) fake.lastSeenAt = this.now;
+  }
+
   /** Eventos (sem redação) do último passo guardado no anel. */
   lastStepEvents(): GameEvent[] {
     return this.core.record!.game!.recent.at(-1)!.events;
@@ -229,7 +265,7 @@ export class Harness {
       const action = legalActions(viewFor(state, seat))[0];
       if (!action) throw new Error(`sem ação legal para ${seat}`);
       const sock = this.fakes.find((fake) => fake.open && fake.seat === seat)!;
-      this.now += 200;
+      this.now += state.phase.kind === 'REACTION' ? 200 + TIMERS.reactionMinMs : 200; // o PASS só vale depois do piso da janela
       for (const fake of this.fakes) if (fake.open && !fake.muted) fake.lastSeenAt = this.now;
       const before = record.seq;
       await this.send(sock, { t: 'act', id: `auto-${i}`, epoch: record.epoch, action: action as PlayerAction });

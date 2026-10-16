@@ -91,6 +91,7 @@ describe('act', () => {
     await h.send(p1, { t: 'act', id: 'k', epoch, action: { type: 'PLAY_K', cardIds: [kId] } });
     expect(p1.inbox.at(-1)).toMatchObject({ ok: true });
     expect(rec.epoch).toBe(epoch + 1);
+    h.now += TIMERS.reactionMinMs; // o PASS só vale depois do piso da janela (Tarefa 7)
     await h.send(p2, { t: 'act', id: 'p', epoch: rec.epoch, action: { type: 'PASS' } });
     expect(p2.inbox.at(-1)).toMatchObject({ ok: true });
     expect(rec.epoch).toBe(epoch + 2);
@@ -304,6 +305,7 @@ describe('fim de partida', () => {
     const { h, p1, p2 } = await Harness.fromState(state);
     const rec = h.core.record!;
     await h.send(p1, { t: 'act', id: 'atk', epoch: rec.epoch, action: { type: 'DECLARE_ATTACK' } });
+    h.now += TIMERS.reactionMinMs;
     await h.send(p2, { t: 'act', id: 'pass', epoch: rec.epoch, action: { type: 'PASS' } });
     expect(rec.status).toBe('FINISHED');
     expect(rec.outcome).toMatchObject({ cause: 'NORMAL', result: { kind: 'WIN', winner: 'p1', reason: 'HP' } });

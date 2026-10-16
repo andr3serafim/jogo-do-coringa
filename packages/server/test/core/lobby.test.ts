@@ -104,7 +104,7 @@ describe('hello', () => {
     expect(p1.closed?.code).toBe(4009);
     expect(h.messages(again).map((m) => m.t)).toEqual(['welcome', 'room', 'state']);
     const state = h.messages(again, 'state')[0]!;
-    expect(state).toMatchObject({ seq: 1, epoch: 1, resync: true, events: [], deadline: null });
+    expect(state).toMatchObject({ seq: 1, epoch: 1, resync: true, events: [], deadline: { kind: 'EQUIP', at: h.now + TIMERS.equipMs, players: ['p1', 'p2'] } });
     expect(state.view).toEqual(viewFor(h.core.record!.game!.state, 'p1'));
     expect(state).not.toHaveProperty('catchUp');
   });
@@ -274,7 +274,7 @@ describe('lobby', () => {
     const s1 = h.messages(p1, 'state').at(-1)!;
     expect(s1.view).toEqual(viewFor(rec.game!.state, 'p1'));
     expect(h.messages(p2, 'state').at(-1)!.view).toEqual(viewFor(rec.game!.state, 'p2'));
-    expect(s1).toMatchObject({ seq: 1, epoch: 1, events: [], deadline: null, serverNow: h.now });
+    expect(s1).toMatchObject({ seq: 1, epoch: 1, events: [], deadline: { kind: 'EQUIP', at: h.now + TIMERS.equipMs, players: ['p1', 'p2'] }, serverNow: h.now });
     expect(JSON.stringify([...p1.inbox, ...p2.inbox])).not.toContain('semente-1');
     expect(h.logs).toContainEqual({ evt: 'game.started', code: 'K7M2QX', gameNo: 1 });
     expect(h.logs.filter((l) => l.evt === 'game.started')).toHaveLength(1);
