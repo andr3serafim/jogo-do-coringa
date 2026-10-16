@@ -1,25 +1,45 @@
 import { quadBonus, reevaluateQuads } from './quads.ts';
 import { finishGame, getPlayer, isGameOver, opponentOf, toGraveyard } from './state.ts';
-import type { GameEvent, GameState, NumCard, PlayerId, PlayerState } from './types.ts';
+import type { GameEvent, GameState, NumCard, PlayerId, PlayerState, SpecialCard } from './types.ts';
 
 const sum = (cards: NumCard[]): number => cards.reduce((total, c) => total + c.value, 0);
 
-export function attackBase(p: PlayerState): number {
+/** Lado que ataca: basta a fileira e os buffs (serve para `PlayerState`, `PublicPlayer` e `SelfView`). */
+export interface AttackSide {
+  attackRow: NumCard[];
+  attackBuffs: SpecialCard[];
+}
+
+/** Lado que defende: basta a fileira e os buffs. */
+export interface DefenseSide {
+  defenseRow: NumCard[];
+  defenseBuffs: SpecialCard[];
+}
+
+export function attackBase(p: AttackSide): number {
   return sum(p.attackRow) + quadBonus(p.attackRow);
 }
 
-export function defenseBase(p: PlayerState): number {
+export function defenseBase(p: DefenseSide): number {
   return sum(p.defenseRow) + quadBonus(p.defenseRow);
 }
 
 /** ATK = (soma + bônus) × (1 + nJ + pressão) — spec §1.9. */
-export function attackValue(s: GameState, p: PlayerState): number {
-  return attackBase(p) * (1 + p.attackBuffs.length + s.pressure);
+export function attackPower(p: AttackSide, pressure: number): number {
+  return attackBase(p) * (1 + p.attackBuffs.length + pressure);
 }
 
 /** DEF = (soma + bônus) × (1 + nQ). */
-export function defenseValue(p: PlayerState): number {
+export function defensePower(p: DefenseSide): number {
   return defenseBase(p) * (1 + p.defenseBuffs.length);
+}
+
+export function attackValue(s: GameState, p: PlayerState): number {
+  return attackPower(p, s.pressure);
+}
+
+export function defenseValue(p: PlayerState): number {
+  return defensePower(p);
 }
 
 export function isAbsoluteAttack(s: GameState, p: PlayerState): boolean {

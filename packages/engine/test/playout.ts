@@ -1,3 +1,4 @@
+import { actingPlayers } from '../src/acting.ts';
 import { applyAction } from '../src/apply-action.ts';
 import { makeConfig, type ConfigOverrides } from '../src/config.ts';
 import { createGame } from '../src/create-game.ts';
@@ -5,6 +6,8 @@ import { legalActions } from '../src/legal-actions.ts';
 import { viewFor } from '../src/view.ts';
 import type { Action, GameEvent, GameState, PlayerId } from '../src/types.ts';
 import { P1, P2 } from './helpers.ts';
+
+export { actingPlayers };
 
 export interface PlayoutOptions {
   seed: string;
@@ -16,23 +19,6 @@ export interface PlayoutOptions {
   timeoutEvery?: number;
   checkImmutability?: boolean;
   onStep?: (before: GameState, after: GameState, events: GameEvent[]) => void;
-}
-
-/** Quem pode agir agora (no Equipar, quem ainda não confirmou). */
-export function actingPlayers(s: GameState): PlayerId[] {
-  const phase = s.phase;
-  switch (phase.kind) {
-    case 'EQUIP':
-      return s.players.filter((p) => !p.equipSubmitted).map((p) => p.id);
-    case 'ORDER_CHOICE':
-      return [phase.player];
-    case 'ATTACK_MAIN':
-      return [phase.player];
-    case 'REACTION':
-      return [phase.responder];
-    case 'GAME_OVER':
-      return [];
-  }
 }
 
 export function playout(options: PlayoutOptions): { state: GameState; steps: number } {
