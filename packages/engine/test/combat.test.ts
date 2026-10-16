@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { attackValue, defenseValue, resolveAttack } from '../src/combat';
-import type { GameEvent, GameState } from '../src/types';
-import { P1, P2, player, setup, values } from './helpers';
+import { attackValue, defenseValue, resolveAttack } from '../src/combat.ts';
+import type { GameEvent, GameState } from '../src/types.ts';
+import { P1, P2, player, setup, values } from './helpers.ts';
 
 function attackP1(s: GameState): GameEvent[] {
   const ev: GameEvent[] = [];

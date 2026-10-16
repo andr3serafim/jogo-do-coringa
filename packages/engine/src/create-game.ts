@@ -1,8 +1,8 @@
-import { validateConfig } from './config';
-import { buildDeck } from './deck';
-import { startRound } from './flow';
-import { nextFloat, seedRng, shuffle } from './rng';
-import type { CreateGameResult, GameState, PlayerId, PlayerState, RulesConfig } from './types';
+import { validateConfig } from './config.ts';
+import { buildDeck } from './deck.ts';
+import { startRound } from './flow.ts';
+import { nextFloat, seedRng, shuffle } from './rng.ts';
+import type { CreateGameResult, GameState, PlayerId, PlayerState, RulesConfig } from './types.ts';
 
 function newPlayer(id: PlayerId, hp: number): PlayerState {
   return {

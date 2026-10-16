@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { makeConfig } from '../src/config';
-import { buildDeck, totalCards } from '../src/deck';
-import { nextFloat, seedRng, shuffle } from '../src/rng';
+import { makeConfig } from '../src/config.ts';
+import { buildDeck, totalCards } from '../src/deck.ts';
+import { nextFloat, seedRng, shuffle } from '../src/rng.ts';
 
 describe('rng', () => {
   it('a mesma semente gera a mesma sequência', () => {

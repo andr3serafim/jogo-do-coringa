@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { makeConfig } from '../src/config';
-import { createGame } from '../src/create-game';
-import { totalCards } from '../src/deck';
-import { startRound } from '../src/flow';
-import { draw } from '../src/state';
-import type { GameEvent } from '../src/types';
-import { P1, P2, allCards, setup } from './helpers';
+import { makeConfig } from '../src/config.ts';
+import { createGame } from '../src/create-game.ts';
+import { totalCards } from '../src/deck.ts';
+import { startRound } from '../src/flow.ts';
+import { draw } from '../src/state.ts';
+import type { GameEvent } from '../src/types.ts';
+import { P1, P2, allCards, setup } from './helpers.ts';
 
 describe('createGame', () => {
   it('rejeita config inválida e jogadores repetidos', () => {

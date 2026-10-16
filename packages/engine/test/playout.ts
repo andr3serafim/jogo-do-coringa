@@ -1,10 +1,10 @@
-import { applyAction } from '../src/apply-action';
-import { makeConfig, type ConfigOverrides } from '../src/config';
-import { createGame } from '../src/create-game';
-import { legalActions } from '../src/legal-actions';
-import { viewFor } from '../src/view';
-import type { Action, GameEvent, GameState, PlayerId } from '../src/types';
-import { P1, P2 } from './helpers';
+import { applyAction } from '../src/apply-action.ts';
+import { makeConfig, type ConfigOverrides } from '../src/config.ts';
+import { createGame } from '../src/create-game.ts';
+import { legalActions } from '../src/legal-actions.ts';
+import { viewFor } from '../src/view.ts';
+import type { Action, GameEvent, GameState, PlayerId } from '../src/types.ts';
+import { P1, P2 } from './helpers.ts';
 
 export interface PlayoutOptions {
   seed: string;

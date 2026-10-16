@@ -1,4 +1,4 @@
-import type { RngState } from './types';
+import type { RngState } from './types.ts';
 
 /** Hash cyrb128: transforma a semente textual em 4 inteiros de 32 bits. */
 export function seedRng(seed: string): RngState {

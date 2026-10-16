@@ -1,12 +1,12 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { applyAction } from '../src/apply-action';
-import { totalCards } from '../src/deck';
-import { legalActions } from '../src/legal-actions';
-import { viewEvents, viewFor } from '../src/view';
-import type { GameEvent, GameState } from '../src/types';
-import { allCards } from './helpers';
-import { actingPlayers, playout } from './playout';
+import { applyAction } from '../src/apply-action.ts';
+import { totalCards } from '../src/deck.ts';
+import { legalActions } from '../src/legal-actions.ts';
+import { viewEvents, viewFor } from '../src/view.ts';
+import type { GameEvent, GameState } from '../src/types.ts';
+import { allCards } from './helpers.ts';
+import { actingPlayers, playout } from './playout.ts';
 
 const arbConfig = fc.record({
   initiativeChoice: fc.boolean(),

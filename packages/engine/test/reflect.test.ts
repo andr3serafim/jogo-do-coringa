@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { Action, GameState } from '../src/types';
-import { P1, P2, act, actErr, handId, player, setup, steps } from './helpers';
+import type { Action, GameState } from '../src/types.ts';
+import { P1, P2, act, actErr, handId, player, setup, steps } from './helpers.ts';
 
 const reflectOf = (s: GameState, id: string, j: 'J' | 'WILD' = 'J'): Action => ({
   type: 'REFLECT',

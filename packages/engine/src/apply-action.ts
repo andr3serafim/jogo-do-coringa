@@ -1,4 +1,4 @@
-import { handleEquip, timeoutEquip } from './actions/equip';
+import { handleEquip, timeoutEquip } from './actions/equip.ts';
 import {
   castReflect,
   declareAttack,
@@ -11,13 +11,13 @@ import {
   resurrect,
   sacrifice,
   useTrap,
-} from './actions/main';
-import { chooseOrder, handleChooseOrder } from './actions/order';
-import { cancelReflect, closeReaction, pass, reactProtect, reactTrap } from './actions/reaction';
-import { fail, RuleViolation } from './errors';
-import { endTurn } from './flow';
-import { finishGame, getPlayer, opponentOf } from './state';
-import type { Action, ActionResult, GameEvent, GameState, PlayerId } from './types';
+} from './actions/main.ts';
+import { chooseOrder, handleChooseOrder } from './actions/order.ts';
+import { cancelReflect, closeReaction, pass, reactProtect, reactTrap } from './actions/reaction.ts';
+import { fail, RuleViolation } from './errors.ts';
+import { endTurn } from './flow.ts';
+import { finishGame, getPlayer, opponentOf } from './state.ts';
+import type { Action, ActionResult, GameEvent, GameState, PlayerId } from './types.ts';
 
 /** Ponto único de entrada. Nunca muta `state`; erros de regra viram `{ ok: false }`. */
 export function applyAction(state: GameState, player: PlayerId | 'system', action: Action): ActionResult {

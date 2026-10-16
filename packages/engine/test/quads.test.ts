@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { makeConfig } from '../src/config';
+import { makeConfig } from '../src/config.ts';
 import {
   currentQuads,
   isResurrectionValid,
@@ -7,8 +7,8 @@ import {
   quadBonus,
   quadValues,
   reevaluateQuads,
-} from '../src/quads';
-import type { GameEvent, GameState, NumCard, PlayerState, Rank } from '../src/types';
+} from '../src/quads.ts';
+import type { GameEvent, GameState, NumCard, PlayerState, Rank } from '../src/types.ts';
 
 let counter = 0;
 const n = (value: Rank): NumCard => ({ id: `n-${value}-${counter++}`, kind: 'NUM', value, suit: 'copas' });

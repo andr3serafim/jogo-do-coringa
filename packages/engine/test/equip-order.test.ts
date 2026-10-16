@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { Action, Destination } from '../src/types';
-import { P1, P2, act, actErr, player, setup, steps, values, type PlayerSetup } from './helpers';
+import type { Action, Destination } from '../src/types.ts';
+import { P1, P2, act, actErr, player, setup, steps, values, type PlayerSetup } from './helpers.ts';
 
 const equipSetup = (p1: PlayerSetup, p2: PlayerSetup, round = 1) =>
   setup({ round, roundKind: 'EQUIP', phase: { kind: 'EQUIP' }, p1, p2 });

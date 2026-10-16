@@ -1,7 +1,7 @@
-export * from './types';
-export { DEFAULT_CONFIG, makeConfig, validateConfig, type ConfigOverrides } from './config';
-export { buildDeck, totalCards } from './deck';
-export { createGame } from './create-game';
-export { applyAction } from './apply-action';
-export { viewEvents, viewFor } from './view';
-export { legalActions } from './legal-actions';
+export * from './types.ts';
+export { DEFAULT_CONFIG, makeConfig, validateConfig, type ConfigOverrides } from './config.ts';
+export { buildDeck, totalCards } from './deck.ts';
+export { createGame } from './create-game.ts';
+export { applyAction } from './apply-action.ts';
+export { viewEvents, viewFor } from './view.ts';
+export { legalActions } from './legal-actions.ts';

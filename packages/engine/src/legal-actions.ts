@@ -1,4 +1,4 @@
-import type { Action, Destination, PlayerView, ReactionTrigger, SpecialCard, SpecialKind } from './types';
+import type { Action, Destination, PlayerView, ReactionTrigger, SpecialCard, SpecialKind } from './types.ts';
 
 const firstOf = (cards: SpecialCard[], kind: SpecialKind): SpecialCard | undefined => cards.find((c) => c.kind === kind);
 const defined = (c: SpecialCard | undefined): c is SpecialCard => c !== undefined;

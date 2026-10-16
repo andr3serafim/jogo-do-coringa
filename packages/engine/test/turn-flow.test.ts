@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { P1, P2, act, actErr, handId, player, setup, steps } from './helpers';
+import { P1, P2, act, actErr, handId, player, setup, steps } from './helpers.ts';
 
 describe('buffs na fase principal', () => {
   it('J vai para os Buffs de Ataque; Selvagem também serve como J', () => {

@@ -1,4 +1,4 @@
-import type { ConfigError, RulesConfig } from './types';
+import type { ConfigError, RulesConfig } from './types.ts';
 
 export const DEFAULT_CONFIG: RulesConfig = {
   hp: 100,

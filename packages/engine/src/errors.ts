@@ -1,4 +1,4 @@
-import type { RuleErrorCode } from './types';
+import type { RuleErrorCode } from './types.ts';
 
 /** Violação de regra causada por uma ação do jogador. `applyAction` converte em `{ ok: false }`. */
 export class RuleViolation extends Error {

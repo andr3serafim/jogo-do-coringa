@@ -1,8 +1,8 @@
-import { fail } from '../errors';
-import { endTurn, openReaction } from '../flow';
-import { assertDistinct, getPlayer, opponentOf, removeById, takeFromHand, toGraveyard } from '../state';
-import { reevaluateQuads, rowCards, validResurrections } from '../quads';
-import type { GameEvent, GameState, PlayerId, PlayerState, ReflectState, RowName, SpecialCard } from '../types';
+import { fail } from '../errors.ts';
+import { endTurn, openReaction } from '../flow.ts';
+import { assertDistinct, getPlayer, opponentOf, removeById, takeFromHand, toGraveyard } from '../state.ts';
+import { reevaluateQuads, rowCards, validResurrections } from '../quads.ts';
+import type { GameEvent, GameState, PlayerId, PlayerState, ReflectState, RowName, SpecialCard } from '../types.ts';
 
 export function requireMain(s: GameState, playerId: PlayerId): PlayerState {
   const phase = s.phase;

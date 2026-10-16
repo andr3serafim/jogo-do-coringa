@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
-    "check": "pnpm lint && pnpm typecheck && pnpm -r test:coverage"
+    "smoke": "pnpm -r smoke",
+    "check": "pnpm lint && pnpm typecheck && pnpm -r test:coverage && pnpm smoke"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

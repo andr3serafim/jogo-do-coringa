@@ -1,6 +1,6 @@
-import { fail } from '../errors';
-import { setTurnOrder, startTurn } from '../flow';
-import type { GameEvent, GameState, PlayerId } from '../types';
+import { fail } from '../errors.ts';
+import { setTurnOrder, startTurn } from '../flow.ts';
+import type { GameEvent, GameState, PlayerId } from '../types.ts';
 
 export function chooseOrder(s: GameState, first: boolean, ev: GameEvent[]): void {
   setTurnOrder(s, first);

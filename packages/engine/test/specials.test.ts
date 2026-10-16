@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { P1, P2, act, actErr, handId, player, setup, steps } from './helpers';
+import { P1, P2, act, actErr, handId, player, setup, steps } from './helpers.ts';
 
 describe('K e Exódia', () => {
   it('jogar K abre a janela de reação e depois volta ao turno', () => {

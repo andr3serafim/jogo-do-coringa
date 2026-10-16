@@ -1,6 +1,6 @@
-import { pruneResurrections } from './quads';
-import { draw, finishGame, getPlayer, opponentOf, toGraveyard } from './state';
-import type { Card, GameEvent, GameResult, GameState, PlayerId, PlayerState, ReactionTrigger } from './types';
+import { pruneResurrections } from './quads.ts';
+import { draw, finishGame, getPlayer, opponentOf, toGraveyard } from './state.ts';
+import type { Card, GameEvent, GameResult, GameState, PlayerId, PlayerState, ReactionTrigger } from './types.ts';
 
 /** Ciclo da spec §1.3: Equipar, Equipar, Ataque, Equipar, Ataque, … */
 export function startRound(s: GameState, ev: GameEvent[]): void {

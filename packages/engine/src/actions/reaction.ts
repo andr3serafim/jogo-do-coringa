@@ -1,9 +1,9 @@
-import { resolveAttack } from '../combat';
-import { fail } from '../errors';
-import { endTurn } from '../flow';
-import { finishGame, getPlayer, isGameOver, opponentOf, toGraveyard } from '../state';
-import type { GameEvent, GameState, PlayerId, PlayerState, ReactionTrigger } from '../types';
-import { protectFromReflect, takeReflectCards, useTrap, type TargetZone } from './main';
+import { resolveAttack } from '../combat.ts';
+import { fail } from '../errors.ts';
+import { endTurn } from '../flow.ts';
+import { finishGame, getPlayer, isGameOver, opponentOf, toGraveyard } from '../state.ts';
+import type { GameEvent, GameState, PlayerId, PlayerState, ReactionTrigger } from '../types.ts';
+import { protectFromReflect, takeReflectCards, useTrap, type TargetZone } from './main.ts';
 
 export function requireReaction(
   s: GameState,

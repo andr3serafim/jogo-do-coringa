@@ -1,6 +1,6 @@
-import { quadBonus, reevaluateQuads } from './quads';
-import { finishGame, getPlayer, isGameOver, opponentOf, toGraveyard } from './state';
-import type { GameEvent, GameState, NumCard, PlayerId, PlayerState } from './types';
+import { quadBonus, reevaluateQuads } from './quads.ts';
+import { finishGame, getPlayer, isGameOver, opponentOf, toGraveyard } from './state.ts';
+import type { GameEvent, GameState, NumCard, PlayerId, PlayerState } from './types.ts';
 
 const sum = (cards: NumCard[]): number => cards.reduce((total, c) => total + c.value, 0);
 

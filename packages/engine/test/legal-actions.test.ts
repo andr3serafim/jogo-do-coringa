@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { applyAction } from '../src/apply-action';
-import { legalActions } from '../src/legal-actions';
-import { viewFor } from '../src/view';
-import type { GameState, PlayerId } from '../src/types';
-import { P1, P2, act, handId, player, setup } from './helpers';
+import { applyAction } from '../src/apply-action.ts';
+import { legalActions } from '../src/legal-actions.ts';
+import { viewFor } from '../src/view.ts';
+import type { GameState, PlayerId } from '../src/types.ts';
+import { P1, P2, act, handId, player, setup } from './helpers.ts';
 
 const equipPhase = { round: 1, roundKind: 'EQUIP' as const, phase: { kind: 'EQUIP' as const } };
 

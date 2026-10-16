@@ -1,4 +1,4 @@
-import type { Card, FaceKind, Rank, RulesConfig, Suit } from './types';
+import type { Card, FaceKind, Rank, RulesConfig, Suit } from './types.ts';
 
 const SUITS: readonly Suit[] = ['copas', 'ouros', 'espadas', 'paus'];
 const RANKS: readonly Rank[] = [2, 3, 4, 5, 6, 7, 8, 9, 10];

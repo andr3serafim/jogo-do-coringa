@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { Resurrection } from '../src/types';
-import { P1, act, actErr, player, setup, values } from './helpers';
+import type { Resurrection } from '../src/types.ts';
+import { P1, act, actErr, player, setup, values } from './helpers.ts';
 
 const token: Resurrection = { row: 'ATK', value: 7, formedAtRound: 3 };
 

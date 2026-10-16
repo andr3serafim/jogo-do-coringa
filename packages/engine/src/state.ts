@@ -1,5 +1,5 @@
-import { fail } from './errors';
-import { shuffle } from './rng';
+import { fail } from './errors.ts';
+import { shuffle } from './rng.ts';
 import type {
   Card,
   GameEvent,
@@ -9,7 +9,7 @@ import type {
   PlayerState,
   SpecialCard,
   SpecialKind,
-} from './types';
+} from './types.ts';
 
 export function getPlayer(s: GameState, id: PlayerId): PlayerState {
   const found = s.players.find((p) => p.id === id);

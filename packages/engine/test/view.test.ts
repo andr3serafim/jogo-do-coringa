@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { viewEvents, viewFor } from '../src/view';
-import { P1, P2, player, setup, steps, values } from './helpers';
+import { viewEvents, viewFor } from '../src/view.ts';
+import { P1, P2, player, setup, steps, values } from './helpers.ts';
 
 describe('viewFor (review focus 3)', () => {
   it('mostra a própria mão e só a quantidade da mão do oponente', () => {

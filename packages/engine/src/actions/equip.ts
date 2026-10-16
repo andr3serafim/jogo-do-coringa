@@ -1,8 +1,8 @@
-import { fail } from '../errors';
-import { startRound } from '../flow';
-import { reevaluateQuads } from '../quads';
-import { getPlayer, toGraveyard } from '../state';
-import type { Destination, GameEvent, GameState, NumCard, Placement, PlayerId, PlayerState, RulesConfig } from '../types';
+import { fail } from '../errors.ts';
+import { startRound } from '../flow.ts';
+import { reevaluateQuads } from '../quads.ts';
+import { getPlayer, toGraveyard } from '../state.ts';
+import type { Destination, GameEvent, GameState, NumCard, Placement, PlayerId, PlayerState, RulesConfig } from '../types.ts';
 
 const DESTINATIONS: readonly Destination[] = ['ATK', 'DEF', 'REPLACE_LAST_ATK', 'REPLACE_LAST_DEF', 'DISCARD'];
 

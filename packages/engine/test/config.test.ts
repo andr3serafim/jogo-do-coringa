@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_CONFIG, makeConfig, validateConfig } from '../src/config';
+import { DEFAULT_CONFIG, makeConfig, validateConfig } from '../src/config.ts';
 
 describe('config', () => {
   it('makeConfig sem argumentos devolve o padrão da spec', () => {

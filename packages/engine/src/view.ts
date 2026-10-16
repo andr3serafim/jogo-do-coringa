@@ -1,6 +1,6 @@
-import { validResurrections } from './quads';
-import { getPlayer, opponentOf } from './state';
-import type { GameEvent, GameState, PlayerId, PlayerState, PlayerView, PublicPlayer } from './types';
+import { validResurrections } from './quads.ts';
+import { getPlayer, opponentOf } from './state.ts';
+import type { GameEvent, GameState, PlayerId, PlayerState, PlayerView, PublicPlayer } from './types.ts';
 
 function publicPart(s: GameState, p: PlayerState): PublicPlayer {
   return {

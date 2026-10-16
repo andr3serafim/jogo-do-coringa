@@ -1,4 +1,4 @@
-import type { GameEvent, GameState, NumCard, PlayerState, Quad, Rank, Resurrection, RowName } from './types';
+import type { GameEvent, GameState, NumCard, PlayerState, Quad, Rank, Resurrection, RowName } from './types.ts';
 
 export function rowCards(p: PlayerState, row: RowName): NumCard[] {
   return row === 'ATK' ? p.attackRow : p.defenseRow;

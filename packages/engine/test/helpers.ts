@@ -1,8 +1,8 @@
-import { applyAction } from '../src/apply-action';
-import { makeConfig, type ConfigOverrides } from '../src/config';
-import { createGame } from '../src/create-game';
-import { currentQuads } from '../src/quads';
-import { getPlayer } from '../src/state';
+import { applyAction } from '../src/apply-action.ts';
+import { makeConfig, type ConfigOverrides } from '../src/config.ts';
+import { createGame } from '../src/create-game.ts';
+import { currentQuads } from '../src/quads.ts';
+import { getPlayer } from '../src/state.ts';
 import type {
   Action,
   Card,
@@ -16,7 +16,7 @@ import type {
   RuleErrorCode,
   SpecialCard,
   SpecialKind,
-} from '../src/types';
+} from '../src/types.ts';
 
 export const P1 = 'p1';
 export const P2 = 'p2';
