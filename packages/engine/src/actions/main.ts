@@ -1,7 +1,8 @@
 import { fail } from '../errors';
 import { endTurn, openReaction } from '../flow';
 import { assertDistinct, getPlayer, opponentOf, removeById, takeFromHand, toGraveyard } from '../state';
-import type { GameEvent, GameState, PlayerId, PlayerState, ReflectState, SpecialCard } from '../types';
+import { reevaluateQuads, rowCards, validResurrections } from '../quads';
+import type { GameEvent, GameState, PlayerId, PlayerState, ReflectState, RowName, SpecialCard } from '../types';
 
 export function requireMain(s: GameState, playerId: PlayerId): PlayerState {
   const phase = s.phase;
@@ -129,4 +130,23 @@ export function protectFromReflect(
   owner.reflect = null;
   toGraveyard(s, [j, q, k, reflect.k, reflect.j, reflect.q]);
   ev.push({ type: 'ReflectProtected', player: p.id, owner: owner.id });
+}
+
+/** Ressurreição (spec §1.8): 1 numérica do cemitério para o fim de uma fileira com espaço. */
+export function resurrect(s: GameState, p: PlayerState, cardId: string, row: RowName, ev: GameEvent[]): void {
+  const tokens = validResurrections(s, p);
+  if (tokens.length === 0) fail('NO_RESURRECTION', 'você não tem Ressurreição disponível');
+  if (row !== 'ATK' && row !== 'DEF') fail('INVALID_TARGET', 'fileira inválida');
+  const target = rowCards(p, row);
+  if (target.length >= s.config.rowLimit) fail('ROW_FULL', 'a fileira escolhida está cheia');
+  const index = s.graveyard.findIndex((c) => c.id === cardId);
+  if (index < 0) fail('CARD_NOT_IN_GRAVEYARD', `a carta ${cardId} não está no cemitério`);
+  const card = s.graveyard[index];
+  if (card.kind !== 'NUM') fail('INVALID_CARD', 'só cartas numéricas podem ser revividas');
+  s.graveyard.splice(index, 1);
+  const used = tokens[0];
+  p.resurrections = p.resurrections.filter((r) => r !== used);
+  target.push(card);
+  ev.push({ type: 'Resurrected', player: p.id, card, row });
+  reevaluateQuads(s, p, ev);
 }

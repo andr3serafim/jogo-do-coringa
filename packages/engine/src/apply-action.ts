@@ -8,6 +8,7 @@ import {
   playQ,
   protectFromReflect,
   requireMain,
+  resurrect,
   sacrifice,
   useTrap,
 } from './actions/main';
@@ -92,6 +93,8 @@ function applyPlayer(s: GameState, player: PlayerId, action: Action, ev: GameEve
     case 'PROTECT_FROM_REFLECT':
       if (s.phase.kind === 'REACTION') return reactProtect(s, player, action.jId, action.qId, action.kId, ev);
       return protectFromReflect(s, requireMain(s, player), action.jId, action.qId, action.kId, ev);
+    case 'RESURRECT':
+      return resurrect(s, requireMain(s, player), action.cardId, action.row, ev);
     case 'PASS':
       return pass(s, player, ev);
     case 'TIMEOUT':
