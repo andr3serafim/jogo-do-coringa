@@ -93,7 +93,9 @@ Um projeto descartável fora do repositório (2026-10-16) confirmou o que o plan
 ## Review Focus
 
 1. **Relógio do cliente errado** (celular com minutos de diferença) → a contagem mostra o tempo do servidor, não o do aparelho. *Teste na Tarefa 2: `remainingMs` usa a diferença estimada por `serverNow`, com `Date.now()` adiantado 3 min.*
-2. **Partida muito longa** (anti-travamento perto do limite, vários reembaralhamentos) → o registro da sala continua bem abaixo do limite de 2 MiB de um valor no KV do SQLite. *Teste na Tarefa 9: o maior `JSON.stringify(core.record)` entre as partidas da propriedade fica < 512 KiB.*
+2. **Partida muito longa** (anti-travamento perto do limite, vários reembaralhamentos) → nenhuma gravação estoura o tamanho de valor do storage.
+   - A doc da Cloudflare só dá o limite do backend KV antigo (128 KiB por valor), não o do SQLite. Por isso o plano não depende dele: o registro é gravado em quatro chaves limitadas (`splitRecord`, Tarefa 3).
+   - *Teste na Tarefa 9: cada parte de `splitRecord` fica < 100 KiB na maior partida.*
 3. **Mensagem chegando a uma sala já apagada** (socket ainda aberto depois do `deleteAll`) → fechamento 4000, sem recriar nada no storage. *Teste na Tarefa 8.*
 4. **Apelido com emoji, acento combinado ou só espaços** → normalizado em NFC e contado por ponto de código ("😀" vale 1; `"  "` é inválido; 21 emojis é inválido). *Teste na Tarefa 1.*
 5. **Clique duplo na mesma jogada** (dois `act` com ids diferentes e o mesmo conteúdo, ou o mesmo id duas vezes) → o segundo recebe o erro do motor (ex.: `CARD_NOT_IN_HAND`) ou o mesmo `ack` guardado, sem efeito duplo. *Teste na Tarefa 6.*
@@ -128,6 +130,7 @@ packages/server/
   src/core/limiter.ts   # TokenBucket
   src/core/tokens.ts    # base64url, hex, sha256Hex (Web Crypto)
   src/core/effects.ts   # emptyEffects, helpers de envio
+  src/core/storage-layout.ts # splitRecord/joinRecord: quatro chaves limitadas no storage
   src/core/views.ts     # stateFor, roomMessage
   src/core/game.ts      # início de partida, passo, prazos de fase, estouros, fim
   src/core/presence.ts  # conectado, varredura, reconciliação, W.O. por reconexão
@@ -383,7 +386,7 @@ it('createRoom/joinRoom/roomInfo: POST/GET com JSON; status não 2xx vira HttpEr
 Spec §1, §6.1, §6.5, §8.2, §9.1, §10.1, §11.1.
 
 **Files:**
-- Create: `packages/server/package.json`, `tsconfig.json`, `tsconfig.worker.json`, `vitest.config.ts`, `vitest.worker.config.ts`, `wrangler.jsonc`, `src/core/types.ts`, `src/core/timers.ts`, `src/core/agenda.ts`, `src/core/epoch.ts`, `src/core/limiter.ts`, `src/core/tokens.ts`, `src/core/effects.ts`, `src/worker/index.ts`, `src/worker/room.ts` (classe vazia por enquanto)
+- Create: `packages/server/package.json`, `tsconfig.json`, `tsconfig.worker.json`, `vitest.config.ts`, `vitest.worker.config.ts`, `wrangler.jsonc`, `src/core/types.ts`, `src/core/timers.ts`, `src/core/agenda.ts`, `src/core/epoch.ts`, `src/core/limiter.ts`, `src/core/tokens.ts`, `src/core/effects.ts`, `src/core/storage-layout.ts`, `src/worker/index.ts`, `src/worker/room.ts` (classe vazia por enquanto)
 - Modify: `pnpm-workspace.yaml`, `eslint.config.js`, `.gitignore`
 - Test: `packages/server/test/core/primitives.test.ts`, `packages/server/test/worker/health.test.ts`
 
@@ -420,6 +423,11 @@ Spec §1, §6.1, §6.5, §8.2, §9.1, §10.1, §11.1.
     - `hex(bytes: Uint8Array): string`;
     - `sha256Hex(text: string): Promise<string>`, via `crypto.subtle.digest`, global no Node 24 e no workerd.
   - `src/core/effects.ts`: `emptyEffects(): Effects` e `mergeEffects(a: Effects, b: Effects): Effects` (concatena listas; `persist`/`deleteAll` por OU; `alarm` fica com o de `b`).
+  - `src/core/storage-layout.ts`:
+    - `STORAGE_KEYS = ['room', 'game', 'recent', 'log'] as const`;
+    - `splitRecord(record: RoomRecord): { room: Omit<RoomRecord, 'game'> & { hasGame: boolean }; game: Omit<GameRecord, 'steps' | 'recent'> | null; recent: StepRecord[]; log: ReplayStep[] }`;
+    - `joinRecord(parts: Partial<ReturnType<typeof splitRecord>>): RoomRecord | null`, que dá `null` sem `room`.
+    - Cada chave fica limitada: `recent` tem no máximo 50 passos, e `log` só cresce até o fim da partida, que o anti-travamento limita.
   - `src/worker/index.ts`: por enquanto, `GET /api/health` → `{ ok: true, version: env.VERSION }` e o resto → 404. Exporta `Room`.
 
 - [ ] **Step 1: Ferramental** (configuração validada no protótipo; copie)
@@ -511,6 +519,9 @@ it('TokenBucket: 20 de uma vez, depois 10/s', () => {
   expect(b.take(99)).toBe(false);
   expect(b.take(100)).toBe(true); // 0,1 s → 1 ficha
 });
+it('storage-layout: splitRecord e joinRecord vão e voltam iguais, com e sem partida; sem room → null', () => {
+  // registro com game (setup() do motor) e sem game; expect(joinRecord(splitRecord(r))).toEqual(r); expect(joinRecord({})).toBeNull()
+});
 it('tokens: base64url de 32 bytes tem 43 caracteres; sha256Hex é o hash conhecido', async () => {
   expect(base64url(new Uint8Array(32).fill(255))).toHaveLength(43);
   expect(await sha256Hex('abc')).toBe('ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
@@ -596,6 +607,13 @@ it('entrar ocupa p2; terceira entrada → FULL; sala vazia → NOT_FOUND sem gra
   // h.create(); h.join() → p2; h.join('Caio') → FULL
 });
 it('assento livre: depois que p1 sai, quem entra fica com p1', async () => { /* manipula record.seats = [p2] e chama join → playerId 'p1' */ });
+it('dois join ao mesmo tempo (Promise.all) → um ok e um FULL', async () => {
+  const h = new Harness();
+  await h.create();
+  const [a, b] = await Promise.all([h.core.join('Bia', [], h.now), h.core.join('Caio', [], h.now)]);
+  expect([a.ok, b.ok].sort()).toEqual([false, true]);
+  expect(h.core.record!.seats).toHaveLength(2);
+});
 it('info: dados públicos sem token nem hash', async () => {
   // { code: 'K7M2QX', status: 'LOBBY', nicknames: ['Ana', 'Bia'], full: true }; sala vazia → null
 });
@@ -606,6 +624,7 @@ it('info: dados públicos sem token nem hash', async () => {
 - [ ] **Step 3: Implementar**
 
 - O token é `base64url(deps.randomBytes(32))`.
+- **Ordem contra corrida:** gerar o token e fazer o `await sha256Hex` **antes** de ler o registro. Depois disso, ler `seats`, escolher o assento e gravar sem nenhum `await` no meio. O Durable Object entrega outros eventos enquanto o `crypto.subtle` roda; lendo antes do `await`, dois cliques em "Entrar" ocupariam o `p2` duas vezes. Vale para `create` e `join`.
 - `offlineSince` começa em `now`: o jogador ainda não conectou.
 - Todo sucesso retorna `persist: true` e manda `room` aos sockets autenticados (no `join`).
 
@@ -922,7 +941,7 @@ Spec §8.4, §11.3, §9.4.
   - `startSeq: number`, o `seq` da largada;
   - `finalRecord: RoomRecord`;
   - `ended: 'GAME_OVER' | 'ABANDONED'`;
-  - `maxRecordBytes: number`, o maior `JSON.stringify(core.record).length` depois de cada entrada;
+  - `maxPartBytes: number`, o maior `JSON.stringify` entre as quatro partes de `splitRecord(core.record)` (Tarefa 3) depois de cada entrada;
   - `persists: number` e `alarmChanges: number`, contados nos `Effects`.
 
 O estado e os eventos de cada passo **não** são capturados do núcleo. Eles saem da reexecução independente de `finalRecord.game.steps` no motor: o passo `startSeq + k` é o `k`-ésimo `applyAction` (k ≥ 1), e `startSeq` é a largada, sem eventos. Assim, a comparação não depende do código sob teste.
@@ -962,9 +981,9 @@ it('erro sem oráculo: id escondido (mão do oponente, pendentes, monte) recebe 
   // em estados aleatórios das partidas: para TRAP/SACRIFICE/PLAY_J/RESURRECT, troca o id por um escondido e por 'nao-existe'
   // e compara o ack.code dos dois
 });
-it('registro da sala fica < 512 KiB na maior partida', async () => { /* max de trace.maxRecordBytes entre as sementes */ });
+it('cada chave gravada fica < 100 KiB na maior partida', async () => { /* max de trace.maxPartBytes entre as sementes */ });
 it('linhas gravadas por partida (estimativa da spec §9.4)', async () => {
-  // greedy × greedy sem caos: console.log(`linhas por partida: ${trace.persists + trace.alarmChanges}`); afirma < 1_000
+  // greedy × greedy sem caos: linhas = 4 × trace.persists + trace.alarmChanges; console.log(`linhas por partida: ${linhas}`); afirma < 1_500
 });
 ```
 
@@ -991,7 +1010,7 @@ Spec §3, §4.1, §4.2, §8.2, §8.5, §9.1, §9.2, §10.1, §10.4, §11.2 (casc
 - Consumes: `RoomCore` e tipos (Tarefas 3–8); `generateCode`, `normalizeCode`, `NicknameBodySchema`, `normalizeNickname` e `LIMITS` do protocolo.
 - Produces:
   - **`class Room extends DurableObject<Env>`** em `room.ts`:
-    - **construtor:** `ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair('ping', 'pong'))` e `this.core = new RoomCore(ctx.storage.kv.get<RoomRecord>('room') ?? null, deps)`. `deps.randomBytes` vem de `crypto.getRandomValues`;
+    - **construtor:** `ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair('ping', 'pong'))` e `this.core = new RoomCore(joinRecord(lido de STORAGE_KEYS com ctx.storage.kv.get), deps)`. `deps.randomBytes` vem de `crypto.getRandomValues`;
     - **RPC:** `create(code: string, nickname: string): Promise<RpcResult<CreateRoomResponse, 'EXISTS' | 'BAD_NICKNAME'>>`, `join(nickname: string): Promise<RpcResult<JoinRoomResponse, 'NOT_FOUND' | 'FULL' | 'BAD_NICKNAME'>>` e `info(): RoomInfoResponse | null`. Aplicam os `Effects` e devolvem `RpcResult<T, E> = { ok: true; value: T } | { ok: false; error: E }`, definido em `room.ts`;
     - **`fetch(request)`:** upgrade com `acceptWebSocket`. O attachment é `{ socketId: crypto.randomUUID(), seat: null, connectedAt: now, lastMessageAt: now }`. Depois chama `onOpen` e responde 101;
     - **`webSocketMessage`:** atualiza `lastMessageAt` no attachment e chama `onMessage`;
@@ -1001,7 +1020,7 @@ Spec §3, §4.1, §4.2, §8.2, §8.5, §9.1, §9.2, §10.1, §10.4, §11.2 (casc
   - **`sockets(): SocketInfo[]`:** monta a lista a partir de `ctx.getWebSockets()`, com `lastSeenAt = max(lastMessageAt, ctx.getWebSocketAutoResponseTimestamp(ws)?.getTime() ?? 0)`.
   - **`apply(effects)`, nesta ordem:**
     1. `attach` → `serializeAttachment` (mantém `connectedAt`/`lastMessageAt`);
-    2. `persist` → `ctx.storage.kv.put('room', core.record)`;
+    2. `persist` → grava as quatro partes de `splitRecord(core.record)` com `ctx.storage.kv.put`, uma por chave, na mesma entrada. Sem `await` entre elas, ficam no mesmo lote atômico do Durable Object;
     3. `send` → `ws.send(JSON.stringify(m))`;
     4. `close` → `ws.close(code, reason)`;
     5. `deleteAll` → `await ctx.storage.deleteAll()`;
@@ -1194,6 +1213,8 @@ git push -u origin feat/server
 
 - [ ] **Step 7: Entregar ao autor os critérios de pronto que são dele** (spec §12, itens 2–4). Ele vai:
   1. jogar uma partida completa pelo `wrangler dev` (dois terminais, ou terminal contra bot), derrubando e voltando no meio;
-  2. criar a conta Cloudflare e rodar `pnpm --filter @coringa/server exec wrangler login` uma vez, depois `pnpm deploy:server`;
+  2. criar a conta Cloudflare e rodar `pnpm --filter @coringa/server exec wrangler login` uma vez, depois `pnpm deploy:server`.
+     - Se o deploy recusar o binding `ratelimits` no plano Free (spec §8.2), aplica-se o plano B da spec: um agente remove os dois bindings do `wrangler.jsonc`, e o `router.ts` passa a pular o limite por IP quando o binding não existe (`env.CREATE_LIMITER === undefined`). Ficam os limites por sala e por conexão.
+     - Isso vira um commit à parte, e o autor publica de novo;
   3. jogar contra o endereço `https://jogo-do-coringa.<subdomínio>.workers.dev` com `pnpm play --online --servidor <endereço>`;
   4. conferir as linhas de log no painel ou no `wrangler tail`.
