@@ -45,6 +45,28 @@ importers:
         specifier: ^5.0.0
         version: 5.0.4(@types/node@24.19.2)(@vitest/coverage-v8@5.0.4)(vite@8.3.4(@types/node@24.19.2))
 
+  packages/sim:
+    dependencies:
+      '@coringa/engine':
+        specifier: workspace:*
+        version: link:../engine
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.19.2
+      '@vitest/coverage-v8':
+        specifier: ^5.0.0
+        version: 5.0.4(vitest@5.0.4)
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      vite:
+        specifier: ^8.3.4
+        version: 8.3.4(@types/node@24.19.2)
+      vitest:
+        specifier: ^5.0.0
+        version: 5.0.4(@types/node@24.19.2)(@vitest/coverage-v8@5.0.4)(vite@8.3.4(@types/node@24.19.2))
+
 packages:
 
   '@babel/helper-string-parser@7.29.7':

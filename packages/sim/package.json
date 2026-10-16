@@ -1,0 +1,23 @@
+{
+  "name": "@coringa/sim",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "smoke": "node src/smoke.ts",
+    "record-golden": "node src/cli/record-golden.ts"
+  },
+  "dependencies": {
+    "@coringa/engine": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@vitest/coverage-v8": "^5.0.0",
+    "typescript": "~6.0.3",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.0"
+  }
+}
