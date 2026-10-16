@@ -1,0 +1,28 @@
+{
+  "name": "random-tudo-desligado",
+  "result": {
+    "kind": "WIN",
+    "winner": "p1",
+    "reason": "HP"
+  },
+  "rounds": 11,
+  "finalHp": {
+    "p1": 100,
+    "p2": -19
+  },
+  "events": {
+    "AttackDeclared": 9,
+    "BuffPlayed": 4,
+    "CardsDealt": 10,
+    "CardsPlaced": 12,
+    "CardsRemovedFromRow": 16,
+    "DamageDealt": 9,
+    "EquipSubmitted": 12,
+    "GameOver": 1,
+    "ReactionWindowClosed": 9,
+    "ReactionWindowOpened": 9,
+    "RoundStarted": 10,
+    "TrapUsed": 3,
+    "TurnStarted": 9
+  }
+}

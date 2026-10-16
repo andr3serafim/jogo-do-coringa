@@ -1,0 +1,32 @@
+{
+  "name": "random-1",
+  "result": {
+    "kind": "WIN",
+    "winner": "p2",
+    "reason": "HP"
+  },
+  "rounds": 9,
+  "finalHp": {
+    "p1": -8,
+    "p2": 67
+  },
+  "events": {
+    "AttackDeclared": 7,
+    "BuffPlayed": 3,
+    "CardsDealt": 8,
+    "CardsPlaced": 10,
+    "CardsRemovedFromRow": 12,
+    "DamageDealt": 7,
+    "EquipSubmitted": 10,
+    "GameOver": 1,
+    "GuardBroken": 2,
+    "GuardPlayed": 2,
+    "InitiativeChanged": 3,
+    "OrderChosen": 4,
+    "ReactionWindowClosed": 9,
+    "ReactionWindowOpened": 9,
+    "RoundStarted": 8,
+    "TrapUsed": 1,
+    "TurnStarted": 7
+  }
+}

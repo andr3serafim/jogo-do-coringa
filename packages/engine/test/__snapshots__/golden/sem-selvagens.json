@@ -1,0 +1,33 @@
+{
+  "name": "sem-selvagens",
+  "result": {
+    "kind": "WIN",
+    "winner": "p2",
+    "reason": "HP"
+  },
+  "rounds": 11,
+  "finalHp": {
+    "p1": -69,
+    "p2": 43
+  },
+  "events": {
+    "AttackDeclared": 9,
+    "BuffPlayed": 6,
+    "CardsDealt": 10,
+    "CardsPlaced": 12,
+    "CardsRemovedFromRow": 16,
+    "DamageDealt": 9,
+    "EquipSubmitted": 12,
+    "GameOver": 1,
+    "GuardBroken": 1,
+    "GuardPlayed": 2,
+    "InitiativeChanged": 2,
+    "OrderChosen": 5,
+    "ReactionWindowClosed": 11,
+    "ReactionWindowOpened": 11,
+    "RoundStarted": 10,
+    "Sacrificed": 1,
+    "TrapUsed": 3,
+    "TurnStarted": 9
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "greedy-1",
+  "result": {
+    "kind": "WIN",
+    "winner": "p1",
+    "reason": "HP"
+  },
+  "rounds": 11,
+  "finalHp": {
+    "p1": 40,
+    "p2": -21
+  },
+  "events": {
+    "AttackDeclared": 10,
+    "BuffPlayed": 6,
+    "CardsDealt": 10,
+    "CardsPlaced": 12,
+    "CardsRemovedFromRow": 16,
+    "DamageDealt": 10,
+    "EquipSubmitted": 12,
+    "GameOver": 1,
+    "GuardBroken": 3,
+    "GuardPlayed": 3,
+    "InitiativeChanged": 3,
+    "OrderChosen": 5,
+    "ReactionWindowClosed": 13,
+    "ReactionWindowOpened": 13,
+    "RoundStarted": 10,
+    "Sacrificed": 1,
+    "TrapUsed": 3,
+    "TurnStarted": 10
+  }
+}

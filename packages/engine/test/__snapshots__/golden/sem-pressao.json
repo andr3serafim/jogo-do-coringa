@@ -1,0 +1,30 @@
+{
+  "name": "sem-pressao",
+  "result": {
+    "kind": "WIN",
+    "winner": "p1",
+    "reason": "HP"
+  },
+  "rounds": 5,
+  "finalHp": {
+    "p1": 84,
+    "p2": -7
+  },
+  "events": {
+    "AttackDeclared": 4,
+    "BuffPlayed": 2,
+    "CardsDealt": 4,
+    "CardsPlaced": 6,
+    "CardsRemovedFromRow": 6,
+    "DamageDealt": 4,
+    "EquipSubmitted": 6,
+    "GameOver": 1,
+    "GuardBroken": 1,
+    "GuardPlayed": 1,
+    "OrderChosen": 2,
+    "ReactionWindowClosed": 5,
+    "ReactionWindowOpened": 5,
+    "RoundStarted": 4,
+    "TurnStarted": 4
+  }
+}
