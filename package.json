@@ -14,7 +14,8 @@
     "smoke": "pnpm -r smoke",
     "check": "pnpm lint && pnpm typecheck && pnpm -r test:coverage && pnpm smoke",
     "sim": "node packages/sim/src/cli/sim.ts",
-    "sim:calibrate": "node packages/sim/src/cli/calibrate.ts"
+    "sim:calibrate": "node packages/sim/src/cli/calibrate.ts",
+    "play": "node packages/sim/src/cli/play.ts"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm check",

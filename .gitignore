@@ -3,3 +3,4 @@ coverage/
 dist/
 *.log
 packages/sim/reports/sim-*.json
+packages/sim/replays/
