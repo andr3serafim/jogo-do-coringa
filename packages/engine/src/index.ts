@@ -3,3 +3,4 @@ export { DEFAULT_CONFIG, makeConfig, validateConfig, type ConfigOverrides } from
 export { buildDeck, totalCards } from './deck';
 export { createGame } from './create-game';
 export { applyAction } from './apply-action';
+export { viewEvents, viewFor } from './view';
