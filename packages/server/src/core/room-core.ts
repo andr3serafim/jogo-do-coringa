@@ -183,93 +183,119 @@ export class RoomCore {
   /**
    * Ordem: sala, frame (binário, tamanho), limite por conexão, autenticação, esquema, despacho. O único `await`
    * é o SHA-256 do token do `hello`, antes de ler ou mudar o registro (spec §9.1). `sockets` inclui quem enviou.
+   * Todo o resto é síncrono: `#receive` termina antes do hash e `#authenticate` roda depois dele.
    */
   async onMessage(socketId: string, raw: string | ArrayBuffer, sockets: SocketInfo[], now: number): Promise<Effects> {
     const effects = emptyEffects();
-    await this.#handle(effects, socketId, raw, sockets, now);
+    const pending = this.#receive(effects, socketId, raw, sockets, now);
+    if (pending !== null) {
+      const tokenHash = await sha256Hex(pending.token);
+      this.#authenticate(effects, socketId, pending.view, tokenHash, now);
+    }
     return effects;
   }
 
-  async #handle(
+  /** Fecha o socket, sem tocar em mais nada. */
+  #close(effects: Effects, socketId: string, code: number, reason: string): void {
+    effects.close.push({ socketId, code, reason });
+  }
+
+  #violation(effects: Effects, socketId: string, kind: 'MALFORMED' | 'RATE' | 'AUTH', code: number, reason: string): void {
+    effects.logs.push({ evt: 'protocol.violation', code: this.#record?.code ?? '', kind });
+    this.#close(effects, socketId, code, reason);
+  }
+
+  /**
+   * Alarme desejado, lido no fim de cada trecho síncrono (`#receive` e `#authenticate`): sem `await` entre o
+   * trabalho que pode mexer na agenda e esta leitura. Num `finally`, vale também se o trecho lançar. O trecho do
+   * hello que espera o hash lê de novo ao terminar, e a leitura dele é a que vale.
+   */
+  #setAlarm(effects: Effects): void {
+    effects.alarm = this.#record ? nextAlarm(this.#record.agenda) : null;
+  }
+
+  /**
+   * Trecho síncrono até o hash. Devolve o `hello` válido que falta autenticar (token e instantâneo com o sinal
+   * de quem enviou) ou `null` quando a mensagem já foi toda tratada.
+   */
+  #receive(
     effects: Effects,
     socketId: string,
     raw: string | ArrayBuffer,
     sockets: SocketInfo[],
     now: number,
-  ): Promise<void> {
+  ): { token: string; view: SocketInfo[] } | null {
     try {
-      await this.#process(effects, socketId, raw, sockets, now);
+      const close = (code: number, reason: string): null => {
+        this.#close(effects, socketId, code, reason);
+        return null;
+      };
+      const violation = (kind: 'MALFORMED' | 'RATE' | 'AUTH', code: number, reason: string): null => {
+        this.#violation(effects, socketId, kind, code, reason);
+        return null;
+      };
+      const reply = (message: ServerMessage): null => {
+        effects.send.push({ socketId, message });
+        return null;
+      };
+
+      if (!this.#record) return close(CLOSE.ROOM_GONE, 'sala inexistente');
+      if (typeof raw !== 'string') return close(CLOSE.BINARY, 'só texto');
+      if (raw.length > LIMITS.frameBytes || new TextEncoder().encode(raw).length > LIMITS.frameBytes) {
+        return close(CLOSE.TOO_BIG, 'mensagem grande demais');
+      }
+
+      const connection = this.#connection(socketId, now);
+      if (!connection.bucket.take(now)) {
+        connection.drops += 1;
+        if (connection.drops > ROOM_LIMITS.maxDrops) return violation('RATE', CLOSE.ABUSE, 'mensagens demais');
+        const id = peekMessageId(raw);
+        return reply(
+          id === null
+            ? { t: 'error', code: 'RATE_LIMITED', message: 'mensagens demais, devagar' }
+            : ackFail(id, 'RATE_LIMITED', 'mensagens demais, devagar'),
+        );
+      }
+
+      // Quem enviou acabou de dar sinal, qualquer que seja o `lastSeenAt` que o chamador trouxe.
+      const view = sockets.map((socket) => (socket.socketId === socketId ? { ...socket, lastSeenAt: now } : socket));
+      const seat = view.find((socket) => socket.socketId === socketId)?.seat ?? null;
+      const message = parseClientMessage(raw);
+
+      if (seat === null) {
+        if (message?.t !== 'hello') return violation('AUTH', CLOSE.AUTH, 'esperava hello');
+        if (message.protocol !== PROTOCOL_VERSION) {
+          reply({ t: 'error', code: 'PROTOCOL_MISMATCH', message: 'versão do protocolo incompatível' });
+          return close(CLOSE.PROTOCOL, 'protocolo incompatível');
+        }
+        return { token: message.token, view };
+      }
+
+      if (message === null) {
+        connection.malformed += 1;
+        if (connection.malformed > ROOM_LIMITS.maxMalformed) {
+          return violation('MALFORMED', CLOSE.ABUSE, 'mensagens malformadas demais');
+        }
+        return reply({ t: 'error', code: 'BAD_MESSAGE', message: 'mensagem inválida' });
+      }
+      this.#dispatch(effects, this.#record, seat, socketId, message, view, now);
+      return null;
     } finally {
-      // O alarme sai no fim do trecho síncrono, no mesmo trecho que mexeu na agenda: nenhuma outra continuação
-      // (outro `hello` esperando o hash) pode mudar a agenda entre o trabalho e esta leitura.
-      effects.alarm = this.#record ? nextAlarm(this.#record.agenda) : null;
+      this.#setAlarm(effects);
     }
   }
 
-  async #process(
-    effects: Effects,
-    socketId: string,
-    raw: string | ArrayBuffer,
-    sockets: SocketInfo[],
-    now: number,
-  ): Promise<void> {
-    const close = (code: number, reason: string): void => {
-      effects.close.push({ socketId, code, reason });
-    };
-    const violation = (kind: 'MALFORMED' | 'RATE' | 'AUTH', code: number, reason: string): void => {
-      effects.logs.push({ evt: 'protocol.violation', code: this.#record?.code ?? '', kind });
-      close(code, reason);
-    };
-    const reply = (message: ServerMessage): void => {
-      effects.send.push({ socketId, message });
-    };
-
-    if (!this.#record) return close(CLOSE.ROOM_GONE, 'sala inexistente');
-    if (typeof raw !== 'string') return close(CLOSE.BINARY, 'só texto');
-    if (raw.length > LIMITS.frameBytes || new TextEncoder().encode(raw).length > LIMITS.frameBytes) {
-      return close(CLOSE.TOO_BIG, 'mensagem grande demais');
-    }
-
-    const connection = this.#connection(socketId, now);
-    if (!connection.bucket.take(now)) {
-      connection.drops += 1;
-      if (connection.drops > ROOM_LIMITS.maxDrops) return violation('RATE', CLOSE.ABUSE, 'mensagens demais');
-      const id = peekMessageId(raw);
-      return reply(
-        id === null
-          ? { t: 'error', code: 'RATE_LIMITED', message: 'mensagens demais, devagar' }
-          : ackFail(id, 'RATE_LIMITED', 'mensagens demais, devagar'),
-      );
-    }
-
-    // Quem enviou acabou de dar sinal, qualquer que seja o `lastSeenAt` que o chamador trouxe.
-    const view = sockets.map((socket) => (socket.socketId === socketId ? { ...socket, lastSeenAt: now } : socket));
-    const seat = view.find((socket) => socket.socketId === socketId)?.seat ?? null;
-    const message = parseClientMessage(raw);
-
-    if (seat === null) {
-      if (message?.t !== 'hello') return violation('AUTH', CLOSE.AUTH, 'esperava hello');
-      if (message.protocol !== PROTOCOL_VERSION) {
-        reply({ t: 'error', code: 'PROTOCOL_MISMATCH', message: 'versão do protocolo incompatível' });
-        return close(CLOSE.PROTOCOL, 'protocolo incompatível');
-      }
-      const tokenHash = await sha256Hex(message.token);
-      // Sem `await` daqui até o fim: o registro é lido e gravado de uma vez.
+  /** Trecho síncrono depois do hash: relê o registro, acha o dono do token e autentica. */
+  #authenticate(effects: Effects, socketId: string, view: SocketInfo[], tokenHash: string, now: number): void {
+    try {
       const record = this.#record;
-      if (!record) return close(CLOSE.ROOM_GONE, 'sala inexistente');
+      if (!record) return this.#close(effects, socketId, CLOSE.ROOM_GONE, 'sala inexistente');
       const owner = record.seats.find((candidate) => candidate.tokenHash === tokenHash);
-      if (!owner) return violation('AUTH', CLOSE.AUTH, 'token inválido');
-      return lobby.hello(effects, record, owner, socketId, view, this.#attachedSeats, now);
+      if (!owner) return this.#violation(effects, socketId, 'AUTH', CLOSE.AUTH, 'token inválido');
+      lobby.hello(effects, record, owner, socketId, view, this.#attachedSeats, now);
+    } finally {
+      this.#setAlarm(effects);
     }
-
-    if (message === null) {
-      connection.malformed += 1;
-      if (connection.malformed > ROOM_LIMITS.maxMalformed) {
-        return violation('MALFORMED', CLOSE.ABUSE, 'mensagens malformadas demais');
-      }
-      return reply({ t: 'error', code: 'BAD_MESSAGE', message: 'mensagem inválida' });
-    }
-    this.#dispatch(effects, this.#record, seat, socketId, message, view, now);
   }
 
   #dispatch(

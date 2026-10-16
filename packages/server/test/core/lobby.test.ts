@@ -383,6 +383,29 @@ describe('fora do lobby e mensagens ainda sem tratamento', () => {
   });
 });
 
+describe('alarme', () => {
+  it('toda saída de onMessage traz o alarme da agenda: hello, ready, leave, recusas e erros', async () => {
+    const { h, p1, p2, tokens } = await Harness.lobby();
+    const expected = (): number | null => {
+      const agenda = h.core.record!.agenda;
+      return agenda.length === 0 ? null : Math.min(...agenda.map((item) => item.at));
+    };
+    const sock = (id: string, seat: 'p1' | 'p2' | null): SocketInfo => ({ socketId: id, seat, connectedAt: 0, lastSeenAt: h.now });
+    const raw = (message: object): string => JSON.stringify(message);
+    const results = [
+      await h.core.onMessage(p1.id, raw({ t: 'ready', ready: true }), h.sockets, h.now),
+      await h.core.onMessage(p1.id, 'lixo', h.sockets, h.now),
+      await h.core.onMessage(p1.id, new ArrayBuffer(1), h.sockets, h.now),
+      await h.core.onMessage(p1.id, raw({ t: 'rematch', want: true }), h.sockets, h.now),
+      await h.core.onMessage('novo', raw({ t: 'hello', protocol: 1, token: tokens.p1 }), [...h.sockets, sock('novo', null)], h.now),
+      await h.core.onMessage('ruim', raw({ t: 'hello', protocol: 1, token: GOOD_TOKEN }), [sock('ruim', null)], h.now),
+      await h.core.onMessage(p2.id, raw({ t: 'leave' }), h.sockets, h.now),
+    ];
+    for (const effects of results) expect(effects.alarm).toBe(expected());
+    expect(expected()).toBe(h.now + TIMERS.idleExpiryMs);
+  });
+});
+
 describe('onClose', () => {
   it('socket sem autenticação que fecha não muda nada', async () => {
     const { h } = await Harness.lobby();
