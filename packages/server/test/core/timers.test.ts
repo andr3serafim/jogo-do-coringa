@@ -2,7 +2,7 @@ import { actingPlayers, applyAction, createGame, legalActions, viewFor } from '@
 import type { GameState } from '@coringa/engine';
 import type { PlayerAction, StateMessage } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
-import { setup, handId } from '../../../engine/test/helpers.ts';
+import { handId, setup, values } from '../../../engine/test/helpers.ts';
 import { applyHeldPass, applyTimeout, autoSteps } from '../../src/core/game.ts';
 import { schedulePhase } from '../../src/core/timing.ts';
 import { TIMERS } from '../../src/core/timers.ts';
@@ -33,14 +33,23 @@ const phaseOf = (h: Harness): GameState['phase'] => h.core.record!.game!.state.p
 
 describe('prazo de cada fase estoura com o efeito da spec (§6.2)', () => {
   it('Equipar: 40 s; as numéricas restantes vão para a fileira; conta estouro para quem não confirmou', async () => {
-    const { h } = await armed(EQUIP_STATE());
+    const { h } = await armed(
+      setup({
+        round: 1,
+        roundKind: 'EQUIP',
+        phase: { kind: 'EQUIP' },
+        p1: { pending: [3, 4], attack: [7, 7, 7] },
+        p2: { pending: [5, 6], defense: [8, 8] },
+      }),
+    );
     const rec = h.core.record!;
     const epoch = rec.epoch;
     h.advance(TIMERS.equipMs + TIMERS.graceMs);
-    const state = rec.game!.state;
-    expect(state.round).toBe(2);
-    expect(state.players.map((p) => p.attackRow.length + p.defenseRow.length)).toEqual([2, 2]);
-    expect(state.players.every((p) => p.pending.length === 0 || p.pending.length === 4)).toBe(true);
+    const [a, b] = rec.game!.state.players;
+    expect(rec.game!.state.round).toBe(2);
+    // Cada numérica vai para a fileira com menos cartas (empate: Defesa).
+    expect([values(a!.attackRow), values(a!.defenseRow)]).toEqual([[7, 7, 7], [3, 4]]);
+    expect([values(b!.attackRow), values(b!.defenseRow)]).toEqual([[5, 6], [8, 8]]);
     expect(rec.game!.steps).toEqual([{ player: 'system', action: { type: 'TIMEOUT' } }]);
     expect(rec.game!.strikes).toEqual({ p1: 1, p2: 1 });
     expect(rec.epoch).toBe(epoch + 1);
@@ -401,14 +410,32 @@ describe('piso da janela de reação (§6.3)', () => {
     expect(applyHeldPass(other.h.core.record!, other.h.now)).toEqual([]);
   });
 
-  it('a janela que fecha por estouro (8 s) leva o PASS guardado junto: o item reactionMin sai da agenda', async () => {
-    const { h, p2 } = await kWindow();
+  it('época nova com PASS guardado (a fase muda antes do piso): o guardado e o item reactionMin saem; o item velho, se sobrar, não vale', async () => {
+    const { h, p1, p2 } = await kWindow();
     const rec = h.core.record!;
+    const opened = rec.game!.phaseStartedAt;
+    const oldEpoch = rec.epoch;
     await act(h, p2, 'a', { type: 'PASS' });
-    h.advance(TIMERS.reactionMs + TIMERS.graceMs);
+    expect(rec.game!.heldPass).not.toBeNull();
+    expect(rec.agenda.some((item) => item.kind === 'reactionMin')).toBe(true);
+
+    // O estouro da janela chega antes dos 2 s (injetado direto): a fase muda com o PASS ainda guardado.
+    applyTimeout(rec, h.now);
     expect(phaseOf(h)).toEqual({ kind: 'ATTACK_MAIN', player: 'p1' });
-    expect(rec.agenda.some((item) => item.kind === 'reactionMin')).toBe(false);
+    expect(rec.epoch).toBe(oldEpoch + 1);
     expect(rec.game!.heldPass).toBeNull();
+    expect(rec.agenda.some((item) => item.kind === 'reactionMin')).toBe(false);
+
+    // Mesmo que o item velho tivesse ficado na agenda, a época dele já passou: nada muda.
+    rec.agenda.push({ kind: 'reactionMin', at: opened + TIMERS.reactionMinMs, epoch: oldEpoch });
+    const seq = rec.seq;
+    const snapshot = JSON.stringify(rec.game);
+    const inbox = [p1.inbox.length, p2.inbox.length];
+    h.advance(TIMERS.reactionMinMs);
+    expect(rec.seq).toBe(seq);
+    expect(JSON.stringify(rec.game)).toBe(snapshot);
+    expect([p1.inbox.length, p2.inbox.length]).toEqual(inbox);
+    expect(rec.agenda.some((item) => item.kind === 'reactionMin')).toBe(false);
   });
 });
 
@@ -442,13 +469,16 @@ describe('estouros e W.O. (§7.3)', () => {
     return { room, strikes, kinds };
   }
 
-  it('estouros: Equipar + Turno + Turno seguidos → W.O. AFK; a partida acaba pelo servidor', async () => {
+  it('estouros: Equipar + Turno + Equipar seguidos (mistura de fases) → W.O. AFK; a partida acaba pelo servidor', async () => {
     const { room, strikes } = await afkP1();
     const { h, p1, p2 } = room;
     const rec = h.core.record!;
-    expect(strikes.map(([, n]) => n)).toEqual([1, 2, 3]);
-    expect(strikes.map(([kind]) => kind)).toContain('EQUIP');
-    expect(strikes.map(([kind]) => kind)).toContain('ATTACK_MAIN');
+    // Entre dois Turnos do mesmo jogador há sempre um Equipar, então a mistura que acontece de fato é esta.
+    expect(strikes).toEqual([
+      ['EQUIP', 1],
+      ['ATTACK_MAIN', 2],
+      ['EQUIP', 3],
+    ]);
     expect(rec.status).toBe('FINISHED');
     expect(rec.outcome).toEqual({ gameNo: 1, result: { kind: 'WIN', winner: 'p2', reason: 'FORFEIT' }, cause: 'AFK' });
     expect(rec.score).toEqual({ p1: 0, p2: 1, draws: 0 });
