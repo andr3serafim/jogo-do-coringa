@@ -34,3 +34,7 @@ Base: `calibracao.md` / `calibracao.json` (1000 partidas por série, `greedy` ×
   - sem a Pressão, o turtle passa a pontuar **mais** que o greedy (+3,6 pp e +0,8 pp) e mais da metade das partidas dele termina no anti-travamento (525 e 552 de ~1000).
   - Com vida 300, a brecha da tartaruga ficou mais visível, e é a Pressão da mesa que a fecha.
 - Todas as partidas terminam.
+
+## Decisões do autor (2026-10-16)
+
+Fallen e Exódia com metas e regras mantidas, desvios aceitos como explicados; Escolha da ordem mantida até o playtest (nota na §3 da spec).
