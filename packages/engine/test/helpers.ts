@@ -1,15 +1,19 @@
+import { applyAction } from '../src/apply-action';
 import { makeConfig, type ConfigOverrides } from '../src/config';
 import { createGame } from '../src/create-game';
 import { currentQuads } from '../src/quads';
 import { getPlayer } from '../src/state';
 import type {
+  Action,
   Card,
+  GameEvent,
   GameState,
   NumCard,
   Phase,
   PlayerId,
   PlayerState,
   Rank,
+  RuleErrorCode,
   SpecialCard,
   SpecialKind,
 } from '../src/types';
@@ -134,4 +138,30 @@ export function allCards(s: GameState): Card[] {
     if (p.reflect) cards.push(p.reflect.k, p.reflect.j, p.reflect.q);
   }
   return cards;
+}
+
+export function act(s: GameState, who: PlayerId | 'system', action: Action): { state: GameState; events: GameEvent[] } {
+  const result = applyAction(s, who, action);
+  if (!result.ok) throw new Error(`${result.error.code}: ${result.error.message}`);
+  return { state: result.state, events: result.events };
+}
+
+export function actErr(s: GameState, who: PlayerId | 'system', action: Action): RuleErrorCode {
+  const result = applyAction(s, who, action);
+  if (result.ok) throw new Error(`esperava erro em ${JSON.stringify(action)}`);
+  return result.error.code;
+}
+
+export function steps(
+  s: GameState,
+  list: Array<[PlayerId | 'system', Action]>,
+): { state: GameState; events: GameEvent[] } {
+  let state = s;
+  const events: GameEvent[] = [];
+  for (const [who, action] of list) {
+    const result = act(state, who, action);
+    state = result.state;
+    events.push(...result.events);
+  }
+  return { state, events };
 }
