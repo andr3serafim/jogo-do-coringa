@@ -1,7 +1,7 @@
 import { handleEquip, timeoutEquip } from './actions/equip';
-import { declareAttack, endTurnAction, playJ, playQ, requireMain } from './actions/main';
+import { declareAttack, endTurnAction, playJ, playK, playQ, requireMain, sacrifice, useTrap } from './actions/main';
 import { chooseOrder, handleChooseOrder } from './actions/order';
-import { closeReaction, pass } from './actions/reaction';
+import { closeReaction, pass, reactTrap } from './actions/reaction';
 import { fail, RuleViolation } from './errors';
 import { endTurn } from './flow';
 import { finishGame, getPlayer, opponentOf } from './state';
@@ -67,6 +67,13 @@ function applyPlayer(s: GameState, player: PlayerId, action: Action, ev: GameEve
       return declareAttack(s, requireMain(s, player), ev);
     case 'END_TURN':
       return endTurnAction(s, requireMain(s, player), ev);
+    case 'PLAY_K':
+      return playK(s, requireMain(s, player), action.cardIds, ev);
+    case 'SACRIFICE':
+      return sacrifice(s, requireMain(s, player), action.cardId, action.targetId, ev);
+    case 'TRAP':
+      if (s.phase.kind === 'REACTION') return reactTrap(s, player, action.cardId, action.targetId, ev);
+      return useTrap(s, requireMain(s, player), action.cardId, action.targetId, ['attackBuffs', 'defenseBuffs', 'guard'], ev);
     case 'PASS':
       return pass(s, player, ev);
     case 'TIMEOUT':

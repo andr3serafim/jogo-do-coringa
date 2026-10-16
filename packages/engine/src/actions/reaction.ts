@@ -3,6 +3,7 @@ import { fail } from '../errors';
 import { endTurn } from '../flow';
 import { finishGame, getPlayer, isGameOver, opponentOf } from '../state';
 import type { GameEvent, GameState, PlayerId, PlayerState, ReactionTrigger } from '../types';
+import { useTrap, type TargetZone } from './main';
 
 export function requireReaction(
   s: GameState,
@@ -34,4 +35,12 @@ export function closeReaction(s: GameState, ev: GameEvent[]): void {
   } else {
     s.phase = { kind: 'ATTACK_MAIN', player: actor.id };
   }
+}
+
+/** Ás como reação: contra ataque mira J, Q ou K; contra jogada de K, só K (spec §1.7). */
+export function reactTrap(s: GameState, playerId: PlayerId, cardId: string, targetId: string, ev: GameEvent[]): void {
+  const { responder, trigger } = requireReaction(s, playerId);
+  if (trigger === 'REFLECT_PLAYED') fail('WRONG_PHASE', 'o Ás não responde a um Reflect');
+  const zones: TargetZone[] = trigger === 'K_PLAYED' ? ['guard'] : ['attackBuffs', 'defenseBuffs', 'guard'];
+  useTrap(s, responder, cardId, targetId, zones, ev);
 }
