@@ -10,7 +10,7 @@
 
 ## Node puro, sem bundler
 
-O motor e o simulador rodam direto no Node 24 (type stripping). Por isso:
+O motor e o simulador rodam direto no Node 24 (≥ 24.2: type stripping e `import.meta.main` dos scripts). Por isso:
 
 - Imports relativos terminam em `.ts`. O ESLint barra os que não terminam.
 - Só sintaxe apagável (`erasableSyntaxOnly`): nada de `enum`, `namespace` ou parameter properties.
