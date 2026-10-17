@@ -1,11 +1,15 @@
+import { handle } from './router.ts';
+
 export { Room } from './room.ts';
 
 export default {
   async fetch(request, env): Promise<Response> {
-    const url = new URL(request.url);
-    if (request.method === 'GET' && url.pathname === '/api/health') {
-      return Response.json({ ok: true, version: env.VERSION });
+    try {
+      return await handle(request, env);
+    } catch (error) {
+      const failure = error instanceof Error ? error : new Error(String(error));
+      console.log(JSON.stringify({ evt: 'error', code: '', message: failure.message, stack: failure.stack }));
+      return Response.json({ error: 'INTERNAL', message: 'erro interno' }, { status: 500 });
     }
-    return new Response('não encontrado', { status: 404 });
   },
 } satisfies ExportedHandler<Env>;
