@@ -56,9 +56,20 @@ describe('pnpm sim:replay', () => {
     expect(() => replayFile(writeTmp({ foo: 1 }))).toThrow(/replay/i);
   });
 
-  it('avisa quando a partida gravada não chega ao fim', () => {
+  it('partida sem GAME_OVER (abandonada ou incompleta) é ok, com resultado nulo', () => {
     const { replay } = recorded();
-    expect(() => replayFile(writeTmp({ ...replay, steps: replay.steps.slice(0, 10) }))).toThrow(/não terminou|incompleta/i);
+    expect(replayFile(writeTmp({ evt: 'game.replay', replay: { ...replay, steps: replay.steps.slice(0, 10) } }))).toEqual({
+      ok: true,
+      result: null,
+      steps: 10,
+    });
+  });
+
+  it('reproduz um W.O. do servidor: passo do sistema com FORFEIT termina em vitória', () => {
+    const { replay } = recorded();
+    const steps = [...replay.steps.slice(0, 10), { player: 'system' as const, action: { type: 'FORFEIT' as const, loser: 'p1' as const } }];
+    const out = replayFile(writeTmp({ evt: 'game.replay', replay: { ...replay, steps } }));
+    expect(out).toEqual({ ok: true, result: { kind: 'WIN', winner: 'p2', reason: 'FORFEIT' }, steps: 11 });
   });
 });
 
@@ -80,6 +91,13 @@ describe('pnpm sim:replay (linha de comando)', () => {
     const out = run(writeTmp({ ...replay, steps }));
     expect(out.status).toBe(1);
     expect(out.stderr).toMatch(/^falhou no passo 5: [A-Z_]+ — .+/);
+  });
+
+  it('partida sem resultado sai com 0 e diz que foi abandonada ou incompleta', () => {
+    const { replay } = recorded();
+    const out = run(writeTmp({ evt: 'game.replay', replay: { ...replay, steps: replay.steps.slice(0, 10) } }));
+    expect(out.status).toBe(0);
+    expect(out.stdout).toContain('ok: 10 passos, sem resultado (partida abandonada ou incompleta)');
   });
 
   it('sem argumento mostra o uso e sai com 1', () => {

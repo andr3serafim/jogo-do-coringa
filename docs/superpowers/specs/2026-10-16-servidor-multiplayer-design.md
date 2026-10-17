@@ -456,12 +456,12 @@ A hibernação apaga a memória do objeto. Ao acordar (mensagem, fechamento, ala
 - O limite que pesa é o de **linhas gravadas: 100 mil por dia**. Cada `put` de chave e cada `setAlarm` contam uma linha.
 - Estimativa: ~150 passos por partida (mediana de 9 rodadas de Ataque) × ~3 linhas + varreduras ≈ **500 linhas por partida → ~200 partidas por dia** (a medida abaixo corrige o ~3 para ~6 linhas por passo). Para um grupo de amigos sobra muito.
 - Fora de partida o objeto não programa alarmes além dos de expiração (§6.5, §7.1). Uma aba esquecida aberta no lobby não gasta linhas.
-- **Medido em 2026-10-17** (teste de propriedades do núcleo, fórmula conservadora `4 × gravações + mudanças de alarme`, que supõe as quatro chaves reescritas a cada gravação):
+- **Medido em 2026-10-17** (teste de propriedades do núcleo, fórmula `4 × gravações + mudanças de alarme`, porque cada gravação reescreve as quatro chaves):
   - greedy × greedy: **388 linhas por partida** (62 passos, 85 gravações, 48 alarmes); em outras cinco sementes, de 299 a 622 (47 a 102 passos);
   - turtle × turtle, a partida mais longa: 713 a 1273 linhas (117 a 211 passos);
   - ~**6 linhas por passo**, o dobro dos ~3 da estimativa acima;
   - maior parte gravada (`maxPartBytes`): 18 280 bytes, contra o limite de 100 KiB por valor; a parte que cresce é o log de passos.
-- Resultado no plano Free (100 mil linhas por dia): **~250 partidas por dia** na partida típica (388 linhas), **~160** na de 622 e **~80** se todas fossem a turtle longa (1273). A faixa realista é de **80 a 250 partidas por dia**, ainda de sobra para um grupo de amigos. É um teto conservador: a casca real grava só as chaves que mudaram.
+- Resultado no plano Free (100 mil linhas por dia): **~250 partidas por dia** na partida típica (388 linhas), **~160** na de 622 e **~80** se todas fossem a turtle longa (1273). A faixa realista é de **80 a 250 partidas por dia**, ainda de sobra para um grupo de amigos. A casca de hoje (`room.ts`) regrava as quatro chaves em cada persistência, então a fórmula é o custo real; gravar só as chaves que mudaram seria uma otimização futura.
 
 ---
 

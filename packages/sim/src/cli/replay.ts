@@ -8,7 +8,8 @@ import { applyAction, createGame, type GameResult } from '@coringa/engine';
 import type { Replay } from '../replay.ts';
 
 export type ReplayOutcome =
-  | { ok: true; result: GameResult; steps: number }
+  /** `result` nulo = sem GAME_OVER: partida abandonada (spec §7.2) ou gravação incompleta. */
+  | { ok: true; result: GameResult | null; steps: number }
   | { ok: false; step: number; code: string; message: string };
 
 function isReplay(value: unknown): value is Replay {
@@ -44,13 +45,11 @@ export function replayFile(path: string): ReplayOutcome {
     if (!applied.ok) return { ok: false, step, code: applied.error.code, message: applied.error.message };
     state = applied.state;
   }
-  if (state.phase.kind !== 'GAME_OVER') {
-    throw new Error(`a partida gravada não terminou depois de ${replay.steps.length} passos (abandonada ou incompleta)`);
-  }
-  return { ok: true, result: state.phase.result, steps: replay.steps.length };
+  return { ok: true, result: state.phase.kind === 'GAME_OVER' ? state.phase.result : null, steps: replay.steps.length };
 }
 
-function describeResult(result: GameResult): string {
+function describeResult(result: GameResult | null): string {
+  if (result === null) return 'sem resultado (partida abandonada ou incompleta)';
   return result.kind === 'WIN' ? `${result.winner} venceu (${result.reason})` : `empate (${result.reason})`;
 }
 
