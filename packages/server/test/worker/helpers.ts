@@ -152,3 +152,19 @@ export async function startGame(): Promise<{ room: TestRoom; p1: TestSocket; p2:
   await p2.waitFor(() => p2.state, 'state do p2');
   return { room, p1, p2 };
 }
+
+/**
+ * Como `startGame`, mas só devolve uma partida em que os dois assentos têm numéricas pendentes e podem Equipar.
+ * A primeira mão vem de `crypto.getRandomValues`: quem recebe 4 especiais (~0,4%) é confirmado sozinho no início e
+ * não tem Equipar legal. Em vez de depender da sorte, descarta a sala e tenta de novo (o limite barra um laço infinito).
+ */
+export async function startEquipGame(): Promise<{ room: TestRoom; p1: TestSocket; p2: TestSocket }> {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const game = await startGame();
+    const both = [game.p1, game.p2].every((socket) => socket.state!.view.self.pending.length > 0 && !socket.state!.view.self.equipSubmitted);
+    if (both) return game;
+    game.p1.ws.close(1000, 'mão sem Equipar; tenta outra sala');
+    game.p2.ws.close(1000, 'mão sem Equipar; tenta outra sala');
+  }
+  throw new Error('20 mãos seguidas sem Equipar para os dois assentos');
+}

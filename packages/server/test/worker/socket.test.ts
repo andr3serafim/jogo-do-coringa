@@ -2,7 +2,7 @@ import { env, evictAllDurableObjects, runDurableObjectAlarm, runInDurableObject 
 import { PROTOCOL_VERSION } from '@coringa/protocol';
 import type { RoomRecord } from '../../src/core/types.ts';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { get, makeRoom, open, post, startGame } from './helpers.ts';
+import { get, makeRoom, open, post, startEquipGame, startGame } from './helpers.ts';
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -12,7 +12,7 @@ const stubFor = (code: string) => env.ROOMS.getByName(code);
 
 describe('Durable Object da sala', () => {
   it('dois WebSockets jogam alguns passos; ping recebe pong', async () => {
-    const { p1, p2 } = await startGame();
+    const { p1, p2 } = await startEquipGame();
     expect(p1.room).toMatchObject({ status: 'PLAYING' });
     expect(p2.room).toMatchObject({ status: 'PLAYING' });
 
@@ -35,7 +35,7 @@ describe('Durable Object da sala', () => {
   });
 
   it('hibernação no meio da partida (evictAllDurableObjects) não perde nada', async () => {
-    const { room, p1, p2 } = await startGame();
+    const { room, p1, p2 } = await startEquipGame();
     const first = await p1.act(p1.equip());
     expect(first).toMatchObject({ ok: true });
     const before = p1.state!.seq;
@@ -62,6 +62,15 @@ describe('Durable Object da sala', () => {
   it('runDurableObjectAlarm aplica o estouro do Equipar', async () => {
     const { room, p1, p2 } = await startGame();
     const before = p1.state!.seq;
+    // A mão inicial é sorteada. O estouro do Equipar só pune quem ainda não confirmou e tem numéricas pendentes (spec
+    // §7.3); quem recebeu 4 especiais é confirmado sozinho e não leva estouro. O esperado sai do que cada ponta viu.
+    const expected = Object.fromEntries(
+      [p1, p2].map((socket) => {
+        const { me, self } = socket.state!.view;
+        return [me, self.pending.length > 0 && !self.equipSubmitted ? 1 : 0];
+      }),
+    );
+    expect(Object.values(expected).reduce((sum, n) => sum + n, 0)).toBeGreaterThan(0); // não passa no vazio
 
     // Vence o prazo da fase na agenda gravada; o objeto acorda do zero e o alarme dispara.
     await runInDurableObject(stubFor(room.code), (_instance, state) => {
@@ -78,7 +87,7 @@ describe('Durable Object da sala', () => {
       stubFor(room.code),
       (_instance, state) => state.storage.kv.get<{ strikes: Record<string, number> }>('game')!.strikes,
     );
-    expect(strikes).toEqual({ p1: 1, p2: 1 });
+    expect(strikes).toEqual(expected);
   });
 
   it('expiração: deleteAll; getAlarm null; info vira 404', async () => {
