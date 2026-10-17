@@ -262,6 +262,17 @@ describe('roomMessage', () => {
     expect(roomMessage(rec, [], 0).outcome).toEqual({ gameNo: 4, result: null, cause: 'ABANDONED' });
   });
 
+  it('placar e desfecho são cópias: mudar o registro depois não altera a mensagem já montada', () => {
+    const rec = base();
+    rec.status = 'FINISHED';
+    rec.outcome = { gameNo: 4, result: null, cause: 'ABANDONED' };
+    const message = roomMessage(rec, [], 0);
+    rec.score.p1 += 1;
+    rec.outcome.cause = 'CONCEDE';
+    expect(message.score).toEqual({ p1: 1, p2: 2, draws: 3 });
+    expect(message.outcome).toEqual({ gameNo: 4, result: null, cause: 'ABANDONED' });
+  });
+
   it('expiresAt é o menor entre idleExpiry e hardExpiry', () => {
     const rec = base();
     rec.agenda = [

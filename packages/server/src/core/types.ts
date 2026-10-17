@@ -43,7 +43,7 @@ export interface GameRecord {
   recent: StepRecord[];
   phaseStartedAt: number;
   phaseDeadlineAt: number | null;
-  /** Tempo de turno que sobrou quando o dono do turno caiu (turno pausado). */
+  /** Tempo de turno que sobrou quando K ou Reflect abriram a janela de reação no meio do turno (turno pausado durante a janela). */
   pausedTurnMs: number | null;
   /** PASS guardado durante a janela de reação mínima. */
   heldPass: { epoch: number; id: string } | null;

@@ -37,11 +37,12 @@ export function roomMessage(record: RoomRecord, sockets: SocketInfo[], now: numb
     code: record.code,
     status: record.status,
     seats,
-    score: record.score,
+    // Cópias: a mensagem fica nos efeitos até a casca serializar, e o placar muda no lugar (`score.p1 += 1`).
+    score: { ...record.score },
     gameNo: record.gameNo,
     expiresAt,
   };
-  if (record.outcome) message.outcome = record.outcome;
+  if (record.outcome) message.outcome = { ...record.outcome };
   return message;
 }
 

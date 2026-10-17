@@ -192,6 +192,32 @@ describe('transporte e limites', () => {
     expect(h.messages(p1, 'error')).toHaveLength(20);
   });
 
+  it('act/concede fora do esquema com id legível → ack BAD_MESSAGE com esse id (spec §4.6 item 2); sem id → error', async () => {
+    const { h, p1 } = await Harness.playing();
+    const before = h.core.record!.seq;
+    const bad = [
+      { t: 'act', id: 'a1', epoch: 'x', action: { type: 'PASS' } },
+      { t: 'act', id: 'a2', epoch: 1 }, // sem action
+      { t: 'concede', id: 'c1', extra: true },
+      { t: 'concede', id: 7 }, // id ilegível
+      { t: 'act', id: 'x'.repeat(65), epoch: 1, action: { type: 'PASS' } },
+    ];
+    for (const message of bad) {
+      h.now += 100;
+      await h.send(p1, JSON.stringify(message));
+    }
+    expect(p1.inbox.slice(-5)).toEqual([
+      { t: 'ack', id: 'a1', ok: false, code: 'BAD_MESSAGE', message: expect.any(String) },
+      { t: 'ack', id: 'a2', ok: false, code: 'BAD_MESSAGE', message: expect.any(String) },
+      { t: 'ack', id: 'c1', ok: false, code: 'BAD_MESSAGE', message: expect.any(String) },
+      { t: 'error', code: 'BAD_MESSAGE', message: 'mensagem inválida' },
+      { t: 'error', code: 'BAD_MESSAGE', message: 'mensagem inválida' },
+    ]);
+    // Continua contando como malformada e não muda a partida nem fica no anel de `ack` (não é jogada).
+    expect(h.core.record!.seq).toBe(before);
+    expect(h.core.record!.game!.acks.p1).toEqual([]);
+  });
+
   it('limite por conexão: 21 mensagens no mesmo instante → a 21ª recebe RATE_LIMITED sem processar; 101 descartes → 1008 e protocol.violation RATE', async () => {
     const { h, p1 } = await Harness.lobby();
     // O balde começou cheio no hello (que gastou uma ficha); um segundo de relógio devolve as 20.

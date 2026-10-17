@@ -28,7 +28,7 @@ export function newConnection(now: number): Connection {
   };
 }
 
-/** `id` de um `act`/`concede`, lido sem validar o resto, para responder o descarte com `ack` em vez de `error`. */
+/** `id` de um `act`/`concede`, lido sem validar o resto, para responder o descarte ou o erro de esquema com `ack` em vez de `error`. */
 export function peekMessageId(raw: string): string | null {
   try {
     const value: unknown = JSON.parse(raw);

@@ -297,7 +297,13 @@ export class RoomCore {
         if (connection.malformed > ROOM_LIMITS.maxMalformed) {
           return violation('MALFORMED', CLOSE.ABUSE, 'mensagens malformadas demais');
         }
-        return reply({ t: 'error', code: 'BAD_MESSAGE', message: 'mensagem inválida' });
+        // `act`/`concede` com `id` legível: `ack` com esse id (spec §4.6 item 2), para a promessa do cliente resolver.
+        const id = peekMessageId(raw);
+        return reply(
+          id === null
+            ? { t: 'error', code: 'BAD_MESSAGE', message: 'mensagem inválida' }
+            : ackFail(id, 'BAD_MESSAGE', 'mensagem inválida'),
+        );
       }
       this.#dispatch(effects, this.#record, seat, socketId, message, view, now);
       return null;
