@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { legalActions, makeConfig, viewFor, type GameEvent, type GameResult, type GameState, type PlayerId } from '@coringa/engine';
 import type {
   AckMessage,
@@ -19,7 +19,7 @@ import type {
 import { P1, P2, setup } from '../../engine/test/helpers.ts';
 import { resolveServer, targetArg } from '../src/cli/args.ts';
 import { runBot } from '../src/online/bot.ts';
-import { enterRoom, forgetSession, loadSession, saveSession, type SavedSession } from '../src/online/sessions.ts';
+import { enterRoom, forgetSession, loadSessions, processAlive, saveSession, type SavedSession } from '../src/online/sessions.ts';
 import { playOnline } from '../src/online/session.ts';
 import { askAction, playGame } from '../src/play/game.ts';
 import { askChoice, scriptedIo, QuitSignal, type Io } from '../src/play/io.ts';
@@ -277,6 +277,63 @@ describe('terminal online', () => {
     expect(text).not.toContain('venceu');
   });
 
+  /** Io cujas perguntas ficam pendentes até o teste responder; guarda o sinal de cada uma. */
+  function pendingIo(): Io & { output: string[]; asks: Array<{ q: string; signal?: AbortSignal; answer: (text: string) => void }> } {
+    const output: string[] = [];
+    const asks: Array<{ q: string; signal?: AbortSignal; answer: (text: string) => void }> = [];
+    return {
+      output,
+      asks,
+      ask: (q, signal) =>
+        new Promise<string>((resolve, reject) => {
+          signal?.throwIfAborted();
+          asks.push({ q, signal, answer: resolve });
+          signal?.addEventListener('abort', () => reject(signal.reason), { once: true });
+        }),
+      print: (t) => output.push(t),
+    };
+  }
+
+  it('volta a uma partida abandonada (room FINISHED e retrato sem GAME_OVER): a revanche segue perguntada e nada é jogado', async () => {
+    const io = pendingIo();
+    const connection = new FakeConnection();
+    const done = playOnline({ io, connection, names });
+    // O hello em FINISHED traz a sala e o retrato final; o abandono não passa pelo motor, então não é GAME_OVER.
+    connection.emitRoom(roomMsg('FINISHED', { outcome: { gameNo: 1, result: null, cause: 'ABANDONED' } }));
+    connection.emitState(stateMsg(stateA, P1, { epoch: 7, resync: true }));
+    await flush();
+    expect(io.asks.map((a) => a.q)).toEqual(['Revanche? (s/n) ']);
+    expect(io.asks[0]!.signal?.aborted).toBe(false);
+    expect(connection.acts).toEqual([]);
+    expect(io.output.join('\n')).not.toContain('Aguardando o oponente');
+
+    io.asks[0]!.answer('s');
+    await flush();
+    expect(connection.rematches).toEqual([true]);
+    connection.emit({ type: 'closed', code: 1000, final: true });
+    await expect(done).resolves.toEqual({ result: null });
+  });
+
+  it('turno pendente e a sala vira FINISHED (abandono por estouros): o turno é abortado e a revanche é perguntada', async () => {
+    const io = pendingIo();
+    const connection = new FakeConnection();
+    const done = playOnline({ io, connection, names });
+    connection.emitRoom(roomMsg('PLAYING'));
+    // O state do TIMEOUT chega antes do room FINISHED (Ruling 13): a pergunta da jogada já estava no ar.
+    connection.emitState(stateMsg(stateA, P1, { epoch: 8 }));
+    await flush();
+    expect(io.asks.map((a) => a.q)).toEqual(['> ']);
+    connection.emitRoom(roomMsg('FINISHED', { outcome: { gameNo: 1, result: null, cause: 'ABANDONED' } }));
+    await flush();
+    expect(io.asks[0]!.signal?.aborted).toBe(true);
+    expect(io.asks.map((a) => a.q)).toEqual(['> ', 'Revanche? (s/n) ']);
+    expect(connection.acts).toEqual([]);
+
+    io.asks[1]!.answer('n');
+    await expect(done).resolves.toEqual({ result: null });
+    expect(connection.rematches).toEqual([false]);
+  });
+
   it('imprime eventos, segundos restantes, eventos perdidos e a queda do oponente', async () => {
     const io = scriptedIo(['1']);
     const connection = new FakeConnection();
@@ -466,34 +523,77 @@ describe('bot online', () => {
 });
 
 describe('sessão salva', () => {
-  const session: SavedSession = { server: 'http://localhost:8787', code: 'K7M2QX', token: 'tok-ana', playerId: 'p1', nickname: 'Ana' };
+  const server = 'http://localhost:8787';
+  const ana: SavedSession = { server, code: 'K7M2QX', token: 'tok-ana', playerId: 'p1', nickname: 'Ana', pid: 101 };
+  const bia: SavedSession = { server, code: 'K7M2QX', token: 'tok-bia', playerId: 'p2', nickname: 'Bia', pid: 202 };
 
-  it('ida e volta num diretório temporário; outro servidor ou código → null', () => {
+  it('um arquivo por assento (<CÓDIGO>-<assento>.json, p1 antes de p2); outro servidor, código ou arquivo estragado ficam de fora', () => {
     const dir = mkdtempSync(join(tmpdir(), 'coringa-sessions-'));
-    saveSession(session, dir);
-    expect(existsSync(join(dir, 'K7M2QX.json'))).toBe(true);
-    expect(loadSession('http://localhost:8787', 'K7M2QX', dir)).toEqual(session);
-    expect(loadSession('http://localhost:8787/', 'k7m2qx', dir)).toEqual(session); // barra final e caixa não importam
-    expect(loadSession('https://outro.exemplo', 'K7M2QX', dir)).toBeNull();
-    expect(loadSession('http://localhost:8787', 'ABCDEF', dir)).toBeNull();
-    expect(loadSession('http://localhost:8787', '../x', dir)).toBeNull();
-    expect(() => saveSession({ ...session, code: '../fora' }, dir)).toThrow('código inválido');
+    saveSession(bia, dir);
+    saveSession(ana, dir);
+    expect(existsSync(join(dir, 'K7M2QX-p1.json'))).toBe(true);
+    expect(existsSync(join(dir, 'K7M2QX-p2.json'))).toBe(true);
+    expect(loadSessions(server, 'K7M2QX', dir)).toEqual([ana, bia]);
+    expect(loadSessions(`${server}/`, 'k7m2qx', dir)).toEqual([ana, bia]); // barra final e caixa não importam
+    expect(loadSessions('https://outro.exemplo', 'K7M2QX', dir)).toEqual([]);
+    expect(loadSessions(server, 'ABCDEF', dir)).toEqual([]);
+    expect(loadSessions(server, '../x', dir)).toEqual([]);
+    expect(loadSessions(server, 'K7M2QX', join(dir, 'nao-existe'))).toEqual([]);
+    expect(() => saveSession({ ...ana, code: '../fora' }, dir)).toThrow('código inválido');
+    expect(() => saveSession({ ...ana, playerId: '../p1' }, dir)).toThrow('assento inválido');
 
-    writeFileSync(join(dir, 'ABCDEF.json'), '{ não é json');
-    expect(loadSession('http://localhost:8787', 'ABCDEF', dir)).toBeNull();
-    writeFileSync(join(dir, 'ABCDEF.json'), JSON.stringify({ ...session, code: 'ABCDEF', token: 7 }));
-    expect(loadSession('http://localhost:8787', 'ABCDEF', dir)).toBeNull();
+    // Formato antigo (`<CÓDIGO>.json`, sem pid): ignorado.
+    writeFileSync(join(dir, 'ABCDEF.json'), JSON.stringify({ ...ana, code: 'ABCDEF', pid: undefined }));
+    expect(loadSessions(server, 'ABCDEF', dir)).toEqual([]);
+    // Estragados: JSON inválido, campo com tipo errado, pid ausente ou que não é inteiro positivo, assento trocado.
+    const broken: unknown[] = [
+      '{ não é json',
+      { ...ana, code: 'ABCDEF', token: 7 },
+      { ...ana, code: 'ABCDEF', pid: undefined },
+      { ...ana, code: 'ABCDEF', pid: 0 },
+      { ...ana, code: 'ABCDEF', pid: -1 },
+      { ...ana, code: 'ABCDEF', pid: 1.5 },
+      { ...ana, code: 'ABCDEF', pid: '101' },
+      { ...bia, code: 'ABCDEF' }, // diz p2 no arquivo do p1
+    ];
+    for (const content of broken) {
+      writeFileSync(join(dir, 'ABCDEF-p1.json'), typeof content === 'string' ? content : JSON.stringify(content));
+      expect(loadSessions(server, 'ABCDEF', dir)).toEqual([]);
+    }
 
     // lastSeq é opcional: com ele a volta em processo novo manda o hello certo; arquivos sem ele seguem carregando.
-    saveSession({ ...session, lastSeq: 42 }, dir);
-    expect(loadSession('http://localhost:8787', 'K7M2QX', dir)).toEqual({ ...session, lastSeq: 42 });
-    saveSession(session, dir);
-    expect(loadSession('http://localhost:8787', 'K7M2QX', dir)).toEqual(session);
-    expect(loadSession('http://localhost:8787', 'K7M2QX', dir)).not.toHaveProperty('lastSeq');
+    saveSession({ ...ana, lastSeq: 42 }, dir);
+    expect(loadSessions(server, 'K7M2QX', dir)[0]).toEqual({ ...ana, lastSeq: 42 });
+    saveSession(ana, dir);
+    expect(loadSessions(server, 'K7M2QX', dir)[0]).not.toHaveProperty('lastSeq');
 
-    forgetSession('http://localhost:8787', 'K7M2QX', dir);
-    expect(loadSession('http://localhost:8787', 'K7M2QX', dir)).toBeNull();
-    forgetSession('http://localhost:8787', 'K7M2QX', dir); // apagar o que não existe não é erro
+    // Esquecer apaga só aquele assento; de outro servidor não apaga; o que não existe não é erro.
+    forgetSession(server, 'K7M2QX', 'p1', dir);
+    expect(loadSessions(server, 'K7M2QX', dir)).toEqual([bia]);
+    forgetSession('https://outro.exemplo', 'K7M2QX', 'p2', dir);
+    expect(loadSessions(server, 'K7M2QX', dir)).toEqual([bia]);
+    forgetSession(server, 'K7M2QX', 'p1', dir);
+    forgetSession(server, '../x', 'p1', dir);
+    forgetSession(server, 'K7M2QX', '../x', dir);
+    expect(loadSessions(server, 'K7M2QX', dir)).toEqual([bia]);
+  });
+
+  it('processAlive: o próprio processo está vivo; ESRCH é morto; EPERM conta como vivo', () => {
+    expect(processAlive(process.pid)).toBe(true);
+    const kill = vi.spyOn(process, 'kill');
+    try {
+      kill.mockImplementation(() => {
+        throw Object.assign(new Error('sem processo'), { code: 'ESRCH' });
+      });
+      expect(processAlive(4242)).toBe(false);
+      kill.mockImplementation(() => {
+        throw Object.assign(new Error('sem permissão'), { code: 'EPERM' });
+      });
+      expect(processAlive(4242)).toBe(true);
+      expect(kill).toHaveBeenLastCalledWith(4242, 0);
+    } finally {
+      kill.mockRestore();
+    }
   });
 
   it('o arquivo padrão fica em packages/sim/sessions (fora do git)', () => {
@@ -501,37 +601,74 @@ describe('sessão salva', () => {
     expect(gitignore).toContain('packages/sim/sessions/');
   });
 
-  it('enterRoom: sem código cria; com código e sessão salva volta sem joinRoom; sem sessão entra; toda sessão nova é salva', async () => {
+  it('enterRoom (Ruling 23): dois terminais no mesmo PC ocupam os dois assentos; quem volta retoma o assento cujo processo morreu', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'coringa-enter-'));
-    const calls: Array<{ url: string; method?: string; body?: string }> = [];
-    const fetchImpl = (async (url: string, init?: { method?: string; body?: string }) => {
-      calls.push({ url, method: init?.method, body: init?.body });
-      const created = url.endsWith('/api/rooms');
-      return new Response(JSON.stringify(created ? { code: 'K7M2QX', token: 'tok-novo', playerId: 'p1' } : { token: 'tok-join', playerId: 'p2' }), { status: 200 });
+    const calls: Array<{ url: string; method?: string }> = [];
+    let joins = 0;
+    const fetchImpl = (async (url: string, init?: { method?: string }) => {
+      calls.push({ url, method: init?.method });
+      const body = url.endsWith('/api/rooms')
+        ? { code: 'K7M2QX', token: 'tok-ana', playerId: 'p1' }
+        : { token: `tok-join-${++joins}`, playerId: 'p2' };
+      return new Response(JSON.stringify(body), { status: 200 });
     }) as unknown as typeof fetch;
     let nicknameAsked = 0;
     const nickname = async () => (++nicknameAsked, 'Ana');
-    const server = 'http://localhost:8787';
+    const alive = new Set<number>();
+    const enter = (code: string | null, pid: number, at = server) =>
+      enterRoom({ server: at, code, nickname, dir, fetchImpl, pid, isAlive: (candidate) => alive.has(candidate) });
 
-    const created = await enterRoom({ server, code: null, nickname, dir, fetchImpl });
-    expect(created).toMatchObject({ resumed: false, created: true, session: { code: 'K7M2QX', token: 'tok-novo', playerId: 'p1', nickname: 'Ana', server } });
+    // A cria a sala: p1, salvo com o pid de A.
+    alive.add(101);
+    const a = await enter(null, 101);
+    expect(a).toMatchObject({ resumed: false, created: true, session: { code: 'K7M2QX', token: 'tok-ana', playerId: 'p1', pid: 101, server } });
     expect(calls.map((c) => `${c.method} ${c.url}`)).toEqual([`POST ${server}/api/rooms`]);
-    expect(loadSession(server, 'K7M2QX', dir)).toEqual(created.session);
+    expect(loadSessions(server, 'K7M2QX', dir)).toEqual([a.session]);
 
-    // Volta: tem sessão salva para este servidor e código → não chama a rede nem pergunta o apelido.
-    const resumed = await enterRoom({ server, code: 'K7M2QX', nickname, dir, fetchImpl });
-    expect(resumed).toEqual({ session: created.session, resumed: true, created: false });
-    expect(calls).toHaveLength(1);
-    expect(nicknameAsked).toBe(1);
+    // B, no mesmo PC, roda `pnpm play --online K7M2QX` como o CLI manda: A está vivo, então B entra como p2.
+    alive.add(202);
+    const b = await enter('K7M2QX', 202);
+    expect(b).toMatchObject({ resumed: false, created: false, session: { playerId: 'p2', token: 'tok-join-1', pid: 202 } });
+    expect(calls.at(-1)).toMatchObject({ method: 'POST', url: `${server}/api/rooms/K7M2QX/join` });
+    expect(loadSessions(server, 'K7M2QX', dir).map((s) => [s.playerId, s.pid])).toEqual([
+      ['p1', 101],
+      ['p2', 202],
+    ]);
 
-    // Sem sessão salva para o código: entra pela rede e guarda o token novo.
-    const joined = await enterRoom({ server, code: 'ABCDEF', nickname, dir, fetchImpl });
-    expect(joined).toMatchObject({ resumed: false, created: false, session: { code: 'ABCDEF', token: 'tok-join', playerId: 'p2' } });
-    expect(calls.at(-1)).toMatchObject({ method: 'POST', url: `${server}/api/rooms/ABCDEF/join` });
-    expect(loadSession(server, 'ABCDEF', dir)).toEqual(joined.session);
+    // A morre: o próximo terminal com o código retoma p1, sem rede nem apelido, e regrava o arquivo com o pid novo.
+    alive.delete(101);
+    alive.add(303);
+    const before = calls.length;
+    const asked = nicknameAsked;
+    const a2 = await enter('K7M2QX', 303);
+    expect(a2).toEqual({ session: { ...a.session, pid: 303 }, resumed: true, created: false });
+    expect(calls).toHaveLength(before);
+    expect(nicknameAsked).toBe(asked);
+    expect(loadSessions(server, 'K7M2QX', dir)[0]).toEqual({ ...a.session, pid: 303 });
 
-    // Outro servidor com o mesmo código também não aproveita a sessão.
-    await enterRoom({ server: 'https://outro.exemplo', code: 'K7M2QX', nickname, dir, fetchImpl });
+    // B morre: com p1 vivo de novo (303), quem volta retoma p2.
+    alive.delete(202);
+    const b2 = await enter('K7M2QX', 404);
+    expect(b2).toEqual({ session: { ...b.session, pid: 404 }, resumed: true, created: false });
+    expect(calls).toHaveLength(before);
+
+    // Arquivo de um processo morto cujo pid o sistema reaproveitou para este terminal: também retoma.
+    alive.add(404);
+    expect((await enter('K7M2QX', 404)).resumed).toBe(true);
+
+    // Nenhuma sessão para o código: entra como novo e salva.
+    const fresh = await enter('ABCDEF', 505);
+    expect(fresh).toMatchObject({ resumed: false, created: false, session: { code: 'ABCDEF', playerId: 'p2', pid: 505 } });
+    expect(loadSessions(server, 'ABCDEF', dir)).toEqual([fresh.session]);
+
+    // Formato antigo (`<CÓDIGO>.json`) é ignorado: entra como novo.
+    writeFileSync(join(dir, 'GHJKMN.json'), JSON.stringify({ server, code: 'GHJKMN', token: 'velho', playerId: 'p1', nickname: 'Ana' }));
+    expect((await enter('GHJKMN', 606)).resumed).toBe(false);
+    expect(calls.at(-1)?.url).toBe(`${server}/api/rooms/GHJKMN/join`);
+
+    // Outro servidor com o mesmo código: as sessões salvas (de localhost) não servem.
+    alive.clear();
+    await enter('K7M2QX', 707, 'https://outro.exemplo');
     expect(calls.at(-1)?.url).toBe('https://outro.exemplo/api/rooms/K7M2QX/join');
   });
 });

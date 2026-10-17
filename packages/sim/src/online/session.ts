@@ -114,9 +114,12 @@ export function playOnline({ io, connection, names }: PlayOnlineOptions): Promis
 
     const onState = (state: StateMessage): void => {
       const gameOver = state.view.phase.kind === 'GAME_OVER';
+      // Quem decide é a sala: em FINISHED o retrato pode não ser GAME_OVER (o abandono não passa pelo motor, spec §2.3),
+      // e aí não há jogada a pedir nem revanche a cancelar. Sem `room` ainda, vale o retrato.
+      const playing = (connection.room?.status ?? 'PLAYING') === 'PLAYING' && !gameOver;
       turn?.abort();
       turn = null;
-      if (!gameOver) rematchAsk?.abort(); // partida nova: a pergunta de revanche perdeu o sentido
+      if (playing) rematchAsk?.abort(); // partida nova: a pergunta de revanche perdeu o sentido
       if (state.seq > lastSeq) {
         lastSeq = state.seq;
         if (state.catchUp) io.print('— Eventos perdidos enquanto você estava fora —');
@@ -127,8 +130,8 @@ export function playOnline({ io, connection, names }: PlayOnlineOptions): Promis
           io.print(`⏱ ${KIND_TEXT[state.deadline.kind]}: ${secondsLeft(state.deadline.at)} s (${who})`);
         }
       }
-      if (gameOver || playerActions(state.view).length === 0) {
-        if (!gameOver) io.print('Aguardando o oponente…');
+      if (!playing || playerActions(state.view).length === 0) {
+        if (playing) io.print('Aguardando o oponente…');
         return;
       }
       turn = new AbortController();
@@ -191,6 +194,11 @@ export function playOnline({ io, connection, names }: PlayOnlineOptions): Promis
         connection.ready(true);
       }
       if (room.status === 'PLAYING') rematchAsk?.abort();
+      if (room.status === 'FINISHED') {
+        // A partida acabou com uma pergunta de jogada no ar (ex.: abandono por estouros, cujo `state` vem antes do `room`).
+        turn?.abort();
+        turn = null;
+      }
       if (room.status === 'FINISHED' && room.gameNo > promptedGameNo) {
         promptedGameNo = room.gameNo;
         onFinished(room);

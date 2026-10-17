@@ -52,11 +52,12 @@ export async function playOnlineCli({ io, positionals, nickname, server: serverF
   }
   const client = new RoomClient({ server, code: session.code, token: session.token, lastSeq: session.lastSeq });
   client.subscribe((event) => {
-    // Guarda o último `seq` para a volta em outro processo receber os eventos perdidos (o arquivo segue com modo 0600).
+    // Guarda o último `seq` para a volta em outro processo receber os eventos perdidos (o arquivo segue com modo 0600
+    // e com o `pid` deste processo, que a sessão já traz do `enterRoom`).
     if (event.type === 'state') saveSession({ ...session, lastSeq: event.state.seq });
     // Sala apagada ou token recusado: a sessão salva não serve mais, e guardá-la só atrapalharia o próximo `joinRoom`.
     if (event.type === 'closed' && event.final && (event.code === 4000 || event.code === 4003)) {
-      forgetSession(server, session.code);
+      forgetSession(server, session.code, session.playerId);
     }
   });
   const playing = playOnline({ io, connection: client, names: namesFor(session.playerId, 'Oponente') });
