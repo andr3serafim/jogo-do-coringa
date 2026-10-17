@@ -106,6 +106,9 @@ importers:
       '@coringa/engine':
         specifier: workspace:*
         version: link:../engine
+      '@coringa/protocol':
+        specifier: workspace:*
+        version: link:../protocol
     devDependencies:
       '@types/node':
         specifier: ^24.0.0

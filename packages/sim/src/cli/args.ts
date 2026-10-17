@@ -29,3 +29,14 @@ export function botName(value: string): BotName {
 }
 
 export { parseArgs };
+
+/** Servidor: `--servidor`, depois `CORINGA_SERVIDOR`, depois o `wrangler dev` local. */
+export function resolveServer(flag: string | undefined, env: Record<string, string | undefined> = process.env): string {
+  return flag || env.CORINGA_SERVIDOR || 'http://localhost:8787';
+}
+
+/** O alvo posicional (código, link ou URL do servidor); vazio vira `undefined`, porque `parseTarget('')` lança. */
+export function targetArg(positionals: string[]): string | undefined {
+  if (positionals.length > 1) throw new Error('informe apenas um alvo (código, link ou URL do servidor)');
+  return positionals[0]?.trim() || undefined;
+}

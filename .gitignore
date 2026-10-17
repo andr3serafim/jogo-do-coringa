@@ -6,3 +6,4 @@ packages/sim/reports/sim-*.json
 packages/sim/replays/
 .wrangler/
 worker-configuration.d.ts
+packages/sim/sessions/

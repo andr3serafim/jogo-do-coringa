@@ -11,7 +11,8 @@
     "record-golden": "node src/cli/record-golden.ts"
   },
   "dependencies": {
-    "@coringa/engine": "workspace:*"
+    "@coringa/engine": "workspace:*",
+    "@coringa/protocol": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

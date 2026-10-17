@@ -21,7 +21,7 @@ import type { Replay } from '../replay.ts';
 import { createRng } from '../rng.ts';
 import { renderBoard } from './board.ts';
 import { askChoice, QuitSignal, type Io } from './io.ts';
-import { actionText, cardText, DESTINATION_TEXT, eventText, namesFor, resultText } from './text.ts';
+import { actionText, cardText, DESTINATION_TEXT, eventText, namesFor, resultText, type Names } from './text.ts';
 
 export const HUMAN: PlayerId = 'voce';
 export const BOT: PlayerId = 'bot';
@@ -46,8 +46,8 @@ export interface PlayOutcome {
 type Equip = Extract<Action, { type: 'EQUIP' }>;
 
 /** Equipar carta a carta: só oferece destinos que levam a uma combinação legal (com as fileiras cheias seriam até 81). */
-async function askEquip(io: Io, view: PlayerView, legal: Action[]): Promise<Action> {
-  const options = legal.filter((a): a is Equip => a.type === 'EQUIP');
+async function askEquip<A extends Action>(io: Io, view: PlayerView, legal: A[], signal?: AbortSignal): Promise<A> {
+  const options = legal.filter((a): a is A & Equip => a.type === 'EQUIP');
   const chosen: Destination[] = [];
   for (const [i, card] of view.self.pending.entries()) {
     const fits = options.filter((a) => chosen.every((d, j) => a.destinations[j] === d));
@@ -57,7 +57,7 @@ async function askEquip(io: Io, view: PlayerView, legal: Action[]): Promise<Acti
       chosen.push(destinations[0]);
       continue;
     }
-    const pick = await askChoice(io, `Carta ${i + 1}/${view.self.pending.length}: ${cardText(card)}`, destinations.map((d) => DESTINATION_TEXT[d]));
+    const pick = await askChoice(io, `Carta ${i + 1}/${view.self.pending.length}: ${cardText(card)}`, destinations.map((d) => DESTINATION_TEXT[d]), signal);
     chosen.push(destinations[pick]);
   }
   const action = options.find((a) => a.destinations.every((d, j) => d === chosen[j]));
@@ -65,10 +65,12 @@ async function askEquip(io: Io, view: PlayerView, legal: Action[]): Promise<Acti
   return action;
 }
 
-async function askHuman(io: Io, view: PlayerView, legal: Action[], names: ReturnType<typeof namesFor>): Promise<Action> {
+/** Mostra a mesa e pergunta a jogada (no Equipar, carta a carta). O `signal` cancela a pergunta pendente com `AbortError`. */
+export async function askAction<A extends Action>(io: Io, view: PlayerView, legal: A[], names: Names, signal?: AbortSignal): Promise<A> {
+  signal?.throwIfAborted();
   io.print(`\n${renderBoard(view, names)}`);
-  if (view.phase.kind === 'EQUIP') return askEquip(io, view, legal);
-  return legal[await askChoice(io, 'Ações legais:', legal.map((a) => actionText(a, view)))];
+  if (view.phase.kind === 'EQUIP') return askEquip(io, view, legal, signal);
+  return legal[await askChoice(io, 'Ações legais:', legal.map((a) => actionText(a, view)), signal)];
 }
 
 function save(replay: Replay, dir: string): string {
@@ -98,7 +100,7 @@ export async function playGame(options: PlayOptions): Promise<PlayOutcome> {
       const actor = actingPlayers(state)[0];
       const view = viewFor(state, actor);
       const legal = legalActions(view);
-      const action = actor === HUMAN ? await askHuman(io, view, legal, names) : bot(view, legal, rng);
+      const action = actor === HUMAN ? await askAction(io, view, legal, names) : bot(view, legal, rng);
       const result = applyAction(state, actor, action);
       if (!result.ok) throw new Error(`${result.error.code}: ${result.error.message}`);
       steps.push({ player: actor, action });
