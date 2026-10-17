@@ -215,6 +215,8 @@ export class Room extends DurableObject<Env> {
     // (fora da lista de sockets, o remetente viraria "sem assento" e levaria um 4003 falso).
     if (ws.readyState !== WebSocket.READY_STATE_OPEN) return;
     await this.#enter(async (core, now) => {
+      // De novo na vez da entrada: uma entrada anterior da fila pode ter fechado este socket (ex.: 4009 da aba nova).
+      if (ws.readyState !== WebSocket.READY_STATE_OPEN) return;
       const attachment = ws.deserializeAttachment() as Attachment | null;
       if (!attachment) return;
       ws.serializeAttachment({ ...attachment, lastMessageAt: now } satisfies Attachment);

@@ -277,6 +277,28 @@ describe('Durable Object da sala', () => {
     expect(lines.some((line) => line.includes('protocol.violation') || line.includes('"evt":"error"'))).toBe(false);
   });
 
+  it('entrada na fila de um socket que a entrada anterior fechou (4009) é ignorada: sem 4003 falso no log', async () => {
+    const room = await makeRoom();
+    const tab1 = await open(room.code);
+    await tab1.hello(room.tokens.p1);
+    const tab2 = await open(room.code);
+    const logged = vi.spyOn(console, 'log');
+    await runInDurableObject(stubFor(room.code), async (instance, state) => {
+      const seatOf = (ws: WebSocket) => (ws.deserializeAttachment() as { seat: string | null }).seat;
+      const ws1 = state.getWebSockets().find((ws) => seatOf(ws) === 'p1')!;
+      const ws2 = state.getWebSockets().find((ws) => seatOf(ws) === null)!;
+      // O ready da aba 1 entra na fila aberto; quando chega a vez dele, o hello da aba 2 já a fechou com 4009.
+      await Promise.all([
+        instance.webSocketMessage(ws2, JSON.stringify({ t: 'hello', protocol: PROTOCOL_VERSION, token: room.tokens.p1 })),
+        instance.webSocketMessage(ws1, JSON.stringify({ t: 'ready', ready: true })),
+      ]);
+    });
+    expect(await tab1.waitClosed()).toMatchObject({ code: 4009 });
+    expect(tab2.closed).toBeNull();
+    const lines = logged.mock.calls.map((call) => String(call[0]));
+    expect(lines.some((line) => line.includes('protocol.violation') || line.includes('"evt":"error"'))).toBe(false);
+  });
+
   it('alarme com a instância fria: reconcile e onAlarm aplicados juntos, um setAlarm só', async () => {
     const { room, p1 } = await startGame();
     const before = p1.state!.seq;
