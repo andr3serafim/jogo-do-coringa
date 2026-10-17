@@ -185,6 +185,9 @@ export class Room extends DurableObject<Env> {
   }
 
   override async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer): Promise<void> {
+    // Mensagem que estava no ar de um socket que a gente já está fechando: o núcleo não precisa saber dela
+    // (fora da lista de sockets, o remetente viraria "sem assento" e levaria um 4003 falso).
+    if (ws.readyState !== WebSocket.READY_STATE_OPEN) return;
     await this.#enter(async (core, now) => {
       const attachment = ws.deserializeAttachment() as Attachment | null;
       if (!attachment) return;

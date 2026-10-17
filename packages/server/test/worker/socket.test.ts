@@ -166,12 +166,25 @@ describe('Durable Object da sala', () => {
     const room = await makeRoom();
     const p1 = await open(room.code);
     const p2 = await open(room.code);
+    const p3 = await open(room.code);
     await p1.hello(room.tokens.p1);
     await p2.hello(room.tokens.p2);
     await p1.waitFor(() => p1.room?.seats.every((seat) => seat.connected), 'os dois conectados');
 
+    // Fechamento limpo pelo cliente (`webSocketClose`).
     p2.ws.close(1000, 'tchau');
     await p1.waitFor(() => p1.room?.seats.some((seat) => !seat.connected), 'p2 fora da sala');
+    expect(p1.room!.seats.find((seat) => seat.playerId === 'p2')!.connected).toBe(false);
+
+    // Erro do socket (`webSocketError`): o p1 cai sem fechamento limpo, e o p3 só observa.
+    await p3.hello(room.tokens.p2);
+    await p1.waitFor(() => p1.room?.seats.every((seat) => seat.connected), 'p2 de volta');
+    await runInDurableObject(stubFor(room.code), async (instance, state) => {
+      const sockets = state.getWebSockets();
+      const target = sockets.find((ws) => (ws.deserializeAttachment() as { seat: string | null }).seat === 'p2')!;
+      await instance.webSocketError(target);
+    });
+    await p1.waitFor(() => p1.room?.seats.some((seat) => !seat.connected), 'p2 fora depois do erro');
     expect(p1.room!.seats.find((seat) => seat.playerId === 'p2')!.connected).toBe(false);
   });
 
