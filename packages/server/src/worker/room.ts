@@ -1,5 +1,6 @@
 import { DurableObject } from 'cloudflare:workers';
 import type { CreateRoomResponse, JoinRoomResponse, RoomInfoResponse } from '@coringa/protocol';
+import { emptyEffects, mergeEffects } from '../core/effects.ts';
 import { RoomCore } from '../core/room-core.ts';
 import { joinRecord, splitRecord, STORAGE_KEYS } from '../core/storage-layout.ts';
 import type { CoreDeps, Effects, SeatId, SocketInfo } from '../core/types.ts';
@@ -29,6 +30,8 @@ export class Room extends DurableObject<Env> {
   #reconciled = false;
   /** Alarme que a plataforma tem agora; `undefined` até a primeira leitura (`getAlarm()` uma vez por vida da instância). */
   #alarm: number | null | undefined;
+  /** Fim da última entrada da fila: cada entrada espera a anterior terminar, com ou sem erro. */
+  #queue: Promise<unknown> = Promise.resolve();
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
@@ -61,18 +64,36 @@ export class Room extends DurableObject<Env> {
   }
 
   /**
-   * Toda entrada passa por aqui. Se o núcleo lançar: nada mais é gravado, o erro vai ao log, a instância do
-   * núcleo é descartada (a próxima entrada recarrega do storage e reconcilia de novo) e a exceção é relançada,
-   * para a plataforma repetir o alarme.
+   * Toda entrada passa por aqui, em fila: a plataforma entrega outro evento enquanto uma entrada espera o SHA-256 do
+   * `hello` (não é storage, o portão de entrada abre), e sem a fila uma mensagem do mesmo socket chegaria ao núcleo
+   * antes do `attach` (4003 falso), a revanche largaria de um instantâneo velho e dois `getAlarm` concorrentes
+   * desencontrariam o `#alarm`. Se o núcleo lançar: nada mais é gravado, o erro vai ao log, a instância do núcleo é
+   * descartada (a próxima entrada recarrega do storage e reconcilia de novo) e a exceção é relançada, para a
+   * plataforma repetir o alarme; a fila segue para a próxima entrada.
+   *
+   * `woke` são os efeitos do `reconcile` desta entrada (vazios se a instância já estava acordada). Por padrão são
+   * aplicados antes de `run`; com `deferWake`, `run` os recebe e aplica junto com os seus (o alarme, para não gravar
+   * um `setAlarm` intermediário).
    */
-  async #enter<T>(run: (core: RoomCore, now: number) => Promise<T>): Promise<T> {
+  #enter<T>(run: (core: RoomCore, now: number, woke: Effects) => Promise<T>, deferWake = false): Promise<T> {
+    const entry = this.#queue.then(() => this.#run(run, deferWake));
+    this.#queue = entry.catch(() => undefined);
+    return entry;
+  }
+
+  async #run<T>(run: (core: RoomCore, now: number, woke: Effects) => Promise<T>, deferWake: boolean): Promise<T> {
     const core = (this.core ??= this.#load());
     try {
+      let woke = emptyEffects();
       if (!this.#reconciled) {
         this.#reconciled = true;
-        await this.#apply(core, core.reconcile(this.sockets(), Date.now()));
+        woke = core.reconcile(this.sockets(), Date.now());
+        if (!deferWake) {
+          await this.#apply(core, woke);
+          woke = emptyEffects();
+        }
       }
-      return await run(core, Date.now());
+      return await run(core, Date.now(), woke);
     } catch (error) {
       // Só descarta se o núcleo que falhou ainda é o atual: outra entrada pode já tê-lo trocado por um recarregado.
       if (this.core === core) this.#fail(error);
@@ -106,7 +127,7 @@ export class Room extends DurableObject<Env> {
 
   /** Aplica os efeitos na ordem da spec: attach, gravação, envios, fechamentos, apagar tudo, alarme, logs. */
   async #apply(core: RoomCore, effects: Effects): Promise<void> {
-    // Outra entrada falhou enquanto esta esperava (o `await` do hash): este núcleo foi descartado, nada dele vale.
+    // Defesa: com a fila nenhuma outra entrada roda no meio desta; se mesmo assim o núcleo foi trocado, nada dele vale.
     if (this.core !== core) throw new Error('a sala foi recarregada durante a entrada');
     const { storage } = this.ctx;
 
@@ -229,10 +250,13 @@ export class Room extends DurableObject<Env> {
   }
 
   override async alarm(): Promise<void> {
-    // O alarme que disparou já foi consumido pela plataforma.
-    this.#alarm = null;
-    await this.#enter(async (core, now) => {
-      await this.#apply(core, core.onAlarm(this.sockets(), now));
-    });
+    await this.#enter(async (core, now, woke) => {
+      // O alarme que disparou já foi consumido pela plataforma. Zerado aqui, na vez desta entrada: uma entrada
+      // anterior da fila ainda poderia regravar o valor velho por cima.
+      this.#alarm = null;
+      // O `reconcile` da instância fria devolve o alarme do item ainda vencido; aplicado sozinho, viraria um
+      // `setAlarm` no passado (uma linha a mais) logo antes do certo. Juntos, o alarme que vale é o do `onAlarm`.
+      await this.#apply(core, mergeEffects(woke, core.onAlarm(this.sockets(), now)));
+    }, true);
   }
 }

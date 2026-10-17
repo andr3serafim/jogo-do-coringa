@@ -1,4 +1,5 @@
 import { env, evictAllDurableObjects, runDurableObjectAlarm, runInDurableObject } from 'cloudflare:test';
+import { PROTOCOL_VERSION } from '@coringa/protocol';
 import type { RoomRecord } from '../../src/core/types.ts';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { get, makeRoom, open, post, startGame } from './helpers.ts';
@@ -255,6 +256,49 @@ describe('Durable Object da sala', () => {
     });
     expect(outcome).toEqual({ threw: true, discarded: true });
     expect(logged.mock.calls.some((call) => String(call[0]).includes('"evt":"error"'))).toBe(true);
+  });
+
+  it('entradas em fila: hello e ready do mesmo socket sem esperar entre eles → o ready vale depois do hello, sem 4003', async () => {
+    const room = await makeRoom();
+    const p1 = await open(room.code);
+    const logged = vi.spyOn(console, 'log');
+    await runInDurableObject(stubFor(room.code), async (instance, state) => {
+      const ws = state.getWebSockets().find((candidate) => (candidate.deserializeAttachment() as { seat: string | null }).seat === null)!;
+      // O ready chega enquanto o hello espera o SHA-256 do token: sem a fila, ele veria o socket ainda sem assento.
+      await Promise.all([
+        instance.webSocketMessage(ws, JSON.stringify({ t: 'hello', protocol: PROTOCOL_VERSION, token: room.tokens.p1 })),
+        instance.webSocketMessage(ws, JSON.stringify({ t: 'ready', ready: true })),
+      ]);
+    });
+    await p1.waitFor(() => p1.room?.seats.find((seat) => seat.playerId === 'p1')?.ready, 'p1 pronto');
+    expect(p1.of('welcome')).toHaveLength(1);
+    expect(p1.closed).toBeNull();
+    const lines = logged.mock.calls.map((call) => String(call[0]));
+    expect(lines.some((line) => line.includes('protocol.violation') || line.includes('"evt":"error"'))).toBe(false);
+  });
+
+  it('alarme com a instância fria: reconcile e onAlarm aplicados juntos, um setAlarm só', async () => {
+    const { room, p1 } = await startGame();
+    const before = p1.state!.seq;
+    await runInDurableObject(stubFor(room.code), (_instance, state) => {
+      const record = state.storage.kv.get<Record<string, unknown>>('room') as unknown as RoomRecord;
+      record.agenda = record.agenda.map((item) => (item.kind === 'phase' ? { ...item, at: Date.now() - 1_000 } : item));
+      state.storage.kv.put('room', record);
+    });
+    await evictAllDurableObjects();
+
+    // Instância nova (o runInDurableObject não passa pelo `#enter`): o alarme é a primeira entrada e reconcilia.
+    const outcome = await runInDurableObject(stubFor(room.code), async (instance, state) => {
+      const setAlarm = vi.spyOn(state.storage, 'setAlarm');
+      const started = Date.now();
+      await instance.alarm();
+      return { calls: setAlarm.mock.calls.map((call) => Number(call[0])), started, stored: await state.storage.getAlarm() };
+    });
+    // Antes: o reconcile gravava o alarme do item ainda vencido (no passado) e o onAlarm gravava o certo logo depois.
+    expect(outcome.calls).toHaveLength(1);
+    expect(outcome.calls[0]).toBeGreaterThan(outcome.started);
+    expect(outcome.stored).toBe(outcome.calls[0]);
+    await p1.waitState(before);
   });
 
   it('duas abas: a segunda derruba a primeira com 4009', async () => {
