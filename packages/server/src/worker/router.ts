@@ -132,6 +132,8 @@ async function openSocket(request: Request, env: Env, url: URL, rawCode: string,
   if (request.headers.get('Upgrade')?.toLowerCase() !== 'websocket') {
     return fail(426, 'UPGRADE_REQUIRED', 'esperava um WebSocket');
   }
+  // O limite vem antes das outras recusas: todas criam um WebSocketPair, e a de origem ainda escreve uma linha de log.
+  if (!(await env.JOIN_LIMITER.limit({ key: ip })).success) return acceptAndClose(CLOSE.LIMITED, 'limite');
   const code = normalizeCode(rawCode);
   // Sem `Origin` (cliente de terminal) passa: só navegador faz sequestro de WebSocket entre sites.
   const origin = request.headers.get('Origin');
@@ -140,7 +142,6 @@ async function openSocket(request: Request, env: Env, url: URL, rawCode: string,
     return acceptAndClose(CLOSE.AUTH, 'origem');
   }
   if (code === null) return acceptAndClose(CLOSE.ROOM_GONE, 'sala inexistente');
-  if (!(await env.JOIN_LIMITER.limit({ key: ip })).success) return acceptAndClose(CLOSE.LIMITED, 'limite');
   return env.ROOMS.getByName(code).fetch(request);
 }
 

@@ -1,12 +1,29 @@
 import { env, SELF } from 'cloudflare:test';
 import type { CreateRoomResponse, JoinRoomResponse, RoomInfoResponse } from '@coringa/protocol';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import worker from '../../src/worker/index.ts';
 import { handle, isOriginAllowed } from '../../src/worker/router.ts';
-import { get, open, post, uniqueIp } from './helpers.ts';
+import { get, open, post, TestSocket, uniqueIp } from './helpers.ts';
 
 afterEach(() => {
   vi.restoreAllMocks();
 });
+
+/**
+ * Repete `attempt` até ela dizer que o limite estourou e devolve quantas passaram antes. A janela do limite (60 s)
+ * pode virar no meio do laço, então o número exato oscila: o que vale é passar pelo menos `limit` vezes e estourar
+ * antes de `2 * limit`.
+ */
+async function untilLimited(limit: number, attempt: (i: number) => Promise<boolean>): Promise<number> {
+  for (let i = 0; i < limit * 2; i += 1) {
+    if (await attempt(i)) {
+      expect(i).toBeGreaterThanOrEqual(limit);
+      return i;
+    }
+  }
+  throw new Error('o limite nunca estourou');
+}
+
 
 describe('rotas HTTP', () => {
   it('cria (201), entra (200), cheia (409), inexistente (404), consulta pública', async () => {
@@ -86,22 +103,28 @@ describe('rotas HTTP', () => {
 
   it('11ª criação no minuto → 429', async () => {
     const ip = uniqueIp();
-    for (let i = 0; i < 10; i += 1) {
-      expect((await post('/api/rooms', { nickname: 'Ana' }, ip)).status, `criação ${i + 1}`).toBe(201);
-    }
-    const limited = await post('/api/rooms', { nickname: 'Ana' }, ip);
-    expect(limited.status).toBe(429);
-    expect(limited.headers.get('retry-after')).toBe('60');
+    let retryAfter: string | null = null;
+    await untilLimited(10, async (i) => {
+      const res = await post('/api/rooms', { nickname: 'Ana' }, ip);
+      if (res.status === 429) {
+        retryAfter = res.headers.get('retry-after');
+        return true;
+      }
+      expect(res.status, `criação ${i + 1}`).toBe(201);
+      return false;
+    });
+    expect(retryAfter).toBe('60');
     // Outro IP não é afetado.
     expect((await post('/api/rooms', { nickname: 'Ana' })).status).toBe(201);
   });
 
   it('entrar e consultar dividem o limite de 60/min por IP; criar tem o seu', async () => {
     const ip = uniqueIp();
-    for (let i = 0; i < 60; i += 1) {
-      expect((await get('/api/rooms/222222', ip)).status, `consulta ${i + 1}`).toBe(404);
-    }
-    expect((await get('/api/rooms/222222', ip)).status).toBe(429);
+    await untilLimited(60, async (i) => {
+      const status = (await get('/api/rooms/222222', ip)).status;
+      if (status !== 429) expect(status, `consulta ${i + 1}`).toBe(404);
+      return status === 429;
+    });
     expect((await post('/api/rooms/222222/join', { nickname: 'Ana' }, ip)).status).toBe(429);
     expect((await post('/api/rooms', { nickname: 'Ana' }, ip)).status).toBe(201);
   });
@@ -164,12 +187,69 @@ describe('WebSocket recusado chega como fechamento', () => {
 
   it('limite por IP no upgrade → 4029', async () => {
     const ip = uniqueIp();
-    for (let i = 0; i < 60; i += 1) {
-      const socket = await open('222222', { 'cf-connecting-ip': ip });
-      expect(await socket.waitClosed(), `upgrade ${i + 1}`).toMatchObject({ code: 4000 });
-    }
-    const limited = await open('222222', { 'cf-connecting-ip': ip });
-    expect(await limited.waitClosed()).toMatchObject({ code: 4029 });
+    await untilLimited(60, async (i) => {
+      const { code } = await (await open('222222', { 'cf-connecting-ip': ip })).waitClosed();
+      if (code !== 4029) expect(code, `upgrade ${i + 1}`).toBe(4000);
+      return code === 4029;
+    });
+  });
+
+  it('o limite vem antes da origem: estourado o limite, o upgrade com origem ruim recebe 4029 e não escreve mais log', async () => {
+    const ip = uniqueIp();
+    const logged = vi.spyOn(console, 'log');
+    const originLogs = () =>
+      logged.mock.calls.filter((call) => String(call[0]).includes('"kind":"ORIGIN"')).length;
+    const allowed = await untilLimited(60, async (i) => {
+      const { code } = await (await open('222222', { 'cf-connecting-ip': ip, Origin: 'https://evil.example' })).waitClosed();
+      if (code !== 4029) expect(code, `upgrade ${i + 1}`).toBe(4003);
+      return code === 4029;
+    });
+    // Um log por upgrade que passou do limite, nenhum para o que foi barrado.
+    expect(originLogs()).toBe(allowed);
+    const again = await open('222222', { 'cf-connecting-ip': ip, Origin: 'https://evil.example' });
+    expect(await again.waitClosed()).toMatchObject({ code: 4029 });
+    // Código malformado também passa pelo limite.
+    const malformed = await open('ABC', { 'cf-connecting-ip': ip });
+    expect(await malformed.waitClosed()).toMatchObject({ code: 4029 });
+    expect(originLogs()).toBe(allowed);
+  });
+
+  it('exceção do objeto durante o upgrade vira fechamento 1011 (nunca um 500) e entra no log', async () => {
+    const fake = {
+      ...env,
+      JOIN_LIMITER: { limit: async () => ({ success: true }) },
+      ROOMS: {
+        getByName: () => ({
+          fetch: async () => {
+            throw new Error('o objeto quebrou');
+          },
+        }),
+      },
+    } as unknown as Env;
+    const logged = vi.spyOn(console, 'log');
+    const upgrade = await worker.fetch!(
+      new Request('https://x/api/rooms/222222/ws', { headers: { Upgrade: 'websocket' } }) as never,
+      fake,
+    );
+    expect(upgrade.status).toBe(101);
+    const socket = new TestSocket(upgrade.webSocket!);
+    expect(await socket.waitClosed()).toMatchObject({ code: 1011 });
+    const lines = logged.mock.calls.map((call) => String(call[0]));
+    expect(lines.some((line) => line.includes('"evt":"error"') && line.includes('o objeto quebrou'))).toBe(true);
+
+    // Sem Upgrade, o erro continua sendo um 500 de verdade.
+    const broken = {
+      ...fake,
+      ROOMS: {
+        getByName: () => ({
+          info: async () => {
+            throw new Error('x');
+          },
+        }),
+      },
+    } as unknown as Env;
+    const plain = await worker.fetch!(new Request('https://x/api/rooms/222222') as never, broken);
+    expect(plain.status).toBe(500);
   });
 
   it('sem Upgrade no /ws → 426', async () => {

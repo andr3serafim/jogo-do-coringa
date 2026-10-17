@@ -188,6 +188,75 @@ describe('Durable Object da sala', () => {
     expect(p1.room!.seats.find((seat) => seat.playerId === 'p2')!.connected).toBe(false);
   });
 
+  it('quadro binário fecha com 1003 e quadro maior que 4 KiB com 1009, visíveis ao cliente', async () => {
+    const room = await makeRoom();
+    const binary = await open(room.code);
+    binary.ws.send(new Uint8Array([1, 2, 3]));
+    expect(await binary.waitClosed()).toMatchObject({ code: 1003 });
+
+    const big = await open(room.code);
+    big.ws.send('x'.repeat(4097));
+    expect(await big.waitClosed()).toMatchObject({ code: 1009 });
+  });
+
+  it('abuso (mais de 100 descartes pelo balde) fecha com 1008', async () => {
+    const room = await makeRoom();
+    const p1 = await open(room.code);
+    await p1.hello(room.tokens.p1);
+    for (let i = 0; i < 140; i += 1) p1.ws.send('{"t":"nada"}');
+    expect(await p1.waitClosed()).toMatchObject({ code: 1008 });
+  });
+
+  it('mensagem de um socket que o núcleo acabou de fechar é ignorada (sem 4003 falso) e o onClose ainda roda', async () => {
+    const room = await makeRoom();
+    const p1 = await open(room.code);
+    const p2 = await open(room.code);
+    await p1.hello(room.tokens.p1);
+    await p2.hello(room.tokens.p2);
+    await p1.waitFor(() => p1.room?.seats.every((seat) => seat.connected), 'os dois conectados');
+
+    const logged = vi.spyOn(console, 'log');
+    await runInDurableObject(stubFor(room.code), async (instance, state) => {
+      const target = state.getWebSockets().find((ws) => (ws.deserializeAttachment() as { seat: string | null }).seat === 'p2')!;
+      target.close(4009, 'fechado pelo núcleo'); // agora CLOSING; a mensagem ainda estava no ar
+      await instance.webSocketMessage(target, JSON.stringify({ t: 'ready', ready: true }));
+      await instance.webSocketClose(target, 4009, 'fechado pelo núcleo');
+    });
+    const lines = logged.mock.calls.map((call) => String(call[0]));
+    expect(lines.some((line) => line.includes('protocol.violation') || line.includes('"evt":"error"'))).toBe(false);
+    expect(await p2.waitClosed()).toMatchObject({ code: 4009 });
+    await p1.waitFor(() => p1.room?.seats.some((seat) => !seat.connected), 'p2 fora depois do fechamento');
+  });
+
+  it('falha de fechamento num socket aberto (código inválido) não é engolida: vai ao log e o núcleo é descartado', async () => {
+    const room = await makeRoom();
+    const p1 = await open(room.code);
+    await p1.hello(room.tokens.p1);
+    const logged = vi.spyOn(console, 'log');
+    const outcome = await runInDurableObject(stubFor(room.code), async (instance, state) => {
+      const target = state.getWebSockets()[0]!;
+      const socketId = (target.deserializeAttachment() as { socketId: string }).socketId;
+      instance.core!.onMessage = async () => ({
+        send: [],
+        close: [{ socketId, code: 5, reason: 'código que o runtime recusa' }],
+        attach: [],
+        persist: false,
+        alarm: null,
+        deleteAll: false,
+        logs: [],
+      });
+      let threw = false;
+      try {
+        await instance.webSocketMessage(target, JSON.stringify({ t: 'ready', ready: true }));
+      } catch {
+        threw = true;
+      }
+      return { threw, discarded: instance.core === null };
+    });
+    expect(outcome).toEqual({ threw: true, discarded: true });
+    expect(logged.mock.calls.some((call) => String(call[0]).includes('"evt":"error"'))).toBe(true);
+  });
+
   it('duas abas: a segunda derruba a primeira com 4009', async () => {
     const room = await makeRoom();
     const first = await open(room.code);

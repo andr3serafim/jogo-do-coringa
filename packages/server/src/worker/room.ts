@@ -94,6 +94,16 @@ export class Room extends DurableObject<Env> {
     return this.ctx.getWebSockets().find((ws) => (ws.deserializeAttachment() as Attachment | null)?.socketId === socketId);
   }
 
+  /** Roda `op`; ignora a falha só se o socket já não está aberto, senão relança. */
+  #tolerant(ws: WebSocket, op: () => void): void {
+    try {
+      op();
+    } catch (error) {
+      if (ws.readyState !== WebSocket.READY_STATE_OPEN) return;
+      throw error;
+    }
+  }
+
   /** Aplica os efeitos na ordem da spec: attach, gravação, envios, fechamentos, apagar tudo, alarme, logs. */
   async #apply(core: RoomCore, effects: Effects): Promise<void> {
     // Outra entrada falhou enquanto esta esperava (o `await` do hash): este núcleo foi descartado, nada dele vale.
@@ -112,20 +122,15 @@ export class Room extends DurableObject<Env> {
       for (const key of STORAGE_KEYS) storage.kv.put(key, parts[key]);
     }
 
-    // Um socket que já fechou (ou sumiu) não é erro: o núcleo pode mandar a quem acabou de cair.
+    // Socket que já fechou (ou sumiu) não é erro: o núcleo pode mandar a quem acabou de cair. Qualquer outra falha
+    // (código de fechamento inválido, envio grande demais) é bug: sobe, e `#enter` registra e descarta o núcleo.
     for (const { socketId, message } of effects.send) {
-      try {
-        this.#byId(socketId)?.send(JSON.stringify(message));
-      } catch {
-        /* socket fechado */
-      }
+      const ws = this.#byId(socketId);
+      if (ws) this.#tolerant(ws, () => ws.send(JSON.stringify(message)));
     }
     for (const { socketId, code, reason } of effects.close) {
-      try {
-        this.#byId(socketId)?.close(code, reason);
-      } catch {
-        /* já estava fechando */
-      }
+      const ws = this.#byId(socketId);
+      if (ws) this.#tolerant(ws, () => ws.close(code, reason));
     }
 
     // `deleteAll` vale com ou sem `persist`; com a `compatibility_date` atual ele apaga o alarme também.
