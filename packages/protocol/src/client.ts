@@ -102,6 +102,8 @@ export class RoomClient implements RoomConnection {
   #pingTimer: unknown = null;
   #reconnectTimer: unknown = null;
   #attempt = 0;
+  /** Quantas vezes `close()` foi chamado: um listener de `closed` pode fechar de vez no meio do aviso de queda. */
+  #manualCloses = 0;
   #idCounter = 0;
   /** Servidor menos relógio local, medido na chegada de cada `welcome`/`state`. */
   #clockOffset = 0;
@@ -157,6 +159,7 @@ export class RoomClient implements RoomConnection {
 
   /** Fecha de vez (1000), sem reconectar. */
   close(): void {
+    this.#manualCloses += 1;
     const ws = this.#ws;
     const waiting = this.#reconnectTimer !== null;
     this.#clearReconnect();
@@ -180,8 +183,15 @@ export class RoomClient implements RoomConnection {
     return Math.max(0, deadline.at - (this.#now() + this.#clockOffset));
   }
 
+  /** Cada listener isolado: a exceção de um vai ao `console.error` e não impede os outros nem o resto do cliente. */
   #emit(event: ConnectionEvent): void {
-    for (const listener of [...this.#listeners]) listener(event);
+    for (const listener of [...this.#listeners]) {
+      try {
+        listener(event);
+      } catch (error) {
+        console.error('RoomClient: erro num listener', error);
+      }
+    }
   }
 
   #send(msg: ClientMessage): boolean {
@@ -219,7 +229,6 @@ export class RoomClient implements RoomConnection {
     this.#ws = ws;
     ws.onopen = () => {
       if (this.#ws !== ws) return;
-      this.#attempt = 0;
       const hello: Extract<ClientMessage, { t: 'hello' }> = { t: 'hello', protocol: PROTOCOL_VERSION, token: this.#options.token };
       const lastSeq = this.#state?.seq ?? this.#options.lastSeq;
       if (lastSeq !== undefined) hello.lastSeq = lastSeq;
@@ -248,6 +257,8 @@ export class RoomClient implements RoomConnection {
     if (typeof msg !== 'object' || msg === null) return;
     switch (msg.t) {
       case 'welcome':
+        // Só o `welcome` prova que a conexão foi aceita: um servidor que aceita e fecha (1011, 4008) não zera a espera.
+        this.#attempt = 0;
         this.#playerId = msg.playerId;
         this.#syncClock(msg.serverNow);
         break;
@@ -284,8 +295,10 @@ export class RoomClient implements RoomConnection {
     this.#stopPing();
     this.#failPending();
     const final = FINAL_CLOSE_CODES.includes(code);
+    const closes = this.#manualCloses;
     this.#emit({ type: 'closed', code, final });
-    if (!final) this.#scheduleReconnect(code);
+    // Um listener que chamou `close()` durante o aviso fechou de vez: não reconecta.
+    if (!final && closes === this.#manualCloses) this.#scheduleReconnect(code);
   }
 
   #scheduleReconnect(code: number): void {

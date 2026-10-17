@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   HttpError,
   PING_INTERVAL_MS,
@@ -419,7 +419,7 @@ describe('RoomClient: reconexão', () => {
     expect(high.clock.scheduled).toEqual([600]);
   });
 
-  it('o índice da espera volta a 0 quando o socket abre', () => {
+  it('o índice da espera volta a 0 no welcome (conexão aceita de fato)', () => {
     const { client, clock, last } = setup();
     client.connect();
     last().serverClose(1006);
@@ -427,9 +427,58 @@ describe('RoomClient: reconexão', () => {
     last().serverClose(1006);
     clock.advance(1000);
     last().serverOpen();
+    last().serverSend({ t: 'welcome', protocol: 1, playerId: 'p1', serverNow: clock.time });
     last().serverClose(1006);
     clock.advance(500);
     expect(clock.scheduled.filter((ms) => ms !== PING_INTERVAL_MS)).toEqual([500, 1000, 500]);
+  });
+
+  it('servidor que aceita e fecha (open sem welcome, 4008 ou 1011) não zera a espera: ela cresce', () => {
+    const { client, clock, last } = setup();
+    client.connect();
+    for (const code of [4008, 1011, 4008, 1011]) {
+      last().serverOpen();
+      last().serverClose(code);
+      clock.advance(100_000);
+    }
+    expect(clock.scheduled.filter((ms) => ms !== PING_INTERVAL_MS)).toEqual([500, 1000, 2000, 4000]);
+  });
+
+  it('close() dentro de um listener de closed: não reconecta depois; connect() volta a abrir', () => {
+    const { client, clock, events, last } = connected();
+    client.subscribe((e) => {
+      if (e.type === 'closed' && !e.final) client.close();
+    });
+    last().serverClose(1006);
+    expect(events.filter((e) => e.type === 'closed')).toEqual([{ type: 'closed', code: 1006, final: false }]);
+    expect(clock.pending()).toBe(0);
+    clock.advance(100_000);
+    expect(FakeWebSocket.instances).toHaveLength(1);
+    client.connect();
+    expect(FakeWebSocket.instances).toHaveLength(2);
+  });
+
+  it('exceção num listener vai ao console.error e não impede os outros listeners nem a reconexão', () => {
+    const { client, clock, last } = setup();
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const seen: string[] = [];
+      client.subscribe(() => {
+        throw new Error('listener quebrado');
+      });
+      client.subscribe((e) => seen.push(e.type));
+      client.connect();
+      last().serverOpen();
+      last().serverSend(stateMsg(1));
+      last().serverClose(1006);
+      expect(seen).toEqual(['open', 'state', 'closed']);
+      expect(client.state?.seq).toBe(1);
+      clock.advance(500);
+      expect(FakeWebSocket.instances).toHaveLength(2);
+      expect(logged).toHaveBeenCalledTimes(3);
+    } finally {
+      logged.mockRestore();
+    }
   });
 
   it.each([1000, 4000, 4001, 4003, 4009])('fechamento %i é final: não reconecta e emite closed final', (code) => {
