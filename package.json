@@ -22,7 +22,7 @@
     "sim:replay": "node packages/sim/src/cli/replay.ts"
   },
   "simple-git-hooks": {
-    "pre-commit": "pnpm check",
+    "pre-commit": "if [ -f scripts/check-fast.ts ]; then node scripts/check-fast.ts; else pnpm check; fi",
     "pre-push": "pnpm check"
   },
   "devDependencies": {

@@ -18,7 +18,10 @@ export function deploy(): number {
   }
   const args = deployArgs(rev.stdout.trim());
   // No Windows o wrangler é um .cmd, que o spawnSync só abre pelo shell; os argumentos são fixos e já validados.
-  const run = spawnSync('wrangler', args, { stdio: 'inherit', shell: process.platform === 'win32' });
+  const run =
+    process.platform === 'win32'
+      ? spawnSync(`wrangler ${args.join(' ')}`, { stdio: 'inherit', shell: true })
+      : spawnSync('wrangler', args, { stdio: 'inherit' });
   if (run.error) {
     console.error(`erro: não consegui rodar o wrangler: ${run.error.message}`);
     return 1;
