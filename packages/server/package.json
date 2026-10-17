@@ -8,7 +8,8 @@
     "test": "vitest run && vitest run -c vitest.worker.config.ts",
     "test:coverage": "vitest run --coverage && vitest run -c vitest.worker.config.ts",
     "smoke": "node scripts/smoke.ts && wrangler deploy --dry-run --outdir .wrangler/dry-run",
-    "dev": "wrangler dev"
+    "dev": "wrangler dev",
+    "deploy": "node scripts/deploy.ts"
   },
   "dependencies": {
     "@coringa/engine": "workspace:*",
