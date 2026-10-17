@@ -484,6 +484,13 @@ describe('sessão salva', () => {
     writeFileSync(join(dir, 'ABCDEF.json'), JSON.stringify({ ...session, code: 'ABCDEF', token: 7 }));
     expect(loadSession('http://localhost:8787', 'ABCDEF', dir)).toBeNull();
 
+    // lastSeq é opcional: com ele a volta em processo novo manda o hello certo; arquivos sem ele seguem carregando.
+    saveSession({ ...session, lastSeq: 42 }, dir);
+    expect(loadSession('http://localhost:8787', 'K7M2QX', dir)).toEqual({ ...session, lastSeq: 42 });
+    saveSession(session, dir);
+    expect(loadSession('http://localhost:8787', 'K7M2QX', dir)).toEqual(session);
+    expect(loadSession('http://localhost:8787', 'K7M2QX', dir)).not.toHaveProperty('lastSeq');
+
     forgetSession('http://localhost:8787', 'K7M2QX', dir);
     expect(loadSession('http://localhost:8787', 'K7M2QX', dir)).toBeNull();
     forgetSession('http://localhost:8787', 'K7M2QX', dir); // apagar o que não existe não é erro

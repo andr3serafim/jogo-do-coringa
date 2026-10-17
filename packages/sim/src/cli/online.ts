@@ -1,6 +1,6 @@
 /** Cola dos CLIs online (`pnpm play --online` e `pnpm bot`): entrar na sala, ligar o `RoomClient` e jogar. */
 import { HttpError, normalizeNickname, parseTarget, RoomClient, roomLink } from '@coringa/protocol';
-import { forgetSession, enterRoom } from '../online/sessions.ts';
+import { enterRoom, forgetSession, saveSession } from '../online/sessions.ts';
 import { playOnline } from '../online/session.ts';
 import type { Io } from '../play/io.ts';
 import { namesFor } from '../play/text.ts';
@@ -50,8 +50,10 @@ export async function playOnlineCli({ io, positionals, nickname, server: serverF
   } else {
     io.print(`Entrando na sala ${session.code} como ${session.nickname}.`);
   }
-  const client = new RoomClient({ server, code: session.code, token: session.token });
+  const client = new RoomClient({ server, code: session.code, token: session.token, lastSeq: session.lastSeq });
   client.subscribe((event) => {
+    // Guarda o último `seq` para a volta em outro processo receber os eventos perdidos (o arquivo segue com modo 0600).
+    if (event.type === 'state') saveSession({ ...session, lastSeq: event.state.seq });
     // Sala apagada ou token recusado: a sessão salva não serve mais, e guardá-la só atrapalharia o próximo `joinRoom`.
     if (event.type === 'closed' && event.final && (event.code === 4000 || event.code === 4003)) {
       forgetSession(server, session.code);

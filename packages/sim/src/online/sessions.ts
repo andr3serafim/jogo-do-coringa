@@ -13,6 +13,8 @@ export interface SavedSession {
   token: string;
   playerId: string;
   nickname: string;
+  /** Último `seq` de `state` recebido: quem volta em processo novo o manda no `hello` e recebe os eventos perdidos (spec §4.7). Arquivos antigos não têm. */
+  lastSeq?: number;
 }
 
 /** `packages/sim/sessions/`, fora do git: o arquivo guarda o token, que é a chave do assento. */
@@ -40,7 +42,9 @@ export function loadSession(server: string, code: string, dir: string = SESSIONS
   const { server: savedServer, code: savedCode, token, playerId, nickname } = data;
   if ([savedServer, savedCode, token, playerId, nickname].some((field) => typeof field !== 'string')) return null;
   if (!sameServer(savedServer as string, server) || savedCode !== normalized) return null;
-  return { server: savedServer as string, code: normalized, token: token as string, playerId: playerId as string, nickname: nickname as string };
+  const session: SavedSession = { server: savedServer as string, code: normalized, token: token as string, playerId: playerId as string, nickname: nickname as string };
+  if (typeof data.lastSeq === 'number') session.lastSeq = data.lastSeq;
+  return session;
 }
 
 /** Esquece a sessão (sala apagada ou token recusado: o arquivo não serve mais). */

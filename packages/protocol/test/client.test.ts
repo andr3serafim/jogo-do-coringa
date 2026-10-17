@@ -160,6 +160,18 @@ describe('RoomClient: conexão', () => {
     expect(last().messages()[0]).toEqual({ t: 'hello', protocol: 1, token: TOKEN, lastSeq: 9 });
   });
 
+  it('com lastSeq nas opções e sem state ainda, o primeiro hello leva lastSeq; um state em memória vale depois', () => {
+    const { client, clock, last } = setup({ lastSeq: 9 });
+    client.connect();
+    last().serverOpen();
+    expect(last().messages()[0]).toEqual({ t: 'hello', protocol: 1, token: TOKEN, lastSeq: 9 });
+    last().serverSend(stateMsg(12));
+    last().serverClose(1006);
+    clock.advance(500);
+    last().serverOpen();
+    expect(last().messages()[0]).toEqual({ t: 'hello', protocol: 1, token: TOKEN, lastSeq: 12 });
+  });
+
   it('https vira wss, tolera barra final e escapa o código', () => {
     const { client, last } = setup({ server: 'https://coringa.example.dev/', code: 'A B' });
     client.connect();

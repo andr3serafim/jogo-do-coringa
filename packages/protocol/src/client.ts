@@ -68,6 +68,8 @@ export interface RoomClientOptions {
   server: string;
   code: string;
   token: string;
+  /** Último `seq` aplicado por uma instância anterior (ex.: processo ou página que fechou); o primeiro `hello` o leva, e um `state` em memória passa a valer no lugar. */
+  lastSeq?: number;
   WebSocketImpl?: typeof WebSocket;
   random?: () => number;
   setTimer?: (fn: () => void, ms: number) => unknown;
@@ -219,7 +221,8 @@ export class RoomClient implements RoomConnection {
       if (this.#ws !== ws) return;
       this.#attempt = 0;
       const hello: Extract<ClientMessage, { t: 'hello' }> = { t: 'hello', protocol: PROTOCOL_VERSION, token: this.#options.token };
-      if (this.#state) hello.lastSeq = this.#state.seq;
+      const lastSeq = this.#state?.seq ?? this.#options.lastSeq;
+      if (lastSeq !== undefined) hello.lastSeq = lastSeq;
       this.#send(hello);
       this.#schedulePing();
       this.#emit({ type: 'open' });
