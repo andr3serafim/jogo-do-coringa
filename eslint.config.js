@@ -31,4 +31,16 @@ export default defineConfig(
       ],
     },
   },
+  {
+    // Esses arquivos vão para o navegador (via `exports` do @coringa/sim): nada de node:*.
+    files: ['packages/sim/src/bots/**/*.ts', 'packages/sim/src/rng.ts', 'packages/sim/src/play/text.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [{ group: ['node:*'], message: 'Este arquivo roda no navegador (exports do @coringa/sim): nada de node:*.' }],
+        },
+      ],
+    },
+  },
 );
