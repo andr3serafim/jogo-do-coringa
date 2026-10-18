@@ -32,6 +32,8 @@ class FakeConnection implements RoomConnection {
   state: StateMessage | null = null;
   now = 1_000_000;
   readonly acts: PlayerAction[] = [];
+  /** Se cada `act` levou a marca `auto`. */
+  readonly autos: boolean[] = [];
   readonly readies: boolean[] = [];
   readonly rematches: boolean[] = [];
   closes = 0;
@@ -59,7 +61,10 @@ class FakeConnection implements RoomConnection {
   close(): void {
     this.closes += 1;
   }
-  act(action: PlayerAction): Promise<AckMessage> {
+  connect(): void {}
+  wake(): void {}
+  act(action: PlayerAction, options?: { auto?: boolean }): Promise<AckMessage> {
+    this.autos.push(options?.auto === true);
     this.acts.push(action);
     return Promise.resolve(this.acks.shift() ?? { t: 'ack', id: `a${this.acts.length}`, ok: true });
   }

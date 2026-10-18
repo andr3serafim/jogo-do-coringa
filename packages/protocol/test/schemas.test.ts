@@ -27,6 +27,15 @@ describe('esquemas do cliente', () => {
       expect(parseClientMessage(JSON.stringify({ t: 'act', id: 'x1', epoch: 3, action }))).toBeNull();
   });
 
+  it('act aceita auto: true; recusa auto: false e auto: 1; sem auto continua aceito', () => {
+    const act = (extra: Record<string, unknown>) =>
+      parseClientMessage(JSON.stringify({ t: 'act', id: 'x1', epoch: 3, action: { type: 'PASS' }, ...extra }));
+    expect(act({ auto: true })).toMatchObject({ t: 'act', auto: true });
+    expect(act({ auto: false })).toBeNull();
+    expect(act({ auto: 1 })).toBeNull();
+    expect(act({})).not.toBeNull();
+  });
+
   it('recusa campo extra, tamanhos acima do limite e JSON quebrado', () => {
     const bad = [
       '{',

@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  ACK_TIMEOUT_MS,
   HttpError,
   PING_INTERVAL_MS,
+  PONG_TIMEOUT_MS,
   RoomClient,
   SLOW_RETRY_MS,
   createRoom,
@@ -19,6 +21,7 @@ interface Sent {
   id: string;
   epoch: number;
   lastSeq?: number;
+  auto?: true;
 }
 
 /** WebSocket falso: registra o que o cliente envia e deixa o teste agir como servidor. */
@@ -368,6 +371,145 @@ describe('RoomClient: act e concede', () => {
     await expect(client.act({ type: 'PASS' })).resolves.toMatchObject({ ok: false, code: 'DISCONNECTED' });
     await expect(client.concede()).resolves.toMatchObject({ ok: false, code: 'DISCONNECTED' });
     expect(FakeWebSocket.instances).toHaveLength(0);
+  });
+});
+
+describe('RoomClient: marca auto', () => {
+  it('act com { auto: true } manda "auto":true; act sem opções e com auto: false não mandam a chave', () => {
+    const { client, last } = connected();
+    void client.act({ type: 'PASS' }, { auto: true });
+    void client.act({ type: 'PASS' });
+    void client.act({ type: 'PASS' }, { auto: false });
+    const [, auto, plain, off] = last().sent;
+    expect(auto).toContain('"auto":true');
+    expect(plain).not.toContain('auto');
+    expect(off).not.toContain('auto');
+  });
+});
+
+describe('RoomClient: wake e socket morto', () => {
+  const pings = (ws: FakeWebSocket): number => ws.sent.filter((s) => s === 'ping').length;
+
+  it('wake com reconexão agendada abre o socket na hora, sem esperar o atraso', () => {
+    const { client, clock, last } = setup();
+    client.connect();
+    last().serverClose(1006);
+    expect(FakeWebSocket.instances).toHaveLength(1);
+    client.wake();
+    expect(FakeWebSocket.instances).toHaveLength(2);
+    // o atraso cancelado não abre um terceiro socket
+    clock.advance(100_000);
+    expect(FakeWebSocket.instances).toHaveLength(2);
+  });
+
+  it('wake sem conexão nenhuma ou com o socket ainda abrindo não faz nada', () => {
+    const { client, clock } = setup();
+    client.wake();
+    expect(FakeWebSocket.instances).toHaveLength(0);
+    client.connect();
+    client.wake();
+    clock.advance(PONG_TIMEOUT_MS * 2);
+    expect(FakeWebSocket.instances).toHaveLength(1);
+  });
+
+  it('wake depois de fechar de vez não faz nada', () => {
+    const { client, clock } = connected();
+    client.close();
+    client.wake();
+    clock.advance(PONG_TIMEOUT_MS * 2);
+    expect(FakeWebSocket.instances).toHaveLength(1);
+  });
+
+  it('wake com socket aberto manda ping; sem pong em 2000 ms solta o socket e abre outro na hora', async () => {
+    const { client, clock, events, last } = connected();
+    const dead = last();
+    const pending = client.act({ type: 'PASS' });
+    client.wake();
+    expect(pings(dead)).toBe(1);
+    clock.advance(PONG_TIMEOUT_MS - 1);
+    expect(FakeWebSocket.instances).toHaveLength(1);
+    clock.advance(1);
+
+    expect(events.at(-1)).toEqual({ type: 'closed', code: 1006, final: false });
+    expect(dead.closedWith).toBe(1000);
+    expect(FakeWebSocket.instances).toHaveLength(2);
+    await expect(pending).resolves.toMatchObject({ ok: false, code: 'DISCONNECTED' });
+    // o socket velho já não conta: um fechamento tardio dele não agenda reconexão
+    dead.serverClose(1000);
+    clock.advance(100_000);
+    expect(FakeWebSocket.instances).toHaveLength(2);
+    // o novo diz hello normalmente
+    last().serverOpen();
+    expect(last().messages()[0]).toMatchObject({ t: 'hello' });
+  });
+
+  it('com pong em 1500 ms nada acontece', () => {
+    const { client, clock, events, last } = connected();
+    client.wake();
+    clock.advance(1500);
+    last().serverSend('pong');
+    clock.advance(10_000);
+    expect(FakeWebSocket.instances).toHaveLength(1);
+    expect(events.map((e) => e.type)).toEqual(['open']);
+  });
+
+  it('wake repetido não estende o prazo do pong', () => {
+    const { client, clock } = connected();
+    client.wake();
+    clock.advance(1500);
+    client.wake();
+    clock.advance(PONG_TIMEOUT_MS - 1500);
+    expect(FakeWebSocket.instances).toHaveLength(2);
+  });
+
+  it('um listener que fecha de vez no aviso do socket morto impede o novo socket', () => {
+    const { client, clock } = connected();
+    client.subscribe((e) => {
+      if (e.type === 'closed') client.close();
+    });
+    client.wake();
+    clock.advance(PONG_TIMEOUT_MS);
+    expect(FakeWebSocket.instances).toHaveLength(1);
+  });
+
+  it('act sem ack em 5000 ms resolve DISCONNECTED e reconecta na hora', async () => {
+    const { client, clock, events, last } = connected();
+    const dead = last();
+    const pending = client.act({ type: 'PASS' });
+    clock.advance(ACK_TIMEOUT_MS - 1);
+    expect(FakeWebSocket.instances).toHaveLength(1);
+    clock.advance(1);
+    await expect(pending).resolves.toMatchObject({ ok: false, code: 'DISCONNECTED' });
+    expect(events.at(-1)).toEqual({ type: 'closed', code: 1006, final: false });
+    expect(dead.closedWith).toBe(1000);
+    expect(FakeWebSocket.instances).toHaveLength(2);
+  });
+
+  it('concede sem ack em 5000 ms também reconecta', async () => {
+    const { client, clock } = connected();
+    const pending = client.concede();
+    clock.advance(ACK_TIMEOUT_MS);
+    await expect(pending).resolves.toMatchObject({ ok: false, code: 'DISCONNECTED' });
+    expect(FakeWebSocket.instances).toHaveLength(2);
+  });
+
+  it('o ack no prazo desarma o timer: nada de reconexão', async () => {
+    const { client, clock, last } = connected();
+    const pending = client.act({ type: 'PASS' });
+    last().serverSend({ t: 'ack', id: last().messages()[1].id, ok: true });
+    await expect(pending).resolves.toMatchObject({ ok: true });
+    clock.advance(ACK_TIMEOUT_MS * 2);
+    expect(FakeWebSocket.instances).toHaveLength(1);
+  });
+
+  it('a queda comum limpa o prazo do ack e do pong (nenhum timer sobra além da reconexão)', () => {
+    const { client, clock, last } = connected();
+    void client.act({ type: 'PASS' });
+    client.wake();
+    last().serverClose(1006);
+    expect(clock.pending()).toBe(1); // só a espera da reconexão
+    client.close();
+    expect(clock.pending()).toBe(0);
   });
 });
 

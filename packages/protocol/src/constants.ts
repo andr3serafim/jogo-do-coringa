@@ -37,6 +37,12 @@ export const SLOW_RETRY_CODES: readonly number[] = [1008, 4029];
 /** Intervalo do texto literal `ping` enviado pelo cliente. */
 export const PING_INTERVAL_MS = 15_000;
 
+/** Prazo do `pong` depois de um `ping` de `wake()`: sem ele, o socket é dado como morto (spec web §6.2). */
+export const PONG_TIMEOUT_MS = 2_000;
+
+/** Prazo do `ack` de um `act`/`concede`: sem ele, o socket é dado como morto (spec web §6.2). */
+export const ACK_TIMEOUT_MS = 5_000;
+
 /** Espera entre tentativas de reconexão; a última se repete. */
 export const RECONNECT_DELAYS_MS = [500, 1000, 2000, 4000, 5000] as const;
 

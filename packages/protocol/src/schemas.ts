@@ -33,7 +33,7 @@ export const ClientMessageSchema = z.discriminatedUnion('t', [
   z.strictObject({ t: z.literal('hello'), protocol: counter, token, lastSeq: counter.optional() }),
   z.strictObject({ t: z.literal('ready'), ready: z.boolean() }),
   z.strictObject({ t: z.literal('leave') }),
-  z.strictObject({ t: z.literal('act'), id: messageId, epoch: counter, action: PlayerActionSchema }),
+  z.strictObject({ t: z.literal('act'), id: messageId, epoch: counter, action: PlayerActionSchema, auto: z.literal(true).optional() }),
   z.strictObject({ t: z.literal('concede'), id: messageId }),
   z.strictObject({ t: z.literal('rematch'), want: z.boolean() }),
 ]);

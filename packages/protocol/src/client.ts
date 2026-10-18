@@ -8,8 +8,10 @@
  */
 import type { PlayerId } from '@coringa/engine';
 import {
+  ACK_TIMEOUT_MS,
   FINAL_CLOSE_CODES,
   PING_INTERVAL_MS,
+  PONG_TIMEOUT_MS,
   PROTOCOL_VERSION,
   RECONNECT_DELAYS_MS,
   RECONNECT_JITTER,
@@ -46,7 +48,15 @@ export interface RoomConnection {
   leave(): void;
   rematch(want: boolean): void;
   close(): void;
-  act(action: PlayerAction): Promise<AckMessage>;
+  /** Abre o socket. Sem efeito se já houver um aberto ou uma reconexão agendada. */
+  connect(): void;
+  /**
+   * A aba voltou ao primeiro plano. Reconexão agendada: abre já. Socket aberto: manda `ping` e, sem
+   * `pong` em `PONG_TIMEOUT_MS`, dá o socket por morto e reconecta. Fechado de vez: nada.
+   */
+  wake(): void;
+  /** `options.auto` marca a jogada como automática (passe ou ordem confirmados sem o jogador). */
+  act(action: PlayerAction, options?: { auto?: boolean }): Promise<AckMessage>;
   concede(): Promise<AckMessage>;
   /** Tempo que falta para o prazo, pelo relógio do servidor (nunca negativo). */
   remainingMs(deadline: Deadline): number;
@@ -96,11 +106,13 @@ export class RoomClient implements RoomConnection {
   readonly #now: () => number;
   readonly #idPrefix: string;
   readonly #listeners = new Set<(e: ConnectionEvent) => void>();
-  readonly #pending = new Map<string, (ack: AckMessage) => void>();
+  /** Cada pendência leva o timer do prazo do `ack`. */
+  readonly #pending = new Map<string, { resolve: (ack: AckMessage) => void; timer: unknown }>();
 
   #ws: EventSocket | null = null;
   #pingTimer: unknown = null;
   #reconnectTimer: unknown = null;
+  #pongTimer: unknown = null;
   #attempt = 0;
   /** Quantas vezes `close()` foi chamado: um listener de `closed` pode fechar de vez no meio do aviso de queda. */
   #manualCloses = 0;
@@ -164,15 +176,38 @@ export class RoomClient implements RoomConnection {
     const waiting = this.#reconnectTimer !== null;
     this.#clearReconnect();
     this.#stopPing();
+    this.#clearPong();
     this.#ws = null;
     this.#failPending();
     ws?.close(1000);
     if (ws || waiting) this.#emit({ type: 'closed', code: 1000, final: true });
   }
 
-  act(action: PlayerAction): Promise<AckMessage> {
+  wake(): void {
+    if (this.#reconnectTimer !== null) {
+      this.#clearReconnect();
+      this.#openSocket();
+      return;
+    }
+    const ws = this.#ws;
+    // Ainda abrindo (ou fechando): não há o que sondar.
+    if (!ws || ws.readyState !== WS_OPEN) return;
+    ws.send('ping');
+    // Um prazo já armado vale: um `wake()` repetido não o estende.
+    if (this.#pongTimer !== null) return;
+    this.#pongTimer = this.#setTimer(() => {
+      this.#pongTimer = null;
+      this.#dropDeadSocket();
+    }, PONG_TIMEOUT_MS);
+  }
+
+  act(action: PlayerAction, options?: { auto?: boolean }): Promise<AckMessage> {
     const epoch = this.#state?.epoch ?? 0;
-    return this.#request((id) => ({ t: 'act', id, epoch, action }));
+    return this.#request((id) => {
+      const msg: Extract<ClientMessage, { t: 'act' }> = { t: 'act', id, epoch, action };
+      if (options?.auto) msg.auto = true;
+      return msg;
+    });
   }
 
   concede(): Promise<AckMessage> {
@@ -204,18 +239,45 @@ export class RoomClient implements RoomConnection {
   #request(build: (id: string) => ClientMessage): Promise<AckMessage> {
     const id = `${this.#idPrefix}-${++this.#idCounter}`;
     return new Promise((resolve) => {
-      this.#pending.set(id, resolve);
       if (!this.#send(build(id))) {
-        this.#pending.delete(id);
         resolve(disconnectedAck(id));
+        return;
       }
+      // Sem `ack` no prazo, o socket está "aberto" mas morto (iPhone em segundo plano): troca por outro.
+      const timer = this.#setTimer(() => this.#dropDeadSocket(), ACK_TIMEOUT_MS);
+      this.#pending.set(id, { resolve, timer });
     });
   }
 
   #failPending(): void {
     const pending = [...this.#pending];
     this.#pending.clear();
-    for (const [id, resolve] of pending) resolve(disconnectedAck(id));
+    for (const [id, { resolve, timer }] of pending) {
+      this.#clearTimer(timer);
+      resolve(disconnectedAck(id));
+    }
+  }
+
+  /**
+   * Solta o socket que parou de responder sem passar por `#onClose` (o 1000 que o `close()` manda
+   * seria lido como fechamento final): desliga os handlers, fecha, avisa a queda (1006, não final),
+   * resolve as pendências e abre outro na hora, sem espera nem contagem de tentativas.
+   */
+  #dropDeadSocket(): void {
+    const ws = this.#ws;
+    if (!ws) return;
+    ws.onopen = null;
+    ws.onmessage = null;
+    ws.onclose = null;
+    this.#ws = null;
+    this.#stopPing();
+    this.#clearPong();
+    this.#failPending();
+    ws.close(1000);
+    const closes = this.#manualCloses;
+    this.#emit({ type: 'closed', code: 1006, final: false });
+    // Um listener que chamou `close()` durante o aviso fechou de vez: não reconecta.
+    if (closes === this.#manualCloses) this.#openSocket();
   }
 
   #wsUrl(): string {
@@ -247,7 +309,11 @@ export class RoomClient implements RoomConnection {
   }
 
   #onMessage(data: unknown): void {
-    if (typeof data !== 'string' || data === 'pong') return;
+    if (data === 'pong') {
+      this.#clearPong();
+      return;
+    }
+    if (typeof data !== 'string') return;
     let msg: ServerMessage;
     try {
       msg = JSON.parse(data) as ServerMessage;
@@ -274,10 +340,11 @@ export class RoomClient implements RoomConnection {
         this.#emit({ type: 'state', state: msg });
         break;
       case 'ack': {
-        const resolve = this.#pending.get(msg.id);
-        if (!resolve) return;
+        const entry = this.#pending.get(msg.id);
+        if (!entry) return;
         this.#pending.delete(msg.id);
-        resolve(msg);
+        this.#clearTimer(entry.timer);
+        entry.resolve(msg);
         break;
       }
       case 'error':
@@ -293,6 +360,7 @@ export class RoomClient implements RoomConnection {
   #onClose(code: number): void {
     this.#ws = null;
     this.#stopPing();
+    this.#clearPong();
     this.#failPending();
     const final = FINAL_CLOSE_CODES.includes(code);
     const closes = this.#manualCloses;
@@ -328,6 +396,12 @@ export class RoomClient implements RoomConnection {
       if (ws && ws.readyState === WS_OPEN) ws.send('ping');
       this.#schedulePing();
     }, PING_INTERVAL_MS);
+  }
+
+  #clearPong(): void {
+    if (this.#pongTimer === null) return;
+    this.#clearTimer(this.#pongTimer);
+    this.#pongTimer = null;
   }
 
   #stopPing(): void {

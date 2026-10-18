@@ -45,7 +45,7 @@ export type ClientMessage =
   | { t: 'hello'; protocol: number; token: string; lastSeq?: number }
   | { t: 'ready'; ready: boolean }
   | { t: 'leave' }
-  | { t: 'act'; id: string; epoch: number; action: PlayerAction }
+  | { t: 'act'; id: string; epoch: number; action: PlayerAction; auto?: true }
   | { t: 'concede'; id: string }
   | { t: 'rematch'; want: boolean };
 
