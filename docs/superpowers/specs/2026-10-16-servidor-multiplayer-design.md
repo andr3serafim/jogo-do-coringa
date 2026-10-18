@@ -1,7 +1,7 @@
 # Jogo do Coringa — Servidor multiplayer (Sub-projeto 2)
 
 - **Data:** 2026-10-16
-- **Status:** **aprovada** pelo autor em 2026-10-16 (inclusive as mudanças pós-lote: abandono com os dois fora, 50 passos na reconexão, `pnpm deploy:server`)
+- **Status:** **aprovada** pelo autor em 2026-10-16 (inclusive as mudanças pós-lote: abandono com os dois fora, 50 passos na reconexão, `pnpm deploy:server`). Atualizada em 2026-10-17 pela spec 3 (interface web): marca `auto` no `act` (§4.3, §7.3).
 - **Depende de:** spec do sub-projeto 1, `docs/superpowers/specs/2026-10-15-jogo-coringa-regras-motor-design.md` (§1.7 janela de reação, §1.11 W.O., §1.12 tempos, §2 API do motor)
 
 ---
@@ -179,7 +179,7 @@ Todas as rotas ficam sob `/api`. Corpo JSON de até 1 KiB. As rotas que não sã
 | `hello` | `protocol`, `token`, `lastSeq?` | primeira mensagem | autentica; responde `welcome`, `room` e, se houver partida, `state` (§4.7) |
 | `ready` | `ready: boolean` | LOBBY | marca ou desmarca o pronto |
 | `leave` | — | LOBBY | libera o assento e fecha o socket |
-| `act` | `id`, `epoch`, `action` | PLAYING | intenção de jogada (§4.6) |
+| `act` | `id`, `epoch`, `action`, `auto?` | PLAYING | intenção de jogada (§4.6). `auto: true` marca a jogada que a interface fez sozinha (spec 3 §5), que não zera os estouros (§7.3) |
 | `concede` | `id` | PLAYING | desistência: o servidor injeta `FORFEIT { loser: quem pediu }` [A] |
 | `rematch` | `want: boolean` | FINISHED | pede ou retira o pedido de revanche |
 
@@ -371,6 +371,7 @@ O `deadline.at` enviado é o que a interface mostra; o servidor só injeta o `TI
 - **Soma 1:** estouro do Equipar com o jogador ainda sem confirmar (e com numéricas pendentes); estouro do Turno de ataque do jogador.
 - **Não conta:** estouro da Escolha da ordem (a interface vem com "atacar primeiro" pré-selecionado e deixar o tempo acabar é normal, spec 1 §3) e estouro da janela de reação.
 - **Zera:** qualquer jogada voluntária aceita daquele jogador, em qualquer fase (inclusive PASS).
+- **Não zera** (acrescentado em 2026-10-17 pela spec 3 §5): jogada com `auto: true`, como o passe automático da janela de reação e a confirmação automática da Escolha da ordem. Vale também para o PASS guardado (§6.3): o registro guarda a marca, e o PASS aplicado pelo alarme `reactionMin` só zera a contagem se não era `auto`.
 - Chegou a 3 → `FORFEIT { loser }`, `cause: 'AFK'`, como passo automático (com o outro fora, abandono, §7.2).
 - Com o relógio correndo durante a queda, uma queda de 60 s no próprio turno costuma somar 1 ou 2 estouros antes do W.O. por reconexão; vale o que chegar primeiro.
 

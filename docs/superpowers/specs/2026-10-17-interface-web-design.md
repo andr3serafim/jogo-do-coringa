@@ -1,7 +1,7 @@
 # Jogo do Coringa — Interface web (Sub-projeto 3)
 
 - **Data:** 2026-10-17
-- **Status:** rascunho, aguardando a revisão do autor (a direção visual, §10, está em aberto)
+- **Status:** **aprovada** pelo autor em 2026-10-17. A aprovação veio pela sessão principal, com permissão dele, e inclui a direção visual A e os acréscimos de §10.
 - **Depende de:**
   - spec do sub-projeto 1, `docs/superpowers/specs/2026-10-15-jogo-coringa-regras-motor-design.md` (regras, API do motor, eventos);
   - spec do sub-projeto 2, `docs/superpowers/specs/2026-10-16-servidor-multiplayer-design.md` (protocolo, tempos, presença, W.O., deploy).
@@ -23,7 +23,8 @@ Fechar o MVP: dois amigos jogam uma partida online pelo navegador, entrando por 
 
 - **[D]** decidido antes desta spec (specs 1 e 2 ou sessão de origem); não se rediscute.
 - **[A]** decidido pelo autor em 2026-10-17, no lote de 11 perguntas desta spec (aprovou todas as recomendações).
-- **[P]** proposta desta spec; o autor confere na revisão.
+- **[P]** proposta desta spec; aprovada junto com ela.
+- **[OBRIGATÓRIO]** acréscimo exigido na aprovação (§10.4, §10.6, §10.7).
 
 ### 0.3 Já decidido [D]
 
@@ -36,7 +37,7 @@ Fechar o MVP: dois amigos jogam uma partida online pelo navegador, entrando por 
 
 ### 0.4 Decidido pelo autor [A]
 
-1. **Direção visual:** eu monto rascunhos e o autor reage. Estado atual em §10.
+1. **Direção visual:** entre três rascunhos, o autor escolheu "A Peleja do Coringa" (xilogravura de cordel), com as fileiras de Ataque frente a frente no centro e o "fica aceso até você ver" trazido de outra direção (§10).
 2. **Aparelho principal:** celular em pé (retrato), com o PC adaptado a partir dele. No celular deitado a mesa funciona, mas sem layout próprio.
 3. **Jogar uma carta:** toca na carta, aparecem as jogadas possíveis, toca no alvo. O mesmo gesto vale no celular e no PC, e tudo funciona pelo teclado. Arrastar fica para o polimento.
 4. **Jogadas automáticas levam a marca `auto`.** O servidor não zera a contagem de estouros por elas (§5). Com essa marca:
@@ -384,7 +385,7 @@ A mesa está em §3 e §4. O menu da partida tem:
 - **Reduzir movimento** (do sistema ou do menu):
   - sem deslocamento: troca direta ou esmaecimento;
   - as faixas especiais viram texto parado por ~1 s;
-  - sem tremida e sem flash. Nada pisca mais de 3 vezes por segundo, em modo nenhum.
+  - sem tremida e sem flash: a inversão das cenas vira esmaecimento (§10.4). Em modo nenhum há mais de 3 transições claro ↔ escuro por segundo.
 
 ### 4.2 Evento → efeito
 
@@ -585,6 +586,7 @@ Uma exceção no React mostra "Algo deu errado", com os botões **Recarregar** e
   - token e `lastSeq` por sala;
   - sem `localStorage`;
   - o token nunca aparece no diagnóstico.
+- **Cenas e marcas:** os limites de fotossensibilidade (§10.4) e a marca "novo" (§10.5).
 - **`LocalRoom`:**
   - uma partida inteira contra o bot termina;
   - mesma semente → mesma partida.
@@ -632,42 +634,92 @@ O sorteio da partida online não é controlável (a semente nunca sai do servido
 
 ---
 
-## 10. Direção visual [A, em aberto]
+## 10. Direção visual [A]
 
-### 10.1 Rascunhos
+### 10.1 A escolha: "A Peleja do Coringa" (xilogravura de cordel) [A]
 
-Três direções, cada uma desenhada no celular e no PC, sobre o **mesmo momento de jogo**: rodada 7, sua vez, a Armadilha selecionada, os alvos de Duda marcados e a prévia "152 × 42, o K absorve, dano 0". Estão no artifact "Jogo do Coringa — rascunhos da mesa": https://claude.ai/artifact/ERTQYecLGcKhTtLArAbBSg.
+O autor escolheu a direção A entre os três rascunhos (celular e PC) do artifact "Jogo do Coringa — rascunhos da mesa" (https://claude.ai/artifact/ERTQYecLGcKhTtLArAbBSg). As outras duas eram "Fliperama" (placar de jogo de luta) e "Painel de embarque" (cartão e quadro de voos). Os rascunhos servem de referência de composição e de acabamento, não de pixel.
 
-- **A · A Peleja do Coringa — xilogravura de cordel.**
-  - **A ideia:** o duelo 1v1 como a peleja de dois cantadores de cordel.
-  - **Materiais:** papel de capa de folheto, uma cor por jogador (verde para o oponente, rosa para você), tinta preta de xilogravura e um vermelho de segunda cor. Os números em tipo de madeira, com borda irregular de carimbo.
-  - **Composição:** a faixa central preta concentra o que é dos dois (rodada, relógio, pressão, monte, cemitério).
-  - **Detalhes:** a vida perdida aparece hachurada, e as cartas que vão para o cemitério perdem a cor.
-  - **Cenas especiais:** inversão do quadro inteiro, como um negativo da gravura.
-- **B · Fliperama — placar de jogo de luta.**
-  - **A ideia:** o duelo como um jogo de luta de fliperama dos anos 90. Duas barras de vida amarelas se encontram no relógio do centro, e os K da Guarda viram as "bolinhas" de especial.
-  - **Cores e botões:** palco azul com linhas de tela de tubo, cor de P1 e P2 (ciano e magenta), "SUA VEZ!" com contorno, e o botão de atacar redondo, como o do painel do fliperama.
-  - **Risco:** é o visual mais familiar dos três.
-- **C · Painel de embarque — cartão e quadro de voos.**
-  - **A ideia:** cada jogador é um cartão de embarque picotado (vida, Guarda, buffs, mão), e as fileiras são linhas de um quadro de letras que viram.
-  - **A cor única:** um âmbar reservado para o que mudou desde a sua última jogada e para os alvos. Fica aceso até você ver.
-  - **No PC:** o histórico vira o quadro de avisos, com rodada e status ("novo" ou "visto").
-  - **Força:** é o mais legível.
-  - **Risco:** é o menos "jogo de cartas".
+- **A ideia:** o duelo 1v1 como a peleja de dois cantadores de cordel. Dá identidade brasileira ao jogo e combina com o duelo.
+- **Materiais:**
+  - papel de capa de folheto, uma cor por jogador (verde para o oponente, rosa para você), cobrindo a metade da mesa de cada um;
+  - tinta preta de xilogravura;
+  - um vermelho de segunda cor, como na impressão a duas cores.
+- **Composição:**
+  - a faixa central preta concentra o que é dos dois: rodada, de quem é a vez, relógio, pressão, iniciativa, monte e cemitério;
+  - as duas fileiras de Ataque ficam frente a frente junto da faixa [A]. É ali que o "fileira contra fileira" fica legível, e a prévia do dano mora na faixa ou na barra de ação.
+- **Cartas:** face em papel, borda preta grossa e irregular de carimbo, valor em tipo de madeira e naipe em SVG próprio.
+- **Detalhes:**
+  - a vida perdida aparece hachurada na barra;
+  - as cartas que vão para o cemitério perdem a cor (escala de cinza);
+  - os alvos e a carta selecionada ganham o contorno ouro.
+- **Cenas especiais** (Exódia, Absolutos, Reflect): a tela inteira se inverte, como o negativo da gravura, dentro dos limites de §10.4.
 
-A saída clássica continua disponível se o autor preferir: feltro verde com cartas realistas.
-
-### 10.2 Regras que valem para qualquer direção [P]
+### 10.2 Regras que valem para a direção [P]
 
 - **Fontes:** servidas pelo próprio Worker (sem Google Fonts em tempo de execução), com subconjunto latino.
 - **Tokens:** cores, tipos e espaços em tokens do Tailwind 4 (`@theme`), com uma única fonte de verdade.
-- **Os dois jogadores** se distinguem por posição e rótulo, não só por cor.
-- **Naipes e o Coringa:** SVG próprio, nunca emoji nem glifo como ícone. O ♥ ♦ ♠ ♣ no texto corrido do histórico é notação, não ícone.
-- **Navegador:** seleção de texto, foco, barra de rolagem e números tabulares tematizados pela direção escolhida.
+- **Os dois jogadores** se distinguem por posição (você sempre embaixo) e por rótulo (apelido, "você"), nunca só pela cor (§10.6).
+- **Naipes, o Coringa e as ilustrações:** SVG próprio, nunca emoji nem glifo como ícone. O ♥ ♦ ♠ ♣ no texto corrido do histórico é notação, não ícone.
+- **Navegador:** seleção de texto, cursor, foco, barra de rolagem e sublinhado tematizados pela paleta.
 
-### 10.3 Escolha do autor
+### 10.3 Paleta e tipos [P]
 
-*Pendente.* Depois da escolha, esta seção recebe a direção, a paleta e as fontes finais, e os tokens viram parte do plano.
+| Token | Cor | Uso |
+|---|---|---|
+| `tinta` | `#17120F` | traço, texto principal, faixa central, barra de ação |
+| `papel` | `#F1F0EA` | face das cartas, texto claro sobre a tinta |
+| `capa-oponente` | `#6FA86C` | metade da mesa do oponente |
+| `capa-voce` | `#EE9DB5` | a sua metade da mesa |
+| `vermelho` | `#B8261C` | naipes vermelhos, marca "novo" (§10.5), urgência do relógio |
+| `ouro` | `#F5C238` | seleção, alvos, botão principal, anel do relógio |
+
+- O verde ficou mais escuro que o do rascunho (`#86BC84` → `#6FA86C`) para abrir diferença de luminosidade em relação ao rosa (≈ 0,33 contra ≈ 0,46). Assim, as duas metades não se confundem para quem não distingue verde de rosa.
+- **Contrastes conferidos:**
+  - tinta sobre as duas capas: ≥ 6,5:1;
+  - vermelho sobre o papel: ≈ 5,5:1;
+  - ouro e papel sobre a tinta: ≥ 11:1.
+- O vermelho sobre a capa do oponente não chega a 3:1. Por isso a marca "novo" e outros sinais vermelhos ficam sobre o papel ou com contorno de tinta.
+- **Urgência do relógio** (últimos 5 s): o disco fica vermelho com o número em papel (≈ 5,5:1), e o anel engrossa. A mudança vem por cor **e** forma, sem piscar.
+- **Tipos:**
+  - **Tipo de madeira:** Alfa Slab One (SIL OFL). Vai nos títulos ("RODADA 7"), nos botões ("ATACAR") e no valor das cartas. A textura de carimbo só entra nos títulos e nas cenas especiais, nunca no valor das cartas pequenas.
+  - **Texto e números de jogo:** Archivo (SIL OFL, variável, com eixo de largura para as versões estreitas). Os números de jogo usam algarismos tabulares (`font-variant-numeric: tabular-nums`). Se o arquivo servido não tiver `tnum`, o plano troca por outra fonte OFL que tenha, conferindo antes.
+
+### 10.4 Fotossensibilidade [OBRIGATÓRIO]
+
+A inversão da tela inteira é um flash. Regras:
+
+- no máximo **1 inversão por cena**, mantida por pelo menos **~300 ms**;
+- nunca mais de **3 transições claro ↔ escuro por segundo**, somando tudo o que estiver na tela (WCAG 2.3.1);
+- com "reduzir movimento" (do sistema ou do menu), a inversão vira um esmaecimento curto, sem troca brusca de luminância;
+- **testes:**
+  - na linha do tempo (puro), toda cena tem no máximo 1 inversão, com duração ≥ 300 ms, e nenhuma janela de 1 s tem mais de 3 trocas;
+  - com movimento reduzido, nenhuma cena gera inversão;
+  - um teste de componente confere que, com movimento reduzido, a cena não aplica a inversão.
+
+### 10.5 "Fica aceso até você ver", na linguagem da Peleja [A]
+
+Ideia trazida da direção C, e só ela; nada mais de B ou C entra.
+
+- **O que marca:** tudo o que mudou na mesa desde a sua última jogada voluntária. Entram as cartas novas nas fileiras do oponente, os buffs e K que ele jogou, as cartas suas que ele destruiu (na entrada do cemitério), a vida perdida, a pressão que subiu e as linhas do histórico.
+- **Como marca:** um carimbo ou sublinhado de goiva no vermelho de segunda cor, sobre a face da carta (papel) ou com contorno de tinta, para ter ≥ 3:1.
+- **Quando apaga:** na sua próxima jogada voluntária (as automáticas não contam), ou quando você toca, foca ou passa o mouse sobre o elemento marcado.
+- **Por quê:** você olha o celular entre um turno e outro, e precisa achar na hora o que o outro fez.
+- **Leitor de tela:** o nome acessível do elemento ganha ", novo".
+- **Testes:** o model calcula o conjunto marcado a partir da `view` da sua última jogada e da atual. Cobre marcar, apagar na jogada voluntária, não apagar na automática e apagar no toque ou foco.
+
+### 10.6 Arte original e licenças [OBRIGATÓRIO]
+
+- **A xilogravura é arte popular viva,** e muitas obras têm autor e direitos (a de J. Borges, por exemplo). Todas as ilustrações (o Coringa, os naipes, as cenas) e texturas do jogo são **originais**, feitas para o projeto. Nada é copiado, decalcado ou traçado por cima de obra existente.
+- **Texturas** (grão do papel, borda de carimbo) são geradas por código (SVG `feTurbulence`) ou desenhadas para o projeto.
+- **Fontes:** só com licença que permita embutir e servir (SIL OFL ou equivalente). O arquivo da licença fica ao lado da fonte no repositório, e um `LICENSES.md` da web lista fonte, versão e licença.
+
+### 10.7 Legibilidade dentro da estética [OBRIGATÓRIO]
+
+- **Textura de papel e borda de carimbo nunca entram nos números de jogo:** vida, ATK e DEF, a conta das fileiras, a prévia, o relógio e o placar. Esses números usam a fonte de texto (§10.3), com algarismos tabulares e contraste AA, e cabem com folga em 360 px.
+- O grão do papel é uma camada por baixo do conteúdo, nunca por cima do texto.
+- **Daltonismo:** o verde e o rosa nunca são a única pista de quem é quem (posição e rótulo, §10.2). O plano confere as telas principais com simulação de deuteranopia, protanopia e tritanopia (por exemplo, a emulação de deficiência de visão do DevTools) e registra o resultado.
+- O axe confere o contraste nos testes de componentes e no E2E (§7).
 
 ---
 
@@ -726,7 +778,8 @@ O mesmo Worker serve a interface. No `packages/server/wrangler.jsonc`:
 - **Relógio:** o deslocamento estimado tem erro de meia ida e volta da rede. O envio do Equipar em −1,5 s, mais a margem de 500 ms do servidor, cobre isso com folga.
 - **Mesa densa em 360 px:** sete cartas por fileira, quatro fileiras, buffs e Guarda. Os rascunhos mostram que cabe. O teste de layout em 360 px entra no E2E de celular.
 - **Tempo do `pnpm check`:** cresce com a web. O pre-commit já é o rápido, e o E2E fica fora.
-- **Direção visual ainda em aberto:** os tokens e os componentes de carta dependem dela. O plano só começa depois da escolha.
+- **Estética contra legibilidade:** a textura de xilogravura pode cobrar caro no celular. As regras de §10.7 e o axe seguram isso, e os números de jogo nunca levam textura.
+- **Fotossensibilidade das cenas:** a inversão da tela é um flash. Os limites e os testes estão em §10.4.
 
 ## 14. Critérios de pronto (sub-projeto 3 e MVP)
 
