@@ -30,11 +30,11 @@ export function validateDestinations(config: RulesConfig, p: PlayerState, destin
 }
 
 /** Timeout (spec §1.12): fileira com menos cartas, empate → Defesa; as duas cheias → cemitério. */
-export function autoDestinations(config: RulesConfig, p: PlayerState): Destination[] {
-  let atk = p.attackRow.length;
-  let def = p.defenseRow.length;
+export function autoDestinations(config: Pick<RulesConfig, 'rowLimit'>, rows: { attack: number; defense: number }, count: number): Destination[] {
+  let atk = rows.attack;
+  let def = rows.defense;
   const limit = config.rowLimit;
-  return p.pending.map((): Destination => {
+  return Array.from({ length: count }, (): Destination => {
     if (atk >= limit && def >= limit) return 'DISCARD';
     if (atk >= limit) {
       def += 1;
@@ -66,7 +66,7 @@ export function handleEquip(s: GameState, playerId: PlayerId, destinations: Dest
 
 export function timeoutEquip(s: GameState, ev: GameEvent[]): void {
   for (const p of s.players) {
-    if (!p.equipSubmitted) submit(p, autoDestinations(s.config, p), ev);
+    if (!p.equipSubmitted) submit(p, autoDestinations(s.config, { attack: p.attackRow.length, defense: p.defenseRow.length }, p.pending.length), ev);
   }
   resolveEquip(s, ev);
 }

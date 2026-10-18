@@ -8,7 +8,7 @@ import { playout } from './playout.ts';
 
 describe('API para bots e interface', () => {
   it('exporta PRNG, quem age agora e o cálculo de ATK/DEF', () => {
-    for (const name of ['seedRng', 'nextFloat', 'nextInt', 'shuffle', 'actingPlayers', 'attackPower', 'defensePower', 'attackBase', 'defenseBase']) {
+    for (const name of ['seedRng', 'nextFloat', 'nextInt', 'shuffle', 'actingPlayers', 'attackPower', 'defensePower', 'attackBase', 'defenseBase', 'autoDestinations', 'quadValues']) {
       expect(typeof (engine as Record<string, unknown>)[name]).toBe('function');
     }
   });

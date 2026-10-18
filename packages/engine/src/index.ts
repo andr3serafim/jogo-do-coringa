@@ -8,3 +8,5 @@ export { legalActions } from './legal-actions.ts';
 export { actingPlayers } from './acting.ts';
 export { attackBase, attackPower, defenseBase, defensePower, type AttackSide, type DefenseSide } from './combat.ts';
 export { nextFloat, nextInt, seedRng, shuffle } from './rng.ts';
+export { autoDestinations } from './actions/equip.ts';
+export { quadValues } from './quads.ts';

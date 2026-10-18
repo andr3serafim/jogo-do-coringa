@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { autoDestinations } from '../src/actions/equip.ts';
 import type { Action, Destination } from '../src/types.ts';
 import { P1, P2, act, actErr, player, setup, steps, values, type PlayerSetup } from './helpers.ts';
 
@@ -138,4 +139,21 @@ describe('entradas inválidas (review focus 1, 2 e 5)', () => {
     expect(actErr(r.state, P2, { type: 'END_TURN' })).toBe('GAME_OVER');
     expect(actErr(r.state, 'system', { type: 'TIMEOUT' })).toBe('GAME_OVER');
   });
+});
+
+describe('autoDestinations', () => {
+  const config = { rowLimit: 7 };
+  const casos: Array<[number, number, number, Destination[]]> = [
+    [3, 5, 4, ['ATK', 'ATK', 'DEF', 'ATK']],
+    [2, 2, 1, ['DEF']],
+    [7, 3, 2, ['DEF', 'DEF']],
+    [3, 7, 1, ['ATK']],
+    [6, 7, 3, ['ATK', 'DISCARD', 'DISCARD']],
+    [7, 7, 2, ['DISCARD', 'DISCARD']],
+  ];
+  for (const [attack, defense, count, esperado] of casos) {
+    it(`{ATK ${attack}, DEF ${defense}} com ${count} carta(s) → ${esperado.join(', ')}`, () => {
+      expect(autoDestinations(config, { attack, defense }, count)).toEqual(esperado);
+    });
+  }
 });
