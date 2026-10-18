@@ -350,7 +350,7 @@ Spec §1.4.
 - [ ] **Step 2:** `pnpm --filter @coringa/sim exec vitest run test/exports.test.ts` → FAIL (o pacote não resolve os subpaths por nome).
 - [ ] **Step 3:** Ajuste o pacote e o ESLint.
   - Acrescente `"exports": { "./bots": "./src/bots/index.ts", "./rng": "./src/rng.ts", "./text": "./src/play/text.ts" }`. Ninguém importa a raiz do pacote hoje (spec §1.4).
-  - Para o sim resolver o próprio nome, acrescente `"@coringa/sim": "workspace:*"` nas `devDependencies` dele. Se o pnpm recusar a autorreferência, troque o teste para importar pelos caminhos dos `exports`.
+  - O Node resolve o próprio nome do pacote pelo `exports` (autorreferência), sem dependência nova. Se o Vitest não resolver assim, mova este teste para a web (Tarefa 6), que é quem consome os subpaths.
   - No `eslint.config.js`, acrescente um bloco que barra `node:*` (`no-restricted-imports`) em `packages/sim/src/bots/**`, `packages/sim/src/rng.ts` e `packages/sim/src/play/text.ts`.
 - [ ] **Step 4:** `pnpm lint` e `pnpm --filter @coringa/sim test` → PASS.
 - [ ] **Step 5:** Commit `feat(sim): exports bots, rng e text para o navegador`.
@@ -381,7 +381,7 @@ Spec §1.1, §1.2, §9.1, §9.3, §10.2, §10.3, §10.6, §12.
 - **`tsconfig.json`:** estende `../../tsconfig.base.json` com `jsx: "react-jsx"`, `lib: ["ES2023", "DOM", "DOM.Iterable"]` e `types: ["vite/client"]`. Inclui `src`, `test`, `e2e`, `scripts` e as configurações.
 - **`vitest.config.ts`:**
   - dois projetos: `model` (Node, `test/model/**/*.test.ts`) e `ui` (jsdom, `test/ui/**/*.test.tsx`, com `@testing-library/jest-dom`);
-  - cobertura v8 com `include: ['src/model/**/*.ts']`, `exclude: ['src/model/copy.ts']` e `thresholds: { lines: 90, branches: 90 }`.
+  - cobertura v8 com `include: ['src/model/**/*.ts']` e `exclude: ['src/model/copy.ts']`. Os `thresholds: { lines: 90, branches: 90 }` entram na Tarefa 8, junto com o primeiro arquivo de `src/model`: com a pasta vazia, a meta pode reprovar o check.
 - **`styles.css`:**
   - `@import "tailwindcss"`;
   - um `@theme` com as cores de §10.3 (`--color-tinta`, `--color-papel`, `--color-capa-oponente`, `--color-capa-voce`, `--color-vermelho`, `--color-ouro`);
@@ -498,8 +498,8 @@ Spec §6.1, §6.5.
   - preferências com campo faltando → completam com os padrões;
   - `diagnostic` com uma mensagem que contém um token (43 caracteres base64url) não devolve o token. Ele é mascarado por regex `[A-Za-z0-9_-]{43}`.
 - [ ] **Step 2:** `pnpm --filter @coringa/web exec vitest run test/model/storage.test.ts` → FAIL.
-- [ ] **Step 3:** Implemente.
-- [ ] **Step 4:** O mesmo comando → PASS.
+- [ ] **Step 3:** Implemente. Ligue no `vitest.config.ts` da web os `thresholds: { lines: 90, branches: 90 }` da cobertura de `src/model`.
+- [ ] **Step 4:** O mesmo comando e `pnpm --filter @coringa/web test:coverage` → PASS.
 - [ ] **Step 5:** Commit `feat(web): persistência local de assento, preferências e diagnóstico`.
 
 ---
@@ -574,7 +574,7 @@ Spec §1.5 (passo 2), §3.4.
   - Reflect, anular e proteger preferem cartas reais ao Selvagem: entre as combinações legais, a de menos Selvagens.
   - Os rótulos ficam em `copy.ts` (pt-BR).
 - **`test/fixtures.ts`** (usado pelas tarefas seguintes):
-  - `seededViews(seed: string, steps: number): PlayerView[]`, uma partida greedy × greedy (`@coringa/sim/bots`) com semente fixa, guardando a `view` de quem age a cada passo;
+  - `seededSteps(seed: string, steps: number): Array<{ state: GameState; view: PlayerView; events: GameEvent[]; actor: PlayerId }>`, uma partida greedy × greedy (`@coringa/sim/bots`) com semente fixa. Cada item guarda, antes da jogada, o estado e a `view` de quem age; e, depois dela, os eventos do passo redigidos para quem age (`viewEvents`);
   - `viewAt(spec)`, que monta uma `view` de cenário por `createGame` mais ações, sem acessar os helpers internos do motor;
   - `FakeConnection`, que implementa `RoomConnection` (com `emitState`, `emitRoom`, `emitClosed`, `acks` roteirizados e a lista `sent`).
 
@@ -587,7 +587,7 @@ Spec §1.5 (passo 2), §3.4.
   - Reflect com J, Q, K e W na mão usa J e Q reais;
   - Ressurreição: um item por valor no cemitério, `rows` só com fileiras de vaga;
   - Ataque vazio → `finish.type === 'END_TURN'`;
-  - **propriedade:** em `seededViews('plays-0'…'plays-9', 400)`, toda jogada gerada por `tablePlays` (cada `CardPlay.make` com cada alvo, os combos, `finish`, `pass`) é aceita pelo motor. Confira com `applyAction` sobre o estado da partida de fixture.
+  - **propriedade:** em `seededSteps('plays-0'…'plays-9', 400)`, toda jogada gerada por `tablePlays(item.view, …)` (cada `CardPlay.make` com cada alvo, os combos, `finish`, `pass`) é aceita por `applyAction(item.state, item.actor, jogada)`.
 - [ ] **Step 2:** Rode → FAIL.
 - [ ] **Step 3:** Implemente.
 - [ ] **Step 4:** Rode → PASS.
@@ -658,7 +658,7 @@ Spec §10.5.
   - pressão que mudou.
 - `base === null` → nenhuma marca. Ids e zonas em `seen` saem do resultado (zonas entram em `seen` como `zone:<nome>`).
 
-- [ ] **Step 1: Testes que falham**, com `views` de uma partida de fixture:
+- [ ] **Step 1: Testes que falham**, com as `view`s de `seededSteps` (Tarefa 10):
   - o J que o oponente jogou depois da `base` aparece marcado;
   - o seu K quebrado aparece marcado no cemitério;
   - vida do oponente menor → `opponentHp`;
@@ -715,7 +715,8 @@ Spec §4, §10.4.
   - `resync` → vazio;
   - `decisionPending` com `ReflectPlayed` → total ≤ 1000 ms e inversão mantida;
   - **propriedade de fotossensibilidade:**
-    - para 200 sequências de eventos tiradas de `seededViews` (eventos reais de partidas com semente), em todo modo, nenhuma janela de 1000 ms tem mais de 3 entradas em `luminanceSwitches`;
+    - para os `events` de cada passo de `seededSteps('luz-0'…'luz-4', 400)` (eventos reais de partidas com semente), em todo modo, nenhuma janela de 1000 ms tem mais de 3 entradas em `luminanceSwitches`;
+    - **sintético:** `[AbsoluteAttack, DamageDealt, Exodia]` numa sequência só (duas cenas seguidas) → a segunda perde a inversão, e a janela de 1 s continua com ≤ 3 trocas;
     - cada cena tem no máximo 1 inversão;
     - com `reducedMotion`, `luminanceSwitches` é sempre vazio.
 - [ ] **Step 2:** Rode → FAIL.
@@ -1005,7 +1006,7 @@ Spec §3.1, §3.2, §3.3, §7, §10.1, §10.5, §10.7.
   - axe sem violação séria.
 - [ ] **Step 2:** Rode → FAIL.
 - [ ] **Step 3:** Implemente.
-- [ ] **Step 4:** Rode → PASS. Abra `pnpm dev:web` em `/treino?semente=mesa` (depois da Tarefa 24) ou num componente de demonstração local, nas larguras 360, 390 e 1440, e confira que nada rola de lado.
+- [ ] **Step 4:** Rode → PASS. A conferência visual nas larguras 360, 390 e 1440 fica para a Tarefa 24 (com `/treino`) e para o E2E de celular (Tarefa 25).
 - [ ] **Step 5:** Commit `feat(web): mesa da Peleja desenhada a partir da view`.
 
 ---
@@ -1132,6 +1133,11 @@ Spec §4, §10.1 (cenas), §10.4.
   - sobreposições: número do dano, faixas e as cenas;
   - o efeito de cada evento segue a tabela de spec §4.2 (escudo do Reflect, fileira de Ataque acesa no ataque, K rachando, quadra acendendo, marca da iniciativa trocando de lado);
   - **cena:** inverte a tela inteira uma vez (`filter: invert(1)` no palco) pelo `holdMs` da batida. Com movimento reduzido, a cena vira texto parado com esmaecimento, sem inversão;
+  - **trava global de flash:**
+    - o limite da spec §10.4 vale para a tela, não para um `state`;
+    - o `Stage` guarda os instantes das trocas claro ↔ escuro recentes (cada inversão são 2: liga e desliga);
+    - ele descarta uma inversão que faria passar de 3 trocas em qualquer janela de 1 s, mesmo vinda de outro `state`;
+    - a cena segue sem a inversão;
   - **pular:** um toque na mesa durante as batidas termina tudo na hora, e o mesmo vale para Esc;
   - os controles ficam desligados enquanto `useBoardBusy()`;
   - Motion carregado com `LazyMotion features={domAnimation}`.
@@ -1142,7 +1148,8 @@ Spec §4, §10.1 (cenas), §10.4.
   - um clique no palco termina as batidas (`useBoardBusy()` falso na hora);
   - os botões da barra ficam desabilitados durante as batidas e voltam depois;
   - `catchUp` não mostra cena;
-  - `resync` não cria batida.
+  - `resync` não cria batida;
+  - **trava global de flash:** dois `state`s com cena chegando com 200 ms de intervalo (o bot do treino responde em ~600 ms, e o online pode ser mais rápido) → a segunda cena não inverte, e o total de trocas claro ↔ escuro em qualquer janela de 1 s no palco fica ≤ 3.
 - [ ] **Step 2:** Rode → FAIL.
 - [ ] **Step 3:** Implemente.
 - [ ] **Step 4:** Rode → PASS.
@@ -1213,7 +1220,8 @@ Spec §2.6, §12.
 - [ ] **Step 2:** Rode → FAIL.
 - [ ] **Step 3:** Implemente.
 - [ ] **Step 4:** Rode, mais `pnpm --filter @coringa/web smoke` → PASS.
-- [ ] **Step 5:** Commit `feat(web): treino contra o bot no navegador`.
+- [ ] **Step 5: Confira à mão.** Com `pnpm dev:web`, abra `/treino?semente=mesa` nas larguras 360, 390 e 1440. Nada rola de lado, as sete cartas de uma fileira cheia cabem, e a mesa segue a direção da Peleja (os rascunhos do artifact são a referência de acabamento).
+- [ ] **Step 6:** Commit `feat(web): treino contra o bot no navegador`.
 
 ---
 
@@ -1239,24 +1247,32 @@ Spec §9.2 (E2E), §9.3, §7, §10.7.
 - [ ] **Step 1: Escreva os testes:**
   - **`online.spec.ts`** (dois `browser.newContext()`):
     - A cria a sala; B abre o link e entra com apelido; os dois marcam pronto;
-    - os dois equipam (destinos oferecidos, Confirmar);
-    - quem tem a iniciativa vê a escolha da ordem e espera a confirmação automática;
+    - **duas** rodadas de Equipar (o ciclo é Equipar → Equipar → Ataque, spec 1 §1.3): em cada uma, os dois equipam pelos destinos oferecidos e confirmam. Quem não recebeu numéricas não tem o que confirmar;
+    - na primeira rodada de Ataque, quem tem a iniciativa vê a escolha da ordem e espera a confirmação automática;
     - o atacante ataca; quem responde tem o passe automático ou passa;
-    - `context.setOffline(true)` em B por 3 s e depois `false` → B volta para a mesma partida (o aviso "Reconectando…" aparece e some);
+    - B perde a conexão por 3 s e volta → B continua na mesma partida, e o aviso "Reconectando…" aparece e some:
+      - primeiro, confira se `context.setOffline(true)` derruba um WebSocket já aberto na versão instalada do Playwright;
+      - se não derrubar, use `page.routeWebSocket` para fechar a conexão de forma determinística;
     - A desiste → os dois veem o painel de fim com a causa certa;
     - os dois pedem revanche → partida nova (a rodada volta a 1);
     - axe em cada tela.
+  - **Robustez ao sorteio:** a distribuição online não tem semente e o `retries` é 0. Cada asserção precisa valer para qualquer sorteio:
+    - a partida pode acabar cedo (aí o teste pula para o painel de fim);
+    - alguém pode não receber numéricas;
+    - pode haver resposta na janela de reação.
+
+    O teste joga reagindo à tela, nunca contando cartas fixas.
   - **`mobile.spec.ts`:** a entrada e a mesa em 390 × 844 e em 360 × 740, com `expectNoHorizontalScroll` na mesa e alvos de toque ≥ 44 px nos botões da barra (`boundingBox`).
   - **`training.spec.ts`:**
     - `/treino?semente=e2e-1`: algumas rodadas determinísticas pela interface;
     - **algarismos tabulares:** a largura do relógio ou da vida com "111" é igual à com "888" (confere o `tnum` da fonte, spec §10.3). Se falhar, troque a fonte de texto por uma OFL com `tnum` e registre no `LICENSES.md`.
-- [ ] **Step 2:** `pnpm --filter @coringa/web exec playwright install chromium` e `pnpm e2e` → PASS localmente.
+- [ ] **Step 2:** `pnpm --filter @coringa/web exec playwright install chromium` e `pnpm e2e` → PASS localmente **10 vezes seguidas** (`pnpm e2e --repeat-each=10`, ou um laço). Uma falha intermitente aqui é bug do teste ou da interface: corrija antes de seguir; não acrescente `retries`.
 - [ ] **Step 3:** No `check.yml`, um job `e2e` em paralelo ao `check`:
   - checkout, pnpm, Node 24 e `pnpm install --frozen-lockfile`;
   - `pnpm --filter @coringa/web exec playwright install --with-deps chromium`;
   - `pnpm e2e`, com `timeout-minutes: 15`;
   - envio do relatório do Playwright como artefato só em falha.
-- [ ] **Step 4:** Push da branch → os dois jobs verdes na CI.
+- [ ] **Step 4:** Push da branch → os dois jobs verdes na CI. O `e2e` só passa a ser exigido no merge depois das 10 rodadas verdes do Step 2 e de uma rodada verde na CI.
 - [ ] **Step 5:** Commit `test(web): E2E com Playwright e job na CI`.
 
 ---
