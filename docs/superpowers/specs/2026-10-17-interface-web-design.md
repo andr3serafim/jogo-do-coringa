@@ -112,6 +112,7 @@ O resto da interface não sabe qual das duas está usando.
 - `@coringa/sim` ganha `exports` para `./bots` (`src/bots/index.ts`), `./rng` (`src/rng.ts`, o `createRng` de que os bots precisam) e `./text` (`src/play/text.ts`). Esses arquivos já não importam nada de `node:*`. Uma regra do ESLint passa a barrar `node:*` neles e em `packages/web/src`.
 - `text.ts` dá os textos em pt-BR de cartas, ações, eventos e resultados, já usados no terminal. A interface monta o `Names` com "Você" e o apelido do oponente. O histórico da mesa e os anúncios para leitor de tela saem daí, iguais ao terminal.
 - Não há ciclo: a web depende do simulador, e o simulador não depende da web.
+- Hoje ninguém importa `@coringa/sim` pelo nome: o motor e o servidor usam caminhos relativos nos testes (`../../sim/src/...`), que o mapa de `exports` não afeta. O mapa só precisa de uma entrada `.` se alguém passar a importar a raiz do pacote.
 - Alternativa que quem constrói pode escolher: extrair esses arquivos para um pacote próprio. O que não pode é a web manter uma cópia dos textos.
 
 ### 1.5 Fluxo de uma jogada [P]
@@ -429,10 +430,11 @@ A mesa está em §3 e §4. O menu da partida tem:
 - **Servidor:**
   - um `act` aceito com `auto: true` **não zera** a contagem de estouros (spec 2 §7.3), como já acontece com os passos automáticos do próprio servidor (`options.automatic` em `core/game.ts`);
   - todo o resto é igual: `ack`, PASS guardado, época, limite por conexão;
-  - a spec 2 §7.3 ganha essa exceção na lista do que **não** zera.
+  - **o PASS guardado leva a marca.** O passe automático sai assim que a janela abre, então quase sempre chega antes do piso de 2 s e fica guardado (`heldPass`). Quando o prazo `reactionMin` vence e o servidor aplica o PASS guardado, a contagem só pode ser zerada se o PASS **não** era `auto`. Por isso o registro do PASS guardado (`heldPass`, hoje `{ epoch, id }`) passa a guardar `auto`, e o caminho do alarme o repassa à lógica de estouros (a checagem de `options.automatic` em `core/game.ts`). Sem isso, a marca falharia sem aviso justamente no caso para o qual existe;
+  - a spec 2 §7.3 ganha essa exceção na lista do que **não** zera. A edição entra no mesmo commit que aprova esta spec.
 - **Usos:** o passe automático (§3.7) e a confirmação automática da ordem (§3.6). Nenhum outro. O envio antecipado do Equipar não é `auto`.
 - **Testes do núcleo:**
-  - três estouros com passes `auto` no meio ainda dão W.O. por ausência;
+  - três estouros com passes `auto` no meio ainda dão W.O. por ausência, com os passes chegando **antes** dos 2 s (guardados e aplicados pelo alarme) e também depois deles;
   - um PASS manual continua zerando;
   - `auto` em mensagem fora do esquema dá `BAD_MESSAGE`.
 - **Honestidade:** um cliente modificado pode omitir a marca. O W.O. por ausência existe contra o jogador que saiu de perto, não contra trapaça: um script já pode jogar de verdade.
@@ -456,7 +458,14 @@ A mesa está em §3 e §4. O menu da partida tem:
 - **Reconectando:** um aviso no topo ("Reconectando…"); a mesa continua visível, com os controles desligados.
 - **Parado:** fechamento final, com a tela de §6.3.
 
-**Voltar ao app** (`visibilitychange` para visível) ou à rede (`online`) com o socket fechado → reconecta na hora, sem esperar a espera crescente. Para isso o `RoomClient` ganha `wake()`, que cancela a espera agendada e abre o socket.
+**Voltar ao app** (`visibilitychange` para visível) ou à rede (`online`):
+
+- Com o socket fechado → reconecta na hora, sem esperar a espera crescente. Para isso o `RoomClient` ganha `wake()`, que cancela a espera agendada e abre o socket.
+- **Com o socket "aberto" depois de a aba ficar escondida:** no iPhone, o socket costuma continuar com `readyState` aberto depois do segundo plano, mas morto. Hoje o `RoomClient` manda `ping` e ignora o `pong`, sem prazo. Então:
+  - durante `PLAYING`, a volta de uma aba escondida faz o `RoomClient` mandar um `ping` e esperar o `pong` por ~2 s;
+  - sem `pong`, fecha o socket e reconecta na hora;
+  - o `lastSeq` e o `catchUp` cobrem os eventos perdidos.
+- **Prazo de `ack`:** um `act` ou `concede` sem resposta em ~5 s se resolve como `DISCONNECTED` e força a reconexão. Sem isso, uma jogada num socket morto ficaria em "enviando" para sempre, enquanto o relógio de W.O. corre no servidor.
 
 ### 6.3 Códigos de fechamento → tela
 
@@ -508,9 +517,9 @@ Uma exceção no React mostra "Algo deu errado", com os botões **Recarregar** e
 | Pacote | Mudança |
 |---|---|
 | `@coringa/engine` | exporta `previewAttack` e `autoDestinations` (§8.2) |
-| `@coringa/protocol` | `act.auto?` no tipo e no esquema; `RoomClient.act(action, { auto })`; `RoomClient.wake()` |
-| `@coringa/server` | o `auto` não zera estouros; assets no `wrangler.jsonc`; smoke e deploy constroem a web antes (§11) |
-| `@coringa/sim` | `exports` `./bots` e `./text`; ESLint barra `node:*` nesses arquivos |
+| `@coringa/protocol` | `act.auto?` no tipo e no esquema; `RoomClient.act(action, { auto })`; `RoomClient.wake()`; conferência do socket por `ping`/`pong` com prazo na volta da aba; prazo de `ack` (§6.2) |
+| `@coringa/server` | o `auto` não zera estouros, inclusive no PASS guardado (§5); assets no `wrangler.jsonc`; os comandos que leem a configuração funcionam sem a web construída ou com ela construída antes (§11) |
+| `@coringa/sim` | `exports` `./bots`, `./rng` e `./text`; ESLint barra `node:*` nesses arquivos |
 | raiz | ESLint para `.tsx`; `check-fast.ts` aceita `.tsx`; scripts `dev:web` e `e2e`; job de E2E na CI |
 
 ### 8.2 Motor
@@ -524,7 +533,7 @@ Uma exceção no React mostra "Algo deu errado", com os botões **Recarregar** e
   - o desfecho: `DAMAGE`, `GUARD_ABSORBS`, `ABSOLUTE_DEFENSE`, `REFLECTED` ou `NO_ATTACK` (Ataque vazio);
   - o dano no defensor, o dano refletido no atacante e as cartas que quebram (K pela absorção ou pelo Ataque Absoluto; Q e K do atacante no Reflect);
   - a marca de Ataque Absoluto.
-- A resolução de verdade (`resolveAttack`) passa a usar a mesma conta, para não haver duas versões da regra.
+- A resolução de verdade (`resolveAttack`) passa a usar a mesma conta, para não haver duas versões da regra. É uma refatoração sem mudança de regra: todas as partidas de referência e os snapshots continuam iguais (regra do `CLAUDE.md`; nenhum `vitest -u`).
 - **Teste de propriedade** (partidas com bots): antes de cada `DECLARE_ATTACK`, guarda a prévia. Se a janela de reação fechar sem mudança no campo (só `PASS`), os eventos `DamageDealt`, `ReflectTriggered` e `GuardBroken` da resolução batem com a prévia. Os exemplos da spec 1 §1.13 viram casos literais.
 - Como a prévia é uma função sobre a `view`, a interface também a usa em cenários hipotéticos. Exemplo: a `view` sem o K que a Armadilha vai quebrar, para mostrar "quebrando o K: 110 de dano".
 
@@ -569,7 +578,9 @@ Uma exceção no React mostra "Algo deu errado", com os botões **Recarregar** e
   - os controles nunca ficam ligados sobre uma `view` que não é a última.
 - **Sessão:**
   - tratamento de cada código de `ack` (§6.4) e de cada código de fechamento (§6.3);
-  - `wake()` na volta do app.
+  - `wake()` na volta do app;
+  - socket "aberto" sem `pong` em ~2 s na volta da aba → fecha e reconecta;
+  - `act` sem `ack` em ~5 s → `DISCONNECTED` e reconexão.
 - **Persistência:**
   - token e `lastSeq` por sala;
   - sem `localStorage`;
@@ -687,8 +698,14 @@ O mesmo Worker serve a interface. No `packages/server/wrangler.jsonc`:
   - `pnpm dev:web` sobe o Vite (porta 5173), com proxy de `/api` para o `wrangler dev` (8787), WebSocket incluído (`ws: true`). A origem `http://localhost:5173` já é aceita por `http://localhost:*`;
   - `pnpm dev:server` continua igual;
   - quem constrói pode trocar o proxy pelo plugin da Cloudflare para o Vite, se ficar mais simples.
+- **A pasta de assets na configuração afeta mais que o smoke.** Com `assets.directory` no `wrangler.jsonc`, todo comando que lê a configuração pode depender de `packages/web/dist` existir:
+  - o `wrangler types` do `typecheck` do servidor;
+  - o projeto de testes no workerd (`configPath`);
+  - o `wrangler dev`;
+  - o `wrangler deploy --dry-run` do smoke.
+
+  Os quatro precisam funcionar num clone novo e na CI. O `pnpm -r` não põe a web antes do servidor (o servidor não depende dela). O plano escolhe o mecanismo depois de conferir o comportamento do wrangler com a pasta ausente: ordem explícita (construir a web antes), uma pasta reservada com um `index.html` mínimo, ou tolerância comprovada. Não vale supor o comportamento.
 - **Ordem do build:**
-  - o `wrangler deploy --dry-run` do smoke do servidor precisa de `packages/web/dist`, e o `pnpm -r` não põe a web antes do servidor (o servidor não depende dela). Por isso o smoke do servidor constrói a web antes;
   - `pnpm deploy:server` passa a ser `pnpm check` → build da web → `wrangler deploy`. O nome fica, e continua sendo o autor quem roda.
 - A versão publicada (hash do commit) já sai em `/api/health`; a interface a mostra no menu.
 
