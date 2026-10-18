@@ -1,3 +1,4 @@
+import { previewBetween } from './preview.ts';
 import { quadBonus, reevaluateQuads } from './quads.ts';
 import { finishGame, getPlayer, isGameOver, opponentOf, toGraveyard } from './state.ts';
 import type { GameEvent, GameState, NumCard, PlayerId, PlayerState, SpecialCard } from './types.ts';
@@ -54,58 +55,48 @@ function loseHp(s: GameState, victim: PlayerState, amount: number, dealer: Playe
   if (victim.hp <= 0) finishGame(s, { kind: 'WIN', winner: dealer.id, reason: 'HP' }, ev);
 }
 
-function breakAllGuards(s: GameState, p: PlayerState, ev: GameEvent[]): void {
-  if (p.guard.length === 0) return;
-  const broken = p.guard.splice(0);
+function breakGuards(s: GameState, p: PlayerState, count: number, ev: GameEvent[]): void {
+  if (count <= 0) return;
+  const broken = p.guard.splice(0, count);
   toGraveyard(s, broken);
   ev.push({ type: 'GuardBroken', player: p.id, cards: broken });
 }
 
-/** Passos 2 a 10 da spec §1.9. A janela de reação (passo 1) já aconteceu. */
+/**
+ * Passos 2 a 10 da spec §1.9. A janela de reação (passo 1) já aconteceu.
+ * A conta vem de `previewBetween`, a mesma que a interface mostra; aqui só se aplicam os efeitos.
+ */
 export function resolveAttack(s: GameState, attackerId: PlayerId, ev: GameEvent[]): void {
   const attacker = getPlayer(s, attackerId);
   const defender = opponentOf(s, attackerId);
-  const absolute = isAbsoluteAttack(s, attacker);
-  const atk = attackValue(s, attacker);
+  const result = previewBetween(attacker, defender, s.pressure, s.config);
+  const { absolute } = result;
 
-  if (defender.reflect) {
+  if (result.outcome === 'REFLECTED') {
     const reflect = defender.reflect;
+    if (!reflect) throw new Error('prévia de Reflect sem Reflect ativo');
     defender.reflect = null;
-    breakAllGuards(s, attacker, ev);
-    let damage = 0;
-    if (!attacker.absoluteDefense) {
-      if (attacker.defenseBuffs.length > 0) {
-        const queens = attacker.defenseBuffs.splice(0);
-        toGraveyard(s, queens);
-        ev.push({ type: 'BuffRemoved', player: attacker.id, cards: queens });
-      }
-      damage = Math.max(0, atk - Math.floor(defenseBase(attacker) / 2));
+    breakGuards(s, attacker, result.breaks.attackerGuard, ev);
+    if (result.breaks.attackerQueens > 0) {
+      const queens = attacker.defenseBuffs.splice(0, result.breaks.attackerQueens);
+      toGraveyard(s, queens);
+      ev.push({ type: 'BuffRemoved', player: attacker.id, cards: queens });
     }
     toGraveyard(s, [reflect.k, reflect.j, reflect.q]);
-    ev.push({ type: 'ReflectTriggered', owner: defender.id, attacker: attacker.id, damage });
-    loseHp(s, attacker, damage, defender, ev);
+    ev.push({ type: 'ReflectTriggered', owner: defender.id, attacker: attacker.id, damage: result.reflected });
+    loseHp(s, attacker, result.reflected, defender, ev);
   } else {
-    const def = defenseValue(defender);
-    if (absolute) {
-      ev.push({ type: 'AbsoluteAttack', player: attacker.id });
-      breakAllGuards(s, defender, ev);
-    }
-    let damage: number;
-    if (defender.absoluteDefense) {
-      damage = absolute ? Math.max(0, atk - def) : 0;
-    } else {
-      const net = Math.max(0, atk - def);
-      if (net > 0 && defender.guard.length > 0) {
-        const absorbed = defender.guard.splice(0, 1);
-        toGraveyard(s, absorbed);
-        ev.push({ type: 'GuardBroken', player: defender.id, cards: absorbed });
-        damage = 0;
-      } else {
-        damage = net;
-      }
-    }
-    ev.push({ type: 'DamageDealt', attacker: attacker.id, defender: defender.id, attack: atk, defense: def, damage });
-    loseHp(s, defender, damage, attacker, ev);
+    if (absolute) ev.push({ type: 'AbsoluteAttack', player: attacker.id });
+    breakGuards(s, defender, result.breaks.defenderGuard, ev);
+    ev.push({
+      type: 'DamageDealt',
+      attacker: attacker.id,
+      defender: defender.id,
+      attack: result.attack,
+      defense: result.defense,
+      damage: result.damage,
+    });
+    loseHp(s, defender, result.damage, attacker, ev);
   }
   if (isGameOver(s)) return;
 

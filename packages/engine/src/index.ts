@@ -10,3 +10,4 @@ export { attackBase, attackPower, defenseBase, defensePower, type AttackSide, ty
 export { nextFloat, nextInt, seedRng, shuffle } from './rng.ts';
 export { autoDestinations } from './actions/equip.ts';
 export { quadValues } from './quads.ts';
+export { previewAttack, previewBetween, type AttackOutcome, type AttackPreview, type CombatSide } from './preview.ts';
