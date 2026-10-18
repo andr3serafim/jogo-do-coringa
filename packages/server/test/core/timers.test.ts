@@ -641,3 +641,81 @@ describe('schedulePhase e stateFor direto', () => {
     expect(rec.game!.strikes).toEqual({ p1: 1, p2: 0 });
   });
 });
+
+describe('marca auto', () => {
+  /** p1 abre a janela de reação do p2 com o K; o p2 tem dois estouros de turno e passa com ou sem `auto`. */
+  async function afterAutoPass(passAtMs: number, auto: boolean): Promise<Room> {
+    const state = setup({ p1: { hand: ['K'] } });
+    const room = await armed(state);
+    const { h, p1, p2 } = room;
+    const rec = h.core.record!;
+    await act(h, p1, 'k', { type: 'PLAY_K', cardIds: [handId(state, 'p1', 'K')] });
+    rec.game!.strikes.p2 = 2;
+    h.advance(passAtMs);
+    await h.send(p2, { t: 'act', id: 'pass', epoch: rec.epoch, action: { type: 'PASS' }, ...(auto ? { auto: true } : {}) });
+    expect(p2.inbox.at(-1)).toMatchObject({ t: 'ack', id: 'pass', ok: true });
+    return room;
+  }
+
+  /** Deixa o relógio correr (ninguém age) até a partida acabar ou o p2 levar o próximo estouro de turno. */
+  function runToNextP2Strike(h: Harness): void {
+    const rec = h.core.record!;
+    for (let i = 0; i < 20 && rec.status === 'PLAYING' && rec.game!.strikes.p2 < 3; i += 1) {
+      h.advance(h.alarm! - h.now);
+    }
+  }
+
+  it('PASS auto guardado (a 0,5 s) e aplicado pelo alarme não zera: o terceiro estouro do p2 dá W.O. AFK', async () => {
+    const { h, p2 } = await afterAutoPass(500, true);
+    const rec = h.core.record!;
+    expect(p2.inbox.at(-1)).toMatchObject({ held: true });
+    expect(rec.game!.heldPass).toEqual({ epoch: rec.epoch, id: 'pass', auto: true });
+    h.advance(TIMERS.reactionMinMs - 500);
+    expect(rec.game!.heldPass).toBeNull();
+    expect(rec.game!.steps.at(-1)).toEqual({ player: 'p2', action: { type: 'PASS' } });
+    expect(rec.game!.strikes.p2).toBe(2);
+    runToNextP2Strike(h);
+    expect(rec.status).toBe('FINISHED');
+    expect(rec.outcome).toMatchObject({ cause: 'AFK', result: { kind: 'WIN', winner: 'p1', reason: 'FORFEIT' } });
+  });
+
+  it('PASS auto a 3 s (aplicado na hora) não zera: o terceiro estouro do p2 dá W.O. AFK', async () => {
+    const { h } = await afterAutoPass(3_000, true);
+    const rec = h.core.record!;
+    expect(rec.game!.steps.at(-1)).toEqual({ player: 'p2', action: { type: 'PASS' } });
+    expect(rec.game!.strikes.p2).toBe(2);
+    runToNextP2Strike(h);
+    expect(rec.status).toBe('FINISHED');
+    expect(rec.outcome).toMatchObject({ cause: 'AFK', result: { kind: 'WIN', winner: 'p1', reason: 'FORFEIT' } });
+  });
+
+  it('PASS sem auto no mesmo ponto zera a contagem (guardado e na hora)', async () => {
+    const held = await afterAutoPass(500, false);
+    expect(held.h.core.record!.game!.heldPass).toEqual({ epoch: held.h.core.record!.epoch, id: 'pass' });
+    held.h.advance(TIMERS.reactionMinMs - 500);
+    expect(held.h.core.record!.game!.strikes.p2).toBe(0);
+
+    const now = await afterAutoPass(3_000, false);
+    expect(now.h.core.record!.game!.strikes.p2).toBe(0);
+  });
+
+  it('um heldPass antigo, sem `auto`, vale como manual (sem mudar o STATE_SCHEMA)', async () => {
+    const { h } = await afterAutoPass(500, true);
+    const rec = h.core.record!;
+    rec.game!.heldPass = { epoch: rec.epoch, id: 'pass' };
+    h.advance(TIMERS.reactionMinMs - 500);
+    expect(rec.game!.strikes.p2).toBe(0);
+  });
+
+  it('CHOOSE_ORDER com auto não zera; sem auto, zera', async () => {
+    for (const auto of [true, false]) {
+      const { h, p1 } = await armed(setup({ round: 3, roundKind: 'ATTACK', phase: { kind: 'ORDER_CHOICE', player: 'p1' } }));
+      const rec = h.core.record!;
+      rec.game!.strikes.p1 = 2;
+      const action: PlayerAction = { type: 'CHOOSE_ORDER', first: true };
+      await h.send(p1, { t: 'act', id: 'ordem', epoch: rec.epoch, action, ...(auto ? { auto: true } : {}) });
+      expect(p1.inbox.at(-1)).toMatchObject({ t: 'ack', id: 'ordem', ok: true });
+      expect(rec.game!.strikes.p1).toBe(auto ? 2 : 0);
+    }
+  });
+});

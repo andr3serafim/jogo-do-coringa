@@ -90,7 +90,7 @@ export function startGame(record: RoomRecord, deps: CoreDeps, now: number): Stat
 /**
  * Passo do jogo (spec §5, itens 1 a 6): `seq` sobe; a `epoch` sobe se a chave da fase mudou; o passo entra no
  * registro da partida e o anel de recentes é cortado em 50. Jogada voluntária de um jogador zera os estouros dele
- * (`automatic` marca o Equipar feito pelo servidor, que não conta como jogada). Em GAME_OVER, fecha a partida com
+ * (`automatic` marca a jogada que não conta como voluntária: o Equipar feito pelo servidor e a jogada `auto` da interface). Em GAME_OVER, fecha a partida com
  * a causa guardada em `game.cause` (`NORMAL` se não houver). Os prazos da fase nova entram pelo `schedulePhase`;
  * a contagem de estouros é de quem injeta o `TIMEOUT` (`applyTimeout`).
  */
@@ -253,7 +253,8 @@ export function applyTimeout(record: RoomRecord, now: number): StateStep[] {
 
 /**
  * Aplica o PASS guardado quando o piso da janela de reação vence (spec §6.3), em nome do respondente: é jogada
- * dele, então zera os estouros dele. Sem PASS guardado na época atual, não faz nada.
+ * dele, então zera os estouros dele, salvo se chegou com `auto` (passe automático da interface, que não zera;
+ * um registro antigo sem `auto` vale como manual). Sem PASS guardado na época atual, não faz nada.
  */
 export function applyHeldPass(record: RoomRecord, now: number): StateStep[] {
   const game = requireGame(record);
@@ -261,7 +262,8 @@ export function applyHeldPass(record: RoomRecord, now: number): StateStep[] {
   const held = game.heldPass;
   if (!held || held.epoch !== record.epoch || phase.kind !== 'REACTION') return [];
   game.heldPass = null;
-  return [injectStep(record, phase.responder as SeatId, { type: 'PASS' }, now), ...autoSteps(record, now)];
+  const step = injectStep(record, phase.responder as SeatId, { type: 'PASS' }, now, { automatic: held.auto === true });
+  return [step, ...autoSteps(record, now)];
 }
 
 /** Guarda o ack de uma jogada aplicada; só os 64 últimos de cada jogador (spec §4.6, item 3). */
@@ -287,12 +289,13 @@ function earlyAck(record: RoomRecord, seat: SeatId, id: string): AckMessage | nu
  * Jogada de um jogador (spec §4.6, etapas 3 a 8; as etapas 1 e 2 são do `RoomCore`). Recusa sem mudar nada:
  * `NOT_PLAYING`, `STALE_EPOCH`, `ALREADY_PASSED`, erro do motor. Um PASS do respondente antes do piso de 2 s da
  * janela fica guardado (`held`, sem passo e sem mudança para o oponente). Aplicada, devolve o `ack` com o `seq` do
- * passo do jogador e os passos (o dele e os automáticos que ele provocou).
+ * passo do jogador e os passos (o dele e os automáticos que ele provocou). Jogada com `auto: true` (feita pela
+ * interface em nome do jogador: passe e ordem automáticos) não zera os estouros, nem quando o PASS fica guardado.
  */
 export function playerAct(
   record: RoomRecord,
   seat: SeatId,
-  msg: { id: string; epoch: number; action: PlayerAction },
+  msg: { id: string; epoch: number; action: PlayerAction; auto?: true },
   now: number,
 ): { ack: AckMessage; steps: StateStep[]; held?: true } {
   const early = earlyAck(record, seat, msg.id);
@@ -306,7 +309,7 @@ export function playerAct(
     if (game.heldPass) return { ack: ackFail(msg.id, 'ALREADY_PASSED', 'você já passou nesta janela'), steps: [] };
     if (msg.action.type === 'PASS' && now < game.phaseStartedAt + TIMERS.reactionMinMs) {
       // Piso da janela (spec §6.3): o PASS espera os 2 s e só então vale; o oponente não vê nada até lá.
-      game.heldPass = { epoch: record.epoch, id: msg.id };
+      game.heldPass = { epoch: record.epoch, id: msg.id, ...(msg.auto === true ? { auto: true as const } : {}) };
       record.agenda = withItem(record.agenda, {
         kind: 'reactionMin',
         at: game.phaseStartedAt + TIMERS.reactionMinMs,
@@ -319,7 +322,7 @@ export function playerAct(
   }
   const result = applyAction(game.state, seat, msg.action);
   if (!result.ok) return { ack: ackFail(msg.id, result.error.code, result.error.message), steps: [] };
-  const step = commitStep(record, seat, msg.action, result, now);
+  const step = commitStep(record, seat, msg.action, result, now, { automatic: msg.auto === true });
   const ack: AckMessage = { t: 'ack', id: msg.id, ok: true, seq: step.seq };
   rememberAck(game, seat, ack);
   return { ack, steps: [step, ...autoSteps(record, now)] };

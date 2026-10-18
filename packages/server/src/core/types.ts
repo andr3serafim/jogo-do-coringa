@@ -45,8 +45,8 @@ export interface GameRecord {
   phaseDeadlineAt: number | null;
   /** Tempo de turno que sobrou quando K ou Reflect abriram a janela de reação no meio do turno (turno pausado durante a janela). */
   pausedTurnMs: number | null;
-  /** PASS guardado durante a janela de reação mínima. */
-  heldPass: { epoch: number; id: string } | null;
+  /** PASS guardado durante a janela de reação mínima; `auto` marca o passe automático, que não zera os estouros. */
+  heldPass: { epoch: number; id: string; auto?: true } | null;
   strikes: Record<SeatId, number>;
   acks: Record<SeatId, AckMessage[]>;
   cause: OutcomeCause | null;
