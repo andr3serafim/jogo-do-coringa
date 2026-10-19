@@ -1,0 +1,56 @@
+@import 'tailwindcss';
+
+/*
+ * Tokens da direção "A Peleja do Coringa" (spec §10.2 e §10.3): a única fonte de verdade de cores, tipos e pontos
+ * de quebra. As paletas e os pontos de quebra padrão do Tailwind saem, para nenhum componente usar uma cor fora
+ * da paleta nem um `md:` que não bate com o layout da spec.
+ */
+@theme {
+  --color-*: initial;
+  --color-tinta: #17120f;
+  --color-papel: #f1f0ea;
+  --color-capa-oponente: #6fa86c;
+  --color-capa-voce: #ee9db5;
+  --color-vermelho: #b8261c;
+  --color-ouro: #f5c238;
+
+  /* Tipo de madeira: títulos, botões e valor das cartas. Texto e números de jogo: Archivo, com `tabular-nums`. */
+  --font-madeira: 'Alfa Slab One', serif;
+  --font-texto: 'Archivo Variable', sans-serif;
+  --default-font-family: var(--font-texto);
+
+  /* Celular de 360 a 599 px (sem prefixo), tablet de 600 a 1023, PC a partir de 1024. */
+  --breakpoint-*: initial;
+  --breakpoint-tablet: 600px;
+  --breakpoint-pc: 1024px;
+}
+
+/* O navegador também fala a língua da Peleja (spec §10.2): seleção, cursor, foco, rolagem e sublinhado. */
+@layer base {
+  html {
+    color-scheme: light;
+    background-color: var(--color-papel);
+    color: var(--color-tinta);
+    accent-color: var(--color-ouro);
+    caret-color: var(--color-vermelho);
+    scrollbar-color: var(--color-tinta) var(--color-papel);
+  }
+
+  ::selection {
+    background-color: var(--color-ouro);
+    color: var(--color-tinta);
+  }
+
+  /* Contorno ouro com borda de tinta por fora: fica visível (≥ 3:1) tanto sobre o papel quanto sobre a tinta. */
+  :focus-visible {
+    outline: 3px solid var(--color-ouro);
+    outline-offset: 0;
+    box-shadow: 0 0 0 6px var(--color-tinta);
+  }
+
+  a {
+    text-decoration-color: var(--color-vermelho);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+  }
+}

@@ -13,8 +13,11 @@ export interface PackageFiles {
   files: string[];
 }
 
-/** Só código TypeScript entra no `vitest related`; as declarações geradas (`*.d.ts`) ficam de fora. */
-const isSource = (file: string): boolean => file.endsWith('.ts') && !file.endsWith('.d.ts');
+/**
+ * Só código TypeScript entra no `vitest related`: `.ts` e os componentes `.tsx` da web. As declarações geradas
+ * (`*.d.ts`) ficam de fora.
+ */
+const isSource = (file: string): boolean => (file.endsWith('.ts') || file.endsWith('.tsx')) && !file.endsWith('.d.ts');
 
 /** Agrupa os arquivos em stage (caminhos com `/`, a partir da raiz) por pacote em `packages/*`. */
 export function groupByPackage(stagedFiles: string[]): PackageFiles[] {

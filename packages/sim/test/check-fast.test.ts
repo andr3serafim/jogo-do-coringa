@@ -32,6 +32,10 @@ describe('scripts/check-fast.ts', () => {
     ).toEqual([]);
   });
 
+  it('aceita componentes .tsx da web, para o pre-commit rodar os testes relacionados', () => {
+    expect(groupByPackage(['packages/web/src/ui/Card.tsx'])).toEqual([{ dir: 'packages/web', files: ['src/ui/Card.tsx'] }]);
+  });
+
   it('aceita caminhos com barra invertida e espaços nas pontas', () => {
     expect(groupByPackage(['packages\\protocol\\src\\code.ts ', ' packages/protocol/src/client.ts'])).toEqual([
       { dir: 'packages/protocol', files: ['src/code.ts', 'src/client.ts'] },
