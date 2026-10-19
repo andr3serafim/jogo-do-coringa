@@ -34,3 +34,6 @@ export const RESURRECT_ROW_TEXT: Record<RowName, string> = {
   ATK: `fileira de ${ROW_NAME.ATK}`,
   DEF: `fileira de ${ROW_NAME.DEF}`,
 };
+
+/** Aviso do ack `RATE_LIMITED` (spec §6.4). */
+export const RATE_NOTICE = 'Devagar: muitas jogadas seguidas.';
