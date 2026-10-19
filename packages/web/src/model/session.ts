@@ -2,8 +2,12 @@
 // `SessionDeps`. Guarda o que a mesa precisa de uma conexão: estado, sala, jogada em voo, aviso e fim.
 //
 // A interface lê `snapshot()` (via `useSyncExternalStore`): um objeto novo a cada mudança e o mesmo
-// enquanto nada muda. Toda mudança passa por `#update`, que é o ponto de extensão das automações.
-import type { PlayerId } from '@coringa/engine';
+// enquanto nada muda. Toda mudança passa por `#update`, que também recalcula o que a sessão deriva do
+// que guarda por dentro (rascunho do Equipar, confirmação, prazo da ordem automática e marcas).
+//
+// Automações (spec §3.5, §3.6, §3.7): o passe automático, a ordem automática e o envio antecipado do
+// Equipar saem daqui, sempre por `deps.setTimer`/`deps.clearTimer`. Só o passe e a ordem levam `auto`.
+import type { Destination, PlayerId, PlayerView } from '@coringa/engine';
 import {
   SLOW_RETRY_CODES,
   type AckMessage,
@@ -13,8 +17,13 @@ import {
   type RoomMessage,
   type StateMessage,
 } from '@coringa/protocol';
-import { RATE_NOTICE } from './copy.ts';
+import { ORDER_AUTO_MS, shouldAutoPass } from './automation.ts';
+import { AUTO_PASS_NOTICE, RATE_NOTICE } from './copy.ts';
+import { completeDraft, EQUIP_AUTO_SEND_MS, nextDestinations, shouldAutoSendEquip } from './equip.ts';
+import { computeMarks, NO_MARKS, type Marks } from './marks.ts';
 import { legalFor } from './plays.ts';
+import { DEFAULT_PREFS, type Prefs } from './storage.ts';
+import { buildTimeline, timelineMs } from './timeline.ts';
 
 export type ConnStatus = 'connecting' | 'open' | 'reconnecting' | 'stopped';
 export type StopReason = 'ROOM_GONE' | 'PROTOCOL' | 'AUTH' | 'OTHER_TAB' | 'LEFT';
@@ -39,7 +48,18 @@ export interface SessionSnapshot {
   notice: Notice | null;
   /** Relógio local (`deps.now`) da chegada do último `state`. */
   receivedAt: number;
+  /** Destinos escolhidos no Equipar, na ordem das cartas pendentes. Zera quando a época muda. */
+  equipDraft: Destination[];
+  /** `thisPage`: esta página confirmou; `earlier`: a `view` já diz que sim (página recarregada). */
+  equipConfirmed: 'none' | 'thisPage' | 'earlier';
+  /** Relógio local (`deps.now`) em que a ordem sai sozinha; `null` sem confirmação agendada. */
+  orderAutoAt: number | null;
+  /** O que mudou na mesa desde a sua última jogada voluntária e ainda não foi visto. */
+  marks: Marks;
 }
+
+/** Campos que a sessão deriva do que guarda por dentro: nunca entram num `patch`. */
+type Derived = 'equipDraft' | 'equipConfirmed' | 'orderAutoAt' | 'marks';
 
 export interface SessionDeps {
   now(): number;
@@ -85,20 +105,63 @@ export function ackOutcome(ack: AckMessage): 'ok' | 'wait' | 'rate' | 'rule' {
   return 'rule';
 }
 
+type Outcome = ReturnType<typeof ackOutcome> | 'skipped';
+
+const noop = (): void => undefined;
+
+function sameSet(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {
+  return a.size === b.size && [...a].every((x) => b.has(x));
+}
+
+function sameMarks(a: Marks, b: Marks): boolean {
+  return a === b || (sameSet(a.cards, b.cards) && sameSet(a.zones, b.zones));
+}
+
 export class Session {
   readonly #connection: RoomConnection;
   readonly #deps: SessionDeps;
   readonly #listeners = new Set<() => void>();
   readonly #unsubscribe: () => void;
   #snapshot: SessionSnapshot;
+  #prefs: Prefs;
   #noticeTimer: unknown = null;
   #disposed = false;
 
-  constructor(connection: RoomConnection, deps: SessionDeps) {
+  /** Época do último `state`: o rascunho e os agendamentos valem para uma época só. */
+  #epoch: number | null = null;
+
+  // Equipar
+  #draft: Destination[] = [];
+  #equipSentEpoch: number | null = null;
+  /** Época em que o envio antecipado (ou a confirmação) já foi tentado: não se tenta sozinho de novo. */
+  #equipAutoEpoch: number | null = null;
+  #equipTimer: unknown = null;
+
+  // Ordem automática
+  #orderEpoch: number | null = null;
+  #orderAt: number | null = null;
+  #orderTimer: unknown = null;
+
+  // Passe automático
+  #autoPassEpoch: number | null = null;
+
+  // Marcas: `base` é a `view` da última jogada voluntária; `seen`, o que o jogador já viu desde então.
+  #base: PlayerView | null = null;
+  #seen: ReadonlySet<string> = new Set();
+  #marksCache: { view: PlayerView | null; base: PlayerView | null; seen: ReadonlySet<string>; value: Marks } = {
+    view: null,
+    base: null,
+    seen: this.#seen,
+    value: NO_MARKS,
+  };
+
+  constructor(connection: RoomConnection, deps: SessionDeps, prefs: Prefs = DEFAULT_PREFS) {
     this.#connection = connection;
     this.#deps = deps;
+    this.#prefs = prefs;
     const state = connection.state;
-    this.#snapshot = {
+    this.#epoch = state?.epoch ?? null;
+    this.#snapshot = this.#derive({
       status: 'connecting',
       stop: null,
       slowRetry: false,
@@ -109,8 +172,9 @@ export class Session {
       pending: false,
       notice: null,
       receivedAt: state ? deps.now() : 0,
-    };
+    });
     this.#unsubscribe = connection.subscribe((event) => this.#onEvent(event));
+    if (state) this.#reconcile();
   }
 
   subscribe(listener: () => void): () => void {
@@ -124,12 +188,19 @@ export class Session {
     return this.#snapshot;
   }
 
+  /** Troca as preferências (a chave do passe automático vale já na janela aberta). */
+  setPrefs(prefs: Prefs): void {
+    this.#prefs = prefs;
+    this.#reconcile();
+  }
+
   /**
    * Manda uma jogada. Com outra em voo (`pending`), não manda nada: a mesa já desliga os controles,
-   * mas dois toques rápidos chegam antes de ela redesenhar.
+   * mas dois toques rápidos chegam antes de ela redesenhar. Sem `auto`, a jogada é voluntária: troca a
+   * base das marcas e cancela a ordem automática.
    */
-  play(action: PlayerAction, options?: { auto?: boolean }): Promise<void> {
-    return this.#send(() => this.#connection.act(action, options));
+  async play(action: PlayerAction, options?: { auto?: boolean }): Promise<void> {
+    await this.#send(() => this.#connection.act(action, options), { voluntary: options?.auto !== true });
   }
 
   ready(value: boolean): void {
@@ -144,13 +215,56 @@ export class Session {
     this.#connection.rematch(want);
   }
 
-  concede(): Promise<void> {
-    return this.#send(() => this.#connection.concede());
+  async concede(): Promise<void> {
+    await this.#send(() => this.#connection.concede(), { voluntary: true });
   }
 
   /** A aba voltou: a conexão reconecta já ou sonda o socket. */
   wake(): void {
     this.#connection.wake();
+  }
+
+  /** O jogador mexeu no painel da ordem (toque, foco, mouse): a confirmação automática não sai mais. */
+  interact(): void {
+    this.#cancelOrder();
+    this.#update({});
+  }
+
+  /** Escolhe o destino da próxima carta pendente, se ele leva a uma montagem legal. */
+  equipChoose(destination: Destination): void {
+    const { state, legal } = this.#snapshot;
+    if (!state || !this.#canEquip()) return;
+    if (!nextDestinations(state.view, legal, this.#draft).includes(destination)) return;
+    this.#draft = [...this.#draft, destination];
+    this.#update({});
+    this.#reconcileEquip();
+  }
+
+  equipUndo(): void {
+    if (this.#draft.length === 0 || !this.#canEquip()) return;
+    this.#draft = this.#draft.slice(0, -1);
+    this.#update({});
+    this.#reconcileEquip();
+  }
+
+  equipReset(): void {
+    if (this.#draft.length === 0 || !this.#canEquip()) return;
+    this.#draft = [];
+    this.#update({});
+    this.#reconcileEquip();
+  }
+
+  /** Confirma o rascunho (o que faltar sai da regra de estouro do motor). */
+  async equipConfirm(): Promise<void> {
+    if (!this.#canEquip()) return;
+    await this.#sendEquip();
+  }
+
+  /** O jogador viu a carta ou a zona (`zone:<nome>`): a marca apaga. */
+  markSeen(key: string): void {
+    if (this.#seen.has(key)) return;
+    this.#seen = new Set([...this.#seen, key]);
+    this.#update({});
   }
 
   /** Para de ouvir a conexão e de agendar timers. Não fecha a conexão: quem a criou a fecha. */
@@ -159,12 +273,24 @@ export class Session {
     this.#unsubscribe();
     this.#listeners.clear();
     this.#clearNoticeTimer();
+    this.#cancelOrder();
+    this.#clearEquipTimer();
   }
 
-  async #send(dispatch: () => Promise<AckMessage>): Promise<void> {
-    if (this.#disposed || this.#snapshot.pending) return;
-    this.#clearNoticeTimer();
-    this.#update({ pending: true, notice: null });
+  async #send(
+    dispatch: () => Promise<AckMessage>,
+    { voluntary, notice }: { voluntary: boolean; notice?: Notice },
+  ): Promise<Outcome> {
+    if (this.#disposed || this.#snapshot.pending) return 'skipped';
+    const current = this.#snapshot.notice;
+    const transient = current?.kind === 'rate' || current?.kind === 'rule';
+    if (transient) this.#clearNoticeTimer();
+    if (voluntary) {
+      this.#cancelOrder();
+      this.#base = this.#snapshot.state?.view ?? null;
+      this.#seen = new Set();
+    }
+    this.#update({ pending: true, notice: notice ?? (transient ? null : current) });
     let ack: AckMessage;
     try {
       ack = await dispatch();
@@ -172,12 +298,14 @@ export class Session {
       if (!this.#disposed) this.#update({ pending: false });
       throw error;
     }
-    if (this.#disposed) return;
+    if (this.#disposed) return 'skipped';
     const outcome = ackOutcome(ack);
     if (outcome === 'rate') this.#update({ pending: false, notice: this.#notice({ kind: 'rate', text: RATE_NOTICE }) });
     else if (outcome === 'rule' && !ack.ok) {
       this.#update({ pending: false, notice: this.#notice({ kind: 'rule', text: ack.message }) });
     } else this.#update({ pending: false });
+    this.#reconcileAutoPass();
+    return outcome;
   }
 
   #onEvent(event: ConnectionEvent): void {
@@ -188,14 +316,21 @@ export class Session {
       case 'room':
         this.#update({ room: event.room });
         return;
-      case 'state':
-        this.#deps.onSeq?.(event.state.seq);
+      case 'state': {
+        const { state } = event;
+        this.#deps.onSeq?.(state.seq);
+        const newEpoch = state.epoch !== this.#epoch;
+        if (newEpoch) this.#startEpoch(state.epoch);
+        const notice = this.#snapshot.notice;
         this.#update({
-          state: event.state,
-          legal: legalFor(event.state.view),
+          state,
+          legal: legalFor(state.view),
           receivedAt: this.#deps.now(),
+          ...(newEpoch && notice?.kind === 'autoPass' ? { notice: null } : {}),
         });
+        this.#reconcile();
         return;
+      }
       case 'error':
         if (event.error.code === 'RATE_LIMITED') {
           this.#update({ notice: this.#notice({ kind: 'rate', text: RATE_NOTICE }) });
@@ -210,6 +345,134 @@ export class Session {
         return;
     }
   }
+
+  /** Época nova: o rascunho e os agendamentos da anterior não valem mais. */
+  #startEpoch(epoch: number): void {
+    this.#epoch = epoch;
+    if (this.#draft.length > 0) this.#draft = [];
+    this.#clearEquipTimer();
+    this.#cancelOrder();
+  }
+
+  // -------------------------------------------------------------------------------------------
+  // Automações
+
+  /** Reavalia as três automações contra o `state` atual. Idempotente. */
+  #reconcile(): void {
+    if (this.#disposed) return;
+    this.#reconcileOrder();
+    this.#update({});
+    this.#reconcileEquip();
+    this.#reconcileAutoPass();
+  }
+
+  /** Passe automático: sai assim que a janela abre, uma vez por época (spec §3.7). */
+  #reconcileAutoPass(): void {
+    const { state, legal, pending } = this.#snapshot;
+    if (this.#disposed || !state || pending) return;
+    if (!shouldAutoPass(state.view, legal, this.#prefs, this.#autoPassEpoch === state.epoch)) return;
+    this.#autoPassEpoch = state.epoch;
+    void this.#send(() => this.#connection.act({ type: 'PASS' }, { auto: true }), {
+      voluntary: false,
+      notice: { kind: 'autoPass', text: AUTO_PASS_NOTICE },
+    }).catch(noop);
+  }
+
+  /** Ordem automática: `receivedAt` + batidas da revelação + 3 s, só para quem escolhe (spec §3.6). */
+  #reconcileOrder(): void {
+    const { state, legal, receivedAt } = this.#snapshot;
+    if (!state || !legal.some((a) => a.type === 'CHOOSE_ORDER')) {
+      this.#cancelOrder();
+      return;
+    }
+    if (this.#orderEpoch === state.epoch) return;
+    this.#orderEpoch = state.epoch;
+    const mode = state.resync ? 'resync' : state.catchUp ? 'catchUp' : 'live';
+    const beats = buildTimeline(state.events, {
+      mode,
+      reducedMotion: this.#prefs.reduceMotion,
+      decisionPending: true,
+    });
+    const at = receivedAt + timelineMs(beats) + ORDER_AUTO_MS;
+    this.#orderAt = at;
+    this.#orderTimer = this.#deps.setTimer(() => {
+      this.#orderTimer = null;
+      this.#orderAt = null;
+      this.#update({});
+      void this.play({ type: 'CHOOSE_ORDER', first: true }, { auto: true }).catch(noop);
+    }, Math.max(0, at - this.#deps.now()));
+  }
+
+  /** Cancela a ordem automática desta época (e só dela: uma época nova agenda de novo). */
+  #cancelOrder(): void {
+    if (this.#orderTimer !== null) {
+      this.#deps.clearTimer(this.#orderTimer);
+      this.#orderTimer = null;
+    }
+    this.#orderAt = null;
+  }
+
+  /** Envio antecipado do Equipar: com ≥ 1 escolha, quando faltam 1500 ms, sem `auto` (spec §3.5). */
+  #reconcileEquip(): void {
+    this.#clearEquipTimer();
+    const { state, legal, equipConfirmed } = this.#snapshot;
+    if (this.#disposed || !state?.deadline || state.deadline.kind !== 'EQUIP') return;
+    if (!legal.some((a) => a.type === 'EQUIP')) return;
+    const gates = {
+      chosen: this.#draft.length,
+      submitted: equipConfirmed !== 'none',
+      sent: this.#equipAutoEpoch === state.epoch,
+    };
+    // Com tempo de sobra, `shouldAutoSendEquip` só diz se as outras condições valem.
+    if (!shouldAutoSendEquip({ ...gates, remainingMs: 0 })) return;
+    const remainingMs = this.#connection.remainingMs(state.deadline);
+    if (shouldAutoSendEquip({ ...gates, remainingMs })) {
+      void this.#sendEquip().catch(noop);
+      return;
+    }
+    this.#equipTimer = this.#deps.setTimer(() => {
+      this.#equipTimer = null;
+      void this.#sendEquip().catch(noop);
+    }, remainingMs - EQUIP_AUTO_SEND_MS);
+  }
+
+  #clearEquipTimer(): void {
+    if (this.#equipTimer === null) return;
+    this.#deps.clearTimer(this.#equipTimer);
+    this.#equipTimer = null;
+  }
+
+  /** Dá para montar agora: há `EQUIP` legal e esta página ainda não confirmou. */
+  #canEquip(): boolean {
+    const { legal, equipConfirmed } = this.#snapshot;
+    return equipConfirmed === 'none' && legal.some((a) => a.type === 'EQUIP');
+  }
+
+  /**
+   * Manda o rascunho completado pela regra do motor. É jogada voluntária (sem `auto`). Depois de uma
+   * tentativa, o envio antecipado não se repete sozinho nesta época; o `Confirmar` continua valendo.
+   */
+  async #sendEquip(): Promise<void> {
+    const { state, pending } = this.#snapshot;
+    if (this.#disposed || !state || pending) return;
+    const epoch = state.epoch;
+    const destinations = completeDraft(state.view, this.#draft);
+    this.#clearEquipTimer();
+    this.#equipAutoEpoch = epoch;
+    this.#equipSentEpoch = epoch;
+    let outcome: Outcome = 'skipped';
+    try {
+      outcome = await this.#send(() => this.#connection.act({ type: 'EQUIP', destinations }), { voluntary: true });
+    } finally {
+      // Sem `ok`, a `view` diz o que vale (`equipSubmitted`), e o rascunho volta a poder ser confirmado.
+      if (outcome !== 'ok' && this.#equipSentEpoch === epoch) {
+        this.#equipSentEpoch = null;
+        if (!this.#disposed) this.#update({});
+      }
+    }
+  }
+
+  // -------------------------------------------------------------------------------------------
 
   /** Mostra o aviso e agenda o sumiço, trocando o prazo do anterior. */
   #notice(notice: Notice): Notice {
@@ -227,12 +490,41 @@ export class Session {
     this.#noticeTimer = null;
   }
 
+  #confirmedFor(state: StateMessage | null): SessionSnapshot['equipConfirmed'] {
+    if (state === null) return 'none';
+    if (this.#equipSentEpoch === state.epoch) return 'thisPage';
+    return state.view.self.equipSubmitted ? 'earlier' : 'none';
+  }
+
+  /** As marcas, no mesmo objeto enquanto a conta der o mesmo conjunto. */
+  #marksFor(state: StateMessage | null): Marks {
+    const view = state?.view ?? null;
+    const cache = this.#marksCache;
+    if (cache.view === view && cache.base === this.#base && cache.seen === this.#seen) return cache.value;
+    const computed = view === null ? NO_MARKS : computeMarks(this.#base, view, this.#seen);
+    const value = sameMarks(cache.value, computed) ? cache.value : computed;
+    this.#marksCache = { view, base: this.#base, seen: this.#seen, value };
+    return value;
+  }
+
+  /** Acrescenta ao snapshot o que a sessão guarda por dentro. */
+  #derive(snapshot: Omit<SessionSnapshot, Derived>): SessionSnapshot {
+    return {
+      ...snapshot,
+      equipDraft: this.#draft,
+      equipConfirmed: this.#confirmedFor(snapshot.state),
+      orderAutoAt: this.#orderAt,
+      marks: this.#marksFor(snapshot.state),
+    };
+  }
+
   /**
-   * O único caminho de mudança: junta o `patch` (e o `me` da conexão) ao snapshot e avisa os ouvintes.
-   * Sem diferença, o snapshot continua sendo o mesmo objeto e ninguém é avisado.
+   * O único caminho de mudança: junta o `patch` (e o `me` da conexão) ao snapshot, recalcula os campos
+   * derivados e avisa os ouvintes. Sem diferença, o snapshot continua sendo o mesmo objeto e ninguém é
+   * avisado.
    */
-  #update(patch: Partial<SessionSnapshot>): void {
-    const next: SessionSnapshot = { ...this.#snapshot, ...patch, me: this.#connection.playerId };
+  #update(patch: Partial<Omit<SessionSnapshot, Derived>>): void {
+    const next = this.#derive({ ...this.#snapshot, ...patch, me: this.#connection.playerId });
     const changed = (Object.keys(next) as (keyof SessionSnapshot)[]).some((k) => next[k] !== this.#snapshot[k]);
     if (!changed) return;
     this.#snapshot = next;

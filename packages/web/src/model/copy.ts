@@ -37,3 +37,6 @@ export const RESURRECT_ROW_TEXT: Record<RowName, string> = {
 
 /** Aviso do ack `RATE_LIMITED` (spec §6.4). */
 export const RATE_NOTICE = 'Devagar: muitas jogadas seguidas.';
+
+/** Aviso do passe automático (spec §3.7). */
+export const AUTO_PASS_NOTICE = 'Sem resposta possível; passando';
