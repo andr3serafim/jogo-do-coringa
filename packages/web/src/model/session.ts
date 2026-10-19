@@ -219,8 +219,9 @@ export class Session {
     await this.#send(() => this.#connection.concede(), { voluntary: true });
   }
 
-  /** A aba voltou: a conexão reconecta já ou sonda o socket. */
+  /** A aba voltou: a conexão reconecta já ou sonda o socket. Depois do `dispose()`, não faz nada. */
   wake(): void {
+    if (this.#disposed) return;
     this.#connection.wake();
   }
 

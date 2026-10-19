@@ -31,6 +31,8 @@ export interface RoomApi {
  */
 class ReopenableClient extends RoomClient {
   #stopped = false;
+  /** `close()` fecha para sempre: depois dele, nem o `wake()` reabre. */
+  #closed = false;
 
   constructor(options: RoomClientOptions) {
     super(options);
@@ -40,7 +42,13 @@ class ReopenableClient extends RoomClient {
     });
   }
 
+  override close(): void {
+    this.#closed = true;
+    super.close();
+  }
+
   override wake(): void {
+    if (this.#closed) return;
     if (this.#stopped) {
       this.#stopped = false;
       this.connect();

@@ -124,7 +124,12 @@ function RoomEntry({ code, api, store, reload, marks }: EntryProps) {
   const [nickname, setNickname] = useState(() => loadNickname(store));
   const [nicknameError, setNicknameError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [reloadMarks] = useState(() => marks ?? openStore('session').store);
+  // Sem `sessionStorage` de verdade a marca não sobrevive à recarga: `null` quer dizer "não recarregue" (spec §6.3).
+  const [reloadMarks] = useState<KeyValueStore | null>(() => {
+    if (marks) return marks;
+    const session = openStore('session');
+    return session.available ? session.store : null;
+  });
 
   // Sem token salvo: a sala existe, está no lobby e tem vaga?
   useEffect(() => {
@@ -241,13 +246,15 @@ interface OnlineProps {
   seat: SeatSession;
   api: RoomApi;
   store: KeyValueStore;
-  marks: KeyValueStore;
+  /** `null`: sem `sessionStorage`, a marca não sobreviveria à recarga e a página giraria sem fim. */
+  marks: KeyValueStore | null;
   reload: () => void;
   onAuth: () => void;
 }
 
-/** Recarrega uma vez só por versão nova (4001). Sem `sessionStorage`, recarregar poderia girar sem fim: não recarrega. */
-function reloadOnce(marks: KeyValueStore, reload: () => void): void {
+/** Recarrega uma vez só por versão nova (4001). Sem onde guardar a marca, não recarrega. */
+function reloadOnce(marks: KeyValueStore | null, reload: () => void): void {
+  if (marks === null) return;
   try {
     if (marks.get(RELOAD_MARK) !== null) return;
     marks.set(RELOAD_MARK, '1');
@@ -271,7 +278,9 @@ function Online({ code, seat, api, store, marks, reload, onAuth }: OnlineProps) 
 
     const onChange = () => {
       const snapshot = created.snapshot();
-      if (snapshot.status === 'open') {
+      // A marca só sai com a prova de que o servidor aceitou o `hello` (a primeira `room` ou `state`). O `open` do
+      // socket vem antes do `hello`, e o 4001 é a resposta a ele: limpar no `open` reabriria o laço de recargas.
+      if (marks !== null && (snapshot.room !== null || snapshot.state !== null)) {
         try {
           marks.remove(RELOAD_MARK);
         } catch {

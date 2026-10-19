@@ -51,8 +51,11 @@ export const info = (extra: Partial<RoomInfoResponse> = {}): RoomInfoResponse =>
   ...extra,
 });
 
-/** `connect` monta uma `Session` de verdade sobre uma `FakeConnection`, já "conectada" e com a sala no lobby. */
-export function fakeApi(): FakeApi {
+/**
+ * `connect` monta uma `Session` de verdade sobre uma `FakeConnection`, já "conectada" e com a sala no lobby.
+ * Com `room: false`, a conexão nasce como a de verdade: sem `room` nem `state` até o servidor aceitar o `hello`.
+ */
+export function fakeApi(options: { room?: boolean } = {}): FakeApi {
   const connections: FakeConnection[] = [];
   const api: FakeApi = {
     connections,
@@ -60,7 +63,7 @@ export function fakeApi(): FakeApi {
     join: vi.fn<RoomApi['join']>(() => Promise.resolve(joined())),
     info: vi.fn<RoomApi['info']>(() => Promise.resolve(info())),
     connect: vi.fn<RoomApi['connect']>((code) => {
-      const connection = new FakeConnection({ room: roomMessage({ code }) });
+      const connection = new FakeConnection({ room: options.room === false ? null : roomMessage({ code }) });
       connections.push(connection);
       const session = new Session(connection, {
         now: () => 0,

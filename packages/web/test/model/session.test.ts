@@ -493,6 +493,13 @@ describe('Session: comandos que só passam adiante', () => {
     expect(connection.calls).toEqual(['ready:true', 'rematch:false', 'wake', 'leave']);
   });
 
+  it('wake depois do dispose não faz nada', () => {
+    const { connection, session } = setup();
+    session.dispose();
+    session.wake();
+    expect(connection.calls).toEqual([]);
+  });
+
   it('dispose para de ouvir a conexão e limpa o timer do aviso', async () => {
     const { connection, clock, session } = setup();
     connection.acks.push({ ok: false, code: 'BUFF_LIMIT', message: 'x' });

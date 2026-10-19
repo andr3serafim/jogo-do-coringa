@@ -17,11 +17,20 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function setup(options: { code?: string | null; seated?: boolean; marks?: ReturnType<typeof memoryStore> } = {}) {
-  const api = fakeApi();
+interface SetupOptions {
+  code?: string | null;
+  seated?: boolean;
+  /** Onde fica a marca da recarga; `'padrão'` não passa nada, e a tela abre o `sessionStorage` de verdade. */
+  marks?: ReturnType<typeof memoryStore> | 'padrão';
+  /** `false`: a conexão não traz `room` até o teste emitir (como a de verdade antes do `hello` aceito). */
+  room?: boolean;
+}
+
+function setup(options: SetupOptions = {}) {
+  const api = fakeApi({ room: options.room ?? true });
   const store = memoryStore();
   const reload = vi.fn();
-  const marks = options.marks ?? memoryStore();
+  const marks = options.marks === 'padrão' ? undefined : (options.marks ?? memoryStore());
   if (options.seated) saveSeat(store, CODE, seat());
   const user = userEvent.setup();
   const code = options.code === undefined ? CODE : options.code;
@@ -233,29 +242,88 @@ describe('sala parada', () => {
     expect(screen.getByRole('region', { name: 'Sala' })).toBeInTheDocument();
   });
 
-  it('4001 (PROTOCOL) recarrega a página uma vez só, com marca no armazenamento da aba', async () => {
-    const { api, reload, marks } = setup({ seated: true });
-    emitClosed(api, 4001);
-    expect(reload).toHaveBeenCalledTimes(1);
+  // O servidor só responde 4001 ao `hello`, que o cliente manda depois do `open` do socket: todo 4001 de verdade
+  // vem depois de um `open`, e o `open` sozinho não prova nada.
+  it('open → 4001 recarrega uma vez; a página recarregada (mesma marca) abre, leva 4001 de novo e pede para atualizar', async () => {
+    const marks = memoryStore();
+    const first = setup({ seated: true, marks, room: false });
+    act(() => first.api.connections[0]!.emit({ type: 'open' }));
+    expect(marks.get('coringa:recarregou')).toBeNull();
+    emitClosed(first.api, 4001);
+    expect(first.reload).toHaveBeenCalledTimes(1);
     expect(marks.get('coringa:recarregou')).not.toBeNull();
+    first.unmount();
+
+    // A "página recarregada": o mesmo `sessionStorage`, a mesma versão velha, outro `open` e outro 4001.
+    const second = setup({ seated: true, marks, room: false });
+    act(() => second.api.connections[0]!.emit({ type: 'open' }));
+    expect(marks.get('coringa:recarregou')).not.toBeNull();
+    emitClosed(second.api, 4001);
+    expect(second.reload).not.toHaveBeenCalled();
+    expect(first.reload).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('heading', { name: 'Atualize a página' })).toBeInTheDocument();
+
+    await second.user.click(screen.getByRole('button', { name: 'Recarregar' }));
+    expect(second.reload).toHaveBeenCalledTimes(1);
+  });
+
+  it('sem sessionStorage (bloqueado), 4001 não recarrega e mostra "Atualize a página"', () => {
+    vi.spyOn(window, 'sessionStorage', 'get').mockImplementation(() => {
+      throw new DOMException('bloqueado', 'SecurityError');
+    });
+    const { api, reload } = setup({ seated: true, marks: 'padrão', room: false });
+    act(() => api.connections[0]!.emit({ type: 'open' }));
+    emitClosed(api, 4001);
+    expect(reload).not.toHaveBeenCalled();
     expect(screen.getByRole('heading', { name: 'Atualize a página' })).toBeInTheDocument();
   });
 
-  it('4001 repetido (a marca já existe) não recarrega de novo e pede para atualizar', async () => {
-    const marks = memoryStore();
-    marks.set('coringa:recarregou', '1');
-    const { api, reload, user } = setup({ seated: true, marks });
+  it('com um sessionStorage que lança, 4001 também não recarrega (a marca não sobreviveria)', () => {
+    const fail = (): never => {
+      throw new Error('bloqueado');
+    };
+    vi.spyOn(window, 'sessionStorage', 'get').mockReturnValue({
+      getItem: fail,
+      setItem: fail,
+      removeItem: fail,
+      clear: fail,
+      key: fail,
+      length: 0,
+    });
+    const { api, reload } = setup({ seated: true, marks: 'padrão', room: false });
     emitClosed(api, 4001);
     expect(reload).not.toHaveBeenCalled();
-    await user.click(screen.getByRole('button', { name: 'Recarregar' }));
-    expect(reload).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('heading', { name: 'Atualize a página' })).toBeInTheDocument();
   });
 
-  it('a marca sai quando a conexão abre, para uma versão nova futura poder recarregar', () => {
+  it('com sessionStorage de verdade, a marca fica nele e 4001 recarrega uma vez', () => {
+    window.sessionStorage.clear();
+    const { api, reload } = setup({ seated: true, marks: 'padrão', room: false });
+    emitClosed(api, 4001);
+    expect(reload).toHaveBeenCalledTimes(1);
+    expect(window.sessionStorage.getItem('coringa:recarregou')).toBe('1');
+    window.sessionStorage.clear();
+  });
+
+  it('a marca só sai quando o servidor aceita o hello (a primeira room), não no open', () => {
     const marks = memoryStore();
     marks.set('coringa:recarregou', '1');
-    const { api } = setup({ seated: true, marks });
-    act(() => api.connections[0]!.emit({ type: 'open' }));
+    const { api } = setup({ seated: true, marks, room: false });
+    const connection = api.connections[0]!;
+    act(() => connection.emit({ type: 'open' }));
+    expect(marks.get('coringa:recarregou')).not.toBeNull();
+    act(() => connection.emitRoom(roomMessage()));
+    expect(marks.get('coringa:recarregou')).toBeNull();
+  });
+
+  it('a marca também sai com o primeiro state', () => {
+    const marks = memoryStore();
+    marks.set('coringa:recarregou', '1');
+    const { api } = setup({ seated: true, marks, room: false });
+    const connection = api.connections[0]!;
+    act(() => connection.emit({ type: 'open' }));
+    expect(marks.get('coringa:recarregou')).not.toBeNull();
+    act(() => connection.emitState(stateMessage(viewAt())));
     expect(marks.get('coringa:recarregou')).toBeNull();
   });
 
@@ -299,8 +367,13 @@ describe('sessão online', () => {
     const { api, unmount } = setup({ seated: true });
     const connection = api.connections[0]!;
     unmount();
-    // Depois do unmount, a sessão não ouve mais a conexão.
-    expect(() => act(() => connection.emitClosed(4000, true))).not.toThrow();
+    // Depois do unmount, nem a conexão nem a aba chegam à sessão: nenhum `wake` novo.
+    act(() => {
+      connection.emitClosed(4000, true);
+      document.dispatchEvent(new Event('visibilitychange'));
+      window.dispatchEvent(new Event('online'));
+    });
+    expect(connection.calls).toEqual(['connect']);
   });
 
   it('visibilitychange para visível e online chamam wake()', () => {
