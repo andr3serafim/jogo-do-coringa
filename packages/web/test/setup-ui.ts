@@ -7,3 +7,7 @@ import { afterEach } from 'vitest';
 afterEach(() => {
   cleanup();
 });
+
+// O jsdom não implementa estes dois; o `navigate` rola para o topo e o axe sonda o canvas. Sem o aviso no log.
+window.scrollTo = () => undefined;
+HTMLCanvasElement.prototype.getContext = (() => null) as typeof HTMLCanvasElement.prototype.getContext;

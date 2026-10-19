@@ -56,6 +56,11 @@ export default defineConfig(
     extends: [reactHooks.configs.flat.recommended],
   },
   {
+    // As dependências dos efeitos são contrato: um efeito que cria a sessão ou ouve eventos não pode ficar com valor velho.
+    files: ['packages/web/**/*.tsx', 'packages/web/src/**/*.ts'],
+    rules: { 'react-hooks/exhaustive-deps': 'error' },
+  },
+  {
     // O código da web vai para o navegador: nada de node:*, e o Zod dos esquemas fica fora do bundle (spec §1.1).
     files: ['packages/web/src/**/*.{ts,tsx}'],
     rules: {
