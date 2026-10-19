@@ -24,8 +24,8 @@ export default mergeConfig(
         provider: 'v8',
         include: ['src/model/**/*.ts'],
         exclude: ['src/model/copy.ts'],
-        // As metas (90% de linhas e branches) entram na Tarefa 8, com o primeiro arquivo de src/model:
-        // com a pasta vazia, a meta reprovaria o check.
+        // Meta da spec §9.1: 90% de linhas e branches no núcleo puro.
+        thresholds: { lines: 90, branches: 90 },
       },
     },
   }),
