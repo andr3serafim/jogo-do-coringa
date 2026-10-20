@@ -1,3 +1,4 @@
+import type { GameEvent } from '@coringa/engine';
 import type { AckCode, AckMessage, RoomMessage } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
 import { legalFor } from '../../src/model/plays.ts';
@@ -54,7 +55,25 @@ function setup(options: ConstructorParameters<typeof FakeConnection>[0] = {}) {
   return { connection, clock, session };
 }
 
-const ROOM = { t: 'room', code: 'ABCD', status: 'PLAYING' } as unknown as RoomMessage;
+const seatOf = (playerId: string, nickname: string) => ({
+  playerId,
+  nickname,
+  connected: true,
+  ready: false,
+  wantsRematch: false,
+});
+
+const roomOf = (gameNo: number): RoomMessage => ({
+  t: 'room',
+  code: 'ABCD',
+  status: 'PLAYING',
+  seats: [seatOf('p1', 'André'), seatOf('p2', 'Duda')],
+  score: { p1: 0, p2: 0, draws: 0 },
+  gameNo,
+  expiresAt: 0,
+});
+
+const ROOM = roomOf(1);
 
 const WAIT_CODES: AckCode[] = [
   'STALE_EPOCH',
@@ -512,5 +531,140 @@ describe('Session: comandos que só passam adiante', () => {
     connection.emitState(stateMessage(viewAt(), { seq: 9 }));
     expect(session.snapshot()).toBe(before);
     expect(clock.seqs).toEqual([]);
+  });
+});
+
+describe('Session: histórico da mesa', () => {
+  const attack: GameEvent = { type: 'AttackDeclared', player: 'p1' };
+  const guardPlayed: GameEvent = { type: 'GuardPlayed', player: 'p2', cards: [{ id: 'k1', kind: 'K', suit: 'paus' }] };
+  const texts = (session: Session) => session.snapshot().history.lines.map((line) => line.text);
+
+  it('começa vazio', () => {
+    const { session } = setup();
+    expect(session.snapshot().history).toEqual({ gameNo: null, lastSeq: 0, lines: [] });
+  });
+
+  it('guarda os eventos de cada state, um depois do outro, com o apelido do outro assento', () => {
+    const { connection, session } = setup();
+    connection.emitRoom(ROOM);
+    connection.emitState(stateMessage(viewAt(), { seq: 2, events: [attack] }));
+    connection.emitState(stateMessage(viewAt(), { seq: 3, events: [guardPlayed] }));
+    expect(texts(session)).toEqual(['Rodada 10: Ataque', 'Você declarou o ataque', 'Duda pôs 1 K na Guarda']);
+  });
+
+  it('um state sem a sala ainda chama o outro de "Oponente"', () => {
+    const { connection, session } = setup();
+    connection.emitState(stateMessage(viewAt(), { seq: 2, events: [guardPlayed] }));
+    expect(texts(session)).toContain('Oponente pôs 1 K na Guarda');
+  });
+
+  it('parte do state que a conexão já tem', () => {
+    const { session } = setup({ room: ROOM, state: stateMessage(viewAt(), { seq: 7, events: [attack] }) });
+    expect(session.snapshot().history).toMatchObject({ gameNo: 1, lastSeq: 7 });
+    expect(texts(session)).toEqual(['Rodada 10: Ataque', 'Você declarou o ataque']);
+  });
+
+  it('um state repetido ou antigo não muda o snapshot', () => {
+    const { connection, session } = setup({ room: ROOM });
+    connection.emitState(stateMessage(viewAt(), { seq: 4, events: [attack] }));
+    const history = session.snapshot().history;
+    connection.emitState(stateMessage(viewAt(), { seq: 4, events: [attack] }));
+    connection.emitState(stateMessage(viewAt(), { seq: 3, events: [attack] }));
+    expect(session.snapshot().history).toBe(history);
+  });
+
+  it('o primeiro número de partida não apaga nada; um número novo esvazia o histórico', () => {
+    const { connection, session } = setup();
+    connection.emitState(stateMessage(viewAt(), { seq: 2, events: [attack] }));
+    connection.emitRoom(ROOM);
+    expect(texts(session)).toEqual(['Rodada 10: Ataque', 'Você declarou o ataque']);
+
+    connection.emitRoom({ ...ROOM, status: 'FINISHED' });
+    expect(texts(session)).toHaveLength(2);
+
+    connection.emitRoom(roomOf(2));
+    expect(session.snapshot().history).toEqual({ gameNo: 2, lastSeq: 2, lines: [] });
+    connection.emitState(stateMessage(viewAt(), { seq: 3 }));
+    expect(texts(session)).toEqual(['Rodada 10: Ataque']);
+  });
+
+  it('o catchUp e o resync deixam as suas notas', () => {
+    const { connection, session } = setup({ room: ROOM });
+    connection.emitState(stateMessage(viewAt(), { seq: 5, events: [attack], catchUp: true }));
+    expect(texts(session)).toContain('Enquanto você estava fora');
+    connection.emitState(stateMessage(viewAt(), { seq: 40, resync: true }));
+    expect(texts(session).at(-1)).toBe('Mesa sincronizada');
+  });
+});
+
+describe('Session: base das marcas no histórico (marksBaseSeq)', () => {
+  const view = viewAt();
+
+  it('é null enquanto não houve jogada voluntária', () => {
+    const { connection, session } = setup();
+    expect(session.snapshot().marksBaseSeq).toBeNull();
+    connection.emitState(stateMessage(view, { seq: 4 }));
+    expect(session.snapshot().marksBaseSeq).toBeNull();
+  });
+
+  it('uma jogada voluntária guarda o seq do state em que ela saiu', async () => {
+    const { connection, session } = setup();
+    connection.emitState(stateMessage(view, { seq: 4 }));
+    await session.play({ type: 'END_TURN' });
+    expect(session.snapshot().marksBaseSeq).toBe(4);
+  });
+
+  it('o ack com seq leva a base até o passo da jogada: o que ela mesma causou não é "novo"', async () => {
+    const { connection, session } = setup();
+    connection.emitState(stateMessage(view, { seq: 4 }));
+    const gate = deferredAck();
+    connection.acks.push(gate.promise);
+    const done = session.play({ type: 'END_TURN' });
+    connection.emitState(stateMessage(view, { seq: 5 }));
+    expect(session.snapshot().marksBaseSeq).toBe(4);
+    gate.resolve({ ok: true, seq: 5 });
+    await done;
+    expect(session.snapshot().marksBaseSeq).toBe(5);
+  });
+
+  it('um ack sem seq (PASS guardado) ou recusado não mexe na base', async () => {
+    const { connection, session } = setup();
+    connection.emitState(stateMessage(view, { seq: 4 }));
+    connection.acks.push({ ok: true, held: true });
+    await session.play(PASS);
+    expect(session.snapshot().marksBaseSeq).toBe(4);
+    connection.emitState(stateMessage(view, { seq: 6 }));
+    connection.acks.push({ ok: false, code: 'BUFF_LIMIT', message: 'x' });
+    await session.play({ type: 'END_TURN' });
+    expect(session.snapshot().marksBaseSeq).toBe(6);
+  });
+
+  it('uma jogada automática não troca a base', async () => {
+    const { connection, session } = setup();
+    connection.emitState(stateMessage(view, { seq: 4 }));
+    await session.play({ type: 'END_TURN' });
+    connection.emitState(stateMessage(view, { seq: 9 }));
+    await session.play(PASS, { auto: true });
+    expect(session.snapshot().marksBaseSeq).toBe(4);
+  });
+
+  it('partida nova (outro gameNo) apaga a base', async () => {
+    const { connection, session } = setup({ room: ROOM });
+    connection.emitState(stateMessage(view, { seq: 4 }));
+    await session.play({ type: 'END_TURN' });
+    connection.emitRoom({ ...ROOM, status: 'FINISHED' });
+    expect(session.snapshot().marksBaseSeq).toBe(4);
+    connection.emitRoom(roomOf(2));
+    expect(session.snapshot().marksBaseSeq).toBeNull();
+    expect(session.snapshot().marks).toEqual({ cards: new Set(), zones: new Set() });
+  });
+});
+
+describe('Session: tempo restante', () => {
+  it('remainingMs pergunta à conexão, que conhece o relógio do servidor', () => {
+    const { connection, session } = setup({ now: 10_000 });
+    expect(session.remainingMs({ kind: 'TURN', at: 31_000, players: ['p1'] })).toBe(21_000);
+    connection.now = 40_000;
+    expect(session.remainingMs({ kind: 'TURN', at: 31_000, players: ['p1'] })).toBe(0);
   });
 });

@@ -45,6 +45,19 @@ describe('viewAt', () => {
     expect(state.players[1].hand.map((c) => c.kind)).toEqual(['A']);
   });
 
+  it('rodada, pressão, rodadas sem dano e vida entram no cenário', () => {
+    const view = viewAt({ round: 7, pressure: 1, noDamageStreak: 6, self: { hp: 187 }, opponent: { hp: 214 } });
+    expect(view.round).toBe(7);
+    expect(view.pressure).toBe(1);
+    expect(view.noDamageStreak).toBe(6);
+    expect([view.self.hp, view.opponent.hp]).toEqual([187, 214]);
+    expect(viewAt()).toMatchObject({ round: 10, pressure: 0, noDamageStreak: 0, initiative: 'p1', turnOrder: ['p1', 'p2'] });
+    expect(viewAt({ initiative: 'opponent', firstToAttack: 'opponent' })).toMatchObject({
+      initiative: 'p2',
+      turnOrder: ['p2', 'p1'],
+    });
+  });
+
   it('as fases de reação e de espera, e `me` como p2', () => {
     expect(viewAt({ phase: 'ATTACK' }).phase).toEqual({ kind: 'REACTION', responder: 'p1', trigger: 'ATTACK' });
     expect(viewAt({ phase: 'WAITING' }).phase).toEqual({ kind: 'ATTACK_MAIN', player: 'p2' });

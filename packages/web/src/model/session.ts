@@ -12,6 +12,7 @@ import {
   SLOW_RETRY_CODES,
   type AckMessage,
   type ConnectionEvent,
+  type Deadline,
   type PlayerAction,
   type RoomConnection,
   type RoomMessage,
@@ -20,6 +21,7 @@ import {
 import { ORDER_AUTO_MS, shouldAutoPass } from './automation.ts';
 import { AUTO_PASS_NOTICE, RATE_NOTICE } from './copy.ts';
 import { completeDraft, EQUIP_AUTO_SEND_MS, nextDestinations, shouldAutoSendEquip } from './equip.ts';
+import { appendHistory, EMPTY_HISTORY, forGame, roomNames, type HistoryState } from './history.ts';
 import { computeMarks, NO_MARKS, type Marks } from './marks.ts';
 import { legalFor } from './plays.ts';
 import { DEFAULT_PREFS, type Prefs } from './storage.ts';
@@ -56,10 +58,18 @@ export interface SessionSnapshot {
   orderAutoAt: number | null;
   /** O que mudou na mesa desde a sua última jogada voluntária e ainda não foi visto. */
   marks: Marks;
+  /**
+   * `seq` do último passo que é seu: as linhas do histórico com `seq` maior são "novas" (spec §10.5). Na jogada voluntária
+   * é o `seq` do `state` da base das marcas; o `ack` com `seq` o leva até o passo da jogada (o que ela mesma causou não é
+   * novo). `null` sem base: nenhuma jogada voluntária nesta partida.
+   */
+  marksBaseSeq: number | null;
+  /** As linhas da partida em curso, em ordem (spec §3.1). */
+  history: HistoryState;
 }
 
 /** Campos que a sessão deriva do que guarda por dentro: nunca entram num `patch`. */
-type Derived = 'equipDraft' | 'equipConfirmed' | 'orderAutoAt' | 'marks';
+type Derived = 'equipDraft' | 'equipConfirmed' | 'orderAutoAt' | 'marks' | 'marksBaseSeq' | 'history';
 
 export interface SessionDeps {
   now(): number;
@@ -147,7 +157,10 @@ export class Session {
 
   // Marcas: `base` é a `view` da última jogada voluntária; `seen`, o que o jogador já viu desde então.
   #base: PlayerView | null = null;
+  #baseSeq: number | null = null;
   #seen: ReadonlySet<string> = new Set();
+  // Histórico: as linhas de todo `state` que chegou (a sessão vê todos, ao contrário de um componente).
+  #history: HistoryState = EMPTY_HISTORY;
   #marksCache: { view: PlayerView | null; base: PlayerView | null; seen: ReadonlySet<string>; value: Marks } = {
     view: null,
     base: null,
@@ -161,6 +174,8 @@ export class Session {
     this.#prefs = prefs;
     const state = connection.state;
     this.#epoch = state?.epoch ?? null;
+    if (connection.room) this.#history = forGame(this.#history, connection.room.gameNo);
+    if (state) this.#history = appendHistory(this.#history, state, this.#names(state, connection.room));
     this.#snapshot = this.#derive({
       status: 'connecting',
       stop: null,
@@ -175,6 +190,11 @@ export class Session {
     });
     this.#unsubscribe = connection.subscribe((event) => this.#onEvent(event));
     if (state) this.#reconcile();
+  }
+
+  /** Tempo que falta para o prazo, pelo relógio do servidor (a conexão conhece o deslocamento). */
+  remainingMs(deadline: Deadline): number {
+    return this.#connection.remainingMs(deadline);
   }
 
   subscribe(listener: () => void): () => void {
@@ -289,6 +309,7 @@ export class Session {
     if (voluntary) {
       this.#cancelOrder();
       this.#base = this.#snapshot.state?.view ?? null;
+      this.#baseSeq = this.#snapshot.state?.seq ?? null;
       this.#seen = new Set();
     }
     this.#update({ pending: true, notice: notice ?? (transient ? null : current) });
@@ -301,6 +322,7 @@ export class Session {
     }
     if (this.#disposed) return 'skipped';
     const outcome = ackOutcome(ack);
+    if (voluntary && ack.ok && ack.seq !== undefined && ack.seq > (this.#baseSeq ?? -1)) this.#baseSeq = ack.seq;
     if (outcome === 'rate') this.#update({ pending: false, notice: this.#notice({ kind: 'rate', text: RATE_NOTICE }) });
     else if (outcome === 'rule' && !ack.ok) {
       this.#update({ pending: false, notice: this.#notice({ kind: 'rule', text: ack.message }) });
@@ -315,11 +337,13 @@ export class Session {
         this.#update({ status: 'open', stop: null, slowRetry: false });
         return;
       case 'room':
+        this.#syncGame(event.room.gameNo);
         this.#update({ room: event.room });
         return;
       case 'state': {
         const { state } = event;
         this.#deps.onSeq?.(state.seq);
+        this.#history = appendHistory(this.#history, state, this.#names(state, this.#snapshot.room));
         const newEpoch = state.epoch !== this.#epoch;
         if (newEpoch) this.#startEpoch(state.epoch);
         const notice = this.#snapshot.notice;
@@ -345,6 +369,20 @@ export class Session {
         }
         return;
     }
+  }
+
+  /** Partida nova (outro `gameNo`): o histórico e a base das marcas da anterior não valem mais. */
+  #syncGame(gameNo: number): void {
+    const before = this.#history.gameNo;
+    this.#history = forGame(this.#history, gameNo);
+    if (before === null || before === gameNo) return;
+    this.#base = null;
+    this.#baseSeq = null;
+    this.#seen = new Set();
+  }
+
+  #names(state: StateMessage, room: RoomMessage | null) {
+    return roomNames(state.view.me, room?.seats ?? []);
   }
 
   /** Época nova: o rascunho e os agendamentos da anterior não valem mais. */
@@ -516,6 +554,8 @@ export class Session {
       equipConfirmed: this.#confirmedFor(snapshot.state),
       orderAutoAt: this.#orderAt,
       marks: this.#marksFor(snapshot.state),
+      marksBaseSeq: this.#baseSeq,
+      history: this.#history,
     };
   }
 

@@ -78,6 +78,7 @@ export function seededSteps(seed: string, steps: number, bots: [BotName, BotName
 export type CardSpec = SpecialKind | SpecialCard;
 
 export interface SideSpec {
+  hp?: number;
   hand?: CardSpec[];
   attackBuffs?: CardSpec[];
   defenseBuffs?: CardSpec[];
@@ -97,6 +98,16 @@ export interface ViewSpec {
   /** Quem vê (padrão `p1`); o outro é o oponente. */
   me?: PlayerId;
   config?: ConfigOverrides;
+  /** Quem tem a iniciativa (padrão: você). */
+  initiative?: 'self' | 'opponent';
+  /** Quem ataca primeiro na rodada (padrão: você). */
+  firstToAttack?: 'self' | 'opponent';
+  /** Rodada (padrão 10). */
+  round?: number;
+  /** Bônus da Pressão da mesa (padrão 0). */
+  pressure?: number;
+  /** Rodadas seguidas sem dano (padrão 0). */
+  noDamageStreak?: number;
   /** `MAIN` (padrão): fase principal de `me`. `WAITING`: fase principal do oponente. Um gatilho abre a reação de `me`. */
   phase?: 'MAIN' | 'WAITING' | ReactionTrigger | Phase;
   self?: SideSpec;
@@ -145,6 +156,7 @@ export function scenarioAt(spec: ViewSpec = {}): { state: GameState; view: Playe
   const fill = (owner: PlayerId, side: SideSpec = {}): void => {
     const p = state.players.find((candidate) => candidate.id === owner)!;
     p.hand = (side.hand ?? []).map((c) => special(c, owner));
+    if (side.hp !== undefined) p.hp = side.hp;
     p.pending = [];
     p.equipSubmitted = true;
     p.submittedDestinations = null;
@@ -159,10 +171,12 @@ export function scenarioAt(spec: ViewSpec = {}): { state: GameState; view: Playe
     p.resurrections = (side.resurrections ?? []).map((r) => ({ ...r, formedAtRound: state.round }));
   };
 
-  state.round = 10;
+  state.round = spec.round ?? 10;
+  state.pressure = spec.pressure ?? 0;
+  state.noDamageStreak = spec.noDamageStreak ?? 0;
   state.roundKind = 'ATTACK';
-  state.initiative = me;
-  state.turnOrder = [me, other];
+  state.initiative = spec.initiative === 'opponent' ? other : me;
+  state.turnOrder = spec.firstToAttack === 'opponent' ? [other, me] : [me, other];
   state.turnIndex = 0;
   state.graveyard = (spec.graveyard ?? []).map((c, i): Card =>
     typeof c === 'number' ? { id: `x-grave-${i}`, kind: 'NUM', value: c, suit: SUITS[i % SUITS.length]! } : c,
@@ -170,6 +184,8 @@ export function scenarioAt(spec: ViewSpec = {}): { state: GameState; view: Playe
   fill(me, spec.self);
   fill(other, spec.opponent);
   state.phase = resolvePhase(spec.phase, me, other);
+  // A fase de Equipar só existe na rodada de Equipar.
+  state.roundKind = state.phase.kind === 'EQUIP' ? 'EQUIP' : 'ATTACK';
   return { state, view: viewFor(state, me) };
 }
 
