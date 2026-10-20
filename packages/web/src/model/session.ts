@@ -21,7 +21,7 @@ import {
 import { ORDER_AUTO_MS, shouldAutoPass } from './automation.ts';
 import { AUTO_PASS_NOTICE, RATE_NOTICE } from './copy.ts';
 import { completeDraft, EQUIP_AUTO_SEND_MS, nextDestinations, shouldAutoSendEquip } from './equip.ts';
-import { appendHistory, EMPTY_HISTORY, forGame, roomNames, type HistoryState } from './history.ts';
+import { appendHistory, appendNote, EMPTY_HISTORY, forGame, returnNote, roomNames, type HistoryState } from './history.ts';
 import { computeMarks, NO_MARKS, type Marks } from './marks.ts';
 import { legalFor } from './plays.ts';
 import { DEFAULT_PREFS, type Prefs } from './storage.ts';
@@ -192,6 +192,11 @@ export class Session {
     if (state) this.#reconcile();
   }
 
+  /** O relógio local da sessão (`deps.now`): é o dos instantes `orderAutoAt` e `receivedAt` do snapshot. */
+  now(): number {
+    return this.#deps.now();
+  }
+
   /** Tempo que falta para o prazo, pelo relógio do servidor (a conexão conhece o deslocamento). */
   remainingMs(deadline: Deadline): number {
     return this.#connection.remainingMs(deadline);
@@ -336,10 +341,14 @@ export class Session {
       case 'open':
         this.#update({ status: 'open', stop: null, slowRetry: false });
         return;
-      case 'room':
+      case 'room': {
         this.#syncGame(event.room.gameNo);
+        const me = this.#connection.playerId;
+        const note = me === null ? null : returnNote(this.#snapshot.room, event.room, me);
+        if (note !== null) this.#history = appendNote(this.#history, note);
         this.#update({ room: event.room });
         return;
+      }
       case 'state': {
         const { state } = event;
         this.#deps.onSeq?.(state.seq);

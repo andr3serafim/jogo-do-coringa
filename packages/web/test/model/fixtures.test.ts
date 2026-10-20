@@ -66,6 +66,18 @@ describe('viewAt', () => {
     expect(p2.opponent.id).toBe('p1');
   });
 
+  it('pending monta o Equipar de um lado: pendentes com ids próprios e sem confirmar', () => {
+    const view = viewAt({ phase: { kind: 'EQUIP' }, self: { pending: [7, 7, 3] }, opponent: { pending: [4] } });
+    expect(view.self.pending.map((c) => c.value)).toEqual([7, 7, 3]);
+    expect(new Set(view.self.pending.map((c) => c.id)).size).toBe(3);
+    expect(view.self.equipSubmitted).toBe(false);
+    expect(view.opponent.pendingCount).toBe(1);
+    expect(view.opponent.equipSubmitted).toBe(false);
+    // Sem `pending` o lado segue confirmado, como antes; `equipSubmitted` sobrescreve.
+    expect(viewAt({ phase: { kind: 'EQUIP' } }).self.equipSubmitted).toBe(true);
+    expect(viewAt({ self: { pending: [2], equipSubmitted: true } }).self.equipSubmitted).toBe(true);
+  });
+
   it('é determinística e aceita cartas prontas e config', () => {
     const wild = { id: 'meu-selvagem', kind: 'WILD' as const };
     const spec = { self: { hand: [wild] }, graveyard: [wild], config: { rowLimit: 3 } };

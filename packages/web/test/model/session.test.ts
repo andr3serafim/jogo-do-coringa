@@ -588,6 +588,27 @@ describe('Session: histórico da mesa', () => {
     expect(texts(session)).toEqual(['Rodada 10: Ataque']);
   });
 
+  it('a volta do oponente durante a partida deixa "Duda voltou" no histórico, uma vez', () => {
+    const { connection, session } = setup({ room: ROOM });
+    connection.emitState(stateMessage(viewAt(), { seq: 2 }));
+    const gone = { ...ROOM, seats: [seatOf('p1', 'André'), { ...seatOf('p2', 'Duda'), connected: false }] };
+    connection.emitRoom(gone);
+    expect(texts(session)).toEqual(['Rodada 10: Ataque']);
+    connection.emitRoom(ROOM);
+    expect(session.snapshot().history.lines.at(-1)).toEqual({ seq: 2, kind: 'note', text: 'Duda voltou' });
+    expect(texts(session)).toEqual(['Rodada 10: Ataque', 'Duda voltou']);
+    connection.emitRoom({ ...ROOM, expiresAt: 5 });
+    expect(texts(session)).toHaveLength(2);
+  });
+
+  it('sem o playerId da conexão (nenhuma volta para contar), a sala não deixa nota', () => {
+    const { connection, session } = setup({ room: ROOM, playerId: null });
+    const gone = { ...ROOM, seats: [seatOf('p1', 'André'), { ...seatOf('p2', 'Duda'), connected: false }] };
+    connection.emitRoom(gone);
+    connection.emitRoom(ROOM);
+    expect(session.snapshot().history.lines).toEqual([]);
+  });
+
   it('o catchUp e o resync deixam as suas notas', () => {
     const { connection, session } = setup({ room: ROOM });
     connection.emitState(stateMessage(viewAt(), { seq: 5, events: [attack], catchUp: true }));
@@ -661,6 +682,13 @@ describe('Session: base das marcas no histórico (marksBaseSeq)', () => {
 });
 
 describe('Session: tempo restante', () => {
+  it('now devolve o relógio local da sessão (o mesmo da ordem automática)', () => {
+    const { clock, session } = setup();
+    expect(session.now()).toBe(1_000);
+    clock.setNow(4_500);
+    expect(session.now()).toBe(4_500);
+  });
+
   it('remainingMs pergunta à conexão, que conhece o relógio do servidor', () => {
     const { connection, session } = setup({ now: 10_000 });
     expect(session.remainingMs({ kind: 'TURN', at: 31_000, players: ['p1'] })).toBe(21_000);

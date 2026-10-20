@@ -6,7 +6,7 @@
 // serve: o primeiro `state` de uma partida (servidor e treino) vem sem eventos. Por isso o histórico vazio abre
 // com a rodada em que a partida está (vinda da `view`), com o mesmo texto do evento.
 import type { PlayerId } from '@coringa/engine';
-import type { SeatInfo, StateMessage } from '@coringa/protocol';
+import type { RoomMessage, SeatInfo, StateMessage } from '@coringa/protocol';
 import { eventText, type Names } from '@coringa/sim/text';
 
 /** `round`: cabeçalho de rodada; `note`: aviso da sincronização; `event`: o que aconteceu. */
@@ -92,4 +92,21 @@ export function appendHistory(prev: HistoryState, msg: StateMessage, names: Name
 export function newLineCount(history: HistoryState, baseSeq: number | null): number {
   if (baseSeq === null) return 0;
   return history.lines.filter((line) => line.seq > baseSeq).length;
+}
+
+/**
+ * A volta do oponente (spec §3.9): o assento dele estava fora e voltou, na mesma partida em curso. Devolve o texto da
+ * nota do histórico ("Duda voltou"), ou `null` se não houve volta. A mensagem `room` é a única que traz a presença.
+ */
+export function returnNote(prev: RoomMessage | null, next: RoomMessage, me: PlayerId): string | null {
+  if (prev === null || prev.status !== 'PLAYING' || next.status !== 'PLAYING' || prev.gameNo !== next.gameNo) return null;
+  const before = prev.seats.find((seat) => seat.playerId !== me);
+  const after = next.seats.find((seat) => seat.playerId !== me);
+  if (!before || !after || before.connected || !after.connected) return null;
+  return `${roomNames(me, next.seats).of(after.playerId)} voltou`;
+}
+
+/** Acrescenta uma nota solta, no `seq` do último `state` (não vem de nenhum evento do motor). */
+export function appendNote(prev: HistoryState, text: string): HistoryState {
+  return { ...prev, lines: [...prev.lines, { seq: prev.lastSeq, kind: 'note', text }] };
 }

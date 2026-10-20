@@ -1,12 +1,15 @@
 import type { GameEvent } from '@coringa/engine';
+import type { RoomMessage } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
 import {
   appendHistory,
+  appendNote,
   CATCH_UP_TEXT,
   EMPTY_HISTORY,
   forGame,
   newLineCount,
   RESYNC_TEXT,
+  returnNote,
   roomNames,
   type HistoryState,
 } from '../../src/model/history.ts';
@@ -177,5 +180,66 @@ describe('newLineCount', () => {
     expect(newLineCount(more, 1)).toBe(3);
     expect(newLineCount(more, 0)).toBe(more.lines.length);
     expect(newLineCount(more, 4)).toBe(0);
+  });
+});
+
+describe('returnNote: a volta do oponente (spec §3.9)', () => {
+  const seat = (playerId: 'p1' | 'p2', nickname: string, connected: boolean) => ({
+    playerId,
+    nickname,
+    connected,
+    ready: true,
+    wantsRematch: false,
+  });
+  const room = (opponentConnected: boolean, extra: Partial<RoomMessage> = {}): RoomMessage => ({
+    t: 'room',
+    code: 'ABCD',
+    status: 'PLAYING',
+    seats: [seat('p1', 'André', true), seat('p2', 'Duda', opponentConnected)],
+    score: { p1: 0, p2: 0, draws: 0 },
+    gameNo: 1,
+    expiresAt: 0,
+    ...extra,
+  });
+
+  it('o oponente estava fora e voltou durante a partida: "Duda voltou"', () => {
+    expect(returnNote(room(false), room(true), 'p1')).toBe('Duda voltou');
+  });
+
+  it('quem vê pelo outro assento recebe o apelido do outro', () => {
+    const swapped = (connected: boolean): RoomMessage => ({
+      ...room(true),
+      seats: [seat('p1', 'André', connected), seat('p2', 'Duda', true)],
+    });
+    expect(returnNote(swapped(false), swapped(true), 'p2')).toBe('André voltou');
+  });
+
+  it('sem sala anterior, sem queda ou fora da partida, não há nota', () => {
+    expect(returnNote(null, room(true), 'p1')).toBeNull();
+    expect(returnNote(room(true), room(true), 'p1')).toBeNull();
+    expect(returnNote(room(true), room(false), 'p1')).toBeNull();
+    expect(returnNote(room(false), room(false), 'p1')).toBeNull();
+    expect(returnNote(room(false, { status: 'LOBBY' }), room(true, { status: 'LOBBY' }), 'p1')).toBeNull();
+    expect(returnNote(room(false), room(true, { status: 'FINISHED' }), 'p1')).toBeNull();
+  });
+
+  it('outra partida (gameNo) não conta como volta', () => {
+    expect(returnNote(room(false), room(true, { gameNo: 2 }), 'p1')).toBeNull();
+  });
+
+  it('sem o assento do outro em alguma das salas, não há nota', () => {
+    const lonely = (connected: boolean): RoomMessage => ({ ...room(connected), seats: [seat('p1', 'André', true)] });
+    expect(returnNote(lonely(false), room(true), 'p1')).toBeNull();
+    expect(returnNote(room(false), lonely(true), 'p1')).toBeNull();
+  });
+});
+
+describe('appendNote', () => {
+  it('acrescenta uma nota com o último seq, sem mexer na anterior', () => {
+    const next = appendNote(started, 'Duda voltou');
+    expect(next.lines.at(-1)).toEqual({ seq: started.lastSeq, kind: 'note', text: 'Duda voltou' });
+    expect(next.lines).toHaveLength(started.lines.length + 1);
+    expect(started.lines).toHaveLength(1);
+    expect(next.lastSeq).toBe(started.lastSeq);
   });
 });

@@ -83,6 +83,10 @@ export interface SideSpec {
   attackBuffs?: CardSpec[];
   defenseBuffs?: CardSpec[];
   guard?: CardSpec[];
+  /** Numéricas pendentes do Equipar (valores, na ordem de compra); com elas o lado ainda não confirmou. */
+  pending?: Rank[];
+  /** Já confirmou o Equipar (padrão: sim, salvo com `pending`). */
+  equipSubmitted?: boolean;
   /** Valores das numéricas, da primeira à última. */
   attackRow?: Rank[];
   defenseRow?: Rank[];
@@ -145,7 +149,7 @@ export function scenarioAt(spec: ViewSpec = {}): { state: GameState; view: Playe
     const kind: FaceKind = c;
     return { id, kind, suit: SUITS[n % SUITS.length]! };
   };
-  const numbers = (values: Rank[] | undefined, owner: PlayerId, row: RowName) =>
+  const numbers = (values: Rank[] | undefined, owner: PlayerId, row: RowName | 'PEND') =>
     (values ?? []).map((value, i) => ({
       id: `x-${owner}-${row}-${i}`,
       kind: 'NUM' as const,
@@ -157,8 +161,8 @@ export function scenarioAt(spec: ViewSpec = {}): { state: GameState; view: Playe
     const p = state.players.find((candidate) => candidate.id === owner)!;
     p.hand = (side.hand ?? []).map((c) => special(c, owner));
     if (side.hp !== undefined) p.hp = side.hp;
-    p.pending = [];
-    p.equipSubmitted = true;
+    p.pending = numbers(side.pending, owner, 'PEND');
+    p.equipSubmitted = side.equipSubmitted ?? side.pending === undefined;
     p.submittedDestinations = null;
     p.attackRow = numbers(side.attackRow, owner, 'ATK');
     p.defenseRow = numbers(side.defenseRow, owner, 'DEF');
