@@ -567,8 +567,9 @@ describe('janela de reação (spec §3.7)', () => {
     expect(m.connection.sent[0]).toMatchObject({ options: undefined });
     expect(inBar().queryByRole('button', { name: 'Passar' })).not.toBeInTheDocument();
     expect(inBar().getByText('Você passou; esperando a janela fechar…')).toBeInTheDocument();
-    // As respostas também saem: o servidor recusaria qualquer jogada depois do passe.
+    // As respostas também saem: o servidor recusaria qualquer jogada depois do passe, e a mão não escolhe mais.
     expect(inBar().queryByText(/Toque numa carta/)).not.toBeInTheDocument();
+    expect(handList().queryAllByRole('button')).toHaveLength(0);
   });
 
   it('um passe recusado devolve os controles', async () => {
@@ -591,6 +592,7 @@ describe('janela de reação (spec §3.7)', () => {
     expect(m.connection.sent[0]).toMatchObject({ action: { type: 'PASS' }, options: { auto: true } });
     expect(inBar().getByText('Sem resposta possível; passando')).toBeInTheDocument();
     expect(inBar().queryByRole('button', { name: 'Passar' })).not.toBeInTheDocument();
+    expect(handList().queryAllByRole('button')).toHaveLength(0);
   });
 
   it('com a chave desligada, o jogador clica em Passar', async () => {

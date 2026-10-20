@@ -125,9 +125,20 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
 
   return (
     <Panel panelRef={panelRef}>
-      <p data-numero className="font-texto text-base font-extrabold leading-tight tabular-nums">
-        {complete ? EQUIP_READY_TEXT : equipCardText(index + 1, total)}
-      </p>
+      {/* O cabeçalho leva o Desfazer e o Recomeçar: a altura do painel é curta no celular, e a mesa rola por cima dele. */}
+      <div className="flex items-center justify-between gap-2">
+        <p data-numero className="font-texto text-base font-extrabold leading-tight tabular-nums">
+          {complete ? EQUIP_READY_TEXT : equipCardText(index + 1, total)}
+        </p>
+        <div className="flex flex-none gap-2">
+          <button type="button" disabled={disabled || draft.length === 0} onClick={onUndo} className={SECONDARY}>
+            {UNDO_LABEL}
+          </button>
+          <button type="button" disabled={disabled || draft.length === 0} onClick={onReset} className={SECONDARY}>
+            {RESET_LABEL}
+          </button>
+        </div>
+      </div>
 
       {complete ? (
         <ol role="list" aria-label="Sua montagem" data-step="resumo" className="flex list-none flex-col gap-1 p-0 text-sm">
@@ -175,24 +186,16 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
         <NoticeLine notice={notice} />
       )}
 
-      <div className="flex flex-wrap gap-2">
-        {complete ? (
-          <TwoLine
-            title={CONFIRM_LABEL}
-            titleClass={PRIMARY_TITLE}
-            data-foco=""
-            disabled={disabled}
-            onClick={onConfirm}
-            className={`${PRIMARY} flex-1 pc:min-w-[220px] pc:flex-none`}
-          />
-        ) : null}
-        <button type="button" disabled={disabled || draft.length === 0} onClick={onUndo} className={SECONDARY}>
-          {UNDO_LABEL}
-        </button>
-        <button type="button" disabled={disabled || draft.length === 0} onClick={onReset} className={SECONDARY}>
-          {RESET_LABEL}
-        </button>
-      </div>
+      {complete ? (
+        <TwoLine
+          title={CONFIRM_LABEL}
+          titleClass={PRIMARY_TITLE}
+          data-foco=""
+          disabled={disabled}
+          onClick={onConfirm}
+          className={`${PRIMARY} w-full pc:w-auto pc:min-w-[220px]`}
+        />
+      ) : null}
     </Panel>
   );
 }

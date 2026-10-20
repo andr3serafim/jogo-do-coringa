@@ -106,6 +106,8 @@ function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
   const cardId = card?.id ?? null;
   const playKey = play?.key ?? null;
   const hasTargets = play?.targets != null;
+  // Depois do passe (manual, ou o automático) o servidor recusa o resto da janela: a mão não escolhe mais.
+  const passed = phase === 'REACTION' && (passedEpoch === state.epoch || snapshot.notice?.kind === 'autoPass');
 
   const moveFocus = useCallback((el: HTMLElement | null) => {
     if (!el) return;
@@ -152,7 +154,7 @@ function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
   };
 
   const selectCard = (id: string) => {
-    if (locked) return;
+    if (locked || passed) return;
     setPointedId(null);
     setSelection(cardId === id ? null : { epoch: state.epoch, cardId: id, playKey: null });
   };
@@ -220,7 +222,7 @@ function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
         acting={acting}
         pending={pending}
         disabled={locked}
-        passed={passedEpoch === state.epoch}
+        passed={passed}
         events={state.events}
         card={card}
         play={play}
@@ -292,7 +294,7 @@ function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
         remainingMs={remainingMs}
         selectedCardId={cardId}
         targetIds={targetIds}
-        onSelectCard={acting ? selectCard : undefined}
+        onSelectCard={acting && !passed ? selectCard : undefined}
         onSelectTarget={hasTargets ? chooseTarget : undefined}
         onSeen={(key) => session.markSeen(key)}
         onOpenGraveyard={() => setGraveyard('view')}

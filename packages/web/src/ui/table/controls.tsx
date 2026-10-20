@@ -8,7 +8,7 @@ export const SECONDARY =
 
 /** O botão principal da fase: ouro, com o título em tipo de madeira. Mais alto que o secundário e longe da mão. */
 export const PRIMARY =
-  'min-h-14 border-0 bg-ouro px-3.5 py-1.5 text-left text-tinta disabled:cursor-wait disabled:opacity-60 pc:min-h-12';
+  'min-h-14 justify-center border-0 bg-ouro px-3.5 py-1.5 text-left text-tinta disabled:cursor-wait disabled:opacity-60 pc:min-h-12';
 
 export const PRIMARY_TITLE = 'font-madeira text-[19px] uppercase leading-tight pc:text-[22px]';
 

@@ -91,6 +91,14 @@ function TableView({
   const self = board ? { ...view.self, attackRow: board.attackRow, defenseRow: board.defenseRow } : view.self;
   const draftIds = board ? new Set(view.self.pending.slice(0, moves.length).map((card) => card.id)) : NO_DRAFT;
 
+  // No celular a mesa rola por dentro e a sua fileira pode estar fora da vista: a última carta posta vem para a vista.
+  const draftKey = moves.join(',');
+  useEffect(() => {
+    if (draftKey === '') return;
+    const drafts = document.querySelectorAll('[data-rascunho]');
+    drafts[drafts.length - 1]?.scrollIntoView?.({ block: 'nearest' });
+  }, [draftKey]);
+
   const ui: TableUi = {
     marked: marks.cards,
     zones: marks.zones,
