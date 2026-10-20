@@ -1,28 +1,36 @@
-// A mesa jogável (spec §1.5, §3.4, §7): liga a `Table` (só vista) à `Session` pela barra de ação. Guarda a escolha da
-// mão em estado local, `{ época, carta, jogada }`, e monta as jogadas de `tablePlays` com a MESMA `view` e a lista
-// legal do último `state` (`snapshot.legal`).
+// A mesa jogável (spec §1.5, §3.4 a §3.8, §7): liga a `Table` (só vista) à `Session`. Em cada fase o painel de baixo é um:
+// a barra de ação (fase principal e janela de reação), o painel do Equipar carta a carta ou a escolha da ordem.
 //
-// A escolha só vale na época em que foi feita e enquanto a carta estiver na mão; a jogada escolhida é sempre
-// reencontrada pela chave nas jogadas do `state` atual, nunca guardada (o `make` dela fecha sobre a `view` velha).
-// O envio é `session.play(...)`, sem `await`: a mesa fica desligada pelo `pending` do snapshot até o `ack`.
+// Na barra, guarda a escolha da mão em estado local, `{ época, carta, jogada }`, e monta as jogadas de `tablePlays` com a
+// MESMA `view` e a lista legal do último `state` (`snapshot.legal`). A escolha só vale na época em que foi feita e enquanto
+// a carta estiver na mão; a jogada escolhida é sempre reencontrada pela chave nas jogadas do `state` atual, nunca guardada
+// (o `make` dela fecha sobre a `view` velha). O envio é `session.play(...)`, sem `await`, e só sai se a jogada ainda é
+// legal pelo papel (`isLegal`, a última linha de defesa).
 //
-// Teclado e foco (spec §7): quando chega o `state` da sua vez de jogar (época nova), o foco vai para a barra, sem
-// roubar de um campo de texto nem de um diálogo aberto. Escolher uma carta leva o foco à primeira jogada, e escolher
-// uma jogada com alvo, ao primeiro alvo. Esc cancela a escolha. Não há atalhos de uma tecla.
+// Controles desligados (`locked`): jogada em voo (`pending`), conexão caída (`reconnecting`, spec §6.2) e prazo do jogador
+// esgotado até chegar o `state` seguinte (spec §3.8).
+//
+// Teclado e foco (spec §7): quando chega o `state` da sua vez (época nova), o foco vai para o painel, sem roubar de um
+// campo de texto nem de um diálogo aberto. Escolher uma carta leva o foco à primeira jogada, e escolher uma jogada com
+// alvo, ao primeiro alvo. Esc ou Cancelar devolvem o foco à carta que abriu a escolha. Não há atalhos de uma tecla. O foco
+// que a própria mesa move não conta como interação do jogador (não cancela a ordem automática nem aponta/apaga marcas).
 import type { SpecialCard } from '@coringa/engine';
-import type { PlayerAction, StateMessage } from '@coringa/protocol';
+import type { Deadline, PlayerAction, StateMessage } from '@coringa/protocol';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { tablePlays, type CardPlay } from '../../model/plays.ts';
+import { isLegal, tablePlays, type CardPlay } from '../../model/plays.ts';
 import type { Session, SessionSnapshot } from '../../model/session.ts';
 import { useSession } from '../useSession.ts';
 import { ActionBar } from './ActionBar.tsx';
+import { EquipPanel } from './EquipPanel.tsx';
 import { GraveyardDialog, type GraveyardMode } from './GraveyardDialog.tsx';
 import { tableNames } from './labels.ts';
+import { OrderPanel } from './OrderPanel.tsx';
 import { Table } from './Table.tsx';
+import { useDeadlineExpired } from './useClock.ts';
 
 export interface PlayTableProps {
   session: Session;
-  /** Avisos acima da mesa ("Reconectando…"). */
+  /** Avisos extras acima da mesa. Os de conexão e de queda do oponente a própria mesa mostra. */
   banner?: ReactNode;
 }
 
@@ -48,6 +56,13 @@ function isTextEntry(el: Element | null): boolean {
   return el.isContentEditable || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement || el instanceof HTMLInputElement;
 }
 
+/** O botão da carta da mão com esse id, ou `null` se ela já saiu da mão. */
+function handButton(id: string | null): HTMLElement | null {
+  if (id === null) return null;
+  const el = [...document.querySelectorAll<HTMLElement>('[data-card-id]')].find((candidate) => candidate.dataset.cardId === id);
+  return el instanceof HTMLButtonElement ? el : null;
+}
+
 interface ViewProps extends PlayTableProps {
   snapshot: SessionSnapshot;
   state: StateMessage;
@@ -56,15 +71,26 @@ interface ViewProps extends PlayTableProps {
 function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
   const { view } = state;
   const { legal, pending } = snapshot;
+  const phase = view.phase.kind;
   const names = tableNames(snapshot.room, view.me);
-  // A barra existe nas fases de jogada. Equipar e a escolha da ordem têm painéis próprios (Tarefa 21).
-  const barPhase = view.phase.kind === 'ATTACK_MAIN' || view.phase.kind === 'REACTION';
+  const remainingMs = useCallback((deadline: Deadline) => session.remainingMs(deadline), [session]);
+  const now = useCallback(() => session.now(), [session]);
+  const timedOut = useDeadlineExpired(state.deadline, remainingMs);
+  const locked = pending || snapshot.status === 'reconnecting' || timedOut;
+
+  // A barra existe nas fases de jogada; o Equipar e a escolha da ordem têm painéis próprios.
+  const barPhase = phase === 'ATTACK_MAIN' || phase === 'REACTION';
   const acting = barPhase && legal.length > 0;
+  const equipping = phase === 'EQUIP' && snapshot.equipConfirmed === 'none' && legal.some((a) => a.type === 'EQUIP');
+  const ordering = phase === 'ORDER_CHOICE' && legal.some((a) => a.type === 'CHOOSE_ORDER');
   const plays = useMemo(() => tablePlays(view, legal), [view, legal]);
 
   const [selection, setSelection] = useState<Selection | null>(null);
   const [pointedId, setPointedId] = useState<string | null>(null);
   const [graveyard, setGraveyard] = useState<GraveyardMode | null>(null);
+  /** Época em que o jogador mandou o PASS: o servidor segura o passe e recusa o resto da janela. */
+  const [passedEpoch, setPassedEpoch] = useState<number | null>(null);
+  /** O painel de baixo (barra, Equipar ou ordem), para a mesa levar o foco a ele quando chega a sua vez. */
   const barRef = useRef<HTMLElement>(null);
   /** Foco movido pela própria mesa: não conta como interação do jogador. */
   const programmatic = useRef(false);
@@ -91,28 +117,48 @@ function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
     }
   }, []);
   const focusBar = useCallback(() => moveFocus(barRef.current), [moveFocus]);
+  /** Esc e Cancelar: o foco volta à carta da mão que abriu a escolha; se ela já saiu, à barra. */
+  const focusCard = useCallback((id: string | null) => moveFocus(handButton(id) ?? barRef.current), [moveFocus]);
 
   const clear = useCallback(() => {
     setSelection(null);
     setPointedId(null);
   }, []);
 
+  /** O jogador mexeu na mesa (clique, foco, mouse no painel da ordem). O foco que a mesa move não conta. */
+  const interact = () => {
+    if (!programmatic.current) session.interact();
+  };
+
   /** Manda a jogada e leva o foco à barra (a carta em que ele estava vai sumir), salvo se `refocus` for falso. */
   const send = (action: PlayerAction, refocus = true) => {
-    if (pending) return;
+    if (locked) return;
+    // A última linha de defesa: a jogada ainda vale pelo papel na lista legal deste `state`.
+    if (!isLegal(action, legal, view)) return;
     clear();
     if (refocus) focusBar();
-    void session.play(action).catch(noop);
+    const isPass = action.type === 'PASS';
+    if (isPass) setPassedEpoch(state.epoch);
+    // Um passe recusado (devagar, regra) devolve os controles; as recusas "esperar o state" mantêm o passe.
+    void session.play(action).then(
+      () => {
+        const notice = session.snapshot().notice;
+        if (isPass && (notice?.kind === 'rate' || notice?.kind === 'rule')) setPassedEpoch(null);
+      },
+      () => {
+        if (isPass) setPassedEpoch(null);
+      },
+    );
   };
 
   const selectCard = (id: string) => {
-    if (pending) return;
+    if (locked) return;
     setPointedId(null);
     setSelection(cardId === id ? null : { epoch: state.epoch, cardId: id, playKey: null });
   };
 
   const choosePlay = (option: CardPlay) => {
-    if (pending || card === null) return;
+    if (locked || card === null) return;
     if (option.targets === null) send(option.make());
     else setSelection({ epoch: state.epoch, cardId: card.id, playKey: option.key });
   };
@@ -122,8 +168,9 @@ function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
   };
 
   const cancel = () => {
+    const id = cardId;
     clear();
-    focusBar();
+    focusCard(id);
   };
 
   // Esc cancela a escolha (e só ela). O ouvinte é do documento: depois de escolher, o foco pode estar no corpo da página.
@@ -133,11 +180,11 @@ function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape' || event.defaultPrevented || document.querySelector('dialog[open]')) return;
       clear();
-      focusBar();
+      focusCard(cardId);
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [cardId, clear, focusBar]);
+  }, [cardId, clear, focusCard]);
 
   // Escolher a carta leva o foco à primeira jogada; escolher uma jogada com alvo, ao primeiro alvo.
   useEffect(() => {
@@ -146,8 +193,8 @@ function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
     moveFocus(barRef.current?.querySelector<HTMLElement>(`[data-step="${step}"] button:not(:disabled)`) ?? null);
   }, [cardId, playKey, hasTargets, moveFocus]);
 
-  // Chegou a sua vez de jogar (época nova): o foco vai para a barra, sem roubar de quem digita ou de um diálogo.
-  const turnEpoch = acting ? state.epoch : null;
+  // Chegou a sua vez de jogar (época nova): o foco vai para o painel, sem roubar de quem digita ou de um diálogo.
+  const turnEpoch = acting || equipping || ordering ? state.epoch : null;
   useEffect(() => {
     if (turnEpoch === null) return;
     if (document.querySelector('dialog[open]') || isTextEntry(document.activeElement)) return;
@@ -163,45 +210,95 @@ function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
 
   const targetIds = useMemo(() => new Set(play?.targets?.map((t) => t.id) ?? []), [play]);
 
-  const bar = barPhase ? (
-    <ActionBar
-      view={view}
-      names={names}
-      plays={plays}
-      acting={acting}
-      pending={pending}
-      card={card}
-      play={play}
-      pointedId={pointedId}
-      notice={snapshot.notice}
-      marked={snapshot.marks.cards}
-      onSeen={(id) => session.markSeen(id)}
-      onPoint={setPointedId}
-      onPlay={choosePlay}
-      onTarget={chooseTarget}
-      onSend={send}
-      onResurrect={() => setGraveyard('resurrect')}
-      onCancel={cancel}
-      barRef={barRef}
-    />
-  ) : undefined;
+  let panel: ReactNode;
+  if (barPhase) {
+    panel = (
+      <ActionBar
+        view={view}
+        names={names}
+        plays={plays}
+        acting={acting}
+        pending={pending}
+        disabled={locked}
+        passed={passedEpoch === state.epoch}
+        events={state.events}
+        card={card}
+        play={play}
+        pointedId={pointedId}
+        notice={snapshot.notice}
+        marked={snapshot.marks.cards}
+        // O foco que a própria mesa leva ao primeiro alvo não aponta nem apaga a marca: só o do jogador.
+        onSeen={(id) => {
+          if (!programmatic.current) session.markSeen(id);
+        }}
+        onPoint={(id) => {
+          if (!programmatic.current) setPointedId(id);
+        }}
+        onPlay={choosePlay}
+        onTarget={chooseTarget}
+        onSend={send}
+        onResurrect={() => setGraveyard('resurrect')}
+        onCancel={cancel}
+        barRef={barRef}
+      />
+    );
+  } else if (phase === 'EQUIP') {
+    panel = (
+      <EquipPanel
+        view={view}
+        names={names}
+        legal={legal}
+        draft={snapshot.equipDraft}
+        confirmed={snapshot.equipConfirmed}
+        pending={pending}
+        notice={snapshot.notice}
+        disabled={locked}
+        onChoose={(destination) => {
+          if (!locked) session.equipChoose(destination);
+        }}
+        onUndo={() => {
+          if (!locked) session.equipUndo();
+        }}
+        onReset={() => {
+          if (!locked) session.equipReset();
+        }}
+        onConfirm={() => {
+          if (!locked) void session.equipConfirm().catch(noop);
+        }}
+        panelRef={barRef}
+      />
+    );
+  } else if (phase === 'ORDER_CHOICE') {
+    panel = (
+      <OrderPanel
+        view={view}
+        names={names}
+        choosing={ordering}
+        autoAt={snapshot.orderAutoAt}
+        now={now}
+        disabled={locked}
+        notice={snapshot.notice}
+        onChoose={(first) => send({ type: 'CHOOSE_ORDER', first })}
+        onInteract={interact}
+        panelRef={barRef}
+      />
+    );
+  }
 
   return (
     <>
       <Table
         snapshot={snapshot}
-        remainingMs={(deadline) => session.remainingMs(deadline)}
+        remainingMs={remainingMs}
         selectedCardId={cardId}
         targetIds={targetIds}
         onSelectCard={acting ? selectCard : undefined}
         onSelectTarget={hasTargets ? chooseTarget : undefined}
         onSeen={(key) => session.markSeen(key)}
         onOpenGraveyard={() => setGraveyard('view')}
-        onInteract={() => {
-          if (!programmatic.current) session.interact();
-        }}
+        onInteract={interact}
         banner={banner}
-        actionBar={bar}
+        actionBar={panel}
       />
       <GraveyardDialog
         mode={graveyard}

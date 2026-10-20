@@ -13,6 +13,7 @@ export function TableCard({ card, inHand = false, ...rest }: TableCardProps) {
   const ui = useTableUi();
   const marked = ui.marked.has(card.id);
   const target = ui.targetIds.has(card.id);
+  const draft = ui.draftIds.has(card.id);
   const { onSelectCard, onSelectTarget, onSeen } = ui;
   let onSelect: (() => void) | undefined;
   if (inHand) {
@@ -26,6 +27,7 @@ export function TableCard({ card, inHand = false, ...rest }: TableCardProps) {
       card={card}
       marked={marked}
       target={target}
+      draft={draft}
       onSelect={onSelect}
       // O alvo na mesa é pequeno e fica antes da mão na ordem do DOM: o teclado usa a lista de alvos da barra
       // (mão → alvos → barra, spec §3.4), e o clique do mouse e o toque continuam valendo aqui.

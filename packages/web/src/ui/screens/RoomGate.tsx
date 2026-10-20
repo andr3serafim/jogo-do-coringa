@@ -17,6 +17,7 @@ import {
   type SeatSession,
 } from '../../model/storage.ts';
 import { Button, Panel, Screen, TextField, Title } from '../parts.tsx';
+import { ConnectionBanner } from '../table/Banners.tsx';
 import { NICKNAME_ERROR, OFFLINE, ROOM_FULL, ROOM_MISSING, TOO_MANY } from '../text.ts';
 import { useSession } from '../useSession.ts';
 import { PlayTable } from '../table/PlayTable.tsx';
@@ -362,12 +363,7 @@ function OnlineRoom({ session, code, reload }: { session: Session; code: string;
   }
   if (stop !== null || room === null) return <Connecting />;
 
-  const banner =
-    status === 'reconnecting' ? (
-      <p role="status" className="border-4 border-tinta bg-ouro px-3 py-2 font-bold">
-        {snapshot.slowRetry ? 'Muitas mensagens; reconectando em 30 s…' : 'Reconectando…'}
-      </p>
-    ) : null;
+  const banner = status === 'reconnecting' ? <ConnectionBanner slowRetry={snapshot.slowRetry} /> : null;
 
   if (room.status === 'LOBBY') {
     return (
@@ -377,8 +373,8 @@ function OnlineRoom({ session, code, reload }: { session: Session; code: string;
       </Screen>
     );
   }
-  // Partida em curso ou terminada: a mesa ocupa a tela inteira (sem a coluna do `Screen`). Sem o primeiro
-  // `state` ainda, só o aviso de conexão.
+  // Partida em curso ou terminada: a mesa ocupa a tela inteira (sem a coluna do `Screen`) e leva os próprios avisos
+  // (conexão, queda do oponente). Sem o primeiro `state` ainda, só o aviso de conexão.
   if (snapshot.state === null) return <Connecting />;
-  return <PlayTable session={session} banner={banner} />;
+  return <PlayTable session={session} />;
 }

@@ -181,7 +181,7 @@ function RowButton({ row, count, limit, onClick }: { row: RowName; count: number
   return (
     <button type="button" aria-labelledby={titleId} aria-describedby={detailId} onClick={onClick} className={`${BUTTON} flex flex-col items-start`}>
       <span id={titleId}>{ROW_NAME[row]}</span>
-      <span id={detailId} className="text-xs font-normal">
+      <span id={detailId} className="text-xs font-normal tabular-nums">
         {resurrectRowDetail(count, limit)}
       </span>
     </button>

@@ -34,6 +34,8 @@ export interface CardProps {
   quad?: boolean;
   /** No cemitério a carta perde a cor. */
   grave?: boolean;
+  /** Carta pendente do Equipar já posta na fileira como rascunho: translúcida, de borda tracejada (spec §3.5). */
+  draft?: boolean;
   /** Texto do `title` (padrão: o papel e o efeito da carta). */
   hint?: string;
   onSelect?: () => void;
@@ -149,6 +151,7 @@ export function Card({
   target = false,
   quad = false,
   grave = false,
+  draft = false,
   hint,
   onSelect,
   tabIndex,
@@ -161,6 +164,7 @@ export function Card({
   if (quad) name.push('quadra');
   if (target) name.push('alvo possível');
   if (marked) name.push('novo');
+  if (draft) name.push('rascunho');
 
   const classes = [
     'relative box-border border-tinta p-0 text-tinta rounded-[3px_5px_4px_6px]',
@@ -169,6 +173,7 @@ export function Card({
     card.kind === 'WILD' ? 'bg-ouro' : quad ? QUAD_FACE : 'bg-papel',
     selected ? '-translate-y-3.5 anel-ouro' : target ? 'anel-ouro' : '',
     grave ? 'grayscale opacity-90' : '',
+    draft ? 'border-dashed opacity-70' : '',
     onSelect ? 'cursor-pointer focus-visible:z-10' : '',
     className,
   ];
@@ -180,6 +185,7 @@ export function Card({
     'data-novo': marked ? 'true' : undefined,
     'data-alvo': target ? 'true' : undefined,
     'data-quad': quad ? 'true' : undefined,
+    'data-rascunho': draft ? 'true' : undefined,
     onPointerEnter: marked ? onSeen : undefined,
     onPointerDown: marked ? onSeen : undefined,
     onFocus: marked ? onSeen : undefined,

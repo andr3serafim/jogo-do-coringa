@@ -21,18 +21,20 @@ export interface PlayerFieldProps {
   name: string;
   /** Oponente fora da sala (só no campo dele). */
   away?: boolean;
+  /** O que ele faz no Equipar: "montando 3 cartas…" ou "pronto" (só no campo dele, só na rodada de Equipar). */
+  equip?: string;
   /** Controles do cabeçalho do oponente no celular (o botão do histórico). */
   tool?: ReactNode;
 }
 
-export function PlayerField({ side, view, player, name, away = false, tool }: PlayerFieldProps) {
+export function PlayerField({ side, view, player, name, away = false, equip, tool }: PlayerFieldProps) {
   const self = side === 'self';
   const zone: MarkZone = self ? 'selfHp' : 'opponentHp';
   const rowLabel = (kind: 'ataque' | 'defesa') => (self ? `Sua fileira de ${kind}` : `Fileira de ${kind} de ${name}`);
   const limit = view.config.rowLimit;
   const attack = <Row label={rowLabel('ataque')} kind="ATK" side={player} pressure={view.pressure} limit={limit} />;
   const defense = <Row label={rowLabel('defesa')} kind="DEF" side={player} pressure={view.pressure} limit={limit} />;
-  const info = <Info side={side} view={view} player={player} name={name} away={away} zone={zone} tool={tool} />;
+  const info = <Info side={side} view={view} player={player} name={name} away={away} equip={equip} zone={zone} tool={tool} />;
   const zones = <Zones player={player} name={name} view={view} />;
 
   return (
@@ -75,11 +77,12 @@ interface InfoProps {
   player: PublicPlayer;
   name: string;
   away: boolean;
+  equip: string | undefined;
   zone: MarkZone;
   tool: ReactNode;
 }
 
-function Info({ side, view, player, name, away, zone, tool }: InfoProps) {
+function Info({ side, view, player, name, away, equip, zone, tool }: InfoProps) {
   const self = side === 'self';
   const { zones, onSeen } = useTableUi();
   const marked = zones.has(zone);
@@ -97,6 +100,7 @@ function Info({ side, view, player, name, away, zone, tool }: InfoProps) {
           {self && name !== 'Você' ? <span className="text-sm font-normal pc:text-lg"> (você)</span> : null}
         </h2>
         {away ? <p className="text-xs font-bold">fora da sala</p> : null}
+        {equip ? <p className="text-xs font-bold">{equip}</p> : null}
       </div>
       {self ? null : (
         <div className="area-mao flex items-center gap-1.5">

@@ -5,9 +5,13 @@
 //
 // Alvo de toque ≥ 44 px (spec §3.2): as cartas da mesa são menores, então os alvos válidos também são listados aqui como
 // botões grandes. Os botões de duas linhas dão o nome só ao título (`aria-labelledby`) e a segunda linha vira descrição.
-import type { PlayerView, SpecialCard } from '@coringa/engine';
+//
+// Na janela de reação (spec §3.7) a barra ganha o gatilho com a prévia no alto e o botão Passar no lugar do principal. Depois
+// de um passe (manual ou automático) o servidor recusa qualquer outra jogada da janela, então as respostas saem da barra.
+// `disabled` desliga todos os controles (jogada em voo, reconexão, prazo esgotado); `pending` só diz "Enviando…".
+import type { GameEvent, PlayerView, SpecialCard } from '@coringa/engine';
 import type { PlayerAction } from '@coringa/protocol';
-import { useId, useMemo, type ComponentPropsWithoutRef, type ReactNode, type RefObject } from 'react';
+import { useMemo, type ReactNode, type RefObject } from 'react';
 import {
   ATTACK_LABEL,
   attackPreviewText,
@@ -21,6 +25,7 @@ import {
   END_TURN_LABEL,
   leavesText,
   noPlaysText,
+  PASSED_TEXT,
   PICK_CARD_TEXT,
   PROTECT_LABEL,
   reactingText,
@@ -37,7 +42,9 @@ import {
 import { previewsOf, previewsWithout, type Previews } from '../../model/preview.ts';
 import type { CardPlay, Target, TablePlays } from '../../model/plays.ts';
 import type { Notice } from '../../model/session.ts';
+import { PRIMARY, PRIMARY_TITLE, SECONDARY, TwoLine } from './controls.tsx';
 import { resurrectionsText, type TableNames } from './labels.ts';
+import { PassButton, ReactionNotice } from './ReactionPanel.tsx';
 
 export interface ActionBarProps {
   view: PlayerView;
@@ -45,8 +52,14 @@ export interface ActionBarProps {
   plays: TablePlays;
   /** É a sua vez de jogar ou de reagir: sem isso a barra só informa. */
   acting: boolean;
-  /** Uma jogada em voo: tudo desligado. */
+  /** Uma jogada em voo: a barra diz "Enviando…". */
   pending: boolean;
+  /** Controles desligados: jogada em voo, reconexão ou prazo esgotado. */
+  disabled: boolean;
+  /** Um PASS já saiu nesta janela de reação: o servidor recusa o resto, então só resta esperar. */
+  passed: boolean;
+  /** Os eventos do `state` atual (o gatilho do K precisa de quantos K entraram). */
+  events: readonly GameEvent[];
   /** A carta da mão tocada. */
   card: SpecialCard | null;
   /** A jogada escolhida para essa carta (a que pede alvo). */
@@ -68,70 +81,49 @@ export interface ActionBarProps {
   barRef: RefObject<HTMLElement | null>;
 }
 
-const SECONDARY =
-  'min-h-11 border-2 border-papel bg-transparent px-3.5 py-1.5 text-left text-[15px] font-bold text-papel disabled:cursor-wait disabled:opacity-60';
-
-interface TwoLineProps extends Omit<ComponentPropsWithoutRef<'button'>, 'children' | 'title'> {
-  title: string;
-  detail?: string;
-  titleClass?: string;
-  detailClass?: string;
-}
-
-/** Botão de duas linhas: o nome é o título; a segunda linha é a descrição. */
-function TwoLine({ title, detail, titleClass = '', detailClass = '', className = '', ...rest }: TwoLineProps) {
-  const titleId = useId();
-  const detailId = useId();
-  return (
-    <button
-      type="button"
-      aria-labelledby={titleId}
-      aria-describedby={detail ? detailId : undefined}
-      className={`flex flex-col items-start ${className}`}
-      {...rest}
-    >
-      <span id={titleId} className={titleClass}>
-        {title}
-      </span>
-      {detail ? (
-        <span id={detailId} className={detailClass}>
-          {detail}
-        </span>
-      ) : null}
-    </button>
-  );
-}
-
 /** As cartas de campo e de mão do jogador, por id: o Reflect e a Proteção nomeiam as que saem. */
 function ownCardsById(view: PlayerView): Map<string, SpecialCard> {
   const { hand, attackBuffs, defenseBuffs, guard } = view.self;
   return new Map([...hand, ...attackBuffs, ...defenseBuffs, ...guard].map((c) => [c.id, c]));
 }
 
-function pickCards(own: Map<string, SpecialCard>, ids: string[]): SpecialCard[] {
-  return ids.flatMap((id) => {
+/** As cartas dos ids, na ordem; `null` se alguma não estiver no campo nem na mão (a combinação não pode ser descrita). */
+export function pickCards(own: Map<string, SpecialCard>, ids: string[]): SpecialCard[] | null {
+  const cards: SpecialCard[] = [];
+  for (const id of ids) {
     const found = own.get(id);
-    return found ? [found] : [];
-  });
+    if (!found) return null;
+    cards.push(found);
+  }
+  return cards;
 }
 
 export function ActionBar(props: ActionBarProps) {
-  const { view, names, plays, acting, pending, card, play, pointedId, notice, barRef } = props;
+  const { view, names, plays, acting, pending, disabled, card, play, pointedId, notice, barRef } = props;
   const opponent = names.opponent;
   const previews = useMemo(() => previewsOf(view), [view]);
   const cardPlays = card ? (plays.byCard.get(card.id) ?? []) : [];
   const targets = play?.targets ?? null;
   const pointed = targets?.find((t) => t.id === pointedId) ?? null;
+  const reacting = view.phase.kind === 'REACTION';
+  // Depois do passe, manual ou automático, só resta esperar a janela fechar.
+  const passed = reacting && (props.passed || notice?.kind === 'autoPass');
+  const open = acting && !passed;
+  // O gatilho já traz a prévia do ataque: a ameaça não se repete.
+  const triggered = reacting && open && view.phase.kind === 'REACTION' && view.phase.trigger === 'ATTACK';
+  const canPass = reacting && open && plays.pass;
 
   return (
     <section ref={barRef} tabIndex={-1} aria-label="Ações" className="flex flex-col gap-2.5 text-papel pc:gap-1.5">
-      <Status {...{ view, names, acting, pending, card, play, cardPlays, plays, notice }} />
+      {reacting && open ? <ReactionNotice view={view} names={names} threat={previews.threat} events={props.events} /> : null}
 
-      {acting && card && play === null && cardPlays.length > 0 ? (
+      <Status {...{ view, names, acting, pending, card, play, cardPlays, plays, notice, passed }} />
+
+      {open && card && play === null && cardPlays.length > 0 ? (
         <ul role="list" aria-label="Jogadas" data-step="plays" className="flex list-none flex-wrap gap-2 p-1.5">
           {cardPlays.map((option) => (
             <li key={option.key}>
-              <button type="button" disabled={pending} onClick={() => props.onPlay(option)} className={SECONDARY}>
+              <button type="button" disabled={disabled} onClick={() => props.onPlay(option)} className={SECONDARY}>
                 {option.label}
               </button>
             </li>
@@ -139,13 +131,13 @@ export function ActionBar(props: ActionBarProps) {
         </ul>
       ) : null}
 
-      {acting && targets ? (
+      {open && targets ? (
         <TargetList
           view={view}
           names={names}
           targets={targets}
           before={previews}
-          pending={pending}
+          disabled={disabled}
           marked={props.marked}
           onSeen={props.onSeen}
           onPoint={props.onPoint}
@@ -159,31 +151,36 @@ export function ActionBar(props: ActionBarProps) {
             {brokenEffectText(previews, previewsWithout(view, pointed.id), opponent, 'long')}
           </PreviewRow>
         ) : null}
-        {previews.threat.outcome !== 'NO_ATTACK' ? (
+        {previews.threat.outcome !== 'NO_ATTACK' && !triggered ? (
           <PreviewRow label={threatLabel(opponent)}>{threatPreviewText(previews.threat, opponent)}</PreviewRow>
         ) : null}
       </div>
 
       {/* Com uma carta escolhida a conversa é sobre ela: os botões próprios (que não usam a escolha) voltam com o Cancelar. */}
-      {acting && card === null ? <OwnPlays {...props} /> : null}
+      {open && card === null ? <OwnPlays {...props} /> : null}
 
-      {acting && (plays.finish || card) ? (
+      {open && (plays.finish || canPass || card) ? (
         <div className="flex gap-2">
+          {canPass ? <PassButton disabled={disabled} onPass={() => props.onSend({ type: 'PASS' })} /> : null}
           {plays.finish ? (
             <TwoLine
               title={plays.finish.type === 'DECLARE_ATTACK' ? ATTACK_LABEL : END_TURN_LABEL}
               detail={
                 plays.finish.type === 'DECLARE_ATTACK' ? attackPreviewText(previews.mine, opponent) : EMPTY_ATTACK_TEXT
               }
-              titleClass="font-madeira text-[19px] uppercase leading-tight pc:text-[22px]"
-              detailClass="text-xs font-semibold pc:text-[13px]"
-              disabled={pending}
+              titleClass={PRIMARY_TITLE}
+              detailClass="text-xs font-semibold tabular-nums pc:text-[13px]"
+              disabled={disabled}
               onClick={() => props.onSend(plays.finish!)}
-              className="min-h-14 flex-1 border-0 bg-ouro px-3.5 py-1.5 text-left text-tinta disabled:cursor-wait disabled:opacity-60 pc:min-h-12 pc:min-w-[300px] pc:flex-none"
+              className={`${PRIMARY} flex-1 pc:min-w-[300px] pc:flex-none`}
             />
           ) : null}
           {card ? (
-            <button type="button" onClick={props.onCancel} className={`${SECONDARY} ${plays.finish ? 'min-h-14 pc:min-h-12' : ''}`}>
+            <button
+              type="button"
+              onClick={props.onCancel}
+              className={`${SECONDARY} ${plays.finish || canPass ? 'min-h-14 pc:min-h-12' : ''}`}
+            >
               {CANCEL_LABEL}
             </button>
           ) : null}
@@ -216,10 +213,19 @@ interface StatusProps {
   cardPlays: CardPlay[];
   plays: TablePlays;
   notice: Notice | null;
+  /** Um passe saiu nesta janela. */
+  passed: boolean;
 }
 
-/** A linha de cima: "Enviando…", o aviso de uma jogada recusada, ou o que fazer agora. */
-function Status({ view, names, acting, pending, card, play, cardPlays, plays, notice }: StatusProps) {
+/** A linha de cima: o passe automático, "Enviando…", o aviso de uma jogada recusada, ou o que fazer agora. */
+function Status({ view, names, acting, pending, card, play, cardPlays, plays, notice, passed }: StatusProps) {
+  if (notice?.kind === 'autoPass') {
+    return (
+      <p role="status" className="text-sm font-bold leading-snug">
+        {notice.text}
+      </p>
+    );
+  }
   if (pending) {
     return (
       <p role="status" className="text-sm font-bold leading-snug">
@@ -231,6 +237,13 @@ function Status({ view, names, acting, pending, card, play, cardPlays, plays, no
     return (
       <p role="status" className="text-sm font-bold leading-snug text-ouro">
         {notice.text}
+      </p>
+    );
+  }
+  if (passed) {
+    return (
+      <p role="status" className="text-sm font-bold leading-snug">
+        {PASSED_TEXT}
       </p>
     );
   }
@@ -253,7 +266,7 @@ interface TargetListProps {
   names: TableNames;
   targets: Target[];
   before: Previews;
-  pending: boolean;
+  disabled: boolean;
   marked: ReadonlySet<string>;
   onSeen: (id: string) => void;
   onPoint: (id: string | null) => void;
@@ -261,7 +274,7 @@ interface TargetListProps {
 }
 
 /** Os alvos válidos como botões grandes, cada um com o efeito de quebrá-lo (o motor, sobre a `view` sem a carta). */
-function TargetList({ view, names, targets, before, pending, marked, onSeen, onPoint, onTarget }: TargetListProps) {
+function TargetList({ view, names, targets, before, disabled, marked, onSeen, onPoint, onTarget }: TargetListProps) {
   const opponent = names.opponent;
   const cards = useMemo(() => {
     const { attackBuffs, defenseBuffs, guard } = view.opponent;
@@ -296,8 +309,8 @@ function TargetList({ view, names, targets, before, pending, marked, onSeen, onP
               title={targetButtonText(targetCard, target.zone, opponent)}
               detail={targetEffectText(targetRole(target.zone), effects.get(target.id) ?? '')}
               titleClass="text-[15px] font-bold leading-tight pc:text-sm"
-              detailClass="text-xs font-normal leading-tight pc:text-[11px]"
-              disabled={pending}
+              detailClass="text-xs font-normal leading-tight tabular-nums pc:text-[11px]"
+              disabled={disabled}
               onClick={() => onTarget(target.id)}
               onPointerEnter={point}
               onPointerDown={seen}
@@ -314,7 +327,7 @@ function TargetList({ view, names, targets, before, pending, marked, onSeen, onP
 }
 
 /** Reflect, Anular o Reflect, Proteger-se e Ressuscitar: as jogadas de várias cartas, quando são possíveis. */
-function OwnPlays({ view, plays, pending, onSend, onResurrect }: ActionBarProps) {
+function OwnPlays({ view, plays, disabled, onSend, onResurrect }: ActionBarProps) {
   const own = ownCardsById(view);
   const items: ReactNode[] = [];
   const add = (key: string, title: string, detail: string, onClick: () => void) =>
@@ -325,24 +338,25 @@ function OwnPlays({ view, plays, pending, onSend, onResurrect }: ActionBarProps)
         detail={detail}
         titleClass="text-[15px] font-bold leading-tight"
         detailClass="text-xs font-normal leading-tight"
-        disabled={pending}
+        disabled={disabled}
         onClick={onClick}
         className={`${SECONDARY} gap-0.5`}
       />,
     );
 
   const { reflect, cancelReflect, protect } = plays;
+  // Uma carta que não está na mão nem no campo não pode ser descrita: sem a lista de quem sai, o botão não aparece.
   if (reflect?.type === 'REFLECT') {
     const cards = pickCards(own, [reflect.kId, reflect.jId, reflect.qId]);
-    add('reflect', REFLECT_LABEL, leavesText(cards, 'hand'), () => onSend(reflect));
+    if (cards) add('reflect', REFLECT_LABEL, leavesText(cards, 'hand'), () => onSend(reflect));
   }
   if (cancelReflect?.type === 'CANCEL_REFLECT') {
     const cards = pickCards(own, [cancelReflect.kId, cancelReflect.jId, cancelReflect.qId]);
-    add('cancel', CANCEL_REFLECT_LABEL, leavesText(cards, 'hand'), () => onSend(cancelReflect));
+    if (cards) add('cancel', CANCEL_REFLECT_LABEL, leavesText(cards, 'hand'), () => onSend(cancelReflect));
   }
   if (protect?.type === 'PROTECT_FROM_REFLECT') {
     const cards = pickCards(own, [protect.jId, protect.qId, protect.kId]);
-    add('protect', PROTECT_LABEL, leavesText(cards, 'field'), () => onSend(protect));
+    if (cards) add('protect', PROTECT_LABEL, leavesText(cards, 'field'), () => onSend(protect));
   }
   if (plays.resurrect.length > 0) {
     add('resurrect', RESURRECT_LABEL, resurrectionsText(view.self.resurrectionCount), onResurrect);

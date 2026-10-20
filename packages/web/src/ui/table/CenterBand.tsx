@@ -1,11 +1,13 @@
 // A faixa central de tinta (spec §3.1 e §10.1): o que é dos dois jogadores. Rodada e tipo, de quem é a vez, o
 // relógio, a Pressão da mesa (com o aviso de anti-travamento), a iniciativa, o monte e o cemitério. Os números
 // de jogo usam a fonte de texto com algarismos tabulares e nenhuma textura (spec §10.7); a textura só vai no
-// título da rodada. A urgência do relógio, os anúncios e o "tempo esgotado" são da Tarefa 21.
-import type { PlayerId, PlayerView } from '@coringa/engine';
+// título da rodada. O relógio (spec §3.8, §10.3): em urgência (últimos 5 s) o disco fica vermelho, com o número em papel e o
+// anel mais grosso, por cor e por forma, e nunca pisca; na janela de reação ele é grande; esgotado, diz "Tempo esgotado".
+// Os anúncios para leitor de tela saem por uma região viva escondida que mora aqui, fora do relógio.
+import type { PlayerView } from '@coringa/engine';
 import type { Deadline } from '@coringa/protocol';
-import { useEffect, useState } from 'react';
-import { clockFace } from '../../model/clock.ts';
+import type { ClockFace } from '../../model/clock.ts';
+import { CLOCK_LABEL, CLOCK_URGENT_LABEL, pausedTurnText, TIMES_UP_TEXT } from '../../model/copy.ts';
 import { zoneKey } from '../../model/marks.ts';
 import { Card, cardName } from '../cards/Card.tsx';
 import { useTableUi } from './context.ts';
@@ -18,6 +20,7 @@ import {
   type TableNames,
 } from './labels.ts';
 import { NovoChip } from './NovoChip.tsx';
+import { useClock } from './useClock.ts';
 
 export interface CenterBandProps {
   view: PlayerView;
@@ -30,15 +33,13 @@ export interface CenterBandProps {
   onOpenGraveyard?: () => void;
 }
 
-/** Quanto tempo a face do relógio espera para ser redesenhada: o bastante para nunca pular um segundo. */
-const TICK_MS = 250;
-
 export function CenterBand({ view, names, deadline, remainingMs, pausedTurnMs, onOpenGraveyard }: CenterBandProps) {
   const ui = useTableUi();
   const { noDamageStreak } = view;
   const untilStall = view.config.antiStallRounds - noDamageStreak;
   const pressureMarked = ui.zones.has('pressure');
   const seenPressure = ui.onSeen && pressureMarked ? () => ui.onSeen?.(zoneKey('pressure')) : undefined;
+  const { face, live } = useClock(deadline, remainingMs, view.me, pausedTurnMs);
 
   return (
     <section
@@ -52,7 +53,12 @@ export function CenterBand({ view, names, deadline, remainingMs, pausedTurnMs, o
         <p className="text-xs font-semibold leading-tight text-ouro pc:text-sm">{turnText(view, names)}</p>
       </div>
 
-      {deadline ? <Clock deadline={deadline} remainingMs={remainingMs} me={view.me} pausedTurnMs={pausedTurnMs} /> : null}
+      {/* A região viva dos anúncios fica sempre montada: uma região criada já preenchida pode não ser lida. */}
+      <div aria-live="assertive" aria-atomic="true" data-anuncio className="sr-only">
+        {live.text === '' ? null : <span key={live.id}>{live.text}</span>}
+      </div>
+
+      {face ? <ClockBlock face={face} /> : null}
 
       {/* No celular, a pressão e a iniciativa formam a segunda linha da faixa (`order-last`); no PC, ficam na linha única. */}
       <div
@@ -100,32 +106,38 @@ export function CenterBand({ view, names, deadline, remainingMs, pausedTurnMs, o
 
 // ---------------------------------------------------------------------------------------------
 
-function Clock({
-  deadline,
-  remainingMs,
-  me,
-  pausedTurnMs,
-}: {
-  deadline: Deadline;
-  remainingMs: (deadline: Deadline) => number;
-  me: PlayerId;
-  pausedTurnMs: number | undefined;
-}) {
-  // O relógio é do servidor; o componente só se redesenha de tempos em tempos para a face acompanhar.
-  const [, setTick] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setTick((tick) => tick + 1), TICK_MS);
-    return () => clearInterval(id);
-  }, []);
-  const face = clockFace(deadline, remainingMs(deadline), me, pausedTurnMs);
-  if (face === null) return null;
+const DISC_SMALL = 'size-12 text-lg pc:size-[60px] pc:text-[22px]';
+/** Na janela de reação o prazo é de 8 s e a decisão é urgente: o relógio cresce. */
+const DISC_BIG = 'size-16 text-3xl pc:size-[72px] pc:text-4xl';
+
+/**
+ * O relógio e o que vem sob ele. Urgência por cor e por forma (disco vermelho, número em papel, anel de 7 px no lugar de
+ * 4 px) e sem animação nenhuma. Os números ficam fora da textura (spec §10.7).
+ */
+function ClockBlock({ face }: { face: ClockFace }) {
+  const size = face.kind === 'REACTION' ? DISC_BIG : DISC_SMALL;
+  const look = face.expired
+    ? 'border-4 border-papel/60'
+    : face.urgent
+      ? 'border-[7px] border-ouro bg-vermelho text-papel'
+      : 'border-4 border-ouro';
   return (
-    <div
-      role="timer"
-      aria-label="Tempo do prazo"
-      className="grid size-12 flex-none place-items-center rounded-full border-4 border-ouro font-texto text-lg font-extrabold leading-none tabular-nums pc:size-[60px] pc:text-[22px]"
-    >
-      {face.seconds}
+    <div className="flex max-w-[7.5rem] flex-none flex-col items-center gap-0.5 text-center">
+      <div
+        role="timer"
+        aria-label={face.urgent ? CLOCK_URGENT_LABEL : CLOCK_LABEL}
+        data-urgente={face.urgent ? 'true' : undefined}
+        className={`grid flex-none place-items-center rounded-full font-texto font-extrabold leading-none tabular-nums ${size} ${look}`}
+      >
+        {face.seconds}
+      </div>
+      {face.expired ? <p className="text-[11px] font-bold uppercase leading-tight">{TIMES_UP_TEXT}</p> : null}
+      {/* O turno de quem espera fica congelado durante a janela de reação do outro. */}
+      {face.pausedTurnSeconds !== null && !face.mine ? (
+        <p data-numero className="font-texto text-[11px] font-semibold leading-tight tabular-nums">
+          {pausedTurnText(face.pausedTurnSeconds)}
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -10,6 +10,8 @@ export interface TableUi {
   zones: ReadonlySet<MarkZone>;
   targetIds: ReadonlySet<string>;
   selectedCardId: string | null;
+  /** Ids das cartas pendentes do Equipar que já estão na fileira como rascunho (spec §3.5). */
+  draftIds: ReadonlySet<string>;
   onSelectCard?: (id: string) => void;
   onSelectTarget?: (id: string) => void;
   /** O jogador viu a carta ou a zona (`zone:<nome>`): a marca apaga. */
@@ -21,6 +23,7 @@ export const TableUiContext = createContext<TableUi>({
   zones: new Set(),
   targetIds: new Set(),
   selectedCardId: null,
+  draftIds: new Set(),
 });
 
 export const useTableUi = (): TableUi => useContext(TableUiContext);

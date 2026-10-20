@@ -702,7 +702,7 @@ describe('barra de ação: quando não é a sua vez', () => {
     expect(inBar().getByText('Duda pode reagir…')).toBeInTheDocument();
   });
 
-  it('no Equipar, na escolha da ordem e no fim, a barra de jogadas não existe (são painéis da Tarefa 21)', () => {
+  it('no Equipar e na escolha da ordem, a barra de jogadas não existe (são painéis próprios, em phases.test.tsx)', () => {
     for (const phase of [{ kind: 'EQUIP' }, { kind: 'ORDER_CHOICE', player: 'p1' }] as const) {
       const { unmount } = mount({ ...DRAFT, phase });
       expect(screen.queryByRole('region', { name: 'Ações' })).not.toBeInTheDocument();
@@ -812,10 +812,12 @@ describe('barra de ação: foco e a sessão (spec §7)', () => {
     expect(bar()).not.toHaveFocus();
   });
 
-  it('na escolha da ordem o foco não vai para a barra (a barra nem existe)', () => {
+  it('na escolha da ordem o foco vai para o painel da ordem (não há barra), sem contar como interação', () => {
     const m = mount({ ...DRAFT, phase: 'WAITING' });
+    const interact = vi.spyOn(m.session, 'interact');
     act(() => m.connection.emitState(stateMessage(scenarioAt({ ...DRAFT, phase: { kind: 'ORDER_CHOICE', player: 'p1' } }).view, { seq: 2, epoch: 2 })));
-    expect(document.body).toHaveFocus();
+    expect(screen.getByRole('region', { name: 'Escolha da ordem' })).toHaveFocus();
+    expect(interact).not.toHaveBeenCalled();
   });
 
   it('qualquer clique ou foco na mesa chama interact()', async () => {

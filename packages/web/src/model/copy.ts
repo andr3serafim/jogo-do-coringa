@@ -1,5 +1,6 @@
 // Textos das jogadas da mesa, em pt-BR (spec §3.4). Fora da meta de cobertura: é só texto.
 import type { AttackPreview, Card, RowName, SpecialCard } from '@coringa/engine';
+import type { DeadlineKind } from '@coringa/protocol';
 import { cardText, ROW_NAME } from '@coringa/sim/text';
 import { previewChanged, type Previews } from './preview.ts';
 
@@ -165,3 +166,111 @@ export const resurrectRowText = (card: Card): string => `Em qual fileira entra $
 export const resurrectRowDetail = (count: number, limit: number): string => `no fim da fileira · ${count} de ${limit}`;
 export const CLOSE_LABEL = 'Fechar';
 export const BACK_LABEL = 'Voltar';
+
+// ---------------------------------------------------------------------------------------------
+// Equipar (spec §3.5)
+
+export const UNDO_LABEL = 'Desfazer';
+export const RESET_LABEL = 'Recomeçar';
+export const CONFIRM_LABEL = 'Confirmar';
+
+/** A fila das numéricas pendentes: "Carta 1 de 3". */
+export const equipCardText = (index: number, total: number): string => `Carta ${index} de ${total}`;
+export const equipWaitingText = (opponent: string): string => `Esperando ${opponent} montar…`;
+export const equipConfirmedText = (opponent: string): string => `Você já confirmou; esperando ${opponent}`;
+export const NO_PENDING_TEXT = 'Você não recebeu numéricas nesta rodada';
+export const EQUIP_READY_TEXT = 'Tudo no lugar: confira a montagem e confirme.';
+
+/** A quadra que o rascunho forma: o bônus é o valor, e cada quadra nova dá uma Ressurreição. */
+export const equipQuadText = (value: number): string => `forma quadra de ${value}: +${value} e 1 Ressurreição`;
+
+/** O que sai da fileira numa troca: " (sai 9♠)". */
+export const leavingText = (card: Card): string => ` (sai ${cardText(card)})`;
+
+/** O que o oponente está fazendo no Equipar, no campo dele. */
+export const equipOpponentText = (pendingCount: number, submitted: boolean): string =>
+  submitted || pendingCount === 0 ? 'pronto' : `montando ${pendingCount} ${pendingCount === 1 ? 'carta' : 'cartas'}…`;
+
+/** A carta já posicionada no resumo: "7♥ → Fileira de Ataque". */
+export const placedText = (card: Card, destination: string): string => `${cardText(card)} → ${destination}`;
+
+// ---------------------------------------------------------------------------------------------
+// Escolha da ordem (spec §3.6)
+
+export const ORDER_QUESTION = 'Você tem a iniciativa: atacar primeiro ou em segundo?';
+export const ORDER_AUTO_TEXT = '"Atacar primeiro" sai sozinho; toque para escolher com calma.';
+export const ORDER_MANUAL_TEXT = 'Escolha quando quiser, dentro do prazo.';
+export const orderWaitingText = (opponent: string): string => `${opponent} está escolhendo a ordem…`;
+
+// ---------------------------------------------------------------------------------------------
+// Janela de reação (spec §3.7)
+
+export const PASS_LABEL = 'Passar';
+export const PASSED_TEXT = 'Você passou; esperando a janela fechar…';
+
+/** O gatilho e a prévia, para quem responde. A conta é do motor (`previewAttack`); aqui só a frase. */
+export function attackDeclaredText(p: AttackPreview, opponent: string): string {
+  const head = `${opponent} declarou ataque:`;
+  switch (p.outcome) {
+    case 'NO_ATTACK':
+      return `${head} sem cartas no Ataque`;
+    // Com Reflect a conta não é contra a sua Defesa: o motor usa metade da DEF base de quem ataca.
+    case 'REFLECTED':
+      return `${head} ${p.attack} → ${
+        p.reflected > 0 ? `seu Reflect devolve ${p.reflected} de dano a ${opponent}` : 'seu Reflect anula o ataque'
+      }`;
+    case 'GUARD_ABSORBS':
+      return `${head} ${p.attack} contra sua Defesa ${p.defense} → seu K absorve`;
+    case 'ABSOLUTE_DEFENSE':
+      return `${head} ${p.attack} contra sua Defesa ${p.defense} → sua Defesa Absoluta anula`;
+    case 'DAMAGE':
+      return `${head} ${p.attack} contra sua Defesa ${p.defense} → ${p.absolute ? 'Ataque Absoluto, ' : ''}dano ${p.damage}`;
+  }
+}
+
+/** "Duda pôs 2 K na Guarda"; sem os eventos (recarga, resync) não se sabe quantos: "Duda pôs K na Guarda". */
+export const guardPlayedText = (opponent: string, count: number | null): string =>
+  `${opponent} pôs ${count === null ? '' : `${count} `}K na Guarda`;
+
+export const reflectPlayedText = (opponent: string): string => `${opponent} lançou um Reflect`;
+
+/** O turno do jogador que espera, congelado durante a janela de reação. */
+export const pausedTurnText = (seconds: number): string => `seu turno: ${seconds} s, pausado`;
+
+// ---------------------------------------------------------------------------------------------
+// Relógio e avisos (spec §3.8, §3.9, §6.2)
+
+export const TIMES_UP_TEXT = 'Tempo esgotado';
+export const CLOCK_LABEL = 'Tempo do prazo';
+export const CLOCK_URGENT_LABEL = 'Tempo do prazo: pouco tempo';
+export const RECONNECTING_TEXT = 'Reconectando…';
+export const SLOW_RETRY_TEXT = 'Muitas mensagens; reconectando em 30 s…';
+
+/** O anúncio (leitor de tela) do começo de um prazo do próprio jogador, por tipo de prazo. */
+const CLOCK_START_TEXT: Record<DeadlineKind, string> = {
+  TURN: 'Sua vez',
+  REACTION: 'Sua reação',
+  EQUIP: 'Monte suas cartas',
+  ORDER: 'Escolha a ordem',
+};
+
+const secondsText = (seconds: number): string => `${seconds} ${seconds === 1 ? 'segundo' : 'segundos'}`;
+
+export function clockAnnouncementText(kind: DeadlineKind, announcement: 'start' | 'ten' | 'five', seconds: number): string {
+  if (announcement === 'start') return `${CLOCK_START_TEXT[kind]}: ${secondsText(seconds)}`;
+  return announcement === 'ten' ? '10 segundos' : '5 segundos';
+}
+
+/** "m:ss", para a contagem do W.O. */
+export function mmss(totalSeconds: number): string {
+  const seconds = Math.max(0, totalSeconds);
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+}
+
+/** O aviso de queda; sem `woAt` ainda não há contagem. */
+export const droppedText = (opponent: string, remaining: string | null): string =>
+  remaining === null ? `${opponent} caiu.` : `${opponent} caiu. Se não voltar em ${remaining}, você vence por W.O.`;
+
+/** A versão fixa do aviso, para a região viva do leitor de tela (a contagem não é anunciada). */
+export const droppedAnnouncement = (opponent: string): string =>
+  `${opponent} caiu. Se não voltar a tempo, você vence por W.O.`;

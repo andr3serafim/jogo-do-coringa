@@ -6,8 +6,11 @@
 import type { PlayerId } from '@coringa/engine';
 import type { Deadline, StateMessage } from '@coringa/protocol';
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { equipOpponentText } from '../../model/copy.ts';
+import { completeDraft, draftBoard } from '../../model/equip.ts';
 import { newLineCount } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
+import { Banners } from './Banners.tsx';
 import { CenterBand } from './CenterBand.tsx';
 import { TableUiContext, type TableUi } from './context.ts';
 import { Hand } from './Hand.tsx';
@@ -38,6 +41,7 @@ export interface TableProps {
 }
 
 const NO_TARGETS: ReadonlySet<string> = new Set();
+const NO_DRAFT: ReadonlySet<string> = new Set();
 
 /** Sem `state` ainda não há o que desenhar. */
 export function Table(props: TableProps) {
@@ -73,11 +77,26 @@ function TableView({
     return () => document.documentElement.classList.remove('mesa-ativa');
   }, []);
 
+  // Equipar (spec §3.5): o que já foi escolhido entra na sua fileira como rascunho, e os totais e a quadra seguem o motor
+  // (`draftBoard`). Depois de confirmar, o que foi mandado (o rascunho mais a regra de estouro) fica à vista até a revelação.
+  const equipping = view.phase.kind === 'EQUIP';
+  const moves = !equipping
+    ? []
+    : snapshot.equipConfirmed === 'thisPage'
+      ? completeDraft(view, snapshot.equipDraft)
+      : snapshot.equipConfirmed === 'none'
+        ? snapshot.equipDraft
+        : [];
+  const board = moves.length > 0 ? draftBoard(view, moves) : null;
+  const self = board ? { ...view.self, attackRow: board.attackRow, defenseRow: board.defenseRow } : view.self;
+  const draftIds = board ? new Set(view.self.pending.slice(0, moves.length).map((card) => card.id)) : NO_DRAFT;
+
   const ui: TableUi = {
     marked: marks.cards,
     zones: marks.zones,
     targetIds,
     selectedCardId,
+    draftIds,
     onSelectCard,
     onSelectTarget,
     onSeen,
@@ -116,6 +135,7 @@ function TableView({
         <h1 className="sr-only">Mesa da partida</h1>
 
         <div className="flex min-h-0 flex-1 flex-col pc:flex-[0_1_1100px]">
+          <Banners snapshot={snapshot} remainingMs={remainingMs} />
           {banner}
           {/* No celular os campos e a faixa rolam por dentro, em telas baixas; a mão e a barra de ação ficam sempre à vista. */}
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-none pc:flex-none pc:overflow-visible [&>*]:flex-none">
@@ -125,6 +145,7 @@ function TableView({
               player={view.opponent}
               name={names.opponent}
               away={theirs?.connected === false}
+              equip={equipping ? equipOpponentText(view.opponent.pendingCount, view.opponent.equipSubmitted) : undefined}
               tool={
                 <HistoryButton
                   panelId={panelId}
@@ -143,7 +164,7 @@ function TableView({
               pausedTurnMs={state.pausedTurnMs}
               onOpenGraveyard={onOpenGraveyard}
             />
-            <PlayerField side="self" view={view} player={view.self} name={names.self} />
+            <PlayerField side="self" view={view} player={self} name={names.self} />
           </div>
           <div className="flex flex-none flex-col pb-[env(safe-area-inset-bottom)] pc:flex-1 pc:flex-row pc:items-center pc:gap-7 pc:px-6 pc:pb-0 pc:text-papel">
             <Hand cards={view.self.hand} />
