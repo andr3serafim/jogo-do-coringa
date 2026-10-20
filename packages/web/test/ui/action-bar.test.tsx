@@ -843,6 +843,18 @@ describe('barra de ação: foco e a sessão (spec §7)', () => {
     expect(screen.queryByRole('img', { name: /, novo$/ })).not.toBeInTheDocument();
   });
 
+  it('focar o botão do cemitério apaga o "novo" das cartas suas que foram para lá (teclado)', async () => {
+    const m = mount();
+    await m.user.click(inBar().getByRole('button', { name: 'Atacar' }));
+    // Duda destruiu o K da sua Guarda: ele sai do campo e entra no cemitério.
+    const guardK = m.view.self.guard[0]!;
+    const { view: next } = scenarioAt({ ...DRAFT, self: { ...DRAFT.self, guard: [] }, graveyard: [3, 5, 8, guardK] });
+    act(() => m.connection.emitState(stateMessage(next, { seq: 2, epoch: 2 })));
+    const button = screen.getByRole('button', { name: /^Ver o cemitério.*, novo$/ });
+    act(() => button.focus());
+    expect(screen.getByRole('button', { name: /^Ver o cemitério/ })).not.toHaveAccessibleName(/, novo$/);
+  });
+
   it('o alvo marcado, na lista da barra, também apaga a marca quando é focado', async () => {
     const m = mount();
     await m.user.click(inBar().getByRole('button', { name: 'Atacar' }));

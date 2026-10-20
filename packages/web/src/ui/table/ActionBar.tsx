@@ -124,7 +124,7 @@ export function ActionBar(props: ActionBarProps) {
   const pointed = targets?.find((t) => t.id === pointedId) ?? null;
 
   return (
-    <section ref={barRef} tabIndex={-1} aria-label="Ações" className="flex flex-col gap-2.5 text-papel pc:gap-2">
+    <section ref={barRef} tabIndex={-1} aria-label="Ações" className="flex flex-col gap-2.5 text-papel pc:gap-1.5">
       <Status {...{ view, names, acting, pending, card, play, cardPlays, plays, notice }} />
 
       {acting && card && play === null && cardPlays.length > 0 ? (
@@ -280,7 +280,7 @@ function TargetList({ view, names, targets, before, pending, marked, onSeen, onP
       role="list"
       aria-label="Alvos"
       data-step="targets"
-      className="flex max-h-[34dvh] list-none flex-col gap-2 overflow-y-auto p-1.5 pc:grid pc:max-h-48 pc:grid-cols-2 pc:gap-1.5"
+      className="flex max-h-[34dvh] list-none flex-col gap-2 overflow-y-auto p-1.5 pc:grid pc:max-h-[8.5rem] pc:grid-cols-2 pc:gap-1.5"
     >
       {targets.map((target) => {
         const targetCard = cards.get(target.id);

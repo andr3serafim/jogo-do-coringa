@@ -170,6 +170,7 @@ function Graveyard({ view, onOpen }: { view: PlayerView; onOpen: (() => void) | 
         onClick={onOpen}
         onPointerEnter={seen}
         onPointerDown={seen}
+        onFocus={seen}
       >
         {content}
       </button>
