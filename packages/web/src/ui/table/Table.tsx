@@ -3,6 +3,7 @@
 // PC. É só vista: as interações chegam por props (`onSelectCard`, `onSelectTarget`, `onSeen`, `onOpenGraveyard`) e
 // a barra de ação entra pelo `actionBar`. A textura de xilogravura vai só nos títulos e no grão do papel, por baixo
 // do conteúdo (spec §10.7).
+import type { PlayerId } from '@coringa/engine';
 import type { Deadline, StateMessage } from '@coringa/protocol';
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { newLineCount } from '../../model/history.ts';
@@ -168,7 +169,7 @@ function RoomFooter({
   names,
 }: {
   room: NonNullable<SessionSnapshot['room']>;
-  me: string;
+  me: PlayerId;
   names: TableNames;
 }) {
   const [mine, theirs] = me === 'p1' ? [room.score.p1, room.score.p2] : [room.score.p2, room.score.p1];

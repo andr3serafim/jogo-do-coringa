@@ -3,12 +3,12 @@
 // (Tarefa 21) têm testes próprios.
 import { attackPower, defensePower, quadValues, type GameEvent, type PlayerView } from '@coringa/engine';
 import type { Deadline, RoomMessage, StateMessage } from '@coringa/protocol';
-import { act, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { zoneKey } from '../../src/model/marks.ts';
 import { Session, type SessionSnapshot } from '../../src/model/session.ts';
-import { Card, cardName } from '../../src/ui/cards/Card.tsx';
+import { Card, cardName, QUAD_FACE } from '../../src/ui/cards/Card.tsx';
 import { Table, type TableProps } from '../../src/ui/table/Table.tsx';
 import { FakeConnection, scenarioAt, stateMessage, type ViewSpec } from '../fixtures.ts';
 import { roomMessage, seriousViolations } from './support.tsx';
@@ -593,6 +593,59 @@ describe('mesa: histórico (spec §3.1, §7, §10.5)', () => {
     expect(within(panel()).getByRole('button', { name: 'Fechar o histórico' })).toHaveFocus();
   });
 
+  describe('rolagem da lista', () => {
+    /** A lista de rolagem com medidas de mentira (o jsdom não faz layout): 1000 de altura, 200 visíveis. */
+    function scroller(top: number) {
+      const mounted = mount(DRAFT, { state: { seq: 2, events: [attack] } });
+      const list = within(panel()).getByRole('list').parentElement!;
+      let scrollTop = top;
+      Object.defineProperty(list, 'scrollHeight', { configurable: true, value: 1000 });
+      Object.defineProperty(list, 'clientHeight', { configurable: true, value: 200 });
+      Object.defineProperty(list, 'scrollTop', {
+        configurable: true,
+        get: () => scrollTop,
+        set: (value: number) => {
+          scrollTop = value;
+        },
+      });
+      const addLine = () => {
+        act(() => mounted.connection.emitState(stateMessage(view, { seq: 5, events: [guard] })));
+        mounted.rerender(<Table {...mounted.props} snapshot={mounted.session.snapshot()} />);
+      };
+      return { list, addLine, top: () => scrollTop };
+    }
+
+    it('no fim da lista, a linha nova a puxa para baixo', () => {
+      const { list, addLine, top } = scroller(800);
+      fireEvent.scroll(list);
+      addLine();
+      expect(top()).toBe(1000);
+    });
+
+    it('quem subiu para ler o que ficou para cima não é interrompido', () => {
+      const { list, addLine, top } = scroller(100);
+      fireEvent.scroll(list);
+      addLine();
+      expect(top()).toBe(100);
+    });
+
+    it('perto do fim (até 24 px) ainda conta como no fim', () => {
+      const { list, addLine, top } = scroller(780);
+      fireEvent.scroll(list);
+      addLine();
+      expect(top()).toBe(1000);
+    });
+
+    it('voltar ao fim com a rolagem religa o acompanhamento', () => {
+      const { list, addLine, top } = scroller(100);
+      fireEvent.scroll(list);
+      list.scrollTop = 800;
+      fireEvent.scroll(list);
+      addLine();
+      expect(top()).toBe(1000);
+    });
+  });
+
   it('um novo só: singular', () => {
     withHistory(2);
     expect(screen.getByRole('button', { name: 'Histórico, 1 novo' })).toBeInTheDocument();
@@ -746,8 +799,30 @@ describe('Card', () => {
     for (const size of ['field', 'mini', 'hand'] as const) {
       for (const props of [{}, { selected: true }, { target: true }, { quad: true }, { onSelect: () => undefined }]) {
         const { container, unmount } = render(<Card card={k} size={size} {...props} />);
-        const tokens = (container.firstElementChild?.className ?? '').split(/s+/);
+        const tokens = (container.firstElementChild?.className ?? '').split(/\s+/);
+        expect(tokens.length).toBeGreaterThan(5); // o teste só vale se de fato leu as classes
         expect(tokens.filter((token) => /(^|:)shadow-/.test(token))).toEqual([]);
+        unmount();
+      }
+    }
+  });
+
+  it('um fundo só por carta: duas classes bg-* disputam a propriedade e a ordem do CSS gerado decide', () => {
+    // Na versão com `bg-papel` fixo mais `bg-ouro`, o CSS do Tailwind põe `.bg-papel` depois e o papel vence:
+    // a quadra e o Selvagem perdiam o ouro.
+    const cases = [
+      { name: 'comum', card: k, props: {}, bg: 'bg-papel' },
+      { name: 'Selvagem', card: wild, props: {}, bg: 'bg-ouro' },
+      { name: 'quadra', card: seven, props: { quad: true }, bg: QUAD_FACE },
+      { name: 'Selvagem em quadra', card: wild, props: { quad: true }, bg: 'bg-ouro' },
+      { name: 'selecionada', card: k, props: { selected: true, onSelect: () => undefined }, bg: 'bg-papel' },
+      { name: 'alvo', card: k, props: { target: true }, bg: 'bg-papel' },
+    ];
+    for (const { name, card, props, bg } of cases) {
+      for (const size of ['field', 'mini', 'hand'] as const) {
+        const { container, unmount } = render(<Card card={card} size={size} {...props} />);
+        const tokens = (container.firstElementChild?.className ?? '').split(/\s+/);
+        expect(tokens.filter((token) => /^bg-/.test(token)), `${name} (${size})`).toEqual([bg]);
         unmount();
       }
     }

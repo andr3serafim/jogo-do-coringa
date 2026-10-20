@@ -54,6 +54,9 @@ export interface HistoryPanelProps {
   footer?: ReactNode;
 }
 
+/** Até onde do fim da lista ainda conta como "no fim". */
+const NEAR_END_PX = 24;
+
 const CLOSED = 'max-pc:sr-only';
 const OPEN =
   'max-pc:fixed max-pc:inset-x-0 max-pc:bottom-0 max-pc:z-40 max-pc:max-h-[70dvh] max-pc:border-t-4 max-pc:border-ouro max-pc:pb-[max(1rem,env(safe-area-inset-bottom))]';
@@ -62,15 +65,30 @@ export function HistoryPanel({ id, open, onClose, lines, baseSeq, footer }: Hist
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  /** A lista está no fim (ou perto): só então uma linha nova a puxa para baixo. Quem lê o que ficou para cima não é interrompido. */
+  const atEnd = useRef(true);
+
   useEffect(() => {
     if (open) closeRef.current?.focus();
   }, [open]);
 
-  // Linha nova: a lista rola até o fim, onde ela chega.
+  // Abrir a gaveta mostra o que há de mais novo.
   useEffect(() => {
     const el = scrollRef.current;
+    atEnd.current = true;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [lines.length, open]);
+  }, [open]);
+
+  // Linha nova: a lista rola até o fim, onde ela chega, se já estava lá.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el && atEnd.current) el.scrollTop = el.scrollHeight;
+  }, [lines.length]);
+
+  const onScroll = () => {
+    const el = scrollRef.current;
+    if (el) atEnd.current = el.scrollHeight - el.scrollTop - el.clientHeight <= NEAR_END_PX;
+  };
 
   const onKeyDown = (event: KeyboardEvent) => {
     if (open && event.key === 'Escape') onClose();
@@ -106,7 +124,7 @@ export function HistoryPanel({ id, open, onClose, lines, baseSeq, footer }: Hist
             Fechar
           </button>
         </div>
-        <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto pr-1">
+        <div ref={scrollRef} onScroll={onScroll} className="min-h-0 flex-1 overflow-y-auto pr-1">
           <ol role="list" aria-live="polite" className="flex list-none flex-col gap-[7px] text-sm leading-[1.35] pc:text-[14px]">
             {lines.map((line, index) => (
               <li

@@ -63,6 +63,13 @@ export function cardHint(card: EngineCard, as?: WildRole): string {
   return HINT[card.kind];
 }
 
+/**
+ * Face das cartas de uma quadra: 45% de ouro sobre o papel, misturados numa cor opaca. Um `bg-ouro/45` solto seria
+ * translúcido e deixaria a capa verde ou rosa aparecer por baixo da carta; misturada, a face segue de papel claro
+ * (o vermelho do valor fica com ≈ 5,4:1).
+ */
+export const QUAD_FACE = 'bg-[color-mix(in_oklab,var(--color-ouro)_45%,var(--color-papel))]';
+
 interface SizeClasses {
   box: string;
   value: string;
@@ -153,9 +160,10 @@ export function Card({
   if (marked) name.push('novo');
 
   const classes = [
-    'relative box-border border-tinta bg-papel p-0 text-tinta rounded-[3px_5px_4px_6px]',
+    'relative box-border border-tinta p-0 text-tinta rounded-[3px_5px_4px_6px]',
     SIZE[size].box,
-    card.kind === 'WILD' ? 'bg-ouro' : quad ? 'bg-ouro/45' : '',
+    // Um fundo só: duas classes `bg-*` disputam a mesma propriedade e quem ganha é a ordem do CSS gerado, não a da lista.
+    card.kind === 'WILD' ? 'bg-ouro' : quad ? QUAD_FACE : 'bg-papel',
     selected ? '-translate-y-3.5 anel-ouro' : target ? 'anel-ouro' : '',
     grave ? 'grayscale opacity-90' : '',
     onSelect ? 'cursor-pointer focus-visible:z-10' : '',
