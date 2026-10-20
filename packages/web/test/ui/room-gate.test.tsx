@@ -80,7 +80,9 @@ describe('entrada: sem token', () => {
     const { api } = setup({ seated: true });
     expect(api.info).not.toHaveBeenCalled();
     expect(api.connect).toHaveBeenCalledExactlyOnceWith(CODE, seat());
-    expect(screen.getByRole('region', { name: 'Sala' })).toHaveTextContent(`Sala ${CODE}: LOBBY`);
+    // A sala no LOBBY mostra o lobby de verdade (código, assentos), não o espaço reservado.
+    expect(screen.getByRole('heading', { name: 'Sala de espera' })).toBeInTheDocument();
+    expect(screen.getByText(CODE)).toBeInTheDocument();
   });
 
   it('LOBBY com vaga pede o apelido (já preenchido), entra, guarda o token e conecta', async () => {
@@ -417,8 +419,31 @@ describe('sessão online', () => {
     expect(screen.getByRole('region', { name: 'Sala' })).toHaveTextContent(`Sala ${CODE}: PLAYING`);
   });
 
-  it('axe: sem violações na sala (espaço reservado)', async () => {
+  it('o lobby ocupa a tela da sala: um só <main>, com o aviso de reconexão por cima', () => {
+    const { api, container } = setup({ seated: true });
+    expect(container.querySelectorAll('main')).toHaveLength(1);
+    act(() => api.connections[0]!.emitClosed(1006, false));
+    expect(screen.getByRole('status')).toHaveTextContent('Reconectando…');
+    expect(container.querySelectorAll('main')).toHaveLength(1);
+    expect(screen.getByRole('button', { name: 'Estou pronto' })).toBeDisabled();
+  });
+
+  it('"Sair da sala" no lobby manda leave, e o fechamento 1000 leva ao início', async () => {
+    const { api, user } = setup({ seated: true });
+    await user.click(screen.getByRole('button', { name: 'Sair da sala' }));
+    expect(api.connections[0]!.calls).toContain('leave');
+    act(() => api.connections[0]!.emitClosed(1000, true));
+    expect(window.location.pathname).toBe('/');
+  });
+
+  it('axe: sem violações na sala (lobby, dentro da tela inteira)', async () => {
     const { container } = setup({ seated: true });
+    expect(await seriousViolations(container)).toEqual([]);
+  });
+
+  it('axe: sem violações na sala fora do lobby (espaço reservado)', async () => {
+    const { api, container } = setup({ seated: true });
+    act(() => api.connections[0]!.emitRoom(roomMessage({ status: 'PLAYING' })));
     expect(await seriousViolations(container)).toEqual([]);
   });
 });

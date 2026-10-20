@@ -1,5 +1,5 @@
-// Entrar numa sala (spec §2.2) e viver nela (§6.2, §6.3). Por enquanto, o lobby e a mesa são um espaço reservado
-// com o status da sala: as Tarefas 18 e seguintes o trocam pelas telas de verdade.
+// Entrar numa sala (spec §2.2) e viver nela (§6.2, §6.3). O lobby é a tela de verdade; a mesa e o fim de partida
+// ainda são um espaço reservado com o status da sala: as Tarefas 19 e seguintes o trocam.
 import { HttpError, normalizeCode, normalizeNickname, parseTarget } from '@coringa/protocol';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { openStore } from '../../app/browser-store.ts';
@@ -19,6 +19,7 @@ import {
 import { Button, Panel, Screen, TextField, Title } from '../parts.tsx';
 import { NICKNAME_ERROR, OFFLINE, ROOM_FULL, ROOM_MISSING, TOO_MANY } from '../text.ts';
 import { useSession } from '../useSession.ts';
+import { Lobby } from './Lobby.tsx';
 import { Stopped } from './Stopped.tsx';
 
 /** Marca no `sessionStorage`: a página já recarregou uma vez por causa de uma versão nova (spec §6.3, 4001). */
@@ -367,12 +368,16 @@ function OnlineRoom({ session, code, reload }: { session: Session; code: string;
           {snapshot.slowRetry ? 'Muitas mensagens; reconectando em 30 s…' : 'Reconectando…'}
         </p>
       ) : null}
-      {/* Espaço reservado: o lobby (Tarefa 18) e a mesa (Tarefa 19 em diante) entram aqui. */}
-      <section aria-label="Sala">
-        <p>
-          Sala {code}: {room.status}
-        </p>
-      </section>
+      {room.status === 'LOBBY' ? (
+        <Lobby session={session} />
+      ) : (
+        // Espaço reservado: a mesa e o fim de partida (Tarefa 19 em diante) entram aqui.
+        <section aria-label="Sala">
+          <p>
+            Sala {code}: {room.status}
+          </p>
+        </section>
+      )}
     </Screen>
   );
 }
