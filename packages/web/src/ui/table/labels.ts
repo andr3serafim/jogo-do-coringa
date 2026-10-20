@@ -1,5 +1,6 @@
 // Textos da mesa em pt-BR (spec §3.1). Só frases; o que é regra vem do motor.
-import type { PlayerView, SpecialCard } from '@coringa/engine';
+import type { PlayerId, PlayerView, SpecialCard } from '@coringa/engine';
+import type { RoomMessage } from '@coringa/protocol';
 
 /** O papel escrito em cada carta da mão (spec §3.1). */
 export const HAND_ROLE: Record<SpecialCard['kind'], string> = {
@@ -13,6 +14,13 @@ export const HAND_ROLE: Record<SpecialCard['kind'], string> = {
 export interface TableNames {
   self: string;
   opponent: string;
+}
+
+/** Os apelidos da sala: o seu e o do oponente ("Você" e "Oponente" enquanto a sala não chegou). */
+export function tableNames(room: RoomMessage | null, me: PlayerId): TableNames {
+  const mine = room?.seats.find((seat) => seat.playerId === me);
+  const theirs = room?.seats.find((seat) => seat.playerId !== me);
+  return { self: mine?.nickname ?? 'Você', opponent: theirs?.nickname ?? 'Oponente' };
 }
 
 const plural = (n: number, one: string, many: string): string => (n === 1 ? one : many);

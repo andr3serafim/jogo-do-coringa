@@ -3,7 +3,7 @@ import type { Card as EngineCard } from '@coringa/engine';
 import { Card, type CardProps } from '../cards/Card.tsx';
 import { useTableUi } from './context.ts';
 
-type TableCardProps = Omit<CardProps, 'marked' | 'target' | 'onSelect' | 'onSeen'> & {
+type TableCardProps = Omit<CardProps, 'marked' | 'target' | 'onSelect' | 'tabIndex' | 'onSeen'> & {
   card: EngineCard;
   /** Carta da mão: o toque escolhe a carta (e não o alvo). */
   inHand?: boolean;
@@ -27,6 +27,9 @@ export function TableCard({ card, inHand = false, ...rest }: TableCardProps) {
       marked={marked}
       target={target}
       onSelect={onSelect}
+      // O alvo na mesa é pequeno e fica antes da mão na ordem do DOM: o teclado usa a lista de alvos da barra
+      // (mão → alvos → barra, spec §3.4), e o clique do mouse e o toque continuam valendo aqui.
+      tabIndex={!inHand && onSelect ? -1 : undefined}
       onSeen={onSeen ? () => onSeen(card.id) : undefined}
     />
   );

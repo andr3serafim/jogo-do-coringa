@@ -37,6 +37,8 @@ export interface CardProps {
   /** Texto do `title` (padrão: o papel e o efeito da carta). */
   hint?: string;
   onSelect?: () => void;
+  /** Só para a carta que é botão (`onSelect`): `-1` a tira da ordem do Tab, quando outro botão faz a mesma coisa. */
+  tabIndex?: number;
   /** O jogador passou o mouse, tocou ou focou numa carta marcada: a marca apaga. */
   onSeen?: () => void;
   className?: string;
@@ -66,7 +68,7 @@ export function cardHint(card: EngineCard, as?: WildRole): string {
 /**
  * Face das cartas de uma quadra: 45% de ouro sobre o papel, misturados numa cor opaca. Um `bg-ouro/45` solto seria
  * translúcido e deixaria a capa verde ou rosa aparecer por baixo da carta; misturada, a face segue de papel claro
- * (o vermelho do valor fica com ≈ 5,4:1).
+ * (o vermelho do valor fica com ≈ 4,70:1; não suba o ouro acima de 55%, a margem é fina).
  */
 export const QUAD_FACE = 'bg-[color-mix(in_oklab,var(--color-ouro)_45%,var(--color-papel))]';
 
@@ -149,6 +151,7 @@ export function Card({
   grave = false,
   hint,
   onSelect,
+  tabIndex,
   onSeen,
   className = '',
 }: CardProps) {
@@ -200,7 +203,7 @@ export function Card({
 
   if (onSelect) {
     return (
-      <button type="button" {...common} aria-pressed={selected} onClick={onSelect}>
+      <button type="button" {...common} aria-pressed={selected} tabIndex={tabIndex} onClick={onSelect}>
         {inside}
       </button>
     );

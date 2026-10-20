@@ -1,7 +1,7 @@
 // A mesa da Peleja desenhada a partir da `view` do último `state` (spec §3.1, §3.2, §3.3, §10): o oponente na
 // capa verde, em cima; a faixa central de tinta; você na capa rosa, embaixo, com a mão; e a coluna do histórico no
-// PC. É só vista: as interações chegam por props (`onSelectCard`, `onSelectTarget`, `onSeen`, `onOpenGraveyard`) e
-// a barra de ação entra pelo `actionBar`. A textura de xilogravura vai só nos títulos e no grão do papel, por baixo
+// PC. É só vista: as interações chegam por props (`onSelectCard`, `onSelectTarget`, `onSeen`, `onOpenGraveyard`,
+// `onInteract`) e a barra de ação entra pelo `actionBar`. Quem liga isso à sessão é a `PlayTable`. A textura de xilogravura vai só nos títulos e no grão do papel, por baixo
 // do conteúdo (spec §10.7).
 import type { PlayerId } from '@coringa/engine';
 import type { Deadline, StateMessage } from '@coringa/protocol';
@@ -12,7 +12,7 @@ import { CenterBand } from './CenterBand.tsx';
 import { TableUiContext, type TableUi } from './context.ts';
 import { Hand } from './Hand.tsx';
 import { HistoryButton, HistoryPanel } from './History.tsx';
-import type { TableNames } from './labels.ts';
+import { tableNames, type TableNames } from './labels.ts';
 import { PlayerField } from './PlayerField.tsx';
 
 export interface TableProps {
@@ -29,6 +29,8 @@ export interface TableProps {
   onSeen?: (key: string) => void;
   /** Sem ele, o cemitério é só informação. */
   onOpenGraveyard?: () => void;
+  /** Um clique ou foco em qualquer parte da mesa (a sessão cancela a confirmação automática da ordem). */
+  onInteract?: () => void;
   /** Avisos acima da mesa ("Reconectando…"). */
   banner?: ReactNode;
   /** A barra de ação, embaixo da mão. */
@@ -54,6 +56,7 @@ function TableView({
   onSelectTarget,
   onSeen,
   onOpenGraveyard,
+  onInteract,
   banner,
   actionBar,
 }: TableProps & { state: StateMessage }) {
@@ -80,9 +83,8 @@ function TableView({
     onSeen,
   };
 
-  const mine = room?.seats.find((seat) => seat.playerId === me);
   const theirs = room?.seats.find((seat) => seat.playerId !== me);
-  const names: TableNames = { self: mine?.nickname ?? 'Você', opponent: theirs?.nickname ?? 'Oponente' };
+  const names = tableNames(room, me);
 
   const closeHistory = () => {
     setHistoryOpen(false);
@@ -93,6 +95,9 @@ function TableView({
     <TableUiContext value={ui}>
       <main
         aria-label="Mesa"
+        onPointerDownCapture={onInteract}
+        onClickCapture={onInteract}
+        onFocusCapture={onInteract}
         className="relative isolate flex h-dvh flex-col overflow-y-auto overflow-x-hidden overscroll-none bg-capa-voce pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] text-tinta pc:flex-row pc:justify-center pc:bg-tinta"
       >
         <svg width="0" height="0" aria-hidden="true" focusable="false" className="absolute">

@@ -19,7 +19,7 @@ import {
 import { Button, Panel, Screen, TextField, Title } from '../parts.tsx';
 import { NICKNAME_ERROR, OFFLINE, ROOM_FULL, ROOM_MISSING, TOO_MANY } from '../text.ts';
 import { useSession } from '../useSession.ts';
-import { Table } from '../table/Table.tsx';
+import { PlayTable } from '../table/PlayTable.tsx';
 import { Lobby } from './Lobby.tsx';
 import { Stopped } from './Stopped.tsx';
 
@@ -380,12 +380,5 @@ function OnlineRoom({ session, code, reload }: { session: Session; code: string;
   // Partida em curso ou terminada: a mesa ocupa a tela inteira (sem a coluna do `Screen`). Sem o primeiro
   // `state` ainda, só o aviso de conexão.
   if (snapshot.state === null) return <Connecting />;
-  return (
-    <Table
-      snapshot={snapshot}
-      remainingMs={(deadline) => session.remainingMs(deadline)}
-      onSeen={(key) => session.markSeen(key)}
-      banner={banner}
-    />
-  );
+  return <PlayTable session={session} banner={banner} />;
 }

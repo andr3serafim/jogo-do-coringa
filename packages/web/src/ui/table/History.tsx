@@ -91,7 +91,10 @@ export function HistoryPanel({ id, open, onClose, lines, baseSeq, footer }: Hist
   };
 
   const onKeyDown = (event: KeyboardEvent) => {
-    if (open && event.key === 'Escape') onClose();
+    if (!open || event.key !== 'Escape') return;
+    // Tratado aqui: o Esc que cancela a escolha da mão (um ouvinte do documento) olha `defaultPrevented` e deixa passar.
+    event.preventDefault();
+    onClose();
   };
 
   return (
