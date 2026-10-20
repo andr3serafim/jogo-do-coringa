@@ -986,14 +986,15 @@ describe('correções da revisão da Tarefa 20', () => {
     expect(card()).toHaveFocus();
   });
 
-  it('sem a carta na mão (saiu na mesma época), o foco cai na barra', async () => {
+  it('a carta que sai da mão leva a escolha junto: o Esc não tem mais o que cancelar', async () => {
     const m = mount();
     await m.user.click(handList().getByRole('button', { name: /^A de / }));
     const without = scenarioAt({ ...DRAFT, self: { ...DRAFT.self, hand: ['K', 'Q'] } }).view;
     act(() => m.connection.emitState(stateMessage(without, { seq: 2, epoch: 1 })));
     await m.user.keyboard('{Escape}');
-    // A escolha já tinha caído com a carta; o Esc não tem mais o que cancelar e o foco segue onde estava.
+    // O retorno do foco à barra (quando a carta já não está na mão) é só defesa: sem carta não há escolha nem Esc ouvido.
     expect(handList().queryByRole('button', { name: /^A de / })).not.toBeInTheDocument();
+    expect(document.querySelectorAll('[aria-pressed="true"]')).toHaveLength(0);
   });
 
   it('pickCards não descarta ids em silêncio: com uma carta faltando, não há combinação', () => {
