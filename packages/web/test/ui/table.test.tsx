@@ -741,6 +741,18 @@ describe('Card', () => {
     expect(screen.getByRole('img')).toHaveAttribute('title', expect.stringMatching(/J, Q ou A/));
   });
 
+  it('nenhum utilitário de box-shadow na carta: o halo de foco e o anel ouro são os donos dele', () => {
+    // Um `shadow-*` (camada de utilitários) apagaria o halo global de `:focus-visible` (camada base) e disputaria o anel.
+    for (const size of ['field', 'mini', 'hand'] as const) {
+      for (const props of [{}, { selected: true }, { target: true }, { quad: true }, { onSelect: () => undefined }]) {
+        const { container, unmount } = render(<Card card={k} size={size} {...props} />);
+        const tokens = (container.firstElementChild?.className ?? '').split(/s+/);
+        expect(tokens.filter((token) => /(^|:)shadow-/.test(token))).toEqual([]);
+        unmount();
+      }
+    }
+  });
+
   it('no cemitério perde a cor', () => {
     render(<Card card={k} size="mini" grave />);
     expect(screen.getByRole('img').className).toContain('grayscale');

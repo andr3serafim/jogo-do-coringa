@@ -2,6 +2,10 @@
 // madeira (sem textura, spec §10.7) e naipe em SVG próprio. Três tamanhos: `field` (fileiras, preenche a coluna
 // da grade), `mini` (Guarda, buffs, cemitério) e `hand` (a mão). Com `onSelect` vira botão; sem, é uma imagem
 // com nome acessível ("7 de copas, sai primeiro, novo").
+//
+// Nenhum utilitário mexe no `box-shadow` de uma carta: o halo de foco global (`:focus-visible`, camada base) e o
+// anel ouro de alvo e seleção (`anel-ouro`) são os dois donos dele. A sombra das cartas da mão é um `drop-shadow`
+// (filtro), que não disputa o `box-shadow`.
 import type { Card as EngineCard } from '@coringa/engine';
 import type { ReactNode } from 'react';
 import { Coringa } from './Coringa.tsx';
@@ -80,7 +84,7 @@ const SIZE: Record<CardSize, SizeClasses> = {
     wild: 'left-[6%] top-[6%] size-[calc(var(--mini-w)*0.62)]',
   },
   hand: {
-    box: 'w-(--hand-w) h-(--hand-h) flex-none border-[3px] pc:border-[3.5px]',
+    box: 'w-(--hand-w) h-(--hand-h) flex-none border-[3px] pc:border-[3.5px] drop-shadow-[0_3px_5px_rgb(23_18_15/0.3)]',
     value: 'left-[8%] top-[2%] text-[length:calc(var(--hand-w)*0.385)]',
     suit: 'right-[8%] top-[8%] size-[calc(var(--hand-w)*0.23)]',
     wild: 'left-[10%] top-[8%] size-[calc(var(--hand-w)*0.5)]',
@@ -149,7 +153,7 @@ export function Card({
   if (marked) name.push('novo');
 
   const classes = [
-    'relative box-border border-tinta bg-papel p-0 text-tinta rounded-[3px_5px_4px_6px] shadow-[0_2px_3px_rgb(23_18_15/0.28)]',
+    'relative box-border border-tinta bg-papel p-0 text-tinta rounded-[3px_5px_4px_6px]',
     SIZE[size].box,
     card.kind === 'WILD' ? 'bg-ouro' : quad ? 'bg-ouro/45' : '',
     selected ? '-translate-y-3.5 anel-ouro' : target ? 'anel-ouro' : '',
