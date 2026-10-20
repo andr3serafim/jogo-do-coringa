@@ -128,6 +128,16 @@ describe('lobby: código e link', () => {
   });
 });
 
+describe('lobby: título do convite', () => {
+  it('sozinho na sala, chama o outro jogador; com a sala cheia, o título é neutro', () => {
+    const { push } = setup({ seats: [seatOf('p1')] });
+    expect(screen.getByRole('heading', { level: 2, name: 'Chame o outro jogador' })).toBeInTheDocument();
+    push([seatOf('p1'), seatOf('p2')]);
+    expect(screen.queryByRole('heading', { name: 'Chame o outro jogador' })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: 'Convite' })).toBeInTheDocument();
+  });
+});
+
 describe('lobby: assentos', () => {
   it('mostra os dois assentos com apelido, presença e pronto (você primeiro)', () => {
     setup({ seats: [seatOf('p1', { ready: true }), seatOf('p2', { connected: false })] });
@@ -208,6 +218,17 @@ describe('lobby: Estou pronto', () => {
     expect(screen.queryByText(DROPPED)).not.toBeInTheDocument();
   });
 
+  it('um pedido de desmarcar que a queda engoliu não vira "desmarquei de propósito": a nota aparece na volta', async () => {
+    const { connection, user, push } = setup({ seats: [seatOf('p1', { ready: true }), seatOf('p2')] });
+    await user.click(screen.getByRole('button', { name: 'Estou pronto' }));
+    expect(connection.calls).toContain('ready:false');
+    // O pedido não chegou ao servidor: a conexão caiu antes do eco.
+    act(() => connection.emitClosed(1006, false));
+    act(() => connection.emit({ type: 'open' }));
+    push([seatOf('p1', { ready: false }), seatOf('p2')]);
+    expect(screen.getByText(DROPPED)).toBeInTheDocument();
+  });
+
   it('com a conexão caída, o botão fica desligado (o envio se perderia)', () => {
     const { connection } = setup();
     act(() => connection.emitClosed(1006, false));
@@ -266,6 +287,17 @@ describe('lobby: Sair da sala', () => {
     const { connection, user } = setup();
     await user.click(screen.getByRole('button', { name: 'Sair da sala' }));
     expect(connection.calls).toContain('leave');
+  });
+
+  it('com a conexão caída, o botão fica desligado (o leave se perderia) e volta no open', async () => {
+    const { connection, user } = setup();
+    act(() => connection.emitClosed(1006, false));
+    const button = screen.getByRole('button', { name: 'Sair da sala' });
+    expect(button).toBeDisabled();
+    await user.click(button);
+    expect(connection.calls).not.toContain('leave');
+    act(() => connection.emit({ type: 'open' }));
+    expect(screen.getByRole('button', { name: 'Sair da sala' })).toBeEnabled();
   });
 });
 

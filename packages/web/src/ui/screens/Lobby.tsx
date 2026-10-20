@@ -1,6 +1,6 @@
 // Lobby (spec §2.3): código e link da sala, os dois assentos com presença e pronto, o botão "Estou pronto"
 // (alterna) e o aviso fixo de W.O. O servidor começa a partida com os dois assentos conectados e prontos.
-import { roomLink } from '@coringa/protocol';
+import { roomLink, type SeatInfo } from '@coringa/protocol';
 import { useId, useState } from 'react';
 import type { Session } from '../../model/session.ts';
 import { Button, Panel, Title } from '../parts.tsx';
@@ -15,11 +15,7 @@ function isAbort(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'name' in error && error.name === 'AbortError';
 }
 
-interface SeatLike {
-  nickname: string;
-  connected: boolean;
-  ready: boolean;
-}
+type SeatLike = Pick<SeatInfo, 'nickname' | 'connected' | 'ready'>;
 
 /** O que falta para a partida começar, do ponto de vista de quem olha. */
 function waitingText(ready: boolean, opponent: SeatLike | undefined): string {
@@ -48,6 +44,8 @@ export function Lobby({ session }: { session: Session }) {
   const [prevReady, setPrevReady] = useState(ready);
   const [askedOff, setAskedOff] = useState(false);
   const [dropped, setDropped] = useState(false);
+  // Com a conexão caída o pedido pode ter se perdido: o pronto que o servidor desmarcar na volta já não é "de propósito".
+  if (askedOff && status === 'reconnecting') setAskedOff(false);
   if (ready !== prevReady) {
     setPrevReady(ready);
     if (ready) setDropped(false);
@@ -92,7 +90,7 @@ export function Lobby({ session }: { session: Session }) {
       <Title>Sala de espera</Title>
 
       <Panel>
-        <h2 className="font-madeira text-xl uppercase">Chame o outro jogador</h2>
+        <h2 className="font-madeira text-xl uppercase">{seats.length < 2 ? 'Chame o outro jogador' : 'Convite'}</h2>
         <div>
           <p className="text-sm font-bold uppercase tracking-wide">Código da sala</p>
           <p className="font-madeira text-5xl leading-tight tracking-widest">{room.code}</p>
@@ -153,7 +151,8 @@ export function Lobby({ session }: { session: Session }) {
         {LOBBY_WO_NOTICE}
       </p>
 
-      <Button variant="secondary" onClick={() => session.leave()}>
+      {/* O `leave` com o socket fechado se perde em silêncio; o banner "Reconectando…" do RoomGate explica o porquê. */}
+      <Button variant="secondary" disabled={status === 'reconnecting'} onClick={() => session.leave()}>
         Sair da sala
       </Button>
     </section>

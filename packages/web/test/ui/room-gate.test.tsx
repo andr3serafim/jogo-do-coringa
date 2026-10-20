@@ -426,6 +426,7 @@ describe('sessão online', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Reconectando…');
     expect(container.querySelectorAll('main')).toHaveLength(1);
     expect(screen.getByRole('button', { name: 'Estou pronto' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Sair da sala' })).toBeDisabled();
   });
 
   it('"Sair da sala" no lobby manda leave, e o fechamento 1000 leva ao início', async () => {
