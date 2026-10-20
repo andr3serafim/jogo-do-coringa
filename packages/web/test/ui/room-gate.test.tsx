@@ -413,10 +413,45 @@ describe('sessão online', () => {
     expect(JSON.stringify(context)).not.toContain(TOKEN);
   });
 
-  it('o aviso de sala reaparece com o status vindo do servidor', () => {
+  it('partida em curso sem o primeiro state: só "Conectando à sala…"', () => {
     const { api } = setup({ seated: true });
     act(() => api.connections[0]!.emitRoom(roomMessage({ status: 'PLAYING' })));
-    expect(screen.getByRole('region', { name: 'Sala' })).toHaveTextContent(`Sala ${CODE}: PLAYING`);
+    expect(screen.getByRole('status')).toHaveTextContent('Conectando à sala…');
+    expect(screen.queryByRole('main', { name: 'Mesa' })).not.toBeInTheDocument();
+  });
+
+  it('com o state, a mesa ocupa a tela: um só <main>, sem a coluna do Screen', () => {
+    const { api, container } = setup({ seated: true });
+    act(() => {
+      api.connections[0]!.emitRoom(roomMessage({ status: 'PLAYING', gameNo: 1 }));
+      api.connections[0]!.emitState(stateMessage(viewAt(), { seq: 2 }));
+    });
+    expect(screen.getByRole('main', { name: 'Mesa' })).toBeInTheDocument();
+    expect(container.querySelectorAll('main')).toHaveLength(1);
+    expect(screen.getByRole('region', { name: 'Seu campo' })).toBeInTheDocument();
+  });
+
+  it('o aviso de reconexão aparece acima da mesa, e a mesa continua visível', () => {
+    const { api, container } = setup({ seated: true });
+    act(() => {
+      api.connections[0]!.emitRoom(roomMessage({ status: 'PLAYING', gameNo: 1 }));
+      api.connections[0]!.emitState(stateMessage(viewAt(), { seq: 2 }));
+      api.connections[0]!.emitClosed(1006, false);
+    });
+    expect(screen.getByRole('status')).toHaveTextContent('Reconectando…');
+    expect(screen.getByRole('region', { name: 'Seu campo' })).toBeInTheDocument();
+    expect(container.querySelectorAll('main')).toHaveLength(1);
+  });
+
+  it('o relógio da mesa vem do servidor (Session.remainingMs)', () => {
+    const { api } = setup({ seated: true });
+    act(() => {
+      api.connections[0]!.emitRoom(roomMessage({ status: 'PLAYING', gameNo: 1 }));
+      api.connections[0]!.emitState(
+        stateMessage(viewAt(), { seq: 2, deadline: { kind: 'TURN', at: 17_000, players: ['p1'] } }),
+      );
+    });
+    expect(screen.getByRole('timer')).toHaveTextContent('17');
   });
 
   it('o lobby ocupa a tela da sala: um só <main>, com o aviso de reconexão por cima', () => {
@@ -442,9 +477,11 @@ describe('sessão online', () => {
     expect(await seriousViolations(container)).toEqual([]);
   });
 
-  it('axe: sem violações na sala fora do lobby (espaço reservado)', async () => {
+  it('axe: sem violações na sala fora do lobby (esperando o state e com a mesa)', async () => {
     const { api, container } = setup({ seated: true });
-    act(() => api.connections[0]!.emitRoom(roomMessage({ status: 'PLAYING' })));
+    act(() => api.connections[0]!.emitRoom(roomMessage({ status: 'PLAYING', gameNo: 1 })));
+    expect(await seriousViolations(container)).toEqual([]);
+    act(() => api.connections[0]!.emitState(stateMessage(viewAt(), { seq: 2 })));
     expect(await seriousViolations(container)).toEqual([]);
   });
 });

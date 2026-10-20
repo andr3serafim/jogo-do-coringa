@@ -1,5 +1,5 @@
-// Entrar numa sala (spec §2.2) e viver nela (§6.2, §6.3). O lobby é a tela de verdade; a mesa e o fim de partida
-// ainda são um espaço reservado com o status da sala: as Tarefas 19 e seguintes o trocam.
+// Entrar numa sala (spec §2.2) e viver nela (§6.2, §6.3). O lobby e a mesa são as telas de verdade; o fim de
+// partida (a Tarefa 23) ainda é a mesa final sem painel.
 import { HttpError, normalizeCode, normalizeNickname, parseTarget } from '@coringa/protocol';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { openStore } from '../../app/browser-store.ts';
@@ -19,6 +19,7 @@ import {
 import { Button, Panel, Screen, TextField, Title } from '../parts.tsx';
 import { NICKNAME_ERROR, OFFLINE, ROOM_FULL, ROOM_MISSING, TOO_MANY } from '../text.ts';
 import { useSession } from '../useSession.ts';
+import { Table } from '../table/Table.tsx';
 import { Lobby } from './Lobby.tsx';
 import { Stopped } from './Stopped.tsx';
 
@@ -361,23 +362,30 @@ function OnlineRoom({ session, code, reload }: { session: Session; code: string;
   }
   if (stop !== null || room === null) return <Connecting />;
 
-  return (
-    <Screen>
-      {status === 'reconnecting' ? (
-        <p role="status" className="border-4 border-tinta bg-ouro px-3 py-2 font-bold">
-          {snapshot.slowRetry ? 'Muitas mensagens; reconectando em 30 s…' : 'Reconectando…'}
-        </p>
-      ) : null}
-      {room.status === 'LOBBY' ? (
+  const banner =
+    status === 'reconnecting' ? (
+      <p role="status" className="border-4 border-tinta bg-ouro px-3 py-2 font-bold">
+        {snapshot.slowRetry ? 'Muitas mensagens; reconectando em 30 s…' : 'Reconectando…'}
+      </p>
+    ) : null;
+
+  if (room.status === 'LOBBY') {
+    return (
+      <Screen>
+        {banner}
         <Lobby session={session} />
-      ) : (
-        // Espaço reservado: a mesa e o fim de partida (Tarefa 19 em diante) entram aqui.
-        <section aria-label="Sala">
-          <p>
-            Sala {code}: {room.status}
-          </p>
-        </section>
-      )}
-    </Screen>
+      </Screen>
+    );
+  }
+  // Partida em curso ou terminada: a mesa ocupa a tela inteira (sem a coluna do `Screen`). Sem o primeiro
+  // `state` ainda, só o aviso de conexão.
+  if (snapshot.state === null) return <Connecting />;
+  return (
+    <Table
+      snapshot={snapshot}
+      remainingMs={(deadline) => session.remainingMs(deadline)}
+      onSeen={(key) => session.markSeen(key)}
+      banner={banner}
+    />
   );
 }

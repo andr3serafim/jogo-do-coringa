@@ -54,3 +54,215 @@
     text-underline-offset: 0.2em;
   }
 }
+
+/*
+ * Mesa (spec §3.2, §10.1, §10.7). Tamanhos das cartas por variável, para a mesa, as fileiras e a mão
+ * usarem a mesma conta: ~34 × 48 px a 360 de largura, ~38 × 52 a 390 (a conta cresce até 44 × 60 nos
+ * celulares largos). A tabela de 360 px está no relatório da Tarefa 19.
+ */
+@layer base {
+  :root {
+    --card-w: clamp(34px, calc(34px + (100vw - 360px) * 0.1333), 44px);
+    --card-h: clamp(48px, calc(48px + (100vw - 360px) * 0.1333), 60px);
+    --mini-w: 30px;
+    --mini-h: 42px;
+    /* A mão acompanha a altura da tela: 108 px em 844 de altura, menos em telas baixas. */
+    --hand-h: clamp(84px, 12.8dvh, 108px);
+    --hand-w: calc(var(--hand-h) * 0.7222);
+  }
+
+  @media (width >= theme(--breakpoint-tablet)) {
+    :root {
+      --card-w: 48px;
+      --card-h: 67px;
+      --mini-w: 34px;
+      --mini-h: 48px;
+    }
+  }
+
+  @media (width >= theme(--breakpoint-pc)) {
+    :root {
+      --card-w: 56px;
+      --card-h: 78px;
+      --mini-w: 38px;
+      --mini-h: 54px;
+      --hand-h: 144px;
+      --hand-w: 104px;
+    }
+  }
+
+  /* Enquanto a mesa está montada, o puxar-para-atualizar não recarrega a página no meio da partida (spec §3.2). */
+  html.mesa-ativa,
+  html.mesa-ativa body {
+    overscroll-behavior: none;
+  }
+}
+
+/*
+ * Textura de xilogravura, só onde a spec deixa (§10.7): a aspereza do carimbo vai nos títulos (o filtro mora no
+ * `<svg>` da mesa) e o grão do papel é uma camada por baixo do conteúdo. Vida, ATK/DEF, conta, prévia, relógio e
+ * placar nunca levam nenhuma das duas. O grão é um SVG com `feTurbulence` embutido como imagem (CSP: `img-src data:`).
+ */
+@utility textura {
+  filter: url(#textura-aspera);
+}
+
+@utility grao {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .09 0 0 0 0 .07 0 0 0 0 .06 0 0 0 .7 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* Alvo e seleção: contorno ouro com borda de tinta (spec §10.1). Com o foco, um anel de papel por fora o distingue. */
+@utility anel-ouro {
+  box-shadow:
+    0 0 0 3px var(--color-ouro),
+    0 0 0 5px var(--color-tinta);
+
+  &:focus-visible {
+    outline: 3px solid var(--color-papel);
+    outline-offset: 5px;
+    box-shadow:
+      0 0 0 3px var(--color-ouro),
+      0 0 0 5px var(--color-tinta);
+  }
+}
+
+/*
+ * Arranjo dos campos (spec §3.2 e §3.3). Cada campo é um contêiner: abaixo de 56rem de largura (celular e tablet,
+ * ou a mesa de um PC estreito) as partes se empilham como no rascunho do celular; a partir daí, no PC, ficam em três
+ * colunas (Coringa | fileiras | Guarda e buffs). A árvore é a mesma nos dois; só a grade muda.
+ */
+@layer components {
+  .campo {
+    container-type: inline-size;
+  }
+
+  .campo-grade {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .campo-filas {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .campo-zonas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    column-gap: 0.875rem;
+    row-gap: 0.375rem;
+  }
+
+  .campo-zona {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1875rem;
+  }
+
+  .campo-estado {
+    display: flex;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  .campo-info {
+    display: grid;
+    align-items: center;
+    column-gap: 0.625rem;
+    row-gap: 0.5rem;
+  }
+
+  .campo-info--oponente {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      'avatar nome vida ferr'
+      'avatar mao vida ferr'
+      'barra barra barra barra';
+  }
+
+  .campo-info--voce {
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    grid-template-areas: 'avatar nome barra vida';
+  }
+
+  .area-avatar {
+    grid-area: avatar;
+  }
+  .area-nome {
+    grid-area: nome;
+  }
+  .area-mao {
+    grid-area: mao;
+  }
+  .area-vida {
+    grid-area: vida;
+  }
+  .area-barra {
+    grid-area: barra;
+  }
+  .area-ferr {
+    grid-area: ferr;
+  }
+
+  @container (min-width: 56rem) {
+    .campo-grade {
+      grid-template-columns: 210px minmax(0, 1fr) 228px;
+      column-gap: 1.75rem;
+    }
+
+    .campo-grade > .campo-info {
+      grid-column: 1;
+      grid-row: 1;
+      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-areas:
+        'avatar nome'
+        'vida vida'
+        'barra barra'
+        'mao mao';
+      align-content: start;
+    }
+
+    .campo-grade--oponente > .campo-info {
+      align-content: start;
+    }
+
+    .campo-grade > .campo-filas {
+      grid-column: 2;
+      grid-row: 1;
+      gap: 1rem;
+    }
+
+    .campo-grade--oponente > .campo-filas {
+      justify-content: flex-end;
+    }
+
+    .campo-grade > .campo-zonas {
+      grid-column: 3;
+      grid-row: 1;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      gap: 0.625rem;
+    }
+
+    .campo-grade--oponente > .campo-zonas {
+      justify-content: flex-end;
+    }
+
+    .campo-zona {
+      flex-direction: row;
+      align-items: center;
+      gap: 0.625rem;
+      min-height: 3.5rem;
+    }
+
+    .campo-zona > .zona-titulo {
+      width: 4.6rem;
+      flex: none;
+    }
+  }
+}
