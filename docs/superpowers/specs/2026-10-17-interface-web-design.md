@@ -32,7 +32,7 @@ Fechar o MVP: dois amigos jogam uma partida online pelo navegador, entrando por 
 - Salas por link `<origem>/s/<CÓDIGO>`, com apelido e sem conta. O token de reconexão fica no navegador, por sala (spec 2 §2.2).
 - A interface só envia intenções; o servidor é a autoridade.
 - O mesmo Worker serve a interface (static assets), na mesma origem e sem CORS (spec 2 §3 e §10.3). Cloudflare Pages fica descartado: seria outra origem, com CORS e mudança em `ALLOWED_ORIGINS`.
-- **Escolha da iniciativa:** "atacar primeiro" vem pré-selecionado, sem travar a rodada, e a regra continua desligável pela chave `initiativeChoice` até o playtest do autor (spec 1 §3).
+- **Escolha da iniciativa:** "atacar primeiro" vem pré-selecionado, sem travar a rodada, e a regra está mantida (decisão de 2026-10-19, por delegação do autor), desligável pela chave `initiativeChoice` (spec 1 §3).
 - **Passe automático:** a decisão é deste sub-projeto e precisa respeitar o piso de 2 s da janela de reação (spec 2 §6.3 e §14).
 
 ### 0.4 Decidido pelo autor [A]
