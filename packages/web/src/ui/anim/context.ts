@@ -14,9 +14,13 @@ export interface Anim {
   reduced: boolean;
   /** Atraso (em segundos) da transição de layout do elemento com este `layoutId`: o início da batida que o move. */
   delayOf(id: string): number;
+  /** `key` do elemento com este `layoutId`: muda quando as transições dele são encerradas na hora (pulo, `state` novo). */
+  markOf(id: string): number;
+  /** O elemento chega ao lugar sem animar (a transição dele acabou de ser encerrada na hora). */
+  instant(id: string): boolean;
   /**
-   * O `layoutDependency` dos elementos com `layoutId`: o Motion só mede a mesa quando ele muda (a cada `state`, e quando
-   * as batidas acabam ou são puladas, o que termina na hora as transições que ficaram no ar).
+   * O `layoutDependency` dos elementos com `layoutId`: o Motion só mede a mesa quando ele muda (a cada `state` e quando as
+   * batidas acabam), e não a cada desenho. Medir de novo não encerra uma transição em andamento; isso é `markOf`/`instant`.
    */
   layoutKey: string;
   /** Efeitos da batida de agora. */
@@ -32,6 +36,8 @@ export const IDLE_ANIM: Anim = {
   busy: false,
   reduced: false,
   delayOf: () => 0,
+  markOf: () => 0,
+  instant: () => false,
   layoutKey: '',
   fx: NO_EFFECTS,
   beatMs: 0,

@@ -34,7 +34,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
   const { state, room } = snapshot;
   // A decisão do jogador espera se há jogada legal para ele neste `state` (spec §4.1: tudo cabe em ~1 s).
   const player = useBeatPlayer(state, { reducedMotion, decisionPending: snapshot.legal.length > 0 }, onSettled);
-  const { run, beat, index, busy, inverted, skip } = player;
+  const { run, beat, index, busy, inverted, released, skip } = player;
   const names = useMemo(() => roomNames(state?.view.me ?? 'p1', room?.seats ?? []), [state, room]);
 
   const count: CountPhase =
@@ -51,13 +51,15 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       busy,
       reduced: reducedMotion,
       delayOf: (id) => (busy && !reducedMotion ? (run.delays.get(id) ?? 0) / 1000 : 0),
+      markOf: (id) => released.marks.get(id) ?? 0,
+      instant: (id) => released.instant.has(id),
       layoutKey: `${seq}:${busy ? 'tocando' : 'parado'}`,
       fx: state ? effectsOf(beat, state.view) : NO_EFFECTS,
       beatMs: beat?.durationMs ?? 0,
       count,
       countMs,
     }),
-    [busy, reducedMotion, run, seq, state, beat, count, countMs],
+    [busy, reducedMotion, run, released, seq, state, beat, count, countMs],
   );
 
   // Esc pula as batidas (o Esc que um diálogo ou a gaveta do histórico já tratou não conta).

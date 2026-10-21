@@ -132,6 +132,13 @@ describe('effectsOf: o efeito de cada evento (spec §4.2)', () => {
     );
   });
 
+  it('Armadilha e Sacrifício racham o alvo', () => {
+    for (const type of ['TrapUsed', 'Sacrificed'] as const) {
+      const effects = fx({ type, player: 'p1', card: face('a1', 'A'), target: face('k9'), targetOwner: 'p2' });
+      expect(effects.cards).toEqual(new Map([['k9', 'crack']]));
+    }
+  });
+
   it('ReflectPlayed forma o escudo com as três cartas', () => {
     const effects = fx({
       type: 'ReflectPlayed',

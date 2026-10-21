@@ -120,9 +120,12 @@ function InitiativeMark({ mine }: { mine: boolean }) {
   const anim = useAnim();
   const marker = (
     <m.span
+      key={anim.markOf(INITIATIVE_ID)}
       layoutId={INITIATIVE_ID}
       layoutDependency={anim.layoutKey}
-      transition={{ layout: { delay: anim.delayOf(INITIATIVE_ID), duration: 0.3, ease: 'easeInOut' } }}
+      transition={{
+        layout: { delay: anim.delayOf(INITIATIVE_ID), duration: anim.instant(INITIATIVE_ID) ? 0 : 0.3, ease: 'easeInOut' },
+      }}
       className="block size-2.5 rotate-45 bg-ouro"
     />
   );

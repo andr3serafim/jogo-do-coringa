@@ -7,6 +7,12 @@
 // A inversão (`filter: invert(1)`) segue outra regra: depois de ligada, só o seu próprio timer a desliga. Um `state` novo
 // que chega no meio dela (o bot responde em ~600 ms) troca a linha do tempo, mas não corta nem esquece a inversão no ar.
 // Quem decide se ela liga é a `FlashLock`, na hora de ligar (spec §10.4: o limite vale para a tela, não para um `state`).
+//
+// Terminar na hora (pulo, ou um `state` novo no meio das batidas) também precisa terminar as transições de layout que o
+// Motion deixou no ar, com o atraso que ainda faltava: a carta ficaria no lugar velho enquanto a mesa já mostra a `view`
+// nova. O Motion não encerra uma transição em andamento quando a medida muda (o alvo é o mesmo), então as cartas que a
+// linha do tempo velha mexia são remontadas (`marks`, que entram na `key` da carta) com transição de duração zero
+// (`instant`): o elemento novo retoma de onde o velho estava e chega na hora.
 import type { StateMessage } from '@coringa/protocol';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { damageBeatIndex, delaysOf } from '../../model/effects.ts';
@@ -28,6 +34,30 @@ interface Machine {
   /** Batida de agora (índice em `run.beats`), ou -1 sem batida com duração. */
   index: number;
   done: boolean;
+}
+
+/**
+ * Os `layoutId` cujas transições foram encerradas na hora. `marks` só cresce (cada encerramento muda a `key` do elemento,
+ * que remonta); `instant` são os que chegam sem animar, até o próximo `state`.
+ */
+export interface Released {
+  marks: ReadonlyMap<string, number>;
+  instant: ReadonlySet<string>;
+}
+
+const NO_RELEASE: Released = { marks: new Map(), instant: new Set() };
+
+/** Encerra as transições da linha do tempo `ended` (se havia batida em curso); `next` é a que a substitui, se houver. */
+function release(prev: Released, ended: Run | null, next: Run | null): Released {
+  if (ended === null) return prev.instant.size === 0 ? prev : { marks: prev.marks, instant: new Set() };
+  const marks = new Map(prev.marks);
+  const instant = new Set<string>();
+  for (const id of ended.delays.keys()) {
+    marks.set(id, (marks.get(id) ?? 0) + 1);
+    // O que a linha nova também mexe se anima de verdade, a partir de onde a velha o deixou.
+    if (!next?.delays.has(id)) instant.add(id);
+  }
+  return { marks, instant };
 }
 
 function makeMachine(state: StateMessage | null, options: TimelineOptions | null): Machine {
@@ -53,6 +83,8 @@ export interface BeatPlayer {
   index: number;
   busy: boolean;
   inverted: boolean;
+  /** As transições de layout que acabaram na hora (pulo, ou `state` novo no meio das batidas). */
+  released: Released;
   /** Termina as batidas na hora (toque na mesa, Esc): a `view` já é a de depois. */
   skip(): void;
 }
@@ -70,11 +102,15 @@ export function useBeatPlayer(
 ): BeatPlayer {
   // O `state` com que a mesa abre (recarregar a página, entrar na partida) já está feito: não há de onde animar.
   const [machine, setMachine] = useState(() => makeMachine(state, null));
+  const [released, setReleased] = useState(NO_RELEASE);
   let current = machine;
   if (machine.run.state !== state) {
     const mode = state?.resync ? 'resync' : state?.catchUp ? 'catchUp' : 'live';
     current = makeMachine(state, { mode, reducedMotion, decisionPending });
     setMachine(current);
+    // Um `state` novo no meio das batidas encerra as transições que a linha velha ainda tinha no ar.
+    const ended = machine.done ? null : machine.run;
+    setReleased((prev) => release(prev, ended, current.run));
   }
   const { run } = current;
 
@@ -131,9 +167,10 @@ export function useBeatPlayer(
   }, [run, invert]);
 
   const skip = useCallback(() => {
+    if (!current.done) setReleased((prev) => release(prev, current.run, null));
     setMachine((m) => (m.done ? m : { ...m, done: true }));
     cutInversion();
-  }, [cutInversion]);
+  }, [cutInversion, current]);
 
   // Avisa quem espera o fim das batidas (o painel de fim de partida), no fim natural ou no pulo.
   const settled = useRef(onSettled);
@@ -153,6 +190,7 @@ export function useBeatPlayer(
     index: current.done ? -1 : current.index,
     busy: !current.done,
     inverted,
+    released,
     skip,
   };
 }

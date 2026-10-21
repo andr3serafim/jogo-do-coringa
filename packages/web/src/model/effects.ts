@@ -46,6 +46,10 @@ function effectsOfEvent(event: GameEvent, view: PlayerView): Partial<BeatEffects
       return { damage: event.damage > 0 ? { target: event.attacker, amount: event.damage } : null };
     case 'GuardBroken':
       return { cards: fxMap(event.cards.map((card) => card.id), 'crack') };
+    case 'TrapUsed':
+    case 'Sacrificed':
+      // A carta usada vai até o alvo e o alvo quebra (as duas vão para o cemitério pelo `layoutId`).
+      return { cards: fxMap([event.target.id], 'crack') };
     case 'ReflectPlayed':
       return { cards: fxMap([event.reflect.k.id, event.reflect.j.id, event.reflect.q.id], 'shield') };
     case 'QuadFormed':

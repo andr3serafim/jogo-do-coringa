@@ -215,7 +215,7 @@ export function Card({
           layoutDependency: anim.layoutKey,
           animate: shake ? { rotate: [0, -4, 4, -3, 3, 0] } : undefined,
           transition: {
-            layout: { delay: anim.delayOf(card.id), duration: 0.3, ease: 'easeInOut' as const },
+            layout: { delay: anim.delayOf(card.id), duration: anim.instant(card.id) ? 0 : 0.3, ease: 'easeInOut' as const },
             rotate: { duration: anim.beatMs / 1000 },
           },
         }
@@ -241,6 +241,7 @@ export function Card({
   if (onSelect) {
     return (
       <m.button
+        key={animated ? anim.markOf(card.id) : undefined}
         type="button"
         {...common}
         aria-pressed={selected}
@@ -253,7 +254,7 @@ export function Card({
     );
   }
   return (
-    <m.div role="img" {...common}>
+    <m.div key={animated ? anim.markOf(card.id) : undefined} role="img" {...common}>
       {inside}
     </m.div>
   );
