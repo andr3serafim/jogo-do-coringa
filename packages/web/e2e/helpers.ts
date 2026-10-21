@@ -56,28 +56,16 @@ export async function expectNoHorizontalScroll(page: Page): Promise<void> {
   expect(overflow, 'rolagem lateral').toEqual({ width: overflow.width, document: 0, body: 0, main: 0, outside: [] });
 }
 
-/**
- * `label-content-name-mismatch` (WCAG 2.5.3, "Rótulo no nome"): o axe exige que o texto VISÍVEL do botão (`visibleVirtual`, que conta
- * até o que é `aria-hidden`) seja um trecho contínuo do nome acessível. Três padrões da mesa foram desenhados de outro jeito (spec §7)
- * e não passam; mudar o nome deles reescreve a interface e os testes de componentes, então é decisão do autor (relatório da Tarefa 25).
- * Texto visível → nome acessível:
- * - carta da mão: "QBuff de defesa" → "Q de ouros, Buff de defesa";
- * - botão de duas linhas (nome = título, detalhe = descrição): "Atacar27 × 3 · dano 24" → "Atacar";
- * - cemitério com cartas: o valor da carta de cima e a contagem → "Ver o cemitério: 3 cartas, a de cima é 4 de ouros".
- */
-const NAME_MISMATCH = 'label-content-name-mismatch';
-const KNOWN_NAME_MISMATCHES = ['[data-card-id]', 'button[aria-labelledby][aria-describedby]', 'button[aria-label^="Ver o cemitério"]'];
-
-/** O axe sobre a tela aberta: nenhuma violação `serious` ou `critical` (spec §7). */
+/** O axe sobre a tela aberta: nenhuma violação `serious` ou `critical` (spec §7), com todas as regras ligadas. */
 export async function axe(page: Page): Promise<void> {
-  // As batidas (opacidade, movimento) mudam o contraste que o axe calcula: ele olha a tela parada.
-  await page.waitForFunction(() => document.getAnimations().length === 0, undefined, { timeout: 5_000 });
-  // Duas passadas: todas as regras menos `label-content-name-mismatch`, e só ela, sem os três padrões conhecidos. Assim um botão
-  // novo com o nome fora do texto visível ainda reprova em qualquer tela.
-  const everything = await new AxeBuilder({ page }).disableRules([NAME_MISMATCH]).analyze();
-  let nameMismatch = new AxeBuilder({ page }).withRules([NAME_MISMATCH]);
-  for (const selector of KNOWN_NAME_MISMATCHES) nameMismatch = nameMismatch.exclude(selector);
-  const violations = [...everything.violations, ...(await nameMismatch.analyze()).violations];
+  // As batidas (opacidade, movimento) mudam o contraste que o axe calcula: ele olha a tela parada. Uma animação infinita (um
+  // spinner de amanhã) nunca para: só as que têm fim contam.
+  await page.waitForFunction(
+    () => document.getAnimations().every((animation) => animation.effect?.getComputedTiming().iterations === Infinity),
+    undefined,
+    { timeout: 5_000 },
+  );
+  const { violations } = await new AxeBuilder({ page }).analyze();
   const blocking = violations
     .filter((violation) => violation.impact === 'serious' || violation.impact === 'critical')
     .map((violation) => {
@@ -102,18 +90,28 @@ export const endPanel = (page: Page): Locator => page.getByRole('dialog').filter
 export const menuButton = (page: Page): Locator => page.getByRole('button', { name: 'Menu da partida' });
 
 /**
- * Abre o menu da partida. Um toque na mesa durante as batidas só as pula e não vira clique (spec §4.1: o gesto que pulou não aciona o
- * botão que estava embaixo), então o clique que cai numa batida é refeito até o diálogo abrir. O jogador de verdade faz o mesmo.
+ * Abre um diálogo pelo botão `trigger`. Um toque na mesa durante as batidas só as pula e não vira clique (spec §4.1: o gesto que
+ * pulou não aciona o botão que estava embaixo), então o clique que cai numa batida é refeito até o diálogo abrir. O jogador de
+ * verdade faz o mesmo.
  */
-export async function openMenu(page: Page): Promise<Locator> {
-  const menu = page.getByRole('dialog', { name: 'Menu da partida' });
+export async function openDialog(trigger: Locator, dialog: Locator): Promise<Locator> {
   await expect(async () => {
-    // Com o menu já aberto (a abertura demorou mais que a espera de uma tentativa) o botão está inerte: não clica de novo.
-    if (!(await menu.isVisible())) await menuButton(page).click({ timeout: 2_000 });
-    await expect(menu).toBeVisible({ timeout: 1_500 });
+    // Com o diálogo já aberto (a abertura demorou mais que a espera de uma tentativa) o botão está inerte: não clica de novo.
+    if (!(await dialog.isVisible())) await trigger.click({ timeout: 2_000 });
+    await expect(dialog).toBeVisible({ timeout: 1_500 });
   }).toPass({ timeout: 20_000 });
-  return menu;
+  return dialog;
 }
+
+/** Abre o menu da partida. */
+export const openMenu = (page: Page): Promise<Locator> => openDialog(menuButton(page), page.getByRole('dialog', { name: 'Menu da partida' }));
+
+/**
+ * O botão principal da barra. O nome é o título e a prévia juntos ("Atacar 27 × 3 · dano 24", "Encerrar turno Sua fileira de Ataque
+ * está vazia"): o axe exige que o texto visível seja trecho contínuo do nome. "Atacar primeiro" é da escolha da ordem, e não casa.
+ */
+export const ATTACK_BUTTON = /^Atacar(?! primeiro| em segundo)/;
+export const END_TURN_BUTTON = /^Encerrar turno/;
 
 /** O número da rodada que a faixa central mostra. */
 export async function roundNumber(page: Page): Promise<number> {
@@ -130,10 +128,10 @@ export function handIds(page: Page): Promise<string[]> {
 // Jogar pela interface
 
 /**
- * Equipar pelos destinos oferecidos (o primeiro de cada carta) e Confirmar. Quem não recebeu numéricas não tem o que
- * confirmar: o servidor envia o Equipar vazio por ele. Devolve quantas cartas foram montadas.
+ * Equipar pelos destinos oferecidos (o primeiro de cada carta, ou o primeiro que casa com `preferred`) e Confirmar. Quem não
+ * recebeu numéricas não tem o que confirmar: o servidor envia o Equipar vazio por ele. Devolve quantas cartas foram montadas.
  */
-export async function equipByUi(page: Page): Promise<number> {
+export async function equipByUi(page: Page, preferred?: RegExp): Promise<number> {
   const panel = equipPanel(page);
   const destinations = panel.getByRole('list', { name: 'Destinos' });
   const none = panel.getByText('Você não recebeu numéricas nesta rodada');
@@ -144,24 +142,26 @@ export async function equipByUi(page: Page): Promise<number> {
   expect(total, 'o painel do Equipar diz quantas cartas faltam montar').toBeGreaterThan(0);
   for (let placed = 0; placed < total; placed += 1) {
     await expect(panel.getByText(`Carta ${placed + 1} de ${total}`)).toBeVisible();
-    await destinations.getByRole('button').first().click();
+    await destinations.getByRole('button', preferred ? { name: preferred } : {}).first().click();
   }
   await panel.getByRole('button', { name: 'Confirmar', exact: true }).click();
   return total;
 }
 
 /**
- * A janela de reação, do lado de quem responde: ou o passe automático (só `PASS` legal: a barra diz "passando"), ou ele
- * passa à mão (há resposta possível, e a barra oferece "Passar"). Devolve qual dos dois aconteceu.
+ * A janela de reação, do lado de quem responde: ou o passe automático (só `PASS` legal: a barra diz "passando"), ou ele passa à
+ * mão (há resposta possível). Devolve qual dos dois aconteceu.
+ *
+ * O aviso do passe automático nasce junto com o `state` e fica até a janela fechar, e o servidor só a fecha depois do piso de 2 s;
+ * a espera pelo aviso (5 s) é bem maior que isso. Só sem o aviso, com o botão ainda lá, passa à mão.
  */
 export async function answerReaction(page: Page): Promise<'auto' | 'manual'> {
   const bar = actionBar(page);
   const auto = bar.getByText('Sem resposta possível; passando');
   const pass = bar.getByRole('button', { name: 'Passar', exact: true });
-  // O botão aparece no primeiro desenho e some assim que o passe automático sai (a barra passa a dizer "passando").
   await expect(auto.or(pass)).toBeVisible();
-  if (await auto.waitFor({ timeout: 2_000 }).then(() => true, () => false)) return 'auto';
-  await pass.click();
+  if (await auto.waitFor({ timeout: 5_000 }).then(() => true, () => false)) return 'auto';
+  await pass.click({ timeout: 3_000 });
   return 'manual';
 }
 
@@ -185,8 +185,8 @@ async function playOnce(page: Page, options: PlayOptions): Promise<string | null
   const order = orderPanel(page).getByRole('button').first();
   const bar = actionBar(page);
   const pass = bar.getByRole('button', { name: 'Passar', exact: true });
-  const attack = bar.getByRole('button', { name: 'Atacar', exact: true });
-  const endTurn = bar.getByRole('button', { name: 'Encerrar turno', exact: true });
+  const attack = bar.getByRole('button', { name: ATTACK_BUTTON });
+  const endTurn = bar.getByRole('button', { name: END_TURN_BUTTON });
 
   return (
     (await attempt('destino do Equipar', destination)) ??

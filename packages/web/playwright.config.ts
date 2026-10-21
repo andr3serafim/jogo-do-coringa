@@ -9,6 +9,13 @@ const PORT = 8787;
 // Por IP, e não `localhost`: o servidor escuta só em IPv4, e o `localhost` do Linux pode resolver para `::1` primeiro.
 const HOST = '127.0.0.1';
 
+/*
+ * O limite de criação de salas do Worker (`CREATE_LIMITER`, no `wrangler.jsonc`) é de 10 por minuto por IP, e o E2E usa um IP só:
+ * uma execução cria 3 salas (a do `online.spec.ts` e uma por tamanho de tela no `mobile.spec.ts`). Reaproveitar um servidor já no
+ * ar (`reuseExistingServer`) ou repetir tudo (`--repeat-each`) soma salas no mesmo minuto e pode estourar o limite (429 ao criar):
+ * para repetir, rode a execução inteira de novo, que sobe um servidor com o limitador zerado.
+ */
+
 /**
  * Semente do sorteio online: o Worker deste servidor sorteia a partida `n` com `<semente>-<n>` (`wrangler dev --var`; no
  * `wrangler.jsonc` a var é vazia e nunca vai para a produção). Com `e2e`, a primeira partida passa das duas rodadas de Equipar
@@ -21,6 +28,8 @@ const E2E_SEED = 'e2e';
 export default defineConfig({
   testDir: './e2e',
   retries: 0,
+  // O job da CI tem 15 min: se algo travar, o Playwright encerra a 10 e ainda sobra tempo para gerar e enviar o relatório.
+  globalTimeout: 600_000,
   // Prazos de verdade (3 s da ordem automática, 2 s do passe, reconexão com espera): cada teste tem folga larga.
   timeout: 120_000,
   expect: { timeout: 15_000 },

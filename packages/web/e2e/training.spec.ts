@@ -4,13 +4,16 @@
 import { expect, test, type Page } from '@playwright/test';
 import {
   actionBar,
+  ATTACK_BUTTON,
   axe,
   band,
   equipByUi,
   equipPanel,
   failOnConsoleErrors,
   menuButton,
+  openDialog,
   openMenu,
+  orderPanel,
   playUntil,
   roundHeading,
   roundNumber,
@@ -45,13 +48,69 @@ test('treino: três rodadas determinísticas pela interface, sem relógio', asyn
   // Rodada 3 (Ataque): o Bot tem a iniciativa e escolhe atacar em segundo; você ataca primeiro. Sem passe automático no treino:
   // quem joga a reação é o jogador ou o bot, e o treino segue pelos botões que a tela oferece.
   await expect(history(page)).toContainText('Bot escolheu atacar em segundo');
-  await expect(actionBar(page).getByRole('button', { name: 'Atacar', exact: true })).toBeEnabled();
+  await expect(actionBar(page).getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
   await axe(page);
   await playUntil(page, async (p) => (await roundNumber(p).catch(() => 0)) >= 4, { order: 'wait' });
   await expect(history(page)).toContainText('Ataque de você: 27 contra 3 → 24 de dano');
   await expect(history(page)).toContainText('Ataque de Bot: 17 contra 0 → 17 de dano');
   await expect.poll(() => lives(page)).toEqual([276, 283]);
 
+  guard.expectClean();
+});
+
+test('axe em cada estado da mesa: mão, Reflect, janela de reação, cemitério (com o chip e o diálogo) e a mão com J, Q e K', async ({ page }) => {
+  const guard = failOnConsoleErrors(page);
+  await page.goto(TRAINING);
+  await expect(table(page)).toBeVisible();
+  // As numéricas da rodada 1 vão para a Defesa: o ataque do Bot na rodada 3 gasta uma delas, que vai ao cemitério por mão dele, e é
+  // isso que acende o chip "novo" no cemitério (as cartas que saem por jogada sua não ficam marcadas).
+  await equipByUi(page, /Defesa/);
+  await expect(roundHeading(page)).toHaveText('Rodada 2');
+  await equipByUi(page);
+  await expect(roundHeading(page)).toHaveText('Rodada 3');
+  const hand = page.getByRole('list', { name: 'Sua mão' });
+
+  // Rodada 3, sua vez: a mão (Q, K e o Selvagem) em botões, "Lançar Reflect" (K + Selvagem + Q) e o botão principal, de duas linhas.
+  const attack = actionBar(page).getByRole('button', { name: ATTACK_BUTTON });
+  await expect(attack).toBeEnabled();
+  await expect(actionBar(page).getByRole('button', { name: /^Lançar Reflect / })).toBeVisible();
+  await expect(hand.getByRole('button', { name: /^Q, Buff de defesa, de / })).toBeVisible();
+  await expect(hand.getByRole('button', { name: /^K, Guarda, de / })).toBeVisible();
+  await axe(page);
+  await attack.click();
+
+  // A janela de reação: o Bot declara o ataque dele (sem relógio, sem passe automático) e a barra oferece "Passar".
+  await expect(page.locator('[data-gatilho]')).toBeVisible();
+  const pass = actionBar(page).getByRole('button', { name: 'Passar', exact: true });
+  await expect(pass).toBeEnabled();
+  await axe(page);
+  await pass.click();
+
+  // Rodada 4: o cemitério já tem cartas (as que saíram das fileiras) e o chip "novo" (o mouse não passou por ele). Depois, o diálogo.
+  await expect(roundHeading(page)).toHaveText('Rodada 4');
+  const graveyard = page.getByRole('button', { name: /^Cemitério \d+, novo, a de cima é / });
+  await expect(graveyard).toHaveText(/^Cemitério \d+ novo$/);
+  await axe(page);
+  const dialog = await openDialog(graveyard, page.getByRole('dialog', { name: 'Cemitério' }));
+  await axe(page);
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(page.getByRole('button', { name: /^Cemitério \d+, a de cima é / })).toBeVisible();
+
+  // Rodada 5: a escolha da ordem é sua (o foco no painel cancela a confirmação de 3 s e deixa a tela parada para o axe), e depois a mão
+  // tem J, Q, K e o Selvagem, de novo em botões.
+  await equipByUi(page);
+  await expect(roundHeading(page)).toHaveText('Rodada 5');
+  const first = orderPanel(page).getByRole('button', { name: 'Atacar primeiro' });
+  await expect(first).toBeVisible();
+  await first.focus();
+  await axe(page);
+  await first.click();
+  await expect(attack).toBeEnabled();
+  await expect(hand.getByRole('button', { name: /^J, Buff de ataque, de / })).toBeVisible();
+  await expect(hand.getByRole('button', { name: /^Q, Buff de defesa, de / })).toBeVisible();
+  await expect(hand.getByRole('button', { name: /^K, Guarda, de / })).toBeVisible();
+  await axe(page);
   guard.expectClean();
 });
 
@@ -96,30 +155,44 @@ test.describe('diálogos', () => {
     await page.goto(TRAINING);
     await expect(table(page)).toBeVisible();
 
-    /** Aperta a tecla `presses` vezes e confere, a cada uma, que o foco está dentro do diálogo aberto (ou fora da página, na interface do navegador). */
-    const stayInside = async (key: 'Tab' | 'Shift+Tab', presses: number) => {
+    /**
+     * Aperta a tecla `presses` vezes e confere que o foco nunca para num elemento FORA do diálogo de cima (a mesa, por exemplo). O
+     * Chromium deixa o Tab passar do último controle de um diálogo modal para a interface do navegador (`document.activeElement` vira o
+     * corpo da página) e o traz de volta ao primeiro: isso vale uma vez seguida, nunca duas. Devolve os controles distintos que o
+     * foco visitou DENTRO do diálogo: um diálogo com o foco parado num só botão não prova nada, então quem chama confere que foram vários.
+     */
+    const stayInside = async (key: 'Tab' | 'Shift+Tab', presses: number): Promise<Set<string>> => {
+      const visited = new Set<string>();
+      let onBody = 0;
       for (let i = 0; i < presses; i += 1) {
         await page.keyboard.press(key);
         const where = await page.evaluate(() => {
           // O diálogo de cima é o último aberto (o resumo das regras é irmão do menu, aberto depois dele).
           const open = [...document.querySelectorAll('dialog[open]')].at(-1);
           const active = document.activeElement;
-          if (!active || active === document.body) return 'fora da página';
-          return open?.contains(active) ? 'dentro' : `fora do diálogo: ${active.tagName.toLowerCase()} ${active.getAttribute('aria-label') ?? active.textContent?.slice(0, 30) ?? ''}`;
+          if (!active || active === document.body) return { body: true, inside: false, what: 'o corpo da página' };
+          const what = `${active.tagName.toLowerCase()} "${active.getAttribute('aria-label') ?? active.textContent?.trim().slice(0, 30) ?? ''}"`;
+          return { body: false, inside: open?.contains(active) === true, what };
         });
-        expect(['dentro', 'fora da página'], `${key} #${i + 1}`).toContain(where);
+        onBody = where.body ? onBody + 1 : 0;
+        expect(onBody, `${key} #${i + 1}: o foco ficou fora da página por mais de um Tab`).toBeLessThanOrEqual(1);
+        if (!where.body) {
+          expect(where.inside, `${key} #${i + 1}: o foco foi para ${where.what}, fora do diálogo`).toBe(true);
+          visited.add(where.what);
+        }
       }
+      return visited;
     };
 
     const menu = await openMenu(page);
-    await stayInside('Tab', 12);
-    await stayInside('Shift+Tab', 12);
+    expect((await stayInside('Tab', 12)).size, 'o Tab percorre os controles do menu').toBeGreaterThanOrEqual(2);
+    expect((await stayInside('Shift+Tab', 12)).size, 'o Shift+Tab também').toBeGreaterThanOrEqual(2);
 
     await page.getByRole('button', { name: 'Resumo das regras' }).click();
     const rules = page.getByRole('dialog', { name: 'Resumo das regras' });
     await expect(rules).toBeVisible();
-    await stayInside('Tab', 12);
-    await stayInside('Shift+Tab', 12);
+    expect((await stayInside('Tab', 12)).size, 'o Tab percorre os controles do resumo').toBeGreaterThanOrEqual(2);
+    expect((await stayInside('Shift+Tab', 12)).size, 'o Shift+Tab também').toBeGreaterThanOrEqual(2);
     await axe(page);
 
     // Esc fecha o de cima e o foco volta ao botão que o abriu.
@@ -203,7 +276,7 @@ test.describe('PC de pouca altura, 1440 × 800', () => {
     // Ataque: o botão principal fica na janela e funciona.
     await equipByUi(page);
     await expect(roundHeading(page)).toHaveText('Rodada 3');
-    const attack = actionBar(page).getByRole('button', { name: 'Atacar', exact: true });
+    const attack = actionBar(page).getByRole('button', { name: ATTACK_BUTTON });
     await expect(attack).toBeEnabled();
     // À vista por inteiro (com 2 px de folga para o arredondamento do navegador): a mão e o botão principal cabem em 800 px.
     for (const place of [attack, page.getByRole('list', { name: 'Sua mão' })]) {

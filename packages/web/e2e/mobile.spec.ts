@@ -3,6 +3,7 @@
 // montar fileiras cheias (7 cartas por fileira cabem em 360 px).
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import {
+  ATTACK_BUTTON,
   axe,
   equipByUi,
   equipPanel,
@@ -97,7 +98,7 @@ for (const size of [
       await expectTouchTargets(equipPanel(page).getByRole('button'));
       await equipByUi(page);
       await expect(roundHeading(page)).toHaveText('Rodada 3');
-      await expect(actionBar(page).getByRole('button', { name: 'Atacar', exact: true })).toBeEnabled();
+      await expect(actionBar(page).getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
       await expectTouchTargets(actionBar(page).getByRole('button'));
       await expectNoHorizontalScroll(page);
       await axe(page);

@@ -9,9 +9,11 @@ import { expect, test, type Browser, type BrowserContext, type Page } from '@pla
 import {
   actionBar,
   answerReaction,
+  ATTACK_BUTTON,
   axe,
   controlSocket,
   endPanel,
+  END_TURN_BUTTON,
   equipByUi,
   equipPanel,
   failOnConsoleErrors,
@@ -147,24 +149,48 @@ test('duas pessoas jogam uma sala: do lobby ao fim, com queda e revanche', async
   });
 
   // Rodada 3, a primeira de Ataque: quem tem a iniciativa escolhe a ordem, e a escolha sai sozinha depois de 3 s.
-  let chooser = duda;
   await test.step('a escolha da ordem: quem tem a iniciativa espera a confirmação automática', async () => {
     const first = (player: Player) => orderPanel(player.page).getByRole('button', { name: 'Atacar primeiro' });
     await expect.poll(async () => (await first(ana).count()) + (await first(duda).count())).toBe(1);
-    chooser = (await first(ana).count()) === 1 ? ana : duda;
+    const chooser = (await first(ana).count()) === 1 ? ana : duda;
     const waiting = opponentOf(chooser);
     // O outro só vê quem escolhe.
     await expect(orderPanel(waiting.page)).toContainText(`${chooser.name} está escolhendo a ordem`);
     await expect(orderPanel(chooser.page).locator('[data-auto-barra]')).toBeVisible();
-    // A tela de quem espera passa pelo axe agora; a de quem escolhe não é tocada: qualquer toque, foco ou mouse no painel cancelaria
-    // a confirmação automática.
-    await axe(waiting.page);
-    // A barra esvazia e a ordem sai com a marca `auto`.
+    // Nenhum toque, foco nem axe em nenhuma das duas telas durante os 3 s: qualquer toque, foco ou mouse no painel cancelaria a
+    // confirmação, e o axe leva tempo do prazo. A barra esvazia e a ordem sai com a marca `auto`.
     await expect(first(chooser)).toBeHidden({ timeout: 15_000 });
     await expect(orderPanel(chooser.page)).toBeHidden();
+    await expect(orderPanel(waiting.page)).toBeHidden();
+    // Com o painel fora, a tela de quem esperava passa pelo axe (ele espera as batidas assentarem).
+    await axe(waiting.page);
   });
 
+  /** O botão principal da barra (Atacar ou Encerrar turno): só quem tem a vez de jogar o vê. */
+  const mainButton = (player: Player) =>
+    actionBar(player.page).getByRole('button', { name: ATTACK_BUTTON }).or(actionBar(player.page).getByRole('button', { name: END_TURN_BUTTON }));
+  /** Espera um dos dois ter a vez e devolve quem. */
+  const whoActs = async (): Promise<Player> => {
+    await expect.poll(async () => (await mainButton(ana).count()) + (await mainButton(duda).count())).toBe(1);
+    return (await mainButton(ana).count()) === 1 ? ana : duda;
+  };
+
+  await test.step('o atacante ataca e quem responde passa sozinho', async () => {
+    const attacker = await whoActs();
+    // A mão e a barra de quem ataca passam pelo axe antes do clique (na semente, a mão de Duda tem Armadilhas); a vez dele tem 30 s.
+    await axe(attacker.page);
+    await mainButton(attacker).click();
+    // Na semente `e2e` só `PASS` é legal para quem responde (nenhuma Armadilha tem alvo), então o passe é o automático. Um sorteio
+    // com resposta possível cairia em "manual", e esta conferência avisaria que a semente não valeu.
+    expect(await answerReaction(opponentOf(attacker).page), 'a semente deixa só PASS legal na primeira reação').toBe('auto');
+  });
+
+  // A queda vem agora, na vez do outro: o relógio do turno (30 s) corre contra quem joga, e quem cai só espera. Se num runner lento ele
+  // vencer e o servidor jogar por quem estava na vez, o resto do teste só reage ao que a tela oferecer (as conferências abaixo toleram isso).
   await test.step('B perde a conexão por 3 s e volta: a mesma partida, o aviso aparece e some', async () => {
+    const acting = await whoActs();
+    // A mão (Q, K, Selvagem) e a barra de quem joga agora, pelo axe, antes de a conexão cair.
+    await axe(acting.page);
     const before = { round: await roundNumber(duda.page), hand: await handIds(duda.page) };
     await socket.drop();
     await expect(reconnecting(duda.page)).toBeVisible();
@@ -175,23 +201,15 @@ test('duas pessoas jogam uma sala: do lobby ao fim, com queda e revanche', async
     await expect(ana.page.getByRole('status').filter({ hasText: `${duda.name} caiu` })).toHaveCount(0);
     await expect(history(ana.page).getByText(`${duda.name} voltou`)).toBeVisible();
 
-    // A mesma partida: a mesa, a rodada e a mão são as de antes, e o lobby não voltou.
+    // A mesma partida: a mesa, e o lobby não voltou; a rodada nunca volta atrás e, enquanto é a mesma, a mão de Duda é a de antes.
     await expect(table(duda.page)).toBeVisible();
-    expect(await roundNumber(duda.page)).toBe(before.round);
-    expect(await handIds(duda.page)).toEqual(before.hand);
     await expect(duda.page.getByRole('heading', { name: 'Sala de espera' })).toHaveCount(0);
+    const round = await roundNumber(duda.page);
+    expect(round, 'a rodada não volta atrás').toBeGreaterThanOrEqual(before.round);
+    if (round === before.round) expect(await handIds(duda.page)).toEqual(before.hand);
   });
 
-  await test.step('o atacante ataca, quem responde tem o passe automático ou passa', async () => {
-    const mainButton = (player: Player) => actionBar(player.page).getByRole('button', { name: /^(Atacar|Encerrar turno)$/ });
-    await expect.poll(async () => (await mainButton(ana).count()) + (await mainButton(duda).count())).toBe(1);
-    const attacker = (await mainButton(ana).count()) === 1 ? ana : duda;
-    await axe(attacker.page);
-    await mainButton(attacker).click();
-    const answered = await answerReaction(opponentOf(attacker).page);
-    expect(['auto', 'manual']).toContain(answered);
-
-    // O resto da rodada 3 (o outro ataca) e o começo da seguinte: cada um joga o que a tela oferece.
+  await test.step('o resto da rodada 3 e o começo da seguinte, pelo que a tela oferece', async () => {
     const nextRound = async (page: Page) => (await roundNumber(page).catch(() => 0)) >= 4;
     await Promise.all(players.map((player) => playUntil(player.page, nextRound, { order: 'wait' })));
     await axe(ana.page);
