@@ -506,6 +506,8 @@ Uma exceção no React mostra "Algo deu errado", com os botões **Recarregar** e
 - **Diálogos** (desistir, cemitério, resumo das regras): `<dialog>` nativo, com o foco preso dentro e devolvido ao fechar.
 - **Movimento:** `prefers-reduced-motion` e a chave do menu (§4.1).
 - **Zoom:** até 200% no PC sem quebrar a mesa.
+  - **Conferido na Tarefa 26 (2026-10-21):** passa, sem perda de conteúdo e sem rolagem de lado. O zoom de 200% numa tela de 1440 × 900 vira uma janela de 720 × 450 px CSS (densidade 2), e numa de 1920 × 1080, de 960 × 540; as duas caem no desenho de tablet. Nas duas, `scrollWidth` do documento é igual ao `clientWidth` (720 e 960), nenhum elemento passa da borda e o botão principal ("Atacar") fica dentro da janela; o menu da partida cabe sem rolar, e o resumo das regras rola por dentro (largura sem estouro). Sem erro de console.
+  - **Custo, não defeito:** com 450 px de altura, a barra de ação e a mão ocupam ~250 px e a mesa fica numa janela de ~200 px que rola por dentro (conteúdo de 675 px). Dá para chegar a tudo, mas não se veem os dois campos juntos: a vida do oponente e a sua ficam em posições de rolagem diferentes. Com 540 px a janela da mesa sobe para ~290 px.
 - `lang="pt-BR"`.
 - **Verificação:** axe nos testes de componentes (vitest-axe ou equivalente) e no E2E (`@axe-core/playwright`), sem violações sérias nem críticas.
 
@@ -626,6 +628,16 @@ O sorteio da partida online não é controlável (a semente nunca sai do servido
   - `no-restricted-imports` barra `@coringa/protocol/schemas` e `node:*` em `packages/web/src`.
 - **`scripts/check-fast.ts`:** `isSource` passa a aceitar `.tsx`, para o pre-commit rodar os testes relacionados dos componentes.
 - **`pnpm check`** ganha lint, typecheck, `test:coverage` e smoke da web. Quem implementa mede o tempo do check antes e depois e registra nesta spec.
+  - **Medições (Tarefa 26, 2026-10-21; Windows 11, 12 núcleos, `pnpm check` completo, três rodadas seguidas e a mediana):**
+
+    | Momento | `pnpm check` (mediana) |
+    |---|---|
+    | Antes do pacote web | 47 s |
+    | Commit da Tarefa 6 (`10dafbc`, o pacote web recém-criado) | 55 s |
+    | Agora (`df11d07`, interface e E2E prontos): 132 s, 122 s e 118 s | **122 s** |
+
+  - O que pesa: o projeto de testes da web (1088 testes, 30 arquivos, ~58 s de relógio entre os dois projetos `model` e `ui`), seguido do motor (~13 s) e do servidor (~16 s, Node e workerd). Lint, typecheck e o `vite build` do smoke somam o resto. O pre-commit já é o rápido (`scripts/check-fast.ts`), então o custo cai no pre-push e na CI; o E2E fica fora do `pnpm check`.
+  - **JavaScript inicial** medido pelo `packages/web/scripts/smoke.ts`: **127,5 KiB comprimidos (gzip) de 200 KiB** de orçamento (402,0 KiB brutos, um arquivo). Fora do inicial: o chunk do treino com o bot (`local-room`, 7,0 KiB gzip) e as funções do Motion (`motion-features`, 26,9 KiB gzip). Na Tarefa 6 o inicial era de 66,4 KiB.
 - **CI:** `.github/workflows/check.yml` ganha o job `e2e`, em paralelo ao `check`:
   - instala as dependências e o Chromium (`pnpm exec playwright install --with-deps chromium`);
   - constrói a web, sobe o `wrangler dev` e roda o Playwright. O `wrangler dev` local não precisa de login; desligue a telemetria (`WRANGLER_SEND_METRICS=false`) para não haver pergunta interativa;
@@ -719,6 +731,18 @@ Ideia trazida da direção C, e só ela; nada mais de B ou C entra.
 - **Textura de papel e borda de carimbo nunca entram nos números de jogo:** vida, ATK e DEF, a conta das fileiras, a prévia, o relógio e o placar. Esses números usam a fonte de texto (§10.3), com algarismos tabulares e contraste AA, e cabem com folga em 360 px.
 - O grão do papel é uma camada por baixo do conteúdo, nunca por cima do texto.
 - **Daltonismo:** o verde e o rosa nunca são a única pista de quem é quem (posição e rótulo, §10.2). O plano confere as telas principais com simulação de deuteranopia, protanopia e tritanopia (por exemplo, a emulação de deficiência de visão do DevTools) e registra o resultado.
+  - **Resultado (Tarefa 26, 2026-10-21): passa nos quatro modos.** Sem DevTools interativo, a conferência usou o Chromium do Playwright com `Emulation.setEmulatedVisionDeficiency` (a mesma emulação do painel Renderização) em `/treino?semente=cor`, com `deuteranopia`, `protanopia`, `tritanopia` e `achromatopsia`, mais um quadro sem deficiência para comparar. Telas: o Equipar da rodada 1 e a mesa da rodada 3 (fileiras cheias nos dois campos, a mão e o painel da escolha da ordem), em 1440 × 900 e em 390 × 844, e um recorte das fileiras a 3× para ver os naipes. Olhei as capturas uma a uma; não conferi o fim de partida, o cemitério nem a janela de reação nesta passada.
+  - **As duas metades:**
+
+    | Modo | Campo do oponente (verde) | Seu campo (rosa) | Por cor |
+    |---|---|---|---|
+    | Deuteranopia | oliva claro | cinza claro | distintos |
+    | Protanopia | oliva claro | cinza-azulado | distintos |
+    | Tritanopia | verde-azulado | rosa | distintos |
+    | Acromatopsia | cinza médio | cinza um pouco mais claro | quase iguais |
+
+    Na acromatopsia a luminosidade dos dois campos é próxima, e o que separa as metades é o que a spec já exige: a posição (o oponente em cima, você embaixo), o rótulo ("Bot" e "Você", com a vida de cada um) e a faixa escura da rodada entre os dois campos. Em nenhum modo a cor é a única pista.
+  - **Naipes:** ♥ ♦ ♣ ♠ se distinguem pela forma em todos os modos, no tamanho real e a 3×. O número vermelho vira oliva escuro (deuteranopia e protanopia) ou cinza médio (acromatopsia) e o preto continua preto: a diferença de luminosidade entre os dois é pequena na deuteranopia e na protanopia, então quem garante a leitura é a forma do naipe (e o nome acessível da carta), como a §7 prevê. O sublinhado do "novo" (§10.5) continua sendo uma forma (uma barra), visível nos quatro modos.
 - O axe confere o contraste nos testes de componentes e no E2E (§7).
 
 ---
@@ -791,6 +815,8 @@ O mesmo Worker serve a interface. No `packages/server/wrangler.jsonc`:
 3. O treino contra o bot funciona no celular e no PC.
 4. A partida inteira é jogável só pelo teclado, e o axe passa sem violação séria.
 5. O tempo do `pnpm check` foi medido e registrado (§9.3).
+
+**Fica para o autor:** rodar `pnpm deploy:server` (precisa do `wrangler login`) e jogar o item 2, uma partida com um amigo pelo link publicado, um no celular e outro no PC, com queda e volta e com revanche.
 
 ## 15. Fica para quem constrói
 
