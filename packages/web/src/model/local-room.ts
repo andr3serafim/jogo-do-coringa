@@ -222,6 +222,7 @@ export class LocalRoom implements RoomConnection {
     this.#epoch += 1;
     this.#publishRoom('PLAYING');
     this.#publishState([]);
+    this.#autoEquip();
     this.#scheduleBot();
   }
 
@@ -241,9 +242,23 @@ export class LocalRoom implements RoomConnection {
       this.#outcome = { gameNo: this.#gameNo, result, cause };
       this.#publishRoom('FINISHED');
     } else {
+      this.#autoEquip();
       this.#scheduleBot();
     }
     return seq;
+  }
+
+  /**
+   * Equipar sem numéricas: quem recebeu zero tem `EQUIP { destinations: [] }` aplicado em seu nome, como passo próprio, igual
+   * ao servidor (spec 2 §5). A interface não tem botão para um Equipar vazio, e sem relógio ninguém mais o enviaria: o jogo
+   * esperaria para sempre. O bot não precisa: ele escolhe a jogada pela lista legal, que traz o `EQUIP` vazio.
+   */
+  #autoEquip(): void {
+    const player = this.#game.players.find((candidate) => candidate.id === LOCAL_ME);
+    if (this.#game.phase.kind !== 'EQUIP' || !player || player.equipSubmitted || player.pending.length > 0) return;
+    const result = applyAction(this.#game, LOCAL_ME, { type: 'EQUIP', destinations: [] });
+    if (!result.ok) throw new Error(`o Equipar vazio foi recusado: ${result.error.code}`);
+    this.#commit(result.state, result.events);
   }
 
   #publishState(events: GameEvent[]): void {

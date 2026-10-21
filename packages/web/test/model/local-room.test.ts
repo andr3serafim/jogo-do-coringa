@@ -68,11 +68,15 @@ function myTurn(view: PlayerView): boolean {
   }
 }
 
-/** Joga a partida até o fim: o jogador escolhe sempre a primeira jogada legal; o bot vem dos timers. */
-async function playToEnd(room: LocalRoom, timers: FakeTimers, limit = 5000): Promise<void> {
+/**
+ * Joga a partida até o fim: o jogador escolhe sempre a primeira jogada legal; o bot vem dos timers. Com `ui`, o jogador joga
+ * como a interface: sem numéricas pendentes ela não tem botão para o Equipar, então ele não manda o `EQUIP` vazio.
+ */
+async function playToEnd(room: LocalRoom, timers: FakeTimers, limit = 5000, ui = false): Promise<void> {
   for (let i = 0; i < limit && room.room?.status !== 'FINISHED'; i++) {
     const view = room.state!.view;
-    if (myTurn(view)) {
+    const noButton = ui && view.phase.kind === 'EQUIP' && view.self.pending.length === 0;
+    if (myTurn(view) && !noButton) {
       const ack = await room.act(legalActions(view)[0] as PlayerAction);
       expect(ack.ok, JSON.stringify(ack)).toBe(true);
     } else if (!timers.runNext()) {
@@ -218,6 +222,35 @@ describe('LocalRoom', () => {
     expect(states(events).at(-1)!.view.opponent.equipSubmitted).toBe(true);
     await playToEnd(room, timers);
     expect(timers.pending.size).toBe(0);
+  });
+
+  describe('Equipar sem numéricas (como o servidor, spec 2 §5): a interface não tem botão para ele', () => {
+    // Sementes em que o jogador recebe 4 especiais (zero numéricas) no primeiro Equipar.
+    const NO_NUMBERS = ['s186', 's207', 's316', 's359'];
+
+    it.each(NO_NUMBERS)('%s: o EQUIP vazio sai em nome do jogador, como passo próprio, e a partida segue', (seed) => {
+      const { room, timers, events } = setup(seed);
+      room.connect();
+      expect(room.state!.view.self.pending).toHaveLength(0);
+      const all = states(events);
+      expect(all.map((s) => s.seq)).toEqual([1, 2]);
+      expect(all[0]!.events).toEqual([]);
+      expect(all[1]!.view.self.equipSubmitted).toBe(true);
+      expect(all[1]!.view.phase.kind).toBe('EQUIP');
+      // O bot ainda vai confirmar o dele: um timer só, e com a confirmação dele o Equipar se resolve (o passo traz os eventos).
+      expect(timers.pending.size).toBe(1);
+      expect(timers.runNext()).toBe(true);
+      expect(room.state!.seq).toBeGreaterThanOrEqual(3);
+      expect(states(events).at(2)!.events.length).toBeGreaterThan(0);
+    });
+
+    it('o jogador que só usa botões nunca fica preso, em nenhuma rodada: a partida termina', async () => {
+      for (const seed of [...NO_NUMBERS, 'u1', 'u2', 'u3', 'u4', 'u5', 'u6']) {
+        const { room, timers } = setup(seed);
+        room.connect();
+        await playToEnd(room, timers, 5000, true);
+      }
+    });
   });
 
   it('concede dá FORFEIT de p1 com causa CONCEDE, e depois disso não há partida', async () => {
