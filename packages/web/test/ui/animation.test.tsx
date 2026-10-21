@@ -284,6 +284,17 @@ describe('palco: pular as batidas (spec §4.1)', () => {
     expect(scene(m.container)).toBeNull();
   });
 
+  it('o pulo cancela os timers da linha do tempo (a inversão e a cortina agendadas não ficam esperando)', async () => {
+    const m = mount(THEIRS);
+    const baseline = vi.getTimerCount();
+    emit(m, EXODIA_OVER, [EXODIA]);
+    advance(50);
+    await m.user.click(stage(m.container));
+    advance(10); // a descida da cortina, que o pulo marca, dispara
+    // Nada da linha do tempo velha (batida seguinte, inversão aos 150 ms, fim da cena, fim da linha) sobrou agendado.
+    expect(vi.getTimerCount()).toBeLessThanOrEqual(baseline);
+  });
+
   it('ligar "reduzir animações" com a cena no ar vale na hora de ligar a inversão', () => {
     const m = mount(THEIRS);
     emit(m, EXODIA_OVER, [EXODIA]);
