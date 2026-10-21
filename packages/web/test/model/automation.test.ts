@@ -105,6 +105,19 @@ describe('Session: passe automático (spec §3.7)', () => {
     expect(connection.sent).toEqual([{ type: 'act', id: 'fake-1', action: PASS, options: { auto: true } }]);
   });
 
+  it('sem o passe automático na sessão (treino, spec §2.6), nada sai com a chave ligada, e o jogador passa à mão', async () => {
+    const connection = new FakeConnection();
+    const session = new Session(connection, fakeDeps().deps, DEFAULT_PREFS, { autoPass: false });
+    connection.emitState(stateMessage(passOnlyView(), { epoch: 3 }));
+    expect(connection.sent).toHaveLength(0);
+    // Ligar a chave não muda nada, e as preferências guardadas ficam como estão (a chave só não se aplica).
+    session.setPrefs({ ...DEFAULT_PREFS, autoPass: true });
+    expect(connection.sent).toHaveLength(0);
+    expect(session.snapshot().prefs).toEqual(DEFAULT_PREFS);
+    await session.play(PASS);
+    expect(connection.sent).toEqual([{ type: 'act', id: 'fake-1', action: PASS, options: undefined }]);
+  });
+
   it('com a chave desligada, nada sai; ligar a chave na janela manda um', () => {
     const { connection, session } = setup({}, { ...DEFAULT_PREFS, autoPass: false });
     connection.emitState(stateMessage(passOnlyView(), { epoch: 3 }));

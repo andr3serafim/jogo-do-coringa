@@ -75,6 +75,8 @@ export interface GameMenuProps {
   loadVersion?: () => Promise<string | null>;
   /** Só no treino: sai da partida na hora, sem resultado (a sala local não tem o que avisar a ninguém). */
   onExit?: () => void;
+  /** A chave "Passar sozinho" (padrão: aparece). O treino a esconde: lá o passe automático não se aplica (spec §2.6). */
+  showAutoPass?: boolean;
   /** Há partida em curso para desistir. */
   canConcede: boolean;
   /** Sem conexão não dá para desistir (o pedido se perderia). */
@@ -92,6 +94,7 @@ export function GameMenu({
   inviteLink,
   loadVersion,
   onExit,
+  showAutoPass = true,
   canConcede,
   concedeDisabled,
   onConcede,
@@ -156,11 +159,13 @@ export function GameMenu({
             </>
           )}
 
-          <Switch
-            label={AUTO_PASS_LABEL}
-            checked={prefs.autoPass}
-            onChange={(autoPass) => onPrefs({ ...prefs, autoPass })}
-          />
+          {showAutoPass ? (
+            <Switch
+              label={AUTO_PASS_LABEL}
+              checked={prefs.autoPass}
+              onChange={(autoPass) => onPrefs({ ...prefs, autoPass })}
+            />
+          ) : null}
           <Switch
             label={REDUCE_MOTION_LABEL}
             checked={prefs.reduceMotion || systemReduced}

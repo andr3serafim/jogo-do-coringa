@@ -64,7 +64,9 @@ export function Training({ store, load = loadLocalRoom, reload = defaultReload }
         const seed = module.trainingSeed(window.location.search, randomUnit);
         const room = new module.LocalRoom({ seed, ...timers });
         // A sessão ouve a sala antes de ela abrir: o `open`, o `room` e o primeiro `state` saem dentro do `connect()`.
-        const session = new Session(room, timers, loadPrefs(store));
+        // O passe automático não se aplica ao treino (spec §2.6): a sessão não o manda, e as preferências guardadas (que valem
+        // para a sala online) ficam como estão, sem ser reescritas.
+        const session = new Session(room, timers, loadPrefs(store), { autoPass: false });
         room.connect();
         dispose = () => {
           session.dispose();

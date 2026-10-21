@@ -3,6 +3,8 @@
 //
 // O módulo da sala local é importado aqui, no topo, antes de qualquer timer falso: o `import()` da tela então sai do cache
 // de módulos na hora, em vez de depender do carregador com o relógio parado.
+import { legalActions } from '@coringa/engine';
+import type { PlayerAction } from '@coringa/protocol';
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { StrictMode } from 'react';
@@ -169,6 +171,84 @@ describe('/treino', () => {
     expect(rooms).toHaveLength(1);
     expect(getRandomValues).toHaveBeenCalledTimes(1);
     expect(rooms[0]!.room?.status).toBe('PLAYING');
+  });
+});
+
+/** O jogador joga a primeira jogada legal (direto na sala) até abrir uma janela de reação em que só há `PASS`. */
+async function playUntilPassOnlyWindow(room: localRoomModule.LocalRoom, advance: (ms: number) => void) {
+  for (let i = 0; i < 300; i++) {
+    const view = room.state!.view;
+    const legal = legalActions(view);
+    if (view.phase.kind === 'REACTION' && view.phase.responder === 'p1' && legal.length === 1 && legal[0]!.type === 'PASS') return;
+    const mine =
+      view.phase.kind === 'EQUIP'
+        ? !view.self.equipSubmitted
+        : view.phase.kind === 'ORDER_CHOICE' || view.phase.kind === 'ATTACK_MAIN'
+          ? view.phase.player === 'p1'
+          : view.phase.kind === 'REACTION' && view.phase.responder === 'p1';
+    if (mine) await act(async () => void (await room.act(legal[0] as PlayerAction)));
+    else advance(700);
+  }
+  throw new Error('a partida não abriu uma janela de reação em que só há PASS');
+}
+
+describe('/treino: o que o §2.6 exclui (passe automático e envio antecipado do Equipar)', () => {
+  it('numa janela de reação em que só há PASS, nenhum PASS sai sozinho: o jogador passa à mão', async () => {
+    const { advance, user } = fakeClock();
+    const { rooms, load } = capture();
+    // A chave ligada (padrão) não muda nada: no treino o passe automático não se aplica.
+    render(<Training store={memoryStore()} load={load} />);
+    await settle();
+    const room = rooms[0]!;
+    await playUntilPassOnlyWindow(room, advance);
+
+    const seq = room.state!.seq;
+    advance(10_000);
+    expect(room.state!.seq).toBe(seq);
+    expect(room.state!.view.phase).toMatchObject({ kind: 'REACTION', responder: 'p1' });
+    expect(screen.queryByText('Sem resposta possível; passando')).not.toBeInTheDocument();
+
+    await user.click(within(screen.getByRole('region', { name: 'Ações' })).getByRole('button', { name: 'Passar' }));
+    expect(room.state!.seq).toBeGreaterThan(seq);
+  });
+
+  it('o menu do treino não tem a chave "Passar sozinho"; a de movimento reduzido continua', async () => {
+    const { user } = fakeClock();
+    render(<Training store={memoryStore()} load={capture().load} />);
+    await settle();
+    await user.click(menuButton());
+    const menu = within(screen.getByRole('dialog', { name: 'Menu da partida' }));
+    expect(menu.queryByRole('switch', { name: /Passar sozinho/ })).not.toBeInTheDocument();
+    expect(menu.getByRole('switch', { name: 'Reduzir animações' })).toBeInTheDocument();
+  });
+
+  it.each([true, false])('trocar "Reduzir animações" no treino não mexe no passe automático guardado (%s)', async (autoPass) => {
+    const { user } = fakeClock();
+    const store = memoryStore();
+    store.set('coringa:prefs', JSON.stringify({ autoPass, reduceMotion: false }));
+    render(<Training store={store} load={capture().load} />);
+    await settle();
+    await user.click(menuButton());
+    await user.click(within(screen.getByRole('dialog', { name: 'Menu da partida' })).getByRole('switch', { name: 'Reduzir animações' }));
+    expect(JSON.parse(store.get('coringa:prefs')!)).toEqual({ autoPass, reduceMotion: true });
+  });
+
+  it('com cartas já posicionadas no Equipar, o tempo passa e nada é enviado antes do Confirmar', async () => {
+    const { advance, user } = fakeClock();
+    const { rooms, load } = capture();
+    render(<Training store={memoryStore()} load={load} />);
+    await settle();
+    const room = rooms[0]!;
+    advance(5_000);
+    const before = room.state!.seq;
+    const total = room.state!.view.self.pending.length;
+    expect(total).toBeGreaterThan(1);
+
+    await user.click(within(equipPanel().getByRole('list', { name: 'Destinos' })).getAllByRole('button')[0]!);
+    advance(10 * 60_000);
+    expect(room.state!.seq).toBe(before);
+    expect(equipPanel().getByText(`Carta 2 de ${total}`)).toBeInTheDocument();
+    expect(equipPanel().queryByText(/Você já confirmou|Esperando/)).not.toBeInTheDocument();
   });
 });
 

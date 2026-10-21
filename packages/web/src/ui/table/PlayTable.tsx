@@ -424,6 +424,8 @@ function PlayTableView({
         inviteLink={inviteLink}
         loadVersion={loadVersion}
         onExit={onExit}
+        // No treino o passe automático não se aplica (spec §2.6): a sessão não o manda, e o menu não oferece a chave.
+        showAutoPass={!training}
         canConcede={room?.status === 'PLAYING' && phase !== 'GAME_OVER'}
         concedeDisabled={snapshot.status === 'reconnecting'}
         onConcede={() => void session.concede().catch(noop)}

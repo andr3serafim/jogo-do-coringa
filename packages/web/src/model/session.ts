@@ -81,6 +81,14 @@ export interface SessionDeps {
   onSeq?(seq: number): void;
 }
 
+export interface SessionOptions {
+  /**
+   * `false`: esta sessão nunca manda o passe automático, qualquer que seja a chave do menu (o treino não o tem, spec §2.6).
+   * As preferências ficam como estão: o que não vale aqui é a automação, e não a chave guardada.
+   */
+  autoPass?: boolean;
+}
+
 /** Quanto tempo um aviso fica na tela. */
 export const NOTICE_MS = 4_000;
 
@@ -134,6 +142,7 @@ export class Session {
   readonly #deps: SessionDeps;
   readonly #listeners = new Set<() => void>();
   readonly #unsubscribe: () => void;
+  readonly #autoPassAllowed: boolean;
   #snapshot: SessionSnapshot;
   #prefs: Prefs;
   #noticeTimer: unknown = null;
@@ -170,10 +179,11 @@ export class Session {
     value: NO_MARKS,
   };
 
-  constructor(connection: RoomConnection, deps: SessionDeps, prefs: Prefs = DEFAULT_PREFS) {
+  constructor(connection: RoomConnection, deps: SessionDeps, prefs: Prefs = DEFAULT_PREFS, options: SessionOptions = {}) {
     this.#connection = connection;
     this.#deps = deps;
     this.#prefs = prefs;
+    this.#autoPassAllowed = options.autoPass !== false;
     const state = connection.state;
     this.#epoch = state?.epoch ?? null;
     if (connection.room) this.#history = forGame(this.#history, connection.room.gameNo);
@@ -419,7 +429,7 @@ export class Session {
   /** Passe automático: sai assim que a janela abre, uma vez por época (spec §3.7). */
   #reconcileAutoPass(): void {
     const { state, legal, pending } = this.#snapshot;
-    if (this.#disposed || !state || pending) return;
+    if (this.#disposed || !this.#autoPassAllowed || !state || pending) return;
     if (!shouldAutoPass(state.view, legal, this.#prefs, this.#autoPassEpoch === state.epoch)) return;
     this.#autoPassEpoch = state.epoch;
     void this.#send(() => this.#connection.act({ type: 'PASS' }, { auto: true }), {
