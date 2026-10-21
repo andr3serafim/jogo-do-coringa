@@ -20,9 +20,11 @@ export interface BeatEffects {
   rows: ReadonlySet<string>;
   /** O número do dano que sobe no Coringa de `target`. */
   damage: { target: PlayerId; amount: number } | null;
+  /** O escudo do Reflect de `owner` quebra: a `view` já não o tem, então é só uma sobreposição no Coringa dele. */
+  shieldBreak: PlayerId | null;
 }
 
-export const NO_EFFECTS: BeatEffects = { cards: new Map(), rows: new Set(), damage: null };
+export const NO_EFFECTS: BeatEffects = { cards: new Map(), rows: new Set(), damage: null, shieldBreak: null };
 
 /** As cartas da fileira da quadra: as da fileira com o valor dela (a `view` já é a de depois do evento). */
 function quadCards(view: PlayerView, player: PlayerId, row: RowName, value: number): string[] {
@@ -50,6 +52,10 @@ function effectsOfEvent(event: GameEvent, view: PlayerView): Partial<BeatEffects
     case 'Sacrificed':
       // A carta usada vai até o alvo e o alvo quebra (as duas vão para o cemitério pelo `layoutId`).
       return { cards: fxMap([event.target.id], 'crack') };
+    case 'ReflectCanceled':
+    case 'ReflectProtected':
+    case 'ReflectExpired':
+      return { shieldBreak: event.owner };
     case 'ReflectPlayed':
       return { cards: fxMap([event.reflect.k.id, event.reflect.j.id, event.reflect.q.id], 'shield') };
     case 'QuadFormed':
@@ -77,6 +83,35 @@ export function delaysOf(beats: readonly Beat[]): ReadonlyMap<string, number> {
     if (beat.event.type === 'InitiativeChanged') delays.set(INITIATIVE_ID, beat.startMs);
   }
   return delays;
+}
+
+export interface Deals {
+  /** Cartas com id que entram (as suas): id → início da batida do `CardsDealt`, em ms. */
+  cards: ReadonlyMap<string, number>;
+  /** Cartas sem id (o verso na mão do oponente): quantas entram e quando. */
+  backs: ReadonlyMap<PlayerId, { count: number; startMs: number }>;
+}
+
+/** As cartas que entram na mesa na batida do `CardsDealt` (spec §4.2): esperam a batida e esmaecem, em vez de já estarem lá. */
+export function dealsOf(beats: readonly Beat[]): Deals {
+  const cards = new Map<string, number>();
+  const backs = new Map<PlayerId, { count: number; startMs: number }>();
+  for (const beat of beats) {
+    if (beat.event.type !== 'CardsDealt') continue;
+    const { player, count, cards: dealt } = beat.event;
+    if (dealt) {
+      for (const card of dealt) cards.set(card.id, beat.startMs);
+    } else {
+      const before = backs.get(player);
+      backs.set(player, { count: (before?.count ?? 0) + count, startMs: before?.startMs ?? beat.startMs });
+    }
+  }
+  return { cards, backs };
+}
+
+/** A batida em que o número da pressão muda (e ganha destaque); -1 sem ela. */
+export function pressureBeatIndex(beats: readonly Beat[]): number {
+  return beats.findIndex((beat) => beat.event.type === 'PressureChanged');
 }
 
 /** A batida em que a vida e os totais contam até o valor novo (o dano, ou o dano devolvido pelo Reflect); -1 sem ela. */

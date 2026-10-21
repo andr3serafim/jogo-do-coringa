@@ -74,7 +74,7 @@ export function Row({ label, kind, side, pressure, limit, aim }: RowProps) {
         </span>
         {base > 0 ? (
           <span data-conta className="font-texto text-[11px] font-semibold tabular-nums pc:text-[13px]">
-            {base} × {Math.round(total / base)}
+            {base} × {Math.round(shownTotal / base)}
           </span>
         ) : null}
         {quads.length > 0 ? (

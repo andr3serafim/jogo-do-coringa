@@ -6,7 +6,7 @@ import type { PlayerView, PublicPlayer, SpecialCard } from '@coringa/engine';
 import { useId, type ReactNode } from 'react';
 import { zoneKey, type MarkZone } from '../../model/marks.ts';
 import { useAnim } from '../anim/context.ts';
-import { DamageNumber } from '../anim/Effects.tsx';
+import { DamageNumber, ShieldBreak } from '../anim/Effects.tsx';
 import { useCountedNumber } from '../anim/useCountedNumber.ts';
 import { CardBack } from '../cards/Card.tsx';
 import { Coringa } from '../cards/Coringa.tsx';
@@ -97,12 +97,16 @@ function Info({ side, view, player, name, away, equip, zone, tool }: InfoProps) 
   // A vida mostrada espera a batida do dano e conta até o valor da `view`, que é a verdade (aria-valuenow).
   const shownHp = useCountedNumber(player.hp);
   const damage = anim.fx.damage?.target === player.id ? anim.fx.damage : null;
+  const dealtBacks = anim.backs(player.id);
   const percent = Math.max(0, Math.min(100, (shownHp / max) * 100));
   const hpName = `Vida de ${name}`;
 
   return (
     <div className={`campo-info ${self ? 'campo-info--voce' : 'campo-info--oponente'}`}>
-      <Coringa className="area-avatar size-10 shrink-0 pc:size-16" />
+      <span className="area-avatar relative size-10 shrink-0 pc:size-16">
+        <Coringa className="size-full" />
+        {anim.fx.shieldBreak === player.id ? <ShieldBreak ms={anim.beatMs} reduced={anim.reduced} /> : null}
+      </span>
       <div className="area-nome min-w-0">
         <h2 className="truncate text-[17px] font-bold leading-tight pc:text-2xl">
           {name}
@@ -118,7 +122,8 @@ function Info({ side, view, player, name, away, equip, zone, tool }: InfoProps) 
           </span>
           <span role="img" aria-label={handCountText(name, player.handCount)} className="flex items-center gap-[3px]">
             {Array.from({ length: player.handCount }, (_, index) => (
-              <CardBack key={index} />
+              // As cartas que o `CardsDealt` traz (as últimas da mão) esmaecem na batida dela.
+              <CardBack key={index} enter={dealtBacks !== null && index >= player.handCount - dealtBacks.count ? dealtBacks.delay : null} />
             ))}
           </span>
         </div>

@@ -3,18 +3,21 @@
 // batida de agora e a fase da contagem dos números.
 //
 // - A `view` mais recente é sempre a que está desenhada; as batidas são transição e sobreposição por cima dela.
-// - A cena inverte o palco inteiro uma vez (`filter: invert(1)`), como o negativo da gravura. A trava de flash (`FlashLock`)
-//   vale para a tela, não para um `state`: uma inversão que passaria de 3 trocas claro ↔ escuro em 1 s, ou que começaria
-//   antes do resfriamento, não acontece, e a cena segue sem ela. Com movimento reduzido, nunca há inversão.
+// - A cena inverte o palco inteiro uma vez (`filter: invert(1)`), como o negativo da gravura, sobre uma cortina escura de
+//   tela inteira. A trava de flash (`FlashLock`) vale para a tela, não para um `state`, e soma a inversão e a cortina: uma
+//   inversão que passaria de 3 trocas claro ↔ escuro em 1 s, ou que começaria antes do resfriamento, não acontece, e a
+//   cena segue sem ela; a cortina que não pode subir deixa só o painel, e a que não pode descer espera. Com movimento
+//   reduzido, nunca há inversão.
 // - Um toque na mesa (ou Esc) durante as batidas termina tudo na hora. O toque que pulou não vira clique: a barra de ação
 //   desligada não pode receber, no mesmo gesto, a jogada que o jogador nem viu liberada.
 // - O Motion vem com `LazyMotion`: o recurso de layout (`layoutId` das cartas) só existe no `domMax`, carregado por
 //   `import()` à parte, fora do JavaScript inicial (spec §12).
 import { LazyMotion, MotionConfig } from 'motion/react';
-import { useEffect, useMemo, useRef, type MouseEvent, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type FocusEvent, type MouseEvent, type ReactNode } from 'react';
 import { effectsOf, NO_EFFECTS } from '../../model/effects.ts';
 import { roomNames } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
+import type { Beat } from '../../model/timeline.ts';
 import { AnimContext, type Anim, type CountPhase } from './context.ts';
 import { BeatOverlay } from './Scene.tsx';
 import { useBeatPlayer } from './useBeatPlayer.ts';
@@ -37,7 +40,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
   const { state, room } = snapshot;
   // A decisão do jogador espera se há jogada legal para ele neste `state` (spec §4.1: tudo cabe em ~1 s).
   const player = useBeatPlayer(state, { reducedMotion, decisionPending: snapshot.legal.length > 0 }, onSettled);
-  const { run, beat, index, busy, inverted, released, skip } = player;
+  const { run, beat, index, busy, inverted, curtain, released, skip } = player;
   const names = useMemo(() => roomNames(state?.view.me ?? 'p1', room?.seats ?? []), [state, room]);
 
   const count: CountPhase =
@@ -47,13 +50,34 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
         ? 'count'
         : 'hold';
   const countMs = run.beats[run.damageIndex]?.durationMs ?? 0;
+  // O número da pressão muda NA batida dela, com destaque (sem movimento: o destaque é só cor, vale com movimento reduzido).
+  const pressure: CountPhase =
+    !busy || run.pressureIndex < 0 || index > run.pressureIndex
+      ? 'idle'
+      : index === run.pressureIndex
+        ? 'count'
+        : 'hold';
   const seq = state?.seq ?? 0;
+
+  // A cena em curso e a última que passou: a cortina segura o painel da última até descer (e o pulo o apaga já).
+  const sceneNow = beat !== null && beat.kind === 'scene' && beat.scene !== null ? beat : null;
+  const [lastScene, setLastScene] = useState<Beat | null>(null);
+  if (sceneNow !== null && sceneNow !== lastScene) setLastScene(sceneNow);
+  const scene = sceneNow ?? (curtain && busy ? lastScene : null);
 
   const anim = useMemo<Anim>(
     () => ({
       busy,
       reduced: reducedMotion,
       delayOf: (id) => (busy && !reducedMotion ? (run.delays.get(id) ?? 0) / 1000 : 0),
+      enterDelay: (id) => {
+        const startMs = busy ? run.deals.cards.get(id) : undefined;
+        return startMs === undefined ? null : startMs / 1000;
+      },
+      backs: (player) => {
+        const deal = busy ? run.deals.backs.get(player) : undefined;
+        return deal === undefined ? null : { count: deal.count, delay: deal.startMs / 1000 };
+      },
       markOf: (id) => released.marks.get(id) ?? 0,
       instant: (id) => released.instant.has(id),
       layoutKey: `${seq}:${busy ? 'tocando' : 'parado'}`,
@@ -61,8 +85,9 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       beatMs: beat?.durationMs ?? 0,
       count,
       countMs,
+      pressure,
     }),
-    [busy, reducedMotion, run, released, seq, state, beat, count, countMs],
+    [busy, reducedMotion, run, released, seq, state, beat, count, countMs, pressure],
   );
 
   // Esc pula as batidas (o Esc que um diálogo ou a gaveta do histórico já tratou não conta).
@@ -75,6 +100,18 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [busy, skip]);
+
+  // O foco que a remontagem de uma carta (pulo, `state` novo) derrubaria volta para ela, ou para o painel de baixo.
+  const focusedCard = useRef<string | null>(null);
+  const onFocus = (event: FocusEvent) => {
+    focusedCard.current = event.target instanceof HTMLElement ? (event.target.closest<HTMLElement>('[data-card-id]')?.dataset.cardId ?? null) : null;
+  };
+  useLayoutEffect(() => {
+    const id = focusedCard.current;
+    if (id === null || !released.marks.has(id) || (document.activeElement && document.activeElement !== document.body)) return;
+    const card = document.querySelector<HTMLElement>(`[data-card-id="${id}"]`);
+    (card instanceof HTMLButtonElement ? card : document.querySelector<HTMLElement>('[data-painel]'))?.focus();
+  }, [released]);
 
   // O toque que pulou as batidas não vira clique na barra, na mão nem em carta nenhuma. O clique do mesmo gesto chega logo
   // depois do `pointerup`; se não chegar (rolagem, `pointercancel`, o navegador que descarta o clique num botão
@@ -119,6 +156,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
             data-ocupado={busy ? 'true' : undefined}
             data-invertido={inverted ? 'true' : undefined}
             style={inverted ? { filter: 'invert(1)' } : undefined}
+            onFocusCapture={onFocus}
             onPointerDownCapture={onPointerDown}
             onPointerUpCapture={onPointerUp}
             onPointerCancelCapture={clearTouch}
@@ -126,7 +164,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
             className="relative isolate"
           >
             {children}
-            <BeatOverlay beat={beat} names={names} reduced={reducedMotion} />
+            <BeatOverlay beat={beat} scene={scene} curtain={curtain} names={names} reduced={reducedMotion} />
           </div>
         </AnimContext>
       </MotionConfig>

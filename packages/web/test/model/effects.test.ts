@@ -3,10 +3,12 @@ import { describe, expect, it } from 'vitest';
 import {
   bannerText,
   damageBeatIndex,
+  dealsOf,
   delaysOf,
   effectsOf,
   INITIATIVE_ID,
   NO_EFFECTS,
+  pressureBeatIndex,
   rowKey,
   sceneText,
 } from '../../src/model/effects.ts';
@@ -88,6 +90,35 @@ describe('damageBeatIndex: onde a vida e os totais contam até o valor novo', ()
   });
 });
 
+describe('dealsOf: as cartas que entram na batida do CardsDealt', () => {
+  it('as cartas com id entram no início da batida; as sem id (a mão do oponente) entram por contagem', () => {
+    const deals = dealsOf(
+      beatsOf(
+        { type: 'TurnStarted', player: 'p1' },
+        { type: 'CardsDealt', player: 'p1', count: 2, cards: [num('n1'), num('n2')] },
+        { type: 'CardsDealt', player: 'p2', count: 3 },
+      ),
+    );
+    expect(deals.cards.get('n1')).toBe(400);
+    expect(deals.cards.get('n2')).toBe(400);
+    expect(deals.backs.get('p2')).toEqual({ count: 3, startMs: 700 });
+    expect(deals.backs.has('p1')).toBe(false);
+  });
+
+  it('sem CardsDealt, nada entra', () => {
+    const deals = dealsOf(beatsOf({ type: 'TurnStarted', player: 'p1' }));
+    expect(deals.cards.size).toBe(0);
+    expect(deals.backs.size).toBe(0);
+  });
+});
+
+describe('pressureBeatIndex: onde o número da pressão muda', () => {
+  it('é a batida do PressureChanged, ou -1', () => {
+    expect(pressureBeatIndex(beatsOf({ type: 'TurnStarted', player: 'p1' }, { type: 'PressureChanged', pressure: 2 }))).toBe(1);
+    expect(pressureBeatIndex(beatsOf({ type: 'TurnStarted', player: 'p1' }))).toBe(-1);
+  });
+});
+
 describe('effectsOf: o efeito de cada evento (spec §4.2)', () => {
   const fx = (event: GameEvent) => effectsOf(beatsOf(event)[0]!, view);
 
@@ -130,6 +161,13 @@ describe('effectsOf: o efeito de cada evento (spec §4.2)', () => {
         ['k2', 'crack'],
       ]),
     );
+  });
+
+  it('o escudo do Reflect do dono quebra ao ser anulado, protegido ou expirar', () => {
+    expect(fx({ type: 'ReflectCanceled', player: 'p1', owner: 'p2' }).shieldBreak).toBe('p2');
+    expect(fx({ type: 'ReflectProtected', player: 'p2', owner: 'p1' }).shieldBreak).toBe('p1');
+    expect(fx({ type: 'ReflectExpired', owner: 'p2' }).shieldBreak).toBe('p2');
+    expect(fx({ type: 'TurnStarted', player: 'p1' }).shieldBreak).toBeNull();
   });
 
   it('Armadilha e Sacrifício racham o alvo', () => {

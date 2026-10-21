@@ -45,6 +45,7 @@ export function OrderPanel({ view, names, choosing, autoAt, now, disabled, notic
   return (
     <section
       ref={panelRef}
+      data-painel
       tabIndex={-1}
       aria-label="Escolha da ordem"
       onPointerMove={onInteract}

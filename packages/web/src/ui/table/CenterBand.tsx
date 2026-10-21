@@ -12,6 +12,7 @@ import { zoneKey } from '../../model/marks.ts';
 import * as m from 'motion/react-m';
 import { INITIATIVE_ID } from '../../model/effects.ts';
 import { useAnim } from '../anim/context.ts';
+import { useHeldNumber } from '../anim/useHeldNumber.ts';
 import { Card, cardName } from '../cards/Card.tsx';
 import { useTableUi } from './context.ts';
 import {
@@ -43,6 +44,9 @@ export function CenterBand({ view, names, deadline, remainingMs, pausedTurnMs, o
   const pressureMarked = ui.zones.has('pressure');
   const seenPressure = ui.onSeen && pressureMarked ? () => ui.onSeen?.(zoneKey('pressure')) : undefined;
   const { face, live } = useClock(deadline, remainingMs, view.me, pausedTurnMs);
+  // O número da pressão muda NA batida do `PressureChanged`, com destaque (spec §4.2).
+  const anim = useAnim();
+  const pressure = useHeldNumber(view.pressure, anim.pressure);
 
   return (
     <section
@@ -71,8 +75,12 @@ export function CenterBand({ view, names, deadline, remainingMs, pausedTurnMs, o
       >
         <span className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">Pressão da mesa</span>
         <span className="flex items-baseline gap-1.5">
-          <span data-numero className="font-texto text-lg font-extrabold leading-tight tabular-nums text-ouro pc:text-xl">
-            +{view.pressure}
+          <span
+            data-numero
+            data-destaque={pressure.highlight ? 'true' : undefined}
+            className={`font-texto text-lg font-extrabold leading-tight tabular-nums pc:text-xl ${pressure.highlight ? 'bg-ouro px-1 text-tinta' : 'text-ouro'}`}
+          >
+            +{pressure.shown}
           </span>
           {noDamageStreak > 0 ? (
             <span className="font-texto text-[11px] leading-tight tabular-nums pc:text-[15px]">{streakText(noDamageStreak)}</span>

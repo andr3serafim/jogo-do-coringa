@@ -81,7 +81,14 @@ export function connect(spec: ViewSpec, options: MountOptions = {}) {
   vi.useFakeTimers();
   vi.setSystemTime(10_000);
   // A Testing Library só avança os timers falsos de um `jest` global; sem ele, o `await user.click` espera para sempre.
-  vi.stubGlobal('jest', { advanceTimersByTime: (ms: number) => vi.advanceTimersByTime(ms) });
+  // O `act` embrulha o avanço: um timer da mesa que dispara no meio de um `user.click` atualiza o estado dentro do `act`
+  // (fora dele o React deixa a atualização na fila e, com os timers falsos, ela nunca sai).
+  const advanceInAct = (ms: number) => {
+    act(() => {
+      vi.advanceTimersByTime(ms);
+    });
+  };
+  vi.stubGlobal('jest', { advanceTimersByTime: advanceInAct });
   const { state: game, view } = scenarioAt(spec);
   const room = roomMessage({
     status: 'PLAYING',
@@ -106,7 +113,7 @@ export function connect(spec: ViewSpec, options: MountOptions = {}) {
     { ...DEFAULT_PREFS, ...options.prefs },
   );
   sessions.push(session);
-  const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+  const user = userEvent.setup({ advanceTimers: advanceInAct });
   return { game, view, connection, session, user };
 }
 
@@ -134,6 +141,8 @@ export const stage = (container: HTMLElement) => container.querySelector<HTMLEle
 export const busy = (container: HTMLElement) => stage(container).hasAttribute('data-ocupado');
 export const inverted = (container: HTMLElement) => stage(container).hasAttribute('data-invertido');
 export const scene = (container: HTMLElement) => container.querySelector('[data-cena]');
+/** A cortina escura da cena (a tela inteira escurecida) está no ar. */
+export const curtainUp = (container: HTMLElement) => container.querySelector('[data-cortina][data-ativa]') !== null;
 export const banner = (container: HTMLElement) => container.querySelector('[data-faixa]');
 
 /** Anda o tempo de 10 em 10 ms e anota o instante de cada troca claro ↔ escuro do palco. */
@@ -198,10 +207,13 @@ export function watchMany(probes: Array<() => boolean>) {
   };
 }
 
+/** O observador amostra de 10 em 10 ms: um instante anotado pode estar até 10 ms depois do real. */
+export const SAMPLE_MS = 10;
+
 /** Nenhuma janela de 1 s tem mais de 3 trocas (spec §10.4): a quarta troca seguida fica a ≥ 1 s da primeira. */
 export function expectFlashSafe(flips: number[]) {
   for (let i = 0; i + FLASH_MAX_SWITCHES < flips.length; i++) {
-    expect(flips[i + FLASH_MAX_SWITCHES]! - flips[i]!).toBeGreaterThanOrEqual(FLASH_WINDOW_MS);
+    expect(flips[i + FLASH_MAX_SWITCHES]! - flips[i]!).toBeGreaterThanOrEqual(FLASH_WINDOW_MS - SAMPLE_MS);
   }
 }
 

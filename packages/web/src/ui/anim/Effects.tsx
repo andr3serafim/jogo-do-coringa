@@ -40,3 +40,28 @@ export function LitRow({ aim, ms }: { aim?: 'up' | 'down'; ms: number }) {
     </m.span>
   );
 }
+
+/** O escudo do Reflect do Coringa quebra (cancelado, protegido ou expirado): a `view` já não o tem, então é só isto. */
+export function ShieldBreak({ ms, reduced }: { ms: number; reduced: boolean }) {
+  return (
+    <m.svg
+      viewBox="0 0 24 26"
+      aria-hidden="true"
+      data-escudo-quebra
+      initial={{ opacity: 0 }}
+      animate={reduced ? { opacity: [0, 1, 1, 0] } : { opacity: [0, 1, 1, 0], scale: [0.9, 1, 1.15, 1.4] }}
+      transition={{ duration: ms / 1000, times, ease: 'linear' }}
+      className="pointer-events-none absolute -inset-1.5 z-10 size-[calc(100%+12px)] text-ouro"
+    >
+      <path
+        d="M12 1 L22 4.5 V13 C22 19 17.5 23.5 12 25 C6.5 23.5 2 19 2 13 V4.5 Z"
+        fill="currentColor"
+        fillOpacity="0.55"
+        stroke="var(--color-tinta)"
+        strokeWidth="1.5"
+        strokeLinejoin="miter"
+      />
+      <path d="M13 3 L10 11 L14 14 L9.5 22" fill="none" stroke="var(--color-tinta)" strokeWidth="1.6" />
+    </m.svg>
+  );
+}

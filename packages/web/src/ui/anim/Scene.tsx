@@ -2,10 +2,10 @@
 // escondidas do leitor de tela: o histórico (região polida) é o registro acessível de tudo o que aconteceu.
 //
 // Sem pisca-pisca (spec §10.4: nunca mais de 3 trocas claro ↔ escuro por segundo, somando tudo o que estiver na tela):
-// as duas camadas ficam montadas o tempo todo e só trocam de opacidade (esmaecimento de 150 ms) quando uma sequência de
-// batidas com sobreposição começa ou termina. Várias faixas seguidas (o `catchUp` toca uma a cada ~75 ms), ou duas cenas de
-// `state`s colados, são UMA subida e UMA descida: entre uma batida e a seguinte só o texto troca. Remontar a camada a cada
-// batida faria a tira e o escurecimento piscarem a cada batida.
+// as camadas ficam montadas o tempo todo e só trocam de opacidade (esmaecimento de 150 ms). A cortina escura da cena (a
+// única mudança de luminância de tela inteira além da inversão) não segue a batida de agora: quem a sobe e a desce é o
+// `useBeatPlayer`, pela mesma `FlashLock` da inversão. Entre uma batida e a seguinte só o texto troca, então várias faixas
+// seguidas (o `catchUp` toca uma a cada ~75 ms) são UMA subida e UMA descida.
 //
 // Com movimento reduzido, a cena é o mesmo texto parado que aparece e some (esmaecimento), sem escala nem deslocamento.
 import type { Names } from '@coringa/sim/text';
@@ -13,21 +13,26 @@ import { bannerText, sceneText } from '../../model/effects.ts';
 import type { Beat } from '../../model/timeline.ts';
 
 export interface BeatOverlayProps {
+  /** A batida de agora. */
   beat: Beat | null;
+  /** A cena que o painel mostra (a de agora, ou a última enquanto a cortina segura). */
+  scene: Beat | null;
+  /** A cortina escura está no ar (decidido pelo `useBeatPlayer`). */
+  curtain: boolean;
   names: Names;
   reduced: boolean;
 }
 
 /** A sobreposição da batida de agora: cena, faixa, ou nada (as camadas ficam, só esmaecem). */
-export function BeatOverlay({ beat, names, reduced }: BeatOverlayProps) {
-  const scene = beat !== null && beat.kind === 'scene' && beat.scene !== null ? beat : null;
+export function BeatOverlay({ beat, scene, curtain, names, reduced }: BeatOverlayProps) {
+  // Com a cortina no ar ou uma cena no painel, a faixa espera: as duas juntas seriam o mesmo texto duas vezes.
   const banner =
-    beat !== null && scene === null && (beat.kind === 'banner' || beat.event.type === 'DeckReshuffled')
+    beat !== null && scene === null && !curtain && (beat.kind === 'banner' || beat.event.type === 'DeckReshuffled')
       ? bannerText(beat.event, names)
       : null;
   return (
     <>
-      <SceneLayer beat={scene} names={names} reduced={reduced} />
+      <SceneLayer scene={scene} curtain={curtain} names={names} reduced={reduced} />
       <BannerLayer text={banner} />
     </>
   );
@@ -47,19 +52,34 @@ function Shield() {
   );
 }
 
-function SceneLayer({ beat, names, reduced }: { beat: Beat | null; names: Names; reduced: boolean }) {
-  const { title, detail } = beat === null ? { title: '', detail: '' } : sceneText(beat, names);
-  const reflect = beat?.scene === 'REFLECT_PLAYED' || beat?.scene === 'REFLECT_TRIGGERED';
+function SceneLayer({
+  scene,
+  curtain,
+  names,
+  reduced,
+}: {
+  scene: Beat | null;
+  curtain: boolean;
+  names: Names;
+  reduced: boolean;
+}) {
+  const { title, detail } = scene === null ? { title: '', detail: '' } : sceneText(scene, names);
+  const reflect = scene?.scene === 'REFLECT_PLAYED' || scene?.scene === 'REFLECT_TRIGGERED';
   return (
     <div
       aria-hidden="true"
       data-camada-cena
-      data-cena={beat?.scene ?? undefined}
+      data-cena={scene?.scene ?? undefined}
       data-reduzido={reduced ? 'true' : undefined}
-      className={`pointer-events-none absolute inset-0 z-50 grid place-items-center bg-tinta/60 px-4 transition-opacity duration-150 ${beat === null ? 'opacity-0' : 'opacity-100'}`}
+      className="pointer-events-none absolute inset-0 z-50 grid place-items-center px-4"
     >
-      {beat === null ? null : (
-        <div className="border-[5px] border-papel bg-tinta px-6 py-4 text-center text-papel">
+      <div
+        data-cortina
+        data-ativa={curtain ? 'true' : undefined}
+        className={`absolute inset-0 bg-tinta/60 transition-opacity duration-150 ${curtain ? 'opacity-100' : 'opacity-0'}`}
+      />
+      {scene === null ? null : (
+        <div className="relative border-[5px] border-papel bg-tinta px-6 py-4 text-center text-papel">
           {reflect ? <Shield /> : null}
           <p className="textura font-madeira text-4xl uppercase leading-none pc:text-6xl">{title}</p>
           {detail ? <p className="mt-2 text-base font-bold pc:text-xl">{detail}</p> : null}

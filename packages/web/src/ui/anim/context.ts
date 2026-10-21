@@ -1,6 +1,7 @@
 // O que o palco (`Stage`) diz ao resto da mesa enquanto toca as batidas (spec §4): se há batida em curso, quando cada
 // carta começa a se mexer, os efeitos da batida de agora e a fase da contagem dos números. Fora de um `Stage` (os
 // testes de vista, a carta solta) vale o `IDLE_ANIM`: sem batida, sem atraso, sem efeito.
+import type { PlayerId } from '@coringa/engine';
 import { createContext, useContext } from 'react';
 import { NO_EFFECTS, type BeatEffects } from '../../model/effects.ts';
 
@@ -14,6 +15,13 @@ export interface Anim {
   reduced: boolean;
   /** Atraso (em segundos) da transição de layout do elemento com este `layoutId`: o início da batida que o move. */
   delayOf(id: string): number;
+  /**
+   * A carta com este id entra na mesa na batida do `CardsDealt` (spec §4.2): fica apagada e esmaece depois de `n` segundos.
+   * `null` se nenhuma batida a traz.
+   */
+  enterDelay(id: string): number | null;
+  /** Quantas cartas de verso (a mão do oponente) entram na batida, e depois de quantos segundos; `null` sem batida. */
+  backs(player: PlayerId): { count: number; delay: number } | null;
   /** `key` do elemento com este `layoutId`: muda quando as transições dele são encerradas na hora (pulo, `state` novo). */
   markOf(id: string): number;
   /** O elemento chega ao lugar sem animar (a transição dele acabou de ser encerrada na hora). */
@@ -30,12 +38,16 @@ export interface Anim {
   count: CountPhase;
   /** Duração, em ms, da batida do dano (a contagem dos números). */
   countMs: number;
+  /** O número da pressão espera a batida do `PressureChanged` (`hold`) e ganha destaque nela (`count`). */
+  pressure: CountPhase;
 }
 
 export const IDLE_ANIM: Anim = {
   busy: false,
   reduced: false,
   delayOf: () => 0,
+  enterDelay: () => null,
+  backs: () => null,
   markOf: () => 0,
   instant: () => false,
   layoutKey: '',
@@ -43,6 +55,7 @@ export const IDLE_ANIM: Anim = {
   beatMs: 0,
   count: 'idle',
   countMs: 0,
+  pressure: 'idle',
 };
 
 export const AnimContext = createContext<Anim>(IDLE_ANIM);

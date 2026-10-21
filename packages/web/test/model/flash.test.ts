@@ -83,9 +83,70 @@ describe('FlashLock: a trava global do palco', () => {
     expect(lock.request(1_000, 100)).toBe(true); // a janela de 1 s já passou
   });
 
+  it('o desligar antecipado troca o desligar da inversão, não a última troca gravada (a da cortina vem depois)', () => {
+    const lock = new FlashLock();
+    expect(lock.request(0, 600)).toBe(true); // 0 e 600
+    expect(lock.toggle(300)).toBe(true); // a cortina troca no meio: 0, 300, 600
+    lock.release(400); // a inversão desliga em 400, não em 600
+    expect(lock.recentSwitches()).toEqual([0, 300, 400]);
+  });
+
   it('não acumula trocas velhas sem fim', () => {
     const lock = new FlashLock();
     for (let i = 0; i < 50; i++) expect(lock.request(i * 10_000, 600)).toBe(true);
     expect(lock.recentSwitches()).toHaveLength(2);
+  });
+});
+
+describe('FlashLock: a cortina da cena entra na mesma conta (spec §10.4: soma tudo o que estiver na tela)', () => {
+  it('toggle grava uma troca que cabe e recusa a que faria a quarta numa janela de 1 s', () => {
+    const lock = new FlashLock();
+    expect(lock.toggle(0)).toBe(true);
+    expect(lock.toggle(100)).toBe(true);
+    expect(lock.toggle(200)).toBe(true);
+    expect(lock.toggle(300)).toBe(false);
+    expect(lock.recentSwitches()).toEqual([0, 100, 200]);
+    expect(lock.toggle(1_000)).toBe(true);
+  });
+
+  it('a inversão conta as trocas da cortina: cortina sobe, inversão liga e desliga, e a descida só cabe 1 s depois da subida', () => {
+    const lock = new FlashLock();
+    expect(lock.toggle(0)).toBe(true); // a cortina sobe
+    expect(lock.request(150, 600)).toBe(true); // 150 e 750
+    expect(lock.toggle(600)).toBe(false); // descer aos 600 faria 4 trocas em 750 ms
+    expect(lock.nextAllowed(600)).toBe(1_000);
+    expect(lock.toggle(1_000)).toBe(true);
+  });
+
+  it('a inversão é recusada se as trocas da cortina já enchem a janela', () => {
+    const lock = new FlashLock({ cooldownMs: 0 });
+    lock.toggle(0);
+    lock.toggle(100);
+    lock.toggle(200);
+    expect(lock.request(300, 400)).toBe(false);
+  });
+
+  it('nextAllowed devolve o próprio instante quando cabe', () => {
+    const lock = new FlashLock();
+    expect(lock.nextAllowed(500)).toBe(500);
+    lock.toggle(0);
+    expect(lock.nextAllowed(500)).toBe(500);
+  });
+
+  it('nextAllowed espera pelo primeiro instante em que a troca cabe, contando as trocas já agendadas (o desligar da inversão)', () => {
+    const lock = new FlashLock();
+    lock.toggle(0);
+    lock.request(150, 600); // gravadas: 0, 150, 750
+    expect(lock.nextAllowed(0)).toBe(1_000);
+    expect(lock.nextAllowed(1_200)).toBe(1_200);
+  });
+
+  it('uma troca recusada não deixa rastro', () => {
+    const lock = new FlashLock();
+    lock.toggle(0);
+    lock.toggle(100);
+    lock.toggle(200);
+    lock.toggle(300);
+    expect(lock.recentSwitches()).toEqual([0, 100, 200]);
   });
 });

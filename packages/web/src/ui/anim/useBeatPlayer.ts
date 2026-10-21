@@ -1,23 +1,33 @@
 // Toca as batidas do último `state` (spec §4.1): uma "máquina" por `state` (a linha do tempo, a batida de agora e se já
-// acabou) e a inversão da tela inteira, que é do palco, não da linha do tempo de um `state`.
+// acabou), a inversão da tela inteira e a cortina escura das cenas, que são do palco, não da linha do tempo de um `state`.
 //
 // A máquina nasce durante a renderização, no mesmo desenho em que a `view` nova chega, porque as cartas precisam do
 // atraso da transição (e os controles, de saber que há batida) nesse desenho e não no seguinte. Os timers saem do efeito.
 //
-// A inversão (`filter: invert(1)`) segue outra regra: depois de ligada, só o seu próprio timer a desliga. Um `state` novo
-// que chega no meio dela (o bot responde em ~600 ms) troca a linha do tempo, mas não corta nem esquece a inversão no ar.
-// Quem decide se ela liga é a `FlashLock`, na hora de ligar (spec §10.4: o limite vale para a tela, não para um `state`).
+// A inversão (`filter: invert(1)`) e a cortina (o escurecimento de tela inteira da cena) seguem outra regra: depois de
+// ligadas, só o seu próprio timer as desliga. Um `state` novo que chega no meio delas (o bot responde em ~600 ms) troca
+// a linha do tempo, mas não as corta nem as esquece. As duas passam pela MESMA `FlashLock` (spec §10.4: o limite de
+// 3 trocas claro ↔ escuro em 1 s vale para a tela e soma tudo o que muda a luminância dela):
+// - a inversão pede licença na hora de ligar; sem ela, a cena segue sem inversão;
+// - a cortina sobe se a regra deixa (sem ela, a cena mostra só o painel) e desce quando nenhuma cena a segura, mas nunca
+//   antes de 1 s no ar e nunca antes de a regra deixar: se a descida quebraria o limite, ela espera.
 //
 // Terminar na hora (pulo, ou um `state` novo no meio das batidas) também precisa terminar as transições de layout que o
 // Motion deixou no ar, com o atraso que ainda faltava: a carta ficaria no lugar velho enquanto a mesa já mostra a `view`
 // nova. O Motion não encerra uma transição em andamento quando a medida muda (o alvo é o mesmo), então as cartas que a
 // linha do tempo velha mexia são remontadas (`marks`, que entram na `key` da carta) com transição de duração zero
 // (`instant`): o elemento novo retoma de onde o velho estava e chega na hora.
+//
+// O pulo cancela os timers da linha do tempo (nenhuma inversão, cortina ou batida chega depois dele), e a inversão confere
+// o movimento reduzido na hora de ligar: ligá-lo com a linha do tempo no ar também vale.
 import type { StateMessage } from '@coringa/protocol';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { damageBeatIndex, delaysOf } from '../../model/effects.ts';
-import { FlashLock } from '../../model/flash.ts';
+import { damageBeatIndex, dealsOf, delaysOf, pressureBeatIndex, type Deals } from '../../model/effects.ts';
+import { FLASH_WINDOW_MS, FlashLock } from '../../model/flash.ts';
 import { buildTimeline, timelineMs, type Beat, type TimelineOptions } from '../../model/timeline.ts';
+
+/** A cortina fica no ar pelo menos 1 s: a subida e a descida não cabem numa janela de 1 s com a inversão no meio. */
+export const CURTAIN_MIN_HOLD_MS = FLASH_WINDOW_MS;
 
 export interface Run {
   state: StateMessage | null;
@@ -27,6 +37,10 @@ export interface Run {
   delays: ReadonlyMap<string, number>;
   /** Índice da batida do dano (onde a vida e os totais contam), ou -1. */
   damageIndex: number;
+  /** Índice da batida em que o número da pressão muda, ou -1. */
+  pressureIndex: number;
+  /** As cartas que entram na batida do `CardsDealt`. */
+  deals: Deals;
 }
 
 interface Machine {
@@ -68,6 +82,8 @@ function makeMachine(state: StateMessage | null, options: TimelineOptions | null
     totalMs: timelineMs(beats),
     delays: delaysOf(beats),
     damageIndex: damageBeatIndex(beats),
+    pressureIndex: pressureBeatIndex(beats),
+    deals: dealsOf(beats),
   };
   return { run, index: beats.findIndex((beat) => beat.durationMs > 0), done: run.totalMs === 0 };
 }
@@ -83,6 +99,8 @@ export interface BeatPlayer {
   index: number;
   busy: boolean;
   inverted: boolean;
+  /** A cortina escura da cena está no ar (ela segura um pouco além da batida, e a regra de flash pode segurá-la mais). */
+  curtain: boolean;
   /** As transições de layout que acabaram na hora (pulo, ou `state` novo no meio das batidas). */
   released: Released;
   /** Termina as batidas na hora (toque na mesa, Esc): a `view` já é a de depois. */
@@ -114,14 +132,21 @@ export function useBeatPlayer(
   }
   const { run } = current;
 
-  // --- Inversão da tela inteira ---
+  // O movimento reduzido vale na hora de ligar a inversão, não só quando a linha do tempo nasceu.
+  const reduced = useRef(reducedMotion);
+  useEffect(() => {
+    reduced.current = reducedMotion;
+  }, [reducedMotion]);
+
   const [lock] = useState(() => new FlashLock());
+
+  // --- Inversão da tela inteira ---
   const [inverted, setInverted] = useState(false);
   const offTimer = useRef<number | null>(null);
 
   const invert = useCallback(
     (holdMs: number) => {
-      if (offTimer.current !== null || !lock.request(clock(), holdMs)) return;
+      if (reduced.current || offTimer.current !== null || !lock.request(clock(), holdMs)) return;
       setInverted(true);
       offTimer.current = window.setTimeout(() => {
         offTimer.current = null;
@@ -140,37 +165,107 @@ export function useBeatPlayer(
     setInverted(false);
   }, [lock]);
 
+  // --- Cortina da cena ---
+  const [curtain, setCurtain] = useState(false);
+  const curtainUp = useRef(false);
+  const curtainSince = useRef(0);
+  const fallTimer = useRef<number | null>(null);
+
+  /** Uma cena começa: a cortina sobe (se a regra deixa) ou, se já está no ar, fica (cancela a descida marcada). */
+  const raiseCurtain = useCallback(() => {
+    if (fallTimer.current !== null) window.clearTimeout(fallTimer.current);
+    fallTimer.current = null;
+    if (curtainUp.current) return;
+    const now = clock();
+    if (!lock.toggle(now)) return;
+    curtainUp.current = true;
+    curtainSince.current = now;
+    setCurtain(true);
+  }, [lock]);
+
+  /** Nenhuma cena segura a cortina: ela desce depois de `minHoldMs` no ar, e só quando a regra de flash deixa. */
+  const lowerCurtain = useCallback(
+    (minHoldMs: number) => {
+      if (!curtainUp.current) return;
+      if (fallTimer.current !== null) window.clearTimeout(fallTimer.current);
+      const attempt = (at: number) => {
+        fallTimer.current = window.setTimeout(() => {
+          fallTimer.current = null;
+          const now = clock();
+          if (!lock.toggle(now)) {
+            attempt(lock.nextAllowed(now));
+            return;
+          }
+          curtainUp.current = false;
+          setCurtain(false);
+        }, Math.max(0, at - clock()));
+      };
+      attempt(lock.nextAllowed(Math.max(clock(), curtainSince.current + minHoldMs)));
+    },
+    [lock],
+  );
+
+  // --- Batidas ---
+  const timers = useRef<number[]>([]);
+  /** A linha do tempo cujos timers ainda valem: o pulo a solta, e o que ela agendou deixa de acontecer. */
+  const live = useRef<Run | null>(null);
+  useEffect(() => {
+    if (run.totalMs === 0) return;
+    live.current = run;
+    const mine: number[] = [];
+    const at = (ms: number, action: () => void) =>
+      mine.push(
+        window.setTimeout(() => {
+          if (live.current === run) action();
+        }, ms),
+      );
+    run.beats.forEach((beat, i) => {
+      if (beat.durationMs > 0 && beat.startMs > 0) {
+        at(beat.startMs, () => setMachine((m) => (m.run === run && !m.done ? { ...m, index: i } : m)));
+      }
+      if (beat.invert) {
+        const { atMs, holdMs } = beat.invert;
+        at(atMs, () => invert(holdMs));
+      }
+      if (beat.kind === 'scene' && beat.scene !== null) {
+        at(beat.startMs, raiseCurtain);
+        at(beat.startMs + beat.durationMs, () => lowerCurtain(CURTAIN_MIN_HOLD_MS));
+      }
+    });
+    at(run.totalMs, () => setMachine((m) => (m.run === run && !m.done ? { ...m, done: true } : m)));
+    timers.current = mine;
+    return () => {
+      mine.forEach((timer) => window.clearTimeout(timer));
+      if (live.current === run) live.current = null;
+    };
+  }, [run, invert, raiseCurtain, lowerCurtain]);
+
+  // Um `state` novo trocou a linha do tempo no meio de uma cena: a cortina que ficou no ar desce, a não ser que a nova
+  // linha também tenha cena (a cena dela a segura, e o fim dela a baixa). A descida respeita a espera mínima e a trava.
+  const hasScene = run.beats.some((beat) => beat.kind === 'scene' && beat.scene !== null);
+  useEffect(() => {
+    if (!hasScene) lowerCurtain(CURTAIN_MIN_HOLD_MS);
+  }, [run, hasScene, lowerCurtain]);
+
+  // Ao sair da mesa, nenhum timer de inversão ou de cortina fica para trás.
   useEffect(
     () => () => {
       if (offTimer.current !== null) window.clearTimeout(offTimer.current);
+      if (fallTimer.current !== null) window.clearTimeout(fallTimer.current);
     },
     [],
   );
 
-  // --- Batidas ---
-  useEffect(() => {
-    if (run.totalMs === 0) return;
-    const timers: number[] = [];
-    run.beats.forEach((beat, i) => {
-      if (beat.durationMs > 0 && beat.startMs > 0) {
-        timers.push(
-          window.setTimeout(() => setMachine((m) => (m.run === run && !m.done ? { ...m, index: i } : m)), beat.startMs),
-        );
-      }
-      if (beat.invert) {
-        const { atMs, holdMs } = beat.invert;
-        timers.push(window.setTimeout(() => invert(holdMs), atMs));
-      }
-    });
-    timers.push(window.setTimeout(() => setMachine((m) => (m.run === run && !m.done ? { ...m, done: true } : m)), run.totalMs));
-    return () => timers.forEach((timer) => window.clearTimeout(timer));
-  }, [run, invert]);
-
   const skip = useCallback(() => {
     if (!current.done) setReleased((prev) => release(prev, current.run, null));
+    timers.current.forEach((timer) => window.clearTimeout(timer));
+    timers.current = [];
+    live.current = null;
     setMachine((m) => (m.done ? m : { ...m, done: true }));
     cutInversion();
-  }, [cutInversion, current]);
+    // Sem a espera mínima da cena: o jogador pulou. A regra de flash ainda vale, e a cortina só desce quando ela deixa.
+    lowerCurtain(0);
+  }, [current, cutInversion, lowerCurtain]);
 
   // Avisa quem espera o fim das batidas (o painel de fim de partida), no fim natural ou no pulo.
   const settled = useRef(onSettled);
@@ -190,6 +285,7 @@ export function useBeatPlayer(
     index: current.done ? -1 : current.index,
     busy: !current.done,
     inverted,
+    curtain,
     released,
     skip,
   };

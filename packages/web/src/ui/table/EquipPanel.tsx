@@ -102,7 +102,7 @@ export function EquipPanel(props: EquipPanelProps) {
 
 function Panel({ panelRef, children }: { panelRef: RefObject<HTMLElement | null>; children: ReactNode }) {
   return (
-    <section ref={panelRef} tabIndex={-1} aria-label="Equipar" className="flex flex-col gap-2 text-papel">
+    <section ref={panelRef} data-painel tabIndex={-1} aria-label="Equipar" className="flex flex-col gap-2 text-papel">
       {children}
     </section>
   );

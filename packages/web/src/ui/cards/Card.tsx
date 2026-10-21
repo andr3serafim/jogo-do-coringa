@@ -173,6 +173,8 @@ export function Card({
   const anim = useAnim();
   const fx = animated ? anim.fx.cards.get(card.id) : undefined;
   const shake = fx === 'crack' && !anim.reduced;
+  // Carta que o `CardsDealt` traz: fica apagada e esmaece na batida dela (só opacidade: vale com movimento reduzido).
+  const enter = animated ? anim.enterDelay(card.id) : null;
   const name = [cardName(card, as)];
   if (roleText) name.push(roleText);
   if (front) name.push('sai primeiro');
@@ -204,6 +206,7 @@ export function Card({
     'data-quad': quad ? 'true' : undefined,
     'data-rascunho': draft ? 'true' : undefined,
     'data-fx': fx,
+    'data-entra': enter === null ? undefined : String(enter),
     onPointerEnter: marked ? onSeen : undefined,
     onPointerDown: marked ? onSeen : undefined,
     onFocus: marked ? onSeen : undefined,
@@ -213,10 +216,12 @@ export function Card({
       ? {
           layoutId: card.id,
           layoutDependency: anim.layoutKey,
-          animate: shake ? { rotate: [0, -4, 4, -3, 3, 0] } : undefined,
+          initial: enter === null ? undefined : { opacity: 0 },
+          animate: enter !== null ? { opacity: 1 } : shake ? { rotate: [0, -4, 4, -3, 3, 0] } : undefined,
           transition: {
             layout: { delay: anim.delayOf(card.id), duration: anim.instant(card.id) ? 0 : 0.3, ease: 'easeInOut' as const },
             rotate: { duration: anim.beatMs / 1000 },
+            opacity: { delay: enter ?? 0, duration: 0.25 },
           },
         }
       : {}),
@@ -284,11 +289,15 @@ function FxOverlay({ fx, ms }: { fx: CardFx; ms: number }) {
 }
 
 /** O verso de uma carta que você não vê (a mão do oponente): sem nome, sem id. */
-export function CardBack({ className = '' }: { className?: string }) {
+export function CardBack({ className = '', enter = null }: { className?: string; enter?: number | null }) {
   return (
-    <span
+    <m.span
       aria-hidden="true"
       data-verso
+      data-entra={enter === null ? undefined : String(enter)}
+      initial={enter === null ? undefined : { opacity: 0 }}
+      animate={enter === null ? undefined : { opacity: 1 }}
+      transition={{ opacity: { delay: enter ?? 0, duration: 0.25 } }}
       className={`box-border inline-block h-[26px] w-[18px] flex-none rounded-[2px] border-[1.5px] border-tinta bg-[repeating-linear-gradient(45deg,var(--color-tinta)_0_2px,var(--color-papel)_2px_4px)] pc:h-[34px] pc:w-6 ${className}`}
     />
   );

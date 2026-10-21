@@ -114,7 +114,7 @@ export function ActionBar(props: ActionBarProps) {
   const canPass = reacting && open && plays.pass;
 
   return (
-    <section ref={barRef} tabIndex={-1} aria-label="Ações" className="flex flex-col gap-2.5 text-papel pc:gap-1.5">
+    <section ref={barRef} data-painel tabIndex={-1} aria-label="Ações" className="flex flex-col gap-2.5 text-papel pc:gap-1.5">
       {reacting && open ? <ReactionNotice view={view} names={names} threat={previews.threat} events={props.events} /> : null}
 
       <Status {...{ view, names, acting, pending, card, play, cardPlays, plays, notice, passed }} />

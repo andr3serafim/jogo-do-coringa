@@ -1,8 +1,9 @@
 // Trava global de flash (spec §10.4, WCAG 2.3.1). Puro: sem React, DOM nem timers; o relógio entra por parâmetro.
 //
 // O limite vale para a tela inteira, não para um `state`: duas cenas de `state`s diferentes, coladas, seriam um
-// pisca-pisca mesmo que cada linha do tempo, sozinha, respeite a regra. Quem aplica a inversão (o `Stage`) pede a
-// licença aqui na hora de ligar e grava o desligar quando ele acontece (inclusive o antecipado, do pulo).
+// pisca-pisca mesmo que cada linha do tempo, sozinha, respeite a regra. E vale para tudo o que muda a luminância da tela
+// inteira, somado: a inversão (liga e desliga) e a cortina escura da cena (sobe e desce). Quem aplica (o `useBeatPlayer`)
+// pede a licença aqui na hora de ligar e grava o desligar quando ele acontece (inclusive o antecipado, do pulo).
 import { INVERT_COOLDOWN_MS } from './timeline.ts';
 
 /** Janela da regra de flash: nunca mais de `FLASH_MAX_SWITCHES` trocas claro ↔ escuro dentro dela. */
@@ -55,12 +56,34 @@ export class FlashLock {
   /** A inversão desligou antes do previsto (o jogador pulou): vale o instante real, e o resfriamento conta dele. */
   release(atMs: number): void {
     if (atMs >= this.#endAt) return;
-    this.#switches[this.#switches.length - 1] = atMs;
+    // É o desligar DA INVERSÃO que muda de instante; a cortina pode ter gravado trocas depois dele.
+    const index = this.#switches.lastIndexOf(this.#endAt);
+    if (index >= 0) this.#switches[index] = atMs;
     this.#endAt = atMs;
   }
 
-  /** As trocas que ainda contam para a janela (para os testes). */
+  /** Uma troca avulsa (a cortina sobe ou desce) em `atMs`: grava e devolve `true` se cabe na janela; senão, nada. */
+  toggle(atMs: number): boolean {
+    this.#switches = this.#switches.filter((instant) => instant > atMs - FLASH_WINDOW_MS);
+    if (!withinFlashLimit(this.#switches, [atMs])) return false;
+    this.#switches.push(atMs);
+    return true;
+  }
+
+  /**
+   * O primeiro instante a partir de `atMs` em que uma troca avulsa cabe, contando também as trocas já agendadas (o
+   * desligar de uma inversão no ar). Serve para segurar a descida da cortina até a regra deixar.
+   */
+  nextAllowed(atMs: number): number {
+    const candidates = [atMs, ...this.#switches.map((instant) => instant + FLASH_WINDOW_MS)]
+      .filter((instant) => instant >= atMs)
+      .sort((a, b) => a - b);
+    // O último candidato (a troca mais tardia mais 1 s) sempre cabe.
+    return candidates.find((instant) => withinFlashLimit(this.#switches, [instant])) ?? atMs;
+  }
+
+  /** As trocas que ainda contam para a janela, em ordem (para os testes). */
   recentSwitches(): readonly number[] {
-    return this.#switches;
+    return [...this.#switches].sort((a, b) => a - b);
   }
 }
