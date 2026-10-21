@@ -13,7 +13,7 @@
 // - O Motion vem com `LazyMotion`: o recurso de layout (`layoutId` das cartas) só existe no `domMax`, carregado por
 //   `import()` à parte, fora do JavaScript inicial (spec §12).
 import { LazyMotion, MotionConfig } from 'motion/react';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type FocusEvent, type MouseEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import { effectsOf, NO_EFFECTS } from '../../model/effects.ts';
 import { roomNames } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
@@ -58,6 +58,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
         ? 'count'
         : 'hold';
   const seq = state?.seq ?? 0;
+  const remounted = useMemo(() => ({ serial: released.serial, ids: released.batch }), [released]);
 
   // A cena em curso e a última que passou: a cortina segura o painel da última até descer (e o pulo o apaga já).
   const sceneNow = beat !== null && beat.kind === 'scene' && beat.scene !== null ? beat : null;
@@ -78,6 +79,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
         const deal = busy ? run.deals.backs.get(player) : undefined;
         return deal === undefined ? null : { count: deal.count, delay: deal.startMs / 1000 };
       },
+      remounted,
       markOf: (id) => released.marks.get(id) ?? 0,
       instant: (id) => released.instant.has(id),
       layoutKey: `${seq}:${busy ? 'tocando' : 'parado'}`,
@@ -87,7 +89,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       countMs,
       pressure,
     }),
-    [busy, reducedMotion, run, released, seq, state, beat, count, countMs, pressure],
+    [busy, reducedMotion, run, released, remounted, seq, state, beat, count, countMs, pressure],
   );
 
   // Esc pula as batidas (o Esc que um diálogo ou a gaveta do histórico já tratou não conta).
@@ -100,18 +102,6 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [busy, skip]);
-
-  // O foco que a remontagem de uma carta (pulo, `state` novo) derrubaria volta para ela, ou para o painel de baixo.
-  const focusedCard = useRef<string | null>(null);
-  const onFocus = (event: FocusEvent) => {
-    focusedCard.current = event.target instanceof HTMLElement ? (event.target.closest<HTMLElement>('[data-card-id]')?.dataset.cardId ?? null) : null;
-  };
-  useLayoutEffect(() => {
-    const id = focusedCard.current;
-    if (id === null || !released.marks.has(id) || (document.activeElement && document.activeElement !== document.body)) return;
-    const card = document.querySelector<HTMLElement>(`[data-card-id="${id}"]`);
-    (card instanceof HTMLButtonElement ? card : document.querySelector<HTMLElement>('[data-painel]'))?.focus();
-  }, [released]);
 
   // O toque que pulou as batidas não vira clique na barra, na mão nem em carta nenhuma. O clique do mesmo gesto chega logo
   // depois do `pointerup`; se não chegar (rolagem, `pointercancel`, o navegador que descarta o clique num botão
@@ -156,7 +146,6 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
             data-ocupado={busy ? 'true' : undefined}
             data-invertido={inverted ? 'true' : undefined}
             style={inverted ? { filter: 'invert(1)' } : undefined}
-            onFocusCapture={onFocus}
             onPointerDownCapture={onPointerDown}
             onPointerUpCapture={onPointerUp}
             onPointerCancelCapture={clearTouch}

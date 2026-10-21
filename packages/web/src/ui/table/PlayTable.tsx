@@ -17,10 +17,10 @@
 // que a própria mesa move não conta como interação do jogador (não cancela a ordem automática nem aponta/apaga marcas).
 import type { SpecialCard } from '@coringa/engine';
 import type { Deadline, PlayerAction, StateMessage } from '@coringa/protocol';
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { isLegal, tablePlays, type CardPlay } from '../../model/plays.ts';
 import type { Session, SessionSnapshot } from '../../model/session.ts';
-import { useBoardBusy } from '../anim/context.ts';
+import { useAnim, useBoardBusy } from '../anim/context.ts';
 import { Stage } from '../anim/Stage.tsx';
 import { useReducedMotion } from '../anim/useReducedMotion.ts';
 import { useSession } from '../useSession.ts';
@@ -119,11 +119,11 @@ function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
   // Depois do passe (manual, ou o automático) o servidor recusa o resto da janela: a mão não escolhe mais.
   const passed = phase === 'REACTION' && (passedEpoch === state.epoch || snapshot.notice?.kind === 'autoPass');
 
-  const moveFocus = useCallback((el: HTMLElement | null) => {
+  const moveFocus = useCallback((el: HTMLElement | null, options?: FocusOptions) => {
     if (!el) return;
     programmatic.current = true;
     try {
-      el.focus();
+      el.focus(options);
     } finally {
       programmatic.current = false;
     }
@@ -131,6 +131,39 @@ function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
   const focusBar = useCallback(() => moveFocus(barRef.current), [moveFocus]);
   /** Esc e Cancelar: o foco volta à carta da mão que abriu a escolha; se ela já saiu, à barra. */
   const focusCard = useCallback((id: string | null) => moveFocus(handButton(id) ?? barRef.current), [moveFocus]);
+
+  // Um pulo, ou um `state` novo no meio das batidas, remonta as cartas que a linha do tempo velha mexia (`anim.remounted`), e o
+  // foco que uma delas tinha cai no corpo da página. Ele volta para ela (ou para o painel de baixo, se ela deixou de ser
+  // botão) pelo mesmo `moveFocus` da mesa, então não conta como interação do jogador: não cancela a ordem automática nem
+  // apaga a marca "novo". Só vale para as cartas remontadas por ESTE encerramento, só se o foco foi mesmo perdido, e sem
+  // rolar a mesa. O foco que o jogador tirou da carta (a carta ainda na página) apaga o registro: nada a devolver depois.
+  const anim = useAnim();
+  const focusedCard = useRef<string | null>(null);
+  useEffect(() => {
+    const onFocusIn = (event: FocusEvent) => {
+      const card = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-card-id]') : null;
+      focusedCard.current = card?.dataset.cardId ?? null;
+    };
+    const onFocusOut = (event: FocusEvent) => {
+      if (event.target instanceof Element && event.target.isConnected) focusedCard.current = null;
+    };
+    document.addEventListener('focusin', onFocusIn);
+    document.addEventListener('focusout', onFocusOut);
+    return () => {
+      document.removeEventListener('focusin', onFocusIn);
+      document.removeEventListener('focusout', onFocusOut);
+    };
+  }, []);
+  const restoredSerial = useRef(anim.remounted.serial);
+  useLayoutEffect(() => {
+    if (restoredSerial.current === anim.remounted.serial) return;
+    restoredSerial.current = anim.remounted.serial;
+    const id = focusedCard.current;
+    if (id === null || !anim.remounted.ids.has(id)) return;
+    focusedCard.current = null;
+    if (document.activeElement && document.activeElement !== document.body) return;
+    moveFocus(handButton(id) ?? barRef.current, { preventScroll: true });
+  }, [anim.remounted, moveFocus]);
 
   const clear = useCallback(() => {
     setSelection(null);
@@ -307,7 +340,10 @@ function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
         targetIds={targetIds}
         onSelectCard={acting && !passed ? selectCard : undefined}
         onSelectTarget={hasTargets ? chooseTarget : undefined}
-        onSeen={(key) => session.markSeen(key)}
+        // O foco que a própria mesa move (incluindo o que ela devolve depois de um pulo) não apaga marca.
+        onSeen={(key) => {
+          if (!programmatic.current) session.markSeen(key);
+        }}
         onOpenGraveyard={() => setGraveyard('view')}
         onInteract={interact}
         banner={banner}

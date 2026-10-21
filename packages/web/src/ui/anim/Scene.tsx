@@ -9,6 +9,7 @@
 //
 // Com movimento reduzido, a cena é o mesmo texto parado que aparece e some (esmaecimento), sem escala nem deslocamento.
 import type { Names } from '@coringa/sim/text';
+import { useState } from 'react';
 import { bannerText, sceneText } from '../../model/effects.ts';
 import type { Beat } from '../../model/timeline.ts';
 
@@ -63,8 +64,13 @@ function SceneLayer({
   names: Names;
   reduced: boolean;
 }) {
-  const { title, detail } = scene === null ? { title: '', detail: '' } : sceneText(scene, names);
-  const reflect = scene?.scene === 'REFLECT_PLAYED' || scene?.scene === 'REFLECT_TRIGGERED';
+  // O painel fica montado depois da primeira cena e só esmaece (150 ms), com o texto da última enquanto some: sem troca
+  // brusca de luminância, e o esmaecimento é o que o movimento reduzido mantém (texto parado que aparece e some).
+  const [last, setLast] = useState<Beat | null>(scene);
+  if (scene !== null && scene !== last) setLast(scene);
+  const shown = scene ?? last;
+  const { title, detail } = shown === null ? { title: '', detail: '' } : sceneText(shown, names);
+  const reflect = shown?.scene === 'REFLECT_PLAYED' || shown?.scene === 'REFLECT_TRIGGERED';
   return (
     <div
       aria-hidden="true"
@@ -78,13 +84,16 @@ function SceneLayer({
         data-ativa={curtain ? 'true' : undefined}
         className={`absolute inset-0 bg-tinta/60 transition-opacity duration-150 ${curtain ? 'opacity-100' : 'opacity-0'}`}
       />
-      {scene === null ? null : (
-        <div className="relative border-[5px] border-papel bg-tinta px-6 py-4 text-center text-papel">
-          {reflect ? <Shield /> : null}
-          <p className="textura font-madeira text-4xl uppercase leading-none pc:text-6xl">{title}</p>
-          {detail ? <p className="mt-2 text-base font-bold pc:text-xl">{detail}</p> : null}
-        </div>
-      )}
+      {/* Sempre montado: até o primeiro aparecer é um esmaecimento, não um pulo de opacidade. */}
+      <div
+        data-painel-cena
+        data-ativo={scene === null ? undefined : 'true'}
+        className={`relative border-[5px] border-papel bg-tinta px-6 py-4 text-center text-papel transition-opacity duration-150 ${scene === null ? 'opacity-0' : 'opacity-100'}`}
+      >
+        {reflect ? <Shield /> : null}
+        <p className="textura font-madeira text-4xl uppercase leading-none pc:text-6xl">{title}</p>
+        {detail ? <p className="mt-2 text-base font-bold pc:text-xl">{detail}</p> : null}
+      </div>
     </div>
   );
 }

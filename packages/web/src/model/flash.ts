@@ -53,13 +53,24 @@ export class FlashLock {
     return true;
   }
 
-  /** A inversão desligou antes do previsto (o jogador pulou): vale o instante real, e o resfriamento conta dele. */
-  release(atMs: number): void {
-    if (atMs >= this.#endAt) return;
+  /**
+   * O jogador pulou com a inversão no ar e quer desligá-la em `atMs`. Devolve o instante em que ela desliga de fato: o
+   * pedido, se isso mantém toda janela de 1 s com no máximo 3 trocas (contando as da cortina), ou o primeiro instante
+   * depois dele em que a conta deixa (no pior caso, o fim que já estava previsto). O desligar gravado vira esse instante,
+   * e o resfriamento conta dele. Sem inversão no ar, devolve `atMs` e não muda nada.
+   */
+  release(atMs: number): number {
+    if (atMs >= this.#endAt) return atMs;
     // É o desligar DA INVERSÃO que muda de instante; a cortina pode ter gravado trocas depois dele.
     const index = this.#switches.lastIndexOf(this.#endAt);
-    if (index >= 0) this.#switches[index] = atMs;
-    this.#endAt = atMs;
+    const others = this.#switches.filter((_, i) => i !== index);
+    const candidates = [atMs, ...others.map((instant) => instant + FLASH_WINDOW_MS)]
+      .filter((instant) => instant >= atMs && instant < this.#endAt)
+      .sort((a, b) => a - b);
+    const off = candidates.find((instant) => withinFlashLimit(others, [instant])) ?? this.#endAt;
+    if (index >= 0) this.#switches[index] = off;
+    this.#endAt = off;
+    return off;
   }
 
   /** Uma troca avulsa (a cortina sobe ou desce) em `atMs`: grava e devolve `true` se cabe na janela; senão, nada. */

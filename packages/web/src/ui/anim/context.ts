@@ -22,6 +22,8 @@ export interface Anim {
   enterDelay(id: string): number | null;
   /** Quantas cartas de verso (a mão do oponente) entram na batida, e depois de quantos segundos; `null` sem batida. */
   backs(player: PlayerId): { count: number; delay: number } | null;
+  /** O último encerramento na hora de transições (pulo, `state` novo): quais cartas remontaram. A mesa devolve o foco. */
+  remounted: { serial: number; ids: ReadonlySet<string> };
   /** `key` do elemento com este `layoutId`: muda quando as transições dele são encerradas na hora (pulo, `state` novo). */
   markOf(id: string): number;
   /** O elemento chega ao lugar sem animar (a transição dele acabou de ser encerrada na hora). */
@@ -48,6 +50,7 @@ export const IDLE_ANIM: Anim = {
   delayOf: () => 0,
   enterDelay: () => null,
   backs: () => null,
+  remounted: { serial: 0, ids: new Set() },
   markOf: () => 0,
   instant: () => false,
   layoutKey: '',

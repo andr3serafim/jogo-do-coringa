@@ -69,10 +69,16 @@ describe('FlashLock: a trava global do palco', () => {
 
   it('soltar depois do fim previsto, ou sem inversão, não muda nada', () => {
     const lock = new FlashLock();
-    lock.release(50); // sem inversão nenhuma
+    expect(lock.release(50)).toBe(50); // sem inversão nenhuma
     expect(lock.request(0, 600)).toBe(true);
-    lock.release(900); // depois do fim previsto (600)
+    expect(lock.release(900)).toBe(900); // depois do fim previsto (600)
     expect(lock.request(600 + INVERT_COOLDOWN_MS, 600)).toBe(true);
+  });
+
+  it('release devolve o instante em que a inversão desliga de fato (o pedido, se a conta deixa)', () => {
+    const lock = new FlashLock();
+    expect(lock.request(0, 600)).toBe(true);
+    expect(lock.release(100)).toBe(100);
   });
 
   it('a conta de 1 s vale mesmo que o resfriamento seja zerado (a regra da spec sozinha)', () => {
@@ -148,5 +154,46 @@ describe('FlashLock: a cortina da cena entra na mesma conta (spec §10.4: soma t
     lock.toggle(200);
     lock.toggle(300);
     expect(lock.recentSwitches()).toEqual([0, 100, 200]);
+  });
+});
+
+describe('FlashLock.release: o desligar antecipado também respeita as 3 trocas por segundo', () => {
+  it('o pulo não desliga a inversão antes de a conta deixar: ela fica ligada até o instante em que cabe', () => {
+    const lock = new FlashLock();
+    // A cortina de uma cena anterior (0 sobe, 1000 desce) e a de uma cena nova (1250 sobe).
+    expect(lock.toggle(0)).toBe(true);
+    expect(lock.toggle(1_000)).toBe(true);
+    expect(lock.toggle(1_250)).toBe(true);
+    expect(lock.request(1_400, 600)).toBe(true); // liga em 1400 e desliga em 2000: a quarta troca fica a exatos 1000 ms da primeira
+    // O jogador pula aos 1500: desligar agora seria a quarta troca em 500 ms (1000, 1250, 1400, 1500).
+    expect(lock.release(1_500)).toBe(2_000);
+    expect(lock.recentSwitches()).toEqual([1_000, 1_250, 1_400, 2_000]);
+  });
+
+  it('se uma parte do caminho cabe, o desligar antecipado vai até o primeiro instante que cabe', () => {
+    const lock = new FlashLock();
+    lock.toggle(0);
+    lock.toggle(100);
+    expect(lock.request(150, 1_000)).toBe(true); // 150 e 1150
+    // Aos 200 seriam 4 trocas em 200 ms; a primeira troca sai da janela aos 1000 e aí cabe.
+    expect(lock.release(200)).toBe(1_000);
+    expect(lock.recentSwitches()).toEqual([0, 100, 150, 1_000]);
+  });
+
+  it('o resfriamento conta do desligar que valeu', () => {
+    const lock = new FlashLock();
+    lock.toggle(0);
+    lock.toggle(1_000);
+    lock.toggle(1_250);
+    expect(lock.request(1_400, 600)).toBe(true);
+    expect(lock.release(1_500)).toBe(2_000);
+    expect(lock.request(2_000 + INVERT_COOLDOWN_MS - 1, 600)).toBe(false);
+  });
+
+  it('com as trocas da cortina longe, soltar antes vale como sempre', () => {
+    const lock = new FlashLock();
+    lock.toggle(0);
+    expect(lock.request(1_200, 600)).toBe(true);
+    expect(lock.release(1_300)).toBe(1_300);
   });
 });

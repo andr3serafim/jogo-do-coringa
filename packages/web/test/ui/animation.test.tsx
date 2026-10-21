@@ -271,6 +271,41 @@ describe('palco: pular as batidas (spec §4.1)', () => {
     expect(inverted(m.container)).toBe(false);
   });
 
+  it('o pulo com a inversão no ar depois de uma cena anterior não a desliga antes de a conta deixar', async () => {
+    const m = mount(MINE);
+    const trace = watchMany([() => curtainUp(m.container), () => inverted(m.container)]);
+    // Estado 1: cena, faixa e cena sob o teto de 1 s. A inversão fica suprimida; a cortina sobe em 0 e desce em 1000.
+    emit(m, MINE, [ABSOLUTE, TURN, { type: 'AbsoluteDefenseStarted', player: 'p2' }]);
+    trace.sample();
+    trace.run(1_250);
+    // Estado 2, sem teto: a cortina sobe em 1250 e a inversão liga em 1400, por 600 ms (a quarta troca a exatos 1 s da primeira).
+    emit(m, THEIRS, [ABSOLUTE]);
+    trace.run(250);
+    expect(inverted(m.container)).toBe(true);
+    // O jogador pula aos 1500: desligar agora faria 4 trocas em 500 ms (1000, 1250, 1400, 1500).
+    await m.user.click(stage(m.container));
+    trace.sample();
+    expect(busy(m.container)).toBe(false);
+    expect(inverted(m.container)).toBe(true); // a mesa já está livre, só o visual segura
+    trace.run(2_500);
+    expect(trace.flips[1]).toEqual([1_400, 2_000]);
+    expect(trace.flips[0]).toHaveLength(4); // 0 sobe, 1000 desce, 1250 sobe, e a descida depois do pulo
+    expectFlashSafe(trace.all);
+  });
+
+  it('pular com a conta folgada desliga a inversão na hora (3 trocas: 0, 150 e 500)', async () => {
+    const m = mount(THEIRS);
+    const trace = watchMany([() => curtainUp(m.container), () => inverted(m.container)]);
+    emit(m, THEIRS, [ABSOLUTE]);
+    trace.sample();
+    trace.run(500);
+    await m.user.click(stage(m.container)); // a inversão ligou em 150: desligar aos 500 faz 3 trocas (0, 150, 500)
+    trace.sample();
+    expect(inverted(m.container)).toBe(false);
+    trace.run(2_000);
+    expectFlashSafe(trace.all);
+  });
+
   it('pular ANTES de a inversão ligar a cancela: ela não liga depois, com a mesa já livre', async () => {
     const m = mount(THEIRS);
     emit(m, EXODIA_OVER, [EXODIA]);
@@ -907,6 +942,57 @@ describe('CardsDealt, Reflect e pressão (spec §4.2)', () => {
     expect(document.activeElement).toBe(after);
   });
 
+  it('devolver o foco depois da remontagem não conta como interação do jogador nem apaga a marca "novo"', async () => {
+    const m = mount(MINE);
+    emit(m, dealt, DEALS);
+    const card = () => m.container.querySelector<HTMLElement>('[data-card-id="n-novo"]')!;
+    card().focus();
+    const interact = vi.spyOn(m.session, 'interact');
+    const markSeen = vi.spyOn(m.session, 'markSeen');
+    const focus = vi.spyOn(HTMLElement.prototype, 'focus');
+    await m.user.keyboard('{Escape}');
+    expect(document.activeElement).toBe(card());
+    expect(interact).not.toHaveBeenCalled();
+    expect(markSeen).not.toHaveBeenCalled();
+    // E sem rolar a mesa.
+    expect(focus.mock.calls.some(([options]) => options?.preventScroll === true)).toBe(true);
+    focus.mockRestore();
+  });
+
+  it('o foco que o jogador tirou da carta não volta num encerramento seguinte', async () => {
+    const m = mount(MINE);
+    emit(m, dealt, DEALS);
+    const card = () => m.container.querySelector<HTMLElement>('[data-card-id="n-novo"]')!;
+    card().focus();
+    await m.user.keyboard('{Escape}'); // pulo: a carta remonta e recebe o foco de volta
+    expect(document.activeElement).toBe(card());
+    card().blur(); // o jogador tirou o foco da carta
+    emit(m, dealt, DEALS);
+    await m.user.keyboard('{Escape}'); // outro pulo remonta a mesma carta
+    expect(document.activeElement).toBe(document.body);
+  });
+
+  it('só a carta remontada por ESTE encerramento recebe o foco de volta: uma carta que ninguém remontou fica como está', async () => {
+    const m = mount(MINE);
+    emit(m, dealt, DEALS);
+    const other = handList().getByRole('button', { name: /^A de / });
+    other.focus();
+    await m.user.keyboard('{Escape}');
+    expect(document.activeElement).toBe(other);
+  });
+
+  it('uma carta que saiu da mesa com o foco não puxa o foco de volta num encerramento posterior', async () => {
+    const m = mount(MINE);
+    handList().getByRole('button', { name: /^A de / }).focus();
+    // O `state` seguinte tira a carta da mão sem batida nenhuma: o foco cai no corpo da página.
+    emit(m, { ...MINE, self: { ...MINE.self, hand: ['K', 'Q'] } }, []);
+    expect(document.activeElement).toBe(document.body);
+    // Um pulo depois, de outra linha do tempo (que não remonta essa carta), não leva o foco a lugar nenhum.
+    emit(m, dealt, DEALS);
+    await m.user.keyboard('{Escape}');
+    expect(document.activeElement).toBe(document.body);
+  });
+
   it('se a carta que tinha o foco deixou de ser um botão, o foco vai para o painel de baixo', async () => {
     const m = mount(MINE);
     emit(m, dealt, DEALS);
@@ -971,6 +1057,42 @@ describe('CardsDealt, Reflect e pressão (spec §4.2)', () => {
     advance(1_300);
     expect(row().querySelector('[data-total]')).toHaveTextContent('23');
     expect(row().querySelector('[data-conta]')).toHaveTextContent('23 × 1');
+  });
+});
+
+describe('o painel da cena esmaece (spec §4.1 e §10.4: nada de troca brusca de luminância)', () => {
+  const panel = (container: HTMLElement) => container.querySelector<HTMLElement>('[data-painel-cena]')!;
+
+  it.each([false, true])('aparece e some com esmaecimento, e fica montado (movimento reduzido: %s)', (reduceMotion) => {
+    const m = mount(THEIRS, { prefs: { reduceMotion } });
+    const first = panel(m.container);
+    // Montado desde o começo, apagado: o primeiro aparecer também é um esmaecimento.
+    expect(first.className).toContain('transition-opacity');
+    expect(first.className).toContain('opacity-0');
+    emit(m, THEIRS, [ABSOLUTE]);
+    expect(panel(m.container)).toBe(first);
+    expect(first.className).toContain('opacity-100');
+    expect(first.className).not.toContain('opacity-0');
+    expect(first).toHaveAttribute('data-ativo', 'true');
+    advance(1_600);
+    // No fim da cena o painel continua na página, com o texto dela, só apagado.
+    expect(panel(m.container)).toBe(first);
+    expect(first.className).toContain('opacity-0');
+    expect(first.className).toContain('transition-opacity');
+    expect(first).not.toHaveAttribute('data-ativo');
+    expect(first).toHaveTextContent('ATAQUE ABSOLUTO');
+  });
+
+  it('com a cortina negada o painel também esmaece, e nenhuma cortina sobe', async () => {
+    const m = mount(THEIRS);
+    emit(m, THEIRS, [ABSOLUTE]);
+    advance(400);
+    await m.user.click(stage(m.container));
+    advance(700);
+    emit(m, THEIRS, [{ type: 'AbsoluteDefenseStarted', player: 'p2' }]);
+    expect(curtainUp(m.container)).toBe(false);
+    expect(panel(m.container).className).toContain('opacity-100');
+    expect(panel(m.container).className).toContain('transition-opacity');
   });
 });
 

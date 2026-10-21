@@ -57,13 +57,17 @@ interface Machine {
 export interface Released {
   marks: ReadonlyMap<string, number>;
   instant: ReadonlySet<string>;
+  /** Quantos encerramentos houve (a mesa devolve o foco uma vez por encerramento). */
+  serial: number;
+  /** As cartas remontadas por ESTE encerramento (o último). */
+  batch: ReadonlySet<string>;
 }
 
-const NO_RELEASE: Released = { marks: new Map(), instant: new Set() };
+const NO_RELEASE: Released = { marks: new Map(), instant: new Set(), serial: 0, batch: new Set() };
 
 /** Encerra as transições da linha do tempo `ended` (se havia batida em curso); `next` é a que a substitui, se houver. */
 function release(prev: Released, ended: Run | null, next: Run | null): Released {
-  if (ended === null) return prev.instant.size === 0 ? prev : { marks: prev.marks, instant: new Set() };
+  if (ended === null) return prev.instant.size === 0 ? prev : { ...prev, instant: new Set() };
   const marks = new Map(prev.marks);
   const instant = new Set<string>();
   for (const id of ended.delays.keys()) {
@@ -71,7 +75,7 @@ function release(prev: Released, ended: Run | null, next: Run | null): Released 
     // O que a linha nova também mexe se anima de verdade, a partir de onde a velha o deixou.
     if (!next?.delays.has(id)) instant.add(id);
   }
-  return { marks, instant };
+  return { marks, instant, serial: prev.serial + 1, batch: new Set(ended.delays.keys()) };
 }
 
 function makeMachine(state: StateMessage | null, options: TimelineOptions | null): Machine {
@@ -156,12 +160,24 @@ export function useBeatPlayer(
     [lock],
   );
 
-  /** Corta a inversão no ar (pulo): o desligar vale agora, e a trava conta o resfriamento daqui. */
+  /**
+   * Corta a inversão no ar (pulo): desliga agora, se a trava deixa, e o resfriamento conta daqui. Se desligar agora faria a
+   * quarta troca numa janela de 1 s (a cortina de uma cena anterior já gastou trocas), a inversão fica ligada até o
+   * instante em que a conta deixa: a mesa já está livre, só o visual demora.
+   */
   const cutInversion = useCallback(() => {
     if (offTimer.current === null) return;
     window.clearTimeout(offTimer.current);
+    const now = clock();
+    const off = lock.release(now);
+    if (off > now) {
+      offTimer.current = window.setTimeout(() => {
+        offTimer.current = null;
+        setInverted(false);
+      }, off - now);
+      return;
+    }
     offTimer.current = null;
-    lock.release(clock());
     setInverted(false);
   }, [lock]);
 
