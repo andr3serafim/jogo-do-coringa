@@ -56,16 +56,28 @@ export async function expectNoHorizontalScroll(page: Page): Promise<void> {
   expect(overflow, 'rolagem lateral').toEqual({ width: overflow.width, document: 0, body: 0, main: 0, outside: [] });
 }
 
+/**
+ * `label-content-name-mismatch` (WCAG 2.5.3, "Rótulo no nome"): o axe exige que o texto VISÍVEL do botão (`visibleVirtual`, que conta
+ * até o que é `aria-hidden`) seja um trecho contínuo do nome acessível. Três padrões da mesa foram desenhados de outro jeito (spec §7)
+ * e não passam; mudar o nome deles reescreve a interface e os testes de componentes, então é decisão do autor (relatório da Tarefa 25).
+ * Texto visível → nome acessível:
+ * - carta da mão: "QBuff de defesa" → "Q de ouros, Buff de defesa";
+ * - botão de duas linhas (nome = título, detalhe = descrição): "Atacar27 × 3 · dano 24" → "Atacar";
+ * - cemitério com cartas: o valor da carta de cima e a contagem → "Ver o cemitério: 3 cartas, a de cima é 4 de ouros".
+ */
+const NAME_MISMATCH = 'label-content-name-mismatch';
+const KNOWN_NAME_MISMATCHES = ['[data-card-id]', 'button[aria-labelledby][aria-describedby]', 'button[aria-label^="Ver o cemitério"]'];
+
 /** O axe sobre a tela aberta: nenhuma violação `serious` ou `critical` (spec §7). */
 export async function axe(page: Page): Promise<void> {
   // As batidas (opacidade, movimento) mudam o contraste que o axe calcula: ele olha a tela parada.
   await page.waitForFunction(() => document.getAnimations().length === 0, undefined, { timeout: 5_000 });
-  // `label-content-name-mismatch` (WCAG 2.5.3, "Rótulo no nome") fica de fora de propósito: o axe exige que o texto VISÍVEL do botão
-  // seja um trecho contínuo do nome acessível, e três padrões da mesa foram desenhados de outro jeito (spec §7): a carta da mão
-  // ("Q de ouros, Buff de defesa", com "Q" e "Buff de defesa" na face), o botão de duas linhas (nome = título, detalhe = descrição)
-  // e o cemitério. Mudar o nome deles reescreve a interface e os testes de componentes: é decisão do autor (registrada no relatório
-  // da Tarefa 25). Todas as outras regras `serious` e `critical`, inclusive contraste, continuam valendo.
-  const { violations } = await new AxeBuilder({ page }).disableRules(['label-content-name-mismatch']).analyze();
+  // Duas passadas: todas as regras menos `label-content-name-mismatch`, e só ela, sem os três padrões conhecidos. Assim um botão
+  // novo com o nome fora do texto visível ainda reprova em qualquer tela.
+  const everything = await new AxeBuilder({ page }).disableRules([NAME_MISMATCH]).analyze();
+  let nameMismatch = new AxeBuilder({ page }).withRules([NAME_MISMATCH]);
+  for (const selector of KNOWN_NAME_MISMATCHES) nameMismatch = nameMismatch.exclude(selector);
+  const violations = [...everything.violations, ...(await nameMismatch.analyze()).violations];
   const blocking = violations
     .filter((violation) => violation.impact === 'serious' || violation.impact === 'critical')
     .map((violation) => {
@@ -96,9 +108,10 @@ export const menuButton = (page: Page): Locator => page.getByRole('button', { na
 export async function openMenu(page: Page): Promise<Locator> {
   const menu = page.getByRole('dialog', { name: 'Menu da partida' });
   await expect(async () => {
-    await menuButton(page).click();
+    // Com o menu já aberto (a abertura demorou mais que a espera de uma tentativa) o botão está inerte: não clica de novo.
+    if (!(await menu.isVisible())) await menuButton(page).click({ timeout: 2_000 });
     await expect(menu).toBeVisible({ timeout: 1_500 });
-  }).toPass();
+  }).toPass({ timeout: 20_000 });
   return menu;
 }
 

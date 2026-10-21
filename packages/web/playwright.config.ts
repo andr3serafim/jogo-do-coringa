@@ -6,6 +6,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const PORT = 8787;
+// Por IP, e não `localhost`: o servidor escuta só em IPv4, e o `localhost` do Linux pode resolver para `::1` primeiro.
+const HOST = '127.0.0.1';
 
 /**
  * Semente do sorteio online: o Worker deste servidor sorteia a partida `n` com `<semente>-<n>` (`wrangler dev --var`; no
@@ -27,7 +29,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : [['list']],
   use: {
-    baseURL: `http://localhost:${PORT}`,
+    baseURL: `http://${HOST}:${PORT}`,
+    // Sem teto, um clique que espera para sempre (botão coberto, diálogo modal) só cairia no limite do teste inteiro.
+    actionTimeout: 20_000,
+    navigationTimeout: 30_000,
     // Sem trace nem vídeo: o trace guardaria o corpo das respostas e os frames do WebSocket, e neles vai o token do assento.
     trace: 'off',
     video: 'off',
@@ -46,8 +51,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `pnpm --filter @coringa/web build && pnpm --filter @coringa/server exec wrangler dev --port ${PORT} --var E2E_SEED:${E2E_SEED}`,
-    url: `http://localhost:${PORT}/api/health`,
+    command: `pnpm --filter @coringa/web build && pnpm --filter @coringa/server exec wrangler dev --ip ${HOST} --port ${PORT} --var E2E_SEED:${E2E_SEED}`,
+    url: `http://${HOST}:${PORT}/api/health`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
     env: { WRANGLER_SEND_METRICS: 'false' },
