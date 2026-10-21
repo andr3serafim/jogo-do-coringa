@@ -138,17 +138,55 @@ export const banner = (container: HTMLElement) => container.querySelector('[data
 
 /** Anda o tempo de 10 em 10 ms e anota o instante de cada troca claro ↔ escuro do palco. */
 export function watchInversion(container: HTMLElement) {
+  return watchFlips(() => inverted(container));
+}
+
+/** Anda o tempo de 10 em 10 ms e anota o instante em que `probe` muda de valor. */
+export function watchFlips(probe: () => boolean) {
   const flips: number[] = [];
-  let was = inverted(container);
+  let was = probe();
   let elapsed = 0;
   const sample = () => {
-    const now = inverted(container);
+    const now = probe();
     if (now !== was) flips.push(elapsed);
     was = now;
   };
   return {
     flips,
     /** Confere agora, sem andar o tempo (depois de um clique). */
+    sample,
+    run(ms: number) {
+      for (let i = 0; i < ms / 10; i++) {
+        advance(10);
+        elapsed += 10;
+        sample();
+      }
+    },
+  };
+}
+
+/**
+ * Como `watchFlips`, para vários observadores no mesmo relógio: `flips[i]` são as trocas de `probes[i]` e `all`, as de todos
+ * juntos, em ordem (a spec §10.4 soma tudo o que estiver na tela).
+ */
+export function watchMany(probes: Array<() => boolean>) {
+  const flips: number[][] = probes.map(() => []);
+  const all: number[] = [];
+  const was = probes.map((probe) => probe());
+  let elapsed = 0;
+  const sample = () => {
+    probes.forEach((probe, i) => {
+      const now = probe();
+      if (now !== was[i]) {
+        flips[i]!.push(elapsed);
+        all.push(elapsed);
+      }
+      was[i] = now;
+    });
+  };
+  return {
+    flips,
+    all,
     sample,
     run(ms: number) {
       for (let i = 0; i < ms / 10; i++) {

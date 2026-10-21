@@ -3,6 +3,7 @@
 // No jsdom o Motion não anima (sem layout nem WAAPI): os testes conferem a máquina do palco com timers falsos (batidas
 // agendadas, inversão ligada e desligada no tempo certo, busy, pulo, movimento reduzido, catchUp, resync, trava) e os
 // efeitos pelos atributos que a mesa deixa no DOM, não os pixels. O harness está em `anim-harness.tsx`.
+import type { GameEvent } from '@coringa/engine';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -36,6 +37,7 @@ import {
   THEIRS,
   TURN,
   watchInversion,
+  watchMany,
 } from './anim-harness.tsx';
 import { roomMessage, seriousViolations } from './support.tsx';
 
@@ -640,6 +642,115 @@ describe('palco: Stage sozinho', () => {
     view.rerender(stageOf(session, false, onSettled));
     await user.click(stage(view.container));
     expect(onSettled).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('sobreposições sem pisca-pisca (spec §10.4: somando tudo o que estiver na tela)', () => {
+  const strip = (container: HTMLElement) => container.querySelector<HTMLElement>('[data-camada-faixa]')!;
+  const scrim = (container: HTMLElement) => container.querySelector<HTMLElement>('[data-camada-cena]')!;
+  const PRESSURE: GameEvent = { type: 'PressureChanged', pressure: 2 };
+
+  it('as camadas ficam montadas e apagadas quando não há batida com sobreposição', () => {
+    const m = mount(THEIRS);
+    expect(strip(m.container).className).toContain('opacity-0');
+    expect(scrim(m.container).className).toContain('opacity-0');
+    expect(strip(m.container)).not.toHaveAttribute('data-faixa');
+    expect(scrim(m.container)).not.toHaveAttribute('data-cena');
+  });
+
+  it('faixas seguidas são uma subida e uma descida: a mesma camada, sem piscar entre as batidas', () => {
+    const m = mount(THEIRS);
+    const layer = strip(m.container);
+    const trace = watchMany([() => banner(m.container) !== null]);
+    emit(m, THEIRS, [TURN, PRESSURE, TURN, { type: 'RoundStarted', round: 8, kind: 'ATTACK' }]);
+    trace.sample();
+    trace.run(2_000);
+    expect(trace.flips[0]).toEqual([0, 1_600]);
+    expect(strip(m.container)).toBe(layer);
+  });
+
+  it('o catchUp toca dezenas de faixas (uma a cada ~75 ms) sem piscar: uma subida e uma descida em 3 s', () => {
+    const m = mount(THEIRS);
+    const trace = watchMany([() => banner(m.container) !== null]);
+    emit(m, THEIRS, Array.from({ length: 40 }, () => TURN), { catchUp: true });
+    trace.sample();
+    trace.run(3_200);
+    expect(trace.flips[0]).toEqual([0, 3_000]);
+  });
+
+  it('faixas de dois `state`s colados são uma subida só, e a camada é a mesma', () => {
+    const m = mount(THEIRS);
+    const layer = strip(m.container);
+    const trace = watchMany([() => banner(m.container) !== null]);
+    emit(m, THEIRS, [TURN, PRESSURE]);
+    trace.sample();
+    trace.run(200);
+    emit(m, THEIRS, [TURN]);
+    trace.run(1_000);
+    expect(trace.flips[0]).toEqual([0, 600]);
+    expect(strip(m.container)).toBe(layer);
+  });
+
+  it('duas cenas de `state`s colados: o escurecimento não solta entre elas, e tudo somado respeita as 3 trocas por segundo', () => {
+    const m = mount(THEIRS);
+    const layer = scrim(m.container);
+    const trace = watchMany([() => scene(m.container) !== null, () => inverted(m.container)]);
+    emit(m, THEIRS, [ABSOLUTE]);
+    trace.sample();
+    trace.run(200);
+    emit(m, THEIRS, [{ type: 'AbsoluteDefenseStarted', player: 'p2' }]);
+    trace.run(3_000);
+    // O escurecimento: sobe com a primeira cena e desce no fim da segunda (aos 1700 ms), uma vez.
+    expect(trace.flips[0]).toEqual([0, 1_700]);
+    // A inversão: a da primeira cena, liga em 150 e desliga em 750.
+    expect(trace.flips[1]).toEqual([150, 750]);
+    expect(scrim(m.container)).toBe(layer);
+    expectFlashSafe(trace.all);
+  });
+
+  it('com movimento reduzido a cena é o mesmo escurecimento com texto parado, sem inversão e sem piscar', () => {
+    const m = mount(THEIRS, { prefs: { reduceMotion: true } });
+    const trace = watchMany([() => scene(m.container) !== null, () => inverted(m.container)]);
+    emit(m, THEIRS, [ABSOLUTE]);
+    trace.sample();
+    emit(m, THEIRS, [{ type: 'AbsoluteDefenseStarted', player: 'p2' }]);
+    trace.run(2_000);
+    expect(trace.flips[1]).toEqual([]);
+    expect(trace.flips[0]).toEqual([0, 1_500]);
+  });
+});
+
+describe('o toque que pulou e o clique que não veio', () => {
+  const toggle = () => screen.getByRole('button', { name: 'Histórico' });
+
+  it('sem clique depois (rolagem, o navegador descartou), o Enter do teclado que vem depois não é engolido', () => {
+    const m = mount(THEIRS);
+    emit(m, THEIRS, [TURN, ATTACK, HIT]);
+    fireEvent.pointerDown(stage(m.container));
+    fireEvent.pointerUp(stage(m.container));
+    expect(busy(m.container)).toBe(false);
+    advance(500);
+    fireEvent.click(toggle());
+    expect(toggle()).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('pointercancel solta a marca na hora', () => {
+    const m = mount(THEIRS);
+    emit(m, THEIRS, [TURN, ATTACK, HIT]);
+    fireEvent.pointerDown(stage(m.container));
+    fireEvent.pointerCancel(stage(m.container));
+    fireEvent.click(toggle());
+    expect(toggle()).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('o clique do mesmo gesto, mesmo atrasado até a tolerância, ainda é engolido', () => {
+    const m = mount(THEIRS);
+    emit(m, THEIRS, [TURN, ATTACK, HIT]);
+    fireEvent.pointerDown(stage(m.container));
+    fireEvent.pointerUp(stage(m.container));
+    advance(300);
+    fireEvent.click(toggle());
+    expect(toggle()).toHaveAttribute('aria-expanded', 'false');
   });
 });
 

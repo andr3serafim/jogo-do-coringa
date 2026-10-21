@@ -19,6 +19,9 @@ import { AnimContext, type Anim, type CountPhase } from './context.ts';
 import { BeatOverlay } from './Scene.tsx';
 import { useBeatPlayer } from './useBeatPlayer.ts';
 
+/** Quanto o clique do gesto que pulou pode demorar depois do `pointerup` (o toque no celular chega em outra tarefa). */
+const CLICK_GRACE_MS = 400;
+
 const loadMotionFeatures = () => import('./motion-features.ts').then((module) => module.default);
 
 export interface StageProps {
@@ -73,15 +76,33 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [busy, skip]);
 
-  // O toque que pulou as batidas não vira clique na barra, na mão nem em carta nenhuma.
+  // O toque que pulou as batidas não vira clique na barra, na mão nem em carta nenhuma. O clique do mesmo gesto chega logo
+  // depois do `pointerup`; se não chegar (rolagem, `pointercancel`, o navegador que descarta o clique num botão
+  // desligado), a marca cai sozinha e o Enter do teclado que vier depois não é engolido.
   const skippedByTouch = useRef(false);
+  const forgetTouch = useRef<number | null>(null);
+  const clearTouch = () => {
+    skippedByTouch.current = false;
+    if (forgetTouch.current !== null) window.clearTimeout(forgetTouch.current);
+    forgetTouch.current = null;
+  };
+  useEffect(
+    () => () => {
+      if (forgetTouch.current !== null) window.clearTimeout(forgetTouch.current);
+    },
+    [],
+  );
   const onPointerDown = () => {
+    clearTouch();
     skippedByTouch.current = busy;
     if (busy) skip();
   };
+  const onPointerUp = () => {
+    if (skippedByTouch.current) forgetTouch.current = window.setTimeout(clearTouch, CLICK_GRACE_MS);
+  };
   const onClick = (event: MouseEvent) => {
     if (skippedByTouch.current) {
-      skippedByTouch.current = false;
+      clearTouch();
       event.stopPropagation();
       event.preventDefault();
       return;
@@ -99,11 +120,13 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
             data-invertido={inverted ? 'true' : undefined}
             style={inverted ? { filter: 'invert(1)' } : undefined}
             onPointerDownCapture={onPointerDown}
+            onPointerUpCapture={onPointerUp}
+            onPointerCancelCapture={clearTouch}
             onClickCapture={onClick}
             className="relative isolate"
           >
             {children}
-            <BeatOverlay key={`${seq}:${index}`} beat={beat} names={names} reduced={reducedMotion} />
+            <BeatOverlay beat={beat} names={names} reduced={reducedMotion} />
           </div>
         </AnimContext>
       </MotionConfig>
