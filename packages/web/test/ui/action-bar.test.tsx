@@ -7,7 +7,7 @@ import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { attackPreviewText, cardText, threatPreviewText } from '../../src/model/copy.ts';
+import { attackPreviewText, cardText, resurrectRowDetail, threatPreviewText } from '../../src/model/copy.ts';
 import { viewWithout } from '../../src/model/preview.ts';
 import { Session } from '../../src/model/session.ts';
 import { PlayTable } from '../../src/ui/table/PlayTable.tsx';
@@ -425,7 +425,7 @@ describe('barra de ação: botões próprios (spec §3.4)', () => {
   it('sem essas jogadas, os botões não aparecem', () => {
     mount();
     for (const name of ['Lançar Reflect', 'Anular o Reflect', 'Proteger-se do Reflect', 'Ressuscitar']) {
-      expect(inBar().queryByRole('button', { name })).not.toBeInTheDocument();
+      expect(inBar().queryByRole('button', { name: startsWith(name) })).not.toBeInTheDocument();
     }
   });
 
@@ -466,7 +466,12 @@ describe('Ressuscitar e o cemitério (spec §3.4, §7)', () => {
 
     await m.user.click(within(dialog).getByRole('button', { name: '7 de copas' }));
     expect(within(dialog).getByText(`Em qual fileira entra ${cardText(m.view.graveyard[0]!)}?`)).toBeInTheDocument();
-    await m.user.click(within(dialog).getByRole('button', { name: startsWith('Ataque') }));
+    const row = within(dialog).getByRole('button', { name: startsWith('Ataque') });
+    // Rótulo no nome (axe, WCAG 2.5.3): o texto visível das duas linhas é, palavra por palavra, o nome ("Ataque no fim da fileira · 1 de 7").
+    const rowName = `Ataque ${resurrectRowDetail(m.view.self.attackRow.length, m.view.config.rowLimit)}`;
+    expect(row.textContent).toBe(rowName);
+    expect(row).toHaveAccessibleName(rowName);
+    await m.user.click(row);
     expect(sentAction(m)).toEqual({ type: 'RESURRECT', cardId: m.view.graveyard[0]!.id, row: 'ATK' });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     // O botão que abriu pode nem existir mais: o foco vai para a barra.
@@ -479,7 +484,7 @@ describe('Ressuscitar e o cemitério (spec §3.4, §7)', () => {
     const dialog = screen.getByRole('dialog', { name: 'Ressuscitar' });
     await m.user.click(within(dialog).getByRole('button', { name: '7 de copas' }));
     expect(within(dialog).getByRole('button', { name: startsWith('Ataque') })).toBeInTheDocument();
-    expect(within(dialog).queryByRole('button', { name: 'Defesa' })).not.toBeInTheDocument();
+    expect(within(dialog).queryByRole('button', { name: startsWith('Defesa') })).not.toBeInTheDocument();
   });
 
   it('Voltar devolve à lista de cartas', async () => {
@@ -524,7 +529,7 @@ describe('Ressuscitar e o cemitério (spec §3.4, §7)', () => {
 
   it('o cemitério vazio não oferece nada a ressuscitar, e a lista diz que está vazio', async () => {
     const m = mount({ ...RESURRECT, graveyard: [] });
-    expect(inBar().queryByRole('button', { name: 'Ressuscitar' })).not.toBeInTheDocument();
+    expect(inBar().queryByRole('button', { name: startsWith('Ressuscitar') })).not.toBeInTheDocument();
     await m.user.click(screen.getByRole('button', { name: 'Cemitério vazio' }));
     expect(within(screen.getByRole('dialog', { name: 'Cemitério' })).getByText('O cemitério está vazio.')).toBeInTheDocument();
     expect(acts(m)).toEqual([]);

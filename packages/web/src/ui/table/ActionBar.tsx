@@ -4,7 +4,8 @@
 // prévia, ou Encerrar turno com o Ataque vazio. É só vista: a escolha e o envio ficam na `PlayTable`.
 //
 // Alvo de toque ≥ 44 px (spec §3.2): as cartas da mesa são menores, então os alvos válidos também são listados aqui como
-// botões grandes. Os botões de duas linhas dão o nome só ao título (`aria-labelledby`) e a segunda linha vira descrição.
+// botões grandes. O nome dos botões de duas linhas é o título e a segunda linha juntos (`aria-labelledby` nos dois, ver `TwoLine`):
+// o axe (WCAG 2.5.3) exige que o texto visível do botão seja trecho contínuo do nome.
 //
 // Na janela de reação (spec §3.7) a barra ganha o gatilho com a prévia no alto e o botão Passar no lugar do principal. Depois
 // de um passe (manual ou automático) o servidor recusa qualquer outra jogada da janela, então as respostas saem da barra.
