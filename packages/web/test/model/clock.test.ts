@@ -1,6 +1,8 @@
 import { RoomClient, type Deadline, type StateMessage } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
-import { URGENT_MS, clockAnnouncement, clockFace, type ClockFace } from '../../src/model/clock.ts';
+import { URGENT_MS, clockAnnouncement, clockFace, turnCue, type ClockFace } from '../../src/model/clock.ts';
+import { legalFor } from '../../src/model/plays.ts';
+import { scenarioAt, stateMessage, type ViewSpec } from '../fixtures.ts';
 
 function deadline(players: Deadline['players'] = ['p1'], at = 0): Deadline {
   return { kind: 'TURN', at, players };
@@ -130,5 +132,40 @@ describe('clockFace com o RoomClient (Review Focus 4)', () => {
     expect(clockFace(d, client.remainingMs(d), 'p1')!.seconds).toBe(5);
     // Sem o deslocamento, o relógio local daria prazo vencido.
     expect(Math.max(0, d.at - local)).toBe(0);
+  });
+});
+
+describe('turnCue: a vez do jogador quando não há prazo (treino)', () => {
+  const cue = (spec: ViewSpec, epoch = 1) => {
+    const { view } = scenarioAt(spec);
+    return turnCue(stateMessage(view, { epoch }), legalFor(view));
+  };
+  const EQUIP: ViewSpec = { phase: { kind: 'EQUIP' }, self: { pending: [7, 3] }, opponent: { pending: [5] } };
+
+  it('sem state, ou sem jogada legal, não há vez', () => {
+    expect(turnCue(null, [])).toBeNull();
+    const { view } = scenarioAt({ phase: 'WAITING' });
+    expect(turnCue(stateMessage(view), legalFor(view))).toBeNull();
+  });
+
+  it('cada fase em que eu decido vira o tipo de prazo que o anúncio já conhece', () => {
+    expect(cue({})?.kind).toBe('TURN');
+    expect(cue({ phase: 'ATTACK' })?.kind).toBe('REACTION');
+    expect(cue(EQUIP)?.kind).toBe('EQUIP');
+    expect(cue({ phase: { kind: 'ORDER_CHOICE', player: 'p1' } })?.kind).toBe('ORDER');
+  });
+
+  it('a vez do outro, a ordem que ele escolhe e o fim da partida não são a minha vez', () => {
+    expect(cue({ phase: { kind: 'ORDER_CHOICE', player: 'p2' } })).toBeNull();
+    expect(cue({ phase: { kind: 'GAME_OVER', result: { kind: 'WIN', winner: 'p2', reason: 'HP' } } })).toBeNull();
+    // Equipar já enviado: nada a montar.
+    expect(cue({ ...EQUIP, self: { pending: [7, 3], equipSubmitted: true } })).toBeNull();
+  });
+
+  it('a chave muda com a época (a vez volta a ser anunciada) e fica igual dentro dela', () => {
+    expect(cue({}, 4)?.key).toBe(cue({}, 4)?.key);
+    expect(cue({}, 4)?.key).not.toBe(cue({}, 6)?.key);
+    // A mesma época com outra fase não repete a chave.
+    expect(cue({}, 4)?.key).not.toBe(cue({ phase: 'ATTACK' }, 4)?.key);
   });
 });

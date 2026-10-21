@@ -3,11 +3,12 @@
 // de jogo usam a fonte de texto com algarismos tabulares e nenhuma textura (spec §10.7); a textura só vai no
 // título da rodada. O relógio (spec §3.8, §10.3): em urgência (últimos 5 s) o disco fica vermelho, com o número em papel e o
 // anel mais grosso, por cor e por forma, e nunca pisca; na janela de reação ele é grande; esgotado, diz "Tempo esgotado".
-// Os anúncios para leitor de tela saem por uma região viva escondida que mora aqui, fora do relógio.
+// Os anúncios para leitor de tela saem por uma região viva escondida que mora aqui, fora do relógio. No treino (spec §2.6) não há
+// prazo: no lugar do relógio a faixa diz "Treino, sem relógio", e a mesma região anuncia a vez do jogador (`turn`).
 import type { PlayerView } from '@coringa/engine';
 import type { Deadline } from '@coringa/protocol';
-import type { ClockFace } from '../../model/clock.ts';
-import { CLOCK_LABEL, CLOCK_URGENT_LABEL, pausedTurnText, TIMES_UP_TEXT } from '../../model/copy.ts';
+import type { ClockFace, TurnCue } from '../../model/clock.ts';
+import { CLOCK_LABEL, CLOCK_URGENT_LABEL, pausedTurnText, TIMES_UP_TEXT, TRAINING_BAND_TEXT } from '../../model/copy.ts';
 import { zoneKey } from '../../model/marks.ts';
 import * as m from 'motion/react-m';
 import { INITIATIVE_ID } from '../../model/effects.ts';
@@ -34,16 +35,29 @@ export interface CenterBandProps {
   remainingMs: (deadline: Deadline) => number;
   /** Tempo do turno congelado durante a janela de reação. */
   pausedTurnMs?: number;
+  /** A vez do jogador, para o anúncio quando não há prazo (o treino não tem relógio). */
+  turn?: TurnCue | null;
+  /** Treino contra o bot: no lugar do relógio, a faixa diz que não há. */
+  training?: boolean;
   onOpenGraveyard?: () => void;
 }
 
-export function CenterBand({ view, names, deadline, remainingMs, pausedTurnMs, onOpenGraveyard }: CenterBandProps) {
+export function CenterBand({
+  view,
+  names,
+  deadline,
+  remainingMs,
+  pausedTurnMs,
+  turn = null,
+  training = false,
+  onOpenGraveyard,
+}: CenterBandProps) {
   const ui = useTableUi();
   const { noDamageStreak } = view;
   const untilStall = view.config.antiStallRounds - noDamageStreak;
   const pressureMarked = ui.zones.has('pressure');
   const seenPressure = ui.onSeen && pressureMarked ? () => ui.onSeen?.(zoneKey('pressure')) : undefined;
-  const { face, live } = useClock(deadline, remainingMs, view.me, pausedTurnMs);
+  const { face, live } = useClock(deadline, remainingMs, view.me, pausedTurnMs, turn);
   // O número da pressão muda NA batida do `PressureChanged`, com destaque (spec §4.2).
   const anim = useAnim();
   const pressure = useHeldNumber(view.pressure, anim.pressure);
@@ -65,7 +79,14 @@ export function CenterBand({ view, names, deadline, remainingMs, pausedTurnMs, o
         {live.text === '' ? null : <span key={live.id}>{live.text}</span>}
       </div>
 
-      {face ? <ClockBlock face={face} /> : null}
+      {face ? (
+        <ClockBlock face={face} />
+      ) : training ? (
+        // Sem relógio, a faixa diz por quê, no lugar dele. Não é região viva: o anúncio é o da vez, acima.
+        <p className="max-w-[6.5rem] text-[11px] font-bold uppercase leading-tight tracking-[0.12em] text-ouro pc:max-w-none pc:text-xs">
+          {TRAINING_BAND_TEXT}
+        </p>
+      ) : null}
 
       {/* No celular, a pressão e a iniciativa formam a segunda linha da faixa (`order-last`); no PC, ficam na linha única. */}
       <div

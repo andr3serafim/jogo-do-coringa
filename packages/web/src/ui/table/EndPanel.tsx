@@ -40,11 +40,25 @@ export interface EndPanelProps {
   /** Sem conexão o pedido se perderia. */
   disabled: boolean;
   onRematch: (want: boolean) => void;
-  /** Sem ele (treino) não há "Nova sala". */
+  /** Fecha a sala e volta ao início. Sem ele o botão não existe. */
   onNewRoom?: () => void;
+  /** O rótulo do botão (padrão "Nova sala"); o treino diz "Voltar ao início". */
+  newRoomLabel?: string;
 }
 
-export function EndPanel({ outcome, score, me, names, mineWants, theirsWants, away, disabled, onRematch, onNewRoom }: EndPanelProps) {
+export function EndPanel({
+  outcome,
+  score,
+  me,
+  names,
+  mineWants,
+  theirsWants,
+  away,
+  disabled,
+  onRematch,
+  onNewRoom,
+  newRoomLabel = NEW_ROOM_LABEL,
+}: EndPanelProps) {
   const titleId = useId();
   const reasonId = useId();
   const [collapsed, setCollapsed] = useState(false);
@@ -109,7 +123,7 @@ export function EndPanel({ outcome, score, me, names, mineWants, theirsWants, aw
             </Button>
             {onNewRoom ? (
               <Button variant="secondary" className="flex-1" onClick={onNewRoom}>
-                {NEW_ROOM_LABEL}
+                {newRoomLabel}
               </Button>
             ) : null}
           </div>

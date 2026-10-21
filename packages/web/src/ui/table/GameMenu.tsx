@@ -14,6 +14,7 @@ import {
   CONCEDE_WARNING,
   CONFIRM_LABEL,
   COPY_LINK_LABEL,
+  EXIT_TRAINING_LABEL,
   MENU_LABEL,
   REDUCE_MOTION_LABEL,
   REDUCE_MOTION_SYSTEM_HINT,
@@ -72,6 +73,8 @@ export interface GameMenuProps {
   inviteLink?: string;
   /** Busca a versão publicada, uma vez a cada abertura do menu; `null` ou falha não mostram nada. Tem que ser estável. */
   loadVersion?: () => Promise<string | null>;
+  /** Só no treino: sai da partida na hora, sem resultado (a sala local não tem o que avisar a ninguém). */
+  onExit?: () => void;
   /** Há partida em curso para desistir. */
   canConcede: boolean;
   /** Sem conexão não dá para desistir (o pedido se perderia). */
@@ -81,7 +84,18 @@ export interface GameMenuProps {
 
 type Feedback = 'copied' | 'copyFailed' | null;
 
-export function GameMenu({ open, onClose, prefs, onPrefs, inviteLink, loadVersion, canConcede, concedeDisabled, onConcede }: GameMenuProps) {
+export function GameMenu({
+  open,
+  onClose,
+  prefs,
+  onPrefs,
+  inviteLink,
+  loadVersion,
+  onExit,
+  canConcede,
+  concedeDisabled,
+  onConcede,
+}: GameMenuProps) {
   const titleId = useId();
   const systemReduced = useSystemReducedMotion();
   const [rulesOpen, setRulesOpen] = useState(false);
@@ -167,6 +181,12 @@ export function GameMenu({ open, onClose, prefs, onPrefs, inviteLink, loadVersio
               onClick={() => setConfirmOpen(true)}
             >
               {CONCEDE_LABEL}
+            </button>
+          ) : null}
+
+          {onExit ? (
+            <button type="button" className={ITEM} onClick={onExit}>
+              {EXIT_TRAINING_LABEL}
             </button>
           ) : null}
 

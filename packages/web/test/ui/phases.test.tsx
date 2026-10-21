@@ -814,6 +814,55 @@ describe('relógio (spec §3.8, §10.3)', () => {
       tick(m, 30_000);
       expect(live()).not.toHaveTextContent('0 segundos');
     });
+
+    describe('sem prazo (treino): a vez do jogador é anunciada pela mesma região, sem os segundos', () => {
+      it.each([
+        ['a fase principal', DRAFT, 'Sua vez'],
+        ['a janela de reação', { ...DRAFT, phase: 'ATTACK' } satisfies ViewSpec, 'Sua reação'],
+        ['o Equipar', EQUIP, 'Monte suas cartas'],
+        ['a escolha da ordem', ORDER, 'Escolha a ordem'],
+      ])('%s', (_name, spec, text) => {
+        const m = mount(spec, { fake: true });
+        tick(m, 0);
+        expect(live().textContent).toBe(text);
+      });
+
+      it('com prazo o relógio anuncia, e a vez não é anunciada duas vezes', () => {
+        const m = mount(DRAFT, { fake: true, state: turn(30_000) });
+        tick(m, 0);
+        expect(live().textContent).toBe('Sua vez: 30 segundos');
+        expect(live().children).toHaveLength(1);
+      });
+
+      it('a vez do oponente não é anunciada', () => {
+        const m = mount({ ...DRAFT, phase: 'WAITING' }, { fake: true });
+        tick(m, 0);
+        expect(live()).toBeEmptyDOMElement();
+      });
+
+      it('jogar dentro da mesma fase (mesma época) não repete o anúncio; a época nova anuncia de novo, num nó novo', () => {
+        const m = mount(DRAFT, { fake: true });
+        tick(m, 0);
+        const first = live().firstElementChild;
+        expect(first).toHaveTextContent('Sua vez');
+        act(() => m.connection.emitState(stateMessage(scenarioAt(DRAFT).view, { seq: 2, epoch: 1 })));
+        tick(m, 0);
+        expect(live().firstElementChild).toBe(first);
+        act(() => m.connection.emitState(stateMessage(scenarioAt(DRAFT).view, { seq: 3, epoch: 2 })));
+        tick(m, 0);
+        expect(live().textContent).toBe('Sua vez');
+        expect(live().firstElementChild).not.toBe(first);
+      });
+
+      it('quando a vez passa ao oponente, o texto antigo sai da região', () => {
+        const m = mount(DRAFT, { fake: true });
+        tick(m, 0);
+        expect(live()).toHaveTextContent('Sua vez');
+        act(() => m.connection.emitState(stateMessage(scenarioAt({ ...DRAFT, phase: 'WAITING' }).view, { seq: 2, epoch: 2 })));
+        tick(m, 0);
+        expect(live()).toBeEmptyDOMElement();
+      });
+    });
   });
 });
 

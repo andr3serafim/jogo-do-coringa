@@ -257,6 +257,9 @@ const CLOCK_START_TEXT: Record<DeadlineKind, string> = {
 
 const secondsText = (seconds: number): string => `${seconds} ${seconds === 1 ? 'segundo' : 'segundos'}`;
 
+/** O mesmo anúncio sem os segundos, para quando não há prazo (treino): "Sua vez", "Sua reação". */
+export const turnCueText = (kind: DeadlineKind): string => CLOCK_START_TEXT[kind];
+
 export function clockAnnouncementText(kind: DeadlineKind, announcement: 'start' | 'ten' | 'five', seconds: number): string {
   if (announcement === 'start') return `${CLOCK_START_TEXT[kind]}: ${secondsText(seconds)}`;
   return announcement === 'ten' ? '10 segundos' : '5 segundos';
@@ -368,6 +371,20 @@ export const CONCEDE_LABEL = 'Desistir';
 export const CONCEDE_TITLE = 'Desistir da partida?';
 export const CONCEDE_WARNING = 'Você perde esta partida por W.O.';
 export const versionText = (version: string): string => `Versão publicada: ${version}`;
+
+// ---------------------------------------------------------------------------------------------
+// Treino contra o bot (spec §2.6)
+
+/** Na faixa central, no lugar do relógio. */
+export const TRAINING_BAND_TEXT = 'Treino, sem relógio';
+/** No menu da partida: sai do treino na hora, sem resultado. */
+export const EXIT_TRAINING_LABEL = 'Sair do treino';
+/** No painel de fim do treino, no lugar de "Nova sala". */
+export const BACK_HOME_LABEL = 'Voltar ao início';
+export const TRAINING_TITLE = 'Treino contra o bot';
+export const TRAINING_LOADING_TEXT = 'Preparando o treino…';
+export const TRAINING_FAILED_TITLE = 'Não deu para carregar o treino';
+export const TRAINING_FAILED_TEXT = 'Confira a internet e tente de novo.';
 
 // ---------------------------------------------------------------------------------------------
 // Resumo das regras (spec 1 §1.6 a §1.8; o autor revisa o texto no PR)

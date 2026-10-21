@@ -1,5 +1,5 @@
 import type { PlayerId } from '@coringa/engine';
-import type { Deadline, DeadlineKind } from '@coringa/protocol';
+import type { Deadline, DeadlineKind, PlayerAction, StateMessage } from '@coringa/protocol';
 
 /** Faltando isto ou menos, o relógio entra em urgência (cor e forma). */
 export const URGENT_MS = 5_000;
@@ -50,4 +50,30 @@ export function clockAnnouncement(
   if (previousSeconds > 5 && face.seconds <= 5) return 'five';
   if (previousSeconds > 10 && face.seconds <= 10) return 'ten';
   return null;
+}
+
+/** A vez do jogador local, para anunciar quando não há prazo (treino, spec §2.6 e §7). A `key` muda a cada época. */
+export interface TurnCue {
+  key: string;
+  /** O mesmo tipo de um prazo: `TURN` é a fase principal, `REACTION` a janela de reação. */
+  kind: DeadlineKind;
+}
+
+const CUE_KIND: Partial<Record<StateMessage['view']['phase']['kind'], DeadlineKind>> = {
+  EQUIP: 'EQUIP',
+  ORDER_CHOICE: 'ORDER',
+  ATTACK_MAIN: 'TURN',
+  REACTION: 'REACTION',
+};
+
+/**
+ * Chegou a hora de o jogador decidir? Com prazo, quem anuncia é o relógio (`clockAnnouncement`); sem prazo (o treino não
+ * tem relógio) o anúncio sai daqui. Vale a época do `state`: ela só sobe quando a fase em que o jogo espera uma jogada
+ * muda, então as jogadas dentro de uma mesma fase não repetem o anúncio, e a vez que volta (depois de uma janela de
+ * reação, na rodada seguinte, na revanche) é anunciada de novo. `legal` vazio é a vez do outro, ou o fim da partida.
+ */
+export function turnCue(state: StateMessage | null, legal: readonly PlayerAction[]): TurnCue | null {
+  if (state === null || legal.length === 0) return null;
+  const kind = CUE_KIND[state.view.phase.kind];
+  return kind === undefined ? null : { key: `${state.epoch}:${kind}`, kind };
 }

@@ -393,11 +393,18 @@ describe('fim de partida: Ver a mesa e Nova sala', () => {
     expect(m.onNewRoom).toHaveBeenCalledTimes(1);
   });
 
-  it('sem onNewRoom (treino), o botão "Nova sala" não existe', () => {
+  it('sem onNewRoom, o botão "Nova sala" não existe', () => {
     mount({ props: { onNewRoom: undefined } });
     expect(within(endDialog('Você venceu')).queryByRole('button', { name: 'Nova sala' })).not.toBeInTheDocument();
   });
 
+  it('o rótulo do botão é configurável (treino: "Voltar ao início"), e o botão chama onNewRoom do mesmo jeito', async () => {
+    const m = mount({ props: { newRoomLabel: 'Voltar ao início' } });
+    const dialog = endDialog('Você venceu');
+    expect(within(dialog).queryByRole('button', { name: 'Nova sala' })).not.toBeInTheDocument();
+    await m.user.click(within(dialog).getByRole('button', { name: 'Voltar ao início' }));
+    expect(m.onNewRoom).toHaveBeenCalledTimes(1);
+  });
 });
 
 // ---------------------------------------------------------------------------------------------
@@ -495,6 +502,31 @@ describe('menu da partida', () => {
     await m.user.click(menuButton());
     await m.user.keyboard('{Escape}');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  describe('treino', () => {
+    it('com onExit, o menu ganha "Sair do treino", que chama onExit; sem ele, o item não existe', async () => {
+      const onExit = vi.fn();
+      const m = mount({ status: 'PLAYING', props: { onExit } });
+      await m.user.click(menuButton());
+      await m.user.click(within(menuDialog()).getByRole('button', { name: 'Sair do treino' }));
+      expect(onExit).toHaveBeenCalledTimes(1);
+      m.unmount();
+
+      const online = mount({ status: 'PLAYING' });
+      await online.user.click(menuButton());
+      expect(within(menuDialog()).queryByRole('button', { name: 'Sair do treino' })).not.toBeInTheDocument();
+    });
+
+    it('a faixa central diz "Treino, sem relógio" no treino, e só nele', () => {
+      const m = mount({ status: 'PLAYING', props: { training: true } });
+      const band = screen.getByRole('region', { name: 'Situação da rodada' });
+      expect(within(band).getByText('Treino, sem relógio')).toBeInTheDocument();
+      expect(within(band).queryByRole('timer')).not.toBeInTheDocument();
+      m.unmount();
+      mount({ status: 'PLAYING' });
+      expect(screen.queryByText('Treino, sem relógio')).not.toBeInTheDocument();
+    });
   });
 
   it('a mesa só para ver (sem onOpenMenu) não tem botão de menu', () => {

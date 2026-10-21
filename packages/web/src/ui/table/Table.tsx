@@ -6,6 +6,7 @@
 import type { PlayerId } from '@coringa/engine';
 import type { Deadline, StateMessage } from '@coringa/protocol';
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { turnCue } from '../../model/clock.ts';
 import { equipOpponentText, scoreText } from '../../model/copy.ts';
 import { completeDraft, draftBoard } from '../../model/equip.ts';
 import { newLineCount } from '../../model/history.ts';
@@ -43,6 +44,8 @@ export interface TableProps {
   banner?: ReactNode;
   /** A barra de ação, embaixo da mão. */
   actionBar?: ReactNode;
+  /** Treino contra o bot: a faixa central diz "Treino, sem relógio" e a vez do jogador é anunciada sem prazo. */
+  training?: boolean;
 }
 
 const NO_TARGETS: ReadonlySet<string> = new Set();
@@ -70,6 +73,7 @@ function TableView({
   onInteract,
   banner,
   actionBar,
+  training = false,
 }: TableProps & { state: StateMessage }) {
   const { room, marks, marksBaseSeq, history } = snapshot;
   const { view } = state;
@@ -181,6 +185,8 @@ function TableView({
               deadline={state.deadline}
               remainingMs={remainingMs}
               pausedTurnMs={state.pausedTurnMs}
+              turn={turnCue(state, snapshot.legal)}
+              training={training}
               onOpenGraveyard={onOpenGraveyard}
             />
             <PlayerField side="self" view={view} player={self} name={names.self} />

@@ -47,6 +47,12 @@ export interface PlayTableProps {
   loadVersion?: () => Promise<string | null>;
   /** "Nova sala" no painel de fim: fecha a conexão e volta ao início. Sem ele o botão não existe. */
   onNewRoom?: () => void;
+  /** O rótulo desse botão (padrão "Nova sala"); o treino diz "Voltar ao início". */
+  newRoomLabel?: string;
+  /** Treino contra o bot (spec §2.6): a faixa central diz que não há relógio e a vez do jogador é anunciada sem prazo. */
+  training?: boolean;
+  /** "Sair do treino", no menu da partida. Sem ele o item não existe. */
+  onExit?: () => void;
 }
 
 /** Sem `state` ainda não há o que desenhar. */
@@ -89,7 +95,19 @@ interface ViewProps extends PlayTableProps {
   state: StateMessage;
 }
 
-function PlayTableView({ session, snapshot, state, banner, store, inviteLink, loadVersion, onNewRoom }: ViewProps) {
+function PlayTableView({
+  session,
+  snapshot,
+  state,
+  banner,
+  store,
+  inviteLink,
+  loadVersion,
+  onNewRoom,
+  newRoomLabel,
+  training,
+  onExit,
+}: ViewProps) {
   const { view } = state;
   const { legal, pending, room } = snapshot;
   const phase = view.phase.kind;
@@ -382,6 +400,7 @@ function PlayTableView({ session, snapshot, state, banner, store, inviteLink, lo
         onInteract={interact}
         banner={banner}
         actionBar={panel}
+        training={training}
       />
       <GraveyardDialog
         mode={graveyard}
@@ -404,6 +423,7 @@ function PlayTableView({ session, snapshot, state, banner, store, inviteLink, lo
         onPrefs={changePrefs}
         inviteLink={inviteLink}
         loadVersion={loadVersion}
+        onExit={onExit}
         canConcede={room?.status === 'PLAYING' && phase !== 'GAME_OVER'}
         concedeDisabled={snapshot.status === 'reconnecting'}
         onConcede={() => void session.concede().catch(noop)}
@@ -422,6 +442,7 @@ function PlayTableView({ session, snapshot, state, banner, store, inviteLink, lo
           disabled={snapshot.status === 'reconnecting'}
           onRematch={(want) => session.rematch(want)}
           onNewRoom={onNewRoom}
+          newRoomLabel={newRoomLabel}
         />
       ) : null}
     </>
