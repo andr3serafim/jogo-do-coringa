@@ -35,6 +35,46 @@ async function expectTouchTargets(buttons: Locator): Promise<number> {
   return found.length;
 }
 
+/**
+ * O alvo do botão do cemitério (spec §3.2). O botão em si é só o texto "Cemitério 3": ele é esticado sobre a caixa inteira por um
+ * `::after` (`after:inset-0`), e é a caixa que tem de medir pelo menos 44 × 44 px. A guarda é geométrica: a caixa mede o mínimo, e o
+ * clique no centro, no desenho da carta de cima e perto dos quatro cantos cai no botão (`elementFromPoint`).
+ */
+async function expectGraveyardTarget(page: Page): Promise<void> {
+  const target = await page.getByRole('button', { name: /^Cemitério / }).evaluate((button) => {
+    const box = button.parentElement!;
+    const rect = box.getBoundingClientRect();
+    const inside = (x: number, y: number) => document.elementFromPoint(x, y) === button;
+    const card = box.firstElementChild!.getBoundingClientRect();
+    const margin = 3; // fora da borda de 1,5 px da caixa
+    return {
+      name: button.getAttribute('aria-label'),
+      width: rect.width,
+      height: rect.height,
+      buttonWidth: button.getBoundingClientRect().width,
+      hits: {
+        centro: inside(rect.left + rect.width / 2, rect.top + rect.height / 2),
+        carta: inside(card.left + card.width / 2, card.top + card.height / 2),
+        cantoSuperiorEsquerdo: inside(rect.left + margin, rect.top + margin),
+        cantoSuperiorDireito: inside(rect.right - margin, rect.top + margin),
+        cantoInferiorEsquerdo: inside(rect.left + margin, rect.bottom - margin),
+        cantoInferiorDireito: inside(rect.right - margin, rect.bottom - margin),
+      },
+    };
+  });
+  expect(target.width, `largura da caixa de "${target.name}"`).toBeGreaterThanOrEqual(MIN_TARGET - 0.5);
+  expect(target.height, `altura da caixa de "${target.name}"`).toBeGreaterThanOrEqual(MIN_TARGET - 0.5);
+  expect(target.buttonWidth, 'o botão é só o texto, menor que a caixa: o alvo vem do ::after').toBeLessThan(target.width);
+  expect(target.hits, `onde o clique cai em "${target.name}"`).toEqual({
+    centro: true,
+    carta: true,
+    cantoSuperiorEsquerdo: true,
+    cantoSuperiorDireito: true,
+    cantoInferiorEsquerdo: true,
+    cantoInferiorDireito: true,
+  });
+}
+
 for (const size of [
   { width: 390, height: 844 },
   { width: 360, height: 740 },
@@ -100,6 +140,7 @@ for (const size of [
       await expect(roundHeading(page)).toHaveText('Rodada 3');
       await expect(actionBar(page).getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
       await expectTouchTargets(actionBar(page).getByRole('button'));
+      await expectGraveyardTarget(page); // vazio: "Cemitério vazio"
       await expectNoHorizontalScroll(page);
       await axe(page);
 
@@ -112,6 +153,7 @@ for (const size of [
       await expect(page.getByRole('group', { name: 'Sua fileira de ataque' }).locator('[data-card-id]')).toHaveCount(7);
       await expectNoHorizontalScroll(page);
       await expectTouchTargets(orderPanel(page).getByRole('button'));
+      await expectGraveyardTarget(page); // com cartas: "Cemitério 3, a de cima é ..."
       await axe(page);
 
       // O menu abre por cima da mesa e também cabe.
