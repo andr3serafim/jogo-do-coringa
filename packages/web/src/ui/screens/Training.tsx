@@ -53,8 +53,10 @@ export function Training({ store, load = loadLocalRoom, reload = defaultReload }
   useEffect(() => {
     let live = true;
     let dispose: (() => void) | null = null;
-    load().then(
-      (module) => {
+    // O `catch` fica depois do `then`: uma exceção ao criar a sala (e não só o módulo que não carrega) cai na tela de falha, e
+    // não numa rejeição solta com a tela presa em "Preparando…".
+    load()
+      .then((module) => {
         if (!live) return;
         const timers = {
           now: () => Date.now(),
@@ -63,21 +65,25 @@ export function Training({ store, load = loadLocalRoom, reload = defaultReload }
         };
         const seed = module.trainingSeed(window.location.search, randomUnit);
         const room = new module.LocalRoom({ seed, ...timers });
+        // O `dispose` vale desde já: se algo abaixo lançar, o `catch` solta o que chegou a nascer (a sala conectada já agendou o bot).
+        let session: Session | null = null;
+        dispose = () => {
+          session?.dispose();
+          room.close();
+        };
         // A sessão ouve a sala antes de ela abrir: o `open`, o `room` e o primeiro `state` saem dentro do `connect()`.
         // O passe automático não se aplica ao treino (spec §2.6): a sessão não o manda, e as preferências guardadas (que valem
         // para a sala online) ficam como estão, sem ser reescritas.
-        const session = new Session(room, timers, loadPrefs(store), { autoPass: false });
+        const created = new Session(room, timers, loadPrefs(store), { autoPass: false });
+        session = created;
         room.connect();
-        dispose = () => {
-          session.dispose();
-          room.close();
-        };
-        setStep({ kind: 'playing', session, seed });
-      },
-      () => {
+        setStep({ kind: 'playing', session: created, seed });
+      })
+      .catch(() => {
+        dispose?.();
+        dispose = null;
         if (live) setStep({ kind: 'failed' });
-      },
-    );
+      });
     return () => {
       live = false;
       dispose?.();

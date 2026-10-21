@@ -398,6 +398,30 @@ describe('/treino: a sala nasce e morre com a tela', () => {
     expect(within(screen.getByRole('dialog', { name: 'Menu da partida' })).getByRole('switch', { name: 'Reduzir animações' })).toBeChecked();
   });
 
+  it.each(['o construtor da sala', 'o connect da sala'])(
+    'uma exceção em %s cai na tela de falha, e a sala que chegou a nascer não deixa timer',
+    async (where) => {
+      fakeClock();
+      class Broken extends localRoomModule.LocalRoom {
+        constructor(options: localRoomModule.LocalRoomOptions) {
+          super(options);
+          if (where === 'o construtor da sala') throw new Error('boom');
+        }
+
+        override connect(): void {
+          super.connect();
+          throw new Error('boom');
+        }
+      }
+      const load = (): Promise<LocalRoomModule> => Promise.resolve({ ...localRoomModule, LocalRoom: Broken });
+      render(<Training store={memoryStore()} load={load} />);
+      await settle();
+      expect(screen.getByRole('heading', { name: 'Não deu para carregar o treino' })).toBeInTheDocument();
+      expect(screen.queryByText('Preparando o treino…')).not.toBeInTheDocument();
+      expect(vi.getTimerCount()).toBe(0);
+    },
+  );
+
   it('se o módulo não carrega, diz isso, recarrega ou volta ao início', async () => {
     const reload = vi.fn();
     const load = () => Promise.reject<LocalRoomModule>(new Error('sem rede'));
