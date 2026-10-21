@@ -407,7 +407,7 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
       'A (Armadilha): destrói 1 J, Q ou K do campo do oponente. Vale no seu turno ou na janela de reação. Não alcança um Reflect ativo nem quem está sob Defesa Absoluta.',
       'Sacrifício: no seu turno, descarte um J da mão para destruir um J do oponente, ou um Q para destruir um Q. Não funciona contra Defesa Absoluta.',
       'Coringa Selvagem: assume o papel de J, Q ou A, nunca o de K.',
-      'Reflect (K + J + Q da mão, no seu turno): fica ativo até o fim do próximo turno de ataque do oponente. Se ele atacar, perde todos os seus K e Q e leva de volta o próprio ataque, com o multiplicador, menos metade da Defesa base dele, sem o multiplicador (o dano nunca fica abaixo de 0). Você não leva nada. Para anular o Reflect, o oponente joga K + J + Q da mão ou sacrifica J + Q + K do próprio campo.',
+      'Reflect (K + J + Q da mão, no seu turno): fica ativo até o fim do próximo turno de ataque do oponente. Se ele atacar, perde todos os seus K e Q e leva de volta o próprio ataque, com o multiplicador, menos metade (arredondada para baixo) da Defesa base dele, sem o multiplicador (o dano nunca fica abaixo de 0). Você não leva nada. Para anular o Reflect, o oponente joga K + J + Q da mão ou sacrifica J + Q + K do próprio campo.',
     ],
   },
   {

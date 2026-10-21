@@ -904,7 +904,7 @@ describe('resumo das regras: o Reflect', () => {
 
   it('diz qual é o dano refletido sem deixar dúvida (spec 1 §1.6): o ataque dele com multiplicador, menos metade da Defesa base sem multiplicador, nunca abaixo de 0', () => {
     expect(reflect).toContain('leva de volta o próprio ataque, com o multiplicador');
-    expect(reflect).toContain('menos metade da Defesa base dele, sem o multiplicador');
+    expect(reflect).toContain('menos metade (arredondada para baixo) da Defesa base dele, sem o multiplicador');
     expect(reflect).toContain('nunca fica abaixo de 0');
     expect(reflect).toContain('Você não leva nada');
   });
@@ -916,16 +916,17 @@ describe('resumo das regras: o Reflect', () => {
 describe('campo do oponente: os botões de ferramenta têm a sua área na grade', () => {
   const styles = readFileSync(resolve(import.meta.dirname, '../../src/styles.css'), 'utf8');
 
-  it('a área `ferr` existe no desenho do container ≥ 56rem enquanto os botões aparecem (viewport < 64rem)', () => {
+  it('a área `ferr` existe no desenho do container ≥ 56rem enquanto os botões aparecem (viewport < o ponto pc, 1024 px)', () => {
     // O jsdom não avalia container queries nem media queries: confere-se o CSS. O botão do histórico e o do menu só somem
     // a partir de 1024 px de viewport (`pc:`), mas a grade do campo vira o desenho largo a partir de 56rem de container.
-    const start = /@media\s*\(width\s*<\s*(?:64rem|1024px)\)\s*\{\s*@container\s*\(min-width:\s*56rem\)\s*\{/.exec(styles);
+    // O limite é o `theme(--breakpoint-pc)`, em px como o resto do arquivo: um `rem` seguiria a fonte do navegador.
+    const start = /@media\s*\(width\s*<\s*theme\(--breakpoint-pc\)\)\s*\{\s*@container\s*\(min-width:\s*56rem\)\s*\{/.exec(styles);
     expect(start, 'falta o ajuste do container largo em viewport estreito').not.toBeNull();
     const rule = /\.campo-grade--oponente\s*>\s*\.campo-info\s*\{([^}]*)\}/.exec(styles.slice(start!.index))?.[1];
     expect(rule, 'falta a regra do campo do oponente').toBeDefined();
     expect(rule).toMatch(/grid-template-areas:[^;]*\bferr\b/);
     // A regra vem depois do desenho largo que ela corrige (mesma especificidade: vale a ordem).
-    expect(styles.indexOf('@media (width < 64rem)')).toBeGreaterThan(styles.indexOf('@container (min-width: 56rem)'));
+    expect(styles.indexOf('@media (width < theme(--breakpoint-pc))')).toBeGreaterThan(styles.indexOf('@container (min-width: 56rem)'));
   });
 
   it('a mesa usa a área `ferr` para o wrapper dos botões do campo do oponente', () => {
