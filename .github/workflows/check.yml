@@ -2,7 +2,8 @@ name: check
 
 on:
   push:
-    branches: [main]
+    # feat/**: sem PR, o fast-forward na main só entra depois dos dois jobs verdes na branch.
+    branches: [main, 'feat/**']
   pull_request:
 
 jobs:
