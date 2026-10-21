@@ -150,7 +150,7 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
         </ol>
       ) : (
         <div className="flex items-start gap-3">
-          <Card card={cards[index]!} size="hand" />
+          <Card card={cards[index]!} size="hand" animated={false} />
           <ul role="list" aria-label="Destinos" data-step="destinos" className="flex min-w-0 flex-1 list-none flex-col gap-2 p-1.5">
             {options.map((destination, i) => (
               <li key={destination}>

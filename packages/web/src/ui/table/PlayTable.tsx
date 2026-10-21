@@ -7,8 +7,9 @@
 // (o `make` dela fecha sobre a `view` velha). O envio é `session.play(...)`, sem `await`, e só sai se a jogada ainda é
 // legal pelo papel (`isLegal`, a última linha de defesa).
 //
-// Controles desligados (`locked`): jogada em voo (`pending`), conexão caída (`reconnecting`, spec §6.2) e prazo do jogador
-// esgotado até chegar o `state` seguinte (spec §3.8).
+// Controles desligados (`locked`): jogada em voo (`pending`), conexão caída (`reconnecting`, spec §6.2), prazo do jogador
+// esgotado até chegar o `state` seguinte (spec §3.8) e batidas em curso (`useBoardBusy`, spec §4.1: no máximo ~1 s quando
+// há uma decisão esperando; um toque na mesa ou Esc termina as batidas).
 //
 // Teclado e foco (spec §7): quando chega o `state` da sua vez (época nova), o foco vai para o painel, sem roubar de um
 // campo de texto nem de um diálogo aberto. Escolher uma carta leva o foco à primeira jogada, e escolher uma jogada com
@@ -19,6 +20,9 @@ import type { Deadline, PlayerAction, StateMessage } from '@coringa/protocol';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { isLegal, tablePlays, type CardPlay } from '../../model/plays.ts';
 import type { Session, SessionSnapshot } from '../../model/session.ts';
+import { useBoardBusy } from '../anim/context.ts';
+import { Stage } from '../anim/Stage.tsx';
+import { useReducedMotion } from '../anim/useReducedMotion.ts';
 import { useSession } from '../useSession.ts';
 import { ActionBar } from './ActionBar.tsx';
 import { EquipPanel } from './EquipPanel.tsx';
@@ -37,8 +41,13 @@ export interface PlayTableProps {
 /** Sem `state` ainda não há o que desenhar. */
 export function PlayTable({ session, banner }: PlayTableProps) {
   const snapshot = useSession(session);
+  const reducedMotion = useReducedMotion(snapshot.prefs.reduceMotion);
   if (snapshot.state === null) return null;
-  return <PlayTableView session={session} snapshot={snapshot} state={snapshot.state} banner={banner} />;
+  return (
+    <Stage snapshot={snapshot} reducedMotion={reducedMotion}>
+      <PlayTableView session={session} snapshot={snapshot} state={snapshot.state} banner={banner} />
+    </Stage>
+  );
 }
 
 interface Selection {
@@ -76,7 +85,8 @@ function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
   const remainingMs = useCallback((deadline: Deadline) => session.remainingMs(deadline), [session]);
   const now = useCallback(() => session.now(), [session]);
   const timedOut = useDeadlineExpired(state.deadline, remainingMs);
-  const locked = pending || snapshot.status === 'reconnecting' || timedOut;
+  const busy = useBoardBusy();
+  const locked = pending || snapshot.status === 'reconnecting' || timedOut || busy;
 
   // A barra existe nas fases de jogada; o Equipar e a escolha da ordem têm painéis próprios.
   const barPhase = phase === 'ATTACK_MAIN' || phase === 'REACTION';
@@ -292,6 +302,7 @@ function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
       <Table
         snapshot={snapshot}
         remainingMs={remainingMs}
+        locked={locked}
         selectedCardId={cardId}
         targetIds={targetIds}
         onSelectCard={acting && !passed ? selectCard : undefined}

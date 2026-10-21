@@ -5,6 +5,9 @@
 import type { PlayerView, PublicPlayer, SpecialCard } from '@coringa/engine';
 import { useId, type ReactNode } from 'react';
 import { zoneKey, type MarkZone } from '../../model/marks.ts';
+import { useAnim } from '../anim/context.ts';
+import { DamageNumber } from '../anim/Effects.tsx';
+import { useCountedNumber } from '../anim/useCountedNumber.ts';
 import { CardBack } from '../cards/Card.tsx';
 import { Coringa } from '../cards/Coringa.tsx';
 import { useTableUi } from './context.ts';
@@ -32,7 +35,9 @@ export function PlayerField({ side, view, player, name, away = false, equip, too
   const zone: MarkZone = self ? 'selfHp' : 'opponentHp';
   const rowLabel = (kind: 'ataque' | 'defesa') => (self ? `Sua fileira de ${kind}` : `Fileira de ${kind} de ${name}`);
   const limit = view.config.rowLimit;
-  const attack = <Row label={rowLabel('ataque')} kind="ATK" side={player} pressure={view.pressure} limit={limit} />;
+  const attack = (
+    <Row label={rowLabel('ataque')} kind="ATK" side={player} pressure={view.pressure} limit={limit} aim={self ? 'up' : 'down'} />
+  );
   const defense = <Row label={rowLabel('defesa')} kind="DEF" side={player} pressure={view.pressure} limit={limit} />;
   const info = <Info side={side} view={view} player={player} name={name} away={away} equip={equip} zone={zone} tool={tool} />;
   const zones = <Zones player={player} name={name} view={view} />;
@@ -88,7 +93,11 @@ function Info({ side, view, player, name, away, equip, zone, tool }: InfoProps) 
   const marked = zones.has(zone);
   const seen = onSeen && marked ? () => onSeen(zoneKey(zone)) : undefined;
   const max = view.config.hp;
-  const percent = Math.max(0, Math.min(100, (player.hp / max) * 100));
+  const anim = useAnim();
+  // A vida mostrada espera a batida do dano e conta até o valor da `view`, que é a verdade (aria-valuenow).
+  const shownHp = useCountedNumber(player.hp);
+  const damage = anim.fx.damage?.target === player.id ? anim.fx.damage : null;
+  const percent = Math.max(0, Math.min(100, (shownHp / max) * 100));
   const hpName = `Vida de ${name}`;
 
   return (
@@ -116,11 +125,12 @@ function Info({ side, view, player, name, away, equip, zone, tool }: InfoProps) 
       )}
       <span className="area-vida relative flex items-baseline gap-0.5" onPointerEnter={seen} onPointerDown={seen}>
         <span data-hp className="font-texto text-[34px] font-extrabold leading-none tabular-nums pc:text-[56px]">
-          {player.hp}
+          {shownHp}
         </span>
         <span aria-hidden="true" className="font-texto text-[13px] font-semibold tabular-nums pc:text-lg">
           /{max}
         </span>
+        {damage ? <DamageNumber amount={damage.amount} ms={anim.beatMs} reduced={anim.reduced} /> : null}
         {marked ? (
           <span className="absolute -bottom-3 left-0">
             <NovoChip />

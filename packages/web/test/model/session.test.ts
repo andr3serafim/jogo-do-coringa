@@ -9,6 +9,7 @@ import {
   type SessionDeps,
   type SessionSnapshot,
 } from '../../src/model/session.ts';
+import { DEFAULT_PREFS } from '../../src/model/storage.ts';
 import { deferredAck, FakeConnection, stateMessage, viewAt } from '../fixtures.ts';
 
 /** Relógio e timers falsos: o teste avança o tempo na mão. */
@@ -694,5 +695,39 @@ describe('Session: tempo restante', () => {
     expect(session.remainingMs({ kind: 'TURN', at: 31_000, players: ['p1'] })).toBe(21_000);
     connection.now = 40_000;
     expect(session.remainingMs({ kind: 'TURN', at: 31_000, players: ['p1'] })).toBe(0);
+  });
+});
+
+describe('Session: preferências no snapshot', () => {
+  it('o snapshot traz as preferências da sessão (a mesa lê "reduzir animações" dali)', () => {
+    const connection = new FakeConnection();
+    const session = new Session(connection, fakeDeps().deps, { ...DEFAULT_PREFS, reduceMotion: true });
+    expect(session.snapshot().prefs).toEqual({ autoPass: true, reduceMotion: true });
+  });
+
+  it('sem preferências, valem as padrão', () => {
+    expect(setup().session.snapshot().prefs).toEqual(DEFAULT_PREFS);
+  });
+
+  it('setPrefs troca o snapshot e avisa quem ouve', () => {
+    const { session } = setup();
+    let calls = 0;
+    session.subscribe(() => {
+      calls += 1;
+    });
+    session.setPrefs({ autoPass: false, reduceMotion: true });
+    expect(session.snapshot().prefs).toEqual({ autoPass: false, reduceMotion: true });
+    expect(calls).toBeGreaterThan(0);
+  });
+
+  it('setPrefs com as mesmas preferências não avisa ninguém', () => {
+    const { session } = setup();
+    const prefs = session.snapshot().prefs;
+    let calls = 0;
+    session.subscribe(() => {
+      calls += 1;
+    });
+    session.setPrefs(prefs);
+    expect(calls).toBe(0);
   });
 });

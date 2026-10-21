@@ -66,10 +66,12 @@ export interface SessionSnapshot {
   marksBaseSeq: number | null;
   /** As linhas da partida em curso, em ordem (spec §3.1). */
   history: HistoryState;
+  /** As preferências do jogador (a mesa lê "reduzir animações" daqui; o menu as troca por `setPrefs`). */
+  prefs: Prefs;
 }
 
 /** Campos que a sessão deriva do que guarda por dentro: nunca entram num `patch`. */
-type Derived = 'equipDraft' | 'equipConfirmed' | 'orderAutoAt' | 'marks' | 'marksBaseSeq' | 'history';
+type Derived = 'equipDraft' | 'equipConfirmed' | 'orderAutoAt' | 'marks' | 'marksBaseSeq' | 'history' | 'prefs';
 
 export interface SessionDeps {
   now(): number;
@@ -565,6 +567,7 @@ export class Session {
       marks: this.#marksFor(snapshot.state),
       marksBaseSeq: this.#baseSeq,
       history: this.#history,
+      prefs: this.#prefs,
     };
   }
 

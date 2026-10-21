@@ -15,6 +15,10 @@ import {
   type NumCard,
   type PublicPlayer,
 } from '@coringa/engine';
+import { rowKey } from '../../model/effects.ts';
+import { useAnim } from '../anim/context.ts';
+import { LitRow } from '../anim/Effects.tsx';
+import { useCountedNumber } from '../anim/useCountedNumber.ts';
 import { TableCard } from './TableCard.tsx';
 
 export interface RowProps {
@@ -24,19 +28,26 @@ export interface RowProps {
   side: PublicPlayer;
   pressure: number;
   limit: number;
+  /** Para onde a fileira de Ataque aponta quando acende (o Coringa do outro). */
+  aim?: 'up' | 'down';
 }
 
 const CAPTION = { ATK: 'Ataque', DEF: 'Defesa' } as const;
 
-export function Row({ label, kind, side, pressure, limit }: RowProps) {
+export function Row({ label, kind, side, pressure, limit, aim }: RowProps) {
+  const anim = useAnim();
   const cards: NumCard[] = kind === 'ATK' ? side.attackRow : side.defenseRow;
   const total = kind === 'ATK' ? attackPower(side, pressure) : defensePower(side);
   const base = kind === 'ATK' ? attackBase(side) : defenseBase(side);
   const quads = quadValues(cards);
   const vacancies = Math.max(0, limit - cards.length);
+  // O total mostrado espera a batida do dano e conta até o valor do motor.
+  const shownTotal = useCountedNumber(total);
+  const lit = anim.fx.rows.has(rowKey(side.id, kind));
 
   return (
-    <div role="group" aria-label={label} className="flex items-center gap-2">
+    <div role="group" aria-label={label} data-aceso={lit ? 'true' : undefined} className="relative flex items-center gap-2">
+      {lit ? <LitRow aim={kind === 'ATK' ? aim : undefined} ms={anim.beatMs} /> : null}
       <ul
         role="list"
         className="grid min-w-0 flex-1 list-none gap-1 p-0 pl-[10px] pc:gap-1.5 pc:pl-[14px]"
@@ -59,7 +70,7 @@ export function Row({ label, kind, side, pressure, limit }: RowProps) {
       <div className="flex w-[52px] shrink-0 flex-col items-end text-right pc:w-24">
         <span className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">{CAPTION[kind]}</span>
         <span data-total className="font-texto text-[22px] font-extrabold leading-[1.1] tabular-nums pc:text-3xl">
-          {total}
+          {shownTotal}
         </span>
         {base > 0 ? (
           <span data-conta className="font-texto text-[11px] font-semibold tabular-nums pc:text-[13px]">

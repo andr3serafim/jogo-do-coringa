@@ -891,7 +891,9 @@ describe('avisos (spec §3.9, §6.2)', () => {
 
   it('sem woAt (ainda), só diz que caiu', () => {
     mount(DRAFT, { fake: true, room: gone() });
-    expect(screen.getByText('Duda caiu.')).toBeInTheDocument();
+    // A frase aparece na faixa (escondida do leitor de tela) e na região fixa que o leitor de tela ouve.
+    expect(screen.getAllByText('Duda caiu.')).toHaveLength(2);
+    expect(screen.getByRole('status')).toHaveTextContent(/^Duda caiu\.$/);
     expect(screen.queryByText(/W\.O\./)).not.toBeInTheDocument();
   });
 

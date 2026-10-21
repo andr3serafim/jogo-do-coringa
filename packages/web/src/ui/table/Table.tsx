@@ -22,6 +22,8 @@ export interface TableProps {
   snapshot: SessionSnapshot;
   /** Tempo que falta para um prazo, pelo relógio do servidor (`Session.remainingMs`). */
   remainingMs: (deadline: Deadline) => number;
+  /** Os controles estão travados (batida, jogada em voo, conexão caída): as cartas que são botão ficam apagadas. */
+  locked?: boolean;
   /** A carta da mão que está escolhida. */
   selectedCardId?: string | null;
   /** Ids das cartas que são alvo possível da jogada em andamento. */
@@ -54,6 +56,7 @@ function TableView({
   snapshot,
   state,
   remainingMs,
+  locked = false,
   selectedCardId = null,
   targetIds = NO_TARGETS,
   onSelectCard,
@@ -103,6 +106,7 @@ function TableView({
     marked: marks.cards,
     zones: marks.zones,
     targetIds,
+    locked,
     selectedCardId,
     draftIds,
     onSelectCard,

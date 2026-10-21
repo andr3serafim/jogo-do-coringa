@@ -138,7 +138,7 @@ export function GraveyardDialog({ mode, graveyard, options, rowCounts, rowLimit,
                       const card = graveyard.find((c) => c.id === option.cardId);
                       return card ? (
                         <li key={option.cardId}>
-                          <Card card={card} size="mini" onSelect={() => setPicked(option.cardId)} />
+                          <Card card={card} size="mini" animated={false} onSelect={() => setPicked(option.cardId)} />
                         </li>
                       ) : null;
                     })}
@@ -167,7 +167,7 @@ function ViewBody({ graveyard }: { graveyard: readonly EngineCard[] }) {
       <ul role="list" aria-label="Cartas do cemitério" className="flex max-h-[50dvh] list-none flex-wrap gap-2.5 overflow-y-auto p-1.5 [--mini-h:67px] [--mini-w:48px]">
         {topFirst.map((card) => (
           <li key={card.id}>
-            <Card card={card} size="mini" />
+            <Card card={card} size="mini" animated={false} />
           </li>
         ))}
       </ul>

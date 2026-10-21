@@ -7,7 +7,10 @@
 // anel ouro de alvo e seleção (`anel-ouro`) são os dois donos dele. A sombra das cartas da mão é um `drop-shadow`
 // (filtro), que não disputa o `box-shadow`.
 import type { Card as EngineCard } from '@coringa/engine';
+import * as m from 'motion/react-m';
 import type { ReactNode } from 'react';
+import type { CardFx } from '../../model/effects.ts';
+import { useAnim } from '../anim/context.ts';
 import { Coringa } from './Coringa.tsx';
 import { isRedSuit, Suit } from './Suit.tsx';
 
@@ -38,6 +41,13 @@ export interface CardProps {
   draft?: boolean;
   /** Texto do `title` (padrão: o papel e o efeito da carta). */
   hint?: string;
+  /**
+   * A carta é do tabuleiro e muda de lugar de forma animada: `layoutId` = id da carta (spec §4.1). Fora do tabuleiro
+   * (o diálogo do cemitério, a carta grande do Equipar) fica desligado, para não disputar o `layoutId` com a da mesa.
+   */
+  animated?: boolean;
+  /** Os controles estão travados (batida em curso, jogada em voo, conexão caída): o botão fica apagado, mas focável. */
+  disabled?: boolean;
   onSelect?: () => void;
   /** Só para a carta que é botão (`onSelect`): `-1` a tira da ordem do Tab, quando outro botão faz a mesma coisa. */
   tabIndex?: number;
@@ -153,11 +163,16 @@ export function Card({
   grave = false,
   draft = false,
   hint,
+  animated = true,
+  disabled = false,
   onSelect,
   tabIndex,
   onSeen,
   className = '',
 }: CardProps) {
+  const anim = useAnim();
+  const fx = animated ? anim.fx.cards.get(card.id) : undefined;
+  const shake = fx === 'crack' && !anim.reduced;
   const name = [cardName(card, as)];
   if (roleText) name.push(roleText);
   if (front) name.push('sai primeiro');
@@ -175,6 +190,8 @@ export function Card({
     grave ? 'grayscale opacity-90' : '',
     draft ? 'border-dashed opacity-70' : '',
     onSelect ? 'cursor-pointer focus-visible:z-10' : '',
+    // Travada, a carta apaga (o toque não faz nada), mas continua focável e lida pelo leitor de tela.
+    disabled && onSelect ? 'opacity-60 cursor-wait' : '',
     className,
   ];
   const common = {
@@ -186,11 +203,24 @@ export function Card({
     'data-alvo': target ? 'true' : undefined,
     'data-quad': quad ? 'true' : undefined,
     'data-rascunho': draft ? 'true' : undefined,
+    'data-fx': fx,
     onPointerEnter: marked ? onSeen : undefined,
     onPointerDown: marked ? onSeen : undefined,
     onFocus: marked ? onSeen : undefined,
+    // A transição de layout da carta espera a batida do evento que a move (`delayOf`). O `layoutDependency` faz o
+    // Motion medir a mesa uma vez por `state` (e uma vez no fim das batidas, que termina o que ficou no ar).
+    ...(animated
+      ? {
+          layoutId: card.id,
+          layoutDependency: anim.layoutKey,
+          animate: shake ? { rotate: [0, -4, 4, -3, 3, 0] } : undefined,
+          transition: {
+            layout: { delay: anim.delayOf(card.id), duration: 0.3, ease: 'easeInOut' as const },
+            rotate: { duration: anim.beatMs / 1000 },
+          },
+        }
+      : {}),
   };
-
   const inside = (
     <>
       {front ? (
@@ -204,20 +234,51 @@ export function Card({
       {marked ? (
         <span aria-hidden="true" data-marca-novo className="absolute bottom-[3px] left-[3px] h-[4px] w-[46%] bg-vermelho" />
       ) : null}
+      {fx ? <FxOverlay fx={fx} ms={anim.beatMs} /> : null}
     </>
   );
 
   if (onSelect) {
     return (
-      <button type="button" {...common} aria-pressed={selected} tabIndex={tabIndex} onClick={onSelect}>
+      <m.button
+        type="button"
+        {...common}
+        aria-pressed={selected}
+        aria-disabled={disabled || undefined}
+        tabIndex={tabIndex}
+        onClick={disabled ? undefined : onSelect}
+      >
         {inside}
-      </button>
+      </m.button>
     );
   }
   return (
-    <div role="img" {...common}>
+    <m.div role="img" {...common}>
       {inside}
-    </div>
+    </m.div>
+  );
+}
+
+/**
+ * O efeito de uma batida sobre a carta (spec §4.2): o K que racha, a carta do escudo do Reflect, a carta da quadra que
+ * acende. Dura a batida, sobe e desce uma vez (sem pisca-pisca) e só usa opacidade.
+ */
+function FxOverlay({ fx, ms }: { fx: CardFx; ms: number }) {
+  const motion = {
+    'aria-hidden': true,
+    'data-fx-overlay': fx,
+    initial: { opacity: 0 },
+    animate: { opacity: [0, 1, 1, 0] },
+    transition: { duration: ms / 1000, times: [0, 0.2, 0.8, 1], ease: 'linear' as const },
+  };
+  if (fx === 'light') return <m.span {...motion} className="pointer-events-none absolute inset-0 bg-ouro/70" />;
+  if (fx === 'shield') {
+    return <m.span {...motion} className="pointer-events-none absolute -inset-1 rounded-[8px] border-4 border-ouro" />;
+  }
+  return (
+    <m.svg {...motion} viewBox="0 0 40 56" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 size-full">
+      <path d="M22 0 L15 15 L26 24 L12 38 L21 56" fill="none" stroke="var(--color-tinta)" strokeWidth="3.5" strokeLinejoin="miter" />
+    </m.svg>
   );
 }
 

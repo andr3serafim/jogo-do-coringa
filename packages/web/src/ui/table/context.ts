@@ -9,6 +9,8 @@ export interface TableUi {
   /** Zonas (vida, pressão) com a marca "novo". */
   zones: ReadonlySet<MarkZone>;
   targetIds: ReadonlySet<string>;
+  /** Controles travados: as cartas que são botão ficam apagadas (`aria-disabled`), sem tirar o foco. */
+  locked: boolean;
   selectedCardId: string | null;
   /** Ids das cartas pendentes do Equipar que já estão na fileira como rascunho (spec §3.5). */
   draftIds: ReadonlySet<string>;
@@ -22,6 +24,7 @@ export const TableUiContext = createContext<TableUi>({
   marked: new Set(),
   zones: new Set(),
   targetIds: new Set(),
+  locked: false,
   selectedCardId: null,
   draftIds: new Set(),
 });

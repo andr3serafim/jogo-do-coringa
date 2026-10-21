@@ -3,6 +3,7 @@ import type { AttackPreview, Card, RowName, SpecialCard } from '@coringa/engine'
 import type { DeadlineKind } from '@coringa/protocol';
 import { cardText, ROW_NAME } from '@coringa/sim/text';
 import { previewChanged, type Previews } from './preview.ts';
+import type { SceneKind } from './timeline.ts';
 
 export { cardText, ROW_NAME };
 
@@ -274,3 +275,12 @@ export const droppedText = (opponent: string, remaining: string | null): string 
 /** A versão fixa do aviso, para a região viva do leitor de tela (a contagem não é anunciada). */
 export const droppedAnnouncement = (opponent: string): string =>
   `${opponent} caiu. Se não voltar a tempo, você vence por W.O.`;
+
+/** O título grande de cada cena (spec §10.1). */
+export const SCENE_TITLE: Record<SceneKind, string> = {
+  EXODIA: 'EXÓDIA!',
+  ABSOLUTE_ATTACK: 'ATAQUE ABSOLUTO',
+  ABSOLUTE_DEFENSE: 'DEFESA ABSOLUTA',
+  REFLECT_PLAYED: 'REFLECT',
+  REFLECT_TRIGGERED: 'REFLECT',
+};

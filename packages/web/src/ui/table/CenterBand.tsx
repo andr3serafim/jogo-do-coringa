@@ -9,6 +9,9 @@ import type { Deadline } from '@coringa/protocol';
 import type { ClockFace } from '../../model/clock.ts';
 import { CLOCK_LABEL, CLOCK_URGENT_LABEL, pausedTurnText, TIMES_UP_TEXT } from '../../model/copy.ts';
 import { zoneKey } from '../../model/marks.ts';
+import * as m from 'motion/react-m';
+import { INITIATIVE_ID } from '../../model/effects.ts';
+import { useAnim } from '../anim/context.ts';
 import { Card, cardName } from '../cards/Card.tsx';
 import { useTableUi } from './context.ts';
 import {
@@ -78,11 +81,14 @@ export function CenterBand({ view, names, deadline, remainingMs, pausedTurnMs, o
         {pressureMarked ? <NovoChip /> : null}
       </div>
 
-      <div className="order-last min-w-0 text-xs leading-tight pc:order-none pc:text-[15px]">
-        <span className="mr-1.5 text-[10px] font-bold uppercase tracking-[0.12em] pc:mr-0 pc:block pc:text-[11px]">
-          Iniciativa
-        </span>
-        <span>{initiativeText(view, names)}</span>
+      <div className="order-last flex min-w-0 items-center gap-1.5 pc:order-none">
+        <InitiativeMark mine={view.initiative === view.me} />
+        <div className="min-w-0 text-xs leading-tight pc:text-[15px]">
+          <span className="mr-1.5 text-[10px] font-bold uppercase tracking-[0.12em] pc:mr-0 pc:block pc:text-[11px]">
+            Iniciativa
+          </span>
+          <span>{initiativeText(view, names)}</span>
+        </div>
       </div>
 
       {untilStall <= 2 && untilStall > 0 ? (
@@ -105,6 +111,32 @@ export function CenterBand({ view, names, deadline, remainingMs, pausedTurnMs, o
 }
 
 // ---------------------------------------------------------------------------------------------
+
+/**
+ * A marca da iniciativa (spec §4.2): um losango ouro que troca de lado, em cima para o oponente e embaixo para você (como
+ * a mesa). É só enfeite do texto ao lado, que diz de quem é; o losango se mexe na batida do `InitiativeChanged`.
+ */
+function InitiativeMark({ mine }: { mine: boolean }) {
+  const anim = useAnim();
+  const marker = (
+    <m.span
+      layoutId={INITIATIVE_ID}
+      layoutDependency={anim.layoutKey}
+      transition={{ layout: { delay: anim.delayOf(INITIATIVE_ID), duration: 0.3, ease: 'easeInOut' } }}
+      className="block size-2.5 rotate-45 bg-ouro"
+    />
+  );
+  return (
+    <span
+      aria-hidden="true"
+      data-iniciativa={mine ? 'voce' : 'oponente'}
+      className="flex h-6 w-3.5 flex-none flex-col justify-between border-l-2 border-papel/50 pl-[3px]"
+    >
+      <span className="size-2.5">{mine ? null : marker}</span>
+      <span className="size-2.5">{mine ? marker : null}</span>
+    </span>
+  );
+}
 
 const DISC_SMALL = 'size-12 text-lg pc:size-[60px] pc:text-[22px]';
 /** Na janela de reação o prazo é de 8 s e a decisão é urgente: o relógio cresce. */
