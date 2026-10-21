@@ -53,6 +53,8 @@ export interface PlayTableProps {
   training?: boolean;
   /** "Sair do treino", no menu da partida. Sem ele o item não existe. */
   onExit?: () => void;
+  /** O aviso da confirmação de Desistir (padrão: perder por W.O.); o treino não tem W.O. */
+  concedeWarning?: string;
 }
 
 /** Sem `state` ainda não há o que desenhar. */
@@ -107,6 +109,7 @@ function PlayTableView({
   newRoomLabel,
   training,
   onExit,
+  concedeWarning,
 }: ViewProps) {
   const { view } = state;
   const { legal, pending, room } = snapshot;
@@ -426,6 +429,7 @@ function PlayTableView({
         onExit={onExit}
         // No treino o passe automático não se aplica (spec §2.6): a sessão não o manda, e o menu não oferece a chave.
         showAutoPass={!training}
+        concedeWarning={concedeWarning}
         canConcede={room?.status === 'PLAYING' && phase !== 'GAME_OVER'}
         concedeDisabled={snapshot.status === 'reconnecting'}
         onConcede={() => void session.concede().catch(noop)}

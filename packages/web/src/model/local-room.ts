@@ -57,6 +57,11 @@ export function trainingSeed(search: string, random: () => number): string {
     .padStart(8, '0');
 }
 
+/** A semente da partida `gameNo` da sala: a 1ª usa a semente da sala, e a `n` usa `<semente>-<n>`. Abrir `?semente=<esta>` repete a partida. */
+export function gameSeed(seed: string, gameNo: number): string {
+  return gameNo === 1 ? seed : `${seed}-${gameNo}`;
+}
+
 /**
  * Chave da fase em que o jogo espera uma jogada. Espelha a do servidor: a `epoch` sobe quando a chave depois
  * de um passo difere da de antes dele (não é derivada da chave, para voltar ao mesmo `ATTACK_MAIN` também contar).
@@ -210,7 +215,7 @@ export class LocalRoom implements RoomConnection {
   /** Estado novo, bot novo: a semente da partida `n` é `<semente>` (a 1ª) ou `<semente>-<n>`. */
   #newGame(): { game: GameState; botRng: Rng } {
     this.#gameNo += 1;
-    const seed = this.#gameNo === 1 ? this.#options.seed : `${this.#options.seed}-${this.#gameNo}`;
+    const seed = gameSeed(this.#options.seed, this.#gameNo);
     const created = createGame(DEFAULT_CONFIG, seed, [LOCAL_ME, BOT_SEAT]);
     if (!created.ok) throw new Error(`configuração inválida: ${created.error.message}`);
     return { game: created.state, botRng: createRng(`${seed}/bot`) };

@@ -10,6 +10,7 @@ import userEvent from '@testing-library/user-event';
 import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../../src/app/App.tsx';
+import { getDiagnosticContext } from '../../src/app/diagnostic-context.ts';
 import { navigate } from '../../src/app/router.ts';
 import * as localRoomModule from '../../src/model/local-room.ts';
 import { Training, type LocalRoomModule } from '../../src/ui/screens/Training.tsx';
@@ -340,6 +341,38 @@ describe('/treino: sair, fim e revanche', () => {
     await user.click(within(screen.getByRole('dialog', { name: 'Bot venceu' })).getByRole('button', { name: 'Voltar ao início' }));
     expect(window.location.pathname).toBe('/');
     expect(screen.getByRole('heading', { name: 'Jogo do Coringa' })).toBeInTheDocument();
+  });
+});
+
+describe('/treino: diagnóstico e desistência', () => {
+  it('o diagnóstico leva a semente da partida e o número dela: a partida 2 usa <semente>-2, que abre a mesma partida', async () => {
+    const { advance, user } = fakeClock();
+    const view = render(<Training store={memoryStore()} load={capture().load} />);
+    await settle();
+    advance(5_000);
+    expect(getDiagnosticContext().code).toBe('TREINO, semente t1, partida 1');
+
+    await user.click(menuButton());
+    await user.click(within(screen.getByRole('dialog', { name: 'Menu da partida' })).getByRole('button', { name: 'Desistir' }));
+    await user.click(within(screen.getByRole('dialog', { name: 'Desistir da partida?' })).getByRole('button', { name: 'Confirmar' }));
+    advance(5_000);
+    await user.click(within(screen.getByRole('dialog', { name: 'Bot venceu' })).getByRole('button', { name: 'Revanche' }));
+    advance(5_000);
+    expect(getDiagnosticContext().code).toBe('TREINO, semente t1-2, partida 2');
+
+    view.unmount();
+    expect(getDiagnosticContext().code).toBeNull();
+  });
+
+  it('desistir no treino não fala em W.O.: não há ninguém para dar a vitória por ausência', async () => {
+    const { user } = fakeClock();
+    render(<Training store={memoryStore()} load={capture().load} />);
+    await settle();
+    await user.click(menuButton());
+    await user.click(within(screen.getByRole('dialog', { name: 'Menu da partida' })).getByRole('button', { name: 'Desistir' }));
+    const confirm = screen.getByRole('dialog', { name: 'Desistir da partida?' });
+    expect(within(confirm).getByText('Você perde esta partida.')).toBeInTheDocument();
+    expect(confirm).not.toHaveTextContent('W.O.');
   });
 });
 

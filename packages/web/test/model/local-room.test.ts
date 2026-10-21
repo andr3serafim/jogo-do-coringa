@@ -1,7 +1,7 @@
 import { legalActions, type GameEvent, type PlayerView } from '@coringa/engine';
 import type { ConnectionEvent, PlayerAction, RoomMessage, StateMessage } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
-import { LOCAL_ME, LocalRoom, trainingSeed, type LocalRoomOptions } from '../../src/model/local-room.ts';
+import { gameSeed, LOCAL_ME, LocalRoom, trainingSeed, type LocalRoomOptions } from '../../src/model/local-room.ts';
 
 /** Timers e relógio de mentira: nada de tempo real; `runNext` dispara o timer mais cedo. */
 class FakeTimers {
@@ -97,6 +97,26 @@ describe('trainingSeed', () => {
     expect(trainingSeed('', () => 0.5)).toBe(trainingSeed('?outro=1', () => 0.5));
     expect(trainingSeed('', () => 0.1)).not.toBe(trainingSeed('', () => 0.9));
     expect(trainingSeed('', () => 0.5)).toMatch(/^[0-9a-z]+$/);
+  });
+});
+
+describe('gameSeed', () => {
+  it('a partida 1 usa a semente, e a n usa <semente>-<n>', () => {
+    expect(gameSeed('mesa', 1)).toBe('mesa');
+    expect(gameSeed('mesa', 2)).toBe('mesa-2');
+    expect(gameSeed('mesa', 10)).toBe('mesa-10');
+  });
+
+  it('abrir o treino com a semente de uma partida n repete a partida n (a do diagnóstico)', async () => {
+    const { room } = setup('rev');
+    room.connect();
+    await room.concede();
+    room.rematch(true);
+    expect(room.room!.gameNo).toBe(2);
+    const second = setup(gameSeed('rev', 2));
+    second.room.connect();
+    expect(second.room.state!.view.self.pending.map((c) => c.id)).toEqual(room.state!.view.self.pending.map((c) => c.id));
+    expect(second.room.state!.view.self.hand.map((c) => c.id)).toEqual(room.state!.view.self.hand.map((c) => c.id));
   });
 });
 

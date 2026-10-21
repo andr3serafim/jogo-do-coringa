@@ -75,6 +75,8 @@ export interface GameMenuProps {
   loadVersion?: () => Promise<string | null>;
   /** Só no treino: sai da partida na hora, sem resultado (a sala local não tem o que avisar a ninguém). */
   onExit?: () => void;
+  /** O aviso da confirmação de Desistir (padrão: perder por W.O.). O treino não tem W.O. e diz só que a partida se perde. */
+  concedeWarning?: string;
   /** A chave "Passar sozinho" (padrão: aparece). O treino a esconde: lá o passe automático não se aplica (spec §2.6). */
   showAutoPass?: boolean;
   /** Há partida em curso para desistir. */
@@ -94,6 +96,7 @@ export function GameMenu({
   inviteLink,
   loadVersion,
   onExit,
+  concedeWarning = CONCEDE_WARNING,
   showAutoPass = true,
   canConcede,
   concedeDisabled,
@@ -210,6 +213,7 @@ export function GameMenu({
       <RulesDialog open={open && rulesOpen} onClose={() => setRulesOpen(false)} />
       <ConcedeDialog
         open={open && confirmOpen}
+        warning={concedeWarning}
         onCancel={() => setConfirmOpen(false)}
         onConfirm={() => {
           setConfirmOpen(false);
@@ -264,12 +268,13 @@ function Switch({ label, checked, onChange, disabled = false, hint }: SwitchProp
 
 interface ConcedeDialogProps {
   open: boolean;
+  warning: string;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
 /** A confirmação de Desistir. O "Cancelar" vem primeiro: é nele que o foco cai ao abrir (o gesto seguro). */
-function ConcedeDialog({ open, onCancel, onConfirm }: ConcedeDialogProps) {
+function ConcedeDialog({ open, warning, onCancel, onConfirm }: ConcedeDialogProps) {
   const titleId = useId();
   const textId = useId();
   return (
@@ -278,7 +283,7 @@ function ConcedeDialog({ open, onCancel, onConfirm }: ConcedeDialogProps) {
         <h2 id={titleId} className="textura font-madeira text-2xl uppercase leading-tight">
           {CONCEDE_TITLE}
         </h2>
-        <p id={textId}>{CONCEDE_WARNING}</p>
+        <p id={textId}>{warning}</p>
         <div className="flex flex-wrap justify-end gap-3">
           <button type="button" className={ITEM} onClick={onCancel}>
             {CANCEL_LABEL}

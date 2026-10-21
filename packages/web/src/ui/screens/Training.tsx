@@ -11,6 +11,7 @@ import { navigate } from '../../app/router.ts';
 import { clearDiagnosticContext, setDiagnosticContext } from '../../app/diagnostic-context.ts';
 import {
   BACK_HOME_LABEL,
+  TRAINING_CONCEDE_WARNING,
   TRAINING_FAILED_TEXT,
   TRAINING_FAILED_TITLE,
   TRAINING_LOADING_TEXT,
@@ -45,7 +46,15 @@ export interface TrainingProps {
   reload?: () => void;
 }
 
-type Step = { kind: 'loading' } | { kind: 'failed' } | { kind: 'playing'; session: Session; seed: string };
+type Step =
+  | { kind: 'loading' }
+  | { kind: 'failed' }
+  | {
+      kind: 'playing';
+      session: Session;
+      /** A semente da partida `n` desta sala: abrir `?semente=<ela>` repete a partida. */
+      seedOf: (gameNo: number) => string;
+    };
 
 export function Training({ store, load = loadLocalRoom, reload = defaultReload }: TrainingProps) {
   const [step, setStep] = useState<Step>({ kind: 'loading' });
@@ -77,7 +86,7 @@ export function Training({ store, load = loadLocalRoom, reload = defaultReload }
         const created = new Session(room, timers, loadPrefs(store), { autoPass: false });
         session = created;
         room.connect();
-        setStep({ kind: 'playing', session: created, seed });
+        setStep({ kind: 'playing', session: created, seedOf: (gameNo) => module.gameSeed(seed, gameNo) });
       })
       .catch(() => {
         dispose?.();
@@ -113,20 +122,28 @@ export function Training({ store, load = loadLocalRoom, reload = defaultReload }
         </Screen>
       );
     case 'playing':
-      return <TrainingTable session={step.session} seed={step.seed} store={store} />;
+      return <TrainingTable session={step.session} seedOf={step.seedOf} store={store} />;
   }
 }
 
-function TrainingTable({ session, seed, store }: { session: Session; seed: string; store: KeyValueStore }) {
+interface TrainingTableProps {
+  session: Session;
+  seedOf: (gameNo: number) => string;
+  store: KeyValueStore;
+}
+
+function TrainingTable({ session, seedOf, store }: TrainingTableProps) {
   const snapshot = useSession(session);
   const seq = snapshot.state?.seq ?? null;
   const epoch = snapshot.state?.epoch ?? null;
+  const gameNo = snapshot.room?.gameNo ?? 1;
 
-  // O diagnóstico copiável da fronteira de erro leva a semente: com ela a partida se repete (spec §2.6).
+  // O diagnóstico copiável da fronteira de erro leva a semente da partida em curso (a revanche `n` usa `<semente>-<n>`) e o
+  // número dela: abrir `/treino?semente=<a do diagnóstico>` repete a partida (spec §2.6).
   useEffect(() => {
-    setDiagnosticContext({ code: `TREINO, semente ${seed}`, seq, epoch });
+    setDiagnosticContext({ code: `TREINO, semente ${seedOf(gameNo)}, partida ${gameNo}`, seq, epoch });
     return clearDiagnosticContext;
-  }, [seed, seq, epoch]);
+  }, [seedOf, gameNo, seq, epoch]);
 
   return (
     <PlayTable
@@ -136,6 +153,7 @@ function TrainingTable({ session, seed, store }: { session: Session; seed: strin
       onNewRoom={goHome}
       newRoomLabel={BACK_HOME_LABEL}
       onExit={goHome}
+      concedeWarning={TRAINING_CONCEDE_WARNING}
     />
   );
 }

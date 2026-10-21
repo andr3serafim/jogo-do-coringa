@@ -381,7 +381,8 @@ export const TRAINING_BAND_TEXT = 'Treino, sem relógio';
 export const EXIT_TRAINING_LABEL = 'Sair do treino';
 /** No painel de fim do treino, no lugar de "Nova sala". */
 export const BACK_HOME_LABEL = 'Voltar ao início';
-export const TRAINING_TITLE = 'Treino contra o bot';
+/** Desistir no treino não tem W.O.: não há quem dê a vitória por ausência. */
+export const TRAINING_CONCEDE_WARNING = 'Você perde esta partida.';
 export const TRAINING_LOADING_TEXT = 'Preparando o treino…';
 export const TRAINING_FAILED_TITLE = 'Não deu para carregar o treino';
 export const TRAINING_FAILED_TEXT = 'Confira a internet e tente de novo.';

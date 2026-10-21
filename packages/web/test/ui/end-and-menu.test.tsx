@@ -518,6 +518,19 @@ describe('menu da partida', () => {
       expect(within(menuDialog()).queryByRole('button', { name: 'Sair do treino' })).not.toBeInTheDocument();
     });
 
+    it('o aviso de desistir é configurável (treino: sem W.O.); online segue com o W.O.', async () => {
+      const m = mount({ status: 'PLAYING', props: { concedeWarning: 'Você perde esta partida.' } });
+      await m.user.click(menuButton());
+      await m.user.click(within(menuDialog()).getByRole('button', { name: 'Desistir' }));
+      expect(within(screen.getByRole('dialog', { name: 'Desistir da partida?' })).getByText('Você perde esta partida.')).toBeInTheDocument();
+      m.unmount();
+
+      const online = mount({ status: 'PLAYING' });
+      await online.user.click(menuButton());
+      await online.user.click(within(menuDialog()).getByRole('button', { name: 'Desistir' }));
+      expect(within(screen.getByRole('dialog', { name: 'Desistir da partida?' })).getByText('Você perde esta partida por W.O.')).toBeInTheDocument();
+    });
+
     it('a faixa central diz "Treino, sem relógio" no treino, e só nele', () => {
       const m = mount({ status: 'PLAYING', props: { training: true } });
       const band = screen.getByRole('region', { name: 'Situação da rodada' });
