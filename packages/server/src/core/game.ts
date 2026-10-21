@@ -49,7 +49,8 @@ function requireGame(record: RoomRecord): GameRecord {
  * zerados. `seq` e `epoch` só sobem, nunca voltam (spec §4.5). Muda o registro e devolve o primeiro passo.
  */
 export function startGame(record: RoomRecord, deps: CoreDeps, now: number): StateStep {
-  const seed = deps.newSeed ? deps.newSeed() : hex(deps.randomBytes(16));
+  // O número da partida que está começando: o `gameNo` só sobe mais abaixo.
+  const seed = deps.newSeed ? deps.newSeed(record.gameNo + 1) : hex(deps.randomBytes(16));
   const created = createGame(DEFAULT_CONFIG, seed, ['p1', 'p2']);
   if (!created.ok) throw new Error(`configuração inválida: ${created.error.message}`);
 

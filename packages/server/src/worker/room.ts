@@ -15,7 +15,18 @@ interface Attachment {
   lastMessageAt: number;
 }
 
-const deps: CoreDeps = { randomBytes: (n) => crypto.getRandomValues(new Uint8Array(n)) };
+const randomBytes = (n: number): Uint8Array => crypto.getRandomValues(new Uint8Array(n));
+
+/**
+ * As dependências do núcleo. `E2E_SEED` não vazio fixa só a semente da partida (`<E2E_SEED>-<gameNo>`, a revanche é outro
+ * sorteio, sempre o mesmo); os tokens de assento e os códigos de sala seguem no `crypto`. No `wrangler.jsonc` ele é vazio
+ * (um teste confere), e só o Playwright o liga, com `wrangler dev --var`.
+ */
+export function depsFor(env: Pick<Env, 'E2E_SEED'>): CoreDeps {
+  // O `wrangler types` gera o tipo literal da var (`""`): alargado para `string`, o `if` enxerga os dois lados.
+  const e2eSeed: string = env.E2E_SEED;
+  return e2eSeed ? { randomBytes, newSeed: (gameNo) => `${e2eSeed}-${gameNo}` } : { randomBytes };
+}
 
 /**
  * Casca do Durable Object da sala (spec §9). Toda a lógica está no `RoomCore`; aqui ficam só o storage, os
@@ -42,7 +53,8 @@ export class Room extends DurableObject<Env> {
   #load(): RoomCore {
     const { kv } = this.ctx.storage;
     const [room, game, recent, log] = STORAGE_KEYS.map((key) => kv.get(key));
-    return new RoomCore(joinRecord({ room, game, recent, log } as Parameters<typeof joinRecord>[0]), deps);
+    const record = joinRecord({ room, game, recent, log } as Parameters<typeof joinRecord>[0]);
+    return new RoomCore(record, depsFor(this.env));
   }
 
   /** Os sockets abertos como o núcleo os entende; `lastSeenAt` junta mensagens e auto-respostas de `ping`. */

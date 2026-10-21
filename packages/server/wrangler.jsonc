@@ -11,5 +11,5 @@
   ],
   "assets": { "directory": "../web/dist", "not_found_handling": "single-page-application", "run_worker_first": ["/api/*"] },
   "observability": { "enabled": true },
-  "vars": { "ALLOWED_ORIGINS": "http://localhost:*", "VERSION": "dev" }
+  "vars": { "ALLOWED_ORIGINS": "http://localhost:*", "VERSION": "dev", "E2E_SEED": "" }
 }

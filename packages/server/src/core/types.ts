@@ -120,7 +120,8 @@ export interface Effects {
 
 export interface CoreDeps {
   randomBytes(n: number): Uint8Array;
-  newSeed?(): string;
+  /** Semente da partida que começa (`gameNo` é o número dela). Só o E2E fixa; sem isto vem de `randomBytes`. */
+  newSeed?(gameNo: number): string;
 }
 
 export type CoreResult<T, E extends string> =
