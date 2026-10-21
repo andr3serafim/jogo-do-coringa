@@ -5,7 +5,7 @@ import { attackPower, defensePower, quadValues, type GameEvent, type PlayerView 
 import type { Deadline, RoomMessage, StateMessage } from '@coringa/protocol';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { zoneKey } from '../../src/model/marks.ts';
 import { Session, type SessionSnapshot } from '../../src/model/session.ts';
 import { Card, cardName, QUAD_FACE } from '../../src/ui/cards/Card.tsx';
@@ -591,6 +591,35 @@ describe('mesa: histórico (spec §3.1, §7, §10.5)', () => {
     expect(panel().className).toContain('max-pc:fixed');
     expect(panel().className).not.toContain('max-pc:sr-only');
     expect(within(panel()).getByRole('button', { name: 'Fechar o histórico' })).toHaveFocus();
+  });
+
+  describe('lista rolável focável (axe: scrollable-region-focusable)', () => {
+    const lines = () => within(panel()).getByRole('region', { name: 'Linhas do histórico', hidden: true });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('gaveta fechada (celular e tablet): sem rolagem e fora do Tab, para não sobrar parada invisível; aberta: focável', async () => {
+      const user = userEvent.setup();
+      withHistory(null);
+      expect(lines()).not.toHaveAttribute('tabindex');
+      expect(lines().className).toContain('max-pc:overflow-hidden');
+      await user.click(screen.getByRole('button', { name: 'Histórico' }));
+      expect(lines()).toHaveAttribute('tabindex', '0');
+      expect(lines().className).toContain('overflow-y-auto');
+      expect(lines().className).not.toContain('max-pc:overflow-hidden');
+    });
+
+    it('no PC a coluna está sempre à vista: a lista é focável mesmo com a gaveta "fechada"', () => {
+      vi.stubGlobal('matchMedia', (query: string) => ({
+        matches: query === '(min-width: 1024px)',
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+      }));
+      withHistory(null);
+      expect(lines()).toHaveAttribute('tabindex', '0');
+    });
   });
 
   describe('rolagem da lista', () => {

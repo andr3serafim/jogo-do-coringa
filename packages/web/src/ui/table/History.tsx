@@ -4,6 +4,7 @@
 // da árvore de acessibilidade (`sr-only`), porque uma região `display: none` não anuncia nada ao leitor de tela.
 import { useEffect, useRef, type KeyboardEvent, type ReactNode, type RefObject } from 'react';
 import type { HistoryLine } from '../../model/history.ts';
+import { useMediaQuery } from '../useMediaQuery.ts';
 import { historyButtonName } from './labels.ts';
 
 export interface HistoryButtonProps {
@@ -59,6 +60,9 @@ export interface HistoryPanelProps {
 /** Até onde do fim da lista ainda conta como "no fim". */
 const NEAR_END_PX = 24;
 
+/** O ponto `pc` do tema (1024 px, `styles.css`): a partir dele o histórico é uma coluna sempre à vista. */
+const PC_QUERY = '(min-width: 1024px)';
+
 const CLOSED = 'max-pc:sr-only';
 const OPEN =
   'max-pc:fixed max-pc:inset-x-0 max-pc:bottom-0 max-pc:z-40 max-pc:max-h-[70dvh] max-pc:border-t-4 max-pc:border-ouro max-pc:pb-[max(1rem,env(safe-area-inset-bottom))]';
@@ -66,6 +70,7 @@ const OPEN =
 export function HistoryPanel({ id, open, onClose, lines, baseSeq, footer, tool }: HistoryPanelProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const pc = useMediaQuery(PC_QUERY);
 
   /** A lista está no fim (ou perto): só então uma linha nova a puxa para baixo. Quem lê o que ficou para cima não é interrompido. */
   const atEnd = useRef(true);
@@ -130,7 +135,16 @@ export function HistoryPanel({ id, open, onClose, lines, baseSeq, footer, tool }
             Fechar
           </button>
         </div>
-        <div ref={scrollRef} onScroll={onScroll} className="min-h-0 flex-1 overflow-y-auto pr-1">
+        {/* A lista rola, então o teclado precisa chegar nela (axe: scrollable-region-focusable). Gaveta fechada (celular e tablet) é só
+            texto para o leitor de tela: sem rolagem e fora do Tab, para não sobrar parada invisível. */}
+        <div
+          ref={scrollRef}
+          onScroll={onScroll}
+          tabIndex={open || pc ? 0 : undefined}
+          role="region"
+          aria-label="Linhas do histórico"
+          className={`min-h-0 flex-1 pr-1 ${open ? 'overflow-y-auto' : 'max-pc:overflow-hidden pc:overflow-y-auto'}`}
+        >
           <ol role="list" aria-live="polite" className="flex list-none flex-col gap-[7px] text-sm leading-[1.35] pc:text-[14px]">
             {lines.map((line, index) => (
               <li
