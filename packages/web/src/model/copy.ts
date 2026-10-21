@@ -388,7 +388,7 @@ export const TRAINING_FAILED_TITLE = 'Não deu para carregar o treino';
 export const TRAINING_FAILED_TEXT = 'Confira a internet e tente de novo.';
 
 // ---------------------------------------------------------------------------------------------
-// Resumo das regras (spec 1 §1.6 a §1.8; o autor revisa o texto no PR)
+// Resumo das regras (spec 1 §1.6 a §1.8; revisado pela sessão principal em 2026-10-21, por delegação do autor)
 
 export interface RulesSection {
   title: string;
@@ -404,8 +404,9 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
     title: 'Rodadas',
     items: [
       'O ciclo é Equipar, Equipar, Ataque, Equipar, Ataque, e assim por diante.',
-      'Equipar: cada jogador recebe 4 cartas. As especiais (J, Q, K, A e Coringa Selvagem) vão para a mão. As numéricas vão para o campo, na ordem em que saíram do monte, e você só escolhe o destino: a fileira de Ataque ou a de Defesa (7 cartas no máximo em cada). Os dois montam ao mesmo tempo, em segredo.',
+      'Equipar: cada jogador recebe 4 cartas. As especiais (J, Q, K, A e Coringa Selvagem) vão para a mão. As numéricas vão para o campo, na ordem em que saíram do monte, e você só escolhe o destino: a fileira de Ataque ou a de Defesa (7 cartas no máximo em cada). Com as duas cheias, a nova carta substitui a última de uma fileira (a antiga vai para o cemitério) ou é descartada. Os dois montam ao mesmo tempo, em segredo.',
       'Ataque: quem tem a iniciativa escolhe atacar primeiro ou em segundo. Cada jogador tem um turno: joga as especiais que quiser e declara o ataque, que é obrigatório se a fileira de Ataque tiver cartas.',
+      'Iniciativa: começa sorteada. No fim de cada rodada de Ataque, fica com quem causou mais dano nela (o dano devolvido por um Reflect conta para quem o lançou). No empate, inclusive 0 a 0, não muda.',
     ],
   },
   {
@@ -425,23 +426,23 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
       'A (Armadilha): destrói 1 J, Q ou K do campo do oponente. Vale no seu turno ou na janela de reação. Não alcança um Reflect ativo nem quem está sob Defesa Absoluta.',
       'Sacrifício: no seu turno, descarte um J da mão para destruir um J do oponente, ou um Q para destruir um Q. Não funciona contra Defesa Absoluta.',
       'Coringa Selvagem: assume o papel de J, Q ou A, nunca o de K.',
-      'Reflect (K + J + Q da mão, no seu turno): fica ativo até o fim do próximo turno de ataque do oponente. Se ele atacar, perde todos os seus K e Q e leva de volta o próprio ataque, com o multiplicador, menos metade (arredondada para baixo) da Defesa base dele, sem o multiplicador (o dano nunca fica abaixo de 0). Você não leva nada. Para anular o Reflect, o oponente joga K + J + Q da mão ou sacrifica J + Q + K do próprio campo.',
+      'Reflect (K + J + Q da mão, no seu turno): fica ativo até o fim do próximo turno de ataque do oponente. Se ele atacar, perde todos os K e Q que tiver e leva de volta o próprio ataque, com o multiplicador, menos metade (arredondada para baixo) da Defesa base dele, sem o multiplicador (o dano nunca fica abaixo de 0). Você não leva nada. Se ele estiver sob Defesa Absoluta, perde só os K e não leva dano. Para anular o Reflect, o oponente joga K + J + Q da mão, na janela de reação do lançamento, ou sacrifica J + Q + K do próprio campo, nessa janela ou no próprio turno, antes de atacar.',
     ],
   },
   {
     title: 'Janela de reação',
     items: [
       'Abre para o oponente quando você declara ataque, joga K ou lança um Reflect, mesmo que ele não tenha resposta.',
-      'Quem responde pode usar A (contra o ataque ou o K) ou, contra um Reflect, anulá-lo ou se proteger. Depois passa. Não há resposta a uma resposta.',
+      'Quem responde pode usar A (contra o ataque ou o K) ou, contra um Reflect, anulá-lo ou se proteger. Pode dar quantas respostas quiser e depois passa. Não há resposta a uma resposta.',
     ],
   },
   {
     title: 'Combos',
     items: [
-      'Quadra: 4 ou mais numéricas do mesmo valor na mesma fileira somam esse valor à fileira e dão 1 Ressurreição.',
-      'Ressurreição: no seu turno, traz 1 numérica do cemitério para o fim de uma fileira com vaga. Vale uma vez por quadra.',
-      'Defesa Absoluta (4 Q): até o fim do próximo turno de ataque do oponente, você é imune a dano, a Armadilha e a Sacrifício, e a fileira de Defesa não perde cartas. Ao acabar, 1 Q vai para o cemitério.',
-      'Ataque Absoluto (4 J): multiplicador 5× e quebra todos os K do alvo. Depois do ataque, 1 J vai para o cemitério.',
+      'Quadra: 4 ou mais numéricas do mesmo valor na mesma fileira, seguidas ou não, somam esse valor à fileira e dão 1 Ressurreição.',
+      'Ressurreição: no seu turno, traz 1 numérica do cemitério para o fim de uma fileira com vaga. Vale uma vez por quadra e fica disponível enquanto a quadra existir, com garantia de 3 rodadas depois de formada.',
+      'Defesa Absoluta (4 Q): até o fim do próximo turno de ataque do oponente, você é imune a dano, a Armadilha e a Sacrifício, e a fileira de Defesa não perde cartas. Só o Ataque Absoluto fura a imunidade a dano: quebra os seus K e causa o dano normal. Ao acabar, 1 Q vai para o cemitério.',
+      'Ataque Absoluto (4 J): multiplicador 5×, mais a Pressão da mesa, e quebra todos os K do alvo. Depois do ataque, 1 J vai para o cemitério.',
       'Exódia (4 K na Guarda): vence na hora, depois da janela de reação.',
     ],
   },
@@ -449,8 +450,8 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
     title: 'Fim da partida',
     items: [
       'Vida em 0 perde na hora.',
-      'Pressão da mesa: cada rodada de Ataque seguida sem dano soma 1 ao multiplicador de ataque dos dois jogadores. Volta a 0 quando alguém perde vida.',
-      'Anti-travamento: 5 rodadas de Ataque seguidas sem dano encerram a partida. Vence quem tiver mais vida; com vidas iguais, empata.',
+      'Pressão da mesa: cada rodada de Ataque seguida em que nenhum Coringa perde vida soma 1 ao multiplicador de ataque dos dois jogadores. Dano absorvido por K não conta. O bônus vale a rodada inteira e volta a 0 depois de uma rodada em que alguém perdeu vida.',
+      'Anti-travamento: 5 rodadas de Ataque seguidas sem ninguém perder vida encerram a partida. Vence quem tiver mais vida; com vidas iguais, empata.',
       'W.O.: perde quem fica mais de 1 minuto fora da sala ou estoura o tempo três vezes seguidas.',
     ],
   },

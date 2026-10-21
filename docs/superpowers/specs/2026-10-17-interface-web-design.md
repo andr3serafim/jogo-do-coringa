@@ -637,7 +637,7 @@ O sorteio da partida online não é controlável (a semente nunca sai do servido
     | Agora (`df11d07`, interface e E2E prontos): 132 s, 122 s e 118 s | **122 s** |
 
   - O que pesa: o projeto de testes da web (1088 testes, 30 arquivos, ~58 s de relógio entre os dois projetos `model` e `ui`), seguido do motor (~13 s) e do servidor (~16 s, Node e workerd). Lint, typecheck e o `vite build` do smoke somam o resto. O pre-commit já é o rápido (`scripts/check-fast.ts`), então o custo cai no pre-push e na CI; o E2E fica fora do `pnpm check`.
-  - **JavaScript inicial** medido pelo `packages/web/scripts/smoke.ts`: **127,5 KiB comprimidos (gzip) de 200 KiB** de orçamento (402,0 KiB brutos, um arquivo). Fora do inicial: o chunk do treino com o bot (`local-room`, 7,0 KiB gzip) e as funções do Motion (`motion-features`, 26,9 KiB gzip). Na Tarefa 6 o inicial era de 66,4 KiB.
+  - **JavaScript inicial** medido pelo `packages/web/scripts/smoke.ts`: **127,9 KiB comprimidos (gzip) de 200 KiB** de orçamento (um arquivo; eram 127,5 KiB e 402,0 KiB brutos antes do texto revisado do resumo das regras). Fora do inicial: o chunk do treino com o bot (`local-room`, 7,0 KiB gzip) e as funções do Motion (`motion-features`, 26,9 KiB gzip). Na Tarefa 6 o inicial era de 66,4 KiB.
 - **CI:** `.github/workflows/check.yml` ganha o job `e2e`, em paralelo ao `check`:
   - instala as dependências e o Chromium (`pnpm exec playwright install --with-deps chromium`);
   - constrói a web, sobe o `wrangler dev` e roda o Playwright. O `wrangler dev` local não precisa de login; desligue a telemetria (`WRANGLER_SEND_METRICS=false`) para não haver pergunta interativa;

@@ -161,6 +161,21 @@ for (const size of [
       await expectNoHorizontalScroll(page);
       await expectTouchTargets(menu.getByRole('button'));
       await axe(page);
+
+      // O resumo das regras é o diálogo com mais texto: abre por cima do menu, cabe na largura e não rola de lado (spec §7).
+      await menu.getByRole('button', { name: 'Resumo das regras' }).click();
+      const rules = page.getByRole('dialog', { name: 'Resumo das regras' });
+      await expect(rules).toBeVisible();
+      await expectNoHorizontalScroll(page);
+      const box = await rules.evaluate((el) => {
+        const rect = el.getBoundingClientRect();
+        return { scrollWidth: el.scrollWidth, clientWidth: el.clientWidth, left: rect.left, right: rect.right, window: window.innerWidth };
+      });
+      expect(box.scrollWidth, 'o resumo das regras não rola de lado').toBeLessThanOrEqual(box.clientWidth);
+      expect(box.left, 'o resumo das regras começa dentro da janela').toBeGreaterThanOrEqual(0);
+      expect(box.right, 'o resumo das regras termina dentro da janela').toBeLessThanOrEqual(box.window);
+      await expectTouchTargets(rules.getByRole('button'));
+      await axe(page);
       guard.expectClean();
     });
   });
