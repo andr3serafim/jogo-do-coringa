@@ -11,6 +11,7 @@ import type { Outcome, Score } from '@coringa/protocol';
 import { useEffect, useId, useRef, useState } from 'react';
 import {
   END_EYEBROW,
+  END_RESULT_LABEL,
   NEW_ROOM_LABEL,
   REMATCH_LABEL,
   rematchStatusText,
@@ -117,7 +118,7 @@ export function EndPanel({ outcome, score, me, names, mineWants, theirsWants, aw
 
       {collapsed ? (
         <section
-          aria-label="Resultado da partida"
+          aria-label={END_RESULT_LABEL}
           className="fixed inset-x-0 bottom-0 z-20 flex flex-wrap items-center gap-x-4 gap-y-2 border-t-4 border-ouro bg-tinta px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] text-papel"
         >
           <div className="min-w-0 flex-1">

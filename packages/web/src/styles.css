@@ -265,4 +265,23 @@
       flex: none;
     }
   }
+
+  /*
+   * Entre 56rem de contêiner e 1024 px de tela (um tablet largo) a grade já é a do PC, mas o botão do histórico e o do
+   * menu ainda aparecem no campo do oponente: eles só somem a partir de 1024 px, quando o histórico vira coluna. O desenho
+   * largo não tem a área `ferr`, e sem ela os botões cairiam em trilhas implícitas. Aqui ganham uma linha própria, logo
+   * abaixo do nome. 64rem é o ponto `pc` do tema (1024 px).
+   */
+  @media (width < 64rem) {
+    @container (min-width: 56rem) {
+      .campo-grade--oponente > .campo-info {
+        grid-template-areas:
+          'avatar nome'
+          'ferr ferr'
+          'vida vida'
+          'barra barra'
+          'mao mao';
+      }
+    }
+  }
 }

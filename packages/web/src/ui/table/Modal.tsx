@@ -9,7 +9,7 @@ import { useEffect, useRef, type KeyboardEvent, type ReactNode } from 'react';
 
 export interface ModalProps {
   open: boolean;
-  /** O diálogo fechou (Esc, botão ou o próprio navegador). Deve ser idempotente: também roda quando `open` já é falso. */
+  /** Quem usa quer fechar: o Esc, ou um fechamento que não foi nosso (o voltar do Android, o navegador). Os botões do conteúdo chamam o próprio. */
   onClose: () => void;
   /** O id do título. */
   labelledBy: string;
@@ -23,22 +23,48 @@ const BASE = 'm-auto max-h-[85dvh] overflow-y-auto border-4 border-tinta bg-pape
 
 export function Modal({ open, onClose, labelledBy, describedBy, className = 'w-[min(92vw,34rem)]', children }: ModalProps) {
   const ref = useRef<HTMLDialogElement>(null);
+  /**
+   * Quantos `close()` nossos ainda esperam o evento `close` correspondente. No navegador esse evento vem numa tarefa
+   * depois de `close()`. Sob o `<StrictMode>` (o `pnpm dev`) o React monta, desmonta e monta de novo os efeitos: o
+   * diálogo fecha na limpeza simulada e reabre logo em seguida, e o `close` atrasado chegaria com ele aberto de novo e
+   * o fecharia pela mão do pai (o painel de fim se recolheria sozinho). O `close` que nós mesmos pedimos não é um
+   * pedido de quem usa: só os que vêm de fora (o voltar do Android, o navegador) chamam `onClose`.
+   */
+  const ownCloses = useRef(0);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (open && !el.open) el.showModal();
-    else if (!open && el.open) el.close();
+    if (open && !el.open) {
+      el.showModal();
+    } else if (!open && el.open) {
+      ownCloses.current += 1;
+      el.close();
+    }
   }, [open]);
 
   // Desmontar com o diálogo aberto o fecha, para o navegador soltar o fundo. O elemento é guardado aqui: na limpeza
   // o React já soltou a `ref`.
   useEffect(() => {
     const el = ref.current;
+    const own = ownCloses;
     return () => {
-      if (el?.open) el.close();
+      if (el?.open) {
+        own.current += 1;
+        el.close();
+      }
     };
   }, []);
+
+  const onNativeClose = () => {
+    if (ownCloses.current > 0) {
+      ownCloses.current -= 1;
+      return;
+    }
+    // Reaberto desde então (outro `showModal` antes de o evento chegar): não há o que fechar.
+    if (ref.current?.open) return;
+    onClose();
+  };
 
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key !== 'Escape') return;
@@ -51,7 +77,7 @@ export function Modal({ open, onClose, labelledBy, describedBy, className = 'w-[
       ref={ref}
       aria-labelledby={labelledBy}
       aria-describedby={describedBy}
-      onClose={onClose}
+      onClose={onNativeClose}
       onKeyDown={onKeyDown}
       className={`${BASE} ${className}`}
     >

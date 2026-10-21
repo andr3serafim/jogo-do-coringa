@@ -2,14 +2,18 @@
 // verdade com uma `FakeConnection`; o painel de fim e o menu são `<dialog>` nativos. O jsdom não prende o foco nem
 // fecha com Esc sozinho (veja `setup-ui.ts`): aqui se confere que o foco entra no diálogo, que ele volta a quem abriu e
 // que `showModal` foi usado (é ele que prende o foco no navegador); o foco preso de verdade fica para o E2E.
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import type { GameResult, PlayerId } from '@coringa/engine';
 import type { Outcome, OutcomeCause, RoomMessage, RoomStatus, Score } from '@coringa/protocol';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { StrictMode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../../src/app/App.tsx';
 import { fetchVersion } from '../../src/app/health.ts';
 import { createRoomApi } from '../../src/app/room-api.ts';
+import { RULES_SECTIONS } from '../../src/model/copy.ts';
 import { Session } from '../../src/model/session.ts';
 import { loadPrefs, safeStore, saveSeat, type Prefs } from '../../src/model/storage.ts';
 import { PlayTable, type PlayTableProps } from '../../src/ui/table/PlayTable.tsx';
@@ -51,6 +55,8 @@ interface MountOptions {
   props?: Partial<PlayTableProps>;
   /** Fase da mesa quando a partida está em curso (padrão: a minha vez). */
   spec?: ViewSpec;
+  /** Sob `<StrictMode>`, como o `pnpm dev` (monta, desmonta e monta de novo os efeitos). */
+  strict?: boolean;
 }
 
 const FINISHED_RESULT = win('p1', 'HP');
@@ -110,7 +116,8 @@ function mount(options: MountOptions = {}) {
   );
   const user = userEvent.setup();
   const onNewRoom = vi.fn();
-  const rendered = render(<PlayTable session={session} store={store} onNewRoom={onNewRoom} {...options.props} />);
+  const table = <PlayTable session={session} store={store} onNewRoom={onNewRoom} {...options.props} />;
+  const rendered = render(options.strict ? <StrictMode>{table}</StrictMode> : table);
   /** O servidor reemite a sala. */
   const push = (extra: MountOptions) => act(() => connection.emitRoom(roomOf(options, extra)));
   return { connection, session, store, user, onNewRoom, push, ...rendered };
@@ -790,6 +797,144 @@ describe('fetchVersion', () => {
     expect(
       await fetchVersion('https://x.example', vi.fn(() => Promise.resolve({ ok: true, json: () => Promise.reject(new Error('json')) } as Response))),
     ).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// StrictMode (`pnpm dev`): os efeitos montam, desmontam e montam de novo
+
+describe('StrictMode: o painel e os diálogos não se fecham sozinhos', () => {
+  /**
+   * No navegador o evento `close` de `close()` vem numa tarefa depois (o polyfill do `setup-ui.ts` o dispara na hora).
+   * Sob o StrictMode o diálogo fecha na limpeza simulada e reabre em seguida; o `close` atrasado chega com ele já aberto.
+   */
+  function closeEventLater() {
+    vi.spyOn(HTMLDialogElement.prototype, 'close').mockImplementation(function close(this: HTMLDialogElement) {
+      if (!this.open) return;
+      this.removeAttribute('open');
+      setTimeout(() => this.dispatchEvent(new Event('close')), 0);
+    });
+  }
+  const flush = () =>
+    act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    });
+
+  describe.each([
+    ['evento close atrasado (o do navegador)', closeEventLater],
+    ['evento close na hora (o do polyfill)', () => undefined],
+  ])('com %s', (_name, setup) => {
+    it('o painel de fim nasce aberto e continua aberto', async () => {
+      setup();
+      mount({ strict: true });
+      await flush();
+      expect(endDialog('Você venceu')).toHaveAttribute('open');
+      expect(screen.queryByRole('region', { name: 'Resultado da partida' })).not.toBeInTheDocument();
+    });
+
+    it('o menu, o resumo das regras e a confirmação de desistir ficam abertos depois de abrir', async () => {
+      setup();
+      const m = mount({ status: 'PLAYING', strict: true });
+      await m.user.click(menuButton());
+      await flush();
+      expect(menuDialog()).toHaveAttribute('open');
+
+      await m.user.click(within(menuDialog()).getByRole('button', { name: 'Resumo das regras' }));
+      await flush();
+      expect(screen.getByRole('dialog', { name: 'Resumo das regras' })).toHaveAttribute('open');
+      await m.user.click(within(screen.getByRole('dialog', { name: 'Resumo das regras' })).getByRole('button', { name: 'Fechar' }));
+      await flush();
+
+      await m.user.click(within(menuDialog()).getByRole('button', { name: 'Desistir' }));
+      await flush();
+      expect(screen.getByRole('dialog', { name: 'Desistir da partida?' })).toHaveAttribute('open');
+      expect(menuDialog()).toHaveAttribute('open');
+    });
+  });
+
+  it('fechar e reabrir logo em seguida não deixa o `close` atrasado do primeiro fechar o segundo', async () => {
+    closeEventLater();
+    const m = mount({ status: 'PLAYING' });
+    await m.user.click(menuButton());
+    await m.user.click(within(menuDialog()).getByRole('button', { name: 'Fechar' }));
+    await m.user.click(menuButton());
+    await flush();
+    expect(menuDialog()).toHaveAttribute('open');
+  });
+
+  it('um `close` que não foi nosso (o voltar do Android, o navegador) ainda fecha o diálogo', async () => {
+    const m = mount({ status: 'PLAYING' });
+    await m.user.click(menuButton());
+    const dialog = menuDialog();
+    dialog.removeAttribute('open');
+    fireEvent(dialog, new Event('close'));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// O menu e o painel de fim
+
+describe('menu aberto quando a partida acaba', () => {
+  it('o painel de fim chega sozinho e o menu sai (um diálogo só por vez)', async () => {
+    const m = mount({ status: 'PLAYING' });
+    await m.user.click(menuButton());
+    expect(menuDialog()).toBeInTheDocument();
+    act(() => {
+      m.connection.emitRoom(roomOf({}, { result: win('p1', 'HP') }));
+      m.connection.emitState(stateMessage(viewOf({ result: win('p1', 'HP') }), { seq: 9, epoch: 9 }));
+    });
+    expect(screen.queryByRole('dialog', { name: 'Menu da partida' })).not.toBeInTheDocument();
+    expect(endDialog('Você venceu')).toBeInTheDocument();
+  });
+
+  it('depois de recolher o painel, o menu abre normalmente e fica aberto', async () => {
+    const m = mount();
+    await m.user.click(within(endDialog('Você venceu')).getByRole('button', { name: 'Ver a mesa' }));
+    await m.user.click(menuButton());
+    expect(menuDialog()).toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// Texto das regras: o Reflect
+
+describe('resumo das regras: o Reflect', () => {
+  const reflect = RULES_SECTIONS.flatMap((section) => section.items).find((item) => item.startsWith('Reflect'))!;
+
+  it('diz qual é o dano refletido sem deixar dúvida (spec 1 §1.6): o ataque dele com multiplicador, menos metade da Defesa base sem multiplicador, nunca abaixo de 0', () => {
+    expect(reflect).toContain('leva de volta o próprio ataque, com o multiplicador');
+    expect(reflect).toContain('menos metade da Defesa base dele, sem o multiplicador');
+    expect(reflect).toContain('nunca fica abaixo de 0');
+    expect(reflect).toContain('Você não leva nada');
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// Grade do campo do oponente entre ~900 e 1023 px
+
+describe('campo do oponente: os botões de ferramenta têm a sua área na grade', () => {
+  const styles = readFileSync(resolve(import.meta.dirname, '../../src/styles.css'), 'utf8');
+
+  it('a área `ferr` existe no desenho do container ≥ 56rem enquanto os botões aparecem (viewport < 64rem)', () => {
+    // O jsdom não avalia container queries nem media queries: confere-se o CSS. O botão do histórico e o do menu só somem
+    // a partir de 1024 px de viewport (`pc:`), mas a grade do campo vira o desenho largo a partir de 56rem de container.
+    const start = /@media\s*\(width\s*<\s*(?:64rem|1024px)\)\s*\{\s*@container\s*\(min-width:\s*56rem\)\s*\{/.exec(styles);
+    expect(start, 'falta o ajuste do container largo em viewport estreito').not.toBeNull();
+    const rule = /\.campo-grade--oponente\s*>\s*\.campo-info\s*\{([^}]*)\}/.exec(styles.slice(start!.index))?.[1];
+    expect(rule, 'falta a regra do campo do oponente').toBeDefined();
+    expect(rule).toMatch(/grid-template-areas:[^;]*\bferr\b/);
+    // A regra vem depois do desenho largo que ela corrige (mesma especificidade: vale a ordem).
+    expect(styles.indexOf('@media (width < 64rem)')).toBeGreaterThan(styles.indexOf('@container (min-width: 56rem)'));
+  });
+
+  it('a mesa usa a área `ferr` para o wrapper dos botões do campo do oponente', () => {
+    const m = mount({ status: 'PLAYING' });
+    const tool = m.container.querySelector('.campo-info--oponente > .area-ferr');
+    expect(tool).not.toBeNull();
+    expect(within(tool as HTMLElement).getByRole('button', { name: /^Histórico/ })).toBeInTheDocument();
+    expect(within(tool as HTMLElement).getByRole('button', { name: 'Menu da partida' })).toBeInTheDocument();
+    expect(styles).toMatch(/\.area-ferr\s*\{\s*grid-area:\s*ferr;/);
   });
 });
 

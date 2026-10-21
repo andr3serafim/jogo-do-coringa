@@ -114,6 +114,13 @@ function PlayTableView({ session, snapshot, state, banner, store, inviteLink, lo
   const [pointedId, setPointedId] = useState<string | null>(null);
   const [graveyard, setGraveyard] = useState<GraveyardMode | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  // O painel de fim chega sozinho (a partida acabou) por cima de um menu que estava aberto: o menu sai, para ficar um diálogo
+  // só (o Esc recolheria o painel e deixaria o menu para trás). Só a chegada conta; depois de recolher o painel, o menu abre.
+  const [endShown, setEndShown] = useState(showEnd);
+  if (showEnd !== endShown) {
+    setEndShown(showEnd);
+    if (showEnd) setMenuOpen(false);
+  }
   /** Época em que o jogador mandou o PASS: o servidor segura o passe e recusa o resto da janela. */
   const [passedEpoch, setPassedEpoch] = useState<number | null>(null);
   /** O painel de baixo (barra, Equipar ou ordem), para a mesa levar o foco a ele quando chega a sua vez. */
