@@ -225,6 +225,7 @@ function Graveyard({ view, onOpen }: { view: PlayerView; onOpen: (() => void) | 
       )}
       <span className="flex flex-col items-start">
         <span className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">Cemitério</span>
+        {/* Entre itens de flex o espaço some (o layout não muda), mas separa as palavras do texto visível: "Cemitério vazio", e não "Cemitériovazio", que o axe compara com o nome. */}{' '}
         {top ? (
           <span data-numero className="font-texto text-[15px] font-bold leading-tight tabular-nums pc:text-xl">
             {graveyard.length}
