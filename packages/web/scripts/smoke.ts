@@ -15,7 +15,8 @@ const BUDGET_BYTES = 200 * 1024;
 const ZOD_MARK = 'ZodError';
 /**
  * Marcas do bot do treino. `greedyBot` é o nome do bot, que o minificador renomeia (nenhum `.js` o guarda hoje); a segunda é o
- * texto de um erro lançado dentro dele, que um literal de string preserva. Qualquer uma das duas num `.js` inicial reprova.
+ * texto de um erro lançado dentro dele (`packages/sim/src/bots/greedy.ts`, que avisa desta dependência), e um literal de string
+ * sobrevive à minificação. Qualquer uma das duas num `.js` inicial reprova.
  */
 const BOT_NAME_MARK = 'greedyBot';
 const BOT_TEXT_MARK = 'fase principal sem DECLARE_ATTACK/END_TURN';

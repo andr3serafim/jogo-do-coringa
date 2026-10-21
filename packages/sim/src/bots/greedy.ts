@@ -38,6 +38,7 @@ function cheapest<A extends Action>(actions: A[], view: PlayerView, rng: Rng): A
 
 function closing(legal: Action[]): Action {
   const end = legal.find((a) => a.type === 'DECLARE_ATTACK' || a.type === 'END_TURN');
+  // Não mude este texto sem mudar `BOT_TEXT_MARK` em `packages/web/scripts/smoke.ts`: o smoke da web o usa para achar o bot no bundle.
   if (!end) throw new Error('fase principal sem DECLARE_ATTACK/END_TURN');
   return end;
 }
