@@ -7,3 +7,5 @@ packages/sim/replays/
 .wrangler/
 worker-configuration.d.ts
 packages/sim/sessions/
+playwright-report/
+test-results/

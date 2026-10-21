@@ -9,7 +9,8 @@
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "smoke": "vite build && node scripts/smoke.ts"
+    "smoke": "vite build && node scripts/smoke.ts",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@coringa/engine": "workspace:*",

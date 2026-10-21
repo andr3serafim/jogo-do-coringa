@@ -19,6 +19,7 @@
     "bot": "node packages/sim/src/cli/bot.ts",
     "dev:server": "pnpm --filter @coringa/server dev",
     "dev:web": "pnpm --filter @coringa/web dev",
+    "e2e": "pnpm --filter @coringa/web e2e",
     "deploy:server": "pnpm check && pnpm --filter @coringa/server run deploy",
     "sim:replay": "node packages/sim/src/cli/replay.ts"
   },
