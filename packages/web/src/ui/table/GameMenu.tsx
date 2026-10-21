@@ -100,6 +100,10 @@ export function GameMenu({ open, onClose, prefs, onPrefs, inviteLink, loadVersio
     }
   }
 
+  // A partida que acaba com a confirmação aberta (o oponente desistiu, o tempo estourou) a fecha: não há mais o que
+  // desistir, e ela não fica armada para quando uma partida nova (revanche) começar.
+  if (!canConcede && confirmOpen) setConfirmOpen(false);
+
   // A versão publicada: uma busca a cada abertura. Falhar não é erro; só não aparece nada.
   useEffect(() => {
     if (!open || loadVersion === undefined) return;

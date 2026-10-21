@@ -683,6 +683,19 @@ describe('menu da partida', () => {
       expect(screen.getByRole('main', { name: 'Mesa' })).toBeInTheDocument();
     });
 
+    it('se a partida acaba com a confirmação aberta, ela fecha (não sobra um "Confirmar" que o servidor recusaria)', async () => {
+      const m = mount({ status: 'PLAYING' });
+      await m.user.click(menuButton());
+      await m.user.click(within(menuDialog()).getByRole('button', { name: 'Desistir' }));
+      expect(screen.getByRole('dialog', { name: 'Desistir da partida?' })).toBeInTheDocument();
+      act(() => {
+        m.connection.emitRoom(roomOf({}, { result: win('p2', 'FORFEIT'), cause: 'AFK' }));
+        m.connection.emitState(stateMessage(viewOf({ result: win('p2', 'FORFEIT') }), { seq: 9, epoch: 9 }));
+      });
+      expect(screen.queryByRole('dialog', { name: 'Desistir da partida?' })).not.toBeInTheDocument();
+      expect(m.connection.sent).toEqual([]);
+    });
+
     it('com a partida acabada não há "Desistir"', async () => {
       const m = mount();
       await m.user.click(within(endDialog('Você venceu')).getByRole('button', { name: 'Ver a mesa' }));
