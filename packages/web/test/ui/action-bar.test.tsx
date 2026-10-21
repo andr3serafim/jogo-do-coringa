@@ -12,7 +12,7 @@ import { viewWithout } from '../../src/model/preview.ts';
 import { Session } from '../../src/model/session.ts';
 import { PlayTable } from '../../src/ui/table/PlayTable.tsx';
 import { deferredAck, FakeConnection, scenarioAt, stateMessage, type SideSpec, type ViewSpec } from '../fixtures.ts';
-import { roomMessage, seriousViolations } from './support.tsx';
+import { ATTACK_BUTTON, END_TURN_BUTTON, roomMessage, seriousViolations, startsWith } from './support.tsx';
 
 const seatOf = (playerId: 'p1' | 'p2', nickname: string) => ({
   playerId,
@@ -86,7 +86,14 @@ const bar = () => screen.getByRole('region', { name: 'Ações' });
 const inBar = () => within(bar());
 const handList = () => within(screen.getByRole('list', { name: 'Sua mão' }));
 
-const HAND_NAME = { K: /^K de /, J: /^J de /, Q: /^Q de /, A: /^A de /, WILD: /^Coringa Selvagem/ } as const;
+// O nome da carta da mão segue a ordem do texto visível: "Q, Buff de defesa, de ouros" (axe: rótulo no nome).
+const HAND_NAME = {
+  K: /^K, Guarda, de /,
+  J: /^J, Buff de ataque, de /,
+  Q: /^Q, Buff de defesa, de /,
+  A: /^A, Armadilha, de /,
+  WILD: /^Coringa Selvagem/,
+} as const;
 /** O botão da carta da mão: a `index`-ésima de `kind`. */
 const handCard = (kind: keyof typeof HAND_NAME, index = 0) => handList().getAllByRole('button', { name: HAND_NAME[kind] })[index]!;
 
@@ -148,7 +155,7 @@ describe('barra de ação: tocar uma carta lista as jogadas (spec §3.4)', () =>
     await m.user.click(handCard('J'));
     expect(inBar().getByText(/nenhuma jogada possível agora/)).toBeInTheDocument();
     expect(inBar().queryByRole('list', { name: 'Jogadas' })).not.toBeInTheDocument();
-    expect(inBar().getByRole('button', { name: 'Atacar' })).toBeEnabled();
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
   });
 
   it('J: Buff de ataque e Sacrifício; o Sacrifício pede o alvo e abate o J de Duda', async () => {
@@ -156,7 +163,7 @@ describe('barra de ação: tocar uma carta lista as jogadas (spec §3.4)', () =>
     await m.user.click(handCard('J'));
     await m.user.click(inBar().getByRole('button', { name: 'Sacrifício' }));
     const jTarget = m.view.opponent.attackBuffs[0]!;
-    await m.user.click(inBar().getByRole('button', { name: `${cardText(jTarget)} dos Buffs de Ataque de Duda` }));
+    await m.user.click(inBar().getByRole('button', { name: startsWith(`${cardText(jTarget)} dos Buffs de Ataque de Duda`) }));
     expect(sentAction(m)).toEqual({ type: 'SACRIFICE', cardId: handCards(m.view, 'J')[0]!.id, targetId: jTarget.id });
   });
 
@@ -211,7 +218,7 @@ describe('barra de ação: Armadilha e alvos (spec §3.2, §3.4)', () => {
     const m = mount();
     await m.user.click(handCard('A'));
     await m.user.click(inBar().getByRole('button', { name: 'Armadilha' }));
-    await m.user.click(inBar().getByRole('button', { name: guardTarget(m.view) }));
+    await m.user.click(inBar().getByRole('button', { name: startsWith(guardTarget(m.view)) }));
     expect(sentAction(m)).toEqual({
       type: 'TRAP',
       cardId: handCards(m.view, 'A')[0]!.id,
@@ -229,10 +236,10 @@ describe('barra de ação: Armadilha e alvos (spec §3.2, §3.4)', () => {
     const k = opponent.guard[0]!;
     const buttons = within(inBar().getByRole('list', { name: 'Alvos' })).getAllByRole('button');
     expect(buttons).toHaveLength(4);
-    expect(buttons[0]).toHaveAccessibleName(`${cardText(j)} dos Buffs de Ataque de Duda`);
-    expect(buttons[1]).toHaveAccessibleName(`${cardText(q1)} dos Buffs de Defesa de Duda`);
-    expect(buttons[2]).toHaveAccessibleName(`${cardText(q2)} dos Buffs de Defesa de Duda`);
-    expect(buttons[3]).toHaveAccessibleName(`${cardText(k)} da Guarda de Duda`);
+    expect(buttons[0]).toHaveAccessibleName(startsWith(`${cardText(j)} dos Buffs de Ataque de Duda`));
+    expect(buttons[1]).toHaveAccessibleName(startsWith(`${cardText(q1)} dos Buffs de Defesa de Duda`));
+    expect(buttons[2]).toHaveAccessibleName(startsWith(`${cardText(q2)} dos Buffs de Defesa de Duda`));
+    expect(buttons[3]).toHaveAccessibleName(startsWith(`${cardText(k)} da Guarda de Duda`));
     // Alvo de toque ≥ 44 px (`min-h-11`).
     for (const button of buttons) expect(button.className).toContain('min-h-11');
     // Na mesa, as mesmas quatro cartas ganham o destaque.
@@ -263,12 +270,12 @@ describe('barra de ação: Armadilha e alvos (spec §3.2, §3.4)', () => {
     const m = mount();
     await m.user.click(handCard('A'));
     await m.user.click(inBar().getByRole('button', { name: 'Armadilha' }));
-    const kButton = inBar().getByRole('button', { name: guardTarget(m.view) });
+    const kButton = inBar().getByRole('button', { name: startsWith(guardTarget(m.view)) });
     const without = previewAttack(viewWithout(m.view, m.view.opponent.guard[0]!.id), 'self');
     expect(without).toMatchObject({ outcome: 'DAMAGE', damage: 110 });
-    expect(kButton).toHaveAccessibleDescription('quebrando o K: 110 de dano');
-    const jButton = inBar().getByRole('button', { name: `${cardText(m.view.opponent.attackBuffs[0]!)} dos Buffs de Ataque de Duda` });
-    expect(jButton).toHaveAccessibleDescription('quebrando o J: ameaça de Duda cai de 84 para 56');
+    expect(kButton).toHaveAccessibleName(`${guardTarget(m.view)} quebrando o K: 110 de dano`);
+    const jButton = inBar().getByRole('button', { name: startsWith(`${cardText(m.view.opponent.attackBuffs[0]!)} dos Buffs de Ataque de Duda`) });
+    expect(jButton).toHaveAccessibleName(`${cardText(m.view.opponent.attackBuffs[0]!)} dos Buffs de Ataque de Duda quebrando o J: ameaça de Duda cai de 84 para 56`);
   });
 
   it('apontar um alvo recalcula a prévia sem ele (quebrando o K: 152 × 42 · dano 110)', async () => {
@@ -276,7 +283,7 @@ describe('barra de ação: Armadilha e alvos (spec §3.2, §3.4)', () => {
     await m.user.click(handCard('A'));
     await m.user.click(inBar().getByRole('button', { name: 'Armadilha' }));
     expect(inBar().queryByText('Quebrando o K antes')).not.toBeInTheDocument();
-    const kButton = inBar().getByRole('button', { name: guardTarget(m.view) });
+    const kButton = inBar().getByRole('button', { name: startsWith(guardTarget(m.view)) });
     await m.user.hover(kButton);
     expect(inBar().getByText('Quebrando o K antes')).toBeInTheDocument();
     expect(inBar().getByText(attackPreviewText(previewAttack(viewWithout(m.view, m.view.opponent.guard[0]!.id), 'self'), 'Duda'))).toHaveTextContent(
@@ -291,7 +298,7 @@ describe('barra de ação: Armadilha e alvos (spec §3.2, §3.4)', () => {
     await m.user.click(handCard('A'));
     await m.user.click(inBar().getByRole('button', { name: 'Armadilha' }));
     expect(within(inBar().getByRole('list', { name: 'Alvos' })).getAllByRole('button')).toHaveLength(1);
-    await m.user.click(inBar().getByRole('button', { name: guardTarget(m.view) }));
+    await m.user.click(inBar().getByRole('button', { name: startsWith(guardTarget(m.view)) }));
     expect(sentAction(m)).toMatchObject({ type: 'TRAP', targetId: m.view.opponent.guard[0]!.id });
   });
 });
@@ -302,8 +309,10 @@ describe('barra de ação: prévias e o botão principal (spec §3.4)', () => {
     const preview = previewAttack(m.view, 'self');
     const text = attackPreviewText(preview, 'Duda');
     expect(text).toBe('152 × 42 · o K de Duda absorve, dano 0');
-    const attack = inBar().getByRole('button', { name: 'Atacar' });
-    expect(attack).toHaveAccessibleDescription(text);
+    const attack = inBar().getByRole('button', { name: ATTACK_BUTTON });
+    expect(attack).toHaveAccessibleName(`Atacar ${text}`);
+    // Rótulo no nome (axe, WCAG 2.5.3): o texto visível das duas linhas é, palavra por palavra, o nome.
+    expect(attack.textContent).toBe(`Atacar ${text}`);
     expect(inBar().getByText(text)).toBeInTheDocument();
     await m.user.click(attack);
     expect(sentAction(m)).toEqual({ type: 'DECLARE_ATTACK' });
@@ -329,22 +338,22 @@ describe('barra de ação: prévias e o botão principal (spec §3.4)', () => {
     ];
     for (const { spec, text } of cases) {
       const { unmount } = mount(spec);
-      expect(inBar().getByRole('button', { name: 'Atacar' })).toHaveAccessibleDescription(text);
+      expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toHaveAccessibleName(`Atacar ${text}`);
       unmount();
     }
   });
 
   it('a prévia do Ataque Absoluto diz que a Guarda não segura', () => {
     mount({ ...DRAFT, self: { ...DRAFT.self, attackBuffs: ['J', 'J', 'J', 'J'] } });
-    expect(inBar().getByRole('button', { name: 'Atacar' }).getAttribute('aria-describedby')).toBeTruthy();
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toHaveAccessibleName(/^Atacar .*Ataque Absoluto, dano \d+/);
     expect(inBar().getByText(/Ataque Absoluto, dano \d+/)).toBeInTheDocument();
   });
 
   it('com o Ataque vazio, o botão principal vira "Encerrar turno" e manda END_TURN', async () => {
     const m = mount({ ...DRAFT, self: { ...DRAFT.self, attackRow: [] } });
-    expect(inBar().queryByRole('button', { name: 'Atacar' })).not.toBeInTheDocument();
-    const end = inBar().getByRole('button', { name: 'Encerrar turno' });
-    expect(end).toHaveAccessibleDescription('Sua fileira de Ataque está vazia');
+    expect(inBar().queryByRole('button', { name: ATTACK_BUTTON })).not.toBeInTheDocument();
+    const end = inBar().getByRole('button', { name: END_TURN_BUTTON });
+    expect(end).toHaveAccessibleName('Encerrar turno Sua fileira de Ataque está vazia');
     await m.user.click(end);
     expect(sentAction(m)).toEqual({ type: 'END_TURN' });
   });
@@ -374,7 +383,7 @@ describe('barra de ação: prévias e o botão principal (spec §3.4)', () => {
 
   it('o botão principal tem altura de alvo de toque', () => {
     mount();
-    expect(inBar().getByRole('button', { name: 'Atacar' }).className).toContain('min-h-14');
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON }).className).toContain('min-h-14');
   });
 });
 
@@ -384,20 +393,20 @@ describe('barra de ação: botões próprios (spec §3.4)', () => {
     const k = handCards(m.view, 'K')[0]!;
     const j = handCards(m.view, 'J')[0]!;
     const q = handCards(m.view, 'Q')[0]!;
-    const button = inBar().getByRole('button', { name: 'Lançar Reflect' });
-    expect(button).toHaveAccessibleDescription(`sai ${cardText(k)} + ${cardText(j)} + ${cardText(q)} da sua mão`);
+    const button = inBar().getByRole('button', { name: startsWith('Lançar Reflect') });
+    expect(button).toHaveAccessibleName(`Lançar Reflect sai ${cardText(k)} + ${cardText(j)} + ${cardText(q)} da sua mão`);
     await m.user.click(button);
     expect(sentAction(m)).toEqual({ type: 'REFLECT', kId: k.id, jId: j.id, qId: q.id });
   });
 
   it('Anular o Reflect aparece na janela de reação e manda CANCEL_REFLECT', async () => {
     const m = mount(withHand(['K', 'J', 'Q'], { phase: 'REFLECT_PLAYED', opponent: { ...DRAFT.opponent, reflect: true } }));
-    expect(inBar().queryByRole('button', { name: 'Lançar Reflect' })).not.toBeInTheDocument();
+    expect(inBar().queryByRole('button', { name: startsWith('Lançar Reflect') })).not.toBeInTheDocument();
     const k = handCards(m.view, 'K')[0]!;
     const j = handCards(m.view, 'J')[0]!;
     const q = handCards(m.view, 'Q')[0]!;
-    const button = inBar().getByRole('button', { name: 'Anular o Reflect' });
-    expect(button).toHaveAccessibleDescription(`sai ${cardText(k)} + ${cardText(j)} + ${cardText(q)} da sua mão`);
+    const button = inBar().getByRole('button', { name: startsWith('Anular o Reflect') });
+    expect(button).toHaveAccessibleName(`Anular o Reflect sai ${cardText(k)} + ${cardText(j)} + ${cardText(q)} da sua mão`);
     await m.user.click(button);
     expect(sentAction(m)).toEqual({ type: 'CANCEL_REFLECT', kId: k.id, jId: j.id, qId: q.id });
   });
@@ -407,8 +416,8 @@ describe('barra de ação: botões próprios (spec §3.4)', () => {
     const j = m.view.self.attackBuffs[0]!;
     const q = m.view.self.defenseBuffs[0]!;
     const k = m.view.self.guard[0]!;
-    const button = inBar().getByRole('button', { name: 'Proteger-se do Reflect' });
-    expect(button).toHaveAccessibleDescription(`sai ${cardText(j)} + ${cardText(q)} + ${cardText(k)} do seu campo`);
+    const button = inBar().getByRole('button', { name: startsWith('Proteger-se do Reflect') });
+    expect(button).toHaveAccessibleName(`Proteger-se do Reflect sai ${cardText(j)} + ${cardText(q)} + ${cardText(k)} do seu campo`);
     await m.user.click(button);
     expect(sentAction(m)).toEqual({ type: 'PROTECT_FROM_REFLECT', jId: j.id, qId: q.id, kId: k.id });
   });
@@ -422,16 +431,16 @@ describe('barra de ação: botões próprios (spec §3.4)', () => {
 
   it('com uma carta escolhida os botões próprios saem da barra, e voltam ao cancelar', async () => {
     const m = mount(withHand(['K', 'J', 'Q']));
-    expect(inBar().getByRole('button', { name: 'Lançar Reflect' })).toBeInTheDocument();
+    expect(inBar().getByRole('button', { name: startsWith('Lançar Reflect') })).toBeInTheDocument();
     await m.user.click(handCard('J'));
-    expect(inBar().queryByRole('button', { name: 'Lançar Reflect' })).not.toBeInTheDocument();
+    expect(inBar().queryByRole('button', { name: startsWith('Lançar Reflect') })).not.toBeInTheDocument();
     await m.user.click(inBar().getByRole('button', { name: 'Cancelar' }));
-    expect(inBar().getByRole('button', { name: 'Lançar Reflect' })).toBeInTheDocument();
+    expect(inBar().getByRole('button', { name: startsWith('Lançar Reflect') })).toBeInTheDocument();
   });
 
   it('os botões próprios têm altura de alvo de toque', () => {
     mount(withHand(['K', 'J', 'Q']));
-    expect(inBar().getByRole('button', { name: 'Lançar Reflect' }).className).toContain('min-h-11');
+    expect(inBar().getByRole('button', { name: startsWith('Lançar Reflect') }).className).toContain('min-h-11');
   });
 });
 
@@ -444,8 +453,8 @@ describe('Ressuscitar e o cemitério (spec §3.4, §7)', () => {
 
   it('abre o cemitério só com as numéricas, escolhe o 7, escolhe Ataque e manda RESURRECT', async () => {
     const m = mount(RESURRECT);
-    const opener = inBar().getByRole('button', { name: 'Ressuscitar' });
-    expect(opener).toHaveAccessibleDescription('1 Ressurreição disponível');
+    const opener = inBar().getByRole('button', { name: startsWith('Ressuscitar') });
+    expect(opener).toHaveAccessibleName('Ressuscitar 1 Ressurreição disponível');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     await m.user.click(opener);
 
@@ -457,7 +466,7 @@ describe('Ressuscitar e o cemitério (spec §3.4, §7)', () => {
 
     await m.user.click(within(dialog).getByRole('button', { name: '7 de copas' }));
     expect(within(dialog).getByText(`Em qual fileira entra ${cardText(m.view.graveyard[0]!)}?`)).toBeInTheDocument();
-    await m.user.click(within(dialog).getByRole('button', { name: 'Ataque' }));
+    await m.user.click(within(dialog).getByRole('button', { name: startsWith('Ataque') }));
     expect(sentAction(m)).toEqual({ type: 'RESURRECT', cardId: m.view.graveyard[0]!.id, row: 'ATK' });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     // O botão que abriu pode nem existir mais: o foco vai para a barra.
@@ -466,16 +475,16 @@ describe('Ressuscitar e o cemitério (spec §3.4, §7)', () => {
 
   it('só oferece as fileiras que têm vaga', async () => {
     const m = mount({ ...RESURRECT, self: { ...RESURRECT.self, defenseRow: [3, 6, 9, 5, 2, 4, 8] } });
-    await m.user.click(inBar().getByRole('button', { name: 'Ressuscitar' }));
+    await m.user.click(inBar().getByRole('button', { name: startsWith('Ressuscitar') }));
     const dialog = screen.getByRole('dialog', { name: 'Ressuscitar' });
     await m.user.click(within(dialog).getByRole('button', { name: '7 de copas' }));
-    expect(within(dialog).getByRole('button', { name: 'Ataque' })).toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: startsWith('Ataque') })).toBeInTheDocument();
     expect(within(dialog).queryByRole('button', { name: 'Defesa' })).not.toBeInTheDocument();
   });
 
   it('Voltar devolve à lista de cartas', async () => {
     const m = mount(RESURRECT);
-    await m.user.click(inBar().getByRole('button', { name: 'Ressuscitar' }));
+    await m.user.click(inBar().getByRole('button', { name: startsWith('Ressuscitar') }));
     const dialog = screen.getByRole('dialog', { name: 'Ressuscitar' });
     await m.user.click(within(dialog).getByRole('button', { name: '3 de ouros' }));
     await m.user.click(within(dialog).getByRole('button', { name: 'Voltar' }));
@@ -485,7 +494,7 @@ describe('Ressuscitar e o cemitério (spec §3.4, §7)', () => {
 
   it('Esc e Fechar fecham sem mandar nada e devolvem o foco ao botão que abriu', async () => {
     const m = mount(RESURRECT);
-    const opener = inBar().getByRole('button', { name: 'Ressuscitar' });
+    const opener = inBar().getByRole('button', { name: startsWith('Ressuscitar') });
     await m.user.click(opener);
     expect(screen.getByRole('dialog', { name: 'Ressuscitar' })).toBeInTheDocument();
     await m.user.keyboard('{Escape}');
@@ -501,7 +510,7 @@ describe('Ressuscitar e o cemitério (spec §3.4, §7)', () => {
 
   it('o botão do cemitério na faixa central abre a lista inteira, só para ver', async () => {
     const m = mount(RESURRECT);
-    const button = screen.getByRole('button', { name: /^Ver o cemitério/ });
+    const button = screen.getByRole('button', { name: /^Cemitério \d/ });
     await m.user.click(button);
     const dialog = screen.getByRole('dialog', { name: 'Cemitério' });
     const names = within(dialog).getAllByRole('img').map((el) => el.getAttribute('aria-label'));
@@ -547,7 +556,7 @@ describe('barra de ação: cancelar e o teclado (spec §3.4, §7)', () => {
     const m = mount();
     await m.user.keyboard('{Escape}');
     expect(acts(m)).toEqual([]);
-    expect(inBar().getByRole('button', { name: 'Atacar' })).toBeEnabled();
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
   });
 
   it('o botão Cancelar faz o mesmo e só existe com uma escolha', async () => {
@@ -565,7 +574,7 @@ describe('barra de ação: cancelar e o teclado (spec §3.4, §7)', () => {
   it('Esc dentro do cemitério fecha só o cemitério: a escolha da mão fica', async () => {
     const m = mount({ ...DRAFT, self: { ...DRAFT.self, resurrections: [{ row: 'ATK', value: 7 }] }, graveyard: [7, 3] });
     await m.user.click(handCard('A'));
-    await m.user.click(screen.getByRole('button', { name: /^Ver o cemitério/ }));
+    await m.user.click(screen.getByRole('button', { name: /^Cemitério \d/ }));
     await m.user.keyboard('{Escape}');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(handCard('A')).toHaveAttribute('aria-pressed', 'true');
@@ -574,7 +583,7 @@ describe('barra de ação: cancelar e o teclado (spec §3.4, §7)', () => {
   it('com o cemitério aberto, um Esc que não passa por ele também não limpa a escolha', async () => {
     const m = mount();
     await m.user.click(handCard('A'));
-    await m.user.click(screen.getByRole('button', { name: /^Ver o cemitério/ }));
+    await m.user.click(screen.getByRole('button', { name: /^Cemitério \d/ }));
     fireEvent.keyDown(document.body, { key: 'Escape' });
     expect(handCard('A')).toHaveAttribute('aria-pressed', 'true');
   });
@@ -637,12 +646,12 @@ describe('barra de ação: enviando (spec §1.5)', () => {
     const ack = deferredAck();
     m.connection.acks = [ack.promise];
     expect(screen.queryByText('Enviando…')).not.toBeInTheDocument();
-    await m.user.click(inBar().getByRole('button', { name: 'Atacar' }));
+    await m.user.click(inBar().getByRole('button', { name: ATTACK_BUTTON }));
     expect(screen.getByText('Enviando…')).toBeInTheDocument();
-    expect(inBar().getByRole('button', { name: 'Atacar' })).toBeDisabled();
-    expect(inBar().getByRole('button', { name: 'Lançar Reflect' })).toBeDisabled();
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toBeDisabled();
+    expect(inBar().getByRole('button', { name: startsWith('Lançar Reflect') })).toBeDisabled();
     // Um segundo toque não manda nada, nem escolhe carta.
-    await m.user.click(inBar().getByRole('button', { name: 'Atacar' }));
+    await m.user.click(inBar().getByRole('button', { name: ATTACK_BUTTON }));
     await m.user.click(handCard('K'));
     expect(handCard('K')).toHaveAttribute('aria-pressed', 'false');
     expect(acts(m)).toHaveLength(1);
@@ -652,7 +661,7 @@ describe('barra de ação: enviando (spec §1.5)', () => {
       await ack.promise;
     });
     expect(screen.queryByText('Enviando…')).not.toBeInTheDocument();
-    expect(inBar().getByRole('button', { name: 'Atacar' })).toBeEnabled();
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
   });
 
   it('os botões da escolha também ficam desligados durante o envio', async () => {
@@ -660,7 +669,7 @@ describe('barra de ação: enviando (spec §1.5)', () => {
     await m.user.click(handCard('K'));
     const ack = deferredAck();
     m.connection.acks = [ack.promise];
-    await m.user.click(inBar().getByRole('button', { name: 'Atacar' }));
+    await m.user.click(inBar().getByRole('button', { name: ATTACK_BUTTON }));
     expect(inBar().queryByRole('button', { name: 'Pôr na Guarda' })).not.toBeInTheDocument();
     await act(async () => {
       ack.resolve({ ok: true });
@@ -671,19 +680,19 @@ describe('barra de ação: enviando (spec §1.5)', () => {
   it('um ack de regra recusada mostra a mensagem do motor; "devagar" mostra o aviso curto', async () => {
     const m = mount();
     m.connection.acks = [{ ok: false, code: 'INVALID_TARGET', message: 'alvo inválido para esta jogada' }];
-    await m.user.click(inBar().getByRole('button', { name: 'Atacar' }));
+    await m.user.click(inBar().getByRole('button', { name: ATTACK_BUTTON }));
     expect(await screen.findByText('alvo inválido para esta jogada')).toBeInTheDocument();
-    expect(inBar().getByRole('button', { name: 'Atacar' })).toBeEnabled();
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
     m.connection.acks = [{ ok: false, code: 'RATE_LIMITED', message: 'x' }];
-    await m.user.click(inBar().getByRole('button', { name: 'Atacar' }));
+    await m.user.click(inBar().getByRole('button', { name: ATTACK_BUTTON }));
     expect(await screen.findByText('Devagar: muitas jogadas seguidas.')).toBeInTheDocument();
   });
 
   it('uma conexão que lança não derruba a mesa', async () => {
     const m = mount();
     vi.spyOn(m.connection, 'act').mockRejectedValueOnce(new Error('socket morto'));
-    await m.user.click(inBar().getByRole('button', { name: 'Atacar' }));
-    expect(inBar().getByRole('button', { name: 'Atacar' })).toBeEnabled();
+    await m.user.click(inBar().getByRole('button', { name: ATTACK_BUTTON }));
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
   });
 });
 
@@ -692,7 +701,7 @@ describe('barra de ação: quando não é a sua vez', () => {
     mount({ ...DRAFT, phase: 'WAITING' });
     expect(handList().queryAllByRole('button')).toHaveLength(0);
     expect(inBar().getByText('Esperando Duda jogar…')).toBeInTheDocument();
-    expect(inBar().queryByRole('button', { name: 'Atacar' })).not.toBeInTheDocument();
+    expect(inBar().queryByRole('button', { name: ATTACK_BUTTON })).not.toBeInTheDocument();
     // A ameaça dele continua à vista.
     expect(inBar().getByText('Ameaça de Duda')).toBeInTheDocument();
   });
@@ -718,8 +727,8 @@ describe('barra de ação: quando não é a sua vez', () => {
 
   it('na janela de reação não há Atacar nem Encerrar turno', () => {
     mount({ ...DRAFT, phase: 'ATTACK' });
-    expect(inBar().queryByRole('button', { name: 'Atacar' })).not.toBeInTheDocument();
-    expect(inBar().queryByRole('button', { name: 'Encerrar turno' })).not.toBeInTheDocument();
+    expect(inBar().queryByRole('button', { name: ATTACK_BUTTON })).not.toBeInTheDocument();
+    expect(inBar().queryByRole('button', { name: END_TURN_BUTTON })).not.toBeInTheDocument();
   });
 });
 
@@ -799,7 +808,7 @@ describe('barra de ação: foco e a sessão (spec §7)', () => {
 
   it('não rouba o foco de um diálogo aberto', async () => {
     const m = mount({ ...DRAFT, phase: 'WAITING' });
-    await m.user.click(screen.getByRole('button', { name: /^Ver o cemitério/ }));
+    await m.user.click(screen.getByRole('button', { name: /^Cemitério \d/ }));
     const dialog = screen.getByRole('dialog', { name: 'Cemitério' });
     act(() => m.connection.emitState(stateMessage(myTurn(), { seq: 2, epoch: 2 })));
     expect(dialog.contains(document.activeElement)).toBe(true);
@@ -834,7 +843,7 @@ describe('barra de ação: foco e a sessão (spec §7)', () => {
     const m = mount();
     const markSeen = vi.spyOn(m.session, 'markSeen');
     // Uma jogada voluntária fixa a base das marcas; depois Duda ganha um K na Guarda.
-    await m.user.click(inBar().getByRole('button', { name: 'Atacar' }));
+    await m.user.click(inBar().getByRole('button', { name: ATTACK_BUTTON }));
     const { view: next } = scenarioAt({ ...DRAFT, opponent: { ...DRAFT.opponent, guard: ['K', 'K'] } });
     act(() => m.connection.emitState(stateMessage(next, { seq: 2, epoch: 2 })));
     const fresh = next.opponent.guard[1]!;
@@ -847,19 +856,21 @@ describe('barra de ação: foco e a sessão (spec §7)', () => {
 
   it('focar o botão do cemitério apaga o "novo" das cartas suas que foram para lá (teclado)', async () => {
     const m = mount();
-    await m.user.click(inBar().getByRole('button', { name: 'Atacar' }));
+    await m.user.click(inBar().getByRole('button', { name: ATTACK_BUTTON }));
     // Duda destruiu o K da sua Guarda: ele sai do campo e entra no cemitério.
     const guardK = m.view.self.guard[0]!;
     const { view: next } = scenarioAt({ ...DRAFT, self: { ...DRAFT.self, guard: [] }, graveyard: [3, 5, 8, guardK] });
     act(() => m.connection.emitState(stateMessage(next, { seq: 2, epoch: 2 })));
-    const button = screen.getByRole('button', { name: /^Ver o cemitério.*, novo$/ });
+    const button = screen.getByRole('button', { name: /^Cemitério \d+, novo, a de cima é / });
+    // Rótulo no nome: o texto visível ("Cemitério 3 novo") é trecho contínuo do nome ("Cemitério 3, novo, a de cima é ...").
+    expect(button.textContent).toMatch(/^Cemitério \d+ novo$/);
     act(() => button.focus());
-    expect(screen.getByRole('button', { name: /^Ver o cemitério/ })).not.toHaveAccessibleName(/, novo$/);
+    expect(screen.getByRole('button', { name: /^Cemitério \d/ })).not.toHaveAccessibleName(/, novo,/);
   });
 
   it('o alvo marcado, na lista da barra, também apaga a marca quando é focado', async () => {
     const m = mount();
-    await m.user.click(inBar().getByRole('button', { name: 'Atacar' }));
+    await m.user.click(inBar().getByRole('button', { name: ATTACK_BUTTON }));
     const { view: next } = scenarioAt({ ...DRAFT, opponent: { ...DRAFT.opponent, guard: ['K', 'K'] } });
     act(() => m.connection.emitState(stateMessage(next, { seq: 2, epoch: 2 })));
     const markSeen = vi.spyOn(m.session, 'markSeen');
@@ -867,7 +878,7 @@ describe('barra de ação: foco e a sessão (spec §7)', () => {
     await m.user.click(inBar().getByRole('button', { name: 'Armadilha' }));
     const fresh = next.opponent.guard[1]!;
     const target = within(inBar().getByRole('list', { name: 'Alvos' })).getAllByRole('button').at(-1)!;
-    expect(target).toHaveAccessibleName(`${cardText(fresh)} da Guarda de Duda`);
+    expect(target).toHaveAccessibleName(startsWith(`${cardText(fresh)} da Guarda de Duda`));
     act(() => target.focus());
     expect(markSeen).toHaveBeenCalledWith(fresh.id);
   });
@@ -886,16 +897,16 @@ describe('barra de ação: acessibilidade (axe)', () => {
     const m = mount();
     await m.user.click(handCard('A'));
     await m.user.click(inBar().getByRole('button', { name: 'Armadilha' }));
-    await m.user.hover(inBar().getByRole('button', { name: guardTarget(m.view) }));
+    await m.user.hover(inBar().getByRole('button', { name: startsWith(guardTarget(m.view)) }));
     expect(await seriousViolations(m.container)).toEqual([]);
   });
 
   it('com o cemitério aberto (ver e ressuscitar)', async () => {
     const m = mount({ ...DRAFT, self: { ...DRAFT.self, resurrections: [{ row: 'ATK', value: 7 }] }, graveyard: [7, 3] });
-    await m.user.click(screen.getByRole('button', { name: /^Ver o cemitério/ }));
+    await m.user.click(screen.getByRole('button', { name: /^Cemitério \d/ }));
     expect(await seriousViolations(m.container)).toEqual([]);
     await m.user.keyboard('{Escape}');
-    await m.user.click(inBar().getByRole('button', { name: 'Ressuscitar' }));
+    await m.user.click(inBar().getByRole('button', { name: startsWith('Ressuscitar') }));
     expect(await seriousViolations(m.container)).toEqual([]);
     await m.user.click(within(screen.getByRole('dialog')).getByRole('button', { name: '7 de copas' }));
     expect(await seriousViolations(m.container)).toEqual([]);

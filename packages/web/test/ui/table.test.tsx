@@ -6,12 +6,15 @@ import type { Deadline, RoomMessage, StateMessage } from '@coringa/protocol';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { zoneKey } from '../../src/model/marks.ts';
 import { Session, type SessionSnapshot } from '../../src/model/session.ts';
 import { Card, cardName, QUAD_FACE } from '../../src/ui/cards/Card.tsx';
+import { PC_QUERY } from '../../src/ui/table/History.tsx';
 import { Table, type TableProps } from '../../src/ui/table/Table.tsx';
 import { FakeConnection, scenarioAt, stateMessage, type ViewSpec } from '../fixtures.ts';
-import { roomMessage, seriousViolations } from './support.tsx';
+import { ATTACK_BUTTON, roomMessage, seriousViolations } from './support.tsx';
 
 const seatOf = (playerId: 'p1' | 'p2', nickname: string) => ({
   playerId,
@@ -188,15 +191,24 @@ describe('mesa: Guarda, buffs e mão (spec §3.1)', () => {
     mount({ ...DRAFT, self: { ...DRAFT.self, hand: ['K', 'J', 'Q', 'A', 'WILD'] } });
     const hand = within(screen.getByRole('list', { name: 'Sua mão' }));
     const names = hand.getAllByRole('img').map((el) => el.getAttribute('aria-label') ?? '');
-    expect(names.map((n) => n.split(', ').slice(1).join(', '))).toEqual([
+    expect(names.map((n) => n.split(', ')[1])).toEqual([
       'Guarda',
       'Buff de ataque',
       'Buff de defesa',
       'Armadilha',
       'Selvagem',
     ]);
-    expect(names[0]).toMatch(/^K de .+, Guarda$/);
+    expect(names[0]).toMatch(/^K, Guarda, de .+$/);
     expect(names[4]).toBe('Coringa Selvagem, Selvagem');
+  });
+
+  it('rótulo no nome (axe, WCAG 2.5.3): o texto visível da carta da mão ("K Guarda") é trecho contínuo do nome ("K, Guarda, de copas")', () => {
+    mount({ ...DRAFT, self: { ...DRAFT.self, hand: ['K', 'J', 'Q', 'A', 'WILD'] } }, { props: { onSelectCard: vi.fn() } });
+    const buttons = within(screen.getByRole('list', { name: 'Sua mão' })).getAllByRole('button');
+    expect(buttons.map((b) => b.textContent?.trim())).toEqual(['K Guarda', 'J Buff de ataque', 'Q Buff de defesa', 'A Armadilha', 'Selvagem']);
+    expect(buttons[0]).toHaveAccessibleName(/^K, Guarda, de (copas|ouros|espadas|paus)$/);
+    expect(buttons[3]).toHaveAccessibleName(/^A, Armadilha, de (copas|ouros|espadas|paus)$/);
+    expect(buttons[4]).toHaveAccessibleName('Coringa Selvagem, Selvagem');
   });
 
   it('com onSelectCard, a mão vira botões; o escolhido fica "pressionado" e o clique devolve o id', async () => {
@@ -363,9 +375,30 @@ describe('mesa: faixa central (spec §3.1)', () => {
     const user = userEvent.setup();
     const { view } = mount(DRAFT, { props: { onOpenGraveyard } });
     const top = view.graveyard.at(-1)!;
-    const button = band().getByRole('button', { name: `Ver o cemitério: 3 cartas, a de cima é ${cardName(top)}` });
+    const button = band().getByRole('button', { name: `Cemitério 3, a de cima é ${cardName(top)}` });
     await user.click(button);
     expect(onOpenGraveyard).toHaveBeenCalledTimes(1);
+  });
+
+  it('rótulo no nome: o botão do cemitério só tem "Cemitério 3" visível, e a carta de cima fica fora dele, só como desenho', () => {
+    const { view } = mount(DRAFT, { props: { onOpenGraveyard: vi.fn() } });
+    const top = view.graveyard.at(-1)!;
+    const button = band().getByRole('button', { name: `Cemitério 3, a de cima é ${cardName(top)}` });
+    expect(button.textContent).toBe('Cemitério 3');
+    // A carta é irmã do botão, na mesma caixa; o botão cobre a caixa inteira (alvo de toque e clique iguais aos de antes).
+    const box = button.parentElement!;
+    expect(box.querySelector(`[data-card-id="${top.id}"]`)).not.toBeNull();
+    expect(button.querySelector('[data-card-id]')).toBeNull();
+    expect(box.firstElementChild).toHaveAttribute('aria-hidden', 'true');
+    expect(box.className).toContain('relative');
+    expect(box.className).toContain('min-h-11');
+    expect(button.className).toContain('after:absolute');
+    expect(button.className).toContain('after:inset-0');
+  });
+
+  it('cemitério vazio: o texto visível é "Cemitério vazio", com espaço entre as palavras', () => {
+    mount({ ...DRAFT, graveyard: [] }, { props: { onOpenGraveyard: vi.fn() } });
+    expect(band().getByRole('button', { name: 'Cemitério vazio' }).textContent).toBe('Cemitério vazio');
   });
 
   it('sem onOpenGraveyard, é só informação (nenhum botão)', () => {
@@ -611,6 +644,13 @@ describe('mesa: histórico (spec §3.1, §7, §10.5)', () => {
       expect(lines().className).not.toContain('max-pc:overflow-hidden');
     });
 
+    it('a media query do PC é o ponto `pc` do tema (styles.css), sem número solto', () => {
+      const css = readFileSync(resolve(import.meta.dirname, '../../src/styles.css'), 'utf8');
+      const px = /--breakpoint-pc:\s*(\d+)px/.exec(css)?.[1];
+      expect(px).toBeDefined();
+      expect(PC_QUERY).toBe(`(min-width: ${px}px)`);
+    });
+
     it('no PC a coluna está sempre à vista: a lista é focável mesmo com a gaveta "fechada"', () => {
       vi.stubGlobal('matchMedia', (query: string) => ({
         matches: query === '(min-width: 1024px)',
@@ -761,7 +801,7 @@ describe('mesa: página (spec §3.2)', () => {
   it('a barra de ação entra abaixo da mão', () => {
     mount(DRAFT, { props: { actionBar: <button type="button">Atacar</button> } });
     const hand = screen.getByRole('list', { name: 'Sua mão' });
-    const bar = screen.getByRole('button', { name: 'Atacar' });
+    const bar = screen.getByRole('button', { name: ATTACK_BUTTON });
     expect(hand.compareDocumentPosition(bar) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 

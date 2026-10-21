@@ -212,50 +212,63 @@ function Graveyard({ view, onOpen }: { view: PlayerView; onOpen: (() => void) | 
   const top = graveyard.at(-1) ?? null;
   const news = graveyard.filter((card) => marked.has(card.id));
   const seen = onSeen && news.length > 0 ? () => news.forEach((card) => onSeen(card.id)) : undefined;
-  const name = graveyardName(graveyard.length, top === null ? null : cardName(top));
-  const content = (
-    <>
+  const name = graveyardName(graveyard.length, top === null ? null : cardName(top), news.length > 0);
+  // A carta de cima fica fora do botão, para o texto visível dele ser só "Cemitério 3" (e "novo"): o axe (WCAG 2.5.3, rótulo no nome)
+  // exige que o texto visível seja trecho contínuo do nome acessível, que já diz a carta de cima. Com o botão, ela é só desenho.
+  const card = top ? (
+    // A carta de cima é menor na faixa do celular: o tamanho "mini" lê estas duas variáveis.
+    <span aria-hidden={onOpen ? true : undefined} className="flex [--mini-h:36px] [--mini-w:26px] pc:[--mini-h:54px] pc:[--mini-w:38px]">
+      <Card card={top} size="mini" grave />
+    </span>
+  ) : (
+    <span aria-hidden="true" className="h-9 w-[26px] rounded-[3px] border-[1.5px] border-dashed border-papel/50 pc:h-[54px] pc:w-[38px]" />
+  );
+  const label = (
+    <span className="flex flex-col items-start">
+      <span className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">Cemitério</span>
+      {/* Entre itens de flex o espaço some (o layout não muda), mas separa as palavras do texto visível: "Cemitério vazio", e não "Cemitériovazio". */}{' '}
       {top ? (
-        // A carta de cima é menor na faixa do celular: o tamanho "mini" lê estas duas variáveis.
-        <span className="flex [--mini-h:36px] [--mini-w:26px] pc:[--mini-h:54px] pc:[--mini-w:38px]">
-          <Card card={top} size="mini" grave />
+        <span data-numero className="font-texto text-[15px] font-bold leading-tight tabular-nums pc:text-xl">
+          {graveyard.length}
         </span>
       ) : (
-        <span aria-hidden="true" className="h-9 w-[26px] rounded-[3px] border-[1.5px] border-dashed border-papel/50 pc:h-[54px] pc:w-[38px]" />
+        <span className="text-xs">vazio</span>
       )}
-      <span className="flex flex-col items-start">
-        <span className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">Cemitério</span>
-        {/* Entre itens de flex o espaço some (o layout não muda), mas separa as palavras do texto visível: "Cemitério vazio", e não "Cemitériovazio", que o axe compara com o nome. */}{' '}
-        {top ? (
-          <span data-numero className="font-texto text-[15px] font-bold leading-tight tabular-nums pc:text-xl">
-            {graveyard.length}
-          </span>
-        ) : (
-          <span className="text-xs">vazio</span>
-        )}
-        {news.length > 0 ? <NovoChip /> : null}
-      </span>
-    </>
+      {news.length > 0 ? (
+        <>
+          {' '}
+          <NovoChip />
+        </>
+      ) : null}
+    </span>
   );
   const box = 'flex min-h-11 items-center gap-1.5 border-[1.5px] border-papel/50 px-1.5 py-0.5 pc:min-h-[62px] pc:gap-2.5 pc:px-2.5';
   if (onOpen) {
+    // O botão cobre a caixa inteira (`after:inset-0`): o alvo de toque e o clique na carta são os mesmos de antes. O foco aparece na
+    // caixa, e não só em volta do texto.
     return (
-      <button
-        type="button"
-        aria-label={news.length > 0 ? `${name}, novo` : name}
-        className={`${box} bg-transparent text-papel`}
-        onClick={onOpen}
-        onPointerEnter={seen}
-        onPointerDown={seen}
-        onFocus={seen}
+      <div
+        className={`${box} relative has-[:focus-visible]:shadow-[0_0_0_6px_var(--color-tinta)] has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-ouro`}
       >
-        {content}
-      </button>
+        {card}
+        <button
+          type="button"
+          aria-label={name}
+          className="bg-transparent p-0 text-left text-papel after:absolute after:inset-0 focus-visible:shadow-none focus-visible:outline-none"
+          onClick={onOpen}
+          onPointerEnter={seen}
+          onPointerDown={seen}
+          onFocus={seen}
+        >
+          {label}
+        </button>
+      </div>
     );
   }
   return (
     <div className={box} onPointerEnter={seen} onPointerDown={seen}>
-      {content}
+      {card}
+      {label}
     </div>
   );
 }

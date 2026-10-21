@@ -179,8 +179,9 @@ function RowButton({ row, count, limit, onClick }: { row: RowName; count: number
   const titleId = useId();
   const detailId = useId();
   return (
-    <button type="button" aria-labelledby={titleId} aria-describedby={detailId} onClick={onClick} className={`${BUTTON} flex flex-col items-start`}>
-      <span id={titleId}>{ROW_NAME[row]}</span>
+    // Nome = as duas linhas (axe: o texto visível tem de ser trecho contínuo do nome), com um espaço entre os `span`.
+    <button type="button" aria-labelledby={`${titleId} ${detailId}`} onClick={onClick} className={`${BUTTON} flex flex-col items-start`}>
+      <span id={titleId}>{ROW_NAME[row]}</span>{' '}
       <span id={detailId} className="text-xs font-normal tabular-nums">
         {resurrectRowDetail(count, limit)}
       </span>

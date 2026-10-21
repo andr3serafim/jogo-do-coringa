@@ -69,6 +69,9 @@ export function initiativeText(view: PlayerView, names: TableNames): string {
 export const historyButtonName = (news: number): string =>
   news === 0 ? 'Histórico' : `Histórico, ${news} ${plural(news, 'novo', 'novos')}`;
 
-/** O nome acessível do cemitério. */
-export const graveyardName = (count: number, top: string | null): string =>
-  top === null ? 'Cemitério vazio' : `Ver o cemitério: ${count} ${plural(count, 'carta', 'cartas')}, a de cima é ${top}`;
+/**
+ * O nome acessível do cemitério. Começa pelo texto visível do botão ("Cemitério 3", e "novo" quando o chip aparece): o axe exige
+ * que o texto visível seja trecho contínuo do nome (WCAG 2.5.3).
+ */
+export const graveyardName = (count: number, top: string | null, isNew = false): string =>
+  top === null ? 'Cemitério vazio' : `Cemitério ${count}${isNew ? ', novo' : ''}, a de cima é ${top}`;

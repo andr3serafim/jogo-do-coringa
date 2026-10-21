@@ -60,8 +60,11 @@ export interface HistoryPanelProps {
 /** Até onde do fim da lista ainda conta como "no fim". */
 const NEAR_END_PX = 24;
 
-/** O ponto `pc` do tema (1024 px, `styles.css`): a partir dele o histórico é uma coluna sempre à vista. */
-const PC_QUERY = '(min-width: 1024px)';
+/**
+ * O ponto `pc` do tema (`--breakpoint-pc` em `styles.css`): a partir dele o histórico é uma coluna sempre à vista. O Tailwind inlina o
+ * valor nas media queries (não deixa a variável no CSS final), então o número é repetido aqui, e um teste confere que é o mesmo.
+ */
+export const PC_QUERY = '(min-width: 1024px)';
 
 const CLOSED = 'max-pc:sr-only';
 const OPEN =

@@ -76,7 +76,7 @@ describe('layoutId das cartas (spec §4.1)', () => {
 
   it('as cartas do diálogo do cemitério e a carta grande do Equipar ficam fora (não disputam o `layoutId` da mesa)', async () => {
     const m = mount(BEFORE);
-    await m.user.click(screen.getByRole('button', { name: /^Ver o cemitério/ }));
+    await m.user.click(screen.getByRole('button', { name: /^Cemitério \d/ }));
     const dialog = screen.getByRole('dialog');
     const inside = dialog.querySelectorAll('[data-card-id]');
     expect(inside.length).toBeGreaterThan(0);
@@ -207,7 +207,7 @@ describe('o resto da mesa continua funcionando com o Motion trocado', () => {
   it('a mão com a barra de ação responde ao toque', async () => {
     const m = mount(BEFORE);
     const hand = within(screen.getByRole('list', { name: 'Sua mão' }));
-    await m.user.click(hand.getByRole('button', { name: /^A de / }));
-    expect(hand.getByRole('button', { name: /^A de / })).toHaveAttribute('aria-pressed', 'true');
+    await m.user.click(hand.getByRole('button', { name: /^A, Armadilha, de / }));
+    expect(hand.getByRole('button', { name: /^A, Armadilha, de / })).toHaveAttribute('aria-pressed', 'true');
   });
 });

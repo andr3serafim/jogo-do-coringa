@@ -9,7 +9,7 @@ import type * as Plays from '../../src/model/plays.ts';
 import { Session } from '../../src/model/session.ts';
 import { PlayTable } from '../../src/ui/table/PlayTable.tsx';
 import { FakeConnection, scenarioAt, stateMessage } from '../fixtures.ts';
-import { roomMessage } from './support.tsx';
+import { END_TURN_BUTTON, roomMessage } from './support.tsx';
 
 vi.mock('../../src/model/plays.ts', async (importOriginal) => {
   const real = await importOriginal<typeof Plays>();
@@ -26,7 +26,7 @@ describe('PlayTable: só manda a jogada que ainda é legal', () => {
     const session = new Session(connection, { now: () => 0, setTimer: () => 0, clearTimer: () => undefined });
     const user = userEvent.setup();
     render(<PlayTable session={session} />);
-    const button = within(screen.getByRole('region', { name: 'Ações' })).getByRole('button', { name: 'Encerrar turno' });
+    const button = within(screen.getByRole('region', { name: 'Ações' })).getByRole('button', { name: END_TURN_BUTTON });
     await user.click(button);
     expect(connection.sent).toEqual([]);
     expect(session.snapshot().pending).toBe(false);

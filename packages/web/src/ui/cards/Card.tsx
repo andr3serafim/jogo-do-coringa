@@ -120,6 +120,17 @@ function RoleLabel({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * As partes do nome acessível. Com o papel escrito na face (a mão), o nome segue a ordem do texto visível, "Q, Buff de defesa, de
+ * ouros": o axe (WCAG 2.5.3, rótulo no nome) exige que o texto visível ("Q Buff de defesa") seja um trecho contínuo do nome.
+ */
+function cardLabel(card: EngineCard, as: WildRole | undefined, roleText: string | undefined): string[] {
+  if (roleText && card.kind !== 'WILD') return [card.kind === 'NUM' ? String(card.value) : card.kind, roleText, `de ${card.suit}`];
+  const parts = [cardName(card, as)];
+  if (roleText) parts.push(roleText);
+  return parts;
+}
+
 function Face({ card, size, as, roleText }: { card: EngineCard; size: CardSize; as?: WildRole; roleText?: string }) {
   const classes = SIZE[size];
   if (card.kind === 'WILD') {
@@ -134,7 +145,13 @@ function Face({ card, size, as, roleText }: { card: EngineCard; size: CardSize; 
             {as}
           </span>
         ) : null}
-        {roleText ? <RoleLabel>{roleText}</RoleLabel> : null}
+        {/* O espaço (os filhos são `absolute`, nada muda no layout) separa as palavras do texto visível; ver `cardLabel`. */}
+        {roleText ? (
+          <>
+            {' '}
+            <RoleLabel>{roleText}</RoleLabel>
+          </>
+        ) : null}
       </>
     );
   }
@@ -145,7 +162,12 @@ function Face({ card, size, as, roleText }: { card: EngineCard; size: CardSize; 
         {card.kind === 'NUM' ? card.value : card.kind}
       </span>
       <Suit suit={card.suit} className={`absolute ${tone} ${classes.suit}`} />
-      {roleText ? <RoleLabel>{roleText}</RoleLabel> : null}
+      {roleText ? (
+        <>
+          {' '}
+          <RoleLabel>{roleText}</RoleLabel>
+        </>
+      ) : null}
     </>
   );
 }
@@ -175,8 +197,7 @@ export function Card({
   const shake = fx === 'crack' && !anim.reduced;
   // Carta que o `CardsDealt` traz: fica apagada e esmaece na batida dela (só opacidade: vale com movimento reduzido).
   const enter = animated ? anim.enterDelay(card.id) : null;
-  const name = [cardName(card, as)];
-  if (roleText) name.push(roleText);
+  const name = cardLabel(card, as, roleText);
   if (front) name.push('sai primeiro');
   if (quad) name.push('quadra');
   if (target) name.push('alvo possível');

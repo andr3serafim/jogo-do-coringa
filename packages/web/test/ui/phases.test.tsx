@@ -16,7 +16,7 @@ import { DEFAULT_PREFS, type Prefs } from '../../src/model/storage.ts';
 import { PlayTable } from '../../src/ui/table/PlayTable.tsx';
 import { pickCards } from '../../src/ui/table/ActionBar.tsx';
 import { FakeConnection, scenarioAt, stateMessage, type ViewSpec } from '../fixtures.ts';
-import { roomMessage, seriousViolations } from './support.tsx';
+import { ATTACK_BUTTON, roomMessage, seriousViolations, startsWith } from './support.tsx';
 
 const seatOf = (playerId: 'p1' | 'p2', nickname: string, extra: { connected?: boolean; woAt?: number } = {}) => ({
   playerId,
@@ -642,7 +642,7 @@ describe('janela de reação (spec §3.7)', () => {
 
   it('com a Armadilha escolhida, o passo do alvo segue como antes e o Passar continua à vista', async () => {
     const m = mount(REACTION, { state: withClock });
-    await m.user.click(handList().getByRole('button', { name: /^A de / }));
+    await m.user.click(handList().getByRole('button', { name: /^A, Armadilha, de / }));
     await m.user.click(inBar().getByRole('button', { name: 'Armadilha' }));
     expect(inBar().getByRole('list', { name: 'Alvos' })).toBeInTheDocument();
     expect(inBar().getByRole('button', { name: 'Passar' })).toBeInTheDocument();
@@ -712,30 +712,30 @@ describe('relógio (spec §3.8, §10.3)', () => {
   it('quando expira: "Tempo esgotado", e os controles ficam desligados até chegar o state seguinte', () => {
     const m = mount(DRAFT, { fake: true, state: turn(3_000) });
     expect(screen.queryByText('Tempo esgotado')).not.toBeInTheDocument();
-    expect(inBar().getByRole('button', { name: 'Atacar' })).toBeEnabled();
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
     tick(m, 3_000);
     expect(screen.getByText('Tempo esgotado')).toBeInTheDocument();
     expect(band().getByRole('timer')).toHaveTextContent('0');
-    expect(inBar().getByRole('button', { name: 'Atacar' })).toBeDisabled();
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toBeDisabled();
     // A mão também não escolhe mais.
     expect(handList().getAllByRole('button')).toHaveLength(3);
     // O servidor injetou o estouro: chega o state da fase seguinte, com outro prazo.
     act(() => m.connection.emitState(stateMessage(scenarioAt(DRAFT).view, { seq: 2, epoch: 2, ...turn(40_000) })));
     expect(screen.queryByText('Tempo esgotado')).not.toBeInTheDocument();
-    expect(inBar().getByRole('button', { name: 'Atacar' })).toBeEnabled();
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
   });
 
   it('com a mão desligada pelo tempo esgotado, tocar numa carta não escolhe', async () => {
     const m = mount(DRAFT, { fake: true, state: turn(3_000) });
     tick(m, 3_000);
-    await m.user.click(handList().getByRole('button', { name: /^A de / }));
-    expect(handList().getByRole('button', { name: /^A de / })).toHaveAttribute('aria-pressed', 'false');
+    await m.user.click(handList().getByRole('button', { name: /^A, Armadilha, de / }));
+    expect(handList().getByRole('button', { name: /^A, Armadilha, de / })).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('sem prazo (treino), não há relógio nem "Tempo esgotado"', () => {
     mount(DRAFT, { fake: true });
     expect(screen.queryByRole('timer')).not.toBeInTheDocument();
-    expect(inBar().getByRole('button', { name: 'Atacar' })).toBeEnabled();
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
   });
 
   describe('anúncios para leitor de tela (só nos prazos do próprio jogador)', () => {
@@ -879,14 +879,14 @@ describe('avisos (spec §3.9, §6.2)', () => {
     act(() => m.connection.emitClosed(1006, false));
     expect(screen.getByRole('status')).toHaveTextContent('Reconectando…');
     expect(screen.getByRole('region', { name: 'Seu campo' })).toBeInTheDocument();
-    expect(inBar().getByRole('button', { name: 'Atacar' })).toBeDisabled();
-    await m.user.click(handList().getByRole('button', { name: /^A de / }));
-    expect(handList().getByRole('button', { name: /^A de / })).toHaveAttribute('aria-pressed', 'false');
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toBeDisabled();
+    await m.user.click(handList().getByRole('button', { name: /^A, Armadilha, de / }));
+    expect(handList().getByRole('button', { name: /^A, Armadilha, de / })).toHaveAttribute('aria-pressed', 'false');
     expect(acts(m)).toEqual([]);
     // De volta, os controles voltam.
     act(() => m.connection.emit({ type: 'open' }));
     expect(screen.queryByText('Reconectando…')).not.toBeInTheDocument();
-    expect(inBar().getByRole('button', { name: 'Atacar' })).toBeEnabled();
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
   });
 
   it('1008 mostra o aviso da espera longa', () => {
@@ -908,7 +908,7 @@ describe('avisos (spec §3.9, §6.2)', () => {
   it('o Atacar e o Passar não mandam nada com a conexão fora', async () => {
     const m = mount(DRAFT);
     act(() => m.connection.emitClosed(1006, false));
-    await m.user.click(inBar().getByRole('button', { name: 'Atacar' }));
+    await m.user.click(inBar().getByRole('button', { name: ATTACK_BUTTON }));
     expect(acts(m)).toEqual([]);
   });
 
@@ -984,11 +984,11 @@ describe('correções da revisão da Tarefa 20', () => {
   it('tabular-nums na linha da prévia do Atacar, na do efeito por alvo e no detalhe das fileiras do cemitério', async () => {
     const m = mount({ ...DRAFT, self: { ...DRAFT.self, resurrections: [{ row: 'ATK', value: 7 }] }, graveyard: [7, 3] });
     expect(inBar().getByText('152 × 42 · o K de Duda absorve, dano 0').className).toContain('tabular-nums');
-    await m.user.click(handList().getByRole('button', { name: /^A de / }));
+    await m.user.click(handList().getByRole('button', { name: /^A, Armadilha, de / }));
     await m.user.click(inBar().getByRole('button', { name: 'Armadilha' }));
     expect(inBar().getByText('quebrando o K: 110 de dano').className).toContain('tabular-nums');
     await m.user.keyboard('{Escape}');
-    await m.user.click(inBar().getByRole('button', { name: 'Ressuscitar' }));
+    await m.user.click(inBar().getByRole('button', { name: startsWith('Ressuscitar') }));
     const dialog = screen.getByRole('dialog', { name: 'Ressuscitar' });
     await m.user.click(within(dialog).getByRole('button', { name: '7 de copas' }));
     expect(within(dialog).getByText('no fim da fileira · 5 de 7').className).toContain('tabular-nums');
@@ -998,14 +998,14 @@ describe('correções da revisão da Tarefa 20', () => {
     // Duda não tem nenhum J; depois da minha jogada ele ganha um, que é o primeiro alvo e vem marcado.
     const base = { ...DRAFT, opponent: { ...DRAFT.opponent, attackBuffs: [] } } satisfies ViewSpec;
     const m = mount(base);
-    await m.user.click(inBar().getByRole('button', { name: 'Atacar' }));
+    await m.user.click(inBar().getByRole('button', { name: ATTACK_BUTTON }));
     const next = scenarioAt({ ...DRAFT, opponent: { ...DRAFT.opponent, attackBuffs: ['J'] } }).view;
     act(() => m.connection.emitState(stateMessage(next, { seq: 2, epoch: 2 })));
     const fresh = next.opponent.attackBuffs[0]!;
     expect(screen.getByRole('img', { name: /^J de .+, novo$/ })).toHaveAttribute('data-card-id', fresh.id);
     const markSeen = vi.spyOn(m.session, 'markSeen');
 
-    await m.user.click(handList().getByRole('button', { name: /^A de / }));
+    await m.user.click(handList().getByRole('button', { name: /^A, Armadilha, de / }));
     await m.user.click(inBar().getByRole('button', { name: 'Armadilha' }));
     const first = within(inBar().getByRole('list', { name: 'Alvos' })).getAllByRole('button')[0]!;
     expect(first).toHaveFocus();
@@ -1022,7 +1022,7 @@ describe('correções da revisão da Tarefa 20', () => {
 
   it('Esc e Cancelar devolvem o foco à carta da mão que abriu a escolha', async () => {
     const m = mount();
-    const card = () => handList().getByRole('button', { name: /^A de / });
+    const card = () => handList().getByRole('button', { name: /^A, Armadilha, de / });
     await m.user.click(card());
     expect(inBar().getByRole('button', { name: 'Armadilha' })).toHaveFocus();
     await m.user.keyboard('{Escape}');
@@ -1039,12 +1039,12 @@ describe('correções da revisão da Tarefa 20', () => {
 
   it('a carta que sai da mão leva a escolha junto: o Esc não tem mais o que cancelar', async () => {
     const m = mount();
-    await m.user.click(handList().getByRole('button', { name: /^A de / }));
+    await m.user.click(handList().getByRole('button', { name: /^A, Armadilha, de / }));
     const without = scenarioAt({ ...DRAFT, self: { ...DRAFT.self, hand: ['K', 'Q'] } }).view;
     act(() => m.connection.emitState(stateMessage(without, { seq: 2, epoch: 1 })));
     await m.user.keyboard('{Escape}');
     // O retorno do foco à barra (quando a carta já não está na mão) é só defesa: sem carta não há escolha nem Esc ouvido.
-    expect(handList().queryByRole('button', { name: /^A de / })).not.toBeInTheDocument();
+    expect(handList().queryByRole('button', { name: /^A, Armadilha, de / })).not.toBeInTheDocument();
     expect(document.querySelectorAll('[aria-pressed="true"]')).toHaveLength(0);
   });
 

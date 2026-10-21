@@ -84,3 +84,14 @@ export async function seriousViolations(container: Element): Promise<string[]> {
     .filter((violation) => violation.impact === 'serious' || violation.impact === 'critical')
     .map((violation) => `${violation.id}: ${violation.help}`);
 }
+
+/**
+ * O nome de um botão de duas linhas é o título e o detalhe juntos ("Atacar 27 × 3 · dano 24"; o axe exige que o texto visível seja
+ * trecho contínuo do nome, WCAG 2.5.3): quem procura o botão pelo título casa pelo começo do nome.
+ */
+export const startsWith = (title: string): RegExp =>
+  new RegExp(`^${title.replace(/[.*+?^${}()|[\]\\]/g, (char) => `\\${char}`)}(?: |$)`);
+
+/** O botão principal da barra: "Atacar" com a prévia (não casa com "Atacar primeiro" nem "Atacar em segundo", da escolha da ordem). */
+export const ATTACK_BUTTON = /^Atacar(?! primeiro| em segundo)/;
+export const END_TURN_BUTTON = startsWith('Encerrar turno');

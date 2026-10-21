@@ -29,15 +29,18 @@ interface TwoLineProps extends Omit<ComponentPropsWithoutRef<'button'>, 'childre
   detailClass?: string;
 }
 
-/** Botão de duas linhas: o nome é o título; a segunda linha é a descrição. */
+/**
+ * Botão de duas linhas. O nome é o título e a segunda linha, juntos (`aria-labelledby` nos dois): o axe (WCAG 2.5.3, rótulo no
+ * nome) exige que o texto visível do botão seja trecho contínuo do nome, e o texto visível é o das duas linhas. O espaço entre
+ * os dois `span` separa as palavras do texto visível ("Atacar 27 × 3 · dano 24", e não "Atacar27 × 3 · dano 24").
+ */
 export function TwoLine({ title, detail, titleClass = '', detailClass = '', className = '', ...rest }: TwoLineProps) {
   const titleId = useId();
   const detailId = useId();
   return (
     <button
       type="button"
-      aria-labelledby={titleId}
-      aria-describedby={detail ? detailId : undefined}
+      aria-labelledby={detail ? `${titleId} ${detailId}` : titleId}
       className={`flex flex-col items-start ${className}`}
       {...rest}
     >
@@ -45,9 +48,12 @@ export function TwoLine({ title, detail, titleClass = '', detailClass = '', clas
         {title}
       </span>
       {detail ? (
-        <span id={detailId} className={detailClass}>
-          {detail}
-        </span>
+        <>
+          {' '}
+          <span id={detailId} className={detailClass}>
+            {detail}
+          </span>
+        </>
       ) : null}
     </button>
   );

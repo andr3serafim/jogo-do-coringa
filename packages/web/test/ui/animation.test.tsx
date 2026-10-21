@@ -42,7 +42,7 @@ import {
   watchInversion,
   watchMany,
 } from './anim-harness.tsx';
-import { roomMessage, seriousViolations } from './support.tsx';
+import { ATTACK_BUTTON, roomMessage, seriousViolations } from './support.tsx';
 
 afterEach(cleanup);
 
@@ -343,7 +343,7 @@ describe('palco: pular as batidas (spec §4.1)', () => {
   it('o toque que pulou não vira clique: a mão não escolhe carta no mesmo gesto', async () => {
     const m = mount(MINE);
     emit(m, MINE, [TURN, ATTACK, HIT, TURN, ATTACK, HIT]);
-    const card = handList().getByRole('button', { name: /^A de / });
+    const card = handList().getByRole('button', { name: /^A, Armadilha, de / });
     expect(busy(m.container)).toBe(true);
     await m.user.click(card);
     expect(busy(m.container)).toBe(false);
@@ -356,33 +356,33 @@ describe('palco: pular as batidas (spec §4.1)', () => {
   it('o toque que pulou não manda jogada nenhuma', async () => {
     const m = mount(MINE);
     emit(m, MINE, [TURN, ATTACK, HIT, TURN, ATTACK, HIT]);
-    await m.user.click(within(bar()).getByRole('button', { name: 'Atacar' }));
+    await m.user.click(within(bar()).getByRole('button', { name: ATTACK_BUTTON }));
     expect(m.connection.sent).toEqual([]);
   });
 
   it('um toque sem batida não é engolido', async () => {
     const m = mount(MINE);
-    await m.user.click(handList().getByRole('button', { name: /^A de / }));
-    expect(handList().getByRole('button', { name: /^A de / })).toHaveAttribute('aria-pressed', 'true');
+    await m.user.click(handList().getByRole('button', { name: /^A, Armadilha, de / }));
+    expect(handList().getByRole('button', { name: /^A, Armadilha, de / })).toHaveAttribute('aria-pressed', 'true');
   });
 });
 
 describe('palco: os controles durante as batidas (spec §4.1)', () => {
   it('a barra fica desabilitada durante as batidas e volta depois (teto de 1 s com decisão esperando)', () => {
     const m = mount(MINE);
-    expect(within(bar()).getByRole('button', { name: 'Atacar' })).toBeEnabled();
+    expect(within(bar()).getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
     // Cinco faixas (2 s de batidas) cabem em 1 s porque uma decisão minha espera.
     emit(m, MINE, [TURN, TURN, TURN, TURN, TURN]);
-    expect(within(bar()).getByRole('button', { name: 'Atacar' })).toBeDisabled();
+    expect(within(bar()).getByRole('button', { name: ATTACK_BUTTON })).toBeDisabled();
     advance(999);
-    expect(within(bar()).getByRole('button', { name: 'Atacar' })).toBeDisabled();
+    expect(within(bar()).getByRole('button', { name: ATTACK_BUTTON })).toBeDisabled();
     advance(1);
-    expect(within(bar()).getByRole('button', { name: 'Atacar' })).toBeEnabled();
+    expect(within(bar()).getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
   });
 
   it('a mão fica apagada (aria-disabled) e focável durante as batidas, e volta depois', () => {
     const m = mount(MINE);
-    const card = () => handList().getByRole('button', { name: /^A de / });
+    const card = () => handList().getByRole('button', { name: /^A, Armadilha, de / });
     expect(card()).not.toHaveAttribute('aria-disabled');
     emit(m, MINE, [TURN, ATTACK]);
     expect(card()).toHaveAttribute('aria-disabled', 'true');
@@ -398,17 +398,17 @@ describe('palco: os controles durante as batidas (spec §4.1)', () => {
   it('pular devolve os controles na hora', async () => {
     const m = mount(MINE);
     emit(m, MINE, [TURN, TURN, TURN, TURN, TURN]);
-    expect(within(bar()).getByRole('button', { name: 'Atacar' })).toBeDisabled();
+    expect(within(bar()).getByRole('button', { name: ATTACK_BUTTON })).toBeDisabled();
     await m.user.keyboard('{Escape}');
-    expect(within(bar()).getByRole('button', { name: 'Atacar' })).toBeEnabled();
+    expect(within(bar()).getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
   });
 
   it('com a jogada em voo, a mão também apaga e o toque numa carta não escolhe nada', async () => {
     const m = mount(MINE);
     const ack = deferredAck();
     m.connection.acks = [ack.promise];
-    await m.user.click(within(bar()).getByRole('button', { name: 'Atacar' }));
-    const card = handList().getByRole('button', { name: /^A de / });
+    await m.user.click(within(bar()).getByRole('button', { name: ATTACK_BUTTON }));
+    const card = handList().getByRole('button', { name: /^A, Armadilha, de / });
     expect(card).toHaveAttribute('aria-disabled', 'true');
     await m.user.click(card);
     expect(card).toHaveAttribute('aria-pressed', 'false');
@@ -419,7 +419,7 @@ describe('palco: os controles durante as batidas (spec §4.1)', () => {
   it('o `state` da mesa de abertura não toca batida: não há de onde animar', () => {
     const m = mount(MINE, { events: [TURN, ATTACK, HIT] });
     expect(busy(m.container)).toBe(false);
-    expect(within(bar()).getByRole('button', { name: 'Atacar' })).toBeEnabled();
+    expect(within(bar()).getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
   });
 
   it('um `state` novo no meio das batidas troca a linha do tempo, e os controles seguem a nova', () => {
@@ -975,7 +975,7 @@ describe('CardsDealt, Reflect e pressão (spec §4.2)', () => {
   it('só a carta remontada por ESTE encerramento recebe o foco de volta: uma carta que ninguém remontou fica como está', async () => {
     const m = mount(MINE);
     emit(m, dealt, DEALS);
-    const other = handList().getByRole('button', { name: /^A de / });
+    const other = handList().getByRole('button', { name: /^A, Armadilha, de / });
     other.focus();
     await m.user.keyboard('{Escape}');
     expect(document.activeElement).toBe(other);
@@ -983,7 +983,7 @@ describe('CardsDealt, Reflect e pressão (spec §4.2)', () => {
 
   it('uma carta que saiu da mesa com o foco não puxa o foco de volta num encerramento posterior', async () => {
     const m = mount(MINE);
-    handList().getByRole('button', { name: /^A de / }).focus();
+    handList().getByRole('button', { name: /^A, Armadilha, de / }).focus();
     // O `state` seguinte tira a carta da mão sem batida nenhuma: o foco cai no corpo da página.
     emit(m, { ...MINE, self: { ...MINE.self, hand: ['K', 'Q'] } }, []);
     expect(document.activeElement).toBe(document.body);
@@ -1133,7 +1133,7 @@ describe('o toque que pulou e o clique que não veio', () => {
 describe('avisos e acessibilidade', () => {
   it('a mão apagada por conexão caída é aria-disabled, não desabilitada, e volta com a conexão', () => {
     const m = mount(MINE);
-    const card = () => handList().getByRole('button', { name: /^A de / });
+    const card = () => handList().getByRole('button', { name: /^A, Armadilha, de / });
     act(() => m.connection.emitClosed(1006, false));
     expect(card()).toHaveAttribute('aria-disabled', 'true');
     expect(card()).not.toBeDisabled();
