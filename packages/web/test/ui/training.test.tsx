@@ -18,6 +18,9 @@ const SEED = '?semente=t1';
 beforeEach(() => {
   window.localStorage.clear();
   window.sessionStorage.clear();
+  // Toda tela de treino dos testes nasce com a semente fixa: sem `?semente=` a partida seria sorteada (e, em cerca de 1% delas,
+  // o jogador não recebe numéricas e o Equipar dele sai sozinho). Quem testa o sorteio troca a URL e o `crypto`.
+  window.history.replaceState(null, '', `/treino${SEED}`);
 });
 
 afterEach(() => {
@@ -106,11 +109,16 @@ describe('/treino', () => {
     // O Equipar é simultâneo: o bot confirma o dele sozinho; a mesa espera o jogador, sem relógio nenhum.
     advance(5_000);
     const before = room.state!.seq;
-    expect(equipPanel().getByText(/^Carta 1 de \d$/)).toBeInTheDocument();
+    const placed = room.state!.view.self.pending.map((card) => card.id);
+    expect(placed.length).toBeGreaterThan(0);
+    expect(equipPanel().getByText(`Carta 1 de ${placed.length}`)).toBeInTheDocument();
 
     await equipByUi(user);
+    // O state novo traz a jogada do jogador: as cartas que ele montou pela interface já estão nas suas fileiras.
     expect(room.state!.seq).toBeGreaterThan(before);
-    expect(room.state!.view.self.equipSubmitted || room.state!.view.round > 1 || room.state!.view.self.pending.length > 0).toBe(true);
+    expect(room.state!.events.length).toBeGreaterThan(0);
+    const { attackRow, defenseRow } = room.state!.view.self;
+    expect([...attackRow, ...defenseRow].map((card) => card.id)).toEqual(expect.arrayContaining(placed));
   });
 
   it('o bot joga sozinho depois de thinkMs (600 ms), sem esperar o jogador', async () => {
@@ -194,6 +202,7 @@ describe('/treino: a vez do jogador é anunciada (spec §7), sem prazo', () => {
 describe('/treino: sair, fim e revanche', () => {
   it('"Sair do treino", no menu, volta ao início e fecha a sala: o bot para', async () => {
     const { advance, user } = fakeClock();
+    window.history.replaceState(null, '', '/');
     render(<App api={fakeApi()} />);
     // Do início para o treino pela navegação do app, como o botão "Treinar contra o bot" faz.
     act(() => navigate(`/treino${SEED}`));
@@ -312,7 +321,6 @@ describe('/treino: a sala nasce e morre com a tela', () => {
   it('se o módulo não carrega, diz isso, recarrega ou volta ao início', async () => {
     const reload = vi.fn();
     const load = () => Promise.reject<LocalRoomModule>(new Error('sem rede'));
-    window.history.replaceState(null, '', '/treino');
     const { user } = fakeClock();
     render(<Training store={memoryStore()} load={load} reload={reload} />);
     await settle();
