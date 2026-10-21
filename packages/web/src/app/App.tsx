@@ -1,15 +1,16 @@
 // Casca da interface: o `Storage` e a porta do servidor nascem aqui, uma vez, e a rota escolhe a tela (spec §2.1).
 import { useState } from 'react';
 import type { KeyValueStore } from '../model/storage.ts';
-import { Button, Panel, Screen, Title } from '../ui/parts.tsx';
+import { Button } from '../ui/parts.tsx';
 import { Home } from '../ui/screens/Home.tsx';
 import { NotFound } from '../ui/screens/NotFound.tsx';
 import { RoomGate } from '../ui/screens/RoomGate.tsx';
+import { Training } from '../ui/screens/Training.tsx';
 import { STORAGE_WARNING } from '../ui/text.ts';
 import { openStore } from './browser-store.ts';
 import { ErrorBoundary } from './ErrorBoundary.tsx';
 import { createRoomApi, type RoomApi } from './room-api.ts';
-import { navigate, useRoute } from './router.ts';
+import { useRoute } from './router.ts';
 
 export interface AppProps {
   /** Troca o HTTP e a conexão (testes). O padrão fala com o próprio site. */
@@ -45,18 +46,7 @@ function Routes({ api, store }: { api: RoomApi; store: KeyValueStore }) {
     case 'room':
       return <RoomGate code={route.code} api={api} store={store} />;
     case 'training':
-      // Espaço reservado: a partida local contra o bot entra numa tarefa seguinte.
-      return (
-        <Screen>
-          <Title>Treino contra o bot</Title>
-          <Panel>
-            <p>Em breve.</p>
-            <Button variant="secondary" onClick={() => navigate('/')}>
-              Voltar ao início
-            </Button>
-          </Panel>
-        </Screen>
-      );
+      return <Training store={store} />;
     case 'notFound':
       return <NotFound />;
   }

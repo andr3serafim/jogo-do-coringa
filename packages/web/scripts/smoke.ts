@@ -2,7 +2,10 @@
 /**
  * Smoke da web, depois do `vite build` (spec §9.1 e §12). Roda no Node puro e confere o `dist`:
  * - o JavaScript inicial (o que o `index.html` carrega e pré-carrega) cabe em 200 KB comprimido (gzip);
- * - nenhum `.js` do `dist` contém o Zod (`ZodError`): os esquemas ficam só no servidor (`@coringa/protocol/schemas`).
+ * - nenhum `.js` do `dist` contém o Zod (`ZodError`): os esquemas ficam só no servidor (`@coringa/protocol/schemas`);
+ * - o bot do treino (`@coringa/sim/bots`) fica fora do JavaScript inicial: ele entra por `import()` dinâmico (spec §12) e
+ *   tem que estar num chunk à parte. Sem essa segunda metade a checagem seria vazia: o minificador renomeia `greedyBot`,
+ *   e um bot que sumisse do `dist` também passaria por "fora do inicial".
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -10,6 +13,13 @@ import { gzipSync } from 'node:zlib';
 
 const BUDGET_BYTES = 200 * 1024;
 const ZOD_MARK = 'ZodError';
+/**
+ * Marcas do bot do treino. `greedyBot` é o nome do bot, que o minificador renomeia (nenhum `.js` o guarda hoje); a segunda é o
+ * texto de um erro lançado dentro dele, que um literal de string preserva. Qualquer uma das duas num `.js` inicial reprova.
+ */
+const BOT_NAME_MARK = 'greedyBot';
+const BOT_TEXT_MARK = 'fase principal sem DECLARE_ATTACK/END_TURN';
+const BOT_MARKS = [BOT_NAME_MARK, BOT_TEXT_MARK];
 
 const dist = join(import.meta.dirname, '..', 'dist');
 const indexPath = join(dist, 'index.html');
@@ -49,6 +59,7 @@ const initial = initialScripts(html);
 if (initial.length === 0) problems.push('o dist/index.html não carrega nenhum script: o orçamento não teria o que medir');
 
 let total = 0;
+const initialPaths = new Set<string>();
 console.log('JavaScript inicial (bruto → gzip):');
 for (const url of initial) {
   if (!url.startsWith('/')) {
@@ -60,10 +71,13 @@ for (const url of initial) {
     problems.push(`o index.html aponta para um script que não está no dist: ${url}`);
     continue;
   }
+  initialPaths.add(path);
   const source = readFileSync(path);
   const gzip = gzipSync(source).length;
   total += gzip;
   console.log(`  ${url}: ${kb(source.length)} → ${kb(gzip)}`);
+  const bot = BOT_MARKS.find((mark) => source.includes(mark));
+  if (bot !== undefined) problems.push(`${url} contém o bot do treino ("${bot}"): ele tem que entrar por import() dinâmico, fora do inicial`);
 }
 console.log(`  total: ${kb(total)} de ${kb(BUDGET_BYTES)}`);
 if (total > BUDGET_BYTES) problems.push(`JavaScript inicial com ${kb(total)} gzip passa do orçamento de ${kb(BUDGET_BYTES)}`);
@@ -74,6 +88,14 @@ for (const path of all) {
   const source = readFileSync(path);
   console.log(`  ${fromDist(path)}: ${kb(source.length)} → ${kb(gzipSync(source).length)}`);
   if (source.includes(ZOD_MARK)) problems.push(`${fromDist(path)} contém o Zod (${ZOD_MARK}): a web nunca importa os esquemas`);
+}
+
+// O bot tem que existir em algum chunk que não é o inicial; do contrário, "fora do inicial" não provaria nada.
+const botChunks = all.filter((path) => !initialPaths.has(path) && readFileSync(path).includes(BOT_TEXT_MARK));
+if (botChunks.length === 0) {
+  problems.push(`o bot do treino ("${BOT_TEXT_MARK}") não está em nenhum chunk carregado sob demanda: o import() dinâmico sumiu, ou a marca mudou`);
+} else {
+  console.log(`Bot do treino (fora do inicial): ${botChunks.map(fromDist).join(', ')}`);
 }
 
 if (problems.length > 0) throw new Error(`smoke da web falhou:\n- ${problems.join('\n- ')}`);

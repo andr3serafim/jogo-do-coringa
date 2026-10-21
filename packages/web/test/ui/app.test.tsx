@@ -41,13 +41,18 @@ describe('<App />: rotas', () => {
     expect(screen.getByRole('heading', { name: 'Código inválido' })).toBeInTheDocument();
   });
 
-  it('/treino tem o espaço do treino, com volta ao início', async () => {
-    window.history.replaceState(null, '', '/treino');
+  it('o botão "Treinar contra o bot" do início leva à mesa do treino', async () => {
+    // Sem `?semente=` o navegador sorteia a partida; o sorteio é fixo aqui, como todo o aleatório dos testes.
+    vi.spyOn(globalThis.crypto, 'getRandomValues').mockImplementation(((array: Uint32Array) => {
+      array[0] = 123_456_789;
+      return array;
+    }) as typeof crypto.getRandomValues);
     render(<App api={fakeApi()} />);
-    expect(screen.getByRole('heading', { name: 'Treino contra o bot' })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Voltar ao início' }));
-    expect(window.location.pathname).toBe('/');
-    expect(screen.getByRole('heading', { name: 'Jogo do Coringa' })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Treinar contra o bot' }));
+    expect(window.location.pathname).toBe('/treino');
+    expect(await screen.findByRole('main', { name: 'Mesa' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Campo de Bot' })).toBeInTheDocument();
+    expect(screen.getByText('Treino, sem relógio')).toBeInTheDocument();
   });
 
   it('qualquer outra rota: "Página não encontrada", com link para o início', async () => {
@@ -63,8 +68,8 @@ describe('<App />: rotas', () => {
 
   it('o botão voltar do navegador troca a tela', () => {
     render(<App api={fakeApi()} />);
-    act(() => navigate('/treino'));
-    expect(screen.getByRole('heading', { name: 'Treino contra o bot' })).toBeInTheDocument();
+    act(() => navigate('/treino?semente=t1'));
+    expect(screen.getByRole('status')).toHaveTextContent('Preparando o treino…');
     act(() => {
       window.history.replaceState(null, '', '/');
       window.dispatchEvent(new PopStateEvent('popstate'));
@@ -101,7 +106,7 @@ describe('<App />: sem armazenamento do navegador', () => {
     const { container } = render(<App api={fakeApi()} />);
     expect(screen.getAllByText(STORAGE_WARNING)).toHaveLength(1);
 
-    act(() => navigate('/treino'));
+    act(() => navigate('/treino?semente=t1'));
     act(() => navigate('/nada'));
     act(() => navigate('/'));
     expect(screen.getAllByText(STORAGE_WARNING)).toHaveLength(1);
