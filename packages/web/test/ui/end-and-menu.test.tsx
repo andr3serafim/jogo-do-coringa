@@ -1,0 +1,813 @@
+// Fim de partida, revanche e menu da partida (spec §2.4, §2.5, §7). A mesa é a `PlayTable` sobre uma `Session` de
+// verdade com uma `FakeConnection`; o painel de fim e o menu são `<dialog>` nativos. O jsdom não prende o foco nem
+// fecha com Esc sozinho (veja `setup-ui.ts`): aqui se confere que o foco entra no diálogo, que ele volta a quem abriu e
+// que `showModal` foi usado (é ele que prende o foco no navegador); o foco preso de verdade fica para o E2E.
+import type { GameResult, PlayerId } from '@coringa/engine';
+import type { Outcome, OutcomeCause, RoomMessage, RoomStatus, Score } from '@coringa/protocol';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { App } from '../../src/app/App.tsx';
+import { fetchVersion } from '../../src/app/health.ts';
+import { createRoomApi } from '../../src/app/room-api.ts';
+import { Session } from '../../src/model/session.ts';
+import { loadPrefs, safeStore, saveSeat, type Prefs } from '../../src/model/storage.ts';
+import { PlayTable, type PlayTableProps } from '../../src/ui/table/PlayTable.tsx';
+import { Table } from '../../src/ui/table/Table.tsx';
+import { FakeConnection, scenarioAt, stateMessage, type ViewSpec } from '../fixtures.ts';
+import { advance, cleanup as cleanupAnim, connect, emit, EXODIA, EXODIA_OVER, THEIRS } from './anim-harness.tsx';
+import { CODE, memoryStore, roomMessage, seat, seriousViolations } from './support.tsx';
+
+afterEach(() => {
+  cleanupAnim();
+  Reflect.deleteProperty(navigator, 'clipboard');
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+  window.history.replaceState(null, '', '/');
+});
+
+const win = (winner: PlayerId, reason: Extract<GameResult, { kind: 'WIN' }>['reason']): GameResult => ({
+  kind: 'WIN',
+  winner,
+  reason,
+});
+const DRAW: GameResult = { kind: 'DRAW', reason: 'ANTI_STALL' };
+
+interface MountOptions {
+  me?: PlayerId;
+  status?: RoomStatus;
+  /** `null`: partida sem resultado (`ABANDONED`). */
+  result?: GameResult | null;
+  cause?: OutcomeCause;
+  gameNo?: number;
+  score?: Score;
+  /** Eu pedi revanche. */
+  mineWants?: boolean;
+  /** Duda pediu revanche. */
+  theirsWants?: boolean;
+  /** Duda está fora da sala. */
+  theirsAway?: boolean;
+  prefs?: Partial<Prefs>;
+  props?: Partial<PlayTableProps>;
+  /** Fase da mesa quando a partida está em curso (padrão: a minha vez). */
+  spec?: ViewSpec;
+}
+
+const FINISHED_RESULT = win('p1', 'HP');
+
+/** O `room` de um cenário; o teste o reemite com `extra` para simular o servidor. */
+function roomOf(options: MountOptions, extra: MountOptions = {}): RoomMessage {
+  const o = { ...options, ...extra };
+  const me = o.me ?? 'p1';
+  const other = me === 'p1' ? 'p2' : 'p1';
+  const mine = { playerId: me, nickname: 'André', connected: true, ready: false, wantsRematch: o.mineWants ?? false };
+  const theirs = {
+    playerId: other,
+    nickname: 'Duda',
+    connected: !(o.theirsAway ?? false),
+    ready: false,
+    wantsRematch: o.theirsWants ?? false,
+  };
+  const status = o.status ?? 'FINISHED';
+  const room = roomMessage({
+    status,
+    gameNo: o.gameNo ?? 1,
+    seats: me === 'p1' ? [mine, theirs] : [theirs, mine],
+    score: o.score ?? { p1: 0, p2: 0, draws: 0 },
+  });
+  if (status === 'FINISHED') {
+    const outcome: Outcome = {
+      gameNo: o.gameNo ?? 1,
+      result: o.result === undefined ? FINISHED_RESULT : o.result,
+      cause: o.cause ?? 'NORMAL',
+    };
+    room.outcome = outcome;
+  }
+  return room;
+}
+
+function viewOf(options: MountOptions) {
+  const me = options.me ?? 'p1';
+  const status = options.status ?? 'FINISHED';
+  const result = options.result === undefined ? FINISHED_RESULT : options.result;
+  if (status === 'FINISHED' && result !== null) return scenarioAt({ me, phase: { kind: 'GAME_OVER', result } }).view;
+  return scenarioAt({ me, ...options.spec }).view;
+}
+
+function mount(options: MountOptions = {}) {
+  const me = options.me ?? 'p1';
+  const connection = new FakeConnection({
+    playerId: me,
+    room: roomOf(options),
+    state: stateMessage(viewOf(options)),
+    now: 0,
+  });
+  const store = memoryStore();
+  const session = new Session(
+    connection,
+    { now: () => 0, setTimer: () => 0, clearTimer: () => undefined },
+    { autoPass: true, reduceMotion: false, ...options.prefs },
+  );
+  const user = userEvent.setup();
+  const onNewRoom = vi.fn();
+  const rendered = render(<PlayTable session={session} store={store} onNewRoom={onNewRoom} {...options.props} />);
+  /** O servidor reemite a sala. */
+  const push = (extra: MountOptions) => act(() => connection.emitRoom(roomOf(options, extra)));
+  return { connection, session, store, user, onNewRoom, push, ...rendered };
+}
+
+type Mounted = ReturnType<typeof mount>;
+
+const endDialog = (name: string) => screen.getByRole('dialog', { name });
+const menuDialog = () => screen.getByRole('dialog', { name: 'Menu da partida' });
+/** O botão do menu existe duas vezes (celular e PC); o CSS esconde um deles, e o jsdom não tem CSS. */
+const menuButton = () => screen.getAllByRole('button', { name: 'Menu da partida' })[0]!;
+const calls = (m: Mounted) => m.connection.calls.filter((call) => call.startsWith('rematch'));
+
+// ---------------------------------------------------------------------------------------------
+// Fim de partida (spec §2.5)
+
+describe('fim de partida: o resultado e o motivo', () => {
+  const CASES: Array<{
+    name: string;
+    options: MountOptions;
+    title: string;
+    reason: string;
+  }> = [
+    { name: 'vida zerada, eu venci', options: { result: win('p1', 'HP') }, title: 'Você venceu', reason: 'A vida de Duda chegou a 0' },
+    { name: 'vida zerada, Duda venceu', options: { result: win('p2', 'HP') }, title: 'Duda venceu', reason: 'Sua vida chegou a 0' },
+    { name: 'Exódia, eu venci', options: { result: win('p1', 'EXODIA') }, title: 'Você venceu', reason: 'Você montou a Exódia' },
+    { name: 'Exódia, Duda venceu', options: { result: win('p2', 'EXODIA') }, title: 'Duda venceu', reason: 'Duda montou a Exódia' },
+    {
+      name: 'anti-travamento, eu venci',
+      options: { result: win('p1', 'ANTI_STALL') },
+      title: 'Você venceu',
+      reason: 'Anti-travamento: rodadas seguidas sem dano, e você terminou com mais vida',
+    },
+    {
+      name: 'anti-travamento, Duda venceu',
+      options: { result: win('p2', 'ANTI_STALL') },
+      title: 'Duda venceu',
+      reason: 'Anti-travamento: rodadas seguidas sem dano, e Duda terminou com mais vida',
+    },
+    {
+      name: 'empate por anti-travamento',
+      options: { result: DRAW },
+      title: 'Empate',
+      reason: 'Anti-travamento: rodadas seguidas sem dano e vidas iguais',
+    },
+    {
+      name: 'Duda caiu e não voltou (RECONNECT_TIMEOUT)',
+      options: { result: win('p1', 'FORFEIT'), cause: 'RECONNECT_TIMEOUT' },
+      title: 'Você venceu',
+      reason: 'Duda caiu e não voltou em 60 s',
+    },
+    {
+      name: 'eu caí e não voltei (RECONNECT_TIMEOUT)',
+      options: { result: win('p2', 'FORFEIT'), cause: 'RECONNECT_TIMEOUT' },
+      title: 'Duda venceu',
+      reason: 'Você caiu e não voltou em 60 s',
+    },
+    {
+      name: 'Duda estourou três tempos (AFK)',
+      options: { result: win('p1', 'FORFEIT'), cause: 'AFK' },
+      title: 'Você venceu',
+      reason: 'Duda estourou o tempo três vezes seguidas',
+    },
+    {
+      name: 'eu estourei três tempos (AFK)',
+      options: { result: win('p2', 'FORFEIT'), cause: 'AFK' },
+      title: 'Duda venceu',
+      reason: 'Você estourou o tempo três vezes seguidas',
+    },
+    {
+      name: 'Duda desistiu (CONCEDE)',
+      options: { result: win('p1', 'FORFEIT'), cause: 'CONCEDE' },
+      title: 'Você venceu',
+      reason: 'Duda desistiu',
+    },
+    {
+      name: 'eu desisti (CONCEDE)',
+      options: { result: win('p2', 'FORFEIT'), cause: 'CONCEDE' },
+      title: 'Duda venceu',
+      reason: 'Você desistiu',
+    },
+    {
+      name: 'os dois saíram (ABANDONED)',
+      options: { result: null, cause: 'ABANDONED' },
+      title: 'Partida sem resultado',
+      reason: 'Os dois saíram da sala',
+    },
+    {
+      name: 'sou o p2: a frase é minha, não do p1',
+      options: { me: 'p2', result: win('p2', 'HP') },
+      title: 'Você venceu',
+      reason: 'A vida de Duda chegou a 0',
+    },
+  ];
+
+  it.each(CASES)('$name', ({ options, title, reason }) => {
+    mount(options);
+    const dialog = endDialog(title);
+    expect(within(dialog).getByText(reason)).toBeInTheDocument();
+    expect(dialog).toHaveAccessibleDescription(reason);
+  });
+
+  it('mostra o placar da sala do meu ponto de vista, com os empates', () => {
+    mount({ score: { p1: 2, p2: 1, draws: 1 } });
+    expect(within(endDialog('Você venceu')).getByText('André 2 × 1 Duda · 1 empate')).toBeInTheDocument();
+  });
+
+  it('o placar do p2 vem invertido', () => {
+    mount({ me: 'p2', result: win('p2', 'HP'), score: { p1: 2, p2: 3, draws: 2 } });
+    expect(within(endDialog('Você venceu')).getByText('André 3 × 2 Duda · 2 empates')).toBeInTheDocument();
+  });
+
+  it('os números do placar usam a fonte de texto com algarismos tabulares', () => {
+    mount();
+    expect(within(endDialog('Você venceu')).getByText('André 0 × 0 Duda')).toHaveClass('tabular-nums');
+  });
+
+  it('o painel abre como diálogo modal (showModal) e o foco entra nele', () => {
+    const showModal = vi.spyOn(HTMLDialogElement.prototype, 'showModal');
+    mount();
+    expect(showModal).toHaveBeenCalled();
+    expect(endDialog('Você venceu').contains(document.activeElement)).toBe(true);
+  });
+
+  it('a mesa final continua na tela, por baixo do painel', () => {
+    mount();
+    expect(screen.getByRole('main', { name: 'Mesa' })).toBeInTheDocument();
+  });
+
+  it('em partida em curso não há painel de fim', () => {
+    mount({ status: 'PLAYING' });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByText('Fim da partida')).not.toBeInTheDocument();
+  });
+
+  it('FINISHED sem outcome ainda não desenha o painel', () => {
+    const m = mount();
+    const room = roomOf({});
+    delete room.outcome;
+    act(() => m.connection.emitRoom(room));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('espera as batidas do último golpe: o painel só chega depois da cena da Exódia', () => {
+    const m = connect(THEIRS);
+    render(<PlayTable session={m.session} />);
+    emit(m, EXODIA_OVER, [EXODIA]);
+    act(() =>
+      m.connection.emitRoom(
+        roomMessage({
+          status: 'FINISHED',
+          seats: [
+            { playerId: 'p1', nickname: 'André', connected: true, ready: false, wantsRematch: false },
+            { playerId: 'p2', nickname: 'Duda', connected: true, ready: false, wantsRematch: false },
+          ],
+          outcome: { gameNo: 1, result: win('p2', 'EXODIA'), cause: 'NORMAL' },
+        }),
+      ),
+    );
+    // A cena da Exódia ainda toca: o painel não a cobre.
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    advance(2_000);
+    expect(screen.getByRole('dialog', { name: 'Duda venceu' })).toBeInTheDocument();
+  });
+});
+
+describe('revanche', () => {
+  it('"Revanche" pede a revanche e o botão só marca quando o servidor confirma', async () => {
+    const m = mount();
+    const button = within(endDialog('Você venceu')).getByRole('button', { name: 'Revanche' });
+    expect(button).toHaveAttribute('aria-pressed', 'false');
+    await m.user.click(button);
+    expect(calls(m)).toEqual(['rematch:true']);
+    expect(button).toHaveAttribute('aria-pressed', 'false');
+    m.push({ mineWants: true });
+    expect(within(endDialog('Você venceu')).getByRole('button', { name: 'Revanche' })).toHaveAttribute('aria-pressed', 'true');
+    expect(within(endDialog('Você venceu')).getByText('esperando Duda')).toBeInTheDocument();
+  });
+
+  it('com a revanche pedida, o botão alterna e retira o pedido', async () => {
+    const m = mount({ mineWants: true });
+    await m.user.click(within(endDialog('Você venceu')).getByRole('button', { name: 'Revanche' }));
+    expect(calls(m)).toEqual(['rematch:false']);
+  });
+
+  it('com Duda pedindo, mostra "Duda quer revanche"', () => {
+    mount({ theirsWants: true });
+    const dialog = endDialog('Você venceu');
+    expect(within(dialog).getByText('Duda quer revanche')).toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: 'Revanche' })).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('sem pedido nenhum não há texto de estado', () => {
+    mount();
+    const dialog = endDialog('Você venceu');
+    expect(within(dialog).queryByText(/esperando|quer revanche|saiu da sala/)).not.toBeInTheDocument();
+  });
+
+  it('Duda fora da sala: avisa, e o pedido espera ele voltar', () => {
+    const m = mount({ theirsAway: true });
+    expect(within(endDialog('Você venceu')).getByText('Duda saiu da sala')).toBeInTheDocument();
+    m.push({ theirsAway: true, mineWants: true });
+    expect(within(endDialog('Você venceu')).getByText('esperando Duda voltar')).toBeInTheDocument();
+  });
+
+  it('o estado da revanche é uma região viva', () => {
+    mount({ theirsWants: true });
+    expect(within(endDialog('Você venceu')).getByRole('status')).toHaveTextContent('Duda quer revanche');
+  });
+
+  it('com a conexão caída o botão fica desligado', () => {
+    const m = mount();
+    act(() => m.connection.emitClosed(1006));
+    expect(within(endDialog('Você venceu')).getByRole('button', { name: 'Revanche' })).toBeDisabled();
+  });
+
+  it('quando a nova partida começa (status volta a PLAYING), o painel some', () => {
+    const m = mount({ mineWants: true, theirsWants: true });
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    act(() => {
+      m.connection.emitRoom(roomOf({}, { status: 'PLAYING', gameNo: 2 }));
+      m.connection.emitState(stateMessage(scenarioAt({ me: 'p1' }).view, { seq: 5, epoch: 5 }));
+    });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Resultado da partida' })).not.toBeInTheDocument();
+  });
+});
+
+describe('fim de partida: Ver a mesa e Nova sala', () => {
+  it('"Ver a mesa" recolhe o painel numa faixa que diz o resultado e o estado da revanche', async () => {
+    const m = mount({ theirsWants: true });
+    await m.user.click(within(endDialog('Você venceu')).getByRole('button', { name: 'Ver a mesa' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    const strip = screen.getByRole('region', { name: 'Resultado da partida' });
+    expect(within(strip).getByText('Você venceu')).toBeInTheDocument();
+    expect(within(strip).getByText('Duda quer revanche')).toBeInTheDocument();
+    expect(within(strip).getByRole('button', { name: 'Mostrar o resultado' })).toHaveFocus();
+  });
+
+  it('"Mostrar o resultado" abre o painel de novo, e a revanche continua ao alcance', async () => {
+    const m = mount();
+    await m.user.click(within(endDialog('Você venceu')).getByRole('button', { name: 'Ver a mesa' }));
+    await m.user.click(screen.getByRole('button', { name: 'Mostrar o resultado' }));
+    expect(screen.queryByRole('region', { name: 'Resultado da partida' })).not.toBeInTheDocument();
+    await m.user.click(within(endDialog('Você venceu')).getByRole('button', { name: 'Revanche' }));
+    expect(calls(m)).toEqual(['rematch:true']);
+  });
+
+  it('Esc recolhe o painel, como "Ver a mesa"', async () => {
+    const m = mount();
+    await m.user.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Resultado da partida' })).toBeInTheDocument();
+  });
+
+  it('o recolhimento vale para uma partida só: o fim da próxima abre o painel de novo', async () => {
+    const m = mount();
+    await m.user.click(within(endDialog('Você venceu')).getByRole('button', { name: 'Ver a mesa' }));
+    act(() => {
+      m.connection.emitRoom(roomOf({}, { status: 'PLAYING', gameNo: 2 }));
+      m.connection.emitState(stateMessage(scenarioAt({ me: 'p1' }).view, { seq: 5, epoch: 5 }));
+    });
+    act(() => {
+      m.connection.emitRoom(roomOf({}, { gameNo: 2, result: win('p2', 'HP') }));
+      m.connection.emitState(stateMessage(viewOf({ result: win('p2', 'HP') }), { seq: 9, epoch: 9 }));
+    });
+    expect(screen.getByRole('dialog', { name: 'Duda venceu' })).toBeInTheDocument();
+  });
+
+  it('"Nova sala" chama onNewRoom', async () => {
+    const m = mount();
+    await m.user.click(within(endDialog('Você venceu')).getByRole('button', { name: 'Nova sala' }));
+    expect(m.onNewRoom).toHaveBeenCalledTimes(1);
+  });
+
+  it('sem onNewRoom (treino), o botão "Nova sala" não existe', () => {
+    mount({ props: { onNewRoom: undefined } });
+    expect(within(endDialog('Você venceu')).queryByRole('button', { name: 'Nova sala' })).not.toBeInTheDocument();
+  });
+
+});
+
+// ---------------------------------------------------------------------------------------------
+// Na sala de verdade (App → RoomGate → PlayTable), com a `RoomApi` de verdade sobre uma conexão falsa
+
+describe('na sala (RoomGate): Nova sala, link e versão', () => {
+  function realRoom(fetchImpl?: typeof fetch) {
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+    window.history.replaceState(null, '', `/s/${CODE}`);
+    const store = safeStore(window.localStorage).store;
+    saveSeat(store, CODE, seat());
+    const made: FakeConnection[] = [];
+    const api = createRoomApi({
+      store,
+      server: 'http://localhost:3000',
+      fetchImpl,
+      makeClient: () => {
+        const connection = new FakeConnection({
+          playerId: 'p1',
+          room: roomOf({}),
+          state: stateMessage(viewOf({})),
+        });
+        made.push(connection);
+        return connection;
+      },
+    });
+    const user = userEvent.setup();
+    const rendered = render(<App api={api} />);
+    return { made, user, ...rendered };
+  }
+
+  it('"Nova sala" volta ao início, solta a sessão e fecha a conexão', async () => {
+    const { made, user } = realRoom();
+    await user.click(within(endDialog('Você venceu')).getByRole('button', { name: 'Nova sala' }));
+    expect(window.location.pathname).toBe('/');
+    expect(screen.getByRole('heading', { name: 'Jogo do Coringa' })).toBeInTheDocument();
+    expect(screen.queryByRole('main', { name: 'Mesa' })).not.toBeInTheDocument();
+    expect(made[0]!.calls).toContain('close');
+  });
+
+  it('o menu copia o link da sala e mostra a versão que /api/health devolve', async () => {
+    const fetchImpl = vi.fn(() => Promise.resolve(new Response(JSON.stringify({ ok: true, version: '9.9.9' }))));
+    const { user } = realRoom(fetchImpl);
+    const writeText = vi.fn(() => Promise.resolve());
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+    await user.click(within(endDialog('Você venceu')).getByRole('button', { name: 'Ver a mesa' }));
+    expect(fetchImpl).not.toHaveBeenCalled();
+    await user.click(menuButton());
+    expect(await within(menuDialog()).findByText('Versão publicada: 9.9.9')).toBeInTheDocument();
+    expect(fetchImpl).toHaveBeenCalledExactlyOnceWith('http://localhost:3000/api/health');
+    await user.click(within(menuDialog()).getByRole('button', { name: 'Copiar link da sala' }));
+    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/s/${CODE}`);
+  });
+
+  it('as preferências do menu vão para o coringa:prefs do navegador', async () => {
+    const { user } = realRoom();
+    await user.click(within(endDialog('Você venceu')).getByRole('button', { name: 'Ver a mesa' }));
+    await user.click(menuButton());
+    await user.click(within(menuDialog()).getByRole('switch', { name: 'Passar sozinho quando não tenho resposta' }));
+    expect(JSON.parse(window.localStorage.getItem('coringa:prefs')!)).toEqual({ autoPass: false, reduceMotion: false });
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// Menu da partida (spec §2.4)
+
+describe('menu da partida', () => {
+  it('fica fechado até o botão; o botão abre um diálogo modal e o foco entra nele', async () => {
+    const showModal = vi.spyOn(HTMLDialogElement.prototype, 'showModal');
+    const m = mount({ status: 'PLAYING' });
+    expect(screen.queryByRole('dialog', { name: 'Menu da partida' })).not.toBeInTheDocument();
+    await m.user.click(menuButton());
+    expect(showModal).toHaveBeenCalledTimes(1);
+    expect(menuDialog().contains(document.activeElement)).toBe(true);
+  });
+
+  it('o botão do menu tem alvo de toque de 44 px e anuncia que abre um diálogo', () => {
+    mount({ status: 'PLAYING' });
+    expect(menuButton()).toHaveAttribute('aria-haspopup', 'dialog');
+    expect(menuButton().className).toContain('size-11');
+  });
+
+  it('fechar devolve o foco ao botão que abriu', async () => {
+    const m = mount({ status: 'PLAYING' });
+    const opener = menuButton();
+    await m.user.click(opener);
+    await m.user.click(within(menuDialog()).getByRole('button', { name: 'Fechar' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(opener).toHaveFocus();
+  });
+
+  it('Esc fecha o menu', async () => {
+    const m = mount({ status: 'PLAYING' });
+    await m.user.click(menuButton());
+    await m.user.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('a mesa só para ver (sem onOpenMenu) não tem botão de menu', () => {
+    const connection = new FakeConnection({ room: roomOf({}), state: stateMessage(viewOf({})) });
+    const session = new Session(connection, { now: () => 0, setTimer: () => 0, clearTimer: () => undefined });
+    render(<Table snapshot={session.snapshot()} remainingMs={() => 0} />);
+    expect(screen.queryByRole('button', { name: 'Menu da partida' })).not.toBeInTheDocument();
+  });
+
+  describe('copiar o link', () => {
+    const LINK = `http://localhost:3000/s/${CODE}`;
+
+    it('escreve o link da sala na área de transferência e avisa', async () => {
+      const m = mount({ status: 'PLAYING', props: { inviteLink: LINK } });
+      const writeText = vi.fn(() => Promise.resolve());
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+      await m.user.click(menuButton());
+      await m.user.click(within(menuDialog()).getByRole('button', { name: 'Copiar link da sala' }));
+      expect(writeText).toHaveBeenCalledWith(LINK);
+      expect(await within(menuDialog()).findByText('Link copiado')).toBeInTheDocument();
+    });
+
+    it('sem área de transferência, manda copiar à mão', async () => {
+      const m = mount({ status: 'PLAYING', props: { inviteLink: LINK } });
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: undefined });
+      await m.user.click(menuButton());
+      await m.user.click(within(menuDialog()).getByRole('button', { name: 'Copiar link da sala' }));
+      expect(await within(menuDialog()).findByText(/Não deu para copiar/)).toBeInTheDocument();
+    });
+
+    it('sem link (treino), o botão não existe', async () => {
+      const m = mount({ status: 'PLAYING' });
+      await m.user.click(menuButton());
+      expect(within(menuDialog()).queryByRole('button', { name: 'Copiar link da sala' })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('as chaves gravam as preferências', () => {
+    const autoPass = () => within(menuDialog()).getByRole('switch', { name: 'Passar sozinho quando não tenho resposta' });
+    const reduce = () => within(menuDialog()).getByRole('switch', { name: 'Reduzir animações' });
+
+    it('"Passar sozinho" vem ligada; desligar grava autoPass: false na sessão e no armazenamento', async () => {
+      const m = mount({ status: 'PLAYING' });
+      await m.user.click(menuButton());
+      expect(autoPass()).toBeChecked();
+      await m.user.click(autoPass());
+      expect(autoPass()).not.toBeChecked();
+      expect(m.session.snapshot().prefs).toEqual({ autoPass: false, reduceMotion: false });
+      expect(loadPrefs(m.store)).toEqual({ autoPass: false, reduceMotion: false });
+    });
+
+    it('ligar de novo grava autoPass: true', async () => {
+      const m = mount({ status: 'PLAYING', prefs: { autoPass: false } });
+      await m.user.click(menuButton());
+      expect(autoPass()).not.toBeChecked();
+      await m.user.click(autoPass());
+      expect(loadPrefs(m.store).autoPass).toBe(true);
+    });
+
+    it('"Reduzir animações" grava reduceMotion e mantém o passe automático', async () => {
+      const m = mount({ status: 'PLAYING' });
+      await m.user.click(menuButton());
+      expect(reduce()).not.toBeChecked();
+      await m.user.click(reduce());
+      expect(reduce()).toBeChecked();
+      expect(loadPrefs(m.store)).toEqual({ autoPass: true, reduceMotion: true });
+      expect(m.session.snapshot().prefs.reduceMotion).toBe(true);
+    });
+
+    it('com o sistema pedindo menos movimento, a chave aparece ligada e travada, com o motivo', async () => {
+      vi.stubGlobal('matchMedia', (query: string) => ({
+        matches: true,
+        media: query,
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+      }));
+      const m = mount({ status: 'PLAYING' });
+      await m.user.click(menuButton());
+      expect(reduce()).toBeChecked();
+      expect(reduce()).toBeDisabled();
+      expect(reduce()).toHaveAccessibleDescription('Ligada porque o seu sistema pede menos movimento.');
+    });
+
+    it('sem armazenamento (treino sem store), a preferência vale só na sessão', async () => {
+      const m = mount({ status: 'PLAYING', props: { store: undefined } });
+      await m.user.click(menuButton());
+      await m.user.click(autoPass());
+      expect(m.session.snapshot().prefs.autoPass).toBe(false);
+    });
+
+    it('as chaves têm alvo de toque de 44 px', async () => {
+      const m = mount({ status: 'PLAYING' });
+      await m.user.click(menuButton());
+      expect(autoPass().closest('label')!.className).toContain('min-h-11');
+    });
+  });
+
+  describe('versão publicada', () => {
+    it('não busca antes de abrir; busca uma vez ao abrir e mostra a versão', async () => {
+      const loadVersion = vi.fn(() => Promise.resolve('1.4.2'));
+      const m = mount({ status: 'PLAYING', props: { loadVersion } });
+      expect(loadVersion).not.toHaveBeenCalled();
+      await m.user.click(menuButton());
+      expect(await within(menuDialog()).findByText('Versão publicada: 1.4.2')).toBeInTheDocument();
+      // Mexer numa chave redesenha o menu, mas não busca de novo.
+      await m.user.click(within(menuDialog()).getByRole('switch', { name: 'Reduzir animações' }));
+      expect(loadVersion).toHaveBeenCalledTimes(1);
+    });
+
+    it('cada abertura do menu busca uma vez', async () => {
+      const loadVersion = vi.fn(() => Promise.resolve('dev'));
+      const m = mount({ status: 'PLAYING', props: { loadVersion } });
+      await m.user.click(menuButton());
+      await m.user.click(within(menuDialog()).getByRole('button', { name: 'Fechar' }));
+      await m.user.click(menuButton());
+      expect(loadVersion).toHaveBeenCalledTimes(2);
+    });
+
+    it('falha ou resposta sem versão: nada aparece e nada quebra', async () => {
+      const loadVersion = vi.fn(() => Promise.reject(new Error('sem rede')));
+      const m = mount({ status: 'PLAYING', props: { loadVersion } });
+      await m.user.click(menuButton());
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(within(menuDialog()).queryByText(/Versão publicada/)).not.toBeInTheDocument();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+
+    it('sem loadVersion (treino), a linha da versão não existe', async () => {
+      const m = mount({ status: 'PLAYING' });
+      await m.user.click(menuButton());
+      expect(within(menuDialog()).queryByText(/Versão publicada/)).not.toBeInTheDocument();
+    });
+
+    it('fechar o menu antes de a versão chegar não atualiza nada', async () => {
+      let resolve!: (version: string | null) => void;
+      const loadVersion = vi.fn(() => new Promise<string | null>((r) => (resolve = r)));
+      const m = mount({ status: 'PLAYING', props: { loadVersion } });
+      await m.user.click(menuButton());
+      await m.user.click(within(menuDialog()).getByRole('button', { name: 'Fechar' }));
+      await act(async () => resolve('1.0.0'));
+      expect(screen.queryByText(/Versão publicada/)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Desistir', () => {
+    it('pede confirmação, e só "Confirmar" chama concede', async () => {
+      const m = mount({ status: 'PLAYING' });
+      await m.user.click(menuButton());
+      await m.user.click(within(menuDialog()).getByRole('button', { name: 'Desistir' }));
+      const confirm = screen.getByRole('dialog', { name: 'Desistir da partida?' });
+      expect(within(confirm).getByText('Você perde esta partida por W.O.')).toBeInTheDocument();
+      expect(m.connection.sent).toEqual([]);
+      await m.user.click(within(confirm).getByRole('button', { name: 'Confirmar' }));
+      expect(m.connection.sent).toHaveLength(1);
+      expect(m.connection.sent[0]!.type).toBe('concede');
+    });
+
+    it('"Cancelar" não desiste e deixa o menu aberto, com o foco de volta em "Desistir"', async () => {
+      const m = mount({ status: 'PLAYING' });
+      await m.user.click(menuButton());
+      const concede = within(menuDialog()).getByRole('button', { name: 'Desistir' });
+      await m.user.click(concede);
+      await m.user.click(within(screen.getByRole('dialog', { name: 'Desistir da partida?' })).getByRole('button', { name: 'Cancelar' }));
+      expect(m.connection.sent).toEqual([]);
+      expect(screen.queryByRole('dialog', { name: 'Desistir da partida?' })).not.toBeInTheDocument();
+      expect(menuDialog()).toBeInTheDocument();
+      expect(concede).toHaveFocus();
+    });
+
+    it('a confirmação abre com o foco no "Cancelar" (o gesto seguro)', async () => {
+      const m = mount({ status: 'PLAYING' });
+      await m.user.click(menuButton());
+      await m.user.click(within(menuDialog()).getByRole('button', { name: 'Desistir' }));
+      expect(within(screen.getByRole('dialog', { name: 'Desistir da partida?' })).getByRole('button', { name: 'Cancelar' })).toHaveFocus();
+    });
+
+    it('depois de confirmar, os dois diálogos fecham', async () => {
+      const m = mount({ status: 'PLAYING' });
+      await m.user.click(menuButton());
+      await m.user.click(within(menuDialog()).getByRole('button', { name: 'Desistir' }));
+      await m.user.click(within(screen.getByRole('dialog', { name: 'Desistir da partida?' })).getByRole('button', { name: 'Confirmar' }));
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('uma recusa do concede não derruba a tela', async () => {
+      const m = mount({ status: 'PLAYING' });
+      m.connection.acks.push({ ok: false, code: 'NOT_PLAYING', message: 'acabou' });
+      await m.user.click(menuButton());
+      await m.user.click(within(menuDialog()).getByRole('button', { name: 'Desistir' }));
+      await m.user.click(within(screen.getByRole('dialog', { name: 'Desistir da partida?' })).getByRole('button', { name: 'Confirmar' }));
+      expect(screen.getByRole('main', { name: 'Mesa' })).toBeInTheDocument();
+    });
+
+    it('com a partida acabada não há "Desistir"', async () => {
+      const m = mount();
+      await m.user.click(within(endDialog('Você venceu')).getByRole('button', { name: 'Ver a mesa' }));
+      await m.user.click(menuButton());
+      expect(within(menuDialog()).queryByRole('button', { name: 'Desistir' })).not.toBeInTheDocument();
+    });
+
+    it('com a conexão caída o botão fica desligado', async () => {
+      const m = mount({ status: 'PLAYING' });
+      act(() => m.connection.emitClosed(1006));
+      await m.user.click(menuButton());
+      expect(within(menuDialog()).getByRole('button', { name: 'Desistir' })).toBeDisabled();
+    });
+  });
+
+  describe('resumo das regras', () => {
+    const open = async (m: Mounted) => {
+      await m.user.click(menuButton());
+      const opener = within(menuDialog()).getByRole('button', { name: 'Resumo das regras' });
+      await m.user.click(opener);
+      return opener;
+    };
+
+    it('abre um <dialog> modal com as seções das regras, e o foco entra nele', async () => {
+      const showModal = vi.spyOn(HTMLDialogElement.prototype, 'showModal');
+      const m = mount({ status: 'PLAYING' });
+      await open(m);
+      expect(showModal).toHaveBeenCalledTimes(2);
+      const rules = screen.getByRole('dialog', { name: 'Resumo das regras' });
+      expect(rules.contains(document.activeElement)).toBe(true);
+      const headings = within(rules)
+        .getAllByRole('heading', { level: 3 })
+        .map((h) => h.textContent);
+      expect(headings).toEqual(['Objetivo', 'Rodadas', 'O ataque', 'Cartas especiais', 'Janela de reação', 'Combos', 'Fim da partida']);
+      expect(within(rules).getByText(/Zere a vida do Coringa do oponente/)).toBeInTheDocument();
+      expect(within(rules).getByText(/Exódia \(4 K na Guarda\)/)).toBeInTheDocument();
+    });
+
+    it('"Fechar" devolve o foco ao botão "Resumo das regras" e deixa o menu aberto', async () => {
+      const m = mount({ status: 'PLAYING' });
+      const opener = await open(m);
+      await m.user.click(within(screen.getByRole('dialog', { name: 'Resumo das regras' })).getByRole('button', { name: 'Fechar' }));
+      expect(screen.queryByRole('dialog', { name: 'Resumo das regras' })).not.toBeInTheDocument();
+      expect(menuDialog()).toBeInTheDocument();
+      expect(opener).toHaveFocus();
+    });
+
+    it('Esc fecha só o das regras', async () => {
+      const m = mount({ status: 'PLAYING' });
+      const opener = await open(m);
+      await m.user.keyboard('{Escape}');
+      expect(screen.queryByRole('dialog', { name: 'Resumo das regras' })).not.toBeInTheDocument();
+      expect(menuDialog()).toBeInTheDocument();
+      expect(opener).toHaveFocus();
+    });
+  });
+
+  it('o Esc que fecha o menu não cancela a escolha da mão nem pula nada fora dele', async () => {
+    const m = mount({ status: 'PLAYING' });
+    await m.user.click(menuButton());
+    fireEvent.keyDown(menuDialog(), { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByRole('main', { name: 'Mesa' })).toBeInTheDocument();
+  });
+
+  it('no fim da partida o menu continua à mão (sem "Desistir")', async () => {
+    const m = mount({ props: { inviteLink: `http://localhost/s/${CODE}` } });
+    await m.user.click(within(endDialog('Você venceu')).getByRole('button', { name: 'Ver a mesa' }));
+    await m.user.click(menuButton());
+    expect(within(menuDialog()).getByRole('button', { name: 'Copiar link da sala' })).toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// /api/health
+
+describe('fetchVersion', () => {
+  const answer = (body: unknown, ok = true) => vi.fn(() => Promise.resolve({ ok, json: () => Promise.resolve(body) } as Response));
+
+  it('lê a versão de /api/health, na origem do servidor', async () => {
+    const fetchImpl = answer({ ok: true, version: '2026.10.21' });
+    expect(await fetchVersion('https://coringa.example', fetchImpl)).toBe('2026.10.21');
+    expect(fetchImpl).toHaveBeenCalledWith('https://coringa.example/api/health');
+  });
+
+  it('falha de rede, resposta recusada ou corpo estranho viram null, sem lançar', async () => {
+    expect(await fetchVersion('https://x.example', vi.fn(() => Promise.reject(new Error('rede'))))).toBeNull();
+    expect(await fetchVersion('https://x.example', answer({ ok: false }, false))).toBeNull();
+    expect(await fetchVersion('https://x.example', answer({ ok: true }))).toBeNull();
+    expect(await fetchVersion('https://x.example', answer('texto'))).toBeNull();
+    expect(await fetchVersion('https://x.example', answer(null))).toBeNull();
+    expect(
+      await fetchVersion('https://x.example', vi.fn(() => Promise.resolve({ ok: true, json: () => Promise.reject(new Error('json')) } as Response))),
+    ).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// Acessibilidade (spec §7)
+
+describe('acessibilidade', () => {
+  it('axe: o painel de fim aberto não tem violações sérias', async () => {
+    const { container } = mount({ theirsWants: true, score: { p1: 1, p2: 0, draws: 1 } });
+    expect(await seriousViolations(container)).toEqual([]);
+  });
+
+  it('axe: a faixa recolhida não tem violações sérias', async () => {
+    const m = mount();
+    await m.user.click(within(endDialog('Você venceu')).getByRole('button', { name: 'Ver a mesa' }));
+    expect(await seriousViolations(m.container)).toEqual([]);
+  });
+
+  it('axe: o menu aberto não tem violações sérias', async () => {
+    const m = mount({ status: 'PLAYING', props: { inviteLink: `http://localhost/s/${CODE}`, loadVersion: () => Promise.resolve('1.0.0') } });
+    await m.user.click(menuButton());
+    expect(await seriousViolations(m.container)).toEqual([]);
+  });
+
+  it('axe: o resumo das regras e a confirmação de desistir não têm violações sérias', async () => {
+    const m = mount({ status: 'PLAYING' });
+    await m.user.click(menuButton());
+    await m.user.click(within(menuDialog()).getByRole('button', { name: 'Resumo das regras' }));
+    expect(await seriousViolations(m.container)).toEqual([]);
+    await m.user.click(within(screen.getByRole('dialog', { name: 'Resumo das regras' })).getByRole('button', { name: 'Fechar' }));
+    await m.user.click(within(menuDialog()).getByRole('button', { name: 'Desistir' }));
+    expect(await seriousViolations(m.container)).toEqual([]);
+  });
+});

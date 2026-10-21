@@ -1,6 +1,6 @@
 // Textos das jogadas da mesa, em pt-BR (spec §3.4). Fora da meta de cobertura: é só texto.
-import type { AttackPreview, Card, RowName, SpecialCard } from '@coringa/engine';
-import type { DeadlineKind } from '@coringa/protocol';
+import type { AttackPreview, Card, PlayerId, RowName, SpecialCard } from '@coringa/engine';
+import type { DeadlineKind, Outcome, Score } from '@coringa/protocol';
 import { cardText, ROW_NAME } from '@coringa/sim/text';
 import { previewChanged, type Previews } from './preview.ts';
 import type { SceneKind } from './timeline.ts';
@@ -284,3 +284,154 @@ export const SCENE_TITLE: Record<SceneKind, string> = {
   REFLECT_PLAYED: 'REFLECT',
   REFLECT_TRIGGERED: 'REFLECT',
 };
+
+// ---------------------------------------------------------------------------------------------
+// Fim da partida e revanche (spec §2.5)
+
+/** Os apelidos da sala, do ponto de vista de quem olha (`tableNames`). */
+export interface OutcomeNames {
+  self: string;
+  opponent: string;
+}
+
+export const END_EYEBROW = 'Fim da partida';
+export const REMATCH_LABEL = 'Revanche';
+export const VIEW_TABLE_LABEL = 'Ver a mesa';
+export const NEW_ROOM_LABEL = 'Nova sala';
+export const SHOW_RESULT_LABEL = 'Mostrar o resultado';
+export const SCORE_LABEL = 'Placar';
+
+/** Quem é o jogador `id` na frase: "Você" ou o apelido do oponente. */
+const whoText = (id: PlayerId, me: PlayerId, names: OutcomeNames): string => (id === me ? 'Você' : names.opponent);
+
+/** "Você venceu", "Duda venceu", "Empate" ou "Partida sem resultado". */
+export function resultTitle(outcome: Outcome, me: PlayerId, names: OutcomeNames): string {
+  const { result } = outcome;
+  if (result === null) return 'Partida sem resultado';
+  if (result.kind === 'DRAW') return 'Empate';
+  return `${whoText(result.winner, me, names)} venceu`;
+}
+
+/**
+ * Por que a partida acabou. Uma `cause` diferente de `NORMAL` vem do servidor (W.O.) e vale mais que o motivo do motor,
+ * que nesses casos é só `FORFEIT`. Nos W.O., quem perdeu é o outro jogador, e a frase muda de pessoa ("Você" ou o apelido).
+ */
+export function reasonText(outcome: Outcome, me: PlayerId, names: OutcomeNames): string {
+  const { result, cause } = outcome;
+  if (result === null) return 'Os dois saíram da sala';
+  if (result.kind === 'DRAW') return 'Anti-travamento: rodadas seguidas sem dano e vidas iguais';
+  const won = result.winner === me;
+  const loser = won ? names.opponent : 'Você';
+  if (cause === 'RECONNECT_TIMEOUT') return `${loser} caiu e não voltou em 60 s`;
+  if (cause === 'AFK') return `${loser} estourou o tempo três vezes seguidas`;
+  if (cause === 'CONCEDE') return `${loser} desistiu`;
+  switch (result.reason) {
+    case 'HP':
+      return won ? `A vida de ${names.opponent} chegou a 0` : 'Sua vida chegou a 0';
+    case 'EXODIA':
+      return `${won ? 'Você' : names.opponent} montou a Exódia`;
+    case 'ANTI_STALL':
+      return `Anti-travamento: rodadas seguidas sem dano, e ${won ? 'você' : names.opponent} terminou com mais vida`;
+    case 'FORFEIT':
+      return `${loser} perdeu por W.O.`;
+  }
+}
+
+/** "André 1 × 0 Duda · 2 empates": o placar da sala do ponto de vista de quem olha. */
+export function scoreText(score: Score, me: PlayerId, names: OutcomeNames): string {
+  const [mine, theirs] = me === 'p1' ? [score.p1, score.p2] : [score.p2, score.p1];
+  const draws = score.draws > 0 ? ` · ${score.draws} ${score.draws === 1 ? 'empate' : 'empates'}` : '';
+  return `${names.self} ${mine} × ${theirs} ${names.opponent}${draws}`;
+}
+
+/** O estado da revanche sob o botão; `null` quando nenhum dos dois pediu e o oponente está na sala. */
+export function rematchStatusText(opponent: string, mine: boolean, theirs: boolean, away: boolean): string | null {
+  if (mine) return away ? `esperando ${opponent} voltar` : theirs ? 'começando a revanche…' : `esperando ${opponent}`;
+  if (theirs) return `${opponent} quer revanche`;
+  return away ? `${opponent} saiu da sala` : null;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Menu da partida (spec §2.4)
+
+export const MENU_LABEL = 'Menu da partida';
+export const COPY_LINK_LABEL = 'Copiar link da sala';
+export const AUTO_PASS_LABEL = 'Passar sozinho quando não tenho resposta';
+export const REDUCE_MOTION_LABEL = 'Reduzir animações';
+export const REDUCE_MOTION_SYSTEM_HINT = 'Ligada porque o seu sistema pede menos movimento.';
+export const SWITCH_ON = 'Ligado';
+export const SWITCH_OFF = 'Desligado';
+export const RULES_LABEL = 'Resumo das regras';
+export const CONCEDE_LABEL = 'Desistir';
+export const CONCEDE_TITLE = 'Desistir da partida?';
+export const CONCEDE_WARNING = 'Você perde esta partida por W.O.';
+export const versionText = (version: string): string => `Versão publicada: ${version}`;
+
+// ---------------------------------------------------------------------------------------------
+// Resumo das regras (spec 1 §1.6 a §1.8; o autor revisa o texto no PR)
+
+export interface RulesSection {
+  title: string;
+  items: readonly string[];
+}
+
+export const RULES_SECTIONS: readonly RulesSection[] = [
+  {
+    title: 'Objetivo',
+    items: ['Zere a vida do Coringa do oponente (cada um começa com 300) ou monte a Exódia.'],
+  },
+  {
+    title: 'Rodadas',
+    items: [
+      'O ciclo é Equipar, Equipar, Ataque, Equipar, Ataque, e assim por diante.',
+      'Equipar: cada jogador recebe 4 cartas. As especiais (J, Q, K, A e Coringa Selvagem) vão para a mão. As numéricas vão para o campo, na ordem em que saíram do monte, e você só escolhe o destino: a fileira de Ataque ou a de Defesa (7 cartas no máximo em cada). Os dois montam ao mesmo tempo, em segredo.',
+      'Ataque: quem tem a iniciativa escolhe atacar primeiro ou em segundo. Cada jogador tem um turno: joga as especiais que quiser e declara o ataque, que é obrigatório se a fileira de Ataque tiver cartas.',
+    ],
+  },
+  {
+    title: 'O ataque',
+    items: [
+      'ATK = (soma da fileira de Ataque + bônus de quadra) × (1 + número de J + Pressão da mesa).',
+      'DEF = (soma da fileira de Defesa + bônus de quadra) × (1 + número de Q).',
+      'O dano é ATK menos DEF, no mínimo 0. Depois, a primeira carta da fileira de Ataque de quem atacou e a primeira da fileira de Defesa de quem defendeu vão para o cemitério.',
+      'Se o ataque causaria dano e o alvo tem K na Guarda, 1 K absorve todo o dano e quebra.',
+    ],
+  },
+  {
+    title: 'Cartas especiais',
+    items: [
+      'J (Buff de Ataque) e Q (Buff de Defesa): cada um soma 1 ao multiplicador de ataque ou de defesa. Cabem 4 de cada.',
+      'K (Guarda): absorve o dano, como acima. Você pode jogar vários K de uma vez; o oponente ganha uma janela de reação.',
+      'A (Armadilha): destrói 1 J, Q ou K do campo do oponente. Vale no seu turno ou na janela de reação. Não alcança um Reflect ativo nem quem está sob Defesa Absoluta.',
+      'Sacrifício: no seu turno, descarte um J da mão para destruir um J do oponente, ou um Q para destruir um Q. Não funciona contra Defesa Absoluta.',
+      'Coringa Selvagem: assume o papel de J, Q ou A, nunca o de K.',
+      'Reflect (K + J + Q da mão, no seu turno): fica ativo até o fim do próximo turno de ataque do oponente. Se ele atacar, perde todos os seus K e Q e leva o dano de volta, menos metade da Defesa base dele, e você não leva nada. Para anular o Reflect, o oponente joga K + J + Q da mão ou sacrifica J + Q + K do próprio campo.',
+    ],
+  },
+  {
+    title: 'Janela de reação',
+    items: [
+      'Abre para o oponente quando você declara ataque, joga K ou lança um Reflect, mesmo que ele não tenha resposta.',
+      'Quem responde pode usar A (contra o ataque ou o K) ou, contra um Reflect, anulá-lo ou se proteger. Depois passa. Não há resposta a uma resposta.',
+    ],
+  },
+  {
+    title: 'Combos',
+    items: [
+      'Quadra: 4 ou mais numéricas do mesmo valor na mesma fileira somam esse valor à fileira e dão 1 Ressurreição.',
+      'Ressurreição: no seu turno, traz 1 numérica do cemitério para o fim de uma fileira com vaga. Vale uma vez por quadra.',
+      'Defesa Absoluta (4 Q): até o fim do próximo turno de ataque do oponente, você é imune a dano, a Armadilha e a Sacrifício, e a fileira de Defesa não perde cartas. Ao acabar, 1 Q vai para o cemitério.',
+      'Ataque Absoluto (4 J): multiplicador 5× e quebra todos os K do alvo. Depois do ataque, 1 J vai para o cemitério.',
+      'Exódia (4 K na Guarda): vence na hora, depois da janela de reação.',
+    ],
+  },
+  {
+    title: 'Fim da partida',
+    items: [
+      'Vida em 0 perde na hora.',
+      'Pressão da mesa: cada rodada de Ataque seguida sem dano soma 1 ao multiplicador de ataque dos dois jogadores. Volta a 0 quando alguém perde vida.',
+      'Anti-travamento: 5 rodadas de Ataque seguidas sem dano encerram a partida. Vence quem tiver mais vida; com vidas iguais, empata.',
+      'W.O.: perde quem fica mais de 1 minuto fora da sala ou estoura o tempo três vezes seguidas.',
+    ],
+  },
+];

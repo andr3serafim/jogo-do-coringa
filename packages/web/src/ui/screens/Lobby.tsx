@@ -3,6 +3,7 @@
 import { roomLink, type SeatInfo } from '@coringa/protocol';
 import { useId, useState } from 'react';
 import type { Session } from '../../model/session.ts';
+import { copyText } from '../clipboard.ts';
 import { Button, Panel, Title } from '../parts.tsx';
 import { COPY_FAILED, LINK_COPIED, LOBBY_DROPPED, LOBBY_WO_NOTICE, SHARE_FAILED } from '../text.ts';
 import { useSession } from '../useSession.ts';
@@ -64,15 +65,7 @@ export function Lobby({ session }: { session: Session }) {
   }
 
   async function copy() {
-    try {
-      // Fora de contexto seguro (http num IP da rede local) não há `navigator.clipboard`.
-      const clipboard = navigator.clipboard as Clipboard | undefined;
-      if (clipboard === undefined) throw new Error('sem área de transferência');
-      await clipboard.writeText(link);
-      setFeedback('copied');
-    } catch {
-      setFeedback('copyFailed');
-    }
+    setFeedback((await copyText(link)) ? 'copied' : 'copyFailed');
   }
 
   async function share() {

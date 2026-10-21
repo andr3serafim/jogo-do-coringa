@@ -20,12 +20,15 @@ import type { Deadline, PlayerAction, StateMessage } from '@coringa/protocol';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { isLegal, tablePlays, type CardPlay } from '../../model/plays.ts';
 import type { Session, SessionSnapshot } from '../../model/session.ts';
+import { savePrefs, type KeyValueStore, type Prefs } from '../../model/storage.ts';
 import { useAnim, useBoardBusy } from '../anim/context.ts';
 import { Stage } from '../anim/Stage.tsx';
 import { useReducedMotion } from '../anim/useReducedMotion.ts';
 import { useSession } from '../useSession.ts';
 import { ActionBar } from './ActionBar.tsx';
+import { EndPanel } from './EndPanel.tsx';
 import { EquipPanel } from './EquipPanel.tsx';
+import { GameMenu } from './GameMenu.tsx';
 import { GraveyardDialog, type GraveyardMode } from './GraveyardDialog.tsx';
 import { tableNames } from './labels.ts';
 import { OrderPanel } from './OrderPanel.tsx';
@@ -36,16 +39,25 @@ export interface PlayTableProps {
   session: Session;
   /** Avisos extras acima da mesa. Os de conexão e de queda do oponente a própria mesa mostra. */
   banner?: ReactNode;
+  /** Onde o menu grava as preferências (`coringa:prefs`). Sem ele, elas valem só nesta sessão. */
+  store?: KeyValueStore;
+  /** O link da sala, para "Copiar link da sala" no menu. Sem ele (treino) o botão não existe. */
+  inviteLink?: string;
+  /** Busca a versão publicada ao abrir o menu. Tem que ser estável entre renderizações; sem ele a linha não existe. */
+  loadVersion?: () => Promise<string | null>;
+  /** "Nova sala" no painel de fim: fecha a conexão e volta ao início. Sem ele o botão não existe. */
+  onNewRoom?: () => void;
 }
 
 /** Sem `state` ainda não há o que desenhar. */
-export function PlayTable({ session, banner }: PlayTableProps) {
+export function PlayTable(props: PlayTableProps) {
+  const { session } = props;
   const snapshot = useSession(session);
   const reducedMotion = useReducedMotion(snapshot.prefs.reduceMotion);
   if (snapshot.state === null) return null;
   return (
     <Stage snapshot={snapshot} reducedMotion={reducedMotion}>
-      <PlayTableView session={session} snapshot={snapshot} state={snapshot.state} banner={banner} />
+      <PlayTableView {...props} snapshot={snapshot} state={snapshot.state} />
     </Stage>
   );
 }
@@ -77,16 +89,19 @@ interface ViewProps extends PlayTableProps {
   state: StateMessage;
 }
 
-function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
+function PlayTableView({ session, snapshot, state, banner, store, inviteLink, loadVersion, onNewRoom }: ViewProps) {
   const { view } = state;
-  const { legal, pending } = snapshot;
+  const { legal, pending, room } = snapshot;
   const phase = view.phase.kind;
-  const names = tableNames(snapshot.room, view.me);
+  const names = tableNames(room, view.me);
   const remainingMs = useCallback((deadline: Deadline) => session.remainingMs(deadline), [session]);
   const now = useCallback(() => session.now(), [session]);
   const timedOut = useDeadlineExpired(state.deadline, remainingMs);
   const busy = useBoardBusy();
   const locked = pending || snapshot.status === 'reconnecting' || timedOut || busy;
+  // O painel de fim (spec §2.5) só vem com a sala em FINISHED e a mesa quieta: não cobre o golpe final nem a cena da Exódia.
+  const outcome = room?.status === 'FINISHED' ? room.outcome : undefined;
+  const showEnd = room !== null && outcome !== undefined && !busy;
 
   // A barra existe nas fases de jogada; o Equipar e a escolha da ordem têm painéis próprios.
   const barPhase = phase === 'ATTACK_MAIN' || phase === 'REACTION';
@@ -98,6 +113,7 @@ function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
   const [selection, setSelection] = useState<Selection | null>(null);
   const [pointedId, setPointedId] = useState<string | null>(null);
   const [graveyard, setGraveyard] = useState<GraveyardMode | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   /** Época em que o jogador mandou o PASS: o servidor segura o passe e recusa o resto da janela. */
   const [passedEpoch, setPassedEpoch] = useState<number | null>(null);
   /** O painel de baixo (barra, Equipar ou ordem), para a mesa levar o foco a ele quando chega a sua vez. */
@@ -238,13 +254,14 @@ function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
     moveFocus(barRef.current?.querySelector<HTMLElement>(`[data-step="${step}"] button:not(:disabled)`) ?? null);
   }, [cardId, playKey, hasTargets, moveFocus]);
 
-  // Chegou a sua vez de jogar (época nova): o foco vai para o painel, sem roubar de quem digita ou de um diálogo.
+  // Chegou a sua vez de jogar (época nova): o foco vai para o painel, sem roubar de quem digita ou de um diálogo. Na revanche
+  // o `state` novo pode chegar antes de o painel de fim sair: quando ele sai (`showEnd`), a vez conta de novo.
   const turnEpoch = acting || equipping || ordering ? state.epoch : null;
   useEffect(() => {
     if (turnEpoch === null) return;
     if (document.querySelector('dialog[open]') || isTextEntry(document.activeElement)) return;
     focusBar();
-  }, [turnEpoch, focusBar]);
+  }, [turnEpoch, showEnd, focusBar]);
 
   // Depois de ressuscitar pelo diálogo, o foco vai para a barra: o botão que abriu pode já nem existir.
   useEffect(() => {
@@ -254,6 +271,15 @@ function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
   }, [graveyard, focusBar]);
 
   const targetIds = useMemo(() => new Set(play?.targets?.map((t) => t.id) ?? []), [play]);
+
+  /** O menu troca as preferências: vão para o armazenamento (se há) e para a sessão, que as aplica já. */
+  const changePrefs = useCallback(
+    (prefs: Prefs) => {
+      if (store) savePrefs(store, prefs);
+      session.setPrefs(prefs);
+    },
+    [store, session],
+  );
 
   let panel: ReactNode;
   if (barPhase) {
@@ -345,6 +371,7 @@ function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
           if (!programmatic.current) session.markSeen(key);
         }}
         onOpenGraveyard={() => setGraveyard('view')}
+        onOpenMenu={() => setMenuOpen(true)}
         onInteract={interact}
         banner={banner}
         actionBar={panel}
@@ -363,6 +390,33 @@ function PlayTableView({ session, snapshot, state, banner }: ViewProps) {
         }}
         onClose={() => setGraveyard(null)}
       />
+      <GameMenu
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        prefs={snapshot.prefs}
+        onPrefs={changePrefs}
+        inviteLink={inviteLink}
+        loadVersion={loadVersion}
+        canConcede={room?.status === 'PLAYING' && phase !== 'GAME_OVER'}
+        concedeDisabled={snapshot.status === 'reconnecting'}
+        onConcede={() => void session.concede().catch(noop)}
+      />
+      {showEnd ? (
+        <EndPanel
+          // O recolhimento ("Ver a mesa") vale para uma partida só.
+          key={outcome.gameNo}
+          outcome={outcome}
+          score={room.score}
+          me={view.me}
+          names={names}
+          mineWants={room.seats.find((seat) => seat.playerId === view.me)?.wantsRematch ?? false}
+          theirsWants={room.seats.find((seat) => seat.playerId !== view.me)?.wantsRematch ?? false}
+          away={room.seats.find((seat) => seat.playerId !== view.me)?.connected === false}
+          disabled={snapshot.status === 'reconnecting'}
+          onRematch={(want) => session.rematch(want)}
+          onNewRoom={onNewRoom}
+        />
+      ) : null}
     </>
   );
 }

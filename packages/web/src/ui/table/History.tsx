@@ -52,6 +52,8 @@ export interface HistoryPanelProps {
   baseSeq: number | null;
   /** Sala e placar, ao pé da coluna. */
   footer?: ReactNode;
+  /** Ferramenta do cabeçalho (o botão do menu no PC, onde o histórico é uma coluna). */
+  tool?: ReactNode;
 }
 
 /** Até onde do fim da lista ainda conta como "no fim". */
@@ -61,7 +63,7 @@ const CLOSED = 'max-pc:sr-only';
 const OPEN =
   'max-pc:fixed max-pc:inset-x-0 max-pc:bottom-0 max-pc:z-40 max-pc:max-h-[70dvh] max-pc:border-t-4 max-pc:border-ouro max-pc:pb-[max(1rem,env(safe-area-inset-bottom))]';
 
-export function HistoryPanel({ id, open, onClose, lines, baseSeq, footer }: HistoryPanelProps) {
+export function HistoryPanel({ id, open, onClose, lines, baseSeq, footer, tool }: HistoryPanelProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -116,6 +118,7 @@ export function HistoryPanel({ id, open, onClose, lines, baseSeq, footer }: Hist
       >
         <div className="flex items-center justify-between">
           <h2 className="textura font-madeira text-[22px] uppercase">Histórico</h2>
+          {tool}
           <button
             type="button"
             ref={closeRef}

@@ -13,11 +13,14 @@ import {
 } from '@coringa/protocol';
 import { Session, type SessionDeps } from '../model/session.ts';
 import { loadPrefs, saveLastSeq, type KeyValueStore, type SeatSession } from '../model/storage.ts';
+import { fetchVersion } from './health.ts';
 
 export interface RoomApi {
   create(nickname: string): Promise<CreateRoomResponse>;
   join(code: string, nickname: string): Promise<JoinRoomResponse>;
   info(code: string): Promise<RoomInfoResponse>;
+  /** A versão publicada, de `/api/health` (spec §2.4); `null` se não deu para saber. Opcional: os falsos de teste não têm. */
+  version?: () => Promise<string | null>;
   /**
    * Abre a conexão da sala com o assento salvo e devolve a sessão dela. Quem recebe a sessão chama
    * `dispose()` ao sair: isso também fecha a conexão (veja `RoomSession`).
@@ -89,6 +92,7 @@ export function createRoomApi({ store, server, makeClient, fetchImpl }: RoomApiO
     create: (nickname) => createRoom(origin, nickname, fetchImpl),
     join: (code, nickname) => joinRoom(origin, code, nickname, fetchImpl),
     info: (code) => roomInfo(origin, code, fetchImpl),
+    version: () => fetchVersion(origin, fetchImpl),
     connect(code, seat) {
       const client = build({
         server: origin,

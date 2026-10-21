@@ -1,6 +1,6 @@
 // Entrar numa sala (spec §2.2) e viver nela (§6.2, §6.3). O lobby e a mesa são as telas de verdade; o fim de
-// partida (a Tarefa 23) ainda é a mesa final sem painel.
-import { HttpError, normalizeCode, normalizeNickname, parseTarget } from '@coringa/protocol';
+// partida (painel, revanche) e o menu da partida moram na própria mesa (`PlayTable`).
+import { HttpError, normalizeCode, normalizeNickname, parseTarget, roomLink } from '@coringa/protocol';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { openStore } from '../../app/browser-store.ts';
 import { clearDiagnosticContext, setDiagnosticContext } from '../../app/diagnostic-context.ts';
@@ -335,7 +335,7 @@ function Online({ code, seat, api, store, marks, reload, onAuth }: OnlineProps) 
   }, [api, code, seat, store, marks, reload, onAuth]);
 
   if (session === null) return <Connecting />;
-  return <OnlineRoom session={session} code={code} reload={reload} />;
+  return <OnlineRoom session={session} code={code} api={api} store={store} reload={reload} />;
 }
 
 function Connecting() {
@@ -346,7 +346,18 @@ function Connecting() {
   );
 }
 
-function OnlineRoom({ session, code, reload }: { session: Session; code: string; reload: () => void }) {
+/** "Nova sala": sair da tela da sala desmonta `Online`, cujo efeito descarta a sessão e fecha a conexão. */
+const goHome = (): void => navigate('/');
+
+interface OnlineRoomProps {
+  session: Session;
+  code: string;
+  api: RoomApi;
+  store: KeyValueStore;
+  reload: () => void;
+}
+
+function OnlineRoom({ session, code, api, store, reload }: OnlineRoomProps) {
   const snapshot = useSession(session);
   const seq = snapshot.state?.seq ?? null;
   const epoch = snapshot.state?.epoch ?? null;
@@ -376,5 +387,13 @@ function OnlineRoom({ session, code, reload }: { session: Session; code: string;
   // Partida em curso ou terminada: a mesa ocupa a tela inteira (sem a coluna do `Screen`) e leva os próprios avisos
   // (conexão, queda do oponente). Sem o primeiro `state` ainda, só o aviso de conexão.
   if (snapshot.state === null) return <Connecting />;
-  return <PlayTable session={session} />;
+  return (
+    <PlayTable
+      session={session}
+      store={store}
+      inviteLink={roomLink(window.location.origin, code)}
+      loadVersion={api.version}
+      onNewRoom={goHome}
+    />
+  );
 }

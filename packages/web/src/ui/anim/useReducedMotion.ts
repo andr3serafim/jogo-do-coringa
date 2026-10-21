@@ -16,8 +16,13 @@ function subscribe(onChange: () => void): () => void {
 
 const systemPrefers = (): boolean => query()?.matches ?? false;
 
+/** `true` se o sistema pede menos movimento (o menu mostra a chave ligada e travada). */
+export function useSystemReducedMotion(): boolean {
+  return useSyncExternalStore(subscribe, systemPrefers, () => false);
+}
+
 /** `true` se o menu (`prefs.reduceMotion`) ou o sistema pedem menos movimento. */
 export function useReducedMotion(menuPrefers: boolean): boolean {
-  const system = useSyncExternalStore(subscribe, systemPrefers, () => false);
+  const system = useSystemReducedMotion();
   return menuPrefers || system;
 }

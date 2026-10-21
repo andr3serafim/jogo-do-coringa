@@ -1,18 +1,19 @@
 // A mesa da Peleja desenhada a partir da `view` do último `state` (spec §3.1, §3.2, §3.3, §10): o oponente na
 // capa verde, em cima; a faixa central de tinta; você na capa rosa, embaixo, com a mão; e a coluna do histórico no
 // PC. É só vista: as interações chegam por props (`onSelectCard`, `onSelectTarget`, `onSeen`, `onOpenGraveyard`,
-// `onInteract`) e a barra de ação entra pelo `actionBar`. Quem liga isso à sessão é a `PlayTable`. A textura de xilogravura vai só nos títulos e no grão do papel, por baixo
+// `onOpenMenu`, `onInteract`) e a barra de ação entra pelo `actionBar`. Quem liga isso à sessão é a `PlayTable`. A textura de xilogravura vai só nos títulos e no grão do papel, por baixo
 // do conteúdo (spec §10.7).
 import type { PlayerId } from '@coringa/engine';
 import type { Deadline, StateMessage } from '@coringa/protocol';
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
-import { equipOpponentText } from '../../model/copy.ts';
+import { equipOpponentText, scoreText } from '../../model/copy.ts';
 import { completeDraft, draftBoard } from '../../model/equip.ts';
 import { newLineCount } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import { Banners } from './Banners.tsx';
 import { CenterBand } from './CenterBand.tsx';
 import { TableUiContext, type TableUi } from './context.ts';
+import { MenuButton } from './GameMenu.tsx';
 import { Hand } from './Hand.tsx';
 import { HistoryButton, HistoryPanel } from './History.tsx';
 import { tableNames, type TableNames } from './labels.ts';
@@ -34,6 +35,8 @@ export interface TableProps {
   onSeen?: (key: string) => void;
   /** Sem ele, o cemitério é só informação. */
   onOpenGraveyard?: () => void;
+  /** Abre o menu da partida. Sem ele, a mesa não tem botão de menu. */
+  onOpenMenu?: () => void;
   /** Um clique ou foco em qualquer parte da mesa (a sessão cancela a confirmação automática da ordem). */
   onInteract?: () => void;
   /** Avisos acima da mesa ("Reconectando…"). */
@@ -63,6 +66,7 @@ function TableView({
   onSelectTarget,
   onSeen,
   onOpenGraveyard,
+  onOpenMenu,
   onInteract,
   banner,
   actionBar,
@@ -159,13 +163,16 @@ function TableView({
               away={theirs?.connected === false}
               equip={equipping ? equipOpponentText(view.opponent.pendingCount, view.opponent.equipSubmitted) : undefined}
               tool={
-                <HistoryButton
-                  panelId={panelId}
-                  open={historyOpen}
-                  count={newLineCount(history, marksBaseSeq)}
-                  onToggle={() => (historyOpen ? closeHistory() : setHistoryOpen(true))}
-                  buttonRef={toggleRef}
-                />
+                <div className="flex items-center gap-2">
+                  <HistoryButton
+                    panelId={panelId}
+                    open={historyOpen}
+                    count={newLineCount(history, marksBaseSeq)}
+                    onToggle={() => (historyOpen ? closeHistory() : setHistoryOpen(true))}
+                    buttonRef={toggleRef}
+                  />
+                  {onOpenMenu ? <MenuButton onClick={onOpenMenu} className="pc:hidden" /> : null}
+                </div>
               }
             />
             <CenterBand
@@ -193,6 +200,7 @@ function TableView({
           open={historyOpen}
           onClose={closeHistory}
           lines={history.lines}
+          tool={onOpenMenu ? <MenuButton onClick={onOpenMenu} tone="papel" className="max-pc:hidden" /> : undefined}
           baseSeq={marksBaseSeq}
           footer={room ? <RoomFooter room={room} me={me} names={names} /> : null}
         />
@@ -210,8 +218,6 @@ function RoomFooter({
   me: PlayerId;
   names: TableNames;
 }) {
-  const [mine, theirs] = me === 'p1' ? [room.score.p1, room.score.p2] : [room.score.p2, room.score.p1];
-  const draws = room.score.draws > 0 ? ` · ${room.score.draws} ${room.score.draws === 1 ? 'empate' : 'empates'}` : '';
   return (
     <>
       <p>
@@ -223,8 +229,7 @@ function RoomFooter({
       <p>
         <span className="text-[11px] font-bold uppercase tracking-[0.12em]">Placar</span>{' '}
         <span data-numero className="font-texto tabular-nums">
-          {names.self} {mine} × {theirs} {names.opponent}
-          {draws}
+          {scoreText(room.score, me, names)}
         </span>
       </p>
     </>
