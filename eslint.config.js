@@ -3,6 +3,11 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 
+const TESTING_ONLY = {
+  name: '@coringa/engine/testing',
+  message: 'Os auxiliares de teste do motor são só para os testes (test/), nunca para o código de produção.',
+};
+
 /** Barra os imports e exports relativos cujo caminho não termina numa das extensões aceitas. */
 function relativeImportRule(extensions, message) {
   const unlisted = String.raw`[source.value=/^\./]:not([source.value=/\.(${extensions})$/])`;
@@ -61,13 +66,22 @@ export default defineConfig(
     rules: { 'react-hooks/exhaustive-deps': 'error' },
   },
   {
-    // O código da web vai para o navegador: nada de node:*, e o Zod dos esquemas fica fora do bundle (spec §1.1).
+    // Os auxiliares de teste do motor (`setup`, `act`...) são só para os testes: código de produção nunca os importa.
+    files: ['packages/*/src/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', { paths: [TESTING_ONLY] }],
+    },
+  },
+  {
+    // O código da web vai para o navegador: nada de node:*, e o Zod dos esquemas fica fora do bundle (spec §1.1). Esta regra
+    // substitui a de cima nos arquivos da web, então repete o subpath de teste.
     files: ['packages/web/src/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': [
         'error',
         {
           paths: [
+            TESTING_ONLY,
             {
               name: '@coringa/protocol/schemas',
               message: 'A web nunca importa os esquemas Zod do protocolo: eles ficam só no servidor.',

@@ -34,7 +34,7 @@ copiar só os campos com objeto.
 numérica que sobra tem 3 destinos: 3^k sequências, quase todas com o mesmo resultado (trocar duas vezes a última do Ataque é o
 mesmo que descartar a primeira e trocar com a segunda). Na config padrão são no máximo 81; com `cardsPerEquip` alto (o `pnpm sim`
 aceita) a lista explode. Conserto: na cauda com as fileiras cheias, só as sequências canônicas (no máximo uma troca por fileira,
-as outras cartas descartadas), (k+1)² no lugar de 3^k. O `handleEquip` continua aceitando qualquer sequência válida. A lista
+as outras cartas descartadas, nunca a mesma carta nas duas), k² + k + 1 no lugar de 3^k. O `handleEquip` continua aceitando qualquer sequência válida. A lista
 também muda na config padrão: conferir os bots, as partidas de referência e o Equipar carta a carta da web.
 
 **B5. Auxiliar "Ataque Absoluto armado".** Exportar `absoluteAttackArmed(side, config)` do motor (a mesma regra de

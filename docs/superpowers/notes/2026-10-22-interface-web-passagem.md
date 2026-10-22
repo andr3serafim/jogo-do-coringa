@@ -4,6 +4,11 @@ Resumo versionado da passagem do sub-projeto 3 (interface web, mesclada na `main
 (polimento). As notas originais ficaram fora do git, na pasta da sessão principal. Aqui ficam os follow-ups, os itens menores
 adiados que ainda valem e as decisões da execução que continuam de pé.
 
+**Estado depois das Fases A e B do polimento:** os follow-ups 1 a 6 da §1 estão resolvidos (1 e 2 na Fase A; 3 a 6 na Fase B,
+com a exceção do `resync` sem eventos, que segue marcando a mais). O 7 é do autor, no playtest. Na §2, saíram o
+`isAbsoluteAttack` morto, o `expired === 0`, a prop `banner` sem uso e o `passed` calculado duas vezes. O resto da §2 segue como
+está, cada item com o seu motivo.
+
 ## 1. Follow-ups (saídos da revisão final da `feat/web`)
 
 Nenhum bloqueou o merge. Os dois primeiros vêm antes do playtest do autor no PC (Fase A do polimento).
@@ -37,7 +42,7 @@ Cada um ficou de fora por ser pequeno ou de baixo risco; o motivo vem quando nã
 **Motor e simulador**
 - `equip.ts`: comentário de `autoDestinations` fala só do estouro; sem teste direto de que `timeoutEquip` passa os argumentos
   certos (as partidas de referência cobrem).
-- `combat.ts`: `isAbsoluteAttack` morto (a regra mora em `preview.ts`); `throw` só para estreitar tipo; ciclo de import
+- `combat.ts`: `throw` só para estreitar tipo; ciclo de import
   `combat.ts` ↔ `preview.ts` (carrega nas duas ordens).
 
 **Protocolo e servidor**
@@ -48,7 +53,6 @@ Cada um ficou de fora por ser pequeno ou de baixo risco; o motivo vem quando nã
 
 **Web: modelo**
 - `storage.ts`: um `remove` que lança depois da sonda faz o valor velho voltar; `available` fica fixo no resultado da sonda.
-- `clock.ts`: `expired` usa `=== 0` (`<= 0` seria mais robusto).
 - `session.ts`: timers da ordem e do Equipar não reconferem a época ao disparar (seguro pelas invariantes de cancelamento); ação
   automática perdida se houver jogada pendente na hora do disparo; aviso `autoPass` fica mesmo se o passe não sair.
 - `local-room.ts`: `#botPlay` sem reconferência de `actingPlayers` (seguro com um timer só); `phaseKey` copiado do servidor sem
@@ -60,8 +64,7 @@ Cada um ficou de fora por ser pequeno ou de baixo risco; o motivo vem quando nã
   `Lobby.tsx` fora de `text.ts`.
 - `RoomGate.tsx`: o efeito depende de `reload` (um pai com arrow inline recriaria a sessão); "Usar aqui" sem feedback de
   pendência.
-- `Table.tsx`: prop `banner` sem uso; `passed` calculado duas vezes (`PlayTable` e `ActionBar`); `handButton` consulta o documento
-  inteiro.
+- `PlayTable.tsx`: `handButton` consulta o documento inteiro.
 - Histórico: sem cabeçalho de rodada depois de um `resync`; a ref `atEnd` só atualiza na rolagem.
 - Cenas: `skip` muda de identidade a cada batida; LitRow/FxOverlay podem não reiniciar entre batidas seguidas no mesmo elemento;
   cena com movimento reduzido dura 1,5 s (a spec diz ~1 s); o painel da cena fica fora do ledger de flash (a faixa entrou nele na Fase A do polimento).

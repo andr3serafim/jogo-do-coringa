@@ -51,8 +51,8 @@ export function nextEquipDestinations(view: PlayerView, chosen: readonly Destina
 
 /**
  * As montagens do Equipar, uma por resultado. Com as duas fileiras cheias, as `k` cartas que sobram têm 3 destinos cada, mas
- * só importa qual delas fica por último em cada fileira (trocar duas vezes a última do Ataque é o mesmo que descartar a
- * primeira e trocar com a segunda): no máximo uma troca por fileira e as outras descartadas, k² + k + 1 montagens no lugar de
+ * só importa qual delas fica por último em cada fileira (trocar duas vezes a última do Ataque deixa as mesmas fileiras e o
+ * mesmo cemitério, em outra ordem, que descartar a primeira e trocar com a segunda): no máximo uma troca por fileira e as outras descartadas, k² + k + 1 montagens no lugar de
  * 3^k. O motor aceita qualquer montagem válida (`nextEquipDestinations`).
  */
 function equipOptions(view: PlayerView): Destination[][] {

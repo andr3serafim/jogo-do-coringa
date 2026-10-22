@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -77,10 +78,12 @@ export async function askAction<A extends Action>(io: Io, view: PlayerView, lega
 
 /**
  * O arquivo do replay de uma semente, sempre dentro de `dir`: o nome sai da semente com só letras, números, `-` e `_` (o resto
- * vira `_`), então `--semente ../x` não grava fora da pasta.
+ * vira `_`), então `--semente ../x` não grava fora da pasta. Quando o saneamento muda a semente, o nome ganha um sufixo curto
+ * dela, para "a.b" e "a_b" não caírem no mesmo arquivo.
  */
 export function replayPath(dir: string, seed: string): string {
-  const name = seed.replace(/[^A-Za-z0-9_-]/g, '_') || 'semente';
+  const safe = seed.replace(/[^A-Za-z0-9_-]/g, '_');
+  const name = safe === seed && safe !== '' ? safe : `${safe || 'semente'}-${createHash('sha256').update(seed).digest('hex').slice(0, 8)}`;
   const path = join(dir, `${name}.json`);
   if (!resolve(path).startsWith(resolve(dir) + sep)) throw new Error(`replay fora da pasta: ${path}`);
   return path;

@@ -23,8 +23,11 @@ describe('o arquivo do replay do pnpm play', () => {
     }
   });
 
-  it('a semente comum vira o nome do arquivo como antes', () => {
+  it('a semente comum vira o nome do arquivo como antes; a saneada ganha um sufixo, e duas sementes nunca dividem o arquivo', () => {
     expect(replayPath(dir, 'lw3k9-abc_1')).toBe(join(dir, 'lw3k9-abc_1.json'));
-    expect(replayPath(dir, '../x')).toBe(join(dir, '___x.json'));
+    expect(replayPath(dir, '../x')).toMatch(/___x-[0-9a-f]{8}\.json$/);
+    for (const [a, b] of [['a.b', 'a_b'], ['coração', 'cora__o'], ['', 'semente']]) {
+      expect(replayPath(dir, a!)).not.toBe(replayPath(dir, b!));
+    }
   });
 });
