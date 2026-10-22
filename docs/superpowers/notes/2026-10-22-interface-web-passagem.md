@@ -64,7 +64,7 @@ Cada um ficou de fora por ser pequeno ou de baixo risco; o motivo vem quando nã
   inteiro.
 - Histórico: sem cabeçalho de rodada depois de um `resync`; a ref `atEnd` só atualiza na rolagem.
 - Cenas: `skip` muda de identidade a cada batida; LitRow/FxOverlay podem não reiniciar entre batidas seguidas no mesmo elemento;
-  cena com movimento reduzido dura 1,5 s (a spec diz ~1 s); o painel e a faixa da cena ficam fora do ledger de flash.
+  cena com movimento reduzido dura 1,5 s (a spec diz ~1 s); o painel da cena fica fora do ledger de flash (a faixa entrou nele na Fase A do polimento).
 - Wrapper `.area-ferr` vazio no PC largo cria trilhas implícitas (~8–10 px); `GraveyardDialog` tem o mesmo eco de close que o
   `Modal` tinha (não atingido hoje).
 - `title` verboso em toda carta; o `title` da carta de cima do cemitério não aparece ao passar o mouse (o `::after` cobre).

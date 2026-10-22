@@ -157,6 +157,55 @@ describe('FlashLock: a cortina da cena entra na mesma conta (spec §10.4: soma t
   });
 });
 
+describe('FlashLock.nextRequest: a inversão que a conta recusa espera; a que o resfriamento recusa, não', () => {
+  it('sem nada na janela, é o próprio instante', () => {
+    expect(new FlashLock().nextRequest(500, 600)).toBe(500);
+  });
+
+  it('a faixa (subiu e desceu) e a cortina enchem a janela: o par cabe quando a primeira troca sai dela', () => {
+    const lock = new FlashLock();
+    lock.toggle(300); // a faixa sobe
+    lock.toggle(700); // e desce
+    lock.toggle(710); // a cortina da cena sobe
+    expect(lock.request(860, 600)).toBe(false);
+    expect(lock.nextRequest(860, 600)).toBe(1_300);
+    expect(lock.request(1_300, 600)).toBe(true);
+    expect(lock.recentSwitches()).toEqual([700, 710, 1_300, 1_900]);
+  });
+
+  it('o desligar também precisa caber: espera até as duas pontas caberem', () => {
+    const lock = new FlashLock({ cooldownMs: 0 });
+    lock.toggle(0);
+    lock.toggle(100);
+    lock.toggle(1_050);
+    // Ligar aos 200 caberia, mas desligar aos 600 seria a quarta troca com 0 e 100; aos 600, o desligar dos 1000 seria a quarta
+    // com 100 e 1050. Aos 700 as duas pontas cabem.
+    expect(lock.nextRequest(200, 400)).toBe(700);
+    expect(withinFlashLimit([0, 100, 1_050], [700, 1_100])).toBe(true);
+    expect(lock.request(700, 400)).toBe(true);
+  });
+
+  it('nunca devolve um instante que o request recusaria', () => {
+    for (const switches of [[0], [0, 50], [0, 50, 100], [0, 400, 900], [100, 200, 950]]) {
+      for (const start of [0, 100, 300, 600, 1_000]) {
+        const lock = new FlashLock({ cooldownMs: 0 });
+        switches.forEach((instant) => lock.toggle(instant));
+        const at = lock.nextRequest(start, 600);
+        expect(at).not.toBeNull();
+        expect(at!).toBeGreaterThanOrEqual(start);
+        expect(lock.request(at!, 600)).toBe(true);
+      }
+    }
+  });
+
+  it('durante o resfriamento de outra inversão não há espera: a cena seguida perde a inversão', () => {
+    const lock = new FlashLock();
+    expect(lock.request(0, 600)).toBe(true);
+    expect(lock.nextRequest(1_000, 600)).toBeNull();
+    expect(lock.nextRequest(600 + INVERT_COOLDOWN_MS, 600)).toBe(600 + INVERT_COOLDOWN_MS);
+  });
+});
+
 describe('FlashLock.release: o desligar antecipado também respeita as 3 trocas por segundo', () => {
   it('o pulo não desliga a inversão antes de a conta deixar: ela fica ligada até o instante em que cabe', () => {
     const lock = new FlashLock();

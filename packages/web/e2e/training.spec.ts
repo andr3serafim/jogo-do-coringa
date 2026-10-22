@@ -235,7 +235,8 @@ test.describe('largura de tablet, ~960 px', () => {
 
 /**
  * Espera a mesa parar (sem batida e sem animação com fim) e confere que cada lugar está À VISTA POR INTEIRO na janela: o
- * `toBeInViewport()` padrão aceita qualquer pedaço, e a vida cortada ao meio no topo da tela passaria.
+ * `toBeInViewport()` padrão aceita qualquer pedaço, e a vida cortada ao meio no topo da tela passaria. E que o meio dele não está
+ * coberto nem recortado: os campos rolam por dentro, e um aviso acima deles poderia esconder a vida sem tirá-la da janela.
  */
 async function expectWhollyInView(page: Page, places: Record<string, Locator>): Promise<void> {
   await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1);
@@ -247,6 +248,12 @@ async function expectWhollyInView(page: Page, places: Record<string, Locator>): 
     // 1 px de folga para o arredondamento do navegador.
     expect(box!.y, `o topo de ${what} está na janela`).toBeGreaterThanOrEqual(-1);
     expect(box!.y + box!.height, `o pé de ${what} está na janela`).toBeLessThanOrEqual(height + 1);
+    const onTop = await place.evaluate((el) => {
+      const rect = el.getBoundingClientRect();
+      const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      return hit !== null && el.contains(hit);
+    });
+    expect(onTop, `o meio de ${what} não está coberto nem recortado`).toBe(true);
   }
 }
 

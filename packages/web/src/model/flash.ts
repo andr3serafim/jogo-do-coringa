@@ -1,9 +1,9 @@
 // Trava global de flash (spec §10.4, WCAG 2.3.1). Puro: sem React, DOM nem timers; o relógio entra por parâmetro.
 //
 // O limite vale para a tela inteira, não para um `state`: duas cenas de `state`s diferentes, coladas, seriam um
-// pisca-pisca mesmo que cada linha do tempo, sozinha, respeite a regra. E vale para tudo o que muda a luminância da tela
-// inteira, somado: a inversão (liga e desliga) e a cortina escura da cena (sobe e desce). Quem aplica (o `useBeatPlayer`)
-// pede a licença aqui na hora de ligar e grava o desligar quando ele acontece (inclusive o antecipado, do pulo).
+// pisca-pisca mesmo que cada linha do tempo, sozinha, respeite a regra. E vale para tudo o que muda a luminância da tela,
+// somado: a inversão (liga e desliga), a cortina escura da cena (sobe e desce) e a faixa (sobe e desce). Quem aplica (o
+// `useBeatPlayer`) pede a licença aqui na hora de ligar e grava o desligar quando ele acontece (inclusive o antecipado, do pulo).
 import { INVERT_COOLDOWN_MS } from './timeline.ts';
 
 /** Janela da regra de flash: nunca mais de `FLASH_MAX_SWITCHES` trocas claro ↔ escuro dentro dela. */
@@ -73,7 +73,7 @@ export class FlashLock {
     return off;
   }
 
-  /** Uma troca avulsa (a cortina sobe ou desce) em `atMs`: grava e devolve `true` se cabe na janela; senão, nada. */
+  /** Uma troca avulsa (a cortina ou a faixa sobe ou desce) em `atMs`: grava e devolve `true` se cabe na janela; senão, nada. */
   toggle(atMs: number): boolean {
     this.#switches = this.#switches.filter((instant) => instant > atMs - FLASH_WINDOW_MS);
     if (!withinFlashLimit(this.#switches, [atMs])) return false;
@@ -82,8 +82,25 @@ export class FlashLock {
   }
 
   /**
+   * O primeiro instante a partir de `atMs` em que `request(_, holdMs)` concederia a inversão: as duas pontas (liga e desliga)
+   * cabem na conta de 3 trocas por segundo. Serve à inversão que as trocas de antes (a faixa, a cortina) recusaram: ela espera,
+   * dentro da cena, em vez de não acontecer. Durante o resfriamento de outra inversão devolve `null`: a cena seguida perde a
+   * inversão, sem espera.
+   */
+  nextRequest(atMs: number, holdMs: number): number | null {
+    if (atMs < this.#endAt + this.#cooldownMs) return null;
+    // Cada troca gravada sai da janela 1 s depois; a ponta do desligar sai `holdMs` antes disso.
+    const candidates = [atMs, ...this.#switches.flatMap((instant) => [instant + FLASH_WINDOW_MS, instant + FLASH_WINDOW_MS - holdMs])]
+      .filter((instant) => instant >= atMs)
+      .sort((a, b) => a - b);
+    // O último candidato (a troca mais tardia mais 1 s) sempre cabe.
+    return candidates.find((instant) => withinFlashLimit(this.#switches, [instant, instant + holdMs])) ?? atMs;
+  }
+
+  /**
    * O primeiro instante a partir de `atMs` em que uma troca avulsa cabe, contando também as trocas já agendadas (o
-   * desligar de uma inversão no ar). Serve para segurar a descida da cortina até a regra deixar.
+   * desligar de uma inversão no ar). Serve para segurar a descida da cortina, e a subida ou a descida da faixa, até a regra
+   * deixar.
    */
   nextAllowed(atMs: number): number {
     const candidates = [atMs, ...this.#switches.map((instant) => instant + FLASH_WINDOW_MS)]

@@ -707,7 +707,10 @@ A inversão da tela inteira é um flash. Regras:
 
 - no máximo **1 inversão por cena**, mantida por pelo menos **~300 ms**;
 - nunca mais de **3 transições claro ↔ escuro por segundo**, somando tudo o que estiver na tela (WCAG 2.3.1);
-- a inversão, a cortina escura das cenas e a faixa passam pela mesma trava (`FlashLock`). A inversão recusada não acontece. A cortina e a faixa que não podem subir ou descer esperam o primeiro instante em que a regra deixa. Só o visual espera: as batidas e os controles seguem a linha do tempo;
+- a inversão, a cortina escura das cenas e a faixa passam pela mesma trava (`FlashLock`):
+  - a inversão que a conta das 3 trocas recusa (a faixa e a cortina de antes encheram a janela) espera o primeiro instante em que cabe inteira, se ainda acabar dentro da cena; a que o resfriamento entre inversões recusa não acontece (a segunda cena seguida fica sem inversão);
+  - a cortina e a faixa que não podem subir ou descer esperam o primeiro instante em que a regra deixa;
+  - só o visual espera: as batidas e os controles seguem a linha do tempo;
 - com "reduzir movimento" (do sistema ou do menu), a inversão vira um esmaecimento curto, sem troca brusca de luminância;
 - **testes:**
   - na linha do tempo (puro), toda cena tem no máximo 1 inversão, com duração ≥ 300 ms, e nenhuma janela de 1 s tem mais de 3 trocas;

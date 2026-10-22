@@ -927,6 +927,50 @@ describe('cortina e inversão contam juntas (spec §10.4: no máximo 3 trocas po
     },
   );
 
+  // A faixa ao vivo gasta trocas da janela (sobe e desce), e a cena que vem logo depois (o Ataque Absoluto, o Reflect ou a Exódia
+  // saem de uma janela de reação, depois da faixa "X pode reagir") encontra a conta cheia. A inversão espera, dentro da cena, o
+  // primeiro instante em que cabe inteira, em vez de não acontecer.
+  const expectInvertedWithinScene = (flips: number[], sceneStart: number, sceneEnd: number) => {
+    expect(flips).toHaveLength(2);
+    expect(flips[0]!).toBeGreaterThanOrEqual(sceneStart);
+    expect(flips[1]!).toBeLessThanOrEqual(sceneEnd + SAMPLE_MS);
+    expect(flips[1]! - flips[0]!).toBeGreaterThanOrEqual(INVERT_MIN_HOLD_MS);
+  };
+
+  it.each([300, 500, 700, 1_000])(
+    'faixa ao vivo e, %i ms depois, uma cena ao vivo: a inversão espera a conta deixar, dentro da cena, e tudo somado respeita as 3 trocas',
+    (gap) => {
+      const m = mount(THEIRS);
+      const trace = watchMany([() => banner(m.container) !== null, () => curtainUp(m.container), () => inverted(m.container)]);
+      emit(m, THEIRS, [TURN]);
+      trace.sample();
+      trace.run(gap);
+      emit(m, THEIRS, [ABSOLUTE]);
+      trace.sample();
+      trace.run(3_000);
+      expectFlashSafe(trace.all);
+      expectInvertedWithinScene(trace.flips[2]!, gap, gap + 1_500);
+    },
+  );
+
+  it('defensor: a faixa "Você pode reagir", o passe assim que os controles voltam e o Ataque Absoluto: a cena ainda inverte', () => {
+    const m = mount(MINE);
+    const trace = watchMany([() => banner(m.container) !== null, () => curtainUp(m.container), () => inverted(m.container)]);
+    emit(m, MINE, [ATTACK, { type: 'ReactionWindowOpened', responder: 'p1', trigger: 'ATTACK' }]);
+    trace.sample();
+    let elapsed = 0;
+    while (busy(m.container)) {
+      trace.run(10);
+      elapsed += 10;
+    }
+    emit(m, MINE, [{ type: 'ReactionWindowClosed', responder: 'p1', trigger: 'ATTACK' }, ABSOLUTE]);
+    trace.sample();
+    trace.run(3_000);
+    expectFlashSafe(trace.all);
+    // Com uma decisão minha esperando, a cena cabe no teto de 1 s.
+    expectInvertedWithinScene(trace.flips[2]!, elapsed, elapsed + 1_000);
+  });
+
   it('a faixa que a trava segura não segura os controles: a decisão chega no teto de 1 s', () => {
     const m = mount(MINE);
     emit(m, MINE, [ABSOLUTE]);
@@ -934,7 +978,10 @@ describe('cortina e inversão contam juntas (spec §10.4: no máximo 3 trocas po
     // O `catchUp` chega com a cortina da cena no ar e uma decisão minha esperando.
     emit(m, MINE, Array.from({ length: 6 }, () => TURN), { catchUp: true });
     expect(within(bar()).getByRole('button', { name: ATTACK_BUTTON })).toBeDisabled();
-    advance(1_000);
+    // De 10 em 10 ms, como num navegador: a faixa sobe e desce pelos efeitos de cada desenho.
+    watchMany([]).run(1_000);
+    // A premissa: a faixa ainda está no ar, segura pela trava, quando os controles voltam.
+    expect(banner(m.container)).not.toBeNull();
     expect(busy(m.container)).toBe(false);
     expect(within(bar()).getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
   });

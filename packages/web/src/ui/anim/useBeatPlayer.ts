@@ -8,7 +8,9 @@
 // ligadas, só o seu próprio timer as desliga. Um `state` novo que chega no meio delas (o bot responde em ~600 ms) troca
 // a linha do tempo, mas não as corta nem as esquece. As duas, e a faixa, passam pela MESMA `FlashLock` (spec §10.4: o
 // limite de 3 trocas claro ↔ escuro em 1 s vale para a tela e soma tudo o que muda a luminância dela):
-// - a inversão pede licença na hora de ligar; sem ela, a cena segue sem inversão;
+// - a inversão pede licença na hora de ligar. Recusada pela conta das 3 trocas (a faixa e a cortina de antes a encheram), ela
+//   espera o primeiro instante em que cabe inteira, se ainda acabar dentro da cena; recusada pelo resfriamento entre
+//   inversões, a cena segue sem inversão;
 // - a cortina sobe se a regra deixa (sem ela, a cena mostra só o painel) e desce quando nenhuma cena a segura, mas nunca
 //   antes de 1 s no ar e nunca antes de a regra deixar: se a descida quebraria o limite, ela espera;
 // - a faixa quer estar no ar quando a batida de agora tem faixa (`bannerBeatAt`) e não há cena nem cortina; ela sobe e
@@ -158,14 +160,25 @@ export function useBeatPlayer(
   const [inverted, setInverted] = useState(false);
   const offTimer = useRef<number | null>(null);
 
+  /**
+   * Liga a inversão por `holdMs`, se a trava deixa. Recusada só pela conta das 3 trocas por segundo (a faixa e a cortina de
+   * antes a encheram), devolve em quantos ms ela passa a caber inteira: quem chama tenta de novo nessa hora, se ainda couber
+   * dentro da cena. Recusada pelo resfriamento (ou já ligada, ou com movimento reduzido), devolve `null`.
+   */
   const invert = useCallback(
-    (holdMs: number) => {
-      if (reduced.current || offTimer.current !== null || !lock.request(clock(), holdMs)) return;
+    (holdMs: number): number | null => {
+      if (reduced.current || offTimer.current !== null) return null;
+      const now = clock();
+      if (!lock.request(now, holdMs)) {
+        const next = lock.nextRequest(now, holdMs);
+        return next === null ? null : next - now;
+      }
       setInverted(true);
       offTimer.current = window.setTimeout(() => {
         offTimer.current = null;
         setInverted(false);
       }, holdMs);
+      return null;
     },
     [lock],
   );
@@ -284,7 +297,14 @@ export function useBeatPlayer(
       }
       if (beat.invert) {
         const { atMs, holdMs } = beat.invert;
-        at(atMs, () => invert(holdMs));
+        const sceneEndMs = beat.startMs + beat.durationMs;
+        // A inversão que a conta recusa espera o primeiro instante em que cabe, desde que acabe dentro da cena.
+        const tryInvert = (delayMs: number, elapsedMs: number) =>
+          at(delayMs, () => {
+            const waitMs = invert(holdMs);
+            if (waitMs !== null && elapsedMs + waitMs + holdMs <= sceneEndMs) tryInvert(waitMs, elapsedMs + waitMs);
+          });
+        tryInvert(atMs, atMs);
       }
       if (beat.kind === 'scene' && beat.scene !== null) {
         at(beat.startMs, raiseCurtain);
