@@ -14,6 +14,13 @@ describe('createGame', () => {
     expect(same.ok ? null : same.error.code).toBe('INVALID_PLAYERS');
   });
 
+  it('config sem baralho volta como erro, sem lançar', () => {
+    const withoutDeck: Partial<typeof DEFAULT_CONFIG> = { ...DEFAULT_CONFIG };
+    delete withoutDeck.deck;
+    const result = createGame(withoutDeck as unknown as typeof DEFAULT_CONFIG, 's', [P1, P2]);
+    expect(result.ok ? null : result.error.code).toBe('INVALID_CONFIG');
+  });
+
   it("rejeita 'system' como id de jogador (revisão final M2)", () => {
     const reserved = createGame(makeConfig(), 's', ['system', P2]);
     expect(reserved.ok ? null : reserved.error.code).toBe('INVALID_PLAYERS');

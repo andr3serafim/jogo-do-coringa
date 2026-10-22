@@ -33,6 +33,11 @@ const isInt = (n: number, min: number, max = Number.MAX_SAFE_INTEGER): boolean =
   Number.isInteger(n) && n >= min && n <= max;
 
 export function validateConfig(c: RulesConfig): ConfigError | null {
+  // A config pode vir de JSON ou de outro pacote: sem o objeto (ou sem o baralho), a resposta é o erro, não um TypeError.
+  if (typeof c !== 'object' || c === null) return { code: 'INVALID_CONFIG', message: 'a config deve ser um objeto' };
+  if (typeof c.deck !== 'object' || c.deck === null) {
+    return { code: 'INVALID_CONFIG', message: 'deck deve ser um objeto { numericCopies, faceCopies }' };
+  }
   const checks: Array<[boolean, string]> = [
     [isInt(c.hp, 1), 'hp deve ser um inteiro ≥ 1'],
     [isInt(c.rowLimit, 1), 'rowLimit deve ser um inteiro ≥ 1'],

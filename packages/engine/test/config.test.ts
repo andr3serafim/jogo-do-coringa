@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_CONFIG, makeConfig, validateConfig } from '../src/config.ts';
+import type { RulesConfig } from '../src/types.ts';
 
 describe('config', () => {
   it('makeConfig sem argumentos devolve o padrão da spec', () => {
@@ -43,5 +44,14 @@ describe('config', () => {
     expect(validateConfig(makeConfig({ buffLimit: 1.5 }))?.code).toBe('INVALID_CONFIG');
     expect(validateConfig(makeConfig({ deck: { numericCopies: 9 } }))?.code).toBe('INVALID_CONFIG');
     expect(validateConfig(makeConfig({ deck: { faceCopies: -1 } }))?.code).toBe('INVALID_CONFIG');
+  });
+
+  it('uma config sem baralho (de JSON ou de outro pacote) volta como INVALID_CONFIG, sem lançar', () => {
+    const withoutDeck: Partial<typeof DEFAULT_CONFIG> = { ...DEFAULT_CONFIG };
+    delete withoutDeck.deck;
+    for (const config of [withoutDeck, { ...DEFAULT_CONFIG, deck: null }, { ...DEFAULT_CONFIG, deck: 'oito' }, null, 'config']) {
+      expect(validateConfig(config as unknown as RulesConfig)?.code).toBe('INVALID_CONFIG');
+    }
+    expect(validateConfig(withoutDeck as unknown as RulesConfig)?.message).toContain('deck');
   });
 });
