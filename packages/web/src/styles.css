@@ -25,6 +25,13 @@
   --breakpoint-pc: 1024px;
 }
 
+/*
+ * PC de pouca altura (spec §3.3): os notebooks comuns têm janelas de 657 a 800 px de altura, e a mesa do PC pede ~850 px nos
+ * estados comuns (o Equipar é o mais alto). Abaixo de 900 px ela fica compacta (cartas do tablet, menos respiro), e cabe
+ * inteira em 1366 × 657 sem rolar. Quando ainda não cabe, só os campos rolam por dentro, como no celular (`Table.tsx`).
+ */
+@custom-variant pc-baixo (@media (width >= theme(--breakpoint-pc)) and (height < 900px));
+
 /* O navegador também fala a língua da Peleja (spec §10.2): seleção, cursor, foco, rolagem e sublinhado. */
 @layer base {
   html {
@@ -88,6 +95,17 @@
       --mini-h: 54px;
       --hand-h: 144px;
       --hand-w: 104px;
+    }
+  }
+
+  :root {
+    @variant pc-baixo {
+      --card-w: 48px;
+      --card-h: 67px;
+      --mini-w: 34px;
+      --mini-h: 48px;
+      --hand-h: 112px;
+      --hand-w: 81px;
     }
   }
 
@@ -234,6 +252,10 @@
       grid-column: 2;
       grid-row: 1;
       gap: 1rem;
+
+      @variant pc-baixo {
+        gap: 0.5rem;
+      }
     }
 
     .campo-grade--oponente > .campo-filas {
@@ -247,6 +269,10 @@
       flex-wrap: nowrap;
       align-items: stretch;
       gap: 0.625rem;
+
+      @variant pc-baixo {
+        gap: 0.375rem;
+      }
     }
 
     .campo-grade--oponente > .campo-zonas {
@@ -258,6 +284,10 @@
       align-items: center;
       gap: 0.625rem;
       min-height: 3.5rem;
+
+      @variant pc-baixo {
+        min-height: 0;
+      }
     }
 
     .campo-zona > .zona-titulo {

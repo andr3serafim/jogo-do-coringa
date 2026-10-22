@@ -254,6 +254,10 @@ A mesa está em §3 e §4. O menu da partida tem:
 ### 3.3 PC e tablet [P]
 
 - **≥ 1024 px:** a mesa fica no centro, com cartas maiores. Uma coluna lateral leva o histórico, a sala, o placar e o menu. A barra de ação mostra a prévia completa (§4.6).
+- **PC de pouca altura** (janela < 900 px; o notebook de 1366 × 768 dá 657 px). A mesa do PC pede ~850 px nos estados comuns, então:
+  - abaixo de 900 px ela fica compacta (as cartas do tablet e menos respiro) e cabe inteira em 1366 × 657;
+  - quando ainda não cabe, só os campos e a faixa rolam por dentro, como no celular. A mão, a barra de ação e a coluna do histórico (com o menu) ficam sempre à vista, e a chegada da sua vez (o foco no painel de baixo) não rola nada;
+  - um E2E confere, a 1366 × 657, 1440 × 800 e 1536 × 730, a vida e o nome do oponente, o menu, a mão e o botão principal à vista por inteiro no Equipar, no Ataque e na reação.
 - **600–1023 px:** o layout do celular, ampliado, com o histórico em gaveta.
 - Passar o mouse sobre uma carta mostra o papel e o efeito. É ajuda, nunca o único caminho para a informação.
 

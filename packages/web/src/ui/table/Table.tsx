@@ -157,8 +157,10 @@ function TableView({
         <div className="flex min-h-0 flex-1 flex-col pc:flex-[0_1_1100px]">
           <Banners snapshot={snapshot} remainingMs={remainingMs} />
           {banner}
-          {/* No celular os campos e a faixa rolam por dentro, em telas baixas; a mão e a barra de ação ficam sempre à vista. */}
-          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-none pc:flex-none pc:overflow-visible [&>*]:flex-none">
+          {/* Em telas baixas os campos e a faixa rolam por dentro; a mão e a barra de ação ficam sempre à vista, e a sua vez (o foco
+              no painel de baixo) não rola nada. No PC eles não crescem além do que pedem (a sobra fica com a mão, centrada), e a
+              coluna do histórico, com o menu, nunca rola junto. */}
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-none pc:flex-initial [&>*]:flex-none">
             <PlayerField
               side="opponent"
               view={view}

@@ -65,7 +65,7 @@ export function CenterBand({
   return (
     <section
       aria-label="Situação da rodada"
-      className="flex flex-none flex-wrap items-center gap-x-2.5 gap-y-1 bg-tinta px-3 py-1.5 text-papel pc:min-h-[76px] pc:gap-x-7 pc:px-6 pc:py-1"
+      className="flex flex-none flex-wrap items-center gap-x-2.5 gap-y-1 bg-tinta px-3 py-1.5 text-papel pc:min-h-[76px] pc:gap-x-7 pc-baixo:min-h-14 pc:px-6 pc:py-1"
     >
       <div className="flex min-w-0 max-w-[8.5rem] flex-col pc:max-w-[13rem]">
         <h2 className="textura font-madeira text-[17px] uppercase leading-[1.1] tracking-[0.02em] pc:text-2xl">

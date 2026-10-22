@@ -45,7 +45,7 @@ export function PlayerField({ side, view, player, name, away = false, equip, too
   return (
     <section
       aria-label={self ? 'Seu campo' : `Campo de ${name}`}
-      className={`campo relative isolate px-3 py-2.5 pc:min-h-[286px] pc:px-6 pc:py-5 ${self ? 'bg-capa-voce' : 'pc:flex pc:flex-col pc:justify-end bg-capa-oponente'}`}
+      className={`campo relative isolate px-3 py-2.5 pc:min-h-[286px] pc:px-6 pc:py-5 pc-baixo:min-h-0 pc-baixo:py-2.5 ${self ? 'bg-capa-voce' : 'pc:flex pc:flex-col pc:justify-end bg-capa-oponente'}`}
     >
       <span aria-hidden="true" data-grao className="grao pointer-events-none absolute inset-0 -z-10 opacity-20" />
       <div className={`campo-grade ${self ? 'campo-grade--voce' : 'campo-grade--oponente'}`}>
@@ -103,7 +103,7 @@ function Info({ side, view, player, name, away, equip, zone, tool }: InfoProps) 
 
   return (
     <div className={`campo-info ${self ? 'campo-info--voce' : 'campo-info--oponente'}`}>
-      <span className="area-avatar relative size-10 shrink-0 pc:size-16">
+      <span className="area-avatar relative size-10 shrink-0 pc:size-16 pc-baixo:size-12">
         <Coringa className="size-full" />
         {anim.fx.shieldBreak === player.id ? <ShieldBreak ms={anim.beatMs} reduced={anim.reduced} /> : null}
       </span>
@@ -129,7 +129,7 @@ function Info({ side, view, player, name, away, equip, zone, tool }: InfoProps) 
         </div>
       )}
       <span className="area-vida relative flex items-baseline gap-0.5" onPointerEnter={seen} onPointerDown={seen}>
-        <span data-hp className="font-texto text-[34px] font-extrabold leading-none tabular-nums pc:text-[56px]">
+        <span data-hp className="font-texto text-[34px] font-extrabold leading-none tabular-nums pc:text-[56px] pc-baixo:text-[44px]">
           {shownHp}
         </span>
         <span aria-hidden="true" className="font-texto text-[13px] font-semibold tabular-nums pc:text-lg">

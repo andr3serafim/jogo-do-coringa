@@ -1,7 +1,7 @@
 // E2E do treino (spec §2.6, §9.2 item 3) e da mesa em situações que o sorteio online não deixa fixar: sem servidor e com semente,
 // a partida contra o bot é sempre a mesma. Aqui entram também as conferências de navegador real que o jsdom não faz: algarismos
 // tabulares, foco preso nos diálogos, o menu a ~960 px e a mesa num PC de pouca altura.
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 import {
   actionBar,
   ATTACK_BUTTON,
@@ -233,59 +233,74 @@ test.describe('largura de tablet, ~960 px', () => {
   });
 });
 
-test.describe('PC de pouca altura, 1440 × 800', () => {
-  test.use({ viewport: { width: 1440, height: 800 } });
+/**
+ * Espera a mesa parar (sem batida e sem animação com fim) e confere que cada lugar está À VISTA POR INTEIRO na janela: o
+ * `toBeInViewport()` padrão aceita qualquer pedaço, e a vida cortada ao meio no topo da tela passaria.
+ */
+async function expectWhollyInView(page: Page, places: Record<string, Locator>): Promise<void> {
+  await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1);
+  await page.waitForFunction(() => document.getAnimations().every((animation) => animation.effect?.getComputedTiming().iterations === Infinity));
+  const height = page.viewportSize()!.height;
+  for (const [what, place] of Object.entries(places)) {
+    const box = await place.boundingBox();
+    expect(box, `${what} está desenhado`).not.toBeNull();
+    // 1 px de folga para o arredondamento do navegador.
+    expect(box!.y, `o topo de ${what} está na janela`).toBeGreaterThanOrEqual(-1);
+    expect(box!.y + box!.height, `o pé de ${what} está na janela`).toBeLessThanOrEqual(height + 1);
+  }
+}
 
-  test('a mesa segue usável: a barra e o botão principal ficam à vista e o que rola é só por dentro', async ({ page }, testInfo) => {
-    await page.goto(TRAINING);
-    await expect(table(page)).toBeVisible();
-    await expect(equipPanel(page)).toBeVisible();
+// Notebooks comuns: 1366×768 (janela de 657 px), 1440×900 (800 px) e 1920×1080 a 125% (730 px). Na sua vez o foco vai para o
+// painel de baixo, e a mesa não pode rolar a vida e o nome do oponente nem o botão do menu para fora da vista.
+for (const size of [
+  { width: 1366, height: 657 },
+  { width: 1440, height: 800 },
+  { width: 1536, height: 730 },
+]) {
+  test.describe(`PC de pouca altura, ${size.width} × ${size.height}`, () => {
+    test.use({ viewport: size });
 
-    const scroll = await page.evaluate(() => {
-      const main = document.querySelector('main')!;
-      const doc = document.documentElement;
-      return {
-        pageOverflow: doc.scrollHeight - doc.clientHeight,
-        mainOverflow: main.scrollHeight - main.clientHeight,
-        // Quando chega a sua vez o foco vai à barra de baixo e a mesa rola até lá: o topo sobe junto.
-        scrolledTop: main.scrollTop,
+    test('na sua vez (Equipar, Ataque e reação) a vida e o nome do oponente, o menu, a mão e o botão principal ficam à vista', async ({ page }) => {
+      const guard = failOnConsoleErrors(page);
+      await page.goto(TRAINING);
+      await expect(table(page)).toBeVisible();
+      const opponent = page.getByRole('region', { name: 'Campo de Bot' });
+      const top = {
+        'a vida do oponente': opponent.locator('[data-hp]'),
+        'o nome do oponente': opponent.getByRole('heading', { name: 'Bot' }),
+        'o botão do menu': menuButton(page),
       };
+      const hand = page.getByRole('list', { name: 'Sua mão' });
+
+      // Rodada 1, Equipar: o painel com os destinos.
+      await expect(equipPanel(page).getByText('Carta 1 de 3')).toBeVisible();
+      const destinations = equipPanel(page).getByRole('list', { name: 'Destinos' });
+      await expectWhollyInView(page, { ...top, 'a mão': hand, 'os destinos do Equipar': destinations });
+      // A página em si nunca rola.
+      expect(await page.evaluate(() => document.documentElement.scrollHeight - document.documentElement.clientHeight)).toBe(0);
+      await equipByUi(page);
+      await expect(roundHeading(page)).toHaveText('Rodada 2');
+
+      // O menu abre sem rolar nada.
+      const menu = await openMenu(page);
+      await page.keyboard.press('Escape');
+      await expect(menu).toBeHidden();
+      await equipByUi(page);
+
+      // Rodada 3, Ataque: a mão e o botão principal, com a prévia.
+      await expect(roundHeading(page)).toHaveText('Rodada 3');
+      const attack = actionBar(page).getByRole('button', { name: ATTACK_BUTTON });
+      await expect(attack).toBeEnabled();
+      await expectWhollyInView(page, { ...top, 'a mão': hand, 'o botão Atacar': attack });
+      await attack.click();
+
+      // A janela de reação ao ataque do Bot: o gatilho com a prévia e o Passar.
+      await expect(page.locator('[data-gatilho]')).toBeVisible();
+      const pass = actionBar(page).getByRole('button', { name: 'Passar', exact: true });
+      await expect(pass).toBeEnabled();
+      await expectWhollyInView(page, { ...top, 'a mão': hand, 'o gatilho da reação': page.locator('[data-gatilho]'), 'o Passar': pass });
+      await axe(page);
+      guard.expectClean();
     });
-    const menuBox = (await menuButton(page).boundingBox())!;
-    // Anotado no relatório: o que rola nesta altura.
-    testInfo.annotations.push({
-      type: 'rolagem 1440×800',
-      description: `a página não rola; a mesa (main) tem ${scroll.mainOverflow} px a mais que a janela e já subiu ${scroll.scrolledTop} px para mostrar a barra, o que leva o botão do menu (no cabeçalho do histórico) para y=${menuBox.y}`,
-    });
-    expect(scroll.pageOverflow, 'a página em si não rola').toBe(0);
-
-    // Equipar até o fim: o painel e o botão Confirmar cabem na janela (sem precisar rolar a mesa), e dá para clicar.
-    const confirm = equipPanel(page).getByRole('button', { name: 'Confirmar', exact: true });
-    const destinations = equipPanel(page).getByRole('list', { name: 'Destinos' }).getByRole('button');
-    await expect(destinations.first()).toBeInViewport();
-    expect(await equipByUi(page)).toBeGreaterThan(0);
-    await expect(roundHeading(page)).toHaveText('Rodada 2');
-    await expect(confirm).toHaveCount(0);
-
-    // O menu continua ao alcance: rolando a mesa de volta (ou pelo Tab) o botão volta à vista e abre.
-    await menuButton(page).scrollIntoViewIfNeeded();
-    const menu = await openMenu(page);
-    await page.keyboard.press('Escape');
-    await expect(menu).toBeHidden();
-
-    // Ataque: o botão principal fica na janela e funciona.
-    await equipByUi(page);
-    await expect(roundHeading(page)).toHaveText('Rodada 3');
-    const attack = actionBar(page).getByRole('button', { name: ATTACK_BUTTON });
-    await expect(attack).toBeEnabled();
-    // À vista por inteiro (com 2 px de folga para o arredondamento do navegador): a mão e o botão principal cabem em 800 px.
-    for (const place of [attack, page.getByRole('list', { name: 'Sua mão' })]) {
-      const box = (await place.boundingBox())!;
-      expect(box.y).toBeGreaterThanOrEqual(0);
-      expect(box.y + box.height).toBeLessThanOrEqual(800 + 2);
-    }
-    await attack.click();
-    await expect.poll(() => history(page).innerText()).toContain('Você declarou o ataque');
-    await axe(page);
   });
-});
+}
