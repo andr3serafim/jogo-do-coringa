@@ -40,8 +40,6 @@ export interface TableProps {
   onOpenMenu?: () => void;
   /** Um clique ou foco em qualquer parte da mesa (a sessão cancela a confirmação automática da ordem). */
   onInteract?: () => void;
-  /** Avisos acima da mesa ("Reconectando…"). */
-  banner?: ReactNode;
   /** A barra de ação, embaixo da mão. */
   actionBar?: ReactNode;
   /** Treino contra o bot: a faixa central diz "Treino, sem relógio" e a vez do jogador é anunciada sem prazo. */
@@ -71,7 +69,6 @@ function TableView({
   onOpenGraveyard,
   onOpenMenu,
   onInteract,
-  banner,
   actionBar,
   training = false,
 }: TableProps & { state: StateMessage }) {
@@ -163,7 +160,6 @@ function TableView({
 
         <div className="flex min-h-0 flex-1 flex-col pc:flex-[0_1_1100px]">
           <Banners snapshot={snapshot} remainingMs={remainingMs} />
-          {banner}
           {/* Em telas baixas os campos e a faixa rolam por dentro; a mão e a barra de ação ficam sempre à vista, e a sua vez (o foco
               no painel de baixo) não rola nada. No PC eles não crescem além do que pedem (a sobra fica com a mão, centrada), e a
               coluna do histórico, com o menu, nunca rola junto. */}

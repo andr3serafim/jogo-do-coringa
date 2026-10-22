@@ -44,6 +44,10 @@ describe('clockFace', () => {
     expect(face.seconds).toBe(0);
   });
 
+  it('um tempo negativo (relógio adiantado) também é esgotado', () => {
+    expect(clockFace(deadline(), -40, 'p1')!.expired).toBe(true);
+  });
+
   it('prazo do outro: mine false; no Equipar (os dois) é meu', () => {
     expect(clockFace(deadline(['p2']), 8_000, 'p1')!.mine).toBe(false);
     expect(clockFace({ kind: 'EQUIP', at: 0, players: ['p1', 'p2'] }, 8_000, 'p1')!.mine).toBe(true);

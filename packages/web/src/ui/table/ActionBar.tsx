@@ -57,7 +57,7 @@ export interface ActionBarProps {
   pending: boolean;
   /** Controles desligados: jogada em voo, reconexão ou prazo esgotado. */
   disabled: boolean;
-  /** Um PASS já saiu nesta janela de reação: o servidor recusa o resto, então só resta esperar. */
+  /** Um PASS já saiu nesta janela de reação (o seu ou o automático): o servidor recusa o resto, então só resta esperar. */
   passed: boolean;
   /** Os eventos do `state` atual (o gatilho do K precisa de quantos K entraram). */
   events: readonly GameEvent[];
@@ -107,8 +107,8 @@ export function ActionBar(props: ActionBarProps) {
   const targets = play?.targets ?? null;
   const pointed = targets?.find((t) => t.id === pointedId) ?? null;
   const reacting = view.phase.kind === 'REACTION';
-  // Depois do passe, manual ou automático, só resta esperar a janela fechar.
-  const passed = reacting && (props.passed || notice?.kind === 'autoPass');
+  // Depois do passe, manual ou automático, só resta esperar a janela fechar (a `PlayTable` já conta os dois).
+  const { passed } = props;
   const open = acting && !passed;
   // O gatilho já traz a prévia do ataque: a ameaça não se repete.
   const triggered = reacting && open && view.phase.kind === 'REACTION' && view.phase.trigger === 'ATTACK';

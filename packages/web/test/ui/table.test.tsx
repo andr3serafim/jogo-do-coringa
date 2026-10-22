@@ -807,12 +807,6 @@ describe('mesa: página (spec §3.2)', () => {
     expect(button.className).toContain('focus-visible:z-10');
   });
 
-  it('o banner vai acima da mesa', () => {
-    mount(DRAFT, { props: { banner: <p role="status">Reconectando…</p> } });
-    // A região fixa dos avisos (vazia) também é `status`: o banner passado é achado pelo texto.
-    expect(screen.getByText('Reconectando…')).toHaveAttribute('role', 'status');
-  });
-
   it('a barra de ação entra abaixo da mão', () => {
     mount(DRAFT, { props: { actionBar: <button type="button">Atacar</button> } });
     const hand = screen.getByRole('list', { name: 'Sua mão' });

@@ -31,7 +31,7 @@ export function clockFace(
     kind: deadline.kind,
     seconds: Math.ceil(remainingMs / 1000),
     urgent: remainingMs > 0 && remainingMs <= URGENT_MS,
-    expired: remainingMs === 0,
+    expired: remainingMs <= 0,
     mine: deadline.players.includes(me),
     pausedTurnSeconds: pausedTurnMs === undefined ? null : Math.ceil(pausedTurnMs / 1000),
   };

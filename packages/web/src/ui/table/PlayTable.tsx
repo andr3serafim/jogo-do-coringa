@@ -39,8 +39,6 @@ import { useDeadlineExpired } from './useClock.ts';
 
 export interface PlayTableProps {
   session: Session;
-  /** Avisos extras acima da mesa. Os de conexão e de queda do oponente a própria mesa mostra. */
-  banner?: ReactNode;
   /** Onde o menu grava as preferências (`coringa:prefs`). Sem ele, elas valem só nesta sessão. */
   store?: KeyValueStore;
   /** O link da sala, para "Copiar link da sala" no menu. Sem ele (treino) o botão não existe. */
@@ -103,7 +101,6 @@ function PlayTableView({
   session,
   snapshot,
   state,
-  banner,
   store,
   inviteLink,
   loadVersion,
@@ -290,6 +287,9 @@ function PlayTableView({
   useEffect(() => {
     if (turnEpoch === null) return;
     if (document.querySelector('dialog[open]') || isTextEntry(document.activeElement)) return;
+    focusBar();
+  }, [turnEpoch, showEnd, focusBar]);
+
   // No celular e no tablet os campos rolam por dentro (spec §3.2) e não cabem numa tela baixa: na sua vez de atacar, a sua
   // fileira de Ataque vem para o pé da janela dos campos, com a faixa e a Defesa do oponente (o alvo) logo acima. No PC a mesa
   // cabe, e a vida do oponente tem de ficar à vista na sua vez: nada rola. Uma vez por época, como o foco.
@@ -299,9 +299,6 @@ function PlayTableView({
     if (attackEpoch === null || window.matchMedia?.(PC_QUERY).matches) return;
     document.querySelector(`[data-fileira="${rowKey(me, 'ATK')}"]`)?.scrollIntoView?.({ block: 'end' });
   }, [attackEpoch, me]);
-
-    focusBar();
-  }, [turnEpoch, showEnd, focusBar]);
 
   // Depois de ressuscitar pelo diálogo, o foco vai para a barra: o botão que abriu pode já nem existir.
   useEffect(() => {
@@ -413,7 +410,6 @@ function PlayTableView({
         onOpenGraveyard={() => setGraveyard('view')}
         onOpenMenu={() => setMenuOpen(true)}
         onInteract={interact}
-        banner={banner}
         actionBar={panel}
         training={training}
       />
