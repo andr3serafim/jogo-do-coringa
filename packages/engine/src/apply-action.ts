@@ -19,7 +19,10 @@ import { endTurn } from './flow.ts';
 import { finishGame, getPlayer, opponentOf } from './state.ts';
 import type { Action, ActionResult, GameEvent, GameState, PlayerId } from './types.ts';
 
-/** Ponto único de entrada. Nunca muta `state`; erros de regra viram `{ ok: false }`. */
+/**
+ * Ponto único de entrada. Nunca muta `state`; erros de regra viram `{ ok: false }`. Os eventos saem como cópia: as cartas, o
+ * Reflect e as quadras que eles citam não são os objetos do estado novo, e quem guardar um não altera o outro.
+ */
 export function applyAction(state: GameState, player: PlayerId | 'system', action: Action): ActionResult {
   if (typeof action !== 'object' || action === null || typeof (action as { type?: unknown }).type !== 'string') {
     return { ok: false, error: { code: 'INVALID_ACTION', message: 'ação malformada' } };
@@ -40,7 +43,7 @@ export function applyAction(state: GameState, player: PlayerId | 'system', actio
     if (e instanceof RuleViolation) return { ok: false, error: { code: e.code, message: e.message } };
     throw e;
   }
-  return { ok: true, state: s, events: ev };
+  return { ok: true, state: s, events: structuredClone(ev) };
 }
 
 function applySystem(s: GameState, action: Action, ev: GameEvent[]): void {

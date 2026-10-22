@@ -42,6 +42,35 @@ describe('propriedades do motor (spec §5)', () => {
     );
   });
 
+  it('os eventos não compartilham objetos com o estado devolvido: quem guarda um não altera o outro', () => {
+    /** Todos os objetos (e listas) alcançáveis a partir de `root`. */
+    const objectsOf = (root: unknown, into = new Set<object>()): Set<object> => {
+      if (typeof root !== 'object' || root === null || into.has(root)) return into;
+      into.add(root);
+      for (const value of Object.values(root)) objectsOf(value, into);
+      return into;
+    };
+    let checked = 0;
+    fc.assert(
+      fc.property(fc.string(), arbChoices, arbConfig, (seed, choices, config) => {
+        playout({
+          seed,
+          choices,
+          config,
+          maxSteps: 400,
+          onStep: (_before, after, events) => {
+            const inState = objectsOf(after);
+            const shared = [...objectsOf(events)].filter((object) => inState.has(object));
+            checked += events.length;
+            expect(shared, 'objetos do evento que são do estado').toEqual([]);
+          },
+        });
+      }),
+      { numRuns: 15 },
+    );
+    expect(checked, 'a propriedade viu eventos').toBeGreaterThan(100);
+  });
+
   it('toda ação listada por legalActions é aceita', () => {
     fc.assert(
       fc.property(fc.string(), arbChoices, arbConfig, (seed, choices, config) => {
