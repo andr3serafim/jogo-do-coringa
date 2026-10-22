@@ -333,7 +333,14 @@ legalActions(view: PlayerView): Action[]
 
 ### 2.5 Eventos
 
-Lista ordenada por ação, base para animações e histórico: `CardsDealt`, `DeckReshuffled`, `CardsPlaced`, `CardReplaced`, `OrderChosen`, `BuffPlayed` (com papel, quando Selvagem), `GuardPlayed`, `TrapUsed`, `Sacrificed`, `ReflectPlayed`, `ReflectCanceled`, `ReflectProtected`, `ReflectTriggered`, `ReactionWindowOpened/Closed`, `AttackDeclared`, `DamageDealt`, `GuardBroken`, `CardsRemovedFromRow`, `QuadFormed`, `QuadBroken`, `Resurrected`, `AbsoluteDefenseStarted/Ended`, `AbsoluteAttack`, `PressureChanged`, `Exodia`, `InitiativeChanged`, `RoundStarted`, `GameOver`.
+A união `GameEvent` de `types.ts`, base para animações e histórico. Cada ação devolve os seus, em ordem. Um teste do motor (`test/spec-events.test.ts`) confere que esta lista e a união têm os mesmos nomes.
+
+- **Rodada e Equipar:** `RoundStarted`, `DeckReshuffled`, `CardsDealt`, `EquipSubmitted`, `CardsPlaced` (a carta que troca a última da fileira leva o `replaced`), `OrderChosen`, `TurnStarted`.
+- **Fase principal:** `BuffPlayed` (com o papel, `as`), `GuardPlayed`, `TrapUsed` e `Sacrificed` (com `as` quando a carta é um Selvagem), `ReflectPlayed`, `ReflectCanceled`, `ReflectProtected`, `ReflectExpired`, `Resurrected`.
+- **Janela de reação:** `ReactionWindowOpened`, `ReactionWindowClosed`.
+- **Ataque:** `AttackDeclared`, `AbsoluteAttack` (antes de tudo, também contra um Reflect), `ReflectTriggered`, `DamageDealt`, `GuardBroken`, `BuffRemoved`, `CardsRemovedFromRow`, `QuadFormed`, `QuadBroken`.
+- **Estado da mesa:** `AbsoluteDefenseStarted`, `AbsoluteDefenseEnded`, `PressureChanged`, `InitiativeChanged`.
+- **Fim:** `Exodia`, `GameOver`.
 
 ### 2.6 Informação oculta
 
