@@ -51,8 +51,9 @@ export interface RoomConnection {
   /** Abre o socket. Sem efeito se já houver um aberto ou uma reconexão agendada. */
   connect(): void;
   /**
-   * A aba voltou ao primeiro plano. Reconexão agendada: abre já. Socket aberto: manda `ping` e, sem
-   * `pong` em `PONG_TIMEOUT_MS`, dá o socket por morto e reconecta. Fechado de vez: nada.
+   * A aba voltou ao primeiro plano. Reconexão agendada: abre já, salvo a espera lenta (`SLOW_RETRY_CODES`, o servidor
+   * limitou ou barrou a conexão), que a volta da aba não encurta. Socket aberto: manda `ping` e, sem `pong` em
+   * `PONG_TIMEOUT_MS`, dá o socket por morto e reconecta. Fechado de vez: nada.
    */
   wake(): void;
   /** `options.auto` marca a jogada como automática (passe ou ordem confirmados sem o jogador). */
@@ -112,6 +113,8 @@ export class RoomClient implements RoomConnection {
   #ws: EventSocket | null = null;
   #pingTimer: unknown = null;
   #reconnectTimer: unknown = null;
+  /** A reconexão agendada é a espera lenta de `SLOW_RETRY_MS`: o `wake()` não a pula. */
+  #reconnectSlow = false;
   #pongTimer: unknown = null;
   #attempt = 0;
   /** Quantas vezes `close()` foi chamado: um listener de `closed` pode fechar de vez no meio do aviso de queda. */
@@ -185,6 +188,8 @@ export class RoomClient implements RoomConnection {
 
   wake(): void {
     if (this.#reconnectTimer !== null) {
+      // 1008 e 4029 pedem 30 s de calma, e a tela diz isso: voltar à aba não é motivo para voltar antes.
+      if (this.#reconnectSlow) return;
       this.#clearReconnect();
       this.#openSocket();
       return;
@@ -371,7 +376,8 @@ export class RoomClient implements RoomConnection {
 
   #scheduleReconnect(code: number): void {
     let delay: number;
-    if (SLOW_RETRY_CODES.includes(code)) {
+    this.#reconnectSlow = SLOW_RETRY_CODES.includes(code);
+    if (this.#reconnectSlow) {
       delay = SLOW_RETRY_MS;
     } else {
       const base = RECONNECT_DELAYS_MS[Math.min(this.#attempt, RECONNECT_DELAYS_MS.length - 1)]!;
@@ -380,6 +386,7 @@ export class RoomClient implements RoomConnection {
     }
     this.#reconnectTimer = this.#setTimer(() => {
       this.#reconnectTimer = null;
+      this.#reconnectSlow = false;
       this.#openSocket();
     }, delay);
   }
@@ -388,6 +395,7 @@ export class RoomClient implements RoomConnection {
     if (this.#reconnectTimer === null) return;
     this.#clearTimer(this.#reconnectTimer);
     this.#reconnectTimer = null;
+    this.#reconnectSlow = false;
   }
 
   #schedulePing(): void {

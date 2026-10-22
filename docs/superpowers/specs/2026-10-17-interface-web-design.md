@@ -461,7 +461,7 @@ A mesa está em §3 e §4. O menu da partida tem:
 
 **Voltar ao app** (`visibilitychange` para visível) ou à rede (`online`):
 
-- Com o socket fechado → reconecta na hora, sem esperar a espera crescente. Para isso o `RoomClient` ganha `wake()`, que cancela a espera agendada e abre o socket.
+- Com o socket fechado → reconecta na hora, sem esperar a espera crescente. Para isso o `RoomClient` ganha `wake()`, que cancela a espera agendada e abre o socket. A exceção é a espera lenta dos fechamentos 1008 e 4029 (30 s, §6.3): a tela já disse "reconectando em 30 s", e o `wake()` não a encurta.
 - **Com o socket "aberto" depois de a aba ficar escondida:** no iPhone, o socket costuma continuar com `readyState` aberto depois do segundo plano, mas morto. Hoje o `RoomClient` manda `ping` e ignora o `pong`, sem prazo. Então:
   - durante `PLAYING`, a volta de uma aba escondida faz o `RoomClient` mandar um `ping` e esperar o `pong` por ~2 s;
   - sem `pong`, fecha o socket e reconecta na hora;

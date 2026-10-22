@@ -402,6 +402,43 @@ describe('RoomClient: wake e socket morto', () => {
     expect(FakeWebSocket.instances).toHaveLength(2);
   });
 
+  it.each([1008, 4029])(
+    'wake durante a espera lenta (fechamento %i) não reconecta: a tela diz 30 s e o cliente cumpre',
+    (code) => {
+      const { client, clock, last } = connected();
+      last().serverClose(code);
+      clock.advance(10_000);
+      client.wake();
+      expect(FakeWebSocket.instances).toHaveLength(1);
+      // Um wake repetido (a aba volta de novo) também não adianta nada, e o prazo original continua valendo.
+      client.wake();
+      clock.advance(SLOW_RETRY_MS - 10_000 - 1);
+      expect(FakeWebSocket.instances).toHaveLength(1);
+      clock.advance(1);
+      expect(FakeWebSocket.instances).toHaveLength(2);
+    },
+  );
+
+  it('depois que a espera lenta acaba, uma queda comum volta a reconectar no wake', () => {
+    const { client, clock, last } = connected();
+    last().serverClose(1008);
+    clock.advance(SLOW_RETRY_MS);
+    expect(FakeWebSocket.instances).toHaveLength(2);
+    // O socket novo cai por uma causa comum (1006): a espera agora é a do backoff, e o wake a pula.
+    last().serverClose(1006);
+    client.wake();
+    expect(FakeWebSocket.instances).toHaveLength(3);
+  });
+
+  it('close() durante a espera lenta cancela tudo: o wake seguinte não faz nada', () => {
+    const { client, clock, last } = connected();
+    last().serverClose(4029);
+    client.close();
+    client.wake();
+    clock.advance(SLOW_RETRY_MS * 2);
+    expect(FakeWebSocket.instances).toHaveLength(1);
+  });
+
   it('wake sem conexão nenhuma ou com o socket ainda abrindo não faz nada', () => {
     const { client, clock } = setup();
     client.wake();
