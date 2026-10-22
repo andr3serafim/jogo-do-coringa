@@ -18,6 +18,7 @@
 import type { SpecialCard } from '@coringa/engine';
 import type { Deadline, PlayerAction, StateMessage } from '@coringa/protocol';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { rowKey } from '../../model/effects.ts';
 import { isLegal, tablePlays, type CardPlay } from '../../model/plays.ts';
 import type { Session, SessionSnapshot } from '../../model/session.ts';
 import { savePrefs, type KeyValueStore, type Prefs } from '../../model/storage.ts';
@@ -30,6 +31,7 @@ import { EndPanel } from './EndPanel.tsx';
 import { EquipPanel } from './EquipPanel.tsx';
 import { GameMenu } from './GameMenu.tsx';
 import { GraveyardDialog, type GraveyardMode } from './GraveyardDialog.tsx';
+import { PC_QUERY } from './History.tsx';
 import { tableNames } from './labels.ts';
 import { OrderPanel } from './OrderPanel.tsx';
 import { Table } from './Table.tsx';
@@ -288,6 +290,16 @@ function PlayTableView({
   useEffect(() => {
     if (turnEpoch === null) return;
     if (document.querySelector('dialog[open]') || isTextEntry(document.activeElement)) return;
+  // No celular e no tablet os campos rolam por dentro (spec §3.2) e não cabem numa tela baixa: na sua vez de atacar, a sua
+  // fileira de Ataque vem para o pé da janela dos campos, com a faixa e a Defesa do oponente (o alvo) logo acima. No PC a mesa
+  // cabe, e a vida do oponente tem de ficar à vista na sua vez: nada rola. Uma vez por época, como o foco.
+  const attackEpoch = acting && phase === 'ATTACK_MAIN' ? state.epoch : null;
+  const me = view.me;
+  useEffect(() => {
+    if (attackEpoch === null || window.matchMedia?.(PC_QUERY).matches) return;
+    document.querySelector(`[data-fileira="${rowKey(me, 'ATK')}"]`)?.scrollIntoView?.({ block: 'end' });
+  }, [attackEpoch, me]);
+
     focusBar();
   }, [turnEpoch, showEnd, focusBar]);
 

@@ -1,7 +1,7 @@
 // E2E do treino (spec §2.6, §9.2 item 3) e da mesa em situações que o sorteio online não deixa fixar: sem servidor e com semente,
 // a partida contra o bot é sempre a mesma. Aqui entram também as conferências de navegador real que o jsdom não faz: algarismos
 // tabulares, foco preso nos diálogos, o menu a ~960 px e a mesa num PC de pouca altura.
-import { expect, test, type Locator, type Page } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import {
   actionBar,
   ATTACK_BUTTON,
@@ -9,6 +9,7 @@ import {
   band,
   equipByUi,
   equipPanel,
+  expectWhollyInView,
   failOnConsoleErrors,
   menuButton,
   openDialog,
@@ -232,30 +233,6 @@ test.describe('largura de tablet, ~960 px', () => {
     guard.expectClean();
   });
 });
-
-/**
- * Espera a mesa parar (sem batida e sem animação com fim) e confere que cada lugar está À VISTA POR INTEIRO na janela: o
- * `toBeInViewport()` padrão aceita qualquer pedaço, e a vida cortada ao meio no topo da tela passaria. E que o meio dele não está
- * coberto nem recortado: os campos rolam por dentro, e um aviso acima deles poderia esconder a vida sem tirá-la da janela.
- */
-async function expectWhollyInView(page: Page, places: Record<string, Locator>): Promise<void> {
-  await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1);
-  await page.waitForFunction(() => document.getAnimations().every((animation) => animation.effect?.getComputedTiming().iterations === Infinity));
-  const height = page.viewportSize()!.height;
-  for (const [what, place] of Object.entries(places)) {
-    const box = await place.boundingBox();
-    expect(box, `${what} está desenhado`).not.toBeNull();
-    // 1 px de folga para o arredondamento do navegador.
-    expect(box!.y, `o topo de ${what} está na janela`).toBeGreaterThanOrEqual(-1);
-    expect(box!.y + box!.height, `o pé de ${what} está na janela`).toBeLessThanOrEqual(height + 1);
-    const onTop = await place.evaluate((el) => {
-      const rect = el.getBoundingClientRect();
-      const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
-      return hit !== null && el.contains(hit);
-    });
-    expect(onTop, `o meio de ${what} não está coberto nem recortado`).toBe(true);
-  }
-}
 
 // Notebooks comuns: 1366×768 (janela de 657 px), 1440×900 (800 px) e 1920×1080 a 125% (730 px). Na sua vez o foco vai para o
 // painel de baixo, e a mesa não pode rolar a vida e o nome do oponente nem o botão do menu para fora da vista.

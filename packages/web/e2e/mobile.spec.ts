@@ -9,6 +9,7 @@ import {
   equipPanel,
   actionBar,
   expectNoHorizontalScroll,
+  expectWhollyInView,
   failOnConsoleErrors,
   openMenu,
   orderPanel,
@@ -180,6 +181,42 @@ for (const size of [
     });
   });
 }
+
+test.describe('celular baixo, 360 × 640', () => {
+  test.use({ viewport: { width: 360, height: 640 } });
+
+  test('na sua vez de atacar, a sua fileira de Ataque, a Defesa do Bot (o alvo) e o botão principal ficam à vista', async ({ page }) => {
+    const guard = failOnConsoleErrors(page);
+    await page.goto(TRAINING);
+    await expect(table(page)).toBeVisible();
+    await equipByUi(page);
+    await expect(roundHeading(page)).toHaveText('Rodada 2');
+
+    // O Equipar rola os campos até a carta posta. Antes de confirmar, eles voltam ao topo (como depois de recarregar a página):
+    // é a chegada da vez de atacar que tem de trazer as fileiras.
+    const panel = equipPanel(page);
+    await expect(panel.getByText('Carta 1 de 2')).toBeVisible();
+    for (const n of [1, 2]) {
+      await expect(panel.getByText(`Carta ${n} de 2`)).toBeVisible();
+      await panel.getByRole('list', { name: 'Destinos' }).getByRole('button').first().click();
+    }
+    await page.evaluate(() => {
+      document.querySelector('section[aria-label="Seu campo"]')!.parentElement!.scrollTop = 0;
+    });
+    await panel.getByRole('button', { name: 'Confirmar', exact: true }).click();
+
+    await expect(roundHeading(page)).toHaveText('Rodada 3');
+    const attack = actionBar(page).getByRole('button', { name: ATTACK_BUTTON });
+    await expect(attack).toBeEnabled();
+    await expectWhollyInView(page, {
+      'a sua fileira de Ataque': page.getByRole('group', { name: 'Sua fileira de ataque' }),
+      'a fileira de Defesa do Bot': page.getByRole('group', { name: 'Fileira de defesa de Bot' }),
+      'o botão Atacar': attack,
+    });
+    await expectNoHorizontalScroll(page);
+    guard.expectClean();
+  });
+});
 
 test('a gaveta do histórico fechada não deixa parada de Tab invisível, e aberta o teclado alcança a lista', async ({ page }) => {
   await page.goto(TRAINING);

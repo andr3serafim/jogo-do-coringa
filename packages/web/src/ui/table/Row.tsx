@@ -46,7 +46,13 @@ export function Row({ label, kind, side, pressure, limit, aim }: RowProps) {
   const lit = anim.fx.rows.has(rowKey(side.id, kind));
 
   return (
-    <div role="group" aria-label={label} data-aceso={lit ? 'true' : undefined} className="relative flex items-center gap-2">
+    <div
+      role="group"
+      aria-label={label}
+      data-fileira={rowKey(side.id, kind)}
+      data-aceso={lit ? 'true' : undefined}
+      className="relative flex items-center gap-2"
+    >
       {lit ? <LitRow aim={kind === 'ATK' ? aim : undefined} ms={anim.beatMs} /> : null}
       <ul
         role="list"

@@ -75,6 +75,34 @@ export async function axe(page: Page): Promise<void> {
   expect(blocking, 'violações de acessibilidade').toEqual([]);
 }
 
+/**
+ * Espera a mesa parar (sem batida e sem animação com fim) e confere que cada lugar está À VISTA POR INTEIRO: dentro da janela e
+ * de todo contêiner que rola por dentro (o `toBeInViewport()` padrão aceita qualquer pedaço, e a vida cortada ao meio passaria),
+ * e com o meio não coberto (um aviso ou a mão por cima esconderiam o lugar sem tirá-lo da janela).
+ */
+export async function expectWhollyInView(page: Page, places: Record<string, Locator>): Promise<void> {
+  await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1);
+  await page.waitForFunction(() => document.getAnimations().every((animation) => animation.effect?.getComputedTiming().iterations === Infinity));
+  for (const [what, place] of Object.entries(places)) {
+    const seen = await place.evaluate((el) => {
+      const rect = el.getBoundingClientRect();
+      // 1 px de folga para o arredondamento do navegador.
+      const inside = (outer: { top: number; bottom: number }) => rect.top >= outer.top - 1 && rect.bottom <= outer.bottom + 1;
+      let clippedBy: string | null = inside({ top: 0, bottom: window.innerHeight }) ? null : 'a janela';
+      for (let parent = el.parentElement; parent && clippedBy === null; parent = parent.parentElement) {
+        const overflow = getComputedStyle(parent).overflowY;
+        if ((overflow === 'auto' || overflow === 'scroll' || overflow === 'hidden') && !inside(parent.getBoundingClientRect())) {
+          clippedBy = `o contêiner ${parent.tagName.toLowerCase()} que rola`;
+        }
+      }
+      const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      return { box: `${Math.round(rect.top)}..${Math.round(rect.bottom)}`, clippedBy, covered: hit === null || !el.contains(hit) };
+    });
+    expect(seen.clippedBy, `${what} (${seen.box}) está inteiro à vista`).toBeNull();
+    expect(seen.covered, `o meio de ${what} (${seen.box}) não está coberto`).toBe(false);
+  }
+}
+
 // ---------------------------------------------------------------------------------------------
 // Lugares da tela
 

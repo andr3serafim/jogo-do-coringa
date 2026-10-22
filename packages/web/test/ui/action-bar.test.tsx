@@ -6,10 +6,11 @@ import type { PlayerAction, StateMessage } from '@coringa/protocol';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { attackPreviewText, cardText, resurrectRowDetail, threatPreviewText } from '../../src/model/copy.ts';
 import { viewWithout } from '../../src/model/preview.ts';
 import { Session } from '../../src/model/session.ts';
+import { PC_QUERY } from '../../src/ui/table/History.tsx';
 import { PlayTable } from '../../src/ui/table/PlayTable.tsx';
 import { deferredAck, FakeConnection, scenarioAt, stateMessage, type SideSpec, type ViewSpec } from '../fixtures.ts';
 import { ATTACK_BUTTON, END_TURN_BUTTON, roomMessage, seriousViolations, startsWith } from './support.tsx';
@@ -800,6 +801,39 @@ describe('barra de ação: foco e a sessão (spec §7)', () => {
   it('já na primeira vez, se a mesa abre na sua vez', () => {
     mount();
     expect(bar()).toHaveFocus();
+  });
+
+  describe('na sua vez de atacar, a sua fileira de Ataque vem para o pé da janela dos campos (celular e tablet)', () => {
+    type ScrollIntoView = (this: Element, arg?: boolean | ScrollIntoViewOptions) => void;
+    const scrolled = (spy: ReturnType<typeof vi.fn<ScrollIntoView>>) =>
+      spy.mock.contexts.map((element) => element.getAttribute('data-fileira'));
+    let spy: ReturnType<typeof vi.fn<ScrollIntoView>>;
+    beforeEach(() => {
+      spy = vi.fn<ScrollIntoView>();
+      Element.prototype.scrollIntoView = spy;
+    });
+    afterEach(() => {
+      delete (Element.prototype as { scrollIntoView?: unknown }).scrollIntoView;
+      vi.unstubAllGlobals();
+    });
+
+    it('rola a sua fileira de Ataque até o pé (com a Defesa do oponente e a faixa acima), uma vez por vez', () => {
+      const m = mount({ ...DRAFT, phase: 'WAITING' });
+      expect(scrolled(spy)).toEqual([]);
+      act(() => m.connection.emitState(stateMessage(myTurn(), { seq: 2, epoch: 2 })));
+      expect(scrolled(spy)).toEqual(['p1:ATK']);
+      expect(spy).toHaveBeenLastCalledWith({ block: 'end' });
+      // Um state da mesma época (o bot respondeu, a carta voltou) não rola de novo.
+      act(() => m.connection.emitState(stateMessage(myTurn(), { seq: 3, epoch: 2 })));
+      expect(scrolled(spy)).toEqual(['p1:ATK']);
+    });
+
+    it('no PC não rola: a mesa cabe, e a vida do oponente fica à vista', () => {
+      vi.stubGlobal('matchMedia', (query: string) => ({ matches: query === PC_QUERY, addEventListener() {}, removeEventListener() {} }));
+      const m = mount({ ...DRAFT, phase: 'WAITING' });
+      act(() => m.connection.emitState(stateMessage(myTurn(), { seq: 2, epoch: 2 })));
+      expect(scrolled(spy)).toEqual([]);
+    });
   });
 
   it('não rouba o foco de um campo de texto', () => {

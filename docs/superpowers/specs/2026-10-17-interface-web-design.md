@@ -244,6 +244,7 @@ A mesa está em §3 e §4. O menu da partida tem:
   4. a mão;
   5. a barra de ação.
 - As duas fileiras de Ataque ficam junto da faixa central, frente a frente. Esse é o arranjo dos rascunhos e pode mudar na reação do autor.
+- **Na sua vez de atacar** (celular e tablet), os campos rolam até a sua fileira de Ataque ficar no pé da janela dos campos, com a faixa e a Defesa do oponente (o alvo) logo acima. Num celular baixo (360 × 640) a mesa pede ~660 px e a janela dos campos tem ~320: sem isso, a sua fileira ficava abaixo da mão. No PC nada rola (§3.3). Um E2E confere a 360 × 640.
 - **Sete cartas cabem em 360 px.** O tamanho das cartas acompanha a largura: ~34 × 48 px a 360, ~38 × 52 a 390. Nada rola de lado.
 - **Alvo de toque ≥ 44 px:**
   - cartas da mesa menores que isso ganham área de toque invisível, sem sobrepor a vizinha;
