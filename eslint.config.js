@@ -66,7 +66,8 @@ export default defineConfig(
     rules: { 'react-hooks/exhaustive-deps': 'error' },
   },
   {
-    // Os auxiliares de teste do motor (`setup`, `act`...) são só para os testes: código de produção nunca os importa.
+    // Os auxiliares de teste do motor (`setup`, `act`...) são só para os testes: código de produção nunca os importa. Um bloco
+    // posterior que também define `no-restricted-imports` substitui este nos arquivos dele, então repete o `TESTING_ONLY`.
     files: ['packages/*/src/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': ['error', { paths: [TESTING_ONLY] }],
@@ -98,6 +99,7 @@ export default defineConfig(
       'no-restricted-imports': [
         'error',
         {
+          paths: [TESTING_ONLY],
           patterns: [{ group: ['cloudflare:*'], message: 'O núcleo e o protocolo rodam no Node puro: nada de cloudflare:*.' }],
         },
       ],
@@ -110,6 +112,7 @@ export default defineConfig(
       'no-restricted-imports': [
         'error',
         {
+          paths: [TESTING_ONLY],
           patterns: [{ group: ['node:*'], message: 'Este arquivo roda no navegador (exports do @coringa/sim): nada de node:*.' }],
         },
       ],
