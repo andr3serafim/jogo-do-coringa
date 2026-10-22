@@ -63,7 +63,7 @@ test('axe em cada estado da mesa: mão, Reflect, janela de reação, cemitério 
   await page.goto(TRAINING);
   await expect(table(page)).toBeVisible();
   // As numéricas da rodada 1 vão para a Defesa: o ataque do Bot na rodada 3 gasta uma delas, que vai ao cemitério por mão dele, e é
-  // isso que acende o chip "novo" no cemitério (as cartas que saem por jogada sua não ficam marcadas).
+  // isso que acende o chip "novo" no cemitério (o que sai do seu campo por ataque seu, o Ataque Absoluto incluído, não fica marcado).
   await equipByUi(page, /Defesa/);
   await expect(roundHeading(page)).toHaveText('Rodada 2');
   await equipByUi(page);

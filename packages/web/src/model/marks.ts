@@ -2,7 +2,7 @@
 // (`base`) com a atual e diz o que mudou na mesa. Quem apaga uma marca é a sessão, pondo o id (ou
 // `zone:<nome>`) em `seen` quando o jogador toca, foca ou passa o mouse; as jogadas automáticas não
 // trocam a `base`.
-import type { Card, PlayerView, PublicPlayer } from '@coringa/engine';
+import type { Card, GameEvent, PlayerId, PlayerView, PublicPlayer } from '@coringa/engine';
 
 export type MarkZone = 'selfHp' | 'opponentHp' | 'pressure';
 
@@ -13,6 +13,8 @@ export interface Marks {
 }
 
 export const NO_MARKS: Marks = { cards: new Set(), zones: new Set() };
+
+const NO_IDS: ReadonlySet<string> = new Set();
 
 /** Chave de `seen` para uma zona. */
 export function zoneKey(zone: MarkZone): string {
@@ -28,10 +30,38 @@ function fieldCards(player: PublicPlayer): Card[] {
 }
 
 /**
- * O que mudou desde `base`, sem o que já está em `seen`. `base === null` (ainda não houve jogada
- * voluntária) não marca nada.
+ * Os ids das cartas que saíram do SEU campo por um ataque seu, nos `events` de um `state`: a carta da frente do seu Ataque
+ * (`CardsRemovedFromRow` com `row: 'ATK'`) e o J que o Ataque Absoluto gasta (o primeiro `BuffRemoved` seu depois do
+ * `AbsoluteAttack`). A §10.5 só marca no cemitério o que o oponente destruiu; essas vão para lá por jogada sua, e o passe do
+ * oponente (que não move a base) as deixaria marcadas até a sua próxima jogada voluntária.
  */
-export function computeMarks(base: PlayerView | null, current: PlayerView, seen: ReadonlySet<string>): Marks {
+export function ownSpentIds(events: readonly GameEvent[], me: PlayerId): string[] {
+  const ids: string[] = [];
+  let absolute = false;
+  for (const event of events) {
+    if (event.type === 'CardsRemovedFromRow' && event.player === me && event.row === 'ATK') {
+      ids.push(...event.cards.map((card) => card.id));
+    } else if (event.type === 'AbsoluteAttack' && event.player === me) {
+      absolute = true;
+    } else if (event.type === 'BuffRemoved' && event.player === me && absolute) {
+      absolute = false;
+      ids.push(...event.cards.map((card) => card.id));
+    }
+  }
+  return ids;
+}
+
+/**
+ * O que mudou desde `base`, sem o que já está em `seen`. `base === null` (ainda não houve jogada
+ * voluntária) não marca nada. `spent` são as cartas suas que saíram do campo por um ataque seu desde a base
+ * (`ownSpentIds`): não contam como destruídas pelo oponente.
+ */
+export function computeMarks(
+  base: PlayerView | null,
+  current: PlayerView,
+  seen: ReadonlySet<string>,
+  spent: ReadonlySet<string> = NO_IDS,
+): Marks {
   if (base === null) return NO_MARKS;
 
   const cards = new Set<string>();
@@ -41,7 +71,7 @@ export function computeMarks(base: PlayerView | null, current: PlayerView, seen:
   }
   const mine = new Set(fieldCards(base.self).map((c) => c.id));
   for (const card of current.graveyard) {
-    if (mine.has(card.id)) cards.add(card.id);
+    if (mine.has(card.id) && !spent.has(card.id)) cards.add(card.id);
   }
   for (const id of seen) cards.delete(id);
 

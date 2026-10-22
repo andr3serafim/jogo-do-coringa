@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { PlayerView } from '@coringa/engine';
-import { computeMarks, NO_MARKS, zoneKey } from '../../src/model/marks.ts';
+import type { GameEvent, NumCard, PlayerView, SpecialCard } from '@coringa/engine';
+import { computeMarks, NO_MARKS, ownSpentIds, zoneKey } from '../../src/model/marks.ts';
 import { seededSteps, viewAt } from '../fixtures.ts';
 
 // Partida de referência (semente fixa): as `view`s de p1 antes de cada jogada dele.
@@ -95,3 +95,71 @@ describe('computeMarks', () => {
     expect([...marks.cards].sort()).toEqual(['x-p1-ATK-0', ids[0]!, reflectIds[0]!, reflectIds[1]!].sort());
   });
 });
+
+describe('computeMarks: as cartas que você mesmo gastou (spent)', () => {
+  const base = viewAt({ self: { attackRow: [5, 6], defenseRow: [3] } });
+  const gone = base.self.attackRow[0]!;
+  const next: PlayerView = {
+    ...base,
+    self: { ...base.self, attackRow: base.self.attackRow.slice(1) },
+    graveyard: [...base.graveyard, gone],
+  };
+
+  it('a carta que foi para o cemitério por ataque seu não é marcada; sem `spent`, é', () => {
+    expect([...computeMarks(base, next, none).cards]).toEqual([gone.id]);
+    expect(computeMarks(base, next, none, new Set([gone.id]))).toBe(NO_MARKS);
+  });
+
+  it('`spent` só vale para o cemitério: não esconde uma carta nova do oponente com o mesmo id', () => {
+    const withTwin = viewAt({ self: { attackRow: [5, 6] }, opponent: { attackBuffs: ['J'] } });
+    const twin = withTwin.opponent.attackBuffs[0]!;
+    expect([...computeMarks(base, withTwin, none, new Set([twin.id])).cards]).toEqual([twin.id]);
+  });
+});
+
+describe('ownSpentIds: o que saiu do seu campo por ataque seu', () => {
+  const num = (id: string): NumCard => ({ id, kind: 'NUM', value: 5, suit: 'copas' });
+  const jack = (id: string): SpecialCard => ({ id, kind: 'J', suit: 'ouros' });
+  const removed = (player: 'p1' | 'p2', row: 'ATK' | 'DEF', id: string): GameEvent => ({
+    type: 'CardsRemovedFromRow',
+    player,
+    row,
+    cards: [num(id)],
+  });
+
+  it('sem eventos, nada', () => {
+    expect(ownSpentIds([], 'p1')).toEqual([]);
+  });
+
+  it('a carta que sai do seu Ataque conta; a da sua Defesa e a do ATK do oponente, não', () => {
+    expect(ownSpentIds([removed('p1', 'ATK', 'a'), removed('p1', 'DEF', 'd'), removed('p2', 'ATK', 'o')], 'p1')).toEqual(['a']);
+    expect(ownSpentIds([removed('p2', 'ATK', 'o')], 'p2')).toEqual(['o']);
+  });
+
+  it('o J do Ataque Absoluto conta: o primeiro BuffRemoved seu depois do AbsoluteAttack seu', () => {
+    const events: GameEvent[] = [
+      { type: 'AbsoluteAttack', player: 'p1' },
+      removed('p1', 'ATK', 'a'),
+      { type: 'BuffRemoved', player: 'p1', cards: [jack('j1')] },
+      { type: 'BuffRemoved', player: 'p1', cards: [jack('j2')] },
+    ];
+    expect(ownSpentIds(events, 'p1')).toEqual(['a', 'j1']);
+  });
+
+  it('um BuffRemoved seu sem Ataque Absoluto seu (Reflect, Armadilha) não conta, nem o de outro jogador', () => {
+    expect(ownSpentIds([{ type: 'BuffRemoved', player: 'p1', cards: [jack('j1')] }], 'p1')).toEqual([]);
+    expect(
+      ownSpentIds(
+        [{ type: 'AbsoluteAttack', player: 'p2' }, { type: 'BuffRemoved', player: 'p1', cards: [jack('j1')] }],
+        'p1',
+      ),
+    ).toEqual([]);
+    expect(
+      ownSpentIds(
+        [{ type: 'AbsoluteAttack', player: 'p1' }, { type: 'BuffRemoved', player: 'p2', cards: [jack('j9')] }],
+        'p1',
+      ),
+    ).toEqual([]);
+  });
+});
+

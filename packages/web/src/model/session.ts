@@ -22,7 +22,7 @@ import { ORDER_AUTO_MS, shouldAutoPass } from './automation.ts';
 import { AUTO_PASS_NOTICE, RATE_NOTICE } from './copy.ts';
 import { completeDraft, EQUIP_AUTO_SEND_MS, nextDestinations, shouldAutoSendEquip } from './equip.ts';
 import { appendHistory, appendNote, EMPTY_HISTORY, forGame, returnNote, roomNames, type HistoryState } from './history.ts';
-import { computeMarks, NO_MARKS, type Marks } from './marks.ts';
+import { computeMarks, NO_MARKS, ownSpentIds, type Marks } from './marks.ts';
 import { legalFor } from './plays.ts';
 import { DEFAULT_PREFS, type Prefs } from './storage.ts';
 import { buildTimeline, timelineMs } from './timeline.ts';
@@ -166,18 +166,21 @@ export class Session {
   // Passe automático
   #autoPassEpoch: number | null = null;
 
-  // Marcas: `base` é a `view` da última jogada voluntária; `seen`, o que o jogador já viu desde então.
+  // Marcas: `base` é a `view` da última jogada voluntária; `seen`, o que o jogador já viu desde então; `spent`, as cartas
+  // suas que saíram do campo por um ataque seu desde a base (o passe do oponente não move a base, e elas não são "novo").
   #base: PlayerView | null = null;
   #baseSeq: number | null = null;
   #seen: ReadonlySet<string> = new Set();
+  #spent: ReadonlySet<string> = new Set();
   // Histórico: as linhas de todo `state` que chegou (a sessão vê todos, ao contrário de um componente).
   #history: HistoryState = EMPTY_HISTORY;
-  #marksCache: { view: PlayerView | null; base: PlayerView | null; seen: ReadonlySet<string>; value: Marks } = {
-    view: null,
-    base: null,
-    seen: this.#seen,
-    value: NO_MARKS,
-  };
+  #marksCache: {
+    view: PlayerView | null;
+    base: PlayerView | null;
+    seen: ReadonlySet<string>;
+    spent: ReadonlySet<string>;
+    value: Marks;
+  } = { view: null, base: null, seen: this.#seen, spent: this.#spent, value: NO_MARKS };
 
   constructor(connection: RoomConnection, deps: SessionDeps, prefs: Prefs = DEFAULT_PREFS, options: SessionOptions = {}) {
     this.#connection = connection;
@@ -328,6 +331,7 @@ export class Session {
       this.#base = this.#snapshot.state?.view ?? null;
       this.#baseSeq = this.#snapshot.state?.seq ?? null;
       this.#seen = new Set();
+      this.#spent = new Set();
     }
     this.#update({ pending: true, notice: notice ?? (transient ? null : current) });
     let ack: AckMessage;
@@ -365,6 +369,8 @@ export class Session {
         const { state } = event;
         this.#deps.onSeq?.(state.seq);
         this.#history = appendHistory(this.#history, state, this.#names(state, this.#snapshot.room));
+        const spent = ownSpentIds(state.events, state.view.me);
+        if (spent.length > 0) this.#spent = new Set([...this.#spent, ...spent]);
         const newEpoch = state.epoch !== this.#epoch;
         if (newEpoch) this.#startEpoch(state.epoch);
         const notice = this.#snapshot.notice;
@@ -400,6 +406,7 @@ export class Session {
     this.#base = null;
     this.#baseSeq = null;
     this.#seen = new Set();
+    this.#spent = new Set();
   }
 
   #names(state: StateMessage, room: RoomMessage | null) {
@@ -560,10 +567,12 @@ export class Session {
   #marksFor(state: StateMessage | null): Marks {
     const view = state?.view ?? null;
     const cache = this.#marksCache;
-    if (cache.view === view && cache.base === this.#base && cache.seen === this.#seen) return cache.value;
-    const computed = view === null ? NO_MARKS : computeMarks(this.#base, view, this.#seen);
+    if (cache.view === view && cache.base === this.#base && cache.seen === this.#seen && cache.spent === this.#spent) {
+      return cache.value;
+    }
+    const computed = view === null ? NO_MARKS : computeMarks(this.#base, view, this.#seen, this.#spent);
     const value = sameMarks(cache.value, computed) ? cache.value : computed;
-    this.#marksCache = { view, base: this.#base, seen: this.#seen, value };
+    this.#marksCache = { view, base: this.#base, seen: this.#seen, spent: this.#spent, value };
     return value;
   }
 

@@ -650,3 +650,125 @@ describe('Session: marcas (spec §10.5)', () => {
     expect([...session.snapshot().marks.cards]).toEqual([jId()]);
   });
 });
+
+describe('Session: marcas — o que você gasta no seu ataque não é "novo" (spec §10.5)', () => {
+  // A §10.5 marca no cemitério só "cartas suas que ELE destruiu". O passe do oponente (ou o dele que termina o turno sem
+  // atacar) não é jogada sua, então a base não anda: a carta da frente do seu Ataque, gasta pelo seu próprio ataque, e o J
+  // do Ataque Absoluto iam para o cemitério marcados.
+  const base = () =>
+    viewAt({
+      self: { attackRow: [5, 6, 7], defenseRow: [3, 4], attackBuffs: ['J', 'J', 'J', 'J'] },
+      opponent: { attackRow: [9], defenseRow: [2] },
+    });
+  const spentAtk = () => base().self.attackRow[0]!;
+  const spentDef = () => base().self.defenseRow[0]!;
+  const spentJ = () => base().self.attackBuffs[0]!;
+
+  /** A `view` depois de as cartas irem para o cemitério (a mesa já mostra a fileira sem elas). */
+  function after(gone: { atk?: boolean; def?: boolean; j?: boolean }): PlayerView {
+    const view = base();
+    const graveyard = [...view.graveyard];
+    if (gone.atk) graveyard.push(view.self.attackRow[0]!);
+    if (gone.def) graveyard.push(view.self.defenseRow[0]!);
+    if (gone.j) graveyard.push(view.self.attackBuffs[0]!);
+    return {
+      ...view,
+      self: {
+        ...view.self,
+        attackRow: gone.atk ? view.self.attackRow.slice(1) : view.self.attackRow,
+        defenseRow: gone.def ? view.self.defenseRow.slice(1) : view.self.defenseRow,
+        attackBuffs: gone.j ? view.self.attackBuffs.slice(1) : view.self.attackBuffs,
+      },
+      graveyard,
+    };
+  }
+
+  const removed = (row: 'ATK' | 'DEF', card: NumCard, player: 'p1' | 'p2' = 'p1'): GameEvent => ({
+    type: 'CardsRemovedFromRow',
+    player,
+    row,
+    cards: [card],
+  });
+
+  it('o seu ataque gasta a carta da frente e o passe do oponente não é jogada sua: ela não fica marcada', async () => {
+    const { connection, session } = setup();
+    connection.emitState(stateMessage(base(), { seq: 1 }));
+    await session.play({ type: 'DECLARE_ATTACK' });
+    // O oponente passa na janela de reação; o ataque se resolve e a sua carta da frente vai para o cemitério.
+    connection.emitState(stateMessage(after({ atk: true }), { seq: 3, events: [removed('ATK', spentAtk())] }));
+    expect(session.snapshot().marks).toBe(NO_MARKS);
+  });
+
+  it('continua sem marca quando o oponente só encerra o turno (nenhum state com a carta nos eventos depois)', async () => {
+    const { connection, session } = setup();
+    connection.emitState(stateMessage(base(), { seq: 1 }));
+    await session.play({ type: 'DECLARE_ATTACK' });
+    connection.emitState(stateMessage(after({ atk: true }), { seq: 3, events: [removed('ATK', spentAtk())] }));
+    connection.emitState(stateMessage(after({ atk: true }), { seq: 4, events: [{ type: 'TurnStarted', player: 'p2' }] }));
+    connection.emitState(stateMessage(after({ atk: true }), { seq: 5, events: [{ type: 'RoundStarted', round: 11, kind: 'EQUIP' }] }));
+    expect(session.snapshot().marks).toBe(NO_MARKS);
+  });
+
+  it('o que o ataque DELE destruiu na sua Defesa continua marcado, ao lado do que você gastou', async () => {
+    const { connection, session } = setup();
+    connection.emitState(stateMessage(base(), { seq: 1 }));
+    await session.play({ type: 'DECLARE_ATTACK' });
+    connection.emitState(stateMessage(after({ atk: true }), { seq: 3, events: [removed('ATK', spentAtk())] }));
+    connection.emitState(stateMessage(after({ atk: true, def: true }), { seq: 5, events: [removed('DEF', spentDef())] }));
+    expect([...session.snapshot().marks.cards]).toEqual([spentDef().id]);
+  });
+
+  it('o ATK de outro jogador e a Defesa não entram na conta do que você gastou', async () => {
+    const { connection, session } = setup();
+    connection.emitState(stateMessage(base(), { seq: 1 }));
+    await session.play(END_TURN);
+    const view = after({ atk: true });
+    // O motor só tira do seu Ataque por ataque seu; o evento do oponente (outro `player`) não vale para o seu campo.
+    connection.emitState(stateMessage(view, { seq: 2, events: [removed('ATK', spentAtk(), 'p2')] }));
+    expect([...session.snapshot().marks.cards]).toEqual([spentAtk().id]);
+  });
+
+  it('o J que o seu Ataque Absoluto gasta não fica marcado, e o J que a Armadilha dele destruiu fica', async () => {
+    const { connection, session } = setup();
+    connection.emitState(stateMessage(base(), { seq: 1 }));
+    await session.play({ type: 'DECLARE_ATTACK' });
+    connection.emitState(
+      stateMessage(after({ atk: true, j: true }), {
+        seq: 3,
+        events: [
+          { type: 'AbsoluteAttack', player: 'p1' },
+          removed('ATK', spentAtk()),
+          { type: 'BuffRemoved', player: 'p1', cards: [spentJ()] },
+        ],
+      }),
+    );
+    expect(session.snapshot().marks).toBe(NO_MARKS);
+
+    // Outro J seu, destruído pela Armadilha do oponente (TrapUsed, sem BuffRemoved): continua marcado.
+    const view = after({ atk: true, j: true });
+    const trapped = view.self.attackBuffs[0]!;
+    connection.emitState(
+      stateMessage(
+        { ...view, self: { ...view.self, attackBuffs: view.self.attackBuffs.slice(1) }, graveyard: [...view.graveyard, trapped] },
+        {
+          seq: 4,
+          events: [
+            { type: 'TrapUsed', player: 'p2', card: { id: 'a-dele', kind: 'A', suit: 'paus' }, target: trapped, targetOwner: 'p1' },
+          ],
+        },
+      ),
+    );
+    expect([...session.snapshot().marks.cards]).toEqual([trapped.id]);
+  });
+
+  it('depois de uma jogada voluntária só o que veio depois é marcado: a base nova já tem a carta no cemitério', async () => {
+    const { connection, session } = setup();
+    connection.emitState(stateMessage(base(), { seq: 1 }));
+    await session.play({ type: 'DECLARE_ATTACK' });
+    connection.emitState(stateMessage(after({ atk: true }), { seq: 3, events: [removed('ATK', spentAtk())] }));
+    await session.play(END_TURN);
+    // A mesma carta, agora na base: nada novo, e um evento antigo repetido não a marca nem esconde outra.
+    connection.emitState(stateMessage(after({ atk: true, def: true }), { seq: 5, events: [removed('DEF', spentDef())] }));
+    expect([...session.snapshot().marks.cards]).toEqual([spentDef().id]);
+  });
+});
