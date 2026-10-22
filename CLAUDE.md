@@ -5,7 +5,7 @@
 - Rode `pnpm check` antes de commitar: lint, typecheck, testes com cobertura e o smoke no Node puro. O hook de pre-push (simple-git-hooks) roda o mesmo comando; o de pre-commit é a versão rápida (abaixo).
 - **Nunca** use `git commit --no-verify`, `git push --no-verify` nem `SKIP_SIMPLE_GIT_HOOKS=1`. Se o check falhar, corrija a causa.
 - Trabalho em branch própria com PR para a `main`. A CI (`.github/workflows/check.yml`) tem dois jobs em paralelo, `check` (`pnpm check`) e `e2e` (`pnpm e2e`), e os dois têm que estar verdes antes do merge, que é feito por squash no GitHub ou fast-forward (histórico limpo). O workflow roda nos pushes de `main` e de `feat/**` e nos PRs; o E2E não faz parte do `pnpm check` nem dos hooks.
-- **Pre-commit rápido (em vigor):** o `pnpm check` passou de ~45 s, então o pre-commit roda `scripts/check-fast.ts`: lint, typecheck e `vitest related --run` nos pacotes com arquivos em stage (sem o projeto workerd do servidor). O pre-push mantém o `pnpm check` completo, e a CI também. O hook cai para `pnpm check` se o script não existir (a pasta `.git/hooks` é compartilhada por todos os worktrees).
+- **Pre-commit rápido (em vigor):** o `pnpm check` passou de ~2 min (mediana de 122 s, medida na spec da web §9.3), então o pre-commit roda `scripts/check-fast.ts`: lint, typecheck e `vitest related --run` nos pacotes com arquivos em stage (sem o projeto workerd do servidor). O pre-push mantém o `pnpm check` completo, e a CI também. O hook cai para `pnpm check` se o script não existir (a pasta `.git/hooks` é compartilhada por todos os worktrees).
 - Calibração (`pnpm sim:calibrate`) é job à parte e nunca entra no `pnpm check`.
 
 ## Node puro, sem bundler

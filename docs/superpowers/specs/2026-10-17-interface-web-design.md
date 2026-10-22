@@ -179,7 +179,7 @@ A mesa está em §3 e §4. O menu da partida tem:
 - **Copiar link da sala**;
 - **Passar sozinho quando não tenho resposta** (chave, ligada por padrão) [A];
 - **Reduzir animações** (chave; liga sozinha com `prefers-reduced-motion`) [P];
-- **Resumo das regras**: uma página estática, curta, sobre o que cada carta faz. O texto sai da spec 1 §1.6–§1.8, e o autor o revisa no PR [P];
+- **Resumo das regras**: uma página estática, curta, sobre o que cada carta faz. O texto sai da spec 1 §1.6–§1.8, revisado pela sessão principal em 2026-10-21, por delegação do autor [P];
 - **Desistir**, com confirmação ("Você perde esta partida por W.O.") → `concede`.
 
 ### 2.5 Fim de partida e revanche [P]
@@ -380,7 +380,7 @@ A mesa está em §3 e §4. O menu da partida tem:
   - o relógio mostra sempre o tempo real do servidor;
   - um toque em qualquer lugar da mesa termina as batidas na hora.
 - Os controles ficam desligados durante as batidas e voltam no fim ou no pulo, com no máximo ~1 s de espera.
-- **`catchUp: true`** (eventos perdidos na reconexão): as batidas tocam em velocidade dobrada, sem cenas especiais e com teto de ~3 s. O histórico marca "Enquanto você estava fora".
+- **`catchUp: true`** (eventos perdidos na reconexão): as batidas tocam em velocidade dobrada, sem cenas especiais e com teto de ~3 s. A faixa fica no ar da primeira à última batida com faixa, com o texto da última que passou: uma subida e uma descida por reconexão, e não uma por faixa (§10.4). O histórico marca "Enquanto você estava fora".
 - **`resync: true`:** a mesa troca de uma vez, sem animação. O histórico registra "Mesa sincronizada".
 - **Reduzir movimento** (do sistema ou do menu):
   - sem deslocamento: troca direta ou esmaecimento;
@@ -489,7 +489,7 @@ A mesa está em §3 e §4. O menu da partida tem:
 
 ### 6.5 Fronteira de erro
 
-Uma exceção no React mostra "Algo deu errado", com os botões **Recarregar** e **Copiar diagnóstico**. O diagnóstico leva código da sala, `seq`, época, versão publicada e mensagem, nunca o token.
+Uma exceção no React mostra "Algo deu errado", com os botões **Recarregar** e **Copiar diagnóstico**. O diagnóstico leva código da sala, `seq`, época, versão e mensagem, nunca o token. A versão do diagnóstico pode ser a do protocolo ("protocolo N"): a versão publicada (hash do commit) aparece no menu (§11) e é o mesmo deploy.
 
 ---
 
@@ -789,7 +789,7 @@ O mesmo Worker serve a interface. No `packages/server/wrangler.jsonc`:
 
 ## 12. Desempenho [P]
 
-- **JavaScript inicial ≤ 200 KB** comprimido, com React, Motion (carregado com `LazyMotion` e `domAnimation`), o motor e a interface. O treino carrega o bot sob demanda (`import()` dinâmico).
+- **JavaScript inicial ≤ 200 KB** comprimido, com React, Motion (carregado com `LazyMotion`; as funções `domMax`, que o recurso de layout das cartas exige, entram por `import()` à parte, fora do inicial), o motor e a interface. O treino carrega o bot sob demanda (`import()` dinâmico).
 - A tela de início abre em menos de 2 s num 4G médio.
 - **Animações:** só com `transform` e `opacity` no que se repete, e 60 fps num celular intermediário. As cenas especiais podem usar `filter` e `clip-path`, dentro do orçamento de §4.1.
 
