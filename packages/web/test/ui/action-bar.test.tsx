@@ -808,24 +808,85 @@ describe('barra de ação: foco e a sessão (spec §7)', () => {
     const scrolled = (spy: ReturnType<typeof vi.fn<ScrollIntoView>>) =>
       spy.mock.contexts.map((element) => element.getAttribute('data-fileira'));
     let spy: ReturnType<typeof vi.fn<ScrollIntoView>>;
+    /** A geometria de um celular de 360 × 640 com os campos no topo: a janela dos campos vai até 317, e a sua fileira está em 422..478. */
+    const rects: Record<string, [number, number]> = { campos: [0, 317], 'p1:ATK': [422, 478], 'p2:DEF': [161, 217] };
+    const original = Element.prototype.getBoundingClientRect;
     beforeEach(() => {
       spy = vi.fn<ScrollIntoView>();
       Element.prototype.scrollIntoView = spy;
+      Element.prototype.getBoundingClientRect = function (this: Element) {
+        const key = this.hasAttribute('data-campos') ? 'campos' : (this.getAttribute('data-fileira') ?? '');
+        const [top, bottom] = rects[key] ?? [0, 0];
+        return { top, bottom, left: 0, right: 360, width: 360, height: bottom - top, x: 0, y: top, toJSON: () => ({}) } as DOMRect;
+      };
     });
     afterEach(() => {
       delete (Element.prototype as { scrollIntoView?: unknown }).scrollIntoView;
+      Element.prototype.getBoundingClientRect = original;
+      rects['p1:ATK'] = [422, 478];
+      vi.useRealTimers();
       vi.unstubAllGlobals();
     });
 
-    it('rola a sua fileira de Ataque até o pé (com a Defesa do oponente e a faixa acima), uma vez por vez', () => {
+    it('rola a sua fileira de Ataque até o pé quando ela não está à vista, uma vez por vez', () => {
       const m = mount({ ...DRAFT, phase: 'WAITING' });
       expect(scrolled(spy)).toEqual([]);
       act(() => m.connection.emitState(stateMessage(myTurn(), { seq: 2, epoch: 2 })));
       expect(scrolled(spy)).toEqual(['p1:ATK']);
-      expect(spy).toHaveBeenLastCalledWith({ block: 'end' });
+      // Instantânea, nunca suave; e o foco segue na barra.
+      expect(spy).toHaveBeenLastCalledWith({ block: 'end', behavior: 'auto' });
+      expect(bar()).toHaveFocus();
       // Um state da mesma época (o bot respondeu, a carta voltou) não rola de novo.
       act(() => m.connection.emitState(stateMessage(myTurn(), { seq: 3, epoch: 2 })));
       expect(scrolled(spy)).toEqual(['p1:ATK']);
+    });
+
+    it('com movimento reduzido (sistema), a rolagem também é instantânea', () => {
+      vi.stubGlobal('matchMedia', (query: string) => ({
+        matches: query.includes('prefers-reduced-motion'),
+        addEventListener() {},
+        removeEventListener() {},
+      }));
+      const m = mount({ ...DRAFT, phase: 'WAITING' });
+      act(() => m.connection.emitState(stateMessage(myTurn(), { seq: 2, epoch: 2 })));
+      expect(spy).toHaveBeenLastCalledWith({ block: 'end', behavior: 'auto' });
+    });
+
+    it.each([
+      ['a roda do mouse', () => new WheelEvent('wheel', { bubbles: true })],
+      ['o toque arrastado', () => new Event('touchmove', { bubbles: true })],
+      ['uma tecla de rolagem', () => new KeyboardEvent('keydown', { key: 'PageDown', bubbles: true })],
+    ])('não briga com o jogador: se ele rolou os campos nesta vez (%s), nada rola', (_, event) => {
+      vi.useFakeTimers();
+      const m = mount({ ...DRAFT, phase: 'WAITING' });
+      const hit = { type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 40, defense: 10, damage: 30 } as const;
+      act(() => m.connection.emitState(stateMessage(myTurn(), { seq: 2, epoch: 2, events: [hit, { type: 'TurnStarted', player: 'p1' }] })));
+      act(() => {
+        document.querySelector('[data-campos]')!.dispatchEvent(event());
+      });
+      act(() => {
+        vi.advanceTimersByTime(3_000);
+      });
+      expect(scrolled(spy)).toEqual([]);
+    });
+
+    it('espera as batidas pararem: enquanto o dano que você recebe conta, a sua vida fica à vista', () => {
+      vi.useFakeTimers();
+      const m = mount({ ...DRAFT, phase: 'WAITING' });
+      const hit = { type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 40, defense: 10, damage: 30 } as const;
+      act(() => m.connection.emitState(stateMessage(myTurn(), { seq: 2, epoch: 2, events: [hit, { type: 'TurnStarted', player: 'p1' }] })));
+      expect(scrolled(spy)).toEqual([]);
+      act(() => {
+        vi.advanceTimersByTime(3_000);
+      });
+      expect(scrolled(spy)).toEqual(['p1:ATK']);
+    });
+
+    it('com a sua fileira e a Defesa do oponente já inteiras na janela, nada rola (a vista que o jogador escolheu fica)', () => {
+      rects['p1:ATK'] = [261, 317];
+      const m = mount({ ...DRAFT, phase: 'WAITING' });
+      act(() => m.connection.emitState(stateMessage(myTurn(), { seq: 2, epoch: 2 })));
+      expect(scrolled(spy)).toEqual([]);
     });
 
     it('no PC não rola: a mesa cabe, e a vida do oponente fica à vista', () => {

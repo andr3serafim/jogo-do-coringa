@@ -85,6 +85,18 @@ function isTextEntry(el: Element | null): boolean {
   return el.isContentEditable || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement || el instanceof HTMLInputElement;
 }
 
+/** As teclas com que o próprio jogador rola os campos. */
+const SCROLL_KEYS: ReadonlySet<string> = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ']);
+
+/** O elemento está inteiro na janela dos campos (o contêiner que rola por dentro, `data-campos`), com 1 px de folga. */
+function insideFields(el: Element): boolean {
+  const fields = el.closest('[data-campos]');
+  if (!fields) return true;
+  const box = el.getBoundingClientRect();
+  const port = fields.getBoundingClientRect();
+  return box.top >= port.top - 1 && box.bottom <= port.bottom + 1;
+}
+
 /** O botão da carta da mão com esse id, ou `null` se ela já saiu da mão. */
 function handButton(id: string | null): HTMLElement | null {
   if (id === null) return null;
@@ -290,15 +302,45 @@ function PlayTableView({
     focusBar();
   }, [turnEpoch, showEnd, focusBar]);
 
-  // No celular e no tablet os campos rolam por dentro (spec §3.2) e não cabem numa tela baixa: na sua vez de atacar, a sua
-  // fileira de Ataque vem para o pé da janela dos campos, com a faixa e a Defesa do oponente (o alvo) logo acima. No PC a mesa
-  // cabe, e a vida do oponente tem de ficar à vista na sua vez: nada rola. Uma vez por época, como o foco.
+  // No celular e no tablet os campos rolam por dentro (spec §3.2) e não cabem numa tela baixa. Na sua vez de atacar, depois de as
+  // batidas pararem (o mesmo `state` pode trazer o ataque do oponente, e a sua vida e a sua Defesa precisam ficar à vista enquanto
+  // o dano conta), se a sua fileira de Ataque ou a Defesa do oponente (o alvo) não está inteira na janela dos campos, a sua fileira
+  // desce até o pé dela, com a fileira de Ataque do oponente, a faixa e a Defesa dele acima. No PC a mesa cabe, e a vida do
+  // oponente tem de ficar à vista na sua vez: nada rola. Uma vez por época, como o foco, e sem brigar com o jogador: se ele mesmo
+  // rolou os campos nesta época (roda, toque arrastado, teclas de rolagem), nada rola. A rolagem é sempre instantânea (nunca suave,
+  // nem sem movimento reduzido) e não mexe no foco, que segue no painel de baixo.
   const attackEpoch = acting && phase === 'ATTACK_MAIN' ? state.epoch : null;
+  const scrolledEpoch = useRef<number | null>(null);
+  const userScrolledEpoch = useRef<number | null>(null);
   const me = view.me;
+  const opponent = view.opponent.id;
   useEffect(() => {
-    if (attackEpoch === null || window.matchMedia?.(PC_QUERY).matches) return;
-    document.querySelector(`[data-fileira="${rowKey(me, 'ATK')}"]`)?.scrollIntoView?.({ block: 'end' });
-  }, [attackEpoch, me]);
+    const fields = document.querySelector('[data-campos]');
+    if (attackEpoch === null || !fields) return;
+    const mark = () => {
+      userScrolledEpoch.current = attackEpoch;
+    };
+    const onKey = (event: Event) => {
+      if (SCROLL_KEYS.has((event as KeyboardEvent).key)) mark();
+    };
+    fields.addEventListener('wheel', mark, { passive: true });
+    fields.addEventListener('touchmove', mark, { passive: true });
+    fields.addEventListener('keydown', onKey);
+    return () => {
+      fields.removeEventListener('wheel', mark);
+      fields.removeEventListener('touchmove', mark);
+      fields.removeEventListener('keydown', onKey);
+    };
+  }, [attackEpoch]);
+  useEffect(() => {
+    if (attackEpoch === null || busy || scrolledEpoch.current === attackEpoch) return;
+    scrolledEpoch.current = attackEpoch;
+    if (userScrolledEpoch.current === attackEpoch || window.matchMedia?.(PC_QUERY).matches) return;
+    const mine = document.querySelector(`[data-fileira="${rowKey(me, 'ATK')}"]`);
+    const target = document.querySelector(`[data-fileira="${rowKey(opponent, 'DEF')}"]`);
+    if (!mine || (insideFields(mine) && (target === null || insideFields(target)))) return;
+    mine.scrollIntoView?.({ block: 'end', behavior: 'auto' });
+  }, [attackEpoch, busy, me, opponent]);
 
   // Depois de ressuscitar pelo diálogo, o foco vai para a barra: o botão que abriu pode já nem existir.
   useEffect(() => {
