@@ -62,6 +62,22 @@ describe('appendHistory: eventos viram linhas', () => {
     expect(next.lastSeq).toBe(5);
   });
 
+  it('o Selvagem na Armadilha e no Sacrifício aparece com o papel', () => {
+    const wild = { id: 'w1', kind: 'WILD' } as const;
+    const next = appendHistory(
+      started,
+      msg(3, [
+        { type: 'TrapUsed', player: 'p2', card: wild, as: 'A', target: { id: 'k1', kind: 'K', suit: 'paus' }, targetOwner: 'p1' },
+        { type: 'Sacrificed', player: 'p1', card: { ...wild, id: 'w2' }, as: 'J', target: { id: 'j1', kind: 'J', suit: 'copas' }, targetOwner: 'p2' },
+      ]),
+      names,
+    );
+    expect(texts(next).slice(-2)).toEqual([
+      'Duda usou Armadilha com Selvagem (como A) e destruiu K♣ de você',
+      'Você sacrificou Selvagem (como J) e destruiu J♥ de Duda',
+    ]);
+  });
+
   it('eventos sem texto (a janela de reação) não viram linha', () => {
     const next = appendHistory(started, msg(2, [windowOpened, attack, windowOpened]), names);
     expect(added(next).map((line) => line.text)).toEqual(['Você declarou o ataque']);

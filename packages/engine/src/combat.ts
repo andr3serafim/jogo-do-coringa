@@ -71,6 +71,9 @@ export function resolveAttack(s: GameState, attackerId: PlayerId, ev: GameEvent[
   const defender = opponentOf(s, attackerId);
   const result = previewBetween(attacker, defender, s.pressure, s.config);
   const { absolute } = result;
+  // O Ataque Absoluto é anunciado antes de tudo, também contra um Reflect (que o intercepta: os K do dono ficam). O J que ele
+  // gasta sai no fim, depois da carta da frente do Ataque.
+  if (absolute) ev.push({ type: 'AbsoluteAttack', player: attacker.id });
 
   if (result.outcome === 'REFLECTED') {
     const reflect = defender.reflect;
@@ -86,7 +89,6 @@ export function resolveAttack(s: GameState, attackerId: PlayerId, ev: GameEvent[
     ev.push({ type: 'ReflectTriggered', owner: defender.id, attacker: attacker.id, damage: result.reflected });
     loseHp(s, attacker, result.reflected, defender, ev);
   } else {
-    if (absolute) ev.push({ type: 'AbsoluteAttack', player: attacker.id });
     breakGuards(s, defender, result.breaks.defenderGuard, ev);
     ev.push({
       type: 'DamageDealt',

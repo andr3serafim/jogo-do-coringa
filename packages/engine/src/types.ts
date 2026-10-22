@@ -154,8 +154,10 @@ export type GameEvent =
   | { type: 'TurnStarted'; player: PlayerId }
   | { type: 'BuffPlayed'; player: PlayerId; card: SpecialCard; as: 'J' | 'Q' }
   | { type: 'GuardPlayed'; player: PlayerId; cards: SpecialCard[] }
-  | { type: 'TrapUsed'; player: PlayerId; card: SpecialCard; target: SpecialCard; targetOwner: PlayerId }
-  | { type: 'Sacrificed'; player: PlayerId; card: SpecialCard; target: SpecialCard; targetOwner: PlayerId }
+  /** `as` só quando a carta usada é um Selvagem (no papel de A). */
+  | { type: 'TrapUsed'; player: PlayerId; card: SpecialCard; as?: 'A'; target: SpecialCard; targetOwner: PlayerId }
+  /** `as` só quando a carta sacrificada é um Selvagem (no papel de J ou de Q, o do alvo). */
+  | { type: 'Sacrificed'; player: PlayerId; card: SpecialCard; as?: 'J' | 'Q'; target: SpecialCard; targetOwner: PlayerId }
   | { type: 'ReflectPlayed'; player: PlayerId; reflect: ReflectState }
   | { type: 'ReflectCanceled'; player: PlayerId; owner: PlayerId }
   | { type: 'ReflectProtected'; player: PlayerId; owner: PlayerId }

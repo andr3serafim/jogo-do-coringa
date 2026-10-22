@@ -37,6 +37,21 @@ describe('textos em pt-BR', () => {
     expect(e({ type: 'GameOver', result: { kind: 'DRAW', reason: 'ANTI_STALL' } })).toContain('empate');
   });
 
+  it('o Selvagem na Armadilha e no Sacrifício diz o papel', () => {
+    const e = (event: GameEvent) => eventText(event, names);
+    const wild = { id: 'w', kind: 'WILD' } as const;
+    const ace = { id: 'a', kind: 'A', suit: 'paus' } as const;
+    const jack = { id: 'j', kind: 'J', suit: 'espadas' } as const;
+    const queen = { id: 'q', kind: 'Q', suit: 'copas' } as const;
+    expect(e({ type: 'TrapUsed', player: P1, card: wild, as: 'A', target: jack, targetOwner: P2 })).toBe(
+      'Você usou Armadilha com Selvagem (como A) e destruiu J♠ do Bot',
+    );
+    expect(e({ type: 'TrapUsed', player: P1, card: ace, target: jack, targetOwner: P2 })).toBe('Você usou Armadilha (A♣) e destruiu J♠ do Bot');
+    expect(e({ type: 'Sacrificed', player: P2, card: wild, as: 'Q', target: queen, targetOwner: P1 })).toBe(
+      'Bot sacrificou Selvagem (como Q) e destruiu Q♥ de você',
+    );
+  });
+
   it('todo tipo de evento de uma partida real tem tratamento', () => {
     const created = createGame(makeConfig(), 'eventos', [P1, P2]);
     if (!created.ok) throw new Error(created.error.message);

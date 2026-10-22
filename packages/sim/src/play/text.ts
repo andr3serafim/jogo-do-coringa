@@ -132,10 +132,12 @@ export function eventText(e: GameEvent, names: Names): string | null {
       return `${who(e.player)} jogou ${cardText(e.card)}${e.card.kind === 'WILD' ? ` como ${e.as}` : ''} nos Buffs de ${e.as === 'J' ? 'Ataque' : 'Defesa'}`;
     case 'GuardPlayed':
       return `${who(e.player)} pôs ${e.cards.length} K na Guarda`;
-    case 'TrapUsed':
-      return `${who(e.player)} usou Armadilha (${cardText(e.card)}) e destruiu ${cardText(e.target)} ${de(e.targetOwner)}`;
+    case 'TrapUsed': {
+      const used = e.as ? `com ${cardText(e.card)} (como ${e.as})` : `(${cardText(e.card)})`;
+      return `${who(e.player)} usou Armadilha ${used} e destruiu ${cardText(e.target)} ${de(e.targetOwner)}`;
+    }
     case 'Sacrificed':
-      return `${who(e.player)} sacrificou ${cardText(e.card)} e destruiu ${cardText(e.target)} ${de(e.targetOwner)}`;
+      return `${who(e.player)} sacrificou ${cardText(e.card)}${e.as ? ` (como ${e.as})` : ''} e destruiu ${cardText(e.target)} ${de(e.targetOwner)}`;
     case 'ReflectPlayed':
       return `${who(e.player)} lançou um Reflect!`;
     case 'ReflectCanceled':

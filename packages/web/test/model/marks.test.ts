@@ -146,6 +146,20 @@ describe('ownSpentIds: o que saiu do seu campo por ataque seu', () => {
     expect(ownSpentIds(events, 'p1')).toEqual(['a', 'j1']);
   });
 
+  it('contra um Reflect, o J gasto conta e as Q que o Reflect quebra não (a ordem do motor: o Absoluto vem antes de tudo)', () => {
+    const queen: SpecialCard = { id: 'q1', kind: 'Q', suit: 'paus' };
+    const events: GameEvent[] = [
+      { type: 'AbsoluteAttack', player: 'p1' },
+      { type: 'GuardBroken', player: 'p1', cards: [{ id: 'k1', kind: 'K', suit: 'copas' }] },
+      { type: 'BuffRemoved', player: 'p1', cards: [queen] },
+      { type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 90 },
+      removed('p1', 'ATK', 'a'),
+      removed('p2', 'DEF', 'd'),
+      { type: 'BuffRemoved', player: 'p1', cards: [jack('j1')] },
+    ];
+    expect(ownSpentIds(events, 'p1')).toEqual(['a', 'j1']);
+  });
+
   it('um BuffRemoved seu sem Ataque Absoluto seu (Reflect, Armadilha) não conta, nem o de outro jogador', () => {
     expect(ownSpentIds([{ type: 'BuffRemoved', player: 'p1', cards: [jack('j1')] }], 'p1')).toEqual([]);
     expect(

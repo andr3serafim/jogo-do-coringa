@@ -134,11 +134,12 @@ describe('askChoice e o jogo offline com AbortSignal', () => {
     // Sem sinal, a mesma pergunta se comporta como antes.
     expect(await askChoice(scriptedIo(['2']), 'Escolha', ['a', 'b'])).toBe(1);
 
-    // O playGame offline (semente 'roteiro', sempre a opção 1) segue idêntico ao de antes da refatoração.
+    // O playGame offline (semente 'roteiro', sempre a opção 1) segue idêntico ao de antes da refatoração. A saída só mudou numa
+    // linha no polimento: a Armadilha do Bot com Selvagem passou a dizer o papel ("com Selvagem (como A)"); as jogadas, não.
     const game = scriptedIo(() => '1');
     const outcome = await playGame({ io: game, seed: 'roteiro', bot: 'greedy', config: makeConfig(), saveDir: null });
     const sha = (text: string) => createHash('sha256').update(text).digest('hex');
-    expect(sha(game.output.join('\n'))).toBe('8131f051a8d7e1543a0f00740b3aaa77e12385c854adbb39a0e3538e8a2f69b0');
+    expect(sha(game.output.join('\n'))).toBe('1aa19b9fc5f329b8799be690a4d112bd7707d5e7ae3c95777e633c8c47715e77');
     expect(sha(JSON.stringify(outcome.replay.steps))).toBe('1cbb67275b3db8bd6141531772b85cebb7de3d014f9096b65c2095a027ce9670');
     expect(outcome.replay.steps).toHaveLength(118);
   });

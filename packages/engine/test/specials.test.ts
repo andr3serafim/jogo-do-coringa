@@ -57,10 +57,17 @@ describe('Armadilha (Ás)', () => {
     expect(r.state.graveyard.map((c) => c.kind)).toEqual(['A', 'Q']);
   });
 
-  it('o Coringa Selvagem funciona como Ás', () => {
+  it('o Coringa Selvagem funciona como Ás, e o evento diz o papel', () => {
     const s = setup({ p1: { hand: ['W'] }, p2: { guard: 1 } });
     const r = act(s, P1, { type: 'TRAP', cardId: handId(s, P1, 'WILD'), targetId: player(s, P2).guard[0].id });
     expect(player(r.state, P2).guard).toHaveLength(0);
+    expect(r.events.find((event) => event.type === 'TrapUsed')).toMatchObject({ as: 'A' });
+  });
+
+  it('a Armadilha com Ás não leva papel no evento', () => {
+    const s = setup({ p1: { hand: ['A'] }, p2: { guard: 1 } });
+    const r = act(s, P1, { type: 'TRAP', cardId: handId(s, P1, 'A'), targetId: player(s, P2).guard[0].id });
+    expect(r.events.find((event) => event.type === 'TrapUsed')).not.toHaveProperty('as');
   });
 
   it('não atravessa a Defesa Absoluta', () => {
@@ -102,6 +109,15 @@ describe('Sacrifício', () => {
       [P1, { type: 'SACRIFICE', cardId: handId(s, P1, 'WILD'), targetId: q2 }],
     ]);
     expect(player(r.state, P2).defenseBuffs).toHaveLength(0);
+    const sacrificed = r.events.filter((event) => event.type === 'Sacrificed');
+    expect(sacrificed[0]).not.toHaveProperty('as');
+    expect(sacrificed[1]).toMatchObject({ as: 'Q' });
+  });
+
+  it('o Selvagem que abate um J vai no papel de J', () => {
+    const s = setup({ p1: { hand: ['W'] }, p2: { attackBuffs: ['J'] } });
+    const r = act(s, P1, { type: 'SACRIFICE', cardId: handId(s, P1, 'WILD'), targetId: player(s, P2).attackBuffs[0].id });
+    expect(r.events.find((event) => event.type === 'Sacrificed')).toMatchObject({ as: 'J' });
   });
 
   it('J não abate Q, e K não é alvo', () => {

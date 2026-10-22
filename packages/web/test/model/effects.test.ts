@@ -1,4 +1,4 @@
-import type { GameEvent, NumCard, SpecialCard } from '@coringa/engine';
+import { applyAction, viewFor, type GameEvent, type NumCard, type SpecialCard } from '@coringa/engine';
 import { describe, expect, it } from 'vitest';
 import {
   bannerBeatAt,
@@ -118,6 +118,37 @@ describe('pressureBeatIndex: onde o número da pressão muda', () => {
   it('é a batida do PressureChanged, ou -1', () => {
     expect(pressureBeatIndex(beatsOf({ type: 'TurnStarted', player: 'p1' }, { type: 'PressureChanged', pressure: 2 }))).toBe(1);
     expect(pressureBeatIndex(beatsOf({ type: 'TurnStarted', player: 'p1' }))).toBe(-1);
+  });
+});
+
+describe('Ataque Absoluto contra um Reflect (eventos do motor): o Reflect intercepta tudo e os K do dono ficam', () => {
+  // Duda ataca com 4 J; você tem um Reflect e um K na Guarda, e passa na janela.
+  const { state } = scenarioAt({
+    phase: 'WAITING',
+    self: { reflect: true, guard: ['K'], defenseRow: [4] },
+    opponent: { attackRow: [5, 6, 7], attackBuffs: ['J', 'J', 'J', 'J'], guard: ['K'] },
+  });
+  const declared = applyAction(state, 'p2', { type: 'DECLARE_ATTACK' });
+  if (!declared.ok) throw new Error(declared.error.message);
+  const passed = applyAction(declared.state, 'p1', { type: 'PASS' });
+  if (!passed.ok) throw new Error(passed.error.message);
+  const after = viewFor(passed.state, 'p1');
+  const beats = buildTimeline(passed.events, LIVE);
+  const myGuard = state.players[0].guard.map((card) => card.id);
+
+  it('a cena do Ataque Absoluto vem antes da do Reflect que o devolve', () => {
+    const scenes = beats.filter((beat) => beat.scene !== null).map((beat) => beat.scene);
+    expect(scenes).toEqual(['ABSOLUTE_ATTACK', 'REFLECT_TRIGGERED']);
+  });
+
+  it('nenhuma batida racha um K seu: a cena do Absoluto só acende o Ataque de quem ataca', () => {
+    const absolute = beats.find((beat) => beat.scene === 'ABSOLUTE_ATTACK')!;
+    expect(effectsOf(absolute, after)).toMatchObject({ rows: new Set([rowKey('p2', 'ATK')]), cards: new Map() });
+    for (const beat of beats) {
+      const cracked = [...effectsOf(beat, after).cards].filter(([, fx]) => fx === 'crack').map(([id]) => id);
+      expect(cracked.filter((id) => myGuard.includes(id))).toEqual([]);
+    }
+    expect(after.self.guard.map((card) => card.id)).toEqual(myGuard);
   });
 });
 

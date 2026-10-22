@@ -144,6 +144,25 @@ describe('resolveAttack', () => {
     expect(player(s, P1).attackBuffs).toHaveLength(3);
   });
 
+  it('o Ataque Absoluto contra um Reflect também é anunciado, antes de tudo, e os K do dono do Reflect não quebram', () => {
+    const s = setup({
+      p1: { attack: [5, 6, 7], attackBuffs: ['J', 'J', 'J', 'J'], defenseBuffs: ['Q'], guard: 1 },
+      p2: { reflect: true, guard: 1 },
+    });
+    const spentJ = player(s, P1).attackBuffs[0]!.id;
+    const ev = attackP1(s);
+    const tags = ev.map((event) => ('player' in event ? `${event.type}:${event.player}` : event.type));
+    expect(tags[0]).toBe(`AbsoluteAttack:${P1}`);
+    expect(tags.indexOf(`AbsoluteAttack:${P1}`)).toBeLessThan(tags.indexOf('ReflectTriggered'));
+    // O Reflect intercepta tudo: quem perde K é o atacante; a Guarda do dono fica.
+    expect(tags).not.toContain(`GuardBroken:${P2}`);
+    expect(player(s, P2).guard).toHaveLength(1);
+    // O J que o Absoluto gasta sai no último `BuffRemoved` do atacante, depois da carta da frente do Ataque.
+    const lastRemoved = ev.findLast((event) => event.type === 'BuffRemoved');
+    expect(lastRemoved).toMatchObject({ player: P1, cards: [{ id: spentJ }] });
+    expect(tags.lastIndexOf(`BuffRemoved:${P1}`)).toBeGreaterThan(tags.indexOf(`CardsRemovedFromRow:${P1}`));
+  });
+
   it('dano letal encerra a partida na hora', () => {
     const s = setup({ p1: { attack: [3, 7, 9], attackBuffs: ['J'] }, p2: { hp: 10, defense: [5, 8] } });
     const ev = attackP1(s);

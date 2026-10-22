@@ -73,7 +73,7 @@ export function useTrap(
   const card = takeFromHand(p, cardId, ['A', 'WILD']);
   const target = takeTarget(owner, targetId, zones);
   toGraveyard(s, [card, target]);
-  ev.push({ type: 'TrapUsed', player: p.id, card, target, targetOwner: owner.id });
+  ev.push({ type: 'TrapUsed', player: p.id, card, ...(card.kind === 'WILD' ? { as: 'A' as const } : {}), target, targetOwner: owner.id });
 }
 
 /** Sacrifício (spec §1.6): J da mão abate J do oponente; Q abate Q. Só na fase principal. */
@@ -82,15 +82,18 @@ export function sacrifice(s: GameState, p: PlayerState, cardId: string, targetId
   if (owner.absoluteDefense) fail('TARGET_PROTECTED', 'o oponente está sob Defesa Absoluta');
   let target = removeById(owner.attackBuffs, targetId);
   let card: SpecialCard;
+  let role: 'J' | 'Q';
   if (target) {
     card = takeFromHand(p, cardId, ['J', 'WILD']);
+    role = 'J';
   } else {
     target = removeById(owner.defenseBuffs, targetId);
     if (!target) fail('INVALID_TARGET', 'o Sacrifício só abate J ou Q do oponente');
     card = takeFromHand(p, cardId, ['Q', 'WILD']);
+    role = 'Q';
   }
   toGraveyard(s, [card, target]);
-  ev.push({ type: 'Sacrificed', player: p.id, card, target, targetOwner: owner.id });
+  ev.push({ type: 'Sacrificed', player: p.id, card, ...(card.kind === 'WILD' ? { as: role } : {}), target, targetOwner: owner.id });
 }
 
 export function takeReflectCards(p: PlayerState, kId: string, jId: string, qId: string): ReflectState {
