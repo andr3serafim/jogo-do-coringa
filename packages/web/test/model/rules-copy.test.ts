@@ -42,3 +42,20 @@ describe('resumo das regras: a Iniciativa', () => {
     expect(rounds[attack + 1]).toContain('No empate, inclusive 0 a 0, não muda.');
   });
 });
+
+describe('resumo das regras: a janela de reação diz o que o motor faz', () => {
+  const window = RULES_SECTIONS.find((section) => section.title === 'Janela de reação')!.items;
+
+  // No motor (`actions/reaction.ts`): a Armadilha (A) deixa a janela aberta, então cabem várias; anular o Reflect ou se
+  // proteger dele fecha a janela na hora (`closeReaction`); e o A é recusado na janela do Reflect.
+  it('o segundo item separa o A (quantas quiser, e depois passa) do Reflect (anular ou proteger fecha na hora)', () => {
+    expect(window[1]).toBe(
+      'Quem responde pode usar A (contra o ataque ou o K), quantas quiser, e depois passa. Contra um Reflect, pode anulá-lo ou se proteger, e isso fecha a janela na hora. Não há resposta a uma resposta.',
+    );
+  });
+
+  it('não promete "quantas respostas quiser" também contra o Reflect', () => {
+    expect(text).not.toContain('Pode dar quantas respostas quiser');
+  });
+});
+
