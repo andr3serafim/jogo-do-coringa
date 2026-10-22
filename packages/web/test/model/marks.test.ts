@@ -117,7 +117,7 @@ describe('computeMarks: as cartas que você mesmo gastou (spent)', () => {
   });
 });
 
-describe('ownSpentIds: o que saiu do seu campo por ataque seu', () => {
+describe('ownSpentIds: o que saiu do seu campo por jogada ou efeito seu', () => {
   const num = (id: string): NumCard => ({ id, kind: 'NUM', value: 5, suit: 'copas' });
   const jack = (id: string): SpecialCard => ({ id, kind: 'J', suit: 'ouros' });
   const removed = (player: 'p1' | 'p2', row: 'ATK' | 'DEF', id: string): GameEvent => ({
@@ -125,6 +125,28 @@ describe('ownSpentIds: o que saiu do seu campo por ataque seu', () => {
     player,
     row,
     cards: [num(id)],
+  });
+
+  it('a carta da sua fileira que o seu próprio Equipar trocou conta; a que o oponente trocou na fileira dele, não', () => {
+    const placed = (player: 'p1' | 'p2', card: string, replaced?: string): GameEvent => ({
+      type: 'CardsPlaced',
+      player,
+      placements: [
+        replaced
+          ? { card: num(card), destination: 'REPLACE_LAST_ATK', replaced: num(replaced) }
+          : { card: num(card), destination: 'ATK' },
+      ],
+    });
+    expect(ownSpentIds([placed('p1', 'n1', 'velha'), placed('p1', 'n2'), placed('p2', 'n3', 'dele')], 'p1')).toEqual(['velha']);
+  });
+
+  it('o Q que a sua Defesa Absoluta gasta ao acabar conta; o BuffRemoved que não vem logo depois do fim dela, não', () => {
+    const queen: SpecialCard = { id: 'q1', kind: 'Q', suit: 'paus' };
+    const ended: GameEvent = { type: 'AbsoluteDefenseEnded', player: 'p1' };
+    const spent: GameEvent = { type: 'BuffRemoved', player: 'p1', cards: [queen] };
+    expect(ownSpentIds([ended, spent], 'p1')).toEqual(['q1']);
+    expect(ownSpentIds([ended, { type: 'TurnStarted', player: 'p2' }, spent], 'p1')).toEqual([]);
+    expect(ownSpentIds([{ type: 'AbsoluteDefenseEnded', player: 'p2' }, spent], 'p1')).toEqual([]);
   });
 
   it('sem eventos, nada', () => {

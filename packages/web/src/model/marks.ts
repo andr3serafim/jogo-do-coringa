@@ -30,27 +30,42 @@ function fieldCards(player: PublicPlayer): Card[] {
 }
 
 /**
- * Os ids das cartas que saíram do SEU campo por um ataque seu, nos `events` de um `state`: a carta da frente do seu Ataque
- * (`CardsRemovedFromRow` com `row: 'ATK'`) e o J que o Ataque Absoluto gasta (o primeiro `BuffRemoved` seu depois daquela
- * carta, num ataque com `AbsoluteAttack` seu; o motor anuncia o Absoluto antes de tudo, e contra um Reflect as Q que o dano
- * devolvido quebra saem antes da carta da frente, e seguem marcadas). A §10.5 só marca no cemitério o que o oponente destruiu;
- * essas vão para lá por jogada sua, e o passe do oponente (que não move a base) as deixaria marcadas até a sua próxima jogada
- * voluntária.
+ * Os ids das cartas que saíram do SEU campo por jogada ou efeito seu, nos `events` de um `state`:
+ * - a carta da frente do seu Ataque (`CardsRemovedFromRow` com `row: 'ATK'`);
+ * - o J que o seu Ataque Absoluto gasta: o primeiro `BuffRemoved` seu depois daquela carta, num ataque com `AbsoluteAttack`
+ *   seu. O motor anuncia o Absoluto antes de tudo, e contra um Reflect as Q que o dano devolvido quebra saem antes da carta da
+ *   frente, e seguem marcadas;
+ * - a carta da sua fileira que o seu próprio Equipar trocou (o `replaced` do seu `CardsPlaced`);
+ * - o Q que a sua Defesa Absoluta gasta ao acabar (o `BuffRemoved` seu logo depois do seu `AbsoluteDefenseEnded`).
+ *
+ * A §10.5 só marca no cemitério o que o oponente destruiu; essas vão para lá por jogada ou efeito seu, e o passe do oponente
+ * (que não move a base) as deixaria marcadas até a sua próxima jogada voluntária. Um `state` de `resync` não traz eventos: nele
+ * não há como separar, e o que foi seu ainda pode acender (sempre a mais, nunca escondendo o que o oponente fez).
  */
 export function ownSpentIds(events: readonly GameEvent[], me: PlayerId): string[] {
   const ids: string[] = [];
   let absolute = false;
   let frontGone = false;
+  let defenseEnded = false;
   for (const event of events) {
+    // O Q da Defesa Absoluta é o `BuffRemoved` que vem logo depois do fim dela: qualquer outro evento no meio desfaz a ligação.
+    const afterDefenseEnded = defenseEnded;
+    defenseEnded = false;
     if (event.type === 'CardsRemovedFromRow' && event.player === me && event.row === 'ATK') {
       ids.push(...event.cards.map((card) => card.id));
       frontGone = absolute;
     } else if (event.type === 'AbsoluteAttack' && event.player === me) {
       absolute = true;
-    } else if (event.type === 'BuffRemoved' && event.player === me && frontGone) {
-      absolute = false;
-      frontGone = false;
+    } else if (event.type === 'BuffRemoved' && event.player === me && (frontGone || afterDefenseEnded)) {
+      if (frontGone) {
+        absolute = false;
+        frontGone = false;
+      }
       ids.push(...event.cards.map((card) => card.id));
+    } else if (event.type === 'CardsPlaced' && event.player === me) {
+      for (const placement of event.placements) if (placement.replaced) ids.push(placement.replaced.id);
+    } else if (event.type === 'AbsoluteDefenseEnded' && event.player === me) {
+      defenseEnded = true;
     }
   }
   return ids;
@@ -58,7 +73,7 @@ export function ownSpentIds(events: readonly GameEvent[], me: PlayerId): string[
 
 /**
  * O que mudou desde `base`, sem o que já está em `seen`. `base === null` (ainda não houve jogada
- * voluntária) não marca nada. `spent` são as cartas suas que saíram do campo por um ataque seu desde a base
+ * voluntária) não marca nada. `spent` são as cartas suas que saíram do campo por jogada ou efeito seu desde a base
  * (`ownSpentIds`): não contam como destruídas pelo oponente.
  */
 export function computeMarks(
