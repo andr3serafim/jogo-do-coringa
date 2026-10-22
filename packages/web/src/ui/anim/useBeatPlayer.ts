@@ -32,7 +32,7 @@ export const CURTAIN_MIN_HOLD_MS = FLASH_WINDOW_MS;
 export interface Run {
   state: StateMessage | null;
   beats: Beat[];
-  /** Os eventos vieram de uma reconexão (`catchUp`): a faixa fica no ar do começo ao fim, sem subir e descer a cada batida. */
+  /** Os eventos vieram de uma reconexão (`catchUp`): a faixa fica no ar da primeira à última faixa, sem subir e descer a cada batida. */
   catchUp: boolean;
   totalMs: number;
   /** Atraso (ms) de cada `layoutId` que as batidas mexem. */
