@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { legalActions, makeConfig, viewFor, type Action, type GameState, type PlayerId } from '@coringa/engine';
 // Builder de cenários do motor: monta estados reais sem inventar cartas.
-// Dívida: trocar por um subpath `@coringa/engine/testing` quando a interface chegar (acopla os pacotes).
-import { P1, P2, setup, type PlayerSetup } from '../../engine/test/helpers.ts';
+import { P1, P2, setup, type PlayerSetup } from '@coringa/engine/testing';
 import { GREEDY, greedyBot, prefersFirst } from '../src/bots/greedy.ts';
 import type { Bot } from '../src/bots/types.ts';
 import { runGame } from '../src/match.ts';

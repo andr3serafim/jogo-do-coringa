@@ -2,7 +2,7 @@ import { legalActions, viewEvents, viewFor } from '@coringa/engine';
 import type { GameEvent } from '@coringa/engine';
 import type { PlayerAction } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
-import { setup } from '../../../engine/test/helpers.ts';
+import { setup } from '@coringa/engine/testing';
 import { RoomCore } from '../../src/core/room-core.ts';
 import { sweep } from '../../src/core/presence.ts';
 import { STATE_SCHEMA, TIMERS } from '../../src/core/timers.ts';

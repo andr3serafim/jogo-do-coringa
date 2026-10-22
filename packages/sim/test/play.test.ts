@@ -5,8 +5,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { applyAction, createGame, legalActions, makeConfig, viewFor, type GameEvent } from '@coringa/engine';
-// Dívida: trocar por um subpath `@coringa/engine/testing` quando a interface chegar (acopla os pacotes).
-import { P1, P2, setup } from '../../engine/test/helpers.ts';
+import { P1, P2, setup } from '@coringa/engine/testing';
 import { renderBoard } from '../src/play/board.ts';
 import { BOT, HUMAN, playGame, REPLAYS_DIR } from '../src/play/game.ts';
 import { askChoice, QuitSignal, scriptedIo } from '../src/play/io.ts';

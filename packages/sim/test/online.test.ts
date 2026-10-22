@@ -15,8 +15,7 @@ import type {
   SeatInfo,
   StateMessage,
 } from '@coringa/protocol';
-// Dívida: trocar por um subpath `@coringa/engine/testing` quando a interface chegar (acopla os pacotes).
-import { P1, P2, setup } from '../../engine/test/helpers.ts';
+import { P1, P2, setup } from '@coringa/engine/testing';
 import { resolveServer, targetArg } from '../src/cli/args.ts';
 import { runBot } from '../src/online/bot.ts';
 import { enterRoom, forgetSession, loadSessions, processAlive, saveSession, type SavedSession } from '../src/online/sessions.ts';

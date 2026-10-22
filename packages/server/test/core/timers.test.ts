@@ -2,7 +2,7 @@ import { actingPlayers, applyAction, createGame, legalActions, viewFor } from '@
 import type { GameState } from '@coringa/engine';
 import type { PlayerAction, StateMessage } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
-import { handId, setup, values } from '../../../engine/test/helpers.ts';
+import { handId, setup, values } from '@coringa/engine/testing';
 import { applyHeldPass, applyTimeout, autoSteps } from '../../src/core/game.ts';
 import { schedulePhase } from '../../src/core/timing.ts';
 import { TIMERS } from '../../src/core/timers.ts';

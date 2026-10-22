@@ -2,7 +2,7 @@ import { applyAction, createGame, legalActions, viewEvents, viewFor } from '@cor
 import type { GameState } from '@coringa/engine';
 import type { ClientMessage, PlayerAction } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
-import { setup } from '../../../engine/test/helpers.ts';
+import { setup } from '@coringa/engine/testing';
 import { autoSteps, commitStep, finishGame } from '../../src/core/game.ts';
 import { phaseKey } from '../../src/core/epoch.ts';
 import { ROOM_LIMITS, TIMERS } from '../../src/core/timers.ts';

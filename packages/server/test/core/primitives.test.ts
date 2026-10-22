@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { act, handId, setup } from '../../../engine/test/helpers.ts';
+import { act, handId, setup } from '@coringa/engine/testing';
 import { dueItems, nextAlarm, withItem, withoutKinds } from '../../src/core/agenda.ts';
 import { emptyEffects, mergeEffects } from '../../src/core/effects.ts';
 import { phaseKey } from '../../src/core/epoch.ts';
