@@ -6,11 +6,14 @@
 //
 // A inversão (`filter: invert(1)`) e a cortina (o escurecimento de tela inteira da cena) seguem outra regra: depois de
 // ligadas, só o seu próprio timer as desliga. Um `state` novo que chega no meio delas (o bot responde em ~600 ms) troca
-// a linha do tempo, mas não as corta nem as esquece. As duas passam pela MESMA `FlashLock` (spec §10.4: o limite de
-// 3 trocas claro ↔ escuro em 1 s vale para a tela e soma tudo o que muda a luminância dela):
+// a linha do tempo, mas não as corta nem as esquece. As duas, e a faixa, passam pela MESMA `FlashLock` (spec §10.4: o
+// limite de 3 trocas claro ↔ escuro em 1 s vale para a tela e soma tudo o que muda a luminância dela):
 // - a inversão pede licença na hora de ligar; sem ela, a cena segue sem inversão;
 // - a cortina sobe se a regra deixa (sem ela, a cena mostra só o painel) e desce quando nenhuma cena a segura, mas nunca
-//   antes de 1 s no ar e nunca antes de a regra deixar: se a descida quebraria o limite, ela espera.
+//   antes de 1 s no ar e nunca antes de a regra deixar: se a descida quebraria o limite, ela espera;
+// - a faixa quer estar no ar quando a batida de agora tem faixa (`bannerBeatAt`) e não há cena nem cortina; ela sobe e
+//   desce quando a regra deixa e, recusada, fica como está até deixar (um `catchUp` logo depois de uma cena ao vivo subia a
+//   faixa no instante em que a cortina descia). Só o visual espera: as batidas e os controles seguem a linha do tempo.
 //
 // Terminar na hora (pulo, ou um `state` novo no meio das batidas) também precisa terminar as transições de layout que o
 // Motion deixou no ar, com o atraso que ainda faltava: a carta ficaria no lugar velho enquanto a mesa já mostra a `view`
@@ -22,7 +25,7 @@
 // o movimento reduzido na hora de ligar: ligá-lo com a linha do tempo no ar também vale.
 import type { StateMessage } from '@coringa/protocol';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { damageBeatIndex, dealsOf, delaysOf, pressureBeatIndex, type Deals } from '../../model/effects.ts';
+import { bannerBeatAt, damageBeatIndex, dealsOf, delaysOf, pressureBeatIndex, type Deals } from '../../model/effects.ts';
 import { FLASH_WINDOW_MS, FlashLock } from '../../model/flash.ts';
 import { buildTimeline, timelineMs, type Beat, type TimelineOptions } from '../../model/timeline.ts';
 
@@ -108,6 +111,10 @@ export interface BeatPlayer {
   inverted: boolean;
   /** A cortina escura da cena está no ar (ela segura um pouco além da batida, e a regra de flash pode segurá-la mais). */
   curtain: boolean;
+  /** A batida cuja faixa vale agora (`bannerBeatAt`), ou `null`: o texto da faixa sai dela. */
+  bannerBeat: Beat | null;
+  /** A camada da faixa está no ar (a regra de flash pode segurá-la, no ar ou fora dele, além da batida). */
+  banner: boolean;
   /** As transições de layout que acabaram na hora (pulo, ou `state` novo no meio das batidas). */
   released: Released;
   /** Termina as batidas na hora (toque na mesa, Esc): a `view` já é a de depois. */
@@ -224,6 +231,39 @@ export function useBeatPlayer(
     [lock],
   );
 
+  // --- Faixa ---
+  const beat = current.done ? null : (run.beats[current.index] ?? null);
+  const bannerBeat = current.done ? null : bannerBeatAt(run.beats, current.index, run.catchUp);
+  // Com a cortina no ar ou uma cena no painel, a faixa espera: as duas juntas seriam o mesmo texto duas vezes.
+  const wantBanner = bannerBeat !== null && !curtain && !(beat?.kind === 'scene' && beat.scene !== null);
+  const [banner, setBanner] = useState(false);
+  const bannerUp = useRef(false);
+  const bannerWanted = useRef(false);
+  const bannerTimer = useRef<number | null>(null);
+
+  /** Leva a faixa ao que a batida quer, se a regra deixa; senão tenta de novo no primeiro instante em que ela deixa. */
+  const settleBanner = useCallback(() => {
+    const attempt = () => {
+      bannerTimer.current = null;
+      const want = bannerWanted.current;
+      if (want === bannerUp.current) return;
+      const now = clock();
+      if (lock.toggle(now)) {
+        bannerUp.current = want;
+        setBanner(want);
+        return;
+      }
+      bannerTimer.current = window.setTimeout(attempt, Math.max(0, lock.nextAllowed(now) - now));
+    };
+    if (bannerTimer.current !== null) window.clearTimeout(bannerTimer.current);
+    attempt();
+  }, [lock]);
+
+  useEffect(() => {
+    bannerWanted.current = wantBanner;
+    settleBanner();
+  }, [wantBanner, settleBanner]);
+
   // --- Batidas ---
   const timers = useRef<number[]>([]);
   /** A linha do tempo cujos timers ainda valem: o pulo a solta, e o que ela agendou deixa de acontecer. */
@@ -266,11 +306,12 @@ export function useBeatPlayer(
     if (!hasScene) lowerCurtain(CURTAIN_MIN_HOLD_MS);
   }, [run, hasScene, lowerCurtain]);
 
-  // Ao sair da mesa, nenhum timer de inversão ou de cortina fica para trás.
+  // Ao sair da mesa, nenhum timer de inversão, de cortina ou de faixa fica para trás.
   useEffect(
     () => () => {
       if (offTimer.current !== null) window.clearTimeout(offTimer.current);
       if (fallTimer.current !== null) window.clearTimeout(fallTimer.current);
+      if (bannerTimer.current !== null) window.clearTimeout(bannerTimer.current);
     },
     [],
   );
@@ -300,11 +341,13 @@ export function useBeatPlayer(
 
   return {
     run,
-    beat: current.done ? null : (run.beats[current.index] ?? null),
+    beat,
     index: current.done ? -1 : current.index,
     busy: !current.done,
     inverted,
     curtain,
+    bannerBeat,
+    banner,
     released,
     skip,
   };

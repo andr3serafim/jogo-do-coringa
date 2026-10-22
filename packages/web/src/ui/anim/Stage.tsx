@@ -14,7 +14,7 @@
 //   `import()` à parte, fora do JavaScript inicial (spec §12).
 import { LazyMotion, MotionConfig } from 'motion/react';
 import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from 'react';
-import { bannerBeatAt, effectsOf, NO_EFFECTS } from '../../model/effects.ts';
+import { effectsOf, NO_EFFECTS } from '../../model/effects.ts';
 import { roomNames } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import type { Beat } from '../../model/timeline.ts';
@@ -40,7 +40,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
   const { state, room } = snapshot;
   // A decisão do jogador espera se há jogada legal para ele neste `state` (spec §4.1: tudo cabe em ~1 s).
   const player = useBeatPlayer(state, { reducedMotion, decisionPending: snapshot.legal.length > 0 }, onSettled);
-  const { run, beat, index, busy, inverted, curtain, released, skip } = player;
+  const { run, beat, index, busy, inverted, curtain, bannerBeat, banner, released, skip } = player;
   const names = useMemo(() => roomNames(state?.view.me ?? 'p1', room?.seats ?? []), [state, room]);
 
   const count: CountPhase =
@@ -154,7 +154,8 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
           >
             {children}
             <BeatOverlay
-              bannerBeat={bannerBeatAt(run.beats, index, run.catchUp)}
+              bannerBeat={bannerBeat}
+              banner={banner}
               scene={scene}
               curtain={curtain}
               names={names}

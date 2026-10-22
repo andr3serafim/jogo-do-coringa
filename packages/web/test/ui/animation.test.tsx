@@ -902,6 +902,43 @@ describe('cortina e inversão contam juntas (spec §10.4: no máximo 3 trocas po
     expectFlashSafe(trace.all);
   });
 
+  // A faixa também conta (spec §10.4: tudo o que estiver na tela, somado). Um `catchUp` que chega logo depois de uma cena ao vivo
+  // (a reconexão cai no meio dela) tem faixa esperando a cortina: ela subia no instante em que a cortina descia, por fora da trava
+  // (a revisão final mediu 4 trocas em ~850 ms). Agora ela sobe e desce pela mesma `FlashLock`, e segura quando a regra não deixa.
+  it.each([100, 200, 300, 400, 500, 600, 700, 800, 900])(
+    'um catchUp %i ms depois de uma cena ao vivo: faixa, cortina e inversão somadas respeitam as 3 trocas por segundo',
+    (gap) => {
+      const m = mount(THEIRS);
+      const trace = watchMany([() => banner(m.container) !== null, () => curtainUp(m.container), () => inverted(m.container)]);
+      emit(m, THEIRS, [ABSOLUTE]);
+      trace.sample();
+      trace.run(gap);
+      emit(m, THEIRS, Array.from({ length: 6 }, () => TURN), { catchUp: true });
+      trace.sample();
+      trace.run(4_000);
+      expectFlashSafe(trace.all);
+      // A cena ao vivo segue invertendo como antes (o `catchUp` que chega antes dos 150 ms a encerra antes da inversão ligar).
+      if (gap >= 200) expect(trace.flips[2]).toEqual([150, 750]);
+      // A cortina sobe com a cena e desce uma vez; a faixa sobe e desce no máximo uma vez, e nada fica no ar.
+      expect(trace.flips[1]).toHaveLength(2);
+      expect(trace.flips[0]!.length).toBeLessThanOrEqual(2);
+      expect(banner(m.container)).toBeNull();
+      expect(curtainUp(m.container)).toBe(false);
+    },
+  );
+
+  it('a faixa que a trava segura não segura os controles: a decisão chega no teto de 1 s', () => {
+    const m = mount(MINE);
+    emit(m, MINE, [ABSOLUTE]);
+    advance(300);
+    // O `catchUp` chega com a cortina da cena no ar e uma decisão minha esperando.
+    emit(m, MINE, Array.from({ length: 6 }, () => TURN), { catchUp: true });
+    expect(within(bar()).getByRole('button', { name: ATTACK_BUTTON })).toBeDisabled();
+    advance(1_000);
+    expect(busy(m.container)).toBe(false);
+    expect(within(bar()).getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
+  });
+
   it('com a cortina negada, o painel da cena ainda aparece', async () => {
     const m = mount(THEIRS);
     emit(m, THEIRS, [ABSOLUTE]);
