@@ -20,6 +20,16 @@ describe('API para bots e interface', () => {
     expect(defensePower(view.opponent)).toBe(13);
   });
 
+  it('absoluteAttackArmed: buffLimit J (ou Selvagens no papel de J) armam o Ataque Absoluto, de cada lado, mesmo com o Ataque vazio', () => {
+    const s = setup({ p1: { attackBuffs: ['J', 'J', 'J', 'W'] }, p2: { attack: [5], attackBuffs: ['J', 'J', 'J'] } });
+    const view = viewFor(s, P1);
+    expect(engine.absoluteAttackArmed(view.self, view.config)).toBe(true);
+    expect(engine.absoluteAttackArmed(view.opponent, view.config)).toBe(false);
+    expect(engine.absoluteAttackArmed(view.opponent, { buffLimit: 3 })).toBe(true);
+    // A prévia usa a mesma regra.
+    expect(engine.previewBetween({ ...view.self, attackRow: view.opponent.attackRow }, view.opponent, 0, view.config).absolute).toBe(true);
+  });
+
   it('a pressão entra no multiplicador de ataque (exemplo 6) e a quadra soma antes dele (exemplo 4)', () => {
     const s = setup({ pressure: 2, p1: { attack: [4, 6], attackBuffs: ['J'] }, p2: { defense: [10, 3, 10, 10, 10], defenseBuffs: ['Q'] } });
     const view = viewFor(s, P2);

@@ -2,7 +2,7 @@
 // buffs, as marcas de estado e as duas fileiras. Em cima o oponente (verde), embaixo você (rosa); os dois se
 // distinguem por posição e por rótulo, nunca só pela cor. O arranjo (celular em coluna, PC em três colunas)
 // é de CSS: a árvore é uma só.
-import type { PlayerView, PublicPlayer, SpecialCard } from '@coringa/engine';
+import { absoluteAttackArmed, type PlayerView, type PublicPlayer, type SpecialCard } from '@coringa/engine';
 import { useId, type ReactNode } from 'react';
 import { zoneKey, type MarkZone } from '../../model/marks.ts';
 import { useAnim } from '../anim/context.ts';
@@ -169,8 +169,7 @@ function Zones({ player, name, view }: { player: PublicPlayer; name: string; vie
   if (player.resurrectionCount > 0) {
     chips.push({ key: 'res', text: resurrectionsText(player.resurrectionCount), strong: false });
   }
-  // `buffLimit` J armam o Ataque Absoluto: é o teste do motor (`isAbsoluteAttack`), que ele não exporta.
-  if (player.attackBuffs.length >= view.config.buffLimit) {
+  if (absoluteAttackArmed(player, view.config)) {
     chips.push({ key: 'atk', text: 'Ataque Absoluto armado', strong: true });
   }
 

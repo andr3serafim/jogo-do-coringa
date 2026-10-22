@@ -43,10 +43,6 @@ export function defenseValue(p: PlayerState): number {
   return defensePower(p);
 }
 
-export function isAbsoluteAttack(s: GameState, p: PlayerState): boolean {
-  return p.attackBuffs.length >= s.config.buffLimit;
-}
-
 function loseHp(s: GameState, victim: PlayerState, amount: number, dealer: PlayerState, ev: GameEvent[]): void {
   if (amount <= 0) return;
   victim.hp -= amount;

@@ -29,6 +29,14 @@ export interface AttackPreview {
 }
 
 /**
+ * Ataque Absoluto armado (spec 1 §1.6): `buffLimit` J, ou Selvagens no papel de J, nos buffs de ataque. Vale de cada lado e com
+ * o Ataque vazio (a marca de estado da mesa); a prévia e a resolução usam a mesma regra.
+ */
+export function absoluteAttackArmed(side: Pick<CombatSide, 'attackBuffs'>, config: Pick<RulesConfig, 'buffLimit'>): boolean {
+  return side.attackBuffs.length >= config.buffLimit;
+}
+
+/**
  * A conta de um ataque, sem tocar no estado — spec 1 §1.6, §1.8 e §1.9.
  * `resolveAttack` aplica os efeitos a partir deste resultado: é a mesma conta.
  */
@@ -42,7 +50,7 @@ export function previewBetween(
   if (attacker.attackRow.length === 0) {
     return { outcome: 'NO_ATTACK', attack: 0, defense: 0, net: 0, damage: 0, reflected: 0, absolute: false, breaks };
   }
-  const absolute = attacker.attackBuffs.length >= config.buffLimit;
+  const absolute = absoluteAttackArmed(attacker, config);
   const attack = attackPower(attacker, pressure);
 
   if (defender.reflect) {
