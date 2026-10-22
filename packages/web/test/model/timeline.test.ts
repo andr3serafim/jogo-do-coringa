@@ -271,6 +271,19 @@ describe('fotossensibilidade (spec §10.4)', () => {
     expectPhotosafe(beats, false);
   });
 
+  it('Ataque Absoluto contra um Reflect: a inversão fica com o Reflect que devolve o golpe (o desfecho), e não com o anúncio', () => {
+    const triggered: GameEvent = { type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 90 };
+    const beats = buildTimeline([ABS_ATTACK, { type: 'GuardBroken', player: 'p2', cards: [] }, triggered], LIVE);
+    const scenes = beats.filter((b) => b.kind === 'scene');
+    expect(scenes.map((b) => b.scene)).toEqual(['ABSOLUTE_ATTACK', 'REFLECT_TRIGGERED']);
+    expect(scenes[0]!.invert).toBeNull();
+    expect(scenes[1]!.invert).not.toBeNull();
+    expect(luminanceSwitches(beats)).toHaveLength(2);
+    expectPhotosafe(beats, false);
+    // Sem Reflect depois, o Ataque Absoluto segue invertendo.
+    expect(buildTimeline([ABS_ATTACK, DAMAGE], LIVE).find((b) => b.kind === 'scene')!.invert).not.toBeNull();
+  });
+
   it('cenas coladas: a segunda perde, a terceira volta a inverter depois do intervalo', () => {
     const beats = buildTimeline([ABS_ATTACK, EXODIA, REFLECT_PLAYED], LIVE);
     expect(beats.map((b) => b.invert !== null)).toEqual([true, false, true]);

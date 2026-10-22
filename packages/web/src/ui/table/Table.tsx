@@ -9,7 +9,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { turnCue } from '../../model/clock.ts';
 import { equipOpponentText, scoreText } from '../../model/copy.ts';
 import { completeDraft, draftBoard } from '../../model/equip.ts';
-import { newLineCount } from '../../model/history.ts';
+import { newLineCount, type HistoryLine } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import { Banners } from './Banners.tsx';
 import { CenterBand } from './CenterBand.tsx';
@@ -80,11 +80,14 @@ function TableView({
   const toggleRef = useRef<HTMLButtonElement>(null);
 
   // Abrir a gaveta conta como ver as linhas (spec §10.5, "quando você toca, foca…"): o contador do botão só conta as que chegam
-  // depois da última vez em que ela esteve aberta. As marcas "novo" dentro da lista seguem a regra das marcas.
-  const lastLineSeq = history.lines.at(-1)?.seq ?? null;
-  const [seenLineSeq, setSeenLineSeq] = useState<number | null>(null);
-  if (historyOpen && lastLineSeq !== null && lastLineSeq !== seenLineSeq) setSeenLineSeq(lastLineSeq);
-  const counterBase = marksBaseSeq === null ? null : Math.max(marksBaseSeq, seenLineSeq ?? marksBaseSeq);
+  // depois da última vez em que ela esteve aberta. Conta pela posição da linha, e não pelo `seq`: uma nota ("Duda voltou") chega
+  // sem `state` novo e repete o `seq` da última linha. A partida nova (histórico zerado, outra primeira linha) começa do zero. As
+  // marcas "novo" dentro da lista seguem a regra das marcas.
+  const [seen, setSeen] = useState<{ first: HistoryLine | undefined; count: number }>({ first: undefined, count: 0 });
+  if (historyOpen && (seen.count !== history.lines.length || seen.first !== history.lines[0])) {
+    setSeen({ first: history.lines[0], count: history.lines.length });
+  }
+  const seenCount = seen.first === history.lines[0] ? seen.count : 0;
 
   // Enquanto a mesa está montada, o puxar-para-atualizar da página não recarrega a partida (spec §3.2).
   useEffect(() => {
@@ -176,7 +179,7 @@ function TableView({
                   <HistoryButton
                     panelId={panelId}
                     open={historyOpen}
-                    count={newLineCount(history, counterBase)}
+                    count={newLineCount(history, marksBaseSeq, seenCount)}
                     onToggle={() => (historyOpen ? closeHistory() : setHistoryOpen(true))}
                     buttonRef={toggleRef}
                   />

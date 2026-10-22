@@ -88,10 +88,13 @@ export function appendHistory(prev: HistoryState, msg: StateMessage, names: Name
   return { ...prev, lastSeq: msg.seq, lines: [...prev.lines, ...lines] };
 }
 
-/** Quantas linhas são novas: as de `seq` maior que o da base das marcas (spec §10.5). Sem base, nenhuma. */
-export function newLineCount(history: HistoryState, baseSeq: number | null): number {
+/**
+ * Quantas linhas são novas: as de `seq` maior que o da base das marcas (spec §10.5), a partir da linha `from` (as de antes já
+ * foram vistas: a gaveta esteve aberta com elas). Sem base, nenhuma.
+ */
+export function newLineCount(history: HistoryState, baseSeq: number | null, from = 0): number {
   if (baseSeq === null) return 0;
-  return history.lines.filter((line) => line.seq > baseSeq).length;
+  return history.lines.slice(from).filter((line) => line.seq > baseSeq).length;
 }
 
 /**

@@ -8,6 +8,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { appendNote } from '../../src/model/history.ts';
 import { zoneKey } from '../../src/model/marks.ts';
 import { Session, type SessionSnapshot } from '../../src/model/session.ts';
 import { Card, cardName, QUAD_FACE } from '../../src/ui/cards/Card.tsx';
@@ -609,6 +610,18 @@ describe('mesa: histórico (spec §3.1, §7, §10.5)', () => {
     const { history } = mounted.props.snapshot;
     const line = { seq: 4, kind: 'event' as const, text: 'Duda declarou o ataque' };
     mounted.rerender(<Table {...mounted.props} snapshot={{ ...mounted.props.snapshot, history: { ...history, lines: [...history.lines, line] } }} />);
+    expect(screen.getByRole('button', { name: 'Histórico, 1 novo' })).toBeInTheDocument();
+  });
+
+  it('uma nota que chega sem state novo (com o seq da última linha) também acende o contador depois de ver', async () => {
+    const user = userEvent.setup();
+    const mounted = withHistory(1);
+    await user.click(screen.getByRole('button', { name: 'Histórico, 3 novos' }));
+    await user.click(screen.getByRole('button', { name: 'Fechar o histórico' }));
+    const { history } = mounted.props.snapshot;
+    const note = appendNote(history, 'Duda voltou');
+    expect(note.lines.at(-1)!.seq).toBe(history.lines.at(-1)!.seq);
+    mounted.rerender(<Table {...mounted.props} snapshot={{ ...mounted.props.snapshot, history: note }} />);
     expect(screen.getByRole('button', { name: 'Histórico, 1 novo' })).toBeInTheDocument();
   });
 

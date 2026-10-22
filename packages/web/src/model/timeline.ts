@@ -147,14 +147,17 @@ export function buildTimeline(events: GameEvent[], options: TimelineOptions): Be
   const cap = Math.min(...caps, Infinity);
   const scale = totalMs > cap ? cap / totalMs : 1;
 
-  // 3. Início absoluto de cada batida e, nas cenas, a inversão (se a regra deixar).
+  // 3. Início absoluto de cada batida e, nas cenas, a inversão (se a regra deixar). O Ataque Absoluto que bate num Reflect
+  // cede a inversão à cena do Reflect que devolve o golpe, que vem logo depois: o negativo da gravura fica com o desfecho.
+  const reflected = items.some((item) => item.scene === 'REFLECT_TRIGGERED');
   const beats: Beat[] = [];
   let startMs = 0;
   let lastInvertEndMs = -Infinity;
   for (const item of items) {
     const durationMs = Math.floor(item.baseMs * scale);
     let invert: Beat['invert'] = null;
-    if (item.scene !== null && !options.reducedMotion) {
+    const yields = reflected && item.scene === 'ABSOLUTE_ATTACK';
+    if (item.scene !== null && !options.reducedMotion && !yields) {
       const holdMs = Math.floor(SCENE_INVERT_HOLD_MS * scale);
       const atMs = startMs + Math.floor(SCENE_INVERT_LEAD_MS * scale);
       if (holdMs >= INVERT_MIN_HOLD_MS && atMs - lastInvertEndMs >= INVERT_COOLDOWN_MS) {
