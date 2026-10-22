@@ -32,6 +32,8 @@ export const CURTAIN_MIN_HOLD_MS = FLASH_WINDOW_MS;
 export interface Run {
   state: StateMessage | null;
   beats: Beat[];
+  /** Os eventos vieram de uma reconexão (`catchUp`): a faixa fica no ar do começo ao fim, sem subir e descer a cada batida. */
+  catchUp: boolean;
   totalMs: number;
   /** Atraso (ms) de cada `layoutId` que as batidas mexem. */
   delays: ReadonlyMap<string, number>;
@@ -83,6 +85,7 @@ function makeMachine(state: StateMessage | null, options: TimelineOptions | null
   const run: Run = {
     state,
     beats,
+    catchUp: options?.mode === 'catchUp',
     totalMs: timelineMs(beats),
     delays: delaysOf(beats),
     damageIndex: damageBeatIndex(beats),

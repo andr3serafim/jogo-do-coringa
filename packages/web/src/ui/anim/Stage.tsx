@@ -14,7 +14,7 @@
 //   `import()` à parte, fora do JavaScript inicial (spec §12).
 import { LazyMotion, MotionConfig } from 'motion/react';
 import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from 'react';
-import { effectsOf, NO_EFFECTS } from '../../model/effects.ts';
+import { bannerBeatAt, effectsOf, NO_EFFECTS } from '../../model/effects.ts';
 import { roomNames } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import type { Beat } from '../../model/timeline.ts';
@@ -153,7 +153,13 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
             className="relative isolate"
           >
             {children}
-            <BeatOverlay beat={beat} scene={scene} curtain={curtain} names={names} reduced={reducedMotion} />
+            <BeatOverlay
+              bannerBeat={bannerBeatAt(run.beats, index, run.catchUp)}
+              scene={scene}
+              curtain={curtain}
+              names={names}
+              reduced={reducedMotion}
+            />
           </div>
         </AnimContext>
       </MotionConfig>

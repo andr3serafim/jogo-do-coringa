@@ -1,6 +1,7 @@
 import type { GameEvent, NumCard, SpecialCard } from '@coringa/engine';
 import { describe, expect, it } from 'vitest';
 import {
+  bannerBeatAt,
   bannerText,
   damageBeatIndex,
   dealsOf,
@@ -12,9 +13,10 @@ import {
   rowKey,
   sceneText,
 } from '../../src/model/effects.ts';
+import { withinFlashLimit } from '../../src/model/flash.ts';
 import { roomNames } from '../../src/model/history.ts';
-import { buildTimeline, type Beat } from '../../src/model/timeline.ts';
-import { scenarioAt } from '../fixtures.ts';
+import { buildTimeline, luminanceSwitches, timelineMs, type Beat } from '../../src/model/timeline.ts';
+import { scenarioAt, seededSteps } from '../fixtures.ts';
 
 const num = (id: string, value: NumCard['value'] = 5): NumCard => ({ id, kind: 'NUM', value, suit: 'copas' });
 const face = (id: string, kind: 'J' | 'Q' | 'K' | 'A' = 'K'): SpecialCard => ({ id, kind, suit: 'ouros' });
@@ -311,5 +313,95 @@ describe('sceneText: o título e a linha de baixo de cada cena', () => {
 
   it('sem cena, devolve um texto vazio', () => {
     expect(sceneText(beat({ type: 'TurnStarted', player: 'p1' }), names)).toEqual({ title: '', detail: '' });
+  });
+});
+
+describe('bannerBeatAt: a faixa que está no ar (spec §4.1, §10.4)', () => {
+  const CATCH_UP = { mode: 'catchUp', reducedMotion: false, decisionPending: false } as const;
+  const turn = (player: 'p1' | 'p2' = 'p2'): GameEvent => ({ type: 'TurnStarted', player });
+  const move = (id: string): GameEvent => ({ type: 'CardsRemovedFromRow', player: 'p2', row: 'ATK', cards: [num(id)] });
+  const textsAt = (beats: Beat[], catchUp: boolean) =>
+    beats.map((_, i) => {
+      const banner = bannerBeatAt(beats, i, catchUp);
+      return banner === null ? null : bannerText(banner.event, names);
+    });
+
+  it('ao vivo: só a batida que tem faixa (a do `DeckReshuffled` também) mostra a dela', () => {
+    const beats = beatsOf(move('n1'), turn(), move('n2'), { type: 'DeckReshuffled', count: 4 }, move('n3'));
+    expect(textsAt(beats, false)).toEqual([null, 'Vez de Duda', null, 'O cemitério virou o monte', null]);
+  });
+
+  it('no catchUp: da primeira à última faixa, com o texto da última que passou; fora delas, nada', () => {
+    const beats = buildTimeline([move('n1'), turn(), move('n2'), move('n3'), turn('p1'), move('n4')], CATCH_UP);
+    expect(textsAt(beats, true)).toEqual([null, 'Vez de Duda', 'Vez de Duda', 'Vez de Duda', 'Sua vez', null]);
+  });
+
+  it('no catchUp com uma faixa só: ela vale só na própria batida', () => {
+    const beats = buildTimeline([move('n1'), turn(), move('n2')], CATCH_UP);
+    expect(textsAt(beats, true)).toEqual([null, 'Vez de Duda', null]);
+  });
+
+  it('sem faixa nenhuma, ou fora das batidas (índice -1 ou além do fim), nada', () => {
+    const beats = buildTimeline([move('n1'), move('n2')], CATCH_UP);
+    expect(textsAt(beats, true)).toEqual([null, null]);
+    const withBanner = buildTimeline([turn()], CATCH_UP);
+    expect(bannerBeatAt(withBanner, -1, true)).toBeNull();
+    expect(bannerBeatAt(withBanner, 1, true)).toBeNull();
+    expect(bannerBeatAt([], 0, false)).toBeNull();
+  });
+
+  it('as cenas viram faixa no catchUp e entram na mesma subida', () => {
+    const beats = buildTimeline([turn(), move('n1'), { type: 'Exodia', player: 'p2' }, move('n2')], CATCH_UP);
+    expect(textsAt(beats, true)).toEqual(['Vez de Duda', 'Vez de Duda', 'EXÓDIA de Duda!', null]);
+  });
+
+  /**
+   * Os instantes (ms) em que a camada da faixa sobe ou desce quando a linha do tempo toca: a camada acompanha a batida de
+   * agora, e a que dura 0 ms (`quiet`) nunca é "a de agora". Se acaba com a faixa no ar, ela desce no fim da linha.
+   */
+  function bannerSwitches(beats: Beat[], catchUp: boolean): number[] {
+    const switches: number[] = [];
+    let up = false;
+    beats.forEach((beat, i) => {
+      if (beat.durationMs === 0) return;
+      const now = bannerBeatAt(beats, i, catchUp) !== null;
+      if (now !== up) switches.push(beat.startMs);
+      up = now;
+    });
+    if (up) switches.push(timelineMs(beats));
+    return switches;
+  }
+
+  it('propriedade: o catchUp de partidas greedy com semente sobe e desce a faixa uma vez, e nenhuma janela de 1 s passa de 3 trocas', () => {
+    // Cada atraso (eventos que a reconexão devolve) é uma janela deslizante sobre os eventos da partida inteira. Os
+    // eventos vêm redigidos para quem agiu (`viewEvents`), o que não muda a batida de nenhum deles.
+    const tally = { backlogs: 0, withBanner: 0, perBeatRuleFails: 0, worstPerBeatRule: 0 };
+    for (const seed of ['luz-0', 'luz-1', 'luz-2', 'luz-3', 'luz-4', 'faixa-0', 'faixa-1', 'faixa-2']) {
+      const events = seededSteps(seed, 400).flatMap((step) => step.events);
+      expect(events.length).toBeGreaterThan(100);
+      for (const delay of [6, 10, 15, 25]) {
+        for (let from = 0; from + delay <= events.length; from++) {
+          for (const decisionPending of [false, true]) {
+            const beats = buildTimeline(events.slice(from, from + delay), { ...CATCH_UP, decisionPending });
+            tally.backlogs++;
+            // No catchUp as cenas viram faixa: não há cortina nem inversão, e a faixa é a única mudança de luminância.
+            expect(luminanceSwitches(beats)).toEqual([]);
+            const switches = bannerSwitches(beats, true);
+            expect(withinFlashLimit([], [...switches, ...luminanceSwitches(beats)])).toBe(true);
+            expect(switches.length).toBeLessThanOrEqual(2);
+            if (switches.length > 0) tally.withBanner++;
+            // A regra antiga (uma subida por batida) quebrava a de 3 por segundo em boa parte desses atrasos.
+            const perBeat = bannerSwitches(beats, false);
+            if (!withinFlashLimit([], perBeat)) tally.perBeatRuleFails++;
+            tally.worstPerBeatRule = Math.max(tally.worstPerBeatRule, perBeat.length);
+          }
+        }
+      }
+    }
+    expect(tally.backlogs).toBeGreaterThan(10_000);
+    expect(tally.withBanner).toBeGreaterThan(tally.backlogs / 2);
+    // Garante que a propriedade pegou o defeito: com a regra de uma faixa por batida, muitos atrasos passavam do limite.
+    expect(tally.perBeatRuleFails).toBeGreaterThan(100);
+    expect(tally.worstPerBeatRule).toBeGreaterThan(4);
   });
 });

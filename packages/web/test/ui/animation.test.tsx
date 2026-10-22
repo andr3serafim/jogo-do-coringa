@@ -750,6 +750,33 @@ describe('sobreposições sem pisca-pisca (spec §10.4: somando tudo o que estiv
     expect(trace.flips[0]).toEqual([0, 3_000]);
   });
 
+  it('o catchUp com eventos intercalados (a revisão final mediu 4 trocas em ~700 ms) é uma subida e uma descida só', () => {
+    // Três faixas (TurnStarted, ReactionWindowOpened) entre batidas de movimento: antes, a camada subia e descia a cada
+    // faixa, por fora da trava. No `catchUp` (velocidade dobrada) as batidas caem em 150, 150, 200, 150, 150 e 200 ms.
+    const num = { id: 'n-5', kind: 'NUM', value: 5, suit: 'copas' } as const;
+    const buff = { id: 'j-1', kind: 'J', suit: 'ouros' } as const;
+    const target = { id: 'j-2', kind: 'J', suit: 'paus' } as const;
+    const guard = { id: 'k-1', kind: 'K', suit: 'copas' } as const;
+    const backlog: GameEvent[] = [
+      { type: 'CardsRemovedFromRow', player: 'p2', row: 'ATK', cards: [num] },
+      { type: 'CardsRemovedFromRow', player: 'p1', row: 'DEF', cards: [{ ...num, id: 'n-6', value: 6 }] },
+      TURN,
+      { type: 'Sacrificed', player: 'p2', card: buff, target, targetOwner: 'p1' },
+      { type: 'GuardPlayed', player: 'p2', cards: [guard] },
+      { type: 'ReactionWindowOpened', responder: 'p1', trigger: 'ATTACK' },
+    ];
+    const m = mount(THEIRS);
+    const trace = watchMany([() => banner(m.container) !== null, () => curtainUp(m.container), () => inverted(m.container)]);
+    emit(m, THEIRS, backlog, { catchUp: true });
+    trace.sample();
+    trace.run(1_500);
+    expectFlashSafe(trace.all);
+    // Sobe na primeira faixa (300 ms) e desce no fim da última (1000 ms): nada de descer e subir no meio.
+    expect(trace.flips[0]).toEqual([300, 1_000]);
+    expect(trace.flips[1]).toEqual([]);
+    expect(trace.flips[2]).toEqual([]);
+  });
+
   it('faixas de dois `state`s colados são uma subida só, e a camada é a mesma', () => {
     const m = mount(THEIRS);
     const first = strip(m.container);

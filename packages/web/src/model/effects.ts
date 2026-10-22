@@ -150,6 +150,32 @@ export function bannerText(event: GameEvent, names: Names): string | null {
   }
 }
 
+/** A batida mostra uma faixa? As cenas só chegam aqui no `catchUp` (viram `banner`); o `DeckReshuffled` é `move` com faixa. */
+function hasBanner(beat: Beat): boolean {
+  return beat.kind === 'banner' || beat.event.type === 'DeckReshuffled';
+}
+
+/**
+ * A batida cuja faixa está no ar quando a batida `index` toca (é dela o texto), ou `null` sem faixa.
+ *
+ * - Ao vivo: a faixa é a da própria batida, se ela tem uma.
+ * - No `catchUp` (spec §4.1, §10.4): a faixa fica no ar da primeira à última batida com faixa da linha do tempo, com o texto
+ *   da última que passou. Uma subida e uma descida por linha do tempo, e não uma por faixa: com eventos de movimento
+ *   entre elas (`CardsRemovedFromRow`, `Sacrificed`...), a camada subiria e desceria várias vezes por segundo.
+ */
+export function bannerBeatAt(beats: readonly Beat[], index: number, catchUp: boolean): Beat | null {
+  const beat = beats[index];
+  if (beat === undefined) return null;
+  if (!catchUp) return hasBanner(beat) ? beat : null;
+  // Da primeira à última faixa da linha do tempo a camada fica no ar; antes e depois dela, apagada.
+  if (index > beats.findLastIndex(hasBanner)) return null;
+  for (let i = index; i >= 0; i--) {
+    const earlier = beats[i]!;
+    if (hasBanner(earlier)) return earlier;
+  }
+  return null;
+}
+
 /** O título e a linha de baixo da cena da batida; vazios se a batida não é uma cena. */
 export function sceneText(beat: Beat, names: Names): { title: string; detail: string } {
   const { event, scene } = beat;

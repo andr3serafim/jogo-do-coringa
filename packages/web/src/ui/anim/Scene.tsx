@@ -4,8 +4,10 @@
 // Sem pisca-pisca (spec §10.4: nunca mais de 3 trocas claro ↔ escuro por segundo, somando tudo o que estiver na tela):
 // as camadas ficam montadas o tempo todo e só trocam de opacidade (esmaecimento de 150 ms). A cortina escura da cena (a
 // única mudança de luminância de tela inteira além da inversão) não segue a batida de agora: quem a sobe e a desce é o
-// `useBeatPlayer`, pela mesma `FlashLock` da inversão. Entre uma batida e a seguinte só o texto troca, então várias faixas
-// seguidas (o `catchUp` toca uma a cada ~75 ms) são UMA subida e UMA descida.
+// `useBeatPlayer`, pela mesma `FlashLock` da inversão. Entre uma faixa e a seguinte só o texto troca, então faixas coladas
+// são UMA subida e UMA descida. No `catchUp`, onde batidas de movimento se intercalam com as faixas, `bannerBeatAt` mantém
+// a camada no ar da primeira à última faixa da linha do tempo (com o texto da última que passou): uma subida e uma descida
+// por reconexão, e não uma por faixa, o que passaria de 3 trocas por segundo.
 //
 // Com movimento reduzido, a cena é o mesmo texto parado que aparece e some (esmaecimento), sem escala nem deslocamento.
 import type { Names } from '@coringa/sim/text';
@@ -14,8 +16,8 @@ import { bannerText, sceneText } from '../../model/effects.ts';
 import type { Beat } from '../../model/timeline.ts';
 
 export interface BeatOverlayProps {
-  /** A batida de agora. */
-  beat: Beat | null;
+  /** A batida cuja faixa está no ar agora (`bannerBeatAt`), ou `null`. */
+  bannerBeat: Beat | null;
   /** A cena que o painel mostra (a de agora, ou a última enquanto a cortina segura). */
   scene: Beat | null;
   /** A cortina escura está no ar (decidido pelo `useBeatPlayer`). */
@@ -25,12 +27,9 @@ export interface BeatOverlayProps {
 }
 
 /** A sobreposição da batida de agora: cena, faixa, ou nada (as camadas ficam, só esmaecem). */
-export function BeatOverlay({ beat, scene, curtain, names, reduced }: BeatOverlayProps) {
+export function BeatOverlay({ bannerBeat, scene, curtain, names, reduced }: BeatOverlayProps) {
   // Com a cortina no ar ou uma cena no painel, a faixa espera: as duas juntas seriam o mesmo texto duas vezes.
-  const banner =
-    beat !== null && scene === null && !curtain && (beat.kind === 'banner' || beat.event.type === 'DeckReshuffled')
-      ? bannerText(beat.event, names)
-      : null;
+  const banner = bannerBeat !== null && scene === null && !curtain ? bannerText(bannerBeat.event, names) : null;
   return (
     <>
       <SceneLayer scene={scene} curtain={curtain} names={names} reduced={reduced} />
