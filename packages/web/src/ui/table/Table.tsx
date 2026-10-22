@@ -82,6 +82,13 @@ function TableView({
   const [historyOpen, setHistoryOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
 
+  // Abrir a gaveta conta como ver as linhas (spec §10.5, "quando você toca, foca…"): o contador do botão só conta as que chegam
+  // depois da última vez em que ela esteve aberta. As marcas "novo" dentro da lista seguem a regra das marcas.
+  const lastLineSeq = history.lines.at(-1)?.seq ?? null;
+  const [seenLineSeq, setSeenLineSeq] = useState<number | null>(null);
+  if (historyOpen && lastLineSeq !== null && lastLineSeq !== seenLineSeq) setSeenLineSeq(lastLineSeq);
+  const counterBase = marksBaseSeq === null ? null : Math.max(marksBaseSeq, seenLineSeq ?? marksBaseSeq);
+
   // Enquanto a mesa está montada, o puxar-para-atualizar da página não recarrega a partida (spec §3.2).
   useEffect(() => {
     document.documentElement.classList.add('mesa-ativa');
@@ -173,7 +180,7 @@ function TableView({
                   <HistoryButton
                     panelId={panelId}
                     open={historyOpen}
-                    count={newLineCount(history, marksBaseSeq)}
+                    count={newLineCount(history, counterBase)}
                     onToggle={() => (historyOpen ? closeHistory() : setHistoryOpen(true))}
                     buttonRef={toggleRef}
                   />

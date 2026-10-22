@@ -597,6 +597,21 @@ describe('mesa: histórico (spec §3.1, §7, §10.5)', () => {
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
   });
 
+  it('abrir a gaveta conta como ver as linhas (spec §10.5): o contador zera, e só a linha que chega depois acende de novo', async () => {
+    const user = userEvent.setup();
+    const mounted = withHistory(1);
+    await user.click(screen.getByRole('button', { name: 'Histórico, 3 novos' }));
+    await user.click(screen.getByRole('button', { name: 'Fechar o histórico' }));
+    expect(screen.getByRole('button', { name: 'Histórico' })).toBeInTheDocument();
+    // Dentro da lista, as marcas "novo" seguem a regra das marcas: apagam na próxima jogada voluntária.
+    expect(within(panel()).getAllByText('novo')).toHaveLength(3);
+    // Uma linha nova depois de ver: o contador volta a 1.
+    const { history } = mounted.props.snapshot;
+    const line = { seq: 4, kind: 'event' as const, text: 'Duda declarou o ataque' };
+    mounted.rerender(<Table {...mounted.props} snapshot={{ ...mounted.props.snapshot, history: { ...history, lines: [...history.lines, line] } }} />);
+    expect(screen.getByRole('button', { name: 'Histórico, 1 novo' })).toBeInTheDocument();
+  });
+
   it('Esc fecha a gaveta e devolve o foco ao botão', async () => {
     const user = userEvent.setup();
     withHistory(null);

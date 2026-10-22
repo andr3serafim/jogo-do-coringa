@@ -233,7 +233,7 @@ A mesa está em §3 e §4. O menu da partida tem:
   - monte (quantidade);
   - cemitério: a carta de cima e a quantidade. Um toque abre a lista inteira, que é pública.
 - **No Equipar:** o oponente aparece como "montando 3 cartas…" (`pendingCount`, que é público) ou "pronto".
-- **Histórico:** os textos de `@coringa/sim/text`. No PC fica numa coluna lateral; no celular, numa gaveta com a contagem do que é novo.
+- **Histórico:** os textos de `@coringa/sim/text`. No PC fica numa coluna lateral; no celular, numa gaveta com a contagem do que é novo (abrir a gaveta conta como ver: a contagem zera, e as marcas "novo" das linhas seguem a §10.5).
 
 ### 3.2 Celular em pé (360–430 px) [A + P]
 
