@@ -5,28 +5,28 @@
     "winner": "p2",
     "reason": "HP"
   },
-  "rounds": 7,
+  "rounds": 9,
   "finalHp": {
-    "p1": -7,
-    "p2": 82
+    "p1": -9,
+    "p2": 175
   },
   "events": {
-    "AttackDeclared": 5,
-    "BuffPlayed": 3,
-    "CardsDealt": 6,
-    "CardsPlaced": 8,
-    "CardsRemovedFromRow": 8,
-    "DamageDealt": 5,
-    "EquipSubmitted": 8,
+    "AttackDeclared": 8,
+    "BuffPlayed": 4,
+    "CardsDealt": 8,
+    "CardsPlaced": 10,
+    "CardsRemovedFromRow": 13,
+    "DamageDealt": 8,
+    "EquipSubmitted": 10,
     "GameOver": 1,
     "GuardBroken": 2,
     "GuardPlayed": 2,
     "InitiativeChanged": 2,
-    "OrderChosen": 3,
-    "ReactionWindowClosed": 7,
-    "ReactionWindowOpened": 7,
-    "RoundStarted": 6,
-    "TrapUsed": 2,
-    "TurnStarted": 5
+    "OrderChosen": 4,
+    "ReactionWindowClosed": 10,
+    "ReactionWindowOpened": 10,
+    "RoundStarted": 8,
+    "TrapUsed": 3,
+    "TurnStarted": 8
   }
 }

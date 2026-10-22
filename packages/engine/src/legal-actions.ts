@@ -23,16 +23,59 @@ function reflectCombos(hand: SpecialCard[]): Array<{ k: string; j: string; q: st
   return combos;
 }
 
+const REPLACE_OR_DISCARD: readonly Destination[] = ['REPLACE_LAST_ATK', 'REPLACE_LAST_DEF', 'DISCARD'];
+
+/** O que a regra (spec §1.4) deixa para uma carta com `atk` e `def` cartas nas fileiras: fileira com vaga; as duas cheias, trocar ou descartar. */
+function allowedDestinations(limit: number, atk: number, def: number): readonly Destination[] {
+  if (atk >= limit && def >= limit) return REPLACE_OR_DISCARD;
+  return [...(atk < limit ? ['ATK' as const] : []), ...(def < limit ? ['DEF' as const] : [])];
+}
+
+/**
+ * Os destinos que a regra deixa para a próxima carta pendente, depois das escolhas `chosen` (o Equipar carta a carta da
+ * interface e do terminal). Sem carta restante, ou com um prefixo que a regra recusa, não há destino. Vale qualquer montagem
+ * válida, e não só as da lista de `legalActions`, que traz uma por resultado.
+ */
+export function nextEquipDestinations(view: PlayerView, chosen: readonly Destination[]): Destination[] {
+  const limit = view.config.rowLimit;
+  if (chosen.length >= view.self.pending.length) return [];
+  let atk = view.self.attackRow.length;
+  let def = view.self.defenseRow.length;
+  for (const destination of chosen) {
+    if (!allowedDestinations(limit, atk, def).includes(destination)) return [];
+    if (destination === 'ATK') atk += 1;
+    if (destination === 'DEF') def += 1;
+  }
+  return [...allowedDestinations(limit, atk, def)];
+}
+
+/**
+ * As montagens do Equipar, uma por resultado. Com as duas fileiras cheias, as `k` cartas que sobram têm 3 destinos cada, mas
+ * só importa qual delas fica por último em cada fileira (trocar duas vezes a última do Ataque é o mesmo que descartar a
+ * primeira e trocar com a segunda): no máximo uma troca por fileira e as outras descartadas, k² + k + 1 montagens no lugar de
+ * 3^k. O motor aceita qualquer montagem válida (`nextEquipDestinations`).
+ */
 function equipOptions(view: PlayerView): Destination[][] {
   const limit = view.config.rowLimit;
+  const pending = view.self.pending.length;
   const results: Destination[][] = [];
   const walk = (i: number, atk: number, def: number, acc: Destination[]): void => {
-    if (i === view.self.pending.length) {
+    if (i === pending) {
       results.push(acc);
       return;
     }
     if (atk >= limit && def >= limit) {
-      for (const d of ['REPLACE_LAST_ATK', 'REPLACE_LAST_DEF', 'DISCARD'] as const) walk(i + 1, atk, def, [...acc, d]);
+      const rest = pending - i;
+      // `rest` é "nenhuma": a fileira fica como está.
+      for (let toAtk = 0; toAtk <= rest; toAtk++) {
+        for (let toDef = 0; toDef <= rest; toDef++) {
+          if (toAtk === toDef && toAtk < rest) continue;
+          const tail = Array.from({ length: rest }, (): Destination => 'DISCARD');
+          if (toAtk < rest) tail[toAtk] = 'REPLACE_LAST_ATK';
+          if (toDef < rest) tail[toDef] = 'REPLACE_LAST_DEF';
+          results.push([...acc, ...tail]);
+        }
+      }
       return;
     }
     if (atk < limit) walk(i + 1, atk + 1, def, [...acc, 'ATK']);

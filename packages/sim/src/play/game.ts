@@ -6,6 +6,7 @@ import {
   applyAction,
   createGame,
   legalActions,
+  nextEquipDestinations,
   viewEvents,
   viewFor,
   type Action,
@@ -45,24 +46,25 @@ export interface PlayOutcome {
 
 type Equip = Extract<Action, { type: 'EQUIP' }>;
 
-/** Equipar carta a carta: só oferece destinos que levam a uma combinação legal (com as fileiras cheias seriam até 81). */
+/**
+ * Equipar carta a carta: oferece os destinos que a regra deixa para cada carta (`nextEquipDestinations`). A lista legal traz
+ * uma montagem por resultado; a escolha do jogador pode ser outra montagem válida (trocar duas vezes a mesma fileira).
+ */
 async function askEquip<A extends Action>(io: Io, view: PlayerView, legal: A[], signal?: AbortSignal): Promise<A> {
-  const options = legal.filter((a): a is A & Equip => a.type === 'EQUIP');
+  const equip = legal.find((a): a is A & Equip => a.type === 'EQUIP');
+  if (!equip) throw new Error('Equipar sem EQUIP na lista legal');
   const chosen: Destination[] = [];
   for (const [i, card] of view.self.pending.entries()) {
-    const fits = options.filter((a) => chosen.every((d, j) => a.destinations[j] === d));
-    const destinations = [...new Set(fits.map((a) => a.destinations[i]))];
+    const destinations = nextEquipDestinations(view, chosen);
     if (destinations.length === 1) {
-      io.print(`Carta ${i + 1}/${view.self.pending.length}: ${cardText(card)} → ${DESTINATION_TEXT[destinations[0]]} (única opção)`);
-      chosen.push(destinations[0]);
+      io.print(`Carta ${i + 1}/${view.self.pending.length}: ${cardText(card)} → ${DESTINATION_TEXT[destinations[0]!]} (única opção)`);
+      chosen.push(destinations[0]!);
       continue;
     }
     const pick = await askChoice(io, `Carta ${i + 1}/${view.self.pending.length}: ${cardText(card)}`, destinations.map((d) => DESTINATION_TEXT[d]), signal);
-    chosen.push(destinations[pick]);
+    chosen.push(destinations[pick]!);
   }
-  const action = options.find((a) => a.destinations.every((d, j) => d === chosen[j]));
-  if (!action) throw new Error('combinação de Equipar fora da lista legal');
-  return action;
+  return { ...equip, destinations: chosen };
 }
 
 /** Mostra a mesa e pergunta a jogada (no Equipar, carta a carta). O `signal` cancela a pergunta pendente com `AbortError`. */

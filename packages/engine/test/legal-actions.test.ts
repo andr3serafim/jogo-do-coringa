@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { applyAction } from '../src/apply-action.ts';
-import { legalActions } from '../src/legal-actions.ts';
+import { legalActions, nextEquipDestinations } from '../src/legal-actions.ts';
 import { viewFor } from '../src/view.ts';
-import type { GameState, PlayerId } from '../src/types.ts';
-import { P1, P2, act, handId, player, setup } from './helpers.ts';
+import type { Destination, GameState, PlayerId, Rank } from '../src/types.ts';
+import { P1, P2, act, handId, player, setup, type PlayerSetup } from './helpers.ts';
 
 const equipPhase = { round: 1, roundKind: 'EQUIP' as const, phase: { kind: 'EQUIP' as const } };
 
@@ -30,6 +30,63 @@ describe('legalActions', () => {
       { type: 'EQUIP', destinations: ['REPLACE_LAST_DEF'] },
       { type: 'EQUIP', destinations: ['DISCARD'] },
     ]);
+  });
+
+  it('Equipar com as fileiras cheias: só as sequências canônicas (no máximo uma troca por fileira), k² + k + 1 e não 3^k', () => {
+    const full = { attack: [2, 2, 3, 3, 4, 4, 5], defense: [6, 6, 7, 7, 8, 8, 9] } satisfies Partial<PlayerSetup>;
+    for (const k of [1, 2, 4]) {
+      const pending = Array.from({ length: k }, (): Rank => 10);
+      expect(legalActions(viewFor(setup({ ...equipPhase, p1: { ...full, pending } }), P1))).toHaveLength(k * k + k + 1);
+    }
+    // Com muitas cartas (o `pnpm sim` aceita `cardsPerEquip` alto), a lista continua pequena.
+    const pending = Array.from({ length: 12 }, (_, i): Rank => (i % 2 === 0 ? 10 : 9));
+    expect(legalActions(viewFor(setup({ ...equipPhase, p1: { ...full, pending } }), P1))).toHaveLength(12 * 12 + 12 + 1);
+  });
+
+  it('a lista canônica cobre todo resultado que uma montagem válida qualquer alcança (as fileiras e o cemitério)', () => {
+    // Uma vaga no Ataque: a primeira carta pode ir para lá, e as fileiras enchem no meio da montagem.
+    const s = setup({ ...equipPhase, p1: { attack: [2, 2, 3, 3, 4, 4], defense: [6, 6, 7, 7, 8, 8, 9], pending: [10, 9, 8, 7] } });
+    const me = player(s, P1);
+    /** As fileiras e o cemitério que a montagem deixa, como o `resolveEquip` aplica. */
+    const result = (destinations: readonly Destination[]): string => {
+      const atk = me.attackRow.map((c) => c.id);
+      const def = me.defenseRow.map((c) => c.id);
+      const gone: string[] = [];
+      me.pending.forEach((card, i) => {
+        const d = destinations[i];
+        if (d === 'ATK') atk.push(card.id);
+        else if (d === 'DEF') def.push(card.id);
+        else if (d === 'DISCARD') gone.push(card.id);
+        else {
+          const row = d === 'REPLACE_LAST_ATK' ? atk : def;
+          gone.push(row.pop()!);
+          row.push(card.id);
+        }
+      });
+      return JSON.stringify([atk, def, gone.sort()]);
+    };
+    let all: Destination[][] = [[]];
+    for (let i = 0; i < me.pending.length; i++) {
+      all = all.flatMap((prefix) => (['ATK', 'DEF', 'REPLACE_LAST_ATK', 'REPLACE_LAST_DEF', 'DISCARD'] as const).map((d) => [...prefix, d]));
+    }
+    const valid = all.filter((destinations) => applyAction(s, P1, { type: 'EQUIP', destinations }).ok);
+    const canonical = legalActions(viewFor(s, P1)).flatMap((action) => (action.type === 'EQUIP' ? [action.destinations] : []));
+    expect(valid.length).toBeGreaterThan(canonical.length);
+    expect(new Set(canonical.map(result))).toEqual(new Set(valid.map(result)));
+  });
+
+  it('nextEquipDestinations: os destinos da próxima carta pela regra, e trocar duas vezes a mesma fileira continua possível', () => {
+    const s = setup({ ...equipPhase, p1: { attack: [2, 2, 3, 3, 4, 4], defense: [6, 6, 7, 7, 8, 8, 9], pending: [10, 9, 8] } });
+    const view = viewFor(s, P1);
+    expect(nextEquipDestinations(view, [])).toEqual(['ATK']);
+    expect(nextEquipDestinations(view, ['ATK'])).toEqual(['REPLACE_LAST_ATK', 'REPLACE_LAST_DEF', 'DISCARD']);
+    expect(nextEquipDestinations(view, ['ATK', 'REPLACE_LAST_ATK'])).toEqual(['REPLACE_LAST_ATK', 'REPLACE_LAST_DEF', 'DISCARD']);
+    expect(nextEquipDestinations(view, ['ATK', 'REPLACE_LAST_ATK', 'REPLACE_LAST_ATK'])).toEqual([]);
+    // A sequência fora da lista canônica é aceita pelo motor.
+    expect(applyAction(s, P1, { type: 'EQUIP', destinations: ['ATK', 'REPLACE_LAST_ATK', 'REPLACE_LAST_ATK'] }).ok).toBe(true);
+    // Um prefixo que a regra recusa não tem continuação.
+    expect(nextEquipDestinations(view, ['DEF'])).toEqual([]);
+    expect(nextEquipDestinations(viewFor(setup({ ...equipPhase, p1: { pending: [3] } }), P1), [])).toEqual(['ATK', 'DEF']);
   });
 
   it('fora da vez não há ações', () => {

@@ -4,7 +4,7 @@ export { buildDeck, totalCards } from './deck.ts';
 export { createGame } from './create-game.ts';
 export { applyAction } from './apply-action.ts';
 export { viewEvents, viewFor } from './view.ts';
-export { legalActions } from './legal-actions.ts';
+export { legalActions, nextEquipDestinations } from './legal-actions.ts';
 export { actingPlayers } from './acting.ts';
 export { attackBase, attackPower, defenseBase, defensePower, type AttackSide, type DefenseSide } from './combat.ts';
 export { nextFloat, nextInt, seedRng, shuffle } from './rng.ts';

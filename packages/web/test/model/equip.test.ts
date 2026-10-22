@@ -37,6 +37,19 @@ describe('nextDestinations: destinos possíveis da próxima carta', () => {
     expect(next(view, ['ATK'])).toEqual([]);
   });
 
+  it('trocar a última do Ataque e depois trocar de novo a mesma fileira continua possível (a regra aceita, mesmo fora da lista canônica)', () => {
+    const view = equipView({ attackRow: FULL_ATK, defenseRow: FULL_ATK, pending: [8, 9, 10] });
+    expect(next(view, ['REPLACE_LAST_ATK'])).toContain('REPLACE_LAST_ATK');
+    expect(next(view, ['REPLACE_LAST_ATK', 'REPLACE_LAST_ATK'])).toContain('REPLACE_LAST_ATK');
+    // A montagem completa é a que o jogador escolheu, sem a regra de estouro mexer nela.
+    expect(completeDraft(view, ['REPLACE_LAST_ATK', 'REPLACE_LAST_ATK'])).toEqual(['REPLACE_LAST_ATK', 'REPLACE_LAST_ATK', 'DISCARD']);
+  });
+
+  it('sem EQUIP na lista legal (já confirmou, ou não é a sua vez), não há destino', () => {
+    const view = equipView({ attackRow: [2], defenseRow: [3], pending: [5] });
+    expect(nextDestinations(view, [], [])).toEqual([]);
+  });
+
   it('uma escolha que não leva a montagem legal não dá destinos', () => {
     const view = equipView({ attackRow: [2, 3, 4, 5, 6, 7], defenseRow: FULL_ATK, pending: [8] });
     expect(next(view, ['DEF'])).toEqual([]);

@@ -1,13 +1,14 @@
 // Rascunho do Equipar carta a carta (spec §3.5). Puro: sem React nem DOM.
 //
-// Nenhuma regra do jogo mora aqui. Os destinos possíveis saem dos `EQUIP` de `legalActions` (o mesmo
-// filtro do `askEquip` do terminal); os totais, de `attackPower`/`defensePower`; as quadras, de
-// `quadValues`; o preenchimento do que falta, de `autoDestinations`. A mesa só aplica o que o motor
-// já disse, para mostrar a prévia (a semântica dos destinos é a de `resolveEquip`).
+// Nenhuma regra do jogo mora aqui. Os destinos possíveis saem do motor (`nextEquipDestinations`, o mesmo
+// do `askEquip` do terminal), quando a lista legal traz um `EQUIP`; os totais, de `attackPower`/`defensePower`;
+// as quadras, de `quadValues`; o preenchimento do que falta, de `autoDestinations`. A mesa só aplica o que o
+// motor já disse, para mostrar a prévia (a semântica dos destinos é a de `resolveEquip`).
 import {
   attackPower,
   autoDestinations,
   defensePower,
+  nextEquipDestinations,
   quadValues,
   type Destination,
   type NumCard,
@@ -21,16 +22,13 @@ import type { PlayerAction } from '@coringa/protocol';
 export const EQUIP_AUTO_SEND_MS = 1_500;
 
 /**
- * Os destinos possíveis da próxima carta, dado o que já foi escolhido: os `EQUIP` legais cujo prefixo
- * é `chosen`, sem repetir, na ordem da lista legal. Sem carta restante, não sobra destino.
+ * Os destinos possíveis da próxima carta, dado o que já foi escolhido: os que a regra do motor deixa, se a lista legal traz um
+ * `EQUIP` (é a sua vez de montar). Não sai da lista legal: ela traz uma montagem por resultado, e trocar duas vezes a mesma
+ * fileira, que a regra aceita, não estaria nela. Sem carta restante, não sobra destino.
  */
 export function nextDestinations(view: PlayerView, legal: PlayerAction[], chosen: Destination[]): Destination[] {
-  const index = chosen.length;
-  if (index >= view.self.pending.length) return [];
-  const fits = legal.filter(
-    (a): a is Extract<PlayerAction, { type: 'EQUIP' }> => a.type === 'EQUIP' && chosen.every((d, i) => a.destinations[i] === d),
-  );
-  return [...new Set(fits.map((a) => a.destinations[index]!))];
+  if (!legal.some((a) => a.type === 'EQUIP')) return [];
+  return nextEquipDestinations(view, chosen);
 }
 
 export interface DraftBoard {
