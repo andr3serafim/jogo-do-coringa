@@ -284,6 +284,8 @@ export function useBeatPlayer(
   useEffect(() => {
     if (run.totalMs === 0) return;
     live.current = run;
+    // O começo da linha do tempo no relógio da trava: o fim de cada cena se mede nele, mesmo com timers atrasados.
+    const startedAt = clock();
     const mine: number[] = [];
     const at = (ms: number, action: () => void) =>
       mine.push(
@@ -297,14 +299,16 @@ export function useBeatPlayer(
       }
       if (beat.invert) {
         const { atMs, holdMs } = beat.invert;
-        const sceneEndMs = beat.startMs + beat.durationMs;
-        // A inversão que a conta recusa espera o primeiro instante em que cabe, desde que acabe dentro da cena.
-        const tryInvert = (delayMs: number, elapsedMs: number) =>
+        const sceneEnd = startedAt + beat.startMs + beat.durationMs;
+        // A inversão que a conta recusa espera o primeiro instante em que cabe, desde que acabe dentro da cena. A espera confere
+        // de novo na hora em que dispara: um timer atrasado não leva o desligar para depois da cena.
+        const tryInvert = (delayMs: number, waited: boolean) =>
           at(delayMs, () => {
+            if (waited && clock() + holdMs > sceneEnd) return;
             const waitMs = invert(holdMs);
-            if (waitMs !== null && elapsedMs + waitMs + holdMs <= sceneEndMs) tryInvert(waitMs, elapsedMs + waitMs);
+            if (waitMs !== null && waitMs > 0 && clock() + waitMs + holdMs <= sceneEnd) tryInvert(waitMs, true);
           });
-        tryInvert(atMs, atMs);
+        tryInvert(atMs, false);
       }
       if (beat.kind === 'scene' && beat.scene !== null) {
         at(beat.startMs, raiseCurtain);

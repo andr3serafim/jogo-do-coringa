@@ -93,8 +93,8 @@ export class FlashLock {
     const candidates = [atMs, ...this.#switches.flatMap((instant) => [instant + FLASH_WINDOW_MS, instant + FLASH_WINDOW_MS - holdMs])]
       .filter((instant) => instant >= atMs)
       .sort((a, b) => a - b);
-    // O último candidato (a troca mais tardia mais 1 s) sempre cabe.
-    return candidates.find((instant) => withinFlashLimit(this.#switches, [instant, instant + holdMs])) ?? atMs;
+    // O último candidato (a troca mais tardia mais 1 s) sempre cabe; sem ele, não há instante a esperar.
+    return candidates.find((instant) => withinFlashLimit(this.#switches, [instant, instant + holdMs])) ?? null;
   }
 
   /**
