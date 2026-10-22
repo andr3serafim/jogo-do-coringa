@@ -491,7 +491,7 @@ A hibernação apaga a memória do objeto. Ao acordar (mensagem, fechamento, ala
   - com o código ou o link: entra na sala.
 
   Pede o apelido (ou `--apelido`) e reaproveita a mesa, os textos e as perguntas do `pnpm play`. Mostra os segundos restantes de cada prazo. Quando a fase muda por estouro ou pela jogada do outro, a pergunta pendente é cancelada (`AbortSignal` no readline) e a mesa é redesenhada. No fim, oferece revanche.
-- **`pnpm bot --online <código|link> [--bot greedy]`**: entra na sala, marca pronto, joga com um bot do simulador (com uma pausa curta de "pensando" para dar para acompanhar) e aceita revanches.
+- **`pnpm bot --online <código|link> [--bot greedy]`**: entra na sala, marca pronto, joga com um bot do simulador (com uma pausa curta de "pensando" para dar para acompanhar) e aceita a revanche que o oponente pede (nunca pede primeiro: dois bots na mesma sala não se pedem revanche para sempre).
 - Servidor padrão: `--servidor` ou a variável `CORINGA_SERVIDOR`; senão `http://localhost:8787`. O link (`https://host/s/CÓDIGO`) já carrega a origem.
 - Os dois usam o `RoomClient` do `@coringa/protocol` e o `WebSocket` global do Node 24.
 - Uso típico: dois terminais (ou um terminal e o bot) contra o `wrangler dev`; depois, o mesmo contra o endereço publicado.

@@ -1,5 +1,5 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   actingPlayers,
@@ -75,9 +75,20 @@ export async function askAction<A extends Action>(io: Io, view: PlayerView, lega
   return legal[await askChoice(io, 'Ações legais:', legal.map((a) => actionText(a, view)), signal)];
 }
 
+/**
+ * O arquivo do replay de uma semente, sempre dentro de `dir`: o nome sai da semente com só letras, números, `-` e `_` (o resto
+ * vira `_`), então `--semente ../x` não grava fora da pasta.
+ */
+export function replayPath(dir: string, seed: string): string {
+  const name = seed.replace(/[^A-Za-z0-9_-]/g, '_') || 'semente';
+  const path = join(dir, `${name}.json`);
+  if (!resolve(path).startsWith(resolve(dir) + sep)) throw new Error(`replay fora da pasta: ${path}`);
+  return path;
+}
+
 function save(replay: Replay, dir: string): string {
   mkdirSync(dir, { recursive: true });
-  const path = join(dir, `${replay.seed}.json`);
+  const path = replayPath(dir, replay.seed);
   writeFileSync(path, `${JSON.stringify(replay, null, 1)}\n`);
   return path;
 }

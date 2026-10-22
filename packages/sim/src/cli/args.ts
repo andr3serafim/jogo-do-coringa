@@ -23,6 +23,13 @@ export function configFromArgs(v: RuleValues): ConfigOverrides {
   return overrides;
 }
 
+/** Um inteiro positivo de uma opção da linha de comando (`--partidas 500`); outra coisa termina com a mensagem que diz o que veio. */
+export function positiveInt(value: string, flag: string): number {
+  const n = Number(value);
+  if (!/^\d+$/.test(value) || !Number.isSafeInteger(n) || n < 1) throw new Error(`${flag} deve ser um inteiro positivo (recebi "${value}")`);
+  return n;
+}
+
 export function botName(value: string): BotName {
   if ((BOT_NAMES as readonly string[]).includes(value)) return value as BotName;
   throw new Error(`bot desconhecido: ${value} (use ${BOT_NAMES.join(', ')})`);

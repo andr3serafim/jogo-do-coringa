@@ -56,7 +56,8 @@ function loadSeat(server: string, code: string, playerId: string, dir: string): 
   if (typeof pid !== 'number' || !Number.isSafeInteger(pid) || pid <= 0) return null;
   if (!sameServer(savedServer as string, server) || savedCode !== code || savedSeat !== playerId) return null;
   const session: SavedSession = { server: savedServer as string, code, token: token as string, playerId, nickname: nickname as string, pid };
-  if (typeof data.lastSeq === 'number') session.lastSeq = data.lastSeq;
+  // O servidor só aceita inteiro não negativo no `hello`: outro valor faria a volta ser recusada (e o terminal reconectar em laço).
+  if (typeof data.lastSeq === 'number' && Number.isSafeInteger(data.lastSeq) && data.lastSeq >= 0) session.lastSeq = data.lastSeq;
   return session;
 }
 

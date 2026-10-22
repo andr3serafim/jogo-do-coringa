@@ -58,6 +58,8 @@ export function playOnline({ io, connection, names }: PlayOnlineOptions): Promis
     let turn: AbortController | null = null;
     let rematchAsk: AbortController | null = null;
     let lastSeq = -1;
+    /** Já disse "Aguardando o oponente…" nesta espera: a próxima linha só sai quando a vez voltar e passar de novo. */
+    let waitingSaid = false;
     let promptedGameNo = 0;
     let opponentOnline = true;
     let wasDropped = false;
@@ -131,9 +133,11 @@ export function playOnline({ io, connection, names }: PlayOnlineOptions): Promis
         }
       }
       if (!playing || playerActions(state.view).length === 0) {
-        if (playing) io.print('Aguardando o oponente…');
+        if (playing && !waitingSaid) io.print('Aguardando o oponente…');
+        waitingSaid = playing;
         return;
       }
+      waitingSaid = false;
       turn = new AbortController();
       void play(state, turn);
     };

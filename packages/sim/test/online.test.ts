@@ -299,6 +299,28 @@ describe('terminal online', () => {
     };
   }
 
+  it('"Aguardando o oponente…" sai uma vez por espera, e não a cada state do oponente', async () => {
+    const io = scriptedIo(['1', '1']);
+    const connection = new FakeConnection();
+    const done = playOnline({ io, connection, names });
+    const waiting = setup({ turnOrder: [P2, P1], phase: { kind: 'ATTACK_MAIN', player: P2 } });
+    const count = () => io.output.filter((line) => line === 'Aguardando o oponente…').length;
+    connection.emitState(stateMsg(waiting, P1, { epoch: 1 }));
+    connection.emitState(stateMsg(waiting, P1, { epoch: 1 }));
+    connection.emitState(stateMsg(waiting, P1, { epoch: 2 }));
+    await flush();
+    expect(count()).toBe(1);
+    // A sua vez, e depois outra espera: sai de novo.
+    connection.emitState(stateMsg(stateA, P1, { epoch: 3 }));
+    await flush();
+    connection.emitState(stateMsg(waiting, P1, { epoch: 4 }));
+    connection.emitState(stateMsg(waiting, P1, { epoch: 5 }));
+    await flush();
+    expect(count()).toBe(2);
+    connection.emit({ type: 'closed', code: 1000, final: true });
+    await done;
+  });
+
   it('volta a uma partida abandonada (room FINISHED e retrato sem GAME_OVER): a revanche segue perguntada e nada é jogado', async () => {
     const io = pendingIo();
     const connection = new FakeConnection();
@@ -494,7 +516,7 @@ describe('bot online', () => {
     expect(timers).toHaveLength(1);
   });
 
-  it('marca pronto no lobby e pede revanche no fim, uma vez por partida', async () => {
+  it('marca pronto no lobby e aceita a revanche que o oponente pede, uma vez por partida; nunca pede primeiro', async () => {
     const connection = new FakeConnection();
     connection.playerId = P2;
     const done = runBot({ connection, bot: 'greedy', seed: 'bot-4', setTimer: () => 0 });
@@ -502,10 +524,19 @@ describe('bot online', () => {
     connection.emitRoom(roomMsg('LOBBY', { seats: [seat(P1), seat(P2, { ready: true })] }));
     expect(connection.readies).toEqual([true]);
 
-    connection.emitRoom(roomMsg('FINISHED', { outcome: { gameNo: 1, result: wins(P1), cause: 'NORMAL' } }));
-    connection.emitRoom(roomMsg('FINISHED', { outcome: { gameNo: 1, result: wins(P1), cause: 'NORMAL' }, seats: [seat(P1, { wantsRematch: true }), seat(P2)] }));
+    // Fim sem pedido do oponente: o bot espera (dois bots na mesma sala não se pedem revanche para sempre).
+    const over = { outcome: { gameNo: 1, result: wins(P1), cause: 'NORMAL' as const } };
+    connection.emitRoom(roomMsg('FINISHED', over));
+    expect(connection.rematches).toEqual([]);
+    connection.emitRoom(roomMsg('FINISHED', { ...over, seats: [seat(P1, { wantsRematch: true }), seat(P2)] }));
     expect(connection.rematches).toEqual([true]);
-    connection.emitRoom(roomMsg('FINISHED', { gameNo: 2, outcome: { gameNo: 2, result: wins(P2), cause: 'NORMAL' } }));
+    // O mesmo FINISHED de novo (com o pedido dele e o meu) não manda outra.
+    connection.emitRoom(roomMsg('FINISHED', { ...over, seats: [seat(P1, { wantsRematch: true }), seat(P2, { wantsRematch: true })] }));
+    expect(connection.rematches).toEqual([true]);
+    const second = { gameNo: 2, outcome: { gameNo: 2, result: wins(P2), cause: 'NORMAL' as const } };
+    connection.emitRoom(roomMsg('FINISHED', second));
+    expect(connection.rematches).toEqual([true]);
+    connection.emitRoom(roomMsg('FINISHED', { ...second, seats: [seat(P1, { wantsRematch: true }), seat(P2)] }));
     expect(connection.rematches).toEqual([true, true]);
     connection.emit({ type: 'open' });
     connection.emit({ type: 'closed', code: 1006, final: false }); // queda comum: o RoomClient reconecta sozinho
@@ -571,6 +602,12 @@ describe('sessão salva', () => {
     expect(loadSessions(server, 'K7M2QX', dir)[0]).toEqual({ ...ana, lastSeq: 42 });
     saveSession(ana, dir);
     expect(loadSessions(server, 'K7M2QX', dir)[0]).not.toHaveProperty('lastSeq');
+    // Um lastSeq que não é inteiro não negativo seria recusado pelo servidor no hello (e o terminal entraria em laço de
+    // reconexão): a sessão carrega sem ele, e a volta pede a mesa inteira.
+    for (const lastSeq of [1.5, -1, '42', null, 2 ** 60]) {
+      writeFileSync(join(dir, 'K7M2QX-p1.json'), JSON.stringify({ ...ana, lastSeq }));
+      expect(loadSessions(server, 'K7M2QX', dir)[0]).toEqual(ana);
+    }
 
     // Esquecer apaga só aquele assento; de outro servidor não apaga; o que não existe não é erro.
     forgetSession(server, 'K7M2QX', 'p1', dir);

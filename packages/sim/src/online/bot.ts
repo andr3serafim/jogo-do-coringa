@@ -41,10 +41,12 @@ export function runBot(options: RunBotOptions): Promise<void> {
         log('Pronto.');
         connection.ready(true);
       }
-      // Uma revanche por partida: o servidor limita as mensagens por segundo.
-      if (room.status === 'FINISHED' && room.gameNo > rematchGameNo) {
+      // O bot só aceita a revanche que o oponente pediu, e nunca pede primeiro: dois bots na mesma sala não se pedem revanche
+      // para sempre. Uma por partida: o servidor limita as mensagens por segundo.
+      const theirs = room.seats.find((candidate) => candidate.playerId !== connection.playerId);
+      if (room.status === 'FINISHED' && room.gameNo > rematchGameNo && theirs?.wantsRematch) {
         rematchGameNo = room.gameNo;
-        log(`Fim da partida (${room.outcome?.cause ?? 'sem causa'}); aceito a revanche.`);
+        log(`Fim da partida (${room.outcome?.cause ?? 'sem causa'}); o oponente pediu revanche e eu aceito.`);
         connection.rematch(true);
       }
     };
