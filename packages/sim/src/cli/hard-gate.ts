@@ -5,9 +5,10 @@
  * fica com a iniciativa em exatamente uma das duas. Três medidas: (a) hard × greedy, pontuação do hard; (b) greedy × easy,
  * pontuação do greedy; (c) tempo por decisão do hard, tirado das partidas de (a).
  */
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { arch, cpus, platform } from 'node:os';
 import { actingPlayers, legalActions, makeConfig, viewFor, type RulesConfig } from '@coringa/engine';
+import { EASY_BLUNDER } from '../bots/easy.ts';
 import { HARD_DEFAULTS, type HardOptions } from '../bots/hard.ts';
 import { BOTS } from '../bots/index.ts';
 import { HARD_BOT, type SeatBot } from '../bots/types.ts';
@@ -20,6 +21,8 @@ import { parseArgs, positiveInt } from './args.ts';
 const THRESHOLDS = { hardVsGreedy: 0.58, greedyVsEasy: 0.65, p95Ms: 300 } as const;
 /** Sementes do relatório versionado: 100 sementes × 2 assentos = 200 partidas por medida. */
 const FULL_SEEDS = 100;
+/** A rodada inicial e até duas de ajuste (plano da fatia 1, Tarefa 7): depois disso o Difícil, se ainda reprova, não entra. */
+const MAX_ROUNDS = 3;
 
 interface Tally {
   games: number;
@@ -35,11 +38,22 @@ interface Tally {
   withoutInitiative: { games: number; rate: number };
 }
 
-interface Timing {
+interface TimingStats {
   decisions: number;
   p50Ms: number;
   p95Ms: number;
   maxMs: number;
+}
+
+interface Timing extends TimingStats {
+  /** Só as decisões das fases em que o Difícil busca (as chaves de `HARD_DEFAULTS.horizon`); as outras são do greedy. */
+  searching?: TimingStats;
+}
+
+/** Os tempos das decisões do hard com 2 ou mais ações legais, em ms: todas e só as das fases com busca. */
+interface DecisionTimes {
+  all: number[];
+  searching: number[];
 }
 
 interface Round {
@@ -47,6 +61,8 @@ interface Round {
   /** Observações desta rodada (o que foi explorado fora do portão, por exemplo), em Markdown. */
   notes: string[];
   hard: HardOptions;
+  /** `EASY_BLUNDER` da rodada. */
+  easyBlunder: number;
   hardVsGreedy: Tally;
   greedyVsEasy: Tally;
   timing: Timing;
@@ -71,22 +87,42 @@ const { values } = parseArgs({
     prefixo: { type: 'string' },
     ajuste: { type: 'string' },
     nota: { type: 'string', multiple: true },
+    'nota-rodada': { type: 'string', multiple: true },
+    recomecar: { type: 'boolean' },
   },
 });
 const seeds = values.sementes === undefined ? FULL_SEEDS : positiveInt(values.sementes, '--sementes');
 const seedPrefix = values.prefixo ?? 'dificil';
 const adjust = values.ajuste;
 const partial = seeds !== FULL_SEEDS || seedPrefix !== 'dificil';
-if (adjust !== undefined && partial) throw new Error('--ajuste só vale na execução completa (100 sementes, prefixo "dificil")');
+const REPORT_PATH = `${REPORTS_DIR}dificil.json`;
+if (partial && (adjust !== undefined || values.recomecar || values['nota-rodada'])) {
+  throw new Error('--ajuste, --recomecar e --nota-rodada só valem na execução completa (100 sementes, prefixo "dificil")');
+}
+if (adjust !== undefined && values.recomecar) throw new Error('--ajuste acrescenta uma rodada ao relatório e --recomecar o descarta: use um dos dois');
+if (values['nota-rodada'] && adjust === undefined) throw new Error('--nota-rodada anota rodadas do relatório existente e só vale junto com --ajuste');
+if (!partial && adjust === undefined && !values.recomecar && existsSync(REPORT_PATH)) {
+  throw new Error(
+    `${REPORT_PATH} já existe e guarda as rodadas e as notas do portão. Para acrescentar uma rodada: pnpm sim:dificil --ajuste "<o que mudou>". ` +
+      'Para jogar fora o histórico e medir do zero: pnpm sim:dificil --recomecar.',
+  );
+}
 
+/** Fases em que o Difícil busca; as outras decisões dele são do greedy (e não pesam no tempo que o jogador espera). */
+const SEARCH_PHASES: ReadonlySet<string> = new Set(Object.keys(HARD_DEFAULTS.horizon));
+
+// Rodadas gravadas antes de os campos existirem: o `HardOptions` não tinha horizonte (o rollout ia até o fim de uma rodada de
+// Ataque, em toda fase), o Fácil errava com 0,50 e a rodada inicial se chamava "padrão".
 const LEGACY_HORIZON: HardOptions['horizon'] = { EQUIP: 1, ORDER_CHOICE: 1, ATTACK_MAIN: 1, REACTION: 1 };
+const LEGACY_EASY_BLUNDER = 0.5;
+const LEGACY_LABEL = 'padrão (`HARD_DEFAULTS`)';
 
 const config = makeConfig();
 // O relatório declara que mediu com a Pressão da mesa: se a config padrão mudar, o texto não pode mentir.
 if (!config.tablePressure) throw new Error('o portão é medido com a config padrão e a Pressão da mesa ligada (o texto do relatório diz isso)');
 
 /** Uma semente, uma partida com `subject` no assento `seat`. O tempo entre dois `onStep` é a decisão de quem jogou o passo. */
-function playSeat(seed: string, seat: 0 | 1, subject: SeatBot, opponent: SeatBot, decisionMs?: number[]) {
+function playSeat(seed: string, seat: 0 | 1, subject: SeatBot, opponent: SeatBot, times?: DecisionTimes) {
   const me = PLAYERS[seat];
   const bots: [SeatBot, SeatBot] = seat === 0 ? [subject, opponent] : [opponent, subject];
   let last = performance.now();
@@ -94,12 +130,15 @@ function playSeat(seed: string, seat: 0 | 1, subject: SeatBot, opponent: SeatBot
     config,
     seed,
     bots,
-    onStep: decisionMs
+    onStep: times
       ? (before) => {
           const now = performance.now();
           const actor = actingPlayers(before)[0];
           // Decisão de uma ação só é instantânea e puxaria o p95 para baixo sem medir a busca.
-          if (actor === me && legalActions(viewFor(before, actor)).length >= 2) decisionMs.push(now - last);
+          if (actor === me && legalActions(viewFor(before, actor)).length >= 2) {
+            times.all.push(now - last);
+            if (SEARCH_PHASES.has(before.phase.kind)) times.searching.push(now - last);
+          }
           last = performance.now();
         }
       : undefined,
@@ -108,10 +147,10 @@ function playSeat(seed: string, seat: 0 | 1, subject: SeatBot, opponent: SeatBot
 }
 
 /** `subject` × `opponent` em `seeds` sementes, cada uma com os dois assentos. */
-function measure(subject: SeatBot, opponent: SeatBot, label: string, decisionMs?: number[]): Tally {
+function measure(subject: SeatBot, opponent: SeatBot, label: string, times?: DecisionTimes): Tally {
   const outcomes: Array<ReturnType<typeof playSeat>> = [];
   for (let i = 0; i < seeds; i += 1) {
-    for (const seat of [0, 1] as const) outcomes.push(playSeat(`${seedPrefix}-${i}`, seat, subject, opponent, decisionMs));
+    for (const seat of [0, 1] as const) outcomes.push(playSeat(`${seedPrefix}-${i}`, seat, subject, opponent, times));
     if ((i + 1) % 20 === 0 || i + 1 === seeds) console.log(`… ${label}: ${i + 1}/${seeds} sementes`);
   }
   const rateOf = (os: typeof outcomes) => (os.length === 0 ? 0 : os.reduce((a, o) => a + o.points, 0) / os.length);
@@ -137,18 +176,17 @@ function percentile(sorted: number[], p: number): number {
   return sorted[Math.max(0, Math.ceil(p * sorted.length) - 1)];
 }
 
+function statsOf(ms: number[]): TimingStats {
+  const sorted = ms.toSorted((a, b) => a - b);
+  return { decisions: sorted.length, p50Ms: percentile(sorted, 0.5), p95Ms: percentile(sorted, 0.95), maxMs: sorted.at(-1) ?? 0 };
+}
+
 function runRound(label: string, notes: string[]): Round {
   const started = performance.now();
-  const decisionMs: number[] = [];
-  const hardVsGreedy = measure(HARD_BOT, BOTS.greedy, 'hard × greedy', decisionMs);
+  const times: DecisionTimes = { all: [], searching: [] };
+  const hardVsGreedy = measure(HARD_BOT, BOTS.greedy, 'hard × greedy', times);
   const greedyVsEasy = measure(BOTS.greedy, BOTS.easy, 'greedy × easy');
-  const sorted = decisionMs.toSorted((a, b) => a - b);
-  const timing: Timing = {
-    decisions: sorted.length,
-    p50Ms: percentile(sorted, 0.5),
-    p95Ms: percentile(sorted, 0.95),
-    maxMs: sorted.at(-1) ?? 0,
-  };
+  const timing: Timing = { ...statsOf(times.all), searching: statsOf(times.searching) };
   const passes = {
     hardVsGreedy: hardVsGreedy.rate >= THRESHOLDS.hardVsGreedy,
     greedyVsEasy: greedyVsEasy.rate >= THRESHOLDS.greedyVsEasy,
@@ -158,6 +196,7 @@ function runRound(label: string, notes: string[]): Round {
     label,
     notes,
     hard: { ...HARD_DEFAULTS },
+    easyBlunder: EASY_BLUNDER,
     hardVsGreedy,
     greedyVsEasy,
     timing,
@@ -174,46 +213,57 @@ const margin = (rate: number, se: number, threshold: number): string => (se === 
 const horizonText = (h: HardOptions['horizon']): string =>
   Object.entries(h)
     .map(([phase, rounds]) => `${phase} ${rounds}`)
-    .join(', ') + ' (as outras fases: greedy, sem busca)';
+    .join(', ');
 
 function tallyLine(name: string, t: Tally): string {
   return `${name}: vitórias/empates/derrotas/sem fim ${t.wins}/${t.draws}/${t.losses}/${t.unfinished}; com a iniciativa ${pct(t.withInitiative.rate)} (${t.withInitiative.games} partidas), sem ela ${pct(t.withoutInitiative.rate)} (${t.withoutInitiative.games}).`;
 }
 
-function reasonText(rounds: Round[]): string {
-  const last = rounds.at(-1)!;
-  const failed = (r: Round) =>
+/** O que a lista de rodadas diz sobre os valores finais: a primeira rodada que aprova, o que veio antes e o que veio depois. */
+function reasonText(rounds: Round[], th: GateReport['thresholds']): string {
+  const failed = (r: Round): string =>
     [
-      !r.passes.hardVsGreedy && `(a) ${pct(r.hardVsGreedy.rate)} < ${pct(THRESHOLDS.hardVsGreedy)}`,
-      !r.passes.greedyVsEasy && `(b) ${pct(r.greedyVsEasy.rate)} < ${pct(THRESHOLDS.greedyVsEasy)}`,
-      !r.passes.p95 && `p95 ${ms(r.timing.p95Ms)} > ${THRESHOLDS.p95Ms} ms`,
+      !r.passes.hardVsGreedy && `(a) ${pct(r.hardVsGreedy.rate)} < ${pct(th.hardVsGreedy)}`,
+      !r.passes.greedyVsEasy && `(b) ${pct(r.greedyVsEasy.rate)} < ${pct(th.greedyVsEasy)}`,
+      !r.passes.p95 && `p95 ${ms(r.timing.p95Ms)} > ${th.p95Ms} ms`,
     ]
       .filter(Boolean)
       .join('; ');
-  if (rounds.length === 1) {
-    return last.approved
-      ? 'Os valores padrão (`HARD_DEFAULTS`) aprovaram na primeira rodada; nenhum ajuste foi necessário.'
-      : `Os valores padrão reprovaram (${failed(last)}) e não houve rodada de ajuste neste relatório.`;
+  const named = (r: Round, i: number): string => `rodada ${i + 1} (${failed(r)})`;
+  const first = rounds.findIndex((r) => r.approved);
+  if (first < 0) {
+    const all = rounds.map(named).join('; ');
+    return rounds.length < MAX_ROUNDS
+      ? `Nenhuma rodada aprovou até aqui: ${all}. Restam ${MAX_ROUNDS - rounds.length} rodada(s) de ajuste.`
+      : `Nenhuma das ${rounds.length} rodadas aprovou: ${all}. As rodadas de ajuste se esgotaram: o nível Difícil não entra, e a oferta da interface fica só com Fácil e Médio.`;
   }
-  if (last.approved) {
-    const earlier = rounds
-      .slice(0, -1)
-      .map((r, i) => `rodada ${i + 1} (${failed(r)})`)
-      .join('; ');
-    return `A rodada ${rounds.length} é a primeira que aprova os três limiares; as anteriores reprovaram: ${earlier}. Os valores finais são os dela.`;
+  const parts =
+    first === 0
+      ? ['A rodada 1 já aprovou os três limiares; nenhum ajuste foi necessário.']
+      : [`A rodada ${first + 1} é a primeira que aprova os três limiares; as anteriores reprovaram: ${rounds.slice(0, first).map(named).join('; ')}. Os valores do Difícil são os dela.`];
+  for (const [i, r] of rounds.entries()) {
+    if (i <= first) continue;
+    const same = JSON.stringify(r.hard) === JSON.stringify(rounds[first].hard);
+    const verdict = r.approved ? 'aprovou os três limiares' : `reprovou (${failed(r)})`;
+    parts.push(`Rodada ${i + 1} (${r.label}): o Difícil ${same ? 'igual' : 'diferente'} ao da rodada ${first + 1}; ${verdict}.`);
   }
-  const all = rounds.map((r, i) => `rodada ${i + 1} (${failed(r)})`).join('; ');
-  return `Nenhuma das ${rounds.length} rodadas aprovou: ${all}. O nível Difícil não entra: a oferta da interface fica só com Fácil e Médio.`;
+  return parts.join(' ');
+}
+
+function timingRows(t: Timing): Array<Array<string | number>> {
+  const row = (name: string, x: TimingStats) => [name, x.decisions, ms(x.p50Ms), ms(x.p95Ms), ms(x.maxMs)];
+  return [row('todas as fases', t), ...(t.searching ? [row(`só as fases com busca (${[...SEARCH_PHASES].join(', ')})`, t.searching)] : [])];
 }
 
 function renderMarkdown(report: GateReport): string {
   const final = report.rounds.at(-1)!;
+  const n = report.rounds.length;
   const { hardVsGreedy: a, greedyVsEasy: b, timing: t } = final;
   const th = report.thresholds;
   const lines: string[] = [
     '# Portão do Difícil',
     '',
-    `**Veredito: ${final.approved ? 'APROVADO' : 'REPROVADO'}.** (a) ${pct(a.rate)} (limiar ${pct(th.hardVsGreedy)}), (b) ${pct(b.rate)} (limiar ${pct(th.greedyVsEasy)}), p95 ${ms(t.p95Ms)} (limiar ${th.p95Ms} ms).`,
+    `**Veredito${n > 1 ? ` da rodada ${n}, a mais recente` : ''}: ${final.approved ? 'APROVADO' : 'REPROVADO'}.** (a) ${pct(a.rate)} (limiar ${pct(th.hardVsGreedy)}), (b) ${pct(b.rate)} (limiar ${pct(th.greedyVsEasy)}), p95 ${ms(t.p95Ms)} (limiar ${th.p95Ms} ms).`,
     '',
     '> **Os números foram medidos COM a Pressão da mesa (`tablePressure: true`), que será removida no sub-projeto 5; nessa hora o portão tem que ser medido de novo, sem ela.**',
     '',
@@ -221,10 +271,10 @@ function renderMarkdown(report: GateReport): string {
     '',
     `- Config: a padrão, \`makeConfig()\` (Pressão da mesa ligada): \`${JSON.stringify(report.config)}\`.`,
     `- Sementes: \`${report.seedPrefix}-0 … ${report.seedPrefix}-${report.seeds - 1}\` (${report.seeds} sementes), cada uma jogada duas vezes com os assentos trocados: ${2 * report.seeds} partidas por medida. O mesmo monte e a mesma iniciativa sorteada em cada par: o bot medido fica com a iniciativa em exatamente uma das duas.`,
-    `- Difícil medido (\`HARD_DEFAULTS\`): \`${JSON.stringify(final.hard)}\`.`,
+    `- Bots da rodada ${n} (os \`HARD_DEFAULTS\` e o \`EASY_BLUNDER\` de então): Difícil \`${JSON.stringify(final.hard)}\`; Fácil erra com probabilidade \`${final.easyBlunder}\`.`,
     `- Máquina: ${report.machine}. O tempo por decisão depende dela.`,
     '- Pontuação: vitória 1, empate ½, derrota ou partida sem fim 0. Erro-padrão (EP) da taxa: sqrt(p(1−p)/n), com as partidas tratadas como independentes; a margem diz a quantos EP a taxa está do limiar. O veredito usa só os limiares.',
-    '- Tempo por decisão: do Difícil, nas partidas de (a), só nas decisões com 2 ou mais ações legais (as de uma ação só são instantâneas e puxariam o p95 para baixo). Mede a ação inteira de um passo (visão, ações legais, busca, motor). Percentil pelo posto mais próximo.',
+    '- Tempo por decisão: do Difícil, nas partidas de (a), só nas decisões com 2 ou mais ações legais (as de uma ação só são instantâneas e puxariam o p95 para baixo). Mede a ação inteira de um passo (visão, ações legais, busca, motor). Percentil pelo posto mais próximo. O limiar vale para todas as fases; a segunda linha da tabela mostra só as fases em que há busca, que são as que o jogador espera.',
     '',
     '## Resultado',
     '',
@@ -242,21 +292,22 @@ function renderMarkdown(report: GateReport): string {
     '',
     '### Tempo por decisão do hard',
     '',
-    markdownTable(['Decisões (≥ 2 ações)', 'p50', 'p95', 'Máx'], [[t.decisions, ms(t.p50Ms), ms(t.p95Ms), ms(t.maxMs)]]),
+    markdownTable(['Decisões com 2 ou mais ações', 'Nº', 'p50', 'p95', 'Máx'], timingRows(t)),
     '',
   ];
-  if (report.rounds.length > 1) {
+  if (n > 1) {
     lines.push(
-      '## Rodadas de ajuste',
+      '## Rodadas',
       '',
       markdownTable(
-        ['Rodada', 'O que mudou', 'Rollouts', 'Candidatas', 'Horizonte (rodadas de Ataque)', '(a)', '(b)', 'p95', 'Veredito'],
+        ['Rodada', 'O que mudou', 'Rollouts', 'Candidatas', 'Horizonte', 'Fácil (erro)', '(a)', '(b)', 'p95', 'Veredito'],
         report.rounds.map((r, i) => [
           i + 1,
           r.label,
           r.hard.rolloutsPerCandidate,
           r.hard.maxCandidates,
           horizonText(r.hard.horizon),
+          r.easyBlunder,
           `${pct(r.hardVsGreedy.rate)} ± ${pct(r.hardVsGreedy.se)}`,
           `${pct(r.greedyVsEasy.rate)} ± ${pct(r.greedyVsEasy.se)}`,
           ms(r.timing.p95Ms),
@@ -264,35 +315,66 @@ function renderMarkdown(report: GateReport): string {
         ]),
       ),
       '',
+      'Horizonte: por fase da decisão, as rodadas de Ataque que terminam no rollout, contando a atual quando a decisão é na fase principal do Ataque; a fase que não consta não busca (vale a escolha do greedy). Fácil (erro): o `EASY_BLUNDER`, a chance de jogar uma ação legal qualquer em vez da escolha do greedy.',
+      '',
       ...report.rounds.flatMap((r, i) => r.notes.flatMap((note) => [`**Rodada ${i + 1}.** ${note}`, ''])),
     );
   }
-  lines.push('## Por que estes valores', '', reasonText(report.rounds), '', 'Para repetir: `pnpm sim:dificil` (a execução completa leva alguns minutos).', '');
+  lines.push(
+    '## Por que estes valores',
+    '',
+    reasonText(report.rounds, th),
+    '',
+    'Para medir de novo (leva alguns minutos): `pnpm sim:dificil --ajuste "<o que mudou>"` acrescenta uma rodada a este relatório; `pnpm sim:dificil --recomecar` joga o histórico fora e mede do zero. Sem uma das duas, o script se recusa a sobrescrever este relatório.',
+    '',
+  );
   return lines.join('\n');
 }
 
+/** As rodadas do relatório gravado, para `--ajuste` acrescentar a nova; recusa um relatório medido com outra config, sementes ou limiares. */
 function previousRounds(): Round[] {
-  const path = `${REPORTS_DIR}dificil.json`;
   let previous: GateReport;
   try {
-    previous = JSON.parse(readFileSync(path, 'utf8')) as GateReport;
+    previous = JSON.parse(readFileSync(REPORT_PATH, 'utf8')) as GateReport;
   } catch (error) {
-    throw new Error(`--ajuste continua o relatório anterior, mas ${path} não pôde ser lido: ${(error as Error).message}`, { cause: error });
+    throw new Error(`--ajuste continua o relatório anterior, mas ${REPORT_PATH} não pôde ser lido: ${(error as Error).message}`, { cause: error });
   }
-  // As rodadas gravadas antes de o `HardOptions` ter horizonte jogavam até o fim de uma rodada de Ataque, em toda fase.
-  return previous.rounds.map((r) => ({ ...r, notes: r.notes ?? [], hard: { ...r.hard, horizon: r.hard.horizon ?? LEGACY_HORIZON } }));
+  const identity = (r: Pick<GateReport, 'config' | 'seedPrefix' | 'seeds' | 'thresholds'>) => JSON.stringify([r.config, r.seedPrefix, r.seeds, r.thresholds]);
+  if (identity(previous) !== identity({ config, seedPrefix, seeds, thresholds: THRESHOLDS })) {
+    throw new Error('o relatório anterior foi medido com outra config, outras sementes ou outros limiares: use --recomecar');
+  }
+  return previous.rounds.map((r) => ({
+    ...r,
+    label: r.label === LEGACY_LABEL ? 'inicial: os valores da Tarefa 6 (8 rollouts × 4 candidatas, horizonte de uma rodada de Ataque em toda fase)' : r.label,
+    notes: r.notes ?? [],
+    easyBlunder: r.easyBlunder ?? LEGACY_EASY_BLUNDER,
+    hard: { ...r.hard, horizon: r.hard.horizon ?? LEGACY_HORIZON },
+  }));
+}
+
+/** `--nota-rodada "<n>:<texto>"`: acrescenta o texto às notas da rodada `n` já gravada (a rodada nova é anotada com `--nota`). */
+function addRoundNotes(rounds: Round[], specs: string[]): void {
+  for (const spec of specs) {
+    const match = /^(\d+):([\s\S]+)$/.exec(spec);
+    const target = match ? rounds[Number(match[1]) - 1] : undefined;
+    if (!match || !target) throw new Error(`--nota-rodada espera "<n>:<texto>" com n entre 1 e ${rounds.length} (recebi "${spec.slice(0, 40)}")`);
+    if (!target.notes.includes(match[2])) target.notes.push(match[2]);
+  }
 }
 
 const started = performance.now();
-console.log(`… portão do Difícil: ${seeds} sementes × 2 assentos, rollouts ${HARD_DEFAULTS.rolloutsPerCandidate} × candidatas ${HARD_DEFAULTS.maxCandidates}`);
-const round = runRound(adjust ?? 'padrão (`HARD_DEFAULTS`)', values.nota ?? []);
+console.log(`… portão do Difícil: ${seeds} sementes × 2 assentos, rollouts ${HARD_DEFAULTS.rolloutsPerCandidate} × candidatas ${HARD_DEFAULTS.maxCandidates}, Fácil errando com ${EASY_BLUNDER}`);
+const earlier = adjust === undefined ? [] : previousRounds();
+addRoundNotes(earlier, values['nota-rodada'] ?? []);
+if (earlier.length >= MAX_ROUNDS) console.log(`… atenção: já são ${earlier.length} rodadas gravadas; o plano previa a inicial e duas de ajuste.`);
+const round = runRound(adjust ?? 'inicial', values.nota ?? []);
 const report: GateReport = {
   config,
   seedPrefix,
   seeds,
   thresholds: THRESHOLDS,
   machine: `Node ${process.version}, ${platform()} ${arch()}, ${cpus()[0]?.model.trim() ?? 'CPU desconhecida'} (${cpus().length} núcleos)`,
-  rounds: [...(adjust === undefined ? [] : previousRounds()), round],
+  rounds: [...earlier, round],
 };
 const markdown = renderMarkdown(report);
 console.log(`\n${markdown}`);

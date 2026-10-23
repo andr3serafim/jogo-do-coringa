@@ -101,7 +101,7 @@ describe('bot Difícil', () => {
     expect(runHard(state, actor, legal, createRng('o'))).toEqual(greedy);
     // com o horizonte da fase ligado, a busca roda: uma cessão por rollout das duas candidatas
     const on = drain(hardSearchTotals(state, actor, legal, createRng('o'), { ...HARD_DEFAULTS, rolloutsPerCandidate: 1, horizon: { ORDER_CHOICE: 1 } }));
-    expect(on.yields).toBe(legal.length);
+    expect(on.yields).toBe(Math.min(legal.length, HARD_DEFAULTS.maxCandidates));
     expect(on.value.candidates[0]).toEqual(greedy);
   });
 
