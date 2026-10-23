@@ -107,10 +107,15 @@ modelo da web. **[decisão minha]** As pistas:
 - **Difícil:** o `greedy` com busca por *rollouts* nas decisões que têm mais de uma opção. Para cada candidata, simula algumas
   continuações `greedy × greedy` a partir de um estado **determinizado** (`determinize`, do simulador: a mão e as pendentes do
   oponente e o monte são resorteados do que o bot não vê) e escolhe a de melhor resultado. Nunca olha a mão real nem o monte.
-  **[decisão minha]** Para caber no navegador, os rollouts são **truncados** (até o fim da próxima rodada de Ataque, avaliados
-  pela heurística do `eval.ts`: vida, totais, buffs, Guarda) e as candidatas são **podadas** (as ~6 melhores pela avaliação do
-  `greedy`; todas quando há até 6). Medido no Node: uma partida inteira `greedy × greedy` leva ~20 ms, e um assento tem ~26
-  decisões com mais de uma opção (até 30 opções no Equipar).
+  **[decisão minha]** Para caber no navegador, os rollouts são **truncados** e avaliados pela heurística do `eval.ts` (vida e
+  mesa), e as candidatas são **podadas**. Os valores saíram do portão (§3.2; medidas em `packages/sim/reports/dificil.md`):
+  - o rollout vai até o fim da 2ª rodada de Ataque, quando a decisão é no Equipar, e até o fim da 3ª, contando a atual,
+    quando é na fase principal do Ataque. O horizonte de uma só rodada de Ataque, o primeiro tentado, não passava do `greedy`;
+  - são 4 candidatas, com a escolha do `greedy` em primeiro, e 8 rollouts por candidata, nos mesmos mundos sorteados para todas;
+  - na escolha da ordem do ataque e na reação não há busca: vale a jogada do `greedy`, porque buscar ali não melhorou nada.
+
+  Medido no Node: uma partida inteira `greedy × greedy` leva ~20 ms, um assento tem ~26 decisões com mais de uma opção (até
+  30 opções no Equipar), e a decisão do Difícil leva 82 ms na mediana e 152 ms no p95.
 
 ### 3.2 Portão do Difícil (medido no simulador, semente fixa)
 - Contra o `greedy`, alternando os assentos e a iniciativa inicial: pontuação ≥ 58% em 200 partidas (≈ 2 erros-padrão acima de
