@@ -11,7 +11,8 @@ import {
   type PlayerId,
   type RulesConfig,
 } from '@coringa/engine';
-import type { Bot } from './bots/types.ts';
+import { runHard } from './bots/hard.ts';
+import { HARD_BOT, type SeatBot } from './bots/types.ts';
 import { createRng, type Rng } from './rng.ts';
 
 export const PLAYERS: [PlayerId, PlayerId] = ['p1', 'p2'];
@@ -25,8 +26,8 @@ export interface GameSetup {
   config: RulesConfig;
   /** Semente da partida (embaralhamento e iniciativa). */
   seed: string;
-  /** bots[0] joga como p1, bots[1] como p2. */
-  bots: [Bot, Bot];
+  /** bots[0] joga como p1, bots[1] como p2. 'hard' (HARD_BOT) é o Difícil, que busca em cima do estado. */
+  bots: [SeatBot, SeatBot];
   /** Semente das escolhas dos bots; padrão `${seed}/bots`. Cada assento recebe a sua. */
   botSeed?: string;
   /** Continua deste estado em vez de criar a partida (ramos dos experimentos). */
@@ -84,7 +85,9 @@ export function runGame(setup: GameSetup): GameRecord {
     const actor = actingPlayers(s)[0];
     const seat = actor === PLAYERS[0] ? 0 : 1;
     const view = viewFor(s, actor);
-    const action = setup.bots[seat](view, legalActions(view), rngs[seat]);
+    const legal = legalActions(view);
+    const bot = setup.bots[seat];
+    const action = bot === HARD_BOT ? runHard(s, actor, legal, rngs[seat]) : bot(view, legal, rngs[seat]);
     const result = applyAction(s, actor, action);
     if (!result.ok) throw new Error(`bot jogou ação ilegal (${result.error.code}): ${JSON.stringify(action)}`);
     record.replay?.push({ player: actor, action });
