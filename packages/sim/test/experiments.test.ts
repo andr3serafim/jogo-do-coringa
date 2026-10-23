@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { makeConfig, totalCards, viewFor, type Card, type GameState } from '@coringa/engine';
+import { makeConfig, totalCards, viewFor, type Card, type Destination, type GameState } from '@coringa/engine';
+// Builder de cenários do motor: monta estados reais sem inventar cartas.
+import { P1, P2, player, setup } from '@coringa/engine/testing';
 import { BOTS } from '../src/bots/index.ts';
 import { determinize } from '../src/experiments/determinize.ts';
 import { orderExperiment } from '../src/experiments/order.ts';
@@ -27,8 +29,9 @@ describe('determinize', () => {
   const s = middle();
   const viewer = s.players[0].id;
 
-  it('não muda nada do que o viewer vê', () => {
-    expect(viewFor(determinize(s, viewer, 'r1'), viewer)).toEqual(viewFor(s, viewer));
+  it('não muda nada do que o viewer vê (salvo o oponente deixar de constar como confirmado no Equipar)', () => {
+    const view = viewFor(s, viewer);
+    expect(viewFor(determinize(s, viewer, 'r1'), viewer)).toEqual({ ...view, opponent: { ...view.opponent, equipSubmitted: false } });
   });
 
   it('conserva as cartas e mantém só especiais na mão do oponente', () => {
@@ -49,6 +52,112 @@ describe('determinize', () => {
     const before = JSON.stringify(s);
     determinize(s, viewer, 'r3');
     expect(JSON.stringify(s)).toBe(before);
+  });
+});
+
+/** Estado do Equipar: mesma visão do P1, mas a informação oculta do P2 (mão, pendentes, monte) é a que se pedir. */
+describe('determinize não vaza a informação oculta', () => {
+  const equip = (): GameState =>
+    setup({
+      phase: { kind: 'EQUIP' },
+      roundKind: 'EQUIP',
+      round: 2,
+      p1: { hand: ['J'], pending: [2, 4, 6] },
+      p2: { hand: ['K', 'A'], pending: [3, 5, 7] },
+    });
+
+  /** Troca cartas do oponente com o monte (mesmas quantidades, ids e tipos diferentes) e inverte a ordem do monte. */
+  function swapHidden(base: GameState): GameState {
+    const s = structuredClone(base);
+    const opponent = player(s, P2);
+    const specialAt = s.deck.findIndex((c) => c.kind !== 'NUM' && c.kind !== opponent.hand[0].kind);
+    const numberAt = s.deck.findIndex((c) => c.kind === 'NUM' && c.value !== opponent.pending[0].value);
+    const swappedHand = opponent.hand[0];
+    const swappedPending = opponent.pending[0];
+    opponent.hand[0] = s.deck[specialAt] as (typeof opponent.hand)[number];
+    opponent.pending[0] = s.deck[numberAt] as (typeof opponent.pending)[number];
+    s.deck[specialAt] = swappedHand;
+    s.deck[numberAt] = swappedPending;
+    s.deck.reverse();
+    return s;
+  }
+
+  const submitted = (base: GameState, destinations: Destination[]): GameState => {
+    const s = structuredClone(base);
+    player(s, P2).equipSubmitted = true;
+    player(s, P2).submittedDestinations = destinations;
+    return s;
+  };
+
+  const ids = (cards: Card[]): string[] => cards.map((c) => c.id);
+  const hidden = (s: GameState) => ({
+    hand: ids(player(s, P2).hand),
+    pending: ids(player(s, P2).pending),
+    deck: ids(s.deck),
+    submittedDestinations: player(s, P2).submittedDestinations,
+    equipSubmitted: player(s, P2).equipSubmitted,
+  });
+
+  it('só a informação oculta real muda entre os dois estados (a visão do viewer é a mesma)', () => {
+    const a = equip();
+    const b = swapHidden(a);
+    expect(viewFor(b, P1)).toEqual(viewFor(a, P1));
+    expect(hidden(b).hand).not.toEqual(hidden(a).hand);
+    expect(hidden(b).pending).not.toEqual(hidden(a).pending);
+    expect(hidden(b).deck).not.toEqual(hidden(a).deck);
+    expect([...hidden(b).deck].sort()).not.toEqual([...hidden(a).deck].sort());
+  });
+
+  it('o resultado não depende da mão do oponente, dos pendentes nem da ordem do monte', () => {
+    const a = equip();
+    const b = swapHidden(a);
+    const da = determinize(a, P1, 's');
+    const db = determinize(b, P1, 's');
+    expect(hidden(db)).toEqual(hidden(da));
+    expect(db).toEqual(da);
+  });
+
+  it('o Equipar já confirmado pelo oponente é descartado: ele decide de novo nos rollouts', () => {
+    const a = equip();
+    const c = submitted(a, ['ATK', 'DEF', 'DISCARD']);
+    const d = swapHidden(submitted(a, ['DEF', 'DEF', 'ATK']));
+    expect(viewFor(d, P1)).toEqual(viewFor(c, P1));
+    const dc = determinize(c, P1, 's');
+    const dd = determinize(d, P1, 's');
+    expect(player(dc, P2).submittedDestinations).toBeNull();
+    expect(player(dc, P2).equipSubmitted).toBe(false);
+    expect(hidden(dd)).toEqual(hidden(dc));
+    expect(dd).toEqual(dc);
+    // quem não tinha confirmado dá o mesmo mundo: o rollout não sabe quem confirmou
+    expect(determinize(a, P1, 's')).toEqual(dc);
+  });
+
+  it('a única diferença na visão do viewer é o oponente deixar de constar como confirmado', () => {
+    const c = submitted(equip(), ['ATK', 'DEF', 'DISCARD']);
+    const view = viewFor(c, P1);
+    expect(viewFor(determinize(c, P1, 's'), P1)).toEqual({ ...view, opponent: { ...view.opponent, equipSubmitted: false } });
+  });
+
+  it('o Equipar do próprio viewer é mantido', () => {
+    const c = equip();
+    player(c, P1).equipSubmitted = true;
+    player(c, P1).submittedDestinations = ['ATK', 'DEF', 'ATK'];
+    const d = determinize(c, P1, 's');
+    expect(player(d, P1).equipSubmitted).toBe(true);
+    expect(player(d, P1).submittedDestinations).toEqual(['ATK', 'DEF', 'ATK']);
+  });
+
+  it('conserva as cartas, as quantidades e os tipos', () => {
+    const b = swapHidden(equip());
+    const d = determinize(b, P1, 's');
+    const all = ids(allCards(d));
+    expect(all).toHaveLength(totalCards(d.config));
+    expect(new Set(all).size).toBe(all.length);
+    expect(player(d, P2).hand).toHaveLength(2);
+    expect(player(d, P2).hand.map((c): string => c.kind)).not.toContain('NUM');
+    expect(player(d, P2).pending).toHaveLength(3);
+    expect(player(d, P2).pending.every((c) => c.kind === 'NUM')).toBe(true);
+    expect(d.deck).toHaveLength(b.deck.length);
   });
 });
 
