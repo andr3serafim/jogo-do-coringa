@@ -117,16 +117,37 @@ describe('SoundController', () => {
     expect(r.synthLoads).toBe(1);
   });
 
-  it('um contexto que nasce suspenso é retomado no gesto seguinte', () => {
+  it('um contexto que nasce suspenso é retomado no próprio gesto que o criou, e nos seguintes enquanto não estiver tocando', () => {
     const r = rig({ contextState: 'suspended' });
     gesture(r.target, 'pointerup');
-    expect(r.contexts[0]!.resumes).toBe(0);
-    gesture(r.target, 'click');
     expect(r.contexts[0]!.resumes).toBe(1);
+    // o navegador ainda não o pôs a tocar: o gesto seguinte tenta de novo
+    gesture(r.target, 'click');
+    expect(r.contexts[0]!.resumes).toBe(2);
     // retomado de verdade: os gestos que vêm depois não mexem mais nele
     r.contexts[0]!.state = 'running';
     gesture(r.target, 'click');
-    expect(r.contexts[0]!.resumes).toBe(1);
+    expect(r.contexts[0]!.resumes).toBe(2);
+  });
+
+  it('um contexto que já nasce tocando não é retomado de novo, e uma retomada recusada não derruba nada', () => {
+    const running = rig();
+    gesture(running.target, 'click');
+    expect(running.contexts[0]!.resumes).toBe(0);
+
+    const refused = rig({ contextState: 'suspended' });
+    const original = FakeContext.prototype.resume;
+    FakeContext.prototype.resume = function (this: FakeContext) {
+      this.resumes += 1;
+      return Promise.reject(new Error('recusado'));
+    };
+    try {
+      gesture(refused.target, 'click');
+    } finally {
+      FakeContext.prototype.resume = original;
+    }
+    expect(refused.contexts[0]!.resumes).toBe(1);
+    expect(refused.synthLoads).toBe(1);
   });
 
   it('um contexto interrompido depois (ligação no iOS) também é retomado no gesto seguinte', () => {

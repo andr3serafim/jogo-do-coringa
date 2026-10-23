@@ -115,8 +115,8 @@ export class LocalRoom implements RoomConnection {
   #closed = false;
   #idCounter = 0;
   #seq = 0;
-  /** O `seq` do estado de abertura da partida em curso: `#seq - #gameStartSeq` é o passo da partida (0 na distribuição). */
-  #gameStartSeq = 0;
+  /** Quantas jogadas o bot já aplicou na partida em curso (zera em `#newGame`): é a decisão `n` que o sorteio da busca do Difícil usa. */
+  #botMoves = 0;
   #epoch = 0;
   #gameNo = 0;
   #score: Score = { p1: 0, p2: 0, draws: 0 };
@@ -241,6 +241,7 @@ export class LocalRoom implements RoomConnection {
   /** Estado novo, bot novo: a semente da partida `n` é `<semente>` (a 1ª) ou `<semente>-<n>`. */
   #newGame(): { game: GameState; botSeed: string } {
     this.#gameNo += 1;
+    this.#botMoves = 0;
     const seed = gameSeed(this.#options.seed, this.#gameNo);
     const created = createGame(DEFAULT_CONFIG, seed, [LOCAL_ME, BOT_SEAT]);
     if (!created.ok) throw new Error(`configuração inválida: ${created.error.message}`);
@@ -250,7 +251,6 @@ export class LocalRoom implements RoomConnection {
   /** Começo de partida (a primeira ou a revanche): `seq` e `epoch` só sobem, e o primeiro `state` vem sem eventos. */
   #publishStart(): void {
     this.#seq += 1;
-    this.#gameStartSeq = this.#seq;
     this.#epoch += 1;
     this.#publishRoom('PLAYING');
     this.#publishState([]);
@@ -351,10 +351,12 @@ export class LocalRoom implements RoomConnection {
     const view = viewFor(this.#game, BOT_SEAT);
     const legal = legalActions(view);
     if (this.#level === 'dificil') {
-      // O sorteio da busca vem do estado que ela olha, pelo passo da PARTIDA (`<semente>/bot/<passo>`), e não do fluxo do bot nem do
-      // `seq` da sala (que a revanche não zera): um estado novo no meio dela a reinicia (`#commit`), a decisão é a mesma de quando o
-      // jogador joga antes do "pensar", e a partida 2 da revanche joga o mesmo que a sala nova aberta com `<semente>-2`.
-      this.#search = hardSearch(this.#game, BOT_SEAT, legal, createRng(`${this.#botSeed}/${this.#seq - this.#gameStartSeq}`));
+      // O sorteio da busca é por DECISÃO do bot (`<semente>/bot/<n>`, `n` = quantas jogadas ele já aplicou na partida), e não do fluxo
+      // do bot, do `seq` da sala (a revanche não o zera) nem do estado: no Equipar simultâneo o bot decide antes, no meio ou depois de o
+      // jogador confirmar (e `seq` e estado mudam), e a decisão `n` é a mesma. Uma busca descartada por um estado novo recomeça com o
+      // mesmo `n`. A partida 2 da revanche joga o mesmo que a sala nova aberta com `<semente>-2`. A busca (`determinize`) não vê se o
+      // oponente já confirmou o Equipar, então o resultado só depende da semente e da decisão.
+      this.#search = hardSearch(this.#game, BOT_SEAT, legal, createRng(`${this.#botSeed}/${this.#botMoves}`));
       this.#searchSlice();
       return;
     }
@@ -393,6 +395,7 @@ export class LocalRoom implements RoomConnection {
   #botMove(action: Action): void {
     const result = applyAction(this.#game, BOT_SEAT, action);
     if (!result.ok) throw new Error(`o bot jogou algo ilegal: ${result.error.code}`);
+    this.#botMoves += 1;
     this.#commit(result.state, result.events);
   }
 

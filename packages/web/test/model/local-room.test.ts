@@ -460,9 +460,9 @@ describe('níveis do bot', () => {
 
   const easy = (seed: string) => (state: GameState, legal: Action[]) => BOTS.easy(viewFor(state, 'p2'), legal, createRng(`${seed}/bot`));
   const greedy = (seed: string) => (state: GameState, legal: Action[]) => BOTS.greedy(viewFor(state, 'p2'), legal, createRng(`${seed}/bot`));
-  // A busca do Difícil sorteia pelo estado que olha (`<semente>/bot/<passo da partida>`), e não pelo fluxo do bot: o estado depois do
-  // Equipar do jogador é o passo 1 (o 0 é o estado da distribuição).
-  const hard = (seed: string) => (state: GameState, legal: Action[]) => runHard(state, 'p2', legal, createRng(`${seed}/bot/1`));
+  // A busca do Difícil sorteia por decisão do bot (`<semente>/bot/<n>`, `n` = quantas jogadas ele já aplicou na partida), e não pelo fluxo do
+  // bot: a primeira decisão é a 0.
+  const hard = (seed: string) => (state: GameState, legal: Action[]) => runHard(state, 'p2', legal, createRng(`${seed}/bot/0`));
 
   /** O relógio que anda 3 ms a cada leitura: a busca do Difícil, que se fatia por ele, precisa de várias tarefas. */
   function steppedClock() {
@@ -551,23 +551,45 @@ describe('níveis do bot', () => {
       expect(room.state!.events).toEqual(want.events);
     });
 
-    it.each([SEED, 'x2', 'x4', 'c2'])('%s: a decisão não depende de quando o jogador joga: antes do pensar, ou no meio da busca (que recomeça), dá o mesmo Equipar', async (seed) => {
-      const early = setup(seed, { level: 'dificil', now: steppedClock() });
-      early.room.connect();
-      await playFirst(early.room);
-      for (let i = 0; i < 200 && early.room.state!.seq < 3; i += 1) early.timers.runNext();
+    it.each([SEED, 'x2', 'x4', 'c2'])(
+      '%s: o Equipar do bot é o mesmo se o jogador confirma antes do pensar, no meio da busca ou depois de o bot jogar',
+      async (seed) => {
+        /** Anda os timers até a partida chegar ao `seq` 3: os dois Equipar confirmados e a rodada resolvida. */
+        const finish = (s: ReturnType<typeof setup>) => {
+          for (let i = 0; i < 200 && s.room.state!.seq < 3; i += 1) s.timers.runNext();
+          expect(s.room.state!.seq).toBe(3);
+        };
 
-      const mid = setup(seed, { level: 'dificil', now: steppedClock() });
-      mid.room.connect();
-      mid.timers.runNext();
-      await playFirst(mid.room);
-      for (let i = 0; i < 200 && mid.room.state!.seq < 3; i += 1) mid.timers.runNext();
+        // O jogador confirma antes do "pensar" do bot.
+        const before = setup(seed, { level: 'dificil', now: steppedClock() });
+        before.room.connect();
+        await playFirst(before.room);
+        finish(before);
 
-      expect(early.room.state!.seq).toBe(3);
-      expect(mid.room.state!.seq).toBe(3);
-      expect(mid.room.state!.view).toEqual(early.room.state!.view);
-      expect(mid.room.state!.events).toEqual(early.room.state!.events);
-    });
+        // No meio da busca (que recomeça).
+        const mid = setup(seed, { level: 'dificil', now: steppedClock() });
+        mid.room.connect();
+        mid.timers.runNext();
+        await playFirst(mid.room);
+        finish(mid);
+
+        // Depois de o bot jogar: o caso comum de quem pensa antes de confirmar. O estado, o `seq` e o fluxo de timers são outros.
+        const after = setup(seed, { level: 'dificil', now: steppedClock() });
+        after.room.connect();
+        for (let i = 0; i < 200 && after.room.state!.seq < 2; i += 1) after.timers.runNext();
+        expect(after.room.state!.view.opponent.equipSubmitted).toBe(true);
+        await playFirst(after.room);
+        finish(after);
+
+        // O que a resolução mostra (as montagens dos dois) é igual; só a ordem de quem confirmou por último (`EquipSubmitted`) muda.
+        const resolved = (s: ReturnType<typeof setup>) => s.room.state!.events.filter((event) => event.type !== 'EquipSubmitted');
+        expect(resolved(before).length, seed).toBeGreaterThan(0);
+        for (const other of [mid, after]) {
+          expect(other.room.state!.view, seed).toEqual(before.room.state!.view);
+          expect(resolved(other), seed).toEqual(resolved(before));
+        }
+      },
+    );
 
     it('desistir no meio da busca encerra a partida e solta a busca: nada fica agendado, e o bot não joga', async () => {
       const { room, timers } = setup(SEED, { level: 'dificil', now: steppedClock() });

@@ -93,6 +93,8 @@ export class SoundController {
       } catch {
         return; // sem Web Audio neste navegador: o próximo gesto tenta de novo, sem custo
       }
+      // Um contexto criado fora de um gesto nasce suspenso, mas este É um gesto: retoma já, para tocar desde a primeira pista.
+      if (this.ctx.state !== 'running') this.ctx.resume().catch(ignore);
       void this.load(this.ctx);
       return;
     }

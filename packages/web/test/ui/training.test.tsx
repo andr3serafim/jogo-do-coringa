@@ -525,7 +525,7 @@ describe('/treino: diagnóstico e desistência', () => {
     const view = render(<Training store={memoryStore()} load={capture().load} />);
     await settle();
     advance(5_000);
-    expect(getDiagnosticContext().code).toBe('TREINO, semente t1, nível Médio, partida 1');
+    expect(getDiagnosticContext().code).toBe('TREINO, semente t1, nivel medio, partida 1');
 
     await user.click(menuButton());
     await user.click(within(screen.getByRole('dialog', { name: 'Menu da partida' })).getByRole('button', { name: 'Desistir' }));
@@ -533,10 +533,18 @@ describe('/treino: diagnóstico e desistência', () => {
     advance(5_000);
     await user.click(within(screen.getByRole('dialog', { name: 'Bot venceu' })).getByRole('button', { name: 'Revanche' }));
     advance(5_000);
-    expect(getDiagnosticContext().code).toBe('TREINO, semente t1-2, nível Médio, partida 2');
+    expect(getDiagnosticContext().code).toBe('TREINO, semente t1-2, nivel medio, partida 2');
 
     view.unmount();
     expect(getDiagnosticContext().code).toBeNull();
+  });
+
+  it('o nível do diagnóstico é o valor da URL (nivel=dificil), o que se cola em /treino?semente=…&nivel=…', async () => {
+    fakeClock();
+    window.history.replaceState(null, '', '/treino?semente=t1&nivel=dificil');
+    render(<Training store={memoryStore()} load={capture().load} />);
+    await settle();
+    expect(getDiagnosticContext().code).toBe('TREINO, semente t1, nivel dificil, partida 1');
   });
 
   it('desistir no treino não fala em W.O.: não há ninguém para dar a vitória por ausência', async () => {

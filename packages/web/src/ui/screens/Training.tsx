@@ -219,9 +219,10 @@ function TrainingTable({ session, level, seedOf, store }: TrainingTableProps) {
   const gameNo = snapshot.room?.gameNo ?? 1;
 
   // O diagnóstico copiável da fronteira de erro leva a semente da partida em curso (a revanche `n` usa `<semente>-<n>`), o nível
-  // do bot e o número dela: abrir `/treino?semente=<a do diagnóstico>&nivel=<o nível>` repete a partida (spec §2.6).
+  // do bot (o valor da URL: `facil`, `medio` ou `dificil`) e o número dela: abrir `/treino?semente=<a do diagnóstico>&nivel=<o
+  // nível>` repete a partida (spec §2.6).
   useEffect(() => {
-    setDiagnosticContext({ code: `TREINO, semente ${seedOf(gameNo)}, nível ${LEVEL_NAME[level]}, partida ${gameNo}`, seq, epoch });
+    setDiagnosticContext({ code: `TREINO, semente ${seedOf(gameNo)}, nivel ${level}, partida ${gameNo}`, seq, epoch });
     return clearDiagnosticContext;
   }, [seedOf, level, gameNo, seq, epoch]);
 
