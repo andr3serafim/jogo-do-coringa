@@ -21,6 +21,7 @@ O motor, o protocolo, o simulador e o núcleo do servidor rodam direto no Node 2
 
 - Replays em `packages/engine/test/fixtures/golden-replays.json`; resumos em `packages/engine/test/__snapshots__/golden/`.
 - Mudou o resultado de uma partida? Só aceite com `pnpm --filter @coringa/engine exec vitest run -u` depois de revisar o diff dos snapshots, e diga no commit qual regra mudou.
+- Mudar o resultado de uma partida de referência exige subir `RULES_VERSION` (`packages/engine/src/version.ts`) e registrar o digest novo em `RULES_DIGESTS` (`packages/engine/test/rules-version.test.ts`, a mensagem de falha imprime a linha pronta): os replays guardados no navegador pela versão antiga abrem com aviso. O `-u` sozinho não basta.
 - Regravar os replays (ex.: depois de mudar a lista em `packages/sim/src/golden.ts`): `pnpm --filter @coringa/sim record-golden`.
 
 ## Servidor (packages/server)

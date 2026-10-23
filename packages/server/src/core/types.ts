@@ -1,4 +1,4 @@
-import type { Action, GameEvent, GameResult, GameState, PlayerId, RulesConfig } from '@coringa/engine';
+import type { GameEvent, GameResult, GameState, PlayerId, Replay, ReplayStep } from '@coringa/engine';
 import type { AckMessage, Outcome, OutcomeCause, RoomStatus, Score, ServerMessage } from '@coringa/protocol';
 
 export type SeatId = 'p1' | 'p2';
@@ -14,19 +14,8 @@ export interface SeatRecord {
   offlineSince: number | null;
 }
 
-export interface ReplayStep {
-  player: PlayerId | 'system';
-  action: Action;
-}
-
-/** Mesmo formato de `packages/sim/src/replay.ts`. */
-export interface Replay {
-  name: string;
-  config: RulesConfig;
-  seed: string;
-  players: [PlayerId, PlayerId];
-  steps: ReplayStep[];
-}
+/** O formato da partida gravada vem do motor; reexportado para o resto do núcleo do servidor. */
+export type { Replay, ReplayStep };
 
 /** Eventos sem redação de um passo, com o `seq` dele (anel de passos recentes, spec §4.7). */
 export interface StepRecord {

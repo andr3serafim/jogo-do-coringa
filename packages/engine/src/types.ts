@@ -144,6 +144,24 @@ export type Action =
   | { type: 'TIMEOUT' }
   | { type: 'FORFEIT'; loser: PlayerId };
 
+/** Uma ação da partida gravada: quem agiu e o quê. */
+export interface ReplayStep {
+  player: PlayerId | 'system';
+  action: Action;
+}
+
+/**
+ * Partida gravada: semente + config completa + ações. Mesmo formato das fixtures de
+ * `test/fixtures/golden-replays.json`, dos arquivos salvos pelo `pnpm play` e do log do servidor.
+ */
+export interface Replay {
+  name: string;
+  config: RulesConfig;
+  seed: string;
+  players: [PlayerId, PlayerId];
+  steps: ReplayStep[];
+}
+
 export type GameEvent =
   | { type: 'RoundStarted'; round: number; kind: 'EQUIP' | 'ATTACK' }
   | { type: 'DeckReshuffled'; count: number }

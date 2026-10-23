@@ -1,4 +1,5 @@
 export * from './types.ts';
+export { RULES_VERSION } from './version.ts';
 export { DEFAULT_CONFIG, makeConfig, validateConfig, type ConfigOverrides } from './config.ts';
 export { buildDeck, totalCards } from './deck.ts';
 export { createGame } from './create-game.ts';

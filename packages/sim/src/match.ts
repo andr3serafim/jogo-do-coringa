@@ -4,11 +4,11 @@ import {
   createGame,
   legalActions,
   viewFor,
-  type Action,
   type GameEvent,
   type GameResult,
   type GameState,
   type PlayerId,
+  type ReplayStep,
   type RulesConfig,
 } from '@coringa/engine';
 import { runHard } from './bots/hard.ts';
@@ -17,10 +17,7 @@ import { createRng, type Rng } from './rng.ts';
 
 export const PLAYERS: [PlayerId, PlayerId] = ['p1', 'p2'];
 
-export interface ReplayStep {
-  player: PlayerId | 'system';
-  action: Action;
-}
+export type { ReplayStep };
 
 export interface GameSetup {
   config: RulesConfig;

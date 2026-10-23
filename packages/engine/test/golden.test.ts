@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { summarizeReplay, type Replay } from './replay.ts';
+import type { Replay } from '../src/types.ts';
+import { summarizeReplay } from './replay.ts';
 
 /**
  * Partidas de referência: replays gravados (semente + ações) reexecutados no motor.

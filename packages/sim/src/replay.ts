@@ -1,17 +1,8 @@
-import type { PlayerId, RulesConfig } from '@coringa/engine';
-import type { GameRecord, ReplayStep } from './match.ts';
+import type { PlayerId, Replay, RulesConfig } from '@coringa/engine';
+import type { GameRecord } from './match.ts';
 
-/**
- * Partida gravada: semente + config completa + ações. Mesmo formato das fixtures de
- * `packages/engine/test/fixtures/golden-replays.json` e dos arquivos salvos pelo `pnpm play`.
- */
-export interface Replay {
-  name: string;
-  config: RulesConfig;
-  seed: string;
-  players: [PlayerId, PlayerId];
-  steps: ReplayStep[];
-}
+/** Partida gravada: o tipo vem do motor (`@coringa/engine`), o mesmo das fixtures e dos arquivos salvos pelo `pnpm play`. */
+export type { Replay };
 
 export function toReplay(name: string, config: RulesConfig, players: [PlayerId, PlayerId], record: GameRecord): Replay {
   if (!record.replay) throw new Error('a partida não foi gravada (use record: true)');

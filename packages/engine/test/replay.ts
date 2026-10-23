@@ -1,15 +1,6 @@
 import { applyAction } from '../src/apply-action.ts';
 import { createGame } from '../src/create-game.ts';
-import type { Action, GameEvent, GameState, PlayerId, RulesConfig } from '../src/types.ts';
-
-/** Partida gravada (formato gerado por `packages/sim/src/replay.ts`). */
-export interface Replay {
-  name: string;
-  config: RulesConfig;
-  seed: string;
-  players: [PlayerId, PlayerId];
-  steps: Array<{ player: PlayerId | 'system'; action: Action }>;
-}
+import type { GameEvent, GameState, Replay } from '../src/types.ts';
 
 /** Reexecuta a partida no motor. Uma ação recusada falha no passo exato. */
 export function runReplay(replay: Replay): { state: GameState; events: GameEvent[] } {
