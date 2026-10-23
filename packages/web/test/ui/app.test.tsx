@@ -50,9 +50,11 @@ describe('<App />: rotas', () => {
     render(<App api={fakeApi()} />);
     await userEvent.click(screen.getByRole('button', { name: 'Treinar contra o bot' }));
     expect(window.location.pathname).toBe('/treino');
+    // Sem `?nivel=`, o treino pergunta o nível antes da mesa.
+    await userEvent.click(await screen.findByRole('button', { name: /^Médio/ }));
     expect(await screen.findByRole('main', { name: 'Mesa' })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Campo de Bot' })).toBeInTheDocument();
-    expect(screen.getByText('Treino, sem relógio')).toBeInTheDocument();
+    expect(screen.getByText('Treino · Médio, sem relógio')).toBeInTheDocument();
   });
 
   it('qualquer outra rota: "Página não encontrada", com link para o início', async () => {

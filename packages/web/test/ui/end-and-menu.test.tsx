@@ -531,14 +531,22 @@ describe('menu da partida', () => {
       expect(within(screen.getByRole('dialog', { name: 'Desistir da partida?' })).getByText('Você perde esta partida por W.O.')).toBeInTheDocument();
     });
 
-    it('a faixa central diz "Treino, sem relógio" no treino, e só nele', () => {
-      const m = mount({ status: 'PLAYING', props: { training: true } });
+    it.each([
+      ['facil', 'Fácil'],
+      ['medio', 'Médio'],
+      ['dificil', 'Difícil'],
+    ] as const)('a faixa central diz "Treino · %s, sem relógio" e o menu "Treino · %s" no treino, e só nele', async (level, name) => {
+      const m = mount({ status: 'PLAYING', props: { training: level } });
       const band = screen.getByRole('region', { name: 'Situação da rodada' });
-      expect(within(band).getByText('Treino, sem relógio')).toBeInTheDocument();
+      expect(within(band).getByText(`Treino · ${name}, sem relógio`)).toBeInTheDocument();
       expect(within(band).queryByRole('timer')).not.toBeInTheDocument();
+      await m.user.click(menuButton());
+      expect(within(menuDialog()).getByText(`Treino · ${name}`)).toBeInTheDocument();
       m.unmount();
-      mount({ status: 'PLAYING' });
-      expect(screen.queryByText('Treino, sem relógio')).not.toBeInTheDocument();
+      const online = mount({ status: 'PLAYING' });
+      expect(screen.queryByText(/^Treino/)).not.toBeInTheDocument();
+      await online.user.click(menuButton());
+      expect(within(menuDialog()).queryByText(/^Treino/)).not.toBeInTheDocument();
     });
   });
 

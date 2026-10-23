@@ -5,11 +5,13 @@
 // anel mais grosso, por cor e por forma, e nunca pisca; na janela de reação ele é grande; esgotado, diz "Tempo esgotado".
 // Os anúncios para leitor de tela saem por uma região viva escondida que mora aqui, fora do relógio. Entrar na urgência no
 // seu prazo também toca a pista `urgencia`, uma vez por prazo (o do oponente, nunca). No treino (spec §2.6) não há
-// prazo: no lugar do relógio a faixa diz "Treino, sem relógio", e a mesma região anuncia a vez do jogador (`turn`).
+// prazo: no lugar do relógio a faixa diz "Treino · Médio, sem relógio" (com o nível do bot), e a mesma região anuncia a vez
+// do jogador (`turn`).
 import type { PlayerView } from '@coringa/engine';
 import type { Deadline } from '@coringa/protocol';
 import type { ClockFace, TurnCue } from '../../model/clock.ts';
-import { CLOCK_LABEL, CLOCK_URGENT_LABEL, pausedTurnText, TIMES_UP_TEXT, TRAINING_BAND_TEXT } from '../../model/copy.ts';
+import { CLOCK_LABEL, CLOCK_URGENT_LABEL, pausedTurnText, TIMES_UP_TEXT, trainingBandText } from '../../model/copy.ts';
+import type { TrainingLevel } from '../../model/local-room.ts';
 import { zoneKey } from '../../model/marks.ts';
 import * as m from 'motion/react-m';
 import { useEffect, useRef } from 'react';
@@ -40,8 +42,8 @@ export interface CenterBandProps {
   pausedTurnMs?: number;
   /** A vez do jogador, para o anúncio quando não há prazo (o treino não tem relógio). */
   turn?: TurnCue | null;
-  /** Treino contra o bot: no lugar do relógio, a faixa diz que não há. */
-  training?: boolean;
+  /** Treino contra o bot, e o nível dele: no lugar do relógio, a faixa diz o nível e que não há relógio. */
+  training?: TrainingLevel;
   onOpenGraveyard?: () => void;
 }
 
@@ -52,7 +54,7 @@ export function CenterBand({
   remainingMs,
   pausedTurnMs,
   turn = null,
-  training = false,
+  training,
   onOpenGraveyard,
 }: CenterBandProps) {
   const ui = useTableUi();
@@ -93,10 +95,10 @@ export function CenterBand({
 
       {face ? (
         <ClockBlock face={face} />
-      ) : training ? (
+      ) : training !== undefined ? (
         // Sem relógio, a faixa diz por quê, no lugar dele. Não é região viva: o anúncio é o da vez, acima.
-        <p className="max-w-[6.5rem] text-[11px] font-bold uppercase leading-tight tracking-[0.12em] text-ouro pc:max-w-none pc:text-xs">
-          {TRAINING_BAND_TEXT}
+        <p className="max-w-[10.5rem] text-[11px] font-bold uppercase leading-tight tracking-[0.12em] text-ouro pc:max-w-none pc:text-xs">
+          {trainingBandText(training)}
         </p>
       ) : null}
 

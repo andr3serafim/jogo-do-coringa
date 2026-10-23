@@ -26,7 +26,7 @@ import type {
   SeatInfo,
   StateMessage,
 } from '@coringa/protocol';
-import { BOTS, type BotName } from '@coringa/sim/bots';
+import { BOTS, hardSearch } from '@coringa/sim/bots';
 import { createRng, type Rng } from '@coringa/sim/rng';
 
 /** O assento do jogador; o do bot é `p2`. */
@@ -34,13 +34,28 @@ export const LOCAL_ME: PlayerId = 'p1';
 const BOT_SEAT: PlayerId = 'p2';
 
 const DEFAULT_THINK_MS = 600;
+/** Quanto de uma tarefa do navegador a busca do Difícil ocupa por vez (medido por `now`): as batidas e os timers não esperam mais que isto. */
+const SLICE_MS = 8;
 /** A sala local não expira de verdade; o `room` só precisa de um instante à frente. */
 const EXPIRES_IN_MS = 24 * 60 * 60 * 1000;
+
+/** Os níveis do bot do treino (spec da fatia 1, §3): o Fácil é o `easy`, o Médio, o `greedy` do simulador, e o Difícil, a busca por rollouts. */
+export type TrainingLevel = 'facil' | 'medio' | 'dificil';
+
+/** Do mais fácil ao mais difícil: a ordem dos botões da escolha. */
+export const TRAINING_LEVELS: readonly TrainingLevel[] = ['facil', 'medio', 'dificil'];
+
+/** `?nivel=<facil|medio|dificil>` de um `location.search`; sem ele, ou com outro valor, `null` (a tela pergunta). */
+export function trainingLevel(search: string): TrainingLevel | null {
+  const fromUrl = new URLSearchParams(search).get('nivel');
+  return TRAINING_LEVELS.find((level) => level === fromUrl) ?? null;
+}
 
 export interface LocalRoomOptions {
   /** Semente da primeira partida; a revanche `n` usa `<semente>-<n>`. */
   seed: string;
-  bot?: BotName;
+  /** O nível do bot (padrão `medio`); a revanche o mantém. */
+  level?: TrainingLevel;
   /** Quanto o bot "pensa" antes de jogar (padrão 600 ms). Na janela de reação ele responde sem esperar. */
   thinkMs?: number;
   setTimer(fn: () => void, ms: number): unknown;
@@ -84,13 +99,18 @@ function phaseKey(state: GameState): string {
 export class LocalRoom implements RoomConnection {
   readonly #options: LocalRoomOptions;
   readonly #think: number;
+  readonly #level: TrainingLevel;
   readonly #listeners = new Set<(e: ConnectionEvent) => void>();
 
   #room: RoomMessage | null = null;
   #state: StateMessage | null = null;
   #game: GameState;
+  #botSeed: string;
   #botRng: Rng;
+  /** O timer do bot: o do "pensar" antes da decisão, ou o da próxima fatia da busca do Difícil. Um por vez. */
   #botTimer: unknown = null;
+  /** A busca do Difícil em curso (a decisão ainda não saiu). `null` fora dela; quando não é `null`, há uma fatia agendada em `#botTimer`. */
+  #search: Generator<void, Action> | null = null;
   #connected = false;
   #closed = false;
   #idCounter = 0;
@@ -103,9 +123,11 @@ export class LocalRoom implements RoomConnection {
   constructor(options: LocalRoomOptions) {
     this.#options = options;
     this.#think = options.thinkMs ?? DEFAULT_THINK_MS;
-    const { game, botRng } = this.#newGame();
+    this.#level = options.level ?? 'medio';
+    const { game, botSeed } = this.#newGame();
     this.#game = game;
-    this.#botRng = botRng;
+    this.#botSeed = botSeed;
+    this.#botRng = createRng(botSeed);
   }
 
   get playerId(): PlayerId {
@@ -153,9 +175,11 @@ export class LocalRoom implements RoomConnection {
       this.#publishRoom('FINISHED');
       return;
     }
-    const { game, botRng } = this.#newGame();
+    this.#cancelBot();
+    const { game, botSeed } = this.#newGame();
     this.#game = game;
-    this.#botRng = botRng;
+    this.#botSeed = botSeed;
+    this.#botRng = createRng(botSeed);
     this.#outcome = undefined;
     this.#publishStart();
   }
@@ -163,7 +187,7 @@ export class LocalRoom implements RoomConnection {
   close(): void {
     if (this.#closed) return;
     this.#closed = true;
-    this.#clearBotTimer();
+    this.#cancelBot();
     if (this.#connected) this.#emit({ type: 'closed', code: 1000, final: true });
   }
 
@@ -213,12 +237,12 @@ export class LocalRoom implements RoomConnection {
   }
 
   /** Estado novo, bot novo: a semente da partida `n` é `<semente>` (a 1ª) ou `<semente>-<n>`. */
-  #newGame(): { game: GameState; botRng: Rng } {
+  #newGame(): { game: GameState; botSeed: string } {
     this.#gameNo += 1;
     const seed = gameSeed(this.#options.seed, this.#gameNo);
     const created = createGame(DEFAULT_CONFIG, seed, [LOCAL_ME, BOT_SEAT]);
     if (!created.ok) throw new Error(`configuração inválida: ${created.error.message}`);
-    return { game: created.state, botRng: createRng(`${seed}/bot`) };
+    return { game: created.state, botSeed: `${seed}/bot` };
   }
 
   /** Começo de partida (a primeira ou a revanche): `seq` e `epoch` só sobem, e o primeiro `state` vem sem eventos. */
@@ -233,6 +257,9 @@ export class LocalRoom implements RoomConnection {
 
   /** Aplica o estado novo, emite o `state` (e, no fim da partida, o `room`) e devolve o `seq` do passo. */
   #commit(next: GameState, events: GameEvent[], cause: 'CONCEDE' | 'NORMAL' = 'NORMAL'): number {
+    // Um estado novo (a jogada do jogador no Equipar, por exemplo) invalida a busca do Difícil em curso: a jogada que ela
+    // devolveria foi pensada sobre o estado velho. O timer do "pensar", que ainda não virou busca, fica como sempre ficou.
+    if (this.#search !== null) this.#cancelBot();
     const keyBefore = phaseKey(this.#game);
     this.#game = next;
     this.#seq += 1;
@@ -240,7 +267,7 @@ export class LocalRoom implements RoomConnection {
     const seq = this.#seq;
     this.#publishState(events);
     if (next.phase.kind === 'GAME_OVER') {
-      this.#clearBotTimer();
+      this.#cancelBot();
       const result = next.phase.result;
       if (result.kind === 'WIN') this.#score[result.winner as 'p1' | 'p2'] += 1;
       else this.#score.draws += 1;
@@ -302,7 +329,11 @@ export class LocalRoom implements RoomConnection {
     this.#emit({ type: 'room', room });
   }
 
-  /** O bot joga quando é a vez dele: depois de `thinkMs`, ou já (0 ms) numa janela de reação. Um timer por vez. */
+  /**
+   * O bot joga quando é a vez dele: depois de `thinkMs`, ou já (0 ms) numa janela de reação. Um timer por vez. O Difícil começa
+   * a busca quando esse timer dispara e a continua em fatias (`#searchSlice`); na reação e na ordem do ataque não há busca, e a
+   * decisão sai na primeira fatia.
+   */
   #scheduleBot(): void {
     if (this.#closed || this.#botTimer !== null) return;
     if (!actingPlayers(this.#game).includes(BOT_SEAT)) return;
@@ -315,13 +346,48 @@ export class LocalRoom implements RoomConnection {
 
   #botPlay(): void {
     const view = viewFor(this.#game, BOT_SEAT);
-    const action: Action = BOTS[this.#options.bot ?? 'greedy'](view, legalActions(view), this.#botRng);
+    const legal = legalActions(view);
+    if (this.#level === 'dificil') {
+      // O sorteio da busca vem do estado que ela olha (`<semente>/bot/<seq>`), e não do fluxo do bot: um estado novo no meio
+      // dela a reinicia (`#commit`), e a decisão é a mesma de quando o jogador joga antes do "pensar". Só depende da semente.
+      this.#search = hardSearch(this.#game, BOT_SEAT, legal, createRng(`${this.#botSeed}/${this.#seq}`));
+      this.#searchSlice();
+      return;
+    }
+    this.#botMove(BOTS[this.#level === 'facil' ? 'easy' : 'greedy'](view, legal, this.#botRng));
+  }
+
+  /**
+   * Uma fatia da busca do Difícil: avança o gerador até `SLICE_MS` (pelo `now` injetado) e, se não terminou, agenda a próxima
+   * em outra tarefa (0 ms), para as batidas, os timers e a `FlashLock` não esperarem a decisão inteira. O gerador pode terminar
+   * já no primeiro passo (um só lance legal; ordem e reação, sem busca). Só joga quando ele devolve a ação.
+   */
+  #searchSlice(): void {
+    const search = this.#search;
+    if (search === null) return;
+    const end = this.#options.now() + SLICE_MS;
+    let step = search.next();
+    while (!step.done && this.#options.now() < end) step = search.next();
+    if (step.done) {
+      this.#search = null;
+      this.#botMove(step.value);
+      return;
+    }
+    this.#botTimer = this.#options.setTimer(() => {
+      this.#botTimer = null;
+      this.#searchSlice();
+    }, 0);
+  }
+
+  #botMove(action: Action): void {
     const result = applyAction(this.#game, BOT_SEAT, action);
     if (!result.ok) throw new Error(`o bot jogou algo ilegal: ${result.error.code}`);
     this.#commit(result.state, result.events);
   }
 
-  #clearBotTimer(): void {
+  /** Solta o que o bot tem em andamento: o timer (do "pensar" ou de uma fatia) e a busca. A jogada velha nunca é aplicada. */
+  #cancelBot(): void {
+    this.#search = null;
     if (this.#botTimer === null) return;
     this.#options.clearTimer(this.#botTimer);
     this.#botTimer = null;

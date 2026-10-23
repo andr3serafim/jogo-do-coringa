@@ -215,7 +215,7 @@ describe('a chave "Som" do menu da partida', () => {
   });
 
   it('no treino o menu também tem a chave (e não tem a do passe automático)', async () => {
-    const m = mountTable(THEIRS, { props: { training: true } });
+    const m = mountTable(THEIRS, { props: { training: 'medio' } });
     await m.user.click(menuButton());
     expect(soundSwitch()).toBeChecked();
     expect(menu().queryByRole('switch', { name: /Passar sozinho/ })).not.toBeInTheDocument();

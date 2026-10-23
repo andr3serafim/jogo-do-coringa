@@ -19,7 +19,7 @@ import {
   table,
 } from './helpers.ts';
 
-const TRAINING = '/treino?semente=e2e-1';
+const TRAINING = '/treino?semente=e2e-1&nivel=medio';
 const MIN_TARGET = 44;
 
 /** Todo botão que `buttons` encontra tem pelo menos 44 × 44 px (`boundingBox`). Devolve quantos conferiu: zero seria uma conferência vazia. */

@@ -1,7 +1,28 @@
-import { legalActions, type GameEvent, type PlayerView } from '@coringa/engine';
+import {
+  applyAction,
+  createGame,
+  DEFAULT_CONFIG,
+  legalActions,
+  viewEvents,
+  viewFor,
+  type Action,
+  type GameEvent,
+  type GameState,
+  type PlayerView,
+} from '@coringa/engine';
 import type { ConnectionEvent, PlayerAction, RoomMessage, StateMessage } from '@coringa/protocol';
+import { BOTS, runHard } from '@coringa/sim/bots';
+import { createRng } from '@coringa/sim/rng';
 import { describe, expect, it } from 'vitest';
-import { gameSeed, LOCAL_ME, LocalRoom, trainingSeed, type LocalRoomOptions } from '../../src/model/local-room.ts';
+import {
+  gameSeed,
+  LOCAL_ME,
+  LocalRoom,
+  TRAINING_LEVELS,
+  trainingLevel,
+  trainingSeed,
+  type LocalRoomOptions,
+} from '../../src/model/local-room.ts';
 
 /** Timers e relógio de mentira: nada de tempo real; `runNext` dispara o timer mais cedo. */
 class FakeTimers {
@@ -229,8 +250,8 @@ describe('LocalRoom', () => {
     expect(timers.delays.filter((d) => d !== 0 && d !== 600)).toEqual([]);
   });
 
-  it('thinkMs configurável e bot escolhido', () => {
-    const { timers, room } = setup('treino-1', { thinkMs: 50, bot: 'random' });
+  it('thinkMs configurável, em qualquer nível', () => {
+    const { timers, room } = setup('treino-1', { thinkMs: 50, level: 'facil' });
     room.connect();
     expect(timers.delays).toEqual([50]);
   });
@@ -377,5 +398,219 @@ describe('LocalRoom', () => {
     } finally {
       console.error = original;
     }
+  });
+});
+
+describe('trainingLevel', () => {
+  it('lê ?nivel= da URL; sem ele, ou com um valor que não é nível, devolve null', () => {
+    expect(trainingLevel('?nivel=facil')).toBe('facil');
+    expect(trainingLevel('?semente=abc&nivel=dificil')).toBe('dificil');
+    expect(trainingLevel('?nivel=medio&semente=abc')).toBe('medio');
+    expect(trainingLevel('')).toBeNull();
+    expect(trainingLevel('?semente=abc')).toBeNull();
+    expect(trainingLevel('?nivel=')).toBeNull();
+    expect(trainingLevel('?nivel=impossivel')).toBeNull();
+    expect(trainingLevel('?nivel=Medio')).toBeNull();
+  });
+
+  it('a lista dos níveis tem os três, do mais fácil ao mais difícil (o portão do Difícil foi aprovado)', () => {
+    expect(TRAINING_LEVELS).toEqual(['facil', 'medio', 'dificil']);
+  });
+});
+
+describe('níveis do bot', () => {
+  // A semente em que o Fácil, o Médio e o Difícil jogam o Equipar do bot de três jeitos diferentes: os testes não passam por acaso.
+  const SEED = 'rev';
+
+  /** Resultado de um passo do motor puro; falha o teste se a jogada for ilegal. */
+  function step(state: GameState, player: 'p1' | 'p2', action: Action): { state: GameState; events: GameEvent[] } {
+    const result = applyAction(state, player, action);
+    if (!result.ok) throw new Error(`jogada ilegal no motor puro: ${result.error.code}`);
+    return result;
+  }
+
+  /**
+   * O que o jogador deve ver depois de jogar a primeira jogada legal dele e de o bot responder com `pick`, no motor puro, sem a
+   * sala. É o que a sala tem que reproduzir no Equipar da rodada 1.
+   */
+  function expected(seed: string, pick: (state: GameState, legal: Action[]) => Action) {
+    const created = createGame(DEFAULT_CONFIG, seed, ['p1', 'p2']);
+    if (!created.ok) throw new Error('configuração inválida');
+    const mine = step(created.state, 'p1', legalActions(viewFor(created.state, 'p1'))[0]!);
+    const action = pick(mine.state, legalActions(viewFor(mine.state, 'p2')));
+    const theirs = step(mine.state, 'p2', action);
+    return { action, view: viewFor(theirs.state, 'p1'), events: viewEvents(theirs.events, 'p1') };
+  }
+
+  const easy = (seed: string) => (state: GameState, legal: Action[]) => BOTS.easy(viewFor(state, 'p2'), legal, createRng(`${seed}/bot`));
+  const greedy = (seed: string) => (state: GameState, legal: Action[]) => BOTS.greedy(viewFor(state, 'p2'), legal, createRng(`${seed}/bot`));
+  // A busca do Difícil sorteia pelo estado que olha (`<semente>/bot/<seq>`), e não pelo fluxo do bot: o estado depois do Equipar do jogador é o seq 2.
+  const hard = (seed: string) => (state: GameState, legal: Action[]) => runHard(state, 'p2', legal, createRng(`${seed}/bot/2`));
+
+  /** O relógio que anda 3 ms a cada leitura: a busca do Difícil, que se fatia por ele, precisa de várias tarefas. */
+  function steppedClock() {
+    let t = 1_000;
+    return () => (t += 3);
+  }
+
+  /** O jogador joga a primeira jogada legal dele. */
+  const playFirst = (room: LocalRoom) => room.act(legalActions(room.state!.view)[0] as PlayerAction);
+
+  it('a semente dos testes separa os três níveis (senão os testes abaixo não provariam nada)', () => {
+    const plays = [easy, greedy, hard].map((bot) => JSON.stringify(expected(SEED, bot(SEED)).action));
+    expect(new Set(plays).size).toBe(3);
+  });
+
+  it.each([
+    ['facil', easy],
+    ['medio', greedy],
+    [undefined, greedy],
+  ] as const)('level %s: o bot joga o que o bot do nível jogaria, com a mesma semente (o padrão é o Médio)', async (level, pick) => {
+    const { room, timers } = setup(SEED, { level });
+    room.connect();
+    await playFirst(room);
+    expect(timers.runNext()).toBe(true);
+    const want = expected(SEED, pick(SEED));
+    expect(room.state!.view).toEqual(want.view);
+    expect(room.state!.events).toEqual(want.events);
+  });
+
+  it('uma partida inteira no Fácil termina, com o bot jogando numa tarefa só (pensar de 600 ms, ou 0 ms na reação)', async () => {
+    const { room, timers } = setup('treino-1', { level: 'facil' });
+    room.connect();
+    await playToEnd(room, timers);
+    expect(timers.delays.filter((d) => d !== 0 && d !== 600)).toEqual([]);
+    expect(timers.pending.size).toBe(0);
+  });
+
+  describe('Difícil: a busca em fatias', () => {
+    it('joga só quando a busca termina, depois de várias tarefas, e é a jogada que o runHard jogaria', async () => {
+      const { room, timers } = setup(SEED, { level: 'dificil', now: steppedClock() });
+      room.connect();
+      await playFirst(room);
+      const before = room.state!.seq;
+      // O tempo de pensar vem antes da busca, como nos outros níveis.
+      expect(timers.delays).toEqual([600]);
+      expect(timers.runNext()).toBe(true);
+      expect(room.state!.seq).toBe(before);
+
+      // Cada fatia seguinte é uma tarefa só dela (0 ms), até a busca terminar. Nada é jogado no meio.
+      let tasks = 1;
+      while (room.state!.seq === before) {
+        expect(timers.pending.size).toBe(1);
+        expect(timers.delays.at(-1)).toBe(0);
+        expect(timers.runNext()).toBe(true);
+        tasks += 1;
+        expect(tasks).toBeLessThan(200);
+      }
+      // 32 rollouts (4 candidatas × 8) a 3 ms a leitura, em fatias de 8 ms: umas dez tarefas.
+      expect(tasks).toBeGreaterThan(5);
+      expect(room.state!.seq).toBe(before + 1);
+      const want = expected(SEED, hard(SEED));
+      expect(room.state!.view).toEqual(want.view);
+      expect(room.state!.events).toEqual(want.events);
+    });
+
+    it('um act do jogador no meio da busca (no Equipar, a única fase em que os dois jogam juntos) a cancela: a fatia velha nunca roda', async () => {
+      const { room, timers } = setup(SEED, { level: 'dificil', now: steppedClock() });
+      room.connect();
+      expect(timers.runNext()).toBe(true);
+      const seq = room.state!.seq;
+      expect(timers.delays.at(-1)).toBe(0);
+      const [stale] = [...timers.pending.keys()];
+      expect(stale).toBeDefined();
+
+      await playFirst(room);
+      // A fatia velha saiu da fila, e só resta o tempo de pensar da decisão nova.
+      expect(timers.pending.has(stale!)).toBe(false);
+      expect(timers.pending.size).toBe(1);
+      expect(timers.delays.at(-1)).toBe(600);
+
+      // O bot joga uma vez só, e o que ele joga é o da busca sobre o estado novo (nada da velha sobrou).
+      for (let i = 0; i < 200 && room.state!.seq === seq + 1; i += 1) expect(timers.runNext()).toBe(true);
+      expect(room.state!.seq).toBe(seq + 2);
+      const want = expected(SEED, hard(SEED));
+      expect(room.state!.view).toEqual(want.view);
+      expect(room.state!.events).toEqual(want.events);
+    });
+
+    it.each([SEED, 'x2', 'x4', 'c2'])('%s: a decisão não depende de quando o jogador joga: antes do pensar, ou no meio da busca (que recomeça), dá o mesmo Equipar', async (seed) => {
+      const early = setup(seed, { level: 'dificil', now: steppedClock() });
+      early.room.connect();
+      await playFirst(early.room);
+      for (let i = 0; i < 200 && early.room.state!.seq < 3; i += 1) early.timers.runNext();
+
+      const mid = setup(seed, { level: 'dificil', now: steppedClock() });
+      mid.room.connect();
+      mid.timers.runNext();
+      await playFirst(mid.room);
+      for (let i = 0; i < 200 && mid.room.state!.seq < 3; i += 1) mid.timers.runNext();
+
+      expect(early.room.state!.seq).toBe(3);
+      expect(mid.room.state!.seq).toBe(3);
+      expect(mid.room.state!.view).toEqual(early.room.state!.view);
+      expect(mid.room.state!.events).toEqual(early.room.state!.events);
+    });
+
+    it('desistir no meio da busca encerra a partida e solta a busca: nada fica agendado, e o bot não joga', async () => {
+      const { room, timers } = setup(SEED, { level: 'dificil', now: steppedClock() });
+      room.connect();
+      timers.runNext();
+      expect(timers.pending.size).toBe(1);
+      expect(timers.delays.at(-1)).toBe(0);
+      const seq = room.state!.seq;
+
+      expect(await room.concede()).toMatchObject({ ok: true });
+      expect(room.room!.status).toBe('FINISHED');
+      expect(timers.pending.size).toBe(0);
+      expect(timers.runNext()).toBe(false);
+      expect(room.state!.seq).toBe(seq + 1);
+    });
+
+    it('fechar a sala no meio da busca solta a busca: nada fica agendado', () => {
+      const { room, timers } = setup(SEED, { level: 'dificil', now: steppedClock() });
+      room.connect();
+      timers.runNext();
+      expect(timers.pending.size).toBe(1);
+      room.close();
+      expect(timers.pending.size).toBe(0);
+      expect(timers.runNext()).toBe(false);
+    });
+
+    it('a revanche mantém o nível: a decisão do bot na partida 2 também sai em fatias', async () => {
+      const { room, timers } = setup(SEED, { level: 'dificil', now: steppedClock() });
+      room.connect();
+      await room.concede();
+      room.rematch(true);
+      expect(room.room).toMatchObject({ status: 'PLAYING', gameNo: 2 });
+      expect(timers.delays.at(-1)).toBe(600);
+      const seq = room.state!.seq;
+      expect(timers.runNext()).toBe(true);
+      // Com o Médio o bot jogaria já neste primeiro disparo; no Difícil sobra uma fatia agendada.
+      expect(room.state!.seq).toBe(seq);
+      expect(timers.delays.at(-1)).toBe(0);
+    });
+
+    it('uma partida inteira termina; a ordem do ataque e a reação não têm busca e saem numa tarefa só', { timeout: 60_000 }, async () => {
+      const { room, timers } = setup('treino-1', { level: 'dificil', now: steppedClock() });
+      room.connect();
+      let searched = 0;
+      for (let i = 0; i < 5000 && room.room?.status !== 'FINISHED'; i++) {
+        const view = room.state!.view;
+        if (myTurn(view)) {
+          await room.act(legalActions(view)[0] as PlayerAction);
+          continue;
+        }
+        const kind = view.phase.kind;
+        const seq = room.state!.seq;
+        let tasks = 0;
+        while (room.state!.seq === seq && timers.runNext()) tasks += 1;
+        expect(room.state!.seq, 'o bot jogou').toBeGreaterThan(seq);
+        if (kind === 'REACTION' || kind === 'ORDER_CHOICE') expect(tasks, kind).toBe(1);
+        else if (tasks > 1) searched += 1;
+      }
+      expect(room.room?.status).toBe('FINISHED');
+      expect(searched, 'houve decisões com busca').toBeGreaterThan(3);
+    });
   });
 });

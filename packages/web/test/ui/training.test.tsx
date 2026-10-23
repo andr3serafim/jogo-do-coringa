@@ -16,13 +16,15 @@ import * as localRoomModule from '../../src/model/local-room.ts';
 import { Training, type LocalRoomModule } from '../../src/ui/screens/Training.tsx';
 import { fakeApi, memoryStore, seriousViolations } from './support.tsx';
 
-const SEED = '?semente=t1';
+/** A semente fixa e o nível Médio na URL: o `?nivel=` pula a escolha, e a mesa dos testes nasce direto. */
+const SEED = '?semente=t1&nivel=medio';
 
 beforeEach(() => {
   window.localStorage.clear();
   window.sessionStorage.clear();
   // Toda tela de treino dos testes nasce com a semente fixa: sem `?semente=` a partida seria sorteada (e, em cerca de 1% delas,
-  // o jogador não recebe numéricas e o Equipar dele sai sozinho). Quem testa o sorteio troca a URL e o `crypto`.
+  // o jogador não recebe numéricas e o Equipar dele sai sozinho). Quem testa o sorteio troca a URL e o `crypto`. Sem `?nivel=`
+  // a tela pergunta o nível antes da mesa: quem testa a escolha também troca a URL.
   window.history.replaceState(null, '', `/treino${SEED}`);
 });
 
@@ -49,17 +51,19 @@ function fakeClock() {
 /** Deixa o `import()` dinâmico e a criação da sala acontecerem. */
 const settle = () => act(async () => vi.dynamicImportSettled());
 
-/** Uma `load` que guarda as salas criadas (a tela não as expõe). Tem que ser estável: é dependência do efeito. */
+/** Uma `load` que guarda as salas criadas e o nível de cada uma (a tela não os expõe). Tem que ser estável: é dependência do efeito. */
 function capture() {
   const rooms: localRoomModule.LocalRoom[] = [];
+  const levels: Array<localRoomModule.TrainingLevel | undefined> = [];
   class Spy extends localRoomModule.LocalRoom {
     constructor(options: localRoomModule.LocalRoomOptions) {
       super(options);
       rooms.push(this);
+      levels.push(options.level);
     }
   }
   const load = (): Promise<LocalRoomModule> => Promise.resolve({ ...localRoomModule, LocalRoom: Spy });
-  return { rooms, load };
+  return { rooms, levels, load };
 }
 
 async function openTraining(search = SEED) {
@@ -85,7 +89,7 @@ async function equipByUi(user: ReturnType<typeof fakeClock>['user']) {
 }
 
 describe('/treino', () => {
-  it('abre com "Preparando o treino…" e logo desenha a mesa contra o Bot, com a faixa "Treino, sem relógio"', async () => {
+  it('abre com "Preparando o treino…" e logo desenha a mesa contra o Bot, com a faixa "Treino · Médio, sem relógio"', async () => {
     fakeClock();
     window.history.replaceState(null, '', `/treino${SEED}`);
     render(<App api={fakeApi()} />);
@@ -96,7 +100,7 @@ describe('/treino', () => {
     expect(screen.getByRole('main', { name: 'Mesa' })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Campo de Bot' })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Seu campo' })).toBeInTheDocument();
-    expect(band().getByText('Treino, sem relógio')).toBeInTheDocument();
+    expect(band().getByText('Treino · Médio, sem relógio')).toBeInTheDocument();
     expect(screen.queryByRole('timer')).not.toBeInTheDocument();
     expect(screen.queryByText('Tempo esgotado')).not.toBeInTheDocument();
   });
@@ -155,7 +159,7 @@ describe('/treino', () => {
     const first = await hands(SEED);
     expect(first.length).toBeGreaterThan(0);
     expect(await hands(SEED)).toEqual(first);
-    expect(await hands('?semente=outra')).not.toEqual(first);
+    expect(await hands('?semente=outra&nivel=medio')).not.toEqual(first);
   });
 
   it('sem semente na URL, a partida é sorteada pelo navegador', async () => {
@@ -166,12 +170,183 @@ describe('/treino', () => {
       return array;
     }) as typeof crypto.getRandomValues);
     const { rooms, load } = capture();
-    window.history.replaceState(null, '', '/treino');
+    window.history.replaceState(null, '', '/treino?nivel=medio');
     render(<Training store={memoryStore()} load={load} />);
     await settle();
     expect(rooms).toHaveLength(1);
     expect(getRandomValues).toHaveBeenCalledTimes(1);
     expect(rooms[0]!.room?.status).toBe('PLAYING');
+  });
+});
+
+describe('/treino: a escolha do nível', () => {
+  // O nome do botão é o nível e a linha (WCAG 2.5.3); aqui se acha pelo começo.
+  const levelButton = (name: string) => screen.getByRole('button', { name: new RegExp(`^${name}`) });
+  const choose = async (search = '?semente=t1', store = memoryStore()) => {
+    const clock = fakeClock();
+    const captured = capture();
+    window.history.replaceState(null, '', `/treino${search}`);
+    const view = render(<Training store={store} load={captured.load} />);
+    await settle();
+    return { ...clock, ...captured, store, view };
+  };
+
+  it('sem ?nivel=, a escolha vem antes da mesa: três botões com uma linha cada, o Médio focado, e nada de sala nem de timer', async () => {
+    const { rooms, advance } = await choose();
+    expect(screen.getByRole('heading', { name: 'Treino' })).toBeInTheDocument();
+    const group = screen.getByRole('group', { name: 'Nível do bot' });
+    // Do mais fácil ao mais difícil, cada um com a sua linha, e o padrão (Médio) é o que vem focado.
+    expect(within(group).getAllByRole('button').map((button) => button.textContent)).toEqual([
+      'Fácil Joga sem pressa e erra bastante',
+      'Médio Joga direto, como o bot do simulador',
+      'Difícil Pensa nas próximas rodadas',
+    ]);
+    expect(levelButton('Fácil')).toHaveAccessibleName('Fácil Joga sem pressa e erra bastante');
+    expect(levelButton('Médio')).toHaveAccessibleName('Médio Joga direto, como o bot do simulador');
+    expect(levelButton('Difícil')).toHaveAccessibleName('Difícil Pensa nas próximas rodadas');
+    expect(levelButton('Médio')).toHaveFocus();
+    expect(screen.queryByRole('main', { name: 'Mesa' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Preparando o treino…')).not.toBeInTheDocument();
+    expect(rooms).toHaveLength(0);
+    // Só sobra o que o próprio React agendou: passado o tempo, não há bot nem relógio nenhum.
+    advance(10_000);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('o último nível escolhido (coringa:nivel) vem focado; um valor que não é nível volta ao Médio', async () => {
+    const saved = memoryStore();
+    saved.set('coringa:nivel', 'dificil');
+    const first = await choose('?semente=t1', saved);
+    expect(levelButton('Difícil')).toHaveFocus();
+    first.view.unmount();
+
+    const broken = memoryStore();
+    broken.set('coringa:nivel', 'impossivel');
+    await choose('?semente=t1', broken);
+    expect(levelButton('Médio')).toHaveFocus();
+  });
+
+  it.each([
+    ['Fácil', 'facil'],
+    ['Médio', 'medio'],
+    ['Difícil', 'dificil'],
+  ] as const)('escolher "%s" grava coringa:nivel, abre a mesa com a sala nesse nível e a faixa o diz', async (name, level) => {
+    const { user, rooms, levels, store } = await choose();
+    await user.click(levelButton(name));
+    expect(store.get('coringa:nivel')).toBe(level);
+    expect(rooms).toHaveLength(1);
+    expect(levels).toEqual([level]);
+    expect(screen.queryByRole('group', { name: 'Nível do bot' })).not.toBeInTheDocument();
+    expect(screen.getByRole('main', { name: 'Mesa' })).toBeInTheDocument();
+    expect(band().getByText(`Treino · ${name}, sem relógio`)).toBeInTheDocument();
+  });
+
+  it('o Enter no botão focado escolhe o nível (teclado)', async () => {
+    const { user, levels, store } = await choose();
+    expect(levelButton('Médio')).toHaveFocus();
+    await user.keyboard('{Enter}');
+    expect(levels).toEqual(['medio']);
+    expect(store.get('coringa:nivel')).toBe('medio');
+    expect(screen.getByRole('main', { name: 'Mesa' })).toBeInTheDocument();
+  });
+
+  it('a semente da URL vale depois da escolha: a mesma mão de abrir direto com ?nivel=', async () => {
+    const { user, rooms, view } = await choose('?semente=t1');
+    await user.click(levelButton('Fácil'));
+    const hand = rooms[0]!.state!.view.self.pending.map((card) => card.id);
+    view.unmount();
+    vi.useRealTimers();
+
+    const direct = await choose('?semente=t1&nivel=facil');
+    expect(direct.rooms[0]!.state!.view.self.pending.map((card) => card.id)).toEqual(hand);
+  });
+
+  it('?nivel=dificil vai direto à mesa, sem a escolha e sem mexer no nível guardado', async () => {
+    const store = memoryStore();
+    const { rooms, levels } = await choose('?semente=t1&nivel=dificil', store);
+    expect(screen.queryByRole('group', { name: 'Nível do bot' })).not.toBeInTheDocument();
+    expect(levels).toEqual(['dificil']);
+    expect(rooms).toHaveLength(1);
+    expect(band().getByText('Treino · Difícil, sem relógio')).toBeInTheDocument();
+    expect(store.get('coringa:nivel')).toBeNull();
+  });
+
+  it('um ?nivel= que não é nível cai na escolha', async () => {
+    const { rooms } = await choose('?semente=t1&nivel=impossivel');
+    expect(screen.getByRole('group', { name: 'Nível do bot' })).toBeInTheDocument();
+    expect(rooms).toHaveLength(0);
+  });
+
+  it('"Voltar ao início", na escolha, volta ao início sem criar sala', async () => {
+    const { user, rooms } = await choose();
+    await user.click(screen.getByRole('button', { name: 'Voltar ao início' }));
+    expect(window.location.pathname).toBe('/');
+    expect(rooms).toHaveLength(0);
+  });
+
+  it('sair da escolha (a tela desmonta) não deixa sala nem timer', async () => {
+    const { rooms, view, advance } = await choose();
+    view.unmount();
+    advance(10_000);
+    expect(rooms).toHaveLength(0);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('no modo estrito, a escolha aparece uma vez e a sala escolhida é uma só', async () => {
+    fakeClock();
+    const { rooms, load } = capture();
+    window.history.replaceState(null, '', '/treino?semente=t1');
+    const user = userEvent.setup({ advanceTimers: (ms) => act(() => void vi.advanceTimersByTime(ms)) });
+    render(
+      <StrictMode>
+        <Training store={memoryStore()} load={load} />
+      </StrictMode>,
+    );
+    await settle();
+    expect(screen.getAllByRole('group', { name: 'Nível do bot' })).toHaveLength(1);
+    await user.click(levelButton('Fácil'));
+    expect(rooms).toHaveLength(1);
+    expect(screen.getByRole('main', { name: 'Mesa' })).toBeInTheDocument();
+  });
+
+  it('uma exceção ao criar a sala escolhida cai na tela de falha, sem timer', async () => {
+    const clock = fakeClock();
+    class Broken extends localRoomModule.LocalRoom {
+      constructor(options: localRoomModule.LocalRoomOptions) {
+        super(options);
+        throw new Error('boom');
+      }
+    }
+    const load = (): Promise<LocalRoomModule> => Promise.resolve({ ...localRoomModule, LocalRoom: Broken });
+    window.history.replaceState(null, '', '/treino?semente=t1');
+    render(<Training store={memoryStore()} load={load} />);
+    await settle();
+    await clock.user.click(levelButton('Fácil'));
+    expect(screen.getByRole('heading', { name: 'Não deu para carregar o treino' })).toBeInTheDocument();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('a revanche mantém o nível e a faixa e o menu seguem dizendo o nível', async () => {
+    const { user, advance, rooms, levels } = await choose();
+    await user.click(levelButton('Difícil'));
+    advance(5_000);
+    await user.click(menuButton());
+    const menu = within(screen.getByRole('dialog', { name: 'Menu da partida' }));
+    expect(menu.getByText('Treino · Difícil')).toBeInTheDocument();
+    await user.click(menu.getByRole('button', { name: 'Desistir' }));
+    await user.click(within(screen.getByRole('dialog', { name: 'Desistir da partida?' })).getByRole('button', { name: 'Confirmar' }));
+    advance(5_000);
+    await user.click(within(screen.getByRole('dialog', { name: 'Bot venceu' })).getByRole('button', { name: 'Revanche' }));
+    advance(5_000);
+    expect(rooms[0]!.room).toMatchObject({ status: 'PLAYING', gameNo: 2 });
+    expect(levels).toEqual(['dificil']);
+    expect(band().getByText('Treino · Difícil, sem relógio')).toBeInTheDocument();
+  });
+
+  it('o menu do treino diz "Treino · Médio"', async () => {
+    const { user } = await choose('?semente=t1&nivel=medio');
+    await user.click(menuButton());
+    expect(within(screen.getByRole('dialog', { name: 'Menu da partida' })).getByText('Treino · Médio')).toBeInTheDocument();
   });
 });
 
@@ -345,12 +520,12 @@ describe('/treino: sair, fim e revanche', () => {
 });
 
 describe('/treino: diagnóstico e desistência', () => {
-  it('o diagnóstico leva a semente da partida e o número dela: a partida 2 usa <semente>-2, que abre a mesma partida', async () => {
+  it('o diagnóstico leva a semente, o nível e o número da partida: a partida 2 usa <semente>-2, que abre a mesma partida', async () => {
     const { advance, user } = fakeClock();
     const view = render(<Training store={memoryStore()} load={capture().load} />);
     await settle();
     advance(5_000);
-    expect(getDiagnosticContext().code).toBe('TREINO, semente t1, partida 1');
+    expect(getDiagnosticContext().code).toBe('TREINO, semente t1, nível Médio, partida 1');
 
     await user.click(menuButton());
     await user.click(within(screen.getByRole('dialog', { name: 'Menu da partida' })).getByRole('button', { name: 'Desistir' }));
@@ -358,7 +533,7 @@ describe('/treino: diagnóstico e desistência', () => {
     advance(5_000);
     await user.click(within(screen.getByRole('dialog', { name: 'Bot venceu' })).getByRole('button', { name: 'Revanche' }));
     advance(5_000);
-    expect(getDiagnosticContext().code).toBe('TREINO, semente t1-2, partida 2');
+    expect(getDiagnosticContext().code).toBe('TREINO, semente t1-2, nível Médio, partida 2');
 
     view.unmount();
     expect(getDiagnosticContext().code).toBeNull();
@@ -475,6 +650,13 @@ describe('/treino: acessibilidade', () => {
     window.history.replaceState(null, '', `/treino${SEED}`);
     const { container } = render(<App api={fakeApi()} />);
     await screen.findByRole('main', { name: 'Mesa' });
+    expect(await seriousViolations(container)).toEqual([]);
+  });
+
+  it('axe: a escolha do nível não tem violações sérias', async () => {
+    window.history.replaceState(null, '', '/treino?semente=t1');
+    const { container } = render(<App api={fakeApi()} />);
+    await screen.findByRole('group', { name: 'Nível do bot' });
     expect(await seriousViolations(container)).toEqual([]);
   });
 

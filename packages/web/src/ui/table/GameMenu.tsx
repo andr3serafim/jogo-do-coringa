@@ -20,8 +20,10 @@ import {
   REDUCE_MOTION_SYSTEM_HINT,
   RULES_LABEL,
   SOUND_LABEL,
+  trainingLevelText,
   versionText,
 } from '../../model/copy.ts';
+import type { TrainingLevel } from '../../model/local-room.ts';
 import type { Prefs } from '../../model/storage.ts';
 import { useSystemReducedMotion } from '../anim/useReducedMotion.ts';
 import { copyText } from '../clipboard.ts';
@@ -79,6 +81,8 @@ export interface GameMenuProps {
   concedeWarning?: string;
   /** A chave "Passar sozinho" (padrão: aparece). O treino a esconde: lá o passe automático não se aplica (spec §2.6). */
   showAutoPass?: boolean;
+  /** Só no treino: o nível do bot, escrito logo abaixo do título ("Treino · Médio"). */
+  trainingLevel?: TrainingLevel;
   /** Há partida em curso para desistir. */
   canConcede: boolean;
   /** Sem conexão não dá para desistir (o pedido se perderia). */
@@ -98,6 +102,7 @@ export function GameMenu({
   onExit,
   concedeWarning = CONCEDE_WARNING,
   showAutoPass = true,
+  trainingLevel,
   canConcede,
   concedeDisabled,
   onConcede,
@@ -150,6 +155,7 @@ export function GameMenu({
           <h2 id={titleId} className="textura font-madeira text-2xl uppercase leading-tight">
             {MENU_LABEL}
           </h2>
+          {trainingLevel === undefined ? null : <p className="font-bold">{trainingLevelText(trainingLevel)}</p>}
 
           {inviteLink === undefined ? null : (
             <>

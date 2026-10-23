@@ -5,7 +5,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { equipPanel, failOnConsoleErrors, openMenu, table } from './helpers.ts';
 
-/** Treino com semente fixa. O `nivel` ainda não existe na tela: o parâmetro é ignorado até a tarefa dos níveis. */
+/** Treino com semente fixa e nível Médio (o `?nivel=` pula a escolha do nível). */
 const TRAINING = '/treino?semente=e2e-1&nivel=medio';
 
 /** Quantos `AudioContext` a página já criou. */

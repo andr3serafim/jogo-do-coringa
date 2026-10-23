@@ -1,6 +1,7 @@
 // Persistência no navegador (spec §6.1 e §6.5). Núcleo puro: o `Storage` entra por parâmetro e toda
 // operação fica num try/catch. O token é segredo e nunca sai daqui para o diagnóstico.
 import type { PlayerId } from '@coringa/engine';
+import type { TrainingLevel } from './local-room.ts';
 
 export interface KeyValueStore {
   get(key: string): string | null;
@@ -169,6 +170,26 @@ export function loadNickname(store: KeyValueStore): string {
 
 export function saveNickname(store: KeyValueStore, nickname: string): void {
   writeValue(store, NICKNAME_KEY, nickname);
+}
+
+// --- Nível do treino ---
+
+const LEVEL_KEY = 'coringa:nivel';
+
+/**
+ * O último nível escolhido no treino, como foi guardado (ou `null`). Quem lê confere se ainda é um nível: a lista dos níveis mora
+ * no módulo da sala local (com o bot), que o armazenamento, no JavaScript inicial, não importa.
+ */
+export function loadLevel(store: KeyValueStore): string | null {
+  try {
+    return store.get(LEVEL_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function saveLevel(store: KeyValueStore, level: TrainingLevel): void {
+  writeValue(store, LEVEL_KEY, level);
 }
 
 // --- Diagnóstico copiável (spec §6.5) ---

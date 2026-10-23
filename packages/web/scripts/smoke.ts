@@ -22,7 +22,9 @@ const ZOD_MARK = 'ZodError';
  */
 const BOT_NAME_MARK = 'greedyBot';
 const BOT_TEXT_MARK = 'fase principal sem DECLARE_ATTACK/END_TURN';
-const BOT_MARKS = [BOT_NAME_MARK, BOT_TEXT_MARK];
+/** Idem para a busca do Difícil (`packages/sim/src/bots/hard.ts`): um erro lançado dentro dela. Ela também só entra com o treino. */
+const HARD_TEXT_MARK = 'hardSearch sem ação legal';
+const BOT_MARKS = [BOT_NAME_MARK, BOT_TEXT_MARK, HARD_TEXT_MARK];
 /**
  * Marcas do sintetizador. Nenhuma sobrevive só no nome de um identificador nosso (o minificador renomeia): `createDynamicsCompressor`
  * é o método do Web Audio que monta o limitador (nome de propriedade do navegador, que não se renomeia) e `sawtooth` é um literal de
@@ -103,10 +105,16 @@ for (const path of all) {
   if (source.includes(ZOD_MARK)) problems.push(`${fromDist(path)} contém o Zod (${ZOD_MARK}): a web nunca importa os esquemas`);
 }
 
-// O bot tem que existir em algum chunk que não é o inicial; do contrário, "fora do inicial" não provaria nada.
-const botChunks = all.filter((path) => !initialPaths.has(path) && readFileSync(path).includes(BOT_TEXT_MARK));
+// O bot (com a busca do Difícil) tem que existir em algum chunk que não é o inicial; do contrário, "fora do inicial" não provaria nada.
+const botChunks = all.filter((path) => {
+  if (initialPaths.has(path)) return false;
+  const source = readFileSync(path);
+  return source.includes(BOT_TEXT_MARK) && source.includes(HARD_TEXT_MARK);
+});
 if (botChunks.length === 0) {
-  problems.push(`o bot do treino ("${BOT_TEXT_MARK}") não está em nenhum chunk carregado sob demanda: o import() dinâmico sumiu, ou a marca mudou`);
+  problems.push(
+    `o bot do treino ("${BOT_TEXT_MARK}") e a busca do Difícil ("${HARD_TEXT_MARK}") não estão num chunk carregado sob demanda: o import() dinâmico sumiu, ou as marcas mudaram`,
+  );
 } else {
   console.log(`Bot do treino (fora do inicial): ${botChunks.map(fromDist).join(', ')}`);
 }

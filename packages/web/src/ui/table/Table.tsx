@@ -10,6 +10,7 @@ import { turnCue } from '../../model/clock.ts';
 import { equipOpponentText, scoreText } from '../../model/copy.ts';
 import { completeDraft, draftBoard } from '../../model/equip.ts';
 import { newLineCount, type HistoryLine } from '../../model/history.ts';
+import type { TrainingLevel } from '../../model/local-room.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import { Banners } from './Banners.tsx';
 import { CenterBand } from './CenterBand.tsx';
@@ -42,8 +43,8 @@ export interface TableProps {
   onInteract?: () => void;
   /** A barra de ação, embaixo da mão. */
   actionBar?: ReactNode;
-  /** Treino contra o bot: a faixa central diz "Treino, sem relógio" e a vez do jogador é anunciada sem prazo. */
-  training?: boolean;
+  /** Treino contra o bot, e o nível dele: a faixa central diz "Treino · Médio, sem relógio" e a vez do jogador é anunciada sem prazo. */
+  training?: TrainingLevel;
 }
 
 const NO_TARGETS: ReadonlySet<string> = new Set();
@@ -70,7 +71,7 @@ function TableView({
   onOpenMenu,
   onInteract,
   actionBar,
-  training = false,
+  training,
 }: TableProps & { state: StateMessage }) {
   const { room, marks, marksBaseSeq, history } = snapshot;
   const { view } = state;

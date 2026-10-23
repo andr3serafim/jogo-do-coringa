@@ -2,6 +2,7 @@
 import type { AttackPreview, Card, PlayerId, RowName, SpecialCard } from '@coringa/engine';
 import type { DeadlineKind, Outcome, Score } from '@coringa/protocol';
 import { cardText, ROW_NAME } from '@coringa/sim/text';
+import type { TrainingLevel } from './local-room.ts';
 import { previewChanged, type Previews } from './preview.ts';
 import type { SceneKind } from './timeline.ts';
 
@@ -376,8 +377,21 @@ export const versionText = (version: string): string => `Versão publicada: ${ve
 // ---------------------------------------------------------------------------------------------
 // Treino contra o bot (spec §2.6)
 
+/** Os níveis do bot (spec da fatia 1, §3): o nome, nos botões da escolha, na faixa central e no menu da partida. */
+export const LEVEL_NAME: Record<TrainingLevel, string> = { facil: 'Fácil', medio: 'Médio', dificil: 'Difícil' };
+/** A linha de cada nível na escolha. O Fácil joga ao acaso em boa parte das decisões; o Médio é o `greedy`; o Difícil busca. */
+export const LEVEL_LINE: Record<TrainingLevel, string> = {
+  facil: 'Joga sem pressa e erra bastante',
+  medio: 'Joga direto, como o bot do simulador',
+  dificil: 'Pensa nas próximas rodadas',
+};
+export const TRAINING_CHOICE_TITLE = 'Treino';
+export const TRAINING_CHOICE_HINT = 'Escolha o nível do bot.';
+export const TRAINING_CHOICE_LABEL = 'Nível do bot';
+/** No menu da partida, e a primeira parte da faixa central. */
+export const trainingLevelText = (level: TrainingLevel): string => `Treino · ${LEVEL_NAME[level]}`;
 /** Na faixa central, no lugar do relógio. */
-export const TRAINING_BAND_TEXT = 'Treino, sem relógio';
+export const trainingBandText = (level: TrainingLevel): string => `${trainingLevelText(level)}, sem relógio`;
 /** No menu da partida: sai do treino na hora, sem resultado. */
 export const EXIT_TRAINING_LABEL = 'Sair do treino';
 /** No painel de fim do treino, no lugar de "Nova sala". */

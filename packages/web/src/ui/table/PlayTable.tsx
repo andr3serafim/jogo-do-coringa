@@ -19,6 +19,7 @@ import type { SpecialCard } from '@coringa/engine';
 import type { Deadline, PlayerAction, StateMessage } from '@coringa/protocol';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { rowKey } from '../../model/effects.ts';
+import type { TrainingLevel } from '../../model/local-room.ts';
 import { isLegal, tablePlays, type CardPlay } from '../../model/plays.ts';
 import type { Session, SessionSnapshot } from '../../model/session.ts';
 import { savePrefs, type KeyValueStore, type Prefs } from '../../model/storage.ts';
@@ -50,8 +51,8 @@ export interface PlayTableProps {
   onNewRoom?: () => void;
   /** O rótulo desse botão (padrão "Nova sala"); o treino diz "Voltar ao início". */
   newRoomLabel?: string;
-  /** Treino contra o bot (spec §2.6): a faixa central diz que não há relógio e a vez do jogador é anunciada sem prazo. */
-  training?: boolean;
+  /** Treino contra o bot, e o nível dele (spec §2.6): a faixa central e o menu dizem o nível, a faixa diz que não há relógio, e a vez do jogador é anunciada sem prazo. */
+  training?: TrainingLevel;
   /** "Sair do treino", no menu da partida. Sem ele o item não existe. */
   onExit?: () => void;
   /** O aviso da confirmação de Desistir (padrão: perder por W.O.); o treino não tem W.O. */
@@ -489,7 +490,8 @@ function PlayTableView({
         loadVersion={loadVersion}
         onExit={onExit}
         // No treino o passe automático não se aplica (spec §2.6): a sessão não o manda, e o menu não oferece a chave.
-        showAutoPass={!training}
+        showAutoPass={training === undefined}
+        trainingLevel={training}
         concedeWarning={concedeWarning}
         canConcede={room?.status === 'PLAYING' && phase !== 'GAME_OVER'}
         concedeDisabled={snapshot.status === 'reconnecting'}
