@@ -231,7 +231,7 @@ describe('/treino: o que o §2.6 exclui (passe automático e envio antecipado do
     await settle();
     await user.click(menuButton());
     await user.click(within(screen.getByRole('dialog', { name: 'Menu da partida' })).getByRole('switch', { name: 'Reduzir animações' }));
-    expect(JSON.parse(store.get('coringa:prefs')!)).toEqual({ autoPass, reduceMotion: true });
+    expect(JSON.parse(store.get('coringa:prefs')!)).toEqual({ autoPass, reduceMotion: true, sound: true });
   });
 
   it('com cartas já posicionadas no Equipar, o tempo passa e nada é enviado antes do Confirmar', async () => {

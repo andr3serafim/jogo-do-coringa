@@ -31,8 +31,12 @@ export interface SoundControllerDeps {
 /** Os gestos que o navegador conta como ativação do usuário, e que por isso podem criar e retomar o contexto. */
 export const ACTIVATION_EVENTS = ['pointerup', 'touchend', 'click', 'keydown'] as const;
 
-// Captura, para um `stopPropagation` da interface não esconder o gesto; passivo, porque o controlador nunca cancela nada.
-const LISTENER_OPTIONS = { capture: true, passive: true } as const;
+// Fase de bolha, e não de captura, de propósito: o clique na chave "Som" que LIGA o som tem de chegar aqui depois do handler do
+// React (que roda na raiz, antes do `document`) já ter chamado `setEnabled(true)`; na captura o ouvinte veria o som ainda
+// desligado e a ativação se perderia até o gesto seguinte. O custo: o clique que a interface engole com `stopPropagation` (o do
+// toque que só pulou as batidas, no `Stage`) não chega aqui; o `pointerup` e o `touchend` do mesmo gesto chegam. Passivo,
+// porque o controlador nunca cancela nada.
+const LISTENER_OPTIONS = { passive: true } as const;
 
 const ignore = () => {};
 
@@ -53,13 +57,14 @@ export class SoundController {
     const onGesture = () => this.onGesture();
     for (const type of ACTIVATION_EVENTS) target.addEventListener(type, onGesture, LISTENER_OPTIONS);
     return () => {
-      for (const type of ACTIVATION_EVENTS) target.removeEventListener(type, onGesture, LISTENER_OPTIONS);
+      for (const type of ACTIVATION_EVENTS) target.removeEventListener(type, onGesture);
     };
   }
 
   /**
-   * Liga ou desliga o som. Desligar suspende o contexto vivo. Ligar não cria nem retoma nada: isso espera o próximo gesto,
-   * que é o único momento em que o navegador deixa.
+   * Liga ou desliga o som. Desligar suspende o contexto vivo. Ligar não cria nem retoma nada por si: isso espera um gesto,
+   * que é o único momento em que o navegador deixa (o do próprio clique na chave, que ainda chega ao ouvinte depois do
+   * React, ou o seguinte).
    */
   setEnabled(on: boolean): void {
     if (on === this.enabled) return;

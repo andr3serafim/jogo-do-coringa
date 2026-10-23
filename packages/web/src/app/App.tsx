@@ -1,11 +1,14 @@
-// Casca da interface: o `Storage` e a porta do servidor nascem aqui, uma vez, e a rota escolhe a tela (spec §2.1).
-import { useState } from 'react';
-import type { KeyValueStore } from '../model/storage.ts';
+// Casca da interface: o `Storage`, a porta do servidor e o controlador de som nascem aqui, uma vez, e a rota escolhe a tela
+// (spec §2.1). O som chega às telas pelo `SoundContext`; os ouvintes de gesto do controlador moram no `document`.
+import { useEffect, useState } from 'react';
+import { loadPrefs, type KeyValueStore } from '../model/storage.ts';
+import { SoundController, browserSoundDeps } from '../sound/controller.ts';
 import { Button } from '../ui/parts.tsx';
 import { Home } from '../ui/screens/Home.tsx';
 import { NotFound } from '../ui/screens/NotFound.tsx';
 import { RoomGate } from '../ui/screens/RoomGate.tsx';
 import { Training } from '../ui/screens/Training.tsx';
+import { SoundContext } from '../ui/sound-context.ts';
 import { STORAGE_WARNING } from '../ui/text.ts';
 import { openStore } from './browser-store.ts';
 import { ErrorBoundary } from './ErrorBoundary.tsx';
@@ -21,19 +24,24 @@ export function App({ api: injected }: AppProps = {}) {
   const [{ store, available }] = useState(() => openStore('local'));
   const [api] = useState(() => injected ?? createRoomApi({ store }));
   const [warned, setWarned] = useState(!available);
+  // Um controlador só, com a preferência guardada. Sem gesto não há contexto de áudio nem sintetizador (`controller.ts`).
+  const [sound] = useState(() => new SoundController(browserSoundDeps, loadPrefs(store).sound));
+  useEffect(() => sound.attach(document), [sound]);
 
   return (
     <ErrorBoundary>
-      {warned ? (
-        // Um único aviso para o site inteiro, e não um por tela (spec §6.1).
-        <aside aria-label="Aviso do navegador" className="flex items-center gap-3 bg-tinta px-4 py-3 text-papel">
-          <p className="flex-1">{STORAGE_WARNING}</p>
-          <Button variant="secondary" onClick={() => setWarned(false)}>
-            Entendi
-          </Button>
-        </aside>
-      ) : null}
-      <Routes api={api} store={store} />
+      <SoundContext value={sound}>
+        {warned ? (
+          // Um único aviso para o site inteiro, e não um por tela (spec §6.1).
+          <aside aria-label="Aviso do navegador" className="flex items-center gap-3 bg-tinta px-4 py-3 text-papel">
+            <p className="flex-1">{STORAGE_WARNING}</p>
+            <Button variant="secondary" onClick={() => setWarned(false)}>
+              Entendi
+            </Button>
+          </aside>
+        ) : null}
+        <Routes api={api} store={store} />
+      </SoundContext>
     </ErrorBoundary>
   );
 }

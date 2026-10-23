@@ -215,30 +215,43 @@ describe('assento', () => {
 });
 
 describe('preferências', () => {
-  it('padrão: passe automático ligado, movimento normal', () => {
-    expect(DEFAULT_PREFS).toEqual({ autoPass: true, reduceMotion: false });
+  it('padrão: passe automático ligado, movimento normal, som ligado', () => {
+    expect(DEFAULT_PREFS).toEqual({ autoPass: true, reduceMotion: false, sound: true });
     expect(loadPrefs(fresh())).toEqual(DEFAULT_PREFS);
   });
 
   it('ida e volta', () => {
     const raw = memoryStorage();
     const { store } = safeStore(raw);
-    savePrefs(store, { autoPass: false, reduceMotion: true });
+    savePrefs(store, { autoPass: false, reduceMotion: true, sound: false });
     expect(raw.getItem('coringa:prefs')).not.toBeNull();
-    expect(loadPrefs(store)).toEqual({ autoPass: false, reduceMotion: true });
+    expect(loadPrefs(store)).toEqual({ autoPass: false, reduceMotion: true, sound: false });
   });
 
   it('campo faltando completa com o padrão', () => {
     const store = fresh();
     store.set('coringa:prefs', JSON.stringify({ reduceMotion: true }));
-    expect(loadPrefs(store)).toEqual({ autoPass: true, reduceMotion: true });
+    expect(loadPrefs(store)).toEqual({ autoPass: true, reduceMotion: true, sound: true });
     store.set('coringa:prefs', JSON.stringify({ autoPass: false }));
-    expect(loadPrefs(store)).toEqual({ autoPass: false, reduceMotion: false });
+    expect(loadPrefs(store)).toEqual({ autoPass: false, reduceMotion: false, sound: true });
+  });
+
+  it('o som: sem a chave vem ligado; com sound: false, desligado; valor que não é booleano volta a ligado', () => {
+    const store = fresh();
+    expect(loadPrefs(store).sound).toBe(true);
+    store.set('coringa:prefs', JSON.stringify({ autoPass: false, reduceMotion: true }));
+    expect(loadPrefs(store).sound).toBe(true);
+    store.set('coringa:prefs', JSON.stringify({ sound: false }));
+    expect(loadPrefs(store)).toEqual({ autoPass: true, reduceMotion: false, sound: false });
+    for (const sound of ['não', 0, 1, null, [], {}]) {
+      store.set('coringa:prefs', JSON.stringify({ sound }));
+      expect(loadPrefs(store).sound).toBe(true);
+    }
   });
 
   it('campo com tipo errado volta ao padrão', () => {
     const store = fresh();
-    store.set('coringa:prefs', JSON.stringify({ autoPass: 'sim', reduceMotion: 1 }));
+    store.set('coringa:prefs', JSON.stringify({ autoPass: 'sim', reduceMotion: 1, sound: 'alto' }));
     expect(loadPrefs(store)).toEqual(DEFAULT_PREFS);
   });
 

@@ -136,9 +136,11 @@ export function forgetSeat(store: KeyValueStore, code: string): void {
 export interface Prefs {
   autoPass: boolean;
   reduceMotion: boolean;
+  /** Os sons da mesa (Fase C): ligados por padrão; a pessoa desliga no menu da partida ou na tela inicial. */
+  sound: boolean;
 }
 
-export const DEFAULT_PREFS: Prefs = { autoPass: true, reduceMotion: false };
+export const DEFAULT_PREFS: Prefs = { autoPass: true, reduceMotion: false, sound: true };
 
 const PREFS_KEY = 'coringa:prefs';
 const NICKNAME_KEY = 'coringa:apelido';
@@ -149,6 +151,7 @@ export function loadPrefs(store: KeyValueStore): Prefs {
   if (!isRecord(value)) return prefs;
   if (typeof value.autoPass === 'boolean') prefs.autoPass = value.autoPass;
   if (typeof value.reduceMotion === 'boolean') prefs.reduceMotion = value.reduceMotion;
+  if (typeof value.sound === 'boolean') prefs.sound = value.sound;
   return prefs;
 }
 

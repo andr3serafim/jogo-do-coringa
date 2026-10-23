@@ -1,10 +1,10 @@
-// O menu da partida (spec §2.4, §7): copiar o link da sala, as duas chaves (passe automático e movimento reduzido), o resumo
+// O menu da partida (spec §2.4, §7): copiar o link da sala, as chaves (passe automático, movimento reduzido e som), o resumo
 // das regras, Desistir (com confirmação) e a versão publicada. É um `<dialog>` modal; o resumo e a confirmação são
 // diálogos irmãos, abertos por cima dele, e o menu continua aberto por baixo (o foco volta ao botão que os abriu).
 //
 // Não conhece a sessão, o armazenamento nem o HTTP: recebe as preferências e os ouvintes por props, e o que depende da
 // sala (o link, a versão) é opcional e some quando falta. Assim o treino contra o bot usa o mesmo menu.
-import { useEffect, useId, useState, type ReactNode } from 'react';
+import { useEffect, useId, useState } from 'react';
 import {
   AUTO_PASS_LABEL,
   CANCEL_LABEL,
@@ -19,13 +19,13 @@ import {
   REDUCE_MOTION_LABEL,
   REDUCE_MOTION_SYSTEM_HINT,
   RULES_LABEL,
-  SWITCH_OFF,
-  SWITCH_ON,
+  SOUND_LABEL,
   versionText,
 } from '../../model/copy.ts';
 import type { Prefs } from '../../model/storage.ts';
 import { useSystemReducedMotion } from '../anim/useReducedMotion.ts';
 import { copyText } from '../clipboard.ts';
+import { Switch } from '../parts.tsx';
 import { COPY_FAILED, LINK_COPIED } from '../text.ts';
 import { Modal } from './Modal.tsx';
 import { RulesDialog } from './RulesDialog.tsx';
@@ -176,6 +176,7 @@ export function GameMenu({
             hint={systemReduced ? REDUCE_MOTION_SYSTEM_HINT : undefined}
             onChange={(reduceMotion) => onPrefs({ ...prefs, reduceMotion })}
           />
+          <Switch label={SOUND_LABEL} checked={prefs.sound} onChange={(sound) => onPrefs({ ...prefs, sound })} />
 
           <button type="button" className={ITEM} onClick={() => setRulesOpen(true)}>
             {RULES_LABEL}
@@ -222,47 +223,6 @@ export function GameMenu({
         }}
       />
     </>
-  );
-}
-
-interface SwitchProps {
-  label: string;
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  disabled?: boolean;
-  hint?: ReactNode;
-}
-
-/** Uma chave: caixa nativa com `role="switch"`. O estado também vem escrito, e não só pela forma. */
-function Switch({ label, checked, onChange, disabled = false, hint }: SwitchProps) {
-  const labelId = useId();
-  const hintId = useId();
-  return (
-    <label className="flex min-h-11 items-center justify-between gap-3 border-2 border-tinta px-3 py-1.5 font-bold">
-      <span className="flex min-w-0 flex-col">
-        <span id={labelId}>{label}</span>
-        {hint ? (
-          <span id={hintId} className="text-sm font-normal">
-            {hint}
-          </span>
-        ) : null}
-      </span>
-      <span className="flex shrink-0 items-center gap-2">
-        <span aria-hidden="true" className="text-sm font-normal">
-          {checked ? SWITCH_ON : SWITCH_OFF}
-        </span>
-        <input
-          type="checkbox"
-          role="switch"
-          checked={checked}
-          disabled={disabled}
-          aria-labelledby={labelId}
-          aria-describedby={hint ? hintId : undefined}
-          onChange={(event) => onChange(event.target.checked)}
-          className="size-6 accent-tinta"
-        />
-      </span>
-    </label>
   );
 }
 

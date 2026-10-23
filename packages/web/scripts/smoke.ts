@@ -6,6 +6,8 @@
  * - o bot do treino (`@coringa/sim/bots`) fica fora do JavaScript inicial: ele entra por `import()` dinâmico (spec §12) e
  *   tem que estar num chunk à parte. Sem essa segunda metade a checagem seria vazia: o minificador renomeia `greedyBot`,
  *   e um bot que sumisse do `dist` também passaria por "fora do inicial".
+ * - o sintetizador dos sons (`src/sound/synth.ts`) também fica fora do JavaScript inicial: só o controlador (`controller.ts`)
+ *   está no inicial, e o `synth.ts` entra por `import()` dinâmico no primeiro gesto. Mesma dupla de conferências do bot.
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -21,6 +23,12 @@ const ZOD_MARK = 'ZodError';
 const BOT_NAME_MARK = 'greedyBot';
 const BOT_TEXT_MARK = 'fase principal sem DECLARE_ATTACK/END_TURN';
 const BOT_MARKS = [BOT_NAME_MARK, BOT_TEXT_MARK];
+/**
+ * Marcas do sintetizador. Nenhuma sobrevive só no nome de um identificador nosso (o minificador renomeia): `createDynamicsCompressor`
+ * é o método do Web Audio que monta o limitador (nome de propriedade do navegador, que não se renomeia) e `sawtooth` é um literal de
+ * string de uma receita; as duas só existem no `synth.ts`. Qualquer uma num `.js` inicial reprova, e o chunk do sintetizador tem as duas.
+ */
+const SYNTH_MARKS = ['createDynamicsCompressor', 'sawtooth'];
 
 const dist = join(import.meta.dirname, '..', 'dist');
 const indexPath = join(dist, 'index.html');
@@ -79,6 +87,10 @@ for (const url of initial) {
   console.log(`  ${url}: ${kb(source.length)} → ${kb(gzip)}`);
   const bot = BOT_MARKS.find((mark) => source.includes(mark));
   if (bot !== undefined) problems.push(`${url} contém o bot do treino ("${bot}"): ele tem que entrar por import() dinâmico, fora do inicial`);
+  const synth = SYNTH_MARKS.find((mark) => source.includes(mark));
+  if (synth !== undefined) {
+    problems.push(`${url} contém o sintetizador dos sons ("${synth}"): ele tem que entrar por import() dinâmico, fora do inicial`);
+  }
 }
 console.log(`  total: ${kb(total)} de ${kb(BUDGET_BYTES)}`);
 if (total > BUDGET_BYTES) problems.push(`JavaScript inicial com ${kb(total)} gzip passa do orçamento de ${kb(BUDGET_BYTES)}`);
@@ -97,6 +109,20 @@ if (botChunks.length === 0) {
   problems.push(`o bot do treino ("${BOT_TEXT_MARK}") não está em nenhum chunk carregado sob demanda: o import() dinâmico sumiu, ou a marca mudou`);
 } else {
   console.log(`Bot do treino (fora do inicial): ${botChunks.map(fromDist).join(', ')}`);
+}
+
+// O sintetizador tem que existir em algum chunk que não é o inicial, pelo mesmo motivo.
+const synthChunks = all.filter((path) => {
+  if (initialPaths.has(path)) return false;
+  const source = readFileSync(path);
+  return SYNTH_MARKS.every((mark) => source.includes(mark));
+});
+if (synthChunks.length === 0) {
+  problems.push(
+    `o sintetizador dos sons (${SYNTH_MARKS.map((mark) => `"${mark}"`).join(' e ')}) não está em nenhum chunk carregado sob demanda: o import() dinâmico sumiu, ou as marcas mudaram`,
+  );
+} else {
+  console.log(`Sintetizador dos sons (fora do inicial): ${synthChunks.map(fromDist).join(', ')}`);
 }
 
 if (problems.length > 0) throw new Error(`smoke da web falhou:\n- ${problems.join('\n- ')}`);

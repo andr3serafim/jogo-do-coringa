@@ -364,6 +364,7 @@ export const COPY_LINK_LABEL = 'Copiar link da sala';
 export const AUTO_PASS_LABEL = 'Passar sozinho quando não tenho resposta';
 export const REDUCE_MOTION_LABEL = 'Reduzir animações';
 export const REDUCE_MOTION_SYSTEM_HINT = 'Ligada porque o seu sistema pede menos movimento.';
+export const SOUND_LABEL = 'Som';
 export const SWITCH_ON = 'Ligado';
 export const SWITCH_OFF = 'Desligado';
 export const RULES_LABEL = 'Resumo das regras';

@@ -91,13 +91,13 @@ describe('SoundController', () => {
   });
 
   it('nenhum contexto antes de um gesto, e um pointerdown sozinho não conta', () => {
-    const { target, contexts, synthLoads } = rig();
-    gesture(target, 'pointerdown');
-    gesture(target, 'pointermove');
-    gesture(target, 'touchstart');
-    gesture(target, 'mousedown');
-    expect(contexts).toHaveLength(0);
-    expect(synthLoads).toBe(0);
+    const r = rig();
+    gesture(r.target, 'pointerdown');
+    gesture(r.target, 'pointermove');
+    gesture(r.target, 'touchstart');
+    gesture(r.target, 'mousedown');
+    expect(r.contexts).toHaveLength(0);
+    expect(r.synthLoads).toBe(0);
   });
 
   it.each(ACTIVATION_EVENTS)('o primeiro %s cria o contexto e carrega o sintetizador', (type) => {

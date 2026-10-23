@@ -132,7 +132,7 @@ const RECIPES: Record<Cue, (voices: Voices) => void> = {
     tone({ wave: 'sawtooth', from: 90, to: 40, length: 0.3, peak: 0.15 });
     noise({ filter: 'lowpass', from: 2200, to: 250, length: 0.25, peak: 0.4 });
   },
-  // O escudo: um tinido metálico (dois parciais que não são harmônicos) e um clique de ruído.
+  // O escudo: um tinido metálico (dois tons agudos, o segundo uma quinta acima do primeiro: 1046 Hz e 1568 Hz) e um clique de ruído.
   escudo: ({ tone, noise }) => {
     tone({ wave: 'triangle', from: 1046, length: 0.35, peak: 0.2 });
     tone({ wave: 'sine', from: 1568, length: 0.25, peak: 0.12 });

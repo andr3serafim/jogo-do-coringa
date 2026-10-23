@@ -702,7 +702,7 @@ describe('Session: preferências no snapshot', () => {
   it('o snapshot traz as preferências da sessão (a mesa lê "reduzir animações" dali)', () => {
     const connection = new FakeConnection();
     const session = new Session(connection, fakeDeps().deps, { ...DEFAULT_PREFS, reduceMotion: true });
-    expect(session.snapshot().prefs).toEqual({ autoPass: true, reduceMotion: true });
+    expect(session.snapshot().prefs).toEqual({ autoPass: true, reduceMotion: true, sound: true });
   });
 
   it('sem preferências, valem as padrão', () => {
@@ -715,8 +715,8 @@ describe('Session: preferências no snapshot', () => {
     session.subscribe(() => {
       calls += 1;
     });
-    session.setPrefs({ autoPass: false, reduceMotion: true });
-    expect(session.snapshot().prefs).toEqual({ autoPass: false, reduceMotion: true });
+    session.setPrefs({ autoPass: false, reduceMotion: true, sound: false });
+    expect(session.snapshot().prefs).toEqual({ autoPass: false, reduceMotion: true, sound: false });
     expect(calls).toBeGreaterThan(0);
   });
 

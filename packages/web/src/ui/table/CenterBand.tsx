@@ -3,7 +3,8 @@
 // de jogo usam a fonte de texto com algarismos tabulares e nenhuma textura (spec §10.7); a textura só vai no
 // título da rodada. O relógio (spec §3.8, §10.3): em urgência (últimos 5 s) o disco fica vermelho, com o número em papel e o
 // anel mais grosso, por cor e por forma, e nunca pisca; na janela de reação ele é grande; esgotado, diz "Tempo esgotado".
-// Os anúncios para leitor de tela saem por uma região viva escondida que mora aqui, fora do relógio. No treino (spec §2.6) não há
+// Os anúncios para leitor de tela saem por uma região viva escondida que mora aqui, fora do relógio. Entrar na urgência no
+// seu prazo também toca a pista `urgencia`, uma vez por prazo (o do oponente, nunca). No treino (spec §2.6) não há
 // prazo: no lugar do relógio a faixa diz "Treino, sem relógio", e a mesma região anuncia a vez do jogador (`turn`).
 import type { PlayerView } from '@coringa/engine';
 import type { Deadline } from '@coringa/protocol';
@@ -11,10 +12,12 @@ import type { ClockFace, TurnCue } from '../../model/clock.ts';
 import { CLOCK_LABEL, CLOCK_URGENT_LABEL, pausedTurnText, TIMES_UP_TEXT, TRAINING_BAND_TEXT } from '../../model/copy.ts';
 import { zoneKey } from '../../model/marks.ts';
 import * as m from 'motion/react-m';
+import { useEffect, useRef } from 'react';
 import { INITIATIVE_ID } from '../../model/effects.ts';
 import { useAnim } from '../anim/context.ts';
 import { useHeldNumber } from '../anim/useHeldNumber.ts';
 import { Card, cardName } from '../cards/Card.tsx';
+import { useSound } from '../sound-context.ts';
 import { useTableUi } from './context.ts';
 import {
   graveyardName,
@@ -25,7 +28,7 @@ import {
   type TableNames,
 } from './labels.ts';
 import { NovoChip } from './NovoChip.tsx';
-import { useClock } from './useClock.ts';
+import { deadlineKey, useClock } from './useClock.ts';
 
 export interface CenterBandProps {
   view: PlayerView;
@@ -58,6 +61,15 @@ export function CenterBand({
   const pressureMarked = ui.zones.has('pressure');
   const seenPressure = ui.onSeen && pressureMarked ? () => ui.onSeen?.(zoneKey('pressure')) : undefined;
   const { face, live } = useClock(deadline, remainingMs, view.me, pausedTurnMs, turn);
+  // A urgência soa uma vez por prazo (o `deadlineKey` identifica o prazo), e só no prazo do jogador.
+  const sound = useSound();
+  const urgentKey = face?.urgent && face.mine ? deadlineKey(deadline) : null;
+  const cuedKey = useRef<string | null>(null);
+  useEffect(() => {
+    if (urgentKey === null || urgentKey === cuedKey.current) return;
+    cuedKey.current = urgentKey;
+    sound.play('urgencia');
+  }, [urgentKey, sound]);
   // O número da pressão muda NA batida do `PressureChanged`, com destaque (spec §4.2).
   const anim = useAnim();
   const pressure = useHeldNumber(view.pressure, anim.pressure);

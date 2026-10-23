@@ -10,6 +10,8 @@
 //   reduzido, nunca há inversão.
 // - Um toque na mesa (ou Esc) durante as batidas termina tudo na hora. O toque que pulou não vira clique: a barra de ação
 //   desligada não pode receber, no mesmo gesto, a jogada que o jogador nem viu liberada.
+// - Cada batida ao vivo toca a pista dela (`cueOf`), uma vez, quando a batida começa. O `catchUp` (eventos perdidos numa
+//   reconexão) e o `resync` (que nem tem batidas) são mudos; o pulo termina as batidas, e as pistas que faltavam não tocam.
 // - O Motion vem com `LazyMotion`: o recurso de layout (`layoutId` das cartas) só existe no `domMax`, carregado por
 //   `import()` à parte, fora do JavaScript inicial (spec §12).
 import { LazyMotion, MotionConfig } from 'motion/react';
@@ -17,7 +19,9 @@ import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode }
 import { effectsOf, NO_EFFECTS } from '../../model/effects.ts';
 import { roomNames } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
+import { cueOf } from '../../model/sound.ts';
 import type { Beat } from '../../model/timeline.ts';
+import { useSound } from '../sound-context.ts';
 import { AnimContext, type Anim, type CountPhase } from './context.ts';
 import { BeatOverlay } from './Scene.tsx';
 import { useBeatPlayer } from './useBeatPlayer.ts';
@@ -59,6 +63,19 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
         : 'hold';
   const seq = state?.seq ?? 0;
   const remounted = useMemo(() => ({ serial: released.serial, ids: released.batch }), [released]);
+
+  // O som da batida: toca quando a batida de agora muda (a identidade dela), só ao vivo. A batida que já tocou não toca de
+  // novo, mesmo que o desenho se repita por outro motivo (o modo estrito monta os efeitos duas vezes).
+  const sound = useSound();
+  const me = state?.view.me ?? 'p1';
+  const cued = useRef<Beat | null>(null);
+  useEffect(() => {
+    if (beat === null || beat === cued.current) return;
+    cued.current = beat;
+    if (run.catchUp) return;
+    const cue = cueOf(beat, me);
+    if (cue !== null) sound.play(cue);
+  }, [beat, run.catchUp, me, sound]);
 
   // A cena em curso e a última que passou: a cortina segura o painel da última até descer (e o pulo o apaga já).
   const sceneNow = beat !== null && beat.kind === 'scene' && beat.scene !== null ? beat : null;

@@ -112,7 +112,7 @@ function mount(options: MountOptions = {}) {
   const session = new Session(
     connection,
     { now: () => 0, setTimer: () => 0, clearTimer: () => undefined },
-    { autoPass: true, reduceMotion: false, ...options.prefs },
+    { autoPass: true, reduceMotion: false, sound: true, ...options.prefs },
   );
   const user = userEvent.setup();
   const onNewRoom = vi.fn();
@@ -465,7 +465,7 @@ describe('na sala (RoomGate): Nova sala, link e versão', () => {
     await user.click(within(endDialog('Você venceu')).getByRole('button', { name: 'Ver a mesa' }));
     await user.click(menuButton());
     await user.click(within(menuDialog()).getByRole('switch', { name: 'Passar sozinho quando não tenho resposta' }));
-    expect(JSON.parse(window.localStorage.getItem('coringa:prefs')!)).toEqual({ autoPass: false, reduceMotion: false });
+    expect(JSON.parse(window.localStorage.getItem('coringa:prefs')!)).toEqual({ autoPass: false, reduceMotion: false, sound: true });
   });
 });
 
@@ -587,8 +587,8 @@ describe('menu da partida', () => {
       expect(autoPass()).toBeChecked();
       await m.user.click(autoPass());
       expect(autoPass()).not.toBeChecked();
-      expect(m.session.snapshot().prefs).toEqual({ autoPass: false, reduceMotion: false });
-      expect(loadPrefs(m.store)).toEqual({ autoPass: false, reduceMotion: false });
+      expect(m.session.snapshot().prefs).toEqual({ autoPass: false, reduceMotion: false, sound: true });
+      expect(loadPrefs(m.store)).toEqual({ autoPass: false, reduceMotion: false, sound: true });
     });
 
     it('ligar de novo grava autoPass: true', async () => {
@@ -605,7 +605,7 @@ describe('menu da partida', () => {
       expect(reduce()).not.toBeChecked();
       await m.user.click(reduce());
       expect(reduce()).toBeChecked();
-      expect(loadPrefs(m.store)).toEqual({ autoPass: true, reduceMotion: true });
+      expect(loadPrefs(m.store)).toEqual({ autoPass: true, reduceMotion: true, sound: true });
       expect(m.session.snapshot().prefs.reduceMotion).toBe(true);
     });
 

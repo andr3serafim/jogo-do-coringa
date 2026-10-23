@@ -25,6 +25,7 @@ import { savePrefs, type KeyValueStore, type Prefs } from '../../model/storage.t
 import { useAnim, useBoardBusy } from '../anim/context.ts';
 import { Stage } from '../anim/Stage.tsx';
 import { useReducedMotion } from '../anim/useReducedMotion.ts';
+import { useSound } from '../sound-context.ts';
 import { useSession } from '../useSession.ts';
 import { ActionBar } from './ActionBar.tsx';
 import { EndPanel } from './EndPanel.tsx';
@@ -62,6 +63,12 @@ export function PlayTable(props: PlayTableProps) {
   const { session } = props;
   const snapshot = useSession(session);
   const reducedMotion = useReducedMotion(snapshot.prefs.reduceMotion);
+  // Enquanto a mesa está aberta, o som segue a preferência da sessão (a que o menu muda e o armazenamento guarda).
+  const sound = useSound();
+  const soundOn = snapshot.prefs.sound;
+  useEffect(() => {
+    sound.setEnabled(soundOn);
+  }, [sound, soundOn]);
   if (snapshot.state === null) return null;
   return (
     <Stage snapshot={snapshot} reducedMotion={reducedMotion}>
@@ -123,6 +130,7 @@ function PlayTableView({
   concedeWarning,
 }: ViewProps) {
   const { view } = state;
+  const sound = useSound();
   const { legal, pending, room } = snapshot;
   const phase = view.phase.kind;
   const names = tableNames(room, view.me);
@@ -351,13 +359,16 @@ function PlayTableView({
 
   const targetIds = useMemo(() => new Set(play?.targets?.map((t) => t.id) ?? []), [play]);
 
-  /** O menu troca as preferências: vão para o armazenamento (se há) e para a sessão, que as aplica já. */
+  /** O menu troca as preferências: vão para o armazenamento (se há), para o som e para a sessão, que as aplica já. */
   const changePrefs = useCallback(
     (prefs: Prefs) => {
       if (store) savePrefs(store, prefs);
+      // Já, e não só pelo efeito da mesa: o clique na chave "Som" chega ao ouvinte do documento depois do React, e é
+      // esse ouvinte que ativa o áudio. Não depende de o React esvaziar os efeitos antes de o clique chegar lá.
+      sound.setEnabled(prefs.sound);
       session.setPrefs(prefs);
     },
-    [store, session],
+    [store, session, sound],
   );
 
   let panel: ReactNode;

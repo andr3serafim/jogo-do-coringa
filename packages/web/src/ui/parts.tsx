@@ -1,6 +1,7 @@
-// Peças compartilhadas das telas de início e de entrada, no tema da Peleja (spec §10): capa colorida, tinta,
-// títulos em tipo de madeira e botões ouro. Alvos de toque ≥ 44 px; campos de texto com 16 px.
+// Peças compartilhadas das telas de início e de entrada e do menu da partida, no tema da Peleja (spec §10): capa colorida,
+// tinta, títulos em tipo de madeira e botões ouro. Alvos de toque ≥ 44 px; campos de texto com 16 px.
 import { useId, type ComponentPropsWithoutRef, type ReactNode } from 'react';
+import { SWITCH_OFF, SWITCH_ON } from '../model/copy.ts';
 
 /** A tela inteira: um `<main>` sobre a capa rosa (a sua) ou verde (a do oponente). */
 export function Screen({ children, tone = 'voce' }: { children: ReactNode; tone?: 'voce' | 'oponente' }) {
@@ -71,5 +72,46 @@ export function TextField({
         </p>
       ) : null}
     </div>
+  );
+}
+
+export interface SwitchProps {
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
+  hint?: ReactNode;
+}
+
+/** Uma chave: caixa nativa com `role="switch"`. O estado também vem escrito, e não só pela forma. */
+export function Switch({ label, checked, onChange, disabled = false, hint }: SwitchProps) {
+  const labelId = useId();
+  const hintId = useId();
+  return (
+    <label className="flex min-h-11 items-center justify-between gap-3 border-2 border-tinta px-3 py-1.5 font-bold">
+      <span className="flex min-w-0 flex-col">
+        <span id={labelId}>{label}</span>
+        {hint ? (
+          <span id={hintId} className="text-sm font-normal">
+            {hint}
+          </span>
+        ) : null}
+      </span>
+      <span className="flex shrink-0 items-center gap-2">
+        <span aria-hidden="true" className="text-sm font-normal">
+          {checked ? SWITCH_ON : SWITCH_OFF}
+        </span>
+        <input
+          type="checkbox"
+          role="switch"
+          checked={checked}
+          disabled={disabled}
+          aria-labelledby={labelId}
+          aria-describedby={hint ? hintId : undefined}
+          onChange={(event) => onChange(event.target.checked)}
+          className="size-6 accent-tinta"
+        />
+      </span>
+    </label>
   );
 }
