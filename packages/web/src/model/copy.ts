@@ -381,8 +381,8 @@ export const versionText = (version: string): string => `Versão publicada: ${ve
 export const LEVEL_NAME: Record<TrainingLevel, string> = { facil: 'Fácil', medio: 'Médio', dificil: 'Difícil' };
 /** A linha de cada nível na escolha. O Fácil joga ao acaso em boa parte das decisões; o Médio é o `greedy`; o Difícil busca. */
 export const LEVEL_LINE: Record<TrainingLevel, string> = {
-  facil: 'Joga sem pressa e erra bastante',
-  medio: 'Joga direto, como o bot do simulador',
+  facil: 'Erra bastante: bom para aprender',
+  medio: 'Pensa só na jogada da vez',
   dificil: 'Pensa nas próximas rodadas',
 };
 export const TRAINING_CHOICE_TITLE = 'Treino';

@@ -66,7 +66,7 @@ test('treino sem nível: a escolha vem antes da mesa; escolher "Fácil" abre a m
   await expect(levelGroup(page)).toBeVisible();
   await expect(table(page)).toHaveCount(0);
   // Do mais fácil ao mais difícil, cada um com a sua linha; sem nível guardado, o Médio (o padrão) vem focado.
-  await expect(levelGroup(page).getByRole('button')).toHaveText([/^Fácil\s*Joga sem pressa e erra bastante$/, /^Médio\s*Joga direto, como o bot do simulador$/, /^Difícil\s*Pensa nas próximas rodadas$/]);
+  await expect(levelGroup(page).getByRole('button')).toHaveText([/^Fácil\s*Erra bastante: bom para aprender$/, /^Médio\s*Pensa só na jogada da vez$/, /^Difícil\s*Pensa nas próximas rodadas$/]);
   await expect(page.getByRole('button', { name: 'Médio' })).toBeFocused();
   await axe(page);
 

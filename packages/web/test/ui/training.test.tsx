@@ -197,12 +197,12 @@ describe('/treino: a escolha do nível', () => {
     const group = screen.getByRole('group', { name: 'Nível do bot' });
     // Do mais fácil ao mais difícil, cada um com a sua linha, e o padrão (Médio) é o que vem focado.
     expect(within(group).getAllByRole('button').map((button) => button.textContent)).toEqual([
-      'Fácil Joga sem pressa e erra bastante',
-      'Médio Joga direto, como o bot do simulador',
+      'Fácil Erra bastante: bom para aprender',
+      'Médio Pensa só na jogada da vez',
       'Difícil Pensa nas próximas rodadas',
     ]);
-    expect(levelButton('Fácil')).toHaveAccessibleName('Fácil Joga sem pressa e erra bastante');
-    expect(levelButton('Médio')).toHaveAccessibleName('Médio Joga direto, como o bot do simulador');
+    expect(levelButton('Fácil')).toHaveAccessibleName('Fácil Erra bastante: bom para aprender');
+    expect(levelButton('Médio')).toHaveAccessibleName('Médio Pensa só na jogada da vez');
     expect(levelButton('Difícil')).toHaveAccessibleName('Difícil Pensa nas próximas rodadas');
     expect(levelButton('Médio')).toHaveFocus();
     expect(screen.queryByRole('main', { name: 'Mesa' })).not.toBeInTheDocument();
