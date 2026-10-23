@@ -3,7 +3,7 @@ import { actingPlayers, applyAction, legalActions, makeConfig, viewFor, type Act
 // Builder de cenários do motor: monta estados reais sem inventar cartas.
 import { P1, setup } from '@coringa/engine/testing';
 import { greedyBot } from '../src/bots/greedy.ts';
-import { HARD_DEFAULTS, hardSearch, runHard } from '../src/bots/hard.ts';
+import { HARD_DEFAULTS, hardSearch, hardSearchTotals, runHard } from '../src/bots/hard.ts';
 import { HARD_BOT } from '../src/bots/types.ts';
 import { newGame, runGame } from '../src/match.ts';
 import { createRng } from '../src/rng.ts';
@@ -14,19 +14,19 @@ const config = makeConfig();
 
 const legalOf = (s: GameState, who: PlayerId = P1): Action[] => legalActions(viewFor(s, who));
 
-/** Roda o gerador até o fim: devolve a ação escolhida e quantas vezes ele cedeu. */
-function drain(search: Generator<void, Action>): { action: Action; yields: number } {
+/** Roda o gerador até o fim: devolve o valor de retorno e quantas vezes ele cedeu. */
+function drain<T>(search: Generator<void, T>): { value: T; yields: number } {
   let yields = 0;
   let step = search.next();
   while (!step.done) {
     yields += 1;
     step = search.next();
   }
-  return { action: step.value, yields };
+  return { value: step.value, yields };
 }
 
 describe('bot Difícil', () => {
-  it('sem trapaça: a decisão é a mesma quando só muda a informação oculta', () => {
+  it('sem trapaça: as candidatas, os totais e a decisão são os mesmos quando só muda a informação oculta', () => {
     const a = equip();
     const b = swapHidden(a);
     // o oponente já confirmou o Equipar: os destinos dele também são informação oculta
@@ -36,9 +36,44 @@ describe('bot Difícil', () => {
     expect(legalOf(b)).toEqual(legal);
     expect(legalOf(c)).toEqual(legal);
     expect(legalOf(d)).toEqual(legal);
-    for (const seed of ['x', 'y', 'z']) {
-      expect(runHard(b, P1, legal, createRng(seed))).toEqual(runHard(a, P1, legal, createRng(seed)));
-      expect(runHard(d, P1, legal, createRng(seed))).toEqual(runHard(c, P1, legal, createRng(seed)));
+    const options = { rolloutsPerCandidate: 3, maxCandidates: 4 };
+    const search = (s: GameState, seed: string) => drain(hardSearchTotals(s, P1, legal, createRng(seed), options)).value;
+    // a premissa da comparação: as candidatas rendem totais diferentes entre si
+    const { candidates, totals } = search(a, 'x');
+    expect(candidates).toHaveLength(4);
+    expect(new Set(totals).size).toBeGreaterThan(1);
+    for (const seed of ['x', 'y', 'z', 'w']) {
+      expect(search(b, seed)).toEqual(search(a, seed));
+      expect(search(d, seed)).toEqual(search(c, seed));
+    }
+    expect(runHard(b, P1, legal, createRng('x'))).toEqual(runHard(a, P1, legal, createRng('x')));
+    expect(runHard(d, P1, legal, createRng('x'))).toEqual(runHard(c, P1, legal, createRng('x')));
+  });
+
+  it('a primeira candidata é a escolha do greedy (um elemento da lista), em posições reais de uma partida', () => {
+    const positions: Array<{ state: GameState; actor: PlayerId }> = [];
+    runGame({
+      config,
+      seed: 'candidatas',
+      bots: [greedyBot, greedyBot],
+      maxSteps: 60,
+      onStep: (before) => {
+        const actor = actingPlayers(before)[0];
+        const kind = before.phase.kind;
+        if (legalOf(before, actor).length >= 2 && positions.filter((p) => p.state.phase.kind === kind).length < 3) positions.push({ state: before, actor });
+      },
+    });
+    const kinds = new Set(positions.map((p) => p.state.phase.kind));
+    for (const kind of ['EQUIP', 'ORDER_CHOICE', 'ATTACK_MAIN'] as const) expect(kinds).toContain(kind);
+    for (const { state, actor } of positions) {
+      const legal = legalOf(state, actor);
+      for (const seed of ['g', 'h']) {
+        const { candidates } = drain(hardSearchTotals(state, actor, legal, createRng(seed), { rolloutsPerCandidate: 1, maxCandidates: 4 })).value;
+        // a semente do greedy sai da semente-base que a busca sorteia do rng
+        const greedy = greedyBot(viewFor(state, actor), legal, createRng(`hard-${createRng(seed).int(2 ** 31)}/greedy`));
+        expect(candidates[0]).toEqual(greedy);
+        for (const candidate of candidates) expect(legal).toContain(candidate);
+      }
     }
   });
 
@@ -85,7 +120,7 @@ describe('bot Difícil', () => {
         const legal = legalOf(s, actor);
         const action =
           actor === hardSeat
-            ? drain(hardSearch(s, actor, legal, hardRng, { rolloutsPerCandidate: 2, maxCandidates: HARD_DEFAULTS.maxCandidates })).action
+            ? drain(hardSearch(s, actor, legal, hardRng, { rolloutsPerCandidate: 2, maxCandidates: HARD_DEFAULTS.maxCandidates })).value
             : greedyBot(viewFor(s, actor), legal, greedyRng);
         expect(legal).toContainEqual(action);
         const result = applyAction(s, actor, action);

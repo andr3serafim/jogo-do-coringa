@@ -5,6 +5,9 @@ import { boardScore, placeAll, upcomingPressure } from './eval.ts';
 import { greedyBot } from './greedy.ts';
 import type { StateBot } from './types.ts';
 
+type EquipAction = Extract<Action, { type: 'EQUIP' }>;
+const isEquip = (a: Action): a is EquipAction => a.type === 'EQUIP';
+
 /** Limites da busca do Difícil. Mais rollouts e candidatas deixam o bot mais forte e a decisão mais lenta. */
 export interface HardOptions {
   /** Rollouts por candidata. Cada um joga num mundo sorteado (`determinize`), o mesmo para todas as candidatas. */
@@ -58,46 +61,49 @@ function rollout(world: GameState, seat: PlayerId, action: Action, seed: string)
   return evaluate(before, seat);
 }
 
-type EquipAction = Extract<Action, { type: 'EQUIP' }>;
-
 /**
  * As candidatas em ordem de prioridade: a escolha do greedy primeiro; no Equipar, as outras pela avaliação de mesa
  * que a montagem deixa (maior primeiro, empate na ordem da lista); nas demais fases, as outras na ordem da lista.
  */
 function orderCandidates(state: GameState, seat: PlayerId, legal: Action[], seed: string): Action[] {
   const view = viewFor(state, seat);
-  const chosen = JSON.stringify(greedyBot(view, legal, createRng(`${seed}/greedy`)));
-  // O greedy pode montar um objeto novo (CHOOSE_ORDER, PASS): acha-se a ação equivalente na lista.
-  const at = legal.findIndex((a) => JSON.stringify(a) === chosen);
+  const chosen = greedyBot(view, legal, createRng(`${seed}/greedy`));
+  // O greedy devolve um elemento da lista, salvo CHOOSE_ORDER e PASS, que ele monta de novo: aí vale a ação equivalente.
+  let at = legal.indexOf(chosen);
+  if (at < 0) {
+    const key = JSON.stringify(chosen);
+    at = legal.findIndex((a) => JSON.stringify(a) === key);
+  }
   const rest = legal.filter((_, i) => i !== at);
   const head = at < 0 ? [] : [legal[at]];
   if (view.phase.kind !== 'EQUIP') return [...head, ...rest];
   const pressure = upcomingPressure(view);
-  const tableValue = (a: EquipAction): number => boardScore(placeAll(view.self, view.self.pending, a.destinations), view.opponent, pressure);
-  const scored = rest.map((action) => ({ action, value: action.type === 'EQUIP' ? tableValue(action) : -Infinity }));
+  const scored = rest
+    .filter(isEquip)
+    .map((action) => ({ action, value: boardScore(placeAll(view.self, view.self.pending, action.destinations), view.opponent, pressure) }));
   return [...head, ...scored.sort((a, b) => b.value - a.value).map((s) => s.action)];
 }
 
 /**
- * Busca do Difícil (spec da fatia 1): para cada candidata, `rolloutsPerCandidate` rollouts em mundos sorteados com
- * a informação oculta reamostrada (`determinize`), cada um até o fim da rodada de Ataque (ver `finished`).
- * Escolhe a maior soma de valores; empate, a primeira na ordem das candidatas. O gerador cede depois de cada rollout,
- * para a interface fatiar a busca em quadros; o retorno é a ação escolhida.
+ * O trabalho da busca do Difícil (spec da fatia 1): as candidatas (ver `orderCandidates`, cortadas em `maxCandidates`) e,
+ * para cada uma, a soma dos valores de `rolloutsPerCandidate` rollouts em mundos sorteados com a informação oculta
+ * reamostrada (`determinize`), cada um até o fim da rodada de Ataque (ver `finished`). Separada de `hardSearch` para
+ * os testes compararem os totais, e não só a ação escolhida. O gerador cede depois de cada rollout.
  *
  * Sem trapaça: do `state`, só se lê o que `seat` vê (a visão) e o que `determinize` reamostra.
  * Mundos compartilhados: o rollout `j` de todas as candidatas usa o mesmo mundo e as mesmas sementes dos greedy,
  * então a comparação entre elas não depende da sorte do sorteio. Gasta uma única chamada do `rng`, e nenhuma
- * quando há uma só ação legal.
+ * quando há uma só ação legal (a única candidata, sem rollouts).
  */
-export function* hardSearch(
+export function* hardSearchTotals(
   state: GameState,
   seat: PlayerId,
   legal: Action[],
   rng: Rng,
   options: HardOptions = HARD_DEFAULTS,
-): Generator<void, Action> {
+): Generator<void, { candidates: Action[]; totals: number[] }> {
   if (legal.length === 0) throw new Error('hardSearch sem ação legal');
-  if (legal.length === 1) return legal[0];
+  if (legal.length === 1) return { candidates: legal, totals: [0] };
   const base = `hard-${rng.int(2 ** 31)}`;
   const candidates = orderCandidates(state, seat, legal, base).slice(0, Math.max(1, options.maxCandidates));
   const totals = candidates.map(() => 0);
@@ -108,6 +114,21 @@ export function* hardSearch(
       yield;
     }
   }
+  return { candidates, totals };
+}
+
+/**
+ * Busca do Difícil: escolhe a candidata de maior soma (`hardSearchTotals`); empate, a primeira na ordem das candidatas.
+ * O gerador cede depois de cada rollout, para a interface fatiar a busca em quadros; o retorno é a ação escolhida.
+ */
+export function* hardSearch(
+  state: GameState,
+  seat: PlayerId,
+  legal: Action[],
+  rng: Rng,
+  options: HardOptions = HARD_DEFAULTS,
+): Generator<void, Action> {
+  const { candidates, totals } = yield* hardSearchTotals(state, seat, legal, rng, options);
   let best = 0;
   for (let c = 1; c < candidates.length; c += 1) {
     if (totals[c] > totals[best]) best = c;
