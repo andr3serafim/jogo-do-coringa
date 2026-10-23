@@ -9,8 +9,9 @@ import {
   type GameEvent,
   type GameState,
   type PlayerView,
+  type Replay,
 } from '@coringa/engine';
-import type { ConnectionEvent, PlayerAction, RoomMessage, StateMessage } from '@coringa/protocol';
+import type { ConnectionEvent, PlayerAction, ReplayMessage, RoomMessage, StateMessage } from '@coringa/protocol';
 import { BOTS, runHard } from '@coringa/sim/bots';
 import { createRng } from '@coringa/sim/rng';
 import { describe, expect, it, vi } from 'vitest';
@@ -88,6 +89,21 @@ function setup(seed: string, extra: Partial<LocalRoomOptions> = {}) {
 const states = (events: ConnectionEvent[]): StateMessage[] =>
   events.flatMap((e) => (e.type === 'state' ? [e.state] : []));
 const rooms = (events: ConnectionEvent[]): RoomMessage[] => events.flatMap((e) => (e.type === 'room' ? [e.room] : []));
+const replays = (events: ConnectionEvent[]): ReplayMessage[] =>
+  events.flatMap((e) => (e.type === 'replay' ? [e.replay] : []));
+
+/** Reexecuta o replay no motor puro, do `createGame` ao último passo: o que o motor faria com ele. */
+function rerun(replay: Replay): GameState {
+  const created = createGame(replay.config, replay.seed, replay.players);
+  if (!created.ok) throw new Error(`configuração inválida: ${created.error.message}`);
+  let state = created.state;
+  for (const [i, step] of replay.steps.entries()) {
+    const result = applyAction(state, step.player, step.action);
+    if (!result.ok) throw new Error(`o passo ${i} foi recusado: ${result.error.code}`);
+    state = result.state;
+  }
+  return state;
+}
 
 /** É a vez do jogador? No Equipar, enquanto ele não confirmou; nas outras fases, pela fase. */
 function myTurn(view: PlayerView): boolean {
@@ -322,8 +338,8 @@ describe('LocalRoom', () => {
       result: { kind: 'WIN', winner: 'p2', reason: 'FORFEIT' },
       cause: 'CONCEDE',
     });
-    // O state do fim vem antes do room do fim.
-    expect(events.map((e) => e.type).slice(-2)).toEqual(['state', 'room']);
+    // O state do fim vem antes do room do fim, e o replay da partida entre os dois.
+    expect(events.map((e) => e.type).slice(-3)).toEqual(['state', 'replay', 'room']);
     expect(await room.concede()).toMatchObject({ ok: false, code: 'NOT_PLAYING' });
     expect(await room.act({ type: 'END_TURN' })).toMatchObject({ ok: false, code: 'NOT_PLAYING' });
   });
@@ -414,6 +430,107 @@ describe('LocalRoom', () => {
     } finally {
       console.error = original;
     }
+  });
+});
+
+describe('LocalRoom: o replay da partida', () => {
+  /** O jogador joga a primeira jogada legal dele. */
+  const playFirst = (room: LocalRoom) => room.act(legalActions(room.state!.view)[0] as PlayerAction);
+
+  it('no fim da partida emite o replay, que o motor reexecuta até o mesmo estado final', async () => {
+    const { room, timers, events } = setup('rep-1');
+    room.connect();
+    await playToEnd(room, timers);
+    expect(replays(events)).toHaveLength(1);
+    const message = replays(events)[0]!;
+    expect(message).toMatchObject({
+      t: 'replay',
+      gameNo: 1,
+      replay: { name: 'treino-rep-1', seed: 'rep-1', players: ['p1', 'p2'], config: DEFAULT_CONFIG },
+    });
+    // Cada `state` depois do primeiro é um passo aplicado (o primeiro é a mesa recém-dada): o replay não perde nem repete nenhum.
+    expect(message.replay.steps).toHaveLength(states(events).length - 1);
+    expect(new Set(message.replay.steps.map((step) => step.player))).toEqual(new Set(['p1', 'p2']));
+
+    const final = rerun(message.replay);
+    expect(final.phase.kind).toBe('GAME_OVER');
+    expect(viewFor(final, 'p1')).toEqual(room.state!.view);
+    expect(final.phase.kind === 'GAME_OVER' && final.phase.result).toEqual(room.room!.outcome!.result);
+
+    // O replay sai depois do último `state` e ANTES do `room` em FINISHED, que ainda traz o `gameNo` da partida.
+    expect(events.map((e) => e.type).slice(-3)).toEqual(['state', 'replay', 'room']);
+    expect(room.room).toMatchObject({ status: 'FINISHED', gameNo: message.gameNo });
+  });
+
+  it('o Equipar vazio automático entra no replay, em nome do jogador, como passo próprio', async () => {
+    // Sementes em que o jogador recebe zero numéricas no primeiro Equipar (as mesmas do bloco do Equipar sem numéricas).
+    for (const seed of ['s186', 's207']) {
+      const { room, timers, events } = setup(seed);
+      room.connect();
+      await playToEnd(room, timers, 5000, true);
+      const { replay } = replays(events)[0]!;
+      expect(replay.steps[0], seed).toEqual({ player: 'p1', action: { type: 'EQUIP', destinations: [] } });
+      expect(replay.steps, seed).toHaveLength(states(events).length - 1);
+      expect(viewFor(rerun(replay), 'p1'), seed).toEqual(room.state!.view);
+    }
+  });
+
+  it('a desistência entra no replay como FORFEIT de system, e o replay sai antes do room', async () => {
+    const { room, timers, events } = setup('rep-c');
+    room.connect();
+    await playFirst(room);
+    expect(timers.runNext()).toBe(true);
+    await room.concede();
+    expect(room.room).toMatchObject({ status: 'FINISHED', outcome: { cause: 'CONCEDE' } });
+    expect(events.map((e) => e.type).slice(-3)).toEqual(['state', 'replay', 'room']);
+    const { replay } = replays(events)[0]!;
+    expect(replay.steps.at(-1)).toEqual({ player: 'system', action: { type: 'FORFEIT', loser: 'p1' } });
+    expect(replay.steps.slice(0, -1).every((step) => step.player !== 'system')).toBe(true);
+    expect(replay.steps).toHaveLength(states(events).length - 1);
+    expect(viewFor(rerun(replay), 'p1')).toEqual(room.state!.view);
+  });
+
+  it('a revanche começa um replay novo: os passos da partida 2 não trazem os da 1', async () => {
+    const { room, timers, events } = setup('rev');
+    room.connect();
+    await playFirst(room);
+    await room.concede();
+    const first = replays(events)[0]!;
+    const firstSteps = structuredClone(first.replay.steps);
+    expect(first).toMatchObject({ gameNo: 1, replay: { name: 'treino-rev', seed: 'rev' } });
+
+    room.rematch(true);
+    // Começar a partida 2 não emite replay nenhum.
+    expect(replays(events)).toHaveLength(1);
+    await playToEnd(room, timers);
+
+    expect(replays(events)).toHaveLength(2);
+    const second = replays(events)[1]!;
+    expect(second).toMatchObject({ gameNo: 2, replay: { name: 'treino-rev-2', seed: 'rev-2', players: ['p1', 'p2'] } });
+    expect(second.replay.steps.some((step) => step.player === 'system')).toBe(false);
+    expect(viewFor(rerun(second.replay), 'p1')).toEqual(room.state!.view);
+    // A mensagem da partida 1 não foi tocada pela 2.
+    expect(first.replay.steps).toEqual(firstSteps);
+    expect(second.replay.steps).not.toBe(first.replay.steps);
+    expect(events.map((e) => e.type).slice(-3)).toEqual(['state', 'replay', 'room']);
+  });
+
+  it('nada de replay antes do fim: nem na abertura, nem a cada jogada, nem na revanche que só avisa', async () => {
+    const { room, timers, events } = setup('rep-2');
+    room.connect();
+    expect(replays(events)).toEqual([]);
+    for (let i = 0; i < 3 && room.room?.status === 'PLAYING'; i++) {
+      const view = room.state!.view;
+      if (myTurn(view)) await playFirst(room);
+      else timers.runNext();
+      expect(replays(events)).toEqual([]);
+    }
+    room.rematch(true);
+    expect(replays(events)).toEqual([]);
+    await playToEnd(room, timers);
+    expect(replays(events)).toHaveLength(1);
+    room.rematch(false);
+    expect(replays(events)).toHaveLength(1);
   });
 });
 

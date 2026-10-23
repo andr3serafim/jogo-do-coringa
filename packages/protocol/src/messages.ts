@@ -1,5 +1,5 @@
 /** Tipos das mensagens do WebSocket e das respostas HTTP (spec §3, §4.3, §4.4). Só tipos. */
-import type { Action, GameEvent, GameResult, PlayerId, PlayerView, RuleErrorCode } from '@coringa/engine';
+import type { Action, GameEvent, GameResult, PlayerId, PlayerView, Replay, RuleErrorCode } from '@coringa/engine';
 
 /** Ação que o jogador pode enviar: o servidor injeta `TIMEOUT` e `FORFEIT`. */
 export type PlayerAction = Exclude<Action, { type: 'TIMEOUT' } | { type: 'FORFEIT' }>;
@@ -79,6 +79,16 @@ export interface StateMessage {
   serverNow: number;
   catchUp?: true;
   resync?: true;
+}
+
+/**
+ * A partida `gameNo` gravada, do primeiro ao último passo. Sai antes do `room` em `FINISHED` (quem vê a sala terminar já tem o
+ * replay). O treino a publica no fim da partida; o servidor a manda na fatia 3.
+ */
+export interface ReplayMessage {
+  t: 'replay';
+  gameNo: number;
+  replay: Replay;
 }
 
 export type AckCode =

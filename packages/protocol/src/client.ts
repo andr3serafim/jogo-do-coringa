@@ -26,6 +26,7 @@ import type {
   ErrorMessage,
   JoinRoomResponse,
   PlayerAction,
+  ReplayMessage,
   RoomInfoResponse,
   RoomMessage,
   ServerMessage,
@@ -36,6 +37,8 @@ export type ConnectionEvent =
   | { type: 'open' }
   | { type: 'room'; room: RoomMessage }
   | { type: 'state'; state: StateMessage }
+  /** Só a sala local do treino a emite por enquanto; o `RoomClient` passa a emiti-lo na fatia 3, quando o servidor mandar a mensagem. */
+  | { type: 'replay'; replay: ReplayMessage }
   | { type: 'error'; error: ErrorMessage }
   | { type: 'closed'; code: number; final: boolean };
 

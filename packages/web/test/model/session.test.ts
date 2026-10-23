@@ -1,5 +1,5 @@
-import type { GameEvent } from '@coringa/engine';
-import type { AckCode, AckMessage, RoomMessage } from '@coringa/protocol';
+import { DEFAULT_CONFIG, type GameEvent } from '@coringa/engine';
+import type { AckCode, AckMessage, ReplayMessage, RoomMessage } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
 import { legalFor } from '../../src/model/plays.ts';
 import {
@@ -75,6 +75,18 @@ const roomOf = (gameNo: number): RoomMessage => ({
 });
 
 const ROOM = roomOf(1);
+
+const replayOf = (gameNo: number): ReplayMessage => ({
+  t: 'replay',
+  gameNo,
+  replay: {
+    name: `treino-s-${gameNo}`,
+    config: DEFAULT_CONFIG,
+    seed: `s-${gameNo}`,
+    players: ['p1', 'p2'],
+    steps: [{ player: 'system', action: { type: 'FORFEIT', loser: 'p1' } }],
+  },
+});
 
 const WAIT_CODES: AckCode[] = [
   'STALE_EPOCH',
@@ -616,6 +628,62 @@ describe('Session: histórico da mesa', () => {
     expect(texts(session)).toContain('Enquanto você estava fora');
     connection.emitState(stateMessage(viewAt(), { seq: 40, resync: true }));
     expect(texts(session).at(-1)).toBe('Mesa sincronizada');
+  });
+});
+
+describe('Session: replay da partida', () => {
+  it('guarda o replay da partida em curso', () => {
+    const { connection, session } = setup({ room: ROOM });
+    expect(session.snapshot().replay).toBeNull();
+    const replay = replayOf(1);
+    connection.emit({ type: 'replay', replay });
+    expect(session.snapshot().replay).toBe(replay);
+    // O room que fecha a partida (mesmo gameNo) não apaga o replay que veio antes dele.
+    connection.emitRoom({ ...ROOM, status: 'FINISHED' });
+    expect(session.snapshot().replay).toBe(replay);
+  });
+
+  it('avisa quem ouve quando o replay chega, e o mesmo replay de novo não avisa', () => {
+    const { connection, session } = setup({ room: ROOM });
+    let calls = 0;
+    session.subscribe(() => (calls += 1));
+    const replay = replayOf(1);
+    connection.emit({ type: 'replay', replay });
+    expect(calls).toBe(1);
+    connection.emit({ type: 'replay', replay });
+    expect(calls).toBe(1);
+  });
+
+  it('ignora o replay de outra partida', () => {
+    const { connection, session } = setup({ room: ROOM });
+    const before = session.snapshot();
+    connection.emit({ type: 'replay', replay: replayOf(2) });
+    connection.emit({ type: 'replay', replay: replayOf(0) });
+    expect(session.snapshot().replay).toBeNull();
+    expect(session.snapshot()).toBe(before);
+    // Um replay da partida certa que já está guardado também não cede lugar ao de outra.
+    const mine = replayOf(1);
+    connection.emit({ type: 'replay', replay: mine });
+    connection.emit({ type: 'replay', replay: replayOf(2) });
+    expect(session.snapshot().replay).toBe(mine);
+  });
+
+  it('ignora o replay quando a sessão ainda não conhece a sala: não há partida para casar o gameNo', () => {
+    const { connection, session } = setup();
+    connection.emit({ type: 'replay', replay: replayOf(1) });
+    expect(session.snapshot().replay).toBeNull();
+  });
+
+  it('zera o replay quando começa outra partida', () => {
+    const { connection, session } = setup({ room: ROOM });
+    connection.emit({ type: 'replay', replay: replayOf(1) });
+    connection.emitRoom({ ...ROOM, status: 'FINISHED' });
+    connection.emitRoom(roomOf(2));
+    expect(session.snapshot().replay).toBeNull();
+    // O da partida nova entra normalmente.
+    const second = replayOf(2);
+    connection.emit({ type: 'replay', replay: second });
+    expect(session.snapshot().replay).toBe(second);
   });
 });
 

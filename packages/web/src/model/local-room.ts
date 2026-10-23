@@ -13,6 +13,7 @@ import {
   type GameEvent,
   type GameState,
   type PlayerId,
+  type ReplayStep,
 } from '@coringa/engine';
 import type {
   AckMessage,
@@ -20,6 +21,7 @@ import type {
   Deadline,
   Outcome,
   PlayerAction,
+  ReplayMessage,
   RoomConnection,
   RoomMessage,
   Score,
@@ -107,6 +109,10 @@ export class LocalRoom implements RoomConnection {
   #game: GameState;
   #botSeed: string;
   #botRng: Rng;
+  /** A semente da partida em curso (`gameSeed`): nome e semente do replay. */
+  #gameSeed = '';
+  /** Toda ação aplicada na partida em curso, na ordem: é o que o replay do fim leva. Zera em `#newGame`. */
+  #steps: ReplayStep[] = [];
   /** O timer do bot: o do "pensar" antes da decisão, ou o da próxima fatia da busca do Difícil. Um por vez. */
   #botTimer: unknown = null;
   /** A busca do Difícil em curso (a decisão ainda não saiu). `null` fora dela; quando não é `null`, há uma fatia agendada em `#botTimer`. */
@@ -202,7 +208,7 @@ export class LocalRoom implements RoomConnection {
     if (!result.ok) {
       return Promise.resolve({ t: 'ack', id, ok: false, code: result.error.code, message: result.error.message });
     }
-    const seq = this.#commit(result.state, result.events);
+    const seq = this.#commit({ player: LOCAL_ME, action }, result.state, result.events);
     return Promise.resolve({ t: 'ack', id, ok: true, seq });
   }
 
@@ -210,11 +216,12 @@ export class LocalRoom implements RoomConnection {
     const id = this.#nextId();
     const early = this.#earlyAck(id);
     if (early) return Promise.resolve(early);
-    const result = applyAction(this.#game, 'system', { type: 'FORFEIT', loser: LOCAL_ME });
+    const action: Action = { type: 'FORFEIT', loser: LOCAL_ME };
+    const result = applyAction(this.#game, 'system', action);
     if (!result.ok) {
       return Promise.resolve({ t: 'ack', id, ok: false, code: result.error.code, message: result.error.message });
     }
-    const seq = this.#commit(result.state, result.events, 'CONCEDE');
+    const seq = this.#commit({ player: 'system', action }, result.state, result.events, 'CONCEDE');
     return Promise.resolve({ t: 'ack', id, ok: true, seq });
   }
 
@@ -238,11 +245,14 @@ export class LocalRoom implements RoomConnection {
     return null;
   }
 
-  /** Estado novo, bot novo: a semente da partida `n` é `<semente>` (a 1ª) ou `<semente>-<n>`. */
+  /** Estado novo, bot novo, replay novo: a semente da partida `n` é `<semente>` (a 1ª) ou `<semente>-<n>`. */
   #newGame(): { game: GameState; botSeed: string } {
     this.#gameNo += 1;
     this.#botMoves = 0;
     const seed = gameSeed(this.#options.seed, this.#gameNo);
+    this.#gameSeed = seed;
+    // Uma lista nova (e não `length = 0`): o replay já emitido da partida anterior guarda a lista dela.
+    this.#steps = [];
     const created = createGame(DEFAULT_CONFIG, seed, [LOCAL_ME, BOT_SEAT]);
     if (!created.ok) throw new Error(`configuração inválida: ${created.error.message}`);
     return { game: created.state, botSeed: `${seed}/bot` };
@@ -258,11 +268,15 @@ export class LocalRoom implements RoomConnection {
     this.#scheduleBot();
   }
 
-  /** Aplica o estado novo, emite o `state` (e, no fim da partida, o `room`) e devolve o `seq` do passo. */
-  #commit(next: GameState, events: GameEvent[], cause: 'CONCEDE' | 'NORMAL' = 'NORMAL'): number {
+  /**
+   * Grava o `step` no replay, aplica o estado novo, emite o `state` (e, no fim da partida, o `replay` e depois o `room`) e devolve o
+   * `seq` do passo. Todo passo da partida passa por aqui: o do jogador, o do bot, o Equipar vazio automático e a desistência.
+   */
+  #commit(step: ReplayStep, next: GameState, events: GameEvent[], cause: 'CONCEDE' | 'NORMAL' = 'NORMAL'): number {
     // Um estado novo (a jogada do jogador no Equipar, por exemplo) invalida a busca do Difícil em curso: a jogada que ela
     // devolveria foi pensada sobre o estado velho. O timer do "pensar", que ainda não virou busca, fica como sempre ficou.
     if (this.#search !== null) this.#cancelBot();
+    this.#steps.push(step);
     const keyBefore = phaseKey(this.#game);
     this.#game = next;
     this.#seq += 1;
@@ -275,6 +289,8 @@ export class LocalRoom implements RoomConnection {
       if (result.kind === 'WIN') this.#score[result.winner as 'p1' | 'p2'] += 1;
       else this.#score.draws += 1;
       this.#outcome = { gameNo: this.#gameNo, result, cause };
+      // O replay sai antes do `room` em FINISHED: quem vê a sala terminar já o tem, e o `gameNo` dele ainda é o da partida.
+      this.#publishReplay();
       this.#publishRoom('FINISHED');
     } else {
       this.#autoEquip();
@@ -291,9 +307,10 @@ export class LocalRoom implements RoomConnection {
   #autoEquip(): void {
     const player = this.#game.players.find((candidate) => candidate.id === LOCAL_ME);
     if (this.#game.phase.kind !== 'EQUIP' || !player || player.equipSubmitted || player.pending.length > 0) return;
-    const result = applyAction(this.#game, LOCAL_ME, { type: 'EQUIP', destinations: [] });
+    const action: Action = { type: 'EQUIP', destinations: [] };
+    const result = applyAction(this.#game, LOCAL_ME, action);
     if (!result.ok) throw new Error(`o Equipar vazio foi recusado: ${result.error.code}`);
-    this.#commit(result.state, result.events);
+    this.#commit({ player: LOCAL_ME, action }, result.state, result.events);
   }
 
   #publishState(events: GameEvent[]): void {
@@ -308,6 +325,22 @@ export class LocalRoom implements RoomConnection {
     };
     this.#state = state;
     this.#emit({ type: 'state', state });
+  }
+
+  /** O replay da partida que acabou de terminar: semente, configuração e os passos na ordem em que o motor os aplicou. */
+  #publishReplay(): void {
+    const replay: ReplayMessage = {
+      t: 'replay',
+      gameNo: this.#gameNo,
+      replay: {
+        name: `treino-${this.#gameSeed}`,
+        config: structuredClone(this.#game.config),
+        seed: this.#gameSeed,
+        players: [LOCAL_ME, BOT_SEAT],
+        steps: [...this.#steps],
+      },
+    };
+    this.#emit({ type: 'replay', replay });
   }
 
   #publishRoom(status: 'PLAYING' | 'FINISHED'): void {
@@ -396,7 +429,7 @@ export class LocalRoom implements RoomConnection {
     const result = applyAction(this.#game, BOT_SEAT, action);
     if (!result.ok) throw new Error(`o bot jogou algo ilegal: ${result.error.code}`);
     this.#botMoves += 1;
-    this.#commit(result.state, result.events);
+    this.#commit({ player: BOT_SEAT, action }, result.state, result.events);
   }
 
   /** Solta o que o bot tem em andamento: o timer (do "pensar" ou de uma fatia) e a busca. A jogada velha nunca é aplicada. */

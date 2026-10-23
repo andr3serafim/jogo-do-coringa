@@ -14,6 +14,7 @@ import {
   type ConnectionEvent,
   type Deadline,
   type PlayerAction,
+  type ReplayMessage,
   type RoomConnection,
   type RoomMessage,
   type StateMessage,
@@ -43,6 +44,11 @@ export interface SessionSnapshot {
   me: PlayerId | null;
   room: RoomMessage | null;
   state: StateMessage | null;
+  /**
+   * O replay da partida em curso na sala (o `gameNo` dele é o do `room`): chega no fim da partida, antes do `room` em
+   * `FINISHED`. Volta a `null` quando começa outra partida. Um replay de outra partida é ignorado.
+   */
+  replay: ReplayMessage | null;
   /** `legalActions` da `view` de `state`, sem `TIMEOUT` nem `FORFEIT`. */
   legal: PlayerAction[];
   /** Uma jogada foi enviada e o `ack` ainda não chegou. */
@@ -198,6 +204,7 @@ export class Session {
       me: connection.playerId,
       room: connection.room,
       state,
+      replay: null,
       legal: state ? legalFor(state.view) : [],
       pending: false,
       notice: null,
@@ -362,7 +369,14 @@ export class Session {
         const me = this.#connection.playerId;
         const note = me === null ? null : returnNote(this.#snapshot.room, event.room, me);
         if (note !== null) this.#history = appendNote(this.#history, note);
-        this.#update({ room: event.room });
+        // Outra partida: o replay da anterior não vale mais (o `room` em FINISHED da mesma partida o mantém).
+        const stale = this.#snapshot.replay !== null && this.#snapshot.replay.gameNo !== event.room.gameNo;
+        this.#update({ room: event.room, ...(stale ? { replay: null } : {}) });
+        return;
+      }
+      case 'replay': {
+        // Só o replay da partida da sala: sem sala, ou de outra partida, não há a que juntá-lo.
+        if (event.replay.gameNo === this.#snapshot.room?.gameNo) this.#update({ replay: event.replay });
         return;
       }
       case 'state': {
