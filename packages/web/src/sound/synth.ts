@@ -109,8 +109,8 @@ function playNoise(ctx: AudioContext, out: AudioNode, buffer: AudioBuffer, spec:
 const RECIPES: Record<Cue, (voices: Voices) => void> = {
   // A carta chega à mesa: um estalo de papel e uma batida seca.
   carta: ({ tone, noise }) => {
-    noise({ filter: 'bandpass', from: 2400, to: 900, q: 0.8, length: 0.07, peak: 0.35 });
-    tone({ wave: 'triangle', from: 220, to: 130, length: 0.09, peak: 0.3 });
+    noise({ filter: 'bandpass', from: 2400, to: 900, q: 0.8, length: 0.07, peak: 0.5 });
+    tone({ wave: 'triangle', from: 220, to: 130, length: 0.09, peak: 0.4 });
   },
   // Algo se parte: um estalo agudo que varre para baixo, um segundo estalo logo atrás e um rangido grave.
   quebra: ({ tone, noise }) => {
@@ -119,8 +119,8 @@ const RECIPES: Record<Cue, (voices: Voices) => void> = {
     tone({ wave: 'sawtooth', from: 320, to: 70, length: 0.22, peak: 0.2 });
   },
   'golpe-leve': ({ tone, noise }) => {
-    tone({ wave: 'sine', from: 180, to: 90, length: 0.12, peak: 0.4 });
-    noise({ filter: 'lowpass', from: 1500, to: 600, length: 0.06, peak: 0.2 });
+    tone({ wave: 'sine', from: 180, to: 90, length: 0.12, peak: 0.5 });
+    noise({ filter: 'lowpass', from: 1500, to: 600, length: 0.06, peak: 0.3 });
   },
   'golpe-medio': ({ tone, noise }) => {
     tone({ wave: 'sine', from: 140, to: 60, length: 0.2, peak: 0.5 });
@@ -140,32 +140,32 @@ const RECIPES: Record<Cue, (voices: Voices) => void> = {
   },
   // O golpe absoluto: uma onda que cresce por uns 700 ms e desaba num impacto grave. É a única pista que passa de 600 ms.
   absoluto: ({ tone, noise }) => {
-    tone({ wave: 'sawtooth', from: 70, to: 210, attack: 0.6, length: 1.0, peak: 0.2 });
-    tone({ wave: 'sine', from: 55, attack: 0.5, length: 1.15, peak: 0.45 });
-    noise({ filter: 'bandpass', from: 300, to: 3000, q: 1.2, attack: 0.7, length: 1.0, peak: 0.3 });
-    tone({ wave: 'sine', from: 100, to: 40, at: 0.7, length: 0.45, peak: 0.5 });
-    noise({ filter: 'lowpass', from: 2000, to: 200, at: 0.7, length: 0.4, peak: 0.35 });
+    tone({ wave: 'sawtooth', from: 70, to: 210, attack: 0.6, length: 1.0, peak: 0.12 });
+    tone({ wave: 'sine', from: 55, attack: 0.5, length: 1.15, peak: 0.25 });
+    noise({ filter: 'bandpass', from: 300, to: 3000, q: 1.2, attack: 0.7, length: 1.0, peak: 0.15 });
+    tone({ wave: 'sine', from: 100, to: 40, at: 0.7, length: 0.45, peak: 0.3 });
+    noise({ filter: 'lowpass', from: 2000, to: 200, at: 0.7, length: 0.4, peak: 0.2 });
   },
   // A sua vez: dois toques de sino, o segundo uma quinta acima.
   vez: ({ tone }) => {
-    tone({ wave: 'sine', from: 660, length: 0.2, peak: 0.3 });
-    tone({ wave: 'sine', from: 990, at: 0.1, length: 0.3, peak: 0.25 });
+    tone({ wave: 'sine', from: 660, length: 0.2, peak: 0.22 });
+    tone({ wave: 'sine', from: 990, at: 0.1, length: 0.3, peak: 0.18 });
   },
   // Vitória: um arpejo que sobe, em sol maior, e termina numa nota mais longa.
   vitoria: ({ tone }) => {
     [392, 494, 587, 784].forEach((hz, i, notes) => {
-      tone({ wave: 'triangle', from: hz, at: i * 0.08, length: i === notes.length - 1 ? 0.34 : 0.26, peak: 0.28 });
+      tone({ wave: 'triangle', from: hz, at: i * 0.08, length: i === notes.length - 1 ? 0.34 : 0.26, peak: 0.2 });
     });
   },
   // Derrota: três notas que descem, sobre um grave que afunda.
   derrota: ({ tone }) => {
-    [330, 262, 196].forEach((hz, i) => tone({ wave: 'sine', from: hz, at: i * 0.13, length: 0.3, peak: 0.3 }));
-    tone({ wave: 'sine', from: 110, to: 55, length: 0.55, peak: 0.3 });
+    [330, 262, 196].forEach((hz, i) => tone({ wave: 'sine', from: hz, at: i * 0.13, length: 0.3, peak: 0.2 }));
+    tone({ wave: 'sine', from: 110, to: 55, length: 0.55, peak: 0.25 });
   },
   // O relógio nos últimos 5 s: dois tiques agudos e secos.
   urgencia: ({ tone }) => {
-    tone({ wave: 'sine', from: 1200, length: 0.05, peak: 0.2 });
-    tone({ wave: 'sine', from: 1200, at: 0.13, length: 0.05, peak: 0.2 });
+    tone({ wave: 'sine', from: 1200, length: 0.05, peak: 0.15 });
+    tone({ wave: 'sine', from: 1200, at: 0.13, length: 0.05, peak: 0.15 });
   },
 };
 
