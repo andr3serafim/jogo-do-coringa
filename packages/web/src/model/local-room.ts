@@ -115,6 +115,8 @@ export class LocalRoom implements RoomConnection {
   #closed = false;
   #idCounter = 0;
   #seq = 0;
+  /** O `seq` do estado de abertura da partida em curso: `#seq - #gameStartSeq` é o passo da partida (0 na distribuição). */
+  #gameStartSeq = 0;
   #epoch = 0;
   #gameNo = 0;
   #score: Score = { p1: 0, p2: 0, draws: 0 };
@@ -248,6 +250,7 @@ export class LocalRoom implements RoomConnection {
   /** Começo de partida (a primeira ou a revanche): `seq` e `epoch` só sobem, e o primeiro `state` vem sem eventos. */
   #publishStart(): void {
     this.#seq += 1;
+    this.#gameStartSeq = this.#seq;
     this.#epoch += 1;
     this.#publishRoom('PLAYING');
     this.#publishState([]);
@@ -348,9 +351,10 @@ export class LocalRoom implements RoomConnection {
     const view = viewFor(this.#game, BOT_SEAT);
     const legal = legalActions(view);
     if (this.#level === 'dificil') {
-      // O sorteio da busca vem do estado que ela olha (`<semente>/bot/<seq>`), e não do fluxo do bot: um estado novo no meio
-      // dela a reinicia (`#commit`), e a decisão é a mesma de quando o jogador joga antes do "pensar". Só depende da semente.
-      this.#search = hardSearch(this.#game, BOT_SEAT, legal, createRng(`${this.#botSeed}/${this.#seq}`));
+      // O sorteio da busca vem do estado que ela olha, pelo passo da PARTIDA (`<semente>/bot/<passo>`), e não do fluxo do bot nem do
+      // `seq` da sala (que a revanche não zera): um estado novo no meio dela a reinicia (`#commit`), a decisão é a mesma de quando o
+      // jogador joga antes do "pensar", e a partida 2 da revanche joga o mesmo que a sala nova aberta com `<semente>-2`.
+      this.#search = hardSearch(this.#game, BOT_SEAT, legal, createRng(`${this.#botSeed}/${this.#seq - this.#gameStartSeq}`));
       this.#searchSlice();
       return;
     }
@@ -366,8 +370,15 @@ export class LocalRoom implements RoomConnection {
     const search = this.#search;
     if (search === null) return;
     const end = this.#options.now() + SLICE_MS;
-    let step = search.next();
-    while (!step.done && this.#options.now() < end) step = search.next();
+    let step: IteratorResult<void, Action>;
+    try {
+      step = search.next();
+      while (!step.done && this.#options.now() < end) step = search.next();
+    } catch (error) {
+      // Uma busca que lança não fica pendurada na sala: solta-a (o próximo estado agenda o bot de novo) e deixa a exceção subir.
+      this.#cancelBot();
+      throw error;
+    }
     if (step.done) {
       this.#search = null;
       this.#botMove(step.value);

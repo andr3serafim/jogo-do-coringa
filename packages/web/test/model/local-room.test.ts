@@ -13,7 +13,7 @@ import {
 import type { ConnectionEvent, PlayerAction, RoomMessage, StateMessage } from '@coringa/protocol';
 import { BOTS, runHard } from '@coringa/sim/bots';
 import { createRng } from '@coringa/sim/rng';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   gameSeed,
   LOCAL_ME,
@@ -23,6 +23,22 @@ import {
   trainingSeed,
   type LocalRoomOptions,
 } from '../../src/model/local-room.ts';
+
+/** Liga a falha da busca do Difícil: ela cede uma vez e lança. Desligada, a busca de verdade passa sem mudar nada. */
+const searchFault = vi.hoisted(() => ({ on: false }));
+vi.mock('@coringa/sim/bots', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@coringa/sim/bots')>();
+  return {
+    ...original,
+    hardSearch: function* (...args: Parameters<typeof original.hardSearch>) {
+      if (searchFault.on) {
+        yield;
+        throw new Error('falha na busca');
+      }
+      return yield* original.hardSearch(...args);
+    },
+  };
+});
 
 /** Timers e relógio de mentira: nada de tempo real; `runNext` dispara o timer mais cedo. */
 class FakeTimers {
@@ -444,8 +460,9 @@ describe('níveis do bot', () => {
 
   const easy = (seed: string) => (state: GameState, legal: Action[]) => BOTS.easy(viewFor(state, 'p2'), legal, createRng(`${seed}/bot`));
   const greedy = (seed: string) => (state: GameState, legal: Action[]) => BOTS.greedy(viewFor(state, 'p2'), legal, createRng(`${seed}/bot`));
-  // A busca do Difícil sorteia pelo estado que olha (`<semente>/bot/<seq>`), e não pelo fluxo do bot: o estado depois do Equipar do jogador é o seq 2.
-  const hard = (seed: string) => (state: GameState, legal: Action[]) => runHard(state, 'p2', legal, createRng(`${seed}/bot/2`));
+  // A busca do Difícil sorteia pelo estado que olha (`<semente>/bot/<passo da partida>`), e não pelo fluxo do bot: o estado depois do
+  // Equipar do jogador é o passo 1 (o 0 é o estado da distribuição).
+  const hard = (seed: string) => (state: GameState, legal: Action[]) => runHard(state, 'p2', legal, createRng(`${seed}/bot/1`));
 
   /** O relógio que anda 3 ms a cada leitura: a busca do Difícil, que se fatia por ele, precisa de várias tarefas. */
   function steppedClock() {
@@ -611,6 +628,85 @@ describe('níveis do bot', () => {
       }
       expect(room.room?.status).toBe('FINISHED');
       expect(searched, 'houve decisões com busca').toBeGreaterThan(3);
+    });
+  });
+
+  describe('a partida da revanche é a da sala nova com a mesma semente (spec §2.6: `?semente=<ela>&nivel=<nível>` repete a partida)', () => {
+    /**
+     * Joga a partida em curso até o bot jogar `botMoves` vezes (o jogador joga a primeira jogada legal) e devolve o que o jogador viu
+     * a partir do estado `from`, e as fases em que o bot decidiu. Compara `view` e `events`: `seq` e `epoch` acumulam por sala.
+     */
+    async function drive(s: ReturnType<typeof setup>, from: number, botMoves: number) {
+      const { room, timers, events } = s;
+      const phases = new Set<string>();
+      for (let moves = 0; moves < botMoves && room.room?.status === 'PLAYING'; ) {
+        const view = room.state!.view;
+        if (myTurn(view)) {
+          await playFirst(room);
+          continue;
+        }
+        const seq = room.state!.seq;
+        phases.add(view.phase.kind);
+        while (room.state!.seq === seq) {
+          if (!timers.runNext()) break;
+        }
+        moves += 1;
+      }
+      const seen = states(events)
+        .slice(from)
+        .map((state) => ({ view: state.view, events: state.events }));
+      return { phases, seen };
+    }
+
+    it.each([
+      ['facil', ['rev', 'x4'], 10],
+      ['medio', ['rev', 'x4'], 10],
+      ['dificil', ['rev', 'x4', 'c2', 'x2'], 8],
+    ] as const)('%s: a partida 2 por revanche joga o mesmo que a sala nova com <semente>-2', { timeout: 60_000 }, async (level, seeds, botMoves) => {
+      for (const seed of seeds) {
+        // A sala velha: a partida 1 anda um pouco (o `seq` da sala sobe) e acaba por desistência; a revanche abre a partida 2.
+        const rematch = setup(seed, { level, now: steppedClock() });
+        rematch.room.connect();
+        await drive(rematch, 0, 3);
+        await rematch.room.concede();
+        rematch.room.rematch(true);
+        expect(rematch.room.room).toMatchObject({ status: 'PLAYING', gameNo: 2 });
+        const from = states(rematch.events).length - 1;
+        const second = await drive(rematch, from, botMoves);
+
+        // A sala nova, aberta com a semente da partida 2 (é o que o diagnóstico manda abrir).
+        const fresh = setup(gameSeed(seed, 2), { level, now: steppedClock() });
+        fresh.room.connect();
+        const direct = await drive(fresh, 0, botMoves);
+
+        expect(second.seen.length, `${level} ${seed}: houve jogadas`).toBeGreaterThan(botMoves);
+        expect(second.seen, `${level} ${seed}`).toEqual(direct.seen);
+        // O que se comparou inclui o Equipar e uma jogada da fase principal do Ataque (onde o Difícil também busca).
+        expect([...second.phases], `${level} ${seed}`).toEqual(expect.arrayContaining(['EQUIP', 'ATTACK_MAIN']));
+      }
+    });
+  });
+
+  describe('falha na busca do Difícil', () => {
+    it('a exceção sobe da tarefa, a busca é solta (nada agendado) e a sala segue: o próximo estado agenda o bot de novo', async () => {
+      const { room, timers } = setup(SEED, { level: 'dificil', now: steppedClock() });
+      room.connect();
+      searchFault.on = true;
+      try {
+        // A 1ª fatia cede uma vez e a mesma fatia chega à exceção.
+        expect(() => timers.runNext()).toThrow('falha na busca');
+      } finally {
+        searchFault.on = false;
+      }
+      expect(timers.pending.size).toBe(0);
+
+      // Sem a busca presa, o estado seguinte (o Equipar do jogador) agenda a decisão do bot, e agora ela chega ao fim.
+      await playFirst(room);
+      expect(timers.pending.size).toBe(1);
+      expect(timers.delays.at(-1)).toBe(600);
+      const seq = room.state!.seq;
+      for (let i = 0; i < 200 && room.state!.seq === seq; i += 1) timers.runNext();
+      expect(room.state!.seq).toBe(seq + 1);
     });
   });
 });
