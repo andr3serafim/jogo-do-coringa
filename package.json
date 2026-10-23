@@ -15,6 +15,7 @@
     "check": "pnpm lint && pnpm typecheck && pnpm -r test:coverage && pnpm smoke",
     "sim": "node packages/sim/src/cli/sim.ts",
     "sim:calibrate": "node packages/sim/src/cli/calibrate.ts",
+    "sim:dificil": "node packages/sim/src/cli/hard-gate.ts",
     "play": "node packages/sim/src/cli/play.ts",
     "bot": "node packages/sim/src/cli/bot.ts",
     "dev:server": "pnpm --filter @coringa/server dev",

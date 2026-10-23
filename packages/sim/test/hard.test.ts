@@ -36,7 +36,7 @@ describe('bot Difícil', () => {
     expect(legalOf(b)).toEqual(legal);
     expect(legalOf(c)).toEqual(legal);
     expect(legalOf(d)).toEqual(legal);
-    const options = { rolloutsPerCandidate: 3, maxCandidates: 4 };
+    const options = { ...HARD_DEFAULTS, rolloutsPerCandidate: 3 };
     const search = (s: GameState, seed: string) => drain(hardSearchTotals(s, P1, legal, createRng(seed), options)).value;
     // a premissa da comparação: as candidatas rendem totais diferentes entre si
     const { candidates, totals } = search(a, 'x');
@@ -68,13 +68,53 @@ describe('bot Difícil', () => {
     for (const { state, actor } of positions) {
       const legal = legalOf(state, actor);
       for (const seed of ['g', 'h']) {
-        const { candidates } = drain(hardSearchTotals(state, actor, legal, createRng(seed), { rolloutsPerCandidate: 1, maxCandidates: 4 })).value;
+        const { candidates } = drain(hardSearchTotals(state, actor, legal, createRng(seed), { ...HARD_DEFAULTS, rolloutsPerCandidate: 1 })).value;
         // a semente do greedy sai da semente-base que a busca sorteia do rng
         const greedy = greedyBot(viewFor(state, actor), legal, createRng(`hard-${createRng(seed).int(2 ** 31)}/greedy`));
         expect(candidates[0]).toEqual(greedy);
         for (const candidate of candidates) expect(legal).toContain(candidate);
       }
     }
+  });
+
+  it('numa fase fora de horizon não há busca: a única candidata é a escolha do greedy e o gerador não cede', () => {
+    let found: { state: GameState; actor: PlayerId } | null = null;
+    runGame({
+      config,
+      seed: 'candidatas',
+      bots: [greedyBot, greedyBot],
+      maxSteps: 60,
+      onStep: (before) => {
+        const actor = actingPlayers(before)[0];
+        if (!found && before.phase.kind === 'ORDER_CHOICE') found = { state: before, actor };
+      },
+    });
+    if (!found) throw new Error('a partida de referência não passou pela escolha da ordem');
+    const { state, actor } = found as { state: GameState; actor: PlayerId };
+    const legal = legalOf(state, actor);
+    expect(legal.length).toBeGreaterThanOrEqual(2);
+    expect(HARD_DEFAULTS.horizon.ORDER_CHOICE).toBeUndefined();
+    const greedy = greedyBot(viewFor(state, actor), legal, createRng(`hard-${createRng('o').int(2 ** 31)}/greedy`));
+    const off = drain(hardSearchTotals(state, actor, legal, createRng('o'), HARD_DEFAULTS));
+    expect(off.yields).toBe(0);
+    expect(off.value).toEqual({ candidates: [greedy], totals: [0] });
+    expect(runHard(state, actor, legal, createRng('o'))).toEqual(greedy);
+    // com o horizonte da fase ligado, a busca roda: uma cessão por rollout das duas candidatas
+    const on = drain(hardSearchTotals(state, actor, legal, createRng('o'), { ...HARD_DEFAULTS, rolloutsPerCandidate: 1, horizon: { ORDER_CHOICE: 1 } }));
+    expect(on.yields).toBe(legal.length);
+    expect(on.value.candidates[0]).toEqual(greedy);
+  });
+
+  it('o horizonte conta rodadas de Ataque: um maior muda os totais, e um enorme termina sem lançar', () => {
+    const s = equip();
+    const legal = legalOf(s);
+    const totalsFor = (equipRounds: number) =>
+      drain(hardSearchTotals(s, P1, legal, createRng('h'), { ...HARD_DEFAULTS, rolloutsPerCandidate: 2, horizon: { EQUIP: equipRounds } })).value;
+    const short = totalsFor(1);
+    const long = totalsFor(3);
+    expect(long.candidates).toEqual(short.candidates);
+    expect(long.totals).not.toEqual(short.totals);
+    expect(() => totalsFor(1_000)).not.toThrow();
   });
 
   it('determinístico para a mesma semente, sem mexer no estado recebido', () => {
@@ -103,7 +143,7 @@ describe('bot Difícil', () => {
     const legal = legalOf(s);
     expect(legal).toHaveLength(8);
     const yieldsFor = (maxCandidates: number, rolloutsPerCandidate: number): number =>
-      drain(hardSearch(s, P1, legal, createRng('c'), { maxCandidates, rolloutsPerCandidate })).yields;
+      drain(hardSearch(s, P1, legal, createRng('c'), { ...HARD_DEFAULTS, maxCandidates, rolloutsPerCandidate })).yields;
     expect(yieldsFor(2, 3)).toBe(2 * 3);
     expect(yieldsFor(20, 2)).toBe(8 * 2);
     expect(yieldsFor(HARD_DEFAULTS.maxCandidates, 1)).toBe(Math.min(legal.length, HARD_DEFAULTS.maxCandidates));
@@ -120,7 +160,7 @@ describe('bot Difícil', () => {
         const legal = legalOf(s, actor);
         const action =
           actor === hardSeat
-            ? drain(hardSearch(s, actor, legal, hardRng, { rolloutsPerCandidate: 2, maxCandidates: HARD_DEFAULTS.maxCandidates })).value
+            ? drain(hardSearch(s, actor, legal, hardRng, { ...HARD_DEFAULTS, rolloutsPerCandidate: 2 })).value
             : greedyBot(viewFor(s, actor), legal, greedyRng);
         expect(legal).toContainEqual(action);
         const result = applyAction(s, actor, action);

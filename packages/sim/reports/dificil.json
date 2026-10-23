@@ -1,0 +1,150 @@
+{
+  "config": {
+    "hp": 300,
+    "rowLimit": 7,
+    "buffLimit": 4,
+    "cardsPerEquip": 4,
+    "antiStallRounds": 5,
+    "exodiaGuard": 4,
+    "resurrectMinRounds": 3,
+    "deck": {
+      "numericCopies": 8,
+      "faceCopies": 6
+    },
+    "initiativeChoice": true,
+    "tablePressure": true,
+    "wildJokers": true
+  },
+  "seedPrefix": "dificil",
+  "seeds": 100,
+  "thresholds": {
+    "hardVsGreedy": 0.58,
+    "greedyVsEasy": 0.65,
+    "p95Ms": 300
+  },
+  "machine": "Node v24.19.0, win32 x64, Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz (12 núcleos)",
+  "rounds": [
+    {
+      "label": "padrão (`HARD_DEFAULTS`)",
+      "hard": {
+        "rolloutsPerCandidate": 8,
+        "maxCandidates": 4,
+        "horizon": {
+          "EQUIP": 1,
+          "ORDER_CHOICE": 1,
+          "ATTACK_MAIN": 1,
+          "REACTION": 1
+        }
+      },
+      "hardVsGreedy": {
+        "games": 200,
+        "rate": 0.535,
+        "se": 0.03526861210765175,
+        "wins": 107,
+        "draws": 0,
+        "losses": 93,
+        "unfinished": 0,
+        "withInitiative": {
+          "games": 100,
+          "rate": 0.51
+        },
+        "withoutInitiative": {
+          "games": 100,
+          "rate": 0.56
+        }
+      },
+      "greedyVsEasy": {
+        "games": 200,
+        "rate": 0.65,
+        "se": 0.033726843908080104,
+        "wins": 130,
+        "draws": 0,
+        "losses": 70,
+        "unfinished": 0,
+        "withInitiative": {
+          "games": 100,
+          "rate": 0.66
+        },
+        "withoutInitiative": {
+          "games": 100,
+          "rate": 0.64
+        }
+      },
+      "timing": {
+        "decisions": 4959,
+        "p50Ms": 27.80580000000191,
+        "p95Ms": 64.40939999998955,
+        "maxMs": 114.62590000000003
+      },
+      "passes": {
+        "hardVsGreedy": false,
+        "greedyVsEasy": true,
+        "p95": true
+      },
+      "approved": false,
+      "seconds": 168.79460550000002,
+      "notes": []
+    },
+    {
+      "label": "horizonte por fase: Equipar 2, fase principal 3; ordem e reação com o greedy",
+      "notes": [
+        "Antes de gastar a rodada, os valores foram escolhidos numa exploração fora do portão: hard × greedy, 400 partidas por célula (200 sementes × 2 assentos) em sementes que não são as do portão (`explora` e `explora2`), erro-padrão de cerca de 2,5 pp por célula (então diferenças de 2 a 3 pp não se distinguem). Pontuação do hard, em %:\n\n| Variante | `explora` | `explora2` |\n| --- | --- | --- |\n| base: horizonte 1 em toda fase, 8 rollouts, 4 candidatas | 53,0 | |\n| 24 rollouts · 8 candidatas · sempre incluir DECLARE_ATTACK/END_TURN/PASS | 52,8 · 52,8 · 53,3 | |\n| só troca de ação se superar a do greedy por 15 · por 40 pontos por rollout | 54,5 · 50,5 | |\n| horizonte 2 | 61,8 | 55,5 |\n| horizonte 2 com 16 rollouts | 60,8 | |\n| horizonte 3 · horizonte 4 | 57,5 · 53,8 | 57,3 · |\n| busca só no Equipar, horizonte 1 · 2 · 3 · 4 | 50,0 · 55,0 · 52,5 · 49,8 | |\n| busca só na fase principal, horizonte 1 · 2 · 3 | 52,8 · 54,0 · 57,3 | |\n| busca só na ordem do ataque · só na reação (horizonte 2) | 49,8 · 48,5 | |\n| Equipar 2 e fase principal 2, sem busca na ordem e na reação | 59,0 | 58,5 |\n| todas as fases (Equipar 2, principal 3, ordem 2, reação 2) | 60,8 | 55,3 |\n| **Equipar 2 e fase principal 3, sem busca na ordem e na reação (esta rodada)** | 62,0 | 58,3 |\n\nLeitura: o que muda a força é o horizonte (olhar mais de uma rodada de Ataque), e não o número de rollouts nem de candidatas; a busca na ordem do ataque e na reação não melhorou nada, então elas ficam com o greedy. A melhor combinação medida (média de 60,1% em 800 partidas, erro-padrão de 1,7 pp) fica perto do limiar de 58%, sem folga confortável: esta rodada pode passar ou não só pela sorte das sementes."
+      ],
+      "hard": {
+        "rolloutsPerCandidate": 8,
+        "maxCandidates": 4,
+        "horizon": {
+          "EQUIP": 2,
+          "ATTACK_MAIN": 3
+        }
+      },
+      "hardVsGreedy": {
+        "games": 200,
+        "rate": 0.59,
+        "se": 0.0347778665245584,
+        "wins": 118,
+        "draws": 0,
+        "losses": 82,
+        "unfinished": 0,
+        "withInitiative": {
+          "games": 100,
+          "rate": 0.54
+        },
+        "withoutInitiative": {
+          "games": 100,
+          "rate": 0.64
+        }
+      },
+      "greedyVsEasy": {
+        "games": 200,
+        "rate": 0.65,
+        "se": 0.033726843908080104,
+        "wins": 130,
+        "draws": 0,
+        "losses": 70,
+        "unfinished": 0,
+        "withInitiative": {
+          "games": 100,
+          "rate": 0.66
+        },
+        "withoutInitiative": {
+          "games": 100,
+          "rate": 0.64
+        }
+      },
+      "timing": {
+        "decisions": 5348,
+        "p50Ms": 82.41229999999632,
+        "p95Ms": 152.42300000000978,
+        "maxMs": 252.7583999999988
+      },
+      "passes": {
+        "hardVsGreedy": true,
+        "greedyVsEasy": true,
+        "p95": true
+      },
+      "approved": true,
+      "seconds": 396.5211229
+    }
+  ]
+}
