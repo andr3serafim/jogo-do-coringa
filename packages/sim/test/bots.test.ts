@@ -3,8 +3,11 @@ import { legalActions, makeConfig, viewFor, type Action, type GameState, type Pl
 // Builder de cenários do motor: monta estados reais sem inventar cartas.
 import { P1, setup, type PlayerSetup } from '@coringa/engine/testing';
 import { BOTS, type BotName } from '../src/bots/index.ts';
+import { easyBot, EASY_BLUNDER } from '../src/bots/easy.ts';
+import { greedyBot } from '../src/bots/greedy.ts';
 import { runGame } from '../src/match.ts';
-import { createRng } from '../src/rng.ts';
+import { createRng, type Rng } from '../src/rng.ts';
+import { runSeries } from '../src/series.ts';
 
 const decide = (bot: BotName, s: GameState, who: PlayerId = P1): Action => {
   const view = viewFor(s, who);
@@ -12,7 +15,7 @@ const decide = (bot: BotName, s: GameState, who: PlayerId = P1): Action => {
 };
 
 describe('todos os bots', () => {
-  it.each(['random', 'greedy', 'turtle'] as const)('%s só joga ações legais e a partida termina', (name) => {
+  it.each(['random', 'greedy', 'turtle', 'easy'] as const)('%s só joga ações legais e a partida termina', (name) => {
     for (let i = 0; i < 20; i += 1) {
       const record = runGame({
         config: makeConfig(),
@@ -73,3 +76,52 @@ describe('random', () => {
   });
 });
 
+
+describe('easy', () => {
+  const config = makeConfig();
+  /** Rng de mentira: `next` fixo (decide se o bot se distrai) e `pick` sempre o último item. */
+  const fixedRng = (next: number): Rng => ({ next: () => next, int: (max) => max - 1, pick: (items) => items[items.length - 1] });
+  const busy = () => setup({ p1: { hand: ['J', 'Q', 'K'], attack: [5], defense: [4] }, p2: { attack: [4] } });
+
+  it('abaixo do limiar de distração, sorteia entre as legais com o RNG recebido', () => {
+    const view = viewFor(busy(), P1);
+    const legal = legalActions(view);
+    expect(legal.length).toBeGreaterThan(1);
+    expect(easyBot(view, legal, fixedRng(EASY_BLUNDER - 0.01))).toEqual(legal[legal.length - 1]);
+  });
+
+  it('no limiar ou acima, joga exatamente como o greedy', () => {
+    const view = viewFor(busy(), P1);
+    const legal = legalActions(view);
+    for (const next of [EASY_BLUNDER, 0.99]) {
+      expect(easyBot(view, legal, fixedRng(next))).toEqual(greedyBot(view, legal, fixedRng(next)));
+    }
+  });
+
+  it('contra o greedy, 100 partidas terminam sem ação ilegal (runGame lança se o bot erra)', () => {
+    const records = runSeries(config, ['easy', 'greedy'], 100, 'easy-legal');
+    expect(records).toHaveLength(100);
+    expect(records.every((r) => r.result !== null)).toBe(true);
+  });
+
+  it('é determinístico para a mesma semente', () => {
+    const a = runSeries(config, ['easy', 'greedy'], 10, 'easy-det');
+    const b = runSeries(config, ['easy', 'greedy'], 10, 'easy-det');
+    expect(b.map((r) => [r.result, r.steps])).toEqual(a.map((r) => [r.result, r.steps]));
+    expect(b.map((r) => r.finalState)).toEqual(a.map((r) => r.finalState));
+  });
+
+  it('o greedy pontua pelo menos 65% contra ele em 200 partidas, alternando assentos', () => {
+    // Vitória vale 1, empate ½. Metade das partidas com o greedy de p1, metade de p2; mesma semente fixa.
+    const asP1 = runSeries(config, ['greedy', 'easy'], 100, 'easy-nivel-a');
+    const asP2 = runSeries(config, ['easy', 'greedy'], 100, 'easy-nivel-b');
+    const points = (records: typeof asP1, greedySeat: PlayerId): number =>
+      records.reduce((sum, r) => {
+        if (r.result === null) throw new Error(`partida sem fim: ${r.seed}`);
+        if (r.result.kind === 'DRAW') return sum + 0.5;
+        return sum + (r.result.winner === greedySeat ? 1 : 0);
+      }, 0);
+    const score = (points(asP1, 'p1') + points(asP2, 'p2')) / (asP1.length + asP2.length);
+    expect(score).toBeGreaterThanOrEqual(0.65);
+  });
+});
