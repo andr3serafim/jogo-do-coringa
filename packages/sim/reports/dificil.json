@@ -25,7 +25,7 @@
   "machine": "Node v24.19.0, win32 x64, Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz (12 núcleos)",
   "rounds": [
     {
-      "label": "padrão (`HARD_DEFAULTS`)",
+      "label": "inicial: os valores da Tarefa 6 (8 rollouts × 4 candidatas, horizonte de uma rodada de Ataque em toda fase)",
       "hard": {
         "rolloutsPerCandidate": 8,
         "maxCandidates": 4,
@@ -83,12 +83,14 @@
       },
       "approved": false,
       "seconds": 168.79460550000002,
-      "notes": []
+      "notes": [],
+      "easyBlunder": 0.5
     },
     {
       "label": "horizonte por fase: Equipar 2, fase principal 3; ordem e reação com o greedy",
       "notes": [
-        "Antes de gastar a rodada, os valores foram escolhidos numa exploração fora do portão: hard × greedy, 400 partidas por célula (200 sementes × 2 assentos) em sementes que não são as do portão (`explora` e `explora2`), erro-padrão de cerca de 2,5 pp por célula (então diferenças de 2 a 3 pp não se distinguem). Pontuação do hard, em %:\n\n| Variante | `explora` | `explora2` |\n| --- | --- | --- |\n| base: horizonte 1 em toda fase, 8 rollouts, 4 candidatas | 53,0 | |\n| 24 rollouts · 8 candidatas · sempre incluir DECLARE_ATTACK/END_TURN/PASS | 52,8 · 52,8 · 53,3 | |\n| só troca de ação se superar a do greedy por 15 · por 40 pontos por rollout | 54,5 · 50,5 | |\n| horizonte 2 | 61,8 | 55,5 |\n| horizonte 2 com 16 rollouts | 60,8 | |\n| horizonte 3 · horizonte 4 | 57,5 · 53,8 | 57,3 · |\n| busca só no Equipar, horizonte 1 · 2 · 3 · 4 | 50,0 · 55,0 · 52,5 · 49,8 | |\n| busca só na fase principal, horizonte 1 · 2 · 3 | 52,8 · 54,0 · 57,3 | |\n| busca só na ordem do ataque · só na reação (horizonte 2) | 49,8 · 48,5 | |\n| Equipar 2 e fase principal 2, sem busca na ordem e na reação | 59,0 | 58,5 |\n| todas as fases (Equipar 2, principal 3, ordem 2, reação 2) | 60,8 | 55,3 |\n| **Equipar 2 e fase principal 3, sem busca na ordem e na reação (esta rodada)** | 62,0 | 58,3 |\n\nLeitura: o que muda a força é o horizonte (olhar mais de uma rodada de Ataque), e não o número de rollouts nem de candidatas; a busca na ordem do ataque e na reação não melhorou nada, então elas ficam com o greedy. A melhor combinação medida (média de 60,1% em 800 partidas, erro-padrão de 1,7 pp) fica perto do limiar de 58%, sem folga confortável: esta rodada pode passar ou não só pela sorte das sementes."
+        "Antes de gastar a rodada, os valores foram escolhidos numa exploração fora do portão: hard × greedy, 400 partidas por célula (200 sementes × 2 assentos) em sementes que não são as do portão (`explora` e `explora2`), erro-padrão de cerca de 2,5 pp por célula (então diferenças de 2 a 3 pp não se distinguem). Pontuação do hard, em %:\n\n| Variante | `explora` | `explora2` |\n| --- | --- | --- |\n| base: horizonte 1 em toda fase, 8 rollouts, 4 candidatas | 53,0 | |\n| 24 rollouts · 8 candidatas · sempre incluir DECLARE_ATTACK/END_TURN/PASS | 52,8 · 52,8 · 53,3 | |\n| só troca de ação se superar a do greedy por 15 · por 40 pontos por rollout | 54,5 · 50,5 | |\n| horizonte 2 | 61,8 | 55,5 |\n| horizonte 2 com 16 rollouts | 60,8 | |\n| horizonte 3 · horizonte 4 | 57,5 · 53,8 | 57,3 · |\n| busca só no Equipar, horizonte 1 · 2 · 3 · 4 | 50,0 · 55,0 · 52,5 · 49,8 | |\n| busca só na fase principal, horizonte 1 · 2 · 3 | 52,8 · 54,0 · 57,3 | |\n| busca só na ordem do ataque · só na reação (horizonte 2) | 49,8 · 48,5 | |\n| Equipar 2 e fase principal 2, sem busca na ordem e na reação | 59,0 | 58,5 |\n| todas as fases (Equipar 2, principal 3, ordem 2, reação 2) | 60,8 | 55,3 |\n| **Equipar 2 e fase principal 3, sem busca na ordem e na reação (esta rodada)** | 62,0 | 58,3 |\n\nLeitura: o que muda a força é o horizonte (olhar mais de uma rodada de Ataque), e não o número de rollouts nem de candidatas; a busca na ordem do ataque e na reação não melhorou nada, então elas ficam com o greedy. A melhor combinação medida (média de 60,1% em 800 partidas, erro-padrão de 1,7 pp) fica perto do limiar de 58%, sem folga confortável: esta rodada pode passar ou não só pela sorte das sementes.",
+        "Confirmação do Difícil em sementes novas, feita depois do portão e fora dele (`--prefixo confirma --sementes 200`, 400 partidas, execução parcial que não grava; `EASY_BLUNDER` 0,50): (a) hard × greedy 60,8% ± 2,4 (243/400; 62,0% com a iniciativa e 59,5% sem), p95 172 ms (parte dela rodou junto com outra carga na máquina), máx 752 ms; (b) greedy × easy 64,0% ± 2,4 (256/400), abaixo dos 65%, o que motivou a rodada 3. Estimativa agrupada do hard (portão + confirmação): 361/600 = 60,2% ± 2,0."
       ],
       "hard": {
         "rolloutsPerCandidate": 8,
@@ -144,7 +146,76 @@
         "p95": true
       },
       "approved": true,
-      "seconds": 396.5211229
+      "seconds": 396.5211229,
+      "easyBlunder": 0.5
+    },
+    {
+      "label": "ajuste do Fácil: EASY_BLUNDER 0,50 → 0,70; o Difícil não muda",
+      "notes": [
+        "Ajuste do Fácil. Com `EASY_BLUNDER` 0,50, o (b) ficou no limiar (65,0% no portão, 64,0% nas sementes novas da rodada 2), sem margem. O valor novo foi escolhido fora do portão: greedy × easy em 400 sementes `explora-facil` × 2 assentos = 800 partidas por valor (erro-padrão de cerca de 1,6 pp), sem tocar nas sementes `dificil-*` nem `confirma`. Pontuação do greedy contra o Fácil, em %:\n\n| `EASY_BLUNDER` | Greedy contra o Fácil (800 partidas) |\n| --- | --- |\n| 0,50 | 67,1 ± 1,7 |\n| 0,60 | 69,3 ± 1,6 |\n| 0,70 | 72,5 ± 1,6 |\n| 0,80 | 76,5 ± 1,5 |\n\nEscolhido 0,70, o menor valor com média acima de 70% (meta: margem clara sobre os 65%, com erro-padrão de até 1,7 pp). O Difícil não muda nesta rodada, e o (a) não envolve o Fácil: ele serve de verificação de determinismo (tem que repetir o resultado da rodada 2). O teste de `bots.test.ts` segue com o limiar de 65%."
+      ],
+      "hard": {
+        "rolloutsPerCandidate": 8,
+        "maxCandidates": 4,
+        "horizon": {
+          "EQUIP": 2,
+          "ATTACK_MAIN": 3
+        }
+      },
+      "easyBlunder": 0.7,
+      "hardVsGreedy": {
+        "games": 200,
+        "rate": 0.59,
+        "se": 0.0347778665245584,
+        "wins": 118,
+        "draws": 0,
+        "losses": 82,
+        "unfinished": 0,
+        "withInitiative": {
+          "games": 100,
+          "rate": 0.54
+        },
+        "withoutInitiative": {
+          "games": 100,
+          "rate": 0.64
+        }
+      },
+      "greedyVsEasy": {
+        "games": 200,
+        "rate": 0.74,
+        "se": 0.031016124838541645,
+        "wins": 148,
+        "draws": 0,
+        "losses": 52,
+        "unfinished": 0,
+        "withInitiative": {
+          "games": 100,
+          "rate": 0.74
+        },
+        "withoutInitiative": {
+          "games": 100,
+          "rate": 0.74
+        }
+      },
+      "timing": {
+        "decisions": 5348,
+        "p50Ms": 97.08879999999772,
+        "p95Ms": 198.19169999999576,
+        "maxMs": 367.27350000001024,
+        "searching": {
+          "decisions": 3943,
+          "p50Ms": 116.57110000000102,
+          "p95Ms": 207.3020999999717,
+          "maxMs": 367.27350000001024
+        }
+      },
+      "passes": {
+        "hardVsGreedy": true,
+        "greedyVsEasy": true,
+        "p95": true
+      },
+      "approved": true,
+      "seconds": 480.77497089999997
     }
   ]
 }
