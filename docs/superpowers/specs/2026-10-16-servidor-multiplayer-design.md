@@ -403,7 +403,7 @@ O `deadline.at` enviado é o que a interface mostra; o servidor só injeta o `TI
 ### 8.4 Nada de informação oculta no fio
 
 - Para o jogador X sai só: `viewFor(estado, X)`, `viewEvents(eventos, X)`, dados públicos da sala e respostas às mensagens do próprio X.
-- A semente é gerada no objeto (`crypto.getRandomValues`, 128 bits), uma nova por partida e por revanche, nunca derivada da anterior. Ela não aparece em nenhuma mensagem enquanto a partida pode continuar; depois do fim (sala `FINISHED`, W.O. ou sala encerrada), a mensagem `replay` a leva (spec 4 §4.2).
+- A semente é gerada no objeto (`crypto.getRandomValues`, 128 bits), uma nova por partida e por revanche, nunca derivada da anterior. Ela não aparece em nenhuma mensagem enquanto a partida pode continuar; depois do fim (sala `FINISHED`, W.O. ou sala encerrada), a mensagem `replay` a leva (a partir da fatia 3 do polimento; spec 4 §4.2).
 - Tempo: piso de 2 s na janela de reação (§6.3); o servidor não passa sozinho; o Equipar automático só acontece quando a quantidade já é pública.
 - **Erros não viram oráculo:** a resposta a uma jogada recusada depende só da mão de X, do cemitério e do campo público. Isso já vale no motor hoje (os erros só consultam a mão de quem joga, o cemitério e o campo do oponente). A mensagem de erro pode repetir o id que o próprio X enviou.
 - Testes obrigatórios (§11.3) [P]:

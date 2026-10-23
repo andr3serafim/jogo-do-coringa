@@ -83,17 +83,18 @@ modelo da web. **[decisão minha]** As pistas:
   pista toca nem fica na fila.
 - **Mudo:** preferência `sound` em `coringa:prefs`, **ligada por padrão [decisão minha]**, com um interruptor "Som" no menu da
   partida e na tela inicial. Desligado, o `AudioContext` é suspenso.
-- **Sem som** no `catchUp` e no `resync` (seria uma rajada). O pulo das batidas cancela as pistas agendadas que ainda não tocaram.
+- **Sem som** no `catchUp` e no `resync` (seria uma rajada). Nada é agendado adiante: cada pista toca na hora em que a batida a
+  pede, e as vozes de uma pista já iniciada terminam sozinhas, sem que um pulo das batidas as corte.
 - **Volume fixo e moderado**, sem picos (limitador no fim da cadeia).
 - **Originais:** os sons são sintetizados por código (osciladores, ruído filtrado e envelopes do Web Audio). Nenhum arquivo de
   áudio, então não há licença a conferir.
-- **Porta injetável:** a mesa fala com uma interface `SoundPort` (`play(cue)`, `cancelPending()`, `setEnabled(on)`). O jsdom não
+- **Porta injetável:** a mesa fala com uma interface `SoundPort` com duas operações, `play(cue)` e `setEnabled(on)`. O jsdom não
   tem `AudioContext`; os testes usam uma porta falsa.
 
 ### 2.3 Testes
 - O mapa `cueOf` para cada tipo de evento, e nenhuma pista em `catchUp`/`resync`.
-- O agendamento acompanha a batida e o pulo cancela o que falta.
-- Com a porta falsa: um contexto que nasce suspenso é retomado no gesto seguinte.
+- A pista toca na batida do evento, e só ao vivo: no `catchUp` e no `resync` nenhuma pista sai.
+- Com a porta falsa: um contexto que nasce suspenso é retomado no próprio gesto que o criou (e nos seguintes, enquanto não estiver tocando).
 - E2E: um espião no `addInitScript` confere que nenhum `AudioContext` nasce antes do primeiro gesto e que nasce depois dele.
 
 ---
@@ -115,7 +116,9 @@ modelo da web. **[decisão minha]** As pistas:
   - na escolha da ordem do ataque e na reação não há busca: vale a jogada do `greedy`, porque buscar ali não melhorou nada.
 
   Medido no Node: uma partida inteira `greedy × greedy` leva ~20 ms, um assento tem ~26 decisões com mais de uma opção (até
-  30 opções no Equipar), e a decisão do Difícil leva 82 ms na mediana e 152 ms no p95.
+  30 opções no Equipar), e a decisão do Difícil leva 97 ms na mediana e 198 ms no p95 (rodada 3 do portão, as decisões com 2 ou
+  mais ações; só nas fases com busca, 117 e 207 ms). Esses tempos variam com a carga da máquina: a confirmação em sementes novas,
+  rodada junto com outra carga, deu p95 de 172 ms e máximo de 752 ms.
 
 ### 3.2 Portão do Difícil (medido no simulador, semente fixa)
 - Contra o `greedy`, alternando os assentos e a iniciativa inicial: pontuação ≥ 58% em 200 partidas (≈ 2 erros-padrão acima de
@@ -126,7 +129,10 @@ modelo da web. **[decisão minha]** As pistas:
 - Tempo **[decisão minha]**: o orçamento protege o navegador. O número de rollouts por decisão é fixo e dimensionado para ≤ 300 ms
   no p95 no Node (um celular modesto, 3 a 5 vezes mais lento, leva até ~1,5 s, mostrado como o bot "pensando"). A busca roda em
   fatias de no máximo ~8 ms na thread principal, uma por tarefa do navegador, para não travar as batidas nem os timers da
-  `FlashLock`.
+  `FlashLock`. A fatia mira ~8 ms, mas a menor unidade dela é **um rollout** (o gerador cede depois de cada um): no Node ele leva
+  p95 de ~6 a 7 ms e máximo de ~35 ms, e num celular modesto, 3 a 5 vezes mais. Então uma fatia pode passar de 8 ms, e é só um
+  alvo, não um teto. O playtest no celular confere se há engasgo no Equipar contra o Difícil (a busca mais pesada, com até 30
+  opções); se houver, o seguimento conhecido é ceder dentro do rollout.
 - O portão roda num script à parte do simulador (como o `sim:calibrate`), nunca no `pnpm check`: cada rodada leva dezenas de
   minutos.
 - A busca é determinística para a mesma semente: o número de rollouts é fixo, e o tempo só decide quando ela termina, não o
