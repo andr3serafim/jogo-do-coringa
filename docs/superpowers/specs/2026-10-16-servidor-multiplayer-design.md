@@ -24,7 +24,7 @@ Dois amigos jogam uma partida 1v1 em tempo real a partir de um link, sem conta. 
 - Sem contas: **apelido + token de reconexão** guardado no navegador.
 - **Servidor autoritativo:** o navegador só envia intenções.
 - Cada jogador recebe o próprio `viewFor` e os eventos redigidos por `viewEvents`.
-- A **semente nunca vai para o navegador** (ver §8.6 para o log da conta).
+- A **semente de uma partida só sai depois do fim dela, no replay** (decisão de 2026-10-22, sessão principal por delegação do autor; spec 4 §4.2). Durante a partida ela nunca vai para o navegador (ver §8.6 para o log da conta).
 - O estado é salvo no storage do objeto **a cada passo**.
 - Tempos da spec 1 §1.12: Equipar 40 s, Escolha da ordem 10 s, Turno 30 s, Janela de reação 8 s (mínimo 2 s), Reconexão 60 s. W.O. por 60 s sem voltar ou 3 turnos estourados seguidos (§1.11).
 
@@ -403,11 +403,11 @@ O `deadline.at` enviado é o que a interface mostra; o servidor só injeta o `TI
 ### 8.4 Nada de informação oculta no fio
 
 - Para o jogador X sai só: `viewFor(estado, X)`, `viewEvents(eventos, X)`, dados públicos da sala e respostas às mensagens do próprio X.
-- A semente é gerada no objeto (`crypto.getRandomValues`, 128 bits) e não aparece em nenhuma mensagem.
+- A semente é gerada no objeto (`crypto.getRandomValues`, 128 bits), uma nova por partida e por revanche, nunca derivada da anterior. Ela não aparece em nenhuma mensagem enquanto a partida pode continuar; depois do fim (sala `FINISHED`, W.O. ou sala encerrada), a mensagem `replay` a leva (spec 4 §4.2).
 - Tempo: piso de 2 s na janela de reação (§6.3); o servidor não passa sozinho; o Equipar automático só acontece quando a quantidade já é pública.
 - **Erros não viram oráculo:** a resposta a uma jogada recusada depende só da mão de X, do cemitério e do campo público. Isso já vale no motor hoje (os erros só consultam a mão de quem joga, o cemitério e o campo do oponente). A mensagem de erro pode repetir o id que o próprio X enviou.
 - Testes obrigatórios (§11.3) [P]:
-  - todo `state` para X traz `view` igual a `viewFor(estado, X)` e `events` igual a `viewEvents(eventos do passo, X)` (no `catchUp`, a concatenação dos passos perdidos), e nenhuma mensagem tem outro dado do jogo nem a semente;
+  - todo `state` para X traz `view` igual a `viewFor(estado, X)` e `events` igual a `viewEvents(eventos do passo, X)` (no `catchUp`, a concatenação dos passos perdidos), e nenhuma mensagem de uma partida que ainda pode continuar tem outro dado do jogo nem a semente;
   - os invariantes do motor já garantem que `viewFor` e `viewEvents` não expõem mão, pendentes, monte nem semente.
 
   Um teste do tipo "nenhum id escondido no fio" não serve. Uma carta mostrada em público (descartada no Equipar, removida da fileira) pode voltar ao monte e ser comprada pelo oponente **no mesmo passo**, quando o monte acaba, e então seu id aparece de forma legítima num evento.
@@ -592,7 +592,7 @@ O `test:coverage` do servidor roda o projeto do Node com cobertura e o do worker
 Partidas completas entre dois clientes simulados que conversam com o núcleo por JSON de verdade (serializa e valida). Um relógio falso avança até o próximo alarme quando ninguém age. Há variações com quedas e voltas aleatórias, jogadas atrasadas (época velha) e mensagens repetidas. Em todas:
 
 - toda partida termina (fim no motor ou abandono);
-- **o que vai para X é exatamente a redação do motor** (§8.4): `view` = `viewFor(estado, X)`, `events` = `viewEvents(…, X)`, e a semente não aparece em nenhuma mensagem;
+- **o que vai para X é exatamente a redação do motor** (§8.4): `view` = `viewFor(estado, X)`, `events` = `viewEvents(…, X)`, e a semente não aparece em nenhuma mensagem enquanto a partida pode continuar (só no `replay`, depois do fim);
 - **erro sem oráculo:** uma jogada de X que cita um id escondido de X (na mão do oponente, nas pendentes ou no monte) recebe o mesmo código de um id inexistente;
 - reexecutar no motor o registro da partida (semente + passos) dá o mesmo estado final (o servidor não desvia o motor);
 - nenhum `TIMEOUT` injetado é recusado pelo motor;
