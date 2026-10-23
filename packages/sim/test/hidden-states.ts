@@ -1,4 +1,4 @@
-import type { Destination, GameState } from '@coringa/engine';
+import { seedRng, type Destination, type GameState } from '@coringa/engine';
 // Builder de cenários do motor: monta estados reais sem inventar cartas.
 import { P2, player, setup } from '@coringa/engine/testing';
 
@@ -12,7 +12,10 @@ export const equip = (): GameState =>
     p2: { hand: ['K', 'A'], pending: [3, 5, 7] },
   });
 
-/** Troca cartas do oponente com o monte (mesmas quantidades, ids e tipos diferentes) e inverte a ordem do monte. */
+/**
+ * Troca cartas do oponente com o monte (mesmas quantidades, ids e tipos diferentes), inverte a ordem do monte e troca o PRNG real
+ * da partida: um bot que ainda usasse o `rng` do estado (que decide os embaralhamentos futuros) deixaria de dar a mesma jogada.
+ */
 export function swapHidden(base: GameState): GameState {
   const s = structuredClone(base);
   const opponent = player(s, P2);
@@ -25,6 +28,7 @@ export function swapHidden(base: GameState): GameState {
   s.deck[specialAt] = swappedHand;
   s.deck[numberAt] = swappedPending;
   s.deck.reverse();
+  s.rng = seedRng('hidden-states/outro-prng');
   return s;
 }
 

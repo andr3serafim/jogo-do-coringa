@@ -106,8 +106,14 @@ export default defineConfig(
     },
   },
   {
-    // Esses arquivos vão para o navegador (via `exports` do @coringa/sim): nada de node:*.
-    files: ['packages/sim/src/bots/**/*.ts', 'packages/sim/src/rng.ts', 'packages/sim/src/play/text.ts'],
+    // Esses arquivos vão para o navegador (via `exports` do @coringa/sim): nada de node:*. O `determinize` entra no chunk do treino
+    // pela busca do Difícil (`bots/hard.ts`).
+    files: [
+      'packages/sim/src/bots/**/*.ts',
+      'packages/sim/src/experiments/determinize.ts',
+      'packages/sim/src/rng.ts',
+      'packages/sim/src/play/text.ts',
+    ],
     rules: {
       'no-restricted-imports': [
         'error',
