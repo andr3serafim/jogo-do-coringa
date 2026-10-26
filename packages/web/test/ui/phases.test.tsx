@@ -540,6 +540,33 @@ describe('janela de reação (spec §3.7)', () => {
     }
   });
 
+  it('o gatilho diz "derruba você" quando o ataque de Duda alcança a sua vida, e só então (spec §8.1)', () => {
+    const cases: Array<{ spec: ViewSpec; text: string }> = [
+      {
+        spec: { ...REACTION, self: { ...DRAFT.self, guard: [], hp: 38 } },
+        text: 'Duda declarou ataque: 84 contra sua Defesa 46 → dano 38 · derruba você',
+      },
+      {
+        spec: { ...REACTION, self: { ...DRAFT.self, guard: [], hp: 39 } },
+        text: 'Duda declarou ataque: 84 contra sua Defesa 46 → dano 38',
+      },
+      // O seu K absorve: a conta de ATK − DEF passa da vida, e o gatilho não diz "derruba".
+      {
+        spec: { ...REACTION, self: { ...DRAFT.self, hp: 10 } },
+        text: 'Duda declarou ataque: 84 contra sua Defesa 46 → seu K absorve',
+      },
+      {
+        spec: { ...REACTION, self: { ...DRAFT.self, reflect: true }, opponent: { ...DRAFT.opponent, hp: 77 } },
+        text: 'Duda declarou ataque: 84 → seu Reflect devolve 77 de dano a Duda · derruba Duda',
+      },
+    ];
+    for (const { spec, text } of cases) {
+      const { unmount } = mount(spec, { state: withClock });
+      expect(inBar().getByText(text)).toBeInTheDocument();
+      unmount();
+    }
+  });
+
   it('o gatilho do K: "Duda pôs 2 K na Guarda", com o número que veio nos eventos', () => {
     const { view } = scenarioAt({ ...DRAFT, phase: 'K_PLAYED' });
     const kings: SpecialCard[] = [view.opponent.guard[0]!, { id: 'k-2', kind: 'K', suit: 'paus' }];

@@ -4,6 +4,7 @@
 // Quem espera vê "Duda pode reagir…" e o próprio turno pausado, os dois na barra e na faixa central.
 import type { AttackPreview, GameEvent, PlayerView } from '@coringa/engine';
 import { attackDeclaredText, guardPlayedText, PASS_LABEL, reflectPlayedText } from '../../model/copy.ts';
+import { livesOf } from '../../model/preview.ts';
 import { PRIMARY, PRIMARY_TITLE, TwoLine } from './controls.tsx';
 import type { TableNames } from './labels.ts';
 
@@ -32,7 +33,7 @@ export function ReactionNotice({ view, names, threat, events }: ReactionNoticePr
   const opponent = names.opponent;
   const text =
     phase.trigger === 'ATTACK'
-      ? attackDeclaredText(threat, opponent)
+      ? attackDeclaredText(threat, opponent, livesOf(view))
       : phase.trigger === 'K_PLAYED'
         ? guardPlayedText(opponent, kingsPlayed(view, events))
         : reflectPlayedText(opponent);

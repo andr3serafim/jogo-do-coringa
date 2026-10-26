@@ -153,7 +153,7 @@ export function ActionBar(props: ActionBarProps) {
           </PreviewRow>
         ) : null}
         {previews.threat.outcome !== 'NO_ATTACK' && !triggered ? (
-          <PreviewRow label={threatLabel(opponent)}>{threatPreviewText(previews.threat, opponent)}</PreviewRow>
+          <PreviewRow label={threatLabel(opponent)}>{threatPreviewText(previews.threat, opponent, previews.lives)}</PreviewRow>
         ) : null}
       </div>
 
@@ -167,7 +167,7 @@ export function ActionBar(props: ActionBarProps) {
             <TwoLine
               title={plays.finish.type === 'DECLARE_ATTACK' ? ATTACK_LABEL : END_TURN_LABEL}
               detail={
-                plays.finish.type === 'DECLARE_ATTACK' ? attackPreviewText(previews.mine, opponent) : EMPTY_ATTACK_TEXT
+                plays.finish.type === 'DECLARE_ATTACK' ? attackPreviewText(previews.mine, opponent, previews.lives) : EMPTY_ATTACK_TEXT
               }
               titleClass={PRIMARY_TITLE}
               detailClass="text-xs font-semibold tabular-nums pc:text-[13px]"

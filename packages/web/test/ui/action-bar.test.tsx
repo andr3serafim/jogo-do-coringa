@@ -8,7 +8,7 @@ import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { attackPreviewText, cardText, resurrectRowDetail, threatPreviewText } from '../../src/model/copy.ts';
-import { viewWithout } from '../../src/model/preview.ts';
+import { livesOf, viewWithout } from '../../src/model/preview.ts';
 import { Session } from '../../src/model/session.ts';
 import { PC_QUERY } from '../../src/ui/table/History.tsx';
 import { PlayTable } from '../../src/ui/table/PlayTable.tsx';
@@ -287,9 +287,9 @@ describe('barra de ação: Armadilha e alvos (spec §3.2, §3.4)', () => {
     const kButton = inBar().getByRole('button', { name: startsWith(guardTarget(m.view)) });
     await m.user.hover(kButton);
     expect(inBar().getByText('Quebrando o K antes')).toBeInTheDocument();
-    expect(inBar().getByText(attackPreviewText(previewAttack(viewWithout(m.view, m.view.opponent.guard[0]!.id), 'self'), 'Duda'))).toHaveTextContent(
-      '152 × 42 · dano 110',
-    );
+    expect(
+      inBar().getByText(attackPreviewText(previewAttack(viewWithout(m.view, m.view.opponent.guard[0]!.id), 'self'), 'Duda', livesOf(m.view))),
+    ).toHaveTextContent('152 × 42 · dano 110');
     await m.user.unhover(kButton);
     expect(inBar().queryByText('Quebrando o K antes')).not.toBeInTheDocument();
   });
@@ -308,7 +308,7 @@ describe('barra de ação: prévias e o botão principal (spec §3.4)', () => {
   it('Atacar mostra a prévia do motor e manda DECLARE_ATTACK', async () => {
     const m = mount();
     const preview = previewAttack(m.view, 'self');
-    const text = attackPreviewText(preview, 'Duda');
+    const text = attackPreviewText(preview, 'Duda', livesOf(m.view));
     expect(text).toBe('152 × 42 · o K de Duda absorve, dano 0');
     const attack = inBar().getByRole('button', { name: ATTACK_BUTTON });
     expect(attack).toHaveAccessibleName(`Atacar ${text}`);
@@ -344,6 +344,48 @@ describe('barra de ação: prévias e o botão principal (spec §3.4)', () => {
     }
   });
 
+  it('o botão Atacar diz "derruba Duda" quando o dano alcança a vida dele, e só então (spec §8.1)', async () => {
+    const noGuard = { ...DRAFT.opponent, guard: [] };
+    const lethal = mount({ ...DRAFT, opponent: { ...noGuard, hp: 110 } });
+    const attack = inBar().getByRole('button', { name: ATTACK_BUTTON });
+    expect(attack).toHaveAccessibleName('Atacar 152 × 42 · dano 110 · derruba Duda');
+    expect(attack.textContent).toBe('Atacar 152 × 42 · dano 110 · derruba Duda');
+    expect(inBar().getByText('152 × 42 · dano 110 · derruba Duda').className).toContain('tabular-nums');
+    await lethal.user.click(attack);
+    expect(sentAction(lethal)).toEqual({ type: 'DECLARE_ATTACK' });
+    lethal.unmount();
+
+    mount({ ...DRAFT, opponent: { ...noGuard, hp: 111 } });
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toHaveAccessibleName('Atacar 152 × 42 · dano 110');
+  });
+
+  it('com a Guarda de Duda de pé o botão não diz "derruba", mesmo com ATK − DEF maior que a vida dele', () => {
+    mount({ ...DRAFT, opponent: { ...DRAFT.opponent, hp: 50 } });
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toHaveAccessibleName(
+      'Atacar 152 × 42 · o K de Duda absorve, dano 0',
+    );
+  });
+
+  it('contra o Reflect de Duda o botão diz "derruba você" quando o que volta alcança a sua vida', () => {
+    const lethal = mount({ ...DRAFT, self: { ...DRAFT.self, hp: 141 }, opponent: { ...DRAFT.opponent, reflect: true } });
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toHaveAccessibleName(
+      'Atacar 152 × 11 · Reflect de Duda: 141 de dano volta para você · derruba você',
+    );
+    lethal.unmount();
+    mount({ ...DRAFT, self: { ...DRAFT.self, hp: 142 }, opponent: { ...DRAFT.opponent, reflect: true } });
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toHaveAccessibleName(
+      'Atacar 152 × 11 · Reflect de Duda: 141 de dano volta para você',
+    );
+  });
+
+  it('a linha "Quebrando o K antes" também diz quando o ataque sem o K derruba', async () => {
+    const m = mount({ ...DRAFT, opponent: { ...DRAFT.opponent, hp: 110 } });
+    await m.user.click(handCard('A'));
+    await m.user.click(inBar().getByRole('button', { name: 'Armadilha' }));
+    await m.user.hover(inBar().getByRole('button', { name: startsWith(guardTarget(m.view)) }));
+    expect(inBar().getByText('152 × 42 · dano 110 · derruba Duda')).toBeInTheDocument();
+  });
+
   it('a prévia do Ataque Absoluto diz que a Guarda não segura', () => {
     mount({ ...DRAFT, self: { ...DRAFT.self, attackBuffs: ['J', 'J', 'J', 'J'] } });
     expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toHaveAccessibleName(/^Atacar .*Ataque Absoluto, dano \d+/);
@@ -362,7 +404,7 @@ describe('barra de ação: prévias e o botão principal (spec §3.4)', () => {
   it('a ameaça do oponente aparece junto da sua Defesa', () => {
     const m = mount();
     const threat = previewAttack(m.view, 'opponent');
-    const text = threatPreviewText(threat, 'Duda');
+    const text = threatPreviewText(threat, 'Duda', livesOf(m.view));
     expect(text).toBe('84 × sua Defesa 46 · seu K absorve, dano 0');
     expect(inBar().getByText('Ameaça de Duda')).toBeInTheDocument();
     expect(inBar().getByText(text)).toBeInTheDocument();
@@ -380,6 +422,21 @@ describe('barra de ação: prévias e o botão principal (spec §3.4)', () => {
     absolute.unmount();
     mount({ ...DRAFT, self: { ...DRAFT.self, reflect: true } });
     expect(inBar().getByText('84 × 7 · seu Reflect devolve 77 de dano a Duda')).toBeInTheDocument();
+  });
+
+  it('a ameaça diz "derruba você" quando o dano de Duda alcança a sua vida, e só então (spec §8.1)', () => {
+    const lethal = mount({ ...DRAFT, self: { ...DRAFT.self, guard: [], hp: 38 } });
+    expect(inBar().getByText('84 × sua Defesa 46 · dano 38 · derruba você')).toBeInTheDocument();
+    lethal.unmount();
+    const spared = mount({ ...DRAFT, self: { ...DRAFT.self, guard: [], hp: 39 } });
+    expect(inBar().getByText('84 × sua Defesa 46 · dano 38')).toBeInTheDocument();
+    spared.unmount();
+    // O seu K absorve: nunca derruba, com a vida que for.
+    const guarded = mount({ ...DRAFT, self: { ...DRAFT.self, hp: 10 } });
+    expect(inBar().getByText('84 × sua Defesa 46 · seu K absorve, dano 0')).toBeInTheDocument();
+    guarded.unmount();
+    mount({ ...DRAFT, self: { ...DRAFT.self, reflect: true }, opponent: { ...DRAFT.opponent, hp: 77 } });
+    expect(inBar().getByText('84 × 7 · seu Reflect devolve 77 de dano a Duda · derruba Duda')).toBeInTheDocument();
   });
 
   it('o botão principal tem altura de alvo de toque', () => {

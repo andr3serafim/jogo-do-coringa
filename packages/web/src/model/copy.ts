@@ -3,7 +3,7 @@ import type { AttackPreview, Card, PlayerId, RowName, SpecialCard } from '@corin
 import type { DeadlineKind, Outcome, Score } from '@coringa/protocol';
 import { cardText, ROW_NAME } from '@coringa/sim/text';
 import type { TrainingLevel } from './local-room.ts';
-import { previewChanged, type Previews } from './preview.ts';
+import { previewChanged, type Lives, type Previews } from './preview.ts';
 import type { SceneKind } from './timeline.ts';
 
 export { cardText, ROW_NAME };
@@ -90,6 +90,21 @@ export function targetButtonText(card: SpecialCard, zone: TargetZone, owner: str
 
 // Prévias: a conta é do motor (`previewAttack`); aqui só ficam as frases de cada desfecho.
 
+/**
+ * " · derruba Duda" quando o `damage` que o motor calculou zera a `life` que resta (dano igual à vida derruba; dano 0, da Guarda
+ * ou da Defesa Absoluta que absorvem, nunca). Nunca se deduz de ATK − DEF: o dano já vem depois da Guarda, da Defesa Absoluta e do Reflect.
+ */
+const knockoutText = (damage: number, life: number, who: string): string =>
+  damage > 0 && damage >= life ? ` · derruba ${who}` : '';
+
+/** O que o seu ataque derruba: o oponente (dano) ou você (o que o Reflect dele devolve); os dois nunca juntos. */
+const myKnockoutText = (p: AttackPreview, opponent: string, lives: Lives): string =>
+  knockoutText(p.damage, lives.opponent, opponent) + knockoutText(p.reflected, lives.self, 'você');
+
+/** O que o ataque do oponente derruba: você (dano) ou ele (o que o seu Reflect devolve). */
+const threatKnockoutText = (p: AttackPreview, opponent: string, lives: Lives): string =>
+  knockoutText(p.damage, lives.self, 'você') + knockoutText(p.reflected, lives.opponent, opponent);
+
 /** O que acontece com o seu ataque, depois da conta "ATK × DEF". */
 function attackOutcomeText(p: AttackPreview, opponent: string): string {
   switch (p.outcome) {
@@ -106,26 +121,28 @@ function attackOutcomeText(p: AttackPreview, opponent: string): string {
   }
 }
 
-/** "152 × 42 · o K de Duda absorve, dano 0": o texto do botão Atacar. */
-export const attackPreviewText = (p: AttackPreview, opponent: string): string =>
-  `${p.attack} × ${p.defense} · ${attackOutcomeText(p, opponent)}`;
+/** "152 × 42 · o K de Duda absorve, dano 0": o texto do botão Atacar. Acrescenta "· derruba Duda" (ou "· derruba você", contra o Reflect). */
+export const attackPreviewText = (p: AttackPreview, opponent: string, lives: Lives): string =>
+  `${p.attack} × ${p.defense} · ${attackOutcomeText(p, opponent)}${myKnockoutText(p, opponent, lives)}`;
 
-/** O ataque do oponente contra a sua Defesa: "84 × sua Defesa 46 · seu K absorve, dano 0". */
-export function threatPreviewText(p: AttackPreview, opponent: string): string {
+/** O ataque do oponente contra a sua Defesa: "84 × sua Defesa 46 · seu K absorve, dano 0", ou "· dano 38 · derruba você". */
+export function threatPreviewText(p: AttackPreview, opponent: string, lives: Lives): string {
   switch (p.outcome) {
     case 'NO_ATTACK':
       return 'sem ataque';
     // Com Reflect o motor usa metade da DEF base de quem ataca, e não a sua Defesa.
     case 'REFLECTED':
       return `${p.attack} × ${p.defense} · ${
-        p.reflected > 0 ? `seu Reflect devolve ${p.reflected} de dano a ${opponent}` : 'seu Reflect anula o ataque, dano 0'
+        p.reflected > 0
+          ? `seu Reflect devolve ${p.reflected} de dano a ${opponent}${threatKnockoutText(p, opponent, lives)}`
+          : 'seu Reflect anula o ataque, dano 0'
       }`;
     case 'GUARD_ABSORBS':
       return `${p.attack} × sua Defesa ${p.defense} · seu K absorve, dano 0`;
     case 'ABSOLUTE_DEFENSE':
       return `${p.attack} × sua Defesa ${p.defense} · sua Defesa Absoluta anula, dano 0`;
     case 'DAMAGE':
-      return `${p.attack} × sua Defesa ${p.defense} · ${p.absolute ? 'Ataque Absoluto, ' : ''}dano ${p.damage}`;
+      return `${p.attack} × sua Defesa ${p.defense} · ${p.absolute ? 'Ataque Absoluto, ' : ''}dano ${p.damage}${threatKnockoutText(p, opponent, lives)}`;
   }
 }
 
@@ -144,7 +161,7 @@ function attackEffectText(p: AttackPreview, opponent: string): string {
 export function brokenEffectText(before: Previews, after: Previews, opponent: string, form: 'short' | 'long'): string {
   const parts: string[] = [];
   if (previewChanged(before.mine, after.mine)) {
-    parts.push(form === 'long' ? attackPreviewText(after.mine, opponent) : attackEffectText(after.mine, opponent));
+    parts.push(form === 'long' ? attackPreviewText(after.mine, opponent, after.lives) : attackEffectText(after.mine, opponent));
   }
   if (previewChanged(before.threat, after.threat)) {
     parts.push(`ameaça de ${opponent} cai de ${before.threat.attack} para ${after.threat.attack}`);
@@ -211,7 +228,7 @@ export const PASS_LABEL = 'Passar';
 export const PASSED_TEXT = 'Você passou; esperando a janela fechar…';
 
 /** O gatilho e a prévia, para quem responde. A conta é do motor (`previewAttack`); aqui só a frase. */
-export function attackDeclaredText(p: AttackPreview, opponent: string): string {
+export function attackDeclaredText(p: AttackPreview, opponent: string, lives: Lives): string {
   const head = `${opponent} declarou ataque:`;
   switch (p.outcome) {
     case 'NO_ATTACK':
@@ -219,14 +236,16 @@ export function attackDeclaredText(p: AttackPreview, opponent: string): string {
     // Com Reflect a conta não é contra a sua Defesa: o motor usa metade da DEF base de quem ataca.
     case 'REFLECTED':
       return `${head} ${p.attack} → ${
-        p.reflected > 0 ? `seu Reflect devolve ${p.reflected} de dano a ${opponent}` : 'seu Reflect anula o ataque'
+        p.reflected > 0
+          ? `seu Reflect devolve ${p.reflected} de dano a ${opponent}${threatKnockoutText(p, opponent, lives)}`
+          : 'seu Reflect anula o ataque'
       }`;
     case 'GUARD_ABSORBS':
       return `${head} ${p.attack} contra sua Defesa ${p.defense} → seu K absorve`;
     case 'ABSOLUTE_DEFENSE':
       return `${head} ${p.attack} contra sua Defesa ${p.defense} → sua Defesa Absoluta anula`;
     case 'DAMAGE':
-      return `${head} ${p.attack} contra sua Defesa ${p.defense} → ${p.absolute ? 'Ataque Absoluto, ' : ''}dano ${p.damage}`;
+      return `${head} ${p.attack} contra sua Defesa ${p.defense} → ${p.absolute ? 'Ataque Absoluto, ' : ''}dano ${p.damage}${threatKnockoutText(p, opponent, lives)}`;
   }
 }
 
