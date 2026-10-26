@@ -628,7 +628,7 @@ Uma exceção no React mostra "Algo deu errado", com os botões **Recarregar** e
 3. Treino com semente fixa: algumas rodadas determinísticas pela interface, sem servidor.
 4. axe nas telas visitadas.
 
-O sorteio da partida online não é controlável (a semente nunca sai do servidor). Por isso o E2E online reage ao que aparece na tela, em vez de seguir um roteiro fixo de cartas.
+Na partida online a semente só sai do servidor depois do fim, no `replay` (spec 2 §8.4). O `wrangler dev` do E2E fixa o sorteio com `E2E_SEED`, mas os prazos são reais; por isso o E2E online reage ao que aparece na tela, em vez de seguir um roteiro fixo de cartas.
 
 ### 9.3 Ferramentas e portão
 

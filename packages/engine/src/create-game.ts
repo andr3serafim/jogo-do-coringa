@@ -25,7 +25,10 @@ function newPlayer(id: PlayerId, hp: number): PlayerState {
   };
 }
 
-/** Cria a partida já na rodada 1 de Equipar, com as cartas distribuídas. A semente nunca sai do servidor. */
+/**
+ * Cria a partida já na rodada 1 de Equipar, com as cartas distribuídas. A semente decide tudo o que está oculto: no online ela
+ * só sai do servidor depois do fim da partida, no `replay` (spec 2 §8.4).
+ */
 export function createGame(config: RulesConfig, seed: string, players: [PlayerId, PlayerId]): CreateGameResult {
   const configError = validateConfig(config);
   if (configError) return { ok: false, error: configError };
