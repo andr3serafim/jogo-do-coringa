@@ -88,7 +88,8 @@ Situações (do ponto de vista de `view.me`; uma dica só se ainda não está em
 6. `trap`: REACTION com uma `TRAP` nas legais → `reaction`;
 7. `wild`: o Coringa Selvagem na sua mão na sua vez → `hand`;
 8. `reflect`: `REFLECT` nas legais, ou um `ReflectPlayed` do oponente nos eventos → `hand`;
-9. `pressure`: `view.pressure ≥ 1` ou uma rodada de Ataque sem dano (`noDamageStreak ≥ 1`) → `center`;
+9. `pressure`: uma rodada de Ataque sem dano (`noDamageStreak ≥ 1`) → `center` (a Pressão da mesa, `view.pressure`, só passa a valer depois
+   de uma delas, e nada novo depende dela: não entra na condição);
 10. `end`: GAME_OVER → `end`.
 
 - [ ] **Step 1: Testes** (estados reais com o builder do motor ou partidas do `LocalRoom` na semente do tutorial): cada dica na

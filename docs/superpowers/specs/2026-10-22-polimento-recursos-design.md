@@ -280,6 +280,12 @@ modelo da web. **[decisão minha]** As pistas:
   (`aria-describedby`), e o leitor de tela a lê junto com o motivo quando ele abre. Não tem "Entendi" nem "Pular". `coringa:tutorial`
   vira `done` quando a nota aparece no diálogo (não no clique). No fim a dica 10 passa na frente de qualquer outra ainda não vista,
   e depois dela o tutorial acabou: **nenhuma dica depois do fim**, nem na revanche.
+- **A ordem é sempre escolha do jogador no tutorial.** A `Session` do tutorial nasce com `autoOrder: false` (só ela; o treino e a sala
+  online seguem com a confirmação automática de "Atacar primeiro" aos 3 s, spec 3 §3.6): quem lê a dica 3 não perde a escolha, e a
+  opção vale na partida toda, também depois de "Pular o tutorial". Sem prazo (treino e tutorial), o painel da ordem diz só "Escolha
+  quando quiser."; com prazo do servidor, "Escolha quando quiser, dentro do prazo."
+- **A rolagem da vez de atacar** espera só a dica que chegou nesta época (`HintFlow.epoch`): uma dica que ficou no painel e cuja
+  situação voltou a valer turnos depois (o Selvagem na mão, os buffs) não a segura mais.
 - **"Pular o tutorial":** esconde o painel, grava `skipped` e a partida segue sem dica nenhuma. A tela inicial trata `done` e
   `skipped` do mesmo jeito (o botão vira comum).
 - **Celular de 360 × 640:** o E2E confere que o painel (com a dica 1 e com a 4, as mais longas), a mão e a barra ficam à vista por
@@ -363,6 +369,8 @@ Cada fatia entra na `main` sozinha, com revisão de código e os dois jobs da CI
 
 - Os timbres exatos dos sons (desde que curtos, originais e sem picos).
 - Os parâmetros do Difícil (rollouts, horizonte, candidatas), desde que o portão feche.
-- A semente do tutorial (procurada no simulador: as especiais nas primeiras rodadas).
-- O texto final das dicas (vai para a sessão principal revisar, como o resumo das regras).
+- ~~A semente do tutorial (procurada no simulador: as especiais nas primeiras rodadas).~~ Resolvido na fatia 4: `TUTORIAL_SEED =
+  'tutorial-132'`, achada por `pnpm sim:tutorial` (§5.3, "Semente").
+- ~~O texto final das dicas (vai para a sessão principal revisar, como o resumo das regras).~~ Resolvido na fatia 4: o texto está no
+  plano ("Textos finais das dicas") e em `packages/web/src/model/tutorial-copy.ts`, revisto pela sessão principal (§5.3, "Textos").
 - O desenho do painel do tutorial, dos controles do replay e do fantasma do arrasto, dentro da direção "A Peleja do Coringa".
