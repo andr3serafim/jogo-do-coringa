@@ -26,6 +26,15 @@ const canDo = (legal: readonly Action[], ...types: Action['type'][]): boolean =>
 /** A fase principal do ataque, na vez de quem vê (fora dela a lista de ações legais é vazia). */
 const inMyTurn = ({ view }: Situation): boolean => view.phase.kind === 'ATTACK_MAIN' && view.phase.player === view.me;
 
+/** Há um J, Q ou K da mão que as ações legais deixam jogar (o K é sempre de verdade; no J e no Q, o Selvagem não vale). */
+const playsRealBuff = ({ view, legal }: Situation): boolean =>
+  legal.some(
+    (action) =>
+      action.type === 'PLAY_K' ||
+      ((action.type === 'PLAY_J' || action.type === 'PLAY_Q') &&
+        view.self.hand.some((card) => card.id === action.cardId && card.kind !== 'WILD')),
+  );
+
 /**
  * Em ordem de prioridade. Cada situação vale só enquanto a coisa acontece: ao mudar de fase ou de vez, a dica de antes não
  * volta, mesmo sem ter sido vista.
@@ -45,10 +54,10 @@ const HINTS: ReadonlyArray<Hint & { holds: (situation: Situation) => boolean }> 
   { id: 'order', zone: 'order', holds: ({ view, legal }) => view.phase.kind === 'ORDER_CHOICE' && canDo(legal, 'CHOOSE_ORDER') },
   { id: 'firstAttack', zone: 'actionBar', holds: (situation) => inMyTurn(situation) && canDo(situation.legal, 'DECLARE_ATTACK') },
   {
-    // O Selvagem também joga como J ou Q: só com ele na mão, esta vem antes da dica dele (que a explica em termos de J e Q).
+    // Só com um J, Q ou K de verdade jogável: o Selvagem que joga como J ou Q (o motor o oferece) não conta, a dica dele é a `wild`.
     id: 'buffs',
     zone: 'hand',
-    holds: (situation) => inMyTurn(situation) && canDo(situation.legal, 'PLAY_J', 'PLAY_Q', 'PLAY_K'),
+    holds: (situation) => inMyTurn(situation) && playsRealBuff(situation),
   },
   { id: 'trap', zone: 'reaction', holds: ({ view, legal }) => view.phase.kind === 'REACTION' && canDo(legal, 'TRAP') },
   {
@@ -67,14 +76,17 @@ const HINTS: ReadonlyArray<Hint & { holds: (situation: Situation) => boolean }> 
   { id: 'end', zone: 'end', holds: ({ view }) => view.phase.kind === 'GAME_OVER' },
 ];
 
+/** No fim da partida a dica do fim vem antes das outras: é a que convida a jogar com um amigo e fecha o tutorial. */
+const AT_GAME_OVER: typeof HINTS = [...HINTS.filter((hint) => hint.id === 'end'), ...HINTS.filter((hint) => hint.id !== 'end')];
+
 /**
- * A dica do momento: a primeira da lista cuja situação vale agora e que ainda não está em `seen`; `null` se não há. Uma dica
- * cuja situação passou não é devolvida depois, e uma já vista não volta. `events` são os do `state` atual, já redigidos
- * para `view.me`.
+ * A dica do momento: a primeira da lista cuja situação vale agora e que ainda não está em `seen`; `null` se não há. Só no
+ * fim da partida a do fim passa na frente. Uma dica cuja situação passou não é devolvida depois, e uma já vista não volta.
+ * `events` são os do `state` atual, já redigidos para `view.me`.
  */
 export function tutorialHint(view: PlayerView, events: readonly GameEvent[], seen: ReadonlySet<HintId>): Hint | null {
   const situation: Situation = { view, events, legal: legalActions(view) };
-  for (const hint of HINTS) {
+  for (const hint of view.phase.kind === 'GAME_OVER' ? AT_GAME_OVER : HINTS) {
     if (!seen.has(hint.id) && hint.holds(situation)) return { id: hint.id, zone: hint.zone };
   }
   return null;

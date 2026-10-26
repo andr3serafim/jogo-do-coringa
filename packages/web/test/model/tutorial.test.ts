@@ -135,12 +135,22 @@ describe('tutorialHint: cada dica na sua situação', () => {
   });
 
   it('wild: o Coringa Selvagem na mão, na sua vez', () => {
-    // Com o Selvagem como J ou Q jogável, o J/Q/K vem antes (ordem da lista); a do Selvagem vem em seguida.
-    expect(hintFor(setup({ p1: { hand: ['W'] } }), { seen: ['buffs'] })).toEqual({ id: 'wild', zone: 'hand' });
+    expect(hintFor(setup({ p1: { hand: ['W'] } }))).toEqual({ id: 'wild', zone: 'hand' });
   });
 
   it('wild: não na vez do oponente', () => {
-    expect(hintFor(quiet({ p1: { attack: [5], hand: ['W'] } }), { seen: ['buffs'] })).toBeNull();
+    expect(hintFor(quiet({ p1: { attack: [5], hand: ['W'] } }))).toBeNull();
+  });
+
+  it('buffs: o Selvagem jogável como J ou Q não basta, só a carta de verdade; com as duas, buffs vem antes de wild', () => {
+    // Só o Selvagem e um A (que não é J, Q nem K): a dica é a do Selvagem, e só ela.
+    expect(hintFor(setup({ p1: { hand: ['W', 'A'] } }))).toEqual({ id: 'wild', zone: 'hand' });
+    expect(drain(setup({ p1: { hand: ['W', 'A'] } })).map((h) => h.id)).toEqual(['wild']);
+    // Com um J de verdade além do Selvagem: J/Q/K primeiro, depois o Selvagem.
+    expect(drain(setup({ p1: { hand: ['J', 'W'] } })).map((h) => h.id)).toEqual(['buffs', 'wild']);
+    // Com o limite de J atingido o J da mão não é jogável (o Selvagem ainda joga como Q, mas não conta): só a do Selvagem.
+    const jLimit = setup({ config: { buffLimit: 1 }, p1: { hand: ['J', 'W'], attackBuffs: ['J'] } });
+    expect(drain(jLimit).map((h) => h.id)).toEqual(['wild']);
   });
 
   it('reflect: K + J + Q na mão e o Reflect jogável', () => {
@@ -191,6 +201,23 @@ function reflectIds(state: GameState, who: PlayerId): { kId: string; jId: string
 }
 
 describe('tutorialHint: ordem, "vista" e situação que passou', () => {
+  it('no fim da partida a dica do fim vem antes de qualquer outra ainda não vista', () => {
+    const result = { kind: 'WIN', winner: P1, reason: 'HP' } as const;
+    // Quadra no seu campo e Pressão ligada: sem o fim, seriam as dicas `quad` e `pressure`.
+    const over = setup({ pressure: 1, phase: { kind: 'GAME_OVER', result }, p1: { attack: [5, 5, 5, 5] } });
+    expect(hintFor(over)).toEqual({ id: 'end', zone: 'end' });
+    expect(drain(over).map((h) => h.id)).toEqual(['end', 'quad', 'pressure']);
+    // Com o QuadFormed do oponente nos eventos, ou só a sequência sem dano: o fim também vem primeiro.
+    const stalled = setup({ noDamageStreak: 2, phase: { kind: 'GAME_OVER', result } });
+    const events: GameEvent[] = [{ type: 'QuadFormed', player: P2, quad: { row: 'ATK', value: 4 } }];
+    expect(hintFor(stalled, { events })).toEqual({ id: 'end', zone: 'end' });
+    expect(hintFor(stalled)).toEqual({ id: 'end', zone: 'end' });
+  });
+
+  it('fora do fim a lista segue a ordem de sempre', () => {
+    expect(drain(quiet({ pressure: 1, p1: { attack: [5, 5, 5, 5] } })).map((h) => h.id)).toEqual(['quad', 'pressure']);
+  });
+
   it('a primeira da lista ganha quando duas valem (o primeiro ataque com J na mão: firstAttack, depois buffs)', () => {
     const state = setup({ p1: { attack: [5], hand: ['J'] } });
     expect(hintFor(state)?.id).toBe('firstAttack');
