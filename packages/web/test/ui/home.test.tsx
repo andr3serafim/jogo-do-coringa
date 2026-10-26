@@ -147,6 +147,12 @@ describe('início: treino e acessibilidade', () => {
     expect(window.location.pathname).toBe('/treino');
   });
 
+  it('Partidas anteriores vai para /partidas', async () => {
+    const { user } = setup();
+    await user.click(screen.getByRole('button', { name: 'Partidas anteriores' }));
+    expect(window.location.pathname).toBe('/partidas');
+  });
+
   it('tem título, campos com rótulo e campos de texto de 16 px', () => {
     setup();
     expect(screen.getByRole('main')).toBeInTheDocument();

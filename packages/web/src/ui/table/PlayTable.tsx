@@ -18,6 +18,7 @@
 import type { SpecialCard } from '@coringa/engine';
 import type { Deadline, PlayerAction, StateMessage } from '@coringa/protocol';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { navigate } from '../../app/router.ts';
 import { rowKey } from '../../model/effects.ts';
 import type { TrainingLevel } from '../../model/local-room.ts';
 import { isLegal, tablePlays, type CardPlay } from '../../model/plays.ts';
@@ -38,6 +39,7 @@ import { tableNames } from './labels.ts';
 import { OrderPanel } from './OrderPanel.tsx';
 import { Table } from './Table.tsx';
 import { useDeadlineExpired } from './useClock.ts';
+import { useRecordPastGame } from './useRecordPastGame.ts';
 
 export interface PlayTableProps {
   session: Session;
@@ -143,6 +145,8 @@ function PlayTableView({
   // O painel de fim (spec §2.5) só vem com a sala em FINISHED e a mesa quieta: não cobre o golpe final nem a cena da Exódia.
   const outcome = room?.status === 'FINISHED' ? room.outcome : undefined;
   const showEnd = room !== null && outcome !== undefined && !busy;
+  // A partida terminada fica na lista local assim que a sala vira FINISHED; com o replay (o treino), o painel oferece "Rever a partida".
+  const pastGame = useRecordPastGame(snapshot, view, names, store, training);
 
   // A barra existe nas fases de jogada; o Equipar e a escolha da ordem têm painéis próprios.
   const barPhase = phase === 'ATTACK_MAIN' || phase === 'REACTION';
@@ -512,6 +516,7 @@ function PlayTableView({
           onRematch={(want) => session.rematch(want)}
           onNewRoom={onNewRoom}
           newRoomLabel={newRoomLabel}
+          onReview={pastGame?.replay === undefined ? undefined : () => navigate(`/partidas/${pastGame.id}`)}
         />
       ) : null}
     </>

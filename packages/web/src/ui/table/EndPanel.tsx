@@ -1,7 +1,8 @@
 // O fim da partida (spec §2.5): um painel sobre a mesa final, que continua à vista e só para ver. Diz o resultado, o motivo
-// (do motor, ou da `cause` do servidor nos W.O.) e o placar da sala, e tem **Revanche** (alterna), **Ver a mesa** (recolhe) e
-// **Nova sala**. É um `<dialog>` modal; recolhido, vira uma faixa no pé da tela com o resultado, o estado da revanche e o
-// botão que o abre de novo, para a revanche não ficar fora de alcance.
+// (do motor, ou da `cause` do servidor nos W.O.) e o placar da sala, e tem **Revanche** (alterna), **Ver a mesa** (recolhe),
+// **Rever a partida** (só quando ela ficou guardada com replay) e **Nova sala**. É um `<dialog>` modal; recolhido, vira uma
+// faixa no pé da tela com o resultado, o estado da revanche e o botão que o abre de novo, para a revanche não ficar fora de
+// alcance.
 //
 // A revanche mostrada é a que o servidor confirmou (`seats[].wantsRematch`), nunca um palpite local. Quem monta o painel
 // o faz só enquanto a sala está em `FINISHED` (e com a mesa quieta); a nova partida desmonta tudo, e o recolhimento vale
@@ -14,6 +15,7 @@ import {
   END_RESULT_LABEL,
   NEW_ROOM_LABEL,
   REMATCH_LABEL,
+  REVIEW_GAME_LABEL,
   rematchStatusText,
   reasonText,
   resultTitle,
@@ -44,6 +46,8 @@ export interface EndPanelProps {
   onNewRoom?: () => void;
   /** O rótulo do botão (padrão "Nova sala"); o treino diz "Voltar ao início". */
   newRoomLabel?: string;
+  /** Abre o replay da partida que acabou. Sem ele (partida sem replay guardado) o botão "Rever a partida" não existe. */
+  onReview?: () => void;
 }
 
 export function EndPanel({
@@ -58,6 +62,7 @@ export function EndPanel({
   onRematch,
   onNewRoom,
   newRoomLabel = NEW_ROOM_LABEL,
+  onReview,
 }: EndPanelProps) {
   const titleId = useId();
   const reasonId = useId();
@@ -121,6 +126,11 @@ export function EndPanel({
             <Button variant="secondary" className="flex-1" onClick={() => setCollapsed(true)}>
               {VIEW_TABLE_LABEL}
             </Button>
+            {onReview ? (
+              <Button variant="secondary" className="flex-1" onClick={onReview}>
+                {REVIEW_GAME_LABEL}
+              </Button>
+            ) : null}
             {onNewRoom ? (
               <Button variant="secondary" className="flex-1" onClick={onNewRoom}>
                 {newRoomLabel}

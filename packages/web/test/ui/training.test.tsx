@@ -3,16 +3,18 @@
 //
 // O módulo da sala local é importado aqui, no topo, antes de qualquer timer falso: o `import()` da tela então sai do cache
 // de módulos na hora, em vez de depender do carregador com o relógio parado.
-import { legalActions } from '@coringa/engine';
+import { legalActions, RULES_VERSION } from '@coringa/engine';
 import type { PlayerAction } from '@coringa/protocol';
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../../src/app/App.tsx';
+import { openStore } from '../../src/app/browser-store.ts';
 import { getDiagnosticContext } from '../../src/app/diagnostic-context.ts';
 import { navigate } from '../../src/app/router.ts';
 import * as localRoomModule from '../../src/model/local-room.ts';
+import { loadPastGames } from '../../src/model/past-games.ts';
 import { Training, type LocalRoomModule } from '../../src/ui/screens/Training.tsx';
 import { fakeApi, memoryStore, seriousViolations } from './support.tsx';
 
@@ -649,6 +651,96 @@ describe('/treino: a sala nasce e morre com a tela', () => {
     expect(reload).toHaveBeenCalledTimes(1);
     await user.click(screen.getByRole('button', { name: 'Voltar ao início' }));
     expect(window.location.pathname).toBe('/');
+  });
+});
+
+describe('/treino: a partida terminada vai para a lista', () => {
+  /** Desiste pelo menu (o treino acaba com o Bot vencendo) e deixa o `room` em FINISHED chegar. */
+  async function concede(user: ReturnType<typeof fakeClock>['user'], advance: (ms: number) => void) {
+    advance(5_000);
+    await user.click(menuButton());
+    await user.click(within(screen.getByRole('dialog', { name: 'Menu da partida' })).getByRole('button', { name: 'Desistir' }));
+    await user.click(within(screen.getByRole('dialog', { name: 'Desistir da partida?' })).getByRole('button', { name: 'Confirmar' }));
+    advance(5_000);
+    expect(screen.getByRole('dialog', { name: 'Bot venceu' })).toBeInTheDocument();
+  }
+  const saved = () => loadPastGames(openStore('local').store);
+
+  it('grava uma linha com o replay da partida, e "Rever a partida" leva a /partidas/<id>', async () => {
+    const { advance, user } = fakeClock();
+    render(<App api={fakeApi()} />);
+    await settle();
+    expect(saved()).toEqual([]);
+
+    await concede(user, advance);
+    const [row, ...others] = saved();
+    expect(others).toEqual([]);
+    expect(row).toMatchObject({
+      mode: { kind: 'training', level: 'medio' },
+      seat: 'p1',
+      names: { me: 'Você', opponent: 'Bot' },
+      outcome: { gameNo: 1, result: { kind: 'WIN', winner: 'p2', reason: 'FORFEIT' }, cause: 'CONCEDE' },
+      score: { p1: 0, p2: 1, draws: 0 },
+      rulesVersion: RULES_VERSION,
+      replay: { name: 'treino-t1', seed: 't1', players: ['p1', 'p2'] },
+    });
+    expect(row).not.toHaveProperty('key');
+    expect(row!.replay!.steps.length).toBeGreaterThan(0);
+
+    await user.click(screen.getByRole('button', { name: 'Rever a partida' }));
+    expect(window.location.pathname).toBe(`/partidas/${row!.id}`);
+    await settle();
+    expect(screen.getByRole('link', { name: 'Voltar à lista' })).toBeInTheDocument();
+  });
+
+  it('sob <StrictMode> grava uma só linha', async () => {
+    const { advance, user } = fakeClock();
+    render(
+      <StrictMode>
+        <App api={fakeApi()} />
+      </StrictMode>,
+    );
+    await settle();
+    await concede(user, advance);
+    expect(saved()).toHaveLength(1);
+    expect(screen.getByRole('button', { name: 'Rever a partida' })).toBeInTheDocument();
+  });
+
+  it('duas sessões de treino seguidas na mesma página (as duas TREINO, partida 1) gravam duas linhas', async () => {
+    const { advance, user } = fakeClock();
+    render(<App api={fakeApi()} />);
+    await settle();
+    await concede(user, advance);
+    await user.click(screen.getByRole('button', { name: 'Voltar ao início' }));
+    expect(window.location.pathname).toBe('/');
+
+    act(() => navigate(`/treino${SEED}`));
+    await settle();
+    await concede(user, advance);
+
+    const rows = saved();
+    expect(rows).toHaveLength(2);
+    expect(rows.map((row) => row.outcome.gameNo)).toEqual([1, 1]);
+    expect(rows.map((row) => row.mode)).toEqual([
+      { kind: 'training', level: 'medio' },
+      { kind: 'training', level: 'medio' },
+    ]);
+    expect(new Set(rows.map((row) => row.id)).size).toBe(2);
+    expect(rows.every((row) => row.replay !== undefined)).toBe(true);
+  });
+
+  it('a revanche é outra linha, com o replay da sua própria partida', async () => {
+    const { advance, user } = fakeClock();
+    render(<App api={fakeApi()} />);
+    await settle();
+    await concede(user, advance);
+    await user.click(within(screen.getByRole('dialog', { name: 'Bot venceu' })).getByRole('button', { name: 'Revanche' }));
+    await concede(user, advance);
+
+    const rows = saved();
+    expect(rows.map((row) => row.outcome.gameNo)).toEqual([2, 1]);
+    expect(rows.map((row) => row.replay?.seed)).toEqual(['t1-2', 't1']);
+    expect(rows[0]!.score).toEqual({ p1: 0, p2: 2, draws: 0 });
   });
 });
 

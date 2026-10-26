@@ -16,6 +16,7 @@ import { createRoomApi } from '../../src/app/room-api.ts';
 import { RULES_SECTIONS } from '../../src/model/copy.ts';
 import { Session } from '../../src/model/session.ts';
 import { loadPrefs, safeStore, saveSeat, type Prefs } from '../../src/model/storage.ts';
+import { EndPanel, type EndPanelProps } from '../../src/ui/table/EndPanel.tsx';
 import { PlayTable, type PlayTableProps } from '../../src/ui/table/PlayTable.tsx';
 import { Table } from '../../src/ui/table/Table.tsx';
 import { FakeConnection, scenarioAt, stateMessage, type ViewSpec } from '../fixtures.ts';
@@ -404,6 +405,41 @@ describe('fim de partida: Ver a mesa e Nova sala', () => {
     expect(within(dialog).queryByRole('button', { name: 'Nova sala' })).not.toBeInTheDocument();
     await m.user.click(within(dialog).getByRole('button', { name: 'Voltar ao início' }));
     expect(m.onNewRoom).toHaveBeenCalledTimes(1);
+  });
+
+  describe('"Rever a partida"', () => {
+    const panel: EndPanelProps = {
+      outcome: { gameNo: 1, result: win('p1', 'HP'), cause: 'NORMAL' },
+      score: { p1: 1, p2: 0, draws: 0 },
+      me: 'p1',
+      names: { self: 'André', opponent: 'Duda' },
+      mineWants: false,
+      theirsWants: false,
+      away: false,
+      disabled: false,
+      onRematch: () => undefined,
+    };
+
+    it('só existe com onReview, e o clique o chama', async () => {
+      const user = userEvent.setup();
+      const onReview = vi.fn();
+      const { rerender } = render(<EndPanel {...panel} />);
+      expect(within(endDialog('Você venceu')).queryByRole('button', { name: 'Rever a partida' })).not.toBeInTheDocument();
+
+      rerender(<EndPanel {...panel} onReview={onReview} />);
+      await user.click(within(endDialog('Você venceu')).getByRole('button', { name: 'Rever a partida' }));
+      expect(onReview).toHaveBeenCalledTimes(1);
+    });
+
+    it('com o botão no painel, a Revanche continua um clique só e o axe não acha violações sérias', async () => {
+      const user = userEvent.setup();
+      const onRematch = vi.fn();
+      render(<EndPanel {...panel} onReview={() => undefined} onRematch={onRematch} />);
+      const dialog = endDialog('Você venceu');
+      await user.click(within(dialog).getByRole('button', { name: 'Revanche' }));
+      expect(onRematch).toHaveBeenCalledWith(true);
+      expect(await seriousViolations(dialog)).toEqual([]);
+    });
   });
 });
 

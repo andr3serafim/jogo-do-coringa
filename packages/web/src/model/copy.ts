@@ -306,6 +306,8 @@ export const VIEW_TABLE_LABEL = 'Ver a mesa';
 export const NEW_ROOM_LABEL = 'Nova sala';
 export const SHOW_RESULT_LABEL = 'Mostrar o resultado';
 export const SCORE_LABEL = 'Placar';
+/** No painel de fim, quando a partida ficou guardada com replay: leva ao visualizador. */
+export const REVIEW_GAME_LABEL = 'Rever a partida';
 
 /** Quem é o jogador `id` na frase: "Você" ou o apelido do oponente. */
 const whoText = (id: PlayerId, me: PlayerId, names: OutcomeNames): string => (id === me ? 'Você' : names.opponent);
@@ -401,6 +403,16 @@ export const TRAINING_CONCEDE_WARNING = 'Você perde esta partida.';
 export const TRAINING_LOADING_TEXT = 'Preparando o treino…';
 export const TRAINING_FAILED_TITLE = 'Não deu para carregar o treino';
 export const TRAINING_FAILED_TEXT = 'Confira a internet e tente de novo.';
+
+// ---------------------------------------------------------------------------------------------
+// Partidas anteriores (spec do polimento §4.3): a lista local e o replay, telas que chegam sob demanda
+
+/** O botão da tela inicial e o título da lista. */
+export const PAST_GAMES_LABEL = 'Partidas anteriores';
+/** Do visualizador de volta à lista. */
+export const BACK_TO_LIST_LABEL = 'Voltar à lista';
+/** Enquanto o pedaço de uma tela carregada sob demanda não chega. */
+export const SCREEN_LOADING_TEXT = 'Carregando…';
 
 // ---------------------------------------------------------------------------------------------
 // Resumo das regras (spec 1 §1.6 a §1.8; revisado pela sessão principal em 2026-10-21, por delegação do autor)

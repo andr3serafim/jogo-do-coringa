@@ -6,13 +6,22 @@ export type Route =
   | { name: 'home' }
   | { name: 'room'; code: string | null }
   | { name: 'training' }
+  | { name: 'pastGames' }
+  /** `/partidas/<id>`: o replay de uma partida da lista local. O id é só o formato; se a partida existe, quem diz é a tela. */
+  | { name: 'pastGame'; id: string }
   | { name: 'notFound' };
+
+/** O id de uma partida guardada (`recordPastGame`): o instante em base 36 e, no mesmo milissegundo, um sufixo `-n`. Sem `%`, sem maiúsculas. */
+const PAST_GAME_PATH = /^\/partidas\/([0-9a-z]+(?:-[0-9a-z]+)*)$/;
 
 /** `/s/<código>` com o código já normalizado; `code: null` para um código fora do formato. */
 export function parseRoute(pathname: string): Route {
   const path = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
   if (path === '/' || path === '') return { name: 'home' };
   if (path === '/treino') return { name: 'training' };
+  if (path === '/partidas') return { name: 'pastGames' };
+  const pastGame = PAST_GAME_PATH.exec(path);
+  if (pastGame) return { name: 'pastGame', id: pastGame[1]! };
   const room = /^\/s\/([^/]+)$/.exec(path);
   if (room) {
     let raw = room[1]!;

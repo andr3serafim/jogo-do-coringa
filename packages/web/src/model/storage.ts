@@ -5,6 +5,7 @@ import type { TrainingLevel } from './local-room.ts';
 
 export interface KeyValueStore {
   get(key: string): string | null;
+  /** Pode lançar (cota estourada, bloqueio): o `safeStore` guarda a cópia em memória e relança. Quem grava por melhor esforço engole. */
   set(key: string, value: string): void;
   remove(key: string): void;
 }

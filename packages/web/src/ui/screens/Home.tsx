@@ -4,7 +4,7 @@ import { HttpError, normalizeNickname, parseTarget } from '@coringa/protocol';
 import { useState, type FormEvent } from 'react';
 import type { RoomApi } from '../../app/room-api.ts';
 import { navigate } from '../../app/router.ts';
-import { SOUND_LABEL } from '../../model/copy.ts';
+import { PAST_GAMES_LABEL, SOUND_LABEL } from '../../model/copy.ts';
 import { loadNickname, loadPrefs, saveNickname, savePrefs, saveSeat, type KeyValueStore } from '../../model/storage.ts';
 import { Button, Panel, Screen, Switch, TextField, Title } from '../parts.tsx';
 import { useSound } from '../sound-context.ts';
@@ -119,6 +119,9 @@ export function Home({ api, store }: HomeProps) {
       </Panel>
       <Button variant="secondary" onClick={() => navigate('/treino')}>
         Treinar contra o bot
+      </Button>
+      <Button variant="secondary" onClick={() => navigate('/partidas')}>
+        {PAST_GAMES_LABEL}
       </Button>
       <Panel label="Preferências">
         <Switch label={SOUND_LABEL} checked={soundOn} onChange={changeSound} />

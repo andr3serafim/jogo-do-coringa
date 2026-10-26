@@ -57,6 +57,28 @@ describe('<App />: rotas', () => {
     expect(screen.getByText('Treino · Médio, sem relógio')).toBeInTheDocument();
   });
 
+  it('/partidas e /partidas/<id> chegam pelo carregamento sob demanda, com "Carregando…" até a tela chegar', async () => {
+    window.history.replaceState(null, '', '/partidas');
+    const { container } = render(<App api={fakeApi()} />);
+    expect(screen.getByRole('status')).toHaveTextContent('Carregando…');
+    expect(await screen.findByRole('heading', { name: 'Partidas anteriores' })).toBeInTheDocument();
+    expect(await seriousViolations(container)).toEqual([]);
+
+    act(() => navigate('/partidas/lz3k9a'));
+    expect(await screen.findByRole('link', { name: 'Voltar à lista' })).toBeInTheDocument();
+    expect(await seriousViolations(container)).toEqual([]);
+
+    await userEvent.click(screen.getByRole('link', { name: 'Voltar à lista' }));
+    expect(window.location.pathname).toBe('/partidas');
+    expect(await screen.findByRole('heading', { name: 'Partidas anteriores' })).toBeInTheDocument();
+  });
+
+  it('um id fora do formato em /partidas/<id> é "Página não encontrada"', () => {
+    window.history.replaceState(null, '', '/partidas/Oi.Mundo');
+    render(<App api={fakeApi()} />);
+    expect(screen.getByRole('heading', { name: 'Página não encontrada' })).toBeInTheDocument();
+  });
+
   it('qualquer outra rota: "Página não encontrada", com link para o início', async () => {
     window.history.replaceState(null, '', '/nada/aqui');
     const { container } = render(<App api={fakeApi()} />);

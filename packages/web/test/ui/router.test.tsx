@@ -18,6 +18,22 @@ describe('parseRoute', () => {
     ['/s/', { name: 'notFound' }],
     ['/s/ABC234/mais', { name: 'notFound' }],
     ['/outra', { name: 'notFound' }],
+    ['/partidas', { name: 'pastGames' }],
+    ['/partidas/', { name: 'pastGames' }],
+    ['/partidas/lz3k9a', { name: 'pastGame', id: 'lz3k9a' }],
+    ['/partidas/lz3k9a/', { name: 'pastGame', id: 'lz3k9a' }],
+    ['/partidas/lz3k9a-1', { name: 'pastGame', id: 'lz3k9a-1' }],
+    // O id tem o formato de `recordPastGame` (base 36 minúsculo, com sufixo `-n`): o resto não é uma partida.
+    ['/partidas/LZ3K9A', { name: 'notFound' }],
+    ['/partidas/a_b', { name: 'notFound' }],
+    ['/partidas/a.b', { name: 'notFound' }],
+    ['/partidas/a%20b', { name: 'notFound' }],
+    ['/partidas/%E0%A4%A', { name: 'notFound' }],
+    ['/partidas/-1', { name: 'notFound' }],
+    ['/partidas/lz3k9a-', { name: 'notFound' }],
+    ['/partidas/lz3k9a/mais', { name: 'notFound' }],
+    ['/partidas//', { name: 'pastGames' }],
+    ['/partida', { name: 'notFound' }],
   ])('%s', (path, route) => {
     expect(parseRoute(path)).toEqual(route);
   });

@@ -1,9 +1,10 @@
 // Casca da interface: o `Storage`, a porta do servidor e o controlador de som nascem aqui, uma vez, e a rota escolhe a tela
 // (spec §2.1). O som chega às telas pelo `SoundContext`; os ouvintes de gesto do controlador moram no `document`.
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { SCREEN_LOADING_TEXT } from '../model/copy.ts';
 import { loadPrefs, type KeyValueStore } from '../model/storage.ts';
 import { SoundController, browserSoundDeps } from '../sound/controller.ts';
-import { Button } from '../ui/parts.tsx';
+import { Button, Screen } from '../ui/parts.tsx';
 import { Home } from '../ui/screens/Home.tsx';
 import { NotFound } from '../ui/screens/NotFound.tsx';
 import { RoomGate } from '../ui/screens/RoomGate.tsx';
@@ -14,6 +15,10 @@ import { openStore } from './browser-store.ts';
 import { ErrorBoundary } from './ErrorBoundary.tsx';
 import { createRoomApi, type RoomApi } from './room-api.ts';
 import { useRoute } from './router.ts';
+
+// A lista das partidas e o visualizador do replay chegam sob demanda: nada deles pesa no JavaScript inicial (`scripts/smoke.ts`).
+const PastGames = lazy(() => import('../ui/screens/PastGames.tsx'));
+const ReplayScreen = lazy(() => import('../ui/screens/ReplayScreen.tsx'));
 
 export interface AppProps {
   /** Troca o HTTP e a conexão (testes). O padrão fala com o próprio site. */
@@ -55,7 +60,27 @@ function Routes({ api, store }: { api: RoomApi; store: KeyValueStore }) {
       return <RoomGate code={route.code} api={api} store={store} />;
     case 'training':
       return <Training store={store} />;
+    case 'pastGames':
+      return (
+        <Suspense fallback={<ScreenLoading />}>
+          <PastGames />
+        </Suspense>
+      );
+    case 'pastGame':
+      return (
+        <Suspense fallback={<ScreenLoading />}>
+          <ReplayScreen />
+        </Suspense>
+      );
     case 'notFound':
       return <NotFound />;
   }
+}
+
+function ScreenLoading() {
+  return (
+    <Screen>
+      <p role="status">{SCREEN_LOADING_TEXT}</p>
+    </Screen>
+  );
 }
