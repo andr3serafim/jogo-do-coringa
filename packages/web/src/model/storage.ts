@@ -34,7 +34,9 @@ function probe(raw: Storage): boolean {
 /**
  * Embrulha o `Storage` do navegador. Sem `Storage` (aba privada, bloqueio) ou com um que lança, vira
  * memória com `available: false`: o jogo funciona, mas recarregar a página perde o assento.
- * Se um `Storage` que passou na sonda falhar depois (cota cheia), a operação cai em memória.
+ * Se um `Storage` que passou na sonda falhar depois (cota cheia), a leitura cai em memória e o `set` guarda o valor lá
+ * (a sessão segue com o mais novo) e **relança** a exceção: quem grava sabe que não foi para o disco. `writeValue`
+ * engole (persistir é por melhor esforço); a lista de partidas corta replays e grava de novo.
  */
 export function safeStore(raw: Storage | undefined): { store: KeyValueStore; available: boolean } {
   const memory = memoryStore();
@@ -54,8 +56,9 @@ export function safeStore(raw: Storage | undefined): { store: KeyValueStore; ava
       try {
         raw.setItem(key, value);
         memory.remove(key);
-      } catch {
+      } catch (error) {
         memory.set(key, value);
+        throw error;
       }
     },
     remove(key) {

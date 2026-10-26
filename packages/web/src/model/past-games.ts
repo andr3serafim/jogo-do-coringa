@@ -164,7 +164,12 @@ function dropOldestReplay(games: PastGame[]): boolean {
 /**
  * Guarda uma partida terminada no topo da lista. Devolve a entrada como ficou guardada (com o `id`; o replay dela é o último
  * a sair se o teto apertar), a que já existia quando é a mesma partida (mesma `key` em até 24 h; não grava nada), ou `null`
- * se o armazenamento recusou até sem nenhum replay. Nunca lança: guardar é por melhor esforço e o jogo segue sem.
+ * se a entrada não passa na validação ou se o armazenamento recusou até sem nenhum replay. Nunca lança: guardar é por melhor
+ * esforço e o jogo segue sem.
+ *
+ * O `set` que lança (cota estourada) tira o replay da mais velha e grava de novo. Com o `safeStore` isso depende de ele relançar
+ * a exceção do `Storage` (guardando a cópia em memória): quando uma tentativa passa, a cópia em memória sai e o disco fica com a
+ * lista completa, menos replays.
  */
 export function recordPastGame(store: KeyValueStore, entry: Omit<PastGame, 'id'>, now: number): PastGame | null {
   try {
@@ -173,7 +178,12 @@ export function recordPastGame(store: KeyValueStore, entry: Omit<PastGame, 'id'>
       const same = old.find((game) => game.key === entry.key && now - game.date <= DEDUPE_WINDOW_MS);
       if (same !== undefined) return same;
     }
-    const games = [{ ...entry, id: newId(now, old) }, ...old].slice(0, MAX_PAST_GAMES);
+    // Guarda o que a leitura devolveria: a entrada passa pelo JSON e pela mesma validação do `loadPastGames`. Se ela seria
+    // rejeitada (`rounds: NaN`, nível desconhecido...), não grava e não devolve um `id` que o `findPastGame` não acharia;
+    // um replay de forma errada sai sozinho, como na leitura.
+    const candidate = parsePastGame(JSON.parse(JSON.stringify({ ...entry, id: newId(now, old) })));
+    if (candidate === null) return null;
+    const games = [candidate, ...old].slice(0, MAX_PAST_GAMES);
     for (;;) {
       const text = JSON.stringify(games);
       if (text.length <= MAX_PAST_GAMES_CHARS) {

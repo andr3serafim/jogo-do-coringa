@@ -92,35 +92,69 @@ describe('safeStore', () => {
     },
   );
 
-  it('Storage que passa a lançar depois da sonda: cada operação cai em memória sem lançar', () => {
+  /** Um `Storage` que passa na sonda e depois recusa (cota cheia), até `full.on` voltar a false. */
+  function fillingStorage() {
     const base = memoryStorage();
-    let broken = false;
-    const flaky: Storage = {
+    const full = { on: false };
+    const storage: Storage = {
       get length() {
         return base.length;
       },
       clear: () => base.clear(),
       key: (index) => base.key(index),
       getItem: (key) => {
-        if (broken) throw new Error('boom');
+        if (full.on) throw new Error('boom');
         return base.getItem(key);
       },
       setItem: (key, value) => {
-        if (broken) throw new Error('quota');
+        if (full.on) throw new Error('quota');
         base.setItem(key, value);
       },
       removeItem: (key) => {
-        if (broken) throw new Error('boom');
+        if (full.on) throw new Error('boom');
         base.removeItem(key);
       },
     };
-    const { store, available } = safeStore(flaky);
+    return { storage, base, full };
+  }
+
+  it('Storage que passa a lançar depois da sonda: o set guarda em memória e relança; get e remove caem em memória', () => {
+    const { storage, full } = fillingStorage();
+    const { store, available } = safeStore(storage);
     expect(available).toBe(true);
-    broken = true;
-    expect(() => store.set('k', 'v')).not.toThrow();
+    full.on = true;
+    // Quem grava precisa saber que não foi para o disco; a sessão, porém, segue vendo o valor mais novo.
+    expect(() => store.set('k', 'v')).toThrow('quota');
     expect(store.get('k')).toBe('v');
     expect(() => store.remove('k')).not.toThrow();
     expect(store.get('k')).toBeNull();
+  });
+
+  it('o set que falhou e depois cabe vai para o disco, e a cópia em memória sai', () => {
+    const { storage, base, full } = fillingStorage();
+    const { store } = safeStore(storage);
+    full.on = true;
+    expect(() => store.set('k', 'velho')).toThrow();
+    full.on = false;
+    store.set('k', 'novo');
+    expect(base.getItem('k')).toBe('novo');
+    expect(store.get('k')).toBe('novo');
+    // Sem a cópia em memória: o que o disco muda por fora é o que a leitura vê.
+    base.setItem('k', 'de fora');
+    expect(store.get('k')).toBe('de fora');
+  });
+
+  it('as gravações do app engolem a falha da cota: o app não lança e a sessão vê o valor', () => {
+    const { storage, base, full } = fillingStorage();
+    const { store } = safeStore(storage);
+    full.on = true;
+    expect(() => saveNickname(store, 'Ana')).not.toThrow();
+    expect(() => savePrefs(store, { ...DEFAULT_PREFS, sound: false })).not.toThrow();
+    expect(() => saveSeat(store, 'ABC234', { token: TOKEN, playerId: 'ana', nickname: 'Ana' })).not.toThrow();
+    expect(loadNickname(store)).toBe('Ana');
+    expect(loadPrefs(store).sound).toBe(false);
+    expect(loadSeat(store, 'ABC234')).toMatchObject({ playerId: 'ana' });
+    expect(base.length).toBe(0);
   });
 });
 

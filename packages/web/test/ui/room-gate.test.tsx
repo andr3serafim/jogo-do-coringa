@@ -298,6 +298,29 @@ describe('sala parada', () => {
     expect(screen.getByRole('heading', { name: 'Atualize a página' })).toBeInTheDocument();
   });
 
+  it('com um sessionStorage que passa na sonda mas recusa a marca (cota cheia), 4001 não recarrega', () => {
+    // O `safeStore` guarda a marca em memória e relança a falha: sem isso, a marca (só em memória) sumiria na recarga e o
+    // 4001 giraria sem fim.
+    const data = new Map<string, string>();
+    vi.spyOn(window, 'sessionStorage', 'get').mockReturnValue({
+      getItem: (key: string) => data.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        if (key === 'coringa:recarregou') throw new DOMException('cheio', 'QuotaExceededError');
+        data.set(key, value);
+      },
+      removeItem: (key: string) => void data.delete(key),
+      clear: () => data.clear(),
+      key: (index: number) => [...data.keys()][index] ?? null,
+      get length() {
+        return data.size;
+      },
+    });
+    const { api, reload } = setup({ seated: true, marks: 'padrão', room: false });
+    emitClosed(api, 4001);
+    expect(reload).not.toHaveBeenCalled();
+    expect(screen.getByRole('heading', { name: 'Atualize a página' })).toBeInTheDocument();
+  });
+
   it('com sessionStorage de verdade, a marca fica nele e 4001 recarrega uma vez', () => {
     window.sessionStorage.clear();
     const { api, reload } = setup({ seated: true, marks: 'padrão', room: false });
