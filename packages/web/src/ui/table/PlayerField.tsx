@@ -4,6 +4,7 @@
 // é de CSS: a árvore é uma só.
 import { absoluteAttackArmed, type PlayerView, type PublicPlayer, type SpecialCard } from '@coringa/engine';
 import { useId, type ReactNode } from 'react';
+import { cardDropKey, DROP, type DropKey } from '../../model/drag.ts';
 import { zoneKey, type MarkZone } from '../../model/marks.ts';
 import { useAnim } from '../anim/context.ts';
 import { DamageNumber, ShieldBreak } from '../anim/Effects.tsx';
@@ -37,11 +38,19 @@ export function PlayerField({ side, view, player, name, away = false, equip, too
   const rowLabel = (kind: 'ataque' | 'defesa') => (self ? `Sua fileira de ${kind}` : `Fileira de ${kind} de ${name}`);
   const limit = view.config.rowLimit;
   const attack = (
-    <Row label={rowLabel('ataque')} kind="ATK" side={player} pressure={view.pressure} limit={limit} aim={self ? 'up' : 'down'} />
+    <Row
+      label={rowLabel('ataque')}
+      kind="ATK"
+      side={player}
+      pressure={view.pressure}
+      limit={limit}
+      aim={self ? 'up' : 'down'}
+      droppable={self}
+    />
   );
-  const defense = <Row label={rowLabel('defesa')} kind="DEF" side={player} pressure={view.pressure} limit={limit} />;
+  const defense = <Row label={rowLabel('defesa')} kind="DEF" side={player} pressure={view.pressure} limit={limit} droppable={self} />;
   const info = <Info side={side} view={view} player={player} name={name} away={away} equip={equip} zone={zone} tool={tool} />;
-  const zones = <Zones player={player} name={name} view={view} />;
+  const zones = <Zones player={player} name={name} view={view} self={self} />;
 
   return (
     <section
@@ -165,7 +174,7 @@ function Info({ side, view, player, name, away, equip, zone, tool }: InfoProps) 
 // ---------------------------------------------------------------------------------------------
 // Guarda, buffs, Reflect e as marcas de estado
 
-function Zones({ player, name, view }: { player: PublicPlayer; name: string; view: PlayerView }) {
+function Zones({ player, name, view, self }: { player: PublicPlayer; name: string; view: PlayerView; self: boolean }) {
   const chips: Array<{ key: string; text: string; strong: boolean }> = [];
   if (player.absoluteDefense) chips.push({ key: 'def', text: 'Defesa Absoluta', strong: true });
   if (player.resurrectionCount > 0) {
@@ -177,9 +186,10 @@ function Zones({ player, name, view }: { player: PublicPlayer; name: string; vie
 
   return (
     <div className="campo-zonas">
-      <Zone label="Guarda" cards={player.guard} count />
-      <Zone label="Buffs de ataque" cards={player.attackBuffs} wildAs="J" />
-      <Zone label="Buffs de defesa" cards={player.defenseBuffs} wildAs="Q" />
+      {/* No seu campo, a zona inteira recebe a carta da mão (J, Q, K); no do oponente, cada carta é um alvo possível (A, Selvagem, Sacrifício). */}
+      <Zone label="Guarda" cards={player.guard} count drop={self ? DROP.guard : 'targets'} />
+      <Zone label="Buffs de ataque" cards={player.attackBuffs} wildAs="J" drop={self ? DROP.attackBuffs : 'targets'} />
+      <Zone label="Buffs de defesa" cards={player.defenseBuffs} wildAs="Q" drop={self ? DROP.defenseBuffs : 'targets'} />
       {player.reflect ? (
         <Zone
           label="Reflect ativo"
@@ -213,15 +223,20 @@ interface ZoneProps {
   wildAs?: 'J' | 'Q' | Record<number, 'J' | 'Q'>;
   /** Mostra a contagem ao lado do rótulo. */
   count?: boolean;
+  /** O arrasto: a chave da zona inteira (a sua), `'targets'` (cada carta é uma zona `carta:<id>`, a do oponente) ou nada (o Reflect). */
+  drop?: DropKey | 'targets';
 }
 
-function Zone({ label, listLabel, cards, wildAs, count = false }: ZoneProps) {
+function Zone({ label, listLabel, cards, wildAs, count = false, drop }: ZoneProps) {
   const labelId = useId();
   // Só uma Guarda grande (muitos K) precisa de cartas sobrepostas para caber na linha.
   const overlap = cards.length > 4;
   const roleAt = (index: number) => (typeof wildAs === 'object' ? wildAs[index] : wildAs);
   return (
-    <div className="campo-zona">
+    <div
+      className="campo-zona [--soltar-folga:-4px]"
+      data-soltar={drop !== undefined && drop !== 'targets' ? drop : undefined}
+    >
       <div className="zona-titulo flex items-baseline gap-1">
         <span id={labelId} className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">
           {label}
@@ -241,7 +256,8 @@ function Zone({ label, listLabel, cards, wildAs, count = false }: ZoneProps) {
         {cards.map((card, index) => (
           <li
             key={card.id}
-            className="relative flex-none"
+            data-soltar={drop === 'targets' ? cardDropKey(card.id) : undefined}
+            className="relative flex-none [--soltar-folga:-4px]"
             style={index > 0 ? { marginLeft: overlap ? 'calc(var(--mini-w) * -0.34)' : '3px' } : undefined}
           >
             <TableCard card={card} size="mini" as={card.kind === 'WILD' ? roleAt(index) : undefined} />

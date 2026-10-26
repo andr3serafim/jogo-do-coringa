@@ -6,7 +6,10 @@
 //
 // Nenhuma regra mora aqui: o rascunho e a regra de estouro são da sessão (`equipChoose`, `equipConfirm`) e do modelo
 // (`equip.ts`). O painel é só vista: as jogadas chegam por props.
-import type { Destination, PlayerView } from '@coringa/engine';
+//
+// Arrastar (fatia 5): a carta da vez também se arrasta até a zona do destino (`data-soltar` na fileira, na última carta dela ou no
+// cemitério, as chaves de `equipDropZones`). A soltura escolhe o destino pelo mesmo `onChoose` dos botões, que seguem como sempre.
+import type { Destination, NumCard, PlayerView } from '@coringa/engine';
 import type { PlayerAction } from '@coringa/protocol';
 import { DESTINATION_TEXT } from '@coringa/sim/text';
 import { useEffect, useRef, type ReactNode, type RefObject } from 'react';
@@ -24,11 +27,14 @@ import {
   SENDING_TEXT,
   UNDO_LABEL,
 } from '../../model/copy.ts';
+import { equipDropZones, type DropKey } from '../../model/drag.ts';
 import { draftBoard, nextDestinations } from '../../model/equip.ts';
 import type { Notice, SessionSnapshot } from '../../model/session.ts';
 import { Card } from '../cards/Card.tsx';
 import { NoticeLine, PRIMARY, PRIMARY_TITLE, SECONDARY, TwoLine } from './controls.tsx';
+import { DragGhost } from './DragGhost.tsx';
 import type { TableNames } from './labels.ts';
+import { useCardDrag } from './useCardDrag.ts';
 
 export interface EquipPanelProps {
   view: PlayerView;
@@ -108,12 +114,42 @@ function Panel({ panelRef, children }: { panelRef: RefObject<HTMLElement | null>
   );
 }
 
+const noop = (): void => undefined;
+
+/** A carta da vez, grande: arrastável até o destino, sem efeito no toque (os destinos ao lado são os botões). */
+function EquipCard({
+  card,
+  enabled,
+  zones,
+  onDrop,
+}: {
+  card: NumCard;
+  enabled: boolean;
+  zones: () => ReadonlySet<DropKey>;
+  onDrop: (key: DropKey | null) => void;
+}) {
+  const { bind, dragging, ghost } = useCardDrag({ enabled, zones, onDrop, onTap: noop });
+  return (
+    <>
+      {/* No ar, a de origem esmaece (esta carta não é animada, então o Motion não põe `opacity` inline nela). */}
+      <Card card={card} size="hand" animated={false} dragRef={bind} className={dragging ? 'opacity-40' : enabled ? 'cursor-grab' : ''} />
+      <DragGhost ghost={ghost} />
+    </>
+  );
+}
+
 function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onUndo, onReset, onConfirm, panelRef, total }: EquipPanelProps & { total: number }) {
   const cards = view.self.pending;
   const index = draft.length;
   const complete = index >= total;
   const board = draftBoard(view, draft);
   const options = complete ? [] : nextDestinations(view, legal, draft);
+  /** As zonas do destino da próxima carta, na hora (a soltura confere de novo com a lista de agora). */
+  const dropZones = () => new Set(equipDropZones(view, legal, draft).keys());
+  const dropCard = (key: DropKey | null) => {
+    const destination = key === null ? undefined : equipDropZones(view, legal, draft).get(key);
+    if (destination !== undefined) onChoose(destination);
+  };
 
   // Depois de cada escolha (ou de desfazer) o foco vai ao primeiro passo útil: o primeiro destino, ou o Confirmar.
   const lastLength = useRef(index);
@@ -150,7 +186,7 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
         </ol>
       ) : (
         <div className="flex items-start gap-3">
-          <Card card={cards[index]!} size="hand" animated={false} />
+          <EquipCard key={cards[index]!.id} card={cards[index]!} enabled={!disabled && options.length > 0} zones={dropZones} onDrop={dropCard} />
           <ul role="list" aria-label="Destinos" data-step="destinos" className="flex min-w-0 flex-1 list-none flex-col gap-2 p-1.5">
             {options.map((destination, i) => (
               <li key={destination}>

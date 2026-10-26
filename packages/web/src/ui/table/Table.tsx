@@ -17,7 +17,7 @@ import type { HintZone } from '../../model/tutorial.ts';
 import { useMediaQuery } from '../useMediaQuery.ts';
 import { Banners } from './Banners.tsx';
 import { CenterBand } from './CenterBand.tsx';
-import { TableUiContext, type TableUi } from './context.ts';
+import { TableUiContext, type HandDrag, type TableUi } from './context.ts';
 import { MenuButton } from './GameMenu.tsx';
 import { Hand } from './Hand.tsx';
 import { HistoryButton, HistoryPanel, PC_QUERY } from './History.tsx';
@@ -52,6 +52,8 @@ export interface TableProps {
   targetIds?: ReadonlySet<string>;
   onSelectCard?: (id: string) => void;
   onSelectTarget?: (id: string) => void;
+  /** Arrastar as cartas da mão até a zona da jogada (um caminho a mais que o toque; sem ele, a mão só toca). */
+  handDrag?: HandDrag;
   /** O jogador viu uma carta ou uma zona (`zone:<nome>`) marcada: a sessão apaga a marca. */
   onSeen?: (key: string) => void;
   /** Sem ele, o cemitério é só informação. */
@@ -97,6 +99,7 @@ function TableView({
   targetIds = NO_TARGETS,
   onSelectCard,
   onSelectTarget,
+  handDrag,
   onSeen,
   onOpenGraveyard,
   onOpenMenu,
@@ -164,6 +167,7 @@ function TableView({
     draftIds,
     onSelectCard,
     onSelectTarget,
+    handDrag,
     onSeen,
     hintZone,
   };

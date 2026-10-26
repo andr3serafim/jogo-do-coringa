@@ -1,6 +1,6 @@
 import { applyAction, viewFor, type Destination, type NumCard, type PlayerView, type Rank, type SpecialCard } from '@coringa/engine';
 import { describe, expect, it } from 'vitest';
-import { equipDropZones, playDropZones, resolvePlayDrop, type DropKey } from '../../src/model/drag.ts';
+import { cardDropKey, DROP, equipDropZones, playDropZones, resolvePlayDrop, ROW_DROP, type DropKey } from '../../src/model/drag.ts';
 import { nextDestinations } from '../../src/model/equip.ts';
 import { legalFor, tablePlays } from '../../src/model/plays.ts';
 import { scenarioAt, type ViewSpec } from '../fixtures.ts';
@@ -200,5 +200,37 @@ describe('equipDropZones: onde cada destino do Equipar cai', () => {
     const view = equipView({ attackRow: [2], defenseRow: [3], pending: [5] });
     expect(zones(view, ['ATK']).size).toBe(0);
     expect(equipDropZones(view, [], []).size).toBe(0);
+  });
+});
+
+describe('as chaves das zonas (o que a mesa põe em data-soltar)', () => {
+  it('as fixas são as da spec, uma para cada zona', () => {
+    expect(Object.values(DROP).sort()).toEqual(
+      ['buffs:ATK', 'buffs:DEF', 'cemiterio', 'fileira:ATK', 'fileira:DEF', 'guarda', 'ultima:ATK', 'ultima:DEF'].sort(),
+    );
+    expect(new Set(Object.values(DROP)).size).toBe(Object.values(DROP).length);
+  });
+
+  it('a de uma carta do oponente é carta:<id>', () => {
+    expect(cardDropKey('x-p2-J-3')).toBe('carta:x-p2-J-3');
+  });
+
+  it('cada fileira tem a zona dela inteira e a da última carta', () => {
+    expect(ROW_DROP).toEqual({
+      ATK: { row: 'fileira:ATK', last: 'ultima:ATK' },
+      DEF: { row: 'fileira:DEF', last: 'ultima:DEF' },
+    });
+  });
+
+  it('o que playDropZones devolve para as cartas da mão só usa essas chaves', () => {
+    const { view, plays } = setup({
+      self: { hand: ['J', 'Q', 'K', 'K', 'A', 'WILD'] },
+      opponent: { attackBuffs: ['J'], defenseBuffs: ['Q'], guard: ['K'] },
+    });
+    const known = new Set<string>(Object.values(DROP));
+    const targets = [...view.opponent.attackBuffs, ...view.opponent.defenseBuffs, ...view.opponent.guard].map((c) => cardDropKey(c.id));
+    const keys = new Set<DropKey>(view.self.hand.flatMap((card) => [...playDropZones(card.id, plays).keys()]));
+    expect(keys.size).toBeGreaterThan(0);
+    for (const key of keys) expect(known.has(key) || targets.includes(key)).toBe(true);
   });
 });

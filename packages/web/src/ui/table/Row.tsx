@@ -6,6 +6,10 @@
 // A grade usa `minmax(0, var(--card-w))` por coluna: com `limit` cartas a fileira cabe em qualquer largura de
 // celular sem rolar de lado, e as cartas só encolhem se faltar espaço. Nada aqui corta com `overflow: hidden`,
 // para o anel de foco (6 px) de uma carta focável passar por cima das vizinhas.
+//
+// Na sua fileira (`droppable`), o arrasto do Equipar (fatia 5) solta a carta na fileira inteira (um lugar vago) ou na última carta
+// dela (a troca): `data-soltar`, com as chaves de `model/drag.ts`. A zona de dentro só vale quando o motor deixa trocar; sem isso o
+// gesto sobe até a fileira.
 import {
   attackBase,
   attackPower,
@@ -15,6 +19,7 @@ import {
   type NumCard,
   type PublicPlayer,
 } from '@coringa/engine';
+import { ROW_DROP } from '../../model/drag.ts';
 import { rowKey } from '../../model/effects.ts';
 import { useAnim } from '../anim/context.ts';
 import { LitRow } from '../anim/Effects.tsx';
@@ -30,11 +35,13 @@ export interface RowProps {
   limit: number;
   /** Para onde a fileira de Ataque aponta quando acende (o Coringa do outro). */
   aim?: 'up' | 'down';
+  /** A fileira é sua: o arrasto do Equipar pode soltar a carta nela. */
+  droppable?: boolean;
 }
 
 const CAPTION = { ATK: 'Ataque', DEF: 'Defesa' } as const;
 
-export function Row({ label, kind, side, pressure, limit, aim }: RowProps) {
+export function Row({ label, kind, side, pressure, limit, aim, droppable = false }: RowProps) {
   const anim = useAnim();
   const cards: NumCard[] = kind === 'ATK' ? side.attackRow : side.defenseRow;
   const total = kind === 'ATK' ? attackPower(side, pressure) : defensePower(side);
@@ -51,7 +58,8 @@ export function Row({ label, kind, side, pressure, limit, aim }: RowProps) {
       aria-label={label}
       data-fileira={rowKey(side.id, kind)}
       data-aceso={lit ? 'true' : undefined}
-      className="relative flex items-center gap-2"
+      data-soltar={droppable ? ROW_DROP[kind].row : undefined}
+      className="relative flex items-center gap-2 [--soltar-folga:-2px]"
     >
       {lit ? <LitRow aim={kind === 'ATK' ? aim : undefined} ms={anim.beatMs} /> : null}
       <ul
@@ -60,7 +68,11 @@ export function Row({ label, kind, side, pressure, limit, aim }: RowProps) {
         style={{ gridTemplateColumns: `repeat(${limit}, minmax(0, var(--card-w)))` }}
       >
         {cards.map((card, index) => (
-          <li key={card.id} className="relative min-w-0">
+          <li
+            key={card.id}
+            data-soltar={droppable && index === cards.length - 1 ? ROW_DROP[kind].last : undefined}
+            className="relative min-w-0 [--soltar-folga:-4px]"
+          >
             <TableCard card={card} size="field" front={index === 0} quad={quads.includes(card.value)} />
           </li>
         ))}

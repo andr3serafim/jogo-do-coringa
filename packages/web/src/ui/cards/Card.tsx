@@ -53,6 +53,8 @@ export interface CardProps {
   tabIndex?: number;
   /** O jogador passou o mouse, tocou ou focou numa carta marcada: a marca apaga. */
   onSeen?: () => void;
+  /** A `ref` do elemento da carta para o gesto de arrastar (`useCardDrag().bind`): é ele que o dedo pega e que o fantasma copia. */
+  dragRef?: (el: HTMLElement | null) => void;
   className?: string;
 }
 
@@ -190,6 +192,7 @@ export function Card({
   onSelect,
   tabIndex,
   onSeen,
+  dragRef,
   className = '',
 }: CardProps) {
   const anim = useAnim();
@@ -269,6 +272,7 @@ export function Card({
       <m.button
         key={animated ? anim.markOf(card.id) : undefined}
         type="button"
+        ref={dragRef}
         {...common}
         aria-pressed={selected}
         aria-disabled={disabled || undefined}
@@ -280,7 +284,7 @@ export function Card({
     );
   }
   return (
-    <m.div key={animated ? anim.markOf(card.id) : undefined} role="img" {...common}>
+    <m.div key={animated ? anim.markOf(card.id) : undefined} ref={dragRef} role="img" {...common}>
       {inside}
     </m.div>
   );

@@ -20,6 +20,7 @@ import {
   TUTORIAL_BAND_TEXT,
 } from '../../model/copy.ts';
 import type { TrainingLevel } from '../../model/local-room.ts';
+import { DROP } from '../../model/drag.ts';
 import { zoneKey } from '../../model/marks.ts';
 import * as m from 'motion/react-m';
 import { useEffect, useRef } from 'react';
@@ -281,6 +282,7 @@ function Graveyard({ view, onOpen }: { view: PlayerView; onOpen: (() => void) | 
     // caixa, e não só em volta do texto.
     return (
       <div
+        data-soltar={DROP.graveyard}
         className={`${box} relative has-[:focus-visible]:shadow-[0_0_0_6px_var(--color-tinta)] has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-ouro`}
       >
         {card}
@@ -299,7 +301,7 @@ function Graveyard({ view, onOpen }: { view: PlayerView; onOpen: (() => void) | 
     );
   }
   return (
-    <div className={box} onPointerEnter={seen} onPointerDown={seen}>
+    <div data-soltar={DROP.graveyard} className={box} onPointerEnter={seen} onPointerDown={seen}>
       {card}
       {label}
     </div>

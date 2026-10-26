@@ -15,10 +15,16 @@
 // campo de texto nem de um diálogo aberto. Escolher uma carta leva o foco à primeira jogada, e escolher uma jogada com
 // alvo, ao primeiro alvo. Esc ou Cancelar devolvem o foco à carta que abriu a escolha. Não há atalhos de uma tecla. O foco
 // que a própria mesa move não conta como interação do jogador (não cancela a ordem automática nem aponta/apaga marcas).
+//
+// Arrastar (fatia 5): soltar uma carta da mão numa zona (`data-soltar`) passa pelo mesmo caminho do toque. A zona com uma jogada só
+// manda pelo `send` (com o `isLegal` de sempre, contra a lista do último `state`); com mais de uma, escolhe a carta e a barra mostra
+// as jogadas, como o toque; fora de zona, nada. O gesto fica desligado com os mesmos controles (`locked`). No Equipar, o painel liga
+// a soltura ao mesmo `onChoose` dos botões.
 import type { SpecialCard } from '@coringa/engine';
 import type { Deadline, PlayerAction, StateMessage } from '@coringa/protocol';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { navigate } from '../../app/router.ts';
+import { playDropZones, resolvePlayDrop, type DropKey } from '../../model/drag.ts';
 import { rowKey } from '../../model/effects.ts';
 import type { TrainingLevel } from '../../model/local-room.ts';
 import { isLegal, tablePlays, type CardPlay } from '../../model/plays.ts';
@@ -280,6 +286,21 @@ function PlayTableView({
     setSelection(cardId === id ? null : { epoch: state.epoch, cardId: id, playKey: null });
   };
 
+  /** A soltura de uma carta da mão (as zonas e a lista legal são as do último `state`, lidas na hora da soltura). */
+  const dropCard = (id: string, key: DropKey | null) => {
+    if (key === null || locked || passed) return;
+    const outcome = resolvePlayDrop(playDropZones(id, plays).get(key));
+    if (outcome === null) return;
+    if (outcome.kind === 'send') {
+      send(outcome.action);
+      return;
+    }
+    // Mais de uma jogada na zona: escolhe a carta e a barra lista as jogadas, como o toque. Não alterna: soltar a carta que já estava
+    // escolhida a mantém escolhida.
+    setPointedId(null);
+    setSelection({ epoch: state.epoch, cardId: id, playKey: null });
+  };
+
   const choosePlay = (option: CardPlay) => {
     if (locked || card === null) return;
     if (option.targets === null) send(option.make());
@@ -474,6 +495,7 @@ function PlayTableView({
         targetIds={targetIds}
         onSelectCard={acting && !passed ? selectCard : undefined}
         onSelectTarget={hasTargets ? chooseTarget : undefined}
+        handDrag={acting && !passed ? { zones: (id) => new Set(playDropZones(id, plays).keys()), onDrop: dropCard } : undefined}
         // O foco que a própria mesa move (incluindo o que ela devolve depois de um pulo) não apaga marca.
         onSeen={(key) => {
           if (!programmatic.current) session.markSeen(key);

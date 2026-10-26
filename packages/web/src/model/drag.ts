@@ -3,7 +3,7 @@
 // Nenhuma regra do jogo mora aqui. Cada zona da mesa leva um `data-soltar="<DropKey>"`; este módulo só diz
 // em qual zona cai cada jogada que a mesa já oferece (`tablePlays`) e cada destino que o motor já deixa no
 // Equipar (`nextDestinations`). O gesto (ponteiro, alvo sob o dedo) é de outro módulo.
-import type { Destination, PlayerView } from '@coringa/engine';
+import type { Destination, PlayerView, RowName } from '@coringa/engine';
 import type { PlayerAction } from '@coringa/protocol';
 import { nextDestinations } from './equip.ts';
 import type { CardPlay, TablePlays } from './plays.ts';
@@ -14,6 +14,32 @@ import type { CardPlay, TablePlays } from './plays.ts';
  */
 export type DropKey = string;
 
+/**
+ * As chaves fixas, num lugar só: este módulo e a mesa (todo `data-soltar`) leem daqui, então um erro de digitação não cria uma zona
+ * morta. `carta:<id>` tem o id de uma carta e sai de `cardDropKey`.
+ */
+export const DROP = {
+  attackBuffs: 'buffs:ATK',
+  defenseBuffs: 'buffs:DEF',
+  guard: 'guarda',
+  attackRow: 'fileira:ATK',
+  defenseRow: 'fileira:DEF',
+  lastAttack: 'ultima:ATK',
+  lastDefense: 'ultima:DEF',
+  graveyard: 'cemiterio',
+} as const;
+
+/** A zona de uma carta do oponente que é alvo de uma jogada. */
+export function cardDropKey(id: string): DropKey {
+  return `carta:${id}`;
+}
+
+/** As duas zonas de uma fileira sua: ela inteira (um lugar vago) e a última carta dela (a troca). */
+export const ROW_DROP: Record<RowName, { row: DropKey; last: DropKey }> = {
+  ATK: { row: DROP.attackRow, last: DROP.lastAttack },
+  DEF: { row: DROP.defenseRow, last: DROP.lastDefense },
+};
+
 /** Uma jogada que a zona aceita; `targetId` só nas jogadas com alvo (zona `carta:<id>`). */
 export interface PlayDrop {
   play: CardPlay;
@@ -22,9 +48,9 @@ export interface PlayDrop {
 
 /** A zona de uma jogada sem alvo, pela chave dela (`PLAY_J`, `PLAY_Q`, `PLAY_K:<n>`). */
 function untargetedZone(key: string): DropKey | null {
-  if (key === 'PLAY_J') return 'buffs:ATK';
-  if (key === 'PLAY_Q') return 'buffs:DEF';
-  if (key.startsWith('PLAY_K')) return 'guarda';
+  if (key === 'PLAY_J') return DROP.attackBuffs;
+  if (key === 'PLAY_Q') return DROP.defenseBuffs;
+  if (key.startsWith('PLAY_K')) return DROP.guard;
   return null;
 }
 
@@ -45,7 +71,7 @@ export function playDropZones(cardId: string, plays: TablePlays): Map<DropKey, P
       const key = untargetedZone(play.key);
       if (key !== null) add(key, { play });
     } else {
-      for (const target of play.targets) add(`carta:${target.id}`, { play, targetId: target.id });
+      for (const target of play.targets) add(cardDropKey(target.id), { play, targetId: target.id });
     }
   }
   return zones;
@@ -65,11 +91,11 @@ export function resolvePlayDrop(
 }
 
 const EQUIP_ZONE: Record<Destination, DropKey> = {
-  ATK: 'fileira:ATK',
-  DEF: 'fileira:DEF',
-  REPLACE_LAST_ATK: 'ultima:ATK',
-  REPLACE_LAST_DEF: 'ultima:DEF',
-  DISCARD: 'cemiterio',
+  ATK: DROP.attackRow,
+  DEF: DROP.defenseRow,
+  REPLACE_LAST_ATK: DROP.lastAttack,
+  REPLACE_LAST_DEF: DROP.lastDefense,
+  DISCARD: DROP.graveyard,
 };
 
 /**
