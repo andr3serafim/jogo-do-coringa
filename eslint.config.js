@@ -107,12 +107,13 @@ export default defineConfig(
   },
   {
     // Esses arquivos vão para o navegador (via `exports` do @coringa/sim): nada de node:*. O `determinize` entra no chunk do treino
-    // pela busca do Difícil (`bots/hard.ts`).
+    // pela busca do Difícil (`bots/hard.ts`); o `tutorial-seed` entra no chunk do tutorial.
     files: [
       'packages/sim/src/bots/**/*.ts',
       'packages/sim/src/experiments/determinize.ts',
       'packages/sim/src/rng.ts',
       'packages/sim/src/play/text.ts',
+      'packages/sim/src/tutorial-seed.ts',
     ],
     rules: {
       'no-restricted-imports': [

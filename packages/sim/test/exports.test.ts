@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { BOTS } from '@coringa/sim/bots';
 import { createRng } from '@coringa/sim/rng';
 import { cardText } from '@coringa/sim/text';
+import { TUTORIAL_SEED } from '@coringa/sim/tutorial';
 
-// A web importa os três pedaços pelo nome do pacote; este teste trava o mapa `exports`.
+// A web importa os quatro pedaços pelo nome do pacote; este teste trava o mapa `exports`.
 describe('exports do pacote para o navegador', () => {
   it('@coringa/sim/bots expõe os bots', () => {
     expect(typeof BOTS.greedy).toBe('function');
@@ -17,5 +18,9 @@ describe('exports do pacote para o navegador', () => {
 
   it('@coringa/sim/text formata cartas', () => {
     expect(cardText({ id: 'c', kind: 'NUM', suit: 'copas', value: 7 })).toBe('7♥');
+  });
+
+  it('@coringa/sim/tutorial expõe a semente do tutorial', () => {
+    expect(TUTORIAL_SEED).toMatch(/^tutorial-\d+$/);
   });
 });
