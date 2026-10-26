@@ -32,6 +32,7 @@ export interface PlayerFieldProps {
 
 export function PlayerField({ side, view, player, name, away = false, equip, tool }: PlayerFieldProps) {
   const self = side === 'self';
+  const { hintZone } = useTableUi();
   const zone: MarkZone = self ? 'selfHp' : 'opponentHp';
   const rowLabel = (kind: 'ataque' | 'defesa') => (self ? `Sua fileira de ${kind}` : `Fileira de ${kind} de ${name}`);
   const limit = view.config.rowLimit;
@@ -51,7 +52,8 @@ export function PlayerField({ side, view, player, name, away = false, equip, too
       <div className={`campo-grade ${self ? 'campo-grade--voce' : 'campo-grade--oponente'}`}>
         {self ? (
           <>
-            <div className="campo-filas">
+            {/* As fileiras da dica do tutorial (as do oponente não: a dica fala das suas). */}
+            <div className="campo-filas" data-dica={hintZone === 'rows' ? 'rows' : undefined}>
               {attack}
               {defense}
             </div>

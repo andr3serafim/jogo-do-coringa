@@ -4,8 +4,16 @@ import { HttpError, normalizeNickname, parseTarget } from '@coringa/protocol';
 import { useState, type FormEvent } from 'react';
 import type { RoomApi } from '../../app/room-api.ts';
 import { navigate } from '../../app/router.ts';
-import { PAST_GAMES_LABEL, SOUND_LABEL } from '../../model/copy.ts';
-import { loadNickname, loadPrefs, saveNickname, savePrefs, saveSeat, type KeyValueStore } from '../../model/storage.ts';
+import { LEARN_LABEL, PAST_GAMES_LABEL, SOUND_LABEL } from '../../model/copy.ts';
+import {
+  loadNickname,
+  loadPrefs,
+  loadTutorialState,
+  saveNickname,
+  savePrefs,
+  saveSeat,
+  type KeyValueStore,
+} from '../../model/storage.ts';
 import { Button, Panel, Screen, Switch, TextField, Title } from '../parts.tsx';
 import { useSound } from '../sound-context.ts';
 import { NICKNAME_ERROR, OFFLINE, TOO_MANY } from '../text.ts';
@@ -26,6 +34,17 @@ export function Home({ api, store }: HomeProps) {
   const [targetError, setTargetError] = useState<string | null>(null);
   const sound = useSound();
   const [soundOn, setSoundOn] = useState(() => loadPrefs(store).sound);
+  // "Aprender jogando" vem em destaque (no alto, em ouro) enquanto o tutorial não foi feito nem pulado; depois, é um botão comum, entre os do treino.
+  const [tutorialPending] = useState(() => loadTutorialState(store) === null);
+  const learn = (
+    <Button
+      variant={tutorialPending ? 'primary' : 'secondary'}
+      data-destaque={tutorialPending ? 'true' : undefined}
+      onClick={() => navigate('/tutorial')}
+    >
+      {LEARN_LABEL}
+    </Button>
+  );
 
   /** Liga ou desliga o som. O controlador é avisado na hora, no próprio clique (ver `PlayTable.changePrefs`). */
   function changeSound(on: boolean) {
@@ -78,6 +97,7 @@ export function Home({ api, store }: HomeProps) {
     <Screen>
       <Title>Jogo do Coringa</Title>
       <p className="text-lg">Duelo de cartas para dois jogadores, direto no navegador.</p>
+      {tutorialPending ? learn : null}
       <Panel label="Criar sala">
         <form onSubmit={(event) => void create(event)} className="flex flex-col gap-4" noValidate>
           <TextField
@@ -117,6 +137,7 @@ export function Home({ api, store }: HomeProps) {
           </Button>
         </form>
       </Panel>
+      {tutorialPending ? null : learn}
       <Button variant="secondary" onClick={() => navigate('/treino')}>
         Treinar contra o bot
       </Button>

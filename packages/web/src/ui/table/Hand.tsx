@@ -8,7 +8,7 @@ import { HAND_ROLE } from './labels.ts';
 import { TableCard } from './TableCard.tsx';
 
 export function Hand({ cards }: { cards: SpecialCard[] }) {
-  const { selectedCardId } = useTableUi();
+  const { selectedCardId, hintZone } = useTableUi();
   if (cards.length === 0) {
     return <p className="px-3 pb-2 pt-[18px] text-center text-sm font-bold pc:text-papel">Sua mão está vazia</p>;
   }
@@ -17,6 +17,8 @@ export function Hand({ cards }: { cards: SpecialCard[] }) {
     <ul
       role="list"
       aria-label="Sua mão"
+      // O contorno da dica do tutorial (`styles.css`, `[data-dica]`) fica folgado: o convite a olhar a mão, sem tapar nenhuma carta.
+      data-dica={hintZone === 'hand' ? 'hand' : undefined}
       className="flex w-full list-none justify-center px-3 pb-2 pt-[18px] pc:w-[clamp(360px,50%,600px)] pc:flex-none pc:justify-start pc:px-0 pc:pb-0 pc:pt-3.5"
     >
       {cards.map((card, index) => (

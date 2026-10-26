@@ -196,6 +196,27 @@ export function saveLevel(store: KeyValueStore, level: TrainingLevel): void {
   writeValue(store, LEVEL_KEY, level);
 }
 
+// --- Tutorial ---
+
+/** Como o tutorial acabou: a pessoa chegou à dica do fim (`done`) ou a pulou (`skipped`). Sem o valor, ele ainda não foi feito. */
+export type TutorialState = 'done' | 'skipped';
+
+const TUTORIAL_KEY = 'coringa:tutorial';
+
+/** O que ficou guardado do tutorial, ou `null` (nunca feito, ou um valor que não é um estado). */
+export function loadTutorialState(store: KeyValueStore): TutorialState | null {
+  try {
+    const value = store.get(TUTORIAL_KEY);
+    return value === 'done' || value === 'skipped' ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveTutorialState(store: KeyValueStore, state: TutorialState): void {
+  writeValue(store, TUTORIAL_KEY, state);
+}
+
 // --- Diagnóstico copiável (spec §6.5) ---
 
 // O token do servidor é base64url de 32 bytes (43 caracteres). Mascara qualquer corrida desse tamanho ou maior.

@@ -140,6 +140,44 @@ describe('início: entrar com código ou link', () => {
   });
 });
 
+describe('início: "Aprender jogando" (coringa:tutorial)', () => {
+  /** Quem vem antes na página: a ordem do documento. */
+  const before = (a: Element, b: Element): boolean => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+
+  it('sem coringa:tutorial vem em destaque (ouro), logo depois da apresentação e antes de criar sala', () => {
+    setup();
+    const learn = screen.getByRole('button', { name: 'Aprender jogando' });
+    expect(learn).toHaveAttribute('data-destaque', 'true');
+    expect(learn).toHaveClass('bg-ouro');
+    expect(before(learn, screen.getByRole('region', { name: 'Criar sala' }))).toBe(true);
+  });
+
+  it.each(['done', 'skipped'])('com coringa:tutorial = %s é um botão comum, entre os do treino, sem destaque', (state) => {
+    const store = memoryStore();
+    store.set('coringa:tutorial', state);
+    render(<Home api={fakeApi()} store={store} />);
+    const learn = screen.getByRole('button', { name: 'Aprender jogando' });
+    expect(learn).not.toHaveAttribute('data-destaque');
+    expect(learn).not.toHaveClass('bg-ouro');
+    expect(before(screen.getByRole('region', { name: 'Entrar numa sala' }), learn)).toBe(true);
+    expect(before(learn, screen.getByRole('button', { name: 'Treinar contra o bot' }))).toBe(true);
+  });
+
+  it('um valor guardado que não é estado do tutorial conta como ausente', () => {
+    const store = memoryStore();
+    store.set('coringa:tutorial', 'talvez');
+    render(<Home api={fakeApi()} store={store} />);
+    expect(screen.getByRole('button', { name: 'Aprender jogando' })).toHaveAttribute('data-destaque', 'true');
+  });
+
+  it.each([null, 'done'])('axe: sem violações sérias (coringa:tutorial = %s)', async (state) => {
+    const store = memoryStore();
+    if (state !== null) store.set('coringa:tutorial', state);
+    const { container } = render(<Home api={fakeApi()} store={store} />);
+    expect(await seriousViolations(container)).toEqual([]);
+  });
+});
+
 describe('início: treino e acessibilidade', () => {
   it('Treinar contra o bot vai para /treino', async () => {
     const { user } = setup();
@@ -151,6 +189,12 @@ describe('início: treino e acessibilidade', () => {
     const { user } = setup();
     await user.click(screen.getByRole('button', { name: 'Partidas anteriores' }));
     expect(window.location.pathname).toBe('/partidas');
+  });
+
+  it('Aprender jogando vai para /tutorial', async () => {
+    const { user } = setup();
+    await user.click(screen.getByRole('button', { name: 'Aprender jogando' }));
+    expect(window.location.pathname).toBe('/tutorial');
   });
 
   it('tem título, campos com rótulo e campos de texto de 16 px', () => {

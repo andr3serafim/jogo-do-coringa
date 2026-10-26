@@ -1,7 +1,7 @@
 // Casca da interface: o `Storage`, a porta do servidor e o controlador de som nascem aqui, uma vez, e a rota escolhe a tela
 // (spec §2.1). O som chega às telas pelo `SoundContext`; os ouvintes de gesto do controlador moram no `document`.
 import { Suspense, useEffect, useState, type ReactNode } from 'react';
-import { SCREEN_LOADING_TEXT } from '../model/copy.ts';
+import { LEARN_LABEL, SCREEN_LOADING_TEXT } from '../model/copy.ts';
 import { loadPrefs, type KeyValueStore } from '../model/storage.ts';
 import { SoundController, browserSoundDeps } from '../sound/controller.ts';
 import { Button, Screen } from '../ui/parts.tsx';
@@ -21,6 +21,8 @@ import { useRoute } from './router.ts';
 // Se o `import()` falhar, a rota mostra o aviso com "Atualizar" (`lazy-screen.tsx`), e não o erro genérico do app.
 const PastGames = lazyScreen(() => import('../ui/screens/PastGames.tsx'));
 const ReplayScreen = lazyScreen(() => import('../ui/screens/ReplayScreen.tsx'));
+// O tutorial (o painel das dicas, os textos e a semente) também: um pedaço só dele, fora do JavaScript inicial.
+const Tutorial = lazyScreen(() => import('../ui/screens/Tutorial.tsx'));
 
 export interface AppProps {
   /** Troca o HTTP e a conexão (testes). O padrão fala com o próprio site. */
@@ -63,6 +65,12 @@ function Routes({ api, store }: { api: RoomApi; store: KeyValueStore }) {
     case 'training':
       return <Training store={store} />;
     // Uma chave por rota: a falha de uma das telas não segue para a outra quando o jogador navega entre elas.
+    case 'tutorial':
+      return (
+        <LazyRoute key="tutorial" title={LEARN_LABEL}>
+          <Tutorial store={store} />
+        </LazyRoute>
+      );
     case 'pastGames':
       return (
         <LazyRoute key="pastGames">
@@ -81,9 +89,9 @@ function Routes({ api, store }: { api: RoomApi; store: KeyValueStore }) {
 }
 
 /** Uma tela sob demanda: "Carregando…" até o pedaço chegar, e o aviso de falha se ele não chegar. */
-function LazyRoute({ children }: { children: ReactNode }) {
+function LazyRoute({ children, title }: { children: ReactNode; title?: string }) {
   return (
-    <ScreenBoundary>
+    <ScreenBoundary title={title}>
       <Suspense fallback={<ScreenLoading />}>{children}</Suspense>
     </ScreenBoundary>
   );

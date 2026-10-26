@@ -21,6 +21,7 @@ import {
   RULES_LABEL,
   SOUND_LABEL,
   trainingLevelText,
+  TUTORIAL_MENU_TEXT,
   versionText,
 } from '../../model/copy.ts';
 import type { TrainingLevel } from '../../model/local-room.ts';
@@ -83,6 +84,8 @@ export interface GameMenuProps {
   showAutoPass?: boolean;
   /** Só no treino: o nível do bot, escrito logo abaixo do título ("Treino · Médio"). */
   trainingLevel?: TrainingLevel;
+  /** O tutorial (um treino guiado): o menu diz "Tutorial" no lugar do nível do bot. */
+  tutorial?: true;
   /** Há partida em curso para desistir. */
   canConcede: boolean;
   /** Sem conexão não dá para desistir (o pedido se perderia). */
@@ -103,6 +106,7 @@ export function GameMenu({
   concedeWarning = CONCEDE_WARNING,
   showAutoPass = true,
   trainingLevel,
+  tutorial,
   canConcede,
   concedeDisabled,
   onConcede,
@@ -155,7 +159,9 @@ export function GameMenu({
           <h2 id={titleId} className="textura font-madeira text-2xl uppercase leading-tight">
             {MENU_LABEL}
           </h2>
-          {trainingLevel === undefined ? null : <p className="font-bold">{trainingLevelText(trainingLevel)}</p>}
+          {trainingLevel === undefined ? null : (
+            <p className="font-bold">{tutorial ? TUTORIAL_MENU_TEXT : trainingLevelText(trainingLevel)}</p>
+          )}
 
           {inviteLink === undefined ? null : (
             <>

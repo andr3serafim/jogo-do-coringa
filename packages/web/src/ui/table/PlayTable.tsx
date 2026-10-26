@@ -37,7 +37,7 @@ import { GraveyardDialog, type GraveyardMode } from './GraveyardDialog.tsx';
 import { PC_QUERY } from './History.tsx';
 import { tableNames } from './labels.ts';
 import { OrderPanel } from './OrderPanel.tsx';
-import { Table } from './Table.tsx';
+import { Table, type TableHint } from './Table.tsx';
 import { useDeadlineExpired } from './useClock.ts';
 import { useRecordPastGame } from './useRecordPastGame.ts';
 
@@ -59,6 +59,10 @@ export interface PlayTableProps {
   onExit?: () => void;
   /** O aviso da confirmação de Desistir (padrão: perder por W.O.); o treino não tem W.O. */
   concedeWarning?: string;
+  /** O tutorial: um treino guiado. A faixa central e o menu dizem "Tutorial" no lugar do nível do bot. Vale com `training`. */
+  tutorial?: true;
+  /** A dica do tutorial (o painel e a zona de que ela fala): a mesa a põe no lugar e contorna a zona. */
+  hint?: TableHint;
 }
 
 /** Sem `state` ainda não há o que desenhar. */
@@ -131,6 +135,8 @@ function PlayTableView({
   training,
   onExit,
   concedeWarning,
+  tutorial,
+  hint,
 }: ViewProps) {
   const { view } = state;
   const sound = useSound();
@@ -322,7 +328,8 @@ function PlayTableView({
   // desce até o pé dela, com a fileira de Ataque do oponente, a faixa e a Defesa dele acima. No PC a mesa cabe, e a vida do
   // oponente tem de ficar à vista na sua vez: nada rola. Uma vez por época, como o foco, e sem brigar com o jogador: se ele mesmo
   // rolou os campos nesta época (roda, toque arrastado, teclas de rolagem), nada rola. A rolagem é sempre instantânea (nunca suave,
-  // nem sem movimento reduzido) e não mexe no foco, que segue no painel de baixo.
+  // nem sem movimento reduzido) e não mexe no foco, que segue no painel de baixo. Com a dica do tutorial aberta no alto dos campos
+  // (`hint.open`), a rolagem espera ela fechar: do contrário a dica da vez de atacar sairia da vista justo quando chega.
   const attackEpoch = acting && phase === 'ATTACK_MAIN' ? state.epoch : null;
   const scrolledEpoch = useRef<number | null>(null);
   const userScrolledEpoch = useRef<number | null>(null);
@@ -346,15 +353,16 @@ function PlayTableView({
       fields.removeEventListener('keydown', onKey);
     };
   }, [attackEpoch]);
+  const hintOpen = hint?.open === true;
   useEffect(() => {
-    if (attackEpoch === null || busy || scrolledEpoch.current === attackEpoch) return;
+    if (attackEpoch === null || busy || hintOpen || scrolledEpoch.current === attackEpoch) return;
     scrolledEpoch.current = attackEpoch;
     if (userScrolledEpoch.current === attackEpoch || window.matchMedia?.(PC_QUERY).matches) return;
     const mine = document.querySelector(`[data-fileira="${rowKey(me, 'ATK')}"]`);
     const target = document.querySelector(`[data-fileira="${rowKey(opponent, 'DEF')}"]`);
     if (!mine || (insideFields(mine) && (target === null || insideFields(target)))) return;
     mine.scrollIntoView?.({ block: 'end', behavior: 'auto' });
-  }, [attackEpoch, busy, me, opponent]);
+  }, [attackEpoch, busy, hintOpen, me, opponent]);
 
   // Depois de ressuscitar pelo diálogo, o foco vai para a barra: o botão que abriu pode já nem existir.
   useEffect(() => {
@@ -471,6 +479,8 @@ function PlayTableView({
         onInteract={interact}
         actionBar={panel}
         training={training}
+        tutorial={tutorial}
+        hint={hint}
       />
       <GraveyardDialog
         mode={graveyard}
@@ -497,6 +507,7 @@ function PlayTableView({
         // No treino o passe automático não se aplica (spec §2.6): a sessão não o manda, e o menu não oferece a chave.
         showAutoPass={training === undefined}
         trainingLevel={training}
+        tutorial={tutorial}
         concedeWarning={concedeWarning}
         canConcede={room?.status === 'PLAYING' && phase !== 'GAME_OVER'}
         concedeDisabled={snapshot.status === 'reconnecting'}

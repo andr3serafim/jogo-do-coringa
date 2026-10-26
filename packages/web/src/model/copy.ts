@@ -413,6 +413,12 @@ export const TRAINING_CHOICE_LABEL = 'Nível do bot';
 export const trainingLevelText = (level: TrainingLevel): string => `Treino · ${LEVEL_NAME[level]}`;
 /** Na faixa central, no lugar do relógio. */
 export const trainingBandText = (level: TrainingLevel): string => `${trainingLevelText(level)}, sem relógio`;
+/** O tutorial (`/tutorial`, spec do polimento, fatia 4): o nome do botão da tela inicial e o aviso de quando o pedaço dele não chega. */
+export const LEARN_LABEL = 'Aprender jogando';
+/** Na faixa central do tutorial, no lugar do relógio e do nível do bot. */
+export const TUTORIAL_BAND_TEXT = 'Tutorial, sem relógio';
+/** No menu da partida do tutorial. */
+export const TUTORIAL_MENU_TEXT = 'Tutorial';
 /** No menu da partida: sai do treino na hora, sem resultado. */
 export const EXIT_TRAINING_LABEL = 'Sair do treino';
 /** No painel de fim do treino, no lugar de "Nova sala". */

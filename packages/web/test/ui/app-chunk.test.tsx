@@ -14,6 +14,9 @@ vi.mock('../../src/ui/screens/PastGames.tsx', () => {
 vi.mock('../../src/ui/screens/ReplayScreen.tsx', () => {
   throw new Error('Failed to fetch dynamically imported module: ReplayScreen');
 });
+vi.mock('../../src/ui/screens/Tutorial.tsx', () => {
+  throw new Error('Failed to fetch dynamically imported module: Tutorial');
+});
 
 const LOAD_FAILED = 'Não deu para abrir esta tela. Atualize a página.';
 
@@ -44,6 +47,17 @@ describe('<App />: uma tela das partidas que não chega', () => {
     expect(await screen.findByText(LOAD_FAILED)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Atualizar' })).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Algo deu errado' })).not.toBeInTheDocument();
+  });
+
+  it('/tutorial também: o aviso leva o título da tela ("Aprender jogando"), e não o das partidas', async () => {
+    window.history.replaceState(null, '', '/tutorial');
+    const { container } = render(<App api={fakeApi()} />);
+    expect(await screen.findByText(LOAD_FAILED)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Aprender jogando' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Partidas anteriores' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Atualizar' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Algo deu errado' })).not.toBeInTheDocument();
+    expect(await seriousViolations(container)).toEqual([]);
   });
 
   it('o resto do site segue de pé: sair da rota que falhou abre a outra tela', async () => {

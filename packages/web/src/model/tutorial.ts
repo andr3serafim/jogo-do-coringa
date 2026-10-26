@@ -91,3 +91,47 @@ export function tutorialHint(view: PlayerView, events: readonly GameEvent[], see
   }
   return null;
 }
+
+/**
+ * A dica `id` ainda vale nesta `view` e nestes eventos? Devolve a dica (com a zona) ou `null`. Olha só a situação dela: uma dica de
+ * prioridade maior valendo junto não a esconde (`tutorialHint` é quem escolhe qual sai).
+ */
+export function hintHolding(view: PlayerView, events: readonly GameEvent[], id: HintId): Hint | null {
+  const hint = HINTS.find((candidate) => candidate.id === id);
+  if (!hint || !hint.holds({ view, events, legal: legalActions(view) })) return null;
+  return { id: hint.id, zone: hint.zone };
+}
+
+/** O que o painel guarda entre uma mensagem `state` e a seguinte. */
+export interface HintFlow {
+  /** A dica que está no painel (`null`: nenhuma). Fica até o "Entendi" ou até outra tomar o lugar. */
+  current: HintId | null;
+  /** As que a pessoa já viu: com "Entendi", ou que saíram do painel depois de a situação passar (cada uma aparece uma vez). */
+  seen: ReadonlySet<HintId>;
+}
+
+/** O começo do tutorial: nada no painel, nada visto. */
+export const NO_HINT: HintFlow = { current: null, seen: new Set() };
+
+const withSeen = (seen: ReadonlySet<HintId>, id: HintId): ReadonlySet<HintId> => (seen.has(id) ? seen : new Set([...seen, id]));
+
+/**
+ * Chegou um `state`. Duas coisas: a dica que está no painel e cuja situação passou conta como vista (ela fica na tela até o
+ * "Entendi", mas não volta quando a situação se repetir); e, se vale uma dica nova, ela toma o painel. Se a dica do fim já foi vista
+ * (com "Entendi", ou saindo do painel porque outra partida começou), o tutorial acabou e o painel esvazia: nada depois do fim. Uma
+ * dica só de evento do oponente (a quadra dele) entra neste `state` e fica até o "Entendi": o modelo só a vê aqui.
+ */
+export function advanceHint(flow: HintFlow, view: PlayerView, events: readonly GameEvent[]): HintFlow {
+  let seen = flow.seen;
+  if (flow.current !== null && hintHolding(view, events, flow.current) === null) seen = withSeen(seen, flow.current);
+  if (seen.has('end')) return { current: null, seen };
+  const next = tutorialHint(view, events, seen);
+  if (next === null || next.id === flow.current) return seen === flow.seen ? flow : { current: flow.current, seen };
+  return { current: next.id, seen };
+}
+
+/** "Entendi": a dica do painel fica vista, e o painel mostra a próxima que vale neste mesmo `state`, se houver. */
+export function acknowledgeHint(flow: HintFlow, view: PlayerView, events: readonly GameEvent[]): HintFlow {
+  if (flow.current === null) return flow;
+  return advanceHint({ current: null, seen: withSeen(flow.seen, flow.current) }, view, events);
+}

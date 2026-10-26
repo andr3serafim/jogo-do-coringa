@@ -53,6 +53,8 @@ export interface HistoryPanelProps {
   baseSeq: number | null;
   /** Sala e placar, ao pé da coluna. */
   footer?: ReactNode;
+  /** O painel da dica do tutorial (só no PC, onde o histórico é uma coluna): logo abaixo do cabeçalho, acima da lista. */
+  top?: ReactNode;
   /** Ferramenta do cabeçalho (o botão do menu no PC, onde o histórico é uma coluna). */
   tool?: ReactNode;
 }
@@ -70,7 +72,7 @@ const CLOSED = 'max-pc:sr-only';
 const OPEN =
   'max-pc:fixed max-pc:inset-x-0 max-pc:bottom-0 max-pc:z-40 max-pc:max-h-[70dvh] max-pc:border-t-4 max-pc:border-ouro max-pc:pb-[max(1rem,env(safe-area-inset-bottom))]';
 
-export function HistoryPanel({ id, open, onClose, lines, baseSeq, footer, tool }: HistoryPanelProps) {
+export function HistoryPanel({ id, open, onClose, lines, baseSeq, footer, top, tool }: HistoryPanelProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const pc = useMediaQuery(PC_QUERY);
@@ -138,6 +140,7 @@ export function HistoryPanel({ id, open, onClose, lines, baseSeq, footer, tool }
             Fechar
           </button>
         </div>
+        {top}
         {/* A lista rola, então o teclado precisa chegar nela (axe: scrollable-region-focusable). Gaveta fechada (celular e tablet) é só
             texto para o leitor de tela: sem rolagem e fora do Tab, para não sobrar parada invisível. */}
         <div

@@ -9,6 +9,7 @@
  * - o sintetizador dos sons (`src/sound/synth.ts`) também fica fora do JavaScript inicial: só o controlador (`controller.ts`)
  *   está no inicial, e o `synth.ts` entra por `import()` dinâmico no primeiro gesto. Mesma dupla de conferências do bot.
  * - as duas telas das partidas anteriores (a lista e o visualizador do replay) também: entram por `React.lazy`. Mesma dupla.
+ * - a tela do tutorial (o painel, os textos das dicas e a semente) também: entra por `React.lazy`. Mesma dupla.
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -44,6 +45,17 @@ const SYNTH_MARKS = ['createDynamicsCompressor', 'sawtooth'];
 const PAST_GAMES_SCREEN_MARKS = [
   { screen: 'a lista das partidas', mark: 'Nenhuma partida terminada neste navegador.' },
   { screen: 'o visualizador do replay', mark: 'jogada malformada' },
+];
+
+/**
+ * Marcas da tela do tutorial (literais de string, que sobrevivem à minificação). Os textos das dicas moram em `src/model/tutorial-copy.ts`,
+ * que só o painel e a tela do tutorial importam; um `import` estático do painel ou da tela no código inicial levaria os dois para o
+ * pacote inicial. Nenhuma das duas frases aparece em outro lugar do código (nem no `copy.ts`, que é do inicial): a do fim da partida
+ * e o botão do painel. Cada marca tem que estar num chunk à parte e em nenhum `.js` inicial.
+ */
+const TUTORIAL_SCREEN_MARKS = [
+  { screen: 'o texto da dica do fim do tutorial', mark: 'Chame alguém para uma sala.' },
+  { screen: 'o painel das dicas do tutorial', mark: 'Pular o tutorial' },
 ];
 
 const dist = join(import.meta.dirname, '..', 'dist');
@@ -110,6 +122,9 @@ for (const url of initial) {
   for (const { screen, mark } of PAST_GAMES_SCREEN_MARKS) {
     if (source.includes(mark)) problems.push(`${url} contém ${screen} ("${mark}"): ela tem que entrar por React.lazy, fora do inicial`);
   }
+  for (const { screen, mark } of TUTORIAL_SCREEN_MARKS) {
+    if (source.includes(mark)) problems.push(`${url} contém ${screen} ("${mark}"): o tutorial tem que entrar por React.lazy, fora do inicial`);
+  }
 }
 console.log(`  total: ${kb(total)} de ${kb(BUDGET_BYTES)}`);
 if (total > BUDGET_BYTES) problems.push(`JavaScript inicial com ${kb(total)} gzip passa do orçamento de ${kb(BUDGET_BYTES)}`);
@@ -157,6 +172,16 @@ for (const { screen, mark } of PAST_GAMES_SCREEN_MARKS) {
     problems.push(`${screen} ("${mark}") não está em nenhum chunk carregado sob demanda: o React.lazy sumiu, ou o texto mudou`);
   } else {
     console.log(`Tela das partidas anteriores, ${screen} (fora do inicial): ${chunks.map(fromDist).join(', ')}`);
+  }
+}
+
+// O tutorial tem que existir em algum chunk que não é o inicial, pelo mesmo motivo.
+for (const { screen, mark } of TUTORIAL_SCREEN_MARKS) {
+  const chunks = all.filter((path) => !initialPaths.has(path) && readFileSync(path).includes(mark));
+  if (chunks.length === 0) {
+    problems.push(`${screen} ("${mark}") não está em nenhum chunk carregado sob demanda: o React.lazy sumiu, ou o texto mudou`);
+  } else {
+    console.log(`Tutorial, ${screen} (fora do inicial): ${chunks.map(fromDist).join(', ')}`);
   }
 }
 

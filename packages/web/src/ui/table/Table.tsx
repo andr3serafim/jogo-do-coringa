@@ -2,7 +2,8 @@
 // capa verde, em cima; a faixa central de tinta; você na capa rosa, embaixo, com a mão; e a coluna do histórico no
 // PC. É só vista: as interações chegam por props (`onSelectCard`, `onSelectTarget`, `onSeen`, `onOpenGraveyard`,
 // `onOpenMenu`, `onInteract`) e a barra de ação entra pelo `actionBar`. Quem liga isso à sessão é a `PlayTable`. A textura de xilogravura vai só nos títulos e no grão do papel, por baixo
-// do conteúdo (spec §10.7).
+// do conteúdo (spec §10.7). No tutorial, o `hint` traz o painel da dica (no alto da coluna do histórico no PC, no alto dos campos no
+// celular e no tablet) e a zona de que ela fala, que ganha o contorno parado (`data-dica`, desenhado em `styles.css`).
 import type { PlayerId } from '@coringa/engine';
 import type { Deadline, StateMessage } from '@coringa/protocol';
 import { useEffect, useId, useRef, useState, type ReactNode, type RefObject } from 'react';
@@ -12,14 +13,30 @@ import { completeDraft, draftBoard } from '../../model/equip.ts';
 import { newLineCount, type HistoryLine } from '../../model/history.ts';
 import type { TrainingLevel } from '../../model/local-room.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
+import type { HintZone } from '../../model/tutorial.ts';
+import { useMediaQuery } from '../useMediaQuery.ts';
 import { Banners } from './Banners.tsx';
 import { CenterBand } from './CenterBand.tsx';
 import { TableUiContext, type TableUi } from './context.ts';
 import { MenuButton } from './GameMenu.tsx';
 import { Hand } from './Hand.tsx';
-import { HistoryButton, HistoryPanel } from './History.tsx';
+import { HistoryButton, HistoryPanel, PC_QUERY } from './History.tsx';
 import { tableNames, type TableNames } from './labels.ts';
 import { PlayerField } from './PlayerField.tsx';
+
+/** A dica do tutorial: o painel (a tela o monta) e a zona de que ela fala, que ganha o contorno parado (`null`: sem contorno). */
+export interface TableHint {
+  zone: HintZone | null;
+  panel: ReactNode;
+  /**
+   * O painel mostra agora uma dica cuja situação ainda vale. No celular e no tablet o painel mora no alto dos campos, que rolam: a
+   * rolagem da vez de atacar (`PlayTable`) espera ele fechar, para o texto não sair da vista justo quando chega.
+   */
+  open?: boolean;
+}
+
+/** As zonas da dica que moram no painel de baixo (Equipar, ordem, barra de ação e a janela de reação): o contorno vai no recipiente dele. */
+const BAR_ZONES: ReadonlySet<HintZone | null> = new Set(['equip', 'order', 'actionBar', 'reaction']);
 
 export interface TableProps {
   snapshot: SessionSnapshot;
@@ -47,6 +64,14 @@ export interface TableProps {
   training?: TrainingLevel;
   /** A mesa do replay (só de vista): a faixa central diz "Revendo a partida" no lugar do relógio. */
   replay?: true;
+  /** O tutorial (um treino guiado): a faixa central diz "Tutorial, sem relógio", e não o nível do bot. */
+  tutorial?: true;
+  /**
+   * A dica do tutorial. O painel vai no alto da coluna do histórico no PC e, no celular e no tablet, no fluxo acima dos campos
+   * (dentro do contêiner que rola: empurra os campos, nunca é camada sobre a mão ou a barra, nem tem z-index); um só, nunca
+   * os dois. A zona ganha o contorno parado, sem animação.
+   */
+  hint?: TableHint;
   /** O título da mesa (só para leitor de tela): com a ref, ele fica focável por código, e a tela leva o foco a ele ao abrir. */
   titleRef?: RefObject<HTMLHeadingElement | null>;
 }
@@ -77,6 +102,8 @@ function TableView({
   actionBar,
   training,
   replay,
+  tutorial,
+  hint,
   titleRef,
 }: TableProps & { state: StateMessage }) {
   const { room, marks, marksBaseSeq, history } = snapshot;
@@ -85,6 +112,8 @@ function TableView({
   const panelId = useId();
   const [historyOpen, setHistoryOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
+  const pc = useMediaQuery(PC_QUERY);
+  const hintZone = hint?.zone ?? null;
 
   // Abrir a gaveta conta como ver as linhas (spec §10.5, "quando você toca, foca…"): o contador do botão só conta as que chegam
   // depois da última vez em que ela esteve aberta. Conta pela posição da linha, e não pelo `seq`: uma nota ("Duda voltou") chega
@@ -134,6 +163,7 @@ function TableView({
     onSelectCard,
     onSelectTarget,
     onSeen,
+    hintZone,
   };
 
   const theirs = room?.seats.find((seat) => seat.playerId !== me);
@@ -176,6 +206,7 @@ function TableView({
               no painel de baixo) não rola nada. No PC eles não crescem além do que pedem (a sobra fica com a mão, centrada), e a
               coluna do histórico, com o menu, nunca rola junto. */}
           <div data-campos className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-none pc:flex-initial [&>*]:flex-none">
+            {pc ? null : hint?.panel}
             <PlayerField
               side="opponent"
               view={view}
@@ -205,6 +236,7 @@ function TableView({
               turn={turnCue(state, snapshot.legal)}
               training={training}
               replay={replay}
+              tutorial={tutorial}
               onOpenGraveyard={onOpenGraveyard}
             />
             <PlayerField side="self" view={view} player={self} name={names.self} />
@@ -212,7 +244,10 @@ function TableView({
           <div className="flex flex-none flex-col pb-[env(safe-area-inset-bottom)] pc:flex-1 pc:flex-row pc:items-center pc:gap-7 pc:px-6 pc:pb-0 pc:text-papel">
             <Hand cards={view.self.hand} />
             {actionBar ? (
-              <div className="bg-tinta px-3 pb-3.5 pt-2.5 text-papel pc:min-w-0 pc:flex-1 pc:bg-transparent pc:px-0 pc:pb-0 pc:pt-0">
+              <div
+                data-dica={BAR_ZONES.has(hintZone) ? hintZone : undefined}
+                className="bg-tinta px-3 pb-3.5 pt-2.5 text-papel pc:min-w-0 pc:flex-1 pc:bg-transparent pc:px-0 pc:pb-0 pc:pt-0"
+              >
                 {actionBar}
               </div>
             ) : null}
@@ -226,6 +261,7 @@ function TableView({
           lines={history.lines}
           tool={onOpenMenu ? <MenuButton onClick={onOpenMenu} tone="papel" className="max-pc:hidden" /> : undefined}
           baseSeq={marksBaseSeq}
+          top={pc ? hint?.panel : undefined}
           footer={room ? <RoomFooter room={room} me={me} names={names} /> : null}
         />
       </main>

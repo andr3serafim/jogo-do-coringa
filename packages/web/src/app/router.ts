@@ -6,6 +6,8 @@ export type Route =
   | { name: 'home' }
   | { name: 'room'; code: string | null }
   | { name: 'training' }
+  /** `/tutorial`: uma partida de treino guiada, com dicas por situação (spec do polimento, fatia 4). */
+  | { name: 'tutorial' }
   | { name: 'pastGames' }
   /** `/partidas/<id>`: o replay de uma partida da lista local. O id é só o formato; se a partida existe, quem diz é a tela. */
   | { name: 'pastGame'; id: string }
@@ -19,6 +21,7 @@ export function parseRoute(pathname: string): Route {
   const path = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
   if (path === '/' || path === '') return { name: 'home' };
   if (path === '/treino') return { name: 'training' };
+  if (path === '/tutorial') return { name: 'tutorial' };
   if (path === '/partidas') return { name: 'pastGames' };
   const pastGame = PAST_GAME_PATH.exec(path);
   if (pastGame) return { name: 'pastGame', id: pastGame[1]! };

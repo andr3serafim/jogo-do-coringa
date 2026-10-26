@@ -29,6 +29,8 @@ export function lazyScreen<P extends object>(load: () => Promise<{ default: Comp
 
 interface Props {
   children: ReactNode;
+  /** O título da tela que não abriu (padrão: "Partidas anteriores", as duas telas do histórico). O texto vem do `copy.ts`, do JavaScript inicial. */
+  title?: string;
   /** Recarrega a página (padrão: `location.reload`). */
   reload?: () => void;
 }
@@ -56,7 +58,7 @@ export class ScreenBoundary extends Component<Props, State> {
     if (!(caught.error instanceof ScreenLoadError)) throw caught.error instanceof Error ? caught.error : new Error(String(caught.error));
     return (
       <Screen>
-        <Title focusOnMount>{PAST_GAMES_LABEL}</Title>
+        <Title focusOnMount>{this.props.title ?? PAST_GAMES_LABEL}</Title>
         <Panel>
           <p>{SCREEN_LOAD_FAILED_TEXT}</p>
           <div>

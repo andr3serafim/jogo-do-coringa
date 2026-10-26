@@ -12,6 +12,7 @@ import { livesOf, viewWithout } from '../../src/model/preview.ts';
 import { Session } from '../../src/model/session.ts';
 import { PC_QUERY } from '../../src/ui/table/History.tsx';
 import { PlayTable } from '../../src/ui/table/PlayTable.tsx';
+import type { TableHint } from '../../src/ui/table/Table.tsx';
 import { deferredAck, FakeConnection, scenarioAt, stateMessage, type SideSpec, type ViewSpec } from '../fixtures.ts';
 import { ATTACK_BUTTON, END_TURN_BUTTON, roomMessage, seriousViolations, startsWith } from './support.tsx';
 
@@ -59,6 +60,8 @@ interface MountOptions {
   state?: Partial<Omit<StateMessage, 't' | 'view'>>;
   /** Fora da mesa, antes dela na árvore (um campo de texto, por exemplo). */
   before?: ReactNode;
+  /** A dica do tutorial. */
+  hint?: TableHint;
 }
 
 function mount(spec: ViewSpec = DRAFT, options: MountOptions = {}) {
@@ -75,7 +78,7 @@ function mount(spec: ViewSpec = DRAFT, options: MountOptions = {}) {
   const rendered = render(
     <>
       {options.before}
-      <PlayTable session={session} />
+      <PlayTable session={session} hint={options.hint} />
     </>,
   );
   return { game, view, me, connection, session, user, ...rendered };
@@ -944,6 +947,27 @@ describe('barra de ação: foco e a sessão (spec §7)', () => {
       const m = mount({ ...DRAFT, phase: 'WAITING' });
       act(() => m.connection.emitState(stateMessage(myTurn(), { seq: 2, epoch: 2 })));
       expect(scrolled(spy)).toEqual([]);
+    });
+
+    it('com a dica do tutorial aberta no alto dos campos, a rolagem espera ela fechar (e rola, uma vez, quando fecha)', () => {
+      const panel = <section aria-label="Dica">o texto</section>;
+      const m = mount({ ...DRAFT, phase: 'WAITING' }, { hint: { zone: 'actionBar', panel, open: true } });
+      // A mesma árvore do `mount` (o fragmento com o `before`): um outro formato remontaria a mesa.
+      const hintIs = (open: boolean) =>
+        m.rerender(
+          <>
+            {undefined}
+            <PlayTable session={m.session} hint={{ zone: null, panel, open }} />
+          </>,
+        );
+      act(() => m.connection.emitState(stateMessage(myTurn(), { seq: 2, epoch: 2 })));
+      expect(scrolled(spy)).toEqual([]);
+      // Uma dica que ficou no painel mas já não vale (`open` falso) não segura a rolagem.
+      hintIs(false);
+      expect(scrolled(spy)).toEqual(['p1:ATK']);
+      hintIs(true);
+      hintIs(false);
+      expect(scrolled(spy)).toEqual(['p1:ATK']);
     });
 
     it('no PC não rola: a mesa cabe, e a vida do oponente fica à vista', () => {

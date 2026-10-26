@@ -6,11 +6,13 @@ import {
   loadNickname,
   loadPrefs,
   loadSeat,
+  loadTutorialState,
   safeStore,
   saveLastSeq,
   saveNickname,
   savePrefs,
   saveSeat,
+  saveTutorialState,
   type KeyValueStore,
 } from '../../src/model/storage.ts';
 
@@ -316,6 +318,28 @@ describe('apelido', () => {
   });
 });
 
+describe('o tutorial (coringa:tutorial)', () => {
+  it('ida e volta, na chave coringa:tutorial', () => {
+    const raw = memoryStorage();
+    const { store } = safeStore(raw);
+    saveTutorialState(store, 'skipped');
+    expect(raw.getItem('coringa:tutorial')).toBe('skipped');
+    expect(loadTutorialState(store)).toBe('skipped');
+    saveTutorialState(store, 'done');
+    expect(raw.getItem('coringa:tutorial')).toBe('done');
+    expect(loadTutorialState(store)).toBe('done');
+  });
+
+  it('sem nada guardado, ou com um valor que não é estado, dá null', () => {
+    expect(loadTutorialState(fresh())).toBeNull();
+    const store = fresh();
+    store.set('coringa:tutorial', 'quase');
+    expect(loadTutorialState(store)).toBeNull();
+    store.set('coringa:tutorial', '');
+    expect(loadTutorialState(store)).toBeNull();
+  });
+});
+
 describe('KeyValueStore que lança (defesa em profundidade)', () => {
   const hostile: KeyValueStore = {
     get: () => {
@@ -338,6 +362,8 @@ describe('KeyValueStore que lança (defesa em profundidade)', () => {
     expect(() => savePrefs(hostile, DEFAULT_PREFS)).not.toThrow();
     expect(loadNickname(hostile)).toBe('');
     expect(() => saveNickname(hostile, 'Ana')).not.toThrow();
+    expect(loadTutorialState(hostile)).toBeNull();
+    expect(() => saveTutorialState(hostile, 'done')).not.toThrow();
   });
 });
 

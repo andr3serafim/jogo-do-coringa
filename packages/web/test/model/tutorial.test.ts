@@ -15,7 +15,16 @@ import {
 import { act, P1, P2, setup, type Setup } from '@coringa/engine/testing';
 import { TUTORIAL_SEED } from '@coringa/sim/tutorial';
 import { describe, expect, it } from 'vitest';
-import { tutorialHint, type Hint, type HintId } from '../../src/model/tutorial.ts';
+import {
+  acknowledgeHint,
+  advanceHint,
+  hintHolding,
+  NO_HINT,
+  tutorialHint,
+  type Hint,
+  type HintFlow,
+  type HintId,
+} from '../../src/model/tutorial.ts';
 
 const ALL: readonly HintId[] = ['equip', 'quad', 'order', 'firstAttack', 'buffs', 'trap', 'wild', 'reflect', 'pressure', 'end'];
 
@@ -333,6 +342,161 @@ describe('tutorialHint na semente do tutorial', () => {
     ({ state, events } = play(state, P1, ofType('CHOOSE_ORDER')));
     read(state, events);
     expect(state.phase).toEqual({ kind: 'ATTACK_MAIN', player: P1 });
+    expect(shown).toEqual(['equip', 'order', 'firstAttack', 'buffs', 'wild', 'reflect']);
+  });
+});
+
+
+// ---------------------------------------------------------------------------------------------
+// O painel: a dica que fica na tela entre um `state` e o seguinte (`advanceHint`, `acknowledgeHint`)
+
+describe('hintHolding: a dica de um id ainda vale agora', () => {
+  it('devolve a dica (com a zona) quando a situação vale, e null quando não', () => {
+    const attack = viewFor(setup({ p1: { attack: [5] } }), P1);
+    expect(hintHolding(attack, [], 'firstAttack')).toEqual({ id: 'firstAttack', zone: 'actionBar' });
+    expect(hintHolding(attack, [], 'equip')).toBeNull();
+    expect(hintHolding(attack, [], 'end')).toBeNull();
+  });
+
+  it('vale mesmo com uma dica de prioridade maior valendo junto (é a situação dela que se olha)', () => {
+    const view = viewFor(setup({ p1: { attack: [5], hand: ['J'] } }), P1);
+    expect(tutorialHint(view, [], new Set())?.id).toBe('firstAttack');
+    expect(hintHolding(view, [], 'buffs')).toEqual({ id: 'buffs', zone: 'hand' });
+  });
+});
+
+describe('advanceHint e acknowledgeHint', () => {
+  const viewOf = (state: GameState, events: GameEvent[] = []): [ReturnType<typeof viewFor>, GameEvent[]] => [
+    viewFor(state, P1),
+    viewEvents(events, P1),
+  ];
+  const advance = (flow: HintFlow, state: GameState, events: GameEvent[] = []): HintFlow => advanceHint(flow, ...viewOf(state, events));
+  const acknowledge = (flow: HintFlow, state: GameState, events: GameEvent[] = []): HintFlow =>
+    acknowledgeHint(flow, ...viewOf(state, events));
+  const over = (extra: Setup = {}): GameState =>
+    setup({ phase: { kind: 'GAME_OVER', result: { kind: 'WIN', winner: P1, reason: 'HP' } }, ...extra });
+
+  it('a primeira situação que vale entra no painel; sem situação, o painel fica vazio', () => {
+    expect(advance(NO_HINT, quiet()).current).toBeNull();
+    expect(advance(NO_HINT, equipRound({ p1: { pending: [4, 5] } })).current).toBe('equip');
+  });
+
+  it('a dica fica no painel até o "Entendi", mesmo depois de a situação passar (e não volta depois)', () => {
+    const equip = advance(NO_HINT, equipRound({ p1: { pending: [4, 5] } }));
+    // O Equipar passou, e nada de novo vale: a dica segue lá, mas já conta como vista.
+    const later = advance(equip, quiet());
+    expect(later.current).toBe('equip');
+    expect(later.seen.has('equip')).toBe(true);
+    const cleared = acknowledge(later, quiet());
+    expect(cleared.current).toBeNull();
+    // Outro Equipar: a dica não volta.
+    expect(advance(cleared, equipRound({ p1: { pending: [4, 5] } })).current).toBeNull();
+  });
+
+  it('uma dica que saiu sem "Entendi" (outra tomou o painel) é vista: não volta quando a situação se repete', () => {
+    const equip = advance(NO_HINT, equipRound({ p1: { pending: [4, 5] } }));
+    const order = advance(equip, setup({ phase: { kind: 'ORDER_CHOICE', player: P1 } }));
+    expect(order.current).toBe('order');
+    expect(order.seen.has('equip')).toBe(true);
+    const next = acknowledge(order, quiet());
+    expect(advance(next, equipRound({ p1: { pending: [4, 5] } })).current).toBeNull();
+  });
+
+  it('uma dica de prioridade maior toma o painel de uma que ainda vale, e a que saiu não é dada por vista', () => {
+    // Sua vez de atacar com um J: firstAttack, que o jogador já viu; fica a dos buffs.
+    const attack = setup({ p1: { attack: [5], hand: ['J'] } });
+    const buffs = acknowledge(advance(NO_HINT, attack), attack);
+    expect(buffs.current).toBe('buffs');
+    // Chega a quadra do oponente (o evento dela, com a sua mão ainda em condição de J): ela toma o painel, e os buffs, que ainda
+    // valem, seguem por ver.
+    const formed = equipRound({ p1: { equipSubmitted: true }, p2: { pending: [5], attack: [5, 5, 5] } });
+    const { events } = act(formed, P2, { type: 'EQUIP', destinations: ['ATK'] });
+    expect(events.some((e) => e.type === 'QuadFormed')).toBe(true);
+    const quad = advance(buffs, attack, events);
+    expect(quad.current).toBe('quad');
+    expect(quad.seen.has('buffs')).toBe(false);
+  });
+
+  it('o "Entendi" troca para a próxima que vale no mesmo estado, e o painel esvazia quando não sobra nenhuma', () => {
+    const attack = setup({ p1: { attack: [5], hand: ['J'] } });
+    const first = advance(NO_HINT, attack);
+    expect(first.current).toBe('firstAttack');
+    const second = acknowledge(first, attack);
+    expect(second.current).toBe('buffs');
+    expect(second.seen).toEqual(new Set(['firstAttack']));
+    const third = acknowledge(second, attack);
+    expect(third.current).toBeNull();
+    expect(third.seen).toEqual(new Set(['firstAttack', 'buffs']));
+    // Sem dica no painel, "Entendi" não muda nada.
+    expect(acknowledge(third, attack)).toEqual(third);
+  });
+
+  it('uma dica só de evento (a quadra do oponente) fica no painel depois de o evento passar', () => {
+    const state = equipRound({ p1: { equipSubmitted: true }, p2: { pending: [5], attack: [5, 5, 5] } });
+    const { state: next, events } = act(state, P2, { type: 'EQUIP', destinations: ['ATK'] });
+    const quad = advance(NO_HINT, next, events);
+    expect(quad.current).toBe('quad');
+    expect(advance(quad, quiet()).current).toBe('quad');
+  });
+
+  it('no fim da partida a dica do fim toma o painel; depois do "Entendi" a tela para de pedir dicas', () => {
+    const attack = setup({ p1: { attack: [5], hand: ['J'] } });
+    const ended = advance(advance(NO_HINT, attack), over());
+    expect(ended.current).toBe('end');
+    const done = acknowledge(ended, over());
+    expect(done.current).toBeNull();
+    expect(done.seen.has('end')).toBe(true);
+    // Nem a pressão, que ainda vale no fim, volta; nem uma partida nova.
+    expect(advance(done, over({ pressure: 2 })).current).toBeNull();
+    expect(advance(done, equipRound({ p1: { pending: [4, 5] } })).current).toBeNull();
+  });
+
+  it('a dica do fim que sai sem "Entendi" (a revanche começa) encerra o tutorial: nenhuma dica depois dela', () => {
+    const ended = advance(NO_HINT, over());
+    expect(ended.current).toBe('end');
+    const rematch = advance(ended, equipRound({ p1: { pending: [4, 5] } }));
+    expect(rematch.current).toBeNull();
+    expect(rematch.seen.has('end')).toBe(true);
+  });
+
+  it('é pura: não muda o fluxo recebido nem o conjunto de vistas', () => {
+    const attack = setup({ p1: { attack: [5], hand: ['J'] } });
+    const flow = advance(NO_HINT, attack);
+    const before = { current: flow.current, seen: [...flow.seen] };
+    acknowledge(flow, attack);
+    advance(flow, quiet());
+    expect({ current: flow.current, seen: [...flow.seen] }).toEqual(before);
+    expect(NO_HINT.seen.size).toBe(0);
+  });
+
+  it('na semente do tutorial, com "Entendi" em cada uma, as dicas saem na ordem e uma só vez', () => {
+    const created = createGame(DEFAULT_CONFIG, TUTORIAL_SEED, [P1, P2]);
+    if (!created.ok) throw new Error(created.error.message);
+    const shown: HintId[] = [];
+    let flow: HintFlow = NO_HINT;
+    const read = (state: GameState, events: GameEvent[]): void => {
+      flow = advance(flow, state, events);
+      for (let i = 0; i <= ALL.length && flow.current !== null; i += 1) {
+        shown.push(flow.current);
+        flow = acknowledge(flow, state, events);
+      }
+    };
+    const step = (state: GameState, who: PlayerId, pick: (actions: Action[]) => Action): { state: GameState; events: GameEvent[] } => {
+      const applied = applyAction(state, who, pick(legalActions(viewFor(state, who))));
+      if (!applied.ok) throw new Error(applied.error.message);
+      return { state: applied.state, events: applied.events };
+    };
+    let state = created.state;
+    read(state, []);
+    for (let equip = 0; equip < 2; equip += 1) {
+      for (const who of [P1, P2]) {
+        const stepped = step(state, who, (actions) => actions[0]!);
+        state = stepped.state;
+        read(state, stepped.events);
+      }
+    }
+    const ordered = step(state, P1, (actions) => actions.find((a) => a.type === 'CHOOSE_ORDER')!);
+    read(ordered.state, ordered.events);
     expect(shown).toEqual(['equip', 'order', 'firstAttack', 'buffs', 'wild', 'reflect']);
   });
 });

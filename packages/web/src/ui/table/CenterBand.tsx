@@ -10,7 +10,15 @@
 import type { PlayerView } from '@coringa/engine';
 import type { Deadline } from '@coringa/protocol';
 import type { ClockFace, TurnCue } from '../../model/clock.ts';
-import { CLOCK_LABEL, CLOCK_URGENT_LABEL, pausedTurnText, REPLAY_BAND_TEXT, TIMES_UP_TEXT, trainingBandText } from '../../model/copy.ts';
+import {
+  CLOCK_LABEL,
+  CLOCK_URGENT_LABEL,
+  pausedTurnText,
+  REPLAY_BAND_TEXT,
+  TIMES_UP_TEXT,
+  trainingBandText,
+  TUTORIAL_BAND_TEXT,
+} from '../../model/copy.ts';
 import type { TrainingLevel } from '../../model/local-room.ts';
 import { zoneKey } from '../../model/marks.ts';
 import * as m from 'motion/react-m';
@@ -46,6 +54,8 @@ export interface CenterBandProps {
   training?: TrainingLevel;
   /** A mesa do replay: no lugar do relógio, a faixa diz "Revendo a partida" (vale mais que o treino). */
   replay?: true;
+  /** O tutorial (um treino guiado): a faixa diz "Tutorial, sem relógio", e não o nível do bot. */
+  tutorial?: true;
   onOpenGraveyard?: () => void;
 }
 
@@ -58,6 +68,7 @@ export function CenterBand({
   turn = null,
   training,
   replay,
+  tutorial,
   onOpenGraveyard,
 }: CenterBandProps) {
   const ui = useTableUi();
@@ -82,6 +93,7 @@ export function CenterBand({
   return (
     <section
       aria-label="Situação da rodada"
+      data-dica={ui.hintZone === 'center' ? 'center' : undefined}
       className="flex flex-none flex-wrap items-center gap-x-2.5 gap-y-1 bg-tinta px-3 py-1.5 text-papel pc:min-h-[76px] pc:gap-x-7 pc-baixo:min-h-14 pc:px-6 pc:py-1"
     >
       <div className="flex min-w-0 max-w-[8.5rem] flex-col pc:max-w-[13rem]">
@@ -105,7 +117,7 @@ export function CenterBand({
       ) : training !== undefined ? (
         // Sem relógio, a faixa diz por quê, no lugar dele. Não é região viva: o anúncio é o da vez, acima.
         <p className="max-w-[10.5rem] text-[11px] font-bold uppercase leading-tight tracking-[0.12em] text-ouro pc:max-w-none pc:text-xs">
-          {trainingBandText(training)}
+          {tutorial ? TUTORIAL_BAND_TEXT : trainingBandText(training)}
         </p>
       ) : null}
 

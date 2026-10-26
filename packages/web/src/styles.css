@@ -146,6 +146,47 @@
 }
 
 /*
+ * O destaque da dica do tutorial (spec do polimento, §5): a zona de que a dica fala (`data-dica`) ganha um contorno PARADO, ouro com
+ * borda de tinta (tinta por fora e por dentro, para o ouro ler sobre a capa rosa, a verde e a tinta). Sem animação nem transição, e
+ * igual com movimento reduzido (spec §10.4: nada de piscar). É uma camada de `::after` que não pega o mouse, e não o `outline` ou o
+ * `box-shadow` do próprio elemento: o painel de baixo recebe foco por código (`:focus-visible` usa os dois) e os campos rolam por
+ * dentro, onde um anel de fora, num filho que encosta na borda, seria cortado. O anel fica dentro da zona (no respiro dela); nas fileiras,
+ * e no PC também na mão e no painel de baixo, que têm folga em volta e não têm respiro, fica por fora (`--dica-folga` negativa), para
+ * não tapar o valor das cartas. Abaixo das camadas da cena e da faixa.
+ */
+@layer components {
+  [data-dica] {
+    position: relative;
+  }
+
+  [data-dica]::after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    inset: var(--dica-folga, 3px);
+    pointer-events: none;
+    border: 3px solid var(--color-ouro);
+    outline: 2px solid var(--color-tinta);
+    box-shadow: inset 0 0 0 2px var(--color-tinta);
+  }
+
+  [data-dica='rows'] {
+    --dica-folga: -8px;
+  }
+
+  /* No PC a mão e o painel de baixo não têm respiro em volta (dividem a linha): o anel fica por fora, na folga entre os dois. */
+  @media (width >= theme(--breakpoint-pc)) {
+    [data-dica='hand'],
+    [data-dica='equip'],
+    [data-dica='order'],
+    [data-dica='actionBar'],
+    [data-dica='reaction'] {
+      --dica-folga: -8px;
+    }
+  }
+}
+
+/*
  * Arranjo dos campos (spec §3.2 e §3.3). Cada campo é um contêiner: abaixo de 56rem de largura (celular e tablet,
  * ou a mesa de um PC estreito) as partes se empilham como no rascunho do celular; a partir daí, no PC, ficam em três
  * colunas (Coringa | fileiras | Guarda e buffs). A árvore é a mesma nos dois; só a grade muda.
