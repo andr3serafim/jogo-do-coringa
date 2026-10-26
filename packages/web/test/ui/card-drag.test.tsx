@@ -49,6 +49,17 @@ function addZone(key: string): HTMLElement {
   return zone;
 }
 
+/** Uma zona dentro da outra (a última carta da fileira dentro da fileira); `over(inner)` acerta uma folha dentro da de dentro. */
+function addNested(outerKey: string, innerKey: string): { outer: HTMLElement; inner: HTMLElement } {
+  const outer = addZone(outerKey);
+  const inner = document.createElement('div');
+  inner.dataset.soltar = innerKey;
+  inner.append(document.createElement('span'));
+  outer.append(inner);
+  zones.set(innerKey, inner);
+  return { outer, inner };
+}
+
 function outside(): HTMLElement {
   const el = document.createElement('p');
   document.body.append(el);
@@ -61,10 +72,13 @@ const over = (zone: HTMLElement | null) => {
   hit = zone === null ? null : (zone.firstElementChild ?? zone);
 };
 
-const POINTER = { pointerId: 1, button: 0 };
+const POINTER = { pointerId: 1, button: 0, isPrimary: true };
+
+/** O clique que o navegador manda depois de um gesto de ponteiro (mouse, toque): `detail` é a contagem de cliques, sempre >= 1. */
+const CLICK = { detail: 1 };
 
 const card = () => screen.getByRole('button', { name: 'Carta K' });
-const down = (x = 10, y = 10, extra: Record<string, number> = {}) => fireEvent.pointerDown(card(), { ...POINTER, clientX: x, clientY: y, ...extra });
+const down = (x = 10, y = 10, extra: Record<string, number | boolean> = {}) => fireEvent.pointerDown(card(), { ...POINTER, clientX: x, clientY: y, ...extra });
 const move = (x: number, y: number) => fireEvent.pointerMove(card(), { ...POINTER, clientX: x, clientY: y });
 const up = (x = 10, y = 10) => fireEvent.pointerUp(card(), { ...POINTER, clientX: x, clientY: y });
 const ghostEl = () => document.querySelector<HTMLElement>('[data-fantasma]');
@@ -118,7 +132,7 @@ describe('useCardDrag: do toque ao arrasto', () => {
     render(<Harness onTap={onTap} onClick={onClick} />);
     down();
     up();
-    fireEvent.click(card());
+    fireEvent.click(card(), CLICK);
     expect(onTap).toHaveBeenCalledTimes(1);
     expect(onClick).not.toHaveBeenCalled();
   });
@@ -258,7 +272,7 @@ describe('useCardDrag: a soltura', () => {
     down();
     move(60, 60);
     up(60, 60);
-    fireEvent.click(card());
+    fireEvent.click(card(), CLICK);
     expect(onTap).not.toHaveBeenCalled();
     expect(onClick).not.toHaveBeenCalled();
     // O arrasto que termina sem clique (o navegador às vezes o descarta) não deixa o próximo clique de teclado engolido.
@@ -314,6 +328,31 @@ describe('useCardDrag: a soltura', () => {
   });
 });
 
+describe('useCardDrag: o clique que não vem de um ponteiro', () => {
+  it('o clique com detail 0 (leitor de tela, element.click()) passa pelo engolidor armado, que segue valendo para o clique do ponteiro', () => {
+    const onClick = vi.fn();
+    render(<Harness onClick={onClick} />);
+    down();
+    move(60, 60);
+    up(60, 60);
+    fireEvent.click(card());
+    expect(onClick).toHaveBeenCalledTimes(1);
+    fireEvent.click(card(), CLICK);
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('o pointercancel não arma o engolidor: o navegador não manda clique depois dele, e o clique seguinte é de outro gesto', () => {
+    const onClick = vi.fn();
+    render(<Harness onClick={onClick} />);
+    down();
+    over(zones.get('guarda') ?? null);
+    move(60, 60);
+    fireEvent.pointerCancel(card(), POINTER);
+    fireEvent.click(card(), CLICK);
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('useCardDrag: as zonas válidas', () => {
   it('as zonas de zones() ganham data-soltar-ativo enquanto a carta está no ar, a zona sob o dedo ganha data-soltar-sob, e tudo sai na soltura', () => {
     render(<Harness />);
@@ -350,6 +389,44 @@ describe('useCardDrag: as zonas válidas', () => {
     up(70, 70);
     // A soltura confere a lista de agora: a zona que deixou de valer não conta.
     expect(marked('data-soltar-ativo')).toEqual([]);
+  });
+
+  it('zonas aninhadas: sobe até a primeira zona válida (a última carta, que não vale, não esconde a fileira, que vale)', () => {
+    const onDrop = vi.fn();
+    const { outer, inner } = addNested('fileira:ATK', 'ultima:ATK');
+    render(<Harness valid={{ current: ['fileira:ATK'] }} onDrop={onDrop} />);
+    down();
+    over(inner);
+    move(60, 60);
+    expect(screen.getByTestId('estado')).toHaveTextContent('true|fileira:ATK');
+    expect(outer).toHaveAttribute('data-soltar-sob');
+    expect(inner).not.toHaveAttribute('data-soltar-ativo');
+    up(60, 60);
+    expect(onDrop).toHaveBeenCalledWith('fileira:ATK');
+  });
+
+  it('zonas aninhadas, as duas válidas: vale a de dentro', () => {
+    const onDrop = vi.fn();
+    const { outer, inner } = addNested('fileira:DEF', 'ultima:DEF');
+    render(<Harness valid={{ current: ['fileira:DEF', 'ultima:DEF'] }} onDrop={onDrop} />);
+    down();
+    over(inner);
+    move(60, 60);
+    expect(inner).toHaveAttribute('data-soltar-sob');
+    expect(outer).not.toHaveAttribute('data-soltar-sob');
+    up(60, 60);
+    expect(onDrop).toHaveBeenCalledWith('ultima:DEF');
+  });
+
+  it('zonas aninhadas, nenhuma válida: soltar é onDrop(null)', () => {
+    const onDrop = vi.fn();
+    const { inner } = addNested('fileira:ATK', 'ultima:ATK');
+    render(<Harness valid={{ current: ['guarda'] }} onDrop={onDrop} />);
+    down();
+    over(inner);
+    move(60, 60);
+    up(60, 60);
+    expect(onDrop).toHaveBeenCalledWith(null);
   });
 
   it('as zonas só ficam marcadas depois do limiar: o toque não pisca contorno nenhum', () => {
@@ -403,7 +480,7 @@ describe('useCardDrag: cancelar', () => {
     move(90, 90);
     expect(ghostEl()).toBeNull();
     up(90, 90);
-    fireEvent.click(card());
+    fireEvent.click(card(), CLICK);
     expect(onDrop).not.toHaveBeenCalled();
     expect(onTap).not.toHaveBeenCalled();
     expect(onClick).not.toHaveBeenCalled();
@@ -553,6 +630,18 @@ describe('useCardDrag: quando não começa', () => {
     down(10, 10, { button: 1 });
     up();
     expect(onTap).not.toHaveBeenCalled();
+  });
+
+  it('só o ponteiro primário começa: o segundo dedo, com o primeiro em outro lugar da tela, não toca nem arrasta', () => {
+    const onTap = vi.fn();
+    render(<Harness onTap={onTap} />);
+    over(zones.get('guarda') ?? null);
+    down(10, 10, { pointerId: 2, isPrimary: false });
+    fireEvent.pointerMove(card(), { pointerId: 2, isPrimary: false, clientX: 60, clientY: 60 });
+    expect(ghostEl()).toBeNull();
+    fireEvent.pointerUp(card(), { pointerId: 2, isPrimary: false, clientX: 60, clientY: 60 });
+    expect(onTap).not.toHaveBeenCalled();
+    expect(capture).not.toHaveBeenCalled();
   });
 
   it('um segundo dedo no meio do gesto é ignorado, e o dedo do arrasto segue valendo', () => {

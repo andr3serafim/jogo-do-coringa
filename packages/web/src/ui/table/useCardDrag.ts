@@ -1,17 +1,20 @@
 // O gesto de arrastar uma carta (spec do polimento, §6; plano da fatia 5, tarefa 2). Genérico: não sabe de mesa nem de regra. Quem usa diz
 // se o gesto vale agora (`enabled`), quais zonas aceitam a carta (`zones`, lida na hora) e o que fazer com a soltura e com o toque.
 //
-// - O `pointerdown` guarda o ponto. Só depois de `DRAG_THRESHOLD_PX` de movimento vira arrasto; antes disso, o `pointerup` é o toque
-//   (`onTap`). O clique que o navegador manda depois de um toque ou de um arrasto é engolido (`CLICK_GRACE_MS`, ou até o próximo
-//   `pointerdown` ou tecla): o `onTap` é o único caminho do ponteiro, e quem liga o mesmo gesto a um botão pode deixar o `onClick` dele
-//   para o teclado e para os leitores de tela, cujo clique não vem de um ponteiro e passa direto. Nunca ligue `onTap` e `onClick` a
-//   efeitos diferentes. O clique é engolido na janela, em captura: nenhum ouvinte de clique do caminho (a carta, os ancestrais, o
-//   `onClickCapture` do palco e o da mesa) o vê. Só o `pointerdown` e o foco seguem normais.
-// - No arrasto, o ponteiro é capturado, o fantasma (`DragGhost`) segue o dedo e a zona sob ele sai de `elementFromPoint` +
-//   `closest('[data-soltar]')`; só conta se estiver em `zones()`. As zonas válidas ganham `data-soltar-ativo` enquanto a carta está no
-//   ar, e a que está sob o dedo também `data-soltar-sob` (o contorno é CSS parado, em `styles.css`). A soltura chama `onDrop(chave)`, ou
-//   `onDrop(null)` fora de toda zona válida.
-// - `pointercancel`, `Esc`, a perda do foco da janela, `enabled` virando falso e a carta saindo da tela cancelam sem soltar nem tocar.
+// - O `pointerdown` do ponteiro primário guarda o ponto (o segundo dedo não começa nada). Só depois de `DRAG_THRESHOLD_PX` de movimento
+//   vira arrasto; antes disso, o `pointerup` é o toque (`onTap`). O clique que o navegador manda depois de um toque ou de um arrasto é
+//   engolido (`CLICK_GRACE_MS`, ou até o próximo `pointerdown` ou tecla): o `onTap` é o único caminho do ponteiro, e quem liga o mesmo
+//   gesto a um botão pode deixar o `onClick` dele para o teclado e para os leitores de tela. O clique que não vem de um ponteiro tem
+//   `event.detail === 0` (Enter/Espaço, leitor de tela, `element.click()`; o do mouse e o do toque trazem a contagem de cliques, >= 1) e
+//   passa sempre pelo engolidor, que segue armado para o clique do ponteiro. Nunca ligue `onTap` e `onClick` a efeitos diferentes. O
+//   clique é engolido na janela, em captura: nenhum ouvinte de clique do caminho (a carta, os ancestrais, o `onClickCapture` do palco e
+//   o da mesa) o vê. Só o `pointerdown` e o foco seguem normais.
+// - No arrasto, o ponteiro é capturado, o fantasma (`DragGhost`) segue o dedo e a zona sob ele sai de `elementFromPoint` + `closest('[data-soltar]')`,
+//   subindo pelos ancestrais até a primeira zona que esteja em `zones()` (a última carta de uma fileira, que não vale, não esconde a fileira, que
+//   vale). As zonas válidas ganham `data-soltar-ativo` enquanto a carta está no ar, e a que está sob o dedo também `data-soltar-sob` (o
+//   contorno é CSS parado, em `styles.css`). A soltura chama `onDrop(chave)`, ou `onDrop(null)` fora de toda zona válida.
+// - `pointercancel`, `Esc`, a perda do foco da janela, `enabled` virando falso e a carta saindo da tela cancelam sem soltar nem tocar. O
+//   `pointercancel` também não arma o engolidor: o navegador não manda clique depois dele.
 // - Com `enabled` falso nada começa, e o `pointerdown` nem é lido: o palco (`Stage`) trata o dele como sempre. O gesto também nunca
 //   segura nem impede o `pointerdown`.
 // - O `pointerdown` é lido em captura na janela, antes de qualquer ouvinte da mesa: o toque que pulou as batidas (e que, ao pulá-las,
@@ -74,11 +77,18 @@ interface Gesture {
   phase: Phase;
 }
 
-/** A zona que o ponto da janela acerta e a chave dela, se estiver entre as válidas. */
+/**
+ * A zona que o ponto da janela acerta e a chave dela: a primeira, de dentro para fora, que esteja entre as válidas. Uma zona de dentro
+ * que não vale (a última carta de uma fileira com vaga) não esconde a de fora que vale (a fileira).
+ */
 function zoneAt(x: number, y: number, valid: ReadonlySet<DropKey>): { el: HTMLElement; key: DropKey } | null {
-  const el = document.elementFromPoint(x, y)?.closest<HTMLElement>(ZONE) ?? null;
-  const key = el?.getAttribute('data-soltar') ?? null;
-  return el !== null && key !== null && valid.has(key) ? { el, key } : null;
+  let el = document.elementFromPoint(x, y)?.closest<HTMLElement>(ZONE) ?? null;
+  while (el !== null) {
+    const key = el.getAttribute('data-soltar');
+    if (key !== null && valid.has(key)) return { el, key };
+    el = el.parentElement?.closest<HTMLElement>(ZONE) ?? null;
+  }
+  return null;
 }
 
 /** Marca as zonas válidas (e a que está sob o dedo) e desmarca o resto, em todo o documento. */
@@ -141,6 +151,8 @@ function createDragController(initial: CardDragOptions, host: Host) {
   const swallowClick = () => {
     stopSwallow?.();
     const onClick = (event: MouseEvent) => {
+      // Sem ponteiro (teclado, leitor de tela, `element.click()`): passa, e o engolidor segue armado para o clique do ponteiro.
+      if (event.detail === 0) return;
       event.stopPropagation();
       event.preventDefault();
       stopSwallow?.();
@@ -236,8 +248,8 @@ function createDragController(initial: CardDragOptions, host: Host) {
 
   const onCancel = (event: PointerEvent) => {
     if (gesture === null || event.pointerId !== gesture.pointerId) return;
+    // Sem `swallowClick()`: depois do `pointercancel` o navegador não manda clique, e o próximo é de outro gesto.
     finish();
-    swallowClick();
   };
 
   const onKeyDown = (event: KeyboardEvent) => {
@@ -281,7 +293,7 @@ function createDragController(initial: CardDragOptions, host: Host) {
   const onDown = (event: PointerEvent) => {
     const target = el;
     if (target === null || !(event.target instanceof Node) || !target.contains(event.target)) return;
-    if (!options.enabled || event.button !== 0) return;
+    if (!options.enabled || event.button !== 0 || !event.isPrimary) return;
     // Um gesto que ficou sem fim (o `pointerup` se perdeu) acaba quando o mesmo ponteiro aperta de novo; outro dedo é ignorado.
     if (gesture !== null) {
       if (gesture.pointerId !== event.pointerId) return;
