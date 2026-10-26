@@ -348,20 +348,21 @@ describe('online: o replay chega depois do FINISHED', () => {
     expect(window.location.pathname).toBe(`/partidas/${before!.id}`);
   });
 
-  it.each([
-    ['no treino', { training: 'medio' } satisfies MountOptions],
-    ['online', {} satisfies MountOptions],
-  ])('%s: o replay que já está no snapshot no FINISHED entra na gravação direto', (_name, options) => {
-    const store = countingStore();
-    const m = mount({ ...options, store });
-    const replay = replayOf('antes-do-room');
-    // O replay vem antes do `room` em FINISHED (o treino emite assim): uma gravação só, já com ele.
-    finish(m, { replay });
+  it('o replay que já está no snapshot no FINISHED entra na gravação direto', () => {
+    // O treino emite o replay antes do `room` em FINISHED; online a ordem também é aceita, se chegar assim.
+    for (const options of [{ training: 'medio' }, {}] satisfies MountOptions[]) {
+      const store = countingStore();
+      const m = mount({ ...options, store });
+      const replay = replayOf('antes-do-room');
+      finish(m, { replay });
 
-    expect(store.sets).toBe(1);
-    expect(rows(m)).toHaveLength(1);
-    expect(rows(m)[0]!.replay).toEqual(replay);
-    expect(reviewButton()).toBeInTheDocument();
+      // Uma gravação só, já com ele.
+      expect(store.sets).toBe(1);
+      expect(rows(m)).toHaveLength(1);
+      expect(rows(m)[0]!.replay).toEqual(replay);
+      expect(reviewButton()).toBeInTheDocument();
+      m.unmount();
+    }
   });
 
   it('as duas ordens de chegada dão a mesma linha, menos o id', () => {
@@ -437,7 +438,7 @@ describe('online: o replay chega depois do FINISHED', () => {
     expect(rows(m)[0]!.replay).toEqual(replay);
   });
 
-  it('um replay de outra partida é ignorado: a linha de cada partida só recebe o seu', () => {
+  it('um replay de outra partida é ignorado', () => {
     const m = mount();
     finish(m, {});
 

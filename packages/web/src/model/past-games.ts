@@ -149,13 +149,14 @@ function newId(now: number, taken: readonly PastGame[]): string {
 }
 
 /**
- * Tira o replay da mais velha que ainda tem um (a linha fica), pulando a linha `keep`, a que acabou de ganhar o seu.
+ * Tira o replay da mais velha que ainda tem um (a linha fica). Com `newerThan`, só olha as linhas mais velhas que a desse
+ * índice (a lista vai da mais nova para a mais velha): o anexo nunca tira o replay da linha que o recebe nem o de uma mais nova.
  * `false` quando não sobrou replay nenhum para tirar.
  */
-function dropOldestReplay(games: PastGame[], keep = -1): boolean {
-  for (let i = games.length - 1; i >= 0; i--) {
+function dropOldestReplay(games: PastGame[], newerThan = -1): boolean {
+  for (let i = games.length - 1; i > newerThan; i--) {
     const game = games[i]!;
-    if (i === keep || game.replay === undefined) continue;
+    if (game.replay === undefined) continue;
     const line = { ...game };
     delete line.replay;
     games[i] = line;
@@ -207,11 +208,13 @@ export function recordPastGame(store: KeyValueStore, entry: Omit<PastGame, 'id'>
 /**
  * Acrescenta o replay à linha `id`, que ainda não tem um: online o `replay` chega depois do `room` em `FINISHED`, e a linha já
  * foi gravada. A linha fica onde está (mesmo lugar, mesma `date`, mesma `key`); o replay passa pela mesma validação e pelo
- * mesmo teto de 1 MB do `recordPastGame`, que tira os replays das mais velhas, nunca o desta linha.
+ * mesmo teto de 1 MB do `recordPastGame`: se preciso, saem os replays das linhas mais velhas que esta, e nunca o desta nem o
+ * de uma mais nova.
  *
  * Devolve a linha como ficou: com o replay; a que já tinha um (o dela fica, nada é gravado); ou sem ele, quando o replay tem
- * forma errada ou sozinho passa do teto (nada é gravado e os das outras ficam). `null` se a linha não existe mais, se o
- * armazenamento recusou até depois de tirar os replays das outras (a lista de antes fica) ou se algo lançou. Nunca lança.
+ * forma errada ou não cabe nem tirando os das mais velhas (nada é gravado e os das outras ficam). `null` se a linha não existe
+ * mais, se o armazenamento recusou até depois de tirar os replays das mais velhas (a lista de antes fica) ou se algo lançou.
+ * Nunca lança.
  */
 export function attachReplay(store: KeyValueStore, id: string, replay: Replay): PastGame | null {
   try {
@@ -231,11 +234,11 @@ export function attachReplay(store: KeyValueStore, id: string, replay: Replay): 
           store.set(PAST_GAMES_KEY, text);
           return candidate;
         } catch {
-          // Cota estourada ou armazenamento bloqueado: tira um replay das outras e tenta de novo.
+          // Cota estourada ou armazenamento bloqueado: tira o replay de uma mais velha e tenta de novo.
         }
       }
       if (!dropOldestReplay(games, index)) {
-        // Só o replay desta linha sobrou. Passando do teto ele não cabe nunca; senão foi o armazenamento que recusou.
+        // Não há mais replay de linha mais velha para tirar. Passando do teto ele não cabe; senão foi o armazenamento que recusou.
         return text.length > MAX_PAST_GAMES_CHARS ? current : null;
       }
     }
