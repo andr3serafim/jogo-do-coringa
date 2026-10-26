@@ -88,7 +88,7 @@ modelo da web. **[decisão minha]** As pistas:
 - **Volume fixo e moderado**, sem picos (limitador no fim da cadeia).
 - **Originais:** os sons são sintetizados por código (osciladores, ruído filtrado e envelopes do Web Audio). Nenhum arquivo de
   áudio, então não há licença a conferir.
-- **Porta injetável:** a mesa fala com uma interface `SoundPort` com duas operações, `play(cue)` e `setEnabled(on)`. O jsdom não
+- **Porta injetável:** a mesa fala com uma interface `SoundApi` (`ui/sound-context.ts`) com duas operações, `play(cue)` e `setEnabled(on)`. O jsdom não
   tem `AudioContext`; os testes usam uma porta falsa.
 
 ### 2.3 Testes
@@ -130,9 +130,9 @@ modelo da web. **[decisão minha]** As pistas:
   no p95 no Node (um celular modesto, 3 a 5 vezes mais lento, leva até ~1,5 s, mostrado como o bot "pensando"). A busca roda em
   fatias de no máximo ~8 ms na thread principal, uma por tarefa do navegador, para não travar as batidas nem os timers da
   `FlashLock`. A fatia mira ~8 ms, mas a menor unidade dela é **um rollout** (o gerador cede depois de cada um): no Node ele leva
-  p95 de ~6 a 7 ms e máximo de ~35 ms, e num celular modesto, 3 a 5 vezes mais. Então uma fatia pode passar de 8 ms, e é só um
-  alvo, não um teto. O playtest no celular confere se há engasgo no Equipar contra o Difícil (a busca mais pesada, com até 30
-  opções); se houver, o seguimento conhecido é ceder dentro do rollout.
+  poucos ms, e num celular modesto, 3 a 5 vezes mais. Então uma fatia pode passar de 8 ms, e é só um alvo, não um teto. O
+  playtest no celular confere se há engasgo no Equipar contra o Difícil (a busca mais pesada, com até 30 opções); se houver, o
+  seguimento conhecido é ceder dentro do rollout.
 - O portão roda num script à parte do simulador (como o `sim:calibrate`), nunca no `pnpm check`: cada rodada leva dezenas de
   minutos.
 - A busca é determinística para a mesma semente: o número de rollouts é fixo, e o tempo só decide quando ela termina, não o
@@ -167,7 +167,11 @@ modelo da web. **[decisão minha]** As pistas:
   a tela.
 
 ### 4.2 De onde vem o replay
-- **Treino:** o `LocalRoom` já tem a semente e as jogadas; no fim da partida ele publica o replay.
+- **Treino:** o `LocalRoom` já tem a semente e as jogadas; no fim da partida ele emite o evento `replay` da conexão
+  (`{ t: 'replay', gameNo, replay }`, a mesma mensagem que o servidor manda online na fatia 3), logo antes do `room` em
+  `FINISHED`. A sessão só guarda o replay cujo `gameNo` é o da sala, e a mesa grava a partida na lista assim que a sala vira
+  `FINISHED` (com o replay, quando ele chegou); o painel de fim oferece "Rever a partida" quando a partida ficou guardada com
+  replay.
 - **Online:** o servidor já monta o replay no fim da partida (hoje só para o log). Ele passa a mandar uma mensagem nova,
   `{ t: 'replay', gameNo, replay }`, aos dois assentos quando a partida termina, e de novo no `hello` com a sala em `FINISHED`
   (só a da partida terminada, nunca a de uma revanche em curso).

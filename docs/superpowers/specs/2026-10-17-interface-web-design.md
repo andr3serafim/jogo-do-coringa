@@ -139,9 +139,11 @@ O endereço do servidor é `location.origin`, para o `RoomClient` e para as cham
 
 | Rota | Tela |
 |---|---|
-| `/` | Início: **Criar sala**, **Entrar com código ou link**, **Treinar contra o bot**. O apelido fica lembrado. |
+| `/` | Início: **Criar sala**, **Entrar com código ou link**, **Treinar contra o bot**, **Partidas anteriores**. O apelido fica lembrado. |
 | `/s/:code` | Sala: entrada, lobby, mesa ou fim, conforme o status da sala |
 | `/treino` | Partida local contra o bot (§2.6) |
+| `/partidas` | Lista local das partidas terminadas neste navegador (§6.1), com **Rever** nas que têm replay |
+| `/partidas/:id` | Replay de uma partida da lista: a mesa só de vista, do assento de quem a guardou, com os controles (início, passo anterior, próximo passo, tocar/pausar e o seletor de rodada). Id que não está mais no navegador ou partida sem replay mostram o motivo e o caminho de volta à lista |
 | qualquer outra | "Página não encontrada", com link para o início |
 
 - Roteamento simples por `history` (sem framework de rotas pesado; a biblioteca fica a critério de quem constrói).
@@ -194,6 +196,7 @@ A mesa está em §3 e §4. O menu da partida tem:
 - Botões:
   - **Revanche**, que alterna. O painel mostra "esperando Duda" ou "Duda quer revanche".
   - **Ver a mesa**, que recolhe o painel.
+  - **Rever a partida**, que abre o replay dela (`/partidas/<id>`). Só existe quando a partida ficou guardada com replay (o treino; online, sem replay até a fatia 3 do polimento).
   - **Nova sala**, que fecha a conexão e volta ao início.
 - Com os dois pedindo e conectados, o servidor começa outra partida (`gameNo` novo). A mesa recomeça com a animação da distribuição.
 
@@ -454,6 +457,7 @@ A mesa está em §3 e §4. O menu da partida tem:
 ### 6.1 Persistência no navegador
 
 - Chave por sala `coringa:sala:<CÓDIGO>` → `{ token, playerId, nickname, lastSeq }`. Também `coringa:apelido` e `coringa:prefs` (passe automático, reduzir animações).
+- Chave `coringa:partidas` → a lista das partidas terminadas, da mais nova para a mais velha: as últimas 20, do treino e online, cada uma com id, data, modo, apelidos, assento, resultado, rodadas, placar, versão das regras e, quando houver, o replay (hoje só o treino tem; online entra sem replay até a fatia 3). Teto de 1 MB (1 000 000 caracteres do JSON): passando, saem os replays das mais velhas e a linha fica. Quem grava é a mesa, no instante em que a sala vira `FINISHED`.
 - Toda leitura e escrita fica num `try/catch`. Sem `localStorage` (aba privada, bloqueio), o jogo funciona, mas recarregar a página perde o assento; a interface avisa uma vez.
 - O `lastSeq` é atualizado a cada `state`. Na volta da página, ele vai como `lastSeq` no `RoomClient`, e os eventos perdidos chegam em `catchUp`.
 - **O token é segredo:** nunca na URL, no console, em mensagem de erro ou no diagnóstico copiável.
