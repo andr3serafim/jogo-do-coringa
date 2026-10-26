@@ -146,6 +146,40 @@
 }
 
 /*
+ * Soltura do arrasto (spec do polimento, §6): enquanto uma carta está no ar, o gesto marca as zonas onde ela pode cair
+ * (`data-soltar-ativo`) e a que está sob o dedo (`data-soltar-sob`). A válida ganha um contorno PARADO, ouro tracejado entre duas
+ * linhas de tinta (a mesma família do destaque da dica, que é cheio); a que está sob o dedo, um cheio e mais grosso, com um véu de ouro.
+ * Sem animação nem transição, e igual com movimento reduzido (spec §10.4: nada de piscar). É uma camada de `::before` que não pega o
+ * mouse: o `::after` é do destaque da dica, e o `outline` e o `box-shadow` do próprio elemento são do halo de foco e do anel de alvo das
+ * cartas (a zona `carta:<id>` é uma carta-alvo). O anel fica dentro da zona, porque os campos rolam por dentro e cortariam um de fora.
+ * O `position: relative` cede a qualquer utilitário de posição (`absolute`, `fixed`, `sticky`), que vive numa camada acima; uma zona que
+ * se posiciona por CSS próprio, fora das camadas, precisa dizer `position` ela mesma.
+ */
+@layer components {
+  [data-soltar] {
+    position: relative;
+  }
+
+  [data-soltar][data-soltar-ativo]::before {
+    content: '';
+    position: absolute;
+    z-index: 2;
+    inset: var(--soltar-folga, 2px);
+    pointer-events: none;
+    border: 3px dashed var(--color-ouro);
+    outline: 2px solid var(--color-tinta);
+    box-shadow: inset 0 0 0 2px var(--color-tinta);
+  }
+
+  [data-soltar][data-soltar-ativo][data-soltar-sob]::before {
+    border-style: solid;
+    border-width: 5px;
+    background-color: color-mix(in oklab, var(--color-ouro) 28%, transparent);
+  }
+}
+/* fim da soltura do arrasto */
+
+/*
  * O destaque da dica do tutorial (spec do polimento, §5): a zona de que a dica fala (`data-dica`) ganha um contorno PARADO, ouro com
  * borda de tinta (tinta por fora e por dentro, para o ouro ler sobre a capa rosa, a verde e a tinta). Sem animação nem transição, e
  * igual com movimento reduzido (spec §10.4: nada de piscar). É uma camada de `::after` que não pega o mouse, e não o `outline` ou o
