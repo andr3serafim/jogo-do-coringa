@@ -176,8 +176,8 @@ modelo da web. **[decisão minha]** As pistas:
   `{ t: 'replay', gameNo, replay }`. Ela sai sempre depois do `room` em `FINISHED` da mesma partida, em três momentos:
   - **no fim da partida** (do motor, W.O., desistência ou abandono): o `room` com o desfecho e, logo depois, o `replay`, a quem
     segue aberto;
-  - **no `hello` com a sala em `FINISHED`** e sem revanche em curso: o `room` e o `replay` só ao socket que voltou (os outros já o
-    têm);
+  - **no `hello` com a sala em `FINISHED`** e sem revanche em curso: o `room` a todos (a presença mudou) e o `replay` só ao socket
+    que voltou (os outros já o têm);
   - **na expiração da sala no meio da partida** (que vira abandono): o `room` abandonado e o `replay`, antes do fechamento 4000.
   - A mensagem só sai quando a partida não pode mais continuar: sala `FINISHED` (fim do motor ou W.O.) ou sala encerrada. Nunca
     durante uma partida viva, nem durante a revanche em curso. Uma desconexão com volta possível não conta; o abandono só conta
