@@ -390,6 +390,20 @@ describe('arrastar da mão: o que trava', () => {
     await act(async () => ack.resolve({ ok: true, seq: 9 }));
   });
 
+  it('na janela de reação (a mesma barra e a mesma lista legal) a Armadilha também arrasta, e só até o que o gatilho permite', () => {
+    const m = mount({ ...DRAFT, phase: 'K_PLAYED' });
+    const guard = m.view.opponent.guard[0]!;
+    const a = handCard('A');
+    press(a);
+    moveTo(a, 80, 80);
+    // Com o K posto, a Armadilha só mira a Guarda: é a única carta-alvo marcada.
+    expect(active()).toEqual([cardDropKey(guard.id)]);
+    release(a, 80, 80);
+    expect(acts(m)).toEqual([]);
+    dragTo(handCard('A'), zone(cardDropKey(guard.id)));
+    expect(sentAction(m)).toMatchObject({ type: 'TRAP', targetId: guard.id });
+  });
+
   it('fora da fase de jogar (a vez do oponente) a mão não é botão e não arrasta', () => {
     const m = mount({ ...DRAFT, phase: 'WAITING' });
     const card = handList().getAllByRole('img').find((el) => /^K, Guarda/.test(el.getAttribute('aria-label') ?? ''))!;

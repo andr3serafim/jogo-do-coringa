@@ -151,7 +151,7 @@
  * linhas de tinta (a mesma família do destaque da dica, que é cheio); a que está sob o dedo, um cheio e mais grosso, com um véu de ouro.
  * Sem animação nem transição, e igual com movimento reduzido (spec §10.4: nada de piscar). É uma camada de `::before` que não pega o
  * mouse: o `::after` é do destaque da dica, e o `outline` e o `box-shadow` do próprio elemento são do halo de foco e do anel de alvo das
- * cartas (a zona `carta:<id>` é uma carta-alvo). O anel fica dentro da zona, porque os campos rolam por dentro e cortariam um de fora.
+ * cartas (a zona `carta:<id>` é uma carta-alvo). O anel fica dentro da zona, ou por fora em até 6 px nas zonas pequenas e nas fileiras (`--soltar-folga` negativa): o respiro do campo (10 px ou mais em volta) o deixa passar sem o corte dos campos, que rolam por dentro.
  * O `position: relative` cede a qualquer utilitário de posição (`absolute`, `fixed`, `sticky`), que vive numa camada acima; uma zona que
  * se posiciona por CSS próprio, fora das camadas, precisa dizer `position` ela mesma.
  */
