@@ -517,7 +517,13 @@ function PlayTableView({
           onRematch={(want) => session.rematch(want)}
           onNewRoom={onNewRoom}
           newRoomLabel={newRoomLabel}
-          onReview={pastGame?.replay === undefined ? undefined : () => navigate(`/partidas/${pastGame.id}`)}
+          // No treino a entrada do histórico é trocada (o Voltar do replay vai ao início, não a um treino novo da mesma URL);
+          // online ela é empilhada (o Voltar volta à sala).
+          onReview={
+            pastGame?.replay === undefined
+              ? undefined
+              : () => navigate(`/partidas/${pastGame.id}`, { replace: training !== undefined })
+          }
         />
       ) : null}
     </>

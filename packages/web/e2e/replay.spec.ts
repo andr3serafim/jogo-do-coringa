@@ -67,9 +67,12 @@ test('treino: desistir, "Rever a partida", andar e voltar pelos passos, e achar 
   const end = await concedeTraining(page);
   await axe(page);
 
+  // No treino "Rever a partida" troca a entrada do histórico (o Voltar do navegador vai ao início, não a um treino novo da mesma URL).
+  const entries = await page.evaluate(() => window.history.length);
   await end.getByRole('button', { name: 'Rever a partida' }).click();
   await expect(page).toHaveURL(/\/partidas\/[0-9a-z-]+$/);
   const replayUrl = page.url();
+  expect(await page.evaluate(() => window.history.length), 'o treino troca a entrada, não empilha outra').toBe(entries);
 
   // A mesa só de vista: sem relógio, sem barra de jogadas e sem menu; a faixa diz que é um replay, no começo da partida.
   await expect(table(page)).toBeVisible();

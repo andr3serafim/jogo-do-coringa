@@ -98,6 +98,30 @@ const entry = (over: Partial<Omit<PastGame, 'id'>> = {}): Omit<PastGame, 'id'> =
 /** O mesmo que `entry`, no formato cru que a lista guarda (para os testes que estragam o armazenamento à mão). */
 const rawGame = (id: string): Record<string, unknown> => ({ id, ...entry() });
 
+/**
+ * Um `Storage` de verdade (o que o `safeStore` embrulha na produção) que passa na sonda e, com `control.on`, recusa todo
+ * `setItem` da lista: disco cheio ou bloqueado. `disk` é o que o navegador guardou, sem a cópia em memória do `safeStore`.
+ */
+function refusingStorage() {
+  const disk = new Map<string, string>();
+  const control = { on: false };
+  const raw: Storage = {
+    get length() {
+      return disk.size;
+    },
+    clear: () => disk.clear(),
+    key: (index) => [...disk.keys()][index] ?? null,
+    getItem: (key) => disk.get(key) ?? null,
+    removeItem: (key) => void disk.delete(key),
+    setItem(key, value) {
+      if (control.on && key === PAST_GAMES_KEY) throw new DOMException('cheio', 'QuotaExceededError');
+      disk.set(key, value);
+    },
+  };
+  return { raw, disk, control };
+}
+const storedGames = (disk: Map<string, string>): PastGame[] => JSON.parse(disk.get(PAST_GAMES_KEY)!) as PastGame[];
+
 const put = (store: KeyValueStore, items: unknown): void => store.set(PAST_GAMES_KEY, JSON.stringify(items));
 const hasReplay = (games: PastGame[]): boolean[] => games.map((game) => game.replay !== undefined);
 
@@ -302,6 +326,58 @@ describe('lista de partidas', () => {
     limit = 10;
     expect(recordPastGame(store, entry({ date: 5, rounds: 5, replay }), 5)).toBeNull();
     expect(disk.get(PAST_GAMES_KEY)).toBe(before);
+  });
+
+  describe('com o safeStore de verdade e um armazenamento que recusa tudo', () => {
+    it('a gravação que desiste deixa a memória do safeStore igual ao disco; o replay guardado antes não se perde na gravação seguinte', () => {
+      const replay = realReplay('recusa-total');
+      const { raw, disk, control } = refusingStorage();
+      const { store } = safeStore(raw);
+      recordPastGame(store, entry({ date: 1, rounds: 1, replay }), 1);
+      const onDisk = disk.get(PAST_GAMES_KEY)!;
+      expect(hasReplay(storedGames(disk))).toEqual([true]);
+
+      control.on = true;
+      expect(recordPastGame(store, entry({ date: 2, rounds: 2, replay }), 2)).toBeNull();
+      // O `set` recusado deixou a última tentativa (a lista com a linha nova e sem os replays) na memória: a leitura tem de
+      // devolver o que o disco tem, não ela.
+      expect(disk.get(PAST_GAMES_KEY)).toBe(onDisk);
+      expect(store.get(PAST_GAMES_KEY)).toBe(onDisk);
+      expect(loadPastGames(store).map((game) => game.rounds)).toEqual([1]);
+
+      // O armazenamento volta a aceitar: a gravação seguinte parte do disco, com o replay da primeira partida.
+      control.on = false;
+      expect(recordPastGame(store, entry({ date: 3, rounds: 3 }), 3)).not.toBeNull();
+      const saved = storedGames(disk);
+      expect(saved.map((game) => game.rounds)).toEqual([3, 1]);
+      expect(hasReplay(saved)).toEqual([false, true]);
+      expect(store.get(PAST_GAMES_KEY)).toBe(disk.get(PAST_GAMES_KEY));
+    });
+
+    it('sem nada guardado antes, a recusa não deixa a linha que falhou na memória', () => {
+      const { raw, disk, control } = refusingStorage();
+      const { store } = safeStore(raw);
+      control.on = true;
+      expect(recordPastGame(store, entry({ date: 1, rounds: 1, replay: realReplay('vazio') }), 1)).toBeNull();
+      expect(disk.has(PAST_GAMES_KEY)).toBe(false);
+      expect(store.get(PAST_GAMES_KEY)).toBeNull();
+      expect(loadPastGames(store)).toEqual([]);
+
+      control.on = false;
+      recordPastGame(store, entry({ date: 2, rounds: 2 }), 2);
+      expect(storedGames(disk).map((game) => game.rounds)).toEqual([2]);
+    });
+
+    it('a regravação do texto lido, que o armazenamento também recusa e lança, não faz a gravação lançar', () => {
+      const { raw, control } = refusingStorage();
+      const { store } = safeStore(raw);
+      recordPastGame(store, entry({ date: 1, rounds: 1 }), 1);
+      control.on = true;
+      // O `set` do `safeStore` relança a recusa do `Storage`: a regravação do texto lido também lança, e a gravação segue sem lançar.
+      expect(() => recordPastGame(store, entry({ date: 2, rounds: 2 }), 2)).not.toThrow();
+      expect(recordPastGame(store, entry({ date: 2, rounds: 2 }), 2)).toBeNull();
+      expect(loadPastGames(store).map((game) => game.rounds)).toEqual([1]);
+    });
   });
 
   it('armazenamento que sempre recusa devolve null sem lançar', () => {
@@ -781,6 +857,43 @@ describe('attachReplay', () => {
     // O que estava guardado fica como estava.
     expect(store.data.get(PAST_GAMES_KEY)).toBe(stored);
     expect(findPastGame(store, keep.id)!.replay).toBeDefined();
+  });
+
+  describe('com o safeStore de verdade e um armazenamento que recusa tudo', () => {
+    it('o anexo que desiste deixa a memória do safeStore igual ao disco; o replay de uma mais velha não se perde na gravação seguinte', () => {
+      const replay = realReplay('recusa-anexo');
+      const { raw, disk, control } = refusingStorage();
+      const { store } = safeStore(raw);
+      recordPastGame(store, entry({ date: 1, rounds: 1, replay }), 1);
+      const target = recordPastGame(store, entry({ date: 2, rounds: 2 }), 2)!;
+      const onDisk = disk.get(PAST_GAMES_KEY)!;
+
+      control.on = true;
+      expect(attachReplay(store, target.id, replay)).toBeNull();
+      // A última tentativa (a linha nova com o replay, a mais velha sem) ficou na memória: a leitura volta ao que o disco tem.
+      expect(disk.get(PAST_GAMES_KEY)).toBe(onDisk);
+      expect(store.get(PAST_GAMES_KEY)).toBe(onDisk);
+      expect(hasReplay(loadPastGames(store))).toEqual([false, true]);
+
+      control.on = false;
+      recordPastGame(store, entry({ date: 3, rounds: 3 }), 3);
+      const saved = storedGames(disk);
+      expect(saved.map((game) => game.rounds)).toEqual([3, 2, 1]);
+      expect(hasReplay(saved)).toEqual([false, false, true]);
+      expect(store.get(PAST_GAMES_KEY)).toBe(disk.get(PAST_GAMES_KEY));
+    });
+
+    it('o anexo que acha a linha mas não cabe (teto) e o que não acha a linha não mexem na memória nem no disco', () => {
+      const { raw, disk, control } = refusingStorage();
+      const { store } = safeStore(raw);
+      const row = recordPastGame(store, entry({ date: 1, rounds: 1 }), 1)!;
+      const onDisk = disk.get(PAST_GAMES_KEY)!;
+      control.on = true;
+      expect(attachReplay(store, 'nao-existe', realReplay('x'))).toBeNull();
+      expect(attachReplay(store, row.id, bulky(realReplay('grande'), MAX_PAST_GAMES_CHARS + 1))?.replay).toBeUndefined();
+      expect(disk.get(PAST_GAMES_KEY)).toBe(onDisk);
+      expect(store.get(PAST_GAMES_KEY)).toBe(onDisk);
+    });
   });
 
   it('um armazenamento que lança até no get devolve null', () => {

@@ -37,9 +37,13 @@ export function parseRoute(pathname: string): Route {
 
 const NAVIGATE_EVENT = 'coringa:navigate';
 
-/** `pushState` não dispara `popstate`: o evento próprio avisa quem usa `useRoute`. */
-export function navigate(path: string): void {
-  window.history.pushState(null, '', path);
+/**
+ * `pushState` não dispara `popstate`: o evento próprio avisa quem usa `useRoute`. Com `replace`, a página troca a entrada de
+ * agora do histórico em vez de empilhar outra (o Voltar não passa por ela): para a tela que a pessoa não quer rever voltando.
+ */
+export function navigate(path: string, options: { replace?: boolean } = {}): void {
+  if (options.replace) window.history.replaceState(null, '', path);
+  else window.history.pushState(null, '', path);
   window.dispatchEvent(new Event(NAVIGATE_EVENT));
   window.scrollTo?.(0, 0);
 }

@@ -114,12 +114,20 @@ function parsePastGame(value: unknown): PastGame | null {
 
 // --- Leitura ---
 
-/** As partidas guardadas, da mais nova para a mais velha. Armazenamento ou JSON estragado vira `[]`; entrada ruim sai e as boas ficam. */
-export function loadPastGames(store: KeyValueStore): PastGame[] {
+/** O texto cru da lista como a leitura o vê (a cópia em memória do `safeStore` vem antes do disco); `undefined` se o `get` lançou. */
+function readRaw(store: KeyValueStore): string | null | undefined {
+  try {
+    return store.get(PAST_GAMES_KEY);
+  } catch {
+    return undefined;
+  }
+}
+
+/** As partidas de um texto cru: JSON estragado vira `[]`; entrada ruim sai e as boas ficam. */
+function parseList(text: string | null | undefined): PastGame[] {
   let parsed: unknown;
   try {
-    const text = store.get(PAST_GAMES_KEY);
-    parsed = text === null ? null : JSON.parse(text);
+    parsed = text === null || text === undefined ? null : JSON.parse(text);
   } catch {
     return [];
   }
@@ -131,6 +139,11 @@ export function loadPastGames(store: KeyValueStore): PastGame[] {
     if (games.length === MAX_PAST_GAMES) break;
   }
   return games;
+}
+
+/** As partidas guardadas, da mais nova para a mais velha. Armazenamento ou JSON estragado vira `[]`; entrada ruim sai e as boas ficam. */
+export function loadPastGames(store: KeyValueStore): PastGame[] {
+  return parseList(readRaw(store));
 }
 
 export function findPastGame(store: KeyValueStore, id: string): PastGame | null {
@@ -166,6 +179,25 @@ function dropOldestReplay(games: PastGame[], newerThan = -1): boolean {
 }
 
 /**
+ * O armazenamento recusou toda tentativa de gravar: devolve a leitura ao que havia antes. O `safeStore` de produção guarda em
+ * memória a última tentativa que o `Storage` recusou, e a leitura devolve a memória antes do disco. Sem isto, a lista lida dali
+ * em diante seria a de uma gravação que falhou (com a linha nova, que "não ficou guardada", e sem os replays que a tentativa foi
+ * tirando), e a gravação seguinte, ao passar, levaria isso para o disco e perderia os replays guardados.
+ * Regrava o texto que a leitura trouxe no começo (`text`; `null` era a chave ausente, que sai de novo): o disco já o tem, então
+ * o `Storage` o aceita; se recusar de novo, a memória fica com esse mesmo texto, igual ao disco. O que lançar aqui não derruba
+ * nada. `undefined` (o `get` lançou): não se sabe o que havia, e nada é feito.
+ */
+function restoreRaw(store: KeyValueStore, text: string | null | undefined): void {
+  if (text === undefined) return;
+  try {
+    if (text === null) store.remove(PAST_GAMES_KEY);
+    else store.set(PAST_GAMES_KEY, text);
+  } catch {
+    // O disco segue recusando: o `set` do `safeStore` já deixou o texto lido na memória, que é o que o disco tem.
+  }
+}
+
+/**
  * Guarda uma partida terminada no topo da lista. Devolve a entrada como ficou guardada (com o `id`; o replay dela é o último
  * a sair se o teto apertar), a que já existia quando é a mesma partida (mesma `key` em até 24 h; não grava nada), ou `null`
  * se a entrada não passa na validação ou se o armazenamento recusou até sem nenhum replay. Nunca lança: guardar é por melhor
@@ -173,11 +205,13 @@ function dropOldestReplay(games: PastGame[], newerThan = -1): boolean {
  *
  * O `set` que lança (cota estourada) tira o replay da mais velha e grava de novo. Com o `safeStore` isso depende de ele relançar
  * a exceção do `Storage` (guardando a cópia em memória): quando uma tentativa passa, a cópia em memória sai e o disco fica com a
- * lista completa, menos replays.
+ * lista completa, menos replays. Se todas recusam, a gravação regrava o texto que leu no começo (`restoreRaw`), e a memória do
+ * `safeStore` volta a ser igual ao disco.
  */
 export function recordPastGame(store: KeyValueStore, entry: Omit<PastGame, 'id'>, now: number): PastGame | null {
   try {
-    const old = loadPastGames(store);
+    const raw = readRaw(store);
+    const old = parseList(raw);
     if (entry.key !== undefined) {
       const same = old.find((game) => game.key === entry.key && now - game.date <= DEDUPE_WINDOW_MS);
       if (same !== undefined) return same;
@@ -188,6 +222,7 @@ export function recordPastGame(store: KeyValueStore, entry: Omit<PastGame, 'id'>
     const candidate = parsePastGame(JSON.parse(JSON.stringify({ ...entry, id: newId(now, old) })));
     if (candidate === null) return null;
     const games = [candidate, ...old].slice(0, MAX_PAST_GAMES);
+    let refused = false;
     for (;;) {
       const text = JSON.stringify(games);
       if (text.length <= MAX_PAST_GAMES_CHARS) {
@@ -196,9 +231,14 @@ export function recordPastGame(store: KeyValueStore, entry: Omit<PastGame, 'id'>
           return games[0]!;
         } catch {
           // Cota estourada ou armazenamento bloqueado: tira um replay e tenta de novo.
+          refused = true;
         }
       }
-      if (!dropOldestReplay(games)) return null;
+      if (!dropOldestReplay(games)) {
+        // Sem `set` nenhum (a lista passou do teto até sem replays) não há o que desfazer.
+        if (refused) restoreRaw(store, raw);
+        return null;
+      }
     }
   } catch {
     return null;
@@ -213,12 +253,14 @@ export function recordPastGame(store: KeyValueStore, entry: Omit<PastGame, 'id'>
  *
  * Devolve a linha como ficou: com o replay; a que já tinha um (o dela fica, nada é gravado); ou sem ele, quando o replay tem
  * forma errada ou não cabe nem tirando os das mais velhas (nada é gravado e os das outras ficam). `null` se a linha não existe
- * mais, se o armazenamento recusou até depois de tirar os replays das mais velhas (a lista de antes fica) ou se algo lançou.
- * Nunca lança.
+ * mais, se o armazenamento recusou até depois de tirar os replays das mais velhas (a lista de antes fica, e o texto que a
+ * leitura trouxe no começo é regravado para a memória do `safeStore` voltar a ser igual ao disco: `restoreRaw`) ou se algo
+ * lançou. Nunca lança.
  */
 export function attachReplay(store: KeyValueStore, id: string, replay: Replay): PastGame | null {
   try {
-    const games = loadPastGames(store);
+    const raw = readRaw(store);
+    const games = parseList(raw);
     const index = games.findIndex((game) => game.id === id);
     if (index < 0) return null;
     const current = games[index]!;
@@ -238,8 +280,11 @@ export function attachReplay(store: KeyValueStore, id: string, replay: Replay): 
         }
       }
       if (!dropOldestReplay(games, index)) {
-        // Não há mais replay de linha mais velha para tirar. Passando do teto ele não cabe; senão foi o armazenamento que recusou.
-        return text.length > MAX_PAST_GAMES_CHARS ? current : null;
+        // Não há mais replay de linha mais velha para tirar. Passando do teto ele não cabe (e nenhum `set` foi tentado); senão
+        // foi o armazenamento que recusou a última tentativa, e a memória do `safeStore` volta ao que o disco tem.
+        if (text.length > MAX_PAST_GAMES_CHARS) return current;
+        restoreRaw(store, raw);
+        return null;
       }
     }
   } catch {

@@ -13,6 +13,8 @@
 //   `data-sem-pulo` (os do replay) ficam de fora: o clique neles é deles.
 // - Cada batida ao vivo toca a pista dela (`cueOf`), uma vez, quando a batida começa. O `catchUp` (eventos perdidos numa
 //   reconexão) e o `resync` (que nem tem batidas) são mudos; o pulo termina as batidas, e as pistas que faltavam não tocam.
+// - O `resync` (a volta da reconexão fora do anel e, no replay, o voltar, o "Início" e a rodada) troca a mesa de uma vez: as cartas
+//   chegam sem a transição de layout (`instant`), e não deslizam do quadro de antes. O `catchUp` e o passo ao vivo animam.
 // - O Motion vem com `LazyMotion`: o recurso de layout (`layoutId` das cartas) só existe no `domMax`, carregado por
 //   `import()` à parte, fora do JavaScript inicial (spec §12).
 import { LazyMotion, MotionConfig } from 'motion/react';
@@ -70,6 +72,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
         ? 'count'
         : 'hold';
   const seq = state?.seq ?? 0;
+  const jump = state?.resync === true;
   const remounted = useMemo(() => ({ serial: released.serial, ids: released.batch }), [released]);
 
   // O som da batida: toca quando a batida de agora muda (a identidade dela), só ao vivo. A batida que já tocou não toca de
@@ -106,7 +109,8 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       },
       remounted,
       markOf: (id) => released.marks.get(id) ?? 0,
-      instant: (id) => released.instant.has(id),
+      // O `resync` troca a mesa de uma vez: uma carta que está nos dois quadros (o salto do replay, a volta da reconexão) não desliza.
+      instant: (id) => jump || released.instant.has(id),
       layoutKey: `${seq}:${busy ? 'tocando' : 'parado'}`,
       fx: state ? effectsOf(beat, state.view) : NO_EFFECTS,
       beatMs: beat?.durationMs ?? 0,
@@ -114,7 +118,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       countMs,
       pressure,
     }),
-    [busy, reducedMotion, run, released, remounted, seq, state, beat, count, countMs, pressure],
+    [busy, reducedMotion, run, released, remounted, seq, jump, state, beat, count, countMs, pressure],
   );
 
   // Esc pula as batidas (o Esc que um diálogo ou a gaveta do histórico já tratou não conta).

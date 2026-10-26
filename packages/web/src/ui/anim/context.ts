@@ -26,7 +26,11 @@ export interface Anim {
   remounted: { serial: number; ids: ReadonlySet<string> };
   /** `key` do elemento com este `layoutId`: muda quando as transições dele são encerradas na hora (pulo, `state` novo). */
   markOf(id: string): number;
-  /** O elemento chega ao lugar sem animar (a transição dele acabou de ser encerrada na hora). */
+  /**
+   * O elemento chega ao lugar sem animar: a transição dele acabou de ser encerrada na hora, ou o `state` é um salto (`resync`:
+   * a reconexão fora do anel, e no replay o voltar, o "Início" e a rodada), que troca a mesa de uma vez sem deslize. O `catchUp`
+   * e o `state` ao vivo seguem animando.
+   */
   instant(id: string): boolean;
   /**
    * O `layoutDependency` dos elementos com `layoutId`: o Motion só mede a mesa quando ele muda (a cada `state` e quando as

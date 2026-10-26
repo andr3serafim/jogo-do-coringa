@@ -5,7 +5,7 @@
 import { RULES_VERSION, makeConfig, type GameResult, type PlayerId, type Replay } from '@coringa/engine';
 import type { RoomMessage, Score } from '@coringa/protocol';
 import { act, render, renderHook, screen } from '@testing-library/react';
-import { StrictMode, type ReactNode } from 'react';
+import { Profiler, StrictMode, type ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { TrainingLevel } from '../../src/model/local-room.ts';
 import { loadPastGames, PAST_GAMES_KEY } from '../../src/model/past-games.ts';
@@ -301,6 +301,23 @@ describe('"Rever a partida" no painel de fim', () => {
     expect(window.location.pathname).toBe(`/partidas/${id}`);
   });
 
+  it('no treino troca a entrada do histórico (o Voltar do replay vai ao início); online empilha uma (o Voltar volta à sala)', async () => {
+    const training = mount({ training: 'medio' });
+    finish(training, { replay: replayOf('treino-voltar') });
+    const trainingLength = window.history.length;
+    await training.user.click(screen.getByRole('button', { name: 'Rever a partida' }));
+    expect(window.location.pathname).toBe(`/partidas/${rows(training)[0]!.id}`);
+    expect(window.history.length).toBe(trainingLength);
+    training.unmount();
+
+    const online = mount();
+    finish(online, { replay: replayOf('online-voltar') });
+    const onlineLength = window.history.length;
+    await online.user.click(screen.getByRole('button', { name: 'Rever a partida' }));
+    expect(window.location.pathname).toBe(`/partidas/${rows(online)[0]!.id}`);
+    expect(window.history.length).toBe(onlineLength + 1);
+  });
+
   it('não aparece enquanto a partida não tem replay: online que ainda não o recebeu, nem o treino sem ele', () => {
     const online = mount();
     finish(online, {});
@@ -400,6 +417,57 @@ describe('online: o replay chega depois do FINISHED', () => {
     expect(rows(again)[0]).toMatchObject({ id, replay });
     expect(store.sets).toBe(2);
     await again.user.click(screen.getByRole('button', { name: 'Rever a partida' }));
+    expect(window.location.pathname).toBe(`/partidas/${id}`);
+  });
+
+  it('o `room` em FINISHED e o `replay` no mesmo `act` (a mesma renderização) anexam o replay à linha que já existia', async () => {
+    const store = countingStore();
+    // A página de antes gravou a linha, sem o replay (a sala já terminada na volta do `hello`).
+    const first = mount({ store, finished: true });
+    const { id } = rows(first)[0]!;
+    expect(rows(first)[0]).not.toHaveProperty('replay');
+    first.unmount();
+    expect(store.sets).toBe(1);
+
+    // A mesa nova abre com a partida em curso; o `room` em FINISHED e o `replay` chegam juntos, numa renderização só. A
+    // gravação acha a linha pela `key` (sem escrever nada) e o anexo, no mesmo desenho, acrescenta o replay a ela: sem esperar
+    // um desenho a mais por causa do estado da gravação (o `Profiler` conta os desenhos até o `set` do anexo).
+    let commits = 0;
+    let commitsAtAttach = -1;
+    const watched: KeyValueStore = {
+      get: (key) => store.get(key),
+      set(key, value) {
+        commitsAtAttach = commits;
+        store.set(key, value);
+      },
+      remove: (key) => store.remove(key),
+    };
+    const m = connect(THEIRS);
+    const { user } = m;
+    render(
+      <Profiler id="mesa" onRender={() => void (commits += 1)}>
+        <PlayTable session={m.session} store={watched} onNewRoom={() => undefined} />
+      </Profiler>,
+    );
+    const replay = replayOf('mesmo-act');
+    const before = commits;
+    act(() => {
+      m.connection.emitRoom(
+        roomMessage({
+          status: 'FINISHED',
+          seats: SEATS,
+          score: { p1: 1, p2: 0, draws: 0 },
+          outcome: { gameNo: 1, result: win('p1'), cause: 'NORMAL' },
+        }),
+      );
+      m.connection.emit({ type: 'replay', replay: { t: 'replay', gameNo: 1, replay } });
+    });
+
+    expect(loadPastGames(store)).toHaveLength(1);
+    expect(loadPastGames(store)[0]).toMatchObject({ id, replay });
+    expect(store.sets).toBe(2);
+    expect(commitsAtAttach).toBe(before + 1);
+    await user.click(screen.getByRole('button', { name: 'Rever a partida' }));
     expect(window.location.pathname).toBe(`/partidas/${id}`);
   });
 

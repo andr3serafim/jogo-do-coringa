@@ -61,4 +61,16 @@ describe('useRoute e navigate', () => {
     });
     expect(screen.getByText('{"name":"training"}')).toBeInTheDocument();
   });
+
+  it('navigate empilha uma entrada no histórico; com `replace` troca a de agora (o Voltar não passa por ela)', () => {
+    render(<Probe />);
+    const length = window.history.length;
+    act(() => navigate('/treino'));
+    expect(window.history.length).toBe(length + 1);
+
+    act(() => navigate('/partidas/abc', { replace: true }));
+    expect(window.history.length).toBe(length + 1);
+    expect(window.location.pathname).toBe('/partidas/abc');
+    expect(screen.getByText('{"name":"pastGame","id":"abc"}')).toBeInTheDocument();
+  });
 });
