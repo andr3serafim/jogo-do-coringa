@@ -22,8 +22,7 @@ do simulador que procura uma distribuição com as especiais nas primeiras rodad
 - O tutorial entra por `import()`; JS inicial ≤ 200 KB gzip (o smoke confere).
 - Painel não modal, sem prender o foco, anunciado por região `polite`; fica abaixo das camadas da cena e da faixa; nunca cobre a
   mão nem a barra. Destaque parado (ouro com borda de tinta), sem piscar; nada de flash nem movimento novo.
-- Textos das dicas: os revisados pela sessão principal (rascunho em
-  `C:\Users\User\AppData\Roaming\Claude\side-session-notes\local_5a6f8935-10df-4551-89d9-04ae6d2bc3c1\tutorial-dicas-rascunho.md`);
+- Textos das dicas: os da seção "Textos finais das dicas" no fim deste plano (revisados pela sessão principal em 2026-10-26);
   a dica 9 tem a frase da Pressão isolada (sai inteira quando a Pressão for removida) e o número do anti-travamento vem de
   `config.antiStallRounds`.
 - Nenhum efeito, texto ou cena nova ligado à Pressão da mesa além da frase isolada da dica 9.
@@ -165,3 +164,38 @@ o texto com o número de `config.antiStallRounds` da partida.
 
 Revisão de código da fatia inteira, `check` e `e2e` verdes na CI da branch, fast-forward na `main`, CI da `main` verde e um
 aviso curto à sessão principal.
+
+---
+
+## Textos finais das dicas
+
+Revisados pela sessão principal em 2026-10-26, por delegação do autor.
+
+1. **Equipar:** "Suas numéricas vão para o campo na ordem em que saíram, e você só escolhe o destino: Ataque ou Defesa. Cada
+   fileira é uma fila: quando você ataca, a primeira carta do seu Ataque vai para o cemitério; quando defende, a primeira da sua
+   Defesa."
+2. **Quadra:** "Quadra: quatro ou mais numéricas do mesmo valor na mesma fileira, seguidas ou não, somam esse valor à fileira e
+   dão uma Ressurreição, que traz uma numérica do cemitério de volta."
+3. **Ordem:** "Quem tem a iniciativa escolhe atacar primeiro ou em segundo. Depois de cada rodada de Ataque, ela fica com quem
+   causou mais dano; no empate, não muda."
+4. **Primeiro ataque:** "Sua vez de atacar: o dano é o seu ATK menos a DEF do oponente, no mínimo 0. Com cartas no Ataque,
+   atacar é obrigatório. O botão mostra a conta antes de você confirmar."
+5. **J, Q e K:** "Cada J soma 1 ao multiplicador do seu ataque, e cada Q ao da sua defesa (até 4 de cada). Um K na Guarda
+   absorve um golpe inteiro e quebra."
+6. **A:** "Janela de reação: quando o oponente ataca ou joga K, você pode responder com um A, que destrói um J, Q ou K dele, ou
+   passar. O A também vale no seu turno."
+7. **Selvagem:** "O Coringa Selvagem vale como J, Q ou A, à sua escolha. Nunca como K."
+8. **Reflect:** "Reflect é K + J + Q da mão, no seu turno. Se o oponente atacar no turno seguinte, ele perde os K e Q e leva o
+   golpe de volta. Você não leva nada. Se ele não atacar, o Reflect se desfaz."
+9. **Pressão e anti-travamento** (duas frases independentes):
+   - 9a (isolada; sai inteira no sub-projeto 5): "Pressão da mesa: cada rodada de Ataque seguida sem ninguém perder vida soma 1 ao
+     multiplicador de ataque dos dois."
+   - 9b: "Anti-travamento: {N} rodadas de Ataque seguidas sem ninguém perder vida encerram a partida. Vence quem tiver mais vida;
+     com vidas iguais, empata." ({N} = `config.antiStallRounds`.)
+10. **Fim:** "A partida acaba quando um Coringa chega a 0 de vida, ou quando alguém monta a Exódia: 4 K na Guarda. Gostou? Chame
+    alguém para uma sala." (link "Jogar com um amigo", para a tela inicial)
+
+Ao redor (aprovados): "Aprender jogando" na tela inicial; painel "Dica" com "Entendi" e "Pular o tutorial".
+Prévia letal (aprovada): "dano 24 · derruba Duda"; contra Reflect "o Reflect devolve 24 · derruba você"; nada de "derruba"
+quando a Guarda ou a Defesa Absoluta absorvem.
+Conferir: as dicas 1 e 4 cabem no painel a 360 px sem esconder a mão nem a barra.
