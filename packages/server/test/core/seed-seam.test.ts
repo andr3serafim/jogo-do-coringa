@@ -71,6 +71,49 @@ describe('newSeed(gameNo)', () => {
   });
 });
 
+describe('sem newSeed (produção)', () => {
+  it('cada partida nova, inclusive a revanche, pede randomBytes(16) para a semente e não a deriva da anterior', async () => {
+    const { h, p1, p2 } = await Harness.lobby();
+    // Os tokens pedem 32 bytes; só as chamadas de 16 são de semente. Cada chamada devolve bytes sem relação com a anterior.
+    const seedDraws: Uint8Array[] = [];
+    let calls = 0;
+    const spy: CoreDeps = {
+      randomBytes: (n) => {
+        calls += 1;
+        const bytes = Uint8Array.from({ length: n }, (_, i) => (calls * 53 + i * 7 + 3) % 256);
+        if (n === 16) seedDraws.push(bytes);
+        return bytes;
+      },
+    };
+    h.core = new RoomCore(h.core.record, spy);
+    const hexOf = (bytes: Uint8Array): string => Buffer.from(bytes).toString('hex');
+
+    await h.send(p1, { t: 'ready', ready: true });
+    await h.send(p2, { t: 'ready', ready: true });
+    expect(seedDraws).toHaveLength(1);
+    const first = h.core.record!.game!.seed;
+    expect(first).toBe(hexOf(seedDraws[0]!));
+    expect(first).toMatch(/^[0-9a-f]{32}$/);
+
+    await h.send(p2, { t: 'concede', id: 'c1' });
+    expect(seedDraws).toHaveLength(1); // acabar a partida não sorteia nada
+    await h.send(p1, { t: 'rematch', want: true });
+    await h.send(p2, { t: 'rematch', want: true });
+    expect(seedDraws).toHaveLength(2);
+    const second = h.core.record!.game!.seed;
+    expect(second).toBe(hexOf(seedDraws[1]!));
+    expect(second).not.toBe(first);
+
+    // O replay de cada partida leva a semente dos bytes daquela chamada.
+    await h.send(p1, { t: 'concede', id: 'c2' });
+    const seeds = h.messages(p1, 'replay').map((message) => [message.gameNo, message.replay.seed]);
+    expect(seeds).toEqual([
+      [1, first],
+      [2, second],
+    ]);
+  });
+});
+
 describe('wrangler.jsonc', () => {
   it('a var E2E_SEED existe e é vazia: a semente fixa nunca vai para a produção', () => {
     const text = readFileSync(new URL('../../wrangler.jsonc', import.meta.url), 'utf8');

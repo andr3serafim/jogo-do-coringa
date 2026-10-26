@@ -292,15 +292,17 @@ describe('fim de partida', () => {
     }
     expect(state).toEqual(game.state);
 
-    // Os dois recebem o `room` final, com o desfecho; a semente não aparece em nenhuma mensagem.
+    // Os dois recebem o `room` final, com o desfecho, e depois o `replay`: a semente só aparece nele (spec 2 §8.4).
     for (const sock of [p1, p2]) {
       expect(h.messages(sock, 'room').at(-1)).toMatchObject({ status: 'FINISHED', outcome: rec.outcome, score: rec.score });
-      expect(JSON.stringify(sock.inbox)).not.toContain(game.seed);
+      expect(sock.inbox.slice(-2).map((m) => m.t)).toEqual(['room', 'replay']);
+      expect(sock.inbox.at(-1)).toEqual({ t: 'replay', gameNo: 1, replay });
+      expect(sock.inbox.filter((m) => JSON.stringify(m).includes(game.seed)).map((m) => m.t)).toEqual(['replay']);
     }
     expect(game.phaseDeadlineAt).toBeNull();
   });
 
-  it('o passo que acaba a partida manda state, ack e depois o room FINISHED', async () => {
+  it('o passo que acaba a partida manda state, ack, o room FINISHED e depois o replay', async () => {
     const state = setup({ p1: { attack: [9] }, p2: { hp: 1 } });
     const { h, p1, p2 } = await Harness.fromState(state);
     const rec = h.core.record!;
@@ -310,8 +312,8 @@ describe('fim de partida', () => {
     expect(rec.status).toBe('FINISHED');
     expect(rec.outcome).toMatchObject({ cause: 'NORMAL', result: { kind: 'WIN', winner: 'p1', reason: 'HP' } });
     expect(rec.score.p1).toBe(1);
-    expect(p2.inbox.slice(-3).map((m) => m.t)).toEqual(['state', 'ack', 'room']);
-    expect(p1.inbox.slice(-2).map((m) => m.t)).toEqual(['state', 'room']);
+    expect(p2.inbox.slice(-4).map((m) => m.t)).toEqual(['state', 'ack', 'room', 'replay']);
+    expect(p1.inbox.slice(-3).map((m) => m.t)).toEqual(['state', 'room', 'replay']);
   });
 
   it('finishGame: empate soma em draws, vitória do p2 soma ao p2, ABANDONED não mexe no placar', async () => {
@@ -358,9 +360,9 @@ describe('desistência', () => {
     expect(rec.outcome).toEqual({ gameNo: 1, result: { kind: 'WIN', winner: 'p1', reason: 'FORFEIT' }, cause: 'CONCEDE' });
     expect(rec.score).toEqual({ p1: 1, p2: 0, draws: 0 });
     expect(rec.game!.steps.at(-1)).toEqual({ player: 'system', action: { type: 'FORFEIT', loser: 'p2' } });
-    expect(p2.inbox.at(-3)).toMatchObject({ t: 'state' });
-    expect(p2.inbox.slice(-3).map((m) => m.t)).toEqual(['state', 'ack', 'room']);
-    expect(p2.inbox.at(-2)).toEqual({ t: 'ack', id: 'c1', ok: true, seq: rec.seq });
+    expect(p2.inbox.at(-4)).toMatchObject({ t: 'state' });
+    expect(p2.inbox.slice(-4).map((m) => m.t)).toEqual(['state', 'ack', 'room', 'replay']);
+    expect(p2.inbox.at(-3)).toEqual({ t: 'ack', id: 'c1', ok: true, seq: rec.seq });
     expect(h.messages(p1, 'state').at(-1)!.view.phase).toMatchObject({ kind: 'GAME_OVER' });
     expect(h.logs).toContainEqual(expect.objectContaining({ evt: 'game.ended', cause: 'CONCEDE' }));
     expect(h.logs.filter((l) => l.evt === 'game.replay')).toHaveLength(1);
@@ -474,7 +476,7 @@ describe('revanche', () => {
     const back = h.open();
     await h.send(back, h.hello(tokens.p1));
     expect(rec.status).toBe('FINISHED');
-    expect(back.inbox.map((m) => m.t)).toEqual(['welcome', 'room', 'state']);
+    expect(back.inbox.map((m) => m.t)).toEqual(['welcome', 'room', 'state', 'replay']);
     expect(h.messages(back, 'state')[0]!.resync).toBe(true);
 
     // Os dois pedem; p2 fica mudo por mais de 45 s e p1 volta: p2 cai com 4008 e nada larga.

@@ -1,7 +1,7 @@
 import { viewEvents, viewFor } from '@coringa/engine';
-import type { StateMessage } from '@coringa/protocol';
+import type { ReplayMessage, ServerMessage, StateMessage } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
-import { Harness, replaySteps } from './harness.ts';
+import { CODE, Harness, reexecute, replaySteps } from './harness.ts';
 import type { MatchTrace, SimulateOptions } from './harness.ts';
 
 /**
@@ -30,6 +30,8 @@ const idleMatch = (seed: string): Promise<MatchTrace> =>
 
 const states = (trace: MatchTrace, seat: (typeof SEATS)[number]): StateMessage[] =>
   trace.outbox.get(seat)!.filter((m): m is StateMessage => m.t === 'state');
+const replays = (messages: ServerMessage[]): ReplayMessage[] =>
+  messages.filter((m): m is ReplayMessage => m.t === 'replay');
 
 const FAMILIES = [
   ['com caos', chaosMatch],
@@ -46,7 +48,8 @@ function checkRedaction(trace: MatchTrace): void {
     const outbox = trace.outbox.get(seat)!;
     expect(outbox.some((m) => m.t === 'state')).toBe(true);
     for (const m of outbox) {
-      expect(JSON.stringify(m)).not.toContain(game.seed);
+      // A semente só viaja na mensagem `replay` (que `checkReplay` confere, junto com a ordem em relação ao `room`).
+      if (m.t !== 'replay') expect(JSON.stringify(m)).not.toContain(game.seed);
       if (m.t !== 'state') continue;
       const at = replayed.get(m.seq);
       expect(at, `seq ${m.seq} existe no registro`).toBeDefined();
@@ -56,9 +59,53 @@ function checkRedaction(trace: MatchTrace): void {
     // O que o jogador viu na largada é o estado inicial, sem eventos.
     expect(states(trace, seat)[0]!.seq).toBe(trace.startSeq);
   }
-  // A semente também não vai a socket nenhum, nem aos que fecharam (tudo o que o núcleo mandou).
+  // A semente também não vai a socket nenhum, nem aos que fecharam (tudo o que o núcleo mandou), fora do `replay`.
   expect(trace.wire.length).toBeGreaterThan(0);
-  for (const m of trace.wire) expect(JSON.stringify(m)).not.toContain(game.seed);
+  for (const m of trace.wire) {
+    if (m.t === 'replay') continue;
+    expect(JSON.stringify(m)).not.toContain(game.seed);
+    // O registro inteiro de passos também só viaja no `replay`.
+    if (game.steps.length > 0) expect(JSON.stringify(m)).not.toContain(JSON.stringify(game.steps));
+  }
+}
+
+/**
+ * Replay online (spec 2 §8.4): a semente e o registro de passos saem só na mensagem `replay`, e um socket só a recebe
+ * depois de ter recebido o `room` em `FINISHED` daquela partida. Quem estava conectado no fim a recebeu, uma vez, e o que
+ * recebeu é a partida gravada.
+ */
+function checkReplay(trace: MatchTrace): void {
+  const game = trace.finalRecord.game!;
+  const bySocket = new Map<string, ServerMessage[]>();
+  for (const { socketId, message } of trace.sent) bySocket.set(socketId, [...(bySocket.get(socketId) ?? []), message]);
+
+  let delivered = 0;
+  for (const [socketId, messages] of bySocket) {
+    messages.forEach((message, index) => {
+      if (message.t !== 'replay') return;
+      delivered += 1;
+      const finished = messages
+        .slice(0, index)
+        .some((earlier) => earlier.t === 'room' && earlier.status === 'FINISHED' && earlier.gameNo === message.gameNo);
+      expect(finished, `${socketId} recebeu o replay da partida ${message.gameNo} antes do room FINISHED dela`).toBe(true);
+    });
+    // Um replay por socket: ele sai no fim da partida e, no hello, só quando a sala já estava terminada.
+    expect(replays(messages).length).toBeLessThanOrEqual(1);
+  }
+  expect(delivered, 'o fim da partida chegou a algum socket com o replay').toBeGreaterThan(0);
+
+  const expected: ReplayMessage = {
+    t: 'replay',
+    gameNo: trace.finalRecord.gameNo,
+    replay: { name: `sala-${CODE}-${trace.finalRecord.gameNo}`, config: game.state.config, seed: game.seed, players: ['p1', 'p2'], steps: game.steps },
+  };
+  for (const seat of trace.connectedAtEnd) {
+    const got = replays(trace.outbox.get(seat)!);
+    expect(got, `${seat} estava conectado no fim e recebeu o replay`).toEqual([expected]);
+    // Reexecutar no motor o que o jogador recebeu dá o estado final guardado.
+    expect(reexecute(got[0]!.replay)).toEqual(game.state);
+  }
+  expect(trace.connectedAtEnd.length).toBeGreaterThan(0);
 }
 
 /** Reexecutar o registro dá o estado final e o replay do log é o próprio registro. */
@@ -79,6 +126,10 @@ describe('partidas com bots pelo núcleo', () => {
 
     it.each(SEEDS)('reexecutar o registro no motor dá o mesmo estado final (%s)', async (seed) => {
       checkDeterminism(await run(seed));
+    });
+
+    it.each(SEEDS)('a semente e os passos só saem no replay, depois do room FINISHED, uma vez por socket (%s)', async (seed) => {
+      checkReplay(await run(seed));
     });
   });
 

@@ -53,3 +53,30 @@ describe('contrato entre o núcleo e a casca: lista de sockets', () => {
     expect(omitted.close).toEqual([{ socketId: p1.id, code: 4003, reason: expect.any(String) }]);
   });
 });
+
+/**
+ * A casca aplica os `Effects` em ordem: envios, fechamentos, `deleteAll` (`worker/room.ts`, conferido de ponta a ponta no
+ * workerd em `test/worker/socket.test.ts`). O núcleo conta com isso na expiração: manda o fim da partida e fecha no mesmo `Effects`.
+ */
+describe('contrato entre o núcleo e a casca: expiração no meio da partida', () => {
+  it('o room e o replay saem nos mesmos Effects do 4000 e do deleteAll, para cada socket que vai fechar', async () => {
+    const { h, p1, p2 } = await Harness.playing();
+    const rec = h.core.record!;
+    rec.agenda = rec.agenda.map((item) => (item.kind === 'hardExpiry' ? { ...item, at: h.now } : item));
+
+    const effects = h.core.onAlarm(h.sockets, h.now);
+    expect(effects.deleteAll).toBe(true);
+    expect(effects.persist).toBe(false);
+    expect(effects.close).toEqual([
+      { socketId: p1.id, code: 4000, reason: expect.any(String) },
+      { socketId: p2.id, code: 4000, reason: expect.any(String) },
+    ]);
+    // Por socket, na ordem em que a casca os aplica: `room` (FINISHED) e `replay`, e só depois o fechamento.
+    for (const sock of [p1, p2]) {
+      const sent = effects.send.filter((entry) => entry.socketId === sock.id).map((entry) => entry.message);
+      expect(sent.map((message) => message.t)).toEqual(['room', 'replay']);
+      expect(sent[0]).toMatchObject({ status: 'FINISHED', outcome: { cause: 'ABANDONED' } });
+      expect(sent[1]).toMatchObject({ gameNo: 1, replay: { seed: rec.game!.seed, steps: rec.game!.steps } });
+    }
+  });
+});

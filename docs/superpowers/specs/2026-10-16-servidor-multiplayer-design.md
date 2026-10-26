@@ -116,7 +116,7 @@ LOBBY ──(2 assentos, os dois conectados e prontos)──▶ PLAYING ──(G
 
 - **Ociosa:** 30 min sem nenhum jogador conectado (vale no lobby, no meio da partida e depois do fim) → a sala é apagada.
 - **Teto:** 24 h depois da criação → a sala é apagada, mesmo no meio de uma partida (registrada no log como abandonada).
-- Apagar = fechar os sockets com o código 4000 ("sala encerrada") e chamar `storage.deleteAll()`. Com a data de compatibilidade ≥ 2026-02-24, `deleteAll` também apaga o alarme.
+- Apagar = fechar os sockets com o código 4000 ("sala encerrada") e chamar `storage.deleteAll()`. Quem segue conectado no meio de uma partida recebe antes o `room` (abandonada) e o `replay` até o último passo (§8.4): a casca aplica os envios antes dos fechamentos e do `deleteAll`. Com a data de compatibilidade ≥ 2026-02-24, `deleteAll` também apaga o alarme.
 - Uma sala criada em que ninguém chega a conectar expira pela regra de 30 min.
 
 ### 2.6 Duas abas com o mesmo token [P]
@@ -176,7 +176,7 @@ Todas as rotas ficam sob `/api`. Corpo JSON de até 1 KiB. As rotas que não sã
 
 | `t` | Campos | Quando | Efeito |
 |---|---|---|---|
-| `hello` | `protocol`, `token`, `lastSeq?` | primeira mensagem | autentica; responde `welcome`, `room` e, se houver partida, `state` (§4.7) |
+| `hello` | `protocol`, `token`, `lastSeq?` | primeira mensagem | autentica; responde `welcome`, `room`, se houver partida, `state` e, com a partida terminada, o `replay` (§4.7) |
 | `ready` | `ready: boolean` | LOBBY | marca ou desmarca o pronto |
 | `leave` | — | LOBBY | libera o assento e fecha o socket |
 | `act` | `id`, `epoch`, `action`, `auto?` | PLAYING | intenção de jogada (§4.6). `auto: true` marca a jogada que a interface fez sozinha (spec 3 §5), que não zera os estouros (§7.3) |
@@ -193,6 +193,7 @@ Todas as rotas ficam sob `/api`. Corpo JSON de até 1 KiB. As rotas que não sã
 | `welcome` | `protocol`, `playerId`, `serverNow` | após um `hello` válido |
 | `room` | `code`, `status`, `seats[]` (`playerId`, `nickname`, `connected`, `ready`, `wantsRematch`, `woAt?`), `score`, `gameNo`, `outcome?`, `expiresAt` | após o `hello` e a cada mudança de lobby, presença, placar ou fim de partida |
 | `state` | `seq`, `epoch`, `view`, `events`, `deadline`, `pausedTurnMs?`, `serverNow`, `catchUp?`, `resync?` | após cada passo aplicado (§5) e na reconexão |
+| `replay` | `gameNo`, `replay` (`name`, `config`, `seed`, `players`, `steps`: a partida inteira, do primeiro ao último passo) | só depois do fim da partida e sempre depois do `room` em `FINISHED` dela: ao fim (do motor, W.O., desistência ou abandono), a quem segue aberto; no `hello` com a sala terminada e sem revanche em curso, só a quem entrou; na expiração no meio da partida (que vira abandono), a quem segue aberto, antes do fechamento 4000 (§8.4) |
 | `ack` | `id`, `ok`, `seq?`, `held?`, `code?`, `message?` | resposta a `act` e `concede` |
 | `error` | `code`, `message` | erro fora de uma jogada (mensagem malformada, protocolo incompatível) |
 
@@ -232,7 +233,7 @@ O servidor trata cada `act` nesta ordem; a primeira falha responde `ack { ok: fa
 - O `hello` leva `lastSeq` (o último `seq` que o cliente aplicou).
 - Se a diferença para o `seq` atual for de até **50 passos** e todos estiverem no anel de passos recentes (§9.1), o servidor manda um `state` com o retrato atual e, em `events`, os eventos redigidos de todos os passos perdidos, em ordem, com `catchUp: true`. A interface pode animá-los.
 - Senão, manda o retrato com `events: []` e `resync: true`; a interface só redesenha.
-- Sem partida (LOBBY), manda só `welcome` e `room`. Em FINISHED, manda também o retrato final.
+- Sem partida (LOBBY), manda só `welcome` e `room`. Em FINISHED, manda também o retrato final e, depois dele, o `replay` da partida terminada (só a quem acabou de entrar: os outros já o têm). Se a revanche larga nesse `hello`, a sala volta a PLAYING e não sai replay.
 - O cliente reconecta sozinho, com espera crescente (0,5 s, 1 s, 2 s, 4 s, teto de 5 s, ±20% de variação), e segue a tabela de códigos de §4.2 para parar ou esperar mais.
 
 ### 4.8 Versão do protocolo
@@ -263,7 +264,7 @@ Um **passo** é uma chamada bem-sucedida de `applyAction`, de um jogador ou do s
 5. Recalcula os prazos (§6) e o alarme.
 6. Se a fase virou `GAME_OVER`: status `FINISHED`, placar, `outcome`, linhas de log (§10.4).
 7. Grava tudo de uma vez (§9.1).
-8. Manda `state` para cada jogador conectado (com a própria visão e os eventos redigidos) e depois o `ack`, se houver.
+8. Manda `state` para cada jogador conectado (com a própria visão e os eventos redigidos) e depois o `ack`, se houver. Se a partida acabou, vêm por último o `room` com o desfecho e, depois dele, o `replay` (§8.4).
 
 **Passos automáticos** (feitos pelo servidor logo depois de um passo, cada um como um passo próprio) [P]:
 
@@ -403,11 +404,12 @@ O `deadline.at` enviado é o que a interface mostra; o servidor só injeta o `TI
 ### 8.4 Nada de informação oculta no fio
 
 - Para o jogador X sai só: `viewFor(estado, X)`, `viewEvents(eventos, X)`, dados públicos da sala e respostas às mensagens do próprio X.
-- A semente é gerada no objeto (`crypto.getRandomValues`, 128 bits), uma nova por partida e por revanche, nunca derivada da anterior. Ela não aparece em nenhuma mensagem enquanto a partida pode continuar; depois do fim (sala `FINISHED`, W.O. ou sala encerrada), a mensagem `replay` a leva (a partir da fatia 3 do polimento; spec 4 §4.2).
+- A semente é gerada no objeto (`crypto.getRandomValues`, 128 bits), uma nova por partida e por revanche, nunca derivada da anterior. Ela não aparece em nenhuma mensagem enquanto a partida pode continuar; depois do fim (sala `FINISHED`, W.O. ou sala encerrada), a mensagem `replay` a leva (spec 4 §4.2). Ela sai sempre depois do `room` em `FINISHED` da mesma partida, e nunca durante uma partida que pode continuar: nem no `hello` de quem volta com a partida em andamento, nem na revanche que já largou.
 - Tempo: piso de 2 s na janela de reação (§6.3); o servidor não passa sozinho; o Equipar automático só acontece quando a quantidade já é pública.
 - **Erros não viram oráculo:** a resposta a uma jogada recusada depende só da mão de X, do cemitério e do campo público. Isso já vale no motor hoje (os erros só consultam a mão de quem joga, o cemitério e o campo do oponente). A mensagem de erro pode repetir o id que o próprio X enviou.
 - Testes obrigatórios (§11.3) [P]:
   - todo `state` para X traz `view` igual a `viewFor(estado, X)` e `events` igual a `viewEvents(eventos do passo, X)` (no `catchUp`, a concatenação dos passos perdidos), e nenhuma mensagem de uma partida que ainda pode continuar tem outro dado do jogo nem a semente;
+  - a semente e o registro inteiro de passos só aparecem em mensagens `replay`, e um socket só recebe o `replay` de uma partida depois de ter recebido o `room` em `FINISHED` dela; quem estava conectado no fim da partida o recebe uma vez, e reexecutá-lo no motor dá o estado final guardado;
   - os invariantes do motor já garantem que `viewFor` e `viewEvents` não expõem mão, pendentes, monte nem semente.
 
   Um teste do tipo "nenhum id escondido no fio" não serve. Uma carta mostrada em público (descartada no Equipar, removida da fileira) pode voltar ao monte e ser comprada pelo oponente **no mesmo passo**, quando o monte acaba, e então seu id aparece de forma legítima num evento.

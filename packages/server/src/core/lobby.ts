@@ -4,7 +4,7 @@ import { TokenBucket } from './limiter.ts';
 import { markOffline, markOnline, missedEvents, syncIdle } from './presence.ts';
 import { ROOM_LIMITS, TIMERS } from './timers.ts';
 import type { CoreDeps, Effects, RoomRecord, SeatId, SeatRecord, SocketInfo } from './types.ts';
-import { deliverSteps, sendRoom, stateFor } from './views.ts';
+import { deliverSteps, sendReplay, sendRoom, stateFor } from './views.ts';
 
 /**
  * Lobby e conexões: funções sobre `effects` e `record`, sem estado próprio. O `RoomCore` decide a ordem das
@@ -96,6 +96,8 @@ export function hello(
     const missed = missedEvents(record, lastSeq);
     effects.send.push({ socketId, message: stateFor(record, owner.id, missed.events, now, missed.flags) });
   }
+  // Sala terminada e sem revanche em curso: o replay da partida vai só a quem acabou de entrar (os outros já o têm).
+  sendReplay(effects, record, live.filter((socket) => socket.socketId === socketId));
 }
 
 /** `leave` libera o assento e fecha o socket com 1000; só no lobby (spec §2.3). */

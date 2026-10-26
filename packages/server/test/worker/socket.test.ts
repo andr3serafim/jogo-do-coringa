@@ -119,6 +119,35 @@ describe('Durable Object da sala', () => {
     expect(await runDurableObjectAlarm(stub)).toBe(false);
   });
 
+  it('expiração no meio da partida: a casca manda o room e o replay antes de fechar com 4000 e apagar tudo', async () => {
+    const { room, p1, p2 } = await startEquipGame();
+    await p1.act(p1.equip());
+    const stub = stubFor(room.code);
+    await runInDurableObject(stub, async (_instance, state) => {
+      const record = state.storage.kv.get<Record<string, unknown>>('room') as unknown as RoomRecord;
+      record.agenda = record.agenda.map((item) => (item.kind === 'hardExpiry' ? { ...item, at: Date.now() - 1_000 } : item));
+      state.storage.kv.put('room', record);
+    });
+    await evictAllDurableObjects(); // o núcleo em memória ainda teria a agenda velha
+    expect(await runDurableObjectAlarm(stub)).toBe(true);
+
+    // Os envios chegam antes do fechamento e antes de o armazenamento ser apagado: a ordem da casca é send, close, deleteAll.
+    for (const socket of [p1, p2]) {
+      expect(await socket.waitClosed()).toMatchObject({ code: 4000 });
+      expect(socket.messages.slice(-2).map((message) => message.t)).toEqual(['room', 'replay']);
+      expect(socket.room).toMatchObject({ status: 'FINISHED', gameNo: 1, outcome: { result: null, cause: 'ABANDONED' } });
+      const [replay] = socket.of('replay');
+      expect(replay).toMatchObject({ t: 'replay', gameNo: 1, replay: { name: `sala-${room.code}-1`, players: ['p1', 'p2'] } });
+      expect(replay!.replay.seed).toMatch(/^[0-9a-f]{32}$/);
+      expect(replay!.replay.steps).toHaveLength(1); // o Equipar do p1, até onde a partida foi
+    }
+    const after = await runInDurableObject(stub, async (_instance, state) => ({
+      alarm: await state.storage.getAlarm(),
+      keys: [...state.storage.kv.list()].map(([key]) => key),
+    }));
+    expect(after).toEqual({ alarm: null, keys: [] });
+  });
+
   it('reinício: assento marcado presente sem socket passa a estar fora (reconcile ao acordar)', async () => {
     const room = await makeRoom();
     const stub = stubFor(room.code);

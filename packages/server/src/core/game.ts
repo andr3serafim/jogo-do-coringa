@@ -6,8 +6,8 @@ import { phaseKey } from './epoch.ts';
 import { schedulePhase } from './timing.ts';
 import { ROOM_LIMITS, TIMERS } from './timers.ts';
 import { hex } from './tokens.ts';
-import type { CoreDeps, GameRecord, LogLine, Replay, RoomRecord, SeatId } from './types.ts';
-import { ackFail, stateFor } from './views.ts';
+import type { CoreDeps, GameRecord, LogLine, RoomRecord, SeatId } from './types.ts';
+import { ackFail, replayOf, stateFor } from './views.ts';
 
 export { schedulePhase } from './timing.ts';
 
@@ -140,13 +140,6 @@ export function finishGame(record: RoomRecord, cause: OutcomeCause, now: number)
   game.heldPass = null;
   record.agenda = withoutKinds(record.agenda, ['phase', 'reactionMin', 'reconnect', 'presenceSweep']);
 
-  const replay: Replay = {
-    name: `sala-${record.code}-${record.gameNo}`,
-    config: game.state.config,
-    seed: game.seed,
-    players: ['p1', 'p2'],
-    steps: game.steps,
-  };
   return [
     {
       evt: 'game.ended',
@@ -158,7 +151,7 @@ export function finishGame(record: RoomRecord, cause: OutcomeCause, now: number)
       durationMs: now - game.startedAt,
       steps: game.steps.length,
     },
-    { evt: 'game.replay', code: record.code, gameNo: record.gameNo, replay },
+    { evt: 'game.replay', code: record.code, gameNo: record.gameNo, replay: replayOf(record) },
   ];
 }
 

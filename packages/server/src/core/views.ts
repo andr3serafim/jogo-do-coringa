@@ -1,9 +1,18 @@
 import { actingPlayers, viewEvents, viewFor } from '@coringa/engine';
 import type { GameEvent } from '@coringa/engine';
-import type { AckCode, AckMessage, Deadline, DeadlineKind, RoomMessage, SeatInfo, StateMessage } from '@coringa/protocol';
+import type {
+  AckCode,
+  AckMessage,
+  Deadline,
+  DeadlineKind,
+  ReplayMessage,
+  RoomMessage,
+  SeatInfo,
+  StateMessage,
+} from '@coringa/protocol';
 import type { StateStep } from './game.ts';
 import { TIMERS } from './timers.ts';
-import type { Effects, RoomRecord, SeatId, SocketInfo } from './types.ts';
+import type { Effects, Replay, RoomRecord, SeatId, SocketInfo } from './types.ts';
 
 /**
  * Mensagem `room` com os dados públicos da sala. `connected` = há socket autenticado naquele assento;
@@ -90,6 +99,36 @@ export function stateFor(
 /** Manda a mesma mensagem `room` a todo socket autenticado da lista. */
 export function sendRoom(effects: Effects, record: RoomRecord, live: SocketInfo[], now: number): void {
   const message = roomMessage(record, live, now);
+  for (const socket of live) {
+    if (socket.seat !== null) effects.send.push({ socketId: socket.socketId, message });
+  }
+}
+
+/**
+ * A partida da sala como `Replay`: o mesmo formato da linha de log `game.replay` e da mensagem `replay`, com o nome
+ * `sala-<código>-<gameNo>`. Os passos são copiados: o registro da partida seguinte não toca neles.
+ */
+export function replayOf(record: RoomRecord): Replay {
+  const game = record.game;
+  if (!game) throw new Error('replayOf chamado sem partida');
+  return {
+    name: `sala-${record.code}-${record.gameNo}`,
+    config: game.state.config,
+    seed: game.seed,
+    players: ['p1', 'p2'],
+    steps: [...game.steps],
+  };
+}
+
+/**
+ * Manda a mensagem `replay` (a semente e o registro de passos) a todo socket com assento da lista, só com a sala
+ * `FINISHED` e o `outcome` da partida atual: depois do fim, que pode ser do motor, W.O., desistência ou abandono (sem
+ * `GAME_OVER` no motor, o replay vai até o último passo). Com qualquer outro status a semente não sai (spec 2 §8.4).
+ * Quem chama manda o `room` antes: a `Session` só junta o replay à partida do `room`.
+ */
+export function sendReplay(effects: Effects, record: RoomRecord, live: SocketInfo[]): void {
+  if (record.status !== 'FINISHED' || record.outcome?.gameNo !== record.gameNo || record.game?.gameNo !== record.gameNo) return;
+  const message: ReplayMessage = { t: 'replay', gameNo: record.gameNo, replay: replayOf(record) };
   for (const socket of live) {
     if (socket.seat !== null) effects.send.push({ socketId: socket.socketId, message });
   }

@@ -1,5 +1,5 @@
 import { actingPlayers, applyAction, createGame, legalActions, nextInt, seedRng, viewFor } from '@coringa/engine';
-import type { GameEvent, GameState } from '@coringa/engine';
+import type { GameEvent, GameState, Replay } from '@coringa/engine';
 import { PROTOCOL_VERSION } from '@coringa/protocol';
 import type {
   AckCode,
@@ -362,6 +362,10 @@ export interface MatchTrace {
   oracle: OracleProbe[];
   /** Tudo o que o núcleo mandou a qualquer socket, inclusive os que já tinham fechado (`h.sent`). */
   wire: ServerMessage[];
+  /** O mesmo que `wire`, com o socket de cada mensagem e na ordem em que saíram (o socket novo de quem voltou tem outro id). */
+  sent: Effects['send'];
+  /** Os assentos com socket aberto no fim da partida (quem estava caído nessa hora não recebeu o fim). */
+  connectedAtEnd: SeatId[];
 }
 
 /**
@@ -382,6 +386,22 @@ export function replaySteps(game: GameRecord, startSeq: number): Map<number, { s
     steps.set(startSeq + i + 1, { state, events: result.events });
   });
   return steps;
+}
+
+/**
+ * Reexecuta no motor, do zero, a partida de um `Replay` (a mensagem `replay` ou a linha `game.replay`): o estado a que
+ * `createGame` e os passos levam. Um passo recusado pelo motor lança.
+ */
+export function reexecute(replay: Replay): GameState {
+  const created = createGame(replay.config, replay.seed, replay.players);
+  if (!created.ok) throw new Error(`createGame recusou o replay: ${created.error.message}`);
+  let state = created.state;
+  replay.steps.forEach((step, i) => {
+    const result = applyAction(state, step.player, step.action);
+    if (!result.ok) throw new Error(`o motor recusou o passo ${i + 1} do replay: ${step.action.type} (${result.error.code})`);
+    state = result.state;
+  });
+  return state;
 }
 
 interface SimClient {
@@ -636,5 +656,7 @@ async function simulate(options: SimulateOptions): Promise<MatchTrace> {
     chaos: counts,
     oracle,
     wire: h.sent.map((entry) => entry.message),
+    sent: h.sent.map((entry) => ({ ...entry })),
+    connectedAtEnd: clients.filter((c) => c.reconnectAt === null).map((c) => c.seat),
   };
 }

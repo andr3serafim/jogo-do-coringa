@@ -18,7 +18,7 @@ import { peekMessageId, SEAT_IDS } from './lobby.ts';
 import type { Connection } from './lobby.ts';
 import { ROOM_LIMITS, STATE_SCHEMA, TIMERS } from './timers.ts';
 import { base64url, sha256Hex } from './tokens.ts';
-import { ackFail, deliverSteps, sendRoom } from './views.ts';
+import { ackFail, deliverSteps, sendReplay, sendRoom } from './views.ts';
 import type { CoreDeps, CoreResult, Effects, RoomRecord, SeatId, SeatRecord, SocketInfo } from './types.ts';
 
 /** Função à parte para o TypeScript não fixar o `status` depois de um `continue` no laço do alarme. */
@@ -368,7 +368,7 @@ export class RoomCore {
 
   /**
    * Resposta a `act` e `concede`: os `state` de cada passo para os dois, depois o `ack` a quem enviou e, se a
-   * partida acabou, o `room` com o desfecho. Uma recusa ou um `id` repetido não traz passo e não grava nada;
+   * partida acabou, o `room` com o desfecho e o `replay`. Uma recusa ou um `id` repetido não traz passo e não grava nada;
    * um PASS guardado (`held`) não traz passo, mas grava o que ficou guardado.
    */
   #play(
@@ -382,7 +382,13 @@ export class RoomCore {
     if (outcome.steps.length > 0 || outcome.held) effects.persist = true;
     deliverSteps(effects, outcome.steps, sockets);
     effects.send.push({ socketId, message: outcome.ack });
-    if (outcome.steps.length > 0 && record.status === 'FINISHED') sendRoom(effects, record, sockets, now);
+    if (outcome.steps.length > 0 && record.status === 'FINISHED') this.#announceEnd(effects, record, sockets, now);
+  }
+
+  /** O fim da partida a quem está aberto: o `room` com o desfecho e, só depois dele, o `replay` (spec 2 §8.4). */
+  #announceEnd(effects: Effects, record: RoomRecord, live: SocketInfo[], now: number): void {
+    sendRoom(effects, record, live, now);
+    sendReplay(effects, record, live);
   }
 
   /**
@@ -439,30 +445,41 @@ export class RoomCore {
     }
   }
 
-  /** Entrega os passos do alarme a quem segue aberto (os fechados nesta rodada não recebem) e avisa a sala se a partida acabou. */
+  /** Entrega os passos do alarme a quem segue aberto (os fechados nesta rodada não recebem) e avisa a sala se a partida acabou (`room` e `replay`). */
   #deliver(effects: Effects, record: RoomRecord, steps: StateStep[], sockets: SocketInfo[], now: number): void {
     const closing = new Set(effects.close.map((entry) => entry.socketId));
     const live = sockets.filter((socket) => !closing.has(socket.socketId));
     deliverSteps(effects, steps, live);
-    if (steps.length > 0 && isFinished(record)) sendRoom(effects, record, live, now);
+    if (steps.length > 0 && isFinished(record)) this.#announceEnd(effects, record, live, now);
   }
 
-  /** Apaga a sala por expiração (spec §2.5). */
+  /**
+   * Apaga a sala por expiração (spec §2.5). No meio da partida ela vira `ABANDONED` (`presence.expire`) e os sockets
+   * que seguem abertos recebem o `room` com o desfecho e o `replay` até o último passo: a casca aplica `send` antes de
+   * `close` e de `deleteAll`, então chegam antes do 4000. Quem a varredura já fechou nesta rodada não recebe nada.
+   */
   #expire(effects: Effects, record: RoomRecord, reason: 'IDLE' | 'HARD', sockets: SocketInfo[], now: number): void {
+    const playing = record.status === 'PLAYING';
+    const closing = new Set(effects.close.map((entry) => entry.socketId));
     const expired = presence.expire(record, reason, sockets, now);
     effects.close.push(...expired.close);
     effects.logs.push(...expired.logs);
     this.#drop(effects);
+    if (playing) {
+      this.#announceEnd(effects, record, sockets.filter((socket) => !closing.has(socket.socketId)), now);
+    }
   }
 
-  /** Esquece a sala: `deleteAll` na casca, nada a gravar, sem alarme e sem estado de conexão em memória. */
+  /**
+   * Esquece a sala: `deleteAll` na casca, nada a gravar, sem alarme e sem estado de conexão em memória. Os envios que
+   * esta rodada já tinha ficam: se uma partida acabou no mesmo alarme da expiração, o `room` e o `replay` dela saem.
+   */
   #drop(effects: Effects): void {
     this.#record = null;
     this.#connections.clear();
     this.#attachedSeats.clear();
     effects.deleteAll = true;
     effects.persist = false;
-    effects.send = [];
   }
 
   /**
