@@ -72,7 +72,9 @@ const HINTS: ReadonlyArray<Hint & { holds: (situation: Situation) => boolean }> 
     holds: ({ view, events, legal }) =>
       canDo(legal, 'REFLECT') || events.some((event) => event.type === 'ReflectPlayed' && event.player !== view.me),
   },
-  { id: 'pressure', zone: 'center', holds: ({ view }) => view.pressure >= 1 || view.noDamageStreak >= 1 },
+  // A situação é uma rodada de Ataque sem dano (`noDamageStreak`), que é também de onde a Pressão da mesa vem: nada novo do tutorial
+  // depende da Pressão (ela some no sub-projeto 5), e a dica fala das duas coisas no mesmo texto.
+  { id: 'pressure', zone: 'center', holds: ({ view }) => view.noDamageStreak >= 1 },
   { id: 'end', zone: 'end', holds: ({ view }) => view.phase.kind === 'GAME_OVER' },
 ];
 
@@ -108,10 +110,15 @@ export interface HintFlow {
   current: HintId | null;
   /** As que a pessoa já viu: com "Entendi", ou que saíram do painel depois de a situação passar (cada uma aparece uma vez). */
   seen: ReadonlySet<HintId>;
+  /**
+   * A época (`state.epoch`) do `state` em que `current` tomou o painel; `null` sem dica. Não anda enquanto a mesma dica segue lá:
+   * a tela só a trata como "recém-chegada" (e segura a rolagem da vez de atacar) na época em que ela chegou.
+   */
+  epoch: number | null;
 }
 
 /** O começo do tutorial: nada no painel, nada visto. */
-export const NO_HINT: HintFlow = { current: null, seen: new Set() };
+export const NO_HINT: HintFlow = { current: null, seen: new Set(), epoch: null };
 
 const withSeen = (seen: ReadonlySet<HintId>, id: HintId): ReadonlySet<HintId> => (seen.has(id) ? seen : new Set([...seen, id]));
 
@@ -119,19 +126,20 @@ const withSeen = (seen: ReadonlySet<HintId>, id: HintId): ReadonlySet<HintId> =>
  * Chegou um `state`. Duas coisas: a dica que está no painel e cuja situação passou conta como vista (ela fica na tela até o
  * "Entendi", mas não volta quando a situação se repetir); e, se vale uma dica nova, ela toma o painel. Se a dica do fim já foi vista
  * (com "Entendi", ou saindo do painel porque outra partida começou), o tutorial acabou e o painel esvazia: nada depois do fim. Uma
- * dica só de evento do oponente (a quadra dele) entra neste `state` e fica até o "Entendi": o modelo só a vê aqui.
+ * dica só de evento do oponente (a quadra dele) entra neste `state` e fica até o "Entendi": o modelo só a vê aqui. `epoch` é a do
+ * `state`: a dica que toma o painel guarda a época em que chegou.
  */
-export function advanceHint(flow: HintFlow, view: PlayerView, events: readonly GameEvent[]): HintFlow {
+export function advanceHint(flow: HintFlow, view: PlayerView, events: readonly GameEvent[], epoch: number): HintFlow {
   let seen = flow.seen;
   if (flow.current !== null && hintHolding(view, events, flow.current) === null) seen = withSeen(seen, flow.current);
-  if (seen.has('end')) return { current: null, seen };
+  if (seen.has('end')) return { current: null, seen, epoch: null };
   const next = tutorialHint(view, events, seen);
-  if (next === null || next.id === flow.current) return seen === flow.seen ? flow : { current: flow.current, seen };
-  return { current: next.id, seen };
+  if (next === null || next.id === flow.current) return seen === flow.seen ? flow : { current: flow.current, seen, epoch: flow.epoch };
+  return { current: next.id, seen, epoch };
 }
 
 /** "Entendi": a dica do painel fica vista, e o painel mostra a próxima que vale neste mesmo `state`, se houver. */
-export function acknowledgeHint(flow: HintFlow, view: PlayerView, events: readonly GameEvent[]): HintFlow {
+export function acknowledgeHint(flow: HintFlow, view: PlayerView, events: readonly GameEvent[], epoch: number): HintFlow {
   if (flow.current === null) return flow;
-  return advanceHint({ current: null, seen: withSeen(flow.seen, flow.current) }, view, events);
+  return advanceHint({ current: null, seen: withSeen(flow.seen, flow.current), epoch: null }, view, events, epoch);
 }

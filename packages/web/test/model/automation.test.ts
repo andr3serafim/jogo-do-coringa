@@ -302,6 +302,35 @@ describe('Session: ordem automática (spec §3.6)', () => {
     expect(b.session.snapshot().orderAutoAt).toBe(b.session.snapshot().receivedAt + ORDER_AUTO_MS);
   });
 
+  it('sem a ordem automática na sessão (o tutorial): nada agendado, orderAutoAt nulo e nada sai, e o jogador escolhe à mão', async () => {
+    const connection = new FakeConnection();
+    const clock = fakeDeps();
+    const session = new Session(connection, clock.deps, DEFAULT_PREFS, { autoOrder: false });
+    connection.emitState(stateMessage(orderView(), { epoch: 5, events: orderEvents }));
+    expect(session.snapshot().orderAutoAt).toBeNull();
+    expect(clock.timers.size).toBe(0);
+    clock.advance(60_000);
+    expect(connection.sent).toHaveLength(0);
+    expect(session.snapshot().orderAutoAt).toBeNull();
+    // Um state da mesma época e o interact() também não agendam nada.
+    connection.emitState(stateMessage(orderView(), { epoch: 5, seq: 2 }));
+    session.interact();
+    expect(clock.timers.size).toBe(0);
+    expect(session.snapshot().orderAutoAt).toBeNull();
+    // A escolha à mão segue valendo, sem a marca `auto`.
+    await session.play({ type: 'CHOOSE_ORDER', first: false });
+    expect(connection.sent).toEqual([
+      { type: 'act', id: 'fake-1', action: { type: 'CHOOSE_ORDER', first: false }, options: undefined },
+    ]);
+  });
+
+  it('autoOrder: false não mexe no passe automático: as duas opções são independentes', () => {
+    const connection = new FakeConnection();
+    new Session(connection, fakeDeps().deps, DEFAULT_PREFS, { autoOrder: false });
+    connection.emitState(stateMessage(passOnlyView(), { epoch: 3 }));
+    expect(connection.sent).toEqual([{ type: 'act', id: 'fake-1', action: PASS, options: { auto: true } }]);
+  });
+
   it('dispose cancela o agendamento', () => {
     const { connection, clock, session } = setup();
     connection.emitState(stateMessage(orderView(), { epoch: 5, events: orderEvents }));

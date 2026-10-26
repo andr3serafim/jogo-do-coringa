@@ -95,6 +95,11 @@ export interface SessionOptions {
    * As preferências ficam como estão: o que não vale aqui é a automação, e não a chave guardada.
    */
   autoPass?: boolean;
+  /**
+   * `false`: esta sessão nunca manda a ordem automática ("Atacar primeiro" aos 3 s, spec §3.6), e o `orderAutoAt` fica `null`.
+   * O jogador escolhe à mão, sem pressa (o tutorial, que mostra a dica da ordem enquanto ele a lê). Vale para a partida toda.
+   */
+  autoOrder?: boolean;
 }
 
 /** Quanto tempo um aviso fica na tela. */
@@ -151,6 +156,7 @@ export class Session {
   readonly #listeners = new Set<() => void>();
   readonly #unsubscribe: () => void;
   readonly #autoPassAllowed: boolean;
+  readonly #autoOrderAllowed: boolean;
   #snapshot: SessionSnapshot;
   #prefs: Prefs;
   #noticeTimer: unknown = null;
@@ -195,6 +201,7 @@ export class Session {
     this.#deps = deps;
     this.#prefs = prefs;
     this.#autoPassAllowed = options.autoPass !== false;
+    this.#autoOrderAllowed = options.autoOrder !== false;
     const state = connection.state;
     this.#epoch = state?.epoch ?? null;
     if (connection.room) this.#history = forGame(this.#history, connection.room.gameNo);
@@ -461,10 +468,10 @@ export class Session {
     }).catch(noop);
   }
 
-  /** Ordem automática: `receivedAt` + batidas da revelação + 3 s, só para quem escolhe (spec §3.6). */
+  /** Ordem automática: `receivedAt` + batidas da revelação + 3 s, só para quem escolhe (spec §3.6). Sem ela (`autoOrder: false`), nada se agenda. */
   #reconcileOrder(): void {
     const { state, legal, receivedAt } = this.#snapshot;
-    if (!state || !legal.some((a) => a.type === 'CHOOSE_ORDER')) {
+    if (!this.#autoOrderAllowed || !state || !legal.some((a) => a.type === 'CHOOSE_ORDER')) {
       this.#cancelOrder();
       return;
     }

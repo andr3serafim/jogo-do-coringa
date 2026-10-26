@@ -29,8 +29,10 @@ export interface TableHint {
   zone: HintZone | null;
   panel: ReactNode;
   /**
-   * O painel mostra agora uma dica cuja situação ainda vale. No celular e no tablet o painel mora no alto dos campos, que rolam: a
-   * rolagem da vez de atacar (`PlayTable`) espera ele fechar, para o texto não sair da vista justo quando chega.
+   * O painel mostra uma dica que acabou de chegar: a situação dela ainda vale e ela tomou o painel na época (`state.epoch`) em curso.
+   * Uma que ficou lá de épocas anteriores (ninguém a marcou, e a situação voltou a valer) não conta. No celular e no tablet o painel
+   * mora no alto dos campos, que rolam: a rolagem da vez de atacar (`PlayTable`) espera a dica recém-chegada fechar, para o texto
+   * não sair da vista justo quando chega.
    */
   open?: boolean;
 }

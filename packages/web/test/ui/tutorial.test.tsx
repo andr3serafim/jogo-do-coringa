@@ -6,6 +6,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { TUTORIAL_SEED } from '@coringa/sim/tutorial';
+import type { StateMessage } from '@coringa/protocol';
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { StrictMode } from 'react';
@@ -17,7 +18,8 @@ import { loadTutorialState } from '../../src/model/storage.ts';
 import { PC_QUERY } from '../../src/ui/table/History.tsx';
 import Tutorial from '../../src/ui/screens/Tutorial.tsx';
 import type { LocalRoomModule } from '../../src/ui/screens/local-game.tsx';
-import { ATTACK_BUTTON, fakeApi, memoryStore, seriousViolations, startsWith } from './support.tsx';
+import { FakeConnection, scenarioAt, stateMessage } from '../fixtures.ts';
+import { ATTACK_BUTTON, fakeApi, memoryStore, roomMessage, seriousViolations, startsWith } from './support.tsx';
 
 const EQUIP_HINT = /^Suas numéricas vão para o campo na ordem em que saíram/;
 const ORDER_HINT = /^Quem tem a iniciativa escolhe atacar primeiro ou em segundo/;
@@ -446,6 +448,117 @@ describe('/tutorial: o painel da dica', () => {
     await clock.user.click(hint().getByRole('button', { name: 'Entendi' }));
     expect(hint().queryByText(ORDER_HINT)).not.toBeInTheDocument();
     expect(stage).toHaveAttribute('data-ocupado', 'true');
+  });
+});
+
+describe('/tutorial: a ordem é sempre sua escolha', () => {
+  const ordering = (room: localRoomModule.LocalRoom) => room.state!.view.phase.kind === 'ORDER_CHOICE';
+
+  it('"Atacar primeiro" não sai sozinho: bem depois das batidas e dos 3 s nada é enviado, a dica 3 segue no painel e não há barra', async () => {
+    const clock = await openTutorial();
+    const room = clock.rooms[0]!;
+    await toOrder(clock);
+    const seq = room.state!.seq;
+    const order = screen.getByRole('region', { name: 'Escolha da ordem' });
+    expect(order.querySelector('[data-auto-barra]')).toBeNull();
+    expect(within(order).queryByText(/sai sozinho/)).not.toBeInTheDocument();
+    expect(within(order).getByText('Escolha quando quiser.')).toBeInTheDocument();
+    expect(within(order).queryByText(/prazo/)).not.toBeInTheDocument();
+
+    clock.advance(60_000);
+    expect(ordering(room)).toBe(true);
+    expect(room.state!.seq).toBe(seq);
+    expect(screen.getByRole('region', { name: 'Escolha da ordem' })).toBeInTheDocument();
+    expect(hint().getByText(ORDER_HINT)).toBeInTheDocument();
+    expect(outlined()).toEqual(['order']);
+    // A escolha à mão segue valendo.
+    await toAttack({ advance: clock.advance, user: clock.user });
+    expect(room.state!.view.phase.kind).toBe('ATTACK_MAIN');
+  });
+
+  it('depois de "Pular o tutorial" a ordem continua sendo escolha do jogador (o tutorial inteiro, e não só as dicas)', async () => {
+    const clock = await openTutorial();
+    const room = clock.rooms[0]!;
+    await clock.user.click(hint().getByRole('button', { name: 'Pular o tutorial' }));
+    await toOrder(clock);
+    clock.advance(60_000);
+    expect(ordering(room)).toBe(true);
+    expect(screen.getByRole('region', { name: 'Escolha da ordem' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Dica' })).not.toBeInTheDocument();
+  });
+});
+
+describe('/tutorial: a rolagem da vez de atacar (celular e tablet) e a dica do painel', () => {
+  type ScrollIntoView = (this: Element, arg?: boolean | ScrollIntoViewOptions) => void;
+  /** A geometria de um celular de 360 × 640 com os campos no topo: a janela dos campos vai até 317, e a sua fileira está em 422..478. */
+  const RECTS: Record<string, [number, number]> = { campos: [0, 317], 'p1:ATK': [422, 478], 'p2:DEF': [161, 217] };
+  const originalRect = Element.prototype.getBoundingClientRect;
+  let scrollSpy: ReturnType<typeof vi.fn<ScrollIntoView>>;
+  /** As vezes em que a fileira de Ataque foi trazida ao pé da janela (o painel da dica também chama `scrollIntoView`: fica de fora). */
+  const rowScrolls = () => scrollSpy.mock.contexts.filter((el) => el.hasAttribute('data-fileira')).map((el) => el.getAttribute('data-fileira'));
+
+  beforeEach(() => {
+    scrollSpy = vi.fn<ScrollIntoView>();
+    Element.prototype.scrollIntoView = scrollSpy;
+    Element.prototype.getBoundingClientRect = function (this: Element) {
+      const key = this.hasAttribute('data-campos') ? 'campos' : (this.getAttribute('data-fileira') ?? '');
+      const [top, bottom] = RECTS[key] ?? [0, 0];
+      return { top, bottom, left: 0, right: 360, width: 360, height: bottom - top, x: 0, y: top, toJSON: () => ({}) } as DOMRect;
+    };
+  });
+  afterEach(() => {
+    delete (Element.prototype as { scrollIntoView?: unknown }).scrollIntoView;
+    Element.prototype.getBoundingClientRect = originalRect;
+  });
+
+  /** Uma sala roteirizada no lugar da `LocalRoom`: o teste entrega os `state`s (e a época de cada um), sem bot nem motor. */
+  function scripted(first: StateMessage) {
+    const rooms: FakeConnection[] = [];
+    class Scripted extends FakeConnection {
+      constructor() {
+        super({ playerId: 'p1' });
+        rooms.push(this);
+      }
+      override connect(): void {
+        super.connect();
+        const seat = (playerId: 'p1' | 'p2', nickname: string) => ({ playerId, nickname, connected: true, ready: true, wantsRematch: false });
+        this.emitRoom(roomMessage({ status: 'PLAYING', seats: [seat('p1', 'Você'), seat('p2', 'Bot')] }));
+        this.emitState(first);
+      }
+    }
+    const load = (): Promise<LocalRoomModule> => Promise.resolve({ ...localRoomModule, LocalRoom: Scripted as unknown as typeof localRoomModule.LocalRoom });
+    return { rooms, load };
+  }
+
+  /** Sua vez de atacar com o Selvagem na mão (a dica 4 e, com "Entendi", a do Selvagem), ou a vez do oponente. */
+  const turn = (mine: boolean) =>
+    scenarioAt({
+      phase: mine ? 'MAIN' : 'WAITING',
+      self: { hand: ['WILD'], attackRow: [5], defenseRow: [3] },
+      opponent: { attackRow: [6], defenseRow: [4] },
+    }).view;
+
+  it('a dica que chegou nesta época segura a rolagem; uma que ficou no painel de épocas anteriores, não', async () => {
+    const { rooms, load } = scripted(stateMessage(turn(true), { seq: 1, epoch: 2 }));
+    render(<Tutorial store={memoryStore()} load={load} />);
+    await screen.findByRole('main', { name: 'Mesa' });
+    // A dica 4 chegou agora, no começo da vez: a rolagem espera ela fechar.
+    expect(await hint().findByText(ATTACK_HINT)).toBeInTheDocument();
+    expect(rowScrolls()).toEqual([]);
+    // "Entendi": a do Selvagem toma o painel neste mesmo `state` (mesma época) e segura do mesmo jeito.
+    await userEvent.setup().click(hint().getByRole('button', { name: 'Entendi' }));
+    expect(hint().getByText(/^O Coringa Selvagem vale como J, Q ou A/)).toBeInTheDocument();
+    expect(rowScrolls()).toEqual([]);
+
+    // Vez do oponente, e a do jogador de novo: a dica do Selvagem ainda está lá (ninguém a marcou) e a situação dela volta a valer,
+    // mas ela chegou numa época anterior: não segura mais, e a fileira desce.
+    act(() => rooms[0]!.emitState(stateMessage(turn(false), { seq: 2, epoch: 3 })));
+    expect(hint().getByText(/^O Coringa Selvagem vale como J, Q ou A/)).toBeInTheDocument();
+    expect(rowScrolls()).toEqual([]);
+    act(() => rooms[0]!.emitState(stateMessage(turn(true), { seq: 3, epoch: 4 })));
+    expect(hint().getByText(/^O Coringa Selvagem vale como J, Q ou A/)).toBeInTheDocument();
+    expect(rowScrolls()).toEqual(['p1:ATK']);
+    expect(scrollSpy).toHaveBeenCalledWith({ block: 'end', behavior: 'auto' });
   });
 });
 

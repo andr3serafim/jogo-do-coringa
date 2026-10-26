@@ -39,10 +39,15 @@ export interface LocalGame {
 /**
  * Cria a sala local (na semente e no nível dados) e a sessão sobre ela, e a abre. O passe automático não se aplica ao treino (spec
  * §2.6): a sessão não o manda, e as preferências guardadas (que valem para a sala online) ficam como estão, sem ser reescritas.
+ * A ordem automática ("Atacar primeiro" aos 3 s) segue valendo no treino; `autoOrder: false` a desliga (só o tutorial, para quem
+ * lê a dica da ordem não perder a escolha), na partida toda.
  * A sessão ouve a sala antes de ela abrir: o `open`, o `room` e o primeiro `state` saem dentro do `connect()`. Se algo lançar no meio
  * (a sala conectada já agendou o bot), o que chegou a nascer é solto antes de a exceção seguir: nenhum timer vaza.
  */
-export function openLocalRoom(module: LocalRoomModule, options: { seed: string; level: TrainingLevel; store: KeyValueStore }): LocalGame {
+export function openLocalRoom(
+  module: LocalRoomModule,
+  options: { seed: string; level: TrainingLevel; store: KeyValueStore; autoOrder?: boolean },
+): LocalGame {
   const timers = {
     now: () => Date.now(),
     setTimer: (fn: () => void, ms: number): unknown => setTimeout(fn, ms),
@@ -56,7 +61,7 @@ export function openLocalRoom(module: LocalRoomModule, options: { seed: string; 
     room.close();
   };
   try {
-    session = new Session(room, timers, loadPrefs(store), { autoPass: false });
+    session = new Session(room, timers, loadPrefs(store), { autoPass: false, autoOrder: options.autoOrder ?? true });
     room.connect();
   } catch (error) {
     dispose();

@@ -1,7 +1,8 @@
 // A escolha da ordem (spec §3.6), no lugar da barra de ação. Quem tem a iniciativa vê "atacar primeiro ou em segundo?", com
 // "Atacar primeiro" pré-selecionado e uma barra de 3 s que esvazia até `orderAutoAt` (o instante em que a sessão confirma
 // sozinha, com a marca `auto`). Qualquer interação com o painel (toque, foco, mouse em cima) chama `onInteract`, e a sessão
-// cancela a confirmação automática; aí vale o prazo do servidor. O outro jogador vê "Duda está escolhendo a ordem…".
+// cancela a confirmação automática; aí vale o prazo do servidor (no treino e no tutorial não há prazo: a frase só diz que a escolha é
+// quando quiser, e o tutorial nem tem confirmação automática). O outro jogador vê "Duda está escolhendo a ordem…".
 //
 // O mouse "em cima" é o `pointermove`, não o `pointerenter`: quando o painel nasce sob um cursor parado (o clique do
 // Confirmar do Equipar estava no mesmo lugar), o Chrome dispara `pointerenter` sem ninguém ter mexido no mouse, e o
@@ -10,7 +11,7 @@ import type { PlayerView } from '@coringa/engine';
 import { actionText } from '@coringa/sim/text';
 import { useEffect, useState, type RefObject } from 'react';
 import { ORDER_AUTO_MS } from '../../model/automation.ts';
-import { ORDER_AUTO_TEXT, ORDER_MANUAL_TEXT, ORDER_QUESTION, orderWaitingText } from '../../model/copy.ts';
+import { ORDER_AUTO_TEXT, ORDER_MANUAL_NO_CLOCK_TEXT, ORDER_MANUAL_TEXT, ORDER_QUESTION, orderWaitingText } from '../../model/copy.ts';
 import type { Notice } from '../../model/session.ts';
 import { NoticeLine, PRIMARY, PRIMARY_TITLE, SECONDARY, TwoLine } from './controls.tsx';
 import type { TableNames } from './labels.ts';
@@ -24,6 +25,8 @@ export interface OrderPanelProps {
   autoAt: number | null;
   /** O relógio local da sessão, o mesmo de `autoAt`. */
   now: () => number;
+  /** O estado tem prazo do servidor. Sem ele (treino e tutorial), a frase da escolha manual não fala em prazo. */
+  hasDeadline: boolean;
   /** Controles desligados: jogada em voo, reconexão ou prazo esgotado. */
   disabled: boolean;
   /** O aviso de uma jogada recusada (devagar, regra do motor). */
@@ -34,7 +37,7 @@ export interface OrderPanelProps {
   panelRef: RefObject<HTMLElement | null>;
 }
 
-export function OrderPanel({ view, names, choosing, autoAt, now, disabled, notice, onChoose, onInteract, panelRef }: OrderPanelProps) {
+export function OrderPanel({ view, names, choosing, autoAt, now, hasDeadline, disabled, notice, onChoose, onInteract, panelRef }: OrderPanelProps) {
   if (!choosing) {
     return (
       <section aria-label="Escolha da ordem" className="flex flex-col gap-2 text-papel">
@@ -69,7 +72,7 @@ export function OrderPanel({ view, names, choosing, autoAt, now, disabled, notic
       </div>
       <NoticeLine notice={notice} />
       {autoAt === null ? (
-        <p className="text-xs leading-snug">{ORDER_MANUAL_TEXT}</p>
+        <p className="text-xs leading-snug">{hasDeadline ? ORDER_MANUAL_TEXT : ORDER_MANUAL_NO_CLOCK_TEXT}</p>
       ) : (
         <>
           <AutoBar at={autoAt} now={now} />

@@ -117,6 +117,13 @@ test('tutorial: a dica do Equipar, a seguinte quando a situação muda, e "Pular
   await expect(hintText(page)).toContainText(ORDER_HINT);
   await expect(page.locator('[data-dica="order"]')).toHaveCount(1);
   await settle(page);
+  // A ordem não sai sozinha no tutorial (nem o "Atacar primeiro" aos 3 s do treino): depois de bem mais que isso, o painel segue
+  // lá, sem barra e sem falar em prazo, e a dica 3 também.
+  await page.waitForTimeout(4_000);
+  await expect(orderPanel(page)).toContainText('Escolha quando quiser.');
+  await expect(orderPanel(page)).not.toContainText('prazo');
+  await expect(orderPanel(page).locator('[data-auto-barra]')).toHaveCount(0);
+  await expect(hintText(page)).toContainText(ORDER_HINT);
   await orderPanel(page).getByRole('button', { name: 'Atacar primeiro' }).click();
 
   // Sua vez de atacar: a dica 4 toma o lugar sem "Entendi" (a da ordem passou). O botão mostra a conta, como a dica diz.

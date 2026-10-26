@@ -219,6 +219,8 @@ export const placedText = (card: Card, destination: string): string => `${cardTe
 export const ORDER_QUESTION = 'Você tem a iniciativa: atacar primeiro ou em segundo?';
 export const ORDER_AUTO_TEXT = '"Atacar primeiro" sai sozinho; toque para escolher com calma.';
 export const ORDER_MANUAL_TEXT = 'Escolha quando quiser, dentro do prazo.';
+/** Sem relógio (treino e tutorial) não há prazo a que se referir. */
+export const ORDER_MANUAL_NO_CLOCK_TEXT = 'Escolha quando quiser.';
 export const orderWaitingText = (opponent: string): string => `${opponent} está escolhendo a ordem…`;
 
 // ---------------------------------------------------------------------------------------------

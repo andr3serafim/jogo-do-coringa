@@ -186,13 +186,17 @@ describe('tutorialHint: cada dica na sua situação', () => {
     expect(hintFor(played.state, { events: played.events })).toBeNull();
   });
 
-  it('pressure: a Pressão da mesa ligada', () => {
-    expect(hintFor(quiet({ pressure: 1 }))).toEqual({ id: 'pressure', zone: 'center' });
-  });
-
-  it('pressure: uma rodada de Ataque sem dano já basta (sem Pressão da mesa na config)', () => {
+  it('pressure: uma rodada de Ataque sem dano já basta, com ou sem Pressão da mesa na config', () => {
+    expect(hintFor(quiet({ noDamageStreak: 1 }))).toEqual({ id: 'pressure', zone: 'center' });
     const state = quiet({ config: { tablePressure: false }, noDamageStreak: 1 });
     expect(hintFor(state)).toEqual({ id: 'pressure', zone: 'center' });
+  });
+
+  it('pressure: a Pressão da mesa sozinha não é a situação (nada novo depende dela; vale a sequência sem dano)', () => {
+    const pressureOnly = quiet({ pressure: 1, noDamageStreak: 0 });
+    expect(hintFor(pressureOnly)).toBeNull();
+    expect(hintHolding(viewFor(pressureOnly, P1), [], 'pressure')).toBeNull();
+    expect(hintHolding(viewFor(quiet({ noDamageStreak: 1 }), P1), [], 'pressure')).toEqual({ id: 'pressure', zone: 'center' });
   });
 
   it('end: partida encerrada', () => {
@@ -212,8 +216,8 @@ function reflectIds(state: GameState, who: PlayerId): { kId: string; jId: string
 describe('tutorialHint: ordem, "vista" e situação que passou', () => {
   it('no fim da partida a dica do fim vem antes de qualquer outra ainda não vista', () => {
     const result = { kind: 'WIN', winner: P1, reason: 'HP' } as const;
-    // Quadra no seu campo e Pressão ligada: sem o fim, seriam as dicas `quad` e `pressure`.
-    const over = setup({ pressure: 1, phase: { kind: 'GAME_OVER', result }, p1: { attack: [5, 5, 5, 5] } });
+    // Quadra no seu campo e uma rodada sem dano: sem o fim, seriam as dicas `quad` e `pressure`.
+    const over = setup({ noDamageStreak: 1, phase: { kind: 'GAME_OVER', result }, p1: { attack: [5, 5, 5, 5] } });
     expect(hintFor(over)).toEqual({ id: 'end', zone: 'end' });
     expect(drain(over).map((h) => h.id)).toEqual(['end', 'quad', 'pressure']);
     // Com o QuadFormed do oponente nos eventos, ou só a sequência sem dano: o fim também vem primeiro.
@@ -224,7 +228,7 @@ describe('tutorialHint: ordem, "vista" e situação que passou', () => {
   });
 
   it('fora do fim a lista segue a ordem de sempre', () => {
-    expect(drain(quiet({ pressure: 1, p1: { attack: [5, 5, 5, 5] } })).map((h) => h.id)).toEqual(['quad', 'pressure']);
+    expect(drain(quiet({ noDamageStreak: 1, p1: { attack: [5, 5, 5, 5] } })).map((h) => h.id)).toEqual(['quad', 'pressure']);
   });
 
   it('a primeira da lista ganha quando duas valem (o primeiro ataque com J na mão: firstAttack, depois buffs)', () => {
@@ -239,7 +243,7 @@ describe('tutorialHint: ordem, "vista" e situação que passou', () => {
   });
 
   it('com várias situações valendo, as dicas saem na ordem da lista', () => {
-    const state = setup({ pressure: 1, p1: { attack: [5, 5, 5, 5], hand: ['K', 'J', 'Q', 'W'] } });
+    const state = setup({ noDamageStreak: 1, p1: { attack: [5, 5, 5, 5], hand: ['K', 'J', 'Q', 'W'] } });
     expect(drain(state).map((h) => h.id)).toEqual(['quad', 'firstAttack', 'buffs', 'wild', 'reflect', 'pressure']);
   });
 
@@ -252,9 +256,9 @@ describe('tutorialHint: ordem, "vista" e situação que passou', () => {
   it('nada depois de todas vistas, em qualquer situação', () => {
     const states = [
       equipRound({ p1: { pending: [4, 5] } }),
-      quiet({ p1: { attack: [5, 5, 5, 5] }, pressure: 2 }),
+      quiet({ p1: { attack: [5, 5, 5, 5] }, noDamageStreak: 2 }),
       setup({ phase: { kind: 'ORDER_CHOICE', player: P1 } }),
-      setup({ pressure: 1, p1: { attack: [5, 5, 5, 5], hand: ['K', 'J', 'Q', 'W'] } }),
+      setup({ noDamageStreak: 1, p1: { attack: [5, 5, 5, 5], hand: ['K', 'J', 'Q', 'W'] } }),
       setup({ phase: { kind: 'REACTION', responder: P1, trigger: 'ATTACK' }, p1: { hand: ['A'] }, p2: { attackBuffs: ['J'] } }),
       setup({ phase: { kind: 'GAME_OVER', result: { kind: 'DRAW', reason: 'ANTI_STALL' } } }),
     ];
@@ -269,7 +273,7 @@ describe('tutorialHint: ordem, "vista" e situação que passou', () => {
     for (const state of [
       setup({ phase: { kind: 'ORDER_CHOICE', player: P1 } }),
       setup({ p1: { attack: [5] } }),
-      quiet({ pressure: 1 }),
+      quiet({ noDamageStreak: 1 }),
       setup({ phase: { kind: 'GAME_OVER', result: { kind: 'WIN', winner: P2, reason: 'HP' } } }),
     ]) {
       expect(hintFor(state)?.id).not.toBe('equip');
@@ -280,7 +284,7 @@ describe('tutorialHint: ordem, "vista" e situação que passou', () => {
   });
 
   it('é pura: não muda a view, os eventos nem o conjunto de vistas', () => {
-    const state = setup({ pressure: 1, p1: { attack: [5, 5, 5, 5], hand: ['K', 'J', 'Q', 'W'] } });
+    const state = setup({ noDamageStreak: 1, p1: { attack: [5, 5, 5, 5], hand: ['K', 'J', 'Q', 'W'] } });
     const view = viewFor(state, P1);
     const events: GameEvent[] = [{ type: 'QuadFormed', player: P2, quad: { row: 'ATK', value: 4 } }];
     const seen = new Set<HintId>(['quad']);
@@ -370,9 +374,10 @@ describe('advanceHint e acknowledgeHint', () => {
     viewFor(state, P1),
     viewEvents(events, P1),
   ];
-  const advance = (flow: HintFlow, state: GameState, events: GameEvent[] = []): HintFlow => advanceHint(flow, ...viewOf(state, events));
-  const acknowledge = (flow: HintFlow, state: GameState, events: GameEvent[] = []): HintFlow =>
-    acknowledgeHint(flow, ...viewOf(state, events));
+  const advance = (flow: HintFlow, state: GameState, events: GameEvent[] = [], epoch = 1): HintFlow =>
+    advanceHint(flow, ...viewOf(state, events), epoch);
+  const acknowledge = (flow: HintFlow, state: GameState, events: GameEvent[] = [], epoch = 1): HintFlow =>
+    acknowledgeHint(flow, ...viewOf(state, events), epoch);
   const over = (extra: Setup = {}): GameState =>
     setup({ phase: { kind: 'GAME_OVER', result: { kind: 'WIN', winner: P1, reason: 'HP' } }, ...extra });
 
@@ -447,7 +452,7 @@ describe('advanceHint e acknowledgeHint', () => {
     expect(done.current).toBeNull();
     expect(done.seen.has('end')).toBe(true);
     // Nem a pressão, que ainda vale no fim, volta; nem uma partida nova.
-    expect(advance(done, over({ pressure: 2 })).current).toBeNull();
+    expect(advance(done, over({ noDamageStreak: 2 })).current).toBeNull();
     expect(advance(done, equipRound({ p1: { pending: [4, 5] } })).current).toBeNull();
   });
 
@@ -457,6 +462,39 @@ describe('advanceHint e acknowledgeHint', () => {
     const rematch = advance(ended, equipRound({ p1: { pending: [4, 5] } }));
     expect(rematch.current).toBeNull();
     expect(rematch.seen.has('end')).toBe(true);
+  });
+
+  it('a época em que a dica chegou: guardada na chegada, mantida enquanto ela segue no painel, trocada quando outra a toma', () => {
+    expect(NO_HINT.epoch).toBeNull();
+    const equipState = equipRound({ p1: { pending: [4, 5] } });
+    const equip = advance(NO_HINT, equipState, [], 3);
+    expect(equip).toMatchObject({ current: 'equip', epoch: 3 });
+    // A mesma dica, vista num state de outra época (o painel não mudou): segue chegada na 3.
+    expect(advance(equip, equipState, [], 4)).toBe(equip);
+    // Outra toma o painel: a época é a do state em que ela chegou.
+    const order = advance(equip, setup({ phase: { kind: 'ORDER_CHOICE', player: P1 } }), [], 5);
+    expect(order).toMatchObject({ current: 'order', epoch: 5 });
+    // A situação passou, e a dica fica no painel até o "Entendi": a época de chegada não anda.
+    expect(advance(order, quiet(), [], 6)).toMatchObject({ current: 'order', epoch: 5 });
+    // Sem dica no painel, sem época.
+    expect(advance(NO_HINT, quiet(), [], 7)).toMatchObject({ current: null, epoch: null });
+  });
+
+  it('"Entendi" que traz a próxima no mesmo state a marca com a época dele, e o painel vazio não tem época', () => {
+    const attack = setup({ p1: { attack: [5], hand: ['J'] } });
+    const first = advance(NO_HINT, attack, [], 8);
+    expect(first).toMatchObject({ current: 'firstAttack', epoch: 8 });
+    const second = acknowledge(first, attack, [], 8);
+    expect(second).toMatchObject({ current: 'buffs', epoch: 8 });
+    // Os buffs seguem por ver: o state da vez de atacar seguinte (outra época) não os traz de volta à época dele.
+    expect(advance(second, attack, [], 12)).toMatchObject({ current: 'buffs', epoch: 8 });
+    expect(acknowledge(second, attack, [], 12)).toMatchObject({ current: null, epoch: null });
+  });
+
+  it('com a dica do fim vista, o painel esvazia e não tem época', () => {
+    const ended = advance(advance(NO_HINT, over(), [], 2), over(), [], 2);
+    expect(ended.current).toBe('end');
+    expect(acknowledge(ended, over(), [], 2)).toMatchObject({ current: null, epoch: null });
   });
 
   it('é pura: não muda o fluxo recebido nem o conjunto de vistas', () => {

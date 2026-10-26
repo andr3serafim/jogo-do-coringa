@@ -5,6 +5,7 @@
 // de módulos na hora, em vez de depender do carregador com o relógio parado.
 import { legalActions, RULES_VERSION } from '@coringa/engine';
 import type { PlayerAction } from '@coringa/protocol';
+import { TUTORIAL_SEED } from '@coringa/sim/tutorial';
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { StrictMode } from 'react';
@@ -427,6 +428,42 @@ describe('/treino: o que o §2.6 exclui (passe automático e envio antecipado do
     expect(room.state!.seq).toBe(before);
     expect(equipPanel().getByText(`Carta 2 de ${total}`)).toBeInTheDocument();
     expect(equipPanel().queryByText(/Você já confirmou|Esperando/)).not.toBeInTheDocument();
+  });
+});
+
+describe('/treino: a ordem automática segue valendo (só o tutorial a desliga)', () => {
+  it('com a iniciativa na rodada 3 (a semente do tutorial), a barra de 3 s aparece e "Atacar primeiro" sai sozinho', async () => {
+    const { advance, user } = fakeClock();
+    window.history.replaceState(null, '', `/treino?semente=${TUTORIAL_SEED}&nivel=facil`);
+    render(<App api={fakeApi()} />);
+    await settle();
+    await equipByUi(user);
+    advance(2_000);
+    await equipByUi(user);
+    advance(2_000);
+    const order = screen.getByRole('region', { name: 'Escolha da ordem' });
+    expect(order.querySelector('[data-auto-barra]')).not.toBeNull();
+    expect(within(order).getByText(/sai sozinho/)).toBeInTheDocument();
+    expect(within(order).queryByText(/Escolha quando quiser/)).not.toBeInTheDocument();
+    advance(6_000);
+    expect(screen.queryByRole('region', { name: 'Escolha da ordem' })).not.toBeInTheDocument();
+  });
+
+  it('depois de o jogador interagir com o painel, o texto é "Escolha quando quiser." (sem prazo, sem falar em prazo)', async () => {
+    const { advance, user } = fakeClock();
+    window.history.replaceState(null, '', `/treino?semente=${TUTORIAL_SEED}&nivel=facil`);
+    render(<App api={fakeApi()} />);
+    await settle();
+    await equipByUi(user);
+    advance(2_000);
+    await equipByUi(user);
+    advance(2_000);
+    await user.click(screen.getByRole('region', { name: 'Escolha da ordem' }));
+    const order = within(screen.getByRole('region', { name: 'Escolha da ordem' }));
+    expect(order.getByText('Escolha quando quiser.')).toBeInTheDocument();
+    expect(order.queryByText(/prazo/)).not.toBeInTheDocument();
+    advance(60_000);
+    expect(screen.getByRole('region', { name: 'Escolha da ordem' })).toBeInTheDocument();
   });
 });
 

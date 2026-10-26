@@ -454,6 +454,7 @@ function PlayTableView({
         choosing={ordering}
         autoAt={snapshot.orderAutoAt}
         now={now}
+        hasDeadline={state.deadline !== null}
         disabled={locked}
         notice={snapshot.notice}
         onChoose={(first) => send({ type: 'CHOOSE_ORDER', first })}

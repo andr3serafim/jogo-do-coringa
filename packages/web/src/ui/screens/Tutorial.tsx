@@ -1,7 +1,8 @@
 // O tutorial (`/tutorial`, spec do polimento, fatia 4): uma partida de treino de verdade contra o bot Fácil, na semente em que as
 // especiais aparecem cedo (`TUTORIAL_SEED`), com dicas por situação num painel. É a mesma mesa do treino (`local-game.tsx` cria a
 // sala e a sessão), com a faixa "Tutorial" e o painel de dica. Não é um roteiro: o jogador joga o que quiser, e a dica certa
-// aparece quando a situação acontece (`tutorialHint`, no modelo).
+// aparece quando a situação acontece (`tutorialHint`, no modelo). A ordem não sai sozinha aqui (`autoOrder: false`): quem lê a dica da
+// ordem escolhe sem pressa, na partida toda.
 //
 // Esta tela chega por `React.lazy` (`App.tsx`), e é a única que importa o painel, os textos e a semente: nada disso pesa no
 // JavaScript inicial (`scripts/smoke.ts` confere). A semente é sempre a do tutorial, nunca a da URL, e as dicas recomeçam a cada
@@ -57,7 +58,7 @@ export default function Tutorial({ store, load = loadLocalRoom, reload = default
     load()
       .then((module) => {
         if (!live) return;
-        const game = openLocalRoom(module, { seed: TUTORIAL_SEED, level: LEVEL, store });
+        const game = openLocalRoom(module, { seed: TUTORIAL_SEED, level: LEVEL, store, autoOrder: false });
         dispose = game.dispose;
         setStep({ kind: 'playing', session: game.session, seedOf: game.seedOf });
       })
@@ -97,7 +98,7 @@ function TutorialTable({ session, seedOf, store }: TutorialTableProps) {
   const [lastState, setLastState] = useState<typeof state>(null);
   if (state !== lastState) {
     setLastState(state);
-    if (state !== null) setFlow(advanceHint(flow, state.view, state.events));
+    if (state !== null) setFlow(advanceHint(flow, state.view, state.events, state.epoch));
   }
   const [skipped, setSkipped] = useState(false);
   // Com a dica do fim vista (ou saída do painel), o tutorial acabou: nada depois dela.
@@ -118,16 +119,18 @@ function TutorialTable({ session, seedOf, store }: TutorialTableProps) {
     [state, current],
   );
 
+  // `open` (que segura a rolagem da vez de atacar, no celular) é só da dica que chegou nesta época: uma que ficou no painel e cuja
+  // situação voltou a valer vários turnos depois (o Selvagem na mão, os buffs) não prende a rolagem para sempre.
   const hint: TableHint | undefined = shown
     ? {
         zone: holding?.zone ?? null,
-        open: holding !== null && current !== 'end',
+        open: holding !== null && current !== 'end' && flow.epoch === state?.epoch,
         panel: (
           <HintPanel
             hint={current === 'end' ? null : current}
             antiStallRounds={state?.view.config.antiStallRounds ?? 0}
             onGotIt={() => {
-              if (state !== null) setFlow(acknowledgeHint(flow, state.view, state.events));
+              if (state !== null) setFlow(acknowledgeHint(flow, state.view, state.events, state.epoch));
             }}
             onSkip={() => {
               saveTutorialState(store, 'skipped');

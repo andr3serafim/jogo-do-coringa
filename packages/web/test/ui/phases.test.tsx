@@ -450,6 +450,20 @@ describe('escolha da ordem (spec §3.6)', () => {
     expect(acts(m)).toEqual([]);
   });
 
+  it('com prazo do servidor, depois de interagir o painel diz "Escolha quando quiser, dentro do prazo."', async () => {
+    const m = mount(ORDER, { fake: true, state: { deadline: deadline('ORDER', 70_000) } });
+    await m.user.click(orderPanel());
+    expect(within(orderPanel()).getByText('Escolha quando quiser, dentro do prazo.')).toBeInTheDocument();
+  });
+
+  it('sem prazo (treino e tutorial) o painel não fala em prazo: "Escolha quando quiser."', async () => {
+    const m = mount(ORDER, { fake: true });
+    expect(m.session.snapshot().state?.deadline).toBeNull();
+    await m.user.click(orderPanel());
+    expect(within(orderPanel()).getByText('Escolha quando quiser.')).toBeInTheDocument();
+    expect(within(orderPanel()).queryByText(/prazo/)).not.toBeInTheDocument();
+  });
+
   it('o mouse por cima do painel também cancela', async () => {
     const m = mount(ORDER, { fake: true });
     await m.user.hover(within(orderPanel()).getByRole('button', { name: 'Atacar em segundo' }));
