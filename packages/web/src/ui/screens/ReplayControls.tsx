@@ -30,7 +30,7 @@ export interface ReplayControlsProps {
   rounds: ReplayTrack['rounds'];
   /** A rodada do passo de agora. */
   round: number;
-  /** Os avisos da partida (outra versão das regras, replay que parou), ao alto. */
+  /** Os avisos da partida (outra versão das regras, resultado que não bate com o guardado, replay que parou), ao alto. */
   notices: readonly string[];
   onStart: () => void;
   onPrevious: () => void;

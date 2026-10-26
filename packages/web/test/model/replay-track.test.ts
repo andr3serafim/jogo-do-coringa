@@ -5,6 +5,7 @@ import {
   viewFor,
   type Action,
   type GameEvent,
+  type GameResult,
   type GameState,
   type PlayerId,
   type Replay,
@@ -14,7 +15,7 @@ import type { RoomMessage } from '@coringa/protocol';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { RESYNC_TEXT, roomNames } from '../../src/model/history.ts';
 import { NO_MARKS } from '../../src/model/marks.ts';
-import { buildTrack, frameMessage, replaySnapshot, type ReplayTrack } from '../../src/model/replay-track.ts';
+import { buildTrack, diverges, frameMessage, replaySnapshot, trackResult, type ReplayTrack } from '../../src/model/replay-track.ts';
 import { DEFAULT_PREFS } from '../../src/model/storage.ts';
 import { realReplay, withStep } from '../fixtures.ts';
 
@@ -409,5 +410,69 @@ describe('replaySnapshot', () => {
     frameMessage(TRACK, 5, 2);
     replaySnapshot(TRACK, frameMessage(TRACK, 5, 2), 2, room(2), DEFAULT_PREFS);
     expect(TRACK).toEqual(copy);
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// A partida que diverge: o resultado do último quadro contra o que ficou guardado
+
+/** O resultado de verdade da partida de teste (o último quadro é o fim de jogo). */
+const FINAL: GameResult = (() => {
+  const { phase } = TRACK.frames[STEPS]!.state.view;
+  if (phase.kind !== 'GAME_OVER') throw new Error('a partida de teste termina');
+  return phase.result;
+})();
+
+/** Um resultado que a partida de teste não teve. */
+const OTHER: GameResult = FINAL.kind === 'WIN' && FINAL.winner === 'p1' ? { kind: 'WIN', winner: 'p2', reason: 'HP' } : { kind: 'WIN', winner: 'p1', reason: 'HP' };
+
+describe('trackResult', () => {
+  it('é o resultado do fim de jogo do último quadro, quando a trilha foi até o fim', () => {
+    expect(FINAL.kind).toBe('WIN');
+    expect(trackResult(TRACK)).toEqual(FINAL);
+  });
+
+  it('é nulo quando a trilha parou antes do fim, quando a partida não acabou ali e quando não há quadro', () => {
+    const stopped = buildTrack(withStep(REPLAY, 6, { ...REPLAY.steps[6]!, player: 'p9' as PlayerId }), 'p1', names);
+    expect(stopped.stoppedAt).not.toBeNull();
+    expect(trackResult(stopped)).toBeNull();
+    expect(trackResult(buildTrack({ ...REPLAY, steps: REPLAY.steps.slice(0, 5) }, 'p1', names))).toBeNull();
+    expect(trackResult(buildTrack({ ...REPLAY, config: { ...REPLAY.config, hp: -5 } }, 'p1', names))).toBeNull();
+  });
+});
+
+describe('diverges', () => {
+  it('o resultado guardado igual ao do último quadro não diverge', () => {
+    expect(diverges(TRACK, FINAL)).toBe(false);
+  });
+
+  it('a ordem das chaves do resultado guardado não importa (o JSON do armazenamento não a garante)', () => {
+    const shuffled = Object.fromEntries(Object.entries(FINAL).reverse()) as GameResult;
+    expect(Object.keys(shuffled)).not.toEqual(Object.keys(FINAL));
+    expect(diverges(TRACK, shuffled)).toBe(false);
+  });
+
+  it('um vencedor, um motivo ou um tipo de resultado diferente diverge', () => {
+    if (FINAL.kind !== 'WIN') throw new Error('a partida de teste tem vencedor');
+    expect(diverges(TRACK, OTHER)).toBe(true);
+    expect(diverges(TRACK, { ...FINAL, reason: 'EXODIA' })).toBe(true);
+    expect(diverges(TRACK, { kind: 'DRAW', reason: 'ANTI_STALL' })).toBe(true);
+  });
+
+  it('sem resultado guardado (abandono) não confere', () => {
+    expect(diverges(TRACK, null)).toBe(false);
+  });
+
+  it('uma trilha que parou antes do fim não confere: o aviso da parada já diz o que houve', () => {
+    const stopped = buildTrack(withStep(REPLAY, 6, { ...REPLAY.steps[6]!, player: 'p9' as PlayerId }), 'p1', names);
+    expect(diverges(stopped, OTHER)).toBe(false);
+    expect(diverges(stopped, FINAL)).toBe(false);
+  });
+
+  it('uma trilha que foi até o fim sem a partida acabar diverge de um resultado guardado', () => {
+    const cut = buildTrack({ ...REPLAY, steps: REPLAY.steps.slice(0, 5) }, 'p1', names);
+    expect(cut.stoppedAt).toBeNull();
+    expect(diverges(cut, FINAL)).toBe(true);
+    expect(diverges(cut, null)).toBe(false);
   });
 });

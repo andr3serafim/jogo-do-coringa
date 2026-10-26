@@ -1,8 +1,11 @@
 import { RULES_VERSION } from '@coringa/engine';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Suspense } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../../src/app/App.tsx';
+import { ErrorBoundary } from '../../src/app/ErrorBoundary.tsx';
+import { lazyScreen, ScreenBoundary } from '../../src/app/lazy-screen.tsx';
 import { navigate } from '../../src/app/router.ts';
 import { recordPastGame } from '../../src/model/past-games.ts';
 import { safeStore } from '../../src/model/storage.ts';
@@ -194,5 +197,80 @@ describe('<App />: sem armazenamento do navegador', () => {
     expect(window.location.pathname).toBe(`/s/${CODE}`);
     expect(await screen.findByRole('region', { name: 'Sala' })).toBeInTheDocument();
     expect(api.info).not.toHaveBeenCalled();
+  });
+});
+
+describe('as telas sob demanda: o import que falha', () => {
+  const LOAD_FAILED = 'Não deu para abrir esta tela. Atualize a página.';
+
+  beforeEach(() => {
+    // O React registra o erro capturado no console; o teste não precisa dele.
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  });
+
+  const chunkFailure = () => Promise.reject(new Error('Failed to fetch dynamically imported module: /assets/PastGames-x1y2z3.js'));
+
+  function screens(Screen: ReturnType<typeof lazyScreen>, reload: () => void = () => undefined) {
+    return (
+      <ErrorBoundary reload={reload}>
+        <ScreenBoundary reload={reload}>
+          <Suspense fallback={<p role="status">Carregando…</p>}>
+            <Screen />
+          </Suspense>
+        </ScreenBoundary>
+      </ErrorBoundary>
+    );
+  }
+
+  it('mostra "Não deu para abrir esta tela. Atualize a página." com o botão "Atualizar", e não o erro genérico', async () => {
+    const reload = vi.fn();
+    render(screens(lazyScreen(chunkFailure), reload));
+    expect(await screen.findByText(LOAD_FAILED)).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Algo deu errado' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Copiar diagnóstico' })).not.toBeInTheDocument();
+
+    expect(reload).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole('button', { name: 'Atualizar' }));
+    expect(reload).toHaveBeenCalledOnce();
+  });
+
+  it('enquanto o import não termina, o "Carregando…" segue valendo, e a tela chega quando termina', async () => {
+    const Ok = lazyScreen(async () => ({ default: () => <p>a tela chegou</p> }));
+    render(screens(Ok));
+    expect(await screen.findByText('a tela chegou')).toBeInTheDocument();
+    expect(screen.queryByText(LOAD_FAILED)).not.toBeInTheDocument();
+  });
+
+  it('uma tela que chegou e quebra ao desenhar segue para o "Algo deu errado" do app, sem o aviso do import', async () => {
+    const Bomb = lazyScreen(async () => ({
+      default: (): never => {
+        throw new Error('quebrou ao desenhar');
+      },
+    }));
+    render(screens(Bomb));
+    expect(await screen.findByRole('heading', { name: 'Algo deu errado' })).toBeInTheDocument();
+    expect(screen.queryByText(LOAD_FAILED)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Atualizar' })).not.toBeInTheDocument();
+  });
+
+  it('um erro de fora do import dentro da fronteira (nada a ver com o chunk) também segue para o app', () => {
+    function Bomb(): never {
+      throw new Error('quebrou');
+    }
+    render(
+      <ErrorBoundary>
+        <ScreenBoundary>
+          <Bomb />
+        </ScreenBoundary>
+      </ErrorBoundary>,
+    );
+    expect(screen.getByRole('heading', { name: 'Algo deu errado' })).toBeInTheDocument();
+    expect(screen.queryByText(LOAD_FAILED)).not.toBeInTheDocument();
+  });
+
+  it('sem violações sérias de acessibilidade, e com um título de tela', async () => {
+    const { container } = render(screens(lazyScreen(chunkFailure)));
+    expect(await screen.findByRole('heading', { name: 'Partidas anteriores' })).toBeInTheDocument();
+    expect(await seriousViolations(container)).toEqual([]);
   });
 });

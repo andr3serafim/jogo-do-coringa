@@ -4,7 +4,17 @@
 //
 // Quem consome é a tela do replay (chunk preguiçoso): ela guarda a trilha, mantém um `Stage` montado entre os passos e pede a
 // mensagem do salto ao `frameMessage` e o snapshot ao `replaySnapshot`.
-import { applyAction, createGame, viewEvents, viewFor, type GameEvent, type GameState, type PlayerId, type Replay } from '@coringa/engine';
+import {
+  applyAction,
+  createGame,
+  viewEvents,
+  viewFor,
+  type GameEvent,
+  type GameResult,
+  type GameState,
+  type PlayerId,
+  type Replay,
+} from '@coringa/engine';
 import type { RoomMessage, StateMessage } from '@coringa/protocol';
 import type { Names } from '@coringa/sim/text';
 import { appendHistory, EMPTY_HISTORY, forGame, type HistoryState } from './history.ts';
@@ -156,4 +166,28 @@ export function replaySnapshot(track: ReplayTrack, message: StateMessage, frame:
     history: forGame(frameAt(track, frame).history, room.gameNo),
     prefs,
   };
+}
+
+/** O resultado do fim de jogo do último quadro. `null` quando a trilha parou antes do fim ou a partida não acabou ali. */
+export function trackResult(track: ReplayTrack): GameResult | null {
+  if (track.stoppedAt !== null) return null;
+  const phase = track.frames.at(-1)?.state.view.phase;
+  return phase?.kind === 'GAME_OVER' ? phase.result : null;
+}
+
+/** Igualdade campo a campo (o JSON do armazenamento não garante a ordem das chaves, e o `winner` só existe na vitória). */
+function sameResult(a: GameResult, b: GameResult): boolean {
+  if (a.kind !== b.kind || a.reason !== b.reason) return false;
+  return a.kind !== 'WIN' || (b.kind === 'WIN' && a.winner === b.winner);
+}
+
+/**
+ * A partida re-executada terminou diferente do que ficou guardado (as regras mudaram desde a gravação, mesmo com a mesma
+ * `rulesVersion`)? Só confere quando a trilha foi até o fim e há resultado guardado: a parada tem o aviso próprio, e o abandono
+ * (`stored` nulo) não tem resultado para conferir. Uma trilha que chegou ao fim sem a partida acabar diverge de qualquer resultado.
+ */
+export function diverges(track: ReplayTrack, stored: GameResult | null): boolean {
+  if (stored === null || track.stoppedAt !== null) return false;
+  const result = trackResult(track);
+  return result === null || !sameResult(result, stored);
 }

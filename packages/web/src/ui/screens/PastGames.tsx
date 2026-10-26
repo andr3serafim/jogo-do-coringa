@@ -27,7 +27,7 @@ export default function PastGames({ store }: PastGamesProps) {
   const [games] = useState(() => loadPastGames(store));
   return (
     <Screen>
-      <Title>{PAST_GAMES_LABEL}</Title>
+      <Title focusOnMount>{PAST_GAMES_LABEL}</Title>
       {games.length === 0 ? (
         <Panel>
           <p>{PAST_GAMES_EMPTY_TEXT}</p>

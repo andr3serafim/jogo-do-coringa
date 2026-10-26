@@ -2,6 +2,10 @@
 // na barra de baixo. Quem monta a trilha é a `ReplayScreen`; aqui só se navega por ela.
 //
 // A mesa não tem regra: a `view` de cada passo vem da trilha (o motor re-executado, `replay-track.ts`), e a mesa a desenha.
+// - No Equipar, as suas numéricas recebidas aparecem num bloco só de leitura acima dos controles (`ReplayEquip`), e o botão do
+//   cemitério abre o diálogo de sempre, em modo só de ver (abri-lo pausa o "Tocar").
+// - Os avisos da partida (outra versão das regras, resultado que não bate com o guardado, replay que parou) vão ao alto dos
+//   controles. O foco vai ao título da mesa ao abrir.
 // - Avançar um passo entrega a mensagem `state` do passo, com os eventos, e o `Stage` toca as batidas como ao vivo. Voltar,
 //   "Início" e a rodada entregam o mesmo estado em `resync`, que troca a mesa de uma vez, sem batidas.
 // - A mensagem do passo é calculada UMA vez por navegação, no clique ou no timer, e fica no estado junto com o passo. Pedi-la
@@ -15,20 +19,26 @@
 import type { RoomMessage, SeatInfo, StateMessage } from '@coringa/protocol';
 import { RULES_VERSION, type PlayerId } from '@coringa/engine';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { myName, opponentName, OTHER_RULES_VERSION_TEXT, replayStoppedText } from '../../model/past-games-copy.ts';
+import { DIVERGED_TEXT, myName, opponentName, OTHER_RULES_VERSION_TEXT, replayStoppedText } from '../../model/past-games-copy.ts';
 import type { PastGame } from '../../model/past-games.ts';
-import { frameMessage, replaySnapshot, type ReplayTrack } from '../../model/replay-track.ts';
+import { diverges, frameMessage, replaySnapshot, type ReplayTrack } from '../../model/replay-track.ts';
 import type { Prefs } from '../../model/storage.ts';
 import { Stage } from '../anim/Stage.tsx';
 import { useReducedMotion } from '../anim/useReducedMotion.ts';
+import { GraveyardDialog } from '../table/GraveyardDialog.tsx';
 import { Table } from '../table/Table.tsx';
 import { ReplayControls } from './ReplayControls.tsx';
+import { ReplayEquip } from './ReplayEquip.tsx';
 
 /** Quanto "Tocar" espera entre um passo e o seguinte (além de o palco assentar). */
 const PLAY_STEP_MS = 700;
 
 /** A mesa do replay não tem relógio: nenhum prazo chega a ela. */
 const remainingMs = (): number => 0;
+
+/** O cemitério do replay é só para ver: nada a ressuscitar. */
+const NO_RESURRECT: [] = [];
+const noop = (): void => undefined;
 
 export interface ReplayViewerProps {
   game: PastGame;
@@ -124,9 +134,22 @@ function Playback({ game, track, prefs }: ReplayViewerProps) {
   const notices = useMemo(() => {
     const out: string[] = [];
     if (game.rulesVersion !== RULES_VERSION) out.push(OTHER_RULES_VERSION_TEXT);
+    // A trilha foi até o fim e a partida terminou diferente do que ficou guardado: vale também com a mesma versão das regras.
+    if (diverges(track, game.outcome.result)) out.push(DIVERGED_TEXT);
     if (track.stoppedAt !== null) out.push(replayStoppedText(track.stoppedAt.step, track.stoppedAt.message));
     return out;
-  }, [game.rulesVersion, track.stoppedAt]);
+  }, [game.rulesVersion, game.outcome.result, track]);
+
+  // Ao abrir, o foco vai ao título da mesa (só ao montar: os passos nunca o devolvem para lá).
+  const title = useRef<HTMLHeadingElement>(null);
+  useEffect(() => title.current?.focus({ preventScroll: true }), []);
+
+  // O cemitério, só para ver. Abri-lo pausa o "Tocar": a mesa de trás seguiria andando com os controles inertes sob o diálogo.
+  const [graveyardOpen, setGraveyardOpen] = useState(false);
+  const openGraveyard = useCallback(() => {
+    setGraveyardOpen(true);
+    dispatch({ kind: 'pause' });
+  }, [dispatch]);
 
   // --- "Tocar" ---
   const root = useRef<HTMLDivElement>(null);
@@ -168,10 +191,34 @@ function Playback({ game, track, prefs }: ReplayViewerProps) {
     />
   );
 
+  const { view } = nav.message;
+  const bar = (
+    <div className="flex flex-col gap-3">
+      <ReplayEquip view={view} />
+      {controls}
+    </div>
+  );
+
   return (
     <div ref={root} className="contents">
       <Stage snapshot={snapshot} reducedMotion={reducedMotion} onSettled={onSettled}>
-        <Table snapshot={snapshot} remainingMs={remainingMs} replay actionBar={controls} />
+        <Table
+          snapshot={snapshot}
+          remainingMs={remainingMs}
+          replay
+          actionBar={bar}
+          onOpenGraveyard={openGraveyard}
+          titleRef={title}
+        />
+        <GraveyardDialog
+          mode={graveyardOpen ? 'view' : null}
+          graveyard={view.graveyard}
+          options={NO_RESURRECT}
+          rowCounts={{ ATK: view.self.attackRow.length, DEF: view.self.defenseRow.length }}
+          rowLimit={view.config.rowLimit}
+          onPick={noop}
+          onClose={() => setGraveyardOpen(false)}
+        />
       </Stage>
     </div>
   );

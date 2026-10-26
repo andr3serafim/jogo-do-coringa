@@ -1,6 +1,6 @@
 // Peças compartilhadas das telas de início e de entrada e do menu da partida, no tema da Peleja (spec §10): capa colorida,
 // tinta, títulos em tipo de madeira e botões ouro. Alvos de toque ≥ 44 px; campos de texto com 16 px.
-import { useId, type ComponentPropsWithoutRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
 import { navigate } from '../app/router.ts';
 import { SWITCH_OFF, SWITCH_ON } from '../model/copy.ts';
 
@@ -15,8 +15,25 @@ export function Screen({ children, tone = 'voce' }: { children: ReactNode; tone?
   );
 }
 
-export function Title({ children }: { children: ReactNode }) {
-  return <h1 className="font-madeira text-4xl uppercase leading-tight tablet:text-5xl">{children}</h1>;
+/**
+ * O título da tela. Com `focusOnMount` (as telas que a rota troca por inteiro, sem recarregar a página) o foco vai a ele ao
+ * abrir, sem rolar a página: o teclado e o leitor de tela começam pela tela nova, e não pelo botão que a abriu, que já saiu de
+ * cena. Só ao montar: um redesenho nunca devolve o foco ao título. Fica fora da ordem do Tab (`tabIndex={-1}`).
+ */
+export function Title({ children, focusOnMount = false }: { children: ReactNode; focusOnMount?: boolean }) {
+  const ref = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (focusOnMount) ref.current?.focus({ preventScroll: true });
+  }, [focusOnMount]);
+  return (
+    <h1
+      ref={ref}
+      tabIndex={focusOnMount ? -1 : undefined}
+      className="font-madeira text-4xl uppercase leading-tight tablet:text-5xl"
+    >
+      {children}
+    </h1>
+  );
 }
 
 /** Folha de papel com borda de carimbo para agrupar um formulário ou uma mensagem. */

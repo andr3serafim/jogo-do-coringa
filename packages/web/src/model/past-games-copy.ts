@@ -56,6 +56,12 @@ export const stepCounterText = (step: number, total: number): string => `Passo $
 export const OTHER_RULES_VERSION_TEXT =
   'Esta partida foi gravada com outra versão das regras. Ela pode não se repetir igual.';
 
+/** O replay foi até o fim e o resultado do último quadro não é o que ficou guardado (vale também com a mesma versão das regras). */
+export const DIVERGED_TEXT = 'Esta partida terminou diferente quando foi reexecutada: as regras mudaram desde que ela foi gravada.';
+
+/** O bloco do Equipar do replay: as numéricas que o seu assento recebeu na rodada (só de leitura). */
+export const REPLAY_EQUIP_LABEL = 'Numéricas que você recebeu';
+
 /** O motor costuma dizer o motivo sem ponto final; com ele, a frase não ganha um segundo. */
 const withoutFinalDot = (message: string): string => message.trim().replace(/\.+$/, '');
 

@@ -5,7 +5,7 @@
 // do conteúdo (spec §10.7).
 import type { PlayerId } from '@coringa/engine';
 import type { Deadline, StateMessage } from '@coringa/protocol';
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { turnCue } from '../../model/clock.ts';
 import { equipOpponentText, scoreText } from '../../model/copy.ts';
 import { completeDraft, draftBoard } from '../../model/equip.ts';
@@ -47,6 +47,8 @@ export interface TableProps {
   training?: TrainingLevel;
   /** A mesa do replay (só de vista): a faixa central diz "Revendo a partida" no lugar do relógio. */
   replay?: true;
+  /** O título da mesa (só para leitor de tela): com a ref, ele fica focável por código, e a tela leva o foco a ele ao abrir. */
+  titleRef?: RefObject<HTMLHeadingElement | null>;
 }
 
 const NO_TARGETS: ReadonlySet<string> = new Set();
@@ -75,6 +77,7 @@ function TableView({
   actionBar,
   training,
   replay,
+  titleRef,
 }: TableProps & { state: StateMessage }) {
   const { room, marks, marksBaseSeq, history } = snapshot;
   const { view } = state;
@@ -163,7 +166,9 @@ function TableView({
           data-grao
           className="grao pointer-events-none absolute inset-0 -z-10 opacity-20 pc:hidden"
         />
-        <h1 className="sr-only">Mesa da partida</h1>
+        <h1 ref={titleRef} tabIndex={titleRef ? -1 : undefined} className="sr-only">
+          Mesa da partida
+        </h1>
 
         <div className="flex min-h-0 flex-1 flex-col pc:flex-[0_1_1100px]">
           <Banners snapshot={snapshot} remainingMs={remainingMs} />

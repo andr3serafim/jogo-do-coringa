@@ -1,7 +1,7 @@
 // A tela do replay de uma partida da lista (`/partidas/<id>`, spec do polimento §4.3): acha a partida, confere que dá para
 // revê-la e monta a trilha (o motor re-executado, `replay-track.ts`), uma vez, ao abrir. Quem navega pela trilha é o
 // `ReplayViewer`. Os casos sem mesa (id que não está mais no navegador, partida sem replay, replay que nem começa) mostram o
-// motivo e o caminho de volta à lista, e nunca quebram a tela.
+// motivo e o caminho de volta à lista, e nunca quebram a tela. Ao abrir, o foco vai ao título (o da tela sem mesa, ou o da mesa).
 //
 // Entra por `React.lazy` (`App.tsx`), com `key={id}` (outro id é outra partida): fica fora do JavaScript inicial, e por isso a
 // exportação é a `default`.
@@ -57,7 +57,7 @@ export default function ReplayScreen({ store, id }: ReplayScreenProps) {
 function Message({ text }: { text: string }) {
   return (
     <Screen>
-      <Title>{PAST_GAMES_LABEL}</Title>
+      <Title focusOnMount>{PAST_GAMES_LABEL}</Title>
       <Panel>
         <p>{text}</p>
         <AppLink to="/partidas">{BACK_TO_LIST_LABEL}</AppLink>

@@ -4,7 +4,7 @@ import { RULES_VERSION, type PlayerId } from '@coringa/engine';
 import type { Outcome } from '@coringa/protocol';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PAST_GAMES_KEY, recordPastGame, type PastGame } from '../../src/model/past-games.ts';
 import PastGames from '../../src/ui/screens/PastGames.tsx';
 import { realReplay } from '../fixtures.ts';
@@ -134,5 +134,38 @@ describe('<PastGames />: a lista', () => {
     const { store } = stored(entry({ replay: REPLAY }), entry());
     const full = render(<PastGames store={store} />);
     expect(await seriousViolations(full.container)).toEqual([]);
+  });
+});
+
+describe('<PastGames />: o foco', () => {
+  const title = () => screen.getByRole('heading', { name: 'Partidas anteriores' });
+
+  it('abre com o foco no título da tela, vazia ou cheia', () => {
+    const empty = render(<PastGames store={memoryStore()} />);
+    expect(title()).toHaveFocus();
+    empty.unmount();
+
+    const { store } = stored(entry({ replay: REPLAY }), entry());
+    render(<PastGames store={store} />);
+    expect(title()).toHaveFocus();
+  });
+
+  it('o título só é focável por código (fora da ordem do Tab) e o foco não rola a página', () => {
+    const focus = vi.spyOn(HTMLElement.prototype, 'focus');
+    render(<PastGames store={memoryStore()} />);
+    expect(title()).toHaveAttribute('tabindex', '-1');
+    expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+    focus.mockRestore();
+  });
+
+  it('redesenhar a lista não devolve o foco ao título', async () => {
+    const { store } = stored(entry({ replay: REPLAY }));
+    const { rerender } = render(<PastGames store={store} />);
+    const button = screen.getByRole('button', { name: 'Voltar ao início' });
+    button.focus();
+    expect(button).toHaveFocus();
+    rerender(<PastGames store={store} />);
+    expect(button).toHaveFocus();
+    expect(title()).not.toHaveFocus();
   });
 });

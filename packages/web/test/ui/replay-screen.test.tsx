@@ -46,6 +46,13 @@ const TRACK = buildTrack(REPLAY, 'p1', NAMES);
 const beatMs = (frame: number) =>
   timelineMs(buildTimeline(TRACK.frames[frame]!.state.events, { mode: 'live', reducedMotion: false, decisionPending: false }));
 
+/** O resultado de verdade da partida de teste: o que a entrada guarda por padrão (guardar outro é divergir, regra 4). */
+const FINAL = (() => {
+  const { phase } = TRACK.frames[TOTAL]!.state.view;
+  if (phase.kind !== 'GAME_OVER') throw new Error('a partida de teste termina');
+  return phase.result;
+})();
+
 type Entry = Omit<PastGame, 'id'>;
 
 const entry = (extra: Partial<Entry> = {}): Entry => ({
@@ -53,7 +60,7 @@ const entry = (extra: Partial<Entry> = {}): Entry => ({
   mode: { kind: 'training', level: 'medio' },
   seat: 'p1',
   names: { me: 'Ana', opponent: 'Duda' },
-  outcome: { gameNo: 1, cause: 'NORMAL', result: { kind: 'WIN', winner: 'p1', reason: 'HP' } },
+  outcome: { gameNo: 1, cause: 'NORMAL', result: FINAL },
   rounds: 19,
   score: { p1: 1, p2: 0, draws: 0 },
   rulesVersion: RULES_VERSION,
@@ -587,6 +594,222 @@ describe('<ReplayScreen />: acessibilidade', () => {
     const mesa = screen.getByRole('main', { name: 'Mesa' });
     expect(within(mesa).getByText(/outra versão das regras/)).toBeInTheDocument();
     expect(within(mesa).getByRole('link', { name: 'Voltar à lista' })).toBeInTheDocument();
+  });
+});
+
+describe('<ReplayScreen />: o Equipar', () => {
+  const EQUIP_LABEL = 'Numéricas que você recebeu';
+  const block = () => screen.getByRole('region', { name: EQUIP_LABEL });
+  const ids = (el: HTMLElement) => within(el).getAllByRole('img').map((card) => card.getAttribute('data-card-id'));
+  const pendingOf = (frame: number) => TRACK.frames[frame]!.state.view.self.pending;
+  /** O primeiro quadro fora do Equipar (a rodada de ataque que vem depois). */
+  const FIRST_ATTACK = TRACK.frames.findIndex((frame) => frame.state.view.phase.kind !== 'EQUIP');
+
+  it('a partida de teste começa com numéricas para o assento de quem vê, e depois sai do Equipar', () => {
+    expect(pendingOf(0).length).toBeGreaterThan(0);
+    expect(FIRST_ATTACK).toBeGreaterThan(1);
+  });
+
+  it('no Equipar mostra as numéricas recebidas, na ordem, no desenho de carta da mão e sem botão nenhum', () => {
+    open();
+    expect(ids(block())).toEqual(pendingOf(0).map((card) => card.id));
+    for (const card of within(block()).getAllByRole('img')) {
+      expect(card).toHaveClass('w-(--hand-w)', 'h-(--hand-h)');
+    }
+    expect(within(block()).queryAllByRole('button')).toEqual([]);
+    expect(screen.queryByRole('region', { name: 'Equipar' })).not.toBeInTheDocument();
+  });
+
+  it('o bloco fica fora do `data-sem-pulo` (só os controles do replay o usam) e dentro da mesa', () => {
+    open();
+    expect(block().closest('[data-sem-pulo]')).toBeNull();
+    expect(screen.getByRole('main', { name: 'Mesa' })).toContainElement(block());
+  });
+
+  it('acompanha o passo: segue à vista até a revelação e some quando a rodada de ataque começa', async () => {
+    const { user } = open();
+    for (let frame = 0; frame < FIRST_ATTACK; frame++) {
+      expect(ids(block())).toEqual(pendingOf(frame).map((card) => card.id));
+      await user.click(next());
+      advance(5_000);
+    }
+    expect(counter()).toBe(`Passo ${FIRST_ATTACK} de ${TOTAL}`);
+    expect(screen.queryByRole('region', { name: EQUIP_LABEL })).not.toBeInTheDocument();
+    // Voltar ao Equipar traz o bloco de novo.
+    await user.click(control('Início'));
+    expect(ids(block())).toEqual(pendingOf(0).map((card) => card.id));
+  });
+
+  it('o Equipar sem numéricas diz que nenhuma chegou (como o painel ao vivo), sem carta', () => {
+    const view = scenarioAt({ phase: { kind: 'EQUIP' } }).view;
+    expect(view.self.pending).toEqual([]);
+    const track: ReplayTrack = {
+      frames: [{ state: stateMessage(view, { seq: 1, epoch: 0 }), round: view.round, history: EMPTY_HISTORY }],
+      stoppedAt: null,
+      rounds: [{ round: view.round, frame: 0 }],
+    };
+    fakeUi();
+    render(<ReplayViewer game={{ id: 'x', ...entry({ replay: undefined }) }} track={track} prefs={DEFAULT_PREFS} />);
+    expect(within(block()).getByText('Você não recebeu numéricas nesta rodada')).toBeInTheDocument();
+    expect(within(block()).queryAllByRole('img')).toEqual([]);
+  });
+});
+
+describe('<ReplayScreen />: o cemitério', () => {
+  const GRAVE_FRAME = TRACK.frames.findIndex((frame) => frame.state.view.graveyard.length > 0);
+  const graveyardButton = () => screen.getByRole('button', { name: /^Cemitério/ });
+
+  it('a partida de teste tem cemitério depois de alguns passos', () => {
+    expect(GRAVE_FRAME).toBeGreaterThan(0);
+  });
+
+  it('o botão da faixa abre o cemitério só para ver: as cartas na ordem do cemitério, a de cima primeiro, sem escolher nada', async () => {
+    const { user } = open();
+    await walk(user, GRAVE_FRAME);
+    const graveyard = TRACK.frames[GRAVE_FRAME]!.state.view.graveyard;
+    await user.click(graveyardButton());
+
+    const dialog = screen.getByRole('dialog', { name: 'Cemitério' });
+    const list = within(dialog).getByRole('list', { name: 'Cartas do cemitério' });
+    expect(within(list).getAllByRole('img').map((card) => card.getAttribute('data-card-id'))).toEqual(
+      [...graveyard].reverse().map((card) => card.id),
+    );
+    expect(within(dialog).getAllByRole('button').map((button) => button.textContent)).toEqual(['Fechar']);
+    expect(within(dialog).queryByText(/Ressuscitar|volt/i)).not.toBeInTheDocument();
+  });
+
+  it('"Fechar" e Esc fecham o diálogo e devolvem o foco ao botão do cemitério', async () => {
+    const { user } = open();
+    await walk(user, GRAVE_FRAME);
+    await user.click(graveyardButton());
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Fechar' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(graveyardButton()).toHaveFocus();
+
+    await user.click(graveyardButton());
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(graveyardButton()).toHaveFocus();
+  });
+
+  it('no começo o cemitério está vazio, e o diálogo diz isso', async () => {
+    const { user } = open();
+    await user.click(screen.getByRole('button', { name: 'Cemitério vazio' }));
+    expect(within(screen.getByRole('dialog', { name: 'Cemitério' })).getByText('O cemitério está vazio.')).toBeInTheDocument();
+  });
+
+  it('o diálogo aberto pausa o "Tocar": a mesa de trás não anda enquanto se olha o cemitério', async () => {
+    const { user } = open();
+    await user.click(control('Tocar'));
+    expect(control('Pausar')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Cemitério vazio' }));
+    advance(10_000);
+    expect(counter()).toBe(`Passo 0 de ${TOTAL}`);
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Fechar' }));
+    expect(control('Tocar')).toBeInTheDocument();
+    advance(10_000);
+    expect(counter()).toBe(`Passo 0 de ${TOTAL}`);
+  });
+
+  it('sem violações sérias do axe, com o cemitério aberto', async () => {
+    const { user, container } = open({}, { fake: false });
+    await user.click(screen.getByRole('button', { name: 'Cemitério vazio' }));
+    expect(await seriousViolations(container)).toEqual([]);
+  });
+});
+
+describe('<ReplayScreen />: o foco', () => {
+  it('abre com o foco no título da mesa', () => {
+    open();
+    expect(screen.getByRole('heading', { name: 'Mesa da partida' })).toHaveFocus();
+  });
+
+  it('uma tela sem mesa abre com o foco no título dela', () => {
+    render(<ReplayScreen store={memoryStore()} id="zzz" />);
+    expect(screen.getByRole('heading', { name: 'Partidas anteriores' })).toHaveFocus();
+    unmountAll();
+    open({ replay: undefined });
+    expect(screen.getByRole('heading', { name: 'Partidas anteriores' })).toHaveFocus();
+  });
+
+  it('o foco do título não rola a página', () => {
+    const focus = vi.spyOn(HTMLElement.prototype, 'focus');
+    open();
+    expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+    focus.mockRestore();
+  });
+
+  it('navegar e redesenhar a tela não devolvem o foco ao título', async () => {
+    const { user, store, game, rerender } = open();
+    await user.click(next());
+    expect(next()).toHaveFocus();
+    rerender(<ReplayScreen store={store} id={game.id} />);
+    expect(next()).toHaveFocus();
+    expect(screen.getByRole('heading', { name: 'Mesa da partida' })).not.toHaveFocus();
+  });
+
+  it('o título da mesa só é focável por código (fora da ordem do Tab)', () => {
+    open();
+    expect(screen.getByRole('heading', { name: 'Mesa da partida' })).toHaveAttribute('tabindex', '-1');
+  });
+});
+
+describe('<ReplayScreen />: a partida que diverge', () => {
+  const DIVERGED = 'Esta partida terminou diferente quando foi reexecutada: as regras mudaram desde que ela foi gravada.';
+  const WIN = (winner: PlayerId): Entry['outcome'] => ({ gameNo: 1, cause: 'NORMAL', result: { kind: 'WIN', winner, reason: 'HP' } });
+  const OTHER_WINNER: PlayerId = FINAL.kind === 'WIN' && FINAL.winner === 'p1' ? 'p2' : 'p1';
+
+  it('o resultado guardado que não bate com o do último quadro avisa já ao abrir, mesmo com a versão atual das regras', () => {
+    open({ outcome: WIN(OTHER_WINNER) });
+    const mesa = screen.getByRole('main', { name: 'Mesa' });
+    expect(within(mesa).getByText(DIVERGED)).toBeInTheDocument();
+    expect(counter()).toBe(`Passo 0 de ${TOTAL}`);
+    expect(screen.queryByText(/outra versão das regras/)).not.toBeInTheDocument();
+  });
+
+  it('um empate guardado numa partida que teve vencedor também avisa', () => {
+    open({ outcome: { gameNo: 1, cause: 'NORMAL', result: { kind: 'DRAW', reason: 'ANTI_STALL' } } });
+    expect(screen.getByText(DIVERGED)).toBeInTheDocument();
+  });
+
+  it('o resultado que bate não avisa, nem a partida de outra versão das regras que terminou igual', () => {
+    open();
+    expect(screen.queryByText(DIVERGED)).not.toBeInTheDocument();
+    unmountAll();
+    open({ rulesVersion: RULES_VERSION + 1 });
+    expect(screen.getByText(/outra versão das regras/)).toBeInTheDocument();
+    expect(screen.queryByText(DIVERGED)).not.toBeInTheDocument();
+  });
+
+  it('o aviso de versão e o de divergência convivem', () => {
+    open({ rulesVersion: RULES_VERSION + 1, outcome: WIN(OTHER_WINNER) });
+    expect(screen.getByText(/outra versão das regras/)).toBeInTheDocument();
+    expect(screen.getByText(DIVERGED)).toBeInTheDocument();
+  });
+
+  it('sem resultado guardado (abandono) não confere', () => {
+    open({ outcome: { gameNo: 1, cause: 'ABANDONED', result: null } });
+    expect(screen.queryByText(DIVERGED)).not.toBeInTheDocument();
+  });
+
+  it('uma trilha que parou num passo recusado só diz onde parou, sem o aviso de divergência', () => {
+    const bad = withStep(REPLAY, 6, { ...REPLAY.steps[6]!, player: 'p9' as PlayerId });
+    open({ replay: bad, outcome: WIN(OTHER_WINNER) });
+    expect(screen.getByText(/^O replay parou no passo 7: /)).toBeInTheDocument();
+    expect(screen.queryByText(DIVERGED)).not.toBeInTheDocument();
+  });
+
+  it('o aviso fica em todos os passos, e não só no último', async () => {
+    const { user } = open({ outcome: WIN(OTHER_WINNER) });
+    await walk(user, 3);
+    expect(screen.getByText(DIVERGED)).toBeInTheDocument();
+    await user.click(control('Início'));
+    expect(screen.getByText(DIVERGED)).toBeInTheDocument();
+  });
+
+  it('sem violações sérias do axe, com o aviso', async () => {
+    const { container } = open({ outcome: WIN(OTHER_WINNER) }, { fake: false });
+    expect(await seriousViolations(container)).toEqual([]);
   });
 });
 

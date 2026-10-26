@@ -413,6 +413,12 @@ export const PAST_GAMES_LABEL = 'Partidas anteriores';
 export const BACK_TO_LIST_LABEL = 'Voltar à lista';
 /** Enquanto o pedaço de uma tela carregada sob demanda não chega. */
 export const SCREEN_LOADING_TEXT = 'Carregando…';
+/**
+ * Quando o pedaço de uma tela carregada sob demanda não chega (a rede caiu, o deploy novo tirou o arquivo velho) e o botão que
+ * recarrega a página. Moram aqui, e não no `past-games-copy.ts`: quem os mostra é a casca, e o pedaço que falhou não chegaria.
+ */
+export const SCREEN_LOAD_FAILED_TEXT = 'Não deu para abrir esta tela. Atualize a página.';
+export const REFRESH_LABEL = 'Atualizar';
 /** Na faixa central da mesa do replay, no lugar do relógio (a mesa é a de sempre, só de vista). Mora aqui porque a `CenterBand` está no JavaScript inicial. */
 export const REPLAY_BAND_TEXT = 'Revendo a partida';
 
