@@ -439,6 +439,28 @@ describe('fim de partida: Ver a mesa e Nova sala', () => {
       expect(endDialog('Você venceu').querySelector('[data-nota]')).toBeNull();
     });
 
+    it('a nota entra na descrição do diálogo: o leitor de tela lê o motivo e a nota ao abrir', () => {
+      render(<EndPanel {...panel} note={<p>uma nota do diálogo</p>} />);
+      const dialog = endDialog('Você venceu');
+      const ids = dialog.getAttribute('aria-describedby')?.split(' ') ?? [];
+      expect(ids).toHaveLength(2);
+      const [reason, note] = ids.map((id) => document.getElementById(id));
+      expect(reason).toHaveTextContent('A vida de Duda chegou a 0');
+      expect(note).toHaveTextContent('uma nota do diálogo');
+      expect(dialog).toContainElement(note);
+      // Resolvido como o navegador faz: a descrição acessível junta os dois.
+      expect(dialog).toHaveAccessibleDescription(/A vida de Duda chegou a 0.*uma nota do diálogo/);
+    });
+
+    it('sem `note` a descrição é só o motivo (treino e sala online)', () => {
+      render(<EndPanel {...panel} />);
+      const dialog = endDialog('Você venceu');
+      const ids = dialog.getAttribute('aria-describedby')?.split(' ') ?? [];
+      expect(ids).toHaveLength(1);
+      expect(document.getElementById(ids[0]!)).toHaveTextContent('A vida de Duda chegou a 0');
+      expect(dialog).toHaveAccessibleDescription('A vida de Duda chegou a 0');
+    });
+
     it('recolhido ("Ver a mesa"), a nota sai junto com o diálogo', async () => {
       const user = userEvent.setup();
       render(<EndPanel {...panel} note={<p>uma nota do diálogo</p>} />);

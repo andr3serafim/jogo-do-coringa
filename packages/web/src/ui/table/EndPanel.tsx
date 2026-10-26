@@ -50,7 +50,8 @@ export interface EndPanelProps {
   onReview?: () => void;
   /**
    * Uma nota dentro do diálogo, entre o placar e os botões (o tutorial põe aqui a dica do fim). Tem que ser aqui: o diálogo é
-   * modal, e uma dica fora dele fica inerte (sem clique, sem foco e fora da árvore de acessibilidade) atrás dele.
+   * modal, e uma dica fora dele fica inerte (sem clique, sem foco e fora da árvore de acessibilidade) atrás dele. A nota também
+   * entra na descrição do diálogo (`aria-describedby`): o leitor de tela a lê junto com o motivo quando o diálogo abre.
    */
   note?: ReactNode;
 }
@@ -72,6 +73,7 @@ export function EndPanel({
 }: EndPanelProps) {
   const titleId = useId();
   const reasonId = useId();
+  const noteId = useId();
   const [collapsed, setCollapsed] = useState(false);
   const showRef = useRef<HTMLButtonElement>(null);
 
@@ -91,7 +93,8 @@ export function EndPanel({
         open={!collapsed}
         onClose={() => setCollapsed(true)}
         labelledBy={titleId}
-        describedBy={reasonId}
+        // O leitor de tela lê o motivo e, no tutorial, a dica do fim junto (os ids se separam por espaço).
+        describedBy={note ? `${reasonId} ${noteId}` : reasonId}
         className="w-full tablet:w-[min(92vw,30rem)] max-tablet:mb-0 max-tablet:max-w-none max-tablet:border-x-0 max-tablet:border-b-0"
       >
         <div className="flex flex-col gap-4">
@@ -112,7 +115,7 @@ export function EndPanel({
             </span>
           </p>
 
-          {note}
+          {note ? <div id={noteId}>{note}</div> : null}
 
           <div className="flex flex-col gap-2">
             <Button

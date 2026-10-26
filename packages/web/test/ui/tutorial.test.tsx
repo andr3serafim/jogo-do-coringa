@@ -298,6 +298,13 @@ describe('/tutorial: o painel da dica', () => {
     expect(loadTutorialState(clock.store)).toBe('done');
   });
 
+  it('a dica do fim entra na descrição do diálogo: o leitor de tela a lê junto com o motivo ao abrir', async () => {
+    const clock = await openTutorial();
+    await concede(clock);
+    const dialog = screen.getByRole('dialog', { name: 'Bot venceu' });
+    expect(dialog).toHaveAccessibleDescription(/Você desistiu.*A partida acaba quando um Coringa chega a 0 de vida/);
+  });
+
   it('o tutorial só fica concluído quando a dica do fim aparece no diálogo (nem antes, nem se foi pulado)', async () => {
     const clock = await openTutorial();
     await clock.user.click(screen.getAllByRole('button', { name: 'Menu da partida' })[0]!);
