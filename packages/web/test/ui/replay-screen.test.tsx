@@ -321,6 +321,8 @@ describe('<ReplayScreen />: a mesa de vista e os controles', () => {
   });
 
   it('não mostra marca "novo" no histórico, nem velha nem negativa, ao voltar e avançar de novo', async () => {
+    // O snapshot do replay tem `marksBaseSeq: null` (`replaySnapshot`): por contrato nenhuma linha é "novo" na mesa do replay, e o
+    // contador do botão "Histórico" nunca anda. O teste confere que isso vale em qualquer vai-e-vem, com a gaveta aberta ou fechada.
     const { user } = open();
     const historyButton = () => screen.getByRole('button', { name: /^Histórico/ });
     const checkFrame = (frame: number) => {
@@ -435,6 +437,26 @@ describe('<ReplayScreen />: tocar e pausar', () => {
     await user.click(control('Tocar'));
     await user.selectOptions(screen.getByLabelText('Rodada'), '2');
     expect(control('Tocar')).toBeInTheDocument();
+  });
+
+  it('desmontar a tela enquanto espera o palco assentar cancela os timers (nenhum fica para trás)', async () => {
+    const user = fakeUi();
+    const baseline = vi.getTimerCount();
+    const store = memoryStore();
+    const game = recordPastGame(store, entry(), 1_000)!;
+    const view = render(<ReplayScreen store={store} id={game.id} />);
+
+    await user.click(next());
+    await user.click(control('Tocar'));
+    advance(700); // passo 2 (1600 ms de batidas)
+    advance(700); // os 700 ms do "Tocar" passaram: a tela espera o palco assentar
+    expect(counter()).toBe(`Passo 2 de ${TOTAL}`);
+    expect(busy(view.container)).toBe(true);
+    expect(vi.getTimerCount()).toBeGreaterThan(baseline);
+
+    view.unmount();
+    expect(vi.getTimerCount()).toBe(baseline);
+    advance(10_000); // nada sobrou para disparar
   });
 
   it('para no último quadro: o botão volta a "Tocar" (desligado) e nada mais anda', async () => {
@@ -667,6 +689,22 @@ describe('<ReplayViewer />: cenas de Ataque Absoluto em passos seguidos', () => 
     await user.click(next());
     expect(counter()).toBe('Passo 2 de 3');
     expect(busy(container)).toBe(true);
+  });
+
+  it('desmontar a tela tocando, com a cena no ar (inversão e cortina agendadas), cancela os timers', async () => {
+    const user = fakeUi();
+    const baseline = vi.getTimerCount();
+    const view = render(<ReplayViewer game={GAME} track={absoluteTrack(3)} prefs={DEFAULT_PREFS} />);
+    await user.click(control('Tocar'));
+    advance(700); // passo 1: a cena do Ataque Absoluto (1500 ms)
+    advance(300);
+    expect(counter()).toBe('Passo 1 de 3');
+    expect(busy(view.container)).toBe(true);
+    expect(vi.getTimerCount()).toBeGreaterThan(baseline);
+
+    view.unmount();
+    expect(vi.getTimerCount()).toBe(baseline);
+    advance(10_000);
   });
 
   it('um replay sem nenhum quadro de passo é só o começo: sem erro, com tudo desligado', async () => {

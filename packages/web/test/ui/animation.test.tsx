@@ -701,6 +701,46 @@ describe('palco: Stage sozinho', () => {
     expect(onSettled).toHaveBeenCalledTimes(1);
   });
 
+  // O contrato do `data-sem-pulo` (só os controles do replay o usam): o que está dentro do elemento marcado não pula as batidas e o
+  // clique nele chega; o que está fora continua pulando, e o toque que pulou continua não virando clique.
+  it('data-sem-pulo: o controle marcado não pula as batidas e o clique chega; o sem marca pula e é engolido, como sempre', async () => {
+    const { session, connection, user } = connect(THEIRS);
+    const own = vi.fn();
+    const table = vi.fn();
+    const ui = () => (
+      <Stage snapshot={session.snapshot()} reducedMotion={false}>
+        <section data-sem-pulo>
+          <button type="button" onClick={own}>
+            Controle do replay
+          </button>
+        </section>
+        <button type="button" onClick={table}>
+          Botão da mesa
+        </button>
+      </Stage>
+    );
+    const view = render(ui());
+    emit({ connection }, THEIRS, [TURN, ATTACK, HIT]);
+    view.rerender(ui());
+    expect(busy(view.container)).toBe(true);
+
+    // Marcado (o botão está DENTRO do elemento marcado): as batidas seguem, e o clique é dele, uma vez por clique.
+    await user.click(screen.getByRole('button', { name: 'Controle do replay' }));
+    expect(own).toHaveBeenCalledTimes(1);
+    expect(busy(view.container)).toBe(true);
+    await user.click(screen.getByRole('button', { name: 'Controle do replay' }));
+    expect(own).toHaveBeenCalledTimes(2);
+    expect(busy(view.container)).toBe(true);
+
+    // Sem marca: o toque pula as batidas, e o clique do mesmo gesto não chega ao botão. O gesto seguinte, já sem batidas, chega.
+    await user.click(screen.getByRole('button', { name: 'Botão da mesa' }));
+    expect(busy(view.container)).toBe(false);
+    expect(table).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: 'Botão da mesa' }));
+    expect(table).toHaveBeenCalledTimes(1);
+    expect(own).toHaveBeenCalledTimes(2);
+  });
+
   it('onSettled também avisa no pulo, e não avisa quando não houve batida', async () => {
     const { session, connection, user } = connect(THEIRS);
     const onSettled = vi.fn();
