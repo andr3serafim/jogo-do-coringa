@@ -197,7 +197,7 @@ Todas as rotas ficam sob `/api`. Corpo JSON de até 1 KiB. As rotas que não sã
 | `ack` | `id`, `ok`, `seq?`, `held?`, `code?`, `message?` | resposta a `act` e `concede` |
 | `error` | `code`, `message` | erro fora de uma jogada (mensagem malformada, protocolo incompatível) |
 
-- `view` = `viewFor(estado, quem recebe)`; `events` = `viewEvents(eventos do passo, quem recebe)`. **Nada mais do `GameState` sai do servidor.**
+- `view` = `viewFor(estado, quem recebe)`; `events` = `viewEvents(eventos do passo, quem recebe)`. **Nada mais do `GameState` sai do servidor, salvo o `replay`, depois do fim da partida.**
 - `deadline` = `{ kind: 'EQUIP' | 'ORDER' | 'TURN' | 'REACTION', at, players }` ou `null`. `at` é o instante (relógio do servidor, em ms) que a interface mostra. `pausedTurnMs` aparece durante uma janela de reação aberta no meio do turno de quem espera (§6.2).
 - `serverNow` permite ao cliente estimar a diferença de relógio.
 - `outcome` = `{ gameNo, result, cause }`, com `cause` igual a `NORMAL`, `RECONNECT_TIMEOUT`, `AFK`, `CONCEDE` ou `ABANDONED`. O motor só conhece `reason: 'FORFEIT'`; a causa é do servidor. Em `ABANDONED` (§7.2), `result` é `null`: a partida acabou sem resultado.
@@ -403,7 +403,7 @@ O `deadline.at` enviado é o que a interface mostra; o servidor só injeta o `TI
 
 ### 8.4 Nada de informação oculta no fio
 
-- Para o jogador X sai só: `viewFor(estado, X)`, `viewEvents(eventos, X)`, dados públicos da sala e respostas às mensagens do próprio X.
+- Para o jogador X sai só: `viewFor(estado, X)`, `viewEvents(eventos, X)`, dados públicos da sala e respostas às mensagens do próprio X, salvo o `replay`, depois do fim da partida (a linha seguinte).
 - A semente é gerada no objeto (`crypto.getRandomValues`, 128 bits), uma nova por partida e por revanche, nunca derivada da anterior. Ela não aparece em nenhuma mensagem enquanto a partida pode continuar; depois do fim (sala `FINISHED`, W.O. ou sala encerrada), a mensagem `replay` a leva (spec 4 §4.2). Ela sai sempre depois do `room` em `FINISHED` da mesma partida, e nunca durante uma partida que pode continuar: nem no `hello` de quem volta com a partida em andamento, nem na revanche que já largou.
 - Tempo: piso de 2 s na janela de reação (§6.3); o servidor não passa sozinho; o Equipar automático só acontece quando a quantidade já é pública.
 - **Erros não viram oráculo:** a resposta a uma jogada recusada depende só da mão de X, do cemitério e do campo público. Isso já vale no motor hoje (os erros só consultam a mão de quem joga, o cemitério e o campo do oponente). A mensagem de erro pode repetir o id que o próprio X enviou.

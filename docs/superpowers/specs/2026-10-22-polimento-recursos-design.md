@@ -168,22 +168,30 @@ modelo da web. **[decisão minha]** As pistas:
 
 ### 4.2 De onde vem o replay
 - **Treino:** o `LocalRoom` já tem a semente e as jogadas; no fim da partida ele emite o evento `replay` da conexão
-  (`{ t: 'replay', gameNo, replay }`, a mesma mensagem que o servidor manda online na fatia 3), logo antes do `room` em
+  (`{ t: 'replay', gameNo, replay }`, a mesma mensagem que o servidor manda online), logo antes do `room` em
   `FINISHED`. A sessão só guarda o replay cujo `gameNo` é o da sala, e a mesa grava a partida na lista assim que a sala vira
   `FINISHED` (com o replay, quando ele chegou); o painel de fim oferece "Rever a partida" quando a partida ficou guardada com
   replay.
-- **Online:** o servidor já monta o replay no fim da partida (hoje só para o log). Ele passa a mandar uma mensagem nova,
-  `{ t: 'replay', gameNo, replay }`, aos dois assentos quando a partida termina, e de novo no `hello` com a sala em `FINISHED`
-  (só a da partida terminada, nunca a de uma revanche em curso).
-  - É aditiva: o `RoomClient` (web e terminal) ignora tipos que não conhece. O `PROTOCOL_VERSION` não muda.
-  - **Ponto para aprovação explícita:** a spec 2 diz que a semente nunca sai do servidor. A regra passa a ser "a semente de uma
-    partida só sai depois do fim dela, no replay". Cada partida sorteia a sua (`randomBytes(16)`), então a semente de uma partida
-    não diz nada sobre a seguinte. O replay em si contém a mão do oponente na partida inteira (quem ler o armazenamento a vê),
-    mas o visualizador mostra só a vista do seu assento, sem botão para ver as cartas do outro **[decisão minha]**.
-  - **Se a mudança for recusada:** a fatia 3 sai. As partidas online ficam na lista, sem "Rever"; só o treino tem replay.
+- **Online:** o servidor já montava o replay no fim da partida (para o log) e passou a mandá-lo numa mensagem nova,
+  `{ t: 'replay', gameNo, replay }`. Ela sai sempre depois do `room` em `FINISHED` da mesma partida, em três momentos:
+  - **no fim da partida** (do motor, W.O., desistência ou abandono): o `room` com o desfecho e, logo depois, o `replay`, a quem
+    segue aberto;
+  - **no `hello` com a sala em `FINISHED`** e sem revanche em curso: o `room` e o `replay` só ao socket que voltou (os outros já o
+    têm);
+  - **na expiração da sala no meio da partida** (que vira abandono): o `room` abandonado e o `replay`, antes do fechamento 4000.
   - A mensagem só sai quando a partida não pode mais continuar: sala `FINISHED` (fim do motor ou W.O.) ou sala encerrada. Nunca
     durante uma partida viva, nem durante a revanche em curso. Uma desconexão com volta possível não conta; o abandono só conta
     quando é terminal (a sala acabou), e aí o replay vai até onde a partida foi.
+  - É aditiva: o `RoomClient` (web e terminal) ignora tipos que não conhece. O `PROTOCOL_VERSION` não muda.
+  - **Mudança na spec 2 (aprovada e entregue):** a semente de uma partida só sai depois do fim dela, no replay (spec 2 §4.4 e
+    §8.4). Cada partida sorteia a sua (`randomBytes(16)`), então a semente de uma partida não diz nada sobre a seguinte. O replay
+    em si contém a mão do oponente na partida inteira (quem ler o armazenamento a vê), mas o visualizador mostra só a vista do seu
+    assento, sem botão para ver as cartas do outro **[decisão minha]**.
+  - **Na web:** a sessão guarda o replay cujo `gameNo` é o da sala. Como o `room` em `FINISHED` chega antes do `replay`, a mesa
+    grava a partida na lista assim que a sala vira `FINISHED` (sem replay; a `key` `sala:<código>:<gameNo>` junta a mesma partida
+    quando ela chega duas vezes) e, quando o `replay` chega, o **acrescenta à linha já gravada** (uma vez por partida, e só se o
+    `gameNo` for o da linha). Só então o painel de fim oferece "Rever a partida". Isso vale mesmo que a sala feche logo depois
+    (4000): o `replay` chega antes do fechamento.
   - Um teste do núcleo prova que cada partida nova, inclusive a revanche, pede `randomBytes` para a semente e nunca a deriva da
     anterior.
 
@@ -201,7 +209,9 @@ modelo da web. **[decisão minha]** As pistas:
 - Servidor: a mensagem `replay` no fim, no `hello` em `FINISHED`, nunca durante a partida nem na revanche em curso, e a semente
   nova a cada partida.
 - Componente: os controles do replay e o aviso de versão.
-- E2E: terminar uma partida de treino (desistindo), abrir "Rever a partida", avançar passos e voltar.
+- E2E: terminar uma partida de treino (desistindo), abrir "Rever a partida", avançar passos e voltar; e, online, duas pessoas
+  numa sala, uma desiste, o painel de fim das duas oferece "Rever a partida", o replay anda um passo e a lista mostra "Sala
+  <código>" com "Rever".
 
 ---
 
