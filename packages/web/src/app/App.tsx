@@ -63,13 +63,13 @@ function Routes({ api, store }: { api: RoomApi; store: KeyValueStore }) {
     case 'pastGames':
       return (
         <Suspense fallback={<ScreenLoading />}>
-          <PastGames />
+          <PastGames store={store} />
         </Suspense>
       );
     case 'pastGame':
       return (
         <Suspense fallback={<ScreenLoading />}>
-          <ReplayScreen />
+          <ReplayScreen key={route.id} store={store} id={route.id} />
         </Suspense>
       );
     case 'notFound':

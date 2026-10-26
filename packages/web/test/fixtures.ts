@@ -18,6 +18,8 @@ import {
   type PlayerView,
   type Rank,
   type ReactionTrigger,
+  type Replay,
+  type ReplayStep,
   type RowName,
   type SpecialCard,
   type SpecialKind,
@@ -69,6 +71,31 @@ export function seededSteps(seed: string, steps: number, bots: [BotName, BotName
     state = result.state;
   }
   return out;
+}
+
+/** Uma partida de verdade (greedy × greedy, até o fim) no formato do replay do motor. */
+export function realReplay(seed: string): Replay {
+  const config = makeConfig();
+  const created = createGame(config, seed, SEATS);
+  if (!created.ok) throw new Error(created.error.message);
+  let state = created.state;
+  const rngs = [createRng(`${seed}/p1`), createRng(`${seed}/p2`)] as const;
+  const steps: ReplayStep[] = [];
+  while (state.phase.kind !== 'GAME_OVER') {
+    const actor = actingPlayers(state)[0]!;
+    const view = viewFor(state, actor);
+    const action = BOTS.greedy(view, legalActions(view), rngs[actor === SEATS[0] ? 0 : 1]);
+    const result = applyAction(state, actor, action);
+    if (!result.ok) throw new Error(`bot jogou ação ilegal (${result.error.code})`);
+    steps.push({ player: actor, action });
+    state = result.state;
+  }
+  return { name: `treino-${seed}`, config, seed, players: SEATS, steps };
+}
+
+/** O mesmo replay com o passo `index` (a partir de 0) trocado. */
+export function withStep(replay: Replay, index: number, step: ReplayStep): Replay {
+  return { ...replay, steps: replay.steps.map((old, i) => (i === index ? step : old)) };
 }
 
 // ---------------------------------------------------------------------------------------------

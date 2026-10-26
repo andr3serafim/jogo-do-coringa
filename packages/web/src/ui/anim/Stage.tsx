@@ -9,13 +9,14 @@
 //   cena segue sem ela; a cortina que não pode subir deixa só o painel, e a que não pode descer espera. Com movimento
 //   reduzido, nunca há inversão.
 // - Um toque na mesa (ou Esc) durante as batidas termina tudo na hora. O toque que pulou não vira clique: a barra de ação
-//   desligada não pode receber, no mesmo gesto, a jogada que o jogador nem viu liberada.
+//   desligada não pode receber, no mesmo gesto, a jogada que o jogador nem viu liberada. Só os controles marcados com
+//   `data-sem-pulo` (os do replay) ficam de fora: o clique neles é deles.
 // - Cada batida ao vivo toca a pista dela (`cueOf`), uma vez, quando a batida começa. O `catchUp` (eventos perdidos numa
 //   reconexão) e o `resync` (que nem tem batidas) são mudos; o pulo termina as batidas, e as pistas que faltavam não tocam.
 // - O Motion vem com `LazyMotion`: o recurso de layout (`layoutId` das cartas) só existe no `domMax`, carregado por
 //   `import()` à parte, fora do JavaScript inicial (spec §12).
 import { LazyMotion, MotionConfig } from 'motion/react';
-import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
 import { effectsOf, NO_EFFECTS } from '../../model/effects.ts';
 import { roomNames } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
@@ -28,6 +29,13 @@ import { useBeatPlayer } from './useBeatPlayer.ts';
 
 /** Quanto o clique do gesto que pulou pode demorar depois do `pointerup` (o toque no celular chega em outra tarefa). */
 const CLICK_GRACE_MS = 400;
+
+/**
+ * Controle que mora dentro do palco sem ser da mesa (os do replay, na barra de baixo da mesa): um toque nele é só dele, não pula as
+ * batidas e não é engolido. Sem isso, o primeiro clique em "Pausar" ou em "Próximo passo" durante uma cena só a pularia.
+ */
+const OWN_CONTROL = '[data-sem-pulo]';
+const isOwnControl = (target: EventTarget | null): boolean => target instanceof Element && target.closest(OWN_CONTROL) !== null;
 
 const loadMotionFeatures = () => import('./motion-features.ts').then((module) => module.default);
 
@@ -136,7 +144,8 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
     },
     [],
   );
-  const onPointerDown = () => {
+  const onPointerDown = (event: PointerEvent) => {
+    if (isOwnControl(event.target)) return;
     clearTouch();
     skippedByTouch.current = busy;
     if (busy) skip();
@@ -145,6 +154,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
     if (skippedByTouch.current) forgetTouch.current = window.setTimeout(clearTouch, CLICK_GRACE_MS);
   };
   const onClick = (event: MouseEvent) => {
+    if (isOwnControl(event.target)) return;
     if (skippedByTouch.current) {
       clearTouch();
       event.stopPropagation();

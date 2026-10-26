@@ -413,6 +413,8 @@ export const PAST_GAMES_LABEL = 'Partidas anteriores';
 export const BACK_TO_LIST_LABEL = 'Voltar à lista';
 /** Enquanto o pedaço de uma tela carregada sob demanda não chega. */
 export const SCREEN_LOADING_TEXT = 'Carregando…';
+/** Na faixa central da mesa do replay, no lugar do relógio (a mesa é a de sempre, só de vista). Mora aqui porque a `CenterBand` está no JavaScript inicial. */
+export const REPLAY_BAND_TEXT = 'Revendo a partida';
 
 // ---------------------------------------------------------------------------------------------
 // Resumo das regras (spec 1 §1.6 a §1.8; revisado pela sessão principal em 2026-10-21, por delegação do autor)

@@ -45,6 +45,8 @@ export interface TableProps {
   actionBar?: ReactNode;
   /** Treino contra o bot, e o nível dele: a faixa central diz "Treino · Médio, sem relógio" e a vez do jogador é anunciada sem prazo. */
   training?: TrainingLevel;
+  /** A mesa do replay (só de vista): a faixa central diz "Revendo a partida" no lugar do relógio. */
+  replay?: true;
 }
 
 const NO_TARGETS: ReadonlySet<string> = new Set();
@@ -72,6 +74,7 @@ function TableView({
   onInteract,
   actionBar,
   training,
+  replay,
 }: TableProps & { state: StateMessage }) {
   const { room, marks, marksBaseSeq, history } = snapshot;
   const { view } = state;
@@ -196,6 +199,7 @@ function TableView({
               pausedTurnMs={state.pausedTurnMs}
               turn={turnCue(state, snapshot.legal)}
               training={training}
+              replay={replay}
               onOpenGraveyard={onOpenGraveyard}
             />
             <PlayerField side="self" view={view} player={self} name={names.self} />

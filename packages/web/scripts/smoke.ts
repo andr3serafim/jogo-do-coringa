@@ -8,6 +8,7 @@
  *   e um bot que sumisse do `dist` também passaria por "fora do inicial".
  * - o sintetizador dos sons (`src/sound/synth.ts`) também fica fora do JavaScript inicial: só o controlador (`controller.ts`)
  *   está no inicial, e o `synth.ts` entra por `import()` dinâmico no primeiro gesto. Mesma dupla de conferências do bot.
+ * - as duas telas das partidas anteriores (a lista e o visualizador do replay) também: entram por `React.lazy`. Mesma dupla.
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -31,6 +32,15 @@ const BOT_MARKS = [BOT_NAME_MARK, BOT_TEXT_MARK, HARD_TEXT_MARK];
  * string de uma receita; as duas só existem no `synth.ts`. Qualquer uma num `.js` inicial reprova, e o chunk do sintetizador tem as duas.
  */
 const SYNTH_MARKS = ['createDynamicsCompressor', 'sawtooth'];
+/**
+ * Marcas das duas telas das partidas anteriores: um texto que só uma delas diz (literais de string sobrevivem à minificação). Os
+ * textos moram em `src/model/past-games-copy.ts`, que só as telas importam; no `copy.ts`, que o código inicial importa, eles
+ * pesariam no pacote inicial. Cada marca tem que estar num chunk à parte e em nenhum `.js` inicial.
+ */
+const PAST_GAMES_SCREEN_MARKS = [
+  { screen: 'a lista das partidas', mark: 'Nenhuma partida terminada neste navegador.' },
+  { screen: 'o visualizador do replay', mark: 'Passo anterior' },
+];
 
 const dist = join(import.meta.dirname, '..', 'dist');
 const indexPath = join(dist, 'index.html');
@@ -93,6 +103,9 @@ for (const url of initial) {
   if (synth !== undefined) {
     problems.push(`${url} contém o sintetizador dos sons ("${synth}"): ele tem que entrar por import() dinâmico, fora do inicial`);
   }
+  for (const { screen, mark } of PAST_GAMES_SCREEN_MARKS) {
+    if (source.includes(mark)) problems.push(`${url} contém ${screen} ("${mark}"): ela tem que entrar por React.lazy, fora do inicial`);
+  }
 }
 console.log(`  total: ${kb(total)} de ${kb(BUDGET_BYTES)}`);
 if (total > BUDGET_BYTES) problems.push(`JavaScript inicial com ${kb(total)} gzip passa do orçamento de ${kb(BUDGET_BYTES)}`);
@@ -131,6 +144,16 @@ if (synthChunks.length === 0) {
   );
 } else {
   console.log(`Sintetizador dos sons (fora do inicial): ${synthChunks.map(fromDist).join(', ')}`);
+}
+
+// As duas telas das partidas anteriores têm que existir em algum chunk que não é o inicial, pelo mesmo motivo.
+for (const { screen, mark } of PAST_GAMES_SCREEN_MARKS) {
+  const chunks = all.filter((path) => !initialPaths.has(path) && readFileSync(path).includes(mark));
+  if (chunks.length === 0) {
+    problems.push(`${screen} ("${mark}") não está em nenhum chunk carregado sob demanda: o React.lazy sumiu, ou o texto mudou`);
+  } else {
+    console.log(`Tela das partidas anteriores, ${screen} (fora do inicial): ${chunks.map(fromDist).join(', ')}`);
+  }
 }
 
 if (problems.length > 0) throw new Error(`smoke da web falhou:\n- ${problems.join('\n- ')}`);

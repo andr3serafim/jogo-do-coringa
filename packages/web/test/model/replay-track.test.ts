@@ -1,9 +1,6 @@
 import {
-  actingPlayers,
   applyAction,
   createGame,
-  legalActions,
-  makeConfig,
   viewEvents,
   viewFor,
   type Action,
@@ -14,13 +11,12 @@ import {
   type ReplayStep,
 } from '@coringa/engine';
 import type { RoomMessage } from '@coringa/protocol';
-import { BOTS } from '@coringa/sim/bots';
-import { createRng } from '@coringa/sim/rng';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { RESYNC_TEXT, roomNames } from '../../src/model/history.ts';
 import { NO_MARKS } from '../../src/model/marks.ts';
 import { buildTrack, frameMessage, replaySnapshot, type ReplayTrack } from '../../src/model/replay-track.ts';
 import { DEFAULT_PREFS } from '../../src/model/storage.ts';
+import { realReplay, withStep } from '../fixtures.ts';
 
 /** Faz o `applyAction` do motor lançar na `failAt`-ésima chamada (1 = a primeira), para o `catch` do `buildTrack`. Desligado, passa direto. */
 const engineFault = vi.hoisted(() => ({ failAt: null as number | null, calls: 0 }));
@@ -59,26 +55,6 @@ const room = (gameNo: number): RoomMessage => ({
   expiresAt: 0,
 });
 
-/** Uma partida de verdade (greedy × greedy, até o fim) no formato do replay do motor. */
-function realReplay(seed: string): Replay {
-  const config = makeConfig();
-  const created = createGame(config, seed, SEATS);
-  if (!created.ok) throw new Error(created.error.message);
-  let state = created.state;
-  const rngs = [createRng(`${seed}/p1`), createRng(`${seed}/p2`)] as const;
-  const steps: ReplayStep[] = [];
-  while (state.phase.kind !== 'GAME_OVER') {
-    const actor = actingPlayers(state)[0]!;
-    const view = viewFor(state, actor);
-    const action = BOTS.greedy(view, legalActions(view), rngs[actor === SEATS[0] ? 0 : 1]);
-    const result = applyAction(state, actor, action);
-    if (!result.ok) throw new Error(`bot jogou ação ilegal (${result.error.code})`);
-    steps.push({ player: actor, action });
-    state = result.state;
-  }
-  return { name: `treino-${seed}`, config, seed, players: SEATS, steps };
-}
-
 /** O motor re-executado à parte: o estado e os eventos (sem redação) de cada quadro, para conferir a trilha. */
 function reference(replay: Replay): { state: GameState; events: GameEvent[] }[] {
   const created = createGame(replay.config, replay.seed, replay.players);
@@ -95,11 +71,6 @@ function reference(replay: Replay): { state: GameState; events: GameEvent[] }[] 
 const REPLAY = realReplay('trilha-1');
 const STEPS = REPLAY.steps.length;
 const TRACK = buildTrack(REPLAY, 'p1', names);
-
-/** O mesmo replay com o passo `index` (a partir de 0) trocado. */
-function withStep(replay: Replay, index: number, step: ReplayStep): Replay {
-  return { ...replay, steps: replay.steps.map((old, i) => (i === index ? step : old)) };
-}
 
 /** Um índice de passo que traz eventos (a trilha de verdade tem muitos). */
 const EVENTFUL = TRACK.frames.findIndex((frame, i) => i > 0 && frame.state.events.length > 0);
@@ -214,6 +185,20 @@ describe('frameMessage', () => {
   it('o mesmo salto devolve a mesma mensagem (o palco compara por identidade)', () => {
     expect(frameMessage(TRACK, 0, 9)).toBe(frameMessage(TRACK, 4, 9));
     expect(frameMessage(TRACK, 0, 9)).not.toBe(frameMessage(TRACK, 0, 10));
+  });
+
+  it('a sequência 5 → 6, 6 → 5, 5 → 6: mensagens vizinhas nunca são o mesmo objeto, e o avanço volta a trazer os eventos', () => {
+    const forward = frameMessage(TRACK, 5, 6);
+    const back = frameMessage(TRACK, 6, 5);
+    const forwardAgain = frameMessage(TRACK, 5, 6);
+    expect(back).not.toBe(forward);
+    expect(forwardAgain).not.toBe(back);
+    // O avanço é sempre o `state` do quadro: o palco o reconhece como novo depois do salto e refaz as batidas.
+    expect(forwardAgain).toBe(forward);
+    expect(forwardAgain.events).toEqual(TRACK.frames[6]!.state.events);
+    expect(forwardAgain.resync).toBeUndefined();
+    expect(back.resync).toBe(true);
+    expect(back.events).toEqual([]);
   });
 
   it('um quadro fora da trilha é erro de quem chama', () => {

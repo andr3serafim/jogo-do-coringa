@@ -1,9 +1,13 @@
+import { RULES_VERSION } from '@coringa/engine';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../../src/app/App.tsx';
 import { navigate } from '../../src/app/router.ts';
+import { recordPastGame } from '../../src/model/past-games.ts';
+import { safeStore } from '../../src/model/storage.ts';
 import { STORAGE_WARNING } from '../../src/ui/text.ts';
+import { realReplay } from '../fixtures.ts';
 import { CODE, fakeApi, seriousViolations } from './support.tsx';
 
 beforeEach(() => {
@@ -71,6 +75,43 @@ describe('<App />: rotas', () => {
     await userEvent.click(screen.getByRole('link', { name: 'Voltar à lista' }));
     expect(window.location.pathname).toBe('/partidas');
     expect(await screen.findByRole('heading', { name: 'Partidas anteriores' })).toBeInTheDocument();
+  });
+
+  it('/partidas lista a partida guardada, "Rever" abre o replay dela, e outro id recomeça do passo 0', async () => {
+    const store = safeStore(window.localStorage).store;
+    const replay = realReplay('app-1');
+    const game = (name: string, now: number) =>
+      recordPastGame(
+        store,
+        {
+          date: new Date(2026, 9, 25, 14, 30).getTime(),
+          mode: { kind: 'training', level: 'medio' },
+          seat: 'p1',
+          names: { me: 'Ana', opponent: name },
+          outcome: { gameNo: 1, cause: 'NORMAL', result: { kind: 'WIN', winner: 'p1', reason: 'HP' } },
+          rounds: 9,
+          score: { p1: 1, p2: 0, draws: 0 },
+          rulesVersion: RULES_VERSION,
+          replay,
+        },
+        now,
+      )!;
+    const first = game('Duda', 1_000);
+    const second = game('Bia', 2_000);
+    window.history.replaceState(null, '', '/partidas');
+    render(<App api={fakeApi()} />);
+
+    const rows = await screen.findAllByRole('button', { name: 'Rever' });
+    expect(rows).toHaveLength(2);
+    await userEvent.click(rows[1]!); // a mais velha: a primeira gravada
+    expect(window.location.pathname).toBe(`/partidas/${first.id}`);
+    expect(await screen.findByRole('region', { name: 'Campo de Duda' })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Próximo passo' }));
+    expect(screen.getByText(/^Passo 1 de \d+$/)).toBeInTheDocument();
+
+    act(() => navigate(`/partidas/${second.id}`));
+    expect(await screen.findByRole('region', { name: 'Campo de Bia' })).toBeInTheDocument();
+    expect(screen.getByText(/^Passo 0 de \d+$/)).toBeInTheDocument();
   });
 
   it('um id fora do formato em /partidas/<id> é "Página não encontrada"', () => {

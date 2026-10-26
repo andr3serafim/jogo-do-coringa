@@ -1,6 +1,7 @@
 // Peças compartilhadas das telas de início e de entrada e do menu da partida, no tema da Peleja (spec §10): capa colorida,
 // tinta, títulos em tipo de madeira e botões ouro. Alvos de toque ≥ 44 px; campos de texto com 16 px.
 import { useId, type ComponentPropsWithoutRef, type ReactNode } from 'react';
+import { navigate } from '../app/router.ts';
 import { SWITCH_OFF, SWITCH_ON } from '../model/copy.ts';
 
 /** A tela inteira: um `<main>` sobre a capa rosa (a sua) ou verde (a do oponente). */
@@ -37,6 +38,26 @@ export function Button({
 }: ComponentPropsWithoutRef<'button'> & { variant?: 'primary' | 'secondary' }) {
   const tone = variant === 'primary' ? 'bg-ouro' : 'bg-papel';
   return <button type="button" className={`${BUTTON_BASE} ${tone} ${className}`} {...rest} />;
+}
+
+/**
+ * Um link para outra tela do site: um `<a href>` de verdade (abre em outra aba, mostra o destino), que no clique simples
+ * navega pelo roteador, sem recarregar a página. O clique com Ctrl, Cmd ou Shift, ou com outro botão do mouse, fica com o navegador.
+ */
+export function AppLink({ to, children, className = '' }: { to: string; children: ReactNode; className?: string }) {
+  return (
+    <a
+      href={to}
+      onClick={(event) => {
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return;
+        event.preventDefault();
+        navigate(to);
+      }}
+      className={`inline-flex min-h-11 items-center font-bold underline ${className}`}
+    >
+      {children}
+    </a>
+  );
 }
 
 export function TextField({
