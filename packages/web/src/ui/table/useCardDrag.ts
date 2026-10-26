@@ -2,9 +2,11 @@
 // se o gesto vale agora (`enabled`), quais zonas aceitam a carta (`zones`, lida na hora) e o que fazer com a soltura e com o toque.
 //
 // - O `pointerdown` guarda o ponto. Só depois de `DRAG_THRESHOLD_PX` de movimento vira arrasto; antes disso, o `pointerup` é o toque
-//   (`onTap`). O clique que o navegador manda depois de um toque ou de um arrasto é engolido (`CLICK_GRACE_MS`): o `onTap` é o único
-//   caminho do ponteiro, e quem liga o mesmo gesto a um botão pode deixar o `onClick` dele para o teclado e para os leitores de tela,
-//   cujo clique não vem de um ponteiro e passa direto. Nunca ligue `onTap` e `onClick` a efeitos diferentes.
+//   (`onTap`). O clique que o navegador manda depois de um toque ou de um arrasto é engolido (`CLICK_GRACE_MS`, ou até o próximo
+//   `pointerdown` ou tecla): o `onTap` é o único caminho do ponteiro, e quem liga o mesmo gesto a um botão pode deixar o `onClick` dele
+//   para o teclado e para os leitores de tela, cujo clique não vem de um ponteiro e passa direto. Nunca ligue `onTap` e `onClick` a
+//   efeitos diferentes. O clique é engolido na janela, em captura: nenhum ouvinte de clique do caminho (a carta, os ancestrais, o
+//   `onClickCapture` do palco e o da mesa) o vê. Só o `pointerdown` e o foco seguem normais.
 // - No arrasto, o ponteiro é capturado, o fantasma (`DragGhost`) segue o dedo e a zona sob ele sai de `elementFromPoint` +
 //   `closest('[data-soltar]')`; só conta se estiver em `zones()`. As zonas válidas ganham `data-soltar-ativo` enquanto a carta está no
 //   ar, e a que está sob o dedo também `data-soltar-sob` (o contorno é CSS parado, em `styles.css`). A soltura chama `onDrop(chave)`, ou
@@ -131,7 +133,11 @@ function createDragController(initial: CardDragOptions, host: Host) {
     host.setOver(null);
   };
 
-  /** Engole o clique que o navegador manda depois do gesto que acabou, até a folga ou o próximo gesto. */
+  /**
+   * Engole o clique que o navegador manda depois do gesto que acabou. Vale até o clique, a folga ou qualquer outro gesto (um
+   * `pointerdown` ou uma tecla, de qualquer elemento): o arrasto de dedo que passa da tolerância não gera clique nenhum, e essa
+   * espera não pode comer o clique seguinte em outro botão.
+   */
   const swallowClick = () => {
     stopSwallow?.();
     const onClick = (event: MouseEvent) => {
@@ -139,10 +145,15 @@ function createDragController(initial: CardDragOptions, host: Host) {
       event.preventDefault();
       stopSwallow?.();
     };
-    const timer = window.setTimeout(() => stopSwallow?.(), CLICK_GRACE_MS);
+    const release = () => stopSwallow?.();
+    const timer = window.setTimeout(release, CLICK_GRACE_MS);
     window.addEventListener('click', onClick, true);
+    window.addEventListener('pointerdown', release, true);
+    window.addEventListener('keydown', release, true);
     stopSwallow = () => {
       window.removeEventListener('click', onClick, true);
+      window.removeEventListener('pointerdown', release, true);
+      window.removeEventListener('keydown', release, true);
       window.clearTimeout(timer);
       stopSwallow = null;
     };

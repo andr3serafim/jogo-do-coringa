@@ -273,6 +273,34 @@ describe('useCardDrag: a soltura', () => {
     expect(onTap).not.toHaveBeenCalled();
   });
 
+  it('o arrasto de dedo, que não gera clique, não come o clique seguinte em outro botão (qualquer pointerdown ou tecla desfaz a espera)', () => {
+    const onOther = vi.fn();
+    render(
+      <>
+        <Harness />
+        <button type="button" onClick={onOther}>
+          Confirmar
+        </button>
+      </>,
+    );
+    const other = () => screen.getByRole('button', { name: 'Confirmar' });
+    down();
+    move(60, 60);
+    up(60, 60);
+    // Nenhum clique veio, e o dedo já toca em outro botão dentro da folga.
+    fireEvent.pointerDown(other(), { pointerId: 2, button: 0, clientX: 300, clientY: 300 });
+    fireEvent.pointerUp(other(), { pointerId: 2, button: 0, clientX: 300, clientY: 300 });
+    fireEvent.click(other());
+    expect(onOther).toHaveBeenCalledTimes(1);
+    // O mesmo com o teclado: o Enter que vem logo depois do arrasto não é engolido.
+    down();
+    move(60, 60);
+    up(60, 60);
+    fireEvent.keyDown(other(), { key: 'Enter' });
+    fireEvent.click(other());
+    expect(onOther).toHaveBeenCalledTimes(2);
+  });
+
   it('o próximo gesto desfaz a espera do clique engolido', () => {
     const onTap = vi.fn();
     render(<Harness onTap={onTap} />);
