@@ -153,6 +153,21 @@ export function handIds(page: Page): Promise<string[]> {
 }
 
 // ---------------------------------------------------------------------------------------------
+// O replay (`/partidas/<id>`): o do treino e o da partida online têm a mesma tela
+
+/** O contador "Passo n de N" do visualizador. */
+export const replayCounter = (page: Page): Locator => page.getByText(/^Passo \d+ de \d+$/);
+/** Um controle do visualizador, pelo nome ("Início", "Passo anterior", "Próximo passo", "Tocar", "Pausar"). */
+export const replayControl = (page: Page, name: string): Locator => page.getByRole('button', { name, exact: true });
+
+/** O que o contador diz agora: o passo e o total de passos do replay. */
+export async function replaySteps(page: Page): Promise<{ step: number; total: number }> {
+  const match = /^Passo (\d+) de (\d+)$/.exec((await replayCounter(page).innerText()).trim());
+  expect(match, 'o contador "Passo n de N"').not.toBeNull();
+  return { step: Number(match![1]), total: Number(match![2]) };
+}
+
+// ---------------------------------------------------------------------------------------------
 // Jogar pela interface
 
 /**

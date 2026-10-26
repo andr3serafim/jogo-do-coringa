@@ -1,6 +1,7 @@
 // E2E online (spec §9.2, item 1): duas pessoas, cada uma no seu navegador, contra o `wrangler dev` servindo a web construída.
 // Criar a sala, entrar pelo link, os dois prontos, duas rodadas de Equipar, a escolha da ordem, um ataque com reação, a queda
-// e a volta de um lado, desistir, o painel de fim e a revanche. Cada tela passa pelo axe.
+// e a volta de um lado, desistir, o painel de fim e a revanche. Cada tela passa pelo axe. Um segundo teste, curto, confere o
+// replay da partida online (spec do polimento §4.2): "Rever a partida" nas duas telas, o visualizador e a lista com "Sala <código>".
 //
 // O servidor de teste sobe com `E2E_SEED=e2e` (playwright.config.ts), o que fixa só o sorteio da partida: a primeira distribuição
 // é sempre a mesma (uma conferência abaixo avisa se não for). Os prazos, o piso de 2 s do passe automático e o relógio do
@@ -21,6 +22,9 @@ import {
   openMenu,
   orderPanel,
   playUntil,
+  replayControl,
+  replayCounter,
+  replaySteps,
   roundHeading,
   roundNumber,
   table,
@@ -247,6 +251,90 @@ test('duas pessoas jogam uma sala: do lobby ao fim, com queda e revanche', async
     await axe(ana.page);
     await axe(duda.page);
   });
+
+  for (const player of players) player.console.expectClean();
+});
+
+/** Ana cria a sala, Duda entra pelo link e os dois marcam pronto: a partida começa na rodada 1, e a função devolve o código da sala. */
+async function startOnlineGame(ana: Player, duda: Player): Promise<string> {
+  await ana.page.goto('/');
+  await ana.page.getByLabel('Seu apelido').fill(ana.name);
+  await ana.page.getByRole('button', { name: 'Criar sala' }).click();
+  await expect(ana.page.getByRole('heading', { name: 'Sala de espera' })).toBeVisible();
+  await expect(ana.page).toHaveURL(/\/s\/[A-Z0-9]{6}$/);
+  const code = /\/s\/([A-Z0-9]{6})$/.exec(ana.page.url())?.[1];
+  if (code === undefined) throw new Error(`o código da sala não está na URL: ${ana.page.url()}`);
+
+  await duda.page.goto(`/s/${code}`);
+  await duda.page.getByLabel('Seu apelido').fill(duda.name);
+  await duda.page.getByRole('button', { name: 'Entrar', exact: true }).click();
+  await expect(duda.page.getByRole('heading', { name: 'Sala de espera' })).toBeVisible();
+  await expect(ana.page.getByText('Conectado', { exact: true })).toHaveCount(2);
+
+  await readyButton(ana.page).click();
+  await readyButton(duda.page).click();
+  for (const player of [ana, duda]) await expect(roundHeading(player.page)).toHaveText('Rodada 1');
+  return code;
+}
+
+test('partida online terminada: as duas telas oferecem "Rever a partida", o replay anda e a lista mostra a sala com "Rever"', async ({ browser }) => {
+  const ana = await newPlayer(browser, 'Ana');
+  const duda = await newPlayer(browser, 'Duda');
+  const players = [ana, duda];
+  const code = await startOnlineGame(ana, duda);
+
+  // Um Equipar de cada um antes de desistir: o replay tem passos para andar (desistindo logo na largada ele poderia ter zero).
+  await Promise.all([equipByUi(ana.page), equipByUi(duda.page)]);
+  for (const player of players) await expect(roundHeading(player.page)).toHaveText('Rodada 2');
+
+  await openMenu(ana.page);
+  await ana.page.getByRole('button', { name: 'Desistir', exact: true }).click();
+  await ana.page.getByRole('dialog', { name: 'Desistir da partida?' }).getByRole('button', { name: 'Confirmar', exact: true }).click();
+
+  // O servidor manda o `room` em FINISHED e, logo depois, o `replay`: o botão aparece nas duas telas quando a web o anexa à linha.
+  for (const player of players) {
+    await expect(endPanel(player.page)).toBeVisible();
+    await expect(endPanel(player.page).getByRole('button', { name: 'Rever a partida' })).toBeVisible();
+  }
+  await axe(ana.page);
+  await axe(duda.page);
+
+  // Duda (a vencedora) abre o replay: a mesa só de vista, no começo, com passos para andar.
+  await endPanel(duda.page).getByRole('button', { name: 'Rever a partida' }).click();
+  await expect(duda.page).toHaveURL(/\/partidas\/[0-9a-z-]+$/);
+  const replayUrl = duda.page.url();
+  await expect(table(duda.page)).toBeVisible();
+  await expect(duda.page.getByRole('region', { name: 'Situação da rodada' })).toContainText('Revendo a partida');
+  await expect(duda.page.getByRole('region', { name: 'Ações' })).toHaveCount(0);
+  const { step, total } = await replaySteps(duda.page);
+  expect(step, 'o replay abre no começo').toBe(0);
+  expect(total, 'a partida tem passos para ver').toBeGreaterThan(0);
+  await expect(replayControl(duda.page, 'Passo anterior')).toHaveAttribute('aria-disabled', 'true');
+  await expect(replayControl(duda.page, 'Próximo passo')).not.toHaveAttribute('aria-disabled', 'true');
+  await axe(duda.page);
+
+  await replayControl(duda.page, 'Próximo passo').click();
+  await expect(replayCounter(duda.page)).toHaveText(`Passo 1 de ${total}`);
+  await expect(replayControl(duda.page, 'Passo anterior')).not.toHaveAttribute('aria-disabled', 'true');
+  await replayControl(duda.page, 'Passo anterior').click();
+  await expect(replayCounter(duda.page)).toHaveText(`Passo 0 de ${total}`);
+
+  // A lista: a partida da sala, com o resultado do assento dele, contra quem, "Sala <código>" e o botão "Rever".
+  await duda.page.getByRole('link', { name: 'Voltar à lista' }).click();
+  await expect(duda.page).toHaveURL(/\/partidas$/);
+  await expect(duda.page.getByRole('heading', { name: 'Partidas anteriores' })).toBeFocused();
+  const games = duda.page.getByRole('list').getByRole('listitem');
+  await expect(games).toHaveCount(1);
+  await expect(games.first()).toContainText('Vitória');
+  await expect(games.first()).toContainText(`contra ${ana.name}`);
+  await expect(games.first()).toContainText(`Sala ${code}`);
+  await expect(games.first().getByRole('button', { name: 'Rever', exact: true })).toBeVisible();
+  await axe(duda.page);
+
+  // "Rever" abre a mesma partida, de novo no começo.
+  await games.first().getByRole('button', { name: 'Rever', exact: true }).click();
+  await expect(duda.page).toHaveURL(replayUrl);
+  await expect(replayCounter(duda.page)).toHaveText(`Passo 0 de ${total}`);
 
   for (const player of players) player.console.expectClean();
 });

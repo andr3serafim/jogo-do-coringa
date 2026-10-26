@@ -11,9 +11,10 @@ const HOST = '127.0.0.1';
 
 /*
  * O limite de criação de salas do Worker (`CREATE_LIMITER`, no `wrangler.jsonc`) é de 10 por minuto por IP, e o E2E usa um IP só:
- * uma execução cria 3 salas (a do `online.spec.ts` e uma por tamanho de tela no `mobile.spec.ts`). Reaproveitar um servidor já no
- * ar (`reuseExistingServer`) ou repetir tudo (`--repeat-each`) soma salas no mesmo minuto e pode estourar o limite (429 ao criar):
- * para repetir, rode a execução inteira de novo, que sobe um servidor com o limitador zerado.
+ * uma execução cria 4 salas (duas no `online.spec.ts`, a partida inteira e a do replay, e uma por tamanho de tela no
+ * `mobile.spec.ts`). Reaproveitar um servidor já no ar (`reuseExistingServer`) ou repetir tudo (`--repeat-each`) soma salas no
+ * mesmo minuto e pode estourar o limite (429 ao criar): para repetir, rode a execução inteira de novo, que sobe um servidor com
+ * o limitador zerado.
  */
 
 /**

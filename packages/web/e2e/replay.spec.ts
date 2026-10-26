@@ -16,6 +16,9 @@ import {
   expectWhollyInView,
   failOnConsoleErrors,
   openMenu,
+  replayControl,
+  replayCounter,
+  replaySteps,
   roundHeading,
   table,
 } from './helpers.ts';
@@ -25,16 +28,7 @@ const TRAINING = '/treino?semente=e2e-1&nivel=medio';
 /** As linhas do histórico (no PC a coluna está à vista; no celular é uma gaveta fechada, mas as linhas seguem no DOM). */
 const historyLines = (page: Page): Locator =>
   page.getByRole('complementary', { name: 'Histórico da partida' }).getByRole('region', { name: 'Linhas do histórico' }).getByRole('listitem');
-const counter = (page: Page): Locator => page.getByText(/^Passo \d+ de \d+$/);
-const control = (page: Page, name: string): Locator => page.getByRole('button', { name, exact: true });
 const round = (page: Page): Locator => page.getByRole('combobox', { name: 'Rodada' });
-
-/** O que o contador diz agora: o passo e o total de passos do replay. */
-async function steps(page: Page): Promise<{ step: number; total: number }> {
-  const match = /^Passo (\d+) de (\d+)$/.exec((await counter(page).innerText()).trim());
-  expect(match, 'o contador "Passo n de N"').not.toBeNull();
-  return { step: Number(match![1]), total: Number(match![2]) };
-}
 
 /**
  * Joga o treino até a rodada 3 (dois Equipar e a escolha da ordem do Bot, que a semente fixa) e desiste pelo menu. Termina com o
@@ -81,36 +75,36 @@ test('treino: desistir, "Rever a partida", andar e voltar pelos passos, e achar 
   await expect(page.getByRole('region', { name: 'Ações' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Menu da partida' })).toHaveCount(0);
   await expect(roundHeading(page)).toHaveText('Rodada 1');
-  const { step, total } = await steps(page);
+  const { step, total } = await replaySteps(page);
   expect(step, 'o replay abre no começo').toBe(0);
   expect(total, 'a partida tem passos para ver').toBeGreaterThan(2);
   // No começo não há para onde voltar. (`aria-disabled` deixa o foco no botão apertado; um clique nele não faz nada.)
-  await expect(control(page, 'Início')).toHaveAttribute('aria-disabled', 'true');
-  await expect(control(page, 'Passo anterior')).toHaveAttribute('aria-disabled', 'true');
-  await expect(control(page, 'Próximo passo')).not.toHaveAttribute('aria-disabled', 'true');
+  await expect(replayControl(page, 'Início')).toHaveAttribute('aria-disabled', 'true');
+  await expect(replayControl(page, 'Passo anterior')).toHaveAttribute('aria-disabled', 'true');
+  await expect(replayControl(page, 'Próximo passo')).not.toHaveAttribute('aria-disabled', 'true');
   await axe(page);
 
   // Próximo passo anda um; Passo anterior volta. O clique cai com ou sem batidas no ar: o palco não o engole.
-  await control(page, 'Próximo passo').click();
-  await expect(counter(page)).toHaveText(`Passo 1 de ${total}`);
-  await expect(control(page, 'Passo anterior')).not.toHaveAttribute('aria-disabled', 'true');
-  await control(page, 'Próximo passo').click();
-  await expect(counter(page)).toHaveText(`Passo 2 de ${total}`);
-  await control(page, 'Passo anterior').click();
-  await expect(counter(page)).toHaveText(`Passo 1 de ${total}`);
-  await control(page, 'Passo anterior').click();
-  await expect(counter(page)).toHaveText(`Passo 0 de ${total}`);
-  await expect(control(page, 'Passo anterior')).toHaveAttribute('aria-disabled', 'true');
+  await replayControl(page, 'Próximo passo').click();
+  await expect(replayCounter(page)).toHaveText(`Passo 1 de ${total}`);
+  await expect(replayControl(page, 'Passo anterior')).not.toHaveAttribute('aria-disabled', 'true');
+  await replayControl(page, 'Próximo passo').click();
+  await expect(replayCounter(page)).toHaveText(`Passo 2 de ${total}`);
+  await replayControl(page, 'Passo anterior').click();
+  await expect(replayCounter(page)).toHaveText(`Passo 1 de ${total}`);
+  await replayControl(page, 'Passo anterior').click();
+  await expect(replayCounter(page)).toHaveText(`Passo 0 de ${total}`);
+  await expect(replayControl(page, 'Passo anterior')).toHaveAttribute('aria-disabled', 'true');
 
   // A rodada pula para a primeira jogada dela (e o histórico cresce até ali); "Início" volta ao começo (e o histórico encolhe).
   const linesAtStart = await historyLines(page).count();
   await round(page).selectOption('3');
   await expect(round(page)).toHaveValue('3');
-  expect((await steps(page)).step, 'a rodada 3 começa depois do começo').toBeGreaterThan(0);
+  expect((await replaySteps(page)).step, 'a rodada 3 começa depois do começo').toBeGreaterThan(0);
   await expect(roundHeading(page)).toHaveText('Rodada 3');
   await expect.poll(() => historyLines(page).count()).toBeGreaterThan(linesAtStart);
-  await control(page, 'Início').click();
-  await expect(counter(page)).toHaveText(`Passo 0 de ${total}`);
+  await replayControl(page, 'Início').click();
+  await expect(replayCounter(page)).toHaveText(`Passo 0 de ${total}`);
   await expect(round(page)).toHaveValue('1');
   await expect(historyLines(page)).toHaveCount(linesAtStart);
 
@@ -119,29 +113,29 @@ test('treino: desistir, "Rever a partida", andar e voltar pelos passos, e achar 
   const quick = Math.min(total, 8);
   let sawBeats = false;
   for (let i = 1; i <= quick; i += 1) {
-    await control(page, 'Próximo passo').click();
+    await replayControl(page, 'Próximo passo').click();
     sawBeats ||= await page.evaluate(() => document.querySelector('[data-palco]')?.hasAttribute('data-ocupado') === true);
   }
   expect(sawBeats, 'algum clique caiu com as batidas no ar').toBe(true);
-  await expect(counter(page)).toHaveText(`Passo ${quick} de ${total}`);
-  await control(page, 'Início').click();
-  await expect(counter(page)).toHaveText(`Passo 0 de ${total}`);
+  await expect(replayCounter(page)).toHaveText(`Passo ${quick} de ${total}`);
+  await replayControl(page, 'Início').click();
+  await expect(replayCounter(page)).toHaveText(`Passo 0 de ${total}`);
 
   // "Tocar" anda sozinho (700 ms por passo, mais o tempo das batidas) e "Pausar" para na hora: o clique no meio de uma cena é um
   // clique, não um pulo que o engoliria.
-  await control(page, 'Tocar').click();
-  await expect(control(page, 'Pausar')).toBeVisible();
-  await expect.poll(async () => (await steps(page)).step, { timeout: 20_000 }).toBeGreaterThan(0);
-  await control(page, 'Pausar').click();
-  await expect(control(page, 'Tocar')).toBeVisible();
-  const paused = await steps(page);
+  await replayControl(page, 'Tocar').click();
+  await expect(replayControl(page, 'Pausar')).toBeVisible();
+  await expect.poll(async () => (await replaySteps(page)).step, { timeout: 20_000 }).toBeGreaterThan(0);
+  await replayControl(page, 'Pausar').click();
+  await expect(replayControl(page, 'Tocar')).toBeVisible();
+  const paused = await replaySteps(page);
   await page.waitForTimeout(1_800);
-  expect(await steps(page), 'pausado, o contador não anda').toEqual(paused);
+  expect(await replaySteps(page), 'pausado, o contador não anda').toEqual(paused);
 
   // A página recarregada na rota do replay (o Worker serve o `index.html` e o chunk da tela vem sob demanda) abre a mesma partida.
   await page.reload();
   await expect(table(page)).toBeVisible();
-  await expect(counter(page)).toHaveText(`Passo 0 de ${total}`);
+  await expect(replayCounter(page)).toHaveText(`Passo 0 de ${total}`);
   expect(page.url()).toBe(replayUrl);
 
   // Voltar à lista: a partida aparece, com o resultado do seu assento, contra quem, o modo e o botão "Rever".
@@ -160,7 +154,7 @@ test('treino: desistir, "Rever a partida", andar e voltar pelos passos, e achar 
   // "Rever" abre a mesma partida, de novo no começo.
   await games.first().getByRole('button', { name: 'Rever', exact: true }).click();
   await expect(page).toHaveURL(replayUrl);
-  await expect(counter(page)).toHaveText(`Passo 0 de ${total}`);
+  await expect(replayCounter(page)).toHaveText(`Passo 0 de ${total}`);
 
   guard.expectClean();
 });
@@ -193,21 +187,21 @@ test.describe('celular em pé, 390 × 844', () => {
     const guard = failOnConsoleErrors(page);
     const end = await concedeTraining(page);
     await end.getByRole('button', { name: 'Rever a partida' }).click();
-    await expect(counter(page)).toBeVisible();
+    await expect(replayCounter(page)).toBeVisible();
     await expectNoHorizontalScroll(page);
     await expectWhollyInView(page, {
-      'o contador': counter(page),
+      'o contador': replayCounter(page),
       'o seletor de rodada': round(page),
-      'Início': control(page, 'Início'),
-      'Passo anterior': control(page, 'Passo anterior'),
-      'Próximo passo': control(page, 'Próximo passo'),
-      'Tocar': control(page, 'Tocar'),
+      'Início': replayControl(page, 'Início'),
+      'Passo anterior': replayControl(page, 'Passo anterior'),
+      'Próximo passo': replayControl(page, 'Próximo passo'),
+      'Tocar': replayControl(page, 'Tocar'),
       'Voltar à lista': page.getByRole('link', { name: 'Voltar à lista' }),
     });
     await axe(page);
 
-    await control(page, 'Próximo passo').tap();
-    await expect(counter(page)).toHaveText(/^Passo 1 de \d+$/);
+    await replayControl(page, 'Próximo passo').tap();
+    await expect(replayCounter(page)).toHaveText(/^Passo 1 de \d+$/);
     await expectNoHorizontalScroll(page);
     guard.expectClean();
   });
