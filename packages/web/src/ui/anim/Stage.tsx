@@ -10,7 +10,8 @@
 //   reduzido, nunca há inversão.
 // - Um toque na mesa (ou Esc) durante as batidas termina tudo na hora. O toque que pulou não vira clique: a barra de ação
 //   desligada não pode receber, no mesmo gesto, a jogada que o jogador nem viu liberada. Só os controles marcados com
-//   `data-sem-pulo` (os do replay) ficam de fora: o clique neles é deles.
+//   `data-sem-pulo` (os controles do replay e o painel da dica do tutorial, que não mandam jogada) ficam de fora: o clique neles é
+//   deles. A barra de jogadas e a mão nunca o usam.
 // - Cada batida ao vivo toca a pista dela (`cueOf`), uma vez, quando a batida começa. O `catchUp` (eventos perdidos numa
 //   reconexão) e o `resync` (que nem tem batidas) são mudos; o pulo termina as batidas, e as pistas que faltavam não tocam.
 // - O `resync` (a volta da reconexão fora do anel e, no replay, o voltar, o "Início" e a rodada) troca a mesa de uma vez: as cartas
@@ -33,8 +34,9 @@ import { useBeatPlayer } from './useBeatPlayer.ts';
 const CLICK_GRACE_MS = 400;
 
 /**
- * Controle que mora dentro do palco sem ser da mesa (os do replay, na barra de baixo da mesa): um toque nele é só dele, não pula as
- * batidas e não é engolido. Sem isso, o primeiro clique em "Pausar" ou em "Próximo passo" durante uma cena só a pularia.
+ * Controle que mora dentro do palco sem ser da mesa (os do replay, na barra de baixo da mesa, e o painel da dica do tutorial): um
+ * toque nele é só dele, não pula as batidas e não é engolido. Sem isso, o primeiro clique em "Pausar", em "Próximo passo" ou em
+ * "Entendi" durante uma cena só a pularia. Só vale para o que não manda jogada: a barra e a mão não o usam.
  */
 const OWN_CONTROL = '[data-sem-pulo]';
 const isOwnControl = (target: EventTarget | null): boolean => target instanceof Element && target.closest(OWN_CONTROL) !== null;

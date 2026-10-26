@@ -196,7 +196,7 @@ function TableView({
           data-grao
           className="grao pointer-events-none absolute inset-0 -z-10 opacity-20 pc:hidden"
         />
-        <h1 ref={titleRef} tabIndex={titleRef ? -1 : undefined} className="sr-only">
+        <h1 ref={titleRef} tabIndex={-1} className="sr-only">
           Mesa da partida
         </h1>
 

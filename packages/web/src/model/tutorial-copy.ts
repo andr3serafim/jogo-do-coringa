@@ -28,6 +28,10 @@ export const PRESSURE_HINT =
 export const stallHint = (rounds: number): string =>
   `Anti-travamento: ${rounds} rodadas de Ataque seguidas sem ninguém perder vida encerram a partida. Vence quem tiver mais vida; com vidas iguais, empata.`;
 
+/** Dica 10, o fim: mora no painel de fim da partida (`EndHintNote`), e o link "Jogar com um amigo" é da tela. */
+export const END_HINT =
+  'A partida acaba quando um Coringa chega a 0 de vida, ou quando alguém monta a Exódia: 4 K na Guarda. Gostou? Chame alguém para uma sala.';
+
 /** Os parágrafos de cada dica, exceto a 9 (que depende da config da partida). */
 const HINT_TEXT: Record<Exclude<HintId, 'pressure'>, string> = {
   equip:
@@ -43,7 +47,7 @@ const HINT_TEXT: Record<Exclude<HintId, 'pressure'>, string> = {
   wild: 'O Coringa Selvagem vale como J, Q ou A, à sua escolha. Nunca como K.',
   reflect:
     'Reflect é K + J + Q da mão, no seu turno. Se o oponente atacar no turno seguinte, ele perde os K e Q e leva o golpe de volta. Você não leva nada. Se ele não atacar, o Reflect se desfaz.',
-  end: 'A partida acaba quando um Coringa chega a 0 de vida, ou quando alguém monta a Exódia: 4 K na Guarda. Gostou? Chame alguém para uma sala.',
+  end: END_HINT,
 };
 
 /** Os parágrafos da dica `id`; o anti-travamento da dica 9 leva o número de rodadas da partida (`config.antiStallRounds`). */

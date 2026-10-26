@@ -407,6 +407,46 @@ describe('fim de partida: Ver a mesa e Nova sala', () => {
     expect(m.onNewRoom).toHaveBeenCalledTimes(1);
   });
 
+  describe('o `note` (o tutorial põe a dica do fim aqui)', () => {
+    const panel: EndPanelProps = {
+      outcome: { gameNo: 1, result: win('p1', 'HP'), cause: 'NORMAL' },
+      score: { p1: 1, p2: 0, draws: 0 },
+      me: 'p1',
+      names: { self: 'André', opponent: 'Duda' },
+      mineWants: false,
+      theirsWants: false,
+      away: false,
+      disabled: false,
+      onRematch: () => undefined,
+    };
+
+    it('entra dentro do diálogo, entre o placar e os botões', () => {
+      render(<EndPanel {...panel} note={<p data-nota>uma nota do diálogo</p>} />);
+      const dialog = endDialog('Você venceu');
+      const note = within(dialog).getByText('uma nota do diálogo');
+      expect(dialog).toContainElement(note);
+      const score = within(dialog).getByText('Placar').closest('p')!;
+      const rematch = within(dialog).getByRole('button', { name: 'Revanche' });
+      expect(score.compareDocumentPosition(note) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(note.compareDocumentPosition(rematch) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it('sem `note` o painel é o de sempre (treino e sala online): nada a mais no diálogo', () => {
+      const { rerender } = render(<EndPanel {...panel} />);
+      const before = endDialog('Você venceu').innerHTML;
+      rerender(<EndPanel {...panel} note={undefined} />);
+      expect(endDialog('Você venceu').innerHTML).toBe(before);
+      expect(endDialog('Você venceu').querySelector('[data-nota]')).toBeNull();
+    });
+
+    it('recolhido ("Ver a mesa"), a nota sai junto com o diálogo', async () => {
+      const user = userEvent.setup();
+      render(<EndPanel {...panel} note={<p>uma nota do diálogo</p>} />);
+      await user.click(within(endDialog('Você venceu')).getByRole('button', { name: 'Ver a mesa' }));
+      expect(screen.queryByText('uma nota do diálogo')).not.toBeInTheDocument();
+    });
+  });
+
   describe('"Rever a partida"', () => {
     const panel: EndPanelProps = {
       outcome: { gameNo: 1, result: win('p1', 'HP'), cause: 'NORMAL' },

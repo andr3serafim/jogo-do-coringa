@@ -281,29 +281,56 @@ describe('/tutorial: o painel da dica', () => {
     expect(loadTutorialState(clock.store)).toBe('skipped');
   });
 
-  it('a dica do fim: aparece primeiro, grava done na hora, tem o link "Jogar com um amigo" para o início e "Entendi" encerra as dicas', async () => {
+  it('a dica do fim vai DENTRO do painel de fim (o diálogo modal deixa o resto da página inerte): o texto e o link, e done já gravado', async () => {
     const clock = await openTutorial();
     expect(loadTutorialState(clock.store)).toBeNull();
     await concede(clock);
-    expect(hint().getByText(END_HINT)).toBeInTheDocument();
-    // A dica do Equipar, que ninguém marcou, não passa na frente da do fim, e nada é contornado (o painel de fim é o diálogo).
-    expect(hint().queryByText(EQUIP_HINT)).not.toBeInTheDocument();
-    expect(outlined()).toEqual([]);
-    expect(loadTutorialState(clock.store)).toBe('done');
-    expect(hint().queryByRole('button', { name: 'Pular o tutorial' })).not.toBeInTheDocument();
-    const friend = hint().getByRole('link', { name: 'Jogar com um amigo' });
+    const dialog = within(screen.getByRole('dialog', { name: 'Bot venceu' }));
+    expect(dialog.getByText(END_HINT)).toBeInTheDocument();
+    const friend = dialog.getByRole('link', { name: 'Jogar com um amigo' });
     expect(friend).toHaveAttribute('href', '/');
-
-    // O tutorial acabou: o painel sai inteiro.
-    await clock.user.click(hint().getByRole('button', { name: 'Entendi' }));
-    expect(screen.queryByRole('region', { name: 'Dica' })).not.toBeInTheDocument();
+    // Fora do diálogo (onde, no navegador, tudo fica inerte) não há dica nenhuma: nem a do Equipar, que ninguém marcou, nem a do fim.
+    expect(hint().queryByText(END_HINT)).not.toBeInTheDocument();
+    expect(hint().queryByText(EQUIP_HINT)).not.toBeInTheDocument();
+    expect(hint().queryByRole('button')).not.toBeInTheDocument();
+    expect(document.querySelectorAll('[data-dica-nota]')).toHaveLength(1);
+    expect(outlined()).toEqual([]);
     expect(loadTutorialState(clock.store)).toBe('done');
   });
 
-  it('depois da dica do fim vista, nem a revanche traz dica nenhuma', async () => {
+  it('o tutorial só fica concluído quando a dica do fim aparece no diálogo (nem antes, nem se foi pulado)', async () => {
+    const clock = await openTutorial();
+    await clock.user.click(screen.getAllByRole('button', { name: 'Menu da partida' })[0]!);
+    await clock.user.click(within(screen.getByRole('dialog', { name: 'Menu da partida' })).getByRole('button', { name: 'Desistir' }));
+    await clock.user.click(within(screen.getByRole('dialog', { name: 'Desistir da partida?' })).getByRole('button', { name: 'Confirmar' }));
+    // As batidas do fim ainda tocam: o painel de fim (e a dica dentro dele) espera a mesa ficar quieta.
+    expect(screen.queryByRole('dialog', { name: 'Bot venceu' })).not.toBeInTheDocument();
+    expect(loadTutorialState(clock.store)).toBeNull();
+    clock.advance(5_000);
+    expect(screen.getByRole('dialog', { name: 'Bot venceu' })).toBeInTheDocument();
+    expect(loadTutorialState(clock.store)).toBe('done');
+  });
+
+  it('pulado, a dica do fim não aparece e o valor guardado segue skipped', async () => {
+    const clock = await openTutorial();
+    await clock.user.click(hint().getByRole('button', { name: 'Pular o tutorial' }));
+    await concede(clock);
+    expect(document.querySelector('[data-dica-nota]')).toBeNull();
+    expect(loadTutorialState(clock.store)).toBe('skipped');
+  });
+
+  it('recolher o painel de fim ("Ver a mesa") leva a nota junto, e nenhuma dica volta', async () => {
     const clock = await openTutorial();
     await concede(clock);
-    await clock.user.click(hint().getByRole('button', { name: 'Entendi' }));
+    await clock.user.click(within(screen.getByRole('dialog', { name: 'Bot venceu' })).getByRole('button', { name: 'Ver a mesa' }));
+    expect(document.querySelector('[data-dica-nota]')).toBeNull();
+    expect(hint().queryByRole('button')).not.toBeInTheDocument();
+    expect(loadTutorialState(clock.store)).toBe('done');
+  });
+
+  it('depois da dica do fim, nem a revanche traz dica nenhuma', async () => {
+    const clock = await openTutorial();
+    await concede(clock);
     await clock.user.click(within(screen.getByRole('dialog', { name: 'Bot venceu' })).getByRole('button', { name: 'Revanche' }));
     clock.advance(5_000);
     expect(screen.getByRole('region', { name: 'Equipar' })).toBeInTheDocument();
@@ -311,11 +338,32 @@ describe('/tutorial: o painel da dica', () => {
     expect(outlined()).toEqual([]);
   });
 
-  it('"Jogar com um amigo" leva à tela inicial', async () => {
+  it('"Jogar com um amigo", dentro do painel de fim, leva à tela inicial', async () => {
     const clock = await openTutorial();
     await concede(clock);
-    await clock.user.click(hint().getByRole('link', { name: 'Jogar com um amigo' }));
+    await clock.user.click(within(screen.getByRole('dialog', { name: 'Bot venceu' })).getByRole('link', { name: 'Jogar com um amigo' }));
     expect(window.location.pathname).toBe('/');
+  });
+
+  it('uma dica nova leva o painel à vista (os campos rolam por dentro no celular e no tablet)', async () => {
+    const scrolled = vi.fn<(this: Element, arg?: boolean | ScrollIntoViewOptions) => void>();
+    Element.prototype.scrollIntoView = scrolled;
+    try {
+      const clock = await openTutorial();
+      const panelAt = (call: number) => scrolled.mock.contexts[call];
+      // A primeira dica (a do Equipar) já vem à vista; um novo desenho com ela não rola de novo.
+      expect(scrolled).toHaveBeenCalledOnce();
+      expect(panelAt(0)).toBe(hintPanel());
+      await clock.user.click(hint().getByRole('button', { name: 'Entendi' }));
+      expect(scrolled).toHaveBeenCalledOnce();
+      // A escolha da ordem toma o painel: ele vem à vista de novo.
+      await toOrder(clock);
+      expect(hint().getByText(ORDER_HINT)).toBeInTheDocument();
+      expect(scrolled.mock.contexts.filter((el) => el === hintPanel()).length).toBe(2);
+      expect(scrolled).toHaveBeenLastCalledWith({ block: 'nearest', behavior: 'auto' });
+    } finally {
+      delete (Element.prototype as { scrollIntoView?: unknown }).scrollIntoView;
+    }
   });
 
   it('recarregar recomeça as dicas na mesma partida e mantém o coringa:tutorial', async () => {
@@ -448,19 +496,20 @@ describe('/tutorial: acessibilidade', () => {
   it('axe: a mesa com a dica do Equipar não tem violações sérias', async () => {
     const { container } = render(<Tutorial store={memoryStore()} load={capture().load} />);
     await screen.findByRole('main', { name: 'Mesa' });
-    expect(hint().getByText(EQUIP_HINT)).toBeInTheDocument();
+    // A dica entra no desenho seguinte ao primeiro: a região viva já está na página.
+    expect(await hint().findByText(EQUIP_HINT)).toBeInTheDocument();
     expect(await seriousViolations(container)).toEqual([]);
   });
 
-  it('axe: a mesa com a dica do fim (com o link) não tem violações sérias', async () => {
+  it('axe: a mesa com a dica do fim (dentro do painel de fim, com o link) não tem violações sérias', async () => {
     const user = userEvent.setup();
     const { container } = render(<Tutorial store={memoryStore()} load={capture().load} />);
     await screen.findByRole('main', { name: 'Mesa' });
     await user.click(screen.getAllByRole('button', { name: 'Menu da partida' })[0]!);
     await user.click(within(screen.getByRole('dialog', { name: 'Menu da partida' })).getByRole('button', { name: 'Desistir' }));
     await user.click(within(screen.getByRole('dialog', { name: 'Desistir da partida?' })).getByRole('button', { name: 'Confirmar' }));
-    await screen.findByRole('dialog', { name: 'Bot venceu' }, { timeout: 10_000 });
-    expect(hint().getByText(END_HINT)).toBeInTheDocument();
+    const dialog = await screen.findByRole('dialog', { name: 'Bot venceu' }, { timeout: 10_000 });
+    expect(within(dialog).getByText(END_HINT)).toBeInTheDocument();
     expect(await seriousViolations(container)).toEqual([]);
   });
 

@@ -9,7 +9,7 @@
 // para uma partida só (`key` pelo `gameNo`, na `PlayTable`).
 import type { PlayerId } from '@coringa/engine';
 import type { Outcome, Score } from '@coringa/protocol';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import {
   END_EYEBROW,
   END_RESULT_LABEL,
@@ -48,6 +48,11 @@ export interface EndPanelProps {
   newRoomLabel?: string;
   /** Abre o replay da partida que acabou. Sem ele (partida sem replay guardado) o botão "Rever a partida" não existe. */
   onReview?: () => void;
+  /**
+   * Uma nota dentro do diálogo, entre o placar e os botões (o tutorial põe aqui a dica do fim). Tem que ser aqui: o diálogo é
+   * modal, e uma dica fora dele fica inerte (sem clique, sem foco e fora da árvore de acessibilidade) atrás dele.
+   */
+  note?: ReactNode;
 }
 
 export function EndPanel({
@@ -63,6 +68,7 @@ export function EndPanel({
   onNewRoom,
   newRoomLabel = NEW_ROOM_LABEL,
   onReview,
+  note,
 }: EndPanelProps) {
   const titleId = useId();
   const reasonId = useId();
@@ -105,6 +111,8 @@ export function EndPanel({
               {scoreText(score, me, names)}
             </span>
           </p>
+
+          {note}
 
           <div className="flex flex-col gap-2">
             <Button

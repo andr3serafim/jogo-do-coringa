@@ -104,6 +104,15 @@ describe('a dica na mesa: o lugar do painel', () => {
   });
 });
 
+describe('a dica na mesa: onde o foco cai', () => {
+  it('o título da mesa é focável por código (e fora do Tab): é para onde o painel da dica devolve o foco sem painel de baixo', () => {
+    mount();
+    const title = screen.getByRole('heading', { name: 'Mesa da partida' });
+    expect(title).toHaveAttribute('tabindex', '-1');
+    expect(title.closest('main')).toHaveAttribute('aria-label', 'Mesa');
+  });
+});
+
 describe('a dica na mesa: a faixa do tutorial', () => {
   it('"Tutorial, sem relógio" no lugar do nível do bot', () => {
     mount({ training: 'facil', tutorial: true });

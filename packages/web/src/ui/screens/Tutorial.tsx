@@ -7,14 +7,14 @@
 // JavaScript inicial (`scripts/smoke.ts` confere). A semente é sempre a do tutorial, nunca a da URL, e as dicas recomeçam a cada
 // vez que a tela abre (o que fica guardado é só `coringa:tutorial`: `done` quando a dica do fim aparece, `skipped` no "Pular").
 import { TUTORIAL_SEED } from '@coringa/sim/tutorial';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BACK_HOME_LABEL, TRAINING_CONCEDE_WARNING } from '../../model/copy.ts';
 import type { TrainingLevel } from '../../model/local-room.ts';
 import type { Session } from '../../model/session.ts';
 import { saveTutorialState, type KeyValueStore } from '../../model/storage.ts';
 import { TUTORIAL_FAILED_TITLE, TUTORIAL_LOADING_TEXT } from '../../model/tutorial-copy.ts';
 import { acknowledgeHint, advanceHint, hintHolding, NO_HINT, type HintFlow } from '../../model/tutorial.ts';
-import { HintPanel } from '../table/HintPanel.tsx';
+import { EndHintNote, HintPanel } from '../table/HintPanel.tsx';
 import { PlayTable } from '../table/PlayTable.tsx';
 import type { TableHint } from '../table/Table.tsx';
 import { useSession } from '../useSession.ts';
@@ -104,12 +104,12 @@ function TutorialTable({ session, seedOf, store }: TutorialTableProps) {
   const finished = flow.current === null && flow.seen.has('end');
   const shown = !skipped && !finished;
 
-  // A dica do fim aparecer é chegar ao fim do tutorial: `done` fica guardado já aí, e não só no "Entendi" (o painel de fim da
-  // partida é um diálogo modal, e atrás dele o painel da dica fica inerte até a pessoa tocar em "Ver a mesa").
+  // A dica do fim vai dentro do painel de fim da partida (o `EndPanel` é um diálogo modal: uma dica fora dele ficaria inerte atrás
+  // dele, sem clique, sem foco e fora da árvore de acessibilidade). Aparecer ali é chegar ao fim do tutorial: `done` fica guardado
+  // nesse momento, sem "Entendi". Sem o painel de fim aberto (as batidas ainda tocam, ou a pessoa recolheu o painel), a nota não
+  // existe, e o tutorial só fica concluído quando ela aparece.
   const current = flow.current;
-  useEffect(() => {
-    if (current === 'end' && !skipped) saveTutorialState(store, 'done');
-  }, [current, skipped, store]);
+  const markDone = useCallback(() => saveTutorialState(store, 'done'), [store]);
 
   // O contorno só vale enquanto a situação da dica vale: uma dica que ficou no painel depois de a situação passar não contorna
   // (por exemplo, a do Equipar não contorna o painel da ordem).
@@ -121,10 +121,10 @@ function TutorialTable({ session, seedOf, store }: TutorialTableProps) {
   const hint: TableHint | undefined = shown
     ? {
         zone: holding?.zone ?? null,
-        open: holding !== null,
+        open: holding !== null && current !== 'end',
         panel: (
           <HintPanel
-            hint={current}
+            hint={current === 'end' ? null : current}
             antiStallRounds={state?.view.config.antiStallRounds ?? 0}
             onGotIt={() => {
               if (state !== null) setFlow(acknowledgeHint(flow, state.view, state.events));
@@ -145,6 +145,7 @@ function TutorialTable({ session, seedOf, store }: TutorialTableProps) {
       training={LEVEL}
       tutorial
       hint={hint}
+      endNote={shown && current === 'end' ? <EndHintNote onShown={markDone} /> : undefined}
       onNewRoom={goHome}
       newRoomLabel={BACK_HOME_LABEL}
       onExit={goHome}

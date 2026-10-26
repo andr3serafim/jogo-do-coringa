@@ -63,6 +63,8 @@ export interface PlayTableProps {
   tutorial?: true;
   /** A dica do tutorial (o painel e a zona de que ela fala): a mesa a põe no lugar e contorna a zona. */
   hint?: TableHint;
+  /** Uma nota dentro do painel de fim (o tutorial põe aqui a dica do fim: o diálogo é modal e deixa o resto da página inerte). */
+  endNote?: ReactNode;
 }
 
 /** Sem `state` ainda não há o que desenhar. */
@@ -137,6 +139,7 @@ function PlayTableView({
   concedeWarning,
   tutorial,
   hint,
+  endNote,
 }: ViewProps) {
   const { view } = state;
   const sound = useSound();
@@ -526,6 +529,7 @@ function PlayTableView({
           away={room.seats.find((seat) => seat.playerId !== view.me)?.connected === false}
           disabled={snapshot.status === 'reconnecting'}
           onRematch={(want) => session.rematch(want)}
+          note={endNote}
           onNewRoom={onNewRoom}
           newRoomLabel={newRoomLabel}
           // No treino a entrada do histórico é trocada (o Voltar do replay vai ao início, não a um treino novo da mesma URL);
