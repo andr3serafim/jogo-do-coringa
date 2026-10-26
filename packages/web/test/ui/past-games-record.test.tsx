@@ -1,17 +1,21 @@
 // A mesa grava a partida terminada na lista local (spec do polimento §4.1): uma linha por partida, no instante em que a sala
-// vira FINISHED, com o replay quando a conexão o entregou antes (o treino). A mesa é a `PlayTable` sobre uma `Session` de
-// verdade com uma `FakeConnection`; o armazenamento recusar nunca pode quebrar o painel de fim.
+// vira FINISHED, com o replay quando a conexão o entregou antes (o treino) ou, quando ele chega depois (online: o servidor manda
+// o `room` e só então o `replay`), acrescentado à mesma linha. A mesa é a `PlayTable` sobre uma `Session` de verdade com uma
+// `FakeConnection`; o armazenamento recusar nunca pode quebrar o painel de fim.
 import { RULES_VERSION, makeConfig, type GameResult, type PlayerId, type Replay } from '@coringa/engine';
 import type { RoomMessage, Score } from '@coringa/protocol';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, renderHook, screen } from '@testing-library/react';
 import { StrictMode, type ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { TrainingLevel } from '../../src/model/local-room.ts';
 import { loadPastGames, PAST_GAMES_KEY } from '../../src/model/past-games.ts';
-import type { KeyValueStore } from '../../src/model/storage.ts';
+import { saveSeat, type KeyValueStore } from '../../src/model/storage.ts';
+import { RoomGate } from '../../src/ui/screens/RoomGate.tsx';
 import { PlayTable } from '../../src/ui/table/PlayTable.tsx';
+import { useRecordPastGame } from '../../src/ui/table/useRecordPastGame.ts';
+import { stateMessage, viewAt } from '../fixtures.ts';
 import { advance, cleanup, connect, emit, EXODIA, EXODIA_OVER, seatOf, THEIRS } from './anim-harness.tsx';
-import { CODE, memoryStore, roomMessage } from './support.tsx';
+import { CODE, fakeApi, memoryStore, roomMessage, seat } from './support.tsx';
 
 afterEach(() => {
   cleanup();
@@ -50,20 +54,16 @@ interface MountOptions {
   finished?: boolean;
 }
 
+/** A sala que abre já em FINISHED: a partida 1, ganha por p1. */
+const FINISHED_ROOM: Parameters<typeof roomMessage>[0] = {
+  status: 'FINISHED',
+  seats: SEATS,
+  score: { p1: 1, p2: 0, draws: 0 },
+  outcome: { gameNo: 1, result: win('p1'), cause: 'NORMAL' },
+};
+
 function mount(options: MountOptions = {}) {
-  const m = connect(
-    THEIRS,
-    options.finished
-      ? {
-          room: {
-            status: 'FINISHED',
-            seats: SEATS,
-            score: { p1: 1, p2: 0, draws: 0 },
-            outcome: { gameNo: 1, result: win('p1'), cause: 'NORMAL' },
-          },
-        }
-      : {},
-  );
+  const m = connect(THEIRS, options.finished ? { room: FINISHED_ROOM } : {});
   const store = options.store === undefined ? memoryStore() : options.store;
   const table: ReactNode = (
     <PlayTable session={m.session} store={store ?? undefined} training={options.training} onNewRoom={() => undefined} />
@@ -78,13 +78,13 @@ interface FinishOptions {
   gameNo?: number;
   result?: GameResult | null;
   score?: Score;
-  /** O replay que a conexão entrega antes do `room` em FINISHED (o treino). */
+  /** O replay que a conexão entrega antes do `room` em FINISHED (o treino; o servidor, online, o manda depois: `deliverReplay`). */
   replay?: Replay;
   /** O assento de quem joga recebe revanche pedida (a sala reemite o `room` com o mesmo `gameNo`). */
   mineWants?: boolean;
 }
 
-/** Como a `LocalRoom`: o `replay` primeiro, o `room` em FINISHED depois, cada um no seu `act`. */
+/** Como a `LocalRoom`: o `replay` primeiro, o `room` em FINISHED depois, cada um no seu `act`. Sem `replay`, só o `room`. */
 function finish(m: Pick<Mounted, 'connection'>, options: FinishOptions = {}) {
   const gameNo = options.gameNo ?? 1;
   if (options.replay) {
@@ -107,6 +107,26 @@ function finish(m: Pick<Mounted, 'connection'>, options: FinishOptions = {}) {
 /** A sala volta a PLAYING numa partida nova (a revanche): o replay da anterior sai da sessão. */
 function startGame(m: Pick<Mounted, 'connection'>, gameNo: number) {
   act(() => m.connection.emitRoom(roomMessage({ status: 'PLAYING', gameNo, seats: SEATS })));
+}
+
+/** Como o servidor online: o `replay` da partida chega depois do `room` em FINISHED, numa mensagem só dele. */
+function deliverReplay(m: Pick<Mounted, 'connection'>, gameNo: number, replay: Replay) {
+  act(() => m.connection.emit({ type: 'replay', replay: { t: 'replay', gameNo, replay } }));
+}
+
+/** Um armazenamento em memória que conta as gravações (`set`): quantas vezes a lista foi escrita. */
+function countingStore(): KeyValueStore & { sets: number } {
+  const inner = memoryStore();
+  const store = {
+    sets: 0,
+    get: (key: string) => inner.get(key),
+    set(key: string, value: string) {
+      store.sets += 1;
+      inner.set(key, value);
+    },
+    remove: (key: string) => inner.remove(key),
+  };
+  return store;
 }
 
 const rows = (m: Pick<Mounted, 'store'>) => (m.store === null ? [] : loadPastGames(m.store));
@@ -281,7 +301,7 @@ describe('"Rever a partida" no painel de fim', () => {
     expect(window.location.pathname).toBe(`/partidas/${id}`);
   });
 
-  it('não aparece online (a conexão não manda replay nesta fatia) nem no treino sem replay', () => {
+  it('não aparece enquanto a partida não tem replay: online que ainda não o recebeu, nem o treino sem ele', () => {
     const online = mount();
     finish(online, {});
     expect(screen.getByRole('dialog', { name: 'Você venceu' })).toBeInTheDocument();
@@ -303,5 +323,246 @@ describe('"Rever a partida" no painel de fim', () => {
     finish(m, { gameNo: 2 });
     expect(screen.getByRole('dialog', { name: 'Você venceu' })).toBeInTheDocument();
     expect(reviewButton()).not.toBeInTheDocument();
+  });
+});
+
+describe('online: o replay chega depois do FINISHED', () => {
+  it('online, o replay que chega depois do FINISHED entra na linha e o "Rever" aparece', async () => {
+    const m = mount();
+    finish(m, {});
+
+    // O servidor manda o `room` em FINISHED e só então o `replay`: a linha já existe, sem ele.
+    const [before] = rows(m);
+    expect(before).toMatchObject({ key: `sala:${CODE}:1`, mode: { kind: 'online', code: CODE } });
+    expect(before).not.toHaveProperty('replay');
+    expect(reviewButton()).not.toBeInTheDocument();
+
+    const replay = replayOf('online-1');
+    deliverReplay(m, 1, replay);
+
+    // A mesma linha (o mesmo id, no mesmo lugar), agora com o replay.
+    const saved = rows(m);
+    expect(saved).toEqual([{ ...before, replay }]);
+    expect(screen.getByRole('dialog', { name: 'Você venceu' })).toBeInTheDocument();
+    await m.user.click(screen.getByRole('button', { name: 'Rever a partida' }));
+    expect(window.location.pathname).toBe(`/partidas/${before!.id}`);
+  });
+
+  it.each([
+    ['no treino', { training: 'medio' } satisfies MountOptions],
+    ['online', {} satisfies MountOptions],
+  ])('%s: o replay que já está no snapshot no FINISHED entra na gravação direto', (_name, options) => {
+    const store = countingStore();
+    const m = mount({ ...options, store });
+    const replay = replayOf('antes-do-room');
+    // O replay vem antes do `room` em FINISHED (o treino emite assim): uma gravação só, já com ele.
+    finish(m, { replay });
+
+    expect(store.sets).toBe(1);
+    expect(rows(m)).toHaveLength(1);
+    expect(rows(m)[0]!.replay).toEqual(replay);
+    expect(reviewButton()).toBeInTheDocument();
+  });
+
+  it('as duas ordens de chegada dão a mesma linha, menos o id', () => {
+    const replay = replayOf('ordem');
+    const first = mount({ strict: true });
+    finish(first, { replay });
+    const direct = rows(first)[0]!;
+    first.unmount();
+
+    const second = mount({ strict: true });
+    finish(second, {});
+    deliverReplay(second, 1, replay);
+    expect(rows(second)[0]).toEqual({ ...direct, id: rows(second)[0]!.id });
+  });
+
+  it('recarregar com a sala FINISHED não duplica e anexa o replay que faltava', async () => {
+    const store = countingStore();
+    // A primeira página: a sala já terminada e nenhum replay antes de a página fechar.
+    const first = mount({ store, finished: true });
+    expect(rows(first)).toHaveLength(1);
+    expect(rows(first)[0]).not.toHaveProperty('replay');
+    const { id } = rows(first)[0]!;
+    first.unmount();
+
+    // A página recarregada: o `hello` devolve o `room`, depois o `state` e o `replay`.
+    const again = mount({ store, finished: true, strict: true });
+    expect(rows(again)).toHaveLength(1);
+    expect(reviewButton()).not.toBeInTheDocument();
+    expect(store.sets).toBe(1);
+
+    const replay = replayOf('recarregou');
+    deliverReplay(again, 1, replay);
+
+    expect(rows(again)).toHaveLength(1);
+    expect(rows(again)[0]).toMatchObject({ id, replay });
+    expect(store.sets).toBe(2);
+    await again.user.click(screen.getByRole('button', { name: 'Rever a partida' }));
+    expect(window.location.pathname).toBe(`/partidas/${id}`);
+  });
+
+  it('a linha que já tem o replay não é regravada quando ele chega de novo (recarregar)', () => {
+    const store = countingStore();
+    const replay = replayOf('ja-tinha');
+    const first = mount({ store });
+    finish(first, { replay });
+    expect(store.sets).toBe(1);
+    first.unmount();
+
+    const again = mount({ store, finished: true });
+    deliverReplay(again, 1, replay);
+    deliverReplay(again, 1, replayOf('outro-conteudo'));
+
+    expect(store.sets).toBe(1);
+    expect(rows(again)).toHaveLength(1);
+    expect(rows(again)[0]!.replay).toEqual(replay);
+    expect(reviewButton()).toBeInTheDocument();
+  });
+
+  it('anexa uma vez só: sob <StrictMode> e com o replay e o `room` reenviados', () => {
+    const store = countingStore();
+    const m = mount({ store, strict: true });
+    finish(m, {});
+    const replay = replayOf('uma-vez');
+    deliverReplay(m, 1, replay);
+    expect(store.sets).toBe(2);
+
+    // O servidor reenvia o replay (a volta do `hello`) e o `room` da mesma partida: nada mais é gravado.
+    deliverReplay(m, 1, replay);
+    finish(m, { mineWants: true });
+    deliverReplay(m, 1, replay);
+    expect(store.sets).toBe(2);
+    expect(rows(m)).toHaveLength(1);
+    expect(rows(m)[0]!.replay).toEqual(replay);
+  });
+
+  it('um replay de outra partida é ignorado: a linha de cada partida só recebe o seu', () => {
+    const m = mount();
+    finish(m, {});
+
+    // O replay da partida 2 chega com a sala ainda na 1: não entra na linha da 1.
+    deliverReplay(m, 2, replayOf('outra'));
+    expect(rows(m)).toHaveLength(1);
+    expect(rows(m)[0]).not.toHaveProperty('replay');
+    expect(reviewButton()).not.toBeInTheDocument();
+
+    // A revanche: a partida 2 acaba e recebe o seu; a linha da 1 continua sem.
+    startGame(m, 2);
+    finish(m, { gameNo: 2, result: win('p2'), score: { p1: 1, p2: 1, draws: 0 } });
+    deliverReplay(m, 2, replayOf('dois'));
+    // Um replay atrasado da partida 1 também não entra, nem na linha da 1 nem na da 2.
+    deliverReplay(m, 1, replayOf('um-atrasado'));
+
+    const saved = rows(m);
+    expect(saved.map((row) => row.outcome.gameNo)).toEqual([2, 1]);
+    expect(saved.map((row) => row.replay?.name)).toEqual(['dois', undefined]);
+  });
+
+  it('o hook também confere o `gameNo`: um replay de outra partida, mesmo que chegasse a ele, não entra', () => {
+    const m = connect(THEIRS, { room: FINISHED_ROOM });
+    const store = memoryStore();
+    const snapshot = m.session.snapshot();
+    const names = { self: 'André', opponent: 'Duda' };
+    const { result, rerender } = renderHook(
+      ({ snap }) => useRecordPastGame(snap, m.view, names, store, undefined),
+      { initialProps: { snap: snapshot } },
+    );
+    expect(result.current).not.toBeNull();
+    expect(result.current).not.toHaveProperty('replay');
+
+    rerender({ snap: { ...snapshot, replay: { t: 'replay', gameNo: 2, replay: replayOf('outra') } } });
+    expect(loadPastGames(store)[0]).not.toHaveProperty('replay');
+    expect(result.current).not.toHaveProperty('replay');
+
+    // Com o `gameNo` da partida gravada, entra.
+    rerender({ snap: { ...snapshot, replay: { t: 'replay', gameNo: 1, replay: replayOf('certa') } } });
+    expect(loadPastGames(store)[0]!.replay?.name).toBe('certa');
+    expect(result.current?.replay?.name).toBe('certa');
+  });
+
+  it('sem `store` o replay que chega depois não faz nada, e o painel segue', () => {
+    const m = mount({ store: null });
+    finish(m, {});
+    deliverReplay(m, 1, replayOf('sem-store'));
+    expect(screen.getByRole('dialog', { name: 'Você venceu' })).toBeInTheDocument();
+    expect(reviewButton()).not.toBeInTheDocument();
+  });
+
+  it('um armazenamento que recusa o anexo não quebra o painel, não oferece "Rever" e não tenta de novo', () => {
+    let refuse = false;
+    const inner = memoryStore();
+    const set = vi.fn((key: string, value: string) => {
+      if (refuse) throw new DOMException('cheio', 'QuotaExceededError');
+      inner.set(key, value);
+    });
+    const store: KeyValueStore = { get: (key) => inner.get(key), set, remove: (key) => inner.remove(key) };
+    const m = mount({ store });
+    finish(m, {});
+    expect(set).toHaveBeenCalledTimes(1);
+
+    refuse = true;
+    deliverReplay(m, 1, replayOf('recusado'));
+    const attempts = set.mock.calls.length;
+    expect(attempts).toBeGreaterThan(1);
+    expect(screen.getByRole('dialog', { name: 'Você venceu' })).toBeInTheDocument();
+    expect(reviewButton()).not.toBeInTheDocument();
+    expect(rows(m)).toHaveLength(1);
+    expect(rows(m)[0]).not.toHaveProperty('replay');
+
+    // Depois de um `null`, nada de nova tentativa: nem com o replay reenviado nem com o `room` reemitido.
+    deliverReplay(m, 1, replayOf('recusado'));
+    finish(m, { mineWants: true });
+    expect(set).toHaveBeenCalledTimes(attempts);
+  });
+});
+
+describe('a sala que termina e fecha em seguida (4000)', () => {
+  /** A mesa de verdade: `RoomGate` com a `Session` sobre uma `FakeConnection`, e a sala já em partida. */
+  function openGate() {
+    window.history.replaceState(null, '', `/s/${CODE}`);
+    const api = fakeApi();
+    const store = memoryStore();
+    saveSeat(store, CODE, seat());
+    render(<RoomGate code={CODE} api={api} store={store} marks={memoryStore()} />);
+    const connection = api.connections[0]!;
+    act(() => {
+      connection.emitRoom(roomMessage({ status: 'PLAYING', gameNo: 1, seats: SEATS }));
+      connection.emitState(stateMessage(viewAt(), { seq: 2 }));
+    });
+    expect(screen.getByRole('main', { name: 'Mesa' })).toBeInTheDocument();
+    return { connection, store };
+  }
+
+  /** A sala que expirou no meio da partida: `ABANDONED`, sem resultado. */
+  const abandoned = () =>
+    roomMessage({
+      status: 'FINISHED',
+      gameNo: 1,
+      seats: SEATS,
+      outcome: { gameNo: 1, result: null, cause: 'ABANDONED' },
+    });
+
+  it('room FINISHED → replay → closed 4000: o replay entra na linha antes de a tela de parada desmontar a mesa', () => {
+    const { connection, store } = openGate();
+    const replay = replayOf('expirou');
+
+    act(() => connection.emitRoom(abandoned()));
+    expect(loadPastGames(store)).toHaveLength(1);
+    expect(loadPastGames(store)[0]).not.toHaveProperty('replay');
+
+    act(() => connection.emit({ type: 'replay', replay: { t: 'replay', gameNo: 1, replay } }));
+    expect(loadPastGames(store)[0]!.replay).toEqual(replay);
+
+    act(() => connection.emitClosed(4000, true));
+    // A mesa saiu e a tela de parada entrou; a partida continua na lista, com o replay, para o "Rever".
+    expect(screen.getByRole('heading', { name: 'Essa sala não existe mais' })).toBeInTheDocument();
+    expect(screen.queryByRole('main', { name: 'Mesa' })).not.toBeInTheDocument();
+    expect(loadPastGames(store)).toHaveLength(1);
+    expect(loadPastGames(store)[0]).toMatchObject({
+      key: `sala:${CODE}:1`,
+      outcome: { gameNo: 1, result: null, cause: 'ABANDONED' },
+      replay,
+    });
   });
 });

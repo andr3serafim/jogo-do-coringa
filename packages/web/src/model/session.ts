@@ -45,8 +45,10 @@ export interface SessionSnapshot {
   room: RoomMessage | null;
   state: StateMessage | null;
   /**
-   * O replay da partida em curso na sala (o `gameNo` dele é o do `room`): chega no fim da partida, antes do `room` em
-   * `FINISHED`. Volta a `null` quando começa outra partida. Um replay de outra partida é ignorado.
+   * O replay da partida em curso na sala (o `gameNo` dele é o do `room`): chega no fim da partida. O treino o entrega antes
+   * do `room` em `FINISHED`; online o servidor manda o `room` e só depois o `replay` (e na volta do `hello` com a sala
+   * terminada, o `room`, o `state` e o `replay`, nessa ordem). Volta a `null` quando começa outra partida. Um replay de
+   * outra partida é ignorado.
    */
   replay: ReplayMessage | null;
   /** `legalActions` da `view` de `state`, sem `TIMEOUT` nem `FORFEIT`. */

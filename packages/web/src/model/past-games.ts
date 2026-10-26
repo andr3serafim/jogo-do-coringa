@@ -148,11 +148,14 @@ function newId(now: number, taken: readonly PastGame[]): string {
   return id;
 }
 
-/** Tira o replay da mais velha que ainda tem um (a linha fica). `false` quando não sobrou replay nenhum. */
-function dropOldestReplay(games: PastGame[]): boolean {
+/**
+ * Tira o replay da mais velha que ainda tem um (a linha fica), pulando a linha `keep`, a que acabou de ganhar o seu.
+ * `false` quando não sobrou replay nenhum para tirar.
+ */
+function dropOldestReplay(games: PastGame[], keep = -1): boolean {
   for (let i = games.length - 1; i >= 0; i--) {
     const game = games[i]!;
-    if (game.replay === undefined) continue;
+    if (i === keep || game.replay === undefined) continue;
     const line = { ...game };
     delete line.replay;
     games[i] = line;
@@ -195,6 +198,46 @@ export function recordPastGame(store: KeyValueStore, entry: Omit<PastGame, 'id'>
         }
       }
       if (!dropOldestReplay(games)) return null;
+    }
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Acrescenta o replay à linha `id`, que ainda não tem um: online o `replay` chega depois do `room` em `FINISHED`, e a linha já
+ * foi gravada. A linha fica onde está (mesmo lugar, mesma `date`, mesma `key`); o replay passa pela mesma validação e pelo
+ * mesmo teto de 1 MB do `recordPastGame`, que tira os replays das mais velhas, nunca o desta linha.
+ *
+ * Devolve a linha como ficou: com o replay; a que já tinha um (o dela fica, nada é gravado); ou sem ele, quando o replay tem
+ * forma errada ou sozinho passa do teto (nada é gravado e os das outras ficam). `null` se a linha não existe mais, se o
+ * armazenamento recusou até depois de tirar os replays das outras (a lista de antes fica) ou se algo lançou. Nunca lança.
+ */
+export function attachReplay(store: KeyValueStore, id: string, replay: Replay): PastGame | null {
+  try {
+    const games = loadPastGames(store);
+    const index = games.findIndex((game) => game.id === id);
+    if (index < 0) return null;
+    const current = games[index]!;
+    if (current.replay !== undefined) return current;
+    // Como na gravação: o que a leitura devolveria. Um replay de forma errada sai sozinho, e a linha fica como estava.
+    const candidate = parsePastGame(JSON.parse(JSON.stringify({ ...current, replay })));
+    if (candidate === null || candidate.replay === undefined) return current;
+    games[index] = candidate;
+    for (;;) {
+      const text = JSON.stringify(games);
+      if (text.length <= MAX_PAST_GAMES_CHARS) {
+        try {
+          store.set(PAST_GAMES_KEY, text);
+          return candidate;
+        } catch {
+          // Cota estourada ou armazenamento bloqueado: tira um replay das outras e tenta de novo.
+        }
+      }
+      if (!dropOldestReplay(games, index)) {
+        // Só o replay desta linha sobrou. Passando do teto ele não cabe nunca; senão foi o armazenamento que recusou.
+        return text.length > MAX_PAST_GAMES_CHARS ? current : null;
+      }
     }
   } catch {
     return null;

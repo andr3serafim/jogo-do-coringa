@@ -145,7 +145,8 @@ function PlayTableView({
   // O painel de fim (spec §2.5) só vem com a sala em FINISHED e a mesa quieta: não cobre o golpe final nem a cena da Exódia.
   const outcome = room?.status === 'FINISHED' ? room.outcome : undefined;
   const showEnd = room !== null && outcome !== undefined && !busy;
-  // A partida terminada fica na lista local assim que a sala vira FINISHED; com o replay (o treino), o painel oferece "Rever a partida".
+  // A partida terminada fica na lista local assim que a sala vira FINISHED; com o replay (o treino já o traz, e online ele é
+  // acrescentado à linha quando chega), o painel oferece "Rever a partida".
   const pastGame = useRecordPastGame(snapshot, view, names, store, training);
 
   // A barra existe nas fases de jogada; o Equipar e a escolha da ordem têm painéis próprios.

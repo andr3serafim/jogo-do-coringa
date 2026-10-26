@@ -4,13 +4,18 @@
 // `gameNo` 1: /treino → início → /treino na mesma página é outra partida e tem de ser gravada. O `ref` também segura o efeito
 // duplo do `<StrictMode>` e os `room` reemitidos da mesma partida (revanche pedida, oponente que sai).
 //
-// Uma tentativa só, e `null` quer dizer "não ficou guardada" (sem "Rever a partida"): o `safeStore` de produção guarda na memória
-// a última tentativa que o `Storage` recusou, e uma segunda chamada faria a verificação de repetida devolver uma entrada que o
-// disco não tem.
+// O replay entra na linha de duas maneiras. O treino o entrega antes do `room` em FINISHED, e ele vai na própria gravação. Online
+// o servidor manda o `room` primeiro e o `replay` depois (e, na volta do `hello` com a sala terminada, a linha já existe sem
+// ele): o segundo efeito o acrescenta à linha com `attachReplay`, uma vez por partida e só se o `gameNo` for o da linha. Isso
+// roda mesmo que a sala feche logo depois (4000): o `replay` chega antes do `closed`, e a mesa ainda está montada para gravar.
+//
+// Uma tentativa só, para a gravação e para o anexo, e `null` quer dizer "não ficou guardada" (sem "Rever a partida"): o
+// `safeStore` de produção guarda na memória a última tentativa que o `Storage` recusou, e uma segunda chamada faria a verificação
+// de repetida devolver uma entrada que o disco não tem.
 import { RULES_VERSION, type PlayerView } from '@coringa/engine';
 import { useEffect, useRef, useState } from 'react';
 import type { TrainingLevel } from '../../model/local-room.ts';
-import { recordPastGame, type PastGame, type PastGameMode } from '../../model/past-games.ts';
+import { attachReplay, recordPastGame, type PastGame, type PastGameMode } from '../../model/past-games.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import type { KeyValueStore } from '../../model/storage.ts';
 import type { TableNames } from './labels.ts';
@@ -23,7 +28,8 @@ interface Recorded {
 /**
  * A entrada gravada da partida que acabou (a da sala em `FINISHED`), ou `null` enquanto não houver uma: partida em curso, sem
  * `store`, ou armazenamento que recusou. O replay vem do `snapshot.replay` quando o `gameNo` dele é o da partida: o treino o
- * entrega antes do `room` em FINISHED; online, nesta fatia, ele não vem, e a linha fica sem replay.
+ * entrega antes do `room` em FINISHED, e a linha já nasce com ele; online ele chega depois, e a entrada devolvida passa a tê-lo
+ * quando é acrescentado (a mesma linha, com o `id` de antes).
  */
 export function useRecordPastGame(
   snapshot: SessionSnapshot,
@@ -35,6 +41,7 @@ export function useRecordPastGame(
   const { room, replay } = snapshot;
   const outcome = room?.status === 'FINISHED' ? room.outcome : undefined;
   const lastGameNo = useRef<number | null>(null);
+  const lastAttachedNo = useRef<number | null>(null);
   const [recorded, setRecorded] = useState<Recorded | null>(null);
   const { me, round } = view;
   const { self, opponent } = names;
@@ -60,6 +67,18 @@ export function useRecordPastGame(
     // Publica o resultado de gravar no armazenamento, que só este efeito faz: a mesa precisa dele para oferecer "Rever a partida".
     setRecorded({ gameNo: outcome.gameNo, game: recordPastGame(store, entry, now) });
   }, [store, room, outcome, replay, training, me, round, self, opponent]);
+
+  useEffect(() => {
+    if (store === undefined || outcome === undefined || recorded === null || recorded.gameNo !== outcome.gameNo) return;
+    const { game } = recorded;
+    // Sem linha, ou com a linha já com replay (o treino, ou a gravação que o levou): nada a acrescentar.
+    if (game === null || game.replay !== undefined) return;
+    // Só o replay desta partida, e uma tentativa por partida: depois de um `null` (armazenamento que recusou) não insiste.
+    if (replay === null || replay.gameNo !== outcome.gameNo || lastAttachedNo.current === outcome.gameNo) return;
+    lastAttachedNo.current = outcome.gameNo;
+    // Com `null` (a linha sumiu ou o armazenamento recusou) a linha de antes continua: sem replay, e o painel sem "Rever".
+    setRecorded({ gameNo: outcome.gameNo, game: attachReplay(store, game.id, replay.replay) ?? game });
+  }, [store, outcome, recorded, replay]);
 
   return recorded !== null && outcome !== undefined && recorded.gameNo === outcome.gameNo ? recorded.game : null;
 }
