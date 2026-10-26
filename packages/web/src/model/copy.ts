@@ -493,7 +493,7 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
     title: 'Janela de reação',
     items: [
       'Abre para o oponente quando você declara ataque, joga K ou lança um Reflect, mesmo que ele não tenha resposta.',
-      'Quem responde pode usar A (contra o ataque ou o K), quantas quiser, e depois passa. Contra um Reflect, pode anulá-lo ou se proteger, e isso fecha a janela na hora. Não há resposta a uma resposta.',
+      'Quem responde pode usar A quantas vezes quiser e depois passa: contra o ataque, o A destrói um J, Q ou K de quem atacou; contra um K jogado, só um K da Guarda. Contra um Reflect, pode anulá-lo ou se proteger, e isso fecha a janela na hora. Não há resposta a uma resposta.',
     ],
   },
   {

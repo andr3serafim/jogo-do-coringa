@@ -182,8 +182,8 @@ Revisados pela sessão principal em 2026-10-26, por delegação do autor.
    atacar é obrigatório. O botão mostra a conta antes de você confirmar."
 5. **J, Q e K:** "Cada J soma 1 ao multiplicador do seu ataque, e cada Q ao da sua defesa (até 4 de cada). Um K na Guarda
    absorve um golpe inteiro e quebra."
-6. **A:** "Janela de reação: quando o oponente ataca ou joga K, você pode responder com um A, que destrói um J, Q ou K dele, ou
-   passar. O A também vale no seu turno."
+6. **A:** "Janela de reação: quando o oponente ataca, você pode responder com um A, que destrói um J, Q ou K dele; quando ele
+   joga K, o A só destrói um K da Guarda. Ou passar. O A também vale no seu turno."
 7. **Selvagem:** "O Coringa Selvagem vale como J, Q ou A, à sua escolha. Nunca como K."
 8. **Reflect:** "Reflect é K + J + Q da mão, no seu turno. Se o oponente atacar no turno seguinte, ele perde os K e Q e leva o
    golpe de volta. Você não leva nada. Se ele não atacar, o Reflect se desfaz."

@@ -48,9 +48,9 @@ describe('resumo das regras: a janela de reação diz o que o motor faz', () => 
 
   // No motor (`actions/reaction.ts`): a Armadilha (A) deixa a janela aberta, então cabem várias; anular o Reflect ou se
   // proteger dele fecha a janela na hora (`closeReaction`); e o A é recusado na janela do Reflect.
-  it('o segundo item separa o A (quantas quiser, e depois passa) do Reflect (anular ou proteger fecha na hora)', () => {
+  it('o segundo item separa o A (quantas quiser, e depois passa; contra o K, só um K da Guarda) do Reflect (anular ou proteger fecha na hora)', () => {
     expect(window[1]).toBe(
-      'Quem responde pode usar A (contra o ataque ou o K), quantas quiser, e depois passa. Contra um Reflect, pode anulá-lo ou se proteger, e isso fecha a janela na hora. Não há resposta a uma resposta.',
+      'Quem responde pode usar A quantas vezes quiser e depois passa: contra o ataque, o A destrói um J, Q ou K de quem atacou; contra um K jogado, só um K da Guarda. Contra um Reflect, pode anulá-lo ou se proteger, e isso fecha a janela na hora. Não há resposta a uma resposta.',
     );
   });
 

@@ -43,7 +43,7 @@ const HINT_TEXT: Record<Exclude<HintId, 'pressure'>, string> = {
     'Sua vez de atacar: o dano é o seu ATK menos a DEF do oponente, no mínimo 0. Com cartas no Ataque, atacar é obrigatório. O botão mostra a conta antes de você confirmar.',
   buffs:
     'Cada J soma 1 ao multiplicador do seu ataque, e cada Q ao da sua defesa (até 4 de cada). Um K na Guarda absorve um golpe inteiro e quebra.',
-  trap: 'Janela de reação: quando o oponente ataca ou joga K, você pode responder com um A, que destrói um J, Q ou K dele, ou passar. O A também vale no seu turno.',
+  trap: 'Janela de reação: quando o oponente ataca, você pode responder com um A, que destrói um J, Q ou K dele; quando ele joga K, o A só destrói um K da Guarda. Ou passar. O A também vale no seu turno.',
   wild: 'O Coringa Selvagem vale como J, Q ou A, à sua escolha. Nunca como K.',
   reflect:
     'Reflect é K + J + Q da mão, no seu turno. Se o oponente atacar no turno seguinte, ele perde os K e Q e leva o golpe de volta. Você não leva nada. Se ele não atacar, o Reflect se desfaz.',

@@ -31,6 +31,12 @@ describe('hintParagraphs', () => {
     expect(hintParagraphs('pressure', DEFAULT_CONFIG.antiStallRounds)[1]).toContain(`${DEFAULT_CONFIG.antiStallRounds} rodadas`);
   });
 
+  it('a dica 6 diz que, contra um K jogado, o A só destrói um K da Guarda', () => {
+    expect(hintParagraphs('trap', DEFAULT_CONFIG.antiStallRounds)).toEqual([
+      'Janela de reação: quando o oponente ataca, você pode responder com um A, que destrói um J, Q ou K dele; quando ele joga K, o A só destrói um K da Guarda. Ou passar. O A também vale no seu turno.',
+    ]);
+  });
+
   it('a dica do fim fala da Exódia e do convite para uma sala (o link "Jogar com um amigo" é da tela)', () => {
     const [end] = hintParagraphs('end', DEFAULT_CONFIG.antiStallRounds);
     expect(end).toContain('Exódia: 4 K na Guarda');
