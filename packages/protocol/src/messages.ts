@@ -82,8 +82,8 @@ export interface StateMessage {
 }
 
 /**
- * A partida `gameNo` gravada, do primeiro ao último passo. Sai antes do `room` em `FINISHED` (quem vê a sala terminar já tem o
- * replay). O treino a publica no fim da partida; o servidor a manda na fatia 3.
+ * A partida `gameNo` gravada, do primeiro ao último passo. A ordem em relação ao `room` varia: o treino a publica antes do
+ * `room` em `FINISHED`, o servidor depois. A `Session` aceita as duas, desde que o `room` da partida (o mesmo `gameNo`) já exista.
  */
 export interface ReplayMessage {
   t: 'replay';
@@ -112,7 +112,7 @@ export interface ErrorMessage {
   message: string;
 }
 
-export type ServerMessage = WelcomeMessage | RoomMessage | StateMessage | AckMessage | ErrorMessage;
+export type ServerMessage = WelcomeMessage | RoomMessage | StateMessage | ReplayMessage | AckMessage | ErrorMessage;
 
 /** Respostas HTTP (§3). */
 export interface CreateRoomResponse {

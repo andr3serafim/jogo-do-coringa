@@ -245,6 +245,37 @@ describe('RoomClient: mensagens do servidor', () => {
     expect(events).toEqual([{ type: 'open' }, { type: 'room', room }, { type: 'error', error }]);
   });
 
+  it('repassa o replay como evento', () => {
+    const { events, last } = connected();
+    const message = { t: 'replay', gameNo: 2, replay: { name: 'p', seed: 's', players: ['p1', 'p2'], steps: [] } };
+    last().serverSend(message);
+    expect(events).toEqual([{ type: 'open' }, { type: 'replay', replay: message }]);
+  });
+
+  it.each([
+    ['sem gameNo', { t: 'replay', replay: {} }],
+    ['com gameNo em texto', { t: 'replay', gameNo: '2', replay: {} }],
+    ['sem replay', { t: 'replay', gameNo: 2 }],
+    ['com replay em texto', { t: 'replay', gameNo: 2, replay: 'x' }],
+    ['com replay nulo', { t: 'replay', gameNo: 2, replay: null }],
+  ])('um replay malformado (%s) é ignorado', (_caso, message) => {
+    const { events, last } = connected();
+    last().serverSend(message);
+    expect(events).toEqual([{ type: 'open' }]);
+  });
+
+  it('o replay não mexe no room nem no state guardados', () => {
+    const { client, last } = connected();
+    last().serverSend({ t: 'welcome', protocol: 1, playerId: 'p2', serverNow: 1_000_000 });
+    const room = { t: 'room', code: 'ABC234', status: 'FINISHED', seats: [], score: { p1: 1, p2: 0, draws: 0 }, gameNo: 1, expiresAt: 1 };
+    last().serverSend(room);
+    last().serverSend(stateMsg(9));
+    last().serverSend({ t: 'replay', gameNo: 1, replay: { name: 'p', seed: 's', players: ['p1', 'p2'], steps: [] } });
+    expect(client.room).toEqual(room);
+    expect(client.state).toEqual(stateMsg(9));
+    expect(client.playerId).toBe('p2');
+  });
+
   it('descarta state com seq menor que o último; aceita igual (reconexão)', () => {
     const { client, events, last } = connected();
     last().serverSend(stateMsg(9));

@@ -37,7 +37,7 @@ export type ConnectionEvent =
   | { type: 'open' }
   | { type: 'room'; room: RoomMessage }
   | { type: 'state'; state: StateMessage }
-  /** Só a sala local do treino a emite por enquanto; o `RoomClient` passa a emiti-lo na fatia 3, quando o servidor mandar a mensagem. */
+  /** A partida gravada: a sala local do treino a emite no fim da partida e o `RoomClient` repassa a mensagem do servidor. */
   | { type: 'replay'; replay: ReplayMessage }
   | { type: 'error'; error: ErrorMessage }
   | { type: 'closed'; code: number; final: boolean };
@@ -355,6 +355,11 @@ export class RoomClient implements RoomConnection {
         entry.resolve(msg);
         break;
       }
+      case 'replay':
+        // Só repassa: não guarda estado (quem decide a que partida pertence é a camada de cima, pelo `gameNo`).
+        if (typeof msg.gameNo !== 'number' || typeof msg.replay !== 'object' || msg.replay === null) return;
+        this.#emit({ type: 'replay', replay: msg });
+        break;
       case 'error':
         this.#emit({ type: 'error', error: msg });
         break;
