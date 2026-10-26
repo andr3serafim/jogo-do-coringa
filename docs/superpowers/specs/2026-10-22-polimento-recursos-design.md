@@ -237,13 +237,57 @@ modelo da web. **[decisão minha]** As pistas:
   abaixo das camadas da cena e da faixa.
 - **Destaque:** a zona de que a dica fala ganha um contorno parado (ouro com borda de tinta), sem piscar.
 - **Entrada:** `/tutorial`. Na tela inicial, "Aprender jogando" em destaque até o tutorial ser concluído ou pulado
-  (`coringa:tutorial`), e depois como link comum.
+  (`coringa:tutorial`), e depois como botão comum, entre os do treino.
 - Entra por `import()`.
 
 ### 5.2 Testes
 - Modelo: cada dica na situação certa, uma vez só, e nenhuma depois de pular.
 - Componente: o painel não prende o foco, "Entendi" e "Pular".
-- E2E: abrir `/tutorial`, ver a dica do Equipar, montar, ver a dica seguinte, pular; o axe sem violações sérias.
+- E2E: abrir `/tutorial`, ver a dica do Equipar, montar, ver a dica seguinte, pular; o axe sem violações sérias. Mais o fim (a
+  dica 10 dentro do painel de fim) e o celular de 360 × 640 (§5.3). Entregue em `packages/web/e2e/tutorial.spec.ts`.
+
+### 5.3 Como ficou (entregue na fatia 4)
+
+- **Semente:** `TUTORIAL_SEED = 'tutorial-132'` (`@coringa/sim/tutorial`, sem `node:*`: a web a importa). Foi achada por
+  `pnpm sim:tutorial` (job à parte, nunca no `pnpm check`), que percorre `tutorial-0`, `tutorial-1`, … e para na primeira em que
+  o jogador (`p1`) recebe J, Q, K e A até o 2º Equipar, o Selvagem até o 3º e K + J + Q juntos na mão até o 3º. A conta é feita
+  pela regra de repartir do motor, sem jogar rodadas: o monte é fixo pela semente, então os Equipares 1 e 2 são exatos, mas o 3º
+  vem depois de uma rodada de ataque, e quem ganha a iniciativa nela muda de que lado do monte as cartas saem; por isso o 3º só
+  conta o especial que chega com qualquer das duas iniciativas. Das 1 000 primeiras candidatas só 4 passam; `tutorial-132` é a
+  133ª. Na semente, `p1` recebe no Equipar 1 A, J e K e uma numérica, no 2º acrescenta A, Q e o Selvagem (K + J + Q já juntos), e
+  tem a iniciativa na rodada 3. O teste do `sim` confere a semente e cruza a conta com o motor; se a regra de repartir mudar, ele
+  reprova e a procura se refaz. Só a primeira partida do tutorial tem esse monte (a revanche usa `<semente>-2`), e depois do fim
+  não há mais dica.
+- **Textos:** os dez textos finais, revisados pela sessão principal em 2026-10-26, estão no plano
+  (`docs/superpowers/plans/2026-10-26-polimento-fatia-4-tutorial.md`, "Textos finais das dicas") e, no código, em
+  `packages/web/src/model/tutorial-copy.ts` (o E2E confere as dicas 1, 3, 4 e 10 por inteiro). A dica 9 são duas frases independentes: a
+  da Pressão da mesa, que sai inteira no sub-projeto 5, e a do anti-travamento, que lê `config.antiStallRounds` da partida.
+  Nenhum texto, efeito ou cena novo depende da Pressão da mesa.
+- **Fluxo das dicas** (`model/tutorial.ts`, puro): a dica fica no painel até o "Entendi" ou até outra tomar o lugar. Uma dica que
+  saiu de situação conta como vista e não volta; uma que ainda vale não é dada por vista. "Entendi" mostra a próxima que vale
+  nesse mesmo momento (o primeiro ataque, depois J/Q/K, depois o Selvagem e o Reflect, na ordem da lista). O contorno só aparece
+  enquanto a situação da dica vale. A dica de J, Q e K só vale com um J, Q ou K de verdade jogável (o Selvagem que o motor oferece
+  como J ou Q não conta: a dele é a 7).
+- **Painel** (`ui/table/HintPanel.tsx`): uma região "Dica" com o texto numa região viva `polite` (montada vazia e preenchida no
+  desenho seguinte, para o leitor de tela a ler) e os botões "Entendi" e "Pular o tutorial". Sem `fixed`, `absolute` nem
+  `z-index`, sem trava de foco, e com `data-sem-pulo` (o toque nos botões durante as batidas é só deles). No PC mora num slot no
+  alto da coluna do histórico; no celular e no tablet é o primeiro filho dos campos (`[data-campos]`, o contêiner que rola), e
+  a mão e a barra ficam fora dele. Uma dica nova que chega com os campos rolados traz o painel à vista (`scrollIntoView`
+  instantâneo). Se o painel esvazia ou some com o foco nele, o foco vai ao painel de baixo da mesa (ou ao título dela).
+- **A dica 10, o fim, mora dentro do painel de fim** (`EndPanel`, no slot `note`), e não no painel da dica: o painel de fim é um
+  `<dialog>` modal, que deixa o resto da página inerte (sem clique, sem foco, fora da árvore de acessibilidade), e uma dica fora
+  dele ficaria atrás. A nota (o texto e o link "Jogar com um amigo", para `/`) entra na descrição do diálogo
+  (`aria-describedby`), e o leitor de tela a lê junto com o motivo quando ele abre. Não tem "Entendi" nem "Pular". `coringa:tutorial`
+  vira `done` quando a nota aparece no diálogo (não no clique). No fim a dica 10 passa na frente de qualquer outra ainda não vista,
+  e depois dela o tutorial acabou: **nenhuma dica depois do fim**, nem na revanche.
+- **"Pular o tutorial":** esconde o painel, grava `skipped` e a partida segue sem dica nenhuma. A tela inicial trata `done` e
+  `skipped` do mesmo jeito (o botão vira comum).
+- **Celular de 360 × 640:** o E2E confere que o painel (com a dica 1 e com a 4, as mais longas), a mão e a barra ficam à vista por
+  inteiro, o painel dentro da janela dos campos. As medidas, feitas com o Playwright fora do E2E: a dica 1 é a mais alta (~230 px de
+  uma janela de ~338 px dos campos) e a 4 ocupa ~190 px de ~320 px na vez de atacar; a rolagem automática da vez de atacar (spec 3
+  §3.2) espera o painel fechar. Observação, sem teste: em 320 × 568 a dica 4 chega a ~210 de ~245 px, então cabe, mas quase não
+  sobra campo à vista até o "Entendi".
+- **A partida do tutorial** entra na lista local de partidas como "Treino · Fácil" (usa o mesmo registro do treino).
 
 ---
 
@@ -304,6 +348,16 @@ Cada fatia entra na `main` sozinha, com revisão de código e os dois jobs da CI
   prévia passa a dizer o desfecho ("dano 24 · derruba Duda"), a partir do resultado do `previewAttack` (o dano depois da Guarda, da
   Defesa Absoluta e do Reflect), nunca de ATK − DEF: com Guarda, não derruba; contra Reflect, mostra o desfecho para quem ataca
   ("o Reflect devolve 24 · derruba você"). Com teste. Entra na fatia do tutorial, que mexe nos textos da barra.
+- **Entregue na fatia 4.** A regra é uma só: `damage > 0 && damage >= vida` de quem leva o golpe, com `damage` (o defensor) e
+  `reflected` (o atacante, no Reflect) do `previewAttack`, igual ao `loseHp` do motor; o empate derruba, e dano 0 (a Guarda e a Defesa
+  Absoluta que absorvem) nunca. Aparece em três lugares: o botão **Atacar** ("114 × 42 · dano 72 · derruba Duda"), a **Ameaça de Duda** na
+  barra ("… · dano 38 · derruba você"; com o seu Reflect, "seu Reflect devolve 77 de dano a Duda · derruba Duda") e o **aviso da janela
+  de reação** ("Duda declarou ataque: … → dano 38 · derruba você"). Contra o Reflect de Duda o texto de antes continua e ganha o
+  sufixo ("Reflect de Duda: 141 de dano volta para você · derruba você"): a forma curta aprovada ("o Reflect devolve 24") não é a
+  frase que o botão já tinha, e a conta é a mesma. A linha longa "Quebrando o K antes" também diz "derruba"; a frase curta do botão
+  de cada alvo ("quebrando o K: 110 de dano") não. Um teste monta partidas de verdade (Guarda, Defesa Absoluta, Ataque Absoluto,
+  Reflect) e confere, com `applyAction`, que a partida acaba por vida exatamente quando o texto diz "derruba" e que cai quem ele
+  nomeia (`copy-lethal-engine.test.ts`): a vida vai mudar no sub-projeto 5, e é ele que reprova primeiro.
 
 ## 9. Fica para quem constrói
 

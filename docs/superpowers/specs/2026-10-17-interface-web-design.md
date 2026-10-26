@@ -139,9 +139,10 @@ O endereço do servidor é `location.origin`, para o `RoomClient` e para as cham
 
 | Rota | Tela |
 |---|---|
-| `/` | Início: **Criar sala**, **Entrar com código ou link**, **Treinar contra o bot**, **Partidas anteriores**. O apelido fica lembrado. |
+| `/` | Início: **Aprender jogando** (em destaque, no alto, até o tutorial ser concluído ou pulado; depois, um botão comum entre os do treino), **Criar sala**, **Entrar com código ou link**, **Treinar contra o bot**, **Partidas anteriores**. O apelido fica lembrado. |
 | `/s/:code` | Sala: entrada, lobby, mesa ou fim, conforme o status da sala |
 | `/treino` | Partida local contra o bot (§2.6) |
+| `/tutorial` | Partida local contra o bot Fácil, numa semente fixa, com dicas por situação (§2.7) |
 | `/partidas` | Lista local das partidas terminadas neste navegador (§6.1), do treino e online, com **Rever** nas que têm replay |
 | `/partidas/:id` | Replay de uma partida da lista: a mesa só de vista, do assento de quem a guardou, com os controles (início, passo anterior, próximo passo, tocar/pausar e o seletor de rodada). Id que não está mais no navegador ou partida sem replay mostram o motivo e o caminho de volta à lista |
 | qualquer outra | "Página não encontrada", com link para o início |
@@ -212,6 +213,22 @@ A mesa está em §3 e §4. O menu da partida tem:
 - Usa as mesmas telas da mesa e do fim. Não tem lobby.
 - Também é a base dos testes de componentes e de um E2E determinístico (§9).
 
+### 2.7 Tutorial (`/tutorial`) [A + P]
+
+- É o treino (§2.6) contra o bot **Fácil**, sempre na semente do tutorial (`TUTORIAL_SEED`, de `@coringa/sim/tutorial`): a URL, com
+  `?semente=` ou `?nivel=`, é ignorada. As mesmas telas da mesa e do fim, sem relógio; a faixa central e o menu dizem "Tutorial"
+  (a faixa, "Tutorial, sem relógio"). A tela entra por `React.lazy` e só ela importa o painel, os textos e a semente (o JS inicial
+  não cresce com eles; o smoke confere).
+- **Dicas por situação** (spec do polimento, §5): um painel "Dica" com **Entendi** e **Pular o tutorial**, não modal e sem prender o
+  foco. A zona de que a dica fala ganha um contorno parado (`data-dica`). Não é um roteiro: a dica certa aparece quando a situação
+  acontece, uma vez cada.
+- **Onde mora o painel:** no PC, no alto da coluna do histórico, abaixo do cabeçalho; no celular e no tablet, como o primeiro filho
+  dos campos (o contêiner que rola, §3.2), então nunca cobre a mão nem a barra de ação. Sem `fixed`, `absolute` nem `z-index`.
+- **A dica do fim** vai dentro do painel de fim (§2.5), e não no painel da dica: o painel de fim é um `<dialog>` modal. O texto e o
+  link "Jogar com um amigo" (para `/`) entram na descrição do diálogo (`aria-describedby`), e o leitor de tela os lê ao abrir.
+- **`coringa:tutorial`** (§6.1): `done` quando a dica do fim aparece, `skipped` no "Pular o tutorial". Sem o valor, o tutorial ainda
+  não foi feito, e a tela inicial o põe em destaque. Recarregar a tela recomeça as dicas (só o valor fica guardado).
+
 ---
 
 ## 3. A mesa
@@ -250,6 +267,9 @@ A mesa está em §3 e §4. O menu da partida tem:
   5. a barra de ação.
 - As duas fileiras de Ataque ficam junto da faixa central, frente a frente. Esse é o arranjo dos rascunhos e pode mudar na reação do autor.
 - **Na sua vez de atacar** (celular e tablet), depois de as batidas pararem, se a sua fileira de Ataque ou a Defesa do oponente (o alvo) não está inteira na janela dos campos, os campos rolam até a sua fileira ficar no pé dela, com a fileira de Ataque do oponente, a faixa e a Defesa dele acima. Uma vez por vez; com tudo à vista, nada rola; se o próprio jogador rolou os campos nesta vez (roda, toque arrastado, teclas de rolagem), nada rola. A rolagem é instantânea (nunca suave, e assim também com movimento reduzido) e não mexe no foco, que segue no painel de baixo. Regra aceita pela sessão principal, por delegação do autor, em 2026-10-22. Num celular baixo (360 × 640) a mesa pede ~660 px e a janela dos campos tem ~320: sem isso, a sua fileira ficava abaixo da mão (a 390 × 844 e a 412 × 915 já cabe, e nada rola). No PC nada rola (§3.3). Um E2E confere a 360 × 640.
+- **No tutorial** (§2.7), o painel da dica é o primeiro filho dos campos, acima do campo do oponente: ele rola com os campos, e a mão e
+  a barra de ação continuam fora do contêiner, sempre à vista. Uma dica nova que chega com os campos rolados traz o painel de volta à
+  vista; a rolagem da vez de atacar espera o painel fechar. A 360 × 640 a dica mais alta (a do Equipar) ocupa ~230 px dos ~338 da janela dos campos.
 - **Sete cartas cabem em 360 px.** O tamanho das cartas acompanha a largura: ~34 × 48 px a 360, ~38 × 52 a 390. Nada rola de lado.
 - **Alvo de toque ≥ 44 px:**
   - cartas da mesa menores que isso ganham área de toque invisível, sem sobrepor a vizinha;
@@ -291,6 +311,7 @@ A mesa está em §3 e §4. O menu da partida tem:
 **Atacar ou encerrar o turno:**
 
 - o botão principal está sempre visível na fase principal: **Atacar**, com a prévia, ou **Encerrar turno**, quando o Ataque está vazio;
+- a prévia diz quando o golpe derruba ("27 × 3 · dano 24 · derruba Duda"): o dano que o motor calculou (depois da Guarda, da Defesa Absoluta e do Reflect, nunca ATK − DEF) alcança a vida de quem o leva, e o empate derruba; contra o Reflect de Duda o sufixo é "derruba você" quando o que volta zera a sua vida. A Ameaça de Duda e o aviso da janela de reação dizem o mesmo ("derruba você"). Um teste prende essa regra ao fim de partida do motor (spec do polimento, §8.1);
 - não há confirmação, mas o botão fica longe da mão, para evitar toque sem querer.
 
 **Cancelar:** botão **Cancelar** ou a tecla Esc.
@@ -457,6 +478,7 @@ A mesa está em §3 e §4. O menu da partida tem:
 ### 6.1 Persistência no navegador
 
 - Chave por sala `coringa:sala:<CÓDIGO>` → `{ token, playerId, nickname, lastSeq }`. Também `coringa:apelido` e `coringa:prefs` (passe automático, reduzir animações).
+- Chave `coringa:tutorial` → `done` (a dica do fim apareceu) ou `skipped` (a pessoa pulou o tutorial); ausente, o tutorial ainda não foi feito (§2.7).
 - Chave `coringa:partidas` → a lista das partidas terminadas, da mais nova para a mais velha: as últimas 20, do treino e online, cada uma com id, data, modo, apelidos, assento, resultado, rodadas, placar, versão das regras e, quando houver, o replay (o treino já o traz; online ele chega depois do `room` em `FINISHED` e é acrescentado à linha, e a lista mostra "Sala <código>" com "Rever"). Teto de 1 MB (1 000 000 caracteres do JSON): passando, saem os replays das mais velhas e a linha fica. Quem grava é a mesa, no instante em que a sala vira `FINISHED`.
 - Toda leitura e escrita fica num `try/catch`. Sem `localStorage` (aba privada, bloqueio), o jogo funciona, mas recarregar a página perde o assento; a interface avisa uma vez.
 - O `lastSeq` é atualizado a cada `state`. Na volta da página, ele vai como `lastSeq` no `RoomClient`, e os eventos perdidos chegam em `catchUp`.
@@ -626,6 +648,8 @@ Uma exceção no React mostra "Algo deu errado", com os botões **Recarregar** e
    - desistir → painel de fim → revanche pedida pelos dois → partida nova.
 2. A mesma entrada em viewports de celular, 390 × 844 e 360 × 740, conferindo que a página não rola de lado.
 3. Treino com semente fixa: algumas rodadas determinísticas pela interface, sem servidor.
+   - O tutorial (`/tutorial`, também sem servidor): a dica do Equipar, a seguinte, "Pular o tutorial", o fim com a dica dentro do painel
+     de fim e, a 360 × 640, as dicas mais longas (a 1 e a 4) à vista por inteiro, com a mão e a barra (spec do polimento, §5.3).
 4. axe nas telas visitadas.
 
 Na partida online a semente só sai do servidor depois do fim, no `replay` (spec 2 §8.4). O `wrangler dev` do E2E fixa o sorteio com `E2E_SEED`, mas os prazos são reais; por isso o E2E online reage ao que aparece na tela, em vez de seguir um roteiro fixo de cartas.
