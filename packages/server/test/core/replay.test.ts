@@ -54,7 +54,7 @@ function expectRoomBeforeReplay(sock: FakeSocket): void {
 }
 
 describe('o replay sai depois do room, em todo caminho que leva a FINISHED', () => {
-  it('o fim pelo motor (jogada): room e depois replay aos dois, com o Replay da linha de log', async () => {
+  it('o fim pelo motor manda room e depois replay aos dois', async () => {
     const { h, p1, p2 } = await Harness.fromState(lethal());
     const rec = h.core.record!;
     await h.send(p1, attack(h));
@@ -73,7 +73,7 @@ describe('o replay sai depois do room, em todo caminho que leva a FINISHED', () 
     expect(firstReplay(p1).replay.config).toEqual(rec.game!.state.config);
   });
 
-  it('o fim pelo motor (estouro da janela de reação, no alarme): room e depois replay', async () => {
+  it('o fim pelo motor no estouro da janela de reação (alarme) também manda room e depois replay', async () => {
     const { h, p1, p2 } = await armed(lethal());
     await h.send(p1, attack(h));
     h.advance(TIMERS.reactionMs + TIMERS.graceMs);
@@ -87,7 +87,7 @@ describe('o replay sai depois do room, em todo caminho que leva a FINISHED', () 
     }
   });
 
-  it('o fim pelo motor (PASS guardado que vale no alarme): room e depois replay', async () => {
+  it('o fim pelo motor com o PASS guardado que vale no alarme também manda room e depois replay', async () => {
     const { h, p1, p2 } = await armed(lethal());
     await h.send(p1, attack(h));
     await h.send(p2, pass(h)); // antes do piso de 2 s: guardado, ninguém vê nada
@@ -105,7 +105,7 @@ describe('o replay sai depois do room, em todo caminho que leva a FINISHED', () 
     }
   });
 
-  it('a desistência: state, ack, room e replay para quem desistiu; state, room e replay para o outro', async () => {
+  it('a desistência também', async () => {
     const { h, p1, p2 } = await Harness.playing();
     await h.send(p2, { t: 'concede', id: 'c1' });
     expect(types(p2, 4)).toEqual(['state', 'ack', 'room', 'replay']);
@@ -121,39 +121,41 @@ describe('o replay sai depois do room, em todo caminho que leva a FINISHED', () 
     expect(replaysOf(p2)).toHaveLength(1);
   });
 
-  it('o W.O. por três estouros (AFK): room e depois replay aos dois', async () => {
-    const { h, p1, p2 } = await armed(setup({}));
-    const rec = h.core.record!;
-    rec.game!.strikes.p1 = 2;
-    h.advance(TIMERS.turnMs + TIMERS.graceMs);
-    expect(rec.outcome).toMatchObject({ cause: 'AFK', result: { kind: 'WIN', winner: 'p2', reason: 'FORFEIT' } });
-    for (const s of [p1, p2]) {
-      expect(types(s, 3)).toEqual(['state', 'room', 'replay']);
-      expect(s.inbox.at(-1)).toEqual(logged(h));
-      expectRoomBeforeReplay(s);
-    }
-    expect(firstReplay(p2).replay.steps.slice(-2)).toEqual([
-      { player: 'system', action: { type: 'TIMEOUT' } },
-      { player: 'system', action: { type: 'FORFEIT', loser: 'p1' } },
-    ]);
-  });
+  describe('o W.O. (tempo esgotado três vezes e queda sem volta) também', () => {
+    it('por três estouros (AFK): room e depois replay aos dois', async () => {
+      const { h, p1, p2 } = await armed(setup({}));
+      const rec = h.core.record!;
+      rec.game!.strikes.p1 = 2;
+      h.advance(TIMERS.turnMs + TIMERS.graceMs);
+      expect(rec.outcome).toMatchObject({ cause: 'AFK', result: { kind: 'WIN', winner: 'p2', reason: 'FORFEIT' } });
+      for (const s of [p1, p2]) {
+        expect(types(s, 3)).toEqual(['state', 'room', 'replay']);
+        expect(s.inbox.at(-1)).toEqual(logged(h));
+        expectRoomBeforeReplay(s);
+      }
+      expect(firstReplay(p2).replay.steps.slice(-2)).toEqual([
+        { player: 'system', action: { type: 'TIMEOUT' } },
+        { player: 'system', action: { type: 'FORFEIT', loser: 'p1' } },
+      ]);
+    });
 
-  it('o W.O. por queda sem volta: o vencedor recebe room e replay; o perdedor, o replay no hello', async () => {
-    const { h, p1, p2, tokens } = await Harness.playing();
-    h.close(p2);
-    h.advance(TIMERS.reconnectMs);
-    const rec = h.core.record!;
-    expect(rec.outcome).toMatchObject({ cause: 'RECONNECT_TIMEOUT', result: { kind: 'WIN', winner: 'p1' } });
-    expect(types(p1, 3)).toEqual(['state', 'room', 'replay']);
-    expect(p1.inbox.at(-1)).toEqual(logged(h));
-    expect(replaysOf(p2)).toEqual([]);
+    it('por queda sem volta: o vencedor recebe room e replay; o perdedor, o replay no hello', async () => {
+      const { h, p1, p2, tokens } = await Harness.playing();
+      h.close(p2);
+      h.advance(TIMERS.reconnectMs);
+      const rec = h.core.record!;
+      expect(rec.outcome).toMatchObject({ cause: 'RECONNECT_TIMEOUT', result: { kind: 'WIN', winner: 'p1' } });
+      expect(types(p1, 3)).toEqual(['state', 'room', 'replay']);
+      expect(p1.inbox.at(-1)).toEqual(logged(h));
+      expect(replaysOf(p2)).toEqual([]);
 
-    const back = h.open();
-    await h.send(back, h.hello(tokens.p2));
-    expect(back.inbox.map((m) => m.t)).toEqual(['welcome', 'room', 'state', 'replay']);
-    expect(back.inbox.at(-1)).toEqual(logged(h));
-    expectRoomBeforeReplay(back);
-    expect(replaysOf(p1)).toHaveLength(1); // quem já tinha o replay não o recebe de novo
+      const back = h.open();
+      await h.send(back, h.hello(tokens.p2));
+      expect(back.inbox.map((m) => m.t)).toEqual(['welcome', 'room', 'state', 'replay']);
+      expect(back.inbox.at(-1)).toEqual(logged(h));
+      expectRoomBeforeReplay(back);
+      expect(replaysOf(p1)).toHaveLength(1); // quem já tinha o replay não o recebe de novo
+    });
   });
 
   it('o abandono por três estouros com o outro fora: room e replay até o último passo, sem FORFEIT', async () => {
@@ -189,7 +191,7 @@ describe('o replay sai depois do room, em todo caminho que leva a FINISHED', () 
 });
 
 describe('nenhum replay enquanto a partida pode continuar', () => {
-  it('nenhuma mensagem com a semente antes do fim; depois dele, só o replay a leva', async () => {
+  it('nenhum replay durante a partida (nenhuma mensagem com a semente antes do fim)', async () => {
     const { h, p1, p2 } = await Harness.playing();
     const seed = h.core.record!.game!.seed;
     const equip = h.core.record!.game!.state.players[0]!.pending.length > 0;
@@ -224,7 +226,7 @@ describe('o hello com a sala FINISHED', () => {
     return room;
   }
 
-  it('reenvia o replay depois do room (e do retrato final)', async () => {
+  it('o hello com a sala FINISHED reenvia o replay depois do room', async () => {
     const { h, p1, tokens } = await finished();
     h.close(p1);
     const back = h.open();
@@ -234,7 +236,7 @@ describe('o hello com a sala FINISHED', () => {
     expectRoomBeforeReplay(back);
   });
 
-  it('no hello só o socket que entrou recebe o replay: o outro já o tem', async () => {
+  it('no hello, só o socket que entrou recebe o replay', async () => {
     const { h, p1, p2, tokens } = await finished();
     expect(replaysOf(p1)).toHaveLength(1);
     expect(replaysOf(p2)).toHaveLength(1);
@@ -255,7 +257,7 @@ describe('o hello com a sala FINISHED', () => {
     expect(replaysOf(p2)).toHaveLength(1);
   });
 
-  it('revanche pedida por um só: o hello ainda manda o replay da partida terminada', async () => {
+  it('revanche pedida por um só: o hello ainda manda o replay da terminada', async () => {
     const { h, p1, p2, tokens } = await finished();
     await h.send(p2, { t: 'rematch', want: true });
     h.close(p1);
@@ -266,7 +268,7 @@ describe('o hello com a sala FINISHED', () => {
     expect(back.inbox.at(-1)).toEqual(logged(h));
   });
 
-  it('revanche começada: nenhum replay novo, nem no hello que a larga', async () => {
+  it('revanche começada: nenhum replay, nem no hello', async () => {
     const { h, p1, p2, tokens } = await finished();
     // A pede, A cai, B pede e A volta: a revanche larga no hello de A.
     await h.send(p1, { t: 'rematch', want: true });
@@ -303,7 +305,7 @@ describe('o hello com a sala FINISHED', () => {
     }
   });
 
-  it('num núcleo reconstruído do armazenamento, o hello manda o replay com a semente e todos os passos', async () => {
+  it('o hello com a sala FINISHED num núcleo reconstruído do armazenamento (como o seed-seam faz) manda o replay com a semente e todos os passos', async () => {
     const { h, p1, tokens } = await Harness.playing();
     const equip = legalFirst(h, 'p1');
     await h.send(p1, { t: 'act', id: 'e1', epoch: h.core.record!.epoch, action: equip });
@@ -338,7 +340,7 @@ describe('a sala que expira', () => {
     h.apply(h.core.onAlarm(h.sockets, h.now));
   }
 
-  it('no meio da partida, manda room (abandonada) e replay até o último passo a quem está conectado, antes de fechar', async () => {
+  it('sala que expira no meio da partida manda o replay até onde foi a quem está conectado, antes de fechar', async () => {
     const { h, p1, p2 } = await Harness.playing();
     await h.send(p1, { t: 'act', id: 'e1', epoch: h.core.record!.epoch, action: legalFirst(h, 'p1') });
     const rec = h.core.record!;
@@ -416,7 +418,7 @@ describe('a sala que expira', () => {
 });
 
 describe('o replay reexecutado no motor', () => {
-  it('chega ao estado final guardado, no fim da partida e na que a expiração abandonou', async () => {
+  it('o replay reexecutado no motor chega ao estado final guardado', async () => {
     const full = await Harness.playing();
     await full.h.playToEnd();
     const [message] = replaysOf(full.p1);

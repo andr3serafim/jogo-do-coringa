@@ -191,7 +191,7 @@ Todas as rotas ficam sob `/api`. Corpo JSON de até 1 KiB. As rotas que não sã
 | `t` | Campos | Quando |
 |---|---|---|
 | `welcome` | `protocol`, `playerId`, `serverNow` | após um `hello` válido |
-| `room` | `code`, `status`, `seats[]` (`playerId`, `nickname`, `connected`, `ready`, `wantsRematch`, `woAt?`), `score`, `gameNo`, `outcome?`, `expiresAt` | após o `hello` e a cada mudança de lobby, presença, placar ou fim de partida |
+| `room` | `code`, `status`, `seats[]` (`playerId`, `nickname`, `connected`, `ready`, `wantsRematch`, `woAt?`), `score`, `gameNo`, `outcome?`, `expiresAt` | após o `hello` e a cada mudança de lobby, presença, placar ou fim de partida (inclusive a expiração no meio da partida, que manda o `room` abandonado antes do fechamento 4000) |
 | `state` | `seq`, `epoch`, `view`, `events`, `deadline`, `pausedTurnMs?`, `serverNow`, `catchUp?`, `resync?` | após cada passo aplicado (§5) e na reconexão |
 | `replay` | `gameNo`, `replay` (`name`, `config`, `seed`, `players`, `steps`: a partida inteira, do primeiro ao último passo) | só depois do fim da partida e sempre depois do `room` em `FINISHED` dela: ao fim (do motor, W.O., desistência ou abandono), a quem segue aberto; no `hello` com a sala terminada e sem revanche em curso, só a quem entrou; na expiração no meio da partida (que vira abandono), a quem segue aberto, antes do fechamento 4000 (§8.4) |
 | `ack` | `id`, `ok`, `seq?`, `held?`, `code?`, `message?` | resposta a `act` e `concede` |
