@@ -317,7 +317,8 @@ A mesa está em §3 e §4. O menu da partida tem:
 **Cancelar:** botão **Cancelar** ou a tecla Esc.
 
 **Arrastar (um caminho a mais, polimento fatia 5):** com o mouse ou o dedo, a carta da mão vai até a zona da jogada (J para os seus
-Buffs de ataque, Q para os de defesa, K para a Guarda, A e Selvagem até a carta do oponente que é alvo) e a jogada sai ao soltar.
+Buffs de ataque, Q para os de defesa, K para a Guarda, A e Selvagem até a carta do oponente que é alvo, e J, Q e Selvagem até o J ou
+o Q do oponente no Sacrifício; detalhes na spec do polimento, §6) e a jogada sai ao soltar.
 Onde há mais de uma jogada, a soltura escolhe a carta e a barra lista as jogadas, como o toque. Reflect, Ressuscitar, Atacar e
 Encerrar turno ficam só nos botões. O toque (tocar a carta, depois a jogada ou o alvo) e o teclado seguem exatamente como acima:
 arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na spec do polimento, §6.

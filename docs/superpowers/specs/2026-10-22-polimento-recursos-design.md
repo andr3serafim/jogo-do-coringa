@@ -313,8 +313,8 @@ modelo da web. **[decisão minha]** As pistas:
   batidas não começa arrasto).
 - **Fantasma:** uma cópia da carta numa camada fixa, fora do contêiner dos campos (que recorta), com `pointer-events: none`. O
   alvo da soltura sai de `elementFromPoint` e de um atributo `data-soltar` nas zonas.
-- **Zonas válidas** ganham um contorno parado enquanto a carta está no ar; soltar fora delas não faz nada: o fantasma some e a
-  carta segue na mão, sem voo de volta (nem com movimento reduzido, nem sem ele).
+- **Zonas válidas** ganham um contorno parado enquanto a carta está no ar; soltar fora delas não faz nada (exceto sobre a própria
+  carta, que vale como toque, §6.4): o fantasma some e a carta segue na mão, sem voo de volta (nem com movimento reduzido, nem sem ele).
 - **Toque:** as cartas arrastáveis têm `touch-action: none`; a mesa continua rolando por fora delas.
 - **Envio:** a soltura passa pelo mesmo caminho do toque (`isLegal` contra a lista do último `state`).
 - **Os botões e o teclado continuam** exatamente como hoje (WCAG 2.5.7).
@@ -366,7 +366,8 @@ modelo da web. **[decisão minha]** As pistas:
 - **Sem efeito, texto nem cena novos** ligados à Pressão da mesa: nada do arrasto depende dela, e ela sai inteira no sub-projeto 5.
 - **Fica para o autor:** nada na tela diz que a carta arrasta além do cursor (a spec não pede texto novo). No celular (390 × 844) com
   a mão cheia (seis cartas), a mão cobre a Guarda e os buffs do seu campo até os campos rolarem: o dedo fora das cartas os traz
-  (o E2E faz isso antes de arrastar o K), mas quem não rolar solta sobre a mão, e isso vale como toque. Se o playtest mostrar que
+  (o E2E faz isso antes de arrastar o K), mas quem não rolar solta sobre a mão e, salvo sobre a própria carta (que vale como toque),
+  nada acontece. Se o playtest mostrar que
   atrapalha, é um ajuste de layout (rolar os campos ao pegar a carta, por exemplo), não do gesto.
 
 ---
