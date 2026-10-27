@@ -51,6 +51,9 @@ export interface TableProps {
   /** Ids das cartas que são alvo possível da jogada em andamento. */
   targetIds?: ReadonlySet<string>;
   onSelectCard?: (id: string) => void;
+  /** Fora da sua vez, o toque na carta da mão explica por que ela não tem jogada (`handNote`). */
+  onExplainCard?: (id: string) => void;
+  handNote?: { cardId: string; text: string } | null;
   onSelectTarget?: (id: string) => void;
   /** Arrastar as cartas da mão até a zona da jogada (um caminho a mais que o toque; sem ele, a mão só toca). */
   handDrag?: HandDrag;
@@ -98,6 +101,8 @@ function TableView({
   selectedCardId = null,
   targetIds = NO_TARGETS,
   onSelectCard,
+  onExplainCard,
+  handNote = null,
   onSelectTarget,
   handDrag,
   onSeen,
@@ -166,6 +171,8 @@ function TableView({
     selectedCardId,
     draftIds,
     onSelectCard,
+    onExplainCard,
+    handNote,
     onSelectTarget,
     handDrag,
     onSeen,

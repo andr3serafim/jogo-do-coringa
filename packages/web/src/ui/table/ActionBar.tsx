@@ -10,7 +10,7 @@
 // Na janela de reação (spec §3.7) a barra ganha o gatilho com a prévia no alto e o botão Passar no lugar do principal. Depois
 // de um passe (manual ou automático) o servidor recusa qualquer outra jogada da janela, então as respostas saem da barra.
 // `disabled` desliga todos os controles (jogada em voo, reconexão, prazo esgotado); `pending` só diz "Enviando…".
-import type { GameEvent, PlayerView, SpecialCard } from '@coringa/engine';
+import { noPlayReason, type GameEvent, type PlayerView, type SpecialCard } from '@coringa/engine';
 import type { PlayerAction } from '@coringa/protocol';
 import { useMemo, type ReactNode, type RefObject } from 'react';
 import {
@@ -257,7 +257,10 @@ function Status({ view, names, acting, pending, card, play, cardPlays, plays, no
   } else if (play?.targets) {
     text = chooseTargetText(play.label, card, names.opponent);
   } else {
-    text = cardPlays.length > 0 ? chooseCardText(card) : noPlaysText(card);
+    text =
+      cardPlays.length > 0
+        ? chooseCardText(card)
+        : noPlaysText(card, noPlayReason(view, card), names.opponent, view.config.buffLimit);
   }
   return text === null ? null : <p className="text-sm leading-snug">{text}</p>;
 }

@@ -20,14 +20,20 @@
 // manda pelo `send` (com o `isLegal` de sempre, contra a lista do último `state`); com mais de uma, escolhe a carta e a barra mostra
 // as jogadas, como o toque; fora de zona, nada. O gesto fica desligado com os mesmos controles (`locked`). No Equipar, o painel liga
 // a soltura ao mesmo `onChoose` dos botões.
-import type { SpecialCard } from '@coringa/engine';
+//
+// Fora da sua vez (Equipar, escolha da ordem, vez do oponente), tocar uma carta da mão não escolhe nada: o balão sobre a mão diz por
+// que ela não tem jogada agora (B2, o motivo é do motor: `noPlayReason`) e some sozinho depois do tempo de leitura, ou com outro toque
+// na mesma carta. Depois do passe, e no fim da partida, a mão fica só de vista.
+import { noPlayReason, type SpecialCard } from '@coringa/engine';
 import type { Deadline, PlayerAction, StateMessage } from '@coringa/protocol';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { navigate } from '../../app/router.ts';
+import { noPlaysText } from '../../model/copy.ts';
 import { playDropZones, resolvePlayDrop, type DropKey } from '../../model/drag.ts';
 import { rowKey } from '../../model/effects.ts';
 import type { TrainingLevel } from '../../model/local-room.ts';
 import { isLegal, tablePlays, type CardPlay } from '../../model/plays.ts';
+import { readingMs } from '../../model/reading.ts';
 import type { Session, SessionSnapshot } from '../../model/session.ts';
 import { savePrefs, type KeyValueStore, type Prefs } from '../../model/storage.ts';
 import { useAnim, useBoardBusy } from '../anim/context.ts';
@@ -280,6 +286,28 @@ function PlayTableView({
     );
   };
 
+  // O balão do motivo (B2): vale na época em que a carta foi tocada, enquanto ela estiver na mão.
+  const [explained, setExplained] = useState<{ epoch: number; cardId: string } | null>(null);
+  const explainedCard =
+    explained !== null && explained.epoch === state.epoch ? (view.self.hand.find((c) => c.id === explained.cardId) ?? null) : null;
+  const handNote = explainedCard
+    ? {
+        cardId: explainedCard.id,
+        text: noPlaysText(explainedCard, noPlayReason(view, explainedCard), names.opponent, view.config.buffLimit),
+      }
+    : null;
+  const noteText = handNote?.text ?? null;
+  useEffect(() => {
+    if (noteText === null) return;
+    const timer = setTimeout(() => setExplained(null), readingMs(noteText));
+    return () => clearTimeout(timer);
+  }, [noteText, explained]);
+  const explainCard = (id: string) => {
+    if (locked) return;
+    setExplained(explainedCard?.id === id ? null : { epoch: state.epoch, cardId: id });
+  };
+  const explaining = !acting && !passed && phase !== 'GAME_OVER';
+
   const selectCard = (id: string) => {
     if (locked || passed) return;
     setPointedId(null);
@@ -494,6 +522,8 @@ function PlayTableView({
         selectedCardId={cardId}
         targetIds={targetIds}
         onSelectCard={acting && !passed ? selectCard : undefined}
+        onExplainCard={explaining ? explainCard : undefined}
+        handNote={explaining ? handNote : null}
         onSelectTarget={hasTargets ? chooseTarget : undefined}
         handDrag={acting && !passed ? { zones: (id) => new Set(playDropZones(id, plays).keys()), onDrop: dropCard } : undefined}
         // O foco que a própria mesa move (incluindo o que ela devolve depois de um pulo) não apaga marca.

@@ -154,10 +154,10 @@ describe('barra de ação: tocar uma carta lista as jogadas (spec §3.4)', () =>
     expect(inBar().queryByRole('list', { name: 'Jogadas' })).not.toBeInTheDocument();
   });
 
-  it('uma carta sem jogada possível diz isso, e o resto da barra continua', async () => {
+  it('uma carta sem jogada possível diz por quê (B2), e o resto da barra continua', async () => {
     const m = mount(withHand(['J'], { self: { ...DRAFT.self, attackBuffs: ['J', 'J', 'J', 'J'] }, opponent: { ...DRAFT.opponent, attackBuffs: [] } }));
     await m.user.click(handCard('J'));
-    expect(inBar().getByText(/nenhuma jogada possível agora/)).toBeInTheDocument();
+    expect(inBar().getByText(/: seus Buffs de ataque já têm 4 J, o limite$/)).toBeInTheDocument();
     expect(inBar().queryByRole('list', { name: 'Jogadas' })).not.toBeInTheDocument();
     expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
   });
@@ -763,9 +763,14 @@ describe('barra de ação: enviando (spec §1.5)', () => {
 });
 
 describe('barra de ação: quando não é a sua vez', () => {
-  it('a mão não escolhe nada, e a barra só diz de quem é a vez', () => {
-    mount({ ...DRAFT, phase: 'WAITING' });
-    expect(handList().queryAllByRole('button')).toHaveLength(0);
+  it('a mão não escolhe nada (o toque só explica, B2), e a barra só diz de quem é a vez', async () => {
+    const m = mount({ ...DRAFT, phase: 'WAITING' });
+    const buttons = handList().getAllByRole('button');
+    for (const button of buttons) expect(button).not.toHaveAttribute('aria-pressed');
+    await m.user.click(buttons[0]!);
+    expect(document.querySelector('[data-motivo]')).toHaveTextContent(/: espere a sua vez \(agora é a de Duda\)$/);
+    expect(document.querySelector('[data-motivo]')).toHaveAttribute('role', 'status');
+    expect(m.connection.sent).toHaveLength(0);
     expect(inBar().getByText('Esperando Duda jogar…')).toBeInTheDocument();
     expect(inBar().queryByRole('button', { name: ATTACK_BUTTON })).not.toBeInTheDocument();
     // A ameaça dele continua à vista.
@@ -842,7 +847,7 @@ describe('barra de ação: a escolha depende da época e da mão (spec §1.5, pa
     nextState(m, { epoch: 1 }, protectedView);
     expect(handCard('A')).toHaveAttribute('aria-pressed', 'true');
     expect(inBar().queryByRole('list', { name: 'Alvos' })).not.toBeInTheDocument();
-    expect(inBar().getByText(/nenhuma jogada possível agora/)).toBeInTheDocument();
+    expect(inBar().getByText(/: Duda está sob Defesa Absoluta: nada de Armadilha nem Sacrifício$/)).toBeInTheDocument();
   });
 });
 

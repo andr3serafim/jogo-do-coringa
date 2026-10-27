@@ -14,10 +14,11 @@ export function TableCard({ card, inHand = false, ...rest }: TableCardProps) {
   const marked = ui.marked.has(card.id);
   const target = ui.targetIds.has(card.id);
   const draft = ui.draftIds.has(card.id);
-  const { onSelectCard, onSelectTarget, onSeen } = ui;
+  const { onSelectCard, onExplainCard, onSelectTarget, onSeen } = ui;
   let onSelect: (() => void) | undefined;
   if (inHand) {
     if (onSelectCard) onSelect = () => onSelectCard(card.id);
+    else if (onExplainCard) onSelect = () => onExplainCard(card.id);
   } else if (target && onSelectTarget) {
     onSelect = () => onSelectTarget(card.id);
   }

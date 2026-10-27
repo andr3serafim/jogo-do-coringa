@@ -1,5 +1,5 @@
 // Textos das jogadas da mesa, em pt-BR (spec §3.4). Fora da meta de cobertura: é só texto.
-import type { AttackPreview, Card, PlayerId, RowName, SpecialCard } from '@coringa/engine';
+import type { AttackPreview, Card, NoPlayReason, PlayerId, RowName, SpecialCard } from '@coringa/engine';
 import type { DeadlineKind, Outcome, Score } from '@coringa/protocol';
 import { cardText, ROW_NAME } from '@coringa/sim/text';
 import type { TrainingLevel } from './local-room.ts';
@@ -61,7 +61,44 @@ export const RESURRECT_LABEL = 'Ressuscitar';
 
 export const PICK_CARD_TEXT = 'Toque numa carta da mão para ver as jogadas.';
 export const chooseCardText = (card: SpecialCard): string => `${cardText(card)}: escolha a jogada`;
-export const noPlaysText = (card: SpecialCard): string => `${cardText(card)}: nenhuma jogada possível agora`;
+/**
+ * Por que a carta não tem jogada agora (B2 do sub-projeto 5). O motivo é do motor (`noPlayReason`); aqui só o texto. O limite
+ * de buffs vem da config da partida.
+ */
+export function noPlayReasonText(card: SpecialCard, reason: NoPlayReason | null, opponent: string, buffLimit: number): string {
+  switch (reason) {
+    case 'GAME_OVER':
+      return 'a partida acabou';
+    case 'EQUIP_ROUND':
+      return 'no Equipar as especiais esperam na mão; elas se jogam nas rodadas de Ataque, no seu turno';
+    case 'ORDER_CHOICE':
+      return 'espere a escolha de quem ataca primeiro';
+    case 'OPPONENT_TURN':
+      return `espere a sua vez (agora é a de ${opponent})`;
+    case 'REACTION_TRAP_ONLY':
+      return 'na janela de reação só o A (ou o Selvagem como A) responde';
+    case 'REACTION_REFLECT':
+      return 'contra o Reflect, só Anular (K + J + Q da mão) ou Proteger-se (J + Q + K do seu campo)';
+    case 'BUFF_LIMIT':
+      return card.kind === 'Q'
+        ? `seus Buffs de defesa já têm ${buffLimit} Q, o limite`
+        : `seus Buffs de ataque já têm ${buffLimit} J, o limite`;
+    case 'NO_TARGET':
+      return `${opponent} não tem J, Q nem K para a Armadilha (as cartas do Reflect não contam)`;
+    case 'NO_GUARD_TARGET':
+      return `contra K jogado a Armadilha só mira a Guarda, e a de ${opponent} está vazia`;
+    case 'TARGET_PROTECTED':
+      return `${opponent} está sob Defesa Absoluta: nada de Armadilha nem Sacrifício`;
+    case 'NO_ROLE':
+      return `os seus buffs estão no limite e ${opponent} não tem alvo para a Armadilha`;
+    case null:
+      return 'nenhuma jogada possível agora';
+  }
+}
+
+/** "J♥: seus Buffs de ataque já têm 4 J, o limite". */
+export const noPlaysText = (card: SpecialCard, reason: NoPlayReason | null, opponent: string, buffLimit: number): string =>
+  `${cardText(card)}: ${noPlayReasonText(card, reason, opponent, buffLimit)}`;
 export const chooseTargetText = (play: string, card: SpecialCard, opponent: string): string =>
   `${play} (${cardText(card)}): escolha o alvo de ${opponent}`;
 export const waitingText = (opponent: string): string => `Esperando ${opponent} jogar…`;

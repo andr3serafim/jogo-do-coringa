@@ -340,10 +340,19 @@ describe('Equipar: carta a carta (spec §3.5)', () => {
     expect(within(screen.getByRole('region', { name: 'Campo de Duda' })).getByText('pronto')).toBeInTheDocument();
   });
 
-  it('a barra de jogadas não existe no Equipar, e a mão fica só de leitura', () => {
-    mount(EQUIP);
+  it('a barra de jogadas não existe no Equipar, e o toque na mão só explica por que a carta espera (B2)', async () => {
+    const m = mount(EQUIP);
     expect(screen.queryByRole('region', { name: 'Ações' })).not.toBeInTheDocument();
-    expect(handList().queryAllByRole('button')).toHaveLength(0);
+    const card = handList().getAllByRole('button')[0]!;
+    expect(card).not.toHaveAttribute('aria-pressed');
+    await m.user.click(card);
+    const note = document.querySelector('[data-motivo]');
+    expect(note).toHaveAttribute('role', 'status');
+    expect(note).toHaveTextContent(/: no Equipar as especiais esperam na mão; elas se jogam nas rodadas de Ataque, no seu turno$/);
+    expect(m.connection.sent).toHaveLength(0);
+    // Outro toque na mesma carta fecha o balão.
+    await m.user.click(card);
+    expect(document.querySelector('[data-motivo]')).toBeNull();
   });
 
   it('com a jogada em voo: "Enviando…", e só depois do ack "Esperando Duda montar…"', async () => {
@@ -516,6 +525,13 @@ describe('janela de reação (spec §3.7)', () => {
     expect(handList().getAllByRole('button')).toHaveLength(3);
     expect(inBar().getByRole('button', { name: 'Passar' })).toBeEnabled();
     expect(band().getByRole('timer')).toHaveTextContent('8');
+  });
+
+  it('na janela de reação, J, Q e K dizem que só o A responde (B2)', async () => {
+    const m = mount(REACTION, { state: withClock });
+    const king = handList().getAllByRole('button').find((el) => /^K, Guarda/.test(el.getAttribute('aria-label') ?? ''))!;
+    await m.user.click(king);
+    expect(inBar().getByText(/: na janela de reação só o A \(ou o Selvagem como A\) responde$/)).toBeInTheDocument();
   });
 
   it('o relógio da reação é grande, e é um só', () => {

@@ -1,7 +1,10 @@
 // Uma fileira de até `limit` cartas (spec §3.1): as cartas na ordem (a da frente sai primeiro), as vagas vazias
 // desenhadas até o limite e, ao lado, o total e a conta. Os números vêm do motor: o total de `attackPower` /
 // `defensePower`, a base de `attackBase` / `defenseBase` e as quadras de `quadValues`. A conta "38 × 4" é a base
-// vezes o multiplicador, que sai da divisão do total pela base (nenhuma regra repetida aqui).
+// vezes o multiplicador, que sai da divisão do total pela base (nenhuma regra repetida aqui). A divisão é sempre entre
+// números do mesmo quadro: enquanto o total espera e conta na batida do dano, a conta fica a de antes, e só troca quando a
+// contagem acaba. Dividir o total velho pela base nova (o golpe já tirou a carta da frente) inventava um J ou um Q que não
+// estava na mesa (B1).
 //
 // A grade usa `minmax(0, var(--card-w))` por coluna: com `limit` cartas a fileira cabe em qualquer largura de
 // celular sem rolar de lado, e as cartas só encolhem se faltar espaço. Nada aqui corta com `overflow: hidden`,
@@ -19,6 +22,7 @@ import {
   type NumCard,
   type PublicPlayer,
 } from '@coringa/engine';
+import { useState } from 'react';
 import { ROW_DROP } from '../../model/drag.ts';
 import { rowKey } from '../../model/effects.ts';
 import { useAnim } from '../anim/context.ts';
@@ -41,6 +45,20 @@ export interface RowProps {
 
 const CAPTION = { ATK: 'Ataque', DEF: 'Defesa' } as const;
 
+interface Conta {
+  base: number;
+  multiplier: number;
+}
+
+/** A conta do mesmo quadro do total mostrado: a de antes enquanto o total espera ou conta, a de agora com a mesa parada. */
+function useShownConta(base: number, total: number): Conta {
+  const { count } = useAnim();
+  const now: Conta = { base, multiplier: base > 0 ? total / base : 0 };
+  const [before, setBefore] = useState(now);
+  if (count === 'idle' && (before.base !== now.base || before.multiplier !== now.multiplier)) setBefore(now);
+  return count === 'idle' ? now : before;
+}
+
 export function Row({ label, kind, side, pressure, limit, aim, droppable = false }: RowProps) {
   const anim = useAnim();
   const cards: NumCard[] = kind === 'ATK' ? side.attackRow : side.defenseRow;
@@ -50,6 +68,7 @@ export function Row({ label, kind, side, pressure, limit, aim, droppable = false
   const vacancies = Math.max(0, limit - cards.length);
   // O total mostrado espera a batida do dano e conta até o valor do motor.
   const shownTotal = useCountedNumber(total);
+  const conta = useShownConta(base, total);
   const lit = anim.fx.rows.has(rowKey(side.id, kind));
 
   return (
@@ -90,9 +109,9 @@ export function Row({ label, kind, side, pressure, limit, aim, droppable = false
         <span data-total className="font-texto text-[22px] font-extrabold leading-[1.1] tabular-nums pc:text-3xl">
           {shownTotal}
         </span>
-        {base > 0 ? (
+        {conta.base > 0 ? (
           <span data-conta className="font-texto text-[11px] font-semibold tabular-nums pc:text-[13px]">
-            {base} × {Math.round(shownTotal / base)}
+            {conta.base} × {conta.multiplier}
           </span>
         ) : null}
         {quads.length > 0 ? (

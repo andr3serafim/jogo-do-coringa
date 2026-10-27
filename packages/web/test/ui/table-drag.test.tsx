@@ -475,9 +475,11 @@ describe('arrastar da mão: o que trava', () => {
     expect(acts(m)).toEqual([]);
   });
 
-  it('fora da fase de jogar (a vez do oponente) a mão não é botão e não arrasta', () => {
+  it('fora da fase de jogar (a vez do oponente) a carta da mão só explica (B2) e não arrasta', () => {
     const m = mount({ ...DRAFT, phase: 'WAITING' });
-    const card = handList().getAllByRole('img').find((el) => /^K, Guarda/.test(el.getAttribute('aria-label') ?? ''))!;
+    const card = handList().getAllByRole('button').find((el) => /^K, Guarda/.test(el.getAttribute('aria-label') ?? ''))!;
+    expect(card).not.toHaveAttribute('aria-pressed');
+    expect(card).not.toHaveClass('cursor-grab');
     press(card);
     hit = document.querySelector('[data-soltar]');
     moveTo(card, 80, 80);

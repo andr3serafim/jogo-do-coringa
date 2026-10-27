@@ -241,7 +241,10 @@ A mesa está em §3 e §4. O menu da partida tem:
 - **Fileira de Ataque** e **Fileira de Defesa**:
   - até 7 cartas, com as vagas vazias desenhadas até o limite;
   - a carta da frente traz a marca "sai primeiro" (as fileiras são filas, spec 1 §1.2);
-  - cada fileira mostra o total e a conta: "152 · 38 × 4", "42 · 14 × 3". O total vem de `attackPower` e `defensePower`;
+  - cada fileira mostra o total e a conta: "152 · 38 × 4", "42 · 14 × 3". O total vem de `attackPower` e `defensePower`. A conta é
+    sempre do mesmo quadro do total mostrado: enquanto o total espera e conta na batida do dano, a base e o multiplicador ficam os de
+    antes, e só trocam com a mesa parada (sub-projeto 5, B1: dividir o total velho pela base nova inventava um J ou um Q que não
+    estava na mesa, porque o golpe já tirou a carta da frente);
   - a quadra aparece destacada nas quatro cartas, com "+V" no total.
 - **Marcas de estado no Coringa:** Reflect ativo, Defesa Absoluta, Ressurreições disponíveis (com contagem), Ataque Absoluto armado (4 J).
 - **Mão:**
@@ -298,6 +301,17 @@ A mesa está em §3 e §4. O menu da partida tem:
 | Q | **Buff de defesa**; **Sacrifício** (destruir uma Q de Duda), se houver alvo |
 | A | **Armadilha** → escolher o alvo (J, Q ou K de Duda) |
 | Selvagem | escolher o papel (J, Q ou A) → segue como a carta escolhida |
+
+**Carta sem jogada agora (sub-projeto 5, B2):** a carta diz por quê. O motivo vem do motor (`noPlayReason`, ao lado de
+`legalActions`, preso a ele por um teste de propriedade); a interface só traduz o código:
+
+- na sua vez (fase principal ou janela de reação), tocar a carta mostra na barra "J♥: seus Buffs de ataque já têm 4 J, o limite",
+  "A♣: Duda não tem J, Q nem K para a Armadilha (as cartas do Reflect não contam)", "K♥: na janela de reação só o A (ou o Selvagem
+  como A) responde", "Duda está sob Defesa Absoluta…" ou, contra um Reflect recém-lançado, "só Anular ou Proteger-se";
+- fora da sua vez (Equipar, escolha da ordem, vez do oponente), a carta da mão é um botão que só explica, sem escolha (sem
+  `aria-pressed`): um balão sobre a mão diz o motivo ("no Equipar as especiais esperam na mão; elas se jogam nas rodadas de
+  Ataque, no seu turno", "espere a sua vez") e some sozinho depois do tempo de leitura (`readingMs`) ou com outro toque na carta.
+  O balão não empurra a mão nem pega o toque de nada embaixo dele. Depois do passe e no fim da partida, a mão é só de vista.
 
 **Jogadas de várias cartas** aparecem como botões próprios quando são possíveis:
 

@@ -6,6 +6,7 @@ export { createGame } from './create-game.ts';
 export { applyAction } from './apply-action.ts';
 export { viewEvents, viewFor } from './view.ts';
 export { legalActions, nextEquipDestinations } from './legal-actions.ts';
+export { noPlayReason, type NoPlayReason } from './no-play.ts';
 export { actingPlayers } from './acting.ts';
 export { attackBase, attackPower, defenseBase, defensePower, type AttackSide, type DefenseSide } from './combat.ts';
 export { nextFloat, nextInt, seedRng, shuffle } from './rng.ts';

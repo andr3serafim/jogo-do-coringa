@@ -25,6 +25,13 @@ export interface TableUi {
   /** Ids das cartas pendentes do Equipar que já estão na fileira como rascunho (spec §3.5). */
   draftIds: ReadonlySet<string>;
   onSelectCard?: (id: string) => void;
+  /**
+   * Fora da sua vez (Equipar, escolha da ordem, vez do oponente), o toque na carta da mão não escolhe: diz por que ela não tem
+   * jogada agora (B2). Sem `onSelectCard`, é ele que faz da carta um botão.
+   */
+  onExplainCard?: (id: string) => void;
+  /** O motivo da última carta tocada fora da sua vez, no balão sobre a mão; `null` sem balão. */
+  handNote?: { cardId: string; text: string } | null;
   onSelectTarget?: (id: string) => void;
   handDrag?: HandDrag;
   /** O jogador viu a carta ou a zona (`zone:<nome>`): a marca apaga. */

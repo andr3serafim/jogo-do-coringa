@@ -8,6 +8,7 @@ import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { FLASH_WINDOW_MS } from '../../src/model/flash.ts';
+import { readingMs } from '../../src/model/reading.ts';
 import { Session } from '../../src/model/session.ts';
 import { DEFAULT_PREFS } from '../../src/model/storage.ts';
 import { INVERT_COOLDOWN_MS, INVERT_MIN_HOLD_MS } from '../../src/model/timeline.ts';
@@ -1208,6 +1209,36 @@ describe('CardsDealt, Reflect e pressão (spec §4.2)', () => {
     advance(1_300);
     expect(row().querySelector('[data-total]')).toHaveTextContent('23');
     expect(row().querySelector('[data-conta]')).toHaveTextContent('23 × 1');
+  });
+
+  it('o balão do motivo (fora da sua vez) fica o tempo de leitura e some sozinho (B2)', async () => {
+    const m = mount(THEIRS);
+    await m.user.click(handList().getAllByRole('button')[0]!);
+    const note = () => document.querySelector('[data-motivo]');
+    const text = note()!.textContent!;
+    expect(text).toMatch(/: espere a sua vez/);
+    advance(readingMs(text) - 100);
+    expect(note()).not.toBeNull();
+    advance(200);
+    expect(note()).toBeNull();
+  });
+
+  it('a carta da frente que sai no ataque não inventa multiplicador: base e multiplicador esperam juntos (B1)', () => {
+    // Defesa 9 + 3 + 6 + 5 = 23 com 1 Q: 46 (23 × 2). O golpe tira o 9 da frente: 14 × 2 = 28. Dividir o total velho pela base nova
+    // dava "14 × 3", um Q que não está na mesa.
+    const spec: ViewSpec = { ...THEIRS, self: { ...THEIRS.self, defenseRow: [9, 3, 6, 5] } };
+    const m = mount(spec);
+    const row = () => screen.getByRole('group', { name: 'Sua fileira de defesa' });
+    expect(row().querySelector('[data-conta]')).toHaveTextContent('23 × 2');
+    emit(m, { ...spec, self: { ...spec.self, defenseRow: [3, 6, 5] } }, [TURN, ATTACK, HIT]);
+    expect(row().querySelector('[data-total]')).toHaveTextContent('46');
+    expect(row().querySelector('[data-conta]')).toHaveTextContent('23 × 2');
+    for (let elapsed = 0; elapsed < 1_300; elapsed += 50) {
+      advance(50);
+      expect(row().querySelector('[data-conta]')?.textContent).toMatch(/^(23|14) × 2$/);
+    }
+    expect(row().querySelector('[data-total]')).toHaveTextContent('28');
+    expect(row().querySelector('[data-conta]')).toHaveTextContent('14 × 2');
   });
 });
 
