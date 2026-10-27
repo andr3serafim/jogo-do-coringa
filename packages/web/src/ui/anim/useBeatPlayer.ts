@@ -27,7 +27,7 @@
 // o movimento reduzido na hora de ligar: ligá-lo com a linha do tempo no ar também vale.
 import type { StateMessage } from '@coringa/protocol';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { bannerBeatAt, damageBeatIndex, dealsOf, delaysOf, pressureBeatIndex, type Deals } from '../../model/effects.ts';
+import { bannerBeatAt, damageBeatIndex, dealsOf, delaysOf, type Deals } from '../../model/effects.ts';
 import { FLASH_WINDOW_MS, FlashLock } from '../../model/flash.ts';
 import { buildTimeline, timelineMs, type Beat, type TimelineOptions } from '../../model/timeline.ts';
 
@@ -44,8 +44,6 @@ export interface Run {
   delays: ReadonlyMap<string, number>;
   /** Índice da batida do dano (onde a vida e os totais contam), ou -1. */
   damageIndex: number;
-  /** Índice da batida em que o número da pressão muda, ou -1. */
-  pressureIndex: number;
   /** As cartas que entram na batida do `CardsDealt`. */
   deals: Deals;
 }
@@ -94,7 +92,6 @@ function makeMachine(state: StateMessage | null, options: TimelineOptions | null
     totalMs: timelineMs(beats),
     delays: delaysOf(beats),
     damageIndex: damageBeatIndex(beats),
-    pressureIndex: pressureBeatIndex(beats),
     deals: dealsOf(beats),
   };
   return { run, index: beats.findIndex((beat) => beat.durationMs > 0), done: run.totalMs === 0 };

@@ -4,7 +4,7 @@
 // trocam a `base`.
 import type { Card, GameEvent, PlayerId, PlayerView, PublicPlayer } from '@coringa/engine';
 
-export type MarkZone = 'selfHp' | 'opponentHp' | 'pressure';
+export type MarkZone = 'selfHp' | 'opponentHp';
 
 export interface Marks {
   /** Ids de carta: novas no campo do oponente, ou suas que foram para o cemitério. */
@@ -98,7 +98,6 @@ export function computeMarks(
   const zones = new Set<MarkZone>();
   if (current.self.hp !== base.self.hp) zones.add('selfHp');
   if (current.opponent.hp !== base.opponent.hp) zones.add('opponentHp');
-  if (current.pressure !== base.pressure) zones.add('pressure');
   for (const zone of [...zones]) {
     if (seen.has(zoneKey(zone))) zones.delete(zone);
   }

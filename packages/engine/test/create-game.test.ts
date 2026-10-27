@@ -90,18 +90,11 @@ describe('início da rodada de Ataque', () => {
     expect(s.phase).toEqual({ kind: 'ATTACK_MAIN', player: P2 });
   });
 
-  it('fixa a pressão pela sequência de rodadas sem dano', () => {
+  it('a rodada de Ataque não mexe na sequência sem dano (o anti-travamento é que a conta)', () => {
     const s = setup({ round: 4, roundKind: 'EQUIP', noDamageStreak: 2 });
-    const ev: GameEvent[] = [];
-    startRound(s, ev);
-    expect(s.pressure).toBe(2);
-    expect(ev).toContainEqual({ type: 'PressureChanged', pressure: 2 });
-  });
-
-  it('sem Pressão da mesa a pressão fica em 0', () => {
-    const s = setup({ round: 4, roundKind: 'EQUIP', noDamageStreak: 2, config: { tablePressure: false } });
     startRound(s, []);
-    expect(s.pressure).toBe(0);
+    expect(s.noDamageStreak).toBe(2);
+    expect(s).not.toHaveProperty('pressure');
   });
 
   it('segue o ciclo Equipar → Equipar → Ataque → Equipar', () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { RoomCore } from '../../src/core/room-core.ts';
-import { TIMERS } from '../../src/core/timers.ts';
+import { STATE_SCHEMA, TIMERS } from '../../src/core/timers.ts';
 import { sha256Hex } from '../../src/core/tokens.ts';
 import type { RoomRecord, SocketInfo } from '../../src/core/types.ts';
 import { roomMessage } from '../../src/core/views.ts';
@@ -14,7 +14,7 @@ describe('sala: criar', () => {
     expect(r.token).toMatch(/^[A-Za-z0-9_-]{43}$/);
     const rec = h.core.record!;
     expect(rec).toMatchObject({
-      schema: 1,
+      schema: STATE_SCHEMA,
       status: 'LOBBY',
       gameNo: 0,
       seq: 0,

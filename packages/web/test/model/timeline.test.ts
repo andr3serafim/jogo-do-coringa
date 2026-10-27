@@ -86,7 +86,6 @@ const SAMPLES: { event: GameEvent; kind: Beat['kind']; scene?: SceneKind; cards?
   { event: { type: 'Resurrected', player: 'p1', card: num('n4'), row: 'ATK' }, kind: 'move', cards: ['n4'] },
   { event: { type: 'AbsoluteDefenseStarted', player: 'p2' }, kind: 'scene', scene: 'ABSOLUTE_DEFENSE' },
   { event: { type: 'AbsoluteDefenseEnded', player: 'p2' }, kind: 'move' },
-  { event: { type: 'PressureChanged', pressure: 2 }, kind: 'banner' },
   { event: { type: 'InitiativeChanged', player: 'p2' }, kind: 'banner' },
   { event: { type: 'Exodia', player: 'p1' }, kind: 'scene', scene: 'EXODIA' },
   { event: { type: 'GameOver', result: { kind: 'WIN', winner: 'p1', reason: 'EXODIA' } }, kind: 'banner' },
@@ -138,7 +137,7 @@ function expectPhotosafe(beats: Beat[], reducedMotion: boolean): void {
 
 describe('mapeamento evento → batida (spec §4.2)', () => {
   it('cobre todos os tipos de evento do motor', () => {
-    expect(new Set(SAMPLES.map((s) => s.event.type)).size).toBe(33);
+    expect(new Set(SAMPLES.map((s) => s.event.type)).size).toBe(32);
   });
 
   for (const { event, kind, scene, cards } of SAMPLES) {

@@ -42,10 +42,10 @@ describe('computeMarks', () => {
     expect([...marks.zones]).toEqual(['opponentHp']);
   });
 
-  it('vida sua e pressão que mudaram', () => {
+  it('as duas vidas que mudaram', () => {
     const base = viewAt({});
-    const next: PlayerView = { ...base, pressure: base.pressure + 1, self: { ...base.self, hp: base.self.hp - 5 } };
-    expect([...computeMarks(base, next, none).zones].sort()).toEqual(['pressure', 'selfHp']);
+    const next: PlayerView = { ...base, opponent: { ...base.opponent, hp: base.opponent.hp - 2 }, self: { ...base.self, hp: base.self.hp - 5 } };
+    expect([...computeMarks(base, next, none).zones].sort()).toEqual(['opponentHp', 'selfHp']);
   });
 
   it('seen com o id: o id some, os outros ficam', () => {
@@ -53,10 +53,10 @@ describe('computeMarks', () => {
     expect([...marks.cards].sort()).toEqual(['b1-paus-8', 'b2-ouros-Q']);
   });
 
-  it('seen com zone:pressure: a zona some, as outras ficam', () => {
+  it('seen com zone:opponentHp: a zona some, as outras ficam', () => {
     const base = viewAt({});
-    const next: PlayerView = { ...base, pressure: base.pressure + 2, self: { ...base.self, hp: base.self.hp - 1 } };
-    const marks = computeMarks(base, next, new Set([zoneKey('pressure')]));
+    const next: PlayerView = { ...base, opponent: { ...base.opponent, hp: base.opponent.hp - 2 }, self: { ...base.self, hp: base.self.hp - 1 } };
+    const marks = computeMarks(base, next, new Set([zoneKey('opponentHp')]));
     expect([...marks.zones]).toEqual(['selfHp']);
   });
 

@@ -3,21 +3,23 @@ import { describe, expect, it } from 'vitest';
 import { previewChanged, previewsOf, previewsWithout, viewWithout } from '../../src/model/preview.ts';
 import { viewAt, type ViewSpec } from '../fixtures.ts';
 
-/** ATK 152 contra DEF 42, com um K na Guarda de Duda: o K absorve. Do lado dele, 84 contra a minha DEF 46. */
+/**
+ * ATK 152 contra DEF 42, com um K na Guarda de Duda: o K absorve. Do lado dele, 84 contra a minha DEF 46. (Sem a Pressão da mesa,
+ * que saiu no sub-projeto 5, um J a mais de cada lado mantém as contas: 38 × 4 e 28 × 3.)
+ */
 const SPEC: ViewSpec = {
-  pressure: 1,
   self: {
     hand: ['A'],
     attackRow: [8, 4, 10, 7, 9],
     defenseRow: [3, 6, 9, 5],
-    attackBuffs: ['J', 'WILD'],
+    attackBuffs: ['J', 'WILD', 'J'],
     defenseBuffs: ['Q'],
     guard: ['K'],
   },
   opponent: {
     attackRow: [6, 9, 3, 10],
     defenseRow: [5, 7, 2],
-    attackBuffs: ['J'],
+    attackBuffs: ['J', 'J'],
     defenseBuffs: ['Q', 'Q'],
     guard: ['K'],
   },
@@ -42,7 +44,7 @@ describe('viewWithout', () => {
     const qId = view.opponent.defenseBuffs[1]!.id;
 
     expect(viewWithout(view, guardId).opponent.guard).toEqual([]);
-    expect(viewWithout(view, jId).opponent.attackBuffs).toEqual([]);
+    expect(viewWithout(view, jId).opponent.attackBuffs.map((c) => c.id)).toEqual([view.opponent.attackBuffs[1]!.id]);
     expect(viewWithout(view, qId).opponent.defenseBuffs.map((c) => c.id)).toEqual([view.opponent.defenseBuffs[0]!.id]);
     // O resto fica como está.
     expect(viewWithout(view, guardId).opponent.attackBuffs).toEqual(view.opponent.attackBuffs);

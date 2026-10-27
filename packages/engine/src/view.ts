@@ -32,7 +32,6 @@ export function viewFor(s: GameState, playerId: PlayerId): PlayerView {
     initiative: s.initiative,
     turnOrder: s.turnOrder,
     turnIndex: s.turnIndex,
-    pressure: s.pressure,
     noDamageStreak: s.noDamageStreak,
     phase: s.phase,
     deckCount: s.deck.length,

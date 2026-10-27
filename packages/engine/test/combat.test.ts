@@ -17,15 +17,15 @@ describe('valores de ATK e DEF', () => {
     expect(defenseValue(player(s, P2))).toBe(30);
   });
 
-  it('Pressão da mesa soma ao multiplicador de ataque (exemplo 6)', () => {
-    const s = setup({ pressure: 2, p1: { attack: [4, 6], attackBuffs: ['J'] } });
-    expect(attackValue(s, player(s, P1))).toBe(40);
+  it('J multiplica o ataque de forma linear, e nada mais entra no multiplicador (a Pressão da mesa saiu no sub-projeto 5)', () => {
+    const s = setup({ noDamageStreak: 2, p1: { attack: [4, 6], attackBuffs: ['J'] } });
+    expect(attackValue(player(s, P1))).toBe(20);
   });
 
   it('quadra soma o valor da carta antes do multiplicador (exemplo 4)', () => {
     const s = setup({ p1: { attack: [5, 5, 5, 5] }, p2: { defense: [10, 3, 10, 10, 10], defenseBuffs: ['Q'] } });
     expect(defenseValue(player(s, P2))).toBe(106);
-    expect(attackValue(s, player(s, P1))).toBe(25);
+    expect(attackValue(player(s, P1))).toBe(25);
   });
 });
 

@@ -35,7 +35,6 @@ export interface RowProps {
   label: string;
   kind: 'ATK' | 'DEF';
   side: PublicPlayer;
-  pressure: number;
   limit: number;
   /** Para onde a fileira de Ataque aponta quando acende (o Coringa do outro). */
   aim?: 'up' | 'down';
@@ -59,10 +58,10 @@ function useShownConta(base: number, total: number): Conta {
   return count === 'idle' ? now : before;
 }
 
-export function Row({ label, kind, side, pressure, limit, aim, droppable = false }: RowProps) {
+export function Row({ label, kind, side, limit, aim, droppable = false }: RowProps) {
   const anim = useAnim();
   const cards: NumCard[] = kind === 'ATK' ? side.attackRow : side.defenseRow;
-  const total = kind === 'ATK' ? attackPower(side, pressure) : defensePower(side);
+  const total = kind === 'ATK' ? attackPower(side) : defensePower(side);
   const base = kind === 'ATK' ? attackBase(side) : defenseBase(side);
   const quads = quadValues(cards);
   const vacancies = Math.max(0, limit - cards.length);

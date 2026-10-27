@@ -9,7 +9,6 @@ import {
   effectsOf,
   INITIATIVE_ID,
   NO_EFFECTS,
-  pressureBeatIndex,
   rowKey,
   sceneText,
 } from '../../src/model/effects.ts';
@@ -111,13 +110,6 @@ describe('dealsOf: as cartas que entram na batida do CardsDealt', () => {
     const deals = dealsOf(beatsOf({ type: 'TurnStarted', player: 'p1' }));
     expect(deals.cards.size).toBe(0);
     expect(deals.backs.size).toBe(0);
-  });
-});
-
-describe('pressureBeatIndex: onde o número da pressão muda', () => {
-  it('é a batida do PressureChanged, ou -1', () => {
-    expect(pressureBeatIndex(beatsOf({ type: 'TurnStarted', player: 'p1' }, { type: 'PressureChanged', pressure: 2 }))).toBe(1);
-    expect(pressureBeatIndex(beatsOf({ type: 'TurnStarted', player: 'p1' }))).toBe(-1);
   });
 });
 
@@ -243,7 +235,6 @@ describe('effectsOf: o efeito de cada evento (spec §4.2)', () => {
   it('eventos sem efeito de carta, fileira ou número devolvem o vazio', () => {
     for (const event of [
       { type: 'TurnStarted', player: 'p1' },
-      { type: 'PressureChanged', pressure: 2 },
       { type: 'Exodia', player: 'p1' },
       { type: 'BuffPlayed', player: 'p1', card: face('j1', 'J'), as: 'J' },
     ] satisfies GameEvent[]) {
@@ -266,14 +257,13 @@ describe('bannerText: a faixa de cada evento', () => {
     );
   });
 
-  it('janela de reação, pressão, iniciativa e quadra', () => {
+  it('janela de reação, iniciativa e quadra', () => {
     expect(bannerText({ type: 'ReactionWindowOpened', responder: 'p1', trigger: 'ATTACK' }, names)).toBe(
       'Você pode reagir',
     );
     expect(bannerText({ type: 'ReactionWindowOpened', responder: 'p2', trigger: 'K_PLAYED' }, names)).toBe(
       'Duda pode reagir',
     );
-    expect(bannerText({ type: 'PressureChanged', pressure: 2 }, names)).toBe('Pressão da mesa: +2');
     expect(bannerText({ type: 'InitiativeChanged', player: 'p2' }, names)).toBe('Duda ficou com a iniciativa');
     expect(bannerText({ type: 'QuadFormed', player: 'p1', quad: { row: 'ATK', value: 7 } }, names)).toContain(
       '+7 e 1 Ressurreição',

@@ -35,9 +35,6 @@ function startEquipRound(s: GameState, ev: GameEvent[]): void {
 }
 
 function startAttackRound(s: GameState, ev: GameEvent[]): void {
-  const pressure = s.config.tablePressure ? s.noDamageStreak : 0;
-  if (pressure !== s.pressure) ev.push({ type: 'PressureChanged', pressure });
-  s.pressure = pressure;
   s.hpLostThisRound = false;
   for (const p of s.players) p.damageThisRound = 0;
   if (s.config.initiativeChoice) {

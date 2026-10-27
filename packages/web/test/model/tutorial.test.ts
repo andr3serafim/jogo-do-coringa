@@ -26,7 +26,7 @@ import {
   type HintId,
 } from '../../src/model/tutorial.ts';
 
-const ALL: readonly HintId[] = ['equip', 'quad', 'order', 'firstAttack', 'buffs', 'trap', 'wild', 'reflect', 'pressure', 'end'];
+const ALL: readonly HintId[] = ['equip', 'quad', 'order', 'firstAttack', 'buffs', 'trap', 'wild', 'reflect', 'stall', 'end'];
 
 /** A dica de P1 (ou de `me`) para o estado, com os eventos da última jogada e as já vistas. */
 function hintFor(
@@ -186,17 +186,11 @@ describe('tutorialHint: cada dica na sua situação', () => {
     expect(hintFor(played.state, { events: played.events })).toBeNull();
   });
 
-  it('pressure: uma rodada de Ataque sem dano já basta, com ou sem Pressão da mesa na config', () => {
-    expect(hintFor(quiet({ noDamageStreak: 1 }))).toEqual({ id: 'pressure', zone: 'center' });
-    const state = quiet({ config: { tablePressure: false }, noDamageStreak: 1 });
-    expect(hintFor(state)).toEqual({ id: 'pressure', zone: 'center' });
-  });
-
-  it('pressure: a Pressão da mesa sozinha não é a situação (nada novo depende dela; vale a sequência sem dano)', () => {
-    const pressureOnly = quiet({ pressure: 1, noDamageStreak: 0 });
-    expect(hintFor(pressureOnly)).toBeNull();
-    expect(hintHolding(viewFor(pressureOnly, P1), [], 'pressure')).toBeNull();
-    expect(hintHolding(viewFor(quiet({ noDamageStreak: 1 }), P1), [], 'pressure')).toEqual({ id: 'pressure', zone: 'center' });
+  it('stall: uma rodada de Ataque sem dano já basta (a contagem do anti-travamento começou)', () => {
+    expect(hintFor(quiet({ noDamageStreak: 1 }))).toEqual({ id: 'stall', zone: 'center' });
+    expect(hintFor(quiet({ noDamageStreak: 0 }))).toBeNull();
+    expect(hintHolding(viewFor(quiet({ noDamageStreak: 0 }), P1), [], 'stall')).toBeNull();
+    expect(hintHolding(viewFor(quiet({ noDamageStreak: 1 }), P1), [], 'stall')).toEqual({ id: 'stall', zone: 'center' });
   });
 
   it('end: partida encerrada', () => {
@@ -216,10 +210,10 @@ function reflectIds(state: GameState, who: PlayerId): { kId: string; jId: string
 describe('tutorialHint: ordem, "vista" e situação que passou', () => {
   it('no fim da partida a dica do fim vem antes de qualquer outra ainda não vista', () => {
     const result = { kind: 'WIN', winner: P1, reason: 'HP' } as const;
-    // Quadra no seu campo e uma rodada sem dano: sem o fim, seriam as dicas `quad` e `pressure`.
+    // Quadra no seu campo e uma rodada sem dano: sem o fim, seriam as dicas `quad` e `stall`.
     const over = setup({ noDamageStreak: 1, phase: { kind: 'GAME_OVER', result }, p1: { attack: [5, 5, 5, 5] } });
     expect(hintFor(over)).toEqual({ id: 'end', zone: 'end' });
-    expect(drain(over).map((h) => h.id)).toEqual(['end', 'quad', 'pressure']);
+    expect(drain(over).map((h) => h.id)).toEqual(['end', 'quad', 'stall']);
     // Com o QuadFormed do oponente nos eventos, ou só a sequência sem dano: o fim também vem primeiro.
     const stalled = setup({ noDamageStreak: 2, phase: { kind: 'GAME_OVER', result } });
     const events: GameEvent[] = [{ type: 'QuadFormed', player: P2, quad: { row: 'ATK', value: 4 } }];
@@ -228,7 +222,7 @@ describe('tutorialHint: ordem, "vista" e situação que passou', () => {
   });
 
   it('fora do fim a lista segue a ordem de sempre', () => {
-    expect(drain(quiet({ noDamageStreak: 1, p1: { attack: [5, 5, 5, 5] } })).map((h) => h.id)).toEqual(['quad', 'pressure']);
+    expect(drain(quiet({ noDamageStreak: 1, p1: { attack: [5, 5, 5, 5] } })).map((h) => h.id)).toEqual(['quad', 'stall']);
   });
 
   it('a primeira da lista ganha quando duas valem (o primeiro ataque com J na mão: firstAttack, depois buffs)', () => {
@@ -244,7 +238,7 @@ describe('tutorialHint: ordem, "vista" e situação que passou', () => {
 
   it('com várias situações valendo, as dicas saem na ordem da lista', () => {
     const state = setup({ noDamageStreak: 1, p1: { attack: [5, 5, 5, 5], hand: ['K', 'J', 'Q', 'W'] } });
-    expect(drain(state).map((h) => h.id)).toEqual(['quad', 'firstAttack', 'buffs', 'wild', 'reflect', 'pressure']);
+    expect(drain(state).map((h) => h.id)).toEqual(['quad', 'firstAttack', 'buffs', 'wild', 'reflect', 'stall']);
   });
 
   it('uma dica vista não volta, e o que sobra aparece; sem sobra, nada', () => {
@@ -451,7 +445,7 @@ describe('advanceHint e acknowledgeHint', () => {
     const done = acknowledge(ended, over());
     expect(done.current).toBeNull();
     expect(done.seen.has('end')).toBe(true);
-    // Nem a pressão, que ainda vale no fim, volta; nem uma partida nova.
+    // Nem a do anti-travamento, que ainda vale no fim, volta; nem uma partida nova.
     expect(advance(done, over({ noDamageStreak: 2 })).current).toBeNull();
     expect(advance(done, equipRound({ p1: { pending: [4, 5] } })).current).toBeNull();
   });

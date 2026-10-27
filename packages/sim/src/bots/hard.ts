@@ -1,7 +1,7 @@
 import { actingPlayers, applyAction, legalActions, viewFor, type Action, type GameState, type Phase, type PlayerId } from '@coringa/engine';
 import { determinize } from '../experiments/determinize.ts';
 import { createRng, type Rng } from '../rng.ts';
-import { boardScore, placeAll, upcomingPressure } from './eval.ts';
+import { boardScore, placeAll } from './eval.ts';
 import { greedyBot } from './greedy.ts';
 import type { StateBot } from './types.ts';
 
@@ -41,7 +41,7 @@ function evaluate(final: GameState, seat: PlayerId): number {
     return phase.result.winner === seat ? GAME_VALUE : -GAME_VALUE;
   }
   const view = viewFor(final, seat);
-  return view.self.hp - view.opponent.hp + boardScore(view.self, view.opponent, upcomingPressure(view));
+  return view.self.hp - view.opponent.hp + boardScore(view.self, view.opponent);
 }
 
 /** Uma rodada de Ataque acabou neste passo (a rodada seguinte já começou). */
@@ -89,10 +89,9 @@ function orderCandidates(state: GameState, seat: PlayerId, legal: Action[], seed
   const rest = legal.filter((_, i) => i !== at);
   const head = at < 0 ? [] : [legal[at]];
   if (view.phase.kind !== 'EQUIP') return [...head, ...rest];
-  const pressure = upcomingPressure(view);
   const scored = rest
     .filter(isEquip)
-    .map((action) => ({ action, value: boardScore(placeAll(view.self, view.self.pending, action.destinations), view.opponent, pressure) }));
+    .map((action) => ({ action, value: boardScore(placeAll(view.self, view.self.pending, action.destinations), view.opponent) }));
   return [...head, ...scored.sort((a, b) => b.value - a.value).map((s) => s.action)];
 }
 

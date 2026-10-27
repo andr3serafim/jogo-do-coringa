@@ -3,4 +3,4 @@
  * (snapshots de `test/__snapshots__/golden/` aceitos com `-u`); `test/rules-version.test.ts` exige a
  * linha nova em `RULES_DIGESTS`. Replays guardados por uma versão antiga abrem com aviso.
  */
-export const RULES_VERSION = 1;
+export const RULES_VERSION = 2;

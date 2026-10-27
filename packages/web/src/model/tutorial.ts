@@ -4,7 +4,7 @@
 import { legalActions, type Action, type GameEvent, type PlayerView } from '@coringa/engine';
 
 /** As dicas, na ordem de prioridade: com duas valendo ao mesmo tempo, a primeira da lista sai e a outra espera. */
-export type HintId = 'equip' | 'quad' | 'order' | 'firstAttack' | 'buffs' | 'trap' | 'wild' | 'reflect' | 'pressure' | 'end';
+export type HintId = 'equip' | 'quad' | 'order' | 'firstAttack' | 'buffs' | 'trap' | 'wild' | 'reflect' | 'stall' | 'end';
 
 /** A zona da mesa de que a dica fala (a tela a destaca). */
 export type HintZone = 'equip' | 'rows' | 'order' | 'actionBar' | 'hand' | 'reaction' | 'center' | 'end';
@@ -72,9 +72,8 @@ const HINTS: ReadonlyArray<Hint & { holds: (situation: Situation) => boolean }> 
     holds: ({ view, events, legal }) =>
       canDo(legal, 'REFLECT') || events.some((event) => event.type === 'ReflectPlayed' && event.player !== view.me),
   },
-  // A situação é uma rodada de Ataque sem dano (`noDamageStreak`), que é também de onde a Pressão da mesa vem: nada novo do tutorial
-  // depende da Pressão (ela some no sub-projeto 5), e a dica fala das duas coisas no mesmo texto.
-  { id: 'pressure', zone: 'center', holds: ({ view }) => view.noDamageStreak >= 1 },
+  // A situação é uma rodada de Ataque sem dano (`noDamageStreak`): a contagem do anti-travamento começou.
+  { id: 'stall', zone: 'center', holds: ({ view }) => view.noDamageStreak >= 1 },
   { id: 'end', zone: 'end', holds: ({ view }) => view.phase.kind === 'GAME_OVER' },
 ];
 

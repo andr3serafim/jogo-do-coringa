@@ -2,37 +2,31 @@
   "name": "turtle-0",
   "result": {
     "kind": "WIN",
-    "winner": "p2",
-    "reason": "HP"
+    "winner": "p1",
+    "reason": "ANTI_STALL"
   },
-  "rounds": 45,
+  "rounds": 11,
   "finalHp": {
-    "p1": -22,
-    "p2": 56
+    "p1": 270,
+    "p2": 257
   },
   "events": {
-    "AttackDeclared": 43,
-    "BuffPlayed": 19,
-    "CardsDealt": 44,
-    "CardsPlaced": 46,
-    "CardsRemovedFromRow": 84,
-    "DamageDealt": 43,
-    "DeckReshuffled": 2,
-    "EquipSubmitted": 46,
+    "AttackDeclared": 10,
+    "BuffPlayed": 5,
+    "CardsDealt": 10,
+    "CardsPlaced": 12,
+    "CardsRemovedFromRow": 20,
+    "DamageDealt": 10,
+    "EquipSubmitted": 12,
     "GameOver": 1,
-    "GuardBroken": 8,
-    "GuardPlayed": 11,
-    "InitiativeChanged": 9,
-    "OrderChosen": 22,
-    "PressureChanged": 13,
-    "QuadBroken": 6,
-    "QuadFormed": 6,
-    "ReactionWindowClosed": 54,
-    "ReactionWindowOpened": 54,
-    "Resurrected": 3,
-    "RoundStarted": 44,
-    "Sacrificed": 6,
-    "TrapUsed": 14,
-    "TurnStarted": 43
+    "GuardBroken": 2,
+    "GuardPlayed": 3,
+    "InitiativeChanged": 1,
+    "OrderChosen": 5,
+    "ReactionWindowClosed": 13,
+    "ReactionWindowOpened": 13,
+    "RoundStarted": 10,
+    "TrapUsed": 3,
+    "TurnStarted": 10
   }
 }

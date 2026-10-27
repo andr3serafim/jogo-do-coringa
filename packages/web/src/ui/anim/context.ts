@@ -44,8 +44,6 @@ export interface Anim {
   count: CountPhase;
   /** Duração, em ms, da batida do dano (a contagem dos números). */
   countMs: number;
-  /** O número da pressão espera a batida do `PressureChanged` (`hold`) e ganha destaque nela (`count`). */
-  pressure: CountPhase;
 }
 
 export const IDLE_ANIM: Anim = {
@@ -62,7 +60,6 @@ export const IDLE_ANIM: Anim = {
   beatMs: 0,
   count: 'idle',
   countMs: 0,
-  pressure: 'idle',
 };
 
 export const AnimContext = createContext<Anim>(IDLE_ANIM);

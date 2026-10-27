@@ -12,7 +12,7 @@ export interface CombatSide extends AttackSide, DefenseSide {
 
 export interface AttackPreview {
   outcome: AttackOutcome;
-  /** ATK do atacante (com multiplicador e pressão). */
+  /** ATK do atacante (com o multiplicador). */
   attack: number;
   /** DEF usada na conta; no Reflect, ⌊DEF_base do atacante / 2⌋. */
   defense: number;
@@ -43,7 +43,6 @@ export function absoluteAttackArmed(side: Pick<CombatSide, 'attackBuffs'>, confi
 export function previewBetween(
   attacker: CombatSide,
   defender: CombatSide,
-  pressure: number,
   config: Pick<RulesConfig, 'buffLimit'>,
 ): AttackPreview {
   const breaks = { defenderGuard: 0, attackerGuard: 0, attackerQueens: 0 };
@@ -51,7 +50,7 @@ export function previewBetween(
     return { outcome: 'NO_ATTACK', attack: 0, defense: 0, net: 0, damage: 0, reflected: 0, absolute: false, breaks };
   }
   const absolute = absoluteAttackArmed(attacker, config);
-  const attack = attackPower(attacker, pressure);
+  const attack = attackPower(attacker);
 
   if (defender.reflect) {
     breaks.attackerGuard = attacker.guard.length;
@@ -82,6 +81,6 @@ export function previewBetween(
 /** Prévia do ataque de `attacker` ('self' = você, 'opponent' = o oponente) a partir da visão pública. */
 export function previewAttack(view: PlayerView, attacker: 'self' | 'opponent'): AttackPreview {
   return attacker === 'self'
-    ? previewBetween(view.self, view.opponent, view.pressure, view.config)
-    : previewBetween(view.opponent, view.self, view.pressure, view.config);
+    ? previewBetween(view.self, view.opponent, view.config)
+    : previewBetween(view.opponent, view.self, view.config);
 }

@@ -26,7 +26,6 @@ const seatOf = (playerId: 'p1' | 'p2', nickname: string) => ({
 /** O rascunho da Peleja: a minha vez, com a mão K, A, Q; Duda tem um J, dois Q e um K nos buffs e na Guarda (todos alvos possíveis). */
 const DRAFT: ViewSpec = {
   round: 7,
-  pressure: 1,
   self: {
     hp: 187,
     hand: ['K', 'A', 'Q'],

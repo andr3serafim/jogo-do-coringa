@@ -5,12 +5,11 @@ export const DEFAULT_CONFIG: RulesConfig = {
   rowLimit: 7,
   buffLimit: 4,
   cardsPerEquip: 4,
-  antiStallRounds: 5,
+  antiStallRounds: 3,
   exodiaGuard: 4,
   resurrectMinRounds: 3,
   deck: { numericCopies: 8, faceCopies: 6 },
   initiativeChoice: true,
-  tablePressure: true,
   wildJokers: true,
 };
 
@@ -18,12 +17,10 @@ export type ConfigOverrides = Partial<Omit<RulesConfig, 'deck'>> & {
   deck?: Partial<RulesConfig['deck']>;
 };
 
-/** Monta uma config a partir do padrão. Sem Pressão da mesa, o anti-travamento padrão é 3 (spec §1.11). */
+/** Monta uma config a partir do padrão. */
 export function makeConfig(overrides: ConfigOverrides = {}): RulesConfig {
-  const antiStallRounds = overrides.tablePressure === false ? 3 : DEFAULT_CONFIG.antiStallRounds;
   return {
     ...DEFAULT_CONFIG,
-    antiStallRounds,
     ...overrides,
     deck: { ...DEFAULT_CONFIG.deck, ...overrides.deck },
   };

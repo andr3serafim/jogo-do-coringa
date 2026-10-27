@@ -9,7 +9,6 @@ import {
   hpDamage,
   placeAll,
   reflectedDamage,
-  upcomingPressure,
   wildsUsed,
   without,
 } from './eval.ts';
@@ -45,28 +44,27 @@ function closing(legal: Action[]): Action {
 
 /** Equipar: os destinos que maximizam a avaliação de mesa no próximo ataque. */
 function chooseEquip(view: PlayerView, legal: Action[], rng: Rng): Action {
-  const pressure = upcomingPressure(view);
   return best(
     ofType(legal, 'EQUIP'),
-    (a) => boardScore(placeAll(view.self, view.self.pending, a.destinations), view.opponent, pressure),
+    (a) => boardScore(placeAll(view.self, view.self.pending, a.destinations), view.opponent),
     (ties) => rng.pick(ties),
   );
 }
 
 /** Escolha da ordem pela situação de vida: 1º com letal ou com Reflect contra um ataque forte; senão, 1º só se estiver atrás. */
 export function prefersFirst(view: PlayerView): boolean {
-  const { self, opponent, pressure, config } = view;
-  if (hpDamage(self, opponent, pressure, config.buffLimit) >= opponent.hp) return true;
-  if (canCastReflect(view) && reflectedDamage(opponent, pressure) >= GREEDY.reflectAttack) return true;
+  const { self, opponent, config } = view;
+  if (hpDamage(self, opponent, config.buffLimit) >= opponent.hp) return true;
+  if (canCastReflect(view) && reflectedDamage(opponent) >= GREEDY.reflectAttack) return true;
   return self.hp < opponent.hp;
 }
 
 /** Valor de destruir um J/Q/K do oponente (A na maior ameaça). Com o meu Reflect ativo, o J dele não vale nada: quanto mais forte o ataque, mais ele leva de volta. */
 export function targetValue(view: PlayerView, targetId: string): number {
-  const { self, opponent, config, pressure } = view;
+  const { self, opponent, config } = view;
   if (opponent.guard.some((c) => c.id === targetId)) {
     if (opponent.guard.length >= config.exodiaGuard - 1) return 1000;
-    return opponent.guard.length === 1 ? hpDamage(self, without(opponent, targetId), pressure, config.buffLimit) : 0;
+    return opponent.guard.length === 1 ? hpDamage(self, without(opponent, targetId), config.buffLimit) : 0;
   }
   if (opponent.attackBuffs.some((c) => c.id === targetId)) {
     if (self.reflect) return 0;
@@ -76,7 +74,7 @@ export function targetValue(view: PlayerView, targetId: string): number {
 }
 
 function mainPhase(view: PlayerView, legal: Action[], rng: Rng): Action {
-  const { self, opponent, config, pressure } = view;
+  const { self, opponent, config } = view;
   const kings = ofType(legal, 'PLAY_K');
   const allKings = kings.at(-1);
   // 1. Exódia: se os K da mão completam a Guarda, joga todos.
@@ -84,7 +82,7 @@ function mainPhase(view: PlayerView, legal: Action[], rng: Rng): Action {
   // 2. Proteção contra o Reflect do oponente antes de um ataque que doeria.
   const protect = ofType(legal, 'PROTECT_FROM_REFLECT')[0];
   if (protect && self.attackRow.length > 0) {
-    const reflected = reflectedDamage(self, pressure);
+    const reflected = reflectedDamage(self);
     if (reflected >= GREEDY.reflectThreat || reflected >= self.hp) return protect;
   }
   // 3. Ressurreição: sempre, no lugar que mais melhora a mesa.
@@ -94,14 +92,14 @@ function mainPhase(view: PlayerView, legal: Action[], rng: Rng): Action {
       resurrections,
       (a) => {
         const card = view.graveyard.find((c) => c.id === a.cardId);
-        return card?.kind === 'NUM' ? boardScore(placeAll(self, [card], [a.row]), opponent, pressure) : -Infinity;
+        return card?.kind === 'NUM' ? boardScore(placeAll(self, [card], [a.row]), opponent) : -Infinity;
       },
       (ties) => rng.pick(ties),
     );
   }
   // 4. Reflect quando o ataque do oponente é alto.
   const reflects = ofType(legal, 'REFLECT');
-  if (reflects.length > 0 && reflectedDamage(opponent, pressure) >= GREEDY.reflectAttack) return cheapest(reflects, view, rng);
+  if (reflects.length > 0 && reflectedDamage(opponent) >= GREEDY.reflectAttack) return cheapest(reflects, view, rng);
   // 5. Armadilha na maior ameaça, se valer gastar o A agora.
   const traps = ofType(legal, 'TRAP');
   if (traps.length > 0) {
@@ -128,10 +126,10 @@ function mainPhase(view: PlayerView, legal: Action[], rng: Rng): Action {
 }
 
 function reaction(view: PlayerView, legal: Action[], trigger: ReactionTrigger, rng: Rng): Action {
-  const { self, opponent, config, pressure } = view;
+  const { self, opponent, config } = view;
   const pass: Action = { type: 'PASS' };
   if (trigger === 'REFLECT_PLAYED') {
-    if (self.attackRow.length === 0 || reflectedDamage(self, pressure) < GREEDY.reflectThreat) return pass;
+    if (self.attackRow.length === 0 || reflectedDamage(self) < GREEDY.reflectThreat) return pass;
     const cancels = ofType(legal, 'CANCEL_REFLECT');
     if (cancels.length > 0) return cheapest(cancels, view, rng);
     return ofType(legal, 'PROTECT_FROM_REFLECT')[0] ?? pass;
@@ -142,8 +140,8 @@ function reaction(view: PlayerView, legal: Action[], trigger: ReactionTrigger, r
     return opponent.guard.length >= config.exodiaGuard - 1 ? cheapest(traps, view, rng) : pass;
   }
   // ATTACK: a Armadilha que mais reduz o dano que vou levar.
-  const incoming = hpDamage(opponent, self, pressure, config.buffLimit);
-  const after = (a: Of<'TRAP'>) => hpDamage(without(opponent, a.targetId), self, pressure, config.buffLimit);
+  const incoming = hpDamage(opponent, self, config.buffLimit);
+  const after = (a: Of<'TRAP'>) => hpDamage(without(opponent, a.targetId), self, config.buffLimit);
   const trap = best(traps, (a) => incoming - after(a) - wildsUsed(a, self.hand) / 2, (ties) => rng.pick(ties));
   const saved = incoming - after(trap);
   const savesLife = incoming >= self.hp && after(trap) < self.hp;

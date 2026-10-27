@@ -1,4 +1,4 @@
-// A marca "novo" fora das cartas (vida, pressão): letras vermelhas sobre papel e contorno de tinta, para ter >= 3:1
+// A marca "novo" fora das cartas (a vida): letras vermelhas sobre papel e contorno de tinta, para ter >= 3:1
 // também sobre a capa verde (spec §10.3 e §10.5). Decorativa: o nome acessível do elemento ganha ", novo".
 export function NovoChip() {
   return (

@@ -10,19 +10,18 @@ describe('config', () => {
       rowLimit: 7,
       buffLimit: 4,
       cardsPerEquip: 4,
-      antiStallRounds: 5,
+      antiStallRounds: 3,
       exodiaGuard: 4,
       resurrectMinRounds: 3,
       deck: { numericCopies: 8, faceCopies: 6 },
       initiativeChoice: true,
-      tablePressure: true,
       wildJokers: true,
     });
   });
 
-  it('sem Pressão da mesa, o anti-travamento padrão cai para 3', () => {
-    expect(makeConfig({ tablePressure: false }).antiStallRounds).toBe(3);
-    expect(makeConfig({ tablePressure: false, antiStallRounds: 4 }).antiStallRounds).toBe(4);
+  it('o anti-travamento padrão é 3, e a config o troca', () => {
+    expect(makeConfig().antiStallRounds).toBe(3);
+    expect(makeConfig({ antiStallRounds: 4 }).antiStallRounds).toBe(4);
   });
 
   it('mescla o baralho parcialmente', () => {

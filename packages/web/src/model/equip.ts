@@ -79,7 +79,7 @@ export function draftBoard(view: PlayerView, chosen: Destination[]): DraftBoard 
     attackRow,
     defenseRow,
     toGraveyard,
-    attack: attackPower({ attackRow, attackBuffs: view.self.attackBuffs }, view.pressure),
+    attack: attackPower({ attackRow, attackBuffs: view.self.attackBuffs }),
     defense: defensePower({ defenseRow, defenseBuffs: view.self.defenseBuffs }),
     newQuads: [
       ...quadsOf('ATK', view.self.attackRow, attackRow),

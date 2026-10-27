@@ -16,7 +16,7 @@ export interface HandDrag {
 export interface TableUi {
   /** Ids de carta com a marca "novo". */
   marked: ReadonlySet<string>;
-  /** Zonas (vida, pressão) com a marca "novo". */
+  /** Zonas (a vida) com a marca "novo". */
   zones: ReadonlySet<MarkZone>;
   targetIds: ReadonlySet<string>;
   /** Controles travados: as cartas que são botão ficam apagadas (`aria-disabled`), sem tirar o foco. */

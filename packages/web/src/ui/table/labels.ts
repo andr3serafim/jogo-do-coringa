@@ -32,7 +32,8 @@ export const handCountText = (name: string, count: number): string =>
 export const resurrectionsText = (count: number): string =>
   `${count} ${plural(count, 'Ressurreição disponível', 'Ressurreições disponíveis')}`;
 
-export const streakText = (count: number): string => `${count} ${plural(count, 'rodada', 'rodadas')} sem dano`;
+/** "Rodadas sem dano: 1 de 3", o nome do contador do anti-travamento na faixa central. */
+export const streakLabel = (count: number, limit: number): string => `Rodadas sem dano: ${count} de ${limit}`;
 
 /** Faltando 2 rodadas ou menos para o anti-travamento (spec §3.1). */
 export const stallWarning = (remaining: number): string =>

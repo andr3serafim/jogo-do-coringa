@@ -34,8 +34,8 @@ export interface CalibrationReport {
   base: SeriesResult[];
   /** Variantes com uma regra [N] desligada por vez, greedy × greedy, mesmas sementes. */
   toggles: SeriesResult[];
-  /** Desenho pareado do turtle, com e sem Pressão da mesa. */
-  turtle: Array<TurtleReport & { tablePressure: boolean }>;
+  /** Desenho pareado do turtle (a brecha que a Pressão da mesa fechava, removida no sub-projeto 5). */
+  turtle: TurtleReport[];
   order: OrderReport | null;
   sweep: SeriesResult[];
 }
@@ -49,7 +49,6 @@ const BASE: Array<[string, [BotName, BotName]]> = [
 const TOGGLES: Array<[string, ConfigOverrides]> = [
   ['padrão', {}],
   ['sem Escolha da iniciativa', { initiativeChoice: false }],
-  ['sem Pressão da mesa', { tablePressure: false }],
   ['sem Coringas Selvagens', { wildJokers: false }],
 ];
 
@@ -82,12 +81,9 @@ export function calibrate(options: CalibrationOptions, log: (line: string) => vo
     }
   }
   if (has('turtle')) {
-    for (const tablePressure of [true, false]) {
-      for (const lead of [10, 20]) {
-        log(`turtle: vantagem ${lead}, pressão ${tablePressure ? 'ligada' : 'desligada'}`);
-        const r = turtleExperiment({ config: makeConfig({ tablePressure }), games: options.games, lead });
-        report.turtle.push({ ...r, tablePressure });
-      }
+    for (const lead of [10, 20]) {
+      log(`turtle: vantagem ${lead}`);
+      report.turtle.push(turtleExperiment({ config: makeConfig(), games: options.games, lead }));
     }
   }
   if (has('order')) {
@@ -146,8 +142,8 @@ export function renderMarkdown(r: CalibrationReport): string {
       'O Equipar só permite trocar/descartar com as duas fileiras cheias: com a Defesa cheia, a numérica vai para o Ataque à força. A própria regra já limita a tartaruga.',
       '',
       markdownTable(
-        ['Pressão', 'Vantagem', 'Ramos', 'Líder turtle', 'Líder greedy', 'Diferença', 'Meta (≤ 0)', 'Fins do turtle'],
-        r.turtle.map((t) => [t.tablePressure ? 'ligada' : 'desligada', t.lead, t.branches, pct(t.turtle), pct(t.greedy), pct(t.difference), t.difference <= 0 ? 'sim' : 'NÃO', JSON.stringify(t.turtleEnds)]),
+        ['Vantagem', 'Ramos', 'Líder turtle', 'Líder greedy', 'Diferença', 'Meta (≤ 0)', 'Fins do turtle'],
+        r.turtle.map((t) => [t.lead, t.branches, pct(t.turtle), pct(t.greedy), pct(t.difference), t.difference <= 0 ? 'sim' : 'NÃO', JSON.stringify(t.turtleEnds)]),
       ),
       '',
     );

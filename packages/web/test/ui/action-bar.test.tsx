@@ -27,13 +27,13 @@ const seatOf = (playerId: 'p1' | 'p2', nickname: string) => ({
 /** O rascunho da Peleja: ATK 152 = 38 × 4 contra DEF 42 com um K na Guarda de Duda; do outro lado, 84 contra a minha DEF 46. */
 const DRAFT: ViewSpec = {
   round: 7,
-  pressure: 1,
   self: {
     hp: 187,
     hand: ['K', 'A', 'Q'],
     attackRow: [8, 4, 10, 7, 9],
     defenseRow: [3, 6, 9, 5],
-    attackBuffs: ['J', 'WILD'],
+    // Um J a mais de cada lado mantém as contas sem a Pressão da mesa (saiu no sub-projeto 5): 38 × 4 e 28 × 3.
+    attackBuffs: ['J', 'WILD', 'J'],
     defenseBuffs: ['Q'],
     guard: ['K'],
   },
@@ -42,7 +42,7 @@ const DRAFT: ViewSpec = {
     hand: ['A', 'K', 'WILD'],
     attackRow: [6, 9, 3, 10],
     defenseRow: [5, 7, 2],
-    attackBuffs: ['J'],
+    attackBuffs: ['J', 'J'],
     defenseBuffs: ['Q', 'Q'],
     guard: ['K'],
   },
@@ -235,20 +235,21 @@ describe('barra de ação: Armadilha e alvos (spec §3.2, §3.4)', () => {
     await m.user.click(handCard('A'));
     await m.user.click(inBar().getByRole('button', { name: 'Armadilha' }));
     const { opponent } = m.view;
-    const j = opponent.attackBuffs[0]!;
+    const [j1, j2] = opponent.attackBuffs as [SpecialCard, SpecialCard];
     const [q1, q2] = opponent.defenseBuffs as [SpecialCard, SpecialCard];
     const k = opponent.guard[0]!;
     const buttons = within(inBar().getByRole('list', { name: 'Alvos' })).getAllByRole('button');
-    expect(buttons).toHaveLength(4);
-    expect(buttons[0]).toHaveAccessibleName(startsWith(`${cardText(j)} dos Buffs de Ataque de Duda`));
-    expect(buttons[1]).toHaveAccessibleName(startsWith(`${cardText(q1)} dos Buffs de Defesa de Duda`));
-    expect(buttons[2]).toHaveAccessibleName(startsWith(`${cardText(q2)} dos Buffs de Defesa de Duda`));
-    expect(buttons[3]).toHaveAccessibleName(startsWith(`${cardText(k)} da Guarda de Duda`));
+    expect(buttons).toHaveLength(5);
+    expect(buttons[0]).toHaveAccessibleName(startsWith(`${cardText(j1)} dos Buffs de Ataque de Duda`));
+    expect(buttons[1]).toHaveAccessibleName(startsWith(`${cardText(j2)} dos Buffs de Ataque de Duda`));
+    expect(buttons[2]).toHaveAccessibleName(startsWith(`${cardText(q1)} dos Buffs de Defesa de Duda`));
+    expect(buttons[3]).toHaveAccessibleName(startsWith(`${cardText(q2)} dos Buffs de Defesa de Duda`));
+    expect(buttons[4]).toHaveAccessibleName(startsWith(`${cardText(k)} da Guarda de Duda`));
     // Alvo de toque ≥ 44 px (`min-h-11`).
     for (const button of buttons) expect(button.className).toContain('min-h-11');
-    // Na mesa, as mesmas quatro cartas ganham o destaque.
+    // Na mesa, as mesmas cinco cartas ganham o destaque.
     const highlighted = [...document.querySelectorAll('[data-alvo="true"]')].map((el) => el.getAttribute('data-card-id'));
-    expect(new Set(highlighted)).toEqual(new Set([j.id, q1.id, q2.id, k.id]));
+    expect(new Set(highlighted)).toEqual(new Set([j1.id, j2.id, q1.id, q2.id, k.id]));
     expect(inBar().getByText(`Armadilha (${cardText(handCards(m.view, 'A')[0]!)}): escolha o alvo de Duda`)).toBeInTheDocument();
   });
 
@@ -679,11 +680,12 @@ describe('barra de ação: cancelar e o teclado (spec §3.4, §7)', () => {
     await m.user.keyboard('{Enter}');
     const targets = within(inBar().getByRole('list', { name: 'Alvos' })).getAllByRole('button');
     expect(targets[0]).toHaveFocus();
-    // Os alvos vêm na ordem J, Q, Q, K; o K é o quarto.
+    // Os alvos vêm na ordem J, J, Q, Q, K; o K é o quinto.
     await m.user.tab();
     await m.user.tab();
     await m.user.tab();
-    expect(targets[3]).toHaveFocus();
+    await m.user.tab();
+    expect(targets[4]).toHaveFocus();
     await m.user.keyboard('{Enter}');
     expect(sentAction(m)).toMatchObject({ type: 'TRAP', targetId: m.view.opponent.guard[0]!.id });
     // Depois de jogar, o foco volta à barra (a carta que ele estava sumiu).

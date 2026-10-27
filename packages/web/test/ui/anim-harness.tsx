@@ -24,7 +24,6 @@ export const seatOf = (playerId: 'p1' | 'p2', nickname: string, extra: { connect
 /** A minha vez de atacar: ATK 152 contra a DEF 42 de Duda, com a mão e a barra de ação à vista. */
 export const MINE: ViewSpec = {
   round: 7,
-  pressure: 1,
   self: {
     hp: 187,
     hand: ['K', 'A', 'Q'],

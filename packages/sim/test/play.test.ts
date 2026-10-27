@@ -66,10 +66,10 @@ describe('textos em pt-BR', () => {
 });
 
 describe('mesa no terminal', () => {
-  it('mostra vida, guarda, buffs, fileiras, mão do oponente só como quantidade, monte, cemitério e pressão', () => {
-    const s = setup({ pressure: 2, p1: { hand: ['J'], attack: [4, 6], attackBuffs: ['J'] }, p2: { hand: ['Q', 'K'], guard: 2, hp: 70 }, graveyard: [5, 'A'] });
+  it('mostra vida, guarda, buffs, fileiras, mão do oponente só como quantidade, monte, cemitério e rodadas sem dano', () => {
+    const s = setup({ noDamageStreak: 2, p1: { hand: ['J'], attack: [4, 6], attackBuffs: ['J'] }, p2: { hand: ['Q', 'K'], guard: 2, hp: 70 }, graveyard: [5, 'A'] });
     const board = renderBoard(viewFor(s, P1), names);
-    for (const piece of ['Vida 70', 'Guarda: 2 K', 'Mão: 2 cartas', 'Pressão +2', 'Monte', 'Cemitério 2', 'ATK 40', 'Sua vez: fase principal']) {
+    for (const piece of ['Vida 70', 'Guarda: 2 K', 'Mão: 2 cartas', '2 de 3 sem dano', 'Monte', 'Cemitério 2', 'ATK 20', 'Sua vez: fase principal']) {
       expect(board).toContain(piece);
     }
     expect(board).not.toMatch(/Q[♥♦♠♣]/);

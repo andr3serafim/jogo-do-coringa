@@ -135,8 +135,6 @@ export interface ViewSpec {
   firstToAttack?: 'self' | 'opponent';
   /** Rodada (padrão 10). */
   round?: number;
-  /** Bônus da Pressão da mesa (padrão 0). */
-  pressure?: number;
   /** Rodadas seguidas sem dano (padrão 0). */
   noDamageStreak?: number;
   /** `MAIN` (padrão): fase principal de `me`. `WAITING`: fase principal do oponente. Um gatilho abre a reação de `me`. */
@@ -203,7 +201,6 @@ export function scenarioAt(spec: ViewSpec = {}): { state: GameState; view: Playe
   };
 
   state.round = spec.round ?? 10;
-  state.pressure = spec.pressure ?? 0;
   state.noDamageStreak = spec.noDamageStreak ?? 0;
   state.roundKind = 'ATTACK';
   state.initiative = spec.initiative === 'opponent' ? other : me;

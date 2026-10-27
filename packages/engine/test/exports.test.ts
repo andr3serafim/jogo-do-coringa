@@ -16,7 +16,7 @@ describe('API para bots e interface', () => {
   it('attackPower e defensePower funcionam sobre a visão pública (exemplo 1 da §1.13)', () => {
     const s = setup({ p1: { attack: [3, 7, 9], attackBuffs: ['J'] }, p2: { defense: [5, 8] } });
     const view = viewFor(s, P1);
-    expect(attackPower(view.self, view.pressure)).toBe(38);
+    expect(attackPower(view.self)).toBe(38);
     expect(defensePower(view.opponent)).toBe(13);
   });
 
@@ -27,13 +27,13 @@ describe('API para bots e interface', () => {
     expect(engine.absoluteAttackArmed(view.opponent, view.config)).toBe(false);
     expect(engine.absoluteAttackArmed(view.opponent, { buffLimit: 3 })).toBe(true);
     // A prévia usa a mesma regra.
-    expect(engine.previewBetween({ ...view.self, attackRow: view.opponent.attackRow }, view.opponent, 0, view.config).absolute).toBe(true);
+    expect(engine.previewBetween({ ...view.self, attackRow: view.opponent.attackRow }, view.opponent, view.config).absolute).toBe(true);
   });
 
-  it('a pressão entra no multiplicador de ataque (exemplo 6) e a quadra soma antes dele (exemplo 4)', () => {
-    const s = setup({ pressure: 2, p1: { attack: [4, 6], attackBuffs: ['J'] }, p2: { defense: [10, 3, 10, 10, 10], defenseBuffs: ['Q'] } });
+  it('o multiplicador de ataque é 1 + nJ (exemplo 6) e a quadra soma antes dele (exemplo 4)', () => {
+    const s = setup({ p1: { attack: [4, 6], attackBuffs: ['J'] }, p2: { defense: [10, 3, 10, 10, 10], defenseBuffs: ['Q'] } });
     const view = viewFor(s, P2);
-    expect(attackPower(view.opponent, view.pressure)).toBe(40);
+    expect(attackPower(view.opponent)).toBe(20);
     expect(defensePower(view.self)).toBe(106);
   });
 
@@ -56,7 +56,7 @@ describe('API para bots e interface', () => {
           for (const e of events) {
             if (e.type !== 'DamageDealt') continue;
             const view = viewFor(before, e.attacker);
-            expect(attackPower(view.self, view.pressure)).toBe(e.attack);
+            expect(attackPower(view.self)).toBe(e.attack);
             expect(defensePower(view.opponent)).toBe(e.defense);
             checked += 1;
           }

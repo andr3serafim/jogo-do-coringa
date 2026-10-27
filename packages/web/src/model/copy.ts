@@ -511,7 +511,7 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
   {
     title: 'O ataque',
     items: [
-      'ATK = (soma da fileira de Ataque + bônus de quadra) × (1 + número de J + Pressão da mesa).',
+      'ATK = (soma da fileira de Ataque + bônus de quadra) × (1 + número de J).',
       'DEF = (soma da fileira de Defesa + bônus de quadra) × (1 + número de Q).',
       'O dano é ATK menos DEF, no mínimo 0. Depois, a primeira carta da fileira de Ataque de quem atacou e a primeira da fileira de Defesa de quem defendeu vão para o cemitério.',
       'Se o ataque causaria dano e o alvo tem K na Guarda, 1 K absorve todo o dano e quebra.',
@@ -541,7 +541,7 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
       'Quadra: 4 ou mais numéricas do mesmo valor na mesma fileira, seguidas ou não, somam esse valor à fileira e dão 1 Ressurreição.',
       'Ressurreição: no seu turno, traz 1 numérica do cemitério para o fim de uma fileira com vaga. Vale uma vez por quadra e fica disponível enquanto a quadra existir, com garantia de 3 rodadas depois de formada.',
       'Defesa Absoluta (4 Q): até o fim do próximo turno de ataque do oponente, você é imune a dano, a Armadilha e a Sacrifício, e a fileira de Defesa não perde cartas. Só o Ataque Absoluto fura a imunidade a dano: quebra os seus K e causa o dano normal. Ao acabar, 1 Q vai para o cemitério.',
-      'Ataque Absoluto (4 J): multiplicador 5×, mais a Pressão da mesa, e quebra todos os K do alvo. Depois do ataque, 1 J vai para o cemitério.',
+      'Ataque Absoluto (4 J): multiplicador 5× e quebra todos os K do alvo. Depois do ataque, 1 J vai para o cemitério.',
       'Exódia (4 K na Guarda): vence na hora, depois da janela de reação.',
     ],
   },
@@ -549,8 +549,7 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
     title: 'Fim da partida',
     items: [
       'Vida em 0 perde na hora.',
-      'Pressão da mesa: cada rodada de Ataque seguida em que nenhum Coringa perde vida soma 1 ao multiplicador de ataque dos dois jogadores. Dano absorvido por K não conta. O bônus vale a rodada inteira e volta a 0 depois de uma rodada em que alguém perdeu vida.',
-      'Anti-travamento: 5 rodadas de Ataque seguidas sem ninguém perder vida encerram a partida. Vence quem tiver mais vida; com vidas iguais, empata.',
+      'Anti-travamento: 3 rodadas de Ataque seguidas sem ninguém perder vida encerram a partida. Dano absorvido por K não conta como dano. Vence quem tiver mais vida; com vidas iguais, empata.',
       'W.O.: perde quem fica mais de 1 minuto fora da sala ou estoura o tempo três vezes seguidas.',
     ],
   },

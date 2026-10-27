@@ -12,8 +12,8 @@ import { summarizeReplay } from './replay.ts';
 const replays: Replay[] = JSON.parse(readFileSync(new URL('./fixtures/golden-replays.json', import.meta.url), 'utf8'));
 
 describe('partidas de referência', () => {
-  it('há 12 partidas gravadas', () => {
-    expect(replays).toHaveLength(12);
+  it('há 11 partidas gravadas', () => {
+    expect(replays).toHaveLength(11);
   });
 
   for (const replay of replays) {

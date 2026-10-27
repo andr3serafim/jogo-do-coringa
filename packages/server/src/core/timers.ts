@@ -15,8 +15,8 @@ export const TIMERS = {
   hardExpiryMs: 86_400_000,
 } as const;
 
-/** Versão do formato gravado no storage (spec §9.3). */
-export const STATE_SCHEMA = 1;
+/** Versão do formato gravado no storage (spec §9.3). 2: o estado perdeu a `pressure` (a Pressão da mesa saiu no sub-projeto 5). */
+export const STATE_SCHEMA = 2;
 
 /** Limites por sala (spec §4, §8). */
 export const ROOM_LIMITS = {

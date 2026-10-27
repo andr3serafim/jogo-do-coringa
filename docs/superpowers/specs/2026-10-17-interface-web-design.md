@@ -253,7 +253,7 @@ A mesa está em §3 e §4. O menu da partida tem:
 - **Faixa central:**
   - rodada e tipo (Equipar ou Ataque);
   - de quem é a vez e o relógio;
-  - Pressão da mesa: +N e as rodadas sem dano. Faltando 2 ou menos para o anti-travamento, aparece "faltam N rodadas sem dano para o fim por anti-travamento";
+  - as rodadas sem dano, "Sem dano N de 3" (a contagem do anti-travamento; a Pressão da mesa, que ficava aqui, saiu no sub-projeto 5). Faltando 2 ou menos para o anti-travamento, aparece "faltam N rodadas sem dano para o fim por anti-travamento";
   - iniciativa, com a ordem escolhida na rodada;
   - monte (quantidade);
   - cemitério: a carta de cima e a quantidade. Um toque abre a lista inteira, que é pública.
@@ -468,7 +468,6 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
 | `Resurrected` | cemitério → fim da fileira |
 | `AbsoluteDefenseStarted` | **cena:** escudo na Defesa |
 | `AbsoluteDefenseEnded` | o escudo some; 1 Q vai para o cemitério |
-| `PressureChanged` | a pressão na faixa central muda, com destaque |
 | `InitiativeChanged` | a marca da iniciativa troca de lado |
 | `Exodia` | **cena maior:** a partida acaba |
 | `GameOver` | o painel de fim aparece depois das batidas |
@@ -585,7 +584,7 @@ Uma exceção no React mostra "Algo deu errado", com os botões **Recarregar** e
 
 **`previewAttack(view, attacker: 'self' | 'opponent')`**
 
-- É função pura sobre a `PlayerView`. Usa só informação pública: fileiras, buffs, Guarda, Reflect, Defesa Absoluta e pressão.
+- É função pura sobre a `PlayerView`. Usa só informação pública: fileiras, buffs, Guarda, Reflect e Defesa Absoluta.
 - Devolve:
   - `atk` e `def`;
   - `net = max(0, atk − def)`;
@@ -716,7 +715,7 @@ O autor escolheu a direção A entre os três rascunhos (celular e PC) do artifa
   - tinta preta de xilogravura;
   - um vermelho de segunda cor, como na impressão a duas cores.
 - **Composição:**
-  - a faixa central preta concentra o que é dos dois: rodada, de quem é a vez, relógio, pressão, iniciativa, monte e cemitério;
+  - a faixa central preta concentra o que é dos dois: rodada, de quem é a vez, relógio, rodadas sem dano, iniciativa, monte e cemitério;
   - as duas fileiras de Ataque ficam frente a frente junto da faixa [A]. É ali que o "fileira contra fileira" fica legível, e a prévia do dano mora na faixa ou na barra de ação.
 - **Cartas:** face em papel, borda preta grossa e irregular de carimbo, valor em tipo de madeira e naipe em SVG próprio.
 - **Detalhes:**
@@ -775,7 +774,7 @@ A inversão da tela inteira é um flash. Regras:
 
 Ideia trazida da direção C, e só ela; nada mais de B ou C entra.
 
-- **O que marca:** tudo o que mudou na mesa desde a sua última jogada voluntária. Entram as cartas novas nas fileiras do oponente, os buffs e K que ele jogou, as cartas suas que ele destruiu (na entrada do cemitério), a vida perdida, a pressão que subiu e as linhas do histórico.
+- **O que marca:** tudo o que mudou na mesa desde a sua última jogada voluntária. Entram as cartas novas nas fileiras do oponente, os buffs e K que ele jogou, as cartas suas que ele destruiu (na entrada do cemitério), a vida perdida e as linhas do histórico.
 - **Como marca:** um carimbo ou sublinhado de goiva no vermelho de segunda cor, sobre a face da carta (papel) ou com contorno de tinta, para ter ≥ 3:1.
 - **Quando apaga:** na sua próxima jogada voluntária (as automáticas não contam), ou quando você toca, foca ou passa o mouse sobre o elemento marcado.
 - **Por quê:** você olha o celular entre um turno e outro, e precisa achar na hora o que o outro fez.

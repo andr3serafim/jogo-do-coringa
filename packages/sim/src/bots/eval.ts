@@ -11,35 +11,29 @@ import {
   type SpecialCard,
 } from '@coringa/engine';
 
-/** Pressão do próximo ataque: a fixada, na rodada de Ataque; no Equipar, a que será fixada (spec §1.11). */
-export function upcomingPressure(view: PlayerView): number {
-  if (view.roundKind === 'ATTACK') return view.pressure;
-  return view.config.tablePressure ? view.noDamageStreak : 0;
-}
-
 /** ATK − DEF sem K, Reflect nem Absolutos (o "líquido" da spec §1.9, passo 6). */
-export function net(attacker: PublicPlayer, defender: PublicPlayer, pressure: number): number {
-  return Math.max(0, attackPower(attacker, pressure) - defensePower(defender));
+export function net(attacker: PublicPlayer, defender: PublicPlayer): number {
+  return Math.max(0, attackPower(attacker) - defensePower(defender));
 }
 
 /** Vida que o defensor perderia se o atacante atacasse agora (spec §1.9, passos 3 a 6). */
-export function hpDamage(attacker: PublicPlayer, defender: PublicPlayer, pressure: number, buffLimit: number): number {
+export function hpDamage(attacker: PublicPlayer, defender: PublicPlayer, buffLimit: number): number {
   if (attacker.attackRow.length === 0 || defender.reflect) return 0;
   const absolute = attacker.attackBuffs.length >= buffLimit;
   if (defender.absoluteDefense && !absolute) return 0;
   if (!absolute && defender.guard.length > 0) return 0;
-  return net(attacker, defender, pressure);
+  return net(attacker, defender);
 }
 
 /** Dano que o atacante levaria batendo num Reflect (spec §1.6). */
-export function reflectedDamage(attacker: PublicPlayer, pressure: number): number {
+export function reflectedDamage(attacker: PublicPlayer): number {
   if (attacker.attackRow.length === 0 || attacker.absoluteDefense) return 0;
-  return Math.max(0, attackPower(attacker, pressure) - Math.floor(defenseBase(attacker) / 2));
+  return Math.max(0, attackPower(attacker) - Math.floor(defenseBase(attacker) / 2));
 }
 
 /** Avaliação de mesa: o quanto eu passo da defesa dele menos o quanto ele passa da minha. */
-export function boardScore(self: PublicPlayer, opponent: PublicPlayer, pressure: number): number {
-  return net(self, opponent, pressure) - net(opponent, self, pressure);
+export function boardScore(self: PublicPlayer, opponent: PublicPlayer): number {
+  return net(self, opponent) - net(opponent, self);
 }
 
 /** Campo depois de aplicar os destinos do Equipar às numéricas `pending`, na ordem de compra. */

@@ -20,14 +20,14 @@ export function phaseText(view: PlayerView): string {
   }
 }
 
-function playerBlock(label: string, p: PublicPlayer, pressure: number, hand: string): string[] {
+function playerBlock(label: string, p: PublicPlayer, hand: string): string[] {
   const status = [p.reflect ? 'Reflect ativo' : '', p.absoluteDefense ? 'Defesa Absoluta' : '', p.resurrectionCount > 0 ? `Ressurreições: ${p.resurrectionCount}` : '']
     .filter(Boolean)
     .join(' · ');
   return [
     `${label.padEnd(5)} Vida ${p.hp}   Guarda: ${p.guard.length === 0 ? '—' : `${p.guard.length} K`}   Mão: ${hand}${status ? `   [${status}]` : ''}`,
     `      Buffs de Ataque: ${cardsText(p.attackBuffs)}   Buffs de Defesa: ${cardsText(p.defenseBuffs)}`,
-    `      Ataque: ${cardsText(p.attackRow).padEnd(28)} ATK ${attackPower(p, pressure)}`,
+    `      Ataque: ${cardsText(p.attackRow).padEnd(28)} ATK ${attackPower(p)}`,
     `      Defesa: ${cardsText(p.defenseRow).padEnd(28)} DEF ${defensePower(p)}`,
   ];
 }
@@ -37,15 +37,15 @@ export function renderBoard(view: PlayerView, names: Names): string {
   const recent = view.graveyard.slice(-5).map(cardText).join(' ');
   const header = [
     `Rodada ${view.round} (${view.roundKind === 'EQUIP' ? 'Equipar' : 'Ataque'})`,
-    `Pressão +${view.pressure} (${view.noDamageStreak} sem dano)`,
+    `${view.noDamageStreak} de ${view.config.antiStallRounds} sem dano`,
     `Monte ${view.deckCount}`,
     `Cemitério ${view.graveyard.length}${recent ? ` (últimas: ${recent})` : ''}`,
     `Iniciativa: ${names.of(view.initiative)}`,
   ].join(' · ');
   return [
     header,
-    ...playerBlock(names.of(view.opponent.id).toUpperCase(), view.opponent, view.pressure, `${view.opponent.handCount} cartas`),
-    ...playerBlock('VOCÊ', view.self, view.pressure, cardsText(view.self.hand)),
+    ...playerBlock(names.of(view.opponent.id).toUpperCase(), view.opponent, `${view.opponent.handCount} cartas`),
+    ...playerBlock('VOCÊ', view.self, cardsText(view.self.hand)),
     phaseText(view),
   ].join('\n');
 }

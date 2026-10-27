@@ -31,7 +31,7 @@ function strikeCue(damage: number): Cue | null {
 
 /**
  * A pista da batida, ou `null` se ela é muda. Só alguns eventos soam; o resto (distribuir cartas, a limpeza da fileira de
- * ataque, os avisos de pressão e de iniciativa...) passa em silêncio. `me` é o jogador deste lado da tela: a vez e a janela
+ * ataque, o aviso de iniciativa...) passa em silêncio. `me` é o jogador deste lado da tela: a vez e a janela
  * de reação só soam para quem tem de jogar, e o fim da partida soa como vitória ou derrota conforme o lado.
  *
  * A pista `urgencia` não vem de nenhuma batida (é o relógio, quando falta pouco): quem a toca é o player.

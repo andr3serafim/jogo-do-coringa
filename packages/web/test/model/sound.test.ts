@@ -55,7 +55,6 @@ const SAMPLES: { [T in GameEvent['type']]: Extract<GameEvent, { type: T }> } = {
   Resurrected: { type: 'Resurrected', player: 'p1', card: num('n4'), row: 'ATK' },
   AbsoluteDefenseStarted: { type: 'AbsoluteDefenseStarted', player: 'p2' },
   AbsoluteDefenseEnded: { type: 'AbsoluteDefenseEnded', player: 'p2' },
-  PressureChanged: { type: 'PressureChanged', pressure: 2 },
   InitiativeChanged: { type: 'InitiativeChanged', player: 'p2' },
   Exodia: { type: 'Exodia', player: 'p1' },
   GameOver: { type: 'GameOver', result: { kind: 'WIN', winner: 'p1', reason: 'EXODIA' } },
@@ -64,8 +63,8 @@ const SAMPLES: { [T in GameEvent['type']]: Extract<GameEvent, { type: T }> } = {
 const gameOver = (result: GameResult): GameEvent => ({ type: 'GameOver', result });
 
 describe('cueOf: o mapa batida → pista dos sons', () => {
-  it('a amostra cobre todos os 33 tipos de evento do motor', () => {
-    expect(Object.keys(SAMPLES)).toHaveLength(33);
+  it('a amostra cobre todos os 32 tipos de evento do motor', () => {
+    expect(Object.keys(SAMPLES)).toHaveLength(32);
   });
 
   describe('carta', () => {
@@ -174,8 +173,8 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
     ]);
     const silent = (Object.keys(SAMPLES) as GameEvent['type'][]).filter((type) => !SOUNDING.has(type));
 
-    it('a lista dos mudos tem os 16 tipos restantes', () => {
-      expect(silent).toHaveLength(33 - SOUNDING.size);
+    it('a lista dos mudos tem os 15 tipos restantes', () => {
+      expect(silent).toHaveLength(32 - SOUNDING.size);
     });
 
     it.each(silent)('%s', (type) => {

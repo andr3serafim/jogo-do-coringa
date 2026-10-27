@@ -66,13 +66,6 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
         ? 'count'
         : 'hold';
   const countMs = run.beats[run.damageIndex]?.durationMs ?? 0;
-  // O número da pressão muda NA batida dela, com destaque (sem movimento: o destaque é só cor, vale com movimento reduzido).
-  const pressure: CountPhase =
-    !busy || run.pressureIndex < 0 || index > run.pressureIndex
-      ? 'idle'
-      : index === run.pressureIndex
-        ? 'count'
-        : 'hold';
   const seq = state?.seq ?? 0;
   const jump = state?.resync === true;
   const remounted = useMemo(() => ({ serial: released.serial, ids: released.batch }), [released]);
@@ -118,9 +111,8 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       beatMs: beat?.durationMs ?? 0,
       count,
       countMs,
-      pressure,
     }),
-    [busy, reducedMotion, run, released, remounted, seq, jump, state, beat, count, countMs, pressure],
+    [busy, reducedMotion, run, released, remounted, seq, jump, state, beat, count, countMs],
   );
 
   // Esc pula as batidas (o Esc que um diálogo ou a gaveta do histórico já tratou não conta).

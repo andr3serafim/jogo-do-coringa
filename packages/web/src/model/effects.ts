@@ -109,11 +109,6 @@ export function dealsOf(beats: readonly Beat[]): Deals {
   return { cards, backs };
 }
 
-/** A batida em que o número da pressão muda (e ganha destaque); -1 sem ela. */
-export function pressureBeatIndex(beats: readonly Beat[]): number {
-  return beats.findIndex((beat) => beat.event.type === 'PressureChanged');
-}
-
 /** A batida em que a vida e os totais contam até o valor novo (o dano, ou o dano devolvido pelo Reflect); -1 sem ela. */
 export function damageBeatIndex(beats: readonly Beat[]): number {
   return beats.findIndex((beat) => beat.event.type === 'DamageDealt' || beat.event.type === 'ReflectTriggered');
@@ -134,7 +129,6 @@ export function bannerText(event: GameEvent, names: Names): string | null {
     case 'DeckReshuffled':
       return 'O cemitério virou o monte';
     case 'OrderChosen':
-    case 'PressureChanged':
     case 'InitiativeChanged':
     case 'QuadFormed':
     case 'QuadBroken':

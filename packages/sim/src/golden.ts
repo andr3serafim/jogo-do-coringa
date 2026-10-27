@@ -9,9 +9,8 @@ export const GOLDEN_GAMES: Array<{ name: string; bots: [BotName, BotName]; confi
   ...[0, 1].map((i) => ({ name: `turtle-${i}`, bots: ['turtle', 'greedy'] as [BotName, BotName], config: {}, seed: `ouro-t${i}` })),
   ...[0, 1].map((i) => ({ name: `random-${i}`, bots: ['random', 'random'] as [BotName, BotName], config: {}, seed: `ouro-r${i}` })),
   { name: 'sem-escolha', bots: ['greedy', 'greedy'], config: { initiativeChoice: false }, seed: 'ouro-e' },
-  { name: 'sem-pressao', bots: ['greedy', 'greedy'], config: { tablePressure: false }, seed: 'ouro-p' },
   { name: 'sem-selvagens', bots: ['greedy', 'greedy'], config: { wildJokers: false }, seed: 'ouro-s' },
-  { name: 'random-tudo-desligado', bots: ['random', 'random'], config: { initiativeChoice: false, tablePressure: false, wildJokers: false }, seed: 'ouro-x' },
+  { name: 'random-tudo-desligado', bots: ['random', 'random'], config: { initiativeChoice: false, wildJokers: false }, seed: 'ouro-x' },
 ];
 
 /** Grava as partidas de referência com a config completa (mudanças no DEFAULT_CONFIG não as afetam). */

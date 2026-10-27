@@ -134,13 +134,15 @@ describe('askChoice e o jogo offline com AbortSignal', () => {
     expect(await askChoice(scriptedIo(['2']), 'Escolha', ['a', 'b'])).toBe(1);
 
     // O playGame offline (semente 'roteiro', sempre a opção 1) segue idêntico ao de antes da refatoração. A saída só mudou numa
-    // linha no polimento: a Armadilha do Bot com Selvagem passou a dizer o papel ("com Selvagem (como A)"); as jogadas, não.
+    // linha no polimento: a Armadilha do Bot com Selvagem passou a dizer o papel ("com Selvagem (como A)"); as jogadas, não. No
+    // sub-projeto 5 a Pressão da mesa saiu e o anti-travamento caiu para 3 rodadas: a saída e as jogadas mudaram (a partida acaba no
+    // anti-travamento).
     const game = scriptedIo(() => '1');
     const outcome = await playGame({ io: game, seed: 'roteiro', bot: 'greedy', config: makeConfig(), saveDir: null });
     const sha = (text: string) => createHash('sha256').update(text).digest('hex');
-    expect(sha(game.output.join('\n'))).toBe('1aa19b9fc5f329b8799be690a4d112bd7707d5e7ae3c95777e633c8c47715e77');
-    expect(sha(JSON.stringify(outcome.replay.steps))).toBe('1cbb67275b3db8bd6141531772b85cebb7de3d014f9096b65c2095a027ce9670');
-    expect(outcome.replay.steps).toHaveLength(118);
+    expect(sha(game.output.join('\n'))).toBe('1b791afdb41e73d3a94d16a2f16d4836ad25e7ea764806dd10f2449dcb83dd01');
+    expect(sha(JSON.stringify(outcome.replay.steps))).toBe('15a1bdab7fde005101fce210cf0fd61b7b11967c9764786b61299b06cab47337');
+    expect(outcome.replay.steps).toHaveLength(111);
   });
 
   it('askAction cancela a pergunta do Equipar e do menu pelo sinal', async () => {

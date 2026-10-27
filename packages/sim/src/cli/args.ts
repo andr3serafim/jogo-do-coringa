@@ -7,18 +7,16 @@ export const RULE_OPTIONS = {
   hp: { type: 'string' },
   fileira: { type: 'string' },
   'sem-escolha': { type: 'boolean' },
-  'sem-pressao': { type: 'boolean' },
   'sem-selvagens': { type: 'boolean' },
 } as const;
 
-export type RuleValues = { hp?: string; fileira?: string; 'sem-escolha'?: boolean; 'sem-pressao'?: boolean; 'sem-selvagens'?: boolean };
+export type RuleValues = { hp?: string; fileira?: string; 'sem-escolha'?: boolean; 'sem-selvagens'?: boolean };
 
 export function configFromArgs(v: RuleValues): ConfigOverrides {
   const overrides: ConfigOverrides = {};
   if (v.hp !== undefined) overrides.hp = Number(v.hp);
   if (v.fileira !== undefined) overrides.rowLimit = Number(v.fileira);
   if (v['sem-escolha']) overrides.initiativeChoice = false;
-  if (v['sem-pressao']) overrides.tablePressure = false;
   if (v['sem-selvagens']) overrides.wildJokers = false;
   return overrides;
 }

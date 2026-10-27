@@ -194,12 +194,12 @@ describe('palco: catchUp e resync (spec §4.1)', () => {
 
   it('catchUp toca as faixas na metade do tempo', () => {
     const m = mount(THEIRS);
-    emit(m, THEIRS, [TURN, { type: 'PressureChanged', pressure: 2 }], { catchUp: true });
+    emit(m, THEIRS, [TURN, { type: 'InitiativeChanged', player: 'p2' }], { catchUp: true });
     expect(banner(m.container)).toHaveTextContent('Vez de Duda');
     advance(199);
     expect(busy(m.container)).toBe(true);
     advance(1);
-    expect(banner(m.container)).toHaveTextContent('Pressão da mesa: +2');
+    expect(banner(m.container)).toHaveTextContent('Duda ficou com a iniciativa');
     advance(200);
     expect(busy(m.container)).toBe(false);
   });
@@ -760,7 +760,8 @@ describe('sobreposições sem pisca-pisca (spec §10.4: somando tudo o que estiv
   const strip = (container: HTMLElement) => container.querySelector<HTMLElement>('[data-camada-faixa]')!;
   const layer = (container: HTMLElement) => container.querySelector<HTMLElement>('[data-camada-cena]')!;
   const curtain = (container: HTMLElement) => container.querySelector<HTMLElement>('[data-cortina]')!;
-  const PRESSURE: GameEvent = { type: 'PressureChanged', pressure: 2 };
+  // Uma faixa qualquer entre duas vezes (era a da Pressão da mesa, que saiu no sub-projeto 5).
+  const BANNER: GameEvent = { type: 'OrderChosen', player: 'p2', first: true, turnOrder: ['p2', 'p1'] };
 
   it('as camadas ficam montadas e apagadas quando não há batida com sobreposição', () => {
     const m = mount(THEIRS);
@@ -775,7 +776,7 @@ describe('sobreposições sem pisca-pisca (spec §10.4: somando tudo o que estiv
     const m = mount(THEIRS);
     const first = strip(m.container);
     const trace = watchMany([() => banner(m.container) !== null]);
-    emit(m, THEIRS, [TURN, PRESSURE, TURN, { type: 'RoundStarted', round: 8, kind: 'ATTACK' }]);
+    emit(m, THEIRS, [TURN, BANNER, TURN, { type: 'RoundStarted', round: 8, kind: 'ATTACK' }]);
     trace.sample();
     trace.run(2_000);
     expect(trace.flips[0]).toEqual([0, 1_600]);
@@ -822,7 +823,7 @@ describe('sobreposições sem pisca-pisca (spec §10.4: somando tudo o que estiv
     const m = mount(THEIRS);
     const first = strip(m.container);
     const trace = watchMany([() => banner(m.container) !== null]);
-    emit(m, THEIRS, [TURN, PRESSURE]);
+    emit(m, THEIRS, [TURN, BANNER]);
     trace.sample();
     trace.run(200);
     emit(m, THEIRS, [TURN]);
@@ -1041,7 +1042,7 @@ describe('cortina e inversão contam juntas (spec §10.4: no máximo 3 trocas po
   });
 });
 
-describe('CardsDealt, Reflect e pressão (spec §4.2)', () => {
+describe('CardsDealt e Reflect (spec §4.2)', () => {
   const newCard = { id: 'n-novo', kind: 'K', suit: 'copas' } as const;
   const dealt: ViewSpec = {
     ...MINE,
@@ -1171,30 +1172,6 @@ describe('CardsDealt, Reflect e pressão (spec §4.2)', () => {
     const m = mount(MINE, { prefs: { reduceMotion: true } });
     emit(m, MINE, [{ type: 'ReflectExpired', owner: 'p1' }]);
     expect(screen.getByRole('region', { name: 'Seu campo' }).querySelector('[data-escudo-quebra]')).not.toBeNull();
-  });
-
-  it('o número da pressão muda NA batida dela, com destaque, e não quando o `state` chega', () => {
-    const m = mount(MINE);
-    const pressure = () =>
-      screen.getByRole('region', { name: 'Situação da rodada' }).querySelector<HTMLElement>('[data-numero]')!;
-    expect(pressure()).toHaveTextContent('+1');
-    emit(m, { ...MINE, pressure: 3 }, [TURN, { type: 'PressureChanged', pressure: 3 }]);
-    expect(pressure()).toHaveTextContent('+1');
-    advance(400);
-    expect(pressure()).toHaveTextContent('+3');
-    expect(pressure()).toHaveAttribute('data-destaque', 'true');
-    advance(400);
-    expect(pressure()).toHaveTextContent('+3');
-    expect(pressure()).not.toHaveAttribute('data-destaque');
-  });
-
-  it('pular mostra a pressão nova na hora, sem destaque', async () => {
-    const m = mount(MINE);
-    emit(m, { ...MINE, pressure: 3 }, [TURN, { type: 'PressureChanged', pressure: 3 }]);
-    await m.user.click(stage(m.container));
-    const pressure = screen.getByRole('region', { name: 'Situação da rodada' }).querySelector<HTMLElement>('[data-numero]')!;
-    expect(pressure).toHaveTextContent('+3');
-    expect(pressure).not.toHaveAttribute('data-destaque');
   });
 
   it('a conta da fileira acompanha o total mostrado: não mostra o multiplicador novo com o total velho', () => {

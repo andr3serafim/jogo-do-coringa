@@ -11,6 +11,8 @@ import { RULES_VERSION } from '../src/index.ts';
  */
 const RULES_DIGESTS: Record<number, string> = {
   1: '0b68077c4621f6317248faef9affbfddc981e71de6fb82bc8c35217efdf84a3a',
+  // 2: a Pressão da mesa saiu (sub-projeto 5); o anti-travamento padrão passou de 5 para 3 rodadas.
+  2: 'f2201819fc174dc3241fe7b4f0256ca507a485568870bd815987ba64f90367f7',
 };
 
 const GOLDEN_DIR = new URL('./__snapshots__/golden/', import.meta.url);

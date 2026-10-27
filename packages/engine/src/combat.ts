@@ -25,9 +25,9 @@ export function defenseBase(p: DefenseSide): number {
   return sum(p.defenseRow) + quadBonus(p.defenseRow);
 }
 
-/** ATK = (soma + bônus) × (1 + nJ + pressão) — spec §1.9. */
-export function attackPower(p: AttackSide, pressure: number): number {
-  return attackBase(p) * (1 + p.attackBuffs.length + pressure);
+/** ATK = (soma + bônus) × (1 + nJ) — spec §1.9. */
+export function attackPower(p: AttackSide): number {
+  return attackBase(p) * (1 + p.attackBuffs.length);
 }
 
 /** DEF = (soma + bônus) × (1 + nQ). */
@@ -35,8 +35,8 @@ export function defensePower(p: DefenseSide): number {
   return defenseBase(p) * (1 + p.defenseBuffs.length);
 }
 
-export function attackValue(s: GameState, p: PlayerState): number {
-  return attackPower(p, s.pressure);
+export function attackValue(p: PlayerState): number {
+  return attackPower(p);
 }
 
 export function defenseValue(p: PlayerState): number {
@@ -65,7 +65,7 @@ function breakGuards(s: GameState, p: PlayerState, count: number, ev: GameEvent[
 export function resolveAttack(s: GameState, attackerId: PlayerId, ev: GameEvent[]): void {
   const attacker = getPlayer(s, attackerId);
   const defender = opponentOf(s, attackerId);
-  const result = previewBetween(attacker, defender, s.pressure, s.config);
+  const result = previewBetween(attacker, defender, s.config);
   const { absolute } = result;
   // O Ataque Absoluto é anunciado antes de tudo, também contra um Reflect (que o intercepta: os K do dono ficam). O J que ele
   // gasta sai no fim, depois da carta da frente do Ataque.

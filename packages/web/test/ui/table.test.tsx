@@ -25,10 +25,9 @@ const seatOf = (playerId: 'p1' | 'p2', nickname: string) => ({
   wantsRematch: false,
 });
 
-/** O rascunho da Peleja (390 × 844): ATK 152 = 38 × 4, DEF 46 = 23 × 2; do outro lado, 84 = 28 × 3 e 42 = 14 × 3. */
+/** O rascunho da Peleja (390 × 844): ATK 114 = 38 × 3, DEF 46 = 23 × 2; do outro lado, 56 = 28 × 2 e 42 = 14 × 3. */
 const DRAFT: ViewSpec = {
   round: 7,
-  pressure: 1,
   self: {
     hp: 187,
     hand: ['K', 'A', 'Q'],
@@ -136,22 +135,22 @@ describe('mesa: as quatro fileiras (spec §3.1)', () => {
     expect(row.querySelector('[data-conta]')).toBeNull();
   });
 
-  it('cada fileira mostra o total e a conta do motor (152 = 38 × 4 no rascunho)', () => {
+  it('cada fileira mostra o total e a conta do motor (114 = 38 × 3 no rascunho)', () => {
     const { view } = mount();
     const total = (name: string) => group(name).querySelector('[data-total]')?.textContent;
     const conta = (name: string) => group(name).querySelector('[data-conta]')?.textContent;
-    expect(total('Sua fileira de ataque')).toBe('152');
-    expect(conta('Sua fileira de ataque')).toBe('38 × 4');
+    expect(total('Sua fileira de ataque')).toBe('114');
+    expect(conta('Sua fileira de ataque')).toBe('38 × 3');
     expect(total('Sua fileira de defesa')).toBe('46');
     expect(conta('Sua fileira de defesa')).toBe('23 × 2');
-    expect(total('Fileira de ataque de Duda')).toBe('84');
-    expect(conta('Fileira de ataque de Duda')).toBe('28 × 3');
+    expect(total('Fileira de ataque de Duda')).toBe('56');
+    expect(conta('Fileira de ataque de Duda')).toBe('28 × 2');
     expect(total('Fileira de defesa de Duda')).toBe('42');
     expect(conta('Fileira de defesa de Duda')).toBe('14 × 3');
     // Os números exibidos são os do motor.
-    expect(Number(total('Sua fileira de ataque'))).toBe(attackPower(view.self, view.pressure));
+    expect(Number(total('Sua fileira de ataque'))).toBe(attackPower(view.self));
     expect(Number(total('Sua fileira de defesa'))).toBe(defensePower(view.self));
-    expect(Number(total('Fileira de ataque de Duda'))).toBe(attackPower(view.opponent, view.pressure));
+    expect(Number(total('Fileira de ataque de Duda'))).toBe(attackPower(view.opponent));
     expect(Number(total('Fileira de defesa de Duda'))).toBe(defensePower(view.opponent));
   });
 
@@ -166,7 +165,7 @@ describe('mesa: as quatro fileiras (spec §3.1)', () => {
     expect([...quad].every((el) => el.getAttribute('aria-label')?.includes(', quadra'))).toBe(true);
     expect(row.querySelector('[data-quadra]')).toHaveTextContent('+7');
     // O total já inclui o bônus (o motor soma): 7×4 + 2 + 3 + 7 = 40, vezes o multiplicador.
-    expect(row.querySelector('[data-total]')).toHaveTextContent(String(attackPower(view.self, view.pressure)));
+    expect(row.querySelector('[data-total]')).toHaveTextContent(String(attackPower(view.self)));
   });
 
   it('sem quadra, nenhuma carta é destacada', () => {
@@ -413,27 +412,27 @@ describe('mesa: faixa central (spec §3.1)', () => {
     expect(band().getByText('vazio')).toBeInTheDocument();
   });
 
-  it('pressão: o bônus e as rodadas sem dano', () => {
-    mount({ ...DRAFT, noDamageStreak: 1 });
-    expect(band().getByText('Pressão da mesa')).toBeInTheDocument();
-    expect(band().getByText('+1')).toBeInTheDocument();
-    expect(band().getByText('1 rodada sem dano')).toBeInTheDocument();
+  it('as rodadas sem dano: a contagem do anti-travamento, sem Pressão da mesa (removida no sub-projeto 5)', () => {
+    mount(DRAFT);
+    expect(band().getByRole('group', { name: 'Rodadas sem dano: 0 de 3' })).toHaveTextContent('Sem dano0 de 3');
+    expect(band().queryByText(/Pressão/)).not.toBeInTheDocument();
     expect(band().queryByText(/anti-travamento/)).not.toBeInTheDocument();
   });
 
   it('perto do anti-travamento (faltam 2 ou menos), avisa quantas rodadas faltam', () => {
-    const { view } = mount({ ...DRAFT, noDamageStreak: 3 });
-    expect(view.config.antiStallRounds).toBe(5);
+    const { view } = mount({ ...DRAFT, noDamageStreak: 1 });
+    expect(view.config.antiStallRounds).toBe(3);
+    expect(band().getByRole('group', { name: 'Rodadas sem dano: 1 de 3' })).toBeInTheDocument();
     expect(band().getByText('faltam 2 rodadas sem dano para o fim por anti-travamento')).toBeInTheDocument();
   });
 
   it('a última rodada antes do anti-travamento fala no singular', () => {
-    mount({ ...DRAFT, noDamageStreak: 4 });
+    mount({ ...DRAFT, noDamageStreak: 2 });
     expect(band().getByText('falta 1 rodada sem dano para o fim por anti-travamento')).toBeInTheDocument();
   });
 
-  it('um antes do limite de aviso ainda não avisa', () => {
-    mount({ ...DRAFT, noDamageStreak: 2 });
+  it('sem nenhuma rodada sem dano, não avisa', () => {
+    mount({ ...DRAFT, noDamageStreak: 0 });
     expect(band().queryByText(/anti-travamento/)).not.toBeInTheDocument();
   });
 
@@ -511,21 +510,17 @@ describe('mesa: o "novo" (spec §10.5)', () => {
     expect(onSeen).not.toHaveBeenCalled();
   });
 
-  it('a vida e a pressão marcadas levam ", novo" e se apagam ao passar o mouse', async () => {
+  it('a vida marcada leva ", novo" e se apaga ao passar o mouse', async () => {
     const onSeen = vi.fn();
     const user = userEvent.setup();
     mount(DRAFT, {
-      snapshot: { marks: { cards: new Set(), zones: new Set(['opponentHp', 'pressure', 'selfHp'] as const) } },
+      snapshot: { marks: { cards: new Set(), zones: new Set(['opponentHp', 'selfHp'] as const) } },
       props: { onSeen },
     });
     const hp = screen.getByRole('meter', { name: 'Vida de Duda, novo' });
     expect(screen.getByRole('meter', { name: 'Vida de André, novo' })).toBeInTheDocument();
     await user.hover(hp);
     expect(onSeen).toHaveBeenCalledWith(zoneKey('opponentHp'));
-    const pressure = within(screen.getByRole('region', { name: 'Situação da rodada' })).getByText('Pressão da mesa').parentElement!;
-    expect(pressure).toHaveTextContent('novo');
-    await user.hover(pressure);
-    expect(onSeen).toHaveBeenCalledWith(zoneKey('pressure'));
   });
 });
 
@@ -752,7 +747,7 @@ describe('mesa: histórico (spec §3.1, §7, §10.5)', () => {
 describe('mesa: números de jogo sem textura (spec §10.7)', () => {
   const textured = (el: Element) => el.closest('.textura') !== null || (el as HTMLElement).style.filter !== '';
 
-  it('vida, totais, conta, relógio, pressão, monte, cemitério e placar ficam fora da textura', () => {
+  it('vida, totais, conta, relógio, rodadas sem dano, monte, cemitério e placar ficam fora da textura', () => {
     const { container } = mount(DRAFT, { state: { deadline: { kind: 'TURN', at: 21_000, players: ['p1'] } } });
     const numbers: Element[] = [
       ...container.querySelectorAll('[data-total]'),
@@ -760,7 +755,6 @@ describe('mesa: números de jogo sem textura (spec §10.7)', () => {
       ...container.querySelectorAll('[data-hp]'),
       ...container.querySelectorAll('[data-numero]'),
       screen.getByRole('timer'),
-      screen.getByText('+1'),
       screen.getByText('André 1 × 0 Duda'),
     ];
     expect(numbers.length).toBeGreaterThan(12);

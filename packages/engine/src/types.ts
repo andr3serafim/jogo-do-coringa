@@ -40,7 +40,6 @@ export interface RulesConfig {
   resurrectMinRounds: number;
   deck: { numericCopies: number; faceCopies: number };
   initiativeChoice: boolean;
-  tablePressure: boolean;
   wildJokers: boolean;
 }
 
@@ -119,8 +118,7 @@ export interface GameState {
   initiative: PlayerId;
   turnOrder: [PlayerId, PlayerId];
   turnIndex: 0 | 1;
-  /** Bônus da Pressão da mesa, fixado no início de cada rodada de Ataque. */
-  pressure: number;
+  /** Rodadas de Ataque seguidas sem ninguém perder vida (o anti-travamento, spec §1.11). */
   noDamageStreak: number;
   hpLostThisRound: boolean;
   phase: Phase;
@@ -194,7 +192,6 @@ export type GameEvent =
   | { type: 'Resurrected'; player: PlayerId; card: NumCard; row: RowName }
   | { type: 'AbsoluteDefenseStarted'; player: PlayerId }
   | { type: 'AbsoluteDefenseEnded'; player: PlayerId }
-  | { type: 'PressureChanged'; pressure: number }
   | { type: 'InitiativeChanged'; player: PlayerId }
   | { type: 'Exodia'; player: PlayerId }
   | { type: 'GameOver'; result: GameResult };
@@ -270,7 +267,6 @@ export interface PlayerView {
   initiative: PlayerId;
   turnOrder: [PlayerId, PlayerId];
   turnIndex: 0 | 1;
-  pressure: number;
   noDamageStreak: number;
   phase: Phase;
   deckCount: number;

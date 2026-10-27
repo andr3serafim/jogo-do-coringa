@@ -7,8 +7,8 @@ describe('calibração (miniatura)', () => {
 
   it('roda todas as seções', () => {
     expect(report.base.map((s) => s.label)).toEqual(['greedy × greedy', 'random × random', 'turtle × greedy']);
-    expect(report.toggles.map((s) => s.label)).toEqual(['padrão', 'sem Escolha da iniciativa', 'sem Pressão da mesa', 'sem Coringas Selvagens']);
-    expect(report.turtle.map((t) => [t.tablePressure, t.lead])).toEqual([[true, 10], [true, 20], [false, 10], [false, 20]]);
+    expect(report.toggles.map((s) => s.label)).toEqual(['padrão', 'sem Escolha da iniciativa', 'sem Coringas Selvagens']);
+    expect(report.turtle.map((t) => t.lead)).toEqual([10, 20]);
     expect(report.order).not.toBeNull();
     expect(report.sweep).toHaveLength(SWEEP.length);
   });

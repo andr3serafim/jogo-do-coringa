@@ -11,7 +11,7 @@ import { EndHintNote, HintPanel, type HintPanelProps } from '../../src/ui/table/
 import { seriousViolations } from './support.tsx';
 
 /** As dicas que o painel mostra: a do fim vai dentro do painel de fim (`EndHintNote`), porque o diálogo modal deixa a página inerte. */
-const IDS: readonly Exclude<HintId, 'end'>[] = ['equip', 'quad', 'order', 'firstAttack', 'buffs', 'trap', 'wild', 'reflect', 'pressure'];
+const IDS: readonly Exclude<HintId, 'end'>[] = ['equip', 'quad', 'order', 'firstAttack', 'buffs', 'trap', 'wild', 'reflect', 'stall'];
 
 function mount(props: Partial<HintPanelProps> = {}) {
   const onGotIt = vi.fn();
@@ -34,18 +34,16 @@ describe('<HintPanel />', () => {
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
-  it('a dica 9 tem a frase da Pressão num elemento só dela, e a do anti-travamento com o número da partida', () => {
-    mount({ hint: 'pressure', antiStallRounds: 7 });
-    const pressure = screen.getByText(/^Pressão da mesa:/);
+  it('a dica 9 é o anti-travamento, com o número da partida (a Pressão da mesa saiu)', () => {
+    mount({ hint: 'stall', antiStallRounds: 7 });
     const stall = screen.getByText(/^Anti-travamento:/);
-    expect(pressure).not.toBe(stall);
-    expect(pressure.tagName).toBe('P');
-    expect(pressure.textContent).not.toMatch(/Anti-travamento/);
+    expect(stall.tagName).toBe('P');
+    expect(screen.queryByText(/Pressão/)).not.toBeInTheDocument();
     expect(stall).toHaveTextContent('Anti-travamento: 7 rodadas de Ataque seguidas sem ninguém perder vida encerram a partida.');
   });
 
   it('o número do anti-travamento acompanha a partida', () => {
-    const view = mount({ hint: 'pressure', antiStallRounds: 3 });
+    const view = mount({ hint: 'stall', antiStallRounds: 3 });
     expect(screen.getByText(/^Anti-travamento:/)).toHaveTextContent('Anti-travamento: 3 rodadas');
     view.rerender({ antiStallRounds: 9 });
     expect(screen.getByText(/^Anti-travamento:/)).toHaveTextContent('Anti-travamento: 9 rodadas');
@@ -215,7 +213,7 @@ describe('<HintPanel />', () => {
   });
 
   it('axe: sem violações sérias, com e sem dica', async () => {
-    const { container, rerender } = mount({ hint: 'pressure' });
+    const { container, rerender } = mount({ hint: 'stall' });
     expect(await seriousViolations(container)).toEqual([]);
     rerender({ hint: null });
     expect(await seriousViolations(container)).toEqual([]);

@@ -9,16 +9,16 @@ import { viewAt, type SideSpec, type ViewSpec } from '../fixtures.ts';
 
 /**
  * A Peleja: ATK 152 contra DEF 42 com um K na Guarda de Duda; do outro lado, 84 contra a minha DEF 46 com um K na minha Guarda.
- * Sem Guarda o dano é 110 (meu) e 38 (dele); com Reflect, 141 volta para mim e 77 para ele.
+ * Sem Guarda o dano é 110 (meu) e 38 (dele); com Reflect, 141 volta para mim e 77 para ele. (Sem a Pressão da mesa, que saiu no
+ * sub-projeto 5, um J a mais de cada lado mantém as contas: 38 × 4 e 28 × 3.)
  */
 const DRAFT: ViewSpec = {
-  pressure: 1,
   self: {
     hp: 187,
     hand: ['A'],
     attackRow: [8, 4, 10, 7, 9],
     defenseRow: [3, 6, 9, 5],
-    attackBuffs: ['J', 'WILD'],
+    attackBuffs: ['J', 'WILD', 'J'],
     defenseBuffs: ['Q'],
     guard: ['K'],
   },
@@ -26,7 +26,7 @@ const DRAFT: ViewSpec = {
     hp: 214,
     attackRow: [6, 9, 3, 10],
     defenseRow: [5, 7, 2],
-    attackBuffs: ['J'],
+    attackBuffs: ['J', 'J'],
     defenseBuffs: ['Q', 'Q'],
     guard: ['K'],
   },
@@ -94,7 +94,7 @@ describe('o seu ataque: o botão Atacar', () => {
 
   it('o Ataque Absoluto fura a Guarda e derruba quando o dano alcança a vida', () => {
     const attack: SideSpec = { attackBuffs: ['J', 'J', 'J', 'J'] };
-    // O dano vem do motor (5× mais a Pressão, com a Guarda quebrada): o teste só o lê e o usa como vida.
+    // O dano vem do motor (5×, com a Guarda quebrada): o teste só o lê e o usa como vida.
     const { damage, attack: atk } = previewsOf(viewAt(draft(attack, {}))).mine;
     expect(damage).toBeGreaterThan(0);
     expect(mine(draft(attack, { hp: damage }))).toBe(`${atk} × 42 · Ataque Absoluto, dano ${damage} · derruba Duda`);

@@ -190,7 +190,7 @@ describe('constantes', () => {
   it('valores da spec', () => {
     expect(TIMERS.turnMs).toBe(30_000);
     expect(TIMERS.hardExpiryMs).toBe(86_400_000);
-    expect(STATE_SCHEMA).toBe(1);
+    expect(STATE_SCHEMA).toBe(2);
     expect(ROOM_LIMITS.recentSteps).toBe(50);
   });
 });

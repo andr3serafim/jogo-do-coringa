@@ -95,8 +95,8 @@ describe('fim da rodada de Ataque', () => {
     expect(r.state.initiative).toBe(P2);
   });
 
-  it('anti-travamento: 5 rodadas sem dano → vence quem tem mais vida', () => {
-    const s = setup({ noDamageStreak: 4, p2: { hp: 90 } });
+  it('anti-travamento: 3 rodadas sem dano → vence quem tem mais vida', () => {
+    const s = setup({ noDamageStreak: 2, p2: { hp: 90 } });
     const r = steps(s, [
       [P1, { type: 'END_TURN' }],
       [P2, { type: 'END_TURN' }],
@@ -104,15 +104,15 @@ describe('fim da rodada de Ataque', () => {
     expect(r.state.phase).toEqual({ kind: 'GAME_OVER', result: { kind: 'WIN', winner: P1, reason: 'ANTI_STALL' } });
   });
 
-  it('anti-travamento com vida igual é empate; sem Pressão da mesa bastam 3 rodadas', () => {
-    const r = steps(setup({ noDamageStreak: 2, config: { tablePressure: false } }), [
+  it('anti-travamento com vida igual é empate', () => {
+    const r = steps(setup({ noDamageStreak: 2 }), [
       [P1, { type: 'END_TURN' }],
       [P2, { type: 'END_TURN' }],
     ]);
     expect(r.state.phase).toEqual({ kind: 'GAME_OVER', result: { kind: 'DRAW', reason: 'ANTI_STALL' } });
   });
 
-  it('Pressão da mesa: rodadas sem dano aumentam o multiplicador da rodada seguinte', () => {
+  it('uma rodada sem dano soma 1 à sequência, e a rodada seguinte começa sem nenhum bônus de ataque', () => {
     const r1 = steps(setup({ noDamageStreak: 1 }), [
       [P1, { type: 'END_TURN' }],
       [P2, { type: 'END_TURN' }],
@@ -120,8 +120,7 @@ describe('fim da rodada de Ataque', () => {
     expect(r1.state.noDamageStreak).toBe(2);
     const r2 = act(r1.state, 'system', { type: 'TIMEOUT' });
     expect(r2.state.round).toBe(5);
-    expect(r2.state.pressure).toBe(2);
-    expect(r2.events).toContainEqual({ type: 'PressureChanged', pressure: 2 });
+    expect(r2.events.map((e) => e.type)).not.toContain('PressureChanged');
   });
 
   it('qualquer perda de vida zera a sequência sem dano', () => {

@@ -635,15 +635,15 @@ describe('Session: marcas (spec §10.5)', () => {
     await session.play(END_TURN);
     const next: PlayerView = {
       ...withJ(),
-      pressure: base.pressure + 1,
       self: { ...withJ().self, hp: base.self.hp - 5 },
+      opponent: { ...withJ().opponent, hp: base.opponent.hp - 3 },
     };
     connection.emitState(stateMessage(next, { seq: 2 }));
-    expect([...session.snapshot().marks.zones].sort()).toEqual(['pressure', 'selfHp']);
+    expect([...session.snapshot().marks.zones].sort()).toEqual(['opponentHp', 'selfHp']);
 
     session.markSeen(jId());
     expect(session.snapshot().marks.cards.size).toBe(0);
-    session.markSeen(zoneKey('pressure'));
+    session.markSeen(zoneKey('opponentHp'));
     expect([...session.snapshot().marks.zones]).toEqual(['selfHp']);
     const settled = session.snapshot();
     session.markSeen(jId());

@@ -30,13 +30,13 @@ const seatOf = (playerId: 'p1' | 'p2', nickname: string, extra: { connected?: bo
 /** O rascunho da Peleja: a minha vez, com ATK 152 contra a DEF 42 de Duda (um K na Guarda dele) e 84 contra a minha DEF 46. */
 const DRAFT: ViewSpec = {
   round: 7,
-  pressure: 1,
   self: {
     hp: 187,
     hand: ['K', 'A', 'Q'],
     attackRow: [8, 4, 10, 7, 9],
     defenseRow: [3, 6, 9, 5],
-    attackBuffs: ['J', 'WILD'],
+    // Um J a mais de cada lado mantém as contas sem a Pressão da mesa (saiu no sub-projeto 5): 38 × 4 e 28 × 3.
+    attackBuffs: ['J', 'WILD', 'J'],
     defenseBuffs: ['Q'],
     guard: ['K'],
   },
@@ -45,7 +45,7 @@ const DRAFT: ViewSpec = {
     hand: ['A', 'K', 'WILD'],
     attackRow: [6, 9, 3, 10],
     defenseRow: [5, 7, 2],
-    attackBuffs: ['J'],
+    attackBuffs: ['J', 'J'],
     defenseBuffs: ['Q', 'Q'],
     guard: ['K'],
   },
@@ -260,10 +260,7 @@ describe('Equipar: carta a carta (spec §3.5)', () => {
     expect(drafts[0]).toHaveAttribute('data-card-id', m.view.self.pending[0]!.id);
     expect(drafts[0]).toHaveAccessibleName(/, rascunho$/);
     expect(drafts[0]!.className).toMatch(/opacity-/);
-    const expected = attackPower(
-      { attackRow: [...m.view.self.attackRow, m.view.self.pending[0]!], attackBuffs: m.view.self.attackBuffs },
-      m.view.pressure,
-    );
+    const expected = attackPower({ attackRow: [...m.view.self.attackRow, m.view.self.pending[0]!], attackBuffs: m.view.self.attackBuffs });
     expect(group().querySelector('[data-total]')).toHaveTextContent(String(expected));
     // A defesa não mudou.
     const defense = screen.getByRole('group', { name: 'Sua fileira de defesa' });
@@ -555,7 +552,7 @@ describe('janela de reação (spec §3.7)', () => {
       },
       {
         spec: { ...REACTION, opponent: { ...DRAFT.opponent, attackBuffs: ['J', 'J', 'J', 'J'] } },
-        text: 'Duda declarou ataque: 168 contra sua Defesa 46 → Ataque Absoluto, dano 122',
+        text: 'Duda declarou ataque: 140 contra sua Defesa 46 → Ataque Absoluto, dano 94',
       },
       // Com o Reflect a conta não é contra a sua Defesa (é metade da DEF base de quem ataca).
       {

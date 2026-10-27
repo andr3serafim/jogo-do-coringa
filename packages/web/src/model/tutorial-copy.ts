@@ -17,14 +17,7 @@ export const HINT_SKIP_LABEL = 'Pular o tutorial';
 /** O link da dica do fim, para a tela inicial. */
 export const HINT_FRIEND_LABEL = 'Jogar com um amigo';
 
-/**
- * Dica 9, a frase da Pressão da mesa. É uma frase à parte (um parágrafo só dela): no sub-projeto 5, que remove a Pressão da mesa,
- * ela sai inteira, e a do anti-travamento fica como está.
- */
-export const PRESSURE_HINT =
-  'Pressão da mesa: cada rodada de Ataque seguida sem ninguém perder vida soma 1 ao multiplicador de ataque dos dois.';
-
-/** Dica 9, a frase do anti-travamento: `rounds` vem de `config.antiStallRounds` da partida (nunca um número escrito aqui). */
+/** Dica 9, o anti-travamento: `rounds` vem de `config.antiStallRounds` da partida (nunca um número escrito aqui). */
 export const stallHint = (rounds: number): string =>
   `Anti-travamento: ${rounds} rodadas de Ataque seguidas sem ninguém perder vida encerram a partida. Vence quem tiver mais vida; com vidas iguais, empata.`;
 
@@ -33,7 +26,7 @@ export const END_HINT =
   'A partida acaba quando um Coringa chega a 0 de vida, ou quando alguém monta a Exódia: 4 K na Guarda. Gostou? Chame alguém para uma sala.';
 
 /** Os parágrafos de cada dica, exceto a 9 (que depende da config da partida). */
-const HINT_TEXT: Record<Exclude<HintId, 'pressure'>, string> = {
+const HINT_TEXT: Record<Exclude<HintId, 'stall'>, string> = {
   equip:
     'Suas numéricas vão para o campo na ordem em que saíram, e você só escolhe o destino: Ataque ou Defesa. Cada fileira é uma fila: quando você ataca, a primeira carta do seu Ataque vai para o cemitério; quando defende, a primeira da sua Defesa.',
   quad: 'Quadra: quatro ou mais numéricas do mesmo valor na mesma fileira, seguidas ou não, somam esse valor à fileira e dão uma Ressurreição, que traz uma numérica do cemitério de volta.',
@@ -52,5 +45,5 @@ const HINT_TEXT: Record<Exclude<HintId, 'pressure'>, string> = {
 
 /** Os parágrafos da dica `id`; o anti-travamento da dica 9 leva o número de rodadas da partida (`config.antiStallRounds`). */
 export function hintParagraphs(id: HintId, antiStallRounds: number): readonly string[] {
-  return id === 'pressure' ? [PRESSURE_HINT, stallHint(antiStallRounds)] : [HINT_TEXT[id]];
+  return id === 'stall' ? [stallHint(antiStallRounds)] : [HINT_TEXT[id]];
 }

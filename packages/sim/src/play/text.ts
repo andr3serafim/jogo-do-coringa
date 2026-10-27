@@ -76,7 +76,7 @@ export function actionText(action: Action, view: PlayerView): string {
     case 'RESURRECT':
       return `Ressuscitar ${t(action.cardId)} no fim da fileira de ${ROW_NAME[action.row]}`;
     case 'DECLARE_ATTACK':
-      return `Declarar o ataque (ATK ${attackPower(view.self, view.pressure)} contra DEF ${defensePower(view.opponent)})`;
+      return `Declarar o ataque (ATK ${attackPower(view.self)} contra DEF ${defensePower(view.opponent)})`;
     case 'END_TURN':
       return 'Encerrar o turno (Ataque vazio, sem ataque)';
     case 'PASS':
@@ -173,8 +173,6 @@ export function eventText(e: GameEvent, names: Names): string | null {
       return `DEFESA ABSOLUTA ${de(e.player)}!`;
     case 'AbsoluteDefenseEnded':
       return `A Defesa Absoluta ${de(e.player)} terminou`;
-    case 'PressureChanged':
-      return `Pressão da mesa: +${e.pressure}`;
     case 'InitiativeChanged':
       return `${who(e.player)} ficou com a iniciativa`;
     case 'Exodia':

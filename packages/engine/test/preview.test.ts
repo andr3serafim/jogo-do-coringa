@@ -40,8 +40,8 @@ describe('previewAttack: exemplos da spec 1 §1.13', () => {
     expect(p.breaks.defenderGuard).toBe(1);
   });
 
-  it('exemplo 6: a pressão entra no multiplicador', () => {
-    expect(preview({ pressure: 2, p1: { attack: [4, 6], attackBuffs: ['J'] } }).attack).toBe(40);
+  it('exemplo 6: só os J entram no multiplicador, mesmo depois de rodadas sem dano', () => {
+    expect(preview({ noDamageStreak: 2, p1: { attack: [4, 6], attackBuffs: ['J'] } }).attack).toBe(20);
   });
 });
 
@@ -93,15 +93,14 @@ describe('previewAttack: outros desfechos', () => {
 
   it("previewAttack(view, 'opponent') é a ameaça do oponente sobre a sua Defesa", () => {
     const s = setup({
-      pressure: 1,
       p1: { defense: [7, 8], defenseBuffs: ['Q'], guard: 1 },
       p2: { attack: [9, 9], attackBuffs: ['J'] },
     });
     const view = viewFor(s, P1);
     const threat = previewAttack(view, 'opponent');
-    const direct = previewBetween(view.opponent, view.self, view.pressure, view.config);
+    const direct = previewBetween(view.opponent, view.self, view.config);
     expect(threat).toEqual(direct);
-    expect(threat.attack).toBe(18 * 3);
+    expect(threat.attack).toBe(18 * 2);
     expect(threat.defense).toBe(30);
     expect(threat.outcome).toBe('GUARD_ABSORBS');
   });

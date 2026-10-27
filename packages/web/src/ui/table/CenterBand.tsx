@@ -1,5 +1,5 @@
 // A faixa central de tinta (spec §3.1 e §10.1): o que é dos dois jogadores. Rodada e tipo, de quem é a vez, o
-// relógio, a Pressão da mesa (com o aviso de anti-travamento), a iniciativa, o monte e o cemitério. Os números
+// relógio, as rodadas sem dano (a contagem do anti-travamento, com o aviso), a iniciativa, o monte e o cemitério. Os números
 // de jogo usam a fonte de texto com algarismos tabulares e nenhuma textura (spec §10.7); a textura só vai no
 // título da rodada. O relógio (spec §3.8, §10.3): em urgência (últimos 5 s) o disco fica vermelho, com o número em papel e o
 // anel mais grosso, por cor e por forma, e nunca pisca; na janela de reação ele é grande; esgotado, diz "Tempo esgotado".
@@ -21,12 +21,10 @@ import {
 } from '../../model/copy.ts';
 import type { TrainingLevel } from '../../model/local-room.ts';
 import { DROP } from '../../model/drag.ts';
-import { zoneKey } from '../../model/marks.ts';
 import * as m from 'motion/react-m';
 import { useEffect, useRef } from 'react';
 import { INITIATIVE_ID } from '../../model/effects.ts';
 import { useAnim } from '../anim/context.ts';
-import { useHeldNumber } from '../anim/useHeldNumber.ts';
 import { Card, cardName } from '../cards/Card.tsx';
 import { useSound } from '../sound-context.ts';
 import { useTableUi } from './context.ts';
@@ -34,7 +32,7 @@ import {
   graveyardName,
   initiativeText,
   stallWarning,
-  streakText,
+  streakLabel,
   turnText,
   type TableNames,
 } from './labels.ts';
@@ -75,8 +73,6 @@ export function CenterBand({
   const ui = useTableUi();
   const { noDamageStreak } = view;
   const untilStall = view.config.antiStallRounds - noDamageStreak;
-  const pressureMarked = ui.zones.has('pressure');
-  const seenPressure = ui.onSeen && pressureMarked ? () => ui.onSeen?.(zoneKey('pressure')) : undefined;
   const { face, live } = useClock(deadline, remainingMs, view.me, pausedTurnMs, turn);
   // A urgência soa uma vez por prazo (o `deadlineKey` identifica o prazo), e só no prazo do jogador.
   const sound = useSound();
@@ -87,9 +83,6 @@ export function CenterBand({
     cuedKey.current = urgentKey;
     sound.play('urgencia');
   }, [urgentKey, sound]);
-  // O número da pressão muda NA batida do `PressureChanged`, com destaque (spec §4.2).
-  const anim = useAnim();
-  const pressure = useHeldNumber(view.pressure, anim.pressure);
 
   return (
     <section
@@ -122,26 +115,19 @@ export function CenterBand({
         </p>
       ) : null}
 
-      {/* No celular, a pressão e a iniciativa formam a segunda linha da faixa (`order-last`); no PC, ficam na linha única. */}
+      {/* No celular, as rodadas sem dano e a iniciativa formam a segunda linha da faixa (`order-last`); no PC, ficam na linha única. */}
       <div
+        role="group"
+        aria-label={streakLabel(noDamageStreak, view.config.antiStallRounds)}
         className="order-last flex min-w-0 items-baseline gap-x-1.5 pc:order-none pc:flex-col pc:items-start pc:gap-0"
-        onPointerEnter={seenPressure}
-        onPointerDown={seenPressure}
       >
-        <span className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">Pressão da mesa</span>
-        <span className="flex items-baseline gap-1.5">
-          <span
-            data-numero
-            data-destaque={pressure.highlight ? 'true' : undefined}
-            className={`font-texto text-lg font-extrabold leading-tight tabular-nums pc:text-xl ${pressure.highlight ? 'bg-ouro px-1 text-tinta' : 'text-ouro'}`}
-          >
-            +{pressure.shown}
-          </span>
-          {noDamageStreak > 0 ? (
-            <span className="font-texto text-[11px] leading-tight tabular-nums pc:text-[15px]">{streakText(noDamageStreak)}</span>
-          ) : null}
+        <span aria-hidden="true" className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">
+          Sem dano
         </span>
-        {pressureMarked ? <NovoChip /> : null}
+        <span aria-hidden="true" data-numero className="font-texto text-lg font-extrabold leading-tight tabular-nums text-ouro pc:text-xl">
+          {noDamageStreak}
+          <span className="text-[13px] font-semibold text-papel pc:text-[15px]"> de {view.config.antiStallRounds}</span>
+        </span>
       </div>
 
       <div className="order-last flex min-w-0 items-center gap-1.5 pc:order-none">

@@ -42,13 +42,12 @@ export function PlayerField({ side, view, player, name, away = false, equip, too
       label={rowLabel('ataque')}
       kind="ATK"
       side={player}
-      pressure={view.pressure}
       limit={limit}
       aim={self ? 'up' : 'down'}
       droppable={self}
     />
   );
-  const defense = <Row label={rowLabel('defesa')} kind="DEF" side={player} pressure={view.pressure} limit={limit} droppable={self} />;
+  const defense = <Row label={rowLabel('defesa')} kind="DEF" side={player} limit={limit} droppable={self} />;
   const info = <Info side={side} view={view} player={player} name={name} away={away} equip={equip} zone={zone} tool={tool} />;
   const zones = <Zones player={player} name={name} view={view} self={self} />;
 

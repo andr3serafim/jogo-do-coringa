@@ -63,7 +63,7 @@ describe('draftBoard: o rascunho sobre a mesa', () => {
     expect(draft.attackRow.map((c) => c.value)).toEqual([2, 3, 4, 5, 6, 7, 8]);
     expect(draft.toGraveyard.map((c) => c.value)).toEqual([9]);
     expect(draft.defenseRow).toEqual(view.self.defenseRow);
-    expect(draft.attack).toBe(attackPower({ attackRow: draft.attackRow, attackBuffs: view.self.attackBuffs }, view.pressure));
+    expect(draft.attack).toBe(attackPower({ attackRow: draft.attackRow, attackBuffs: view.self.attackBuffs }));
     expect(draft.defense).toBe(defensePower({ defenseRow: draft.defenseRow, defenseBuffs: view.self.defenseBuffs }));
   });
 

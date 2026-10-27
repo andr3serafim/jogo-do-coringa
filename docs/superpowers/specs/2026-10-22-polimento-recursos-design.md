@@ -230,7 +230,7 @@ modelo da web. **[decisão minha]** As pistas:
   6. o A na janela de reação;
   7. o Selvagem;
   8. o Reflect;
-  9. a Pressão da mesa e o anti-travamento;
+  9. o anti-travamento (a frase da Pressão da mesa saiu com ela, no sub-projeto 5);
   10. o fim (vida, Exódia) e o convite para jogar com um amigo.
 - **Painel:** não modal, sem prender o foco, anunciado como `polite`, com "Entendi" e "Pular o tutorial". No PC fica no alto da
   coluna do histórico; no celular e no tablet, no fluxo acima dos campos (empurra os campos, nunca cobre a mão nem a barra). Fica
@@ -260,9 +260,9 @@ modelo da web. **[decisão minha]** As pistas:
   não há mais dica.
 - **Textos:** os dez textos finais, revisados pela sessão principal em 2026-10-26, estão no plano
   (`docs/superpowers/plans/2026-10-26-polimento-fatia-4-tutorial.md`, "Textos finais das dicas") e, no código, em
-  `packages/web/src/model/tutorial-copy.ts` (o E2E confere as dicas 1, 3, 4 e 10 por inteiro). A dica 9 são duas frases independentes: a
-  da Pressão da mesa, que sai inteira no sub-projeto 5, e a do anti-travamento, que lê `config.antiStallRounds` da partida.
-  Nenhum texto, efeito ou cena novo depende da Pressão da mesa.
+  `packages/web/src/model/tutorial-copy.ts` (o E2E confere as dicas 1, 3, 4 e 10 por inteiro). A dica 9 eram duas frases independentes: a
+  da Pressão da mesa saiu inteira no sub-projeto 5 (a dica virou `stall`), e ficou a do anti-travamento, que lê
+  `config.antiStallRounds` da partida.
 - **Fluxo das dicas** (`model/tutorial.ts`, puro): a dica fica no painel até o "Entendi" ou até outra tomar o lugar. Uma dica que
   saiu de situação conta como vista e não volta; uma que ainda vale não é dada por vista. "Entendi" mostra a próxima que vale
   nesse mesmo momento (o primeiro ataque, depois J/Q/K, depois o Selvagem e o Reflect, na ordem da lista). O contorno só aparece

@@ -118,8 +118,6 @@ const LEGACY_EASY_BLUNDER = 0.5;
 const LEGACY_LABEL = 'padrão (`HARD_DEFAULTS`)';
 
 const config = makeConfig();
-// O relatório declara que mediu com a Pressão da mesa: se a config padrão mudar, o texto não pode mentir.
-if (!config.tablePressure) throw new Error('o portão é medido com a config padrão e a Pressão da mesa ligada (o texto do relatório diz isso)');
 
 /** Uma semente, uma partida com `subject` no assento `seat`. O tempo entre dois `onStep` é a decisão de quem jogou o passo. */
 function playSeat(seed: string, seat: 0 | 1, subject: SeatBot, opponent: SeatBot, times?: DecisionTimes) {
@@ -265,11 +263,9 @@ function renderMarkdown(report: GateReport): string {
     '',
     `**Veredito${n > 1 ? ` da rodada ${n}, a mais recente` : ''}: ${final.approved ? 'APROVADO' : 'REPROVADO'}.** (a) ${pct(a.rate)} (limiar ${pct(th.hardVsGreedy)}), (b) ${pct(b.rate)} (limiar ${pct(th.greedyVsEasy)}), p95 ${ms(t.p95Ms)} (limiar ${th.p95Ms} ms).`,
     '',
-    '> **Os números foram medidos COM a Pressão da mesa (`tablePressure: true`), que será removida no sub-projeto 5; nessa hora o portão tem que ser medido de novo, sem ela.**',
-    '',
     '## Como foi medido',
     '',
-    `- Config: a padrão, \`makeConfig()\` (Pressão da mesa ligada): \`${JSON.stringify(report.config)}\`.`,
+    `- Config: a padrão, \`makeConfig()\`: \`${JSON.stringify(report.config)}\`.`,
     `- Sementes: \`${report.seedPrefix}-0 … ${report.seedPrefix}-${report.seeds - 1}\` (${report.seeds} sementes), cada uma jogada duas vezes com os assentos trocados: ${2 * report.seeds} partidas por medida. O mesmo monte e a mesma iniciativa sorteada em cada par: o bot medido fica com a iniciativa em exatamente uma das duas.`,
     `- Bots da rodada ${n} (os \`HARD_DEFAULTS\` e o \`EASY_BLUNDER\` de então): Difícil \`${JSON.stringify(final.hard)}\`; Fácil erra com probabilidade \`${final.easyBlunder}\`.`,
     `- Máquina: ${report.machine}. O tempo por decisão depende dela.`,
