@@ -300,12 +300,12 @@ modelo da web. **[decisão minha]** As pistas:
 ## 6. Arrastar cartas
 
 ### 6.1 Onde
-- **Fase principal, na sua vez:** arrastar uma carta da mão até a zona da jogada. J para os seus Buffs de ataque; Q para os de
+- **Fase principal, na sua vez, e na janela de reação:** arrastar uma carta da mão até a zona da jogada. J para os seus Buffs de ataque; Q para os de
   defesa; K para a Guarda; A ou Selvagem até a carta do oponente que é alvo da Armadilha; J/Q/Selvagem até o J/Q do oponente
   (Sacrifício). Soltar onde há exatamente uma jogada a faz; onde há mais de uma (por exemplo, o Selvagem nos buffs), abre a
   escolha que a barra já mostra. Reflect e Ressuscitar continuam pelos botões.
 - **Equipar:** arrastar a carta da vez até a sua fileira de Ataque ou de Defesa (com as duas cheias, até a última carta de uma
-  delas para trocar, ou até o cemitério para descartar). Os destinos válidos vêm de `nextEquipDestinations`.
+  delas para trocar, ou até o cemitério para descartar). Os destinos válidos vêm de `nextDestinations` (`model/equip.ts`).
 
 ### 6.2 Regras
 - **Limiar:** só vira arrasto depois de ~8 px de movimento; antes disso o toque segue sendo o toque de hoje (escolher a carta).
@@ -313,16 +313,61 @@ modelo da web. **[decisão minha]** As pistas:
   batidas não começa arrasto).
 - **Fantasma:** uma cópia da carta numa camada fixa, fora do contêiner dos campos (que recorta), com `pointer-events: none`. O
   alvo da soltura sai de `elementFromPoint` e de um atributo `data-soltar` nas zonas.
-- **Zonas válidas** ganham um contorno parado enquanto a carta está no ar; soltar fora delas devolve a carta à mão (sem voo com
-  movimento reduzido).
+- **Zonas válidas** ganham um contorno parado enquanto a carta está no ar; soltar fora delas não faz nada: o fantasma some e a
+  carta segue na mão, sem voo de volta (nem com movimento reduzido, nem sem ele).
 - **Toque:** as cartas arrastáveis têm `touch-action: none`; a mesa continua rolando por fora delas.
 - **Envio:** a soltura passa pelo mesmo caminho do toque (`isLegal` contra a lista do último `state`).
 - **Os botões e o teclado continuam** exatamente como hoje (WCAG 2.5.7).
 
 ### 6.3 Testes
-- Modelo: o mapa carta → zonas a partir das jogadas da mesa (`tablePlays`), e do Equipar a partir de `nextEquipDestinations`.
+- Modelo: o mapa carta → zonas a partir das jogadas da mesa (`tablePlays`), e do Equipar a partir de `nextDestinations`.
 - Componente: o limiar (toque não arrasta), travado não arrasta, soltar numa zona com uma jogada envia, com duas abre a escolha.
 - E2E: no treino, arrastar um K até a Guarda e uma numérica do Equipar até a Defesa, no PC e no celular.
+
+### 6.4 Como ficou (entregue na fatia 5)
+
+- **O gesto** (`ui/table/useCardDrag.ts`, genérico: não sabe de mesa nem de regra). O `pointerdown` do ponteiro primário (o botão
+  principal; o segundo dedo não começa nada) guarda o ponto, e só depois de **8 px** de movimento (`DRAG_THRESHOLD_PX`) vira arrasto;
+  antes disso o `pointerup` é o toque de sempre (escolher a carta). No arrasto o ponteiro é capturado, o fantasma segue o dedo e a
+  zona sob ele sai de `elementFromPoint` + `closest('[data-soltar]')`. Esc, `pointercancel`, a perda de foco da janela, a trava
+  (`enabled` virando falso: batidas, jogada em voo, conexão caída, depois do Passar) e a carta que sai da mão cancelam sem soltar
+  nem tocar.
+- **O fantasma não voa de volta.** É um clone da carta numa camada `fixed` no `body` (`DragGhost`), `pointer-events: none`,
+  `aria-hidden`, `inert`, sem id nem rótulo, sem transição nem animação (igual com movimento reduzido: o movimento é o do dedo). Some
+  na soltura e no cancelamento, e a carta de origem, que nunca saiu do lugar, só esmaece (`opacity: 0.4`) enquanto está no ar. O clone
+  mantém `data-card-id`: um seletor de teste por `[data-card-id]` durante o arrasto vê duas cartas, e o E2E mira a mão e a mesa.
+- **A mão também arrasta na janela de reação**, com o mesmo critério do toque (`acting` e ainda sem ter passado): a Armadilha,
+  por exemplo, vai até a Guarda do oponente depois de um K dele, e só até o que o gatilho permite, porque as zonas saem da mesma lista
+  legal da barra. Depois do Passar, ou com a conexão caída, nada arrasta.
+- **Zonas aninhadas valem a primeira válida, de dentro para fora.** A última carta de uma fileira (`ultima:*`) mora dentro da
+  fileira (`fileira:*`): com vaga na fileira só ela vale, e o gesto sobe até ela; cheia, vale a de dentro (a troca). O contorno
+  (`data-soltar-ativo` nas válidas, `data-soltar-sob` na que está sob o dedo, CSS parado em `styles.css`) marca a zona que valeu.
+- **Soltar de volta sobre a própria carta, sem zona, é um toque** (escolhe a carta, como o toque; de novo, desfaz): o dedo do
+  celular escorrega uns pixels num toque, e não devia virar "soltei fora". Uma zona válida sob o ponto vale mais; soltar sobre outra
+  carta, ou em qualquer outro lugar sem zona, não faz nada.
+- **O toque do ponteiro escolhe no `pointerup`** (`onTap`), e o clique que o navegador manda depois do gesto é engolido (até a
+  folga de 400 ms, o próximo `pointerdown` ou uma tecla), então o toque não escolhe duas vezes. O clique sem ponteiro (`event.detail
+  === 0`: Enter, Espaço, leitor de tela) passa sempre: o teclado e o leitor de tela seguem como eram. No Equipar, tocar a carta da vez
+  não faz nada (os botões de destino ao lado são o toque).
+- **As chaves** (`DROP`, `cardDropKey`, `ROW_DROP`, em `model/drag.ts`) são o único lugar do texto de cada `data-soltar`
+  (`buffs:ATK`, `buffs:DEF`, `guarda`, `carta:<id>`, `fileira:ATK`, `fileira:DEF`, `ultima:ATK`, `ultima:DEF`, `cemiterio`), e um teste
+  amarra cada uma à zona que se vê. As zonas do oponente são só as cartas que são alvo (cada uma é uma zona `carta:<id>`): nunca a
+  mão dele, as fileiras dele nem o Reflect. Nenhuma regra mora na interface: o mapa carta → zonas vem de `tablePlays` e do Equipar
+  de `nextDestinations`, e a soltura passa pelo mesmo `send` do toque (`isLegal` contra a lista do último `state`).
+- **Toque e rolagem.** `touch-action: none` só nas cartas que arrastam agora (a da mão com jogada, destravada; a carta da vez do
+  Equipar), e só enquanto valem; o resto, e a janela dos campos, ficam em `auto` e rolam. O cursor das cartas que arrastam é a
+  mãozinha (`cursor-grab`), e as outras seguem com o `cursor-pointer` de botão.
+- **Testes:** `test/model/drag.test.ts`, `test/ui/card-drag.test.tsx` (o gesto), `test/ui/table-drag.test.tsx` (a mesa de verdade, com
+  o cruzamento das chaves com as zonas e o axe) e o E2E `e2e/drag.spec.ts`, nos dois projetos (PC, e celular de 390 × 844): o Equipar
+  e o K até a Guarda com o mouse do Playwright, e, só no celular, o dedo de verdade (eventos de toque pelo CDP, que passam pelo
+  `touch-action` do Chromium): com `touch-action: none` o gesto vira arrasto, e a página e os campos não rolam durante ele; com o
+  dedo fora das cartas, os campos rolam. Sem `touch-action: none` o dedo vira rolagem e o fantasma nem aparece (conferido por
+  mutação). A página não rola em 390 × 844 nem com a mão cheia: quem rola são só os campos.
+- **Sem efeito, texto nem cena novos** ligados à Pressão da mesa: nada do arrasto depende dela, e ela sai inteira no sub-projeto 5.
+- **Fica para o autor:** nada na tela diz que a carta arrasta além do cursor (a spec não pede texto novo). No celular (390 × 844) com
+  a mão cheia (seis cartas), a mão cobre a Guarda e os buffs do seu campo até os campos rolarem: o dedo fora das cartas os traz
+  (o E2E faz isso antes de arrastar o K), mas quem não rolar solta sobre a mão, e isso vale como toque. Se o playtest mostrar que
+  atrapalha, é um ajuste de layout (rolar os campos ao pegar a carta, por exemplo), não do gesto.
 
 ---
 

@@ -39,7 +39,7 @@ Fechar o MVP: dois amigos jogam uma partida online pelo navegador, entrando por 
 
 1. **Direção visual:** entre três rascunhos, o autor escolheu "A Peleja do Coringa" (xilogravura de cordel), com as fileiras de Ataque frente a frente no centro e o "fica aceso até você ver" trazido de outra direção (§10).
 2. **Aparelho principal:** celular em pé (retrato), com o PC adaptado a partir dele. No celular deitado a mesa funciona, mas sem layout próprio.
-3. **Jogar uma carta:** toca na carta, aparecem as jogadas possíveis, toca no alvo. O mesmo gesto vale no celular e no PC, e tudo funciona pelo teclado. Arrastar fica para o polimento.
+3. **Jogar uma carta:** toca na carta, aparecem as jogadas possíveis, toca no alvo. O mesmo gesto vale no celular e no PC, e tudo funciona pelo teclado. Arrastar a carta até a zona entrou depois, no polimento, como um caminho a mais: o toque e o teclado seguem como estão (§3.4, e a spec do polimento, §6).
 4. **Jogadas automáticas levam a marca `auto`.** O servidor não zera a contagem de estouros por elas (§5). Com essa marca:
    - a) a janela de reação **passa sozinha** quando não há resposta possível. A chave vem ligada e pode ser desligada (para blefar);
    - b) a Escolha da iniciativa **confirma "atacar primeiro" sozinha** depois de ~3 s sem interação.
@@ -57,7 +57,7 @@ Fechar o MVP: dois amigos jogam uma partida online pelo navegador, entrando por 
 ### 0.5 Não-objetivos
 
 - Som, tutorial interativo, chat, espectadores, histórico ou replay entre salas, contas, ranking.
-- Arrastar cartas, vibração e notificação do sistema: polimento (sub-projeto 4).
+- Vibração e notificação do sistema: polimento (sub-projeto 4). Arrastar cartas também era do polimento e entrou lá, como um caminho a mais além do toque (§3.4).
 - Instalação como app (PWA), modo offline, outros idiomas.
 - Escolher regras ou tempos por sala; deploy automático pela CI.
 - Treino contra o bot com relógio, níveis de dificuldade ou tutorial (sub-projeto 4).
@@ -316,6 +316,12 @@ A mesa está em §3 e §4. O menu da partida tem:
 
 **Cancelar:** botão **Cancelar** ou a tecla Esc.
 
+**Arrastar (um caminho a mais, polimento fatia 5):** com o mouse ou o dedo, a carta da mão vai até a zona da jogada (J para os seus
+Buffs de ataque, Q para os de defesa, K para a Guarda, A e Selvagem até a carta do oponente que é alvo) e a jogada sai ao soltar.
+Onde há mais de uma jogada, a soltura escolhe a carta e a barra lista as jogadas, como o toque. Reflect, Ressuscitar, Atacar e
+Encerrar turno ficam só nos botões. O toque (tocar a carta, depois a jogada ou o alvo) e o teclado seguem exatamente como acima:
+arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na spec do polimento, §6.
+
 **Escolher o alvo:**
 
 - os alvos válidos ganham destaque na mesa e aparecem em lista na barra;
@@ -335,6 +341,7 @@ A mesa está em §3 e §4. O menu da partida tem:
 - Só aparecem destinos que levam a uma montagem legal: o mesmo filtro do `askEquip` do terminal, sobre os `EQUIP` de `legalActions`.
 - A escolha aparece na fileira como rascunho (carta translúcida), e os totais e a quadra se atualizam. Exemplo: "forma quadra de 7: +7 e 1 Ressurreição".
 - **Desfazer** volta um passo; **Recomeçar** volta ao início.
+- A carta da vez também se **arrasta** até a fileira (ou até a última carta de uma fileira cheia, ou o cemitério, que são os destinos que o motor deixa); os botões de destino ao lado seguem valendo, e os dois caminhos se misturam carta a carta. Tocar na carta da vez não faz nada.
 - Com todas posicionadas, aparece **Confirmar**, sem envio automático na hora. Depois de confirmar, aparece "Esperando Duda montar…".
 - Especiais recebidas vão para a mão e aparecem chegando lá.
 - Quem não recebeu numéricas tem o Equipar enviado pelo servidor (spec 2 §5). A interface mostra "Você não recebeu numéricas nesta rodada".
@@ -536,6 +543,7 @@ Uma exceção no React mostra "Algo deu errado", com os botões **Recarregar** e
   - o histórico é uma região `aria-live="polite"`, com os textos de `@coringa/sim/text`;
   - "Sua vez" e a abertura da janela de reação (com o tempo) são anúncios `assertive`;
   - o relógio não é anunciado a cada segundo (ver §3.8).
+- **Arrastar** nunca é o único caminho (WCAG 2.5.7): tudo que se arrasta também sai pelo toque e pelo teclado. O fantasma da carta no ar é só desenho (`aria-hidden`, `inert`, sem id nem rótulo), então o leitor de tela não lê a carta duas vezes.
 - **Diálogos** (desistir, cemitério, resumo das regras): `<dialog>` nativo, com o foco preso dentro e devolvido ao fechar.
 - **Movimento:** `prefers-reduced-motion` e a chave do menu (§4.1).
 - **Zoom:** até 200% no PC sem quebrar a mesa.
