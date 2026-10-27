@@ -38,3 +38,18 @@ Base: `calibracao.md` / `calibracao.json` (1000 partidas por série, `greedy` ×
 ## Decisões do autor (2026-10-16)
 
 Fallen e Exódia com metas e regras mantidas, desvios aceitos como explicados; Escolha da ordem mantida até o playtest (nota na §3 da spec).
+
+## Sub-projeto 5, Fase B: sem a Pressão da mesa (2026-10-27)
+
+`calibracao.md` foi medido de novo com a Pressão da mesa removida e o anti-travamento padrão em 3 rodadas (vida 300, fileiras
+de 7). As leituras acima são da calibração de 2026-10-16, com a Pressão.
+
+- **Duração:** mediana de 9 rodadas de Ataque (p10–p90: 5–14), igual.
+- **Fim por anti-travamento:** **10,7%** das partidas `greedy` × `greedy` (meta < 5%; com a Pressão eram 0,0%). No `turtle` ×
+  `greedy`, **51,4%**. A Pressão é que fazia a sequência sem dano acabar em dano; sem ela, uma em cada nove partidas chega às 3
+  rodadas sem dano.
+- **Tartaruga (desenho pareado):** o líder que se fecha ganha **+3,1 pp** com vantagem de 10 e **+0,4 pp** com 20 (meta ≤ 0;
+  com a Pressão eram −15,8 e −16,2). A brecha volta, como a spec previa. Como o anti-travamento termina está em decisão com o
+  autor (opções medidas no sub-projeto 5: manter a vitória por vida, empate, ou morte súbita).
+- **Iniciativa:** 47,6% (meta 45–55%), ok. **Exódia:** 0,8%. **Quadra:** 44,6%.
+- A série "sem Pressão da mesa" saiu das regras liga/desliga (a regra não existe mais).
