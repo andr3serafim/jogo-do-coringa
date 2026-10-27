@@ -226,7 +226,7 @@ DEF = (soma(Defesa do defensor) + bônus) × (1 + nQ)
 ### 1.11 Anti-travamento e fim de jogo
 
 - **"Rodada sem dano":** rodada de Ataque em que **nenhum Coringa perdeu vida** (dano absorvido por K não conta como dano **[I]**).
-- **Pressão da mesa: removida no sub-projeto 5** (pedido do autor em 2026-10-23, "remoção completa da implementação"). Ela dava +1 no multiplicador de ataque dos dois jogadores por rodada de Ataque seguida sem dano, para fechar a brecha da "tartaruga" (quem está na frente põe tudo na Defesa, deixa o Ataque vazio e espera o anti-travamento). Sem ela, a brecha volta: no desenho pareado (§3), o líder que se fecha ganha +3,1 pp com vantagem de 10 e +0,4 pp com 20 (a meta é ≤ 0), e 62–65% das partidas dele acabam no anti-travamento. **Como o anti-travamento termina está em decisão com o autor** (opções medidas: manter a vitória por vida, empate, ou morte súbita); até a resposta, vale a regra abaixo.
+- **Pressão da mesa: removida no sub-projeto 5** (pedido do autor em 2026-10-23, "remoção completa da implementação"). Ela dava +1 no multiplicador de ataque dos dois jogadores por rodada de Ataque seguida sem dano, para fechar a brecha da "tartaruga" (quem está na frente põe tudo na Defesa, deixa o Ataque vazio e espera o anti-travamento). Sem ela, a brecha volta: no desenho pareado (§3), o líder que se fecha ganha +3,1 pp com vantagem de 10 e +0,4 pp com 20 (a meta é ≤ 0), e 62–65% das partidas dele acabam no anti-travamento. **Decisão do autor (2026-10-27): nenhuma regra nova.** Ele lembrou que quem não põe nenhuma carta no Ataque não ataca, e a Defesa do oponente não perde carta (§1.5, item 3, já é assim e tem teste), e vai testar a tartaruga no playtest dele depois do jogo pronto. Medido com as regras da Fase D (vida 500, fileiras de 8, 8 Ás): o líder que se fecha ganha +6,1 pp, e 16,7% das partidas acabam no anti-travamento.
 - **Anti-travamento [M]:** **3 rodadas de Ataque seguidas** sem dano → vence quem tiver mais vida; vida igual → **empate**.
 - **Vida ≤ 0** → perde na hora, mesmo no meio da rodada **[O]**.
 - **Exódia** → vence na hora (após a janela de reação) **[O]**.
@@ -270,7 +270,7 @@ DEF = (soma(Defesa do defensor) + bônus) × (1 + nQ)
 | Absolutos | sem custo definido | consomem 1 Q / 1 J ao terminar |
 | Exódia | instantânea | instantânea após janela de reação (A) |
 | Fim do monte | — | cemitério embaralhado vira novo monte; a compra nunca para |
-| Travamento | — | 3 rodadas sem dano → mais vida vence (a Pressão da mesa saiu no sub-projeto 5; o fim do anti-travamento está em decisão com o autor) |
+| Travamento | — | 3 rodadas sem dano → mais vida vence (a Pressão da mesa saiu no sub-projeto 5; a tartaruga fica para o playtest do autor) |
 
 ---
 

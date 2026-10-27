@@ -21,10 +21,11 @@ Marcas: **[feito]** já na `main`; **[decisão]** decidido pela sessão do sub-p
 
 - Pedido do autor (2026-10-23): "remoção completa da implementação". Sai do motor, do simulador, da web, dos testes e das specs 1,
   3 e 4. O anti-travamento padrão fica em **3 rodadas**, como a spec 1 previa sem a Pressão. `RULES_VERSION` 2, `STATE_SCHEMA` 2.
-- **A brecha da tartaruga volta** [autor]: o líder que se fecha na Defesa ganha +3,1 pp (vantagem de 10) e +0,4 pp (vantagem de 20),
-  e 10,7% das partidas normais acabam no anti-travamento. Opções medidas e recomendação (morte súbita) em
-  `side-session-notes/…/sub5-tartaruga-decisao.md`, mandadas à sessão principal. Até a resposta vale "3 rodadas, vence quem tem
-  mais vida".
+- **A brecha da tartaruga volta** [autor]: o líder que se fecha na Defesa ganha +3,1 pp (Fase B) e +6,1 pp com as regras da Fase D,
+  e 16,7% das partidas acabam no anti-travamento. Foram medidas três opções (vitória por vida, empate, morte súbita), em
+  `side-session-notes/…/sub5-tartaruga-decisao.md`. **O autor escolheu nenhuma** (2026-10-27): vale "3 rodadas, vence quem tem mais
+  vida", com a regra que já existe (sem carta no Ataque não há ataque e a Defesa do oponente não perde carta, spec 1 §1.5 item 3,
+  agora com teste próprio), e ele testa a tartaruga no playtest dele depois do jogo pronto.
 
 ## Fase C: interface e experiência [decisão]
 

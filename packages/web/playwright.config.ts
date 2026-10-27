@@ -40,7 +40,9 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   forbidOnly: !!process.env.CI,
-  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : [['list']],
+  // Na CI o `github` põe cada falha (o teste e a mensagem) nas anotações da run, que a API pública mostra sem login: o log do Actions
+  // pede login, e o E2E já falhou de forma intermitente sem dizer onde.
+  reporter: process.env.CI ? [['list'], ['github'], ['html', { open: 'never' }]] : [['list']],
   use: {
     baseURL: `http://${HOST}:${PORT}`,
     // Sem teto, um clique que espera para sempre (botão coberto, diálogo modal) só cairia no limite do teste inteiro.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { P1, P2, act, actErr, handId, player, setup, steps } from './helpers.ts';
+import { P1, P2, act, actErr, handId, player, setup, steps, values } from './helpers.ts';
 
 describe('buffs na fase principal', () => {
   it('J vai para os Buffs de Ataque; Selvagem também serve como J', () => {
@@ -65,6 +65,17 @@ describe('ataque e janela de reação', () => {
     expect(actErr(empty, P1, { type: 'DECLARE_ATTACK' })).toBe('ATTACK_ROW_EMPTY');
     expect(act(empty, P1, { type: 'END_TURN' }).state.phase).toEqual({ kind: 'ATTACK_MAIN', player: P2 });
     expect(actErr(setup({ p1: { attack: [3] } }), P1, { type: 'END_TURN' })).toBe('ATTACK_ROW_NOT_EMPTY');
+  });
+
+  it('com Ataque vazio não há ataque e nenhuma carta sai da Defesa do oponente (spec §1.5, item 3; a "tartaruga" do autor)', () => {
+    const s = setup({ p1: { defense: [9, 9, 9] }, p2: { attack: [4], defense: [5, 8] } });
+    const r = act(s, P1, { type: 'END_TURN' });
+    expect(r.events.map((e) => e.type)).not.toContain('AttackDeclared');
+    expect(r.events.map((e) => e.type)).not.toContain('DamageDealt');
+    expect(r.events.map((e) => e.type)).not.toContain('CardsRemovedFromRow');
+    expect(values(player(r.state, P2).defenseRow)).toEqual([5, 8]);
+    expect(values(player(r.state, P1).defenseRow)).toEqual([9, 9, 9]);
+    expect(player(r.state, P2).hp).toBe(player(s, P2).hp);
   });
 });
 
