@@ -215,10 +215,16 @@ export interface PlayOptions {
   order?: 'click' | 'wait';
 }
 
-/** Uma jogada oferecida agora pela interface, a primeira de cada painel, ou `null` se não há nenhuma. Erros de clique (o botão sumiu) contam como nenhuma. */
+/**
+ * Uma jogada oferecida agora pela interface, a primeira de cada painel, ou `null` se não há nenhuma. O botão que some no meio da
+ * conferência (o `state` seguinte chegou) conta como nenhum: o `isEnabled` de um elemento que já saiu esperaria o tempo de ação
+ * inteiro e lançaria (a falha intermitente do E2E online na CI), então ele tem prazo curto e o erro vira "nenhuma". Erros de
+ * clique também.
+ */
 async function playOnce(page: Page, options: PlayOptions): Promise<string | null> {
   const attempt = async (name: string, button: Locator): Promise<string | null> => {
-    if (!(await button.isVisible()) || !(await button.isEnabled())) return null;
+    if (!(await button.isVisible())) return null;
+    if (!(await button.isEnabled({ timeout: 1_000 }).catch(() => false))) return null;
     return button.click({ timeout: 2_000 }).then(() => name, () => null);
   };
 
