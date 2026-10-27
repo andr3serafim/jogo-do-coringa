@@ -204,6 +204,7 @@ export function Card({
   // Carta que o `CardsDealt` traz: fica apagada e esmaece na batida dela (só opacidade: vale com movimento reduzido).
   const enter = animated ? anim.enterDelay(card.id) : null;
   const name = cardLabel(card, as, roleText);
+  const waiting = disabled && onSelect !== undefined;
   if (front) name.push('sai primeiro');
   if (quad) name.push('quadra');
   if (target) name.push('alvo possível');
@@ -218,11 +219,12 @@ export function Card({
     selected ? '-translate-y-3.5 anel-ouro' : target ? 'anel-ouro' : '',
     grave ? 'grayscale opacity-90' : '',
     draft ? 'border-dashed opacity-70' : '',
-    // Um cursor só: duas classes `cursor-*` disputam a mesma propriedade e quem ganha é a ordem do CSS gerado.
-    grabbable ? 'cursor-grab' : onSelect ? 'cursor-pointer' : '',
+    // Um cursor só por carta: duas classes `cursor-*` disputam a mesma propriedade e quem ganha é a ordem do CSS gerado. Travada, é a
+    // espera; destravada e arrastável, a mãozinha; só botão, o dedo.
+    waiting ? 'cursor-wait' : grabbable ? 'cursor-grab' : onSelect ? 'cursor-pointer' : '',
     onSelect ? 'focus-visible:z-10' : '',
     // Travada, a carta apaga (o toque não faz nada), mas continua focável e lida pelo leitor de tela.
-    disabled && onSelect ? 'opacity-60 cursor-wait' : '',
+    waiting ? 'opacity-60' : '',
     className,
   ];
   const common = {

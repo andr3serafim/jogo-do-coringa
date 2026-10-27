@@ -550,6 +550,7 @@ describe('os botões e o teclado seguem iguais (WCAG 2.5.7): fase principal', ()
     m.connection.acks = [ack.promise];
     await m.user.click(inBar().getByRole('button', { name: ATTACK_BUTTON }));
     expect(handCard('K')).not.toHaveClass('cursor-grab');
+    expect(handCard('K')).not.toHaveClass('cursor-pointer');
     expect(handCard('K')).toHaveClass('cursor-wait');
     await act(async () => ack.resolve({ ok: true, seq: 9 }));
   });
