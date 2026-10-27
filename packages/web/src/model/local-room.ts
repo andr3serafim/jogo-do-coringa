@@ -7,6 +7,7 @@ import {
   applyAction,
   createGame,
   legalActions,
+  makeConfig,
   viewEvents,
   viewFor,
   type Action,
@@ -15,6 +16,7 @@ import {
   type PlayerId,
   type ReplayStep,
 } from '@coringa/engine';
+import { HP_CHOICES } from '@coringa/protocol';
 import type {
   AckMessage,
   ConnectionEvent,
@@ -53,9 +55,17 @@ export function trainingLevel(search: string): TrainingLevel | null {
   return TRAINING_LEVELS.find((level) => level === fromUrl) ?? null;
 }
 
+/** `?vida=<n>` de um `location.search`, se for uma das vidas que a sala pode escolher (`HP_CHOICES`); senão, `null`. */
+export function trainingHp(search: string): number | null {
+  const fromUrl = Number(new URLSearchParams(search).get('vida'));
+  return HP_CHOICES.includes(fromUrl) ? fromUrl : null;
+}
+
 export interface LocalRoomOptions {
   /** Semente da primeira partida; a revanche `n` usa `<semente>-<n>`. */
   seed: string;
+  /** A vida inicial (sub-projeto 5, R3; padrão a do motor); a revanche a mantém. */
+  hp?: number;
   /** O nível do bot (padrão `medio`); a revanche o mantém. */
   level?: TrainingLevel;
   /** Quanto o bot "pensa" antes de jogar (padrão 600 ms). Na janela de reação ele responde sem esperar. */
@@ -255,7 +265,7 @@ export class LocalRoom implements RoomConnection {
     this.#gameSeed = seed;
     // Uma lista nova (e não `length = 0`): o replay já emitido da partida anterior guarda a lista dela.
     this.#steps = [];
-    const created = createGame(DEFAULT_CONFIG, seed, [LOCAL_ME, BOT_SEAT]);
+    const created = createGame(makeConfig({ hp: this.#options.hp ?? DEFAULT_CONFIG.hp }), seed, [LOCAL_ME, BOT_SEAT]);
     if (!created.ok) throw new Error(`configuração inválida: ${created.error.message}`);
     return { game: created.state, botSeed: `${seed}/bot` };
   }

@@ -51,11 +51,18 @@ export interface SeededStep {
 }
 
 /**
+ * A config das partidas de referência e dos cenários da interface: a de antes da Fase D do sub-projeto 5 (vida 300, fileiras de 7,
+ * 6 Ás). As partidas com semente fixa (as marcas, o replay de teste) foram escolhidas com ela; a config padrão de agora (500, 8 e
+ * 8 Ás) entra pelos testes que a pedem.
+ */
+export const REFERENCE_CONFIG: ConfigOverrides = { hp: 300, rowLimit: 7, deck: { numericCopies: 8, faceCopies: 6, aceCopies: 6 } };
+
+/**
  * Uma partida bot × bot (greedy × greedy por padrão) com semente fixa, passo a passo. Pode terminar
  * antes de `steps` jogadas, se a partida acabar.
  */
 export function seededSteps(seed: string, steps: number, bots: [BotName, BotName] = ['greedy', 'greedy']): SeededStep[] {
-  const created = createGame(makeConfig(), seed, SEATS);
+  const created = createGame(makeConfig(REFERENCE_CONFIG), seed, SEATS);
   if (!created.ok) throw new Error(`${created.error.code}: ${created.error.message}`);
   let state = created.state;
   const rngs = [createRng(`${seed}/bots/p1`), createRng(`${seed}/bots/p2`)] as const;
@@ -75,7 +82,7 @@ export function seededSteps(seed: string, steps: number, bots: [BotName, BotName
 
 /** Uma partida de verdade (greedy × greedy, até o fim) no formato do replay do motor. */
 export function realReplay(seed: string): Replay {
-  const config = makeConfig();
+  const config = makeConfig(REFERENCE_CONFIG);
   const created = createGame(config, seed, SEATS);
   if (!created.ok) throw new Error(created.error.message);
   let state = created.state;
@@ -161,7 +168,8 @@ function resolvePhase(phase: ViewSpec['phase'], me: PlayerId, other: PlayerId): 
 export function scenarioAt(spec: ViewSpec = {}): { state: GameState; view: PlayerView } {
   const me = spec.me ?? SEATS[0];
   const other = me === SEATS[0] ? SEATS[1] : SEATS[0];
-  const created = createGame(makeConfig(spec.config), spec.seed ?? 'view-at', SEATS);
+  // Os cenários fixam a config de referência (vida 300, fileiras de 7); a padrão do sub-projeto 5 entra por `spec.config`.
+  const created = createGame(makeConfig({ ...REFERENCE_CONFIG, ...spec.config }), spec.seed ?? 'view-at', SEATS);
   if (!created.ok) throw new Error(`${created.error.code}: ${created.error.message}`);
   const state = created.state;
   let n = 0;

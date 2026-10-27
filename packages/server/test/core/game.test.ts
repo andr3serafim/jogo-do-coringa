@@ -199,8 +199,9 @@ describe('Equipar automático', () => {
     expect(r2.game!.recent.map((s) => s.seq)).toEqual([1, 2, 3]);
   });
 
-  it('a partida já começa com o passo automático quando alguém recebe só figuras (semente s29: p2 sem numéricas)', async () => {
-    const { h, p1, p2 } = await Harness.playing(undefined, 's29');
+  it('a partida já começa com o passo automático quando alguém recebe só figuras (semente s33: p2 sem numéricas)', async () => {
+    // A semente muda quando o baralho muda (era s29 antes dos 8 Ás do sub-projeto 5).
+    const { h, p1, p2 } = await Harness.playing(undefined, 's33');
     const rec = h.core.record!;
     expect(rec.seq).toBe(2);
     expect(rec.game!.steps).toEqual([{ player: 'p2', action: { type: 'EQUIP', destinations: [] } }]);

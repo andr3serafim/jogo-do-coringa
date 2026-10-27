@@ -9,6 +9,7 @@
 // com o efeito: ele cria a sessão e a conexão (na hora, com o nível da URL, ou quando a pessoa escolhe), e a limpeza solta uma e
 // fecha a outra. Isso também vale para o modo estrito, que monta duas vezes, e para um módulo que chega depois de a tela
 // sair de cena (`live`): nesse caso não nasce sala nenhuma, e o timer do bot não vaza.
+import { DEFAULT_CONFIG } from '@coringa/engine';
 import { useEffect, useState } from 'react';
 import {
   BACK_HOME_LABEL,
@@ -24,6 +25,7 @@ import {
 import type { TrainingLevel } from '../../model/local-room.ts';
 import type { Session } from '../../model/session.ts';
 import { loadLevel, saveLevel, type KeyValueStore } from '../../model/storage.ts';
+import { HpChoice } from '../HpChoice.tsx';
 import { Button, Screen, Title } from '../parts.tsx';
 import { PlayTable } from '../table/PlayTable.tsx';
 import {
@@ -58,7 +60,9 @@ type Step =
       levels: readonly TrainingLevel[];
       /** O nível que vem focado: o último escolhido, ou o Médio. */
       initial: TrainingLevel;
-      choose: (level: TrainingLevel) => void;
+      /** A vida inicial que vem marcada: a de `?vida=`, ou a padrão (R3 do sub-projeto 5). */
+      initialHp: number;
+      choose: (level: TrainingLevel, hp: number) => void;
     }
   | {
       kind: 'playing';
@@ -80,9 +84,9 @@ export function Training({ store, load = loadLocalRoom, reload = defaultReload }
       if (live) setStep({ kind: 'failed' });
     };
     /** Cria a sala e a sessão no nível dado e abre a mesa. */
-    const begin = (module: LocalRoomModule, level: TrainingLevel): void => {
+    const begin = (module: LocalRoomModule, level: TrainingLevel, hp: number): void => {
       const seed = module.trainingSeed(window.location.search, randomUnit);
-      const game = openLocalRoom(module, { seed, level, store });
+      const game = openLocalRoom(module, { seed, level, store, hp });
       dispose = game.dispose;
       setStep({ kind: 'playing', session: game.session, level, seedOf: game.seedOf });
     };
@@ -92,8 +96,10 @@ export function Training({ store, load = loadLocalRoom, reload = defaultReload }
       .then((module) => {
         if (!live) return;
         const fromUrl = module.trainingLevel(window.location.search);
+        // A vida inicial (R3): `?vida=` na URL, ou a escolhida na tela; sem nenhuma, a padrão.
+        const hpFromUrl = module.trainingHp(window.location.search);
         if (fromUrl !== null) {
-          begin(module, fromUrl);
+          begin(module, fromUrl, hpFromUrl ?? DEFAULT_CONFIG.hp);
           return;
         }
         const saved = loadLevel(store);
@@ -101,12 +107,13 @@ export function Training({ store, load = loadLocalRoom, reload = defaultReload }
           kind: 'choosing',
           levels: module.TRAINING_LEVELS,
           initial: module.TRAINING_LEVELS.find((level) => level === saved) ?? 'medio',
-          choose: (level) => {
+          initialHp: hpFromUrl ?? DEFAULT_CONFIG.hp,
+          choose: (level, hp) => {
             // Uma sala só: o segundo clique antes de a mesa aparecer não cria outra.
             if (!live || dispose !== null) return;
             saveLevel(store, level);
             try {
-              begin(module, level);
+              begin(module, level, hp);
             } catch {
               fail();
             }
@@ -126,7 +133,7 @@ export function Training({ store, load = loadLocalRoom, reload = defaultReload }
     case 'failed':
       return <LocalRoomFailed title={TRAINING_FAILED_TITLE} reload={reload} />;
     case 'choosing':
-      return <LevelChoice levels={step.levels} initial={step.initial} onChoose={step.choose} />;
+      return <LevelChoice levels={step.levels} initial={step.initial} initialHp={step.initialHp} onChoose={step.choose} />;
     case 'playing':
       return <TrainingTable session={step.session} level={step.level} seedOf={step.seedOf} store={store} />;
   }
@@ -135,15 +142,18 @@ export function Training({ store, load = loadLocalRoom, reload = defaultReload }
 interface LevelChoiceProps {
   levels: readonly TrainingLevel[];
   initial: TrainingLevel;
-  onChoose: (level: TrainingLevel) => void;
+  initialHp: number;
+  onChoose: (level: TrainingLevel, hp: number) => void;
 }
 
 /** A escolha do nível (spec da fatia 1, §3.3): um botão grande por nível, com o nome e uma linha, e o inicial já focado. */
-function LevelChoice({ levels, initial, onChoose }: LevelChoiceProps) {
+function LevelChoice({ levels, initial, initialHp, onChoose }: LevelChoiceProps) {
+  const [hp, setHp] = useState(initialHp);
   return (
     <Screen>
       <Title>{TRAINING_CHOICE_TITLE}</Title>
       <p className="text-lg">{TRAINING_CHOICE_HINT}</p>
+      <HpChoice value={hp} onChange={setHp} />
       <div role="group" aria-label={TRAINING_CHOICE_LABEL} className="flex flex-col gap-3">
         {levels.map((level) => (
           <button
@@ -151,7 +161,7 @@ function LevelChoice({ levels, initial, onChoose }: LevelChoiceProps) {
             type="button"
             // O nome do botão é o texto visível inteiro, nível e linha (WCAG 2.5.3: o axe barra um nome que não o contenha).
             autoFocus={level === initial}
-            onClick={() => onChoose(level)}
+            onClick={() => onChoose(level, hp)}
             className="flex min-h-20 flex-col items-start gap-0.5 border-4 border-tinta bg-ouro px-5 py-3 text-left text-tinta"
           >
             <span className="font-madeira text-2xl uppercase leading-tight tracking-wide">{LEVEL_NAME[level]}</span>

@@ -103,3 +103,25 @@ describe('Ressurreição', () => {
     expect(p.resurrections).toEqual([{ row: 'DEF', value: 4, formedAtRound: 8 }]);
   });
 });
+
+describe('duas quadras na mesma fileira (fileiras de 8, sub-projeto 5)', () => {
+  it('cada quadra conta separadamente: o bônus soma as duas e cada uma dá a sua Ressurreição', () => {
+    const s = stateAt(5);
+    const p = makePlayer([7, 7, 7, 3, 3, 3, 3], []);
+    reevaluateQuads(s, p, []);
+    expect(quadValues(p.attackRow)).toEqual([3]);
+    p.attackRow.push(n(7));
+    const ev: GameEvent[] = [];
+    reevaluateQuads(s, p, ev);
+    expect(quadValues(p.attackRow)).toEqual([3, 7]);
+    expect(quadBonus(p.attackRow)).toBe(10);
+    expect(ev).toEqual([{ type: 'QuadFormed', player: 'p', quad: { row: 'ATK', value: 7 } }]);
+    expect(p.resurrections.map((r) => r.value).sort((a, b) => a - b)).toEqual([3, 7]);
+  });
+
+  it('oito cartas iguais são uma quadra só (o bônus vale uma vez, mesmo com 5+ iguais)', () => {
+    const cards = row(5, 5, 5, 5, 5, 5, 5, 5);
+    expect(quadValues(cards)).toEqual([5]);
+    expect(quadBonus(cards)).toBe(5);
+  });
+});

@@ -59,6 +59,20 @@ describe('rotas HTTP', () => {
     expect((await get(`/api/rooms/${ana.code.toLowerCase()}`)).status).toBe(200);
   });
 
+  it('a vida inicial (sub-projeto 5): uma das escolhas vale (201); outra, ou de outro tipo, é 400; na entrada não existe', async () => {
+    expect((await post('/api/rooms', { nickname: 'Ana', hp: 800 })).status).toBe(201);
+    expect((await post('/api/rooms', { nickname: 'Ana', hp: 300 })).status).toBe(201);
+    for (const hp of [0, 400, 501, -500, 1_000_000]) {
+      const res = await post('/api/rooms', { nickname: 'Ana', hp });
+      expect(res.status, String(hp)).toBe(400);
+      expect(((await res.json()) as { error: string }).error).toBe('BAD_HP');
+    }
+    expect((await post('/api/rooms', '{"nickname":"Ana","hp":"500"}')).status).toBe(400);
+    expect((await post('/api/rooms', '{"nickname":"Ana","hp":500.5}')).status).toBe(400);
+    const ana = (await (await post('/api/rooms', { nickname: 'Ana' })).json()) as CreateRoomResponse;
+    expect((await post(`/api/rooms/${ana.code}/join`, { nickname: 'Bia', hp: 800 })).status).toBe(400);
+  });
+
   it('apelido inválido 400; corpo > 1 KiB 413; código fora do formato 404', async () => {
     for (const body of [{ nickname: '' }, { nickname: '   ' }, { nickname: 'x'.repeat(21) }, { nickname: 'a\u0007b' }]) {
       expect((await post('/api/rooms', body)).status, JSON.stringify(body)).toBe(400);

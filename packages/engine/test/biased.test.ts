@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest';
 import type { GameEvent } from '../src/types.ts';
 import { absolutesProfile, exodiaProfile, reflectExpiryProfile } from './biased.ts';
 import { checkInvariants } from './invariants.ts';
-import { playout, type Chooser } from './playout.ts';
+import { playout, type Chooser, type PlayoutOptions } from './playout.ts';
 import { P1 } from './helpers.ts';
 
 const SEEDS = 40;
 
 /** Joga SEEDS partidas com a política, checa as invariantes em todo passo e conta em quantas cada evento-alvo aconteceu. */
-function reach(name: string, chooser: Chooser, targets: GameEvent['type'][]): Record<string, number> {
+function reach(name: string, chooser: Chooser, targets: GameEvent['type'][], config?: PlayoutOptions['config']): Record<string, number> {
   const counts: Record<string, number> = Object.fromEntries(targets.map((t) => [t, 0]));
   for (let i = 0; i < SEEDS; i += 1) {
     const seen = new Set<string>();
@@ -16,6 +16,7 @@ function reach(name: string, chooser: Chooser, targets: GameEvent['type'][]): Re
       seed: `vies-${name}-${i}`,
       choices: [],
       chooser,
+      config,
       onStep: (before, after, events) => {
         checkInvariants(before, after, events);
         for (const e of events) if (targets.includes(e.type)) seen.add(e.type);
@@ -29,7 +30,9 @@ function reach(name: string, chooser: Chooser, targets: GameEvent['type'][]): Re
 
 describe('playouts enviesados: caminhos raros sob as invariantes (spec §5)', () => {
   it('Exódia acontece e respeita as invariantes', () => {
-    expect(reach('exodia', exodiaProfile, ['Exodia']).Exodia).toBeGreaterThan(0);
+    // Com as fileiras de 8 e todo mundo na Defesa, ninguém toma dano e o anti-travamento (3 rodadas) acabaria antes de os K se
+    // juntarem: aqui ele espera mais, para o caminho da Exódia ser exercitado.
+    expect(reach('exodia', exodiaProfile, ['Exodia'], { antiStallRounds: 12 }).Exodia).toBeGreaterThan(0);
   });
 
   it('Ataque Absoluto e Defesa Absoluta acontecem e expiram', () => {

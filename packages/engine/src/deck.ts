@@ -10,7 +10,11 @@ function copies(count: number): Array<{ deckNo: number; suit: Suit }> {
   return all.slice(0, count);
 }
 
-/** Baralho da spec §1.1: 2 baralhos sem 2 cópias de cada figura, mais 2 Selvagens com `wildJokers`. */
+/** Quantas cópias de uma figura entram: os Ás têm a conta deles (os 8 dos dois baralhos, sub-projeto 5); J, Q e K, `faceCopies`. */
+const faceCount = (config: RulesConfig, kind: FaceKind): number =>
+  kind === 'A' ? (config.deck.aceCopies ?? config.deck.faceCopies) : config.deck.faceCopies;
+
+/** Baralho da spec §1.1: 2 baralhos sem 2 cópias de J, Q e K (os 8 Ás ficam), mais 2 Selvagens com `wildJokers`. */
 export function buildDeck(config: RulesConfig): Card[] {
   const cards: Card[] = [];
   for (const value of RANKS) {
@@ -19,7 +23,7 @@ export function buildDeck(config: RulesConfig): Card[] {
     }
   }
   for (const kind of FACES) {
-    for (const { deckNo, suit } of copies(config.deck.faceCopies)) {
+    for (const { deckNo, suit } of copies(faceCount(config, kind))) {
       cards.push({ id: `b${deckNo}-${suit}-${kind}`, kind, suit });
     }
   }
@@ -30,5 +34,6 @@ export function buildDeck(config: RulesConfig): Card[] {
 }
 
 export function totalCards(config: RulesConfig): number {
-  return 9 * config.deck.numericCopies + 4 * config.deck.faceCopies + (config.wildJokers ? 2 : 0);
+  const faces = FACES.reduce((sum, kind) => sum + faceCount(config, kind), 0);
+  return 9 * config.deck.numericCopies + faces + (config.wildJokers ? 2 : 0);
 }

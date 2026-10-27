@@ -74,7 +74,7 @@ escuro numa janela de 1 s; com movimento reduzido, nenhuma inversão) e sem afro
   "André venceu".
 - Com movimento reduzido, sem o "pop" de entrada.
 
-## Fase D: números do jogo [autor: pedidos dele, medidos antes do merge]
+## Fase D: números do jogo [autor: pedidos dele, medidos antes do merge; feito no código]
 
 - **R2:** 8 Ás (hoje 6). **R3:** fileiras de **8** (hoje 7; correção do autor em 2026-10-27, que antes pedira 10; a garantia de
   compra segue: 4 × 8 = 32 ≤ 64). **R3:** vida padrão 500 (hoje 300), ajustável no menu: config da sala na criação → protocolo →
@@ -85,6 +85,14 @@ escuro numa janela de 1 s; com movimento reduzido, nenhuma inversão) e sem afro
   legíveis.
 - Medidos no simulador antes do merge; recalibra e mede de novo o portão do Difícil. O resumo das regras e o teste que amarra os
   números acompanham.
+- Como ficou [decisão]: `deck.aceCopies` (8; sem ele, os Ás têm `faceCopies`, e os replays antigos seguem iguais), `rowLimit` 8 e
+  `hp` 500 no `DEFAULT_CONFIG`. A vida escolhível é `HP_CHOICES` = 300, 500, 800 (protocolo): o corpo da criação ganha `hp`
+  (o servidor recusa outra com `BAD_HP`), o registro da sala a guarda, a partida e a revanche a usam e o `room` a mostra; no treino,
+  a tela do nível tem a mesma escolha, e `?vida=` a marca. As partidas de referência guardam a config inteira e não mudam (a
+  `RULES_VERSION` não sobe). No celular de 360 px a carta passa de 34 para 29 px de largura para caberem 8, e o valor e o naipe da
+  carta de campo seguem a largura real dela (`cqw`). O baralho novo muda todas as distribuições: a semente do tutorial passou a ser
+  `tutorial-2431` (o critério ganhou "ao menos uma numérica no 1º Equipar" e "a iniciativa com o jogador", que a anterior cumpria
+  por sorte).
 
 ## Fase E: regras novas do autor [autor]
 

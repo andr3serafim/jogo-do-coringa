@@ -19,12 +19,15 @@ const HOST = '127.0.0.1';
 
 /**
  * Semente do sorteio online: o Worker deste servidor sorteia a partida `n` com `<semente>-<n>` (`wrangler dev --var`; no
- * `wrangler.jsonc` a var é vazia e nunca vai para a produção). Com `e2e`, a primeira partida passa das duas rodadas de Equipar
- * (Ana recebe 3 e 2 numéricas, Duda 4 e 2), nenhuma vida chega perto de zero e a partida dura até a desistência. Os testes ainda
+ * `wrangler.jsonc` a var é vazia e nunca vai para a produção). Com `e2e2631` (a partida 1 é `e2e2631-1`, a mesma semente do
+ * treino dos E2E), a primeira partida passa das duas rodadas de Equipar (Ana recebe 3 numéricas e Duda 4 na primeira), nenhuma
+ * vida chega perto de zero e a partida dura até a desistência. A semente mudou no sub-projeto 5 (o baralho com 8 Ás muda todas as
+ * distribuições): era `e2e`, e `e2e2631-1` é a primeira que cumpre a história dos E2E do treino (3 e 2 numéricas, o Bot com a
+ * iniciativa escolhendo atacar em segundo, o Reflect na rodada 3 e J, Q e K na rodada 5). Os testes ainda
  * reagem ao que está na tela, porque os prazos e o relógio do runner continuam reais. Para reaproveitar um servidor que você já
- * subiu à mão, suba com `--var E2E_SEED:e2e`: o `online.spec.ts` confere a distribuição e avisa se a semente não valeu.
+ * subiu à mão, suba com `--var E2E_SEED:e2e2631`: o `online.spec.ts` confere a distribuição e avisa se a semente não valeu.
  */
-const E2E_SEED = 'e2e';
+const E2E_SEED = 'e2e2631';
 
 export default defineConfig({
   testDir: './e2e',

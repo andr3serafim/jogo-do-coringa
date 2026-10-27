@@ -35,25 +35,33 @@ describe('rng', () => {
 });
 
 describe('baralho', () => {
-  it('padrão: 72 numéricas, 6 de cada figura e 2 Coringas Selvagens', () => {
+  it('padrão: 72 numéricas, 6 de cada figura J, Q e K, os 8 Ás e 2 Coringas Selvagens', () => {
     const deck = buildDeck(makeConfig());
-    expect(deck).toHaveLength(98);
+    expect(deck).toHaveLength(100);
     expect(deck.filter((c) => c.kind === 'NUM')).toHaveLength(72);
-    for (const kind of ['J', 'Q', 'K', 'A'] as const) {
+    for (const kind of ['J', 'Q', 'K'] as const) {
       expect(deck.filter((c) => c.kind === kind)).toHaveLength(6);
     }
+    expect(deck.filter((c) => c.kind === 'A')).toHaveLength(8);
     expect(deck.filter((c) => c.kind === 'WILD')).toHaveLength(2);
     for (let v = 2; v <= 10; v += 1) {
       expect(deck.filter((c) => c.kind === 'NUM' && c.value === v)).toHaveLength(8);
     }
-    expect(new Set(deck.map((c) => c.id)).size).toBe(98);
-    expect(totalCards(makeConfig())).toBe(98);
+    expect(new Set(deck.map((c) => c.id)).size).toBe(100);
+    expect(totalCards(makeConfig())).toBe(100);
   });
 
-  it('sem Coringas Selvagens tem 96 cartas', () => {
+  it('sem Coringas Selvagens tem 98 cartas', () => {
     const config = makeConfig({ wildJokers: false });
-    expect(buildDeck(config)).toHaveLength(96);
-    expect(totalCards(config)).toBe(96);
+    expect(buildDeck(config)).toHaveLength(98);
+    expect(totalCards(config)).toBe(98);
+  });
+
+  it('sem `aceCopies` (replays de antes do sub-projeto 5), os Ás têm as cópias das outras figuras', () => {
+    const old = makeConfig({ deck: { numericCopies: 8, faceCopies: 6 } });
+    delete old.deck.aceCopies;
+    expect(buildDeck(old).filter((c) => c.kind === 'A')).toHaveLength(6);
+    expect(totalCards(old)).toBe(98);
   });
 
   it('as figuras retiradas são as 2 últimas cópias do segundo baralho', () => {
@@ -61,6 +69,7 @@ describe('baralho', () => {
     expect(ids).toContain('b1-copas-7');
     expect(ids).toContain('b2-ouros-K');
     expect(ids).not.toContain('b2-espadas-K');
-    expect(ids).not.toContain('b2-paus-A');
+    // Os Ás ficam todos (sub-projeto 5).
+    expect(ids).toContain('b2-paus-A');
   });
 });

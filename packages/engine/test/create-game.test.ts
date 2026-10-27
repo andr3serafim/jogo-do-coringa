@@ -39,7 +39,7 @@ describe('createGame', () => {
       expect(p.hand.some((c) => (c as { kind: string }).kind === 'NUM')).toBe(false);
       expect(p.pending.every((c) => c.kind === 'NUM')).toBe(true);
     }
-    expect(s.deck).toHaveLength(98 - 8);
+    expect(s.deck).toHaveLength(totalCards(s.config) - 8);
     expect(allCards(s)).toHaveLength(totalCards(s.config));
     expect([P1, P2]).toContain(s.initiative);
   });

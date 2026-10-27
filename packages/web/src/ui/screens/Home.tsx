@@ -1,5 +1,6 @@
 // Início (spec §2.1): criar sala, entrar com código ou link e treinar contra o bot. O apelido fica lembrado, e a chave "Som"
 // já mora aqui (guardada em `coringa:prefs`, com as outras preferências como estavam).
+import { DEFAULT_CONFIG } from '@coringa/engine';
 import { HttpError, normalizeNickname, parseTarget } from '@coringa/protocol';
 import { useState, type FormEvent } from 'react';
 import type { RoomApi } from '../../app/room-api.ts';
@@ -14,6 +15,7 @@ import {
   saveSeat,
   type KeyValueStore,
 } from '../../model/storage.ts';
+import { HpChoice } from '../HpChoice.tsx';
 import { Button, Panel, Screen, Switch, TextField, Title } from '../parts.tsx';
 import { useSound } from '../sound-context.ts';
 import { NICKNAME_ERROR, OFFLINE, TOO_MANY } from '../text.ts';
@@ -27,6 +29,7 @@ export interface HomeProps {
 
 export function Home({ api, store }: HomeProps) {
   const [nickname, setNickname] = useState(() => loadNickname(store));
+  const [hp, setHp] = useState(DEFAULT_CONFIG.hp);
   const [nicknameError, setNicknameError] = useState<string | null>(null);
   const [createError, setCreateError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -64,7 +67,7 @@ export function Home({ api, store }: HomeProps) {
     setNicknameError(null);
     setBusy(true);
     try {
-      const room = await api.create(valid);
+      const room = await api.create(valid, hp);
       saveNickname(store, valid);
       saveSeat(store, room.code, { token: room.token, playerId: room.playerId, nickname: valid });
       navigate(`/s/${room.code}`);
@@ -110,6 +113,7 @@ export function Home({ api, store }: HomeProps) {
             autoCapitalize="words"
             enterKeyHint="go"
           />
+          <HpChoice value={hp} onChange={setHp} />
           {createError ? (
             <p role="alert" className="font-bold text-vermelho">
               {createError}

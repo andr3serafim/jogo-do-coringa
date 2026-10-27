@@ -63,8 +63,9 @@ function matches(card: Card, spec: CardSpec): boolean {
  * Padrão: rodada 3 de Ataque, fase principal de P1, ordem [P1, P2], iniciativa de P1.
  */
 export function setup(spec: Setup = {}): GameState {
-  // Cenários fixam hp 100: os valores esperados não dependem da vida padrão (balanceamento).
-  const created = createGame(makeConfig({ hp: 100, ...spec.config }), 'seed-teste', [P1, P2]);
+  // Cenários fixam hp 100 e fileiras de 7: os valores esperados não dependem da vida nem do limite padrão (balanceamento, que o
+  // sub-projeto 5 mudou para 500 e 8).
+  const created = createGame(makeConfig({ hp: 100, rowLimit: 7, ...spec.config }), 'seed-teste', [P1, P2]);
   if (!created.ok) throw new Error(created.error.message);
   const s = created.state;
   for (const p of s.players) {

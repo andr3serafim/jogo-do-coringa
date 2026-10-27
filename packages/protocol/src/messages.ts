@@ -68,6 +68,8 @@ export interface RoomMessage {
   gameNo: number;
   outcome?: Outcome;
   expiresAt: number;
+  /** A vida inicial que a sala escolheu na criação (sub-projeto 5); sem ela, a padrão do motor. */
+  hp?: number;
 }
 
 export interface StateMessage {

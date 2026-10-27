@@ -68,6 +68,8 @@ export class RoomCore {
     code: string,
     nickname: string,
     now: number,
+    /** A vida inicial escolhida (o roteador já conferiu que é uma de `HP_CHOICES`); sem ela, a padrão do motor. */
+    hp?: number,
   ): Promise<CoreResult<CreateRoomResponse, 'EXISTS' | 'BAD_NICKNAME'>> {
     const clean = normalizeNickname(nickname);
     if (clean === null) return this.#fail('BAD_NICKNAME');
@@ -95,6 +97,7 @@ export class RoomCore {
       seq: 0,
       epoch: 0,
       game: null,
+      ...(hp === undefined ? {} : { hp }),
       agenda: [
         { kind: 'idleExpiry', at: now + TIMERS.idleExpiryMs },
         { kind: 'hardExpiry', at: now + TIMERS.hardExpiryMs },

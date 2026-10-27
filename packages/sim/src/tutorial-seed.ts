@@ -28,6 +28,10 @@ type EquipNo = 1 | 2 | 3;
 export interface TutorialDeal {
   firstEquipWithSpecial: Record<SpecialKind, number | null>;
   reflectByEquip: number | null;
+  /** Quantas numéricas `p1` recebe no 1º Equipar: sem nenhuma, o Equipar dele sai sozinho e a dica 1 não aparece. */
+  numericsInEquip1: number;
+  /** `p1` começa com a iniciativa: na rodada 3 é ele quem escolhe a ordem (a dica 3). */
+  initiativeIsMine: boolean;
 }
 
 const SPECIALS: readonly SpecialKind[] = ['J', 'Q', 'K', 'A', 'WILD'];
@@ -39,13 +43,25 @@ export function tutorialSeedAt(index: number): string {
 }
 
 /** O monte e a iniciativa da partida de treino (rodada 1 já distribuída). */
-function startOfGame(seed: string): { equip1: SpecialKind[]; deck: readonly Card[]; initiative: PlayerId; perEquip: number } {
+function startOfGame(seed: string): {
+  equip1: SpecialKind[];
+  numerics1: number;
+  deck: readonly Card[];
+  initiative: PlayerId;
+  perEquip: number;
+} {
   const created = createGame(DEFAULT_CONFIG, seed, [ME, BOT]);
   if (!created.ok) throw new Error(`configuração inválida: ${created.error.message}`);
   const state = created.state;
   const me = state.players.find((p) => p.id === ME);
   if (!me) throw new Error('o jogador p1 não está na partida');
-  return { equip1: me.hand.map((card) => card.kind), deck: state.deck, initiative: state.initiative, perEquip: state.config.cardsPerEquip };
+  return {
+    equip1: me.hand.map((card) => card.kind),
+    numerics1: me.pending.length,
+    deck: state.deck,
+    initiative: state.initiative,
+    perEquip: state.config.cardsPerEquip,
+  };
 }
 
 /**
@@ -79,17 +95,25 @@ function firstEquipWhere(seed: string, ok: (hand: readonly SpecialKind[]) => boo
 export function tutorialDeal(seed: string): TutorialDeal {
   const firstEquipWithSpecial = {} as Record<SpecialKind, number | null>;
   for (const kind of SPECIALS) firstEquipWithSpecial[kind] = firstEquipWhere(seed, (hand) => hand.includes(kind));
-  return { firstEquipWithSpecial, reflectByEquip: firstEquipWhere(seed, (hand) => REFLECT_TRIO.every((kind) => hand.includes(kind))) };
+  return {
+    firstEquipWithSpecial,
+    reflectByEquip: firstEquipWhere(seed, (hand) => REFLECT_TRIO.every((kind) => hand.includes(kind))),
+    numericsInEquip1: startOfGame(seed).numerics1,
+    initiativeIsMine: startOfGame(seed).initiative === ME,
+  };
 }
 
-/** J, Q, K e A até o 2º Equipar, o Selvagem até o 3º e K + J + Q até o 3º. */
+/** A iniciativa com o jogador (a dica 3 é a escolha da ordem), ao menos uma numérica no 1º Equipar (a dica 1 é a do Equipar), J, Q, K e A até o 2º Equipar, o Selvagem até o 3º e K + J + Q até o 3º. */
 export function meetsTutorialCriterion(result: TutorialDeal): boolean {
   const first = result.firstEquipWithSpecial;
   const by = (equip: number | null, limit: number): boolean => equip !== null && equip <= limit;
   return (
-    by(first.J, 2) && by(first.Q, 2) && by(first.K, 2) && by(first.A, 2) && by(first.WILD, 3) && by(result.reflectByEquip, 3)
+    result.initiativeIsMine &&
+    result.numericsInEquip1 >= 1 &&
+    by(first.J, 2) &&
+    by(first.Q, 2) && by(first.K, 2) && by(first.A, 2) && by(first.WILD, 3) && by(result.reflectByEquip, 3)
   );
 }
 
 /** A semente do tutorial: a de menor índice na ordem de `tutorialSeedAt` que cumpre `meetsTutorialCriterion` (`pnpm sim:tutorial`). */
-export const TUTORIAL_SEED = 'tutorial-132';
+export const TUTORIAL_SEED = 'tutorial-2431';

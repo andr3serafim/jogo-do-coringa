@@ -182,9 +182,9 @@ export class Room extends DurableObject<Env> {
     for (const line of effects.logs) console.log(JSON.stringify(line));
   }
 
-  async create(code: string, nickname: string): Promise<RpcResult<CreateRoomResponse, 'EXISTS' | 'BAD_NICKNAME'>> {
+  async create(code: string, nickname: string, hp?: number): Promise<RpcResult<CreateRoomResponse, 'EXISTS' | 'BAD_NICKNAME'>> {
     return this.#enter(async (core, now) => {
-      const result = await core.create(code, nickname, now);
+      const result = await core.create(code, nickname, now, hp);
       await this.#apply(core, result.effects);
       return result.ok ? { ok: true, value: result.value } : { ok: false, error: result.error };
     });

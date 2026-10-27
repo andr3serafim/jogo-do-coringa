@@ -195,7 +195,7 @@ function Figure({ rare, reduced }: { rare: RareScene; reduced: boolean }) {
         return (
           <m.div
             key={card.id}
-            className="absolute"
+            className="absolute w-(--card-w)"
             style={{
               left: `calc(50% + ${place.x} * var(--card-w) - var(--card-w) / 2)`,
               top: `calc(50% + ${place.y} * var(--card-w) * 1.39 - var(--card-w) * 0.7)`,

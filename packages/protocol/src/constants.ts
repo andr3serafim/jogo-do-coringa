@@ -2,6 +2,12 @@
 
 export const PROTOCOL_VERSION = 1;
 
+/**
+ * As vidas iniciais que a sala pode escolher na criação (sub-projeto 5, R3): o padrão é a do motor (`DEFAULT_CONFIG.hp`, 500). O
+ * servidor recusa outra; o treino oferece as mesmas.
+ */
+export const HP_CHOICES: readonly number[] = [300, 500, 800];
+
 /** Limites de tamanho de frames, corpos e campos (spec §4.1, §4.3, §3). */
 export const LIMITS = {
   frameBytes: 4096,

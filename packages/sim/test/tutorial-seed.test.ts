@@ -13,7 +13,7 @@ const KINDS: readonly SpecialKind[] = ['J', 'Q', 'K', 'A', 'WILD'];
 
 /** Uma distribuição com tudo cedo; cada teste muda só o campo que quer provar. */
 function deal(overrides: Partial<TutorialDeal['firstEquipWithSpecial']> = {}, reflectByEquip: number | null = 2): TutorialDeal {
-  return { firstEquipWithSpecial: { J: 1, Q: 1, K: 2, A: 2, WILD: 3, ...overrides }, reflectByEquip };
+  return { firstEquipWithSpecial: { J: 1, Q: 1, K: 2, A: 2, WILD: 3, ...overrides }, reflectByEquip, numericsInEquip1: 2, initiativeIsMine: true };
 }
 
 /** Joga a partida só com o TIMEOUT do sistema (Equipar automático, ordem, ataque e janelas fechadas) até o 3º Equipar. */
@@ -46,6 +46,8 @@ describe('a semente do tutorial', () => {
     expect(result.firstEquipWithSpecial.WILD, 'Selvagem até o 3º Equipar').toBeLessThanOrEqual(3);
     expect(result.reflectByEquip, 'K + J + Q chegam').not.toBeNull();
     expect(result.reflectByEquip, 'K + J + Q até o 3º Equipar').toBeLessThanOrEqual(3);
+    expect(result.numericsInEquip1, 'ao menos uma numérica no 1º Equipar (a dica do Equipar)').toBeGreaterThanOrEqual(1);
+    expect(result.initiativeIsMine, 'a iniciativa com o jogador (a dica da ordem)').toBe(true);
     expect(meetsTutorialCriterion(result)).toBe(true);
   });
 

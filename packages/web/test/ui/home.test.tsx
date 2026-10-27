@@ -1,5 +1,5 @@
 import { HttpError } from '@coringa/protocol';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { loadNickname, loadSeat } from '../../src/model/storage.ts';
@@ -34,10 +34,22 @@ describe('início: criar sala', () => {
     await fill(user, 'Seu apelido', 'Duda');
     await user.click(screen.getByRole('button', { name: 'Criar sala' }));
 
-    expect(api.create).toHaveBeenCalledExactlyOnceWith('Duda');
+    // Sem mexer na vida inicial, vai a padrão (500).
+    expect(api.create).toHaveBeenCalledExactlyOnceWith('Duda', 500);
     expect(window.location.pathname).toBe(`/s/${CODE}`);
     expect(loadSeat(store, CODE)).toEqual({ token: TOKEN, playerId: 'p1', nickname: 'Duda' });
     expect(loadNickname(store)).toBe('Duda');
+  });
+
+  it('a vida inicial (sub-projeto 5): 500 vem marcada, e a escolhida vai junto na criação', async () => {
+    const { api, user } = setup();
+    const group = screen.getByRole('group', { name: 'Vida inicial' });
+    expect(within(group).getByRole('radio', { name: '500 · padrão' })).toBeChecked();
+    expect(within(group).getAllByRole('radio').map((radio) => radio.getAttribute('value'))).toEqual(['300', '500', '800']);
+    await user.click(within(group).getByRole('radio', { name: '800' }));
+    await fill(user, 'Seu apelido', 'Duda');
+    await user.click(screen.getByRole('button', { name: 'Criar sala' }));
+    expect(api.create).toHaveBeenCalledExactlyOnceWith('Duda', 800);
   });
 
   it('lembra o apelido da última vez', () => {

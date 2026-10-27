@@ -6,14 +6,14 @@ describe('config', () => {
   it('makeConfig sem argumentos devolve o padrão da spec', () => {
     expect(makeConfig()).toEqual(DEFAULT_CONFIG);
     expect(DEFAULT_CONFIG).toEqual({
-      hp: 300,
-      rowLimit: 7,
+      hp: 500,
+      rowLimit: 8,
       buffLimit: 4,
       cardsPerEquip: 4,
       antiStallRounds: 3,
       exodiaGuard: 4,
       resurrectMinRounds: 3,
-      deck: { numericCopies: 8, faceCopies: 6 },
+      deck: { numericCopies: 8, faceCopies: 6, aceCopies: 8 },
       initiativeChoice: true,
       wildJokers: true,
     });
@@ -25,7 +25,7 @@ describe('config', () => {
   });
 
   it('mescla o baralho parcialmente', () => {
-    expect(makeConfig({ deck: { faceCopies: 4 } }).deck).toEqual({ numericCopies: 8, faceCopies: 4 });
+    expect(makeConfig({ deck: { faceCopies: 4 } }).deck).toEqual({ numericCopies: 8, faceCopies: 4, aceCopies: 8 });
   });
 
   it('aceita o padrão e limites válidos', () => {
@@ -43,6 +43,7 @@ describe('config', () => {
     expect(validateConfig(makeConfig({ buffLimit: 1.5 }))?.code).toBe('INVALID_CONFIG');
     expect(validateConfig(makeConfig({ deck: { numericCopies: 9 } }))?.code).toBe('INVALID_CONFIG');
     expect(validateConfig(makeConfig({ deck: { faceCopies: -1 } }))?.code).toBe('INVALID_CONFIG');
+    expect(validateConfig(makeConfig({ deck: { aceCopies: 9 } }))?.code).toBe('INVALID_CONFIG');
   });
 
   it('uma config sem baralho (de JSON ou de outro pacote) volta como INVALID_CONFIG, sem lançar', () => {

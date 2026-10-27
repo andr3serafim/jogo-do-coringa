@@ -61,6 +61,8 @@ export interface RoomRecord {
   seq: number;
   epoch: number;
   game: GameRecord | null;
+  /** A vida inicial que a sala escolheu (sub-projeto 5); sem ela (salas de antes), a padrão do motor. */
+  hp?: number;
   agenda: AgendaItem[];
 }
 

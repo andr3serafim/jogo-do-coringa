@@ -16,7 +16,8 @@ import { loadPrefs, saveLastSeq, type KeyValueStore, type SeatSession } from '..
 import { fetchVersion } from './health.ts';
 
 export interface RoomApi {
-  create(nickname: string): Promise<CreateRoomResponse>;
+  /** Cria a sala; `hp` é a vida inicial escolhida (sem ele, a padrão). */
+  create(nickname: string, hp?: number): Promise<CreateRoomResponse>;
   join(code: string, nickname: string): Promise<JoinRoomResponse>;
   info(code: string): Promise<RoomInfoResponse>;
   /** A versão publicada, de `/api/health` (spec §2.4); `null` se não deu para saber. Opcional: os falsos de teste não têm. */
@@ -89,7 +90,7 @@ export function createRoomApi({ store, server, makeClient, fetchImpl }: RoomApiO
   const origin = server ?? window.location.origin;
   const build = makeClient ?? ((options: RoomClientOptions): RoomConnection => new ReopenableClient(options));
   return {
-    create: (nickname) => createRoom(origin, nickname, fetchImpl),
+    create: (nickname, hp) => createRoom(origin, nickname, fetchImpl, hp),
     join: (code, nickname) => joinRoom(origin, code, nickname, fetchImpl),
     info: (code) => roomInfo(origin, code, fetchImpl),
     version: () => fetchVersion(origin, fetchImpl),

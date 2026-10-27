@@ -244,6 +244,20 @@ describe('/treino: a escolha do nível', () => {
     expect(band().getByText(`Treino · ${name}, sem relógio`)).toBeInTheDocument();
   });
 
+  it('a vida inicial (sub-projeto 5): 500 vem marcada; a escolhida vale na sala, e ?vida= já a marca', async () => {
+    const { user, rooms } = await choose();
+    const group = screen.getByRole('group', { name: 'Vida inicial' });
+    expect(within(group).getByRole('radio', { name: '500 · padrão' })).toBeChecked();
+    await user.click(within(group).getByRole('radio', { name: '300' }));
+    await user.click(levelButton('Fácil'));
+    expect(rooms[0]!.state!.view.self.hp).toBe(300);
+  });
+
+  it('?vida= vem marcada na escolha', async () => {
+    await choose('?vida=800');
+    expect(within(screen.getByRole('group', { name: 'Vida inicial' })).getByRole('radio', { name: '800' })).toBeChecked();
+  });
+
   it('o Enter no botão focado escolhe o nível (teclado)', async () => {
     const { user, levels, store } = await choose();
     expect(levelButton('Médio')).toHaveFocus();

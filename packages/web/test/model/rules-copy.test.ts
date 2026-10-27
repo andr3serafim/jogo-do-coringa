@@ -12,7 +12,7 @@ const { hp, rowLimit, buffLimit, cardsPerEquip, antiStallRounds, exodiaGuard, re
 
 describe('resumo das regras: os números do texto seguem a config padrão do motor', () => {
   it.each([
-    ['a vida inicial (hp)', `cada um começa com ${hp})`],
+    ['a vida inicial (hp)', `cada um começa com ${hp}, ou com a vida que a sala escolheu)`],
     ['o limite de cada fileira (rowLimit)', `(${rowLimit} cartas no máximo em cada)`],
     ['as cartas por Equipar (cardsPerEquip)', `cada jogador recebe ${cardsPerEquip} cartas`],
     ['os buffs que cabem (buffLimit)', `Cabem ${buffLimit} de cada`],

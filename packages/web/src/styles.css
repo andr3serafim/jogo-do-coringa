@@ -64,13 +64,16 @@
 
 /*
  * Mesa (spec §3.2, §10.1, §10.7). Tamanhos das cartas por variável, para a mesa, as fileiras e a mão
- * usarem a mesma conta: ~34 × 48 px a 360 de largura, ~38 × 52 a 390 (a conta cresce até 44 × 60 nos
- * celulares largos). A tabela de 360 px está no relatório da Tarefa 19.
+ * usarem a mesma conta: ~29 × 40 px a 360 de largura, ~33 × 46 a 390 (a conta cresce até 44 × 60 nos
+ * celulares largos). Com as fileiras de 8 (sub-projeto 5) a conta é 8 cartas + 7 vãos de 4 px no que sobra
+ * de 360 px depois do respiro, do total da fileira e da folga (266 px): 8 × 29 + 28 = 260. Era 34 × 48 com
+ * as fileiras de 7 (a tabela de 360 px do relatório da Tarefa 19). O valor da carta segue `--card-w`, então
+ * cabe nela.
  */
 @layer base {
   :root {
-    --card-w: clamp(34px, calc(34px + (100vw - 360px) * 0.1333), 44px);
-    --card-h: clamp(48px, calc(48px + (100vw - 360px) * 0.1333), 60px);
+    --card-w: clamp(29px, calc(29px + (100vw - 360px) * 0.15), 44px);
+    --card-h: clamp(40px, calc(40px + (100vw - 360px) * 0.2), 60px);
     --mini-w: 30px;
     --mini-h: 42px;
     /* A mão acompanha a altura da tela: 108 px em 844 de altura, menos em telas baixas. */

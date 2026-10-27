@@ -1,3 +1,4 @@
+import { DEFAULT_CONFIG } from '@coringa/engine';
 import { describe, expect, it } from 'vitest';
 import { RoomCore } from '../../src/core/room-core.ts';
 import { STATE_SCHEMA, TIMERS } from '../../src/core/timers.ts';
@@ -7,6 +8,19 @@ import { roomMessage } from '../../src/core/views.ts';
 import { Harness } from './harness.ts';
 
 describe('sala: criar', () => {
+  it('a vida inicial escolhida (sub-projeto 5) fica no registro, sai na mensagem da sala e vale na partida e na revanche', async () => {
+    const { h } = await Harness.playing(undefined, undefined, 800);
+    const rec = h.core.record!;
+    expect(rec.hp).toBe(800);
+    expect(roomMessage(rec, [], 0).hp).toBe(800);
+    expect(rec.game!.state.config.hp).toBe(800);
+    expect(rec.game!.state.players.map((p) => p.hp)).toEqual([800, 800]);
+    // Sem escolha, a padrão do motor.
+    const { h: plain } = await Harness.playing();
+    expect(plain.core.record!.hp).toBeUndefined();
+    expect(plain.core.record!.game!.state.config.hp).toBe(DEFAULT_CONFIG.hp);
+  });
+
   it('criar ocupa p1, grava o hash do token e loga room.created', async () => {
     const h = new Harness();
     const r = await h.create('  Ana ');
@@ -245,6 +259,8 @@ describe('roomMessage', () => {
       score: { p1: 1, p2: 2, draws: 3 },
       gameNo: 4,
       expiresAt: 100 + TIMERS.hardExpiryMs,
+      // A sala de antes do sub-projeto 5 não guardou a vida inicial: vale a padrão do motor.
+      hp: DEFAULT_CONFIG.hp,
     });
     expect('outcome' in lobby).toBe(false);
     expect('woAt' in lobby.seats[1]!).toBe(false);

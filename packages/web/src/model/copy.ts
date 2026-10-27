@@ -372,6 +372,10 @@ const whoText = (id: PlayerId, me: PlayerId, names: OutcomeNames): string => (id
 
 export const DURATION_LABEL = 'Duração';
 
+/** A escolha da vida inicial, na criação da sala e no treino (sub-projeto 5, R3). */
+export const HP_CHOICE_LABEL = 'Vida inicial';
+export const hpChoiceText = (hp: number, isDefault: boolean): string => (isDefault ? `${hp} · padrão` : String(hp));
+
 /** O tempo de partida no painel de fim (U5): "12:34", ou "1:02:03" passando de uma hora. */
 export function durationText(ms: number): string {
   const total = Math.max(0, Math.round(ms / 1000));
@@ -511,13 +515,13 @@ export interface RulesSection {
 export const RULES_SECTIONS: readonly RulesSection[] = [
   {
     title: 'Objetivo',
-    items: ['Zere a vida do Coringa do oponente (cada um começa com 300) ou monte a Exódia.'],
+    items: ['Zere a vida do Coringa do oponente (cada um começa com 500, ou com a vida que a sala escolheu) ou monte a Exódia.'],
   },
   {
     title: 'Rodadas',
     items: [
       'O ciclo é Equipar, Equipar, Ataque, Equipar, Ataque, e assim por diante.',
-      'Equipar: cada jogador recebe 4 cartas. As especiais (J, Q, K, A e Coringa Selvagem) vão para a mão. As numéricas vão para o campo, na ordem em que saíram do monte, e você só escolhe o destino: a fileira de Ataque ou a de Defesa (7 cartas no máximo em cada). Com as duas cheias, a nova carta substitui a última de uma fileira (a antiga vai para o cemitério) ou é descartada. Os dois montam ao mesmo tempo, em segredo.',
+      'Equipar: cada jogador recebe 4 cartas. As especiais (J, Q, K, A e Coringa Selvagem) vão para a mão. As numéricas vão para o campo, na ordem em que saíram do monte, e você só escolhe o destino: a fileira de Ataque ou a de Defesa (8 cartas no máximo em cada). Com as duas cheias, a nova carta substitui a última de uma fileira (a antiga vai para o cemitério) ou é descartada. Os dois montam ao mesmo tempo, em segredo.',
       'Ataque: quem tem a iniciativa escolhe atacar primeiro ou em segundo. Cada jogador tem um turno: joga as especiais que quiser e declara o ataque, que é obrigatório se a fileira de Ataque tiver cartas.',
       'Iniciativa: começa sorteada. No fim de cada rodada de Ataque, fica com quem causou mais dano nela (o dano devolvido por um Reflect conta para quem o lançou). No empate, inclusive 0 a 0, não muda.',
     ],
@@ -552,7 +556,7 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
   {
     title: 'Combos',
     items: [
-      'Quadra: 4 ou mais numéricas do mesmo valor na mesma fileira, seguidas ou não, somam esse valor à fileira e dão 1 Ressurreição.',
+      'Quadra: 4 ou mais numéricas do mesmo valor na mesma fileira, seguidas ou não, somam esse valor à fileira e dão 1 Ressurreição. Uma fileira pode ter duas quadras de valores diferentes, e cada uma conta.',
       'Ressurreição: no seu turno, traz 1 numérica do cemitério para o fim de uma fileira com vaga. Vale uma vez por quadra e fica disponível enquanto a quadra existir, com garantia de 3 rodadas depois de formada.',
       'Defesa Absoluta (4 Q): até o fim do próximo turno de ataque do oponente, você é imune a dano, a Armadilha e a Sacrifício, e a fileira de Defesa não perde cartas. Só o Ataque Absoluto fura a imunidade a dano: quebra os seus K e causa o dano normal. Ao acabar, 1 Q vai para o cemitério.',
       'Ataque Absoluto (4 J): multiplicador 5× e quebra todos os K do alvo. Depois do ataque, 1 J vai para o cemitério.',

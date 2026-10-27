@@ -50,22 +50,22 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
 
 ### 1.1 Componentes
 
-- **Baralho [I]:** 2 baralhos franceses, retirando 2 de cada figura. Total **96 cartas**:
+- **Baralho [I]:** 2 baralhos franceses, retirando 2 de cada figura J, Q e K. Total **98 cartas**:
   - 72 numéricas: valores 2 a 10, **8 cópias de cada valor**;
-  - 6 **J**, 6 **Q**, 6 **K**, 6 **A**;
+  - 6 **J**, 6 **Q**, 6 **K** e os **8 A** dos dois baralhos (sub-projeto 5, pedido do autor: antes eram 6; `deck.aceCopies`);
   - naipes são apenas visuais.
-- **Coringas:** 2 coringas são os **avatares** dos jogadores (fora do monte) **[I]**. Os outros 2 entram no monte como **Coringas Selvagens** (§1.6) **[N]** → **98 cartas** no monte com a regra ligada.
+- **Coringas:** 2 coringas são os **avatares** dos jogadores (fora do monte) **[I]**. Os outros 2 entram no monte como **Coringas Selvagens** (§1.6) **[N]** → **100 cartas** no monte com a regra ligada.
 - **Monte** único compartilhado. **Cemitério** único compartilhado, público (face para cima).
-- **Vida:** **300** por jogador **[M]** (original: 1000 — partidas longas demais com cartas 2–10). Calibrado pelo simulador em 2026-10-16: mediana de 9 rodadas de Ataque (com 100, eram 4).
+- **Vida:** **500** por jogador, e a sala escolhe entre 300, 500 e 800 na criação (o treino também) **[M]** (original: 1000 — partidas longas demais com cartas 2–10). Era 300, calibrado em 2026-10-16 (mediana de 9 rodadas de Ataque; com 100, eram 4); o autor pediu 500 ajustável no sub-projeto 5.
 
 ### 1.2 Zonas de cada jogador
 
 | Zona | Conteúdo | Limite | Visibilidade |
 |---|---|---|---|
 | **Coringa** | vida + **Guarda** (cartas K) | sem limite (4+ = Exódia) | pública |
-| **Fileira de Ataque** | fila de numéricas | **7** **[M]** (ajustável) | pública |
+| **Fileira de Ataque** | fila de numéricas | **8** **[M]** (ajustável; era 7 até o sub-projeto 5) | pública |
 | **Buffs de Ataque** | cartas J | 4 **[O]** | pública |
-| **Fileira de Defesa** | fila de numéricas | **7** **[M]** (ajustável) | pública |
+| **Fileira de Defesa** | fila de numéricas | **8** **[M]** (ajustável; era 7 até o sub-projeto 5) | pública |
 | **Buffs de Defesa** | cartas Q | 4 **[O]** | pública |
 | **Mão** | **somente especiais** (J, Q, K, A, Selvagem) **[I]** | sem limite | oculta (oponente vê só a quantidade) |
 
@@ -88,7 +88,7 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
 4. Os dois jogadores montam **ao mesmo tempo, em segredo**; o resultado é revelado junto quando ambos confirmam (ou o tempo acaba) **[M]**.
 5. Especiais **não** podem ser jogados na rodada de Equipar **[O]**.
 6. **Monte vazio [O]:** quando o monte acaba (inclusive no meio de uma distribuição), o **cemitério inteiro é embaralhado e vira o novo monte**, e a distribuição continua.
-   - **A compra nunca para [I]:** numéricas nunca ficam na mão e o campo comporta no máximo 4 × 7 = 28 delas; logo, pelo menos 72 − 28 = **44 cartas** estão sempre no monte ou no cemitério — mais que as 8 de uma distribuição. A config é validada para manter essa garantia (§2.7).
+   - **A compra nunca para [I]:** numéricas nunca ficam na mão e o campo comporta no máximo 4 × 8 = 32 delas; logo, pelo menos 72 − 32 = **40 cartas** estão sempre no monte ou no cemitério — mais que as 8 de uma distribuição. A config é validada para manter essa garantia (§2.7).
 7. Após a revelação, verificam-se as quadras (Fallen is Back, §1.8).
 
 ### 1.5 Rodada de Ataque
@@ -173,7 +173,7 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
 
 **Fallen is Back [O, simplificado]**
 - **Quadra:** 4 ou mais numéricas **do mesmo valor na mesma fileira ao mesmo tempo** — não precisam estar seguidas **[I]** (sem organização, "seguidas" seria quase impossível).
-- **Bônus [O]:** enquanto a quadra existir, a fileira soma **+ valor da carta** antes do multiplicador **[I]** (quadra de 10 → +10). Cada quadra dá bônus uma única vez, mesmo com 5+ cartas iguais. Com limite de 7 cartas cabe no máximo uma quadra por fileira; se o limite subir, cada quadra conta separadamente.
+- **Bônus [O]:** enquanto a quadra existir, a fileira soma **+ valor da carta** antes do multiplicador **[I]** (quadra de 10 → +10). Cada quadra dá bônus uma única vez, mesmo com 5+ cartas iguais. Com o limite de 8 cartas (sub-projeto 5) cabem duas quadras de valores diferentes na mesma fileira, e cada uma conta separadamente: o bônus soma as duas e cada uma dá a sua Ressurreição. Oito cartas iguais continuam sendo uma quadra só.
 - **Ressurreição [M]:** ao formar uma quadra, o jogador ganha **1 Ressurreição**: na fase principal de um turno seu, pega **1 carta numérica** do cemitério **[O do autor: só numéricas]** e a coloca no **fim de uma fileira à escolha** (que tenha espaço).
   - Validade: enquanto a quadra existir, com **garantia mínima de 3 rodadas** após a formação **[O]**.
   - Uso único por quadra. Se a quadra se desfizer e se formar de novo depois, gera nova Ressurreição **[I]**.
@@ -257,7 +257,7 @@ DEF = (soma(Defesa do defensor) + bônus) × (1 + nQ)
 
 | Tema | Original | v2 |
 |---|---|---|
-| Vida | 1000 | 300 (calibrado pelo simulador) |
+| Vida | 1000 | 500, escolhível entre 300, 500 e 800 (sub-projeto 5) |
 | Coringas | nome do jogo; sem função nas regras | 2 avatares + 2 Coringas Selvagens no monte (J, Q ou A) |
 | Fileiras | sem limite | 7 numéricas cada (calibrável) |
 | Equipar | — | simultâneo e secreto; numéricas obrigatórias, na ordem de compra |
@@ -351,10 +351,10 @@ A união `GameEvent` de `types.ts`, base para animações e histórico. Cada aç
 
 ```ts
 RulesConfig {
-  hp: 300, rowLimit: 7, buffLimit: 4, cardsPerEquip: 4,
+  hp: 500, rowLimit: 8, buffLimit: 4, cardsPerEquip: 4,
   antiStallRounds: 3,
   exodiaGuard: 4, resurrectMinRounds: 3,
-  deck: { numericCopies: 8, faceCopies: 6 },
+  deck: { numericCopies: 8, faceCopies: 6, aceCopies: 8 }, // sem aceCopies (replays antigos), os A têm faceCopies
   // regras novas [N] — ligadas por padrão; o simulador compara com elas desligadas
   initiativeChoice: true,
   wildJokers: true
@@ -362,7 +362,7 @@ RulesConfig {
 ```
 
 - **Validação em `createGame`:** rejeita configs que quebram a garantia de compra (§1.4): `4 × rowLimit ≤ totalNuméricas − 2 × cardsPerEquip` (com o baralho padrão: `rowLimit ≤ 16`).
-- O total de cartas do monte é **derivado da config** (96, ou 98 com `wildJokers`).
+- O total de cartas do monte é **derivado da config** (98, ou 100 com `wildJokers`).
 - Timers (§1.12) **não** fazem parte do motor: ficam numa `TimerConfig` usada pelo servidor (sub-projeto 2), que injeta `TIMEOUT` via alarmes do Durable Object e impõe a duração mínima da janela de reação.
 
 ---
@@ -407,7 +407,7 @@ Bots não jogam como humanos: as metas guiam a calibração inicial; o ajuste fi
 - **Vitest.** Cada regra desta spec tem pelo menos um **teste de cenário**, montado com um builder (ex.: `scenario().attack([3,7,9]).buffsJ(1).vs().defense([5,8])` → espera dano 25 e remoções corretas). Os exemplos de §1.13 viram testes literais.
 - **Cada regra [N]** tem testes com a chave ligada e desligada.
 - **Invariantes (property-based, fast-check)** sobre partidas aleatórias:
-  - todas as cartas estão sempre contabilizadas (monte + mãos + campo + cemitério), com o total **derivado da config** (96 ou 98);
+  - todas as cartas estão sempre contabilizadas (monte + mãos + campo + cemitério), com o total **derivado da config** (98 ou 100);
   - a vida nunca aumenta;
   - a compra nunca falha por falta de cartas;
   - `viewFor`/`viewEvents` nunca expõem mão do oponente, ordem do monte nem semente;

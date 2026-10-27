@@ -1,5 +1,5 @@
-import { CLOSE, LIMITS, generateCode, normalizeCode, normalizeNickname } from '@coringa/protocol';
-import { NicknameBodySchema } from '@coringa/protocol/schemas';
+import { CLOSE, HP_CHOICES, LIMITS, generateCode, normalizeCode, normalizeNickname } from '@coringa/protocol';
+import { CreateRoomBodySchema, NicknameBodySchema } from '@coringa/protocol/schemas';
 import { ROOM_LIMITS } from '../core/timers.ts';
 import type { LogLine } from '../core/types.ts';
 
@@ -75,6 +75,24 @@ async function readBody(request: Request): Promise<string | null> {
   return new TextDecoder().decode(bytes);
 }
 
+/** O corpo da criação: o apelido normalizado e a vida inicial (uma de `HP_CHOICES`), ou a resposta de erro. */
+async function readCreate(request: Request): Promise<{ nickname: string; hp?: number } | { error: Response }> {
+  const text = await readBody(request);
+  if (text === null) return { error: fail(413, 'TOO_BIG', 'corpo grande demais') };
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    return { error: fail(400, 'BAD_BODY', 'corpo inválido') };
+  }
+  const body = CreateRoomBodySchema.safeParse(parsed);
+  const nickname = body.success ? normalizeNickname(body.data.nickname) : null;
+  if (nickname === null) return { error: fail(400, 'BAD_NICKNAME', 'apelido inválido') };
+  const hp = body.success ? body.data.hp : undefined;
+  if (hp !== undefined && !HP_CHOICES.includes(hp)) return { error: fail(400, 'BAD_HP', 'vida inicial inválida') };
+  return hp === undefined ? { nickname } : { nickname, hp };
+}
+
 /** Apelido normalizado do corpo `{ nickname }`, ou a resposta de erro (413 corpo grande, 400 corpo ou apelido inválido). */
 async function readNickname(request: Request): Promise<{ nickname: string } | { error: Response }> {
   const text = await readBody(request);
@@ -93,11 +111,11 @@ async function readNickname(request: Request): Promise<{ nickname: string } | { 
 
 async function createRoom(request: Request, env: Env, ip: string): Promise<Response> {
   if (!(await env.CREATE_LIMITER.limit({ key: ip })).success) return tooMany();
-  const read = await readNickname(request);
+  const read = await readCreate(request);
   if ('error' in read) return read.error;
   for (let attempt = 0; attempt < ROOM_LIMITS.createAttempts; attempt += 1) {
     const code = generateCode((n) => crypto.getRandomValues(new Uint8Array(n)));
-    const result = await env.ROOMS.getByName(code).create(code, read.nickname);
+    const result = await env.ROOMS.getByName(code).create(code, read.nickname, read.hp);
     if (result.ok) return json(result.value, 201);
     if (result.error === 'BAD_NICKNAME') return fail(400, 'BAD_NICKNAME', 'apelido inválido');
   }

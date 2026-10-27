@@ -1,14 +1,14 @@
 import type { ConfigError, RulesConfig } from './types.ts';
 
 export const DEFAULT_CONFIG: RulesConfig = {
-  hp: 300,
-  rowLimit: 7,
+  hp: 500,
+  rowLimit: 8,
   buffLimit: 4,
   cardsPerEquip: 4,
   antiStallRounds: 3,
   exodiaGuard: 4,
   resurrectMinRounds: 3,
-  deck: { numericCopies: 8, faceCopies: 6 },
+  deck: { numericCopies: 8, faceCopies: 6, aceCopies: 8 },
   initiativeChoice: true,
   wildJokers: true,
 };
@@ -45,6 +45,7 @@ export function validateConfig(c: RulesConfig): ConfigError | null {
     [isInt(c.resurrectMinRounds, 0), 'resurrectMinRounds deve ser um inteiro ≥ 0'],
     [isInt(c.deck.numericCopies, 1, 8), 'deck.numericCopies deve ser um inteiro entre 1 e 8'],
     [isInt(c.deck.faceCopies, 0, 8), 'deck.faceCopies deve ser um inteiro entre 0 e 8'],
+    [c.deck.aceCopies === undefined || isInt(c.deck.aceCopies, 0, 8), 'deck.aceCopies deve ser um inteiro entre 0 e 8'],
   ];
   for (const [ok, message] of checks) {
     if (!ok) return { code: 'INVALID_CONFIG', message };

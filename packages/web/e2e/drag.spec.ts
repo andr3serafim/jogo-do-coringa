@@ -10,7 +10,7 @@ import { expect, test, type CDPSession, type Locator, type Page } from '@playwri
 import { actionBar, ATTACK_BUTTON, axe, equipByUi, equipPanel, expectNoHorizontalScroll, failOnConsoleErrors, orderPanel, roundHeading, table } from './helpers.ts';
 
 /** O tutorial sem o painel da dica: a mão do Equipar 1 vem com J, K e A, e a iniciativa da rodada 3 é sua. */
-const TRAINING = '/treino?semente=tutorial-132&nivel=facil';
+const TRAINING = '/treino?semente=tutorial-2431&nivel=facil';
 
 // As zonas de soltura (`data-soltar`, `model/drag.ts`).
 const ZONE = {
@@ -20,7 +20,8 @@ const ZONE = {
 } as const;
 
 const hand = (page: Page): Locator => page.getByRole('list', { name: 'Sua mão' });
-const handCard = (page: Page, name: RegExp): Locator => hand(page).getByRole('button', { name });
+// A primeira carta da mão com o nome (a semente do tutorial pode dar duas Q).
+const handCard = (page: Page, name: RegExp): Locator => hand(page).getByRole('button', { name }).first();
 const K = /^K, Guarda, de /;
 const J = /^J, Buff de ataque, de /;
 const Q = /^Q, Buff de defesa, de /;

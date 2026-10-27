@@ -38,7 +38,11 @@ export interface RulesConfig {
   antiStallRounds: number;
   exodiaGuard: number;
   resurrectMinRounds: number;
-  deck: { numericCopies: number; faceCopies: number };
+  /**
+   * Cópias de cada numérica e de cada figura (J, Q, K), e dos Ás. Sem `aceCopies` (replays de antes do sub-projeto 5), os Ás têm
+   * `faceCopies` cópias, como as outras figuras.
+   */
+  deck: { numericCopies: number; faceCopies: number; aceCopies?: number };
   initiativeChoice: boolean;
   wildJokers: boolean;
 }

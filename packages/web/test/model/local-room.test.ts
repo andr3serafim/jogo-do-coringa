@@ -20,6 +20,7 @@ import {
   LOCAL_ME,
   LocalRoom,
   TRAINING_LEVELS,
+  trainingHp,
   trainingLevel,
   trainingSeed,
   type LocalRoomOptions,
@@ -298,8 +299,8 @@ describe('LocalRoom', () => {
   });
 
   describe('Equipar sem numéricas (como o servidor, spec 2 §5): a interface não tem botão para ele', () => {
-    // Sementes em que o jogador recebe 4 especiais (zero numéricas) no primeiro Equipar.
-    const NO_NUMBERS = ['s186', 's207', 's316', 's359'];
+    // Sementes em que o jogador recebe 4 especiais (zero numéricas) no primeiro Equipar (com o baralho do sub-projeto 5, 8 Ás).
+    const NO_NUMBERS = ['s618', 's701', 's852', 's867'];
 
     it.each(NO_NUMBERS)('%s: o EQUIP vazio sai em nome do jogador, como passo próprio, e a partida segue', (seed) => {
       const { room, timers, events } = setup(seed);
@@ -467,7 +468,7 @@ describe('LocalRoom: o replay da partida', () => {
 
   it('o Equipar vazio automático entra no replay, em nome do jogador, como passo próprio', async () => {
     // Sementes em que o jogador recebe zero numéricas no primeiro Equipar (as mesmas do bloco do Equipar sem numéricas).
-    for (const seed of ['s186', 's207']) {
+    for (const seed of ['s618', 's701']) {
       const { room, timers, events } = setup(seed);
       room.connect();
       await playToEnd(room, timers, 5000, true);
@@ -534,6 +535,29 @@ describe('LocalRoom: o replay da partida', () => {
     expect(replays(events)).toHaveLength(1);
     room.rematch(false);
     expect(replays(events)).toHaveLength(1);
+  });
+});
+
+describe('a vida inicial do treino (sub-projeto 5, R3)', () => {
+  it('trainingHp aceita só as vidas da sala (HP_CHOICES)', () => {
+    expect(trainingHp('?vida=800')).toBe(800);
+    expect(trainingHp('?nivel=facil&vida=300')).toBe(300);
+    expect(trainingHp('?vida=400')).toBeNull();
+    expect(trainingHp('?vida=abc')).toBeNull();
+    expect(trainingHp('')).toBeNull();
+  });
+
+  it('a sala local começa com a vida dada (e a padrão sem ela), e a revanche a mantém', async () => {
+    const { room } = setup('vida-1', { hp: 800 });
+    room.connect();
+    expect(room.state!.view.config.hp).toBe(800);
+    expect(room.state!.view.self.hp).toBe(800);
+    const plain = setup('vida-1');
+    plain.room.connect();
+    expect(plain.room.state!.view.self.hp).toBe(DEFAULT_CONFIG.hp);
+    await room.concede();
+    room.rematch(true);
+    expect(room.state!.view.self.hp).toBe(800);
   });
 });
 

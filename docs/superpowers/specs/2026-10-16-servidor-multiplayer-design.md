@@ -131,7 +131,7 @@ Todas as rotas ficam sob `/api`. Corpo JSON de até 1 KiB. As rotas que não sã
 
 | Rota | Faz | Respostas |
 |---|---|---|
-| `POST /api/rooms` `{ nickname }` | cria a sala e ocupa `p1` | 201 `{ code, token, playerId }` · 400 apelido inválido · 429 |
+| `POST /api/rooms` `{ nickname, hp? }` | cria a sala e ocupa `p1`; `hp` é a vida inicial (uma de `HP_CHOICES`: 300, 500, 800; sem ela, a padrão do motor), que vale para a partida e as revanches e sai no `room` (sub-projeto 5) | 201 `{ code, token, playerId }` · 400 apelido inválido · 400 `BAD_HP` vida fora das escolhas · 429 |
 | `POST /api/rooms/:code/join` `{ nickname }` | ocupa o assento livre | 200 `{ token, playerId }` · 404 sala não existe · 409 sala cheia · 429 |
 | `GET /api/rooms/:code` | dados públicos para a tela de convite | 200 `{ code, status, nicknames, full }` · 404 |
 | `GET /api/rooms/:code/ws` (Upgrade) | abre o WebSocket da sala | 101 sempre que houver `Upgrade`; recusas viram fechamento com código (abaixo) · 426 sem `Upgrade` |

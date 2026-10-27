@@ -3,7 +3,7 @@
 // (`/partidas`, `/partidas/<id>`) e os chunks carregados sob demanda, o `localStorage` de verdade e os cliques de mouse nos controles
 // do replay no meio de uma cena (o `data-sem-pulo` tira os controles do "toque pula as batidas" do palco).
 //
-// A semente fixa do treino (`e2e-1`, Médio) faz a partida ser sempre a mesma; o número de passos do replay depende só de quando a
+// A semente fixa do treino (`e2e2631-1`, Médio) faz a partida ser sempre a mesma; o número de passos do replay depende só de quando a
 // desistência cai, e por isso o teste a faz num ponto fixo (rodada 3, depois de o Bot escolher a ordem) e lê o total do contador.
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import {
@@ -23,7 +23,7 @@ import {
   table,
 } from './helpers.ts';
 
-const TRAINING = '/treino?semente=e2e-1&nivel=medio';
+const TRAINING = '/treino?semente=e2e2631-1&nivel=medio';
 
 /** As linhas do histórico (no PC a coluna está à vista; no celular é uma gaveta fechada, mas as linhas seguem no DOM). */
 const historyLines = (page: Page): Locator =>

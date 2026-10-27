@@ -144,6 +144,8 @@ modelo da web. **[decisão minha]** As pistas:
 ### 3.3 Interface
 - `/treino` mostra antes da mesa a escolha do nível: três botões grandes com uma linha cada. O último nível escolhido fica em
   `coringa:nivel` e vem focado. `/treino?nivel=facil|medio|dificil` pula a escolha (o E2E usa).
+  Desde o sub-projeto 5 a mesma tela tem a **Vida inicial** (300, 500 ou 800, como na criação da sala), e `?vida=` a marca (com
+  `?nivel=`, a mesa abre direto com ela).
 - A semente do treino continua em `?semente=`.
 - A faixa central e o menu mostram o nível ("Treino · Médio").
 

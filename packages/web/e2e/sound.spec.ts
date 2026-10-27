@@ -6,7 +6,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { equipPanel, failOnConsoleErrors, openMenu, table } from './helpers.ts';
 
 /** Treino com semente fixa e nível Médio (o `?nivel=` pula a escolha do nível). */
-const TRAINING = '/treino?semente=e2e-1&nivel=medio';
+const TRAINING = '/treino?semente=e2e2631-1&nivel=medio';
 
 /** Quantos `AudioContext` a página já criou. */
 const audioContexts = (page: Page): Promise<number> =>

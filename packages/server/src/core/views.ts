@@ -1,4 +1,4 @@
-import { actingPlayers, viewEvents, viewFor } from '@coringa/engine';
+import { DEFAULT_CONFIG, actingPlayers, viewEvents, viewFor } from '@coringa/engine';
 import type { GameEvent } from '@coringa/engine';
 import type {
   AckCode,
@@ -50,6 +50,7 @@ export function roomMessage(record: RoomRecord, sockets: SocketInfo[], now: numb
     score: { ...record.score },
     gameNo: record.gameNo,
     expiresAt,
+    hp: record.hp ?? DEFAULT_CONFIG.hp,
   };
   if (record.outcome) message.outcome = { ...record.outcome };
   return message;

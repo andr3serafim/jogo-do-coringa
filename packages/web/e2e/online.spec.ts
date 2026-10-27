@@ -3,7 +3,7 @@
 // e a volta de um lado, desistir, o painel de fim e a revanche. Cada tela passa pelo axe. Um segundo teste, curto, confere o
 // replay da partida online (spec do polimento §4.2): "Rever a partida" nas duas telas, o visualizador e a lista com "Sala <código>".
 //
-// O servidor de teste sobe com `E2E_SEED=e2e` (playwright.config.ts), o que fixa só o sorteio da partida: a primeira distribuição
+// O servidor de teste sobe com `E2E_SEED=e2e2631` (playwright.config.ts), o que fixa só o sorteio da partida: a primeira distribuição
 // é sempre a mesma (uma conferência abaixo avisa se não for). Os prazos, o piso de 2 s do passe automático e o relógio do
 // runner continuam reais, então o resto do teste só reage ao que está na tela e não conta cartas.
 import { expect, test, type Browser, type BrowserContext, type Page } from '@playwright/test';
@@ -142,8 +142,8 @@ test('duas pessoas jogam uma sala: do lobby ao fim, com queda e revanche', async
   await test.step('rodada 1 (Equipar): os dois equipam pelos destinos oferecidos e confirmam', async () => {
     await axe(ana.page);
     const [anaPlaced, dudaPlaced] = await Promise.all([equipByUi(ana.page), equipByUi(duda.page)]);
-    // A semente do servidor de teste vale: Ana recebe 3 numéricas e Duda 4 (sem isso o servidor não subiu com E2E_SEED=e2e).
-    expect([anaPlaced, dudaPlaced], 'o Worker de teste sorteia com E2E_SEED=e2e').toEqual([3, 4]);
+    // A semente do servidor de teste vale: Ana recebe 3 numéricas e Duda 4 (sem isso o servidor não subiu com E2E_SEED=e2e2631).
+    expect([anaPlaced, dudaPlaced], 'o Worker de teste sorteia com E2E_SEED=e2e2631').toEqual([3, 4]);
     for (const player of players) await expect(roundHeading(player.page)).toHaveText('Rodada 2');
   });
 

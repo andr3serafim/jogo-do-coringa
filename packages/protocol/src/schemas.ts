@@ -41,6 +41,9 @@ export const ClientMessageSchema = z.discriminatedUnion('t', [
 /** Corpo de `POST /api/rooms` e de `POST /api/rooms/:code/join`; o apelido é normalizado depois. */
 export const NicknameBodySchema = z.strictObject({ nickname: z.string().max(64) });
 
+/** O corpo da criação da sala: o apelido e, se quiser, a vida inicial (uma de `HP_CHOICES`, sub-projeto 5). */
+export const CreateRoomBodySchema = z.strictObject({ nickname: z.string().max(64), hp: z.number().int().optional() });
+
 /** Texto de um frame → mensagem validada, ou `null` para JSON quebrado ou fora do esquema. */
 export function parseClientMessage(raw: string): ClientMessage | null {
   try {

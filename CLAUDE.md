@@ -30,7 +30,7 @@ O motor, o protocolo, o simulador e o núcleo do servidor rodam direto no Node 2
 - `pnpm dev:server` sobe o `wrangler dev`.
 - `pnpm deploy:server` roda `pnpm check`, constrói a web e publica (`wrangler deploy`), e só o autor roda (precisa do `wrangler login`). **Nunca** `pnpm deploy`, que é comando do pnpm.
 - O Worker serve a interface como static assets (`assets.directory` aponta para `packages/web/dist`, no `wrangler.jsonc`). Os scripts do servidor rodam antes `scripts/ensure-assets.ts`, que reserva a pasta com um `index.html` mínimo num clone novo (o `wrangler dev` e o `deploy --dry-run` recusam a pasta ausente); o `vite build` da web a refaz.
-- A var `E2E_SEED` do `wrangler.jsonc` **fica vazia**: um teste do servidor barra qualquer valor, para a semente fixa nunca ir para a produção. Só o `webServer` do Playwright a preenche, com `wrangler dev --var E2E_SEED:e2e`.
+- A var `E2E_SEED` do `wrangler.jsonc` **fica vazia**: um teste do servidor barra qualquer valor, para a semente fixa nunca ir para a produção. Só o `webServer` do Playwright a preenche, com `wrangler dev --var E2E_SEED:e2e2631` (a partida 1 é `e2e2631-1`, a mesma semente do treino dos E2E).
 - O `worker-configuration.d.ts` é gerado pelo `typecheck` e não vai para o git.
 - Mudou a forma do `GameState` ou o sentido de uma regra a ponto de estado antigo não servir? Suba `STATE_SCHEMA` (`src/core/timers.ts`): salas antigas são encerradas no deploy.
 - No Windows, mantenha o worktree num caminho curto: o caminho do `workerd.exe` precisa caber em 260 caracteres.

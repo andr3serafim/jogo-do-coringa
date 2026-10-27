@@ -1,4 +1,4 @@
-import { DEFAULT_CONFIG, actingPlayers, applyAction, createGame } from '@coringa/engine';
+import { DEFAULT_CONFIG, actingPlayers, applyAction, createGame, makeConfig } from '@coringa/engine';
 import type { Action, GameEvent, GameResult, GameState } from '@coringa/engine';
 import type { AckMessage, OutcomeCause, PlayerAction, StateMessage } from '@coringa/protocol';
 import { withItem, withoutKinds } from './agenda.ts';
@@ -51,7 +51,8 @@ function requireGame(record: RoomRecord): GameRecord {
 export function startGame(record: RoomRecord, deps: CoreDeps, now: number): StateStep {
   // O número da partida que está começando: o `gameNo` só sobe mais abaixo.
   const seed = deps.newSeed ? deps.newSeed(record.gameNo + 1) : hex(deps.randomBytes(16));
-  const created = createGame(DEFAULT_CONFIG, seed, ['p1', 'p2']);
+  // A config da sala: a padrão do motor, com a vida inicial que ela escolheu (a revanche mantém a mesma).
+  const created = createGame(makeConfig({ hp: record.hp ?? DEFAULT_CONFIG.hp }), seed, ['p1', 'p2']);
   if (!created.ok) throw new Error(`configuração inválida: ${created.error.message}`);
 
   record.gameNo += 1;

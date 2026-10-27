@@ -164,7 +164,7 @@ O endereço do servidor é `location.origin`, para o `RoomClient` e para as cham
    - 429 → "Muitas tentativas; espere um minuto";
    - falha de rede → "Sem conexão", com o botão **Tentar de novo**.
 
-**Criar sala:** `POST /api/rooms` → guarda o token → vai para `/s/<CÓDIGO>`.
+**Criar sala:** `POST /api/rooms` → guarda o token → vai para `/s/<CÓDIGO>`. O formulário tem a **Vida inicial** (sub-projeto 5): 300, 500 (padrão, já marcada) ou 800, como botões de rádio grandes; a escolhida vai no corpo (`hp`).
 
 ### 2.3 Lobby [A + P]
 
@@ -243,7 +243,7 @@ A mesa está em §3 e §4. O menu da partida tem:
 - **Guarda:** os K, com a contagem.
 - **Buffs de Ataque** (J, até 4) e **Buffs de Defesa** (Q, até 4). O Selvagem aparece com o papel que assumiu.
 - **Fileira de Ataque** e **Fileira de Defesa**:
-  - até 7 cartas, com as vagas vazias desenhadas até o limite;
+  - até 8 cartas (eram 7 até o sub-projeto 5), com as vagas vazias desenhadas até o limite;
   - a carta da frente traz a marca "sai primeiro" (as fileiras são filas, spec 1 §1.2);
   - cada fileira mostra o total e a conta: "152 · 38 × 4", "42 · 14 × 3". O total vem de `attackPower` e `defensePower`. A conta é
     sempre do mesmo quadro do total mostrado: enquanto o total espera e conta na batida do dano, a base e o multiplicador ficam os de
@@ -277,7 +277,7 @@ A mesa está em §3 e §4. O menu da partida tem:
 - **No tutorial** (§2.7), o painel da dica é o primeiro filho dos campos, acima do campo do oponente: ele rola com os campos, e a mão e
   a barra de ação continuam fora do contêiner, sempre à vista. Uma dica nova que chega com os campos rolados traz o painel de volta à
   vista; a rolagem da vez de atacar espera o painel fechar. A 360 × 640 a dica mais alta (a do Equipar) ocupa ~230 px dos ~338 da janela dos campos.
-- **Sete cartas cabem em 360 px.** O tamanho das cartas acompanha a largura: ~34 × 48 px a 360, ~38 × 52 a 390. Nada rola de lado.
+- **Oito cartas cabem em 360 px.** O tamanho das cartas acompanha a largura: ~29 × 40 px a 360, ~33 × 46 a 390 (eram 34 × 48 com as fileiras de 7). O valor e o naipe da carta de campo seguem a largura real dela (`cqw`): quando a grade a encolhe, eles encolhem junto. Nada rola de lado.
 - **Alvo de toque ≥ 44 px:**
   - cartas da mesa menores que isso ganham área de toque invisível, sem sobrepor a vizinha;
   - na escolha de alvo, a barra de ação também lista os alvos válidos como botões grandes ("K♣ da Guarda de Duda", "J♠ dos Buffs de Ataque…"). Isso serve ao toque, ao teclado e ao leitor de tela.

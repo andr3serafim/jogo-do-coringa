@@ -97,11 +97,13 @@ interface SizeClasses {
 }
 
 const SIZE: Record<CardSize, SizeClasses> = {
+  // A carta de campo é contêiner do próprio tamanho: com as fileiras de 8 (sub-projeto 5) a grade a encolhe abaixo de `--card-w`
+  // quando falta lugar, e o valor e o naipe seguem a largura de verdade (`cqw`), sem passar da carta.
   field: {
-    box: 'w-full aspect-[0.72] border-[2.5px] pc:border-[3px]',
-    value: 'left-[8%] top-0 text-[length:calc(var(--card-w)*0.47)]',
-    suit: 'right-[7%] bottom-[6%] size-[calc(var(--card-w)*0.37)]',
-    wild: 'left-[6%] top-[6%] size-[calc(var(--card-w)*0.55)]',
+    box: 'w-full aspect-[0.72] border-[2.5px] pc:border-[3px] [container-type:inline-size]',
+    value: 'left-[8%] top-0 text-[length:47cqw]',
+    suit: 'right-[7%] bottom-[6%] size-[37cqw]',
+    wild: 'left-[6%] top-[6%] size-[55cqw]',
   },
   mini: {
     box: 'w-(--mini-w) h-(--mini-h) flex-none border-2 pc:border-[2.5px]',

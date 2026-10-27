@@ -441,7 +441,7 @@ export class HttpError extends Error {
 async function call<T>(
   fetchImpl: typeof fetch | undefined,
   url: string,
-  init?: { method: string; nickname: string },
+  init?: { method: string; nickname: string; hp?: number },
 ): Promise<T> {
   const doFetch = fetchImpl ?? globalThis.fetch;
   const res = await doFetch(
@@ -450,7 +450,7 @@ async function call<T>(
       ? {
           method: init.method,
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ nickname: init.nickname }),
+          body: JSON.stringify(init.hp === undefined ? { nickname: init.nickname } : { nickname: init.nickname, hp: init.hp }),
         }
       : { method: 'GET' },
   );
@@ -462,8 +462,14 @@ function baseOf(server: string): string {
   return server.replace(/\/+$/, '');
 }
 
-export function createRoom(server: string, nickname: string, fetchImpl?: typeof fetch): Promise<CreateRoomResponse> {
-  return call(fetchImpl, `${baseOf(server)}/api/rooms`, { method: 'POST', nickname });
+/** Cria a sala; `hp` é a vida inicial escolhida (uma de `HP_CHOICES`), e sem ele vale a padrão. */
+export function createRoom(
+  server: string,
+  nickname: string,
+  fetchImpl?: typeof fetch,
+  hp?: number,
+): Promise<CreateRoomResponse> {
+  return call(fetchImpl, `${baseOf(server)}/api/rooms`, { method: 'POST', nickname, ...(hp === undefined ? {} : { hp }) });
 }
 
 export function joinRoom(

@@ -22,7 +22,7 @@ import {
 } from './helpers.ts';
 
 /** Treino com semente fixa e nível Médio: a distribuição, as jogadas do bot e os danos são sempre os mesmos (o `?nivel=` pula a escolha). */
-const TRAINING = '/treino?semente=e2e-1&nivel=medio';
+const TRAINING = '/treino?semente=e2e2631-1&nivel=medio';
 
 const history = (page: Page) => page.getByRole('complementary', { name: 'Histórico da partida' });
 const levelGroup = (page: Page) => page.getByRole('group', { name: 'Nível do bot' });
@@ -35,7 +35,7 @@ test('treino: três rodadas determinísticas pela interface, sem relógio', asyn
   await expect(roundHeading(page)).toHaveText('Rodada 1');
   await expect(band(page)).toContainText('Treino · Médio, sem relógio');
   await expect(page.getByRole('timer')).toHaveCount(0);
-  expect(await lives(page), 'vida do Bot e a sua').toEqual([300, 300]);
+  expect(await lives(page), 'vida do Bot e a sua').toEqual([500, 500]);
 
   // Rodada 1 e 2 (Equipar): quantas numéricas vêm é da semente.
   await expect(equipPanel(page)).toContainText('Carta 1 de 3');
@@ -53,16 +53,16 @@ test('treino: três rodadas determinísticas pela interface, sem relógio', asyn
   await expect(actionBar(page).getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
   await axe(page);
   await playUntil(page, async (p) => (await roundNumber(p).catch(() => 0)) >= 4, { order: 'wait' });
-  await expect(history(page)).toContainText('Ataque de você: 27 contra 3 → 24 de dano');
-  await expect(history(page)).toContainText('Ataque de Bot: 17 contra 0 → 17 de dano');
-  await expect.poll(() => lives(page)).toEqual([276, 283]);
+  await expect(history(page)).toContainText('Ataque de você: 37 contra 0 → 37 de dano');
+  await expect(history(page)).toContainText('Ataque de Bot: 34 contra 0 → 34 de dano');
+  await expect.poll(() => lives(page)).toEqual([463, 466]);
 
   guard.expectClean();
 });
 
 test('treino sem nível: a escolha vem antes da mesa; escolher "Fácil" abre a mesa com a faixa do nível, e o próximo treino já vem com o Fácil focado', async ({ page }) => {
   const guard = failOnConsoleErrors(page);
-  await page.goto('/treino?semente=e2e-1');
+  await page.goto('/treino?semente=e2e2631-1');
   await expect(levelGroup(page)).toBeVisible();
   await expect(table(page)).toHaveCount(0);
   // Do mais fácil ao mais difícil, cada um com a sua linha; sem nível guardado, o Médio (o padrão) vem focado.
@@ -78,7 +78,7 @@ test('treino sem nível: a escolha vem antes da mesa; escolher "Fácil" abre a m
   await expect(menu.getByText('Treino · Fácil')).toBeVisible();
 
   // Outra visita: o último nível escolhido (guardado em `coringa:nivel`) vem focado.
-  await page.goto('/treino?semente=e2e-1');
+  await page.goto('/treino?semente=e2e2631-1');
   await expect(page.getByRole('button', { name: 'Fácil' })).toBeFocused();
   guard.expectClean();
 });
@@ -133,7 +133,8 @@ test('axe em cada estado da mesa: mão, Reflect, janela de reação, cemitério 
   await first.click();
   await expect(attack).toBeEnabled();
   await expect(hand.getByRole('button', { name: /^J, Buff de ataque, de / })).toBeVisible();
-  await expect(hand.getByRole('button', { name: /^Q, Buff de defesa, de / })).toBeVisible();
+  // Duas Q na mão nesta rodada (a semente): basta a primeira.
+  await expect(hand.getByRole('button', { name: /^Q, Buff de defesa, de / }).first()).toBeVisible();
   await expect(hand.getByRole('button', { name: /^K, Guarda, de / })).toBeVisible();
   await axe(page);
   guard.expectClean();

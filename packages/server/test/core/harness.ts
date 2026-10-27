@@ -129,8 +129,8 @@ export class Harness {
     }
   }
 
-  async create(nickname = 'Ana'): Promise<CreateRoomResponse> {
-    const r = await this.core.create(CODE, nickname, this.now);
+  async create(nickname = 'Ana', hp?: number): Promise<CreateRoomResponse> {
+    const r = await this.core.create(CODE, nickname, this.now, hp);
     this.apply(r.effects);
     if (!r.ok) throw new Error(`create falhou: ${r.error}`);
     return r.value;
@@ -191,9 +191,9 @@ export class Harness {
   }
 
   /** Sala com os dois assentos ocupados e os dois sockets autenticados. */
-  static async lobby(seed?: string, gameSeed?: string): Promise<Room> {
+  static async lobby(seed?: string, gameSeed?: string, hp?: number): Promise<Room> {
     const h = new Harness(seed, gameSeed);
-    const ana = await h.create('Ana');
+    const ana = await h.create('Ana', hp);
     const bia = await h.join('Bia');
     const p1 = h.open();
     await h.send(p1, h.hello(ana.token));
@@ -203,8 +203,8 @@ export class Harness {
   }
 
   /** O lobby com os dois prontos: a partida já começou. */
-  static async playing(seed?: string, gameSeed?: string): Promise<Room> {
-    const room = await Harness.lobby(seed, gameSeed);
+  static async playing(seed?: string, gameSeed?: string, hp?: number): Promise<Room> {
+    const room = await Harness.lobby(seed, gameSeed, hp);
     await room.h.send(room.p1, { t: 'ready', ready: true });
     await room.h.send(room.p2, { t: 'ready', ready: true });
     return room;

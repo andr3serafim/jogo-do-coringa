@@ -54,8 +54,9 @@ const TOGGLES: Array<[string, ConfigOverrides]> = [
 
 /** Varredura da spec §3: vida, tamanho da fileira e composição do baralho. */
 export const SWEEP: Array<[string, ConfigOverrides]> = [
-  ...[100, 200, 250, 350, 400].map((hp): [string, ConfigOverrides] => [`hp ${hp}`, { hp }]),
-  ...[5, 6, 8, 9].map((rowLimit): [string, ConfigOverrides] => [`fileira ${rowLimit}`, { rowLimit }]),
+  ...[300, 400, 600, 800].map((hp): [string, ConfigOverrides] => [`hp ${hp}`, { hp }]),
+  ...[6, 7, 9, 10].map((rowLimit): [string, ConfigOverrides] => [`fileira ${rowLimit}`, { rowLimit }]),
+  ['6 Ás', { deck: { aceCopies: 6 } }],
   ...[4, 8].map((faceCopies): [string, ConfigOverrides] => [`${faceCopies} de cada figura`, { deck: { faceCopies } }]),
   ...[6, 7].map((numericCopies): [string, ConfigOverrides] => [`${numericCopies} de cada numérica`, { deck: { numericCopies } }]),
 ];

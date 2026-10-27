@@ -46,7 +46,7 @@ export interface LocalGame {
  */
 export function openLocalRoom(
   module: LocalRoomModule,
-  options: { seed: string; level: TrainingLevel; store: KeyValueStore; autoOrder?: boolean },
+  options: { seed: string; level: TrainingLevel; store: KeyValueStore; autoOrder?: boolean; hp?: number },
 ): LocalGame {
   const timers = {
     now: () => Date.now(),
@@ -54,7 +54,7 @@ export function openLocalRoom(
     clearTimer: (handle: unknown): void => clearTimeout(handle as ReturnType<typeof setTimeout>),
   };
   const { seed, level, store } = options;
-  const room: LocalRoom = new module.LocalRoom({ seed, level, ...timers });
+  const room: LocalRoom = new module.LocalRoom({ seed, level, ...(options.hp === undefined ? {} : { hp: options.hp }), ...timers });
   let session: Session | null = null;
   const dispose = (): void => {
     session?.dispose();
