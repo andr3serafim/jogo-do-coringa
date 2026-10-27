@@ -1,7 +1,7 @@
 {
   "config": {
-    "hp": 300,
-    "rowLimit": 7,
+    "hp": 500,
+    "rowLimit": 8,
     "buffLimit": 4,
     "cardsPerEquip": 4,
     "antiStallRounds": 3,
@@ -9,7 +9,8 @@
     "resurrectMinRounds": 3,
     "deck": {
       "numericCopies": 8,
-      "faceCopies": 6
+      "faceCopies": 6,
+      "aceCopies": 8
     },
     "initiativeChoice": true,
     "wildJokers": true
@@ -37,48 +38,48 @@
       "easyBlunder": 0.7,
       "hardVsGreedy": {
         "games": 200,
-        "rate": 0.635,
-        "se": 0.0340422531569225,
-        "wins": 127,
+        "rate": 0.65,
+        "se": 0.033726843908080104,
+        "wins": 130,
         "draws": 0,
-        "losses": 73,
+        "losses": 70,
         "unfinished": 0,
         "withInitiative": {
           "games": 100,
-          "rate": 0.64
+          "rate": 0.68
         },
         "withoutInitiative": {
           "games": 100,
-          "rate": 0.63
+          "rate": 0.62
         }
       },
       "greedyVsEasy": {
         "games": 200,
-        "rate": 0.7175,
-        "se": 0.03183502395161655,
-        "wins": 143,
-        "draws": 1,
-        "losses": 56,
+        "rate": 0.78,
+        "se": 0.029291637031753616,
+        "wins": 156,
+        "draws": 0,
+        "losses": 44,
         "unfinished": 0,
         "withInitiative": {
           "games": 100,
-          "rate": 0.725
+          "rate": 0.8
         },
         "withoutInitiative": {
           "games": 100,
-          "rate": 0.71
+          "rate": 0.76
         }
       },
       "timing": {
-        "decisions": 5602,
-        "p50Ms": 80.56489999999758,
-        "p95Ms": 149.0636999999988,
-        "maxMs": 287.6334999999999,
+        "decisions": 8848,
+        "p50Ms": 83.91189999999915,
+        "p95Ms": 163.01980000000913,
+        "maxMs": 271.2229000000516,
         "searching": {
-          "decisions": 4103,
-          "p50Ms": 99.26239999999234,
-          "p95Ms": 155.22920000000158,
-          "maxMs": 287.6334999999999
+          "decisions": 6380,
+          "p50Ms": 104.74239999998827,
+          "p95Ms": 169.90090000000782,
+          "maxMs": 271.2229000000516
         }
       },
       "passes": {
@@ -87,7 +88,7 @@
         "p95": true
       },
       "approved": true,
-      "seconds": 404.0068673
+      "seconds": 676.0934083999999
     }
   ]
 }

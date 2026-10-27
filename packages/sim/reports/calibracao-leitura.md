@@ -53,3 +53,19 @@ de 7). As leituras acima são da calibração de 2026-10-16, com a Pressão.
   autor (opções medidas no sub-projeto 5: manter a vitória por vida, empate, ou morte súbita).
 - **Iniciativa:** 47,6% (meta 45–55%), ok. **Exódia:** 0,8%. **Quadra:** 44,6%.
 - A série "sem Pressão da mesa" saiu das regras liga/desliga (a regra não existe mais).
+
+## Sub-projeto 5, Fase D: vida 500, fileiras de 8 e 8 Ás (2026-10-27)
+
+`calibracao.md` medido de novo com a config padrão nova (vida 500, fileiras de 8, 8 Ás, anti-travamento em 3, sem a Pressão).
+A varredura passou a girar em torno dela (vida 300 a 800, fileiras de 6 a 10, e "6 Ás").
+
+- **Duração:** mediana de **13 rodadas de Ataque** (p10–p90: 7–20), dentro da meta (8–14), mas no alto dela. Com vida 300 (a
+  varredura) seriam 9; com 800, 17.
+- **Fim por anti-travamento:** **16,7%** (meta < 5%; 10,7% na Fase B). A vida maior e as fileiras maiores (Defesas mais fortes)
+  deixam mais rodadas sem dano; a vida 800 chega a 28,4%.
+- **Tartaruga (desenho pareado, vantagem de 10):** o líder que se fecha ganha **+6,1 pp** (63,4% contra 57,4%), e 60% das partidas
+  dele acabam no anti-travamento. A brecha cresceu em relação à Fase B (+3,1 pp): a decisão do autor sobre o fim do
+  anti-travamento pesa mais com os números novos.
+- **Quadra e Ressurreições:** quadra em **62,7%** das partidas (era 44,6%), 1,09 Ressurreição por partida. Com 8 cartas por fileira
+  as quadras ficam bem mais prováveis, e cabem duas numa fileira.
+- **Exódia:** 0,9%. **Iniciativa:** 49,8% (ok). Os 8 Ás quase não mudam a duração contra "6 Ás" (13 contra 11 rodadas de mediana).
