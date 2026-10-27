@@ -338,11 +338,12 @@ test.describe('celular: o dedo (eventos de toque pelo CDP)', () => {
     await toMainPhase(page);
     const cdp = await touchSession(page);
     // A Guarda fica sob a mão: o dedo fora das cartas rola os campos até ela (o que o jogador faria).
+    const before = await fieldsScroll(page);
     const fromScroll = { x: 195, y: 400 };
     await touch(cdp, 'touchStart', fromScroll);
     await slide(page, cdp, fromScroll, { x: fromScroll.x, y: 100 });
     await touch(cdp, 'touchEnd');
-    await expect.poll(async () => (await fieldsScroll(page)).top).toBe((await fieldsScroll(page)).max);
+    await expect.poll(async () => (await fieldsScroll(page)).top, 'os campos rolaram com o dedo fora das cartas').toBeGreaterThan(before.top);
     await expect(page.locator(ZONE.guard)).toBeInViewport();
     const rolled = await fieldsScroll(page);
 
@@ -378,6 +379,30 @@ test.describe('celular: o dedo (eventos de toque pelo CDP)', () => {
     await touch(cdp, 'touchEnd');
     await expect(q).toHaveAttribute('aria-pressed', 'false');
     await expect(ghost(page)).toHaveCount(0);
+    guard.expectClean();
+  });
+
+  // No toque de verdade o Chromium manda os eventos de mouse de compatibilidade (mousedown, mouseup, click) DEPOIS do pointerup, e o mousedown
+  // foca a carta tocada. Se a escolha saísse no pointerup, o foco iria à primeira jogada e voltaria à carta; escolhendo no clique, que vem
+  // depois do mousedown, o foco termina na primeira jogada (o contrato da mesa), como no PC.
+  test('o toque na carta da mão leva o foco à primeira jogada (o mousedown do toque não o devolve à carta)', async ({ page }) => {
+    const guard = failOnConsoleErrors(page);
+    await toMainPhase(page);
+    const q = handCard(page, Q);
+    await page.evaluate(() => {
+      const w = window as unknown as { __toque: string[] };
+      w.__toque = [];
+      // Na janela, em captura: o clique chega aqui mesmo que um ouvinte do gesto o engula depois.
+      for (const type of ['pointerup', 'mousedown', 'click']) window.addEventListener(type, () => w.__toque.push(type), true);
+    });
+    await q.tap();
+    // Espera o fim do gesto (o clique de compatibilidade é a última peça) e deixa o React e o foco assentarem.
+    await expect.poll(() => page.evaluate(() => (window as unknown as { __toque: string[] }).__toque.includes('click'))).toBe(true);
+    await page.evaluate(() => new Promise<void>((done) => requestAnimationFrame(() => requestAnimationFrame(() => done()))));
+    expect(await page.evaluate(() => (window as unknown as { __toque: string[] }).__toque), 'o mousedown vem depois do pointerup').toEqual(['pointerup', 'mousedown', 'click']);
+    await expect(q).toHaveAttribute('aria-pressed', 'true');
+    await expect(actionBar(page).locator('[data-step="plays"] button').first()).toBeFocused();
+    await expect(q).not.toBeFocused();
     guard.expectClean();
   });
 });

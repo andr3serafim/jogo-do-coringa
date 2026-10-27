@@ -491,9 +491,35 @@ describe('os botões e o teclado seguem iguais (WCAG 2.5.7): fase principal', ()
   it('toque: tocar a carta escolhe, e o botão da barra manda a jogada', async () => {
     const m = mount();
     await m.user.click(handCard('K'));
-    // O clique do toque é engolido pelo gesto: a carta fica escolhida, e não alternada duas vezes.
+    // Quem escolhe é o clique do toque (o gesto não o engole nem escolhe antes dele): a carta fica escolhida, e não alternada duas vezes.
     expect(handCard('K')).toHaveAttribute('aria-pressed', 'true');
     await m.user.click(inBar().getByRole('button', { name: 'Pôr na Guarda' }));
+    expect(sentAction(m)).toEqual({ type: 'PLAY_K', cardIds: [handCards(m.view, 'K')[0]!.id] });
+  });
+
+  it('o toque escolhe no clique, e não no pointerup: o gesto abaixo do limiar não escolhe nada sozinho', () => {
+    mount();
+    const card = handCard('K');
+    press(card);
+    release(card, 10, 10);
+    expect(card).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(card, { detail: 1 });
+    expect(card).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('no celular o mousedown de compatibilidade vem depois do pointerup e foca a carta: o foco termina na primeira jogada, e o Enter manda a jogada', async () => {
+    const m = mount();
+    const card = handCard('K');
+    // A ordem do toque no Chromium: pointerdown, pointerup, mousedown (que foca a carta), mouseup, click.
+    press(card);
+    release(card, 10, 10);
+    fireEvent.mouseDown(card, { detail: 1 });
+    act(() => card.focus());
+    fireEvent.mouseUp(card, { detail: 1 });
+    fireEvent.click(card, { detail: 1 });
+    expect(card).toHaveAttribute('aria-pressed', 'true');
+    expect(inBar().getByRole('button', { name: 'Pôr na Guarda' })).toHaveFocus();
+    await m.user.keyboard('{Enter}');
     expect(sentAction(m)).toEqual({ type: 'PLAY_K', cardIds: [handCards(m.view, 'K')[0]!.id] });
   });
 

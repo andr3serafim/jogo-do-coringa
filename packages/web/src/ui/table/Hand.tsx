@@ -4,10 +4,11 @@
 // valor, no canto esquerdo, continua à vista.
 //
 // Arrastar (fatia 5): com `handDrag` na mesa, cada carta que tem jogada pode ser arrastada até a zona dela (`data-soltar`); o toque
-// e o teclado seguem como sempre. Cada carta chama o seu `useCardDrag` (as zonas dependem da carta). O toque do ponteiro (`onTap`) e o
-// clique do botão (`onSelectCard`, no `TableCard`) fazem a mesma coisa: escolher a carta; o clique que o navegador manda depois do
-// toque é engolido pelo gesto, então o toque não escolhe duas vezes. A carta de origem esmaece enquanto está no ar (na `<li>`: o
-// Motion põe `opacity` inline na carta, e uma regra de CSS perderia para ele).
+// e o teclado seguem como sempre. Cada carta chama o seu `useCardDrag` (as zonas dependem da carta). O toque comum é só o clique do botão
+// (`onSelectCard`, no `TableCard`): o gesto não mexe nele, e o foco termina na primeira jogada como no PC (no celular o `mousedown` de
+// compatibilidade vem antes do clique). O `onTap` é só do arrasto que escorrega além do limiar e solta de volta sobre a carta: faz o
+// mesmo que o clique, que o gesto então engole, e a carta não é escolhida duas vezes. A carta de origem esmaece enquanto está no ar (na
+// `<li>`: o Motion põe `opacity` inline na carta, e uma regra de CSS perderia para ele).
 import type { SpecialCard } from '@coringa/engine';
 import type { CSSProperties } from 'react';
 import type { DropKey } from '../../model/drag.ts';

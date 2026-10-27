@@ -328,7 +328,7 @@ modelo da web. **[decisão minha]** As pistas:
 
 - **O gesto** (`ui/table/useCardDrag.ts`, genérico: não sabe de mesa nem de regra). O `pointerdown` do ponteiro primário (o botão
   principal; o segundo dedo não começa nada) guarda o ponto, e só depois de **8 px** de movimento (`DRAG_THRESHOLD_PX`) vira arrasto;
-  antes disso o `pointerup` é o toque de sempre (escolher a carta). No arrasto o ponteiro é capturado, o fantasma segue o dedo e a
+  antes disso é o toque de sempre (o clique do navegador escolhe a carta). No arrasto o ponteiro é capturado, o fantasma segue o dedo e a
   zona sob ele sai de `elementFromPoint` + `closest('[data-soltar]')`. Esc, `pointercancel`, a perda de foco da janela, a trava
   (`enabled` virando falso: batidas, jogada em voo, conexão caída, depois do Passar) e a carta que sai da mão cancelam sem soltar
   nem tocar.
@@ -345,10 +345,14 @@ modelo da web. **[decisão minha]** As pistas:
 - **Soltar de volta sobre a própria carta, sem zona, é um toque** (escolhe a carta, como o toque; de novo, desfaz): o dedo do
   celular escorrega uns pixels num toque, e não devia virar "soltei fora". Uma zona válida sob o ponto vale mais; soltar sobre outra
   carta, ou em qualquer outro lugar sem zona, não faz nada.
-- **O toque do ponteiro escolhe no `pointerup`** (`onTap`), e o clique que o navegador manda depois do gesto é engolido (até a
-  folga de 400 ms, o próximo `pointerdown` ou uma tecla), então o toque não escolhe duas vezes. O clique sem ponteiro (`event.detail
-  === 0`: Enter, Espaço, leitor de tela) passa sempre: o teclado e o leitor de tela seguem como eram. No Equipar, tocar a carta da vez
-  não faz nada (os botões de destino ao lado são o toque).
+- **O toque abaixo do limiar é o clique do navegador, como antes do arrasto**: o gesto não chama `onTap` nem engole o clique, e o
+  `onClick` do botão escolhe a carta. Escolher no `pointerup` quebrava o foco no celular: o Chromium manda o `mousedown` de
+  compatibilidade depois do `pointerup`, e ele foca a carta tocada depois de a escolha ter levado o foco à primeira jogada (o contrato
+  da mesa); o clique vem depois do `mousedown`, e o foco termina na jogada. Só o arrasto que passou do limiar e solta sem zona de volta
+  sobre a própria carta chama `onTap` (o mesmo efeito do clique), e aí o clique que o navegador manda depois do gesto é engolido (como
+  o de todo arrasto: até a folga de 400 ms, o próximo `pointerdown` ou uma tecla), então a carta não é escolhida duas vezes. O clique
+  sem ponteiro (`event.detail === 0`: Enter, Espaço, leitor de tela) passa sempre: o teclado e o leitor de tela seguem como eram. No
+  Equipar, tocar a carta da vez não faz nada (os botões de destino ao lado são o toque).
 - **As chaves** (`DROP`, `cardDropKey`, `ROW_DROP`, em `model/drag.ts`) são o único lugar do texto de cada `data-soltar`
   (`buffs:ATK`, `buffs:DEF`, `guarda`, `carta:<id>`, `fileira:ATK`, `fileira:DEF`, `ultima:ATK`, `ultima:DEF`, `cemiterio`), e um teste
   amarra cada uma à zona que se vê. As zonas do oponente são só as cartas que são alvo (cada uma é uma zona `carta:<id>`): nunca a
@@ -362,7 +366,7 @@ modelo da web. **[decisão minha]** As pistas:
   e o K até a Guarda com o mouse do Playwright, e, só no celular, o dedo de verdade (eventos de toque pelo CDP, que passam pelo
   `touch-action` do Chromium): com `touch-action: none` o gesto vira arrasto, e a página e os campos não rolam durante ele; com o
   dedo fora das cartas, os campos rolam. Sem `touch-action: none` o dedo vira rolagem e o fantasma nem aparece (conferido por
-  mutação). A página não rola em 390 × 844 nem com a mão cheia: quem rola são só os campos.
+  mutação). O toque (`tap()`) numa carta da mão termina com o foco na primeira jogada, depois do `mousedown` de compatibilidade. A página não rola em 390 × 844 nem com a mão cheia: quem rola são só os campos.
 - **Sem efeito, texto nem cena novos** ligados à Pressão da mesa: nada do arrasto depende dela, e ela sai inteira no sub-projeto 5.
 - **Fica para o autor:** nada na tela diz que a carta arrasta além do cursor (a spec não pede texto novo). No celular (390 × 844) com
   a mão cheia (seis cartas), a mão cobre a Guarda e os buffs do seu campo até os campos rolarem: o dedo fora das cartas os traz

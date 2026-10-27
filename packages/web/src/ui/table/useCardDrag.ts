@@ -2,20 +2,24 @@
 // se o gesto vale agora (`enabled`), quais zonas aceitam a carta (`zones`, lida na hora) e o que fazer com a soltura e com o toque.
 //
 // - O `pointerdown` do ponteiro primário guarda o ponto (o segundo dedo não começa nada). Só depois de `DRAG_THRESHOLD_PX` de movimento
-//   vira arrasto; antes disso, o `pointerup` é o toque (`onTap`). O clique que o navegador manda depois de um toque ou de um arrasto é
-//   engolido (`CLICK_GRACE_MS`, ou até o próximo `pointerdown` ou tecla): o `onTap` é o único caminho do ponteiro, e quem liga o mesmo
-//   gesto a um botão pode deixar o `onClick` dele para o teclado e para os leitores de tela. O clique que não vem de um ponteiro tem
-//   `event.detail === 0` (Enter/Espaço, leitor de tela, `element.click()`; o do mouse e o do toque trazem a contagem de cliques, >= 1) e
-//   passa sempre pelo engolidor, que segue armado para o clique do ponteiro. Nunca ligue `onTap` e `onClick` a efeitos diferentes. O
-//   clique é engolido na janela, em captura: nenhum ouvinte de clique do caminho (a carta, os ancestrais, o `onClickCapture` do palco e
-//   o da mesa) o vê. Só o `pointerdown` e o foco seguem normais.
+//   vira arrasto. Antes disso é um toque, e o gancho não faz nada com ele: o `pointerup` não chama `onTap` nem arma o engolidor, e o clique
+//   que o navegador manda depois chega ao botão como sempre. O `onClick` do botão é o caminho do toque, do mouse, do teclado e dos
+//   leitores de tela. Escolher no `pointerup` seria cedo no celular: o Chromium manda o `mousedown` de compatibilidade DEPOIS do `pointerup`
+//   e ele foca a carta tocada, desfazendo o foco que a escolha acabou de levar à primeira jogada; o clique vem depois do `mousedown`.
+//   Só o arrasto que passou do limiar e termina sem zona de volta sobre a própria carta é um toque (`onTap`), e aí o clique que o
+//   navegador manda depois (como o de todo arrasto, solto numa zona ou fora) é engolido (`CLICK_GRACE_MS`, ou até o próximo `pointerdown`
+//   ou tecla). O clique que não vem de um ponteiro tem `event.detail === 0` (Enter/Espaço, leitor de tela, `element.click()`; o do mouse
+//   e o do toque trazem a contagem de cliques, >= 1) e passa sempre pelo engolidor, que segue armado para o clique do ponteiro. Nunca
+//   ligue `onTap` e `onClick` a efeitos diferentes. O clique é engolido na janela, em captura: nenhum ouvinte de clique do caminho (a
+//   carta, os ancestrais, o `onClickCapture` do palco e o da mesa) o vê. Só o `pointerdown` e o foco seguem normais.
 // - No arrasto, o ponteiro é capturado, o fantasma (`DragGhost`) segue o dedo e a zona sob ele sai de `elementFromPoint` + `closest('[data-soltar]')`,
 //   subindo pelos ancestrais até a primeira zona que esteja em `zones()` (a última carta de uma fileira, que não vale, não esconde a fileira, que
 //   vale). As zonas válidas ganham `data-soltar-ativo` enquanto a carta está no ar, e a que está sob o dedo também `data-soltar-sob` (o
 //   contorno é CSS parado, em `styles.css`). A soltura chama `onDrop(chave)`, ou `onDrop(null)` fora de toda zona válida. Soltar sem
 //   zona de volta sobre a própria carta é toque (`onTap`), e não `onDrop(null)`: o dedo do celular escorrega uns pixels num toque.
 // - `pointercancel`, `Esc`, a perda do foco da janela, `enabled` virando falso e a carta saindo da tela cancelam sem soltar nem tocar. O
-//   `pointercancel` também não arma o engolidor: o navegador não manda clique depois dele.
+//   `pointercancel` também não arma o engolidor: o navegador não manda clique depois dele. O `pointerup` que vem depois de um cancelamento
+//   (o dedo ainda estava na tela) arma: o clique dele é do gesto cancelado.
 // - Com `enabled` falso nada começa, e o `pointerdown` nem é lido: o palco (`Stage`) trata o dele como sempre. O gesto também nunca
 //   segura nem impede o `pointerdown`.
 // - O `pointerdown` é lido em captura na janela, antes de qualquer ouvinte da mesa: o toque que pulou as batidas (e que, ao pulá-las,
@@ -53,7 +57,10 @@ export interface CardDragOptions {
   zones: () => ReadonlySet<DropKey>;
   /** A soltura: a chave da zona válida sob o dedo, ou `null` fora de todas. */
   onDrop: (key: DropKey | null) => void;
-  /** O toque de um ponteiro (menos de `DRAG_THRESHOLD_PX` de movimento, ou um arrasto sem zona solto de volta sobre a própria carta); o teclado não passa por aqui. */
+  /**
+   * O arrasto que passou do limiar, não achou zona e foi solto de volta sobre a própria carta: o dedo escorregou, e era um toque. O toque
+   * de verdade (abaixo do limiar) não passa por aqui: o clique do navegador chega ao botão, e o `onClick` dele faz o mesmo que esta função.
+   */
   onTap: () => void;
 }
 
@@ -251,8 +258,10 @@ function createDragController(initial: CardDragOptions, host: Host) {
     // costuma andar uns pixels). Uma zona válida sob o ponto vale mais; soltar sobre outra carta continua sendo `onDrop(null)`.
     const backOnCard = phase === 'dragging' && key === null && isOverCard(event.clientX, event.clientY);
     finish();
+    // O toque abaixo do limiar não é do gesto: sem `onTap` e sem engolidor, o clique do navegador chega ao botão (veja o cabeçalho).
+    if (phase === 'pending') return;
     swallowClick();
-    if (phase === 'pending' || backOnCard) onTap();
+    if (backOnCard) onTap();
     else if (phase === 'dragging') onDrop(key);
   };
 

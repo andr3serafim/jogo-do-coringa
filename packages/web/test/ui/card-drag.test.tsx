@@ -111,39 +111,58 @@ afterEach(() => {
 });
 
 describe('useCardDrag: do toque ao arrasto', () => {
-  it('abaixo de 8 px é toque: chama onTap, não arrasta, não mostra fantasma nem captura o ponteiro', () => {
+  it('abaixo de 8 px é toque: não arrasta, não mostra fantasma, não captura o ponteiro e não chama onTap (o clique do navegador é quem escolhe)', () => {
     const onTap = vi.fn();
     const onDrop = vi.fn();
-    render(<Harness onTap={onTap} onDrop={onDrop} />);
+    const onClick = vi.fn();
+    render(<Harness onTap={onTap} onDrop={onDrop} onClick={onClick} />);
     down(10, 10);
     move(14, 13);
     expect(ghostEl()).toBeNull();
     expect(screen.getByTestId('estado')).toHaveTextContent('false|');
     up(14, 13);
-    expect(onTap).toHaveBeenCalledTimes(1);
+    expect(onTap).not.toHaveBeenCalled();
     expect(onDrop).not.toHaveBeenCalled();
     expect(capture).not.toHaveBeenCalled();
     expect(DRAG_THRESHOLD_PX).toBe(8);
+    // O clique do navegador passa: é ele que chega ao `onClick` do botão, como se o gesto não existisse.
+    expect(onClick).not.toHaveBeenCalled();
+    fireEvent.click(card(), CLICK);
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it('um toque inteiro (pointerdown, pointerup, click) dá um onTap só: o clique que o navegador manda depois é engolido', () => {
+  it('um toque inteiro (pointerdown, pointerup, click) chega ao botão uma vez e não chama onTap: o gesto não engole o clique do toque', () => {
     const onTap = vi.fn();
     const onClick = vi.fn();
     render(<Harness onTap={onTap} onClick={onClick} />);
     down();
     up();
     fireEvent.click(card(), CLICK);
-    expect(onTap).toHaveBeenCalledTimes(1);
-    expect(onClick).not.toHaveBeenCalled();
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(onTap).not.toHaveBeenCalled();
   });
 
-  it('o toque feito pelo user-event (mouse) também dá um onTap só', async () => {
+  it('o toque feito pelo user-event (mouse) também chega ao botão uma vez, sem onTap', async () => {
     const onTap = vi.fn();
     const onClick = vi.fn();
     render(<Harness onTap={onTap} onClick={onClick} />);
     await userEvent.click(card());
-    expect(onTap).toHaveBeenCalledTimes(1);
-    expect(onClick).not.toHaveBeenCalled();
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(onTap).not.toHaveBeenCalled();
+  });
+
+  it('o toque do celular (pointerup, e só então o mousedown de compatibilidade que foca a carta) deixa o clique chegar ao botão, depois do foco', () => {
+    const order: string[] = [];
+    render(<Harness onClick={() => order.push('click')} />);
+    card().addEventListener('focus', () => order.push('foco'));
+    down();
+    up();
+    fireEvent.mouseDown(card(), { detail: 1 });
+    act(() => card().focus());
+    fireEvent.mouseUp(card(), { detail: 1 });
+    fireEvent.click(card(), CLICK);
+    // O foco da carta vem antes do clique: quem move o foco no clique (a mesa, para a primeira jogada) tem a última palavra.
+    expect(order).toEqual(['foco', 'click']);
   });
 
   it('o clique sem gesto de ponteiro (o Enter no botão) segue direto para o botão, e não é toque', async () => {
@@ -406,14 +425,17 @@ describe('useCardDrag: a soltura', () => {
 
   it('o próximo gesto desfaz a espera do clique engolido', () => {
     const onTap = vi.fn();
-    render(<Harness onTap={onTap} />);
+    const onClick = vi.fn();
+    render(<Harness onTap={onTap} onClick={onClick} />);
     down();
     move(60, 60);
     up(60, 60);
-    // Nenhum clique veio; o toque seguinte é um toque inteiro.
+    // Nenhum clique veio; o toque seguinte é um toque inteiro, e o clique dele chega ao botão.
     down();
     up();
-    expect(onTap).toHaveBeenCalledTimes(1);
+    fireEvent.click(card(), CLICK);
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(onTap).not.toHaveBeenCalled();
   });
 });
 
@@ -532,7 +554,8 @@ describe('useCardDrag: cancelar', () => {
   it('pointercancel cancela sem soltar nem tocar, e limpa o fantasma e as zonas', () => {
     const onDrop = vi.fn();
     const onTap = vi.fn();
-    render(<Harness onDrop={onDrop} onTap={onTap} />);
+    const onClick = vi.fn();
+    render(<Harness onDrop={onDrop} onTap={onTap} onClick={onClick} />);
     down();
     over(zones.get('guarda') ?? null);
     move(60, 60);
@@ -543,10 +566,12 @@ describe('useCardDrag: cancelar', () => {
     expect(ghostEl()).toBeNull();
     expect(marked('data-soltar-ativo')).toEqual([]);
     expect(screen.getByTestId('estado')).toHaveTextContent('false|');
-    // O gesto acabou: um toque novo funciona.
+    // O gesto acabou, e nada ficou armado: um toque novo chega ao botão.
     down();
     up();
-    expect(onTap).toHaveBeenCalledTimes(1);
+    fireEvent.click(card(), CLICK);
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(onTap).not.toHaveBeenCalled();
   });
 
   it('Esc cancela o arrasto (e segura o evento para quem olha o defaultPrevented); o pointerup que vem depois não solta nem toca, e o clique dele é engolido', () => {
