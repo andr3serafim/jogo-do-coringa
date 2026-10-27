@@ -55,6 +55,8 @@ export interface CardProps {
   onSeen?: () => void;
   /** A `ref` do elemento da carta para o gesto de arrastar (`useCardDrag().bind`): é ele que o dedo pega e que o fantasma copia. */
   dragRef?: (el: HTMLElement | null) => void;
+  /** O gesto de arrastar vale agora para esta carta: o cursor vira a mãozinha (`cursor-grab`), no lugar do `cursor-pointer` do botão. */
+  grabbable?: boolean;
   className?: string;
 }
 
@@ -193,6 +195,7 @@ export function Card({
   tabIndex,
   onSeen,
   dragRef,
+  grabbable = false,
   className = '',
 }: CardProps) {
   const anim = useAnim();
@@ -215,7 +218,9 @@ export function Card({
     selected ? '-translate-y-3.5 anel-ouro' : target ? 'anel-ouro' : '',
     grave ? 'grayscale opacity-90' : '',
     draft ? 'border-dashed opacity-70' : '',
-    onSelect ? 'cursor-pointer focus-visible:z-10' : '',
+    // Um cursor só: duas classes `cursor-*` disputam a mesma propriedade e quem ganha é a ordem do CSS gerado.
+    grabbable ? 'cursor-grab' : onSelect ? 'cursor-pointer' : '',
+    onSelect ? 'focus-visible:z-10' : '',
     // Travada, a carta apaga (o toque não faz nada), mas continua focável e lida pelo leitor de tela.
     disabled && onSelect ? 'opacity-60 cursor-wait' : '',
     className,

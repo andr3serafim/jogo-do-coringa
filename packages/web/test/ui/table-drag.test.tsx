@@ -4,7 +4,7 @@
 // fantasma, cancelamento) é testado lá; aqui, o que a mesa liga a ele: as zonas, a soltura e o que trava.
 import { applyAction, type PlayerView, type SpecialCard } from '@coringa/engine';
 import type { PlayerAction, StateMessage } from '@coringa/protocol';
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cardDropKey, DROP, equipDropZones, playDropZones } from '../../src/model/drag.ts';
@@ -172,6 +172,7 @@ function sentAction(m: Mounted): PlayerAction {
   return action;
 }
 
+
 // ---------------------------------------------------------------------------------------------
 
 describe('arrastar da mão: a fase principal', () => {
@@ -251,6 +252,25 @@ describe('arrastar da mão: a fase principal', () => {
     expect(acts(m)).toEqual([]);
     expect(handCard('K')).toHaveAttribute('aria-pressed', 'false');
     expect(ghost()).toBeNull();
+  });
+
+  it('soltar sem zona de volta sobre a própria carta é um toque: escolhe a carta, como o toque (e de novo desfaz)', () => {
+    const m = mount();
+    dragTo(handCard('K'), handCard('K'));
+    expect(handCard('K')).toHaveAttribute('aria-pressed', 'true');
+    expect(inBar().getByRole('button', { name: 'Pôr na Guarda' })).toBeInTheDocument();
+    expect(ghost()).toBeNull();
+    dragTo(handCard('K'), handCard('K'));
+    expect(handCard('K')).toHaveAttribute('aria-pressed', 'false');
+    expect(acts(m)).toEqual([]);
+  });
+
+  it('soltar de volta sobre outra carta da mão (que não é zona) não escolhe nada', () => {
+    const m = mount();
+    dragTo(handCard('K'), handCard('Q'));
+    expect(handCard('K')).toHaveAttribute('aria-pressed', 'false');
+    expect(handCard('Q')).toHaveAttribute('aria-pressed', 'false');
+    expect(acts(m)).toEqual([]);
   });
 
   it('soltar numa zona onde a carta não vale (o K nos Buffs de ataque, a mão do oponente) não manda nada', () => {
@@ -404,6 +424,57 @@ describe('arrastar da mão: o que trava', () => {
     expect(sentAction(m)).toMatchObject({ type: 'TRAP', targetId: guard.id });
   });
 
+  it('depois do Passar na janela de reação a mão não arrasta mais (o servidor recusaria qualquer jogada)', async () => {
+    const m = mount({ ...DRAFT, phase: 'K_PLAYED' });
+    const guard = m.view.opponent.guard[0]!;
+    await m.user.click(inBar().getByRole('button', { name: 'Passar' }));
+    expect(acts(m)).toEqual([{ type: 'PASS' }]);
+    // A mão deixou de ser botão (a escolha também fecha); a Armadilha estava válida até o passe.
+    expect(handList().queryAllByRole('button')).toHaveLength(0);
+    const trap = handList().getAllByRole('img').find((el) => /^A, Armadilha/.test(el.getAttribute('aria-label') ?? ''))!;
+    expect(trap.style.touchAction).toBe('');
+    expect(trap).not.toHaveClass('cursor-grab');
+    press(trap);
+    hit = zone(cardDropKey(guard.id));
+    moveTo(trap, 80, 80);
+    expect(ghost()).toBeNull();
+    expect(active()).toEqual([]);
+    release(trap, 80, 80);
+    expect(acts(m)).toEqual([{ type: 'PASS' }]);
+  });
+
+  it('com a conexão caída (reconectando) a mão não arrasta, e o toque não escolhe', () => {
+    const m = mount();
+    act(() => m.connection.emitClosed(1006));
+    expect(m.session.snapshot().status).toBe('reconnecting');
+    const card = handCard('K');
+    expect(card).toHaveAttribute('aria-disabled', 'true');
+    expect(card.style.touchAction).toBe('');
+    expect(card).not.toHaveClass('cursor-grab');
+    press(card);
+    hit = zone(DROP.guard);
+    moveTo(card, 80, 80);
+    expect(ghost()).toBeNull();
+    expect(active()).toEqual([]);
+    release(card, 80, 80);
+    expect(acts(m)).toEqual([]);
+    expect(card).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('a conexão que cai no meio do arrasto cancela: o fantasma some e a soltura não manda nada', () => {
+    const m = mount();
+    const card = handCard('K');
+    press(card);
+    hit = zone(DROP.guard);
+    moveTo(card, 80, 80);
+    expect(ghost()).not.toBeNull();
+    act(() => m.connection.emitClosed(1006));
+    expect(ghost()).toBeNull();
+    expect(active()).toEqual([]);
+    release(card, 80, 80);
+    expect(acts(m)).toEqual([]);
+  });
+
   it('fora da fase de jogar (a vez do oponente) a mão não é botão e não arrasta', () => {
     const m = mount({ ...DRAFT, phase: 'WAITING' });
     const card = handList().getAllByRole('img').find((el) => /^K, Guarda/.test(el.getAttribute('aria-label') ?? ''))!;
@@ -462,6 +533,25 @@ describe('os botões e o teclado seguem iguais (WCAG 2.5.7): fase principal', ()
     const m = mount();
     await m.user.click(inBar().getByRole('button', { name: ATTACK_BUTTON }));
     expect(sentAction(m)).toEqual({ type: 'DECLARE_ATTACK' });
+  });
+
+  it('a carta da mão que arrasta mostra a mãozinha (cursor-grab); a que não tem jogada segue com cursor-pointer', () => {
+    mount(withHand(['K', 'J'], { self: { ...DRAFT.self, attackBuffs: ['J', 'J', 'J', 'J'] }, opponent: { ...DRAFT.opponent, attackBuffs: [] } }));
+    expect(handCard('K')).toHaveClass('cursor-grab');
+    expect(handCard('K')).not.toHaveClass('cursor-pointer');
+    expect(handCard('J')).toHaveClass('cursor-pointer');
+    expect(handCard('J')).not.toHaveClass('cursor-grab');
+  });
+
+  it('travada (jogada em voo), a carta não mostra a mãozinha: é a espera', async () => {
+    const m = mount();
+    expect(handCard('K')).toHaveClass('cursor-grab');
+    const ack = deferredAck();
+    m.connection.acks = [ack.promise];
+    await m.user.click(inBar().getByRole('button', { name: ATTACK_BUTTON }));
+    expect(handCard('K')).not.toHaveClass('cursor-grab');
+    expect(handCard('K')).toHaveClass('cursor-wait');
+    await act(async () => ack.resolve({ ok: true, seq: 9 }));
   });
 
   it('a carta arrastável tem touch-action: none; a que não tem jogada, não', () => {
@@ -559,6 +649,33 @@ describe('arrastar o Equipar', () => {
     expect(m.session.snapshot().equipDraft).toEqual([]);
   });
 
+  it('a carta do Equipar mostra a mãozinha; travada (conexão caída), não', () => {
+    const m = mount(EQUIP);
+    expect(equipCard()).toHaveClass('cursor-grab');
+    act(() => m.connection.emitClosed(1006));
+    expect(equipCard()).not.toHaveClass('cursor-grab');
+    expect(equipCard().style.touchAction).toBe('');
+  });
+
+  it('com a conexão caída a carta do Equipar não arrasta', () => {
+    const m = mount(EQUIP);
+    act(() => m.connection.emitClosed(1006));
+    const card = equipCard();
+    press(card);
+    hit = zone(DROP.defenseRow);
+    moveTo(card, 80, 80);
+    expect(ghost()).toBeNull();
+    release(card, 80, 80);
+    expect(m.session.snapshot().equipDraft).toEqual([]);
+  });
+
+  it('soltar a carta do Equipar de volta sobre ela mesma é um toque, e o toque não faz nada', () => {
+    const m = mount(EQUIP);
+    dragTo(equipCard(), equipCard());
+    expect(m.session.snapshot().equipDraft).toEqual([]);
+    expect(inEquip().getByText('Carta 1 de 3')).toBeInTheDocument();
+  });
+
   it('a carta do Equipar tem touch-action: none', () => {
     mount(EQUIP);
     expect(equipCard().style.touchAction).toBe('none');
@@ -631,6 +748,79 @@ describe('as zonas da mesa (data-soltar) e as chaves do modelo', () => {
     const inField = [...field.querySelectorAll('[data-soltar]')].map((el) => el.getAttribute('data-soltar'));
     const targets = [...view.opponent.attackBuffs, ...view.opponent.defenseBuffs, ...view.opponent.guard].map((c) => cardDropKey(c.id));
     expect(new Set(inField)).toEqual(new Set(targets));
+  });
+
+  // Cada chave na zona que se vê: trocar duas chaves de lugar (os buffs de ataque pelos de defesa, a Guarda pela fileira) reprova.
+  const mine = () => within(screen.getByRole('region', { name: 'Seu campo' }));
+  const theirs = () => within(screen.getByRole('region', { name: 'Campo de Duda' }));
+  const keyOf = (el: HTMLElement) => el.closest('[data-soltar]')?.getAttribute('data-soltar') ?? null;
+
+  it('a Guarda e os buffs do seu campo levam as chaves delas', () => {
+    mount();
+    expect(keyOf(mine().getByRole('list', { name: 'Guarda' }))).toBe(DROP.guard);
+    expect(keyOf(mine().getByRole('list', { name: 'Buffs de ataque' }))).toBe(DROP.attackBuffs);
+    expect(keyOf(mine().getByRole('list', { name: 'Buffs de defesa' }))).toBe(DROP.defenseBuffs);
+    // O título da zona está dentro dela: a zona que se vê é a que o jogador apontaria.
+    expect(zone(DROP.attackBuffs)).toHaveTextContent('Buffs de ataque');
+    expect(zone(DROP.defenseBuffs)).toHaveTextContent('Buffs de defesa');
+    expect(zone(DROP.guard)).toHaveTextContent('Guarda');
+  });
+
+  it('as suas fileiras levam fileira:* e a última carta de cada uma leva ultima:*, na fileira certa', () => {
+    const { view } = mount();
+    const attackRow = screen.getByRole('group', { name: 'Sua fileira de ataque' });
+    const defenseRow = screen.getByRole('group', { name: 'Sua fileira de defesa' });
+    expect(keyOf(attackRow)).toBe(DROP.attackRow);
+    expect(keyOf(defenseRow)).toBe(DROP.defenseRow);
+    const lastAttack = view.self.attackRow.at(-1)!;
+    const lastDefense = view.self.defenseRow.at(-1)!;
+    expect(zone(DROP.lastAttack).querySelector(`[data-card-id="${lastAttack.id}"]`)).not.toBeNull();
+    expect(zone(DROP.lastDefense).querySelector(`[data-card-id="${lastDefense.id}"]`)).not.toBeNull();
+    expect(attackRow).toContainElement(zone(DROP.lastAttack));
+    expect(defenseRow).toContainElement(zone(DROP.lastDefense));
+    // As fileiras do oponente não são destino de nada.
+    expect(keyOf(screen.getByRole('group', { name: 'Fileira de ataque de Duda' }))).toBeNull();
+    expect(keyOf(screen.getByRole('group', { name: 'Fileira de defesa de Duda' }))).toBeNull();
+  });
+
+  it('o cemitério leva cemiterio, no botão que abre o diálogo e na caixa dele', () => {
+    mount();
+    const graveyard = screen.getByRole('button', { name: /^Cemitério / });
+    expect(keyOf(graveyard)).toBe(DROP.graveyard);
+    expect(zone(DROP.graveyard)).toContainElement(graveyard);
+  });
+
+  it('cada carta-alvo do oponente leva a chave carta:<id> dela, na lista dela (a Guarda, os buffs de ataque e os de defesa)', () => {
+    const { view } = mount();
+    const lists = [
+      ['Guarda', view.opponent.guard],
+      ['Buffs de ataque', view.opponent.attackBuffs],
+      ['Buffs de defesa', view.opponent.defenseBuffs],
+    ] as const;
+    for (const [name, cards] of lists) {
+      const list = theirs().getByRole('list', { name });
+      // A lista em si não é zona: só cada carta dela.
+      expect(keyOf(list), name).toBeNull();
+      for (const card of cards) {
+        const inside = list.querySelector<HTMLElement>(`[data-card-id="${card.id}"]`)!;
+        expect(keyOf(inside), `${name}: ${card.id}`).toBe(cardDropKey(card.id));
+      }
+    }
+    // E as cartas da sua Guarda levam a chave da Guarda, não a de alvo.
+    const mineGuard = mine().getByRole('list', { name: 'Guarda' });
+    for (const card of view.self.guard) expect(keyOf(mineGuard.querySelector<HTMLElement>(`[data-card-id="${card.id}"]`)!)).toBe(DROP.guard);
+  });
+
+  it('no Equipar as mesmas chaves seguem nos mesmos lugares (as fileiras com vaga; as últimas cartas com elas cheias)', () => {
+    mount(EQUIP);
+    expect(keyOf(screen.getByRole('group', { name: 'Sua fileira de ataque' }))).toBe(DROP.attackRow);
+    expect(keyOf(screen.getByRole('group', { name: 'Sua fileira de defesa' }))).toBe(DROP.defenseRow);
+    cleanup();
+    const { view } = mount(FULL);
+    const attackRow = screen.getByRole('group', { name: 'Sua fileira de ataque' });
+    expect(attackRow).toContainElement(zone(DROP.lastAttack));
+    expect(zone(DROP.lastAttack).querySelector(`[data-card-id="${view.self.attackRow.at(-1)!.id}"]`)).not.toBeNull();
+    expect(screen.getByRole('group', { name: 'Sua fileira de defesa' })).toContainElement(zone(DROP.lastDefense));
   });
 
   it('o Equipar com vaga: toda chave de equipDropZones existe na mesa', () => {

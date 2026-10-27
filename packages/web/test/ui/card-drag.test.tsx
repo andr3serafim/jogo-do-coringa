@@ -264,6 +264,95 @@ describe('useCardDrag: a soltura', () => {
     expect(onDrop).toHaveBeenLastCalledWith(null);
   });
 
+  it('soltar de volta sobre a própria carta, sem zona, é toque (o dedo do celular escorrega alguns px): chama onTap, e o clique que vem depois é engolido', () => {
+    const onDrop = vi.fn();
+    const onTap = vi.fn();
+    const onClick = vi.fn();
+    render(<Harness onDrop={onDrop} onTap={onTap} onClick={onClick} />);
+    down();
+    hit = outside();
+    move(40, 40); // passou do limiar: está no ar, longe da carta
+    expect(ghostEl()).not.toBeNull();
+    hit = card();
+    up(12, 12);
+    expect(onTap).toHaveBeenCalledTimes(1);
+    expect(onDrop).not.toHaveBeenCalled();
+    expect(ghostEl()).toBeNull();
+    fireEvent.click(card(), CLICK);
+    expect(onClick).not.toHaveBeenCalled();
+    expect(onTap).toHaveBeenCalledTimes(1);
+  });
+
+  it('o toque que escorregou além do limiar e solta ainda sobre a carta (sem sair dela) também é toque, não onDrop(null)', () => {
+    const onDrop = vi.fn();
+    const onTap = vi.fn();
+    render(<Harness onDrop={onDrop} onTap={onTap} />);
+    down(10, 10);
+    hit = card();
+    move(22, 10); // 12 px: arrasto para o gesto, mas o dedo continua em cima da carta
+    up(22, 10);
+    expect(onTap).toHaveBeenCalledTimes(1);
+    expect(onDrop).not.toHaveBeenCalled();
+  });
+
+  it('soltar sobre um filho da própria carta também vale como toque', () => {
+    const onTap = vi.fn();
+    render(<Harness onTap={onTap} />);
+    const child = document.createElement('span');
+    card().append(child);
+    down();
+    move(40, 40);
+    hit = child;
+    up(12, 12);
+    expect(onTap).toHaveBeenCalledTimes(1);
+  });
+
+  it('sobre outra carta (um botão vizinho) a soltura segue sendo onDrop(null), e uma zona válida vale mais que a própria carta', () => {
+    const onDrop = vi.fn();
+    const onTap = vi.fn();
+    render(
+      <>
+        <Harness onDrop={onDrop} onTap={onTap} />
+        <button type="button">Vizinha</button>
+      </>,
+    );
+    down();
+    move(40, 40);
+    hit = screen.getByRole('button', { name: 'Vizinha' });
+    up(40, 40);
+    expect(onDrop).toHaveBeenLastCalledWith(null);
+    expect(onTap).not.toHaveBeenCalled();
+    // A zona válida que contém o ponto (mesmo que o elemento da carta estivesse dentro dela) é a soltura, e não um toque.
+    const zone = zones.get('guarda')!;
+    zone.append(card());
+    down();
+    move(40, 40);
+    hit = card();
+    up(40, 40);
+    expect(onDrop).toHaveBeenLastCalledWith('guarda');
+    expect(onTap).not.toHaveBeenCalled();
+  });
+
+  it('depois do Esc ou do pointercancel, soltar sobre a própria carta não toca nem solta', () => {
+    const onDrop = vi.fn();
+    const onTap = vi.fn();
+    render(<Harness onDrop={onDrop} onTap={onTap} />);
+    down();
+    move(40, 40);
+    fireEvent.keyDown(window, { key: 'Escape' });
+    hit = card();
+    up(12, 12);
+    expect(onTap).not.toHaveBeenCalled();
+    expect(onDrop).not.toHaveBeenCalled();
+    down();
+    move(40, 40);
+    fireEvent.pointerCancel(card(), { ...POINTER });
+    hit = card();
+    up(12, 12);
+    expect(onTap).not.toHaveBeenCalled();
+    expect(onDrop).not.toHaveBeenCalled();
+  });
+
   it('o clique que o navegador manda depois do arrasto não vira toque nem chega ao botão; depois da folga, o clique volta ao normal', () => {
     vi.useFakeTimers();
     const onTap = vi.fn();

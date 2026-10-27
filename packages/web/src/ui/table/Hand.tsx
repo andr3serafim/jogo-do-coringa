@@ -53,9 +53,10 @@ interface HandCardProps {
 function HandCard({ card, index, count, selected }: HandCardProps) {
   const { onSelectCard, handDrag, locked } = useTableUi();
   const zones = () => handDrag?.zones(card.id) ?? NO_ZONES;
+  // O mesmo `locked` que apaga a carta e o toque; sem zona (nenhuma jogada com ela agora) não há o que arrastar.
+  const enabled = handDrag !== undefined && onSelectCard !== undefined && !locked && zones().size > 0;
   const { bind, dragging, ghost } = useCardDrag({
-    // O mesmo `locked` que apaga a carta e o toque; sem zona (nenhuma jogada com ela agora) não há o que arrastar.
-    enabled: handDrag !== undefined && onSelectCard !== undefined && !locked && zones().size > 0,
+    enabled,
     zones,
     onDrop: (key) => handDrag?.onDrop(card.id, key),
     onTap: () => onSelectCard?.(card.id),
@@ -67,7 +68,7 @@ function HandCard({ card, index, count, selected }: HandCardProps) {
   if (dragging) style.opacity = DRAGGED_OPACITY;
   return (
     <li className="relative flex-none" style={style}>
-      <TableCard card={card} size="hand" inHand selected={selected} roleText={HAND_ROLE[card.kind]} dragRef={bind} />
+      <TableCard card={card} size="hand" inHand selected={selected} roleText={HAND_ROLE[card.kind]} dragRef={bind} grabbable={enabled} />
       <DragGhost ghost={ghost} />
     </li>
   );

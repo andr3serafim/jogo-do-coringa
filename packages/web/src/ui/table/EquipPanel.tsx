@@ -132,7 +132,7 @@ function EquipCard({
   return (
     <>
       {/* No ar, a de origem esmaece (esta carta não é animada, então o Motion não põe `opacity` inline nela). */}
-      <Card card={card} size="hand" animated={false} dragRef={bind} className={dragging ? 'opacity-40' : enabled ? 'cursor-grab' : ''} />
+      <Card card={card} size="hand" animated={false} dragRef={bind} grabbable={enabled} className={dragging ? 'opacity-40' : ''} />
       <DragGhost ghost={ghost} />
     </>
   );

@@ -12,7 +12,8 @@
 // - No arrasto, o ponteiro é capturado, o fantasma (`DragGhost`) segue o dedo e a zona sob ele sai de `elementFromPoint` + `closest('[data-soltar]')`,
 //   subindo pelos ancestrais até a primeira zona que esteja em `zones()` (a última carta de uma fileira, que não vale, não esconde a fileira, que
 //   vale). As zonas válidas ganham `data-soltar-ativo` enquanto a carta está no ar, e a que está sob o dedo também `data-soltar-sob` (o
-//   contorno é CSS parado, em `styles.css`). A soltura chama `onDrop(chave)`, ou `onDrop(null)` fora de toda zona válida.
+//   contorno é CSS parado, em `styles.css`). A soltura chama `onDrop(chave)`, ou `onDrop(null)` fora de toda zona válida. Soltar sem
+//   zona de volta sobre a própria carta é toque (`onTap`), e não `onDrop(null)`: o dedo do celular escorrega uns pixels num toque.
 // - `pointercancel`, `Esc`, a perda do foco da janela, `enabled` virando falso e a carta saindo da tela cancelam sem soltar nem tocar. O
 //   `pointercancel` também não arma o engolidor: o navegador não manda clique depois dele.
 // - Com `enabled` falso nada começa, e o `pointerdown` nem é lido: o palco (`Stage`) trata o dele como sempre. O gesto também nunca
@@ -52,7 +53,7 @@ export interface CardDragOptions {
   zones: () => ReadonlySet<DropKey>;
   /** A soltura: a chave da zona válida sob o dedo, ou `null` fora de todas. */
   onDrop: (key: DropKey | null) => void;
-  /** O toque (menos de `DRAG_THRESHOLD_PX` de movimento) de um ponteiro; o teclado não passa por aqui. */
+  /** O toque de um ponteiro (menos de `DRAG_THRESHOLD_PX` de movimento, ou um arrasto sem zona solto de volta sobre a própria carta); o teclado não passa por aqui. */
   onTap: () => void;
 }
 
@@ -195,6 +196,12 @@ function createDragController(initial: CardDragOptions, host: Host) {
     }
   };
 
+  /** O ponto da janela está sobre a carta de origem (ou sobre algo dentro dela)? */
+  const isOverCard = (x: number, y: number): boolean => {
+    const under = document.elementFromPoint(x, y);
+    return el !== null && under !== null && el.contains(under);
+  };
+
   const ghostNode = (current: Gesture): HTMLElement | null => {
     if (el === null) return null;
     if (clone === null || clone.gesture !== current) clone = { gesture: current, node: cloneForGhost(el, current.rect) };
@@ -240,9 +247,12 @@ function createDragController(initial: CardDragOptions, host: Host) {
     const phase = current.phase;
     const { onDrop, onTap, zones } = options;
     const key = phase === 'dragging' ? (zoneAt(event.clientX, event.clientY, zones())?.key ?? null) : null;
+    // O dedo que passou do limiar mas solta sem zona, ainda em cima da própria carta, só escorregou: é um toque (um toque no celular
+    // costuma andar uns pixels). Uma zona válida sob o ponto vale mais; soltar sobre outra carta continua sendo `onDrop(null)`.
+    const backOnCard = phase === 'dragging' && key === null && isOverCard(event.clientX, event.clientY);
     finish();
     swallowClick();
-    if (phase === 'pending') onTap();
+    if (phase === 'pending' || backOnCard) onTap();
     else if (phase === 'dragging') onDrop(key);
   };
 
