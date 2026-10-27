@@ -177,7 +177,7 @@ export function sceneText(beat: Beat, names: Names): { title: string; detail: st
   const title = SCENE_TITLE[scene];
   switch (event.type) {
     case 'Exodia':
-      return { title, detail: `${names.of(event.player)} reuniu os quatro K` };
+      return { title, detail: `${names.of(event.player)} reuniu os quatro K e vence!` };
     case 'AbsoluteAttack':
     case 'AbsoluteDefenseStarted':
       return { title, detail: names.of(event.player) };

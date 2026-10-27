@@ -6,6 +6,7 @@
 import type { SpecialCard } from '@coringa/engine';
 import { screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { LAYOUT_SPRING } from '../../src/ui/anim/motion.ts';
 import { INITIATIVE_ID } from '../../src/model/effects.ts';
 import { advance, busy, cleanup, emit, mount, MINE, TURN, THEIRS, stage } from './anim-harness.tsx';
 import type { ViewSpec } from '../fixtures.ts';
@@ -19,7 +20,7 @@ vi.mock('motion/react-m', async () => {
       const { layoutId, layoutDependency, transition, ...rest } = props as {
         layoutId?: string;
         layoutDependency?: string;
-        transition?: { layout?: { delay?: number; duration?: number } };
+        transition?: { layout?: { delay?: number; duration?: number; visualDuration?: number } };
       } & Record<string, unknown>;
       // Props do Motion que não são atributos do DOM.
       delete rest.animate;
@@ -31,7 +32,8 @@ vi.mock('motion/react-m', async () => {
         ...rest,
         'data-layout-id': layoutId,
         'data-layout-delay': transition?.layout?.delay,
-        'data-layout-duration': transition?.layout?.duration,
+        // A mola (U4) não tem `duration`: o que vale é quanto ela leva para assentar.
+        'data-layout-duration': transition?.layout?.duration ?? transition?.layout?.visualDuration,
         'data-layout-dep': layoutDependency,
       });
     };
@@ -141,7 +143,7 @@ describe('encerrar na hora as transições que ficaram no ar', () => {
     const m = mount(BEFORE);
     emit(m, AFTER, [TURN, BUFF]);
     const before = new Map(probe.mounts);
-    expect(durationOf(m.container, 'j1')).toBe('0.3');
+    expect(durationOf(m.container, 'j1')).toBe(String(LAYOUT_SPRING.visualDuration));
     await m.user.click(stage(m.container));
     expect(probe.mounts.get('j1')).toBe((before.get('j1') ?? 0) + 1);
     expect(durationOf(m.container, 'j1')).toBe('0');
@@ -174,7 +176,7 @@ describe('encerrar na hora as transições que ficaram no ar', () => {
     emit(m, AFTER, [TURN, BUFF]);
     advance(200);
     emit(m, AFTER, [TURN, TURN, BUFF]);
-    expect(durationOf(m.container, 'j1')).toBe('0.3');
+    expect(durationOf(m.container, 'j1')).toBe(String(LAYOUT_SPRING.visualDuration));
     // Mais batidas antes (e o teto de 1 s, com uma decisão minha esperando): espera mais que na linha velha.
     expect(Number(delayOf(m.container, 'j1'))).toBeGreaterThan(0.4);
   });
@@ -185,7 +187,7 @@ describe('encerrar na hora as transições que ficaram no ar', () => {
     await m.user.click(stage(m.container));
     expect(durationOf(m.container, 'j1')).toBe('0');
     emit(m, BEFORE, [BUFF]);
-    expect(durationOf(m.container, 'j1')).toBe('0.3');
+    expect(durationOf(m.container, 'j1')).toBe(String(LAYOUT_SPRING.visualDuration));
   });
 
   it('pular sem batida não remonta nada', async () => {
@@ -210,7 +212,7 @@ describe('o salto (resync) troca a mesa sem deslizar', () => {
 
   it('um `state` em resync chega com duração zero em toda carta, mesmo com a carta presente nos dois quadros', () => {
     const m = mount(BEFORE);
-    expect(durationOf(m.container, 'j1')).toBe('0.3');
+    expect(durationOf(m.container, 'j1')).toBe(String(LAYOUT_SPRING.visualDuration));
     emit(m, AFTER, [], { resync: true });
     expect(busy(m.container)).toBe(false);
     expect(durations(m.container).length).toBeGreaterThan(10);
@@ -219,7 +221,7 @@ describe('o salto (resync) troca a mesa sem deslizar', () => {
 
   it('a marca da iniciativa também troca de lado de uma vez', () => {
     const m = mount(THEIRS);
-    expect(durationOf(m.container, INITIATIVE_ID)).toBe('0.3');
+    expect(durationOf(m.container, INITIATIVE_ID)).toBe(String(LAYOUT_SPRING.visualDuration));
     emit(m, { ...THEIRS, initiative: 'opponent' }, [], { resync: true });
     expect(durationOf(m.container, INITIATIVE_ID)).toBe('0');
   });
@@ -230,34 +232,34 @@ describe('o salto (resync) troca a mesa sem deslizar', () => {
     expect(durationOf(m.container, 'j1')).toBe('0');
 
     emit(m, BEFORE, [TURN, BUFF]);
-    expect(durationOf(m.container, 'j1')).toBe('0.3');
+    expect(durationOf(m.container, 'j1')).toBe(String(LAYOUT_SPRING.visualDuration));
     expect(delayOf(m.container, 'j1')).toBe('0.4');
     advance(1_000);
 
     emit(m, AFTER, [], { resync: true });
     expect(durationOf(m.container, 'j1')).toBe('0');
     emit(m, BEFORE, [TURN, BUFF], { catchUp: true });
-    expect(durationOf(m.container, 'j1')).toBe('0.3');
+    expect(durationOf(m.container, 'j1')).toBe(String(LAYOUT_SPRING.visualDuration));
   });
 
   it('o `state` ao vivo e o catchUp, sem resync, nunca zeram a duração das cartas que se mexem', () => {
     const live = mount(BEFORE);
     emit(live, AFTER, [TURN, BUFF]);
-    expect(durationOf(live.container, 'j1')).toBe('0.3');
+    expect(durationOf(live.container, 'j1')).toBe(String(LAYOUT_SPRING.visualDuration));
     live.unmount();
 
     const catchUp = mount(BEFORE);
     emit(catchUp, AFTER, [TURN, BUFF], { catchUp: true });
-    expect(durationOf(catchUp.container, 'j1')).toBe('0.3');
+    expect(durationOf(catchUp.container, 'j1')).toBe(String(LAYOUT_SPRING.visualDuration));
   });
 
   it('com movimento reduzido nada muda: a duração segue a regra de sempre (o MotionConfig é que desliga o deslize)', () => {
     const m = mount(BEFORE, { prefs: { reduceMotion: true } });
     emit(m, AFTER, [TURN, BUFF]);
-    expect(durationOf(m.container, 'j1')).toBe('0.3');
+    expect(durationOf(m.container, 'j1')).toBe(String(LAYOUT_SPRING.visualDuration));
     expect(delayOf(m.container, 'j1')).toBe('0');
     advance(1_000);
-    expect(durationOf(m.container, 'j1')).toBe('0.3');
+    expect(durationOf(m.container, 'j1')).toBe(String(LAYOUT_SPRING.visualDuration));
     emit(m, BEFORE, [], { resync: true });
     expect(durationOf(m.container, 'j1')).toBe('0');
   });

@@ -516,7 +516,9 @@ describe('Ressuscitar e o cemitério (spec §3.4, §7)', () => {
   it('abre o cemitério só com as numéricas, escolhe o 7, escolhe Ataque e manda RESURRECT', async () => {
     const m = mount(RESURRECT);
     const opener = inBar().getByRole('button', { name: startsWith('Ressuscitar') });
-    expect(opener).toHaveAccessibleName('Ressuscitar 1 Ressurreição disponível');
+    // A segunda linha diz de onde vem a Ressurreição e o que há no cemitério (U2), e a arte da lápide fica escondida.
+    expect(opener).toHaveAccessibleName('Ressuscitar 1 Ressurreição da quadra · 3 numéricas no cemitério');
+    expect(opener.querySelector('[data-arte="ressurreicao"]')).toHaveAttribute('aria-hidden', 'true');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     await m.user.click(opener);
 

@@ -76,9 +76,13 @@ escuro numa janela de 1 s; com movimento reduzido, nenhuma inversão) e sem afro
 
 ## Fase D: números do jogo [autor: pedidos dele, medidos antes do merge]
 
-- **R2:** 8 Ás (hoje 6). **R3:** fileiras de 10 (hoje 7; a garantia de compra segue: 4 × 10 = 40 ≤ 64). **R3:** vida padrão 500
-  (hoje 300), ajustável no menu: config da sala na criação → protocolo → servidor (validação) → `createGame` → replay com a config.
-  O treino também tem o ajuste.
+- **R2:** 8 Ás (hoje 6). **R3:** fileiras de **8** (hoje 7; correção do autor em 2026-10-27, que antes pedira 10; a garantia de
+  compra segue: 4 × 8 = 32 ≤ 64). **R3:** vida padrão 500 (hoje 300), ajustável no menu: config da sala na criação → protocolo →
+  servidor (validação) → `createGame` → replay com a config. O treino também tem o ajuste.
+- Com 8 cartas cabem **duas quadras na mesma fileira** (4 + 4). A spec 1 §1.8 já prevê que cada quadra conta separadamente: um teste
+  confere `quadValues`, o bônus e as Ressurreições com duas quadras numa fileira, e o resumo das regras diz isso.
+- Layout: 8 cartas por fileira têm de caber no celular de 360 px, no tablet e no PC (hoje dimensionados para 7), com os números
+  legíveis.
 - Medidos no simulador antes do merge; recalibra e mede de novo o portão do Difícil. O resumo das regras e o teste que amarra os
   números acompanham.
 

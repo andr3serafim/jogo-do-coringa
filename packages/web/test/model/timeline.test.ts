@@ -6,6 +6,7 @@ import {
   DECISION_CAP_MS,
   INVERT_COOLDOWN_MS,
   INVERT_MIN_HOLD_MS,
+  RARE_SCENE_MS,
   buildTimeline,
   luminanceSwitches,
   timelineMs,
@@ -108,6 +109,11 @@ const REFLECT_PLAYED: GameEvent = {
   player: 'p1',
   reflect: { k: face('k1'), j: face('j1', 'J'), q: face('q1', 'Q') },
 };
+const REFLECT_TRIGGERED: GameEvent = { type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 30 };
+
+/** A soma das cenas raras, que não contam no teto de decisão. */
+const rareMs = (beats: Beat[]): number =>
+  beats.filter((b) => b.scene !== null && b.scene in RARE_SCENE_MS).reduce((sum, b) => sum + b.durationMs, 0);
 
 /** Maior número de trocas dentro de uma janela fechada de 1000 ms. */
 function maxSwitchesPerSecond(switches: number[]): number {
@@ -148,7 +154,8 @@ describe('mapeamento evento → batida (spec §4.2)', () => {
       expect(beat!.kind).toBe(kind);
       expect(beat!.scene).toBe(scene ?? null);
       if (cards) expect(beat!.cards).toEqual(cards);
-      expect(beat!.durationMs).toBe(kind === 'quiet' ? 0 : BEAT_MS[kind]);
+      const rare = scene !== undefined && scene in RARE_SCENE_MS ? RARE_SCENE_MS[scene as keyof typeof RARE_SCENE_MS] : null;
+      expect(beat!.durationMs).toBe(kind === 'quiet' ? 0 : (rare ?? BEAT_MS[kind]));
       expect(beat!.invert !== null).toBe(kind === 'scene');
     });
   }
@@ -178,13 +185,14 @@ describe('buildTimeline', () => {
     expect(luminanceSwitches(beats)).toEqual([]);
   });
 
-  it('Exodia gera uma cena com uma inversão de pelo menos 300 ms', () => {
+  it('Exodia gera uma cena longa (a rara, U3) com uma inversão de pelo menos 300 ms, na chegada do quarto K', () => {
     const beats = buildTimeline([EXODIA], LIVE);
     expect(beats).toHaveLength(1);
     const [beat] = beats;
     expect(beat!.kind).toBe('scene');
     expect(beat!.scene).toBe('EXODIA');
-    expect(beat!.durationMs).toBe(BEAT_MS.scene);
+    expect(beat!.durationMs).toBe(RARE_SCENE_MS.EXODIA);
+    expect(beat!.invert!.atMs).toBe(1_400);
     expect(beat!.invert!.holdMs).toBeGreaterThanOrEqual(INVERT_MIN_HOLD_MS);
     expect(luminanceSwitches(beats)).toEqual([beat!.invert!.atMs, beat!.invert!.atMs + beat!.invert!.holdMs]);
   });
@@ -230,10 +238,21 @@ describe('buildTimeline', () => {
   });
 
   it('decisionPending: inversão que ficaria com menos de 300 ms é descartada, a cena continua', () => {
-    const beats = buildTimeline([ABS_ATTACK, DAMAGE, EXODIA], { ...LIVE, decisionPending: true });
+    const beats = buildTimeline([REFLECT_PLAYED, DAMAGE, REFLECT_TRIGGERED], { ...LIVE, decisionPending: true });
     expect(timelineMs(beats)).toBeLessThanOrEqual(DECISION_CAP_MS);
     expect(beats.filter((b) => b.kind === 'scene')).toHaveLength(2);
     expect(beats.every((b) => b.invert === null)).toBe(true);
+  });
+
+  it('decisionPending: as cenas raras não encolhem nem contam no teto; o resto encolhe para caber nele', () => {
+    const events: GameEvent[] = [...ATTACK, ABS_ATTACK, DAMAGE, { type: 'TurnStarted', player: 'p2' }];
+    const beats = buildTimeline(events, { ...LIVE, decisionPending: true });
+    const rare = beats.find((b) => b.scene === 'ABSOLUTE_ATTACK')!;
+    expect(rare.durationMs).toBe(RARE_SCENE_MS.ABSOLUTE_ATTACK);
+    expect(rare.invert).toEqual({ atMs: rare.startMs + 700, holdMs: 600 });
+    expect(timelineMs(beats) - rare.durationMs).toBeLessThanOrEqual(DECISION_CAP_MS);
+    expect(beats.filter((b) => b !== rare && b.durationMs > 0).every((b) => b.durationMs < BEAT_MS[b.kind as 'move'])).toBe(true);
+    expectPhotosafe(beats, false);
   });
 
   it('decisionPending sem nada a comprimir não mexe nos tempos', () => {
@@ -259,14 +278,22 @@ describe('buildTimeline', () => {
 });
 
 describe('fotossensibilidade (spec §10.4)', () => {
-  it('sintético: [AbsoluteAttack, DamageDealt, Exodia] — a segunda cena perde a inversão', () => {
-    const beats = buildTimeline([ABS_ATTACK, DAMAGE, EXODIA], LIVE);
+  it('sintético: [ReflectPlayed, DamageDealt, ReflectTriggered] — a segunda cena perde a inversão', () => {
+    const beats = buildTimeline([REFLECT_PLAYED, DAMAGE, REFLECT_TRIGGERED], LIVE);
     const scenes = beats.filter((b) => b.kind === 'scene');
     expect(scenes).toHaveLength(2);
     expect(scenes[0]!.invert).not.toBeNull();
     expect(scenes[1]!.invert).toBeNull();
-    expect(scenes[1]!.scene).toBe('EXODIA');
+    expect(scenes[1]!.scene).toBe('REFLECT_TRIGGERED');
     expect(luminanceSwitches(beats)).toHaveLength(2);
+    expectPhotosafe(beats, false);
+  });
+
+  it('sintético: [AbsoluteAttack, DamageDealt, Exodia] — as cenas raras, longas, ficam a mais de 2 s e invertem as duas', () => {
+    const beats = buildTimeline([ABS_ATTACK, DAMAGE, EXODIA], LIVE);
+    const [first, second] = beats.filter((b) => b.kind === 'scene').map((b) => b.invert!);
+    expect(second!.atMs - (first!.atMs + first!.holdMs)).toBeGreaterThanOrEqual(INVERT_COOLDOWN_MS);
+    expect(luminanceSwitches(beats)).toHaveLength(4);
     expectPhotosafe(beats, false);
   });
 
@@ -284,7 +311,7 @@ describe('fotossensibilidade (spec §10.4)', () => {
   });
 
   it('cenas coladas: a segunda perde, a terceira volta a inverter depois do intervalo', () => {
-    const beats = buildTimeline([ABS_ATTACK, EXODIA, REFLECT_PLAYED], LIVE);
+    const beats = buildTimeline([REFLECT_PLAYED, REFLECT_TRIGGERED, REFLECT_PLAYED], LIVE);
     expect(beats.map((b) => b.invert !== null)).toEqual([true, false, true]);
     const [first, , third] = beats.map((b) => b.invert!);
     expect(third!.atMs - (first!.atMs + first!.holdMs)).toBeGreaterThanOrEqual(INVERT_COOLDOWN_MS);
@@ -292,7 +319,7 @@ describe('fotossensibilidade (spec §10.4)', () => {
   });
 
   it('cenas coladas em sequência longa: nunca duas inversões a menos de 2 s uma da outra', () => {
-    const beats = buildTimeline(Array.from({ length: 12 }, () => EXODIA), LIVE);
+    const beats = buildTimeline(Array.from({ length: 12 }, () => REFLECT_PLAYED), LIVE);
     const inverted = beats.filter((b) => b.invert).map((b) => b.invert!);
     expect(inverted.length).toBeGreaterThan(1);
     expect(inverted.length).toBeLessThan(12);
@@ -330,7 +357,8 @@ describe('fotossensibilidade (spec §10.4)', () => {
           expectPhotosafe(beats, reducedMotion);
           if (mode === 'resync') expect(beats).toEqual([]);
           else expect(beats).toHaveLength(events.length);
-          if (decisionPending) expect(timelineMs(beats)).toBeLessThanOrEqual(DECISION_CAP_MS);
+          // As cenas raras ficam fora do teto (U3): o resto cabe nele.
+          if (decisionPending) expect(timelineMs(beats) - rareMs(beats)).toBeLessThanOrEqual(DECISION_CAP_MS);
           if (mode === 'catchUp') expect(timelineMs(beats)).toBeLessThanOrEqual(CATCH_UP_CAP_MS);
           if (mode === 'live' && !reducedMotion && !decisionPending) {
             if (beats.some((b) => b.kind === 'scene')) tally.withScene++;

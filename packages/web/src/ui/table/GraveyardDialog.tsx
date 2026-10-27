@@ -23,6 +23,7 @@ import {
 } from '../../model/copy.ts';
 import type { TablePlays } from '../../model/plays.ts';
 import { Card } from '../cards/Card.tsx';
+import { ResurrectIcon } from './ResurrectIcon.tsx';
 
 export type GraveyardMode = 'view' | 'resurrect';
 
@@ -94,9 +95,12 @@ export function GraveyardDialog({ mode, graveyard, options, rowCounts, rowLimit,
     >
       {mode === null ? null : (
         <div className="flex flex-col gap-4">
-          <h2 id={titleId} className="textura font-madeira text-2xl uppercase leading-tight">
-            {mode === 'view' ? GRAVEYARD_TITLE : RESURRECT_TITLE}
-          </h2>
+          <div className="flex items-center gap-2.5">
+            {mode === 'resurrect' ? <ResurrectIcon className="size-11" /> : null}
+            <h2 id={titleId} className="textura font-madeira text-2xl uppercase leading-tight">
+              {mode === 'view' ? GRAVEYARD_TITLE : RESURRECT_TITLE}
+            </h2>
+          </div>
 
           {mode === 'view' ? (
             <ViewBody graveyard={graveyard} />

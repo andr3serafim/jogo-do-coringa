@@ -7,8 +7,13 @@
 // sobreposição; o número de dano, a faixa e a tremida acontecem dentro da duração da própria batida.
 import type { GameEvent } from '@coringa/engine';
 
-/** Duração base de cada tipo de batida (spec §4.1). */
+/** Duração base de cada tipo de batida (spec §4.1). `scene` é a cena comum (o Reflect); as raras têm a sua, em `RARE_SCENE_MS`. */
 export const BEAT_MS = { move: 300, damage: 600, banner: 400, scene: 1_500 } as const;
+/**
+ * As cenas raras (sub-projeto 5, U3): mais longas que a comum, e fora do teto de decisão (o resto da linha do tempo encolhe para
+ * caber nele; elas não). São raras, a Exódia acaba a partida, e o toque ou o Esc pulam na hora.
+ */
+export const RARE_SCENE_MS = { EXODIA: 4_200, ABSOLUTE_ATTACK: 2_600, ABSOLUTE_DEFENSE: 2_600 } as const;
 /** Teto de uma linha do tempo que antecede uma decisão do jogador. */
 export const DECISION_CAP_MS = 1_000;
 /** Teto de uma linha do tempo de `catchUp` (eventos perdidos na reconexão). */
@@ -23,11 +28,22 @@ export const INVERT_MIN_HOLD_MS = 300;
  */
 export const INVERT_COOLDOWN_MS = 2_000;
 
-/** Onde, dentro de uma cena de 1500 ms, a inversão acontece, e quanto ela dura. */
-const SCENE_INVERT_LEAD_MS = 150;
+export type SceneKind = 'EXODIA' | 'ABSOLUTE_ATTACK' | 'ABSOLUTE_DEFENSE' | 'REFLECT_PLAYED' | 'REFLECT_TRIGGERED';
+
+/**
+ * Onde, dentro da cena, a inversão acontece: na comum, logo no começo; nas raras, quando o título carimba (os J ou os Q já em
+ * leque; na Exódia, a chegada do quarto K). A inversão dura sempre o mesmo, e é uma só por cena.
+ */
+export const SCENE_INVERT_LEAD_MS: Record<SceneKind, number> = {
+  REFLECT_PLAYED: 150,
+  REFLECT_TRIGGERED: 150,
+  ABSOLUTE_ATTACK: 700,
+  ABSOLUTE_DEFENSE: 700,
+  EXODIA: 1_400,
+};
 const SCENE_INVERT_HOLD_MS = 600;
 
-export type SceneKind = 'EXODIA' | 'ABSOLUTE_ATTACK' | 'ABSOLUTE_DEFENSE' | 'REFLECT_PLAYED' | 'REFLECT_TRIGGERED';
+const isRare = (scene: SceneKind | null): scene is keyof typeof RARE_SCENE_MS => scene !== null && scene in RARE_SCENE_MS;
 
 export interface Beat {
   event: GameEvent;
@@ -120,8 +136,9 @@ function classify(event: GameEvent): Classified {
   }
 }
 
-function baseDuration(kind: Beat['kind']): number {
-  return kind === 'quiet' ? 0 : BEAT_MS[kind];
+function baseDuration(kind: Beat['kind'], scene: SceneKind | null): number {
+  if (kind === 'quiet') return 0;
+  return kind === 'scene' && isRare(scene) ? RARE_SCENE_MS[scene] : BEAT_MS[kind];
 }
 
 export function buildTimeline(events: GameEvent[], options: TimelineOptions): Beat[] {
@@ -133,16 +150,17 @@ export function buildTimeline(events: GameEvent[], options: TimelineOptions): Be
     const classified = classify(event);
     const flattened = catchUp && classified.kind === 'scene';
     const kind = flattened ? 'banner' : classified.kind;
-    const baseMs = baseDuration(kind) / (catchUp ? 2 : 1);
-    return { event, kind, cards: classified.cards, scene: flattened ? null : classified.scene, baseMs };
+    const scene = flattened ? null : classified.scene;
+    const baseMs = baseDuration(kind, scene) / (catchUp ? 2 : 1);
+    return { event, kind, cards: classified.cards, scene, baseMs, rare: isRare(scene) };
   });
 
-  // 2. Escala proporcional para caber no teto (o menor dos que valem). Arredonda para baixo, para
-  // nunca passar do teto por causa do arredondamento.
+  // 2. Escala proporcional para caber no teto (o menor dos que valem). As cenas raras ficam de fora: não encolhem nem contam
+  // no teto. Arredonda para baixo, para nunca passar do teto por causa do arredondamento.
   const caps: number[] = [];
   if (catchUp) caps.push(CATCH_UP_CAP_MS);
   if (options.decisionPending) caps.push(DECISION_CAP_MS);
-  const totalMs = items.reduce((sum, item) => sum + item.baseMs, 0);
+  const totalMs = items.reduce((sum, item) => sum + (item.rare ? 0 : item.baseMs), 0);
   const cap = Math.min(...caps, Infinity);
   const scale = totalMs > cap ? cap / totalMs : 1;
 
@@ -153,12 +171,13 @@ export function buildTimeline(events: GameEvent[], options: TimelineOptions): Be
   let startMs = 0;
   let lastInvertEndMs = -Infinity;
   for (const item of items) {
-    const durationMs = Math.floor(item.baseMs * scale);
+    const itemScale = item.rare ? 1 : scale;
+    const durationMs = Math.floor(item.baseMs * itemScale);
     let invert: Beat['invert'] = null;
     const yields = reflected && item.scene === 'ABSOLUTE_ATTACK';
     if (item.scene !== null && !options.reducedMotion && !yields) {
-      const holdMs = Math.floor(SCENE_INVERT_HOLD_MS * scale);
-      const atMs = startMs + Math.floor(SCENE_INVERT_LEAD_MS * scale);
+      const holdMs = Math.floor(SCENE_INVERT_HOLD_MS * itemScale);
+      const atMs = startMs + Math.floor(SCENE_INVERT_LEAD_MS[item.scene] * itemScale);
       if (holdMs >= INVERT_MIN_HOLD_MS && atMs - lastInvertEndMs >= INVERT_COOLDOWN_MS) {
         invert = { atMs, holdMs };
         lastInvertEndMs = atMs + holdMs;

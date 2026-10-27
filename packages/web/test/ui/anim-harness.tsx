@@ -55,6 +55,13 @@ export const EXODIA_OVER: ViewSpec = {
 
 export const EXODIA: GameEvent = { type: 'Exodia', player: 'p2' };
 export const ABSOLUTE: GameEvent = { type: 'AbsoluteAttack', player: 'p2' };
+/**
+ * Uma cena comum (1,5 s, a inversão aos 150 ms), para os testes da mecânica de flash. As raras (Exódia e Absolutos) são mais longas
+ * e não encolhem no teto de decisão (U3 do sub-projeto 5).
+ */
+export const SCENE: GameEvent = { type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 40 };
+/** Outra cena comum (o Reflect de Duda devolve o seu golpe). */
+export const SCENE_2: GameEvent = { type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 10 };
 export const TURN: GameEvent = { type: 'TurnStarted', player: 'p2' };
 export const ATTACK: GameEvent = { type: 'AttackDeclared', player: 'p2' };
 export const HIT: GameEvent = { type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 100, defense: 50, damage: 50 };

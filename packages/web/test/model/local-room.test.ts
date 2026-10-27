@@ -337,7 +337,10 @@ describe('LocalRoom', () => {
       gameNo: 1,
       result: { kind: 'WIN', winner: 'p2', reason: 'FORFEIT' },
       cause: 'CONCEDE',
+      // A duração (U5), pelo relógio injetado, do começo da partida ao fim.
+      durationMs: expect.any(Number),
     });
+    expect(last.outcome!.durationMs).toBeGreaterThanOrEqual(0);
     // O state do fim vem antes do room do fim, e o replay da partida entre os dois.
     expect(events.map((e) => e.type).slice(-3)).toEqual(['state', 'replay', 'room']);
     expect(await room.concede()).toMatchObject({ ok: false, code: 'NOT_PLAYING' });

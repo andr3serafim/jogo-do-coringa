@@ -44,8 +44,9 @@ import { previewsOf, previewsWithout, type Previews } from '../../model/preview.
 import type { CardPlay, Target, TablePlays } from '../../model/plays.ts';
 import type { Notice } from '../../model/session.ts';
 import { PRIMARY, PRIMARY_TITLE, SECONDARY, TwoLine } from './controls.tsx';
-import { resurrectionsText, type TableNames } from './labels.ts';
+import { resurrectDetailText, type TableNames } from './labels.ts';
 import { PassButton, ReactionNotice } from './ReactionPanel.tsx';
+import { ResurrectIcon } from './ResurrectIcon.tsx';
 
 export interface ActionBarProps {
   view: PlayerView;
@@ -334,7 +335,7 @@ function TargetList({ view, names, targets, before, disabled, marked, onSeen, on
 function OwnPlays({ view, plays, disabled, onSend, onResurrect }: ActionBarProps) {
   const own = ownCardsById(view);
   const items: ReactNode[] = [];
-  const add = (key: string, title: string, detail: string, onClick: () => void) =>
+  const add = (key: string, title: string, detail: string, onClick: () => void, icon?: ReactNode) =>
     items.push(
       <TwoLine
         key={key}
@@ -344,6 +345,7 @@ function OwnPlays({ view, plays, disabled, onSend, onResurrect }: ActionBarProps
         detailClass="text-xs font-normal leading-tight"
         disabled={disabled}
         onClick={onClick}
+        icon={icon}
         className={`${SECONDARY} gap-0.5`}
       />,
     );
@@ -363,7 +365,9 @@ function OwnPlays({ view, plays, disabled, onSend, onResurrect }: ActionBarProps
     if (cards) add('protect', PROTECT_LABEL, leavesText(cards, 'field'), () => onSend(protect));
   }
   if (plays.resurrect.length > 0) {
-    add('resurrect', RESURRECT_LABEL, resurrectionsText(view.self.resurrectionCount), onResurrect);
+    // A arte da Ressurreição (U2): a carta que sobe da lápide; a linha de baixo diz de onde ela vem e o que há para trazer.
+    const numerics = view.graveyard.filter((card) => card.kind === 'NUM').length;
+    add('resurrect', RESURRECT_LABEL, resurrectDetailText(view.self.resurrectionCount, numerics), onResurrect, <ResurrectIcon />);
   }
   if (items.length === 0) return null;
   return (

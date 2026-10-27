@@ -164,7 +164,7 @@ describe('o replay sai depois do room, em todo caminho que leva a FINISHED', () 
     rec.game!.strikes.p1 = 2;
     h.close(p2);
     h.advance(TIMERS.turnMs + TIMERS.graceMs);
-    expect(rec.outcome).toEqual({ gameNo: 1, result: null, cause: 'ABANDONED' });
+    expect(rec.outcome).toEqual({ gameNo: 1, result: null, cause: 'ABANDONED', durationMs: expect.any(Number) });
     // O abandono não é passo do motor: só o TIMEOUT gerou `state`; depois dele vêm `room` e `replay`.
     expect(types(p1, 3)).toEqual(['state', 'room', 'replay']);
     expect(p1.inbox.at(-1)).toEqual(logged(h));
@@ -178,7 +178,7 @@ describe('o replay sai depois do room, em todo caminho que leva a FINISHED', () 
     h.close(p2);
     h.advance(TIMERS.reconnectMs);
     const rec = h.core.record!;
-    expect(rec.outcome).toEqual({ gameNo: 1, result: null, cause: 'ABANDONED' });
+    expect(rec.outcome).toEqual({ gameNo: 1, result: null, cause: 'ABANDONED', durationMs: expect.any(Number) });
 
     for (const seat of ['p1', 'p2'] as const) {
       const back = h.open();

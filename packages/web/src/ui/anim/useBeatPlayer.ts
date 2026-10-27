@@ -13,7 +13,9 @@
 //   inversões, a cena segue sem inversão;
 // - a cortina sobe se a regra deixa (sem ela, a cena mostra só o painel) e desce quando nenhuma cena a segura, mas nunca
 //   antes de 1 s no ar e nunca antes de a regra deixar: se a descida quebraria o limite, ela espera;
-// - a faixa quer estar no ar quando a batida de agora tem faixa (`bannerBeatAt`) e não há cena nem cortina; ela sobe e
+// - a faixa quer estar no ar quando a batida de agora tem faixa (`bannerBeatAt`) e não há cena nem cortina, e ao vivo fica no ar
+//   depois disso até o texto completar o tempo de leitura (`bannerReadMs`, U1 do sub-projeto 5), mesmo com as batidas já
+//   acabadas: só o visual fica, os controles voltam no fim da linha do tempo, e o pulo, uma cena ou a cortina a tiram; ela sobe e
 //   desce quando a regra deixa e, recusada, fica como está até deixar (um `catchUp` logo depois de uma cena ao vivo subia a
 //   faixa no instante em que a cortina descia). Só o visual espera: as batidas e os controles seguem a linha do tempo.
 //
@@ -124,11 +126,15 @@ export interface BeatPlayerOptions {
   reducedMotion: boolean;
   /** Há uma decisão do jogador esperando (spec §4.1): tudo cabe em 1 s. */
   decisionPending: boolean;
+  /** O tempo de leitura da faixa de uma batida, em ms (U1): ela fica no ar ao menos isso, contado de quando a batida começa. */
+  bannerReadMs?: (beat: Beat) => number;
 }
+
+const NO_READING = (): number => 0;
 
 export function useBeatPlayer(
   state: StateMessage | null,
-  { reducedMotion, decisionPending }: BeatPlayerOptions,
+  { reducedMotion, decisionPending, bannerReadMs = NO_READING }: BeatPlayerOptions,
   onSettled?: () => void,
 ): BeatPlayer {
   // O `state` com que a mesa abre (recarregar a página, entrar na partida) já está feito: não há de onde animar.
@@ -244,8 +250,28 @@ export function useBeatPlayer(
   // --- Faixa ---
   const beat = current.done ? null : (run.beats[current.index] ?? null);
   const bannerBeat = current.done ? null : bannerBeatAt(run.beats, current.index, run.catchUp);
+  const sceneNow = beat?.kind === 'scene' && beat.scene !== null;
+  // A faixa que ainda não completou o tempo de leitura (U1), só ao vivo (o `catchUp` é um resumo, e o histórico guarda tudo). A
+  // batida com faixa começa a contar; outra faixa recomeça a conta; o pulo, uma cena ou a cortina a encerram.
+  const [lingering, setLingering] = useState<Beat | null>(null);
+  const liveBanner = run.catchUp ? null : bannerBeat;
+  const blocked = curtain || sceneNow;
+  if (blocked) {
+    if (lingering !== null) setLingering(null);
+  } else if (liveBanner !== null && liveBanner !== lingering) {
+    setLingering(liveBanner);
+  }
+  const readMs = useRef(bannerReadMs);
+  useEffect(() => {
+    readMs.current = bannerReadMs;
+  }, [bannerReadMs]);
+  useEffect(() => {
+    if (lingering === null) return;
+    const timer = window.setTimeout(() => setLingering((now) => (now === lingering ? null : now)), readMs.current(lingering));
+    return () => window.clearTimeout(timer);
+  }, [lingering]);
   // Com a cortina no ar ou uma cena no painel, a faixa espera: as duas juntas seriam o mesmo texto duas vezes.
-  const wantBanner = bannerBeat !== null && !curtain && !(beat?.kind === 'scene' && beat.scene !== null);
+  const wantBanner = (bannerBeat !== null || lingering !== null) && !blocked;
   const [banner, setBanner] = useState(false);
   const bannerUp = useRef(false);
   const bannerWanted = useRef(false);
@@ -343,6 +369,7 @@ export function useBeatPlayer(
     timers.current = [];
     live.current = null;
     setMachine((m) => (m.done ? m : { ...m, done: true }));
+    setLingering(null);
     cutInversion();
     // Sem a espera mínima da cena: o jogador pulou. A regra de flash ainda vale, e a cortina só desce quando ela deixa.
     lowerCurtain(0);

@@ -254,7 +254,7 @@ describe('fim de partida', () => {
     expect(rec.status).toBe('FINISHED');
     const phase = game.state.phase;
     if (phase.kind !== 'GAME_OVER') throw new Error('a fase devia ser GAME_OVER');
-    expect(rec.outcome).toEqual({ gameNo: 1, result: phase.result, cause: 'NORMAL' });
+    expect(rec.outcome).toEqual({ gameNo: 1, result: phase.result, cause: 'NORMAL', durationMs: expect.any(Number) });
     expect(game.cause).toBe('NORMAL');
     if (phase.result.kind === 'WIN') {
       expect(rec.score).toEqual({ p1: phase.result.winner === 'p1' ? 1 : 0, p2: phase.result.winner === 'p2' ? 1 : 0, draws: 0 });
@@ -322,7 +322,7 @@ describe('fim de partida', () => {
     rec.agenda.push({ kind: 'phase', at: 5, epoch: 1 }, { kind: 'reconnect', at: 6, seat: 'p1', gameNo: 1 });
     const logs = finishGame(rec, 'NORMAL', draw.h.now + 5_000);
     expect(rec).toMatchObject({ status: 'FINISHED', score: { p1: 0, p2: 0, draws: 1 } });
-    expect(rec.outcome).toEqual({ gameNo: 1, result: { kind: 'DRAW', reason: 'ANTI_STALL' }, cause: 'NORMAL' });
+    expect(rec.outcome).toEqual({ gameNo: 1, result: { kind: 'DRAW', reason: 'ANTI_STALL' }, cause: 'NORMAL', durationMs: expect.any(Number) });
     expect(logs.map((l) => l.evt)).toEqual(['game.ended', 'game.replay']);
     expect(logs[0]).toMatchObject({ durationMs: 5_000, steps: 0, rounds: 3 });
     // Os dois estão conectados (o `hello` tira o `idleExpiry`): sobra só o teto.
@@ -339,7 +339,7 @@ describe('fim de partida', () => {
     const rec3 = abandoned.h.core.record!;
     const logs3 = finishGame(rec3, 'ABANDONED', abandoned.h.now);
     expect(rec3.score).toEqual({ p1: 0, p2: 0, draws: 0 });
-    expect(rec3.outcome).toEqual({ gameNo: 1, result: null, cause: 'ABANDONED' });
+    expect(rec3.outcome).toEqual({ gameNo: 1, result: null, cause: 'ABANDONED', durationMs: expect.any(Number) });
     expect(rec3.status).toBe('FINISHED');
     expect(logs3[0]).toMatchObject({ evt: 'game.ended', result: null, cause: 'ABANDONED' });
     expect(logs3[1]).toMatchObject({ evt: 'game.replay', gameNo: 1 });
@@ -357,7 +357,7 @@ describe('desistência', () => {
     const rec = h.core.record!;
     await h.send(p2, { t: 'concede', id: 'c1' });
     expect(rec.status).toBe('FINISHED');
-    expect(rec.outcome).toEqual({ gameNo: 1, result: { kind: 'WIN', winner: 'p1', reason: 'FORFEIT' }, cause: 'CONCEDE' });
+    expect(rec.outcome).toEqual({ gameNo: 1, result: { kind: 'WIN', winner: 'p1', reason: 'FORFEIT' }, cause: 'CONCEDE', durationMs: expect.any(Number) });
     expect(rec.score).toEqual({ p1: 1, p2: 0, draws: 0 });
     expect(rec.game!.steps.at(-1)).toEqual({ player: 'system', action: { type: 'FORFEIT', loser: 'p2' } });
     expect(p2.inbox.at(-4)).toMatchObject({ t: 'state' });

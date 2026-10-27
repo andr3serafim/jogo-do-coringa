@@ -4,6 +4,7 @@
 import { RULES_VERSION } from '@coringa/engine';
 import { act, cleanup as unmountAll, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { LAYOUT_SPRING } from '../../src/ui/anim/motion.ts';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { recordPastGame, type PastGame } from '../../src/model/past-games.ts';
 import ReplayScreen from '../../src/ui/screens/ReplayScreen.tsx';
@@ -18,14 +19,15 @@ vi.mock('motion/react-m', async () => {
       const { layoutId, layoutDependency, transition, ...rest } = props as {
         layoutId?: string;
         layoutDependency?: string;
-        transition?: { layout?: { delay?: number; duration?: number } };
+        transition?: { layout?: { delay?: number; duration?: number; visualDuration?: number } };
       } & Record<string, unknown>;
       delete rest.animate;
       delete rest.initial;
       return React.createElement(tag, {
         ...rest,
         'data-layout-id': layoutId,
-        'data-layout-duration': transition?.layout?.duration,
+        // A mola (U4) não tem `duration`: o que vale é quanto ela leva para assentar.
+        'data-layout-duration': transition?.layout?.duration ?? transition?.layout?.visualDuration,
         'data-layout-dep': layoutDependency,
       });
     };
@@ -83,16 +85,16 @@ describe('o replay: o salto troca a mesa sem deslizar', () => {
     const { user, container } = open();
     expect(durations(container).size).toBe(1);
 
-    // Passo a passo, com as batidas: as cartas deslizam (0,3 s; as que um passo seguinte encerrou na hora chegam com 0).
+    // Passo a passo, com as batidas: as cartas deslizam (a mola, U4; as que um passo seguinte encerrou na hora chegam com 0).
     for (let i = 0; i < 12; i++) await user.click(control('Próximo passo'));
     advance(5_000);
-    expect(durations(container).has('0.3')).toBe(true);
+    expect(durations(container).has(String(LAYOUT_SPRING.visualDuration))).toBe(true);
 
     await user.click(control('Passo anterior'));
     expect(durations(container)).toEqual(new Set(['0']));
 
     await user.click(control('Próximo passo'));
-    expect(durations(container)).toEqual(new Set(['0.3']));
+    expect(durations(container)).toEqual(new Set([String(LAYOUT_SPRING.visualDuration)]));
     advance(5_000);
 
     await user.click(control('Início'));
@@ -100,7 +102,7 @@ describe('o replay: o salto troca a mesa sem deslizar', () => {
 
     await user.click(control('Próximo passo'));
     await user.click(control('Próximo passo'));
-    expect(durations(container)).toEqual(new Set(['0.3']));
+    expect(durations(container)).toEqual(new Set([String(LAYOUT_SPRING.visualDuration)]));
     advance(5_000);
 
     await user.selectOptions(screen.getByLabelText('Rodada'), '3');

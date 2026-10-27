@@ -127,6 +127,8 @@ export class LocalRoom implements RoomConnection {
   #gameNo = 0;
   #score: Score = { p1: 0, p2: 0, draws: 0 };
   #outcome: Outcome | undefined;
+  /** Quando a partida em curso começou (pelo `now` injetado): o painel de fim mostra a duração. */
+  #startedAt = 0;
 
   constructor(options: LocalRoomOptions) {
     this.#options = options;
@@ -260,6 +262,7 @@ export class LocalRoom implements RoomConnection {
 
   /** Começo de partida (a primeira ou a revanche): `seq` e `epoch` só sobem, e o primeiro `state` vem sem eventos. */
   #publishStart(): void {
+    this.#startedAt = this.#options.now();
     this.#seq += 1;
     this.#epoch += 1;
     this.#publishRoom('PLAYING');
@@ -288,7 +291,7 @@ export class LocalRoom implements RoomConnection {
       const result = next.phase.result;
       if (result.kind === 'WIN') this.#score[result.winner as 'p1' | 'p2'] += 1;
       else this.#score.draws += 1;
-      this.#outcome = { gameNo: this.#gameNo, result, cause };
+      this.#outcome = { gameNo: this.#gameNo, result, cause, durationMs: this.#options.now() - this.#startedAt };
       // O replay sai antes do `room` em FINISHED: quem vê a sala terminar já o tem, e o `gameNo` dele ainda é o da partida.
       this.#publishReplay();
       this.#publishRoom('FINISHED');

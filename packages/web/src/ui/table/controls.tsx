@@ -1,6 +1,6 @@
 // Peças de controle que a barra de ação e os painéis das fases (Equipar, ordem, reação) dividem: o botão secundário
 // (contorno de papel sobre a tinta), o principal (ouro) e o botão de duas linhas. Alvo de toque ≥ 44 px (spec §3.2).
-import { useId, type ComponentPropsWithoutRef } from 'react';
+import { useId, type ComponentPropsWithoutRef, type ReactNode } from 'react';
 import type { Notice } from '../../model/session.ts';
 
 export const SECONDARY =
@@ -27,6 +27,8 @@ interface TwoLineProps extends Omit<ComponentPropsWithoutRef<'button'>, 'childre
   detail?: string;
   titleClass?: string;
   detailClass?: string;
+  /** Um desenho à esquerda das duas linhas (escondido do leitor de tela: o nome é o texto). */
+  icon?: ReactNode;
 }
 
 /**
@@ -34,16 +36,11 @@ interface TwoLineProps extends Omit<ComponentPropsWithoutRef<'button'>, 'childre
  * nome) exige que o texto visível do botão seja trecho contínuo do nome, e o texto visível é o das duas linhas. O espaço entre
  * os dois `span` separa as palavras do texto visível ("Atacar 27 × 3 · dano 24", e não "Atacar27 × 3 · dano 24").
  */
-export function TwoLine({ title, detail, titleClass = '', detailClass = '', className = '', ...rest }: TwoLineProps) {
+export function TwoLine({ title, detail, titleClass = '', detailClass = '', className = '', icon, ...rest }: TwoLineProps) {
   const titleId = useId();
   const detailId = useId();
-  return (
-    <button
-      type="button"
-      aria-labelledby={detail ? `${titleId} ${detailId}` : titleId}
-      className={`flex flex-col items-start ${className}`}
-      {...rest}
-    >
+  const lines = (
+    <>
       <span id={titleId} className={titleClass}>
         {title}
       </span>
@@ -55,6 +52,23 @@ export function TwoLine({ title, detail, titleClass = '', detailClass = '', clas
           </span>
         </>
       ) : null}
+    </>
+  );
+  return (
+    <button
+      type="button"
+      aria-labelledby={detail ? `${titleId} ${detailId}` : titleId}
+      className={`flex ${icon ? 'flex-row items-center gap-2.5' : 'flex-col items-start'} ${className}`}
+      {...rest}
+    >
+      {icon ? (
+        <>
+          {icon}
+          <span className="flex flex-col items-start">{lines}</span>
+        </>
+      ) : (
+        lines
+      )}
     </button>
   );
 }

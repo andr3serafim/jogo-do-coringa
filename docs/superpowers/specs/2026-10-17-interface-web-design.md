@@ -189,7 +189,11 @@ A mesa está em §3 e §4. O menu da partida tem:
 
 - Um painel sobre a mesa final, que continua visível e só para ver.
 - O painel mostra:
-  - o resultado: "Você venceu", "Duda venceu", "Empate" ou "Partida sem resultado";
+  - o resultado: "Você venceu", "Duda venceu", "Empate" ou "Partida sem resultado". Desde o sub-projeto 5 (U5) ele é grande, em
+    estilo HQ: "VOCÊ VENCEU!" em Alfa Slab One sobre um "estouro" desenhado no código (estrela de pontas irregulares, ouro com
+    contorno de tinta), com um "pop" de mola na entrada (parado com movimento reduzido). A exclamação é só desenho: o nome do
+    diálogo segue "Você venceu";
+  - a duração da partida ("Duração 12:34"), do `outcome.durationMs` que o servidor e o treino mandam (sem ele, a linha não aparece);
   - o motivo:
     - pelo motor: vida zerada, Exódia ou anti-travamento;
     - pelo `outcome.cause` do servidor: caiu e não voltou em 60 s, três tempos estourados, desistência ou os dois saíram;
@@ -320,7 +324,9 @@ A mesa está em §3 e §4. O menu da partida tem:
 - **Proteger-se do Reflect** (sacrificando J + Q + K do próprio campo).
 - Em todas elas, a interface prefere cartas reais ao Selvagem e diz quais cartas vão sair ("sai J♥ + Q♣ + K♥ do seu campo").
 
-**Ressuscitar:** abre o cemitério filtrado nas numéricas → escolhe a carta → escolhe a fileira (só as que têm vaga).
+**Ressuscitar:** abre o cemitério filtrado nas numéricas → escolhe a carta → escolhe a fileira (só as que têm vaga). O botão tem arte própria (sub-projeto 5, U2): uma carta numérica subindo de uma lápide, com três raios, desenhada no código; a
+segunda linha diz de onde vem e o que há ("1 Ressurreição da quadra · 3 numéricas no cemitério"). O diálogo do cemitério, no modo de
+ressuscitar, tem o mesmo desenho no título.
 
 **Atacar ou encerrar o turno:**
 
@@ -426,13 +432,25 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
 - **Orçamento:**
   - batida comum: 250 a 350 ms;
   - número de dano: ~600 ms;
-  - cenas especiais (Exódia, Ataque Absoluto, Defesa Absoluta, Reflect lançado e disparado): até ~1,5 s;
+  - cena comum (Reflect lançado e disparado): ~1,5 s;
+  - cenas raras (sub-projeto 5, U3): Ataque Absoluto e Defesa Absoluta 2,6 s (os quatro J em leque, os quatro Q em muro), Exódia
+    4,2 s (os quatro K sobem um a um até a cruz). O título carimba, com mola, no instante da única inversão da cena; raios de
+    xilogravura giram devagar atrás do painel. Elas **não encolhem nem contam no teto de decisão** (o resto da linha do tempo encolhe
+    para caber nele): são raras, a Exódia acaba a partida, e o toque ou o Esc pulam na hora. No `catchUp` viram faixa, como as outras;
   - um ataque inteiro: ~2 s.
+- **Movimento (sub-projeto 5, U4):** as cartas e a marca da iniciativa deslizam com mola (`type: 'spring'`, `visualDuration` 0,42 s,
+  `bounce` 0,15), começando na batida que as move; a mola não atrasa a linha do tempo. Os esmaecimentos das camadas são de 220 ms,
+  com `ease-out`, e o número do dano sobe desacelerando.
+- **Tempo de leitura da faixa (sub-projeto 5, U1):** ao vivo, a faixa fica no ar ao menos `bannerReadMs(texto)` (600 ms + 30 ms
+  por caractere, entre 1 s e 2 s), contado do começo da batida dela, mesmo depois de as batidas acabarem. Só o visual fica: os
+  controles voltam no fim da linha do tempo, como sempre, e a faixa não pega toque. Outra faixa recomeça a conta; o pulo, uma cena
+  ou a cortina a tiram. No `catchUp` não há esse tempo extra.
 - **Decisão não espera animação:**
   - o que leva a uma decisão do jogador (a janela de reação aberta pelo ataque do outro) aparece em no máximo ~1 s;
   - o relógio mostra sempre o tempo real do servidor;
   - um toque em qualquer lugar da mesa termina as batidas na hora.
-- Os controles ficam desligados durante as batidas e voltam no fim ou no pulo, com no máximo ~1 s de espera.
+- Os controles ficam desligados durante as batidas e voltam no fim ou no pulo, com no máximo ~1 s de espera (mais a cena rara, quando
+  há uma: ela não encolhe, e o toque a pula).
 - **`catchUp: true`** (eventos perdidos na reconexão): as batidas tocam em velocidade dobrada, sem cenas especiais e com teto de ~3 s. A faixa fica no ar da primeira à última batida com faixa, com o texto da última que passou: uma subida e uma descida por reconexão, e não uma por faixa (§10.4). O histórico marca "Enquanto você estava fora".
 - **`resync: true`:** a mesa troca de uma vez, sem animação. O histórico registra "Mesa sincronizada".
 - **Reduzir movimento** (do sistema ou do menu):

@@ -486,7 +486,7 @@ describe('estouros e W.O. (§7.3)', () => {
       ['EQUIP', 3],
     ]);
     expect(rec.status).toBe('FINISHED');
-    expect(rec.outcome).toEqual({ gameNo: 1, result: { kind: 'WIN', winner: 'p2', reason: 'FORFEIT' }, cause: 'AFK' });
+    expect(rec.outcome).toEqual({ gameNo: 1, result: { kind: 'WIN', winner: 'p2', reason: 'FORFEIT' }, cause: 'AFK', durationMs: expect.any(Number) });
     expect(rec.score).toEqual({ p1: 0, p2: 1, draws: 0 });
     expect(rec.game!.steps.at(-1)).toEqual({ player: 'system', action: { type: 'FORFEIT', loser: 'p1' } });
     const evts = h.logs.map((line) => line.evt);

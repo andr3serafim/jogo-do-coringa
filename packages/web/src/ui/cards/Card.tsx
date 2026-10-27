@@ -11,6 +11,7 @@ import * as m from 'motion/react-m';
 import type { ReactNode } from 'react';
 import type { CardFx } from '../../model/effects.ts';
 import { useAnim } from '../anim/context.ts';
+import { layoutTransition } from '../anim/motion.ts';
 import { Coringa } from './Coringa.tsx';
 import { isRedSuit, Suit } from './Suit.tsx';
 
@@ -250,7 +251,7 @@ export function Card({
           initial: enter === null ? undefined : { opacity: 0 },
           animate: enter !== null ? { opacity: 1 } : shake ? { rotate: [0, -4, 4, -3, 3, 0] } : undefined,
           transition: {
-            layout: { delay: anim.delayOf(card.id), duration: anim.instant(card.id) ? 0 : 0.3, ease: 'easeInOut' as const },
+            layout: layoutTransition(anim.delayOf(card.id), anim.instant(card.id)),
             rotate: { duration: anim.beatMs / 1000 },
             opacity: { delay: enter ?? 0, duration: 0.25 },
           },

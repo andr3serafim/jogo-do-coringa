@@ -25,6 +25,7 @@ import * as m from 'motion/react-m';
 import { useEffect, useRef } from 'react';
 import { INITIATIVE_ID } from '../../model/effects.ts';
 import { useAnim } from '../anim/context.ts';
+import { layoutTransition } from '../anim/motion.ts';
 import { Card, cardName } from '../cards/Card.tsx';
 import { useSound } from '../sound-context.ts';
 import { useTableUi } from './context.ts';
@@ -173,7 +174,7 @@ function InitiativeMark({ mine }: { mine: boolean }) {
       layoutId={INITIATIVE_ID}
       layoutDependency={anim.layoutKey}
       transition={{
-        layout: { delay: anim.delayOf(INITIATIVE_ID), duration: anim.instant(INITIATIVE_ID) ? 0 : 0.3, ease: 'easeInOut' },
+        layout: layoutTransition(anim.delayOf(INITIATIVE_ID), anim.instant(INITIATIVE_ID)),
       }}
       className="block size-2.5 rotate-45 bg-ouro"
     />

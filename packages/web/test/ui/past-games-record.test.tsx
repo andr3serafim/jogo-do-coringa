@@ -248,7 +248,8 @@ describe('a mesa grava a partida terminada', () => {
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(loadPastGames(store)).toHaveLength(1);
-    advance(2_000);
+    // A cena da Exódia é longa (U3): 4,2 s.
+    advance(4_400);
     expect(screen.getByRole('dialog', { name: 'Duda venceu' })).toBeInTheDocument();
     expect(loadPastGames(store)).toHaveLength(1);
   });

@@ -32,6 +32,10 @@ export const handCountText = (name: string, count: number): string =>
 export const resurrectionsText = (count: number): string =>
   `${count} ${plural(count, 'Ressurreição disponível', 'Ressurreições disponíveis')}`;
 
+/** A segunda linha do botão Ressuscitar (U2): de onde a Ressurreição vem e o que há para trazer. */
+export const resurrectDetailText = (count: number, numerics: number): string =>
+  `${count} ${plural(count, 'Ressurreição da quadra', 'Ressurreições das quadras')} · ${numerics} ${plural(numerics, 'numérica', 'numéricas')} no cemitério`;
+
 /** "Rodadas sem dano: 1 de 3", o nome do contador do anti-travamento na faixa central. */
 export const streakLabel = (count: number, limit: number): string => `Rodadas sem dano: ${count} de ${limit}`;
 

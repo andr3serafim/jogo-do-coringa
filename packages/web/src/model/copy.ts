@@ -370,6 +370,20 @@ export const REVIEW_GAME_LABEL = 'Rever a partida';
 /** Quem é o jogador `id` na frase: "Você" ou o apelido do oponente. */
 const whoText = (id: PlayerId, me: PlayerId, names: OutcomeNames): string => (id === me ? 'Você' : names.opponent);
 
+export const DURATION_LABEL = 'Duração';
+
+/** O tempo de partida no painel de fim (U5): "12:34", ou "1:02:03" passando de uma hora. */
+export function durationText(ms: number): string {
+  const total = Math.max(0, Math.round(ms / 1000));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = String(total % 60).padStart(2, '0');
+  return hours > 0 ? `${hours}:${String(minutes).padStart(2, '0')}:${seconds}` : `${minutes}:${seconds}`;
+}
+
+/** O título do painel de fim termina em exclamação quando tem resultado ("Duda venceu!", "Empate!"); sem resultado, não. */
+export const resultShouts = (outcome: Outcome): boolean => outcome.result !== null;
+
 /** "Você venceu", "Duda venceu", "Empate" ou "Partida sem resultado". */
 export function resultTitle(outcome: Outcome, me: PlayerId, names: OutcomeNames): string {
   const { result } = outcome;

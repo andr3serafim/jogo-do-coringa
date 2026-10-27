@@ -52,7 +52,7 @@ describe('queda e volta no meio da partida', () => {
     expect(rec2.status).toBe('PLAYING');
     h2.advance(1);
     expect(rec2.status).toBe('FINISHED');
-    expect(rec2.outcome).toEqual({ gameNo: 1, result: { kind: 'WIN', winner: 'p1', reason: 'FORFEIT' }, cause: 'RECONNECT_TIMEOUT' });
+    expect(rec2.outcome).toEqual({ gameNo: 1, result: { kind: 'WIN', winner: 'p1', reason: 'FORFEIT' }, cause: 'RECONNECT_TIMEOUT', durationMs: expect.any(Number) });
     expect(rec2.score).toEqual({ p1: 1, p2: 0, draws: 0 });
     expect(rec2.game!.steps.at(-1)).toEqual({ player: 'system', action: { type: 'FORFEIT', loser: 'p2' } });
     expect(h2.logs).toContainEqual({ evt: 'wo.applied', code: CODE, gameNo: 1, loser: 'p2', cause: 'RECONNECT_TIMEOUT' });
@@ -73,7 +73,7 @@ describe('queda e volta no meio da partida', () => {
     expect(find(rec, 'idleExpiry')!.at).toBe(t + 10_000 + TIMERS.idleExpiryMs);
     h.advance(50_000); // t + 60 s: vence o reconnect de p1 e o outro (p2) está fora
     expect(rec.status).toBe('FINISHED');
-    expect(rec.outcome).toEqual({ gameNo: 1, result: null, cause: 'ABANDONED' });
+    expect(rec.outcome).toEqual({ gameNo: 1, result: null, cause: 'ABANDONED', durationMs: expect.any(Number) });
     expect(rec.score).toEqual({ p1: 0, p2: 0, draws: 0 });
     expect(rec.game!.steps.some((step) => step.action.type === 'FORFEIT')).toBe(false);
     expect(h.logs).toContainEqual(expect.objectContaining({ evt: 'game.ended', gameNo: 1, result: null, cause: 'ABANDONED' }));
@@ -104,7 +104,7 @@ describe('queda e volta no meio da partida', () => {
     await h.send(back, h.hello(tokens.p1));
     expect(find(rec, 'idleExpiry')).toBeUndefined();
     h.advance(50_000); // vence o reconnect de p2 (t + 70 s) com p1 conectado
-    expect(rec.outcome).toEqual({ gameNo: 1, result: { kind: 'WIN', winner: 'p1', reason: 'FORFEIT' }, cause: 'RECONNECT_TIMEOUT' });
+    expect(rec.outcome).toEqual({ gameNo: 1, result: { kind: 'WIN', winner: 'p1', reason: 'FORFEIT' }, cause: 'RECONNECT_TIMEOUT', durationMs: expect.any(Number) });
     expect(p2.open).toBe(false);
   });
 
@@ -187,7 +187,7 @@ describe('queda silenciosa e varredura', () => {
     h.advance(10_000);
     expect(p2.closed).toEqual({ code: 4008, reason: 'sem sinal' });
     expect(rec.status).toBe('FINISHED');
-    expect(rec.outcome).toEqual({ gameNo: 1, result: null, cause: 'ABANDONED' });
+    expect(rec.outcome).toEqual({ gameNo: 1, result: null, cause: 'ABANDONED', durationMs: expect.any(Number) });
     expect(rec.score).toEqual({ p1: 0, p2: 0, draws: 0 });
     expect(rec.game!.steps.some((step) => step.action.type === 'FORFEIT')).toBe(false);
     expect(h.logs.some((line) => line.evt === 'wo.applied')).toBe(false);
@@ -652,7 +652,7 @@ describe('W.O. por estouros e abandono (Ruling 13)', () => {
     h.advance(TIMERS.equipMs + TIMERS.graceMs);
     expect(rec.game!.strikes).toEqual({ p1: 3, p2: 3 });
     expect(rec.status).toBe('FINISHED');
-    expect(rec.outcome).toEqual({ gameNo: 1, result: null, cause: 'ABANDONED' });
+    expect(rec.outcome).toEqual({ gameNo: 1, result: null, cause: 'ABANDONED', durationMs: expect.any(Number) });
     expect(rec.score).toEqual({ p1: 0, p2: 0, draws: 0 });
     expect(rec.game!.steps.some((step) => step.action.type === 'FORFEIT')).toBe(false);
     expect(h.logs.some((line) => line.evt === 'wo.applied')).toBe(false);
@@ -676,7 +676,7 @@ describe('W.O. por estouros e abandono (Ruling 13)', () => {
     h.close(p2);
     h.advance(TIMERS.turnMs + TIMERS.graceMs);
     expect(rec.game!.strikes.p1).toBe(3);
-    expect(rec.outcome).toEqual({ gameNo: 1, result: null, cause: 'ABANDONED' });
+    expect(rec.outcome).toEqual({ gameNo: 1, result: null, cause: 'ABANDONED', durationMs: expect.any(Number) });
     expect(rec.score).toEqual({ p1: 0, p2: 0, draws: 0 });
     expect(h.logs.some((line) => line.evt === 'wo.applied')).toBe(false);
     expect(h.messages(p1, 'room').at(-1)).toMatchObject({ status: 'FINISHED', outcome: { cause: 'ABANDONED' } });

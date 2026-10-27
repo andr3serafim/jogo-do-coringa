@@ -12,8 +12,9 @@ export function DamageNumber({ amount, ms, reduced }: { amount: number; ms: numb
       aria-hidden="true"
       data-dano
       initial={{ opacity: 0 }}
-      animate={reduced ? { opacity: [0, 1, 1, 0] } : { opacity: [0, 1, 1, 0], y: [0, -6, -18, -26] }}
-      transition={{ duration: ms / 1000, times, ease: 'linear' }}
+      animate={reduced ? { opacity: [0, 1, 1, 0] } : { opacity: [0, 1, 1, 0], y: [0, -10, -22, -28] }}
+      // O número sobe desacelerando (U4): rápido no começo, assentando no alto.
+      transition={{ duration: ms / 1000, times, ease: 'easeOut' }}
       className="pointer-events-none absolute -top-5 left-0 z-10 border-2 border-tinta bg-vermelho px-1.5 font-texto text-xl font-extrabold leading-tight tabular-nums text-papel pc:-top-7 pc:text-3xl"
     >
       −{amount}

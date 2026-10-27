@@ -326,7 +326,7 @@ describe('sceneText: o título e a linha de baixo de cada cena', () => {
       ).detail,
     ).toBe('Duda armou o escudo');
     expect(sceneText(beat({ type: 'AbsoluteAttack', player: 'p2' }), names).detail).toBe('Duda');
-    expect(sceneText(beat({ type: 'Exodia', player: 'p2' }), names).detail).toBe('Duda reuniu os quatro K');
+    expect(sceneText(beat({ type: 'Exodia', player: 'p2' }), names).detail).toBe('Duda reuniu os quatro K e vence!');
     expect(sceneText(beat({ type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 5 }), names).detail).toBe(
       'O ataque voltou: 5 de dano em você',
     );

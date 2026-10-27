@@ -131,7 +131,7 @@ export function finishGame(record: RoomRecord, cause: OutcomeCause, now: number)
     result = phase.result;
   }
   record.status = 'FINISHED';
-  record.outcome = { gameNo: record.gameNo, result, cause };
+  record.outcome = { gameNo: record.gameNo, result, cause, durationMs: now - game.startedAt };
   if (result?.kind === 'WIN') record.score[result.winner as SeatId] += 1;
   else if (result?.kind === 'DRAW') record.score.draws += 1;
   game.cause = cause;

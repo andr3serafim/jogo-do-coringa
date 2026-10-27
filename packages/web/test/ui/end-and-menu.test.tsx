@@ -44,6 +44,8 @@ interface MountOptions {
   /** `null`: partida sem resultado (`ABANDONED`). */
   result?: GameResult | null;
   cause?: OutcomeCause;
+  /** A duração que o servidor mandou no `outcome` (U5). */
+  durationMs?: number;
   gameNo?: number;
   score?: Score;
   /** Eu pedi revanche. */
@@ -87,6 +89,7 @@ function roomOf(options: MountOptions, extra: MountOptions = {}): RoomMessage {
       gameNo: o.gameNo ?? 1,
       result: o.result === undefined ? FINISHED_RESULT : o.result,
       cause: o.cause ?? 'NORMAL',
+      ...(o.durationMs === undefined ? {} : { durationMs: o.durationMs }),
     };
     room.outcome = outcome;
   }
@@ -262,6 +265,27 @@ describe('fim de partida: o resultado e o motivo', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
+  it('o resultado é grande, com a exclamação só no desenho (o nome do diálogo segue "Você venceu"), e sobre o estouro (U5)', () => {
+    mount({ result: win('p1', 'HP') });
+    const heading = within(endDialog('Você venceu')).getByRole('heading', { name: 'Você venceu' });
+    expect(heading).toHaveTextContent('Você venceu!');
+    expect(heading.className).toContain('font-madeira');
+    expect(heading.closest('[data-resultado]')!.querySelector('[data-estouro]')).not.toBeNull();
+  });
+
+  it('sem resultado, sem exclamação', () => {
+    mount({ result: null, cause: 'ABANDONED' });
+    expect(within(endDialog('Partida sem resultado')).getByRole('heading')).toHaveTextContent(/^Partida sem resultado$/);
+  });
+
+  it('mostra a duração da partida que o servidor mandou, e nada quando ela não vem', () => {
+    const m = mount({ result: win('p2', 'HP'), durationMs: 754_000 });
+    expect(within(endDialog('Duda venceu')).getByText('12:34')).toHaveAttribute('data-duracao');
+    m.unmount();
+    mount({ result: win('p2', 'HP') });
+    expect(document.querySelector('[data-duracao]')).toBeNull();
+  });
+
   it('espera as batidas do último golpe: o painel só chega depois da cena da Exódia', () => {
     const m = connect(THEIRS);
     render(<PlayTable session={m.session} />);
@@ -281,6 +305,9 @@ describe('fim de partida: o resultado e o motivo', () => {
     // A cena da Exódia ainda toca: o painel não a cobre.
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     advance(2_000);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    // A cena da Exódia é longa (U3): 4,2 s.
+    advance(2_400);
     expect(screen.getByRole('dialog', { name: 'Duda venceu' })).toBeInTheDocument();
   });
 });

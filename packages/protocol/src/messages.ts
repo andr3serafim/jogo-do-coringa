@@ -13,6 +13,8 @@ export interface Outcome {
   /** `null` quando a partida acabou sem resultado (`ABANDONED`). */
   result: GameResult | null;
   cause: OutcomeCause;
+  /** Quanto a partida durou, em ms, do começo ao fim (o painel de fim mostra, U5 do sub-projeto 5). Sem ele, o painel não diz. */
+  durationMs?: number;
 }
 
 export interface SeatInfo {

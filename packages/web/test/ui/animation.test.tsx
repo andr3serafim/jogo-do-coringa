@@ -8,15 +8,17 @@ import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { FLASH_WINDOW_MS } from '../../src/model/flash.ts';
-import { readingMs } from '../../src/model/reading.ts';
+import { bannerReadMs, readingMs } from '../../src/model/reading.ts';
 import { Session } from '../../src/model/session.ts';
 import { DEFAULT_PREFS } from '../../src/model/storage.ts';
-import { INVERT_COOLDOWN_MS, INVERT_MIN_HOLD_MS } from '../../src/model/timeline.ts';
+import { INVERT_COOLDOWN_MS, INVERT_MIN_HOLD_MS, RARE_SCENE_MS } from '../../src/model/timeline.ts';
 import { useBoardBusy } from '../../src/ui/anim/context.ts';
 import { Stage } from '../../src/ui/anim/Stage.tsx';
 import { deferredAck, scenarioAt, type ViewSpec } from '../fixtures.ts';
 import {
   ABSOLUTE,
+  SCENE,
+  SCENE_2,
   advance,
   ATTACK,
   banner,
@@ -57,9 +59,9 @@ describe('palco: a cena inverte a tela inteira uma vez (spec §10.1, §10.4)', (
     emit(m, EXODIA_OVER, [EXODIA]);
     expect(busy(m.container)).toBe(true);
     const trace = watchInversion(m.container);
-    trace.run(1_600);
-    // Liga aos 150 ms, desliga 600 ms depois: uma inversão só, e mantida bem mais que o piso de 300 ms.
-    expect(trace.flips).toEqual([150, 750]);
+    trace.run(4_300);
+    // Liga aos 1400 ms (a chegada do quarto K), desliga 600 ms depois: uma inversão só, mantida bem mais que o piso de 300 ms.
+    expect(trace.flips).toEqual([1_400, 2_000]);
     expect(trace.flips[1]! - trace.flips[0]!).toBeGreaterThanOrEqual(INVERT_MIN_HOLD_MS);
     expect(busy(m.container)).toBe(false);
   });
@@ -68,7 +70,7 @@ describe('palco: a cena inverte a tela inteira uma vez (spec §10.1, §10.4)', (
     const m = mount(THEIRS);
     emit(m, EXODIA_OVER, [EXODIA]);
     expect(stage(m.container).style.filter).toBe('');
-    advance(150);
+    advance(1_400);
     expect(stage(m.container).style.filter).toBe('invert(1)');
     expect(inverted(m.container)).toBe(true);
     advance(599);
@@ -84,7 +86,7 @@ describe('palco: a cena inverte a tela inteira uma vez (spec §10.1, §10.4)', (
     expect(scene(m.container)).toHaveAttribute('data-cena', 'EXODIA');
     expect(scene(m.container)).toHaveTextContent('EXÓDIA!');
     expect(scene(m.container)).toHaveTextContent('Duda reuniu os quatro K');
-    advance(1_499);
+    advance(4_199);
     expect(scene(m.container)).not.toBeNull();
     advance(1);
     expect(scene(m.container)).toBeNull();
@@ -96,14 +98,54 @@ describe('palco: a cena inverte a tela inteira uma vez (spec §10.1, §10.4)', (
     expect(scene(m.container)).toHaveAttribute('aria-hidden', 'true');
   });
 
-  it('uma cena dentro do teto de 1 s (decisão esperando) inverte uma vez, por 400 ms (a escala 2/3 de 150 e 600)', () => {
+  it('uma cena comum dentro do teto de 1 s (decisão esperando) inverte uma vez, por 400 ms (a escala 2/3 de 150 e 600)', () => {
     const m = mount(MINE);
-    emit(m, MINE, [ABSOLUTE]);
+    emit(m, MINE, [SCENE]);
     const trace = watchInversion(m.container);
     trace.run(1_100);
     expect(trace.flips).toEqual([100, 500]);
     expect(trace.flips[1]! - trace.flips[0]!).toBeGreaterThanOrEqual(INVERT_MIN_HOLD_MS);
     expect(busy(m.container)).toBe(false);
+  });
+});
+
+describe('cenas raras (U3): a figura, o título que carimba e os raios', () => {
+  const figure = (container: HTMLElement) => container.querySelector('[data-figura]');
+  const figureCards = (container: HTMLElement) => [...container.querySelectorAll('[data-figura] [data-card-id]')];
+
+  it('a Exódia: os quatro K em cruz, os raios girando, e o título com "e vence!"', () => {
+    const m = mount(THEIRS);
+    emit(m, EXODIA_OVER, [EXODIA]);
+    expect(figure(m.container)).toHaveAttribute('data-figura', 'cross');
+    expect(figureCards(m.container).map((card) => card.getAttribute('data-card-id'))).toEqual(['cena-K-0', 'cena-K-1', 'cena-K-2', 'cena-K-3']);
+    expect(m.container.querySelector('[data-raios]')!.getAttribute('class')).toContain('animate-[spin');
+    expect(scene(m.container)).toHaveTextContent('Duda reuniu os quatro K e vence!');
+  });
+
+  it('o Ataque Absoluto abre os J em leque, e a Defesa Absoluta faz um muro de Q', () => {
+    const m = mount(THEIRS);
+    emit(m, THEIRS, [ABSOLUTE]);
+    expect(figure(m.container)).toHaveAttribute('data-figura', 'fan');
+    expect(figureCards(m.container)).toHaveLength(4);
+    advance(RARE_SCENE_MS.ABSOLUTE_ATTACK + 1_100);
+    emit(m, THEIRS, [{ type: 'AbsoluteDefenseStarted', player: 'p2' }]);
+    expect(figure(m.container)).toHaveAttribute('data-figura', 'wall');
+    expect(figureCards(m.container).every((card) => card.getAttribute('data-card-id')!.startsWith('cena-Q-'))).toBe(true);
+  });
+
+  it('a cena comum (o Reflect) não tem figura nem raios', () => {
+    const m = mount(THEIRS);
+    emit(m, THEIRS, [SCENE]);
+    expect(scene(m.container)).not.toBeNull();
+    expect(figure(m.container)).toBeNull();
+    expect(m.container.querySelector('[data-raios]')).toBeNull();
+  });
+
+  it('com movimento reduzido, a figura já parada e os raios parados', () => {
+    const m = mount(THEIRS, { prefs: { reduceMotion: true } });
+    emit(m, EXODIA_OVER, [EXODIA]);
+    expect(figureCards(m.container)).toHaveLength(4);
+    expect(m.container.querySelector('[data-raios]')!.getAttribute('class')).not.toContain('animate-');
   });
 });
 
@@ -114,7 +156,7 @@ describe('palco: movimento reduzido (spec §4.1, §10.4)', () => {
     expect(scene(m.container)).toHaveAttribute('data-reduzido', 'true');
     expect(scene(m.container)).toHaveTextContent('EXÓDIA!');
     const trace = watchInversion(m.container);
-    trace.run(1_600);
+    trace.run(4_300);
     expect(trace.flips).toEqual([]);
     expect(stage(m.container).style.filter).toBe('');
   });
@@ -129,7 +171,7 @@ describe('palco: movimento reduzido (spec §4.1, §10.4)', () => {
     const m = mount(THEIRS);
     emit(m, EXODIA_OVER, [EXODIA]);
     const trace = watchInversion(m.container);
-    trace.run(1_600);
+    trace.run(4_300);
     expect(trace.flips).toEqual([]);
     expect(scene(m.container)).toBeNull();
   });
@@ -144,8 +186,8 @@ describe('palco: movimento reduzido (spec §4.1, §10.4)', () => {
     const m = mount(THEIRS);
     emit(m, EXODIA_OVER, [EXODIA]);
     const trace = watchInversion(m.container);
-    trace.run(1_600);
-    expect(trace.flips).toEqual([150, 750]);
+    trace.run(4_300);
+    expect(trace.flips).toEqual([1_400, 2_000]);
   });
 
   it('o sistema que liga o movimento reduzido com a partida aberta vale no `state` seguinte', () => {
@@ -166,7 +208,7 @@ describe('palco: movimento reduzido (spec §4.1, §10.4)', () => {
     });
     emit(m, EXODIA_OVER, [EXODIA]);
     const trace = watchInversion(m.container);
-    trace.run(1_600);
+    trace.run(4_300);
     expect(trace.flips).toEqual([]);
   });
 
@@ -175,7 +217,7 @@ describe('palco: movimento reduzido (spec §4.1, §10.4)', () => {
     act(() => m.session.setPrefs({ ...DEFAULT_PREFS, reduceMotion: true }));
     emit(m, EXODIA_OVER, [EXODIA]);
     const trace = watchInversion(m.container);
-    trace.run(1_600);
+    trace.run(4_300);
     expect(trace.flips).toEqual([]);
   });
 });
@@ -262,7 +304,7 @@ describe('palco: pular as batidas (spec §4.1)', () => {
   it('pular com a inversão no ar a desliga na hora', async () => {
     const m = mount(THEIRS);
     emit(m, EXODIA_OVER, [EXODIA]);
-    advance(300);
+    advance(1_500);
     expect(inverted(m.container)).toBe(true);
     await m.user.click(stage(m.container));
     expect(inverted(m.container)).toBe(false);
@@ -276,11 +318,11 @@ describe('palco: pular as batidas (spec §4.1)', () => {
     const m = mount(MINE);
     const trace = watchMany([() => curtainUp(m.container), () => inverted(m.container)]);
     // Estado 1: cena, faixa e cena sob o teto de 1 s. A inversão fica suprimida; a cortina sobe em 0 e desce em 1000.
-    emit(m, MINE, [ABSOLUTE, TURN, { type: 'AbsoluteDefenseStarted', player: 'p2' }]);
+    emit(m, MINE, [SCENE, TURN, SCENE_2]);
     trace.sample();
     trace.run(1_250);
     // Estado 2, sem teto: a cortina sobe em 1250 e a inversão liga em 1400, por 600 ms (a quarta troca a exatos 1 s da primeira).
-    emit(m, THEIRS, [ABSOLUTE]);
+    emit(m, THEIRS, [SCENE]);
     trace.run(250);
     expect(inverted(m.container)).toBe(true);
     // O jogador pula aos 1500: desligar agora faria 4 trocas em 500 ms (1000, 1250, 1400, 1500).
@@ -297,7 +339,7 @@ describe('palco: pular as batidas (spec §4.1)', () => {
   it('pular com a conta folgada desliga a inversão na hora (3 trocas: 0, 150 e 500)', async () => {
     const m = mount(THEIRS);
     const trace = watchMany([() => curtainUp(m.container), () => inverted(m.container)]);
-    emit(m, THEIRS, [ABSOLUTE]);
+    emit(m, THEIRS, [SCENE]);
     trace.sample();
     trace.run(500);
     await m.user.click(stage(m.container)); // a inversão ligou em 150: desligar aos 500 faz 3 trocas (0, 150, 500)
@@ -442,7 +484,7 @@ describe('palco: trava global de flash (spec §10.4)', () => {
   it('dois `state`s com cena a 200 ms: a segunda cena não inverte, e nenhuma janela de 1 s passa de 3 trocas', () => {
     const m = mount(THEIRS);
     const trace = watchInversion(m.container);
-    emit(m, THEIRS, [ABSOLUTE]);
+    emit(m, THEIRS, [SCENE]);
     trace.run(200);
     emit(m, THEIRS, [{ type: 'AbsoluteDefenseStarted', player: 'p2' }]);
     // A segunda cena toca (título na tela), mas sem inversão.
@@ -456,7 +498,7 @@ describe('palco: trava global de flash (spec §10.4)', () => {
   it('a inversão que já está no ar não é cortada nem esquecida pelo `state` novo', () => {
     const m = mount(THEIRS);
     const trace = watchInversion(m.container);
-    emit(m, THEIRS, [ABSOLUTE]);
+    emit(m, THEIRS, [SCENE]);
     trace.run(200);
     expect(inverted(m.container)).toBe(true);
     emit(m, THEIRS, [TURN]); // outro `state`, sem cena
@@ -469,7 +511,7 @@ describe('palco: trava global de flash (spec §10.4)', () => {
     const m = mount(THEIRS);
     const trace = watchInversion(m.container);
     for (let i = 0; i < 6; i++) {
-      emit(m, THEIRS, [ABSOLUTE]);
+      emit(m, THEIRS, [SCENE]);
       trace.run(200);
     }
     trace.run(4_000);
@@ -480,9 +522,9 @@ describe('palco: trava global de flash (spec §10.4)', () => {
   it('depois do resfriamento, a cena seguinte inverte de novo', () => {
     const m = mount(THEIRS);
     const trace = watchInversion(m.container);
-    emit(m, THEIRS, [ABSOLUTE]);
+    emit(m, THEIRS, [SCENE]);
     trace.run(750 + INVERT_COOLDOWN_MS - 150); // a próxima inversão liga 150 ms depois do `state`
-    emit(m, THEIRS, [ABSOLUTE]);
+    emit(m, THEIRS, [SCENE]);
     trace.run(1_600);
     expect(trace.flips).toEqual([150, 750, 750 + INVERT_COOLDOWN_MS, 750 + INVERT_COOLDOWN_MS + 600]);
     expectFlashSafe(trace.flips);
@@ -491,9 +533,9 @@ describe('palco: trava global de flash (spec §10.4)', () => {
   it('um pouco antes do resfriamento acabar, a cena não inverte', () => {
     const m = mount(THEIRS);
     const trace = watchInversion(m.container);
-    emit(m, THEIRS, [ABSOLUTE]);
+    emit(m, THEIRS, [SCENE]);
     trace.run(750 + INVERT_COOLDOWN_MS - 150 - 10);
-    emit(m, THEIRS, [ABSOLUTE]);
+    emit(m, THEIRS, [SCENE]);
     trace.run(1_600);
     expect(trace.flips).toEqual([150, 750]);
   });
@@ -501,13 +543,13 @@ describe('palco: trava global de flash (spec §10.4)', () => {
   it('pular a inversão no ar não zera o resfriamento: ele conta do instante real do desligar', async () => {
     const m = mount(THEIRS);
     const trace = watchInversion(m.container);
-    emit(m, THEIRS, [ABSOLUTE]);
+    emit(m, THEIRS, [SCENE]);
     trace.run(300);
     await m.user.click(stage(m.container)); // desliga aos 300 ms
     trace.sample();
     // Uma cena nova 1 s depois liga aos 1150 ms: ainda dentro dos 2 s do desligar real (300 + 2000).
     trace.run(700);
-    emit(m, THEIRS, [ABSOLUTE]);
+    emit(m, THEIRS, [SCENE]);
     trace.run(1_600);
     expect(trace.flips).toEqual([150, 300]);
   });
@@ -778,8 +820,9 @@ describe('sobreposições sem pisca-pisca (spec §10.4: somando tudo o que estiv
     const trace = watchMany([() => banner(m.container) !== null]);
     emit(m, THEIRS, [TURN, BANNER, TURN, { type: 'RoundStarted', round: 8, kind: 'ATTACK' }]);
     trace.sample();
-    trace.run(2_000);
-    expect(trace.flips[0]).toEqual([0, 1_600]);
+    trace.run(3_000);
+    // A última faixa começa aos 1200 ms e fica o tempo de leitura dela (U1), além do fim das batidas (1600 ms).
+    expect(trace.flips[0]).toEqual([0, 1_200 + bannerReadMs('Rodada 8 · Ataque')]);
     expect(strip(m.container)).toBe(first);
   });
 
@@ -827,19 +870,53 @@ describe('sobreposições sem pisca-pisca (spec §10.4: somando tudo o que estiv
     trace.sample();
     trace.run(200);
     emit(m, THEIRS, [TURN]);
-    trace.run(1_000);
-    expect(trace.flips[0]).toEqual([0, 600]);
+    trace.run(1_500);
+    // A faixa do segundo `state` fica o tempo de leitura dela (U1).
+    expect(trace.flips[0]).toEqual([0, 200 + bannerReadMs('Vez de Duda')]);
     expect(strip(m.container)).toBe(first);
+  });
+
+  it('a faixa fica o tempo de leitura dela (U1), e os controles voltam antes, no fim das batidas', () => {
+    const m = mount(MINE);
+    emit(m, MINE, [{ type: 'TurnStarted', player: 'p1' }]);
+    expect(banner(m.container)).toHaveTextContent('Sua vez');
+    advance(450);
+    expect(busy(m.container)).toBe(false);
+    expect(within(bar()).getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
+    expect(banner(m.container)).toHaveTextContent('Sua vez');
+    advance(bannerReadMs('Sua vez') - 450 - 50);
+    expect(banner(m.container)).not.toBeNull();
+    advance(100);
+    expect(banner(m.container)).toBeNull();
+  });
+
+  it('o pulo tira a faixa que ainda estava no tempo de leitura', async () => {
+    const m = mount(THEIRS);
+    emit(m, THEIRS, [TURN, ATTACK, HIT]);
+    expect(banner(m.container)).toHaveTextContent('Vez de Duda');
+    await m.user.click(stage(m.container));
+    advance(200);
+    expect(banner(m.container)).toBeNull();
+  });
+
+  it('uma cena tira a faixa que ainda estava no tempo de leitura (as duas juntas repetiriam o texto)', () => {
+    const m = mount(THEIRS);
+    emit(m, THEIRS, [TURN, SCENE]);
+    advance(450);
+    expect(scene(m.container)).not.toBeNull();
+    expect(banner(m.container)).toBeNull();
+    advance(2_000);
+    expect(banner(m.container)).toBeNull();
   });
 
   it('duas cenas de `state`s colados: o escurecimento não solta entre elas, e tudo somado respeita as 3 trocas por segundo', () => {
     const m = mount(THEIRS);
     const first = layer(m.container);
     const trace = watchMany([() => scene(m.container) !== null, () => inverted(m.container)]);
-    emit(m, THEIRS, [ABSOLUTE]);
+    emit(m, THEIRS, [SCENE]);
     trace.sample();
     trace.run(200);
-    emit(m, THEIRS, [{ type: 'AbsoluteDefenseStarted', player: 'p2' }]);
+    emit(m, THEIRS, [SCENE_2]);
     trace.run(3_000);
     // O painel da cena: sobe com a primeira cena e desce no fim da segunda (aos 1700 ms), uma vez.
     expect(trace.flips[0]).toEqual([0, 1_700]);
@@ -852,9 +929,9 @@ describe('sobreposições sem pisca-pisca (spec §10.4: somando tudo o que estiv
   it('com movimento reduzido a cena é o mesmo escurecimento com texto parado, sem inversão e sem piscar', () => {
     const m = mount(THEIRS, { prefs: { reduceMotion: true } });
     const trace = watchMany([() => scene(m.container) !== null, () => inverted(m.container)]);
-    emit(m, THEIRS, [ABSOLUTE]);
+    emit(m, THEIRS, [SCENE]);
     trace.sample();
-    emit(m, THEIRS, [{ type: 'AbsoluteDefenseStarted', player: 'p2' }]);
+    emit(m, THEIRS, [SCENE_2]);
     trace.run(2_000);
     expect(trace.flips[1]).toEqual([]);
     expect(trace.flips[0]).toEqual([0, 1_500]);
@@ -867,7 +944,7 @@ describe('cortina e inversão contam juntas (spec §10.4: no máximo 3 trocas po
     (gap) => {
       const m = mount(THEIRS);
       const trace = watchMany([() => curtainUp(m.container), () => inverted(m.container)]);
-      emit(m, THEIRS, [ABSOLUTE]);
+      emit(m, THEIRS, [SCENE]);
       trace.sample();
       trace.run(gap);
       emit(m, THEIRS, [TURN]);
@@ -884,7 +961,7 @@ describe('cortina e inversão contam juntas (spec §10.4: no máximo 3 trocas po
   it('a cortina desce depois da inversão apagar, não no meio dela (quatro trocas em 750 ms nunca)', () => {
     const m = mount(THEIRS);
     const trace = watchMany([() => curtainUp(m.container), () => inverted(m.container)]);
-    emit(m, THEIRS, [ABSOLUTE]);
+    emit(m, THEIRS, [SCENE]);
     trace.sample();
     trace.run(600);
     emit(m, THEIRS, [TURN]); // o bot responde aos 600 ms
@@ -901,7 +978,7 @@ describe('cortina e inversão contam juntas (spec §10.4: no máximo 3 trocas po
       () => banner(m.container) !== null,
       () => inverted(m.container),
     ]);
-    emit(m, MINE, [ABSOLUTE, TURN, { type: 'AbsoluteDefenseStarted', player: 'p2' }]);
+    emit(m, MINE, [SCENE, TURN, SCENE_2]);
     trace.sample();
     trace.run(2_000);
     expect(trace.flips[0]).toHaveLength(2); // a cortina
@@ -928,7 +1005,7 @@ describe('cortina e inversão contam juntas (spec §10.4: no máximo 3 trocas po
   it('a regra cheia: a cena aparece sem a cortina (só o painel) e sem inversão', async () => {
     const m = mount(THEIRS);
     const trace = watchMany([() => curtainUp(m.container), () => inverted(m.container)]);
-    emit(m, THEIRS, [ABSOLUTE]); // a cortina sobe em 0 e a inversão liga em 150
+    emit(m, THEIRS, [SCENE]); // a cortina sobe em 0 e a inversão liga em 150
     trace.sample();
     trace.run(400);
     await m.user.click(stage(m.container)); // pulo aos 400: a inversão corta, e a cortina espera a regra deixar (1000)
@@ -952,7 +1029,7 @@ describe('cortina e inversão contam juntas (spec §10.4: no máximo 3 trocas po
     (gap) => {
       const m = mount(THEIRS);
       const trace = watchMany([() => banner(m.container) !== null, () => curtainUp(m.container), () => inverted(m.container)]);
-      emit(m, THEIRS, [ABSOLUTE]);
+      emit(m, THEIRS, [SCENE]);
       trace.sample();
       trace.run(gap);
       emit(m, THEIRS, Array.from({ length: 6 }, () => TURN), { catchUp: true });
@@ -987,7 +1064,7 @@ describe('cortina e inversão contam juntas (spec §10.4: no máximo 3 trocas po
       emit(m, THEIRS, [TURN]);
       trace.sample();
       trace.run(gap);
-      emit(m, THEIRS, [ABSOLUTE]);
+      emit(m, THEIRS, [SCENE]);
       trace.sample();
       trace.run(3_000);
       expectFlashSafe(trace.all);
@@ -1009,13 +1086,13 @@ describe('cortina e inversão contam juntas (spec §10.4: no máximo 3 trocas po
     trace.sample();
     trace.run(3_000);
     expectFlashSafe(trace.all);
-    // Com uma decisão minha esperando, a cena cabe no teto de 1 s.
-    expectInvertedWithinScene(trace.flips[2]!, elapsed, elapsed + 1_000);
+    // Mesmo com uma decisão minha esperando, a cena rara não encolhe (U3): a inversão cabe dentro dela.
+    expectInvertedWithinScene(trace.flips[2]!, elapsed, elapsed + RARE_SCENE_MS.ABSOLUTE_ATTACK);
   });
 
   it('a faixa que a trava segura não segura os controles: a decisão chega no teto de 1 s', () => {
     const m = mount(MINE);
-    emit(m, MINE, [ABSOLUTE]);
+    emit(m, MINE, [SCENE]);
     advance(300);
     // O `catchUp` chega com a cortina da cena no ar e uma decisão minha esperando.
     emit(m, MINE, Array.from({ length: 6 }, () => TURN), { catchUp: true });
@@ -1030,7 +1107,7 @@ describe('cortina e inversão contam juntas (spec §10.4: no máximo 3 trocas po
 
   it('com a cortina negada, o painel da cena ainda aparece', async () => {
     const m = mount(THEIRS);
-    emit(m, THEIRS, [ABSOLUTE]);
+    emit(m, THEIRS, [SCENE]);
     advance(400);
     await m.user.click(stage(m.container));
     advance(700);
@@ -1233,7 +1310,7 @@ describe('o painel da cena esmaece (spec §4.1 e §10.4: nada de troca brusca de
     expect(first.className).toContain('opacity-100');
     expect(first.className).not.toContain('opacity-0');
     expect(first).toHaveAttribute('data-ativo', 'true');
-    advance(1_600);
+    advance(RARE_SCENE_MS.ABSOLUTE_ATTACK + 100);
     // No fim da cena o painel continua na página, com o texto dela, só apagado.
     expect(panel(m.container)).toBe(first);
     expect(first.className).toContain('opacity-0');
@@ -1244,7 +1321,7 @@ describe('o painel da cena esmaece (spec §4.1 e §10.4: nada de troca brusca de
 
   it('com a cortina negada o painel também esmaece, e nenhuma cortina sobe', async () => {
     const m = mount(THEIRS);
-    emit(m, THEIRS, [ABSOLUTE]);
+    emit(m, THEIRS, [SCENE]);
     advance(400);
     await m.user.click(stage(m.container));
     advance(700);

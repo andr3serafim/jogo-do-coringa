@@ -19,10 +19,11 @@
 // - O Motion vem com `LazyMotion`: o recurso de layout (`layoutId` das cartas) só existe no `domMax`, carregado por
 //   `import()` à parte, fora do JavaScript inicial (spec §12).
 import { LazyMotion, MotionConfig } from 'motion/react';
-import { useEffect, useMemo, useRef, useState, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
-import { effectsOf, NO_EFFECTS } from '../../model/effects.ts';
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
+import { bannerText, effectsOf, NO_EFFECTS } from '../../model/effects.ts';
 import { roomNames } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
+import { bannerReadMs } from '../../model/reading.ts';
 import { cueOf } from '../../model/sound.ts';
 import type { Beat } from '../../model/timeline.ts';
 import { useSound } from '../sound-context.ts';
@@ -55,9 +56,15 @@ export interface StageProps {
 export function Stage({ snapshot, reducedMotion, onSettled, children }: StageProps) {
   const { state, room } = snapshot;
   // A decisão do jogador espera se há jogada legal para ele neste `state` (spec §4.1: tudo cabe em ~1 s).
-  const player = useBeatPlayer(state, { reducedMotion, decisionPending: snapshot.legal.length > 0 }, onSettled);
-  const { run, beat, index, busy, inverted, curtain, bannerBeat, banner, released, skip } = player;
   const names = useMemo(() => roomNames(state?.view.me ?? 'p1', room?.seats ?? []), [state, room]);
+  // A faixa fica no ar ao menos o tempo de leitura do texto dela (U1).
+  const readBanner = useCallback((beat: Beat) => bannerReadMs(bannerText(beat.event, names) ?? ''), [names]);
+  const player = useBeatPlayer(
+    state,
+    { reducedMotion, decisionPending: snapshot.legal.length > 0, bannerReadMs: readBanner },
+    onSettled,
+  );
+  const { run, beat, index, busy, inverted, curtain, bannerBeat, banner, released, skip } = player;
 
   const count: CountPhase =
     !busy || reducedMotion || run.damageIndex < 0 || index > run.damageIndex
