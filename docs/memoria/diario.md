@@ -24,7 +24,9 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   - o `jogar-treino.bat` do autor sobe o Vite na 5173; para o preview do app, use o `.claude/launch.json` (servidor `web`) só
     com a porta livre;
   - o E2E reaproveita um `wrangler dev` que já esteja na 8787, que pode servir um `dist` velho;
-  - o Chromium do Playwright foi instalado nesta máquina em 2026-10-30.
+  - o Chromium do Playwright foi instalado nesta máquina em 2026-10-30;
+  - escreva no `estado.md` como as coisas ficam **depois** do merge antes do último push da branch. Senão a `main` fica com
+    um estado velho, ou é preciso mais um ciclo de push e CI só para a memória.
 - **Ferramenta útil:** para ver um estado raro da mesa, grave uma entrada de `coringa:partidas` com o replay de uma partida do
   simulador (o formato está em `web/src/model/past-games.ts`) e abra `/partidas/<id>`. A fixture do `layout.spec.ts` é um
   exemplo.

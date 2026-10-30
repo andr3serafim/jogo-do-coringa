@@ -5,34 +5,33 @@
 
 ## Agora
 
-- **Branch:** `feat/revisao-notas`, no checkout principal `D:\andr3\jogo-coringa`, a partir da `main` em `755ddc0`.
-- **Feito nesta branch:**
+- **Branch:** `main`, no checkout principal `D:\andr3\jogo-coringa`. A `feat/revisao-notas` entrou por fast-forward em
+  2026-10-30, com a CI verde na branch (run 41008238994: check + e2e). Ela trouxe:
   - as respostas do autor ao lote de 2026-10-30 no `decisoes.md` ("2026-10-30 (2)") e na spec (F2, F3);
-  - **F5 corrigido:** o tabuleiro quebrado no PC de 1536 × 695, no CSS, com o E2E novo `e2e/layout.spec.ts` e a fixture
-    `e2e/fixtures/especiais.json`;
+  - **F5 corrigido:** o tabuleiro quebrado no PC de 1536 × 695 (CSS), com o E2E `e2e/layout.spec.ts`;
   - **F4 investigado, sem bug** no motor nem na mesa; as explicações voltaram ao autor;
   - a revisão de todas as notas, em `notas/revisao-das-notas.md`;
-  - o histórico agora diz "da Defesa" e "na Defesa", em vez de "do Defesa" e "no Defesa".
-- **Próximo passo exato:** subir a branch (o pre-push roda o `pnpm check`), esperar a CI (check + e2e) e fazer o merge por
-  fast-forward na `main`. Depois, começar a **E1** numa branch `feat/sem-anti-travamento`.
+  - o histórico agora diz "da Defesa" e "na Defesa".
+- **Em curso:** nada.
+- **Próximo passo exato:** começar a **E1** (remover o anti-travamento) numa branch `feat/sem-anti-travamento` a partir da
+  `main`. As perguntas abaixo não a bloqueiam.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
 ## A `main`
 
-`755ddc0`, CI verde (check + e2e). Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D (`8d7f078`, `a5a76c5`,
+`feat/revisao-notas` mesclada (2026-10-30), CI verde (check + e2e). Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D (`8d7f078`, `a5a76c5`,
 `bba8377`, `8cdf0a1`) e a memória compartilhada. Regras em vigor: spec 1
 (`docs/superpowers/specs/2026-10-15-jogo-coringa-regras-motor-design.md`), com os ajustes da spec do sub-projeto 5
 (`2026-10-27-ajustes-design.md`).
 
 ## Fila (sub-projeto 5)
 
-1. **Merge desta branch** (F5, revisão das notas, textos do histórico).
-2. **E1:** sem anti-travamento e sem limite de rodadas. `RULES_VERSION`/`STATE_SCHEMA` 3, partidas de referência regravadas,
+1. **E1:** sem anti-travamento e sem limite de rodadas. `RULES_VERSION`/`STATE_SCHEMA` 3, partidas de referência regravadas,
    portão do Difícil do zero.
-3. **E2:** Equipar livre.
-4. **F1:** apagar o histórico (só web).
-5. **E3 + F2 + F3:** roubo, cura pela Defesa, limite de 4 especiais, Reflect reativo e Devastação, medidos juntos no simulador
+2. **E2:** Equipar livre.
+3. **F1:** apagar o histórico (só web).
+4. **E3 + F2 + F3:** roubo, cura pela Defesa, limite de 4 especiais, Reflect reativo e Devastação, medidos juntos no simulador
    antes de virar regra. As regras estão aprovadas (spec do sub-projeto 5); falta a medição e a forma da penalidade do limite.
 
 ## Esperando o autor
