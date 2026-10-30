@@ -13,11 +13,12 @@
   - **F4 investigado, sem bug** no motor nem na mesa; as explicações voltaram ao autor;
   - a revisão de todas as notas, em `notas/revisao-das-notas.md`;
   - o histórico agora diz "da Defesa" e "na Defesa".
-- **Em curso:** nada.
-- **Próximo passo exato:** começar a **E1** numa branch `feat/sem-anti-travamento` a partir da `main` (depois de mesclar a
-  `feat/memoria-espera`). O autor respondeu às perguntas (`decisoes.md` 2026-10-30 (4)), e a E1 agora leva três coisas: sem
-  anti-travamento, a **Defesa Absoluta até o ataque** e os **Absolutos em 3 s** (spec do sub-projeto 5, E1). Antes de medir,
-  conferir se os bots atacam uma Defesa Absoluta (o risco está na spec).
+- **Em curso:** a **E1** na branch `feat/sem-anti-travamento` (a partir da `feat/memoria-espera`), pelo plano
+  `docs/superpowers/plans/2026-10-30-e1-sem-anti-travamento.md`. As caixas marcadas no plano dizem o que já foi feito.
+- **Próximo passo exato:** tarefa 1 do plano da E1 (Defesa Absoluta até o ataque, com `RULES_VERSION` 3 e as partidas de
+  referência regravadas no mesmo commit). Se a `feat/memoria-espera` ainda não estiver na `main`, mescle-a por fast-forward
+  (CI verde). A E1 leva três coisas: sem anti-travamento, a **Defesa Absoluta até o ataque** e os **Absolutos em 3 s**
+  (`decisoes.md` 2026-10-30 (4); spec do sub-projeto 5, E1).
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
