@@ -6,6 +6,56 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-10-30 (2): respostas ao lote de perguntas de 2026-10-30
+
+As perguntas estão na entrada seguinte desta lista e no histórico do `estado.md` (commit `755ddc0`). Texto do autor:
+
+> 1. Ok. Observação: Deve haver um limite de cartas especiais em mãos pois nessa é só o player ficar esperando juntar 4x K pro
+>    exódia ou cartas para formar lançamentos especiais tipo reflect ou devastação. perde a graça do jogo. (minha sugestão max
+>    4 cartas especiais).
+> 2. Só se pode anular um reflect com outro reflect ou com defesa absoluta. ambos se anulam quando lançados reflects e o
+>    atacante passa o turno.
+> 3. Ok.
+> 4. Ok.
+> 5. Ok.
+> 6. Isso já está implementado.
+> 7. Ok.
+> 8. Ok.
+> 9. Revise o 'ataque vazio' pois acredito que não foi implementado. As cartas de defesa ainda estão sendo retiradas após
+>    atacantes sem cartas de ataque equipadas. Joguei a versão depois de 27/10 mas parece que nem todos os pontos levantados
+>    foram feitos ou concluídos por falta de limite de sessão. revise todos as notas.
+> 10. PC. Onde ficam as cartas especiais equipadas fica tudo quebrado quando aviso de ressurreição, absolutos, reflect, etc são
+>     exibidos. Tamanho da tela do notebook é 1536x695.20.
+
+**Leitura:**
+
+- **1. Reflect reativo, aprovado:** jogado só na janela de reação a um ataque ou a uma Devastação, vale só para aquele golpe,
+  com o efeito de hoje. O limite de 4 especiais na mão segue de pé, agora também contra quem guarda cartas para Reflect e
+  Devastação.
+- **2. Contra o Reflect:**
+  - **Reflect contra Reflect:** quem é refletido pode responder com outro Reflect (K+J+Q da mão; é o Anular de hoje). Os dois
+    se anulam, as 6 cartas vão ao cemitério e **o atacante passa o turno**: o golpe não acontece **[I]: nenhuma carta sai das
+    fileiras e ninguém leva dano**.
+  - **A Proteção por sacrifício (J+Q+K do campo) sai do jogo.**
+  - **Defesa Absoluta contra o Reflect:** o Reflect lançado contra um atacante sob Defesa Absoluta é anulado. **[I], a confirmar:**
+    o Reflect ainda segura o golpe (o dono leva 0), mas não devolve dano e não quebra Q nem K do atacante. Hoje os K do
+    atacante quebram nesse caso, e isso deixa de valer.
+- **3 a 5 e 7, Devastação, aprovados como propostos:**
+  - sai da mão na fase principal e esvazia a fileira do oponente; os buffs ficam e a quadra se desfaz;
+  - abre a janela de reação, e a única resposta é o Reflect, que devolve a fileira do mesmo tipo sem quebrar Q nem K; a
+    Armadilha não responde;
+  - não pode ser lançada contra quem está sob Defesa Absoluta;
+  - carta destruída pela Devastação não cura.
+- **6. Selvagem na Devastação:** "já está implementado" (o Selvagem faz o papel de J, Q ou A em qualquer jogada). Vale também
+  na Devastação: A, J ou Q, nunca K.
+- **8. Defesa Absoluta contra o Roubo:** bloqueia o roubo inteiro (nada é roubado).
+- **9. Ataque vazio:** relato de bug. Ele jogou a versão de depois de 27/10 e viu a Defesa perder carta depois de um atacante
+  sem cartas no Ataque. Ele pede também que **todas as notas** (23/10 e 30/10) sejam revistas uma a uma contra o jogo.
+- **10. Tabuleiro quebrado:** no PC, num notebook de 1536 × 695 (área visível), a área dos especiais equipados (buffs e Guarda)
+  quebra quando aparecem os avisos de Ressurreição, dos Absolutos, do Reflect etc.
+
+---
+
 ## 2026-10-30: respostas ajustadas da Fase E e anotações novas
 
 Substitui a entrada de 2026-10-28 (as respostas da Fase E repassadas pela sessão principal da conta anterior).

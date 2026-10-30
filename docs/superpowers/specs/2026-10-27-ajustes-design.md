@@ -135,11 +135,11 @@ leitura e não está nas palavras dele.
 - **Roubo** (só na fase principal do seu turno): pega uma numérica de qualquer fileira do oponente e a põe no fim da fileira que
   o ladrão escolher; com a fileira cheia, a última dela vai ao cemitério. O naipe vira regra (hoje é só visual).
   - ♣/♠: o oponente leva dano igual ao **valor seco** da carta (sem buffs nem bônus de quadra). Um K na Guarda **anula esse
-    dano e não quebra**. A Defesa Absoluta anula o dano. O dano do roubo **não conta para a iniciativa** e **não mata**: a vida
+    dano e não quebra**. O dano do roubo **não conta para a iniciativa** e **não mata**: a vida
     do oponente fica em no mínimo 1.
   - ♥/♦: quem roubou cura o valor seco, até a vida inicial.
   - A carta que o ladrão perde com a fileira cheia cura, se cumprir a cura passiva.
-  - **[autor]** Defesa Absoluta × Roubo: bloqueia o roubo inteiro (aprovado em 28/10) ou só anula o dano (texto de 30/10)?
+  - A Defesa Absoluta do oponente **bloqueia o roubo inteiro**: nada é roubado (autor, 2026-10-30).
 - **Cura passiva:** com 2 K ou mais na Guarda **[I: "2 K" = pelo menos 2]**, cada numérica da **própria Fileira de Defesa**
   que vai ao cemitério, de qualquer naipe, cura valor × (1 + nº de Q). A vida nunca passa da inicial.
 - **Limite de 4 especiais na mão**, com penalidade na compra (o autor: senão "o player fica juntando K até fazer o exódia").
@@ -161,18 +161,33 @@ Texto dele em `docs/memoria/decisoes.md` (2026-10-30, "Anotações novas"). As p
 
 - **F1. Apagar o histórico de partidas** [decisão: só web]. Na tela `/partidas`, uma ação de apagar a lista guardada
   (`coringa:partidas`), com confirmação. Apagar uma partida só também cabe.
-- **F2. Reflect reativo** [autor]. O Reflect deixa de ser lançado na própria vez e de ficar armado. Passa a ser resposta: atacado
-  → lança K+J+Q → o dano volta na hora → acabou. Em aberto: o destino do Anular e da Proteção por sacrifício (seriam resposta
-  de uma resposta, e o jogo não tem cadeia, spec 1 §1.7) e se o efeito de hoje (quebra os Q e K do atacante, dano refletido
-  ATK − ⌊DEF_base/2⌋) continua.
-- **F3. Devastação** [autor]. K + A + J esvazia uma Fileira de Ataque e K + A + Q uma Fileira de Defesa: todas as numéricas
-  vão ao cemitério, os buffs ficam. Só o Reflect (devolve) e a Defesa Absoluta (anula) a impedem. Uma cena cinematográfica à
-  altura (dentro da `FlashLock` e do movimento reduzido, spec da web §10.4). Em aberto: quem é atingido, a janela de reação, o
-  Selvagem e a cura passiva das cartas destruídas.
-- **F4. Ataque vazio:** já é a regra (spec 1 §1.5 item 3) e tem teste desde `af6b827`. Esperar o que o autor viu.
-- **F5. Tabuleiro quebrado com buffs e o aviso de Ressurreição** [decisão: bug de layout]. Reproduzir no navegador (celular e
-  PC) e corrigir; a arte do botão já entrou na Fase C.
-- **F6, F7 e F8** (ver todas as cartas; Absolutos e Exódia mais longos; movimentos suaves): a F6 é a E2, a F7 e a F8 entraram
-  na Fase C (`bba8377`). Esperar o autor dizer se jogou uma versão de depois de 2026-10-27.
+- **F2. Reflect reativo** [autor, aprovado em 2026-10-30]:
+  - **Quando:** o Reflect (K+J+Q da mão) deixa de ser lançado na própria vez e de ficar armado. É jogado só na janela de
+    reação, quando o oponente declara um ataque ou lança uma Devastação, e vale só para aquele golpe: atacado → lança → o dano
+    volta na hora → acabou.
+  - **Efeito contra um ataque (o de hoje):** todos os Q e K do atacante quebram; ele leva ATK − ⌊DEF_base / 2⌋; o dono leva 0;
+    saem a 1ª carta do Ataque do atacante e a 1ª da Defesa do dono.
+  - **Reflect contra Reflect:** quem é refletido pode responder com outro Reflect (K+J+Q da mão; é o Anular de hoje e a única
+    resposta a uma resposta). Os dois se anulam, as 6 cartas vão ao cemitério e o atacante passa o turno, sem golpe
+    **[I: nenhuma carta sai das fileiras e ninguém leva dano]**.
+  - **A Proteção por sacrifício sai do jogo.**
+  - **Defesa Absoluta:** o Reflect lançado contra um atacante sob Defesa Absoluta é anulado **[I, a confirmar: segura o golpe
+    (o dono leva 0), mas não devolve dano nem quebra Q e K]**.
+- **F3. Devastação** [autor, aprovada em 2026-10-30]:
+  - **Jogada:** K + A + J (ou K + A + Q) sai da mão na fase principal da sua vez e esvazia a Fileira de Ataque (ou de Defesa)
+    **do oponente**. Todas as numéricas dela vão ao cemitério, os buffs ficam e a quadra se desfaz. As 3 cartas vão ao
+    cemitério.
+  - **Resposta:** abre a janela de reação do oponente, e a única resposta é o Reflect. Ele devolve a Devastação (quem lançou
+    perde a própria fileira do mesmo tipo), sem quebrar Q nem K de quem lançou. A Armadilha não responde.
+  - **Restrições:** não pode ser lançada contra quem está sob Defesa Absoluta. O Selvagem faz o papel do A, do J ou do Q, nunca
+    do K. As cartas destruídas pela Devastação não curam.
+  - **Cena:** cinematográfica, à altura, dentro da `FlashLock` e do movimento reduzido (spec da web §10.4).
+- **F4. Ataque vazio** [bug relatado pelo autor em 2026-10-30]. Ele jogou a versão de depois de 27/10 e viu a Defesa perder
+  carta depois de um atacante sem cartas no Ataque. Reproduzir e corrigir com systematic-debugging.
+- **F5. Tabuleiro quebrado** [bug de layout]. No PC de 1536 × 695 (área visível), a área dos especiais equipados (buffs e
+  Guarda) quebra quando aparecem os avisos de Ressurreição, dos Absolutos, do Reflect etc. Reproduzir nesse tamanho e corrigir.
+- **F6, F7 e F8** (ver todas as cartas; Absolutos e Exódia mais longos; movimentos suaves): a F6 é a E2; a F7 e a F8 entraram
+  na Fase C (`bba8377`). O autor jogou depois de 27/10 e achou que nem tudo das notas foi feito: **revisar uma a uma, no jogo,
+  todas as notas de 23/10 e de 30/10** (registro em `docs/memoria/notas/revisao-das-notas.md`).
 - **Ordem proposta:** E1 → E2 → F1 e F5 (só web) → E3 com F2 e F3 medidos juntos, porque o Reflect reativo, a Devastação, o
   roubo, a cura e o limite de especiais mexem no mesmo equilíbrio.
