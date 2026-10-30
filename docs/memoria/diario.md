@@ -20,8 +20,13 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   Ressurreição) no `decisoes.md` e na spec do sub-projeto 5.
 - **Ambiente desta máquina (formatada):**
   - Node 26.13 e pnpm 11.9; não há `gh` nem a CLI `claude`; o Ubuntu do WSL sumiu (só há o `docker-desktop`).
-  - O `pnpm check` passa em tudo menos nos testes do servidor no workerd: o `workerd.exe` cai ao iniciar
-    (`access violation`, `thread 'main' has overflowed its stack`). Detalhes e andamento em `estado.md`.
+  - O `pnpm check` passava em tudo menos nos testes do servidor no workerd: o `workerd.exe` caía ao iniciar
+    (`access violation`, `thread 'main' has overflowed its stack`). A causa é o Visual C++ Redistributable de 2020 desta
+    instalação do Windows: com as DLLs novas do Edge copiadas ao lado do `workerd.exe`, os testes passam. A correção
+    definitiva é do autor (instalar o redistribuível atual); detalhes em `estado.md`, seção "Ambiente".
+  - O git desta máquina estava sem identidade. Ficou configurada só neste repositório, com o mesmo autor dos commits
+    anteriores.
+  - A pasta `.pnpm` tem um `wrangler@4.154.0` órfão (fora do lockfile), que nenhum pacote usa.
   - O E2E precisa de `pnpm --filter @coringa/web exec playwright install chromium` antes da primeira vez.
 
 ## 2026-10-27/28: conta anterior, sub-projeto 5 (Fases A–D) e o fim da semana

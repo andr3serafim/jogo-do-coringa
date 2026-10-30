@@ -6,10 +6,11 @@
 ## Agora
 
 - **Branch:** `feat/memoria`, no checkout principal `D:\andr3\jogo-coringa`, a partir da `main` em `af6b827`.
-- **Em curso:** criação da memória compartilhada; registro da Fase E (respostas ajustadas) e da Fase F (anotações de 30/10)
-  na spec do sub-projeto 5; investigação da falha do workerd nesta máquina.
-- **Próximo passo exato:** fazer os testes do workerd voltarem a rodar nesta máquina (abaixo). Depois, merge desta branch na
-  `main` por fast-forward, com a CI verde, e então começar a **E1** (remover o anti-travamento) numa branch `feat/sem-anti-travamento`.
+- **Em curso:** a memória compartilhada e o registro das Fases E e F na spec estão commitados nesta branch. O workerd voltou a
+  rodar nesta máquina, com um paliativo (veja "Ambiente").
+- **Próximo passo exato:** subir esta branch (o pre-push roda o `pnpm check`), esperar a CI verde (check + e2e) e fazer o merge
+  por fast-forward na `main`. Depois, começar a **E1** (remover o anti-travamento) numa branch `feat/sem-anti-travamento`,
+  enquanto o autor responde o lote abaixo.
 
 ## A `main`
 
@@ -19,7 +20,7 @@ os ajustes da spec do sub-projeto 5 (`2026-10-27-ajustes-design.md`).
 
 ## Fila (sub-projeto 5)
 
-1. **Workerd nesta máquina** (bloqueia o push: o pre-push roda o `pnpm check` completo, e `--no-verify` é proibido).
+1. **Merge da memória compartilhada** (`feat/memoria`) na `main`.
 2. **E1:** sem anti-travamento e sem limite de rodadas. `RULES_VERSION`/`STATE_SCHEMA` 3, partidas de referência regravadas,
    portão do Difícil do zero.
 3. **E2:** Equipar livre.
@@ -91,10 +92,19 @@ Playtest online, `wrangler login` + `pnpm deploy:server`, proteção da `main`, 
 
 - **Ferramentas:** Node 26.13 e pnpm 11.9. Não há `gh` nem a CLI `claude` no PATH. O Ubuntu do WSL sumiu.
 - **E2E:** precisa de `pnpm --filter @coringa/web exec playwright install chromium` na primeira vez.
-- **Workerd:** o `pnpm check` (2026-10-30) passa no lint, no typecheck, nos testes do motor (189), do protocolo (93), do núcleo
-  do servidor (272), do simulador (142) e da web (1971), e no smoke. Os testes do servidor no workerd
-  (`vitest.worker.config.ts`) não sobem: o `workerd.exe` cai ao iniciar com `access violation` e
-  `thread 'main' has overflowed its stack`.
+- **Workerd (resolvido com um paliativo; a correção definitiva é do autor):**
+  - **Sintoma:** os testes do servidor no workerd (`vitest.worker.config.ts`) não subiam. O `workerd.exe` caía ao iniciar com
+    `access violation` e `thread 'main' has overflowed its stack`, e o próprio workerd sugeria um Visual C++ Redistributable
+    desatualizado.
+  - **Causa:** confirmada. O Windows desta máquina veio com o VC++ Redistributable 14.28, de 2020. Com as DLLs 14.51 ao lado do
+    `workerd.exe`, os 35 testes do workerd passam.
+  - **Paliativo:** `msvcp140.dll`, `vcruntime140.dll` e `vcruntime140_1.dll` copiados do Edge
+    (`C:\Program Files (x86)\Microsoft\Edge\Application\156.0.4314.50\`) para
+    `node_modules/.pnpm/@cloudflare+workerd-windows-64@1.20261012.1/node_modules/@cloudflare/workerd-windows-64/bin/`.
+    É o único workerd que o projeto usa (wrangler 4.151, testes, `wrangler dev` e E2E). Um `pnpm install` que troque o
+    workerd perde o paliativo.
+  - **Correção definitiva (autor):** instalar o Visual C++ Redistributable x64 mais recente, da Microsoft
+    (`https://aka.ms/vs/17/release/vc_redist.x64.exe`). Depois disso, apagar as três DLLs copiadas.
 - **Worktrees:**
   - `D:\andr3\jogo-coringa`: checkout principal.
   - `.claude/worktrees/inspiring-sammet-387417` (`feat/ajustes`, limpo): o da conta anterior.
