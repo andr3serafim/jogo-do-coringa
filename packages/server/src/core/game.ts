@@ -120,7 +120,8 @@ export function commitStep(
 }
 
 /**
- * Fecha a partida: status `FINISHED`, `outcome`, placar (vitória soma ao vencedor, `ABANDONED` não mexe) e as linhas `game.ended` e `game.replay`. Sem `GAME_OVER` só vale `ABANDONED`.
+ * Fecha a partida: status `FINISHED`, `outcome`, placar (vitória soma ao vencedor, `ABANDONED` não mexe) e as linhas
+ * `game.ended` e `game.replay`. Sem `GAME_OVER` só vale `ABANDONED`.
  */
 export function finishGame(record: RoomRecord, cause: OutcomeCause, now: number): LogLine[] {
   const game = requireGame(record);
