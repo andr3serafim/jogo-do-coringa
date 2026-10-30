@@ -5,7 +5,8 @@
 
 ## Agora
 
-- **Branch:** `main`, no checkout principal `D:\andr3\jogo-coringa`. A `feat/revisao-notas` entrou por fast-forward em
+- **Branch:** `main`, no checkout principal `D:\andr3\jogo-coringa` (o registro da espera sobe pela `feat/memoria-espera` e
+  entra por fast-forward com a CI verde; se ela ainda não estiver na `main`, é só mesclar). A `feat/revisao-notas` entrou por fast-forward em
   2026-10-30, com a CI verde na branch (run 41008238994: check + e2e). Ela trouxe:
   - as respostas do autor ao lote de 2026-10-30 no `decisoes.md` ("2026-10-30 (2)") e na spec (F2, F3);
   - **F5 corrigido:** o tabuleiro quebrado no PC de 1536 × 695 (CSS), com o E2E `e2e/layout.spec.ts`;
@@ -13,8 +14,8 @@
   - a revisão de todas as notas, em `notas/revisao-das-notas.md`;
   - o histórico agora diz "da Defesa" e "na Defesa".
 - **Em curso:** nada.
-- **Próximo passo exato:** começar a **E1** (remover o anti-travamento) numa branch `feat/sem-anti-travamento` a partir da
-  `main`. As perguntas abaixo não a bloqueiam.
+- **Próximo passo exato:** **esperar o autor** ("Espere minhas respostas", `decisoes.md` 2026-10-30 (3)). Só com as respostas
+  abaixo e o ok dele começa a **E1** (remover o anti-travamento), numa branch `feat/sem-anti-travamento` a partir da `main`.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 

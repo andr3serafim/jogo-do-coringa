@@ -6,6 +6,17 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-10-30 (3): a E1 espera as respostas
+
+Depois do fechamento da revisão das notas (F4 e notas 6 a 8 em aberto), à pergunta "Posso começar a E1?":
+
+> Espere minhas respostas
+
+**Leitura:** nada da fila (E1 em diante) começa antes de o autor responder às perguntas do `estado.md` ("Esperando o autor")
+e liberar a E1. Substitui o "as perguntas não a bloqueiam" do `estado.md` de `d840f48`.
+
+---
+
 ## 2026-10-30 (2): respostas ao lote de perguntas de 2026-10-30
 
 As perguntas estão na entrada seguinte desta lista e no histórico do `estado.md` (commit `755ddc0`). Texto do autor:
