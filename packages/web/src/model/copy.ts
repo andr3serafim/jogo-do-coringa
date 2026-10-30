@@ -230,8 +230,8 @@ export const UNDO_LABEL = 'Desfazer';
 export const RESET_LABEL = 'Recomeçar';
 export const CONFIRM_LABEL = 'Confirmar';
 
-/** A fila das numéricas pendentes: "Carta 1 de 3". */
-export const equipCardText = (index: number, total: number): string => `Carta ${index} de ${total}`;
+/** Quantas numéricas faltam pôr (E2: todas à vista, em qualquer ordem): "Faltam 3 cartas", "Falta 1 carta". */
+export const equipLeftText = (left: number): string => (left === 1 ? 'Falta 1 carta' : `Faltam ${left} cartas`);
 export const equipWaitingText = (opponent: string): string => `Esperando ${opponent} montar…`;
 export const equipConfirmedText = (opponent: string): string => `Você já confirmou; esperando ${opponent}`;
 export const NO_PENDING_TEXT = 'Você não recebeu numéricas nesta rodada';
@@ -516,7 +516,7 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
     title: 'Rodadas',
     items: [
       'O ciclo é Equipar, Equipar, Ataque, Equipar, Ataque, e assim por diante.',
-      'Equipar: cada jogador recebe 4 cartas. As especiais (J, Q, K, A e Coringa Selvagem) vão para a mão. As numéricas vão para o campo, na ordem em que saíram do monte, e você só escolhe o destino: a fileira de Ataque ou a de Defesa (8 cartas no máximo em cada). Com as duas cheias, a nova carta substitui a última de uma fileira (a antiga vai para o cemitério) ou é descartada. Os dois montam ao mesmo tempo, em segredo.',
+      'Equipar: cada jogador recebe 4 cartas. As especiais (J, Q, K, A e Coringa Selvagem) vão para a mão. As numéricas vão para o campo: você vê todas de uma vez e você escolhe a fileira e a ordem de cada uma, Ataque ou Defesa (8 cartas no máximo em cada); a primeira que você põe numa fileira fica na frente da fila. Com as duas cheias, a nova carta substitui a última de uma fileira (a antiga vai para o cemitério) ou é descartada. Os dois montam ao mesmo tempo, em segredo.',
       'Ataque: quem tem a iniciativa escolhe atacar primeiro ou em segundo. Cada jogador tem um turno: joga as especiais que quiser e declara o ataque, que é obrigatório se a fileira de Ataque tiver cartas.',
       'Iniciativa: começa sorteada. No fim de cada rodada de Ataque, fica com quem causou mais dano nela (o dano devolvido por um Reflect conta para quem o lançou). No empate, inclusive 0 a 0, não muda.',
     ],

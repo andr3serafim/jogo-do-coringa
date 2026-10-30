@@ -203,9 +203,9 @@ test.describe('celular baixo, 360 × 640', () => {
     // O Equipar rola os campos até a carta posta. Antes de confirmar, eles voltam ao topo (como depois de recarregar a página):
     // é a chegada da vez de atacar que tem de trazer as fileiras.
     const panel = equipPanel(page);
-    await expect(panel.getByText('Carta 1 de 2')).toBeVisible();
-    for (const n of [1, 2]) {
-      await expect(panel.getByText(`Carta ${n} de 2`)).toBeVisible();
+    await expect(panel.getByText('Faltam 2 cartas')).toBeVisible();
+    for (const left of ['Faltam 2 cartas', 'Falta 1 carta']) {
+      await expect(panel.getByText(left)).toBeVisible();
       await panel.getByRole('list', { name: 'Destinos' }).getByRole('button').first().click();
     }
     await page.evaluate(() => {

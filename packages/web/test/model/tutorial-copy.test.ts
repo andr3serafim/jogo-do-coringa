@@ -20,6 +20,12 @@ describe('hintParagraphs', () => {
     for (const id of IDS) expect(hintParagraphs(id).join(' ')).not.toMatch(/travamento|Pressão|sem ninguém perder vida/);
   });
 
+  it('a dica 1 diz que você escolhe a ordem das numéricas (Equipar livre, E2 do sub-projeto 5)', () => {
+    const [equip] = hintParagraphs('equip');
+    expect(equip).toContain('na ordem que quiser');
+    expect(equip).not.toMatch(/ordem em que saíram/);
+  });
+
   it('a dica 6 diz que, contra um K jogado, o A só destrói um K da Guarda', () => {
     expect(hintParagraphs('trap')).toEqual([
       'Janela de reação: quando o oponente ataca, você pode responder com um A, que destrói um J, Q ou K dele; quando ele joga K, o A só destrói um K da Guarda. Ou passar. O A também vale no seu turno.',

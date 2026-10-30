@@ -24,7 +24,7 @@ export const END_HINT =
 /** Os parágrafos de cada dica. */
 const HINT_TEXT: Record<HintId, string> = {
   equip:
-    'Suas numéricas vão para o campo na ordem em que saíram, e você só escolhe o destino: Ataque ou Defesa. Cada fileira é uma fila: quando você ataca, a primeira carta do seu Ataque vai para o cemitério; quando defende, a primeira da sua Defesa.',
+    'Suas numéricas vão para o campo na ordem que quiser: toque numa carta e depois no destino, Ataque ou Defesa (ou arraste a carta até a fileira). Cada fileira é uma fila: quando você ataca, a primeira carta do seu Ataque vai para o cemitério; quando defende, a primeira da sua Defesa.',
   quad: 'Quadra: quatro ou mais numéricas do mesmo valor na mesma fileira, seguidas ou não, somam esse valor à fileira e dão uma Ressurreição, que traz uma numérica do cemitério de volta.',
   order:
     'Quem tem a iniciativa escolhe atacar primeiro ou em segundo. Depois de cada rodada de Ataque, ela fica com quem causou mais dano; no empate, não muda.',

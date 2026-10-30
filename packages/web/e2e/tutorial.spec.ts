@@ -29,7 +29,7 @@ const TUTORIAL_KEY = 'coringa:tutorial';
 
 /** Os textos das dicas 1, 3 e 4 por inteiro (as mais longas são a 1 e a 4) e o começo das outras: o plano da fatia 4, "Textos finais das dicas". */
 const EQUIP_HINT =
-  'Suas numéricas vão para o campo na ordem em que saíram, e você só escolhe o destino: Ataque ou Defesa. Cada fileira é uma fila: quando você ataca, a primeira carta do seu Ataque vai para o cemitério; quando defende, a primeira da sua Defesa.';
+  'Suas numéricas vão para o campo na ordem que quiser: toque numa carta e depois no destino, Ataque ou Defesa (ou arraste a carta até a fileira). Cada fileira é uma fila: quando você ataca, a primeira carta do seu Ataque vai para o cemitério; quando defende, a primeira da sua Defesa.';
 const ORDER_HINT =
   'Quem tem a iniciativa escolhe atacar primeiro ou em segundo. Depois de cada rodada de Ataque, ela fica com quem causou mais dano; no empate, não muda.';
 const FIRST_ATTACK_HINT =

@@ -174,6 +174,9 @@ export async function replaySteps(page: Page): Promise<{ step: number; total: nu
  * Equipar pelos destinos oferecidos (o primeiro de cada carta, ou o primeiro que casa com `preferred`) e Confirmar. Quem não
  * recebeu numéricas não tem o que confirmar: o servidor envia o Equipar vazio por ele. Devolve quantas cartas foram montadas.
  */
+/** O cabeçalho do painel do Equipar com `left` numéricas por pôr (o `equipLeftText` da web). */
+export const equipLeft = (left: number): string => (left === 1 ? 'Falta 1 carta' : `Faltam ${left} cartas`);
+
 export async function equipByUi(page: Page, preferred?: RegExp): Promise<number> {
   const panel = equipPanel(page);
   const destinations = panel.getByRole('list', { name: 'Destinos' });
@@ -181,10 +184,10 @@ export async function equipByUi(page: Page, preferred?: RegExp): Promise<number>
   await expect(destinations.or(none)).toBeVisible();
   if (await none.isVisible()) return 0;
 
-  const total = Number(/Carta 1 de (\d+)/.exec(await panel.innerText())?.[1]);
+  const total = Number(/Faltam? (\d+) cartas?/.exec(await panel.innerText())?.[1]);
   expect(total, 'o painel do Equipar diz quantas cartas faltam montar').toBeGreaterThan(0);
   for (let placed = 0; placed < total; placed += 1) {
-    await expect(panel.getByText(`Carta ${placed + 1} de ${total}`)).toBeVisible();
+    await expect(panel.getByText(equipLeft(total - placed))).toBeVisible();
     await destinations.getByRole('button', preferred ? { name: preferred } : {}).first().click();
   }
   await panel.getByRole('button', { name: 'Confirmar', exact: true }).click();

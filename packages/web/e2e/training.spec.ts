@@ -38,11 +38,11 @@ test('treino: três rodadas determinísticas pela interface, sem relógio', asyn
   expect(await lives(page), 'vida do Bot e a sua').toEqual([500, 500]);
 
   // Rodada 1 e 2 (Equipar): quantas numéricas vêm é da semente.
-  await expect(equipPanel(page)).toContainText('Carta 1 de 3');
+  await expect(equipPanel(page)).toContainText('Faltam 3 cartas');
   await axe(page);
   expect(await equipByUi(page)).toBe(3);
   await expect(roundHeading(page)).toHaveText('Rodada 2');
-  await expect(equipPanel(page)).toContainText('Carta 1 de 2');
+  await expect(equipPanel(page)).toContainText('Faltam 2 cartas');
   expect(await equipByUi(page)).toBe(2);
   await expect(roundHeading(page)).toHaveText('Rodada 3');
   await expect(history(page)).toContainText('Bot confirmou o Equipar');
@@ -282,7 +282,7 @@ for (const size of [
       const hand = page.getByRole('list', { name: 'Sua mão' });
 
       // Rodada 1, Equipar: o painel com os destinos.
-      await expect(equipPanel(page).getByText('Carta 1 de 3')).toBeVisible();
+      await expect(equipPanel(page).getByText('Faltam 3 cartas')).toBeVisible();
       const destinations = equipPanel(page).getByRole('list', { name: 'Destinos' });
       await expectWhollyInView(page, { ...top, 'a mão': hand, 'os destinos do Equipar': destinations });
       // A página em si nunca rola.

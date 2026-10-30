@@ -118,13 +118,13 @@ const fieldsScroll = (page: Page): Promise<{ top: number; max: number; page: num
 // ---------------------------------------------------------------------------------------------
 // O mouse (PC e celular)
 
-test('Equipar: a carta da vez arrasta até a fileira de Defesa; solta fora de uma fileira, não escolhe nada', async ({ page }) => {
+test('Equipar: a numérica arrasta até a fileira de Defesa; solta fora de uma fileira, não escolhe nada', async ({ page }) => {
   const guard = failOnConsoleErrors(page);
   await page.goto(TRAINING);
   await expect(table(page)).toBeVisible();
   await expect(roundHeading(page)).toHaveText('Rodada 1');
   const panel = equipPanel(page);
-  await expect(panel.getByText('Carta 1 de 1')).toBeVisible();
+  await expect(panel.getByText('Falta 1 carta')).toBeVisible();
   // Só a carta do painel (o fantasma, um clone no `body`, também leva `data-card-id`).
   const card = panel.locator('[data-card-id]');
   await expect(card).toHaveCount(1);
@@ -150,7 +150,7 @@ test('Equipar: a carta da vez arrasta até a fileira de Defesa; solta fora de um
   await expect(ghost(page)).toHaveCount(0);
   await expect(valid(page)).toHaveCount(0);
   await expect(card).toHaveCSS('opacity', '1');
-  await expect(panel.getByText('Carta 1 de 1')).toBeVisible();
+  await expect(panel.getByText('Falta 1 carta')).toBeVisible();
   await expect(page.locator('[data-rascunho]')).toHaveCount(0);
 
   // De novo, até a fileira de Defesa: ela leva o contorno de "sob o dedo" (a de Ataque, não), e a carta vira rascunho nela.
@@ -178,14 +178,38 @@ test('Equipar: o botão do destino segue valendo, e as duas formas se misturam (
   await page.goto(TRAINING);
   await expect(table(page)).toBeVisible();
   const panel = equipPanel(page);
-  await expect(panel.getByText('Carta 1 de 1')).toBeVisible();
+  await expect(panel.getByText('Falta 1 carta')).toBeVisible();
   await panel.getByRole('list', { name: 'Destinos' }).getByRole('button', { name: 'Fileira de Ataque' }).click();
   await expect(myRow(page, 'ATK').locator('[data-rascunho]')).toHaveCount(1);
   await panel.getByRole('button', { name: 'Desfazer' }).click();
-  await expect(panel.getByText('Carta 1 de 1')).toBeVisible();
-  // Depois do Desfazer, a carta volta a ser a da vez e arrasta.
+  await expect(panel.getByText('Falta 1 carta')).toBeVisible();
+  // Depois do Desfazer, a carta volta à lista do painel e arrasta.
   await drag(page, panel.locator('[data-card-id]'), myRow(page, 'ATK'));
   await expect(myRow(page, 'ATK').locator('[data-rascunho]')).toHaveCount(1);
+  guard.expectClean();
+});
+
+test('Equipar livre (E2): a última numérica arrasta primeiro e entra na frente da fila do Ataque', async ({ page }) => {
+  const guard = failOnConsoleErrors(page);
+  await page.goto(TRAINING);
+  await expect(table(page)).toBeVisible();
+  await equipByUi(page);
+  await expect(roundHeading(page)).toHaveText('Rodada 2');
+  const panel = equipPanel(page);
+  const cards = panel.getByRole('list', { name: 'Suas numéricas' }).locator('[data-card-id]');
+  await expect(cards.first()).toBeVisible();
+  const total = await cards.count();
+  expect(total, 'a rodada 2 do treino traz mais de uma numérica').toBeGreaterThan(1);
+  const lastId = await cards.last().getAttribute('data-card-id');
+  const before = await myRow(page, 'ATK').locator('[data-card-id]').count();
+
+  await drag(page, cards.last(), myRow(page, 'ATK'));
+  // A carta escolhida sai da lista e entra no fim do Ataque, como rascunho, antes das que faltam.
+  await expect(myRow(page, 'ATK').locator(`[data-rascunho][data-card-id="${lastId}"]`)).toHaveCount(1);
+  await expect(cards).toHaveCount(total - 1);
+  await expect(panel.locator(`[data-card-id="${lastId}"]`)).toHaveCount(0);
+  await expect(myRow(page, 'ATK').locator('[data-card-id]').nth(before)).toHaveAttribute('data-card-id', lastId!);
+  await expectNoHorizontalScroll(page);
   guard.expectClean();
 });
 

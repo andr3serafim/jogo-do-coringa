@@ -158,7 +158,8 @@ const handCard = (kind: keyof typeof HAND_NAME, index = 0) => handList().getAllB
 const handCards = (view: PlayerView, kind: SpecialCard['kind']) => view.self.hand.filter((c) => c.kind === kind);
 
 /** A carta da vez do Equipar (a grande, no painel). */
-const equipCard = () => equipPanel().querySelector<HTMLElement>('[data-card-id]')!;
+/** A primeira numérica que falta no painel do Equipar; com `id`, aquela carta. */
+const equipCard = (id?: string) => equipPanel().querySelector<HTMLElement>(id ? `[data-card-id="${id}"]` : '[data-card-id]')!;
 
 const acts = (m: Pick<Mounted, 'connection'>) => m.connection.sent.flatMap((s) => (s.type === 'act' ? [s.action] : []));
 
@@ -590,16 +591,28 @@ describe('os botões e o teclado seguem iguais (WCAG 2.5.7): fase principal', ()
 });
 
 describe('arrastar o Equipar', () => {
-  it('a carta da vez até a Defesa escolhe DEF, e a próxima carta vira a da vez', () => {
+  it('a primeira carta até a Defesa escolhe DEF, e ela sai da lista do painel', () => {
     const m = mount(EQUIP);
-    expect(inEquip().getByText('Carta 1 de 3')).toBeInTheDocument();
+    expect(inEquip().getByText('Faltam 3 cartas')).toBeInTheDocument();
     const first = equipCard().getAttribute('data-card-id');
     dragTo(equipCard(), zone(DROP.defenseRow));
-    expect(inEquip().getByText('Carta 2 de 3')).toBeInTheDocument();
+    expect(inEquip().getByText('Faltam 2 cartas')).toBeInTheDocument();
     expect(equipCard().getAttribute('data-card-id')).not.toBe(first);
     expect(m.session.snapshot().equipDraft.map((p) => p.destination)).toEqual(['DEF']);
     // A carta posta já está na fileira de Defesa, como rascunho.
     expect(document.querySelectorAll('[data-rascunho]')).toHaveLength(1);
+  });
+
+  it('Equipar livre (E2): arrastar a segunda carta põe a segunda, e a ordem enviada começa por ela', async () => {
+    const m = mount(EQUIP);
+    const [first, second, third] = m.view.self.pending;
+    dragTo(equipCard(second!.id), zone(DROP.defenseRow));
+    expect(m.session.snapshot().equipDraft).toEqual([{ cardId: second!.id, destination: 'DEF' }]);
+    expect(equipPanel().querySelector(`[data-card-id="${second!.id}"]`)).toBeNull();
+    dragTo(equipCard(third!.id), zone(DROP.attackRow));
+    dragTo(equipCard(), zone(DROP.attackRow));
+    await m.user.click(inEquip().getByRole('button', { name: 'Confirmar' }));
+    expect(sentAction(m)).toEqual({ type: 'EQUIP', destinations: ['DEF', 'ATK', 'ATK'], order: [second!.id, third!.id, first!.id] });
   });
 
   it('as três cartas pelo arrasto e o Confirmar mandam EQUIP com esses destinos', async () => {
@@ -654,12 +667,14 @@ describe('arrastar o Equipar', () => {
     dragTo(equipCard(), zone(DROP.graveyard));
     dragTo(equipCard(), zone(DROP.guard));
     expect(m.session.snapshot().equipDraft).toEqual([]);
-    expect(inEquip().getByText('Carta 1 de 3')).toBeInTheDocument();
+    expect(inEquip().getByText('Faltam 3 cartas')).toBeInTheDocument();
   });
 
-  it('tocar a carta da vez não faz nada', async () => {
+  it('tocar uma carta só a escolhe: nada vai para a mesa', async () => {
     const m = mount(EQUIP);
-    await m.user.click(equipCard());
+    const third = m.view.self.pending[2]!;
+    await m.user.click(equipCard(third.id));
+    expect(equipCard(third.id)).toHaveAttribute('aria-pressed', 'true');
     expect(m.session.snapshot().equipDraft).toEqual([]);
   });
 
@@ -697,11 +712,13 @@ describe('arrastar o Equipar', () => {
     expect(m.session.snapshot().equipDraft).toEqual([]);
   });
 
-  it('soltar a carta do Equipar de volta sobre ela mesma é um toque, e o toque não faz nada', () => {
+  it('soltar a carta do Equipar de volta sobre ela mesma é um toque: só a escolhe', () => {
     const m = mount(EQUIP);
-    dragTo(equipCard(), equipCard());
+    const second = m.view.self.pending[1]!;
+    dragTo(equipCard(second.id), equipCard(second.id));
     expect(m.session.snapshot().equipDraft).toEqual([]);
-    expect(inEquip().getByText('Carta 1 de 3')).toBeInTheDocument();
+    expect(equipCard(second.id)).toHaveAttribute('aria-pressed', 'true');
+    expect(inEquip().getByText('Faltam 3 cartas')).toBeInTheDocument();
   });
 
   it('a carta do Equipar tem touch-action: none', () => {
@@ -722,7 +739,7 @@ describe('os botões e o teclado seguem iguais (WCAG 2.5.7): Equipar', () => {
     const m = mount(EQUIP);
     await m.user.click(inEquip().getByRole('button', { name: 'Fileira de Defesa' }));
     expect(m.session.snapshot().equipDraft.map((p) => p.destination)).toEqual(['DEF']);
-    expect(inEquip().getByText('Carta 2 de 3')).toBeInTheDocument();
+    expect(inEquip().getByText('Faltam 2 cartas')).toBeInTheDocument();
   });
 
   it('teclado: Enter no destino escolhe, e o foco vai ao primeiro destino da carta seguinte', async () => {

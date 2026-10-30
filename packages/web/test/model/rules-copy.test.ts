@@ -83,3 +83,12 @@ describe('resumo das regras: a janela de reação diz o que o motor faz', () => 
   });
 });
 
+
+describe('resumo das regras: o Equipar livre (E2 do sub-projeto 5; motor: `order` da ação EQUIP)', () => {
+  it('diz que você vê as numéricas e escolhe a fileira e a ordem, e não fala mais da ordem do monte', () => {
+    const equip = items.find((item) => item.startsWith('Equipar:'))!;
+    expect(equip).toContain('você escolhe a fileira e a ordem de cada uma');
+    expect(equip).toContain('a primeira que você põe numa fileira fica na frente da fila');
+    expect(equip).not.toMatch(/ordem em que saíram/);
+  });
+});

@@ -480,8 +480,8 @@ function PlayTableView({
         pending={pending}
         notice={snapshot.notice}
         disabled={locked}
-        onChoose={(destination) => {
-          if (!locked) session.equipChoose(destination);
+        onChoose={(destination, cardId) => {
+          if (!locked) session.equipChoose(destination, cardId);
         }}
         onUndo={() => {
           if (!locked) session.equipUndo();

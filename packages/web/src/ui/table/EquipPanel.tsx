@@ -1,22 +1,25 @@
-// O painel do Equipar carta a carta (spec §3.5), no lugar da barra de ação. As numéricas pendentes viram uma fila ("Carta 1 de
-// 3"): a carta da vez aparece grande, com os destinos que a lista legal permite (`nextDestinations`, o mesmo filtro do
-// terminal), nos rótulos do terminal e, na troca, com a carta que sai ("sai 9♠"). A escolha vai para a fileira como
-// rascunho (quem desenha é a `Table`, com `draftBoard`), e o painel diz a quadra que o rascunho forma. Desfazer volta um
-// passo, Recomeçar volta ao início, e Confirmar só aparece com todas as cartas posicionadas.
+// O painel do Equipar (spec §3.5), no lugar da barra de ação. Desde a E2 do sub-projeto 5 (Equipar livre), todas as numéricas
+// recebidas aparecem juntas ("Faltam 3 cartas"), e o jogador as põe em qualquer ordem: toca numa carta (a escolhida sobe, como na
+// mão; sem toque, é a primeira que falta, na ordem de compra) e depois no destino. Os destinos são os que a lista legal permite
+// (`nextDestinations`, o mesmo filtro do terminal), nos rótulos do terminal e, na troca, com a carta que sai ("sai 9♠"); eles só
+// dependem de quantas cartas cada fileira tem, então valem para qualquer carta. A escolha vai para a fileira como rascunho
+// (quem desenha é a `Table`, com `draftBoard`), e o painel diz a quadra que o rascunho forma. Desfazer volta um passo,
+// Recomeçar volta ao início, e Confirmar só aparece com todas as cartas posicionadas.
 //
 // Nenhuma regra mora aqui: o rascunho e a regra de estouro são da sessão (`equipChoose`, `equipConfirm`) e do modelo
 // (`equip.ts`). O painel é só vista: as jogadas chegam por props.
 //
-// Arrastar (fatia 5): a carta da vez também se arrasta até a zona do destino (`data-soltar` na fileira, na última carta dela ou no
-// cemitério, as chaves de `equipDropZones`). A soltura escolhe o destino pelo mesmo `onChoose` dos botões, que seguem como sempre.
+// Arrastar (fatia 5): qualquer numérica que falta também se arrasta até a zona do destino (`data-soltar` na fileira, na última carta
+// dela ou no cemitério, as chaves de `equipDropZones`). A soltura escolhe aquela carta e aquele destino pelo mesmo `onChoose` dos
+// botões, que seguem como sempre.
 import type { Destination, NumCard, PlayerView } from '@coringa/engine';
 import type { PlayerAction } from '@coringa/protocol';
 import { DESTINATION_TEXT } from '@coringa/sim/text';
-import { useEffect, useRef, type ReactNode, type RefObject } from 'react';
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import {
   CONFIRM_LABEL,
-  equipCardText,
   equipConfirmedText,
+  equipLeftText,
   EQUIP_READY_TEXT,
   equipQuadText,
   equipWaitingText,
@@ -49,7 +52,8 @@ export interface EquipPanelProps {
   notice: Notice | null;
   /** Controles desligados: jogada em voo, reconexão ou prazo esgotado. */
   disabled: boolean;
-  onChoose: (destination: Destination) => void;
+  /** Põe a carta no destino (sem carta, a primeira que falta). */
+  onChoose: (destination: Destination, cardId?: string) => void;
   onUndo: () => void;
   onReset: () => void;
   onConfirm: () => void;
@@ -103,7 +107,7 @@ export function EquipPanel(props: EquipPanelProps) {
       </Panel>
     );
   }
-  return <Choosing {...props} total={total} />;
+  return <Choosing {...props} />;
 }
 
 function Panel({ panelRef, children }: { panelRef: RefObject<HTMLElement | null>; children: ReactNode }) {
@@ -114,58 +118,78 @@ function Panel({ panelRef, children }: { panelRef: RefObject<HTMLElement | null>
   );
 }
 
-const noop = (): void => undefined;
-
-/** A carta da vez, grande: arrastável até o destino, sem efeito no toque (os destinos ao lado são os botões). */
-function EquipCard({
+/** Uma numérica que falta pôr: o toque a escolhe (a escolhida sobe), e o arrasto a leva direto até a zona do destino. */
+function PendingCard({
   card,
+  selected,
   enabled,
   zones,
+  onSelect,
   onDrop,
 }: {
   card: NumCard;
+  selected: boolean;
   enabled: boolean;
   zones: () => ReadonlySet<DropKey>;
+  onSelect: () => void;
   onDrop: (key: DropKey | null) => void;
 }) {
-  const { bind, dragging, ghost } = useCardDrag({ enabled, zones, onDrop, onTap: noop });
+  const { bind, dragging, ghost } = useCardDrag({ enabled, zones, onDrop, onTap: onSelect });
   return (
-    <>
+    <li className="relative flex-none">
       {/* No ar, a de origem esmaece (esta carta não é animada, então o Motion não põe `opacity` inline nela). */}
-      <Card card={card} size="hand" animated={false} dragRef={bind} grabbable={enabled} className={dragging ? 'opacity-40' : ''} />
+      <Card
+        card={card}
+        size="hand"
+        animated={false}
+        selected={selected}
+        onSelect={onSelect}
+        dragRef={bind}
+        grabbable={enabled}
+        className={dragging ? 'opacity-40' : ''}
+      />
       <DragGhost ghost={ghost} />
-    </>
+    </li>
   );
 }
 
-function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onUndo, onReset, onConfirm, panelRef, total }: EquipPanelProps & { total: number }) {
+function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onUndo, onReset, onConfirm, panelRef }: EquipPanelProps) {
   const cards = view.self.pending;
-  const current = remainingCards(view, draft)[0];
-  const index = draft.length;
-  const complete = index >= total;
+  const remaining = remainingCards(view, draft);
+  const complete = remaining.length === 0;
+  // A carta escolhida pelo toque; sem toque (ou se ela já foi posta), a primeira que falta, na ordem de compra.
+  const [pickedId, setPickedId] = useState<string | null>(null);
+  const selected = remaining.find((card) => card.id === pickedId) ?? remaining[0];
   const board = draftBoard(view, draft);
   const options = complete ? [] : nextDestinations(view, legal, draft);
+  const focusFirstStep = () => panelRef.current?.querySelector<HTMLElement>('[data-foco]:not(:disabled)')?.focus();
   /** As zonas do destino da próxima carta, na hora (a soltura confere de novo com a lista de agora). */
   const dropZones = () => new Set(equipDropZones(view, legal, draft).keys());
-  const dropCard = (key: DropKey | null) => {
+  const dropCard = (cardId: string) => (key: DropKey | null) => {
     const destination = key === null ? undefined : equipDropZones(view, legal, draft).get(key);
-    if (destination !== undefined) onChoose(destination);
+    if (destination !== undefined) onChoose(destination, cardId);
+  };
+  /** O toque na carta a escolhe e leva o foco ao primeiro destino, o passo seguinte. */
+  const select = (cardId: string) => {
+    if (disabled) return;
+    setPickedId(cardId);
+    focusFirstStep();
   };
 
   // Depois de cada escolha (ou de desfazer) o foco vai ao primeiro passo útil: o primeiro destino, ou o Confirmar.
-  const lastLength = useRef(index);
+  const lastLength = useRef(draft.length);
   useEffect(() => {
-    if (lastLength.current === index) return;
-    lastLength.current = index;
+    if (lastLength.current === draft.length) return;
+    lastLength.current = draft.length;
     panelRef.current?.querySelector<HTMLElement>('[data-foco]:not(:disabled)')?.focus();
-  }, [index, panelRef]);
+  }, [draft.length, panelRef]);
 
   return (
     <Panel panelRef={panelRef}>
       {/* O cabeçalho leva o Desfazer e o Recomeçar: a altura do painel é curta no celular, e a mesa rola por cima dele. */}
       <div className="flex items-center justify-between gap-2">
         <p data-numero className="font-texto text-base font-extrabold leading-tight tabular-nums">
-          {complete ? EQUIP_READY_TEXT : equipCardText(index + 1, total)}
+          {complete ? EQUIP_READY_TEXT : equipLeftText(remaining.length)}
         </p>
         <div className="flex flex-none gap-2">
           <button type="button" disabled={disabled || draft.length === 0} onClick={onUndo} className={SECONDARY}>
@@ -186,16 +210,35 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
           ))}
         </ol>
       ) : (
-        <div className="flex items-start gap-3">
-          <EquipCard key={current!.id} card={current!} enabled={!disabled && options.length > 0} zones={dropZones} onDrop={dropCard} />
-          <ul role="list" aria-label="Destinos" data-step="destinos" className="flex min-w-0 flex-1 list-none flex-col gap-2 p-1.5">
+        // No celular, as cartas em cima e os destinos embaixo, lado a lado; no PC, os destinos em coluna ao lado das cartas.
+        <div className="flex flex-col gap-2 pc:flex-row pc:items-start pc:gap-3">
+          {/* O espaço de cima é o da carta escolhida, que sobe como na mão. */}
+          <ul role="list" aria-label="Suas numéricas" data-step="cartas" className="flex flex-none list-none flex-wrap gap-2 p-0 pt-3.5">
+            {remaining.map((card) => (
+              <PendingCard
+                key={card.id}
+                card={card}
+                selected={card.id === selected?.id}
+                enabled={!disabled && options.length > 0}
+                zones={dropZones}
+                onSelect={() => select(card.id)}
+                onDrop={dropCard(card.id)}
+              />
+            ))}
+          </ul>
+          <ul
+            role="list"
+            aria-label="Destinos"
+            data-step="destinos"
+            className="flex min-w-0 flex-1 list-none flex-wrap gap-2 p-1.5 pc:flex-col pc:flex-nowrap"
+          >
             {options.map((destination, i) => (
-              <li key={destination}>
+              <li key={destination} className="min-w-0 flex-1 pc:flex-none">
                 <button
                   type="button"
                   data-foco={i === 0 ? '' : undefined}
                   disabled={disabled}
-                  onClick={() => onChoose(destination)}
+                  onClick={() => onChoose(destination, selected?.id)}
                   className={`${SECONDARY} w-full`}
                 >
                   {destinationLabel(view, draft, destination)}

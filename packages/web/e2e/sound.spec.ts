@@ -32,7 +32,7 @@ test('som: nenhum AudioContext antes de um gesto de ativação; a chave "Som" ve
 
   await page.goto(TRAINING);
   await expect(table(page)).toBeVisible();
-  await expect(equipPanel(page)).toContainText('Carta 1 de 3');
+  await expect(equipPanel(page)).toContainText('Faltam 3 cartas');
   // A mesa parada: o toque seguinte não pula batida nenhuma (um toque que pula não vira clique, e o teste esperaria à toa).
   await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1);
   expect(await audioContexts(page), 'só abrir a página não cria contexto').toBe(0);

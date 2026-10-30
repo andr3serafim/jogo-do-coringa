@@ -3,6 +3,7 @@
 //
 // O módulo da sala local é importado aqui, no topo, antes de qualquer timer falso: o `import()` da tela então sai do cache
 // de módulos na hora, em vez de depender do carregador com o relógio parado.
+import { equipLeftText } from '../../src/model/copy.ts';
 import { legalActions, RULES_VERSION } from '@coringa/engine';
 import type { PlayerAction } from '@coringa/protocol';
 import { TUTORIAL_SEED } from '@coringa/sim/tutorial';
@@ -121,7 +122,7 @@ describe('/treino', () => {
     const before = room.state!.seq;
     const placed = room.state!.view.self.pending.map((card) => card.id);
     expect(placed.length).toBeGreaterThan(0);
-    expect(equipPanel().getByText(`Carta 1 de ${placed.length}`)).toBeInTheDocument();
+    expect(equipPanel().getByText(equipLeftText(placed.length))).toBeInTheDocument();
 
     await equipByUi(user);
     // O state novo traz a jogada do jogador: as cartas que ele montou pela interface já estão nas suas fileiras.
@@ -440,7 +441,7 @@ describe('/treino: o que o §2.6 exclui (passe automático e envio antecipado do
     await user.click(within(equipPanel().getByRole('list', { name: 'Destinos' })).getAllByRole('button')[0]!);
     advance(10 * 60_000);
     expect(room.state!.seq).toBe(before);
-    expect(equipPanel().getByText(`Carta 2 de ${total}`)).toBeInTheDocument();
+    expect(equipPanel().getByText(equipLeftText(total - 1))).toBeInTheDocument();
     expect(equipPanel().queryByText(/Você já confirmou|Esperando/)).not.toBeInTheDocument();
   });
 });

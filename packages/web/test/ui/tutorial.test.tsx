@@ -21,7 +21,7 @@ import type { LocalRoomModule } from '../../src/ui/screens/local-game.tsx';
 import { FakeConnection, scenarioAt, stateMessage } from '../fixtures.ts';
 import { ATTACK_BUTTON, fakeApi, memoryStore, roomMessage, seriousViolations, startsWith } from './support.tsx';
 
-const EQUIP_HINT = /^Suas numéricas vão para o campo na ordem em que saíram/;
+const EQUIP_HINT = /^Suas numéricas vão para o campo na ordem que quiser/;
 const ORDER_HINT = /^Quem tem a iniciativa escolhe atacar primeiro ou em segundo/;
 const ATTACK_HINT = /^Sua vez de atacar: o dano é o seu ATK menos a DEF do oponente/;
 const BUFFS_HINT = /^Cada J soma 1 ao multiplicador do seu ataque/;
@@ -206,7 +206,7 @@ describe('/tutorial: o painel da dica', () => {
     const { user } = await openTutorial();
     const live = hintPanel().querySelector('[aria-live]')!;
     expect(live).toHaveAttribute('aria-live', 'polite');
-    expect(live).toHaveTextContent('Suas numéricas vão para o campo na ordem em que saíram');
+    expect(live).toHaveTextContent('Suas numéricas vão para o campo na ordem que quiser');
     expect(live).not.toContainElement(hint().getByRole('button', { name: 'Entendi' }));
 
     await user.click(hint().getByRole('button', { name: 'Entendi' }));

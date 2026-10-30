@@ -152,6 +152,8 @@ const handList = () => within(screen.getByRole('list', { name: 'Sua mão' }));
 const live = () => document.querySelector('[aria-live="assertive"]') as HTMLElement;
 
 const dest = (name: string) => inEquip().getByRole('button', { name });
+/** Uma numérica do Equipar, pelo id (o botão da lista "Suas numéricas"). */
+const pendingCard = (id: string) => equipPanel().querySelector<HTMLElement>(`[data-card-id="${id}"]`)!;
 const choose = async (m: Mounted, ...names: string[]) => {
   for (const name of names) await m.user.click(dest(name));
 };
@@ -160,11 +162,14 @@ const deadline = (kind: Deadline['kind'], at: number, players: Deadline['players
 
 // ---------------------------------------------------------------------------------------------
 
-describe('Equipar: carta a carta (spec §3.5)', () => {
-  it('"Carta 1 de 3", a carta grande e os destinos nos rótulos do terminal', () => {
+describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
+  it('"Faltam 3 cartas", todas as numéricas à vista (a primeira escolhida) e os destinos nos rótulos do terminal', () => {
     const m = mount(EQUIP);
-    expect(inEquip().getByText('Carta 1 de 3')).toBeInTheDocument();
-    expect(inEquip().getByRole('img', { name: new RegExp(`^7 de ${m.view.self.pending[0]!.suit}`) })).toBeInTheDocument();
+    expect(inEquip().getByText('Faltam 3 cartas')).toBeInTheDocument();
+    const cards = within(inEquip().getByRole('list', { name: 'Suas numéricas' })).getAllByRole('button');
+    expect(cards.map((c) => c.getAttribute('data-card-id'))).toEqual(m.view.self.pending.map((c) => c.id));
+    expect(cards.map((c) => c.getAttribute('aria-pressed'))).toEqual(['true', 'false', 'false']);
+    expect(cards[0]).toHaveAccessibleName(new RegExp(`^7 de ${m.view.self.pending[0]!.suit}`));
     const labels = within(inEquip().getByRole('list', { name: 'Destinos' }))
       .getAllByRole('button')
       .map((b) => b.textContent);
@@ -174,7 +179,7 @@ describe('Equipar: carta a carta (spec §3.5)', () => {
   it('escolher Ataque, Ataque, Defesa e Confirmar manda EQUIP com esses destinos', async () => {
     const m = mount(EQUIP);
     await choose(m, 'Fileira de Ataque');
-    expect(inEquip().getByText('Carta 2 de 3')).toBeInTheDocument();
+    expect(inEquip().getByText('Faltam 2 cartas')).toBeInTheDocument();
     await choose(m, 'Fileira de Ataque', 'Fileira de Defesa');
     await m.user.click(inEquip().getByRole('button', { name: 'Confirmar' }));
     expect(sentAction(m)).toEqual({ type: 'EQUIP', destinations: ['ATK', 'ATK', 'DEF'], order: m.view.self.pending.map((c) => c.id) });
@@ -189,21 +194,22 @@ describe('Equipar: carta a carta (spec §3.5)', () => {
     expect(inEquip().queryByRole('button', { name: 'Confirmar' })).not.toBeInTheDocument();
     await choose(m, 'Fileira de Defesa');
     expect(inEquip().getByRole('button', { name: 'Confirmar' })).toBeEnabled();
-    // Sem destinos para escolher e sem o "Carta N de 3".
+    // Sem cartas nem destinos para escolher, e sem o "Faltam".
     expect(inEquip().queryByRole('list', { name: 'Destinos' })).not.toBeInTheDocument();
-    expect(inEquip().queryByText(/^Carta \d de 3$/)).not.toBeInTheDocument();
+    expect(inEquip().queryByRole('list', { name: 'Suas numéricas' })).not.toBeInTheDocument();
+    expect(inEquip().queryByText(/^Falta/)).not.toBeInTheDocument();
   });
 
   it('Desfazer volta um passo, Recomeçar volta ao início', async () => {
     const m = mount(EQUIP);
     await choose(m, 'Fileira de Ataque', 'Fileira de Defesa');
-    expect(inEquip().getByText('Carta 3 de 3')).toBeInTheDocument();
+    expect(inEquip().getByText('Falta 1 carta')).toBeInTheDocument();
     await m.user.click(inEquip().getByRole('button', { name: 'Desfazer' }));
-    expect(inEquip().getByText('Carta 2 de 3')).toBeInTheDocument();
+    expect(inEquip().getByText('Faltam 2 cartas')).toBeInTheDocument();
     expect(m.session.snapshot().equipDraft.map((p) => p.destination)).toEqual(['ATK']);
     await choose(m, 'Fileira de Defesa');
     await m.user.click(inEquip().getByRole('button', { name: 'Recomeçar' }));
-    expect(inEquip().getByText('Carta 1 de 3')).toBeInTheDocument();
+    expect(inEquip().getByText('Faltam 3 cartas')).toBeInTheDocument();
     expect(m.session.snapshot().equipDraft).toEqual([]);
     expect(acts(m)).toEqual([]);
   });
@@ -369,6 +375,37 @@ describe('Equipar: carta a carta (spec §3.5)', () => {
     expect(inEquip().queryByText('Enviando…')).not.toBeInTheDocument();
   });
 
+  it('tocar na terceira carta e depois no destino põe a terceira, na frente da fila', async () => {
+    const m = mount(EQUIP);
+    const [first, second, third] = m.view.self.pending;
+    await m.user.click(pendingCard(third!.id));
+    expect(pendingCard(third!.id)).toHaveAttribute('aria-pressed', 'true');
+    expect(pendingCard(first!.id)).toHaveAttribute('aria-pressed', 'false');
+    // O toque na carta leva o foco ao primeiro destino, o passo seguinte.
+    expect(dest('Fileira de Ataque')).toHaveFocus();
+    await choose(m, 'Fileira de Ataque');
+    expect(m.session.snapshot().equipDraft).toEqual([{ cardId: third!.id, destination: 'ATK' }]);
+    expect(inEquip().getByText('Faltam 2 cartas')).toBeInTheDocument();
+    // A carta posta sai da lista e entra no Ataque como rascunho; a primeira que falta volta a ser a escolhida.
+    expect(inEquip().queryByRole('button', { name: new RegExp(`^3 de ${third!.suit}`) })).not.toBeInTheDocument();
+    expect(document.querySelector(`[data-card-id="${third!.id}"][data-rascunho]`)).not.toBeNull();
+    expect(pendingCard(first!.id)).toHaveAttribute('aria-pressed', 'true');
+    await choose(m, 'Fileira de Defesa', 'Fileira de Defesa');
+    await m.user.click(inEquip().getByRole('button', { name: 'Confirmar' }));
+    expect(sentAction(m)).toEqual({ type: 'EQUIP', destinations: ['ATK', 'DEF', 'DEF'], order: [third!.id, first!.id, second!.id] });
+  });
+
+  it('Desfazer depois de escolher fora de ordem devolve a carta à lista', async () => {
+    const m = mount(EQUIP);
+    const third = m.view.self.pending[2]!;
+    await m.user.click(pendingCard(third.id));
+    await choose(m, 'Fileira de Defesa');
+    await m.user.click(inEquip().getByRole('button', { name: 'Desfazer' }));
+    expect(m.session.snapshot().equipDraft).toEqual([]);
+    expect(within(inEquip().getByRole('list', { name: 'Suas numéricas' })).getAllByRole('button')).toHaveLength(3);
+    expect(document.querySelector(`[data-card-id="${third.id}"][data-rascunho]`)).toBeNull();
+  });
+
   it('uma confirmação recusada devolve o rascunho para confirmar de novo', async () => {
     const m = mount(EQUIP);
     await choose(m, 'Fileira de Ataque', 'Fileira de Ataque', 'Fileira de Defesa');
@@ -398,11 +435,14 @@ describe('Equipar: foco e teclado (spec §7)', () => {
     expect(dest('Fileira de Defesa')).toHaveFocus();
   });
 
-  it('a montagem inteira só pelo teclado', async () => {
+  it('a montagem inteira só pelo teclado: a primeira tecla escolhe a carta, a segunda o destino', async () => {
     const m = mount(EQUIP);
     await m.user.tab();
+    expect(pendingCard(m.view.self.pending[0]!.id)).toHaveFocus();
     await m.user.keyboard('{Enter}');
-    expect(inEquip().getByText('Carta 2 de 3')).toBeInTheDocument();
+    expect(dest('Fileira de Ataque')).toHaveFocus();
+    await m.user.keyboard('{Enter}');
+    expect(inEquip().getByText('Faltam 2 cartas')).toBeInTheDocument();
     await m.user.keyboard('{Enter}{Enter}');
     expect(inEquip().getByRole('button', { name: 'Confirmar' })).toHaveFocus();
     await m.user.keyboard('{Enter}');
