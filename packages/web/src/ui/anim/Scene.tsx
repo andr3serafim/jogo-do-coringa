@@ -153,8 +153,8 @@ interface RareScene {
 }
 
 const RARE: Record<RareKind, RareScene> = {
-  ABSOLUTE_ATTACK: { kind: 'J', layout: 'fan', stagger: 0.12, titleAt: SCENE_INVERT_LEAD_MS.ABSOLUTE_ATTACK / 1000 },
-  ABSOLUTE_DEFENSE: { kind: 'Q', layout: 'wall', stagger: 0.12, titleAt: SCENE_INVERT_LEAD_MS.ABSOLUTE_DEFENSE / 1000 },
+  ABSOLUTE_ATTACK: { kind: 'J', layout: 'fan', stagger: 0.18, titleAt: SCENE_INVERT_LEAD_MS.ABSOLUTE_ATTACK / 1000 },
+  ABSOLUTE_DEFENSE: { kind: 'Q', layout: 'wall', stagger: 0.18, titleAt: SCENE_INVERT_LEAD_MS.ABSOLUTE_DEFENSE / 1000 },
   EXODIA: { kind: 'K', layout: 'cross', stagger: 0.3, titleAt: SCENE_INVERT_LEAD_MS.EXODIA / 1000 },
 };
 

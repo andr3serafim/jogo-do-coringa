@@ -51,7 +51,8 @@ escuro numa janela de 1 s; com movimento reduzido, nenhuma inversão) e sem afro
 
 ### U3. Cenas raras
 
-- **Ataque Absoluto e Defesa Absoluta:** 2,6 s (eram 1,5 s; o autor pediu 3 s em 2026-10-30, na E1). Os quatro J (ou Q) entram em leque atrás do título, um por vez; o
+- **Ataque Absoluto e Defesa Absoluta:** 3 s (eram 1,5 s, depois 2,6 s; o autor pediu 3 s em 2026-10-30, feito na E1). O leque
+  tem 0,18 s entre uma carta e a seguinte, e o título carimba a 0,9 s, com a última carta chegando. Os quatro J (ou Q) entram em leque atrás do título, um por vez; o
   título carimba (escala de 1,4 para 1, com mola). Raios de xilogravura giram devagar atrás do painel.
 - **Exódia:** 4,2 s, em três tempos: os quatro K sobem um a um até formar uma cruz; na chegada do quarto, a única inversão da cena
   (600 ms); o título "EXÓDIA" carimba grande, com "NOME VENCE!" embaixo.

@@ -433,7 +433,8 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
   - batida comum: 250 a 350 ms;
   - número de dano: ~600 ms;
   - cena comum (Reflect lançado e disparado): ~1,5 s;
-  - cenas raras (sub-projeto 5, U3): Ataque Absoluto e Defesa Absoluta 2,6 s (os quatro J em leque, os quatro Q em muro), Exódia
+  - cenas raras (sub-projeto 5, U3): Ataque Absoluto e Defesa Absoluta 3 s (eram 2,6 s; o autor pediu 3 s em 2026-10-30; os quatro J
+    em leque, os quatro Q em muro, 0,18 s entre uma carta e a seguinte, o título e a inversão a 0,9 s), Exódia
     4,2 s (os quatro K sobem um a um até a cruz). O título carimba, com mola, no instante da única inversão da cena; raios de
     xilogravura giram devagar atrás do painel. Elas **não encolhem nem contam no teto de decisão** (o resto da linha do tempo encolhe
     para caber nele): são raras, a Exódia acaba a partida, e o toque ou o Esc pulam na hora. No `catchUp` viram faixa, como as outras;

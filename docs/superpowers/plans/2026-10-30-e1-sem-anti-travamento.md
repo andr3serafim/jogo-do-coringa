@@ -264,11 +264,11 @@ Um commit só com a tarefa 3: tirar o `DRAW` do tipo quebra o typecheck dos outr
 - Specs: `docs/superpowers/specs/2026-10-17-interface-web-design.md:436` e a U3 da spec do sub-projeto 5.
 - Testes: os da linha do tempo e da cena que fixam 2 600 ou 700.
 
-- [ ] **Passo 1:** troque as expectativas para 3 000 e 900. Os testes de fotossensibilidade ficam como estão. Veja-os falhar.
-- [ ] **Passo 2:** implemente.
-- [ ] **Passo 3:** as suítes passam. A Exódia segue em 4 200.
-- [ ] **Passo 4:** confira no navegador com um replay que tenha um Ataque Absoluto. A cena não pode ter tempo morto.
-- [ ] **Passo 5:** commit `feat(web): Ataque e Defesa Absoluta em 3 s`.
+- [x] **Passo 1:** troque as expectativas para 3 000 e 900. Os testes de fotossensibilidade ficam como estão. Veja-os falhar.
+- [x] **Passo 2:** implemente.
+- [x] **Passo 3:** as suítes passam. A Exódia segue em 4 200.
+- [x] **Passo 4:** confira no navegador com um replay que tenha um Ataque Absoluto. A cena não pode ter tempo morto.
+- [x] **Passo 5:** commit `feat(web): Ataque e Defesa Absoluta em 3 s`.
 
 ### Tarefa 7: medir, revisar e mesclar
 

@@ -7,6 +7,7 @@ import {
   INVERT_COOLDOWN_MS,
   INVERT_MIN_HOLD_MS,
   RARE_SCENE_MS,
+  SCENE_INVERT_LEAD_MS,
   buildTimeline,
   luminanceSwitches,
   timelineMs,
@@ -161,6 +162,19 @@ describe('mapeamento evento → batida (spec §4.2)', () => {
   }
 });
 
+describe('as cenas raras (U3 do sub-projeto 5)', () => {
+  it('o Ataque e a Defesa Absoluta duram 3 s (o autor pediu em 2026-10-30, eram 2,6 s); a Exódia, 4,2 s', () => {
+    expect(RARE_SCENE_MS).toEqual({ EXODIA: 4_200, ABSOLUTE_ATTACK: 3_000, ABSOLUTE_DEFENSE: 3_000 });
+  });
+
+  it('nos Absolutos, o título e a inversão vêm a 0,9 s, depois do leque dos quatro J ou Q; a cena segura até o fim', () => {
+    expect(SCENE_INVERT_LEAD_MS.ABSOLUTE_ATTACK).toBe(900);
+    expect(SCENE_INVERT_LEAD_MS.ABSOLUTE_DEFENSE).toBe(900);
+    // A inversão (600 ms) acaba bem antes do fim da cena: sobra 1,5 s com o título no ar.
+    expect(RARE_SCENE_MS.ABSOLUTE_ATTACK - SCENE_INVERT_LEAD_MS.ABSOLUTE_ATTACK - 600).toBe(1_500);
+  });
+});
+
 describe('buildTimeline', () => {
   it('sem eventos: linha do tempo vazia, 0 ms', () => {
     expect(buildTimeline([], LIVE)).toEqual([]);
@@ -249,7 +263,7 @@ describe('buildTimeline', () => {
     const beats = buildTimeline(events, { ...LIVE, decisionPending: true });
     const rare = beats.find((b) => b.scene === 'ABSOLUTE_ATTACK')!;
     expect(rare.durationMs).toBe(RARE_SCENE_MS.ABSOLUTE_ATTACK);
-    expect(rare.invert).toEqual({ atMs: rare.startMs + 700, holdMs: 600 });
+    expect(rare.invert).toEqual({ atMs: rare.startMs + SCENE_INVERT_LEAD_MS.ABSOLUTE_ATTACK, holdMs: 600 });
     expect(timelineMs(beats) - rare.durationMs).toBeLessThanOrEqual(DECISION_CAP_MS);
     expect(beats.filter((b) => b !== rare && b.durationMs > 0).every((b) => b.durationMs < BEAT_MS[b.kind as 'move'])).toBe(true);
     expectPhotosafe(beats, false);

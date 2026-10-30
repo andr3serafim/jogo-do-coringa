@@ -11,9 +11,10 @@ import type { GameEvent } from '@coringa/engine';
 export const BEAT_MS = { move: 300, damage: 600, banner: 400, scene: 1_500 } as const;
 /**
  * As cenas raras (sub-projeto 5, U3): mais longas que a comum, e fora do teto de decisão (o resto da linha do tempo encolhe para
- * caber nele; elas não). São raras, a Exódia acaba a partida, e o toque ou o Esc pulam na hora.
+ * caber nele; elas não). São raras, a Exódia acaba a partida, e o toque ou o Esc pulam na hora. Os Absolutos passaram de 2,6 s
+ * para 3 s a pedido do autor (2026-10-30).
  */
-export const RARE_SCENE_MS = { EXODIA: 4_200, ABSOLUTE_ATTACK: 2_600, ABSOLUTE_DEFENSE: 2_600 } as const;
+export const RARE_SCENE_MS = { EXODIA: 4_200, ABSOLUTE_ATTACK: 3_000, ABSOLUTE_DEFENSE: 3_000 } as const;
 /** Teto de uma linha do tempo que antecede uma decisão do jogador. */
 export const DECISION_CAP_MS = 1_000;
 /** Teto de uma linha do tempo de `catchUp` (eventos perdidos na reconexão). */
@@ -37,8 +38,8 @@ export type SceneKind = 'EXODIA' | 'ABSOLUTE_ATTACK' | 'ABSOLUTE_DEFENSE' | 'REF
 export const SCENE_INVERT_LEAD_MS: Record<SceneKind, number> = {
   REFLECT_PLAYED: 150,
   REFLECT_TRIGGERED: 150,
-  ABSOLUTE_ATTACK: 700,
-  ABSOLUTE_DEFENSE: 700,
+  ABSOLUTE_ATTACK: 900,
+  ABSOLUTE_DEFENSE: 900,
   EXODIA: 1_400,
 };
 const SCENE_INVERT_HOLD_MS = 600;
