@@ -131,7 +131,7 @@ leitura e não está nas palavras dele.
 - `RULES_VERSION` 3 e `STATE_SCHEMA` 3. As partidas de referência são regravadas e passam a usar a config atual (500, 8, 8 Ás).
   O portão do Difícil é medido do zero (`pnpm sim:dificil --recomecar`) e a calibração é refeita.
 
-### E2. Equipar livre (muda a regra original da ordem de compra)
+### E2. Equipar livre (muda a regra original da ordem de compra) [feita em 2026-10-30]
 
 - Depois da compra, o jogador vê todas as numéricas recebidas de uma vez e as põe na fileira que quiser, na ordem que quiser
   (a ordem define quem fica na frente da fila). Com as duas fileiras cheias, as opções de hoje continuam (trocar a última de uma
@@ -142,6 +142,14 @@ leitura e não está nas palavras dele.
   hoje (cada numérica restante vai para a fileira com menos cartas, empate → Defesa).
 - **Interface:** a tela do Equipar mostra todas as numéricas recebidas juntas, e o jogador escolhe carta e destino em qualquer
   ordem (toque ou arraste, como hoje). Isso também atende o pedido de ver as numéricas sem ler o histórico (item 9).
+- **Como ficou** (plano `docs/superpowers/plans/2026-10-30-e2-equipar-livre.md`): a ação `EQUIP` ganhou `order` opcional (os ids
+  das pendentes na ordem em que entram); sem ela, a ordem de compra, então os bots, o tempo esgotado e os replays guardados não
+  mudam, as partidas de referência saem iguais e nem `RULES_VERSION` nem `STATE_SCHEMA` sobem. `legalActions` segue canônica,
+  sem `order`. O painel mostra todas as numéricas ("Faltam 3 cartas"); o toque escolhe a carta e o destino vale para ela.
+  Leituras **[I]**, a confirmar com o autor:
+  - sem tocar numa carta, o destino vale para a primeira que falta, na ordem de compra (o fluxo de antes segue em um toque);
+  - no envio antecipado (faltam 1,5 s) e no tempo esgotado, as que faltam entram depois das escolhidas, na ordem de compra;
+  - o terminal do simulador (`pnpm play`) continua perguntando na ordem de compra.
 
 ### E3. Roubo, cura pela Defesa e limite de especiais (medir antes)
 

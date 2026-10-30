@@ -306,7 +306,7 @@ modelo da web. **[decisão minha]** As pistas:
   defesa; K para a Guarda; A ou Selvagem até a carta do oponente que é alvo da Armadilha; J/Q/Selvagem até o J/Q do oponente
   (Sacrifício). Soltar onde há exatamente uma jogada a faz; onde há mais de uma (por exemplo, o Selvagem nos buffs), abre a
   escolha que a barra já mostra. Reflect e Ressuscitar continuam pelos botões.
-- **Equipar:** arrastar a carta da vez até a sua fileira de Ataque ou de Defesa (com as duas cheias, até a última carta de uma
+- **Equipar:** arrastar qualquer numérica que falta (desde a E2 do sub-projeto 5; antes, a carta da vez) até a sua fileira de Ataque ou de Defesa (com as duas cheias, até a última carta de uma
   delas para trocar, ou até o cemitério para descartar). Os destinos válidos vêm de `nextDestinations` (`model/equip.ts`).
 
 ### 6.2 Regras
@@ -354,13 +354,13 @@ modelo da web. **[decisão minha]** As pistas:
   sobre a própria carta chama `onTap` (o mesmo efeito do clique), e aí o clique que o navegador manda depois do gesto é engolido (como
   o de todo arrasto: até a folga de 400 ms, o próximo `pointerdown` ou uma tecla), então a carta não é escolhida duas vezes. O clique
   sem ponteiro (`event.detail === 0`: Enter, Espaço, leitor de tela) passa sempre: o teclado e o leitor de tela seguem como eram. No
-  Equipar, tocar a carta da vez não faz nada (os botões de destino ao lado são o toque).
+  Equipar, tocar uma numérica só a escolhe (E2; os botões de destino são o toque que a põe).
 - **As chaves** (`DROP`, `cardDropKey`, `ROW_DROP`, em `model/drag.ts`) são o único lugar do texto de cada `data-soltar`
   (`buffs:ATK`, `buffs:DEF`, `guarda`, `carta:<id>`, `fileira:ATK`, `fileira:DEF`, `ultima:ATK`, `ultima:DEF`, `cemiterio`), e um teste
   amarra cada uma à zona que se vê. As zonas do oponente são só as cartas que são alvo (cada uma é uma zona `carta:<id>`): nunca a
   mão dele, as fileiras dele nem o Reflect. Nenhuma regra mora na interface: o mapa carta → zonas vem de `tablePlays` e do Equipar
   de `nextDestinations`, e a soltura passa pelo mesmo `send` do toque (`isLegal` contra a lista do último `state`).
-- **Toque e rolagem.** `touch-action: none` só nas cartas que arrastam agora (a da mão com jogada, destravada; a carta da vez do
+- **Toque e rolagem.** `touch-action: none` só nas cartas que arrastam agora (a da mão com jogada, destravada; as numéricas que faltam no
   Equipar), e só enquanto valem; o resto, e a janela dos campos, ficam em `auto` e rolam. O cursor das cartas que arrastam é a
   mãozinha (`cursor-grab`), e as outras seguem com o `cursor-pointer` de botão.
 - **Testes:** `test/model/drag.test.ts`, `test/ui/card-drag.test.tsx` (o gesto), `test/ui/table-drag.test.tsx` (a mesa de verdade, com

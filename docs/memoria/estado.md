@@ -18,7 +18,10 @@
   `feat/equipar-livre` (a partir da `main` `0136e47`). Plano: `docs/superpowers/plans/2026-10-30-e2-equipar-livre.md` (4
   tarefas). Desenho: a ação `EQUIP` ganha `order` opcional (ids das pendentes); sem ela, a ordem de compra. Sem subir
   `RULES_VERSION` nem `STATE_SCHEMA`.
-- **Próximo passo exato:** a tarefa do plano que ainda não tiver commit (`git log main..feat/equipar-livre`).
+  Tarefas 1 a 3 feitas (motor/protocolo `3a9a82a`, rascunho da web `ce5c897`, painel `ea567a8` e `16c56ed`) e as specs da
+  tarefa 4. Conferido no navegador: 4 numéricas a 375 px e a 1536 × 695, sem rolagem horizontal.
+- **Próximo passo exato:** o resto da tarefa 4: push (o pre-push roda o `pnpm check`), `pnpm e2e`, o portão do Difícil sozinho
+  (`pnpm sim:dificil --ajuste "E2: ordem livre no Equipar; bots inalterados"`), a CI verde, o diário e o merge por fast-forward.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 

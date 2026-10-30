@@ -44,7 +44,7 @@ Fechar o MVP: dois amigos jogam uma partida online pelo navegador, entrando por 
    - a) a janela de reação **passa sozinha** quando não há resposta possível. A chave vem ligada e pode ser desligada (para blefar);
    - b) a Escolha da iniciativa **confirma "atacar primeiro" sozinha** depois de ~3 s sem interação.
 5. **Equipar:**
-   - carta a carta, com prévia de ATK/DEF, Desfazer e Confirmar;
+   - todas as numéricas à vista, em qualquer ordem (E2 do sub-projeto 5), com prévia de ATK/DEF, Desfazer e Confirmar;
    - 1,5 s antes do prazo, o navegador envia o que o jogador escolheu e completa o resto pela regra de estouro;
    - quem não escolheu nada não envia nada (o estouro conta).
 6. **Prévia do dano:** mostra o desfecho previsto (K absorve, Reflect devolve, Defesa Absoluta zera), por uma função nova do motor, testada contra a resolução real. Vale também para a ameaça do oponente.
@@ -354,21 +354,25 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
 - Enter e Espaço escolhem, Esc cancela;
 - sem atalhos de uma tecla no MVP, para evitar jogada sem querer.
 
-### 3.5 Equipar carta a carta [A + P]
+### 3.5 Equipar [A + P; livre desde a E2 do sub-projeto 5]
 
-- As numéricas pendentes (`self.pending`, na ordem de compra) aparecem como fila: "Carta 1 de 3". A carta da vez aparece grande, com os destinos:
+- Todas as numéricas pendentes (`self.pending`) aparecem juntas, e o cabeçalho diz quantas faltam ("Faltam 3 cartas", "Falta 1
+  carta"). O jogador toca numa carta (a escolhida sobe, como na mão; sem toque, é a primeira que falta, na ordem de compra) e
+  depois no destino, em qualquer ordem: a ordem das escolhas é a ordem em que as cartas entram (`order` da ação `EQUIP`). O toque
+  na carta leva o foco ao primeiro destino. Os destinos valem para a carta escolhida:
   - **Ataque** e **Defesa** (só as fileiras com vaga);
   - com as duas cheias: **Trocar a última do Ataque (sai 9♠)**, **Trocar a última da Defesa (sai 5♥)** e **Descartar**.
 - Só aparecem destinos que levam a uma montagem legal: o mesmo filtro do `askEquip` do terminal, sobre os `EQUIP` de `legalActions`.
 - A escolha aparece na fileira como rascunho (carta translúcida), e os totais e a quadra se atualizam. Exemplo: "forma quadra de 7: +7 e 1 Ressurreição".
 - **Desfazer** volta um passo; **Recomeçar** volta ao início.
-- A carta da vez também se **arrasta** até a fileira (ou até a última carta de uma fileira cheia, ou o cemitério, que são os destinos que o motor deixa); os botões de destino ao lado seguem valendo, e os dois caminhos se misturam carta a carta. Tocar na carta da vez não faz nada.
+- Qualquer numérica que falta também se **arrasta** até a fileira (ou até a última carta de uma fileira cheia, ou o cemitério, que são os destinos que o motor deixa); os botões de destino seguem valendo, e os dois caminhos se misturam carta a carta. Tocar numa carta só a escolhe.
+- No celular, as cartas ficam em cima e os destinos embaixo, no máximo dois por linha; no PC, os destinos em coluna ao lado das cartas.
 - Com todas posicionadas, aparece **Confirmar**, sem envio automático na hora. Depois de confirmar, aparece "Esperando Duda montar…".
 - Especiais recebidas vão para a mão e aparecem chegando lá.
 - Quem não recebeu numéricas tem o Equipar enviado pelo servidor (spec 2 §5). A interface mostra "Você não recebeu numéricas nesta rodada".
 - **Envio antecipado [A]:**
   - quando faltam 1,5 s pelo relógio do servidor (`remainingMs`), se o jogador escolheu ao menos uma carta e não confirmou, a interface envia `EQUIP` com as escolhas feitas;
-  - o resto é completado pela regra de estouro do motor, a fileira com menos cartas (empate → Defesa; as duas cheias → descarte). A conta vem de `autoDestinations` exportada (§8.2), nunca de uma cópia;
+  - o resto (as cartas que faltam, depois das escolhidas, na ordem de compra) é completado pela regra de estouro do motor, a fileira com menos cartas (empate → Defesa; as duas cheias → descarte). A conta vem de `autoDestinations` exportada (§8.2), nunca de uma cópia;
   - é uma jogada voluntária (o jogador escolheu) e vai **sem** a marca `auto`;
   - com nenhuma escolha feita, nada é enviado: o servidor aplica o estouro, que conta para o W.O. por ausência.
 

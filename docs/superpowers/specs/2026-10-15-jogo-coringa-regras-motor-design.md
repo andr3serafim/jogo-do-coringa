@@ -82,7 +82,7 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
 
 1. Cada jogador recebe **4 cartas**, distribuídas alternadamente uma a uma, começando por quem tem a iniciativa **[I]**.
 2. **Especiais** (J, Q, K, A, Selvagem) vão para a **mão**.
-3. **Numéricas vão obrigatoriamente para o campo [I]**, **na ordem em que foram compradas** — o jogador **não organiza** a ordem **[O]**. Para cada numérica ele escolhe apenas o destino:
+3. **Numéricas vão obrigatoriamente para o campo [I]**. **Equipar livre (sub-projeto 5, E2; antes: na ordem de compra, sem o jogador organizar [O]):** o jogador vê todas as numéricas recebidas de uma vez e escolhe, para cada uma, o destino e a ordem em que entram (a primeira posta numa fileira fica na frente da fila). Os destinos possíveis:
    - Fileira de Ataque ou de Defesa (só pode escolher uma fileira que não esteja cheia);
    - se **as duas estiverem cheias** **[O]**: substituir a **última carta** (a do fim da fila) de qualquer fileira — a carta antiga vai para o cemitério — **ou** descartar a nova no cemitério **[I]**.
 4. Os dois jogadores montam **ao mesmo tempo, em segredo**; o resultado é revelado junto quando ambos confirmam (ou o tempo acaba) **[M]**.
@@ -262,7 +262,7 @@ DEF = (soma(Defesa do defensor) + bônus) × (1 + nQ)
 | Vida | 1000 | 500, escolhível entre 300, 500 e 800 (sub-projeto 5) |
 | Coringas | nome do jogo; sem função nas regras | 2 avatares + 2 Coringas Selvagens no monte (J, Q ou A) |
 | Fileiras | sem limite | 7 numéricas cada (calibrável) |
-| Equipar | — | simultâneo e secreto; numéricas obrigatórias, na ordem de compra |
+| Equipar | — | simultâneo e secreto; numéricas obrigatórias, na ordem que o jogador escolher (E2) |
 | Iniciativa | quem causou mais dano começa | quem causou mais dano **escolhe** atacar 1º ou 2º |
 | K | bloqueia todo dano enquanto equipado | absorve 1 ataque com dano e quebra; todos quebram ao atacar um Reflect |
 | A | elimina um especial | armadilha: também como reação a ataque ou jogada de K |
@@ -315,7 +315,7 @@ legalActions(view: PlayerView): Action[]
 
 | Ação | Quando |
 |---|---|
-| `EQUIP { destinations[] }` — um destino por numérica recebida, na ordem de compra: `ATK` \| `DEF` \| `REPLACE_LAST_ATK` \| `REPLACE_LAST_DEF` \| `DISCARD` | `EQUIP` |
+| `EQUIP { destinations[], order? }` — um destino por numérica recebida: `ATK` \| `DEF` \| `REPLACE_LAST_ATK` \| `REPLACE_LAST_DEF` \| `DISCARD`. `order` (E2) traz os ids das numéricas pendentes na ordem em que entram, e `destinations[i]` vale para a carta `order[i]`; precisa ser uma permutação delas (senão `INVALID_DESTINATIONS`, `DUPLICATE_CARDS` ou `INVALID_CARD`). Sem `order`, a ordem de compra. `legalActions` traz só a lista canônica, sem `order` | `EQUIP` |
 | `CHOOSE_ORDER { first: boolean }` | `ORDER_CHOICE` |
 | `PLAY_J`, `PLAY_Q { cardId }` | `ATTACK_MAIN` |
 | `PLAY_K { cardIds[] }` | `ATTACK_MAIN` |
@@ -398,7 +398,7 @@ Bots não jogam como humanos: as metas guiam a calibração inicial; o ajuste fi
 ## 4. Jogo no terminal (`pnpm play`)
 
 - Partida contra o bot `greedy` no terminal, sem timers (`--bot` troca o bot; `--semente` repete uma partida).
-- Mostra vida, guarda, buffs, fileiras, quantidade de cartas na mão do oponente, monte e cemitério; lista as ações legais numeradas; escolha de ordem e janelas de reação aparecem como prompts. O Equipar é perguntado carta a carta (com as duas fileiras cheias seriam até 81 combinações).
+- Mostra vida, guarda, buffs, fileiras, quantidade de cartas na mão do oponente, monte e cemitério; lista as ações legais numeradas; escolha de ordem e janelas de reação aparecem como prompts. O Equipar é perguntado carta a carta, na ordem de compra (com as duas fileiras cheias seriam até 81 combinações; a ordem livre da E2 fica com a web).
 - Ao terminar, salva a partida (semente + ações) em `packages/sim/replays/`, para reproduzir bugs.
 - Objetivo: validar o "feeling" das regras antes da interface.
 
