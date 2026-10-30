@@ -5,8 +5,8 @@
 
 ## Agora
 
-- **Branch:** `main`, no checkout principal `D:\andr3\jogo-coringa` (o registro da espera sobe pela `feat/memoria-espera` e
-  entra por fast-forward com a CI verde; se ela ainda não estiver na `main`, é só mesclar). A `feat/revisao-notas` entrou por fast-forward em
+- **Branch:** `main`, no checkout principal `D:\andr3\jogo-coringa` (as respostas do autor sobem pela `feat/memoria-espera`
+  e entram por fast-forward com a CI verde; se ela ainda não estiver na `main`, é só mesclar). A `feat/revisao-notas` entrou por fast-forward em
   2026-10-30, com a CI verde na branch (run 41008238994: check + e2e). Ela trouxe:
   - as respostas do autor ao lote de 2026-10-30 no `decisoes.md` ("2026-10-30 (2)") e na spec (F2, F3);
   - **F5 corrigido:** o tabuleiro quebrado no PC de 1536 × 695 (CSS), com o E2E `e2e/layout.spec.ts`;
@@ -14,8 +14,10 @@
   - a revisão de todas as notas, em `notas/revisao-das-notas.md`;
   - o histórico agora diz "da Defesa" e "na Defesa".
 - **Em curso:** nada.
-- **Próximo passo exato:** **esperar o autor** ("Espere minhas respostas", `decisoes.md` 2026-10-30 (3)). Só com as respostas
-  abaixo e o ok dele começa a **E1** (remover o anti-travamento), numa branch `feat/sem-anti-travamento` a partir da `main`.
+- **Próximo passo exato:** começar a **E1** numa branch `feat/sem-anti-travamento` a partir da `main` (depois de mesclar a
+  `feat/memoria-espera`). O autor respondeu às perguntas (`decisoes.md` 2026-10-30 (4)), e a E1 agora leva três coisas: sem
+  anti-travamento, a **Defesa Absoluta até o ataque** e os **Absolutos em 3 s** (spec do sub-projeto 5, E1). Antes de medir,
+  conferir se os bots atacam uma Defesa Absoluta (o risco está na spec).
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
@@ -28,8 +30,8 @@
 
 ## Fila (sub-projeto 5)
 
-1. **E1:** sem anti-travamento e sem limite de rodadas. `RULES_VERSION`/`STATE_SCHEMA` 3, partidas de referência regravadas,
-   portão do Difícil do zero.
+1. **E1:** sem anti-travamento e sem limite de rodadas, Defesa Absoluta até o ataque, Absolutos em 3 s.
+   `RULES_VERSION`/`STATE_SCHEMA` 3, partidas de referência regravadas, portão do Difícil do zero.
 2. **E2:** Equipar livre.
 3. **F1:** apagar o histórico (só web).
 4. **E3 + F2 + F3:** roubo, cura pela Defesa, limite de 4 especiais, Reflect reativo e Devastação, medidos juntos no simulador
@@ -37,15 +39,14 @@
 
 ## Esperando o autor
 
-- **F4, Ataque vazio:** qual das duas explicações bate com o que ele viu (`notas/revisao-das-notas.md`). Se for a Defesa
-  Absoluta, a decisão de regra é dele: ela continua acabando (e gastando 1 Q) sem ataque, ou só depois de um ataque de fato?
-- **Notas 6 a 8:** o que ainda parece faltar, já que as entregas da Fase C estão no jogo.
 - **[I] a confirmar, junto com os números da E3:**
+  - Defesa Absoluta até o ataque: o Ataque Absoluto e o ataque devolvido por Reflect contam como ataque; Reflect contra Reflect,
+    Armadilha, Sacrifício, Roubo e Devastação não a encerram; ao acabar, sai 1 Q como hoje (`decisoes.md` 2026-10-30 (4)).
   - Defesa Absoluta contra o Reflect: o Reflect segura o golpe (o dono leva 0), mas não devolve dano nem quebra Q e K do
     atacante?
   - Reflect contra Reflect: o golpe não acontece, nenhuma carta sai das fileiras e ninguém leva dano?
 - **Forma da penalidade do limite de 4 especiais:** vai com 2 ou 3 opções medidas.
-- O lote de 2026-10-30 foi respondido; as perguntas e as respostas estão no `decisoes.md`.
+- O lote de 2026-10-30 e as perguntas da revisão das notas (F4, notas 6 a 8) foram respondidos; tudo no `decisoes.md`.
 
 ## Só o autor
 

@@ -6,6 +6,31 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-10-30 (4): Defesa Absoluta até o ataque; Absolutos em 3 s
+
+Respostas às duas perguntas do fechamento da revisão das notas (F4 e notas 6 a 8):
+
+> 1. Defesa absoluta dura até o oponente atacar de fato.
+> 2. 3 segundos acredito que seja o suficiente para o tempo de animaçao dos absolutos.
+
+**Leitura:**
+
+- As perguntas em aberto foram respondidas: a espera da entrada (3) acabou e a fila segue pela E1.
+- **Defesa Absoluta (regra nova, muda a spec 1 §1.5 item 4 e §1.8 "Ao terminar"):** ela não acaba mais no fim do próximo
+  turno do oponente. Dura até ele atacar de fato e acaba depois desse ataque. Entra junto com a E1 (mesma subida de
+  `RULES_VERSION` e o mesmo portão do Difícil).
+  - **[I]** Ao acabar, continua indo 1 Q (o mais antigo) ao cemitério, como hoje; só muda quando.
+  - **[I]** O Ataque Absoluto conta como ataque e a encerra.
+  - **[I]** Um ataque devolvido por um Reflect conta como ataque.
+  - **[I]** Com o Reflect reativo (F2), o Reflect contra Reflect não tem golpe: a Defesa Absoluta continua.
+  - **[I]** A Armadilha, o Sacrifício, o Roubo e a Devastação não a encerram, porque ela os bloqueia.
+  - Os **[I]** vão ao autor junto com os números da E3.
+- **Absolutos:** o Ataque Absoluto e a Defesa Absoluta passam de 2,6 s para 3 s (só a web). **[I]** A Exódia fica em 4,2 s,
+  porque ele não falou dela.
+- As notas 6 (ver todas as cartas, a E2) e 8 (movimentos suaves) não tiveram comentário novo.
+
+---
+
 ## 2026-10-30 (3): a E1 espera as respostas
 
 Depois do fechamento da revisão das notas (F4 e notas 6 a 8 em aberto), à pergunta "Posso começar a E1?":

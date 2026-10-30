@@ -51,7 +51,7 @@ escuro numa janela de 1 s; com movimento reduzido, nenhuma inversão) e sem afro
 
 ### U3. Cenas raras
 
-- **Ataque Absoluto e Defesa Absoluta:** 2,6 s (eram 1,5 s). Os quatro J (ou Q) entram em leque atrás do título, um por vez; o
+- **Ataque Absoluto e Defesa Absoluta:** 2,6 s (eram 1,5 s; o autor pediu 3 s em 2026-10-30, na E1). Os quatro J (ou Q) entram em leque atrás do título, um por vez; o
   título carimba (escala de 1,4 para 1, com mola). Raios de xilogravura giram devagar atrás do painel.
 - **Exódia:** 4,2 s, em três tempos: os quatro K sobem um a um até formar uma cruz; na chegada do quarto, a única inversão da cena
   (600 ms); o título "EXÓDIA" carimba grande, com "NOME VENCE!" embaixo.
@@ -114,6 +114,19 @@ leitura e não está nas palavras dele.
 - O simulador ganha um teto **só dele** (proposta: 400 rodadas), que conta como "sem fim" nos relatórios e nunca vira regra.
   Reportar a distribuição da duração (mediana, p95, máx.) e a fração que bate no teto, antes e depois da E3.
 - Sem o anti-travamento, a tartaruga perde a única forma de vencer parada (`docs/memoria/notas/tartaruga.md`).
+- **Defesa Absoluta até o ataque** (autor, 2026-10-30, a resposta à F4; muda a spec 1 §1.5 item 4 e §1.8 "Ao terminar"): ela não
+  acaba mais no fim do próximo turno do oponente; dura até ele atacar de fato e acaba depois desse ataque, com 1 Q (o mais
+  antigo) ao cemitério, como hoje **[I]**. O Ataque Absoluto e o ataque devolvido por um Reflect contam como ataque **[I]**; a
+  Armadilha, o Sacrifício, o Roubo e a Devastação não a encerram, porque ela os bloqueia **[I]**. Entra na E1 para dividir a
+  mesma subida de versão e o mesmo portão.
+  - **Risco a conferir antes de medir:** sem o anti-travamento, uma Defesa Absoluta que ninguém ataca dura para sempre. Atacar
+    nela não dá dano e gasta a 1ª carta do Ataque de quem ataca; se os bots nunca fizerem esse ataque, as partidas batem no teto
+    do simulador por defeito do bot, não da regra. Os bots precisam valorizar quebrar a Defesa Absoluta, e o relatório separa os
+    tetos das partidas com Defesa Absoluta.
+  - A interface acompanha: textos que prometem "até o fim do próximo turno", o resumo das regras, as dicas do tutorial e a
+    prévia.
+- **Absolutos em 3 s** (autor, 2026-10-30, a resposta à nota 7; só web): o Ataque Absoluto e a Defesa Absoluta passam de 2,6 s
+  para 3 s; a Exódia fica em 4,2 s **[I]**. O leque e o carimbo acompanham a duração nova, sem tempo morto no fim.
 - `RULES_VERSION` 3 e `STATE_SCHEMA` 3. As partidas de referência são regravadas e passam a usar a config atual (500, 8, 8 Ás).
   O portão do Difícil é medido do zero (`pnpm sim:dificil --recomecar`) e a calibração é refeita.
 
@@ -186,7 +199,8 @@ Texto dele em `docs/memoria/decisoes.md` (2026-10-30, "Anotações novas"). As p
   ataque com o Ataque vazio, e nenhuma Defesa perdeu carta sem ataque em 2.000 partidas simuladas nem numa partida de treino
   jogada de tartaruga. Explicações levadas ao autor: a Defesa Absoluta, que acaba e gasta 1 Q no fim do próximo turno do
   oponente mesmo sem ataque; ou o atacante de uma carta só, que fica com o Ataque vazio depois do golpe. Detalhes em
-  `docs/memoria/notas/revisao-das-notas.md`.
+  `docs/memoria/notas/revisao-das-notas.md`. **O autor confirmou a primeira e mudou a regra** (2026-10-30): a Defesa Absoluta
+  dura até o oponente atacar de fato (na E1).
 - **F5. Tabuleiro quebrado** [corrigido]. No PC de 1536 × 695 (mesa compacta), as zonas dos especiais se espremiam
   (`min-height: 0`) e a lista das marcas ocupava a coluna inteira (`flex-basis: 100%`, pensado para o celular). Agora nenhuma
   zona encolhe abaixo das cartas e as marcas têm a altura delas; o campo cresce junto. Coberto por `e2e/layout.spec.ts`
