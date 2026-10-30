@@ -14,10 +14,11 @@
   - `RULES_VERSION` 3 e `STATE_SCHEMA` 3; partidas de referência na config atual (500, 8, 8 Ás);
   - teto de 400 rodadas **só do simulador**, com a duração (p95, máx.) e as paradas no teto nos relatórios;
   - calibração e portão do Difícil medidos de novo (leitura em `packages/sim/reports/calibracao-leitura.md`, seção E1).
-- **Em curso:** nada.
-- **Próximo passo exato:** a **E2** (Equipar livre: ver todas as numéricas recebidas e pô-las na ordem e na fileira que
-  quiser), numa branch `feat/equipar-livre` a partir da `main`. Começar pelo plano (spec do sub-projeto 5, E2: com ordem livre
-  o `legalActions` cresce para k! × destinos; os bots ficam com a lista canônica).
+- **Em curso:** a **E2** (Equipar livre), liberada pelo autor em 2026-10-30 ("ok, pode começar a E2"), na branch
+  `feat/equipar-livre` (a partir da `main` `0136e47`). Plano: `docs/superpowers/plans/2026-10-30-e2-equipar-livre.md` (4
+  tarefas). Desenho: a ação `EQUIP` ganha `order` opcional (ids das pendentes); sem ela, a ordem de compra. Sem subir
+  `RULES_VERSION` nem `STATE_SCHEMA`.
+- **Próximo passo exato:** a tarefa do plano que ainda não tiver commit (`git log main..feat/equipar-livre`).
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
