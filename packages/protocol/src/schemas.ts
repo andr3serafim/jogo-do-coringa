@@ -9,7 +9,11 @@ const row = z.enum(['ATK', 'DEF']);
 
 /** Todas as ações do motor menos `TIMEOUT` e `FORFEIT`, que só o servidor injeta. */
 export const PlayerActionSchema = z.discriminatedUnion('type', [
-  z.strictObject({ type: z.literal('EQUIP'), destinations: z.array(destination).max(LIMITS.destinations) }),
+  z.strictObject({
+    type: z.literal('EQUIP'),
+    destinations: z.array(destination).max(LIMITS.destinations),
+    order: z.array(cardId).max(LIMITS.destinations).optional(),
+  }),
   z.strictObject({ type: z.literal('CHOOSE_ORDER'), first: z.boolean() }),
   z.strictObject({ type: z.literal('PLAY_J'), cardId }),
   z.strictObject({ type: z.literal('PLAY_Q'), cardId }),

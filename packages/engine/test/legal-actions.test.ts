@@ -23,6 +23,13 @@ describe('legalActions', () => {
     expect(legal).toContainEqual({ type: 'EQUIP', destinations: ['ATK', 'DEF'] });
   });
 
+  it('Equipar livre (E2): a lista legal é a canônica, na ordem de compra, sem order (a busca do Difícil não cresce k!)', () => {
+    const s = setup({ ...equipPhase, p1: { pending: [3, 4, 5, 6] } });
+    const equips = legalActions(viewFor(s, P1)).filter((a) => a.type === 'EQUIP');
+    expect(equips).toHaveLength(16);
+    expect(equips.every((a) => !('order' in a))).toBe(true);
+  });
+
   it('Equipar com as duas fileiras cheias: substituir ou descartar', () => {
     const s = setup({ ...equipPhase, p1: { attack: [2, 2, 3, 3, 4, 4, 5], defense: [6, 6, 7, 7, 8, 8, 9], pending: [10] } });
     expect(legalActions(viewFor(s, P1))).toEqual([

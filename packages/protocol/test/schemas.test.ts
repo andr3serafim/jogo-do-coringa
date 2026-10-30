@@ -7,6 +7,7 @@ describe('esquemas do cliente', () => {
   it('aceita cada ação do jogador e recusa TIMEOUT/FORFEIT', () => {
     const ok: PlayerAction[] = [
       { type: 'EQUIP', destinations: ['ATK', 'DEF', 'DISCARD'] },
+      { type: 'EQUIP', destinations: ['ATK', 'DEF'], order: ['b1-copas-7', 'b1-ouros-3'] },
       { type: 'CHOOSE_ORDER', first: true },
       { type: 'PLAY_J', cardId: 'b1-copas-J' },
       { type: 'PLAY_Q', cardId: 'b1-copas-Q' },
@@ -46,6 +47,10 @@ describe('esquemas do cliente', () => {
       JSON.stringify({ t: 'act', id: 'a', epoch: -1, action: { type: 'PASS' } }),
       JSON.stringify({ t: 'act', id: 'a', epoch: 1, action: { type: 'PLAY_J', cardId: 'c'.repeat(33) } }),
       JSON.stringify({ t: 'act', id: 'a', epoch: 1, action: { type: 'EQUIP', destinations: Array(17).fill('ATK') } }),
+      JSON.stringify({ t: 'act', id: 'a', epoch: 1, action: { type: 'EQUIP', destinations: ['ATK'], order: Array(17).fill('n') } }),
+      JSON.stringify({ t: 'act', id: 'a', epoch: 1, action: { type: 'EQUIP', destinations: ['ATK'], order: [''] } }),
+      JSON.stringify({ t: 'act', id: 'a', epoch: 1, action: { type: 'EQUIP', destinations: ['ATK'], order: 'n' } }),
+      JSON.stringify({ t: 'act', id: 'a', epoch: 1, action: { type: 'EQUIP', destinations: ['ATK'], ordem: ['n'] } }),
       JSON.stringify({ t: 'act', id: 'a', epoch: 1, action: { type: 'PLAY_K', cardIds: Array(9).fill('k') } }),
       JSON.stringify({ t: 'act', id: 'a', epoch: 1, action: { type: 'PLAY_K', cardIds: [] } }),
       JSON.stringify({ t: 'hello', protocol: 1, token: 'curto' }),

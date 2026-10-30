@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { autoDestinations } from '../src/actions/equip.ts';
-import type { Action, Destination } from '../src/types.ts';
-import { P1, P2, act, actErr, player, setup, steps, values, type PlayerSetup } from './helpers.ts';
+import type { Action, Destination, GameState } from '../src/types.ts';
+import { P1, P2, act, actErr, handId, player, setup, steps, values, type PlayerSetup } from './helpers.ts';
 
 const equipSetup = (p1: PlayerSetup, p2: PlayerSetup, round = 1) =>
   setup({ round, roundKind: 'EQUIP', phase: { kind: 'EQUIP' }, p1, p2 });
@@ -78,6 +78,72 @@ describe('Equipar', () => {
     ]);
     expect(r.state.round).toBe(3);
     expect(r.state.phase).toEqual({ kind: 'ORDER_CHOICE', player: P1 });
+  });
+});
+
+describe('Equipar livre (E2 do sub-projeto 5)', () => {
+  const pendingIds = (s: GameState, id: typeof P1 | typeof P2) => player(s, id).pending.map((c) => c.id);
+  const reveal = (s: GameState, p1: Action) => steps(s, [[P1, p1], [P2, { type: 'EQUIP', destinations: [] }]]);
+
+  it('com order, cada destino vai para a carta de order[i]', () => {
+    const s = equipSetup({ pending: [3, 7, 9] }, {});
+    const [three, seven, nine] = pendingIds(s, P1);
+    const r = reveal(s, { type: 'EQUIP', destinations: ['ATK', 'ATK', 'DEF'], order: [nine, three, seven] });
+    expect(values(player(r.state, P1).attackRow)).toEqual([9, 3]);
+    expect(values(player(r.state, P1).defenseRow)).toEqual([7]);
+    const placed = r.events.find((e) => e.type === 'CardsPlaced' && e.player === P1);
+    expect(placed?.type === 'CardsPlaced' && placed.placements.map((p) => [p.card.id, p.destination])).toEqual([
+      [nine, 'ATK'],
+      [three, 'ATK'],
+      [seven, 'DEF'],
+    ]);
+  });
+
+  it('a ordem define a frente da fila: a primeira escolhida é a primeira a sair', () => {
+    const s = equipSetup({ pending: [3, 9] }, {});
+    const [three, nine] = pendingIds(s, P1);
+    const r = reveal(s, { type: 'EQUIP', destinations: ['ATK', 'ATK'], order: [nine, three] });
+    expect(values(player(r.state, P1).attackRow)).toEqual([9, 3]);
+  });
+
+  it('com as duas fileiras cheias, a troca usa a carta de order', () => {
+    const s = equipSetup({ attack: [2, 2, 3, 3, 4, 4, 5], defense: [6, 6, 7, 7, 8, 8, 9], pending: [10, 4] }, {});
+    const [ten, four] = pendingIds(s, P1);
+    const r = reveal(s, { type: 'EQUIP', destinations: ['REPLACE_LAST_ATK', 'DISCARD'], order: [four, ten] });
+    expect(values(player(r.state, P1).attackRow)).toEqual([2, 2, 3, 3, 4, 4, 4]);
+    expect(r.state.graveyard.map((c) => c.id)).toEqual(expect.arrayContaining([ten]));
+  });
+
+  it('sem order, vale a ordem de compra', () => {
+    const s = equipSetup({ pending: [3, 9] }, {});
+    const r = reveal(s, { type: 'EQUIP', destinations: ['ATK', 'ATK'] });
+    expect(values(player(r.state, P1).attackRow)).toEqual([3, 9]);
+  });
+
+  it('recusa order que não é uma permutação das pendentes, sem mexer no estado', () => {
+    const s = equipSetup({ pending: [3, 7], hand: ['K'], attack: [5] }, {});
+    const before = structuredClone(s);
+    const [three, seven] = pendingIds(s, P1);
+    const equip = (order: unknown): Action => ({ type: 'EQUIP', destinations: ['ATK', 'DEF'], order: order as string[] });
+    expect(actErr(s, P1, equip([three]))).toBe('INVALID_DESTINATIONS');
+    expect(actErr(s, P1, equip([three, seven, three]))).toBe('INVALID_DESTINATIONS');
+    expect(actErr(s, P1, equip('3,7'))).toBe('INVALID_DESTINATIONS');
+    expect(actErr(s, P1, equip([three, three]))).toBe('DUPLICATE_CARDS');
+    expect(actErr(s, P1, equip([three, handId(s, P1, 'K')]))).toBe('INVALID_CARD');
+    expect(actErr(s, P1, equip([three, player(s, P1).attackRow[0]!.id]))).toBe('INVALID_CARD');
+    expect(actErr(s, P1, equip([three, 'inventada']))).toBe('INVALID_CARD');
+    expect(s).toEqual(before);
+  });
+
+  it('o tempo esgotado depois de uma montagem com order mantém a ordem confirmada', () => {
+    const s = equipSetup({ pending: [3, 9] }, { pending: [5] });
+    const [three, nine] = pendingIds(s, P1);
+    const r = steps(s, [
+      [P1, { type: 'EQUIP', destinations: ['DEF', 'DEF'], order: [nine, three] }],
+      ['system', { type: 'TIMEOUT' }],
+    ]);
+    expect(values(player(r.state, P1).defenseRow)).toEqual([9, 3]);
+    expect(values(player(r.state, P2).defenseRow)).toEqual([5]);
   });
 });
 

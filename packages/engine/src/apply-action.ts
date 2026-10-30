@@ -74,7 +74,7 @@ function applySystem(s: GameState, action: Action, ev: GameEvent[]): void {
 function applyPlayer(s: GameState, player: PlayerId, action: Action, ev: GameEvent[]): void {
   switch (action.type) {
     case 'EQUIP':
-      return handleEquip(s, player, action.destinations, ev);
+      return handleEquip(s, player, action.destinations, action.order, ev);
     case 'CHOOSE_ORDER':
       return handleChooseOrder(s, player, action.first, ev);
     case 'PLAY_J':

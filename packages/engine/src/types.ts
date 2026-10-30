@@ -76,7 +76,7 @@ export interface PlayerState {
   hp: number;
   /** Só especiais (J, Q, K, A, Selvagem). */
   hand: SpecialCard[];
-  /** Numéricas recebidas no Equipar, na ordem de compra, aguardando destino. */
+  /** Numéricas recebidas no Equipar, na ordem de compra, aguardando destino (depois de confirmar, na ordem escolhida). */
   pending: NumCard[];
   equipSubmitted: boolean;
   submittedDestinations: Destination[] | null;
@@ -124,7 +124,11 @@ export interface GameState {
 }
 
 export type Action =
-  | { type: 'EQUIP'; destinations: Destination[] }
+  /**
+   * `destinations[i]` vale para a carta `order[i]` (ids das numéricas pendentes, na ordem em que entram: E2 do sub-projeto 5).
+   * Sem `order`, a ordem de compra.
+   */
+  | { type: 'EQUIP'; destinations: Destination[]; order?: string[] }
   | { type: 'CHOOSE_ORDER'; first: boolean }
   | { type: 'PLAY_J'; cardId: string }
   | { type: 'PLAY_Q'; cardId: string }

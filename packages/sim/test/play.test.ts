@@ -28,6 +28,14 @@ describe('textos em pt-BR', () => {
     expect(texts).toContain('Declarar o ataque (ATK 38 contra DEF 26)');
   });
 
+  it('o Equipar com order (E2) diz cada carta com o seu destino, na ordem escolhida', () => {
+    const s = setup({ round: 1, roundKind: 'EQUIP', phase: { kind: 'EQUIP' }, p1: { pending: [3, 9] } });
+    const view = viewFor(s, P1);
+    const [three, nine] = view.self.pending;
+    const text = actionText({ type: 'EQUIP', destinations: ['ATK', 'DEF'], order: [nine!.id, three!.id] }, view);
+    expect(text).toBe(`Equipar: ${cardText(nine!)} → Fileira de Ataque, ${cardText(three!)} → Fileira de Defesa`);
+  });
+
   it('eventos viram frases; janelas de reação não aparecem', () => {
     const e = (event: GameEvent) => eventText(event, names);
     expect(e({ type: 'DamageDealt', attacker: P1, defender: P2, attack: 38, defense: 13, damage: 25 })).toBe('Ataque de você: 38 contra 13 → 25 de dano');

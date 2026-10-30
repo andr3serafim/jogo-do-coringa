@@ -53,12 +53,19 @@ export const DESTINATION_TEXT: Record<Destination, string> = {
   DISCARD: 'Descartar no cemitério',
 };
 
+/** As numéricas do Equipar na ordem dos destinos: a de `order` (E2 do sub-projeto 5) ou, sem ela, a de compra. */
+function equipCards(action: Extract<Action, { type: 'EQUIP' }>, view: PlayerView): Array<Card | undefined> {
+  return action.order ? action.order.map((id) => view.self.pending.find((c) => c.id === id)) : view.self.pending;
+}
+
 /** Texto de uma ação legal, em pt-BR, como aparece no menu numerado. */
 export function actionText(action: Action, view: PlayerView): string {
   const t = (id: string) => idText(view, id);
   switch (action.type) {
     case 'EQUIP':
-      return `Equipar: ${view.self.pending.map((c, i) => `${cardText(c)} → ${DESTINATION_TEXT[action.destinations[i]]}`).join(', ')}`;
+      return `Equipar: ${equipCards(action, view)
+        .map((c, i) => `${c ? cardText(c) : '?'} → ${DESTINATION_TEXT[action.destinations[i]]}`)
+        .join(', ')}`;
     case 'CHOOSE_ORDER':
       return action.first ? 'Atacar primeiro' : 'Atacar em segundo';
     case 'PLAY_J':

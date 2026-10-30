@@ -1,7 +1,7 @@
 import { fail } from '../errors.ts';
 import { startRound } from '../flow.ts';
 import { reevaluateQuads } from '../quads.ts';
-import { getPlayer, toGraveyard } from '../state.ts';
+import { assertDistinct, getPlayer, toGraveyard } from '../state.ts';
 import type { Destination, GameEvent, GameState, NumCard, Placement, PlayerId, PlayerState, RulesConfig } from '../types.ts';
 
 const DESTINATIONS: readonly Destination[] = ['ATK', 'DEF', 'REPLACE_LAST_ATK', 'REPLACE_LAST_DEF', 'DISCARD'];
@@ -27,6 +27,19 @@ export function validateDestinations(config: RulesConfig, p: PlayerState, destin
       fail('INVALID_DESTINATIONS', 'só dá para substituir ou descartar com as duas fileiras cheias');
     }
   }
+}
+
+/**
+ * Equipar livre (E2 do sub-projeto 5): `order` diz em que ordem as numéricas pendentes entram, e precisa trazer cada uma
+ * exatamente uma vez. Devolve as pendentes nessa ordem; sem `order`, a ordem de compra.
+ */
+function orderedPending(p: PlayerState, order: string[] | undefined): NumCard[] {
+  if (order === undefined) return p.pending;
+  if (!Array.isArray(order) || order.length !== p.pending.length) {
+    fail('INVALID_DESTINATIONS', `a ordem deve trazer as ${p.pending.length} numérica(s) recebidas`);
+  }
+  assertDistinct(order);
+  return order.map((id) => p.pending.find((c) => c.id === id) ?? fail('INVALID_CARD', `a carta ${String(id)} não está entre as recebidas`));
 }
 
 /** Timeout (spec §1.12): fileira com menos cartas, empate → Defesa; as duas cheias → cemitério. */
@@ -55,11 +68,13 @@ function submit(p: PlayerState, destinations: Destination[], ev: GameEvent[]): v
   ev.push({ type: 'EquipSubmitted', player: p.id });
 }
 
-export function handleEquip(s: GameState, playerId: PlayerId, destinations: Destination[], ev: GameEvent[]): void {
+export function handleEquip(s: GameState, playerId: PlayerId, destinations: Destination[], order: string[] | undefined, ev: GameEvent[]): void {
   if (s.phase.kind !== 'EQUIP') fail('WRONG_PHASE', 'não é a rodada de Equipar');
   const p = getPlayer(s, playerId);
   if (p.equipSubmitted) fail('ALREADY_SUBMITTED', 'você já confirmou o Equipar desta rodada');
   validateDestinations(s.config, p, destinations);
+  // A revelação casa `destinations[i]` com `pending[i]`: confirmar com `order` deixa as pendentes na ordem escolhida.
+  p.pending = orderedPending(p, order);
   submit(p, destinations, ev);
   if (s.players.every((pl) => pl.equipSubmitted)) resolveEquip(s, ev);
 }
