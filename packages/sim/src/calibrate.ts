@@ -100,7 +100,7 @@ export function calibrate(options: CalibrationOptions, log: (line: string) => vo
   return report;
 }
 
-const METRIC_HEADERS = ['Série', 'Rodadas ATK (p10–med–p90)', 'Iniciativa vence', 'Exódia', 'Quadra', 'Ressurreições por partida (méd · p90 · máx · ≥3)', 'Terminam', 'Metas ok'];
+const METRIC_HEADERS = ['Série', 'Rodadas ATK (p10–med–p90 · p95 · máx)', 'Iniciativa vence', 'Exódia', 'Quadra', 'Ressurreições por partida (méd · p90 · máx · ≥3)', 'Terminam', 'No teto (com Def. Absoluta)', 'Metas ok'];
 
 /** "0.14 · 1 · 3 · 0.2%": média, p90, máximo e fração de partidas com 3 ou mais Ressurreições. */
 export function resurrectionsText(m: Metrics): string {
@@ -112,12 +112,13 @@ function metricRow(s: SeriesResult): Array<string | number> {
   const m = s.metrics;
   return [
     s.label,
-    `${m.attackRounds.p10}–${m.attackRounds.median}–${m.attackRounds.p90}`,
+    `${m.attackRounds.p10}–${m.attackRounds.median}–${m.attackRounds.p90} · ${m.attackRounds.p95} · ${m.attackRounds.max}`,
     pct(m.initiativeWin),
     pct(m.endReasons.EXODIA),
     pct(m.quads),
     resurrectionsText(m),
     pct(m.terminated),
+    `${pct(m.capped)} (${pct(m.cappedWithAbsoluteDefense)})`,
     `${s.targets.filter((t) => t.ok).length}/${s.targets.length}`,
   ];
 }

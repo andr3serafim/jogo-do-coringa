@@ -15,6 +15,8 @@ function rec(result: GameResult | null, attackRounds: number, extra: Partial<Gam
     finalState: {} as GameRecord['finalState'],
     steps: 1,
     attackRounds,
+    capped: false,
+    absoluteDefenseAtCap: false,
     eventCounts: {},
     orderChoices: { first: 0, second: 0 },
     ...extra,
@@ -29,12 +31,19 @@ describe('summarize', () => {
     rec(win('p2'), 10),
     rec(win('p1', 'EXODIA'), 12),
     rec(win('p2', 'FORFEIT'), 14),
-    rec(null, 20),
+    rec(null, 20, { capped: true, absoluteDefenseAtCap: true }),
   ];
   const m = summarize(records);
 
-  it('duração por percentis das rodadas de Ataque', () => {
-    expect(m.attackRounds).toEqual({ median: 12, p10: 8, p90: 20 });
+  it('duração por percentis das rodadas de Ataque, com p95 e máximo', () => {
+    expect(m.attackRounds).toEqual({ median: 12, p10: 8, p90: 20, p95: 20, max: 20 });
+  });
+
+  it('as partidas paradas no teto do simulador, e as que tinham uma Defesa Absoluta ativa ali', () => {
+    expect(m.capped).toBeCloseTo(1 / 5);
+    expect(m.cappedWithAbsoluteDefense).toBeCloseTo(1 / 5);
+    const stopped = summarize([rec(null, 5), rec(win('p1'), 5)]);
+    expect([stopped.capped, stopped.cappedWithAbsoluteDefense]).toEqual([0, 0]);
   });
 
   it('vitória da iniciativa inicial, motivos de fim e partidas que terminam', () => {
@@ -73,7 +82,6 @@ describe('checkTargets (metas da spec §3)', () => {
       'Vitória de quem começa com a iniciativa',
       'Exódia',
       'Fallen is Back',
-      'Partidas que terminam',
     ]);
   });
 });

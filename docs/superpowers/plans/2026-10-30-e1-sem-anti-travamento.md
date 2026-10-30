@@ -227,15 +227,15 @@ Um commit só com a tarefa 3: tirar o `DRAW` do tipo quebra o typecheck dos outr
 - Produz: `RunRecord.absoluteDefenseAtCap: boolean` e `Metrics.duration: { median: number; p95: number; max: number }`. Também
   `Metrics.capped` e `Metrics.cappedWithAbsoluteDefense`, frações de 0 a 1.
 
-- [ ] **Passo 1: testes que falham.**
+- [x] **Passo 1: testes que falham.**
   - `turtle × turtle para no teto`: `runGame` com dois `turtle` e `maxRounds: 40` termina com `result === null` e `round === 41`
     (foco da revisão 3).
   - `as métricas contam as paradas no teto e a duração`: três registros fabricados (rodadas 10, 20 e o teto), com mediana 20 e a
     fração 1/3.
-- [ ] **Passo 2:** veja-os falhar.
-- [ ] **Passo 3:** implemente.
-- [ ] **Passo 4:** a suíte do simulador passa.
-- [ ] **Passo 5:** commit `feat(sim): teto de 400 rodadas e a duração das partidas nos relatórios`.
+- [x] **Passo 2:** veja-os falhar.
+- [x] **Passo 3:** implemente.
+- [x] **Passo 4:** a suíte do simulador passa.
+- [x] **Passo 5:** commit `feat(sim): teto de 400 rodadas e a duração das partidas nos relatórios`.
 
 ### Tarefa 5: fixture do E2E e semente do tutorial
 

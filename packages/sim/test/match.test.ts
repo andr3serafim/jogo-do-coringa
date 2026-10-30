@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { makeConfig } from '@coringa/engine';
+import { makeConfig, type Action } from '@coringa/engine';
+import type { Bot } from '../src/bots/types.ts';
 import { randomBot } from '../src/bots/random.ts';
-import { attackRoundsUpTo, PLAYERS, runGame } from '../src/match.ts';
+import { attackRoundsUpTo, PLAYERS, runGame, SIM_MAX_ROUNDS } from '../src/match.ts';
 import { createRng } from '../src/rng.ts';
 
 describe('createRng', () => {
@@ -65,6 +66,39 @@ describe('runGame', () => {
 
   it('ação ilegal de bot é bug e lança exceção', () => {
     expect(() => runGame({ config, seed: 's7', bots: [() => ({ type: 'PASS' }), randomBot] })).toThrow(/ação ilegal/);
+  });
+
+  // Sem o anti-travamento (E1 do sub-projeto 5) nada garante o fim: o simulador tem um teto de rodadas só dele, que conta como
+  // partida sem fim e nunca vira regra.
+  describe('teto de rodadas', () => {
+    /** Nunca ataca: tudo na Defesa (1 carta por Equipar, então cabe), passa na reação, atacar em segundo. */
+    const pacifist: Bot = (_view, legal) =>
+      legal.find((a): a is Extract<Action, { type: 'EQUIP' }> => a.type === 'EQUIP' && a.destinations.every((d) => d === 'DEF')) ??
+      legal.find((a) => a.type === 'END_TURN' || a.type === 'PASS' || (a.type === 'CHOOSE_ORDER' && !a.first)) ??
+      legal[0]!;
+    const quiet = makeConfig({ cardsPerEquip: 1 });
+
+    it('o teto padrão é de 400 rodadas', () => {
+      expect(SIM_MAX_ROUNDS).toBe(400);
+    });
+
+    it('ninguém ataca: a partida para no teto, sem resultado, e o registro diz que foi o teto', () => {
+      const r = runGame({ config: quiet, seed: 'teto', bots: [pacifist, pacifist], maxRounds: 12 });
+      expect(r.result).toBeNull();
+      expect(r.capped).toBe(true);
+      expect(r.finalState.round).toBe(13);
+      expect(r.absoluteDefenseAtCap).toBe(false);
+    });
+
+    it('a partida que acaba antes do teto não é parada no teto', () => {
+      const r = runGame({ config, seed: 's1', bots: [randomBot, randomBot] });
+      expect(r.capped).toBe(false);
+      expect(r.absoluteDefenseAtCap).toBe(false);
+    });
+
+    it('o maxSteps e o onStep param sem ser o teto', () => {
+      expect(runGame({ config, seed: 's5', bots: [randomBot, randomBot], maxSteps: 3 }).capped).toBe(false);
+    });
   });
 
   it('attackRoundsUpTo segue o ciclo E, E, A, E, A', () => {

@@ -17,6 +17,12 @@ import { createRng, type Rng } from './rng.ts';
 
 export const PLAYERS: [PlayerId, PlayerId] = ['p1', 'p2'];
 
+/**
+ * Teto de rodadas do simulador (E1 do sub-projeto 5): sem o anti-travamento nada garante o fim, e a partida em que ninguém ataca
+ * seguiria para sempre. Conta como partida sem fim nos relatórios e nunca vira regra.
+ */
+export const SIM_MAX_ROUNDS = 400;
+
 export type { ReplayStep };
 
 export interface GameSetup {
@@ -31,7 +37,9 @@ export interface GameSetup {
   initial?: GameState;
   /** Guarda as ações para replay. */
   record?: boolean;
-  /** Padrão 5000. Estourar conta como partida que não terminou. */
+  /** Padrão `SIM_MAX_ROUNDS`. Chegando ao início da rodada seguinte, a simulação para ali, sem resultado (`capped`). */
+  maxRounds?: number;
+  /** Trava de segurança, padrão 50 000 (bem acima de 400 rodadas). Estourar conta como partida que não terminou. */
   maxSteps?: number;
   /** Chamado a cada ação; devolver 'stop' encerra a simulação ali (resultado null). */
   onStep?: (before: GameState, after: GameState, events: GameEvent[]) => void | 'stop';
@@ -41,8 +49,12 @@ export interface GameRecord {
   seed: string;
   /** Quem tinha a iniciativa ao criar a partida (sorteio do motor). */
   initialInitiative: PlayerId;
-  /** null = não terminou (maxSteps ou parada pelo onStep). */
+  /** null = não terminou (teto de rodadas, maxSteps ou parada pelo onStep). */
   result: GameResult | null;
+  /** Parou no teto de rodadas (`maxRounds`). */
+  capped: boolean;
+  /** No teto, algum jogador estava sob Defesa Absoluta: o risco da E1 é ninguém atacá-la e ela durar para sempre. */
+  absoluteDefenseAtCap: boolean;
   finalState: GameState;
   steps: number;
   /** Rodadas de Ataque iniciadas (spec §1.3). */
@@ -66,11 +78,14 @@ export function runGame(setup: GameSetup): GameRecord {
   let s = setup.initial ?? newGame(setup.config, setup.seed);
   const botSeed = setup.botSeed ?? `${setup.seed}/bots`;
   const rngs: [Rng, Rng] = [createRng(`${botSeed}/p1`), createRng(`${botSeed}/p2`)];
-  const maxSteps = setup.maxSteps ?? 5_000;
+  const maxRounds = setup.maxRounds ?? SIM_MAX_ROUNDS;
+  const maxSteps = setup.maxSteps ?? 50_000;
   const record: GameRecord = {
     seed: setup.seed,
     initialInitiative: s.initiative,
     result: null,
+    capped: false,
+    absoluteDefenseAtCap: false,
     finalState: s,
     steps: 0,
     attackRounds: 0,
@@ -78,7 +93,7 @@ export function runGame(setup: GameSetup): GameRecord {
     orderChoices: { first: 0, second: 0 },
     replay: setup.record ? [] : undefined,
   };
-  while (s.phase.kind !== 'GAME_OVER' && record.steps < maxSteps) {
+  while (s.phase.kind !== 'GAME_OVER' && s.round <= maxRounds && record.steps < maxSteps) {
     const actor = actingPlayers(s)[0];
     const seat = actor === PLAYERS[0] ? 0 : 1;
     const view = viewFor(s, actor);
@@ -100,5 +115,7 @@ export function runGame(setup: GameSetup): GameRecord {
   record.finalState = s;
   record.attackRounds = attackRoundsUpTo(s.round);
   record.result = s.phase.kind === 'GAME_OVER' ? s.phase.result : null;
+  record.capped = record.result === null && s.round > maxRounds;
+  record.absoluteDefenseAtCap = record.capped && s.players.some((p) => p.absoluteDefense);
   return record;
 }

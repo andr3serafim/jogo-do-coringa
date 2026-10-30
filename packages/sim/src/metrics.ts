@@ -25,10 +25,13 @@ export interface Metrics {
   games: number;
   /** Frações em [0, 1]. */
   terminated: number;
-  attackRounds: { median: number; p10: number; p90: number };
+  attackRounds: { median: number; p10: number; p90: number; p95: number; max: number };
   /** Vitórias de quem o motor sorteou com a iniciativa inicial. */
   initiativeWin: number;
   endReasons: Record<EndReason, number>;
+  /** Paradas no teto de rodadas do simulador (E1: sem anti-travamento nada garante o fim), e a parte delas com Defesa Absoluta. */
+  capped: number;
+  cappedWithAbsoluteDefense: number;
   /** Partidas com pelo menos uma quadra (Fallen is Back). */
   quads: number;
   /** Secundária, só informativa: fração de "atacar primeiro" entre as Escolhas da iniciativa; null sem a regra. */
@@ -61,9 +64,17 @@ export function summarize(records: GameRecord[]): Metrics {
   return {
     games: n,
     terminated: frac((r) => r.result !== null),
-    attackRounds: { median: percentile(rounds, 0.5), p10: percentile(rounds, 0.1), p90: percentile(rounds, 0.9) },
+    attackRounds: {
+      median: percentile(rounds, 0.5),
+      p10: percentile(rounds, 0.1),
+      p90: percentile(rounds, 0.9),
+      p95: percentile(rounds, 0.95),
+      max: rounds[rounds.length - 1],
+    },
     initiativeWin: frac((r) => r.result?.kind === 'WIN' && r.result.winner === r.initialInitiative),
     endReasons,
+    capped: frac((r) => r.capped),
+    cappedWithAbsoluteDefense: frac((r) => r.absoluteDefenseAtCap),
     quads: frac((r) => (r.eventCounts.QuadFormed ?? 0) > 0),
     orderFirst: first + second === 0 ? null : first / (first + second),
     perGame,
@@ -91,6 +102,5 @@ export function checkTargets(m: Metrics): TargetCheck[] {
     { metric: 'Vitória de quem começa com a iniciativa', value: m.initiativeWin, target: '45–55%', ok: within(m.initiativeWin, 0.45, 0.55) },
     { metric: 'Exódia', value: m.endReasons.EXODIA, target: '1–3%', ok: within(m.endReasons.EXODIA, 0.01, 0.03) },
     { metric: 'Fallen is Back', value: m.quads, target: '10–25%', ok: within(m.quads, 0.1, 0.25) },
-    { metric: 'Partidas que terminam', value: m.terminated, target: '100%', ok: m.terminated === 1 },
   ];
 }
