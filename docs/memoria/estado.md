@@ -5,12 +5,11 @@
 
 ## Agora
 
-- **Branch:** `feat/memoria`, no checkout principal `D:\andr3\jogo-coringa`, a partir da `main` em `af6b827`.
-- **Em curso:** a memória compartilhada e o registro das Fases E e F na spec estão commitados nesta branch. O workerd voltou a
-  rodar nesta máquina, com um paliativo (veja "Ambiente").
-- **Próximo passo exato:** subir esta branch (o pre-push roda o `pnpm check`), esperar a CI verde (check + e2e) e fazer o merge
-  por fast-forward na `main`. Depois, começar a **E1** (remover o anti-travamento) numa branch `feat/sem-anti-travamento`,
-  enquanto o autor responde o lote abaixo.
+- **Branch:** `main`, no checkout principal `D:\andr3\jogo-coringa`. A `feat/memoria` (memória compartilhada e registro das
+  Fases E e F na spec) entrou por fast-forward em 2026-10-30, com a CI verde na branch (run 40999067655: check + e2e).
+- **Em curso:** nada. O workerd voltou a rodar nesta máquina, com um paliativo (veja "Ambiente").
+- **Próximo passo exato:** começar a **E1** (remover o anti-travamento), numa branch `feat/sem-anti-travamento` a partir da
+  `main`, quando o autor der o início. O lote abaixo não bloqueia a E1, a E2, a F1 nem a F5.
 
 ## A `main`
 
@@ -20,12 +19,11 @@ os ajustes da spec do sub-projeto 5 (`2026-10-27-ajustes-design.md`).
 
 ## Fila (sub-projeto 5)
 
-1. **Merge da memória compartilhada** (`feat/memoria`) na `main`.
-2. **E1:** sem anti-travamento e sem limite de rodadas. `RULES_VERSION`/`STATE_SCHEMA` 3, partidas de referência regravadas,
+1. **E1:** sem anti-travamento e sem limite de rodadas. `RULES_VERSION`/`STATE_SCHEMA` 3, partidas de referência regravadas,
    portão do Difícil do zero.
-3. **E2:** Equipar livre.
-4. **F1** (apagar o histórico) e **F5** (tabuleiro quebrado com buffs e o aviso de Ressurreição): só web.
-5. **E3 + F2 + F3:** roubo, cura pela Defesa, limite de especiais, Reflect reativo e Devastação, medidos juntos no simulador
+2. **E2:** Equipar livre.
+3. **F1** (apagar o histórico) e **F5** (tabuleiro quebrado com buffs e o aviso de Ressurreição): só web.
+4. **E3 + F2 + F3:** roubo, cura pela Defesa, limite de especiais, Reflect reativo e Devastação, medidos juntos no simulador
    antes de virar regra. Depende das respostas abaixo.
 
 ## Esperando o autor (lote de 2026-10-30)
