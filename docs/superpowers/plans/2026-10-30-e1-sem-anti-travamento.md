@@ -244,14 +244,14 @@ Um commit só com a tarefa 3: tirar o `DRAW` do tipo quebra o typecheck dos outr
 - `packages/sim/src/tutorial-seed.ts`: só se o critério falhar.
 - As partidas de referência: regrave só se alguma das que antes acabavam por anti-travamento agora parar no teto da tarefa 4.
 
-- [ ] **Passo 1: fixture do E2E.**
+- [x] **Passo 1: fixture do E2E.**
   - Rode o replay `layout-107` no motor novo. Se ele quebrar ou o passo 75 não juntar mais a Guarda, os 4 J, os 3 Q, o Reflect e
     uma Ressurreição do Bot, procure outra semente `layout-N` (greedy × greedy, config padrão) que junte tudo.
   - Regrave a entrada e ajuste `STEP` e a rodada do `layout.spec.ts`.
-- [ ] **Passo 2: semente do tutorial.** O teste do `tutorial-seed` passa com `tutorial-2431`. Se falhar, rode a busca e registre
+- [x] **Passo 2: semente do tutorial.** O teste do `tutorial-seed` passa com `tutorial-2431`. Se falhar, rode a busca e registre
   a semente nova na spec.
-- [ ] **Passo 3:** commite o `estado.md`, depois rode o `pnpm check`. Ele tem que passar.
-- [ ] **Passo 4:** se algo mudou, commit `test: fixture do E2E e semente do tutorial nas regras novas`.
+- [x] **Passo 3:** commite o `estado.md`, depois rode o `pnpm check`. Ele tem que passar.
+- [x] **Passo 4:** se algo mudou, commit `test: fixture do E2E e semente do tutorial nas regras novas`.
 
 ### Tarefa 6: Absolutos em 3 s (web)
 
