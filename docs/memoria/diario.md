@@ -5,6 +5,36 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-10-30 (3): E1, sem anti-travamento, Defesa Absoluta até o ataque, Absolutos em 3 s
+
+- **Respostas do autor:** "Espere minhas respostas" (a E1 esperou), depois "Defesa absoluta dura até o oponente atacar de
+  fato" e "3 segundos" para os Absolutos (`decisoes.md` 2026-10-30 (3) e (4)). A regra da Defesa Absoluta entrou na E1 para
+  dividir a mesma subida de versão e o mesmo portão.
+- **Plano:** `docs/superpowers/plans/2026-10-30-e1-sem-anti-travamento.md`, executado aqui mesmo, tarefa por tarefa, com TDD.
+  Commits na `feat/sem-anti-travamento`: `4491726` (Defesa Absoluta), `f88e401` (sem anti-travamento nem empate, em todos os
+  pacotes), `2bc0b61` (teto do simulador), `b71c033` (fixture do E2E), `18d1ead` (Absolutos em 3 s), `2fd8c95` (ajustes da
+  revisão), mais os de memória e os relatórios.
+- **Decisões técnicas (tomadas aqui, com o porquê no plano e nos commits):**
+  - o empate saiu do tipo do resultado e o placar perdeu `draws`; a lista de partidas guardadas aceita o resultado antigo
+    (`LegacyResult`) e o placar com `draws`, para nada sumir da lista do jogador;
+  - a `RULES_VERSION` subiu uma vez só (3); os commits seguintes da branch só trocaram o digest;
+  - o teste de tamanho por chave do servidor passou de 100 KiB a 1 MiB: o teto real do storage SQLite é de 2 MB (doc da
+    Cloudflare); os 100 KiB vinham do backend KV antigo;
+  - o simulador tem um teto de 400 rodadas só dele (`SIM_MAX_ROUNDS`), que conta como "sem fim".
+- **Medição:** calibração e portão do Difícil de novo. Leitura em `packages/sim/reports/calibracao-leitura.md` (seção E1):
+  `greedy` × `greedy` com mediana de 14 rodadas de Ataque e nenhuma no teto; a tartaruga deixou de compensar (−25 pp), mas o
+  `turtle` × `greedy` chega à Exódia em 25,5% das partidas, o que o limite de especiais (E3) precisa responder. O portão do
+  Difícil passou de primeira, com as mesmas pontuações.
+- **Armadilhas:**
+  - **crase dentro de string do bash é substituição de comando.** Um `node -e "…"` com `` `jogar-treino.bat` `` no texto
+    executou o lançador do autor pelo bash: o `taskkill` dele derrubou o Vite e o wrangler que o autor tinha no ar (nada de
+    arquivo mudou). Escreva memória e textos com a ferramenta de edição, nunca por `node -e`/`echo` com crases no bash;
+  - medir o portão do Difícil junto com a calibração estraga o tempo por decisão (dividem a CPU): o p95 subiu de 163 para
+    272 ms. O portão foi medido de novo sozinho;
+  - um `cd` no Bash muda o diretório de trabalho da sessão: volte com `cd /d/andr3/jogo-coringa` ou use caminhos absolutos;
+  - o pre-commit roda os testes ligados aos arquivos em stage: mudar uma regra exige regravar as partidas de referência e o
+    digest no mesmo commit.
+
 ## 2026-10-30 (2): respostas do lote, tabuleiro quebrado, revisão das notas
 
 - **Respostas:** as do autor ao lote de 2026-10-30 estão no `decisoes.md`, e as regras do Reflect reativo (F2) e da

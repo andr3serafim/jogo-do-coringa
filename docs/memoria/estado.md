@@ -5,49 +5,44 @@
 
 ## Agora
 
-- **Branch:** `main`, no checkout principal `D:\andr3\jogo-coringa` (as respostas do autor sobem pela `feat/memoria-espera`
-  e entram por fast-forward com a CI verde; se ela ainda não estiver na `main`, é só mesclar). A `feat/revisao-notas` entrou por fast-forward em
-  2026-10-30, com a CI verde na branch (run 41008238994: check + e2e). Ela trouxe:
-  - as respostas do autor ao lote de 2026-10-30 no `decisoes.md` ("2026-10-30 (2)") e na spec (F2, F3);
-  - **F5 corrigido:** o tabuleiro quebrado no PC de 1536 × 695 (CSS), com o E2E `e2e/layout.spec.ts`;
-  - **F4 investigado, sem bug** no motor nem na mesa; as explicações voltaram ao autor;
-  - a revisão de todas as notas, em `notas/revisao-das-notas.md`;
-  - o histórico agora diz "da Defesa" e "na Defesa".
-- **Em curso:** a **E1** na branch `feat/sem-anti-travamento` (a partir da `feat/memoria-espera`), pelo plano
-  `docs/superpowers/plans/2026-10-30-e1-sem-anti-travamento.md`. As caixas marcadas no plano dizem o que já foi feito.
-- **Feito na E1 (branch `feat/sem-anti-travamento`, ainda sem push):** tarefa 1 (`4491726`, Defesa Absoluta até o ataque,
-  `RULES_VERSION` 3) e tarefas 2 e 3 (`f88e401`, sem anti-travamento nem empate no motor, servidor, simulador e web;
-  `STATE_SCHEMA` 3; partidas de referência na config atual). A `feat/memoria-espera` já está na `main` (`f7f26d8`).
-- **Também feito:** faixa central conferida no navegador; tarefa 4 (`2bc0b61`, teto de 400 rodadas no simulador); tarefa 5
-  (`b71c033`, fixture do E2E na versão 3; a semente do tutorial continua); tarefa 6 (`18d1ead`, Absolutos em 3 s, conferidos
-  num replay).
-- **Em curso / próximo passo exato:** tarefa 7 do plano. Rodando `pnpm sim:calibrate` e depois
-  `pnpm sim:dificil --recomecar --ajuste "E1: sem anti-travamento, Defesa Absoluta até o ataque"`. Se a sessão cair no meio,
-  rode de novo os dois (os relatórios só são gravados no fim). Depois: commitar os relatórios com a leitura, `pnpm e2e`,
-  revisão da branch inteira, push e merge.
-- **Achado a levar ao autor:** sem limite de rodadas, o log de passos de uma partida online cresce sem teto. O storage aguenta
-  2 MB por chave (~20 mil passos com a margem do teste); detalhes na spec do servidor §9.4.
+- **Branch:** `main`, no checkout principal `D:\andr3\jogo-coringa`. A **E1** (`feat/sem-anti-travamento`) entrou por
+  fast-forward em 2026-10-30, com a CI verde na branch (check + e2e). Ela trouxe:
+  - **sem anti-travamento e sem empate** (motor, protocolo, servidor, simulador e web): a partida acaba por vida, Exódia ou W.O.;
+    sem o contador "Sem dano" e sem a dica 9 do tutorial; as partidas guardadas antes continuam na lista;
+  - **Defesa Absoluta até o oponente atacar de fato** (`endTurn` com `attacked`);
+  - **Absolutos em 3 s** (leque mais lento, título e inversão a 0,9 s);
+  - `RULES_VERSION` 3 e `STATE_SCHEMA` 3; partidas de referência na config atual (500, 8, 8 Ás);
+  - teto de 400 rodadas **só do simulador**, com a duração (p95, máx.) e as paradas no teto nos relatórios;
+  - calibração e portão do Difícil medidos de novo (leitura em `packages/sim/reports/calibracao-leitura.md`, seção E1).
+- **Em curso:** nada.
+- **Próximo passo exato:** a **E2** (Equipar livre: ver todas as numéricas recebidas e pô-las na ordem e na fileira que
+  quiser), numa branch `feat/equipar-livre` a partir da `main`. Começar pelo plano (spec do sub-projeto 5, E2: com ordem livre
+  o `legalActions` cresce para k! × destinos; os bots ficam com a lista canônica).
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
 ## A `main`
 
-`feat/revisao-notas` mesclada (2026-10-30), CI verde (check + e2e). Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D (`8d7f078`, `a5a76c5`,
-`bba8377`, `8cdf0a1`) e a memória compartilhada. Regras em vigor: spec 1
+E1 mesclada (2026-10-30). Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D (`8d7f078`, `a5a76c5`,
+`bba8377`, `8cdf0a1`), a memória compartilhada e a E1. Regras em vigor: spec 1
 (`docs/superpowers/specs/2026-10-15-jogo-coringa-regras-motor-design.md`), com os ajustes da spec do sub-projeto 5
 (`2026-10-27-ajustes-design.md`).
 
 ## Fila (sub-projeto 5)
 
-1. **E1:** sem anti-travamento e sem limite de rodadas, Defesa Absoluta até o ataque, Absolutos em 3 s.
-   `RULES_VERSION`/`STATE_SCHEMA` 3, partidas de referência regravadas, portão do Difícil do zero.
-2. **E2:** Equipar livre.
-3. **F1:** apagar o histórico (só web).
-4. **E3 + F2 + F3:** roubo, cura pela Defesa, limite de 4 especiais, Reflect reativo e Devastação, medidos juntos no simulador
+1. **E2:** Equipar livre.
+2. **F1:** apagar o histórico (só web).
+3. **E3 + F2 + F3:** roubo, cura pela Defesa, limite de 4 especiais, Reflect reativo e Devastação, medidos juntos no simulador
    antes de virar regra. As regras estão aprovadas (spec do sub-projeto 5); falta a medição e a forma da penalidade do limite.
 
 ## Esperando o autor
 
+- **Achados da E1, para ele saber (não pedem decisão agora):**
+  - sem o anti-travamento, quem se fecha na Defesa e joga todos os K chega à **Exódia em 25,5%** das partidas `turtle` ×
+    `greedy` (era 1,7%). É o caso que ele previu; o limite de 4 especiais (E3) responde. A tartaruga deixou de compensar: o
+    líder que se fecha pontua 25 pp menos que o que segue jogando;
+  - uma partida online sem limite de rodadas faz o log de passos crescer sem teto. O storage aguenta 2 MB por chave (~20 mil
+    passos com a margem do teste, cem vezes uma partida típica), e a sala expira em 24 h. Detalhes na spec do servidor §9.4.
 - **[I] a confirmar, junto com os números da E3:**
   - Defesa Absoluta até o ataque: o Ataque Absoluto e o ataque devolvido por Reflect contam como ataque; Reflect contra Reflect,
     Armadilha, Sacrifício, Roubo e Devastação não a encerram; ao acabar, sai 1 Q como hoje (`decisoes.md` 2026-10-30 (4)).
@@ -64,7 +59,8 @@ Playtest online, `wrangler login` + `pnpm deploy:server`, proteção da `main`, 
 
 ## Ambiente (máquina do autor, formatada em 2026-10-28)
 
-- **Ferramentas:** Node 26.13 e pnpm 11.9. Não há `gh` nem a CLI `claude` no PATH. O Ubuntu do WSL sumiu.
+- **Ferramentas:** Node 26.13 e pnpm 11.9. Não há `gh` nem a CLI `claude` no PATH (a CI se lê pela API pública do GitHub,
+  com `curl`). O Ubuntu do WSL sumiu.
 - **E2E:** precisa de `pnpm --filter @coringa/web exec playwright install chromium` na primeira vez.
 - **Workerd (resolvido com um paliativo; a correção definitiva é do autor):**
   - **Sintoma:** os testes do servidor no workerd (`vitest.worker.config.ts`) não subiam. O `workerd.exe` caía ao iniciar com

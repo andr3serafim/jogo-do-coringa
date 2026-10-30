@@ -69,3 +69,26 @@ A varredura passou a girar em torno dela (vida 300 a 800, fileiras de 6 a 10, e 
 - **Quadra e Ressurreições:** quadra em **62,7%** das partidas (era 44,6%), 1,09 Ressurreição por partida. Com 8 cartas por fileira
   as quadras ficam bem mais prováveis, e cabem duas numa fileira.
 - **Exódia:** 0,9%. **Iniciativa:** 49,8% (ok). Os 8 Ás quase não mudam a duração contra "6 Ás" (13 contra 11 rodadas de mediana).
+
+## Sub-projeto 5, E1: sem anti-travamento, Defesa Absoluta até o ataque (2026-10-30)
+
+`calibracao.md` medido de novo com as regras versão 3 (vida 500, fileiras de 8, 8 Ás, sem anti-travamento, a Defesa Absoluta
+durando até o oponente atacar). O simulador para a partida no início da rodada 401 (`SIM_MAX_ROUNDS`, só dele) e conta como
+"sem fim"; a coluna "No teto" mostra essas paradas, e entre parênteses as que tinham uma Defesa Absoluta ativa ali.
+
+- **Duração (`greedy` × `greedy`):** mediana de **14 rodadas de Ataque** (p10–p90: 7–23; p95 28; máximo 42). Antes eram 13
+  (7–20), com 16,7% das partidas cortadas pelo anti-travamento; agora elas seguem até alguém cair. Nenhuma parou no teto.
+- **`random` × `random`:** mediana de 21 (p95 40, máximo 72); nenhuma no teto. Antes 63% acabavam no anti-travamento.
+- **`turtle` × `greedy`:** mediana de 22, mas cauda longa (p90 64, p95 84, máximo 200 = o teto); 0,2% no teto, nenhuma com
+  Defesa Absoluta. **Exódia em 25,5%** das partidas: sem o anti-travamento, quem se fecha na Defesa e joga todos os K tem tempo
+  de juntar os quatro. É o caso que o autor previu ("o player fica juntando K até fazer o exódia") e que o limite de 4 especiais
+  na mão (E3) responde.
+- **Tartaruga (desenho pareado):** o líder que se fecha agora pontua **25,0 pp** (vantagem 10) e **26,9 pp** (vantagem 20)
+  **menos** que o líder `greedy` (meta ≤ 0: ok). Antes ganhava +6,1 pp. Das 1000 partidas do turtle-líder com vantagem 10: 150
+  vitórias pela vida, 147 pela Exódia, 702 derrotas, 1 sem fim. Sem o anti-travamento, parar de atacar deixou de ser vantagem.
+- **Exódia (`greedy` × `greedy`):** 1,6% (era 0,9%), dentro da meta (1–3%). **Iniciativa:** 49,2% (ok). **Quadra:** 67,5%.
+- **Risco da Defesa Absoluta eterna:** não apareceu. Com cartas no Ataque, o ataque é obrigatório, então ela só sobrevive contra
+  quem está de Ataque vazio; nenhuma partida parou no teto com uma ativa.
+- **Portão do Difícil:** medido do zero (`dificil.md`), aprovado na rodada 1, com as mesmas pontuações de antes (Difícil ×
+  `greedy` 65,0%, `greedy` × Fácil 78,0%) e o p95 do tempo por decisão em 150 ms (era 163). Uma primeira medição, rodando junto
+  com a calibração, deu 272 ms: as duas dividiam a CPU, e ela foi descartada.

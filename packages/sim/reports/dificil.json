@@ -4,7 +4,6 @@
     "rowLimit": 8,
     "buffLimit": 4,
     "cardsPerEquip": 4,
-    "antiStallRounds": 3,
     "exodiaGuard": 4,
     "resurrectMinRounds": 3,
     "deck": {
@@ -22,7 +21,7 @@
     "greedyVsEasy": 0.65,
     "p95Ms": 300
   },
-  "machine": "Node v24.19.0, win32 x64, Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz (12 núcleos)",
+  "machine": "Node v26.13.0, win32 x64, Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz (12 núcleos)",
   "rounds": [
     {
       "label": "inicial",
@@ -41,7 +40,6 @@
         "rate": 0.65,
         "se": 0.033726843908080104,
         "wins": 130,
-        "draws": 0,
         "losses": 70,
         "unfinished": 0,
         "withInitiative": {
@@ -58,7 +56,6 @@
         "rate": 0.78,
         "se": 0.029291637031753616,
         "wins": 156,
-        "draws": 0,
         "losses": 44,
         "unfinished": 0,
         "withInitiative": {
@@ -71,15 +68,15 @@
         }
       },
       "timing": {
-        "decisions": 8848,
-        "p50Ms": 83.91189999999915,
-        "p95Ms": 163.01980000000913,
-        "maxMs": 271.2229000000516,
+        "decisions": 10333,
+        "p50Ms": 71.48600000003353,
+        "p95Ms": 150.1330999999991,
+        "maxMs": 393.4195999999938,
         "searching": {
-          "decisions": 6380,
-          "p50Ms": 104.74239999998827,
-          "p95Ms": 169.90090000000782,
-          "maxMs": 271.2229000000516
+          "decisions": 7502,
+          "p50Ms": 87.80040000000736,
+          "p95Ms": 158.9941000000108,
+          "maxMs": 393.4195999999938
         }
       },
       "passes": {
@@ -88,7 +85,7 @@
         "p95": true
       },
       "approved": true,
-      "seconds": 676.0934083999999
+      "seconds": 695.3821165999999
     }
   ]
 }

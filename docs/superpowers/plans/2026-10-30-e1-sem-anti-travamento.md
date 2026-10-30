@@ -272,19 +272,19 @@ Um commit só com a tarefa 3: tirar o `DRAW` do tipo quebra o typecheck dos outr
 
 ### Tarefa 7: medir, revisar e mesclar
 
-- [ ] **Passo 1:** `estado.md` commitado. Depois `pnpm sim:calibrate`. Leia:
+- [x] **Passo 1:** `estado.md` commitado. Depois `pnpm sim:calibrate`. Leia:
   - a duração (mediana, p95, máx.);
   - a fração no teto e a parte dela com Defesa Absoluta.
 
   Se partidas greedy × greedy ou com o Difícil baterem no teto, é defeito de bot e não de regra: investigue antes de seguir
   (a spec E1, "risco a conferir").
-- [ ] **Passo 2:** `estado.md` commitado. Depois
+- [x] **Passo 2:** `estado.md` commitado. Depois
   `pnpm sim:dificil --recomecar --ajuste "E1: sem anti-travamento, Defesa Absoluta até o ataque"`. O portão tem que passar como
   antes. Se cair, investigue o bot (não a regra) e meça de novo com `--ajuste`.
-- [ ] **Passo 3:** commite os relatórios (`packages/sim/reports/`) com um resumo da leitura.
-- [ ] **Passo 4:** `estado.md` commitado. Depois `pnpm e2e` (todos verdes; o `layout.spec.ts` com a fixture nova).
-- [ ] **Passo 5:** revisão do branch inteiro por um revisor novo, contra a spec E1 e o foco da revisão.
-- [ ] **Passo 6:** fechamento:
+- [x] **Passo 3:** commite os relatórios (`packages/sim/reports/`) com um resumo da leitura.
+- [x] **Passo 4:** `estado.md` commitado. Depois `pnpm e2e` (todos verdes; o `layout.spec.ts` com a fixture nova).
+- [x] **Passo 5:** revisão do branch inteiro por um revisor novo, contra a spec E1 e o foco da revisão.
+- [x] **Passo 6:** fechamento:
   - suba a branch e espere a CI verde (check + e2e);
   - fast-forward na `main`;
   - entrada no `diario.md` e o `estado.md` com o próximo passo (E2), escritos antes do último push.
