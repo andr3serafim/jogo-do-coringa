@@ -18,9 +18,13 @@
 - **Feito na E1 (branch `feat/sem-anti-travamento`, ainda sem push):** tarefa 1 (`4491726`, Defesa Absoluta até o ataque,
   `RULES_VERSION` 3) e tarefas 2 e 3 (`f88e401`, sem anti-travamento nem empate no motor, servidor, simulador e web;
   `STATE_SCHEMA` 3; partidas de referência na config atual). A `feat/memoria-espera` já está na `main` (`f7f26d8`).
-- **Próximo passo exato:** conferir a faixa central no navegador (1536 × 695 e 390 × 844, sem o "Sem dano"); depois a tarefa 4
-  do plano (teto de 400 rodadas no simulador e a duração nos relatórios). A E1 leva três coisas: sem anti-travamento, a
-  **Defesa Absoluta até o ataque** e os **Absolutos em 3 s** (`decisoes.md` 2026-10-30 (4); spec do sub-projeto 5, E1).
+- **Também feito:** faixa central conferida no navegador; tarefa 4 (`2bc0b61`, teto de 400 rodadas no simulador); tarefa 5
+  (`b71c033`, fixture do E2E na versão 3; a semente do tutorial continua); tarefa 6 (`18d1ead`, Absolutos em 3 s, conferidos
+  num replay).
+- **Em curso / próximo passo exato:** tarefa 7 do plano. Rodando `pnpm sim:calibrate` e depois
+  `pnpm sim:dificil --recomecar --ajuste "E1: sem anti-travamento, Defesa Absoluta até o ataque"`. Se a sessão cair no meio,
+  rode de novo os dois (os relatórios só são gravados no fim). Depois: commitar os relatórios com a leitura, `pnpm e2e`,
+  revisão da branch inteira, push e merge.
 - **Achado a levar ao autor:** sem limite de rodadas, o log de passos de uma partida online cresce sem teto. O storage aguenta
   2 MB por chave (~20 mil passos com a margem do teste); detalhes na spec do servidor §9.4.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
