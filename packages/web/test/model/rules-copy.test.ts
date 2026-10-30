@@ -43,6 +43,19 @@ describe('resumo das regras: a Iniciativa', () => {
   });
 });
 
+describe('resumo das regras: a Defesa Absoluta dura até o ataque (motor: `endTurn` com `attacked`)', () => {
+  const item = items.find((i) => i.startsWith('Defesa Absoluta'))!;
+
+  it('diz que dura até o oponente atacar e que o Q sai depois desse ataque', () => {
+    expect(item).toContain('até o oponente atacar');
+    expect(item).toContain('Depois do primeiro ataque do oponente, ela acaba e 1 Q vai para o cemitério.');
+  });
+
+  it('não promete mais o fim no próximo turno', () => {
+    expect(item).not.toContain('próximo turno');
+  });
+});
+
 describe('resumo das regras: a janela de reação diz o que o motor faz', () => {
   const window = RULES_SECTIONS.find((section) => section.title === 'Janela de reação')!.items;
 

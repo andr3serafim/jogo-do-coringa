@@ -28,7 +28,7 @@ export function closeReaction(s: GameState, ev: GameEvent[]): void {
   ev.push({ type: 'ReactionWindowClosed', responder: phase.responder, trigger: phase.trigger });
   if (phase.trigger === 'ATTACK') {
     resolveAttack(s, actor.id, ev);
-    if (!isGameOver(s)) endTurn(s, ev);
+    if (!isGameOver(s)) endTurn(s, ev, true);
   } else if (phase.trigger === 'K_PLAYED' && actor.guard.length >= s.config.exodiaGuard) {
     ev.push({ type: 'Exodia', player: actor.id });
     finishGame(s, { kind: 'WIN', winner: actor.id, reason: 'EXODIA' }, ev);

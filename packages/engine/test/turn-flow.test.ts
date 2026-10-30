@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { P1, P2, act, actErr, handId, player, setup, steps, values } from './helpers.ts';
+import { legalActions } from '../src/legal-actions.ts';
+import { viewFor } from '../src/view.ts';
+import { P1, P2, act, actErr, handId, player, setup, steps, values, type PlayerSetup } from './helpers.ts';
 
 describe('buffs na fase principal', () => {
   it('J vai para os Buffs de Ataque; Selvagem também serve como J', () => {
@@ -144,13 +146,66 @@ describe('fim da rodada de Ataque', () => {
   });
 });
 
-describe('expiração de efeitos', () => {
-  it('a Defesa Absoluta termina no fim do turno do oponente e consome 1 Q', () => {
-    const s = setup({ p2: { defenseBuffs: ['Q', 'Q', 'Q', 'Q'], absoluteDefense: true } });
-    const r = act(s, P1, { type: 'END_TURN' });
+// A Defesa Absoluta dura até o oponente atacar de fato (autor, 2026-10-30; spec 1 §1.8).
+describe('Defesa Absoluta até o ataque', () => {
+  const absolute: PlayerSetup = { defenseBuffs: ['Q', 'Q', 'Q', 'Q'], absoluteDefense: true };
+
+  it('continua depois de um turno do oponente sem ataque', () => {
+    const r = act(setup({ p2: { ...absolute } }), P1, { type: 'END_TURN' });
+    expect(r.events.map((e) => e.type)).not.toContain('AbsoluteDefenseEnded');
+    expect(player(r.state, P2).absoluteDefense).toBe(true);
+    expect(player(r.state, P2).defenseBuffs).toHaveLength(4);
+  });
+
+  it('continua por três turnos do oponente sem ataque, com os 4 Q', () => {
+    // Os dois põem tudo na Defesa e ninguém ataca; o resto (a escolha da ordem) é a primeira jogada legal.
+    let s = setup({ config: { rowLimit: 8 }, p2: { ...absolute } });
+    let opponentTurns = 0;
+    while (opponentTurns < 3) {
+      const phase = s.phase;
+      if (phase.kind === 'ATTACK_MAIN') {
+        if (phase.player === P1) opponentTurns += 1;
+        s = act(s, phase.player, { type: 'END_TURN' }).state;
+        continue;
+      }
+      const actor = [P1, P2].find((id) => legalActions(viewFor(s, id)).length > 0)!;
+      const legal = legalActions(viewFor(s, actor));
+      const allDefense = legal.find((a) => a.type === 'EQUIP' && a.destinations.every((d) => d === 'DEF'));
+      s = act(s, actor, allDefense ?? legal[0]).state;
+    }
+    expect(player(s, P2).absoluteDefense).toBe(true);
+    expect(player(s, P2).defenseBuffs).toHaveLength(4);
+  });
+
+  it('acaba depois do ataque do oponente e consome 1 Q', () => {
+    const r = steps(setup({ p1: { attack: [5] }, p2: { ...absolute } }), [
+      [P1, { type: 'DECLARE_ATTACK' }],
+      [P2, { type: 'PASS' }],
+    ]);
     expect(r.events).toContainEqual({ type: 'AbsoluteDefenseEnded', player: P2 });
     expect(player(r.state, P2).absoluteDefense).toBe(false);
     expect(player(r.state, P2).defenseBuffs).toHaveLength(3);
+    expect(player(r.state, P2).hp).toBe(100);
+  });
+
+  it('um Ataque Absoluto também a encerra (exemplo 5 da spec 1)', () => {
+    const r = steps(setup({ p1: { attack: [5, 6, 7], attackBuffs: ['J', 'J', 'J', 'J'] }, p2: { ...absolute, defense: [8, 9] } }), [
+      [P1, { type: 'DECLARE_ATTACK' }],
+      [P2, { type: 'PASS' }],
+    ]);
+    expect(player(r.state, P2).hp).toBe(95);
+    expect(r.events).toContainEqual({ type: 'AbsoluteDefenseEnded', player: P2 });
+    expect(player(r.state, P2).defenseBuffs).toHaveLength(3);
+  });
+
+  it('um ataque devolvido pelo Reflect também a encerra', () => {
+    const r = steps(setup({ p1: { attack: [5] }, p2: { ...absolute, reflect: true } }), [
+      [P1, { type: 'DECLARE_ATTACK' }],
+      [P2, { type: 'PASS' }],
+    ]);
+    expect(r.events.map((e) => e.type)).toContain('ReflectTriggered');
+    expect(r.events).toContainEqual({ type: 'AbsoluteDefenseEnded', player: P2 });
+    expect(player(r.state, P2).absoluteDefense).toBe(false);
   });
 });
 

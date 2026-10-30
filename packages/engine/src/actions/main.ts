@@ -37,7 +37,7 @@ export function declareAttack(s: GameState, p: PlayerState, ev: GameEvent[]): vo
 
 export function endTurnAction(s: GameState, p: PlayerState, ev: GameEvent[]): void {
   if (p.attackRow.length > 0) fail('ATTACK_ROW_NOT_EMPTY', 'com cartas no Ataque, o turno termina declarando o ataque');
-  endTurn(s, ev);
+  endTurn(s, ev, false);
 }
 
 export type TargetZone = 'attackBuffs' | 'defenseBuffs' | 'guard';

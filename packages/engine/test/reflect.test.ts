@@ -155,9 +155,9 @@ describe('Defesa Absoluta × proteção contra Reflect (decisão do autor, 2026-
     expect(r.events.filter((e) => e.type === 'BuffRemoved' && e.player === P2)).toHaveLength(0);
   });
 
-  it('se o Q for reposto depois da proteção, o fim da Defesa Absoluta consome 1 e sobram 3', () => {
+  it('se o Q for reposto depois da proteção, o fim da Defesa Absoluta (no ataque seguinte) consome 1 e sobram 3', () => {
     const s = setup({
-      p1: { reflect: true },
+      p1: { reflect: true, attack: [3] },
       p2: { hand: ['Q', 'Q'], attackBuffs: ['J'], defenseBuffs: ['Q', 'Q', 'Q'], guard: 1 },
       turnOrder: [P2, P1],
       phase: { kind: 'ATTACK_MAIN', player: P2 },
@@ -168,7 +168,8 @@ describe('Defesa Absoluta × proteção contra Reflect (decisão do autor, 2026-
       [P2, { type: 'PROTECT_FROM_REFLECT', jId: p2.attackBuffs[0].id, qId: p2.defenseBuffs[0].id, kId: p2.guard[0].id }],
       [P2, { type: 'PLAY_Q', cardId: handId(s, P2, 'Q', 1) }],
       [P2, { type: 'END_TURN' }],
-      [P1, { type: 'END_TURN' }],
+      [P1, { type: 'DECLARE_ATTACK' }],
+      [P2, { type: 'PASS' }],
     ]);
     expect(player(r.state, P2).absoluteDefense).toBe(false);
     expect(player(r.state, P2).defenseBuffs).toHaveLength(3);

@@ -62,7 +62,7 @@ function applySystem(s: GameState, action: Action, ev: GameEvent[]): void {
     case 'ATTACK_MAIN': {
       const p = getPlayer(s, phase.player);
       if (p.attackRow.length > 0) return declareAttack(s, p, ev);
-      return endTurn(s, ev);
+      return endTurn(s, ev, false);
     }
     case 'REACTION':
       return closeReaction(s, ev);

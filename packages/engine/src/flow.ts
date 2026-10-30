@@ -62,21 +62,24 @@ export function openReaction(s: GameState, responder: PlayerId, trigger: Reactio
   ev.push({ type: 'ReactionWindowOpened', responder, trigger });
 }
 
-/** Fim de um turno de ataque: expira os efeitos do OUTRO jogador (spec §1.5 item 4) e avança. */
-export function endTurn(s: GameState, ev: GameEvent[]): void {
+/**
+ * Fim de um turno de ataque: expira os efeitos do OUTRO jogador (spec §1.5 item 4) e avança. `attacked` diz se houve ataque
+ * neste turno: só ele encerra a Defesa Absoluta do outro (spec §1.8, autor em 2026-10-30).
+ */
+export function endTurn(s: GameState, ev: GameEvent[], attacked: boolean): void {
   const current = s.turnOrder[s.turnIndex];
-  expireEffects(s, opponentOf(s, current), ev);
+  expireEffects(s, opponentOf(s, current), attacked, ev);
   if (s.turnIndex === 0) startTurn(s, 1, ev);
   else endAttackRound(s, ev);
 }
 
-function expireEffects(s: GameState, owner: PlayerState, ev: GameEvent[]): void {
+function expireEffects(s: GameState, owner: PlayerState, attacked: boolean, ev: GameEvent[]): void {
   if (owner.reflect) {
     toGraveyard(s, [owner.reflect.k, owner.reflect.j, owner.reflect.q]);
     owner.reflect = null;
     ev.push({ type: 'ReflectExpired', owner: owner.id });
   }
-  if (owner.absoluteDefense) {
+  if (owner.absoluteDefense && attacked) {
     owner.absoluteDefense = false;
     // Um Q sacrificado na proteção contra Reflect já conta como o Q consumido (spec §1.8): sobram 3.
     const consumed = owner.defenseBuffs.length >= s.config.buffLimit ? owner.defenseBuffs.splice(0, 1) : [];

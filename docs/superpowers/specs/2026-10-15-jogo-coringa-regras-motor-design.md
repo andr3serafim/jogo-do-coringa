@@ -106,7 +106,7 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
 3. **Encerramento do turno:**
    - se a Fileira de Ataque tiver cartas, o jogador **declara o ataque** (obrigatório) → janela de reação do oponente → resolução do dano (§1.9);
    - se estiver vazia, o turno termina sem ataque e **nenhuma carta é removida**.
-4. **Ao fim de cada turno de ataque** (com ou sem ataque), expiram os efeitos do **outro** jogador que duravam "até o fim do próximo turno de ataque do oponente": Reflect não disparado vai para o cemitério **[I]**; Defesa Absoluta termina e 1 Q vai para o cemitério (§1.8).
+4. **Ao fim de cada turno de ataque** (com ou sem ataque), expiram os efeitos do **outro** jogador que duravam "até o fim do próximo turno de ataque do oponente": Reflect não disparado vai para o cemitério **[I]**. A Defesa Absoluta do outro termina só se houve ataque neste turno, e então 1 Q vai para o cemitério (§1.8; autor, 2026-10-30).
 5. Ao fim da rodada de Ataque, define-se a iniciativa (§1.10) e atualiza-se o anti-travamento (§1.11).
 
 ### 1.6 Cartas especiais
@@ -179,10 +179,12 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
   - Uso único por quadra. Se a quadra se desfizer e se formar de novo depois, gera nova Ressurreição **[I]**.
 
 **Defesa Absoluta — 4 Q nos Buffs de Defesa**
-- Ativa ao colocar o 4º Q. Dura **até o fim do próximo turno de ataque do oponente** ("1 rodada") **[O]**.
+- Ativa ao colocar o 4º Q. Dura **até o oponente atacar de fato**: acaba no fim do turno em que ele ataca, e um turno dele sem
+  ataque (Ataque vazio) não a encerra **[autor, 2026-10-30; substitui "até o fim do próximo turno de ataque do oponente", de
+  2026-10-15]**. O Ataque Absoluto e o ataque devolvido por um Reflect contam como ataque **[I]**.
 - Enquanto ativa: imune a dano **[O]**, a **A** **[O]** e a **Sacrifício** **[I]**; **nenhuma carta da Fileira de Defesa vai para o cemitério** **[O]**.
 - A imunidade da rodada é garantida mesmo que o próprio jogador sacrifique 1 Q para se proteger de um Reflect **[I]** (§1.0 item 5).
-- Ao terminar: **apenas 1 Q** (o mais antigo) vai para o cemitério **[O do autor]**; os outros 3 continuam (multiplicador 4×). Se um Q já foi sacrificado na proteção contra Reflect durante a Defesa Absoluta, ele conta como esse Q e nenhum outro é consumido **[I]**. Novo Q → nova Defesa Absoluta.
+- Ao terminar (depois do ataque do oponente): **apenas 1 Q** (o mais antigo) vai para o cemitério **[O do autor]**; os outros 3 continuam (multiplicador 4×). Se um Q já foi sacrificado na proteção contra Reflect durante a Defesa Absoluta, ele conta como esse Q e nenhum outro é consumido **[I]**. Novo Q → nova Defesa Absoluta.
 
 **Ataque Absoluto — 4 J nos Buffs de Ataque**
 - Vale no ataque declarado com 4 J (multiplicador 1 + 4 = **5×**).

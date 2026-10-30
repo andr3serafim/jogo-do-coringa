@@ -119,10 +119,10 @@ leitura e não está nas palavras dele.
   antigo) ao cemitério, como hoje **[I]**. O Ataque Absoluto e o ataque devolvido por um Reflect contam como ataque **[I]**; a
   Armadilha, o Sacrifício, o Roubo e a Devastação não a encerram, porque ela os bloqueia **[I]**. Entra na E1 para dividir a
   mesma subida de versão e o mesmo portão.
-  - **Risco a conferir antes de medir:** sem o anti-travamento, uma Defesa Absoluta que ninguém ataca dura para sempre. Atacar
-    nela não dá dano e gasta a 1ª carta do Ataque de quem ataca; se os bots nunca fizerem esse ataque, as partidas batem no teto
-    do simulador por defeito do bot, não da regra. Os bots precisam valorizar quebrar a Defesa Absoluta, e o relatório separa os
-    tetos das partidas com Defesa Absoluta.
+  - **Risco a conferir antes de medir:** sem o anti-travamento, uma Defesa Absoluta que ninguém ataca dura para sempre. Com
+    cartas no Ataque o ataque é obrigatório (o turno só termina declarando o ataque), então ela só sobrevive contra quem está de
+    Ataque vazio, como a tartaruga. O risco do teto fica nas partidas com a tartaruga, não no greedy nem no Difícil. O relatório
+    separa os tetos das partidas com Defesa Absoluta.
   - A interface acompanha: textos que prometem "até o fim do próximo turno", o resumo das regras, as dicas do tutorial e a
     prévia.
 - **Absolutos em 3 s** (autor, 2026-10-30, a resposta à nota 7; só web): o Ataque Absoluto e a Defesa Absoluta passam de 2,6 s

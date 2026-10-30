@@ -69,7 +69,7 @@ lendo as partidas antigas guardadas no navegador (anti-travamento e empate).
   - O `expireEffects` encerra a Defesa Absoluta do outro jogador só com `attacked`. O Reflect não disparado continua expirando
     em todo fim de turno: a F2 muda isso depois.
 
-- [ ] **Passo 1: testes que falham.** Troque o teste `a Defesa Absoluta termina no fim do turno do oponente e consome 1 Q` por:
+- [x] **Passo 1: testes que falham.** Troque o teste `a Defesa Absoluta termina no fim do turno do oponente e consome 1 Q` por:
   - `a Defesa Absoluta continua depois de um turno do oponente sem ataque`. Use `setup({ p2: { defenseBuffs: ['Q','Q','Q','Q'],
     absoluteDefense: true } })` e `act(s, P1, { type: 'END_TURN' })`. Espere `absoluteDefense === true`, `defenseBuffs` com 4 e
     nenhum `AbsoluteDefenseEnded` nos eventos.
@@ -78,16 +78,16 @@ lendo as partidas antigas guardadas no navegador (anti-travamento e empate).
     `AbsoluteDefenseEnded` de P2, `absoluteDefense === false`, 3 Q, e a vida de P2 intacta.
   - `um Ataque Absoluto também a encerra`: P1 com 4 J. É o exemplo 5 da spec 1: o dano é a conta normal e sobra com 3 Q.
   - `um ataque devolvido pelo Reflect também a encerra`: P2 com a Defesa Absoluta e um Reflect ativo.
-- [ ] **Passo 2:** `pnpm --filter @coringa/engine exec vitest run test/turn-flow.test.ts`. Os dois testes "continua" falham.
-- [ ] **Passo 3:** implemente a assinatura acima. Atualize o comentário do `endTurn` (spec §1.5 item 4).
-- [ ] **Passo 4:** a suíte do motor passa, menos as partidas de referência e o digest.
-- [ ] **Passo 4b: partidas de referência e versão.**
+- [x] **Passo 2:** `pnpm --filter @coringa/engine exec vitest run test/turn-flow.test.ts`. Os dois testes "continua" falham.
+- [x] **Passo 3:** implemente a assinatura acima. Atualize o comentário do `endTurn` (spec §1.5 item 4).
+- [x] **Passo 4:** a suíte do motor passa, menos as partidas de referência e o digest.
+- [x] **Passo 4b: partidas de referência e versão.**
   - `RULES_VERSION = 3` em `packages/engine/src/version.ts`.
   - `pnpm --filter @coringa/sim record-golden`.
   - Leia o diff dos snapshots (`pnpm --filter @coringa/engine exec vitest run`). Toda mudança tem que vir de uma Defesa
     Absoluta que não acabou sem ataque.
   - Depois `vitest run -u` e o digest novo em `RULES_DIGESTS` (`packages/engine/test/rules-version.test.ts`).
-- [ ] **Passo 5: textos.**
+- [x] **Passo 5: textos.**
   - **Resumo das regras (`copy.ts:561`):** "Defesa Absoluta (4 Q): até o oponente atacar, você é imune a dano, a Armadilha e a
     Sacrifício, e a fileira de Defesa não perde cartas. Só o Ataque Absoluto fura a imunidade a dano: quebra os seus K e causa
     o dano normal. Depois do primeiro ataque do oponente, ela acaba e 1 Q vai para o cemitério."
@@ -96,7 +96,7 @@ lendo as partidas antigas guardadas no navegador (anti-travamento e empate).
   - **Nota de risco da spec E1, corrigida:** com cartas no Ataque, o ataque é obrigatório (`endTurnAction` recusa
     `END_TURN`). A Defesa Absoluta só sobrevive contra quem está de Ataque vazio, como a tartaruga. O risco do teto fica nas
     partidas com a tartaruga, não no greedy nem no Difícil.
-- [ ] **Passo 6:** commit `feat(engine): a Defesa Absoluta dura até o oponente atacar`, com a versão 3. O corpo cita a regra
+- [x] **Passo 6:** commit `feat(engine): a Defesa Absoluta dura até o oponente atacar`, com a versão 3. O corpo cita a regra
   e lista as partidas de referência que mudaram.
 
 ### Tarefa 2: o anti-travamento sai do motor, do servidor e do simulador
