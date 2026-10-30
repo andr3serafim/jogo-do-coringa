@@ -20,8 +20,12 @@
   `RULES_VERSION` nem `STATE_SCHEMA`.
   Tarefas 1 a 3 feitas (motor/protocolo `3a9a82a`, rascunho da web `ce5c897`, painel `ea567a8` e `16c56ed`) e as specs da
   tarefa 4. Conferido no navegador: 4 numéricas a 375 px e a 1536 × 695, sem rolagem horizontal.
-- **Próximo passo exato:** o resto da tarefa 4: push (o pre-push roda o `pnpm check`), `pnpm e2e`, o portão do Difícil sozinho
-  (`pnpm sim:dificil --ajuste "E2: ordem livre no Equipar; bots inalterados"`), a CI verde, o diário e o merge por fast-forward.
+  Revisão feita (`7480999`: o painel cabe no celular com 1–2 numéricas; as numéricas apagam com a mesa travada) e enviada; o
+  diário e a decisão (5) já estão escritos. O E2E local passou nos 6 testes do Equipar (a suíte inteira vai pela CI).
+- **Em curso agora:** o portão do Difícil, sozinho na máquina:
+  `pnpm sim:dificil --ajuste "E2: ordem livre no Equipar; bots inalterados"` (~21 min). Se a sessão cair no meio, rode de novo.
+- **Próximo passo exato:** com o portão aprovado e a CI verde (check + e2e) no último commit da `feat/equipar-livre`, commitar o
+  `dificil.md`/`dificil.json`, escrever este estado como pós-merge e fazer o merge por fast-forward na `main`.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
