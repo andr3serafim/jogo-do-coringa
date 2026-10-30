@@ -26,6 +26,8 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 - **Revisão final (autorrevisão, sem revisor independente):** as numéricas do painel não apagavam com a mesa travada (pareciam
   clicáveis); corrigido com teste. O E2E local pegou o painel alto demais no celular com 1 numérica (a fileira de Defesa saía
   da vista): os destinos voltaram para o lado das cartas até 2 numéricas, e só embaixo com 3 ou mais.
+- **Medição:** o portão do Difícil remedido com `--ajuste` (os bots não mudaram): aprovado na rodada 2, 65,0% e 78,0%, p95 de
+  142 ms. A calibração não foi refeita: as partidas de referência idênticas mostram que nenhum resultado dos bots muda.
 - **Armadilha:** um script `node` grande num heredoc do bash quebrou com crases dentro; gravar o script num arquivo do
   scratchpad (ferramenta Write) e rodar `node arquivo` funciona.
 

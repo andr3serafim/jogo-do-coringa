@@ -5,42 +5,34 @@
 
 ## Agora
 
-- **Branch:** `main`, no checkout principal `D:\andr3\jogo-coringa`. A **E1** (`feat/sem-anti-travamento`) entrou por
-  fast-forward em 2026-10-30, com a CI verde na branch (check + e2e). Ela trouxe:
-  - **sem anti-travamento e sem empate** (motor, protocolo, servidor, simulador e web): a partida acaba por vida, Exódia ou W.O.;
-    sem o contador "Sem dano" e sem a dica 9 do tutorial; as partidas guardadas antes continuam na lista;
-  - **Defesa Absoluta até o oponente atacar de fato** (`endTurn` com `attacked`);
-  - **Absolutos em 3 s** (leque mais lento, título e inversão a 0,9 s);
-  - `RULES_VERSION` 3 e `STATE_SCHEMA` 3; partidas de referência na config atual (500, 8, 8 Ás);
-  - teto de 400 rodadas **só do simulador**, com a duração (p95, máx.) e as paradas no teto nos relatórios;
-  - calibração e portão do Difícil medidos de novo (leitura em `packages/sim/reports/calibracao-leitura.md`, seção E1).
-- **Em curso:** a **E2** (Equipar livre), liberada pelo autor em 2026-10-30 ("ok, pode começar a E2"), na branch
-  `feat/equipar-livre` (a partir da `main` `0136e47`). Plano: `docs/superpowers/plans/2026-10-30-e2-equipar-livre.md` (4
-  tarefas). Desenho: a ação `EQUIP` ganha `order` opcional (ids das pendentes); sem ela, a ordem de compra. Sem subir
-  `RULES_VERSION` nem `STATE_SCHEMA`.
-  Tarefas 1 a 3 feitas (motor/protocolo `3a9a82a`, rascunho da web `ce5c897`, painel `ea567a8` e `16c56ed`) e as specs da
-  tarefa 4. Conferido no navegador: 4 numéricas a 375 px e a 1536 × 695, sem rolagem horizontal.
-  Revisão feita (`7480999`: o painel cabe no celular com 1–2 numéricas; as numéricas apagam com a mesa travada) e enviada; o
-  diário e a decisão (5) já estão escritos. O E2E local passou nos 6 testes do Equipar (a suíte inteira vai pela CI).
-- **Em curso agora:** o portão do Difícil, sozinho na máquina:
-  `pnpm sim:dificil --ajuste "E2: ordem livre no Equipar; bots inalterados"` (~21 min). Se a sessão cair no meio, rode de novo.
-- **Próximo passo exato:** com o portão aprovado e a CI verde (check + e2e) no último commit da `feat/equipar-livre`, commitar o
-  `dificil.md`/`dificil.json`, escrever este estado como pós-merge e fazer o merge por fast-forward na `main`.
+- **Branch:** `main`, no checkout principal `D:\andr3\jogo-coringa`. A **E2** (`feat/equipar-livre`) entrou por fast-forward
+  em 2026-10-30, com a CI verde na branch (check + e2e). Ela trouxe o **Equipar livre**:
+  - a ação `EQUIP` ganhou `order` opcional (os ids das numéricas pendentes, na ordem em que entram); sem ela, a ordem de
+    compra. Os bots, o tempo esgotado, o terminal e os replays guardados não mudam; as partidas de referência saíram idênticas
+    (digest 3), sem subir `RULES_VERSION` nem `STATE_SCHEMA`; `legalActions` segue canônica, sem `order`;
+  - o painel do Equipar mostra todas as numéricas ("Faltam 3 cartas"); o toque escolhe a carta (sem toque, a primeira que
+    falta), o destino vale para ela, e qualquer uma arrasta até a fileira. No celular, com 3 ou mais por pôr, os destinos descem
+    para baixo das cartas;
+  - o resumo das regras e a dica 1 do tutorial dizem que a ordem é do jogador;
+  - o portão do Difícil foi remedido (`--ajuste`): aprovado, com as mesmas pontuações (65,0% e 78,0%) e p95 de 142 ms.
+- **Em curso:** nada.
+- **Próximo passo exato:** a **F1** (apagar o histórico de partidas, só web: na tela `/partidas`, apagar a lista
+  `coringa:partidas` com confirmação, e apagar uma partida só), numa branch `feat/apagar-historico` a partir da `main`.
+  Perguntar ao autor antes de começar, como nas anteriores.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
 ## A `main`
 
-E1 mesclada (2026-10-30). Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D (`8d7f078`, `a5a76c5`,
-`bba8377`, `8cdf0a1`), a memória compartilhada e a E1. Regras em vigor: spec 1
+E1 e E2 mescladas (2026-10-30). Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D (`8d7f078`, `a5a76c5`,
+`bba8377`, `8cdf0a1`), a memória compartilhada, a E1 e a E2. Regras em vigor: spec 1
 (`docs/superpowers/specs/2026-10-15-jogo-coringa-regras-motor-design.md`), com os ajustes da spec do sub-projeto 5
 (`2026-10-27-ajustes-design.md`).
 
 ## Fila (sub-projeto 5)
 
-1. **E2:** Equipar livre.
-2. **F1:** apagar o histórico (só web).
-3. **E3 + F2 + F3:** roubo, cura pela Defesa, limite de 4 especiais, Reflect reativo e Devastação, medidos juntos no simulador
+1. **F1:** apagar o histórico (só web).
+2. **E3 + F2 + F3:** roubo, cura pela Defesa, limite de 4 especiais, Reflect reativo e Devastação, medidos juntos no simulador
    antes de virar regra. As regras estão aprovadas (spec do sub-projeto 5); falta a medição e a forma da penalidade do limite.
 
 ## Esperando o autor
@@ -51,6 +43,10 @@ E1 mesclada (2026-10-30). Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as F
     líder que se fecha pontua 25 pp menos que o que segue jogando;
   - uma partida online sem limite de rodadas faz o log de passos crescer sem teto. O storage aguenta 2 MB por chave (~20 mil
     passos com a margem do teste, cem vezes uma partida típica), e a sala expira em 24 h. Detalhes na spec do servidor §9.4.
+- **[I] da E2 (Equipar livre), para ele confirmar no playtest:**
+  - sem tocar numa carta, o destino vale para a primeira que falta, na ordem de compra (o fluxo de antes segue em um toque);
+  - no envio antecipado (faltam 1,5 s) e no tempo esgotado, as que faltam entram depois das escolhidas, na ordem de compra;
+  - o terminal do simulador (`pnpm play`) continua perguntando na ordem de compra.
 - **[I] a confirmar, junto com os números da E3:**
   - Defesa Absoluta até o ataque: o Ataque Absoluto e o ataque devolvido por Reflect contam como ataque; Reflect contra Reflect,
     Armadilha, Sacrifício, Roubo e Devastação não a encerram; ao acabar, sai 1 Q como hoje (`decisoes.md` 2026-10-30 (4)).
