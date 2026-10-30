@@ -47,7 +47,6 @@ function loseHp(s: GameState, victim: PlayerState, amount: number, dealer: Playe
   if (amount <= 0) return;
   victim.hp -= amount;
   dealer.damageThisRound += amount;
-  s.hpLostThisRound = true;
   if (victim.hp <= 0) finishGame(s, { kind: 'WIN', winner: dealer.id, reason: 'HP' }, ev);
 }
 

@@ -1,9 +1,8 @@
 import type { GameResult, PlayerId } from '@coringa/engine';
 
-/** Pontos de `player` numa partida: vitória 1, empate 0,5, derrota ou não terminou 0. */
+/** Pontos de `player` numa partida: vitória 1, derrota ou não terminou 0 (sem anti-travamento não há empate). */
 export function score(result: GameResult | null, player: PlayerId): number {
   if (!result) return 0;
-  if (result.kind === 'DRAW') return 0.5;
   return result.winner === player ? 1 : 0;
 }
 

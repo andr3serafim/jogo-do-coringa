@@ -37,7 +37,6 @@ export function renderBoard(view: PlayerView, names: Names): string {
   const recent = view.graveyard.slice(-5).map(cardText).join(' ');
   const header = [
     `Rodada ${view.round} (${view.roundKind === 'EQUIP' ? 'Equipar' : 'Ataque'})`,
-    `${view.noDamageStreak} de ${view.config.antiStallRounds} sem dano`,
     `Monte ${view.deckCount}`,
     `Cemitério ${view.graveyard.length}${recent ? ` (últimas: ${recent})` : ''}`,
     `Iniciativa: ${names.of(view.initiative)}`,

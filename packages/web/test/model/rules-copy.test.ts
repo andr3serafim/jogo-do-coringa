@@ -8,7 +8,7 @@ import { RULES_SECTIONS } from '../../src/model/copy.ts';
 
 const items = RULES_SECTIONS.flatMap((section) => section.items);
 const text = items.join('\n');
-const { hp, rowLimit, buffLimit, cardsPerEquip, antiStallRounds, exodiaGuard, resurrectMinRounds } = DEFAULT_CONFIG;
+const { hp, rowLimit, buffLimit, cardsPerEquip, exodiaGuard, resurrectMinRounds } = DEFAULT_CONFIG;
 
 describe('resumo das regras: os números do texto seguem a config padrão do motor', () => {
   it.each([
@@ -19,7 +19,6 @@ describe('resumo das regras: os números do texto seguem a config padrão do mot
     ['a Defesa Absoluta pede buffLimit Q', `Defesa Absoluta (${buffLimit} Q)`],
     ['o Ataque Absoluto pede buffLimit J', `Ataque Absoluto (${buffLimit} J)`],
     ['os K da Guarda da Exódia (exodiaGuard)', `Exódia (${exodiaGuard} K na Guarda)`],
-    ['as rodadas do anti-travamento (antiStallRounds)', `Anti-travamento: ${antiStallRounds} rodadas de Ataque seguidas`],
     ['a garantia da Ressurreição (resurrectMinRounds)', `garantia de ${resurrectMinRounds} rodadas depois de formada`],
   ])('%s', (_label, phrase) => {
     expect(text).toContain(phrase);
@@ -40,6 +39,18 @@ describe('resumo das regras: a Iniciativa', () => {
     expect(attack).toBeGreaterThanOrEqual(0);
     expect(rounds[attack + 1]).toMatch(/^Iniciativa: começa sorteada\./);
     expect(rounds[attack + 1]).toContain('No empate, inclusive 0 a 0, não muda.');
+  });
+});
+
+describe('resumo das regras: o fim da partida (o anti-travamento saiu na E1 do sub-projeto 5)', () => {
+  const end = RULES_SECTIONS.find((section) => section.title === 'Fim da partida')!.items;
+
+  it('diz que não há limite de rodadas e como a partida acaba', () => {
+    expect(end).toContain('Não há limite de rodadas: a partida só acaba pela vida, pela Exódia ou por W.O.');
+  });
+
+  it('não fala mais em anti-travamento nem em empate', () => {
+    expect(text).not.toMatch(/travamento|empata/);
   });
 });
 

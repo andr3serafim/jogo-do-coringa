@@ -33,7 +33,7 @@ describe('textos em pt-BR', () => {
     expect(e({ type: 'DamageDealt', attacker: P1, defender: P2, attack: 38, defense: 13, damage: 25 })).toBe('Ataque de você: 38 contra 13 → 25 de dano');
     expect(e({ type: 'ReactionWindowOpened', responder: P2, trigger: 'ATTACK' })).toBeNull();
     expect(e({ type: 'CardsDealt', player: P2, count: 4 })).toBe('Bot recebeu 4 cartas');
-    expect(e({ type: 'GameOver', result: { kind: 'DRAW', reason: 'ANTI_STALL' } })).toContain('empate');
+    expect(e({ type: 'GameOver', result: { kind: 'WIN', winner: P2, reason: 'EXODIA' } })).toBe('Fim de jogo: Bot venceu (Exódia)');
   });
 
   it('a fileira leva o artigo certo: do Ataque, da Defesa, no Ataque, na Defesa', () => {
@@ -79,10 +79,10 @@ describe('textos em pt-BR', () => {
 });
 
 describe('mesa no terminal', () => {
-  it('mostra vida, guarda, buffs, fileiras, mão do oponente só como quantidade, monte, cemitério e rodadas sem dano', () => {
-    const s = setup({ noDamageStreak: 2, p1: { hand: ['J'], attack: [4, 6], attackBuffs: ['J'] }, p2: { hand: ['Q', 'K'], guard: 2, hp: 70 }, graveyard: [5, 'A'] });
+  it('mostra vida, guarda, buffs, fileiras, mão do oponente só como quantidade, monte e cemitério', () => {
+    const s = setup({ p1: { hand: ['J'], attack: [4, 6], attackBuffs: ['J'] }, p2: { hand: ['Q', 'K'], guard: 2, hp: 70 }, graveyard: [5, 'A'] });
     const board = renderBoard(viewFor(s, P1), names);
-    for (const piece of ['Vida 70', 'Guarda: 2 K', 'Mão: 2 cartas', '2 de 3 sem dano', 'Monte', 'Cemitério 2', 'ATK 20', 'Sua vez: fase principal']) {
+    for (const piece of ['Vida 70', 'Guarda: 2 K', 'Mão: 2 cartas', 'Monte', 'Cemitério 2', 'ATK 20', 'Sua vez: fase principal']) {
       expect(board).toContain(piece);
     }
     expect(board).not.toMatch(/Q[♥♦♠♣]/);

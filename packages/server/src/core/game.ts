@@ -120,8 +120,7 @@ export function commitStep(
 }
 
 /**
- * Fecha a partida: status `FINISHED`, `outcome`, placar (vitória soma ao vencedor, empate em `draws`,
- * `ABANDONED` não mexe) e as linhas `game.ended` e `game.replay`. Sem `GAME_OVER` só vale `ABANDONED`.
+ * Fecha a partida: status `FINISHED`, `outcome`, placar (vitória soma ao vencedor, `ABANDONED` não mexe) e as linhas `game.ended` e `game.replay`. Sem `GAME_OVER` só vale `ABANDONED`.
  */
 export function finishGame(record: RoomRecord, cause: OutcomeCause, now: number): LogLine[] {
   const game = requireGame(record);
@@ -133,8 +132,7 @@ export function finishGame(record: RoomRecord, cause: OutcomeCause, now: number)
   }
   record.status = 'FINISHED';
   record.outcome = { gameNo: record.gameNo, result, cause, durationMs: now - game.startedAt };
-  if (result?.kind === 'WIN') record.score[result.winner as SeatId] += 1;
-  else if (result?.kind === 'DRAW') record.score.draws += 1;
+  if (result) record.score[result.winner as SeatId] += 1;
   game.cause = cause;
   game.phaseDeadlineAt = null;
   game.pausedTurnMs = null;

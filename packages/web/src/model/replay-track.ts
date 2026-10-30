@@ -20,6 +20,7 @@ import type { Names } from '@coringa/sim/text';
 import { appendHistory, EMPTY_HISTORY, forGame, type HistoryState } from './history.ts';
 import { NO_MARKS } from './marks.ts';
 import type { SessionSnapshot } from './session.ts';
+import type { StoredResult } from './past-games.ts';
 import type { Prefs } from './storage.ts';
 
 export interface ReplayFrame {
@@ -175,10 +176,9 @@ export function trackResult(track: ReplayTrack): GameResult | null {
   return phase?.kind === 'GAME_OVER' ? phase.result : null;
 }
 
-/** Igualdade campo a campo (o JSON do armazenamento não garante a ordem das chaves, e o `winner` só existe na vitória). */
-function sameResult(a: GameResult, b: GameResult): boolean {
-  if (a.kind !== b.kind || a.reason !== b.reason) return false;
-  return a.kind !== 'WIN' || (b.kind === 'WIN' && a.winner === b.winner);
+/** Igualdade campo a campo (o JSON do armazenamento não garante a ordem das chaves; o guardado pode ser de regras antigas). */
+function sameResult(a: GameResult, b: StoredResult): boolean {
+  return b.kind === 'WIN' && a.reason === b.reason && a.winner === b.winner;
 }
 
 /**
@@ -186,7 +186,7 @@ function sameResult(a: GameResult, b: GameResult): boolean {
  * `rulesVersion`)? Só confere quando a trilha foi até o fim e há resultado guardado: a parada tem o aviso próprio, e o abandono
  * (`stored` nulo) não tem resultado para conferir. Uma trilha que chegou ao fim sem a partida acabar diverge de qualquer resultado.
  */
-export function diverges(track: ReplayTrack, stored: GameResult | null): boolean {
+export function diverges(track: ReplayTrack, stored: StoredResult | null): boolean {
   if (stored === null || track.stoppedAt !== null) return false;
   const result = trackResult(track);
   return result === null || !sameResult(result, stored);

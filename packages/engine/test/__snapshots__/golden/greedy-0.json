@@ -2,32 +2,36 @@
   "name": "greedy-0",
   "result": {
     "kind": "WIN",
-    "winner": "p1",
+    "winner": "p2",
     "reason": "HP"
   },
-  "rounds": 17,
+  "rounds": 51,
   "finalHp": {
-    "p1": 249,
-    "p2": -56
+    "p1": -21,
+    "p2": 94
   },
   "events": {
-    "AttackDeclared": 15,
-    "BuffPlayed": 8,
-    "CardsDealt": 16,
-    "CardsPlaced": 18,
-    "CardsRemovedFromRow": 26,
-    "DamageDealt": 15,
-    "EquipSubmitted": 18,
+    "AttackDeclared": 50,
+    "BuffPlayed": 25,
+    "CardsDealt": 50,
+    "CardsPlaced": 52,
+    "CardsRemovedFromRow": 97,
+    "DamageDealt": 50,
+    "DeckReshuffled": 2,
+    "EquipSubmitted": 52,
     "GameOver": 1,
-    "GuardBroken": 3,
-    "GuardPlayed": 4,
-    "InitiativeChanged": 3,
-    "OrderChosen": 8,
-    "ReactionWindowClosed": 19,
-    "ReactionWindowOpened": 19,
-    "RoundStarted": 16,
-    "Sacrificed": 3,
-    "TrapUsed": 4,
-    "TurnStarted": 15
+    "GuardBroken": 11,
+    "GuardPlayed": 13,
+    "InitiativeChanged": 10,
+    "OrderChosen": 25,
+    "QuadBroken": 4,
+    "QuadFormed": 4,
+    "ReactionWindowClosed": 63,
+    "ReactionWindowOpened": 63,
+    "Resurrected": 2,
+    "RoundStarted": 50,
+    "Sacrificed": 2,
+    "TrapUsed": 24,
+    "TurnStarted": 50
   }
 }

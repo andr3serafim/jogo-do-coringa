@@ -94,7 +94,6 @@ describe('fim da rodada de Ataque', () => {
     expect(player(r.state, P1).hp).toBe(98);
     expect(r.events).toContainEqual({ type: 'InitiativeChanged', player: P1 });
     expect(r.state.initiative).toBe(P1);
-    expect(r.state.noDamageStreak).toBe(0);
     expect(r.state.round).toBe(4);
     expect(r.state.phase).toEqual({ kind: 'EQUIP' });
   });
@@ -108,41 +107,34 @@ describe('fim da rodada de Ataque', () => {
     expect(r.state.initiative).toBe(P2);
   });
 
-  it('anti-travamento: 3 rodadas sem dano → vence quem tem mais vida', () => {
-    const s = setup({ noDamageStreak: 2, p2: { hp: 90 } });
-    const r = steps(s, [
-      [P1, { type: 'END_TURN' }],
-      [P2, { type: 'END_TURN' }],
-    ]);
-    expect(r.state.phase).toEqual({ kind: 'GAME_OVER', result: { kind: 'WIN', winner: P1, reason: 'ANTI_STALL' } });
+  // O anti-travamento saiu (autor, 2026-10-30): a partida acaba por vida, Exódia ou W.O., nunca por rodadas sem dano.
+  it('cinco rodadas de Ataque seguidas sem dano não encerram a partida', () => {
+    // 1 carta por Equipar: as numéricas cabem todas na Defesa, e o Ataque fica vazio (ninguém é obrigado a atacar).
+    let s = setup({ config: { cardsPerEquip: 1 } });
+    while (s.round < 13) {
+      const phase = s.phase;
+      expect(phase.kind).not.toBe('GAME_OVER');
+      if (phase.kind === 'ATTACK_MAIN') {
+        s = act(s, phase.player, { type: 'END_TURN' }).state;
+        continue;
+      }
+      const actor = [P1, P2].find((id) => legalActions(viewFor(s, id)).length > 0)!;
+      const legal = legalActions(viewFor(s, actor));
+      const allDefense = legal.find((a) => a.type === 'EQUIP' && a.destinations.every((d) => d === 'DEF'));
+      s = act(s, actor, allDefense ?? legal[0]).state;
+    }
+    expect(s.players.every((p) => p.attackRow.length === 0 && p.hp === 100)).toBe(true);
+    expect(s.phase.kind).not.toBe('GAME_OVER');
   });
 
-  it('anti-travamento com vida igual é empate', () => {
-    const r = steps(setup({ noDamageStreak: 2 }), [
+  it('uma rodada sem dano não dá bônus de ataque na seguinte', () => {
+    const r1 = steps(setup(), [
       [P1, { type: 'END_TURN' }],
       [P2, { type: 'END_TURN' }],
     ]);
-    expect(r.state.phase).toEqual({ kind: 'GAME_OVER', result: { kind: 'DRAW', reason: 'ANTI_STALL' } });
-  });
-
-  it('uma rodada sem dano soma 1 à sequência, e a rodada seguinte começa sem nenhum bônus de ataque', () => {
-    const r1 = steps(setup({ noDamageStreak: 1 }), [
-      [P1, { type: 'END_TURN' }],
-      [P2, { type: 'END_TURN' }],
-    ]);
-    expect(r1.state.noDamageStreak).toBe(2);
     const r2 = act(r1.state, 'system', { type: 'TIMEOUT' });
     expect(r2.state.round).toBe(5);
     expect(r2.events.map((e) => e.type)).not.toContain('PressureChanged');
-  });
-
-  it('qualquer perda de vida zera a sequência sem dano', () => {
-    const r = steps(setup({ noDamageStreak: 3, p1: { attack: [5] } }), [
-      [P1, { type: 'DECLARE_ATTACK' }],
-      [P2, { type: 'PASS' }],
-      [P2, { type: 'END_TURN' }],
-    ]);
-    expect(r.state.noDamageStreak).toBe(0);
   });
 });
 

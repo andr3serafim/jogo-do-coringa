@@ -48,7 +48,6 @@ export interface Setup {
   roundKind?: 'EQUIP' | 'ATTACK';
   initiative?: PlayerId;
   turnOrder?: [PlayerId, PlayerId];
-  noDamageStreak?: number;
 }
 
 function matches(card: Card, spec: CardSpec): boolean {
@@ -112,8 +111,6 @@ export function setup(spec: Setup = {}): GameState {
   s.phase = spec.phase ?? { kind: 'ATTACK_MAIN', player: turnOrder[0] };
   const phase = s.phase;
   s.turnIndex = phase.kind === 'ATTACK_MAIN' && phase.player === turnOrder[1] ? 1 : 0;
-  s.noDamageStreak = spec.noDamageStreak ?? 0;
-  s.hpLostThisRound = false;
   return s;
 }
 

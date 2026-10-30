@@ -51,7 +51,7 @@ const room = (gameNo: number): RoomMessage => ({
     { playerId: 'p1', nickname: 'Ana', connected: true, ready: true, wantsRematch: false },
     { playerId: 'p2', nickname: 'Duda', connected: true, ready: true, wantsRematch: false },
   ],
-  score: { p1: 0, p2: 0, draws: 0 },
+  score: { p1: 0, p2: 0 },
   gameNo,
   expiresAt: 0,
 });
@@ -456,7 +456,9 @@ describe('diverges', () => {
     if (FINAL.kind !== 'WIN') throw new Error('a partida de teste tem vencedor');
     expect(diverges(TRACK, OTHER)).toBe(true);
     expect(diverges(TRACK, { ...FINAL, reason: 'EXODIA' })).toBe(true);
+    // O guardado pelas regras antigas (até a 2) ainda pode trazer o fim por anti-travamento: diverge de qualquer fim de hoje.
     expect(diverges(TRACK, { kind: 'DRAW', reason: 'ANTI_STALL' })).toBe(true);
+    expect(diverges(TRACK, { ...FINAL, reason: 'ANTI_STALL' })).toBe(true);
   });
 
   it('sem resultado guardado (abandono) não confere', () => {

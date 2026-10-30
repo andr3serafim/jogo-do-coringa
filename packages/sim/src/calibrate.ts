@@ -100,7 +100,7 @@ export function calibrate(options: CalibrationOptions, log: (line: string) => vo
   return report;
 }
 
-const METRIC_HEADERS = ['Série', 'Rodadas ATK (p10–med–p90)', 'Iniciativa vence', 'Exódia', 'Quadra', 'Ressurreições por partida (méd · p90 · máx · ≥3)', 'Anti-trav.', 'Terminam', 'Metas ok'];
+const METRIC_HEADERS = ['Série', 'Rodadas ATK (p10–med–p90)', 'Iniciativa vence', 'Exódia', 'Quadra', 'Ressurreições por partida (méd · p90 · máx · ≥3)', 'Terminam', 'Metas ok'];
 
 /** "0.14 · 1 · 3 · 0.2%": média, p90, máximo e fração de partidas com 3 ou mais Ressurreições. */
 export function resurrectionsText(m: Metrics): string {
@@ -117,7 +117,6 @@ function metricRow(s: SeriesResult): Array<string | number> {
     pct(m.endReasons.EXODIA),
     pct(m.quads),
     resurrectionsText(m),
-    pct(m.endReasons.ANTI_STALL + m.endReasons.DRAW),
     pct(m.terminated),
     `${s.targets.filter((t) => t.ok).length}/${s.targets.length}`,
   ];

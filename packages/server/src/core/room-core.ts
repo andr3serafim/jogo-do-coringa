@@ -91,7 +91,7 @@ export class RoomCore {
       createdAt: now,
       status: 'LOBBY',
       seats: [seat],
-      score: { p1: 0, p2: 0, draws: 0 },
+      score: { p1: 0, p2: 0 },
       gameNo: 0,
       outcome: null,
       seq: 0,

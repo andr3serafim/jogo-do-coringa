@@ -37,7 +37,6 @@ const ROLLOUT_STEP_CAP = 400;
 function evaluate(final: GameState, seat: PlayerId): number {
   const phase = final.phase;
   if (phase.kind === 'GAME_OVER') {
-    if (phase.result.kind === 'DRAW') return 0;
     return phase.result.winner === seat ? GAME_VALUE : -GAME_VALUE;
   }
   const view = viewFor(final, seat);

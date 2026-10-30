@@ -128,7 +128,6 @@ function TutorialTable({ session, seedOf, store }: TutorialTableProps) {
         panel: (
           <HintPanel
             hint={current === 'end' ? null : current}
-            antiStallRounds={state?.view.config.antiStallRounds ?? 0}
             onGotIt={() => {
               if (state !== null) setFlow(acknowledgeHint(flow, state.view, state.events, state.epoch));
             }}

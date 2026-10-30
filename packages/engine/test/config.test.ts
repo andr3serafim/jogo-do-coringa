@@ -10,7 +10,6 @@ describe('config', () => {
       rowLimit: 8,
       buffLimit: 4,
       cardsPerEquip: 4,
-      antiStallRounds: 3,
       exodiaGuard: 4,
       resurrectMinRounds: 3,
       deck: { numericCopies: 8, faceCopies: 6, aceCopies: 8 },
@@ -19,9 +18,10 @@ describe('config', () => {
     });
   });
 
-  it('o anti-travamento padrão é 3, e a config o troca', () => {
-    expect(makeConfig().antiStallRounds).toBe(3);
-    expect(makeConfig({ antiStallRounds: 4 }).antiStallRounds).toBe(4);
+  it('o anti-travamento saiu (E1 do sub-projeto 5): a config não o tem, e uma config antiga com ele ainda vale', () => {
+    expect(DEFAULT_CONFIG).not.toHaveProperty('antiStallRounds');
+    // Replays guardados antes da regra nova trazem a chave: ela é ignorada, nunca recusada.
+    expect(validateConfig({ ...DEFAULT_CONFIG, antiStallRounds: 3 } as RulesConfig)).toBeNull();
   });
 
   it('mescla o baralho parcialmente', () => {

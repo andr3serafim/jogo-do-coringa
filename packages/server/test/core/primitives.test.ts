@@ -112,7 +112,7 @@ describe('epoch', () => {
     const order = setup({ phase: { kind: 'ORDER_CHOICE', player: 'p2' }, round: 2 });
     expect(JSON.parse(phaseKey(order))).toEqual([2, 'ORDER_CHOICE', 'p2', null]);
     const over = setup({ round: 7 });
-    over.phase = { kind: 'GAME_OVER', result: { kind: 'DRAW', reason: 'ANTI_STALL' } };
+    over.phase = { kind: 'GAME_OVER', result: { kind: 'WIN', winner: 'p1', reason: 'HP' } };
     expect(phaseKey(over)).toBe(JSON.stringify([7, 'GAME_OVER', null, null]));
   });
 });
@@ -190,7 +190,7 @@ describe('constantes', () => {
   it('valores da spec', () => {
     expect(TIMERS.turnMs).toBe(30_000);
     expect(TIMERS.hardExpiryMs).toBe(86_400_000);
-    expect(STATE_SCHEMA).toBe(2);
+    expect(STATE_SCHEMA).toBe(3);
     expect(ROOM_LIMITS.recentSteps).toBe(50);
   });
 });
@@ -222,7 +222,7 @@ function makeRecord(withGame: boolean, nSteps = 3, nRecent = 60): RoomRecord {
       { id: 'p1', nickname: 'Ana', tokenHash: 'h1', ready: true, wantsRematch: false, offlineSince: null },
       { id: 'p2', nickname: 'Beto', tokenHash: 'h2', ready: false, wantsRematch: false, offlineSince: 5 },
     ],
-    score: { p1: 0, p2: 0, draws: 0 },
+    score: { p1: 0, p2: 0 },
     gameNo: withGame ? 1 : 0,
     outcome: null,
     seq: 4,

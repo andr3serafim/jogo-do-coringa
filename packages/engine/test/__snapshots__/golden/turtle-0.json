@@ -3,30 +3,37 @@
   "result": {
     "kind": "WIN",
     "winner": "p1",
-    "reason": "ANTI_STALL"
+    "reason": "HP"
   },
-  "rounds": 11,
+  "rounds": 43,
   "finalHp": {
-    "p1": 270,
-    "p2": 257
+    "p1": 331,
+    "p2": -6
   },
   "events": {
-    "AttackDeclared": 10,
-    "BuffPlayed": 5,
-    "CardsDealt": 10,
-    "CardsPlaced": 12,
-    "CardsRemovedFromRow": 20,
-    "DamageDealt": 10,
-    "EquipSubmitted": 12,
+    "AbsoluteDefenseEnded": 2,
+    "AbsoluteDefenseStarted": 2,
+    "AttackDeclared": 42,
+    "BuffPlayed": 18,
+    "BuffRemoved": 2,
+    "CardsDealt": 42,
+    "CardsPlaced": 44,
+    "CardsRemovedFromRow": 80,
+    "DamageDealt": 42,
+    "DeckReshuffled": 2,
+    "EquipSubmitted": 44,
     "GameOver": 1,
-    "GuardBroken": 2,
-    "GuardPlayed": 3,
-    "InitiativeChanged": 1,
-    "OrderChosen": 5,
-    "ReactionWindowClosed": 13,
-    "ReactionWindowOpened": 13,
-    "RoundStarted": 10,
-    "TrapUsed": 3,
-    "TurnStarted": 10
+    "GuardBroken": 4,
+    "GuardPlayed": 9,
+    "InitiativeChanged": 2,
+    "OrderChosen": 21,
+    "QuadBroken": 1,
+    "QuadFormed": 1,
+    "ReactionWindowClosed": 51,
+    "ReactionWindowOpened": 51,
+    "RoundStarted": 42,
+    "Sacrificed": 1,
+    "TrapUsed": 18,
+    "TurnStarted": 42
   }
 }

@@ -36,7 +36,6 @@ const win = (winner: PlayerId, reason: Extract<GameResult, { kind: 'WIN' }>['rea
   winner,
   reason,
 });
-const DRAW: GameResult = { kind: 'DRAW', reason: 'ANTI_STALL' };
 
 interface MountOptions {
   me?: PlayerId;
@@ -82,7 +81,7 @@ function roomOf(options: MountOptions, extra: MountOptions = {}): RoomMessage {
     status,
     gameNo: o.gameNo ?? 1,
     seats: me === 'p1' ? [mine, theirs] : [theirs, mine],
-    score: o.score ?? { p1: 0, p2: 0, draws: 0 },
+    score: o.score ?? { p1: 0, p2: 0 },
   });
   if (status === 'FINISHED') {
     const outcome: Outcome = {
@@ -150,24 +149,6 @@ describe('fim de partida: o resultado e o motivo', () => {
     { name: 'Exódia, eu venci', options: { result: win('p1', 'EXODIA') }, title: 'Você venceu', reason: 'Você montou a Exódia' },
     { name: 'Exódia, Duda venceu', options: { result: win('p2', 'EXODIA') }, title: 'Duda venceu', reason: 'Duda montou a Exódia' },
     {
-      name: 'anti-travamento, eu venci',
-      options: { result: win('p1', 'ANTI_STALL') },
-      title: 'Você venceu',
-      reason: 'Anti-travamento: rodadas seguidas sem dano, e você terminou com mais vida',
-    },
-    {
-      name: 'anti-travamento, Duda venceu',
-      options: { result: win('p2', 'ANTI_STALL') },
-      title: 'Duda venceu',
-      reason: 'Anti-travamento: rodadas seguidas sem dano, e Duda terminou com mais vida',
-    },
-    {
-      name: 'empate por anti-travamento',
-      options: { result: DRAW },
-      title: 'Empate',
-      reason: 'Anti-travamento: rodadas seguidas sem dano e vidas iguais',
-    },
-    {
       name: 'Duda caiu e não voltou (RECONNECT_TIMEOUT)',
       options: { result: win('p1', 'FORFEIT'), cause: 'RECONNECT_TIMEOUT' },
       title: 'Você venceu',
@@ -224,14 +205,14 @@ describe('fim de partida: o resultado e o motivo', () => {
     expect(dialog).toHaveAccessibleDescription(reason);
   });
 
-  it('mostra o placar da sala do meu ponto de vista, com os empates', () => {
-    mount({ score: { p1: 2, p2: 1, draws: 1 } });
-    expect(within(endDialog('Você venceu')).getByText('André 2 × 1 Duda · 1 empate')).toBeInTheDocument();
+  it('mostra o placar da sala do meu ponto de vista (sem empates: o anti-travamento saiu)', () => {
+    mount({ score: { p1: 2, p2: 1 } });
+    expect(within(endDialog('Você venceu')).getByText('André 2 × 1 Duda')).toBeInTheDocument();
   });
 
   it('o placar do p2 vem invertido', () => {
-    mount({ me: 'p2', result: win('p2', 'HP'), score: { p1: 2, p2: 3, draws: 2 } });
-    expect(within(endDialog('Você venceu')).getByText('André 3 × 2 Duda · 2 empates')).toBeInTheDocument();
+    mount({ me: 'p2', result: win('p2', 'HP'), score: { p1: 2, p2: 3 } });
+    expect(within(endDialog('Você venceu')).getByText('André 3 × 2 Duda')).toBeInTheDocument();
   });
 
   it('os números do placar usam a fonte de texto com algarismos tabulares', () => {
@@ -437,7 +418,7 @@ describe('fim de partida: Ver a mesa e Nova sala', () => {
   describe('o `note` (o tutorial põe a dica do fim aqui)', () => {
     const panel: EndPanelProps = {
       outcome: { gameNo: 1, result: win('p1', 'HP'), cause: 'NORMAL' },
-      score: { p1: 1, p2: 0, draws: 0 },
+      score: { p1: 1, p2: 0 },
       me: 'p1',
       names: { self: 'André', opponent: 'Duda' },
       mineWants: false,
@@ -499,7 +480,7 @@ describe('fim de partida: Ver a mesa e Nova sala', () => {
   describe('"Rever a partida"', () => {
     const panel: EndPanelProps = {
       outcome: { gameNo: 1, result: win('p1', 'HP'), cause: 'NORMAL' },
-      score: { p1: 1, p2: 0, draws: 0 },
+      score: { p1: 1, p2: 0 },
       me: 'p1',
       names: { self: 'André', opponent: 'Duda' },
       mineWants: false,
@@ -1122,7 +1103,7 @@ describe('campo do oponente: os botões de ferramenta têm a sua área na grade'
 
 describe('acessibilidade', () => {
   it('axe: o painel de fim aberto não tem violações sérias', async () => {
-    const { container } = mount({ theirsWants: true, score: { p1: 1, p2: 0, draws: 1 } });
+    const { container } = mount({ theirsWants: true, score: { p1: 1, p2: 0 } });
     expect(await seriousViolations(container)).toEqual([]);
   });
 

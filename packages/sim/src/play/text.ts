@@ -95,12 +95,10 @@ export function actionText(action: Action, view: PlayerView): string {
 const REASON_TEXT: Record<Extract<GameResult, { kind: 'WIN' }>['reason'], string> = {
   HP: 'vida do oponente chegou a 0',
   EXODIA: 'Exódia',
-  ANTI_STALL: 'anti-travamento, com mais vida',
   FORFEIT: 'W.O.',
 };
 
 export function resultText(result: GameResult, names: Names): string {
-  if (result.kind === 'DRAW') return 'Fim de jogo: empate (anti-travamento, vidas iguais)';
   return `Fim de jogo: ${names.of(result.winner)} venceu (${REASON_TEXT[result.reason]})`;
 }
 

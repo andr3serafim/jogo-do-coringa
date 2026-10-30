@@ -143,7 +143,6 @@ export interface ViewSpec {
   /** Rodada (padrão 10). */
   round?: number;
   /** Rodadas seguidas sem dano (padrão 0). */
-  noDamageStreak?: number;
   /** `MAIN` (padrão): fase principal de `me`. `WAITING`: fase principal do oponente. Um gatilho abre a reação de `me`. */
   phase?: 'MAIN' | 'WAITING' | ReactionTrigger | Phase;
   self?: SideSpec;
@@ -209,7 +208,6 @@ export function scenarioAt(spec: ViewSpec = {}): { state: GameState; view: Playe
   };
 
   state.round = spec.round ?? 10;
-  state.noDamageStreak = spec.noDamageStreak ?? 0;
   state.roundKind = 'ATTACK';
   state.initiative = spec.initiative === 'opponent' ? other : me;
   state.turnOrder = spec.firstToAttack === 'opponent' ? [other, me] : [me, other];

@@ -206,7 +206,12 @@ describe('partidas com bots pelo núcleo', () => {
     expect(new Set(probes.map((p) => p.hiddenIn))).toEqual(new Set(['hand', 'pending', 'deck']));
   });
 
-  it('cada chave gravada fica < 100 KiB na maior partida', async () => {
+  // O teto por chave do storage SQLite do Durable Object é de 2 MB (chave e valor juntos, doc da Cloudflare, 2026-10-30); os
+  // 100 KiB de antes vinham do backend KV antigo (128 KiB). Sem o anti-travamento (E1 do sub-projeto 5) a partida não tem mais
+  // limite de rodadas e o log de passos cresce com ela: o teste fica na metade do teto de verdade, com folga para partidas longas.
+  const PART_BUDGET = 1024 * 1024;
+
+  it('cada chave gravada fica < 1 MiB (metade do teto da plataforma) na maior partida', async () => {
     const traces = [
       ...(await Promise.all(SEEDS.map(chaosMatch))),
       await match('tartaruga', { seed: 'prop-tartaruga', bots: ['turtle', 'turtle'] }),
@@ -214,9 +219,9 @@ describe('partidas com bots pelo núcleo', () => {
     const biggest = Math.max(...traces.map((t) => t.maxPartBytes));
     console.log(`maior parte gravada: ${biggest} bytes`);
     expect(biggest).toBeGreaterThan(0);
-    expect(biggest).toBeLessThan(100 * 1024);
+    expect(biggest).toBeLessThan(PART_BUDGET);
     // A parte que mais cresce é o log de passos; os outros três são limitados por construção.
-    for (const trace of traces) expect(trace.maxPartBytes).toBeLessThan(100 * 1024);
+    for (const trace of traces) expect(trace.maxPartBytes).toBeLessThan(PART_BUDGET);
   });
 
   it('linhas gravadas por partida (estimativa da spec §9.4)', async () => {

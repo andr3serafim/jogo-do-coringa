@@ -2,30 +2,31 @@
   "name": "sem-escolha",
   "result": {
     "kind": "WIN",
-    "winner": "p1",
+    "winner": "p2",
     "reason": "HP"
   },
-  "rounds": 19,
+  "rounds": 15,
   "finalHp": {
-    "p1": 196,
-    "p2": -22
+    "p1": -34,
+    "p2": 297
   },
   "events": {
-    "AttackDeclared": 17,
-    "BuffPlayed": 10,
-    "CardsDealt": 18,
-    "CardsPlaced": 20,
-    "CardsRemovedFromRow": 31,
-    "DamageDealt": 17,
-    "EquipSubmitted": 20,
+    "AttackDeclared": 13,
+    "BuffPlayed": 7,
+    "CardsDealt": 14,
+    "CardsPlaced": 16,
+    "CardsRemovedFromRow": 23,
+    "DamageDealt": 13,
+    "EquipSubmitted": 16,
     "GameOver": 1,
-    "GuardBroken": 2,
+    "GuardBroken": 1,
     "GuardPlayed": 4,
-    "InitiativeChanged": 3,
-    "ReactionWindowClosed": 21,
-    "ReactionWindowOpened": 21,
-    "RoundStarted": 18,
-    "TrapUsed": 7,
-    "TurnStarted": 17
+    "InitiativeChanged": 2,
+    "ReactionWindowClosed": 17,
+    "ReactionWindowOpened": 17,
+    "RoundStarted": 14,
+    "Sacrificed": 1,
+    "TrapUsed": 6,
+    "TurnStarted": 13
   }
 }

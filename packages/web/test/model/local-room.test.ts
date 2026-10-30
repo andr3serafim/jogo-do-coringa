@@ -190,7 +190,7 @@ describe('LocalRoom', () => {
       t: 'room',
       status: 'PLAYING',
       gameNo: 1,
-      score: { p1: 0, p2: 0, draws: 0 },
+      score: { p1: 0, p2: 0 },
       seats: [
         { playerId: 'p1', nickname: 'Você', connected: true, ready: false, wantsRematch: false },
         { playerId: 'p2', nickname: 'Bot', connected: true, ready: false, wantsRematch: false },
@@ -216,10 +216,9 @@ describe('LocalRoom', () => {
     const last = room.room!;
     expect(last.status).toBe('FINISHED');
     expect(last.outcome).toMatchObject({ gameNo: 1, cause: 'NORMAL' });
-    expect(last.score.p1 + last.score.p2 + last.score.draws).toBe(1);
+    expect(last.score.p1 + last.score.p2).toBe(1);
     const result = last.outcome!.result!;
-    if (result.kind === 'WIN') expect(last.score[result.winner as 'p1' | 'p2']).toBe(1);
-    else expect(last.score.draws).toBe(1);
+    expect(last.score[result.winner as 'p1' | 'p2']).toBe(1);
   });
 
   it('a mesma semente dá a mesma sequência de seq e de eventos', async () => {
@@ -333,7 +332,7 @@ describe('LocalRoom', () => {
     const ack = await room.concede();
     expect(ack).toMatchObject({ ok: true });
     const last = room.room!;
-    expect(last).toMatchObject({ status: 'FINISHED', score: { p1: 0, p2: 1, draws: 0 } });
+    expect(last).toMatchObject({ status: 'FINISHED', score: { p1: 0, p2: 1 } });
     expect(last.outcome).toEqual({
       gameNo: 1,
       result: { kind: 'WIN', winner: 'p2', reason: 'FORFEIT' },
@@ -356,7 +355,7 @@ describe('LocalRoom', () => {
     const seqBefore = room.state!.seq;
     const epochBefore = room.state!.epoch;
     room.rematch(true);
-    expect(room.room).toMatchObject({ status: 'PLAYING', gameNo: 2, score: { p1: 0, p2: 1, draws: 0 } });
+    expect(room.room).toMatchObject({ status: 'PLAYING', gameNo: 2, score: { p1: 0, p2: 1 } });
     expect(room.room!.outcome).toBeUndefined();
     expect(room.state!.seq).toBe(seqBefore + 1);
     expect(room.state!.epoch).toBe(epochBefore + 1);

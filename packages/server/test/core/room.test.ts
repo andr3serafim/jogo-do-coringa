@@ -33,7 +33,7 @@ describe('sala: criar', () => {
       gameNo: 0,
       seq: 0,
       epoch: 0,
-      score: { p1: 0, p2: 0, draws: 0 },
+      score: { p1: 0, p2: 0 },
     });
     expect(rec.seats).toEqual([
       {
@@ -230,7 +230,7 @@ describe('roomMessage', () => {
       { id: 'p1', nickname: 'Ana', tokenHash: 'h1', ready: true, wantsRematch: false, offlineSince: null },
       { id: 'p2', nickname: 'Bia', tokenHash: 'h2', ready: false, wantsRematch: true, offlineSince: 5_000 },
     ],
-    score: { p1: 1, p2: 2, draws: 3 },
+    score: { p1: 1, p2: 2 },
     gameNo: 4,
     outcome: null,
     seq: 0,
@@ -256,7 +256,7 @@ describe('roomMessage', () => {
         { playerId: 'p1', nickname: 'Ana', connected: true, ready: true, wantsRematch: false },
         { playerId: 'p2', nickname: 'Bia', connected: false, ready: false, wantsRematch: true },
       ],
-      score: { p1: 1, p2: 2, draws: 3 },
+      score: { p1: 1, p2: 2 },
       gameNo: 4,
       expiresAt: 100 + TIMERS.hardExpiryMs,
       // A sala de antes do sub-projeto 5 não guardou a vida inicial: vale a padrão do motor.
@@ -285,7 +285,7 @@ describe('roomMessage', () => {
     const message = roomMessage(rec, [], 0);
     rec.score.p1 += 1;
     rec.outcome.cause = 'CONCEDE';
-    expect(message.score).toEqual({ p1: 1, p2: 2, draws: 3 });
+    expect(message.score).toEqual({ p1: 1, p2: 2 });
     expect(message.outcome).toEqual({ gameNo: 4, result: null, cause: 'ABANDONED' });
   });
 

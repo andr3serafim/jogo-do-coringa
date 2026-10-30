@@ -464,6 +464,12 @@ A hibernação apaga a memória do objeto. Ao acordar (mensagem, fechamento, ala
   - turtle × turtle, a partida mais longa: 713 a 1273 linhas (117 a 211 passos);
   - ~**6 linhas por passo**, o dobro dos ~3 da estimativa acima;
   - maior parte gravada (`maxPartBytes`): 18 280 bytes, contra o limite de 100 KiB por valor; a parte que cresce é o log de passos.
+- **Sem o anti-travamento (E1 do sub-projeto 5, 2026-10-30)** a partida não tem mais limite de rodadas, e o log de passos e as
+  linhas gravadas crescem com ela. A maior parte medida pelo teste das propriedades passou a 103 KB (turtle × turtle). O teto de
+  verdade do storage SQLite do Durable Object é de **2 MB por chave e valor** (doc da Cloudflare, consultada em 2026-10-30;
+  os 128 KiB eram do backend KV antigo), e o teste agora exige < 1 MiB, a metade. A ~51 bytes por passo, 1 MiB são ~20 mil
+  passos, cem vezes uma partida típica; a sala expira em 24 h de qualquer jeito. Se partidas longas aparecerem no playtest,
+  o próximo passo é dividir o log de passos em várias chaves.
 - **A medida é um mínimo.** Ela roda no ritmo de bot (`thinkMs` 300 ms por jogada): ~1 varredura de presença por partida. No ritmo humano, cada varredura de 20 s grava mais **~5 linhas** (as quatro chaves e o `setAlarm` da próxima). Uma partida de 15 min soma ~45 varreduras, ~225 linhas: a típica vai de 388 para ~610.
 - Resultado no plano Free (100 mil linhas por dia): **~250 partidas por dia** na partida típica no ritmo de bot (388 linhas), **~160** na de 622 ou na típica de 15 min no ritmo humano (~610) e **~80** se todas fossem a turtle longa (1273). A faixa realista é de **80 a 250 partidas por dia**, ainda de sobra para um grupo de amigos. A casca de hoje (`room.ts`) regrava as quatro chaves em cada persistência, então a fórmula é o custo real; gravar só as chaves que mudaram seria uma otimização futura.
 - **A outra cota a observar** na primeira partida online é a de **duração: 13 000 GB-s por dia** no plano Free. Ela conta o tempo em que o objeto fica acordado (a hibernação dos WebSockets, §9.2, é o que a mantém baixa). Confira no painel depois da primeira partida publicada.

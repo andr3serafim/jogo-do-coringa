@@ -549,7 +549,7 @@ describe('/treino: sair, fim e revanche', () => {
 
     await user.click(within(end).getByRole('button', { name: 'Revanche' }));
     advance(5_000);
-    expect(room.room).toMatchObject({ status: 'PLAYING', gameNo: 2, score: { p1: 0, p2: 1, draws: 0 } });
+    expect(room.room).toMatchObject({ status: 'PLAYING', gameNo: 2, score: { p1: 0, p2: 1 } });
     expect(screen.queryByRole('dialog', { name: 'Bot venceu' })).not.toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Equipar' })).toBeInTheDocument();
     // Outra semente (`<semente>-2`): outra partida.
@@ -731,7 +731,7 @@ describe('/treino: a partida terminada vai para a lista', () => {
       seat: 'p1',
       names: { me: 'Você', opponent: 'Bot' },
       outcome: { gameNo: 1, result: { kind: 'WIN', winner: 'p2', reason: 'FORFEIT' }, cause: 'CONCEDE' },
-      score: { p1: 0, p2: 1, draws: 0 },
+      score: { p1: 0, p2: 1 },
       rulesVersion: RULES_VERSION,
       replay: { name: 'treino-t1', seed: 't1', players: ['p1', 'p2'] },
     });
@@ -791,7 +791,7 @@ describe('/treino: a partida terminada vai para a lista', () => {
     const rows = saved();
     expect(rows.map((row) => row.outcome.gameNo)).toEqual([2, 1]);
     expect(rows.map((row) => row.replay?.seed)).toEqual(['t1-2', 't1']);
-    expect(rows[0]!.score).toEqual({ p1: 0, p2: 2, draws: 0 });
+    expect(rows[0]!.score).toEqual({ p1: 0, p2: 2 });
   });
 });
 

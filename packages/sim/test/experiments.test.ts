@@ -131,10 +131,9 @@ describe('determinize não vaza a informação oculta', () => {
 });
 
 describe('outcome', () => {
-  it('score: vitória 1, empate 0,5, derrota ou sem fim 0', () => {
+  it('score: vitória 1, derrota ou sem fim 0', () => {
     expect(score({ kind: 'WIN', winner: 'p1', reason: 'HP' }, 'p1')).toBe(1);
     expect(score({ kind: 'WIN', winner: 'p2', reason: 'HP' }, 'p1')).toBe(0);
-    expect(score({ kind: 'DRAW', reason: 'ANTI_STALL' }, 'p1')).toBe(0.5);
     expect(score(null, 'p1')).toBe(0);
   });
 

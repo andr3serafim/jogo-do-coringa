@@ -13,9 +13,9 @@ const RULES_DIGESTS: Record<number, string> = {
   1: '0b68077c4621f6317248faef9affbfddc981e71de6fb82bc8c35217efdf84a3a',
   // 2: a Pressão da mesa saiu (sub-projeto 5); o anti-travamento padrão passou de 5 para 3 rodadas.
   2: 'f2201819fc174dc3241fe7b4f0256ca507a485568870bd815987ba64f90367f7',
-  // 3 (E1 do sub-projeto 5): a Defesa Absoluta dura até o oponente atacar. Nenhuma partida de referência tinha uma que acabasse
-  // sem ataque, então o digest ainda é o da 2; a versão sobe porque um replay guardado pode divergir.
-  3: 'f2201819fc174dc3241fe7b4f0256ca507a485568870bd815987ba64f90367f7',
+  // 3 (E1 do sub-projeto 5): sem anti-travamento (nem empate), a Defesa Absoluta dura até o oponente atacar, e as partidas de
+  // referência passaram à config atual (vida 500, fileiras de 8, 8 Ás).
+  3: '4507a11fa8301154c5b9ea32ac3acb50ff486c79066c0f50438755487207df9e',
 };
 
 const GOLDEN_DIR = new URL('./__snapshots__/golden/', import.meta.url);

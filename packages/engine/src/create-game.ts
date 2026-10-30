@@ -53,8 +53,6 @@ export function createGame(config: RulesConfig, seed: string, players: [PlayerId
     initiative,
     turnOrder: [a, b],
     turnIndex: 0,
-    noDamageStreak: 0,
-    hpLostThisRound: false,
     phase: { kind: 'EQUIP' },
   };
   startRound(state, []);

@@ -40,8 +40,8 @@ describe('previewAttack: exemplos da spec 1 §1.13', () => {
     expect(p.breaks.defenderGuard).toBe(1);
   });
 
-  it('exemplo 6: só os J entram no multiplicador, mesmo depois de rodadas sem dano', () => {
-    expect(preview({ noDamageStreak: 2, p1: { attack: [4, 6], attackBuffs: ['J'] } }).attack).toBe(20);
+  it('exemplo 6: só os J entram no multiplicador', () => {
+    expect(preview({ p1: { attack: [4, 6], attackBuffs: ['J'] } }).attack).toBe(20);
   });
 });
 

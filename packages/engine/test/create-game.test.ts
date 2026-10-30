@@ -90,10 +90,11 @@ describe('início da rodada de Ataque', () => {
     expect(s.phase).toEqual({ kind: 'ATTACK_MAIN', player: P2 });
   });
 
-  it('a rodada de Ataque não mexe na sequência sem dano (o anti-travamento é que a conta)', () => {
-    const s = setup({ round: 4, roundKind: 'EQUIP', noDamageStreak: 2 });
+  it('o estado não conta rodadas sem dano nem guarda Pressão (os dois saíram no sub-projeto 5)', () => {
+    const s = setup({ round: 4, roundKind: 'EQUIP' });
     startRound(s, []);
-    expect(s.noDamageStreak).toBe(2);
+    expect(s).not.toHaveProperty('noDamageStreak');
+    expect(s).not.toHaveProperty('hpLostThisRound');
     expect(s).not.toHaveProperty('pressure');
   });
 

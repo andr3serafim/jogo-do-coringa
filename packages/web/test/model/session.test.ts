@@ -69,7 +69,7 @@ const roomOf = (gameNo: number): RoomMessage => ({
   code: 'ABCD',
   status: 'PLAYING',
   seats: [seatOf('p1', 'André'), seatOf('p2', 'Duda')],
-  score: { p1: 0, p2: 0, draws: 0 },
+  score: { p1: 0, p2: 0 },
   gameNo,
   expiresAt: 0,
 });

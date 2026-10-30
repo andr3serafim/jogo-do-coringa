@@ -112,13 +112,12 @@ describe('easy', () => {
   });
 
   it('o greedy pontua pelo menos 65% contra ele em 200 partidas, alternando assentos', () => {
-    // Vitória vale 1, empate ½. Metade das partidas com o greedy de p1, metade de p2; mesma semente fixa.
+    // Vitória vale 1. Metade das partidas com o greedy de p1, metade de p2; mesma semente fixa.
     const asP1 = runSeries(config, ['greedy', 'easy'], 100, 'easy-nivel-a');
     const asP2 = runSeries(config, ['easy', 'greedy'], 100, 'easy-nivel-b');
     const points = (records: typeof asP1, greedySeat: PlayerId): number =>
       records.reduce((sum, r) => {
         if (r.result === null) throw new Error(`partida sem fim: ${r.seed}`);
-        if (r.result.kind === 'DRAW') return sum + 0.5;
         return sum + (r.result.winner === greedySeat ? 1 : 0);
       }, 0);
     const score = (points(asP1, 'p1') + points(asP2, 'p2')) / (asP1.length + asP2.length);

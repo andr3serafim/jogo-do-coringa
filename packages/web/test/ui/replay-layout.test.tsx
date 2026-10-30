@@ -54,7 +54,7 @@ const ENTRY: Entry = {
   names: { me: 'Ana', opponent: 'Duda' },
   outcome: { gameNo: 1, cause: 'NORMAL', result: { kind: 'WIN', winner: 'p1', reason: 'HP' } },
   rounds: 19,
-  score: { p1: 1, p2: 0, draws: 0 },
+  score: { p1: 1, p2: 0 },
   rulesVersion: RULES_VERSION,
   replay: REPLAY,
 };

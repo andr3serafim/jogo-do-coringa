@@ -2,36 +2,32 @@
   "name": "greedy-2",
   "result": {
     "kind": "WIN",
-    "winner": "p2",
+    "winner": "p1",
     "reason": "HP"
   },
-  "rounds": 25,
+  "rounds": 17,
   "finalHp": {
-    "p1": -74,
-    "p2": 194
+    "p1": 358,
+    "p2": -69
   },
   "events": {
-    "AttackDeclared": 24,
-    "BuffPlayed": 11,
-    "CardsDealt": 24,
-    "CardsPlaced": 26,
-    "CardsRemovedFromRow": 46,
-    "DamageDealt": 24,
-    "DeckReshuffled": 1,
-    "EquipSubmitted": 26,
+    "AttackDeclared": 15,
+    "BuffPlayed": 9,
+    "CardsDealt": 16,
+    "CardsPlaced": 18,
+    "CardsRemovedFromRow": 26,
+    "DamageDealt": 15,
+    "EquipSubmitted": 18,
     "GameOver": 1,
     "GuardBroken": 4,
-    "GuardPlayed": 5,
-    "InitiativeChanged": 3,
-    "OrderChosen": 12,
-    "QuadBroken": 2,
-    "QuadFormed": 2,
-    "ReactionWindowClosed": 29,
-    "ReactionWindowOpened": 29,
-    "Resurrected": 1,
-    "RoundStarted": 24,
-    "Sacrificed": 3,
-    "TrapUsed": 8,
-    "TurnStarted": 24
+    "GuardPlayed": 4,
+    "InitiativeChanged": 5,
+    "OrderChosen": 8,
+    "ReactionWindowClosed": 19,
+    "ReactionWindowOpened": 19,
+    "RoundStarted": 16,
+    "Sacrificed": 1,
+    "TrapUsed": 3,
+    "TurnStarted": 15
   }
 }

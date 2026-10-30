@@ -3,9 +3,8 @@
 // minificador os deixaria no pacote inicial (o `scripts/smoke.ts` confere que não vazam). Os textos que o código inicial
 // também usa (o título "Partidas anteriores", "Voltar à lista", "Revendo a partida") ficam no `copy.ts`.
 import type { PlayerId } from '@coringa/engine';
-import type { Outcome } from '@coringa/protocol';
 import { trainingLevelText } from './copy.ts';
-import type { PastGameMode } from './past-games.ts';
+import type { PastGameMode, StoredOutcome } from './past-games.ts';
 
 // --- A lista ---
 
@@ -22,8 +21,8 @@ export function pastGameDateText(ms: number): string {
   return `${two(date.getDate())}/${two(date.getMonth() + 1)}, ${two(date.getHours())}:${two(date.getMinutes())}`;
 }
 
-/** O resultado do ponto de vista de quem guardou a partida (`seat`). */
-export function pastGameResultText(outcome: Outcome, seat: PlayerId): string {
+/** O resultado do ponto de vista de quem guardou a partida (`seat`). O empate só vem das partidas guardadas até a versão 2 das regras. */
+export function pastGameResultText(outcome: StoredOutcome, seat: PlayerId): string {
   const { result } = outcome;
   if (result === null) return 'Sem resultado';
   if (result.kind === 'DRAW') return 'Empate';

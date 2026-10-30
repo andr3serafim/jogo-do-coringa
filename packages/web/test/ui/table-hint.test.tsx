@@ -37,12 +37,6 @@ const asPc = () =>
   vi.stubGlobal('matchMedia', (query: string) => ({ matches: query === PC_QUERY, addEventListener() {}, removeEventListener() {} }));
 
 describe('a dica na mesa: o contorno de cada zona', () => {
-  it('center: a faixa central', () => {
-    mount({ hint: { zone: 'center', panel } });
-    expect(outlined()).toEqual([screen.getByRole('region', { name: 'Situação da rodada' })]);
-    expect(outlined()[0]).toHaveAttribute('data-dica', 'center');
-  });
-
   it('rows: as duas fileiras suas, e nenhuma do oponente', () => {
     mount({ hint: { zone: 'rows', panel } });
     const [rows] = outlined();

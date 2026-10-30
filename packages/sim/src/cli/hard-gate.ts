@@ -26,12 +26,11 @@ const MAX_ROUNDS = 3;
 
 interface Tally {
   games: number;
-  /** Pontos do bot medido (vitória 1, empate ½) sobre as partidas. */
+  /** Pontos do bot medido (vitória 1) sobre as partidas. */
   rate: number;
   /** Erro-padrão da taxa, sqrt(p(1−p)/n). */
   se: number;
   wins: number;
-  draws: number;
   losses: number;
   unfinished: number;
   withInitiative: { games: number; rate: number };
@@ -160,7 +159,6 @@ function measure(subject: SeatBot, opponent: SeatBot, label: string, times?: Dec
     rate,
     se: Math.sqrt((rate * (1 - rate)) / outcomes.length),
     wins: outcomes.filter((o) => o.ended && o.points === 1).length,
-    draws: outcomes.filter((o) => o.ended && o.points === 0.5).length,
     losses: outcomes.filter((o) => o.ended && o.points === 0).length,
     unfinished: outcomes.filter((o) => !o.ended).length,
     withInitiative: { games: withI.length, rate: rateOf(withI) },
@@ -214,7 +212,7 @@ const horizonText = (h: HardOptions['horizon']): string =>
     .join(', ');
 
 function tallyLine(name: string, t: Tally): string {
-  return `${name}: vitórias/empates/derrotas/sem fim ${t.wins}/${t.draws}/${t.losses}/${t.unfinished}; com a iniciativa ${pct(t.withInitiative.rate)} (${t.withInitiative.games} partidas), sem ela ${pct(t.withoutInitiative.rate)} (${t.withoutInitiative.games}).`;
+  return `${name}: vitórias/derrotas/sem fim ${t.wins}/${t.losses}/${t.unfinished}; com a iniciativa ${pct(t.withInitiative.rate)} (${t.withInitiative.games} partidas), sem ela ${pct(t.withoutInitiative.rate)} (${t.withoutInitiative.games}).`;
 }
 
 /** O que a lista de rodadas diz sobre os valores finais: a primeira rodada que aprova, o que veio antes e o que veio depois. */
@@ -269,7 +267,7 @@ function renderMarkdown(report: GateReport): string {
     `- Sementes: \`${report.seedPrefix}-0 … ${report.seedPrefix}-${report.seeds - 1}\` (${report.seeds} sementes), cada uma jogada duas vezes com os assentos trocados: ${2 * report.seeds} partidas por medida. O mesmo monte e a mesma iniciativa sorteada em cada par: o bot medido fica com a iniciativa em exatamente uma das duas.`,
     `- Bots da rodada ${n} (os \`HARD_DEFAULTS\` e o \`EASY_BLUNDER\` de então): Difícil \`${JSON.stringify(final.hard)}\`; Fácil erra com probabilidade \`${final.easyBlunder}\`.`,
     `- Máquina: ${report.machine}. O tempo por decisão depende dela.`,
-    '- Pontuação: vitória 1, empate ½, derrota ou partida sem fim 0. Erro-padrão (EP) da taxa: sqrt(p(1−p)/n), com as partidas tratadas como independentes; a margem diz a quantos EP a taxa está do limiar. O veredito usa só os limiares.',
+    '- Pontuação: vitória 1, derrota ou partida sem fim 0. Erro-padrão (EP) da taxa: sqrt(p(1−p)/n), com as partidas tratadas como independentes; a margem diz a quantos EP a taxa está do limiar. O veredito usa só os limiares.',
     '- Tempo por decisão: do Difícil, nas partidas de (a), só nas decisões com 2 ou mais ações legais (as de uma ação só são instantâneas e puxariam o p95 para baixo). Mede a ação inteira de um passo (visão, ações legais, busca, motor). Percentil pelo posto mais próximo. O limiar vale para todas as fases; a segunda linha da tabela mostra só as fases em que há busca, que são as que o jogador espera.',
     '',
     '## Resultado',

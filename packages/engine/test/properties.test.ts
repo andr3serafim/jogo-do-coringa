@@ -13,14 +13,25 @@ const arbConfig = fc.record({
 const arbChoices = fc.array(fc.nat(), { minLength: 1, maxLength: 64 });
 
 describe('propriedades do motor (spec §5)', () => {
-  it('partidas aleatórias terminam e respeitam conservação, vida e sigilo', () => {
+  // Sem o anti-travamento (E1 do sub-projeto 5) nada garante o fim: a partida em que ninguém ataca segue para sempre. A
+  // invariante "toda partida termina" virou "toda partida que para no teto é contada" (spec §5).
+  it('partidas aleatórias respeitam conservação, vida e sigilo; as que não acabam param no teto e são contadas', () => {
+    const cap = 5_000;
+    let ended = 0;
+    let capped = 0;
     fc.assert(
       fc.property(fc.string(), arbChoices, arbConfig, fc.integer({ min: 0, max: 9 }), (seed, choices, config, timeoutEvery) => {
-        const { state } = playout({ seed, choices, config, timeoutEvery, onStep: checkInvariants });
-        expect(state.phase.kind).toBe('GAME_OVER');
+        const { state, steps } = playout({ seed, choices, config, timeoutEvery, maxSteps: cap, onStep: checkInvariants });
+        if (state.phase.kind === 'GAME_OVER') ended += 1;
+        else {
+          expect(steps).toBe(cap);
+          capped += 1;
+        }
       }),
       { numRuns: 60 },
     );
+    expect(ended + capped).toBe(60);
+    expect(ended, `${capped} de 60 pararam no teto`).toBeGreaterThan(0);
   });
 
   it('determinismo: mesma semente e mesmas escolhas → mesmo estado final', () => {

@@ -30,9 +30,7 @@ function reach(name: string, chooser: Chooser, targets: GameEvent['type'][], con
 
 describe('playouts enviesados: caminhos raros sob as invariantes (spec §5)', () => {
   it('Exódia acontece e respeita as invariantes', () => {
-    // Com as fileiras de 8 e todo mundo na Defesa, ninguém toma dano e o anti-travamento (3 rodadas) acabaria antes de os K se
-    // juntarem: aqui ele espera mais, para o caminho da Exódia ser exercitado.
-    expect(reach('exodia', exodiaProfile, ['Exodia'], { antiStallRounds: 12 }).Exodia).toBeGreaterThan(0);
+    expect(reach('exodia', exodiaProfile, ['Exodia']).Exodia).toBeGreaterThan(0);
   });
 
   it('Ataque Absoluto e Defesa Absoluta acontecem e expiram', () => {

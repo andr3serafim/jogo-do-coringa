@@ -385,14 +385,13 @@ export function durationText(ms: number): string {
   return hours > 0 ? `${hours}:${String(minutes).padStart(2, '0')}:${seconds}` : `${minutes}:${seconds}`;
 }
 
-/** O título do painel de fim termina em exclamação quando tem resultado ("Duda venceu!", "Empate!"); sem resultado, não. */
+/** O título do painel de fim termina em exclamação quando tem resultado ("Duda venceu!"); sem resultado, não. */
 export const resultShouts = (outcome: Outcome): boolean => outcome.result !== null;
 
-/** "Você venceu", "Duda venceu", "Empate" ou "Partida sem resultado". */
+/** "Você venceu", "Duda venceu" ou "Partida sem resultado". */
 export function resultTitle(outcome: Outcome, me: PlayerId, names: OutcomeNames): string {
   const { result } = outcome;
   if (result === null) return 'Partida sem resultado';
-  if (result.kind === 'DRAW') return 'Empate';
   return `${whoText(result.winner, me, names)} venceu`;
 }
 
@@ -403,7 +402,6 @@ export function resultTitle(outcome: Outcome, me: PlayerId, names: OutcomeNames)
 export function reasonText(outcome: Outcome, me: PlayerId, names: OutcomeNames): string {
   const { result, cause } = outcome;
   if (result === null) return 'Os dois saíram da sala';
-  if (result.kind === 'DRAW') return 'Anti-travamento: rodadas seguidas sem dano e vidas iguais';
   const won = result.winner === me;
   const loser = won ? names.opponent : 'Você';
   if (cause === 'RECONNECT_TIMEOUT') return `${loser} caiu e não voltou em 60 s`;
@@ -414,18 +412,15 @@ export function reasonText(outcome: Outcome, me: PlayerId, names: OutcomeNames):
       return won ? `A vida de ${names.opponent} chegou a 0` : 'Sua vida chegou a 0';
     case 'EXODIA':
       return `${won ? 'Você' : names.opponent} montou a Exódia`;
-    case 'ANTI_STALL':
-      return `Anti-travamento: rodadas seguidas sem dano, e ${won ? 'você' : names.opponent} terminou com mais vida`;
     case 'FORFEIT':
       return `${loser} perdeu por W.O.`;
   }
 }
 
-/** "André 1 × 0 Duda · 2 empates": o placar da sala do ponto de vista de quem olha. */
+/** "André 1 × 0 Duda": o placar da sala do ponto de vista de quem olha. */
 export function scoreText(score: Score, me: PlayerId, names: OutcomeNames): string {
   const [mine, theirs] = me === 'p1' ? [score.p1, score.p2] : [score.p2, score.p1];
-  const draws = score.draws > 0 ? ` · ${score.draws} ${score.draws === 1 ? 'empate' : 'empates'}` : '';
-  return `${names.self} ${mine} × ${theirs} ${names.opponent}${draws}`;
+  return `${names.self} ${mine} × ${theirs} ${names.opponent}`;
 }
 
 /** O estado da revanche sob o botão; `null` quando nenhum dos dois pediu e o oponente está na sala. */
@@ -567,7 +562,7 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
     title: 'Fim da partida',
     items: [
       'Vida em 0 perde na hora.',
-      'Anti-travamento: 3 rodadas de Ataque seguidas sem ninguém perder vida encerram a partida. Dano absorvido por K não conta como dano. Vence quem tiver mais vida; com vidas iguais, empata.',
+      'Não há limite de rodadas: a partida só acaba pela vida, pela Exódia ou por W.O.',
       'W.O.: perde quem fica mais de 1 minuto fora da sala ou estoura o tempo três vezes seguidas.',
     ],
   },

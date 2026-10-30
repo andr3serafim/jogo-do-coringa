@@ -36,13 +36,6 @@ export const resurrectionsText = (count: number): string =>
 export const resurrectDetailText = (count: number, numerics: number): string =>
   `${count} ${plural(count, 'Ressurreição da quadra', 'Ressurreições das quadras')} · ${numerics} ${plural(numerics, 'numérica', 'numéricas')} no cemitério`;
 
-/** "Rodadas sem dano: 1 de 3", o nome do contador do anti-travamento na faixa central. */
-export const streakLabel = (count: number, limit: number): string => `Rodadas sem dano: ${count} de ${limit}`;
-
-/** Faltando 2 rodadas ou menos para o anti-travamento (spec §3.1). */
-export const stallWarning = (remaining: number): string =>
-  `${plural(remaining, 'falta', 'faltam')} ${remaining} ${plural(remaining, 'rodada', 'rodadas')} sem dano para o fim por anti-travamento`;
-
 /** De quem é a vez, na faixa central (o tipo da rodada vem na frente). */
 export function turnText(view: PlayerView, names: TableNames): string {
   const kind = view.roundKind === 'EQUIP' ? 'Equipar' : 'Ataque';

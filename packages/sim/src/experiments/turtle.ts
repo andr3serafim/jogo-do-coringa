@@ -13,11 +13,11 @@ export interface TurtleOptions {
 }
 
 export interface TurtleBranchResult {
-  /** Pontos do líder (vitória 1, empate 0,5) com ele jogando de turtle. */
+  /** Pontos do líder (vitória 1) com ele jogando de turtle. */
   turtle: number;
   /** Pontos do líder com ele seguindo greedy. */
   greedy: number;
-  /** Como o turtle-líder terminou: HP, EXODIA, ANTI_STALL, DRAW, LOSS, UNFINISHED. */
+  /** Como o turtle-líder terminou: HP, EXODIA, FORFEIT, LOSS, UNFINISHED. */
   turtleEnds: Record<string, number>;
 }
 
@@ -51,7 +51,6 @@ export function findLead(config: RulesConfig, seed: string, lead: number): { sta
 
 function endOf(result: GameResult | null, leader: PlayerId): string {
   if (!result) return 'UNFINISHED';
-  if (result.kind === 'DRAW') return 'DRAW';
   return result.winner === leader ? result.reason : 'LOSS';
 }
 

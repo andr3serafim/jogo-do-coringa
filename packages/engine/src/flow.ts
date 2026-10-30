@@ -1,6 +1,6 @@
 import { pruneResurrections } from './quads.ts';
-import { draw, finishGame, getPlayer, opponentOf, toGraveyard } from './state.ts';
-import type { Card, GameEvent, GameResult, GameState, PlayerId, PlayerState, ReactionTrigger } from './types.ts';
+import { draw, getPlayer, opponentOf, toGraveyard } from './state.ts';
+import type { Card, GameEvent, GameState, PlayerId, PlayerState, ReactionTrigger } from './types.ts';
 
 /** Ciclo da spec §1.3: Equipar, Equipar, Ataque, Equipar, Ataque, … */
 export function startRound(s: GameState, ev: GameEvent[]): void {
@@ -35,7 +35,6 @@ function startEquipRound(s: GameState, ev: GameEvent[]): void {
 }
 
 function startAttackRound(s: GameState, ev: GameEvent[]): void {
-  s.hpLostThisRound = false;
   for (const p of s.players) p.damageThisRound = 0;
   if (s.config.initiativeChoice) {
     s.phase = { kind: 'ORDER_CHOICE', player: s.initiative };
@@ -89,22 +88,13 @@ function expireEffects(s: GameState, owner: PlayerState, attacked: boolean, ev: 
   }
 }
 
-/** Iniciativa (spec §1.10), sequência sem dano e anti-travamento (spec §1.11). */
+/** Iniciativa (spec §1.10). Sem anti-travamento (E1 do sub-projeto 5): a rodada nunca encerra a partida. */
 function endAttackRound(s: GameState, ev: GameEvent[]): void {
   const [a, b] = s.players;
   const leader = a.damageThisRound > b.damageThisRound ? a : b.damageThisRound > a.damageThisRound ? b : null;
   if (leader && leader.id !== s.initiative) {
     s.initiative = leader.id;
     ev.push({ type: 'InitiativeChanged', player: leader.id });
-  }
-  s.noDamageStreak = s.hpLostThisRound ? 0 : s.noDamageStreak + 1;
-  if (s.noDamageStreak >= s.config.antiStallRounds) {
-    const result: GameResult =
-      a.hp === b.hp
-        ? { kind: 'DRAW', reason: 'ANTI_STALL' }
-        : { kind: 'WIN', winner: a.hp > b.hp ? a.id : b.id, reason: 'ANTI_STALL' };
-    finishGame(s, result, ev);
-    return;
   }
   startRound(s, ev);
 }

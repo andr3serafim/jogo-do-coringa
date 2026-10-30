@@ -35,7 +35,6 @@ export interface RulesConfig {
   /** Limite de J (e de Q). Atingi-lo ativa Ataque/Defesa Absoluta. */
   buffLimit: number;
   cardsPerEquip: number;
-  antiStallRounds: number;
   exodiaGuard: number;
   resurrectMinRounds: number;
   /**
@@ -97,9 +96,8 @@ export interface PlayerState {
 
 export type ReactionTrigger = 'ATTACK' | 'K_PLAYED' | 'REFLECT_PLAYED';
 
-export type GameResult =
-  | { kind: 'WIN'; winner: PlayerId; reason: 'HP' | 'EXODIA' | 'ANTI_STALL' | 'FORFEIT' }
-  | { kind: 'DRAW'; reason: 'ANTI_STALL' };
+/** Sem anti-travamento (E1 do sub-projeto 5) não há empate: a partida acaba por vida, Exódia ou W.O. */
+export type GameResult = { kind: 'WIN'; winner: PlayerId; reason: 'HP' | 'EXODIA' | 'FORFEIT' };
 
 export type Phase =
   | { kind: 'EQUIP' }
@@ -122,9 +120,6 @@ export interface GameState {
   initiative: PlayerId;
   turnOrder: [PlayerId, PlayerId];
   turnIndex: 0 | 1;
-  /** Rodadas de Ataque seguidas sem ninguém perder vida (o anti-travamento, spec §1.11). */
-  noDamageStreak: number;
-  hpLostThisRound: boolean;
   phase: Phase;
 }
 
@@ -271,7 +266,6 @@ export interface PlayerView {
   initiative: PlayerId;
   turnOrder: [PlayerId, PlayerId];
   turnIndex: 0 | 1;
-  noDamageStreak: number;
   phase: Phase;
   deckCount: number;
   graveyard: Card[];

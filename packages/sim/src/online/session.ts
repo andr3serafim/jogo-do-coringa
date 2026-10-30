@@ -172,7 +172,7 @@ export function playOnline({ io, connection, names }: PlayOnlineOptions): Promis
         [
           result ? `\n${resultText(result, names)}` : '\nPartida sem resultado.',
           cause,
-          `Placar: você ${room.score[me]} × ${room.score[me === 'p1' ? 'p2' : 'p1']} oponente · empates ${room.score.draws}`,
+          `Placar: você ${room.score[me]} × ${room.score[me === 'p1' ? 'p2' : 'p1']} oponente`,
         ]
           .filter(Boolean)
           .join('\n'),

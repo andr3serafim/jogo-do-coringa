@@ -237,7 +237,7 @@ describe('RoomClient: mensagens do servidor', () => {
     const { client, events, last } = connected();
     last().serverSend({ t: 'welcome', protocol: 1, playerId: 'p2', serverNow: 1_000_000 });
     expect(client.playerId).toBe('p2');
-    const room = { t: 'room', code: 'ABC234', status: 'LOBBY', seats: [], score: { p1: 0, p2: 0, draws: 0 }, gameNo: 0, expiresAt: 1 };
+    const room = { t: 'room', code: 'ABC234', status: 'LOBBY', seats: [], score: { p1: 0, p2: 0 }, gameNo: 0, expiresAt: 1 };
     last().serverSend(room);
     expect(client.room).toEqual(room);
     const error = { t: 'error', code: 'WRONG_STATUS', message: 'x' };
@@ -267,7 +267,7 @@ describe('RoomClient: mensagens do servidor', () => {
   it('o replay não mexe no room nem no state guardados', () => {
     const { client, last } = connected();
     last().serverSend({ t: 'welcome', protocol: 1, playerId: 'p2', serverNow: 1_000_000 });
-    const room = { t: 'room', code: 'ABC234', status: 'FINISHED', seats: [], score: { p1: 1, p2: 0, draws: 0 }, gameNo: 1, expiresAt: 1 };
+    const room = { t: 'room', code: 'ABC234', status: 'FINISHED', seats: [], score: { p1: 1, p2: 0 }, gameNo: 1, expiresAt: 1 };
     last().serverSend(room);
     last().serverSend(stateMsg(9));
     last().serverSend({ t: 'replay', gameNo: 1, replay: { name: 'p', seed: 's', players: ['p1', 'p2'], steps: [] } });

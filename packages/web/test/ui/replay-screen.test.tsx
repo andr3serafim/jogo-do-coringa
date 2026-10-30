@@ -62,7 +62,7 @@ const entry = (extra: Partial<Entry> = {}): Entry => ({
   names: { me: 'Ana', opponent: 'Duda' },
   outcome: { gameNo: 1, cause: 'NORMAL', result: FINAL },
   rounds: 19,
-  score: { p1: 1, p2: 0, draws: 0 },
+  score: { p1: 1, p2: 0 },
   rulesVersion: RULES_VERSION,
   replay: REPLAY,
   ...extra,

@@ -26,7 +26,7 @@ export const roomMessage = (extra: Partial<RoomMessage> = {}): RoomMessage => ({
   code: CODE,
   status: 'LOBBY',
   seats: [],
-  score: { p1: 0, p2: 0, draws: 0 },
+  score: { p1: 0, p2: 0 },
   gameNo: 1,
   expiresAt: 0,
   ...extra,

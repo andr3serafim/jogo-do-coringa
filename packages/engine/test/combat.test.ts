@@ -18,7 +18,7 @@ describe('valores de ATK e DEF', () => {
   });
 
   it('J multiplica o ataque de forma linear, e nada mais entra no multiplicador (a Pressão da mesa saiu no sub-projeto 5)', () => {
-    const s = setup({ noDamageStreak: 2, p1: { attack: [4, 6], attackBuffs: ['J'] } });
+    const s = setup({ p1: { attack: [4, 6], attackBuffs: ['J'] } });
     expect(attackValue(player(s, P1))).toBe(20);
   });
 
@@ -39,7 +39,6 @@ describe('resolveAttack', () => {
     expect(values(player(s, P2).defenseRow)).toEqual([8]);
     expect(graveSummary(s)).toEqual([3, 5]);
     expect(player(s, P1).damageThisRound).toBe(25);
-    expect(s.hpLostThisRound).toBe(true);
   });
 
   it('defesa maior que o ataque: dano 0, mas as cartas saem', () => {
@@ -48,7 +47,6 @@ describe('resolveAttack', () => {
     expect(player(s, P2).hp).toBe(100);
     expect(player(s, P1).attackRow).toHaveLength(0);
     expect(player(s, P2).defenseRow).toHaveLength(0);
-    expect(s.hpLostThisRound).toBe(false);
   });
 
   it('K absorve todo o dano de um ataque e quebra (exemplo 2)', () => {
@@ -59,7 +57,6 @@ describe('resolveAttack', () => {
     expect(ev).toContainEqual(expect.objectContaining({ type: 'GuardBroken', player: P2 }));
     expect(ev).toContainEqual(expect.objectContaining({ type: 'DamageDealt', damage: 0 }));
     expect(graveSummary(s)).toEqual(['K', 10, 10]);
-    expect(s.hpLostThisRound).toBe(false);
   });
 
   it('com a Defesa vazia o dano entra cheio e nada sai dela', () => {

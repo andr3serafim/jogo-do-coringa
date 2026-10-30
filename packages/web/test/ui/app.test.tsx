@@ -93,7 +93,7 @@ describe('<App />: rotas', () => {
           names: { me: 'Ana', opponent: name },
           outcome: { gameNo: 1, cause: 'NORMAL', result: { kind: 'WIN', winner: 'p1', reason: 'HP' } },
           rounds: 9,
-          score: { p1: 1, p2: 0, draws: 0 },
+          score: { p1: 1, p2: 0 },
           rulesVersion: RULES_VERSION,
           replay,
         },

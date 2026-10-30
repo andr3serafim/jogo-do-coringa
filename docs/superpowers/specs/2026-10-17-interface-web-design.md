@@ -195,7 +195,7 @@ A mesa está em §3 e §4. O menu da partida tem:
     diálogo segue "Você venceu";
   - a duração da partida ("Duração 12:34"), do `outcome.durationMs` que o servidor e o treino mandam (sem ele, a linha não aparece);
   - o motivo:
-    - pelo motor: vida zerada, Exódia ou anti-travamento;
+    - pelo motor: vida zerada ou Exódia (o anti-travamento saiu na E1 do sub-projeto 5; as partidas guardadas com ele ainda aparecem na lista, com "Empate" quando for o caso);
     - pelo `outcome.cause` do servidor: caiu e não voltou em 60 s, três tempos estourados, desistência ou os dois saíram;
   - o placar da sala.
 - Botões:
@@ -257,7 +257,7 @@ A mesa está em §3 e §4. O menu da partida tem:
 - **Faixa central:**
   - rodada e tipo (Equipar ou Ataque);
   - de quem é a vez e o relógio;
-  - as rodadas sem dano, "Sem dano N de 3" (a contagem do anti-travamento; a Pressão da mesa, que ficava aqui, saiu no sub-projeto 5). Faltando 2 ou menos para o anti-travamento, aparece "faltam N rodadas sem dano para o fim por anti-travamento";
+  - ~~as rodadas sem dano, "Sem dano N de 3", e o aviso do anti-travamento~~: saíram com a regra na E1 do sub-projeto 5 (a Pressão da mesa, que também ficava aqui, já tinha saído). No celular, a iniciativa forma sozinha a segunda linha da faixa;
   - iniciativa, com a ordem escolhida na rodada;
   - monte (quantidade);
   - cemitério: a carta de cima e a quantidade. Um toque abre a lista inteira, que é pública.
@@ -733,7 +733,7 @@ O autor escolheu a direção A entre os três rascunhos (celular e PC) do artifa
   - tinta preta de xilogravura;
   - um vermelho de segunda cor, como na impressão a duas cores.
 - **Composição:**
-  - a faixa central preta concentra o que é dos dois: rodada, de quem é a vez, relógio, rodadas sem dano, iniciativa, monte e cemitério;
+  - a faixa central preta concentra o que é dos dois: rodada, de quem é a vez, relógio, iniciativa, monte e cemitério;
   - as duas fileiras de Ataque ficam frente a frente junto da faixa [A]. É ali que o "fileira contra fileira" fica legível, e a prévia do dano mora na faixa ou na barra de ação.
 - **Cartas:** face em papel, borda preta grossa e irregular de carimbo, valor em tipo de madeira e naipe em SVG próprio.
 - **Detalhes:**

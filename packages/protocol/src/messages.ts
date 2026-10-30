@@ -30,7 +30,6 @@ export interface SeatInfo {
 export interface Score {
   p1: number;
   p2: number;
-  draws: number;
 }
 
 export type DeadlineKind = 'EQUIP' | 'ORDER' | 'TURN' | 'REACTION';

@@ -1,4 +1,4 @@
-// O painel da dica sozinho (plano da fatia 4, tarefa 4): texto por dica, a dica 9 em duas frases com o número da partida, os botões,
+// O painel da dica sozinho (plano da fatia 4, tarefa 4): texto por dica (a do anti-travamento saiu na E1 do sub-projeto 5), os botões,
 // a região viva sempre montada (e vazia no primeiro desenho), a dica nova à vista e o foco que não cai na página quando o painel
 // esvazia. A dica do fim mora no painel de fim (`EndHintNote`).
 import { render, screen, within } from '@testing-library/react';
@@ -11,12 +11,12 @@ import { EndHintNote, HintPanel, type HintPanelProps } from '../../src/ui/table/
 import { seriousViolations } from './support.tsx';
 
 /** As dicas que o painel mostra: a do fim vai dentro do painel de fim (`EndHintNote`), porque o diálogo modal deixa a página inerte. */
-const IDS: readonly Exclude<HintId, 'end'>[] = ['equip', 'quad', 'order', 'firstAttack', 'buffs', 'trap', 'wild', 'reflect', 'stall'];
+const IDS: readonly Exclude<HintId, 'end'>[] = ['equip', 'quad', 'order', 'firstAttack', 'buffs', 'trap', 'wild', 'reflect'];
 
 function mount(props: Partial<HintPanelProps> = {}) {
   const onGotIt = vi.fn();
   const onSkip = vi.fn();
-  const all: HintPanelProps = { hint: 'equip', antiStallRounds: 5, onGotIt, onSkip, ...props };
+  const all: HintPanelProps = { hint: 'equip', onGotIt, onSkip, ...props };
   const view = render(<HintPanel {...all} />);
   const rerender = (next: Partial<HintPanelProps>) => view.rerender(<HintPanel {...all} {...next} />);
   return { ...view, onGotIt, onSkip, rerender };
@@ -28,25 +28,10 @@ const noop = () => undefined;
 describe('<HintPanel />', () => {
   it.each(IDS)('a dica %s mostra o texto dela, com "Entendi" e "Pular o tutorial"', (id) => {
     mount({ hint: id });
-    for (const paragraph of hintParagraphs(id, 5)) expect(within(panel()).getByText(paragraph)).toBeInTheDocument();
+    for (const paragraph of hintParagraphs(id)) expect(within(panel()).getByText(paragraph)).toBeInTheDocument();
     expect(within(panel()).getByRole('button', { name: 'Entendi' })).toBeInTheDocument();
     expect(within(panel()).getByRole('button', { name: 'Pular o tutorial' })).toBeInTheDocument();
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
-  });
-
-  it('a dica 9 é o anti-travamento, com o número da partida (a Pressão da mesa saiu)', () => {
-    mount({ hint: 'stall', antiStallRounds: 7 });
-    const stall = screen.getByText(/^Anti-travamento:/);
-    expect(stall.tagName).toBe('P');
-    expect(screen.queryByText(/Pressão/)).not.toBeInTheDocument();
-    expect(stall).toHaveTextContent('Anti-travamento: 7 rodadas de Ataque seguidas sem ninguém perder vida encerram a partida.');
-  });
-
-  it('o número do anti-travamento acompanha a partida', () => {
-    const view = mount({ hint: 'stall', antiStallRounds: 3 });
-    expect(screen.getByText(/^Anti-travamento:/)).toHaveTextContent('Anti-travamento: 3 rodadas');
-    view.rerender({ antiStallRounds: 9 });
-    expect(screen.getByText(/^Anti-travamento:/)).toHaveTextContent('Anti-travamento: 9 rodadas');
   });
 
   it('"Entendi" e "Pular o tutorial" chamam o que lhes cabe', async () => {
@@ -73,7 +58,7 @@ describe('<HintPanel />', () => {
 
   it('a região viva monta vazia e a primeira dica entra depois do primeiro desenho (uma região criada já preenchida pode não ser lida)', () => {
     // Sem efeitos (o servidor): o primeiro desenho que o navegador veria. A região viva está lá, vazia, e sem botões.
-    const html = renderToString(<HintPanel hint="equip" antiStallRounds={5} onGotIt={noop} onSkip={noop} />);
+    const html = renderToString(<HintPanel hint="equip" onGotIt={noop} onSkip={noop} />);
     expect(html).toContain('aria-live="polite"');
     expect(html).not.toContain('Suas numéricas');
     expect(html).not.toContain('Entendi');
@@ -120,8 +105,8 @@ describe('<HintPanel />', () => {
       expect(spy.mock.contexts[0]).toBe(panel());
       // Instantânea, nunca suave, e só o que falta: o painel já à vista não mexe nos campos.
       expect(spy).toHaveBeenLastCalledWith({ block: 'nearest', behavior: 'auto' });
-      // Um desenho novo com a mesma dica (o número do anti-travamento mudou, por exemplo) não rola de novo.
-      view.rerender({ antiStallRounds: 9 });
+      // Um desenho novo com a mesma dica não rola de novo.
+      view.rerender({ hint: 'firstAttack' });
       expect(spy).toHaveBeenCalledOnce();
       view.rerender({ hint: 'buffs' });
       expect(spy).toHaveBeenCalledTimes(2);
@@ -140,14 +125,14 @@ describe('<HintPanel />', () => {
   it('esvaziar o painel com o foco nele leva o foco ao painel de baixo da mesa', () => {
     const view = render(
       <>
-        <HintPanel hint="equip" antiStallRounds={5} onGotIt={noop} onSkip={noop} />
+        <HintPanel hint="equip" onGotIt={noop} onSkip={noop} />
         <section data-painel tabIndex={-1} aria-label="Painel de baixo" />
       </>,
     );
     screen.getByRole('button', { name: 'Entendi' }).focus();
     view.rerender(
       <>
-        <HintPanel hint={null} antiStallRounds={5} onGotIt={noop} onSkip={noop} />
+        <HintPanel hint={null} onGotIt={noop} onSkip={noop} />
         <section data-painel tabIndex={-1} aria-label="Painel de baixo" />
       </>,
     );
@@ -158,7 +143,7 @@ describe('<HintPanel />', () => {
     const tree = (hint: HintPanelProps['hint']) => (
       <main aria-label="Mesa">
         <h1 tabIndex={-1}>Mesa da partida</h1>
-        <HintPanel hint={hint} antiStallRounds={5} onGotIt={noop} onSkip={noop} />
+        <HintPanel hint={hint} onGotIt={noop} onSkip={noop} />
       </main>
     );
     const view = render(tree('equip'));
@@ -171,7 +156,7 @@ describe('<HintPanel />', () => {
     const tree = (hint: HintPanelProps['hint']) => (
       <main aria-label="Mesa">
         <h1 tabIndex={-1}>Mesa da partida</h1>
-        <HintPanel hint={hint} antiStallRounds={5} onGotIt={noop} onSkip={noop} />
+        <HintPanel hint={hint} onGotIt={noop} onSkip={noop} />
         <section data-painel tabIndex={-1} aria-label="Painel de baixo" />
       </main>
     );
@@ -185,7 +170,7 @@ describe('<HintPanel />', () => {
     const view = render(
       <>
         <button type="button">outro</button>
-        <HintPanel hint="equip" antiStallRounds={5} onGotIt={noop} onSkip={noop} />
+        <HintPanel hint="equip" onGotIt={noop} onSkip={noop} />
         <section data-painel tabIndex={-1} aria-label="Painel de baixo" />
       </>,
     );
@@ -193,7 +178,7 @@ describe('<HintPanel />', () => {
     view.rerender(
       <>
         <button type="button">outro</button>
-        <HintPanel hint={null} antiStallRounds={5} onGotIt={noop} onSkip={noop} />
+        <HintPanel hint={null} onGotIt={noop} onSkip={noop} />
         <section data-painel tabIndex={-1} aria-label="Painel de baixo" />
       </>,
     );
@@ -203,7 +188,7 @@ describe('<HintPanel />', () => {
   it('o painel que sai inteiro com o foco nele ("Pular") também leva o foco ao painel de baixo', () => {
     const view = render(
       <>
-        <HintPanel hint="equip" antiStallRounds={5} onGotIt={noop} onSkip={noop} />
+        <HintPanel hint="equip" onGotIt={noop} onSkip={noop} />
         <section data-painel tabIndex={-1} aria-label="Painel de baixo" />
       </>,
     );
@@ -213,7 +198,7 @@ describe('<HintPanel />', () => {
   });
 
   it('axe: sem violações sérias, com e sem dica', async () => {
-    const { container, rerender } = mount({ hint: 'stall' });
+    const { container, rerender } = mount({ hint: 'reflect' });
     expect(await seriousViolations(container)).toEqual([]);
     rerender({ hint: null });
     expect(await seriousViolations(container)).toEqual([]);
@@ -225,7 +210,7 @@ describe('<EndHintNote />', () => {
     const user = userEvent.setup();
     render(<EndHintNote onShown={noop} />);
     const note = document.querySelector<HTMLElement>('[data-dica-nota]')!;
-    expect(note).toHaveTextContent(hintParagraphs('end', 5)[0]!);
+    expect(note).toHaveTextContent(hintParagraphs('end')[0]!);
     const link = within(note).getByRole('link', { name: 'Jogar com um amigo' });
     expect(link).toHaveAttribute('href', '/');
     expect(screen.queryByRole('button')).not.toBeInTheDocument();

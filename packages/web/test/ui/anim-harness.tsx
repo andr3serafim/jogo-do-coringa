@@ -99,7 +99,7 @@ export function connect(spec: ViewSpec, options: MountOptions = {}) {
   const room = roomMessage({
     status: 'PLAYING',
     seats: [seatOf('p1', 'André'), seatOf('p2', 'Duda')],
-    score: { p1: 0, p2: 0, draws: 0 },
+    score: { p1: 0, p2: 0 },
     ...options.room,
   });
   seq = 1;

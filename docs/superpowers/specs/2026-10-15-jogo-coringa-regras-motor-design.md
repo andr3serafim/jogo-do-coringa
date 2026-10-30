@@ -44,7 +44,7 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
 
 1. **Reflect × K (leitura do item 2):** quem ataca um Reflect ativo tem **todos os K quebrados** e **leva o dano refletido inteiro** — o K não absorve.
 2. **Reflect × atacante sob Defesa Absoluta:** os K do atacante quebram (o Reflect sempre quebra K), mas ele leva **0** de dano e **não perde os Q** — coerente com "imune a qualquer dano" da Defesa Absoluta.
-3. **Rodada sem dano × K:** dano absorvido por K **não** conta como dano: a sequência sem dano continua enquanto os K quebram. (Nasceu como "Pressão da mesa × K"; a Pressão da mesa saiu no sub-projeto 5, a pedido do autor, e a regra ficou para o anti-travamento, §1.11.) O bot `turtle` também joga K para medir isso.
+3. **Rodada sem dano × K:** ~~dano absorvido por K não conta como dano~~ — sem efeito desde a E1 do sub-projeto 5: a Pressão da mesa e o anti-travamento, que contavam rodadas sem dano, saíram (§1.11). O bot `turtle` continua jogando K.
 4. ~~**Pressão da mesa fixa na rodada.**~~ Removido com a Pressão da mesa (sub-projeto 5).
 5. **Defesa Absoluta × proteção contra Reflect (decidido em 2026-10-16):** quem está sob Defesa Absoluta e sacrifica 1 Q do campo para se proteger de um Reflect **mantém a imunidade da rodada inteira** — ela é garantida. O Q sacrificado **conta como o Q consumido** no fim da Defesa Absoluta: ao terminar, sobram 3 Q. A exceção continua sendo o Ataque Absoluto, que segue a conta normal (§1.8).
 
@@ -107,7 +107,7 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
    - se a Fileira de Ataque tiver cartas, o jogador **declara o ataque** (obrigatório) → janela de reação do oponente → resolução do dano (§1.9);
    - se estiver vazia, o turno termina sem ataque e **nenhuma carta é removida**.
 4. **Ao fim de cada turno de ataque** (com ou sem ataque), expiram os efeitos do **outro** jogador que duravam "até o fim do próximo turno de ataque do oponente": Reflect não disparado vai para o cemitério **[I]**. A Defesa Absoluta do outro termina só se houve ataque neste turno, e então 1 Q vai para o cemitério (§1.8; autor, 2026-10-30).
-5. Ao fim da rodada de Ataque, define-se a iniciativa (§1.10) e atualiza-se o anti-travamento (§1.11).
+5. Ao fim da rodada de Ataque, define-se a iniciativa (§1.10). (O anti-travamento, que também se atualizava aqui, saiu na E1 do sub-projeto 5, §1.11.)
 
 ### 1.6 Cartas especiais
 
@@ -150,7 +150,7 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
   5. a remoção de cartas da fila ocorre normalmente (§1.9 passo 8) — inclusive a 1ª da Defesa do dono do Reflect **[I]**;
   6. as 3 cartas do Reflect vão para o cemitério.
 - Atacante sob Defesa Absoluta: os K quebram, mas ele leva 0 de dano e não perde os Q (§1.0 item 2) **[I]**.
-- O dano refletido **conta como dano causado pelo dono do Reflect** para iniciativa e anti-travamento **[I]**.
+- O dano refletido **conta como dano causado pelo dono do Reflect** para a iniciativa **[I]**.
 - Se o oponente não atacar (Fileira de Ataque vazia), o Reflect expira ao fim do turno dele e vai para o cemitério **[I]**.
 - **Contra-jogadas:**
   - **Anular [O]:** na janela de reação aberta quando o Reflect é lançado, o oponente joga **K+J+Q da mão** → os dois conjuntos (6 cartas) vão para o cemitério.
@@ -225,15 +225,15 @@ DEF = (soma(Defesa do defensor) + bônus) × (1 + nQ)
 - **Escolha da iniciativa [N]:** quem tem a iniciativa escolhe, no início de cada rodada de Ataque, se ataca primeiro ou segundo. Ir primeiro vence corridas de dano letal e cobre o oponente com um Reflect na mesma rodada; ir segundo dá informação completa antes de agir.
 - A iniciativa também define quem recebe a primeira carta na distribuição (§1.4).
 
-### 1.11 Anti-travamento e fim de jogo
+### 1.11 Fim de jogo (sem anti-travamento)
 
-- **"Rodada sem dano":** rodada de Ataque em que **nenhum Coringa perdeu vida** (dano absorvido por K não conta como dano **[I]**).
+- **Sem limite de rodadas** (autor, 2026-10-28/30: "este jogo não deve ter limite de rodadas"): o anti-travamento saiu por completo na E1 do sub-projeto 5, e com ele o empate. A partida acaba só pelos três motivos abaixo.
 - **Pressão da mesa: removida no sub-projeto 5** (pedido do autor em 2026-10-23, "remoção completa da implementação"). Ela dava +1 no multiplicador de ataque dos dois jogadores por rodada de Ataque seguida sem dano, para fechar a brecha da "tartaruga" (quem está na frente põe tudo na Defesa, deixa o Ataque vazio e espera o anti-travamento). Sem ela, a brecha volta: no desenho pareado (§3), o líder que se fecha ganha +3,1 pp com vantagem de 10 e +0,4 pp com 20 (a meta é ≤ 0), e 62–65% das partidas dele acabam no anti-travamento. **Decisão do autor (2026-10-27): nenhuma regra nova.** Ele lembrou que quem não põe nenhuma carta no Ataque não ataca, e a Defesa do oponente não perde carta (§1.5, item 3, já é assim e tem teste), e vai testar a tartaruga no playtest dele depois do jogo pronto. Medido com as regras da Fase D (vida 500, fileiras de 8, 8 Ás): o líder que se fecha ganha +6,1 pp, e 16,7% das partidas acabam no anti-travamento.
-- **Anti-travamento [M]:** **3 rodadas de Ataque seguidas** sem dano → vence quem tiver mais vida; vida igual → **empate**.
+- ~~**Anti-travamento [M]:** 3 rodadas de Ataque seguidas sem dano → vence quem tiver mais vida; vida igual → empate.~~ Removido na E1 (`RULES_VERSION` 3).
 - **Vida ≤ 0** → perde na hora, mesmo no meio da rodada **[O]**.
 - **Exódia** → vence na hora (após a janela de reação) **[O]**.
 - **W.O.** (aplicado pelo servidor): desconexão sem retorno em 60 s ou 3 turnos estourados seguidos.
-- Terminação garantida: não existe cura; todo dano reduz a vida em ≥ 1; o anti-travamento limita sequências sem dano; a compra nunca para (§1.4).
+- **Sem terminação garantida:** dois jogadores que nunca atacam (Ataque vazio) jogam para sempre. Com cartas no Ataque, atacar é obrigatório. O servidor encerra a sala pelo tempo (W.O. e expiração), e o simulador tem um teto próprio de 400 rodadas, que conta como "sem fim" nos relatórios e nunca vira regra.
 
 ### 1.12 Tempo (aplicado pelo servidor; valores iniciais)
 
@@ -252,7 +252,7 @@ DEF = (soma(Defesa do defensor) + bônus) × (1 + nQ)
 3. **Reflect.** O oponente, com 2 K na Guarda, ataca com [6, 8, 9] + 1 J = **46** contra um Reflect ativo. Os 2 K e o Q dele quebram; Defesa [4, 10] → ⌊14 / 2⌋ = 7. **Ele leva 39**. O dono do Reflect leva 0; saem o 6 do atacante e a 1ª carta da Defesa do dono do Reflect.
 4. **Quadra.** Defesa [10, 3, 10, 10, 10] → 43 + bônus 10 = 53; com 1 Q → **106**.
 5. **Absoluto × Absoluto.** Ataque [5, 6, 7] com 4 J → 18 × 5 = **90**. Defesa [8, 9] com 4 Q → 17 × 5 = **85**. Os K do defensor quebram; dano **5**; o defensor não perde carta de Defesa; o atacante perde o 5 e 1 J. Ao fim do turno, a Defesa Absoluta expira e 1 Q do defensor vai para o cemitério.
-6. **Só os J multiplicam.** Depois de 2 rodadas de Ataque seguidas sem dano, Ataque [4, 6] + 1 J → 10 × (1 + 1) = **20** (com a Pressão da mesa, removida no sub-projeto 5, eram 40).
+6. **Só os J multiplicam.** Ataque [4, 6] + 1 J → 10 × (1 + 1) = **20** (com a Pressão da mesa, removida no sub-projeto 5, eram 40).
 7. **Coringa Selvagem.** Com 3 J nos Buffs de Ataque, o jogador joga um Coringa Selvagem como J → 4 J → o ataque deste turno é **Absoluto**.
 
 ### 1.14 Original × v2 (resumo das mudanças)
@@ -272,7 +272,7 @@ DEF = (soma(Defesa do defensor) + bônus) × (1 + nQ)
 | Absolutos | sem custo definido | consomem 1 Q / 1 J ao terminar |
 | Exódia | instantânea | instantânea após janela de reação (A) |
 | Fim do monte | — | cemitério embaralhado vira novo monte; a compra nunca para |
-| Travamento | — | 3 rodadas sem dano → mais vida vence (a Pressão da mesa saiu no sub-projeto 5; a tartaruga fica para o playtest do autor) |
+| Travamento | — | sem regra: o anti-travamento saiu na E1 (sem limite de rodadas); a tartaruga fica para o playtest do autor |
 
 ---
 
@@ -309,7 +309,7 @@ legalActions(view: PlayerView): Action[]
   - `ATTACK_MAIN(jogador)` — fase principal do turno;
   - `REACTION(respondente, gatilho)` — gatilho: `ATTACK` | `K_PLAYED` | `REFLECT_PLAYED`;
   - `GAME_OVER(resultado)`.
-- Além das zonas: vida, iniciativa, ordem da rodada, contador de rodadas, contador de rodadas sem dano (alimenta o anti-travamento), dano por jogador na rodada atual, efeitos com duração (Reflect, Defesa Absoluta, Ressurreições com rodada de expiração).
+- Além das zonas: vida, iniciativa, ordem da rodada, contador de rodadas, dano por jogador na rodada atual, efeitos com duração (Reflect, Defesa Absoluta, Ressurreições com rodada de expiração).
 
 ### 2.4 Ações
 
@@ -354,7 +354,6 @@ A união `GameEvent` de `types.ts`, base para animações e histórico. Cada aç
 ```ts
 RulesConfig {
   hp: 500, rowLimit: 8, buffLimit: 4, cardsPerEquip: 4,
-  antiStallRounds: 3,
   exodiaGuard: 4, resurrectMinRounds: 3,
   deck: { numericCopies: 8, faceCopies: 6, aceCopies: 8 }, // sem aceCopies (replays antigos), os A têm faceCopies
   // regras novas [N] — ligadas por padrão; o simulador compara com elas desligadas
@@ -374,7 +373,7 @@ RulesConfig {
 - **Bots:**
   - `random` — qualquer ação legal;
   - `greedy` — heurísticas: destino da numérica que maximiza ATK−DEF esperado; A na maior ameaça; Reflect quando o ATK do oponente é alto; Sacrifício quando o buff do oponente vale mais que o próprio; escolha de ordem pela situação de vida;
-  - `turtle` — quando está na frente em vida, põe tudo na Defesa, deixa o Ataque vazio e joga todos os K que tiver (testa a brecha da tartaruga, que a Pressão da mesa fechava antes de sair no sub-projeto 5, inclusive via K). O Equipar só permite trocar/descartar com as duas fileiras cheias (§1.4): com a Defesa cheia e espaço no Ataque, a numérica vai para o Ataque à força e o ataque passa a ser obrigatório. A própria regra já limita a tartaruga; o relatório separa as vitórias dela por motivo (vida, anti-travamento, Exódia).
+  - `turtle` — quando está na frente em vida, põe tudo na Defesa, deixa o Ataque vazio e joga todos os K que tiver (testa a brecha da tartaruga, que a Pressão da mesa fechava antes de sair no sub-projeto 5, inclusive via K). O Equipar só permite trocar/descartar com as duas fileiras cheias (§1.4): com a Defesa cheia e espaço no Ataque, a numérica vai para o Ataque à força e o ataque passa a ser obrigatório. A própria regra já limita a tartaruga; o relatório separa as vitórias dela por motivo (vida, Exódia, sem fim).
 - Interface: `Bot = (view: PlayerView, legal: Action[], rng) => Action`. O `rng` é do bot, com semente própria — nunca o da partida, nunca `Math.random`.
 - **Runner:** N partidas por configuração com sementes reprodutíveis; varredura de parâmetros (`hp`, `rowLimit`, composição do baralho); **comparação liga/desliga de cada regra [N]**, uma por vez a partir do padrão e com as mesmas sementes; saída em tabela no terminal + JSON em `packages/sim/reports/`.
 - Marcação nesta seção: **[I]** = interpretação do Plano 2, aprovada em 2026-10-16.
@@ -388,8 +387,7 @@ RulesConfig {
 | Vitória do `turtle` quando está na frente | não maior que a do `greedy` na mesma situação — desenho pareado, abaixo |
 | Exódia | 1–3% das partidas |
 | Fallen is Back | aparece em 10–25% das partidas |
-| Fim por anti-travamento | < 5% |
-| Partidas que terminam | 100% |
+| Partidas que param no teto do simulador (400 rodadas) | reportadas, com a parte que tinha uma Defesa Absoluta ativa (sem meta: sem anti-travamento nada garante o fim) |
 
 - **Escolha da ordem (contrafactual):** em cada partida `greedy` × `greedy` sorteia-se um ponto de Escolha da iniciativa. Dali, o simulador joga o resto da partida K vezes indo primeiro e K vezes indo segundo, com as mesmas sementes de rollout para as duas opções (comparação pareada). Cada rollout reamostra a informação oculta para quem escolhe (mão do oponente e ordem do monte), com semente própria, para não espiar o monte real. O ponto é **decisivo** quando a diferença média de pontos (vitória 1, empate 0,5) passa de 2 erros padrão **[I]**. Metas: entre os pontos decisivos, ir primeiro é melhor em **30–70%**; e pelo menos **20%** dos pontos são decisivos **[I]** (se a diferença some em quase todo lugar, a escolha não importa, o que também falha a intenção da regra). O relatório traz a direção e o tamanho da diferença. A frequência com que o `greedy` escolhe ir primeiro mede a heurística do bot, não a regra: fica só como informação. É job de calibração; nunca entra no `pnpm check`.
   - **Decisão (2026-10-19, por delegação do autor):** a regra fica mantida (ligada); desligável pela chave `initiativeChoice`, da config. Medição atual: 4% de pontos decisivos, com o limite dos rollouts `greedy` × `greedy`. Na interface (sub-projeto 3), a escolha vem com "atacar primeiro" pré-selecionado, sem travar a rodada.
@@ -400,7 +398,7 @@ Bots não jogam como humanos: as metas guiam a calibração inicial; o ajuste fi
 ## 4. Jogo no terminal (`pnpm play`)
 
 - Partida contra o bot `greedy` no terminal, sem timers (`--bot` troca o bot; `--semente` repete uma partida).
-- Mostra vida, guarda, buffs, fileiras, quantidade de cartas na mão do oponente, monte, cemitério e as rodadas sem dano; lista as ações legais numeradas; escolha de ordem e janelas de reação aparecem como prompts. O Equipar é perguntado carta a carta (com as duas fileiras cheias seriam até 81 combinações).
+- Mostra vida, guarda, buffs, fileiras, quantidade de cartas na mão do oponente, monte e cemitério; lista as ações legais numeradas; escolha de ordem e janelas de reação aparecem como prompts. O Equipar é perguntado carta a carta (com as duas fileiras cheias seriam até 81 combinações).
 - Ao terminar, salva a partida (semente + ações) em `packages/sim/replays/`, para reproduzir bugs.
 - Objetivo: validar o "feeling" das regras antes da interface.
 
@@ -414,7 +412,7 @@ Bots não jogam como humanos: as metas guiam a calibração inicial; o ajuste fi
   - a compra nunca falha por falta de cartas;
   - `viewFor`/`viewEvents` nunca expõem mão do oponente, ordem do monte nem semente;
   - determinismo (mesma semente + ações → mesmo estado);
-  - toda partida termina.
+  - ~~toda partida termina~~ → toda partida que o simulador encerra pelo teto dele é contada e reportada (a E1 tirou a terminação garantida).
 - **Comando único `pnpm check`:** lint + typecheck + testes com cobertura (meta ≥ 90% de linhas e branches no motor) + smoke no Node puro (motor e simulador carregados sem bundler).
 - **Portão automático contra regressões:** hooks versionados (pre-commit e pre-push) rodam o `pnpm check`; a CI roda o mesmo comando em push e PR, e precisa estar verde antes do merge. Quando o check passar de ~45 s, o pre-commit vira a versão rápida (lint, typecheck e testes relacionados) e o pre-push mantém o completo.
 - **Partidas de referência:** replays gravados (semente + ações) reexecutados no motor, com snapshot de um resumo de cada partida. Mudança de regra que torna uma ação ilegal falha no passo exato; mudança de resultado só entra aceitando o snapshot de propósito.

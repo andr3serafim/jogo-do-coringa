@@ -143,11 +143,6 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
       expect(cueFor(win, 'p2')).toBe('derrota');
     });
 
-    it('empate é mudo', () => {
-      const draw = gameOver({ kind: 'DRAW', reason: 'ANTI_STALL' });
-      expect(cueFor(draw, 'p1')).toBeNull();
-      expect(cueFor(draw, 'p2')).toBeNull();
-    });
   });
 
   describe('os outros eventos não têm pista', () => {

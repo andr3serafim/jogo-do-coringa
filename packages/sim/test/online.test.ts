@@ -103,7 +103,7 @@ function roomMsg(status: RoomStatus, over: Partial<RoomMessage> = {}): RoomMessa
     code: 'K7M2QX',
     status,
     seats: [seat(P1), seat(P2)],
-    score: { p1: 0, p2: 0, draws: 0 },
+    score: { p1: 0, p2: 0 },
     gameNo: 1,
     expiresAt: 2_000_000,
     ...over,
@@ -137,11 +137,12 @@ describe('askChoice e o jogo offline com AbortSignal', () => {
     // linha no polimento: a Armadilha do Bot com Selvagem passou a dizer o papel ("com Selvagem (como A)"); as jogadas, não. No
     // sub-projeto 5 a Pressão da mesa saiu e o anti-travamento caiu para 3 rodadas: a saída e as jogadas mudaram (a partida acaba no
     // anti-travamento). Na Fase D (vida 500, fileiras de 8, 8 Ás) mudaram de novo. Em 2026-10-30 só a saída mudou: "Saiu … da
-    // Defesa" e "quadra … na Defesa" no lugar de "do Defesa" e "no Defesa".
+    // Defesa" e "quadra … na Defesa" no lugar de "do Defesa" e "no Defesa". Na E1 (sem anti-travamento) também só a saída: a mesa
+    // não mostra mais "N de 3 sem dano"; a partida já acabava pela vida.
     const game = scriptedIo(() => '1');
     const outcome = await playGame({ io: game, seed: 'roteiro', bot: 'greedy', config: makeConfig(), saveDir: null });
     const sha = (text: string) => createHash('sha256').update(text).digest('hex');
-    expect(sha(game.output.join('\n'))).toBe('98e3d8d976e1d715559b0bd15d09504e1df13c4ab13c85f4dc4a57dfd6cb2b52');
+    expect(sha(game.output.join('\n'))).toBe('b160711bf12d663187e066d5faa40e115e1f6a5604e92c336803e633b34df0df');
     expect(sha(JSON.stringify(outcome.replay.steps))).toBe('e7ee6c59a87263f640db3c73591178caba1a09c270c936e6436699488eb28bd6');
     expect(outcome.replay.steps).toHaveLength(165);
   });
@@ -249,7 +250,7 @@ describe('terminal online', () => {
     // Fim: o state final não tem jogada; a sala em FINISHED traz resultado e causa.
     const over = setup({ phase: { kind: 'GAME_OVER', result: wins(P2) } });
     connection.emitState(stateMsg(over, P1, { epoch: 6, events: [{ type: 'GameOver', result: wins(P2) }] }));
-    connection.emitRoom(roomMsg('FINISHED', { outcome: { gameNo: 1, result: wins(P2), cause: 'RECONNECT_TIMEOUT' }, score: { p1: 0, p2: 1, draws: 0 } }));
+    connection.emitRoom(roomMsg('FINISHED', { outcome: { gameNo: 1, result: wins(P2), cause: 'RECONNECT_TIMEOUT' }, score: { p1: 0, p2: 1 } }));
     await flush();
     const text = io.output.join('\n');
     expect(text).toContain('Fim de jogo: Oponente venceu (W.O.)');

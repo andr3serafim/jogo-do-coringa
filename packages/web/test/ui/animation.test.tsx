@@ -1385,7 +1385,7 @@ describe('avisos e acessibilidade', () => {
       roomMessage({
         status: 'PLAYING',
         seats: [seatOf('p1', 'André'), seatOf('p2', 'Duda', { connected: false, ...(woAt === undefined ? {} : { woAt }) })],
-        score: { p1: 0, p2: 0, draws: 0 },
+        score: { p1: 0, p2: 0 },
       });
     act(() => m.connection.emitRoom(dropped()));
     expect(screen.getByRole('status')).toBe(region);
@@ -1395,7 +1395,7 @@ describe('avisos e acessibilidade', () => {
     expect(region).toHaveTextContent('Duda caiu. Se não voltar a tempo, você vence por W.O.');
     act(() =>
       m.connection.emitRoom(
-        roomMessage({ status: 'PLAYING', seats: [seatOf('p1', 'André'), seatOf('p2', 'Duda')], score: { p1: 0, p2: 0, draws: 0 } }),
+        roomMessage({ status: 'PLAYING', seats: [seatOf('p1', 'André'), seatOf('p2', 'Duda')], score: { p1: 0, p2: 0 } }),
       ),
     );
     expect(screen.getByRole('status')).toBe(region);

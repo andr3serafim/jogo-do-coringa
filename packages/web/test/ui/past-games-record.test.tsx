@@ -58,7 +58,7 @@ interface MountOptions {
 const FINISHED_ROOM: Parameters<typeof roomMessage>[0] = {
   status: 'FINISHED',
   seats: SEATS,
-  score: { p1: 1, p2: 0, draws: 0 },
+  score: { p1: 1, p2: 0 },
   outcome: { gameNo: 1, result: win('p1'), cause: 'NORMAL' },
 };
 
@@ -97,7 +97,7 @@ function finish(m: Pick<Mounted, 'connection'>, options: FinishOptions = {}) {
         status: 'FINISHED',
         gameNo,
         seats: SEATS.map((seat) => ({ ...seat, wantsRematch: seat.playerId === 'p1' && (options.mineWants ?? false) })),
-        score: options.score ?? { p1: 1, p2: 0, draws: 0 },
+        score: options.score ?? { p1: 1, p2: 0 },
         outcome: { gameNo, result: options.result === undefined ? win('p1') : options.result, cause: 'NORMAL' },
       }),
     ),
@@ -138,7 +138,7 @@ describe('a mesa grava a partida terminada', () => {
     expect(rows(m)).toEqual([]);
 
     const replay = replayOf('treino-t1');
-    finish(m, { replay, score: { p1: 1, p2: 0, draws: 0 } });
+    finish(m, { replay, score: { p1: 1, p2: 0 } });
 
     const [row, ...others] = rows(m);
     expect(others).toEqual([]);
@@ -150,7 +150,7 @@ describe('a mesa grava a partida terminada', () => {
       names: { me: 'André', opponent: 'Duda' },
       outcome: { gameNo: 1, result: win('p1'), cause: 'NORMAL' },
       rounds: 7,
-      score: { p1: 1, p2: 0, draws: 0 },
+      score: { p1: 1, p2: 0 },
       rulesVersion: RULES_VERSION,
       replay,
     });
@@ -160,7 +160,7 @@ describe('a mesa grava a partida terminada', () => {
 
   it('online: sem replay, com o código da sala e a `key` da partida', () => {
     const m = mount();
-    finish(m, { gameNo: 3, result: win('p2', 'EXODIA'), score: { p1: 1, p2: 2, draws: 0 } });
+    finish(m, { gameNo: 3, result: win('p2', 'EXODIA'), score: { p1: 1, p2: 2 } });
 
     expect(rows(m)).toEqual([
       {
@@ -172,7 +172,7 @@ describe('a mesa grava a partida terminada', () => {
         names: { me: 'André', opponent: 'Duda' },
         outcome: { gameNo: 3, result: win('p2', 'EXODIA'), cause: 'NORMAL' },
         rounds: 7,
-        score: { p1: 1, p2: 2, draws: 0 },
+        score: { p1: 1, p2: 2 },
         rulesVersion: RULES_VERSION,
       },
     ]);
@@ -222,20 +222,20 @@ describe('a mesa grava a partida terminada', () => {
 
   it('a revanche é outra partida: a segunda linha tem o seu `gameNo` e o seu replay, e não herda o da primeira', () => {
     const m = mount({ training: 'medio' });
-    finish(m, { replay: replayOf('treino-a'), score: { p1: 1, p2: 0, draws: 0 } });
+    finish(m, { replay: replayOf('treino-a'), score: { p1: 1, p2: 0 } });
     startGame(m, 2);
-    finish(m, { gameNo: 2, replay: replayOf('treino-a-2'), result: win('p2'), score: { p1: 1, p2: 1, draws: 0 } });
+    finish(m, { gameNo: 2, replay: replayOf('treino-a-2'), result: win('p2'), score: { p1: 1, p2: 1 } });
     startGame(m, 3);
     // A terceira não recebe replay: a linha dela fica sem, e o da segunda não passa para ela.
-    finish(m, { gameNo: 3, result: { kind: 'DRAW', reason: 'ANTI_STALL' }, score: { p1: 1, p2: 1, draws: 1 } });
+    finish(m, { gameNo: 3, result: win('p1'), score: { p1: 2, p2: 1 } });
 
     const saved = rows(m);
     expect(saved.map((row) => row.outcome.gameNo)).toEqual([3, 2, 1]);
     expect(saved.map((row) => row.replay?.name)).toEqual([undefined, 'treino-a-2', 'treino-a']);
     expect(saved.map((row) => row.score)).toEqual([
-      { p1: 1, p2: 1, draws: 1 },
-      { p1: 1, p2: 1, draws: 0 },
-      { p1: 1, p2: 0, draws: 0 },
+      { p1: 2, p2: 1 },
+      { p1: 1, p2: 1 },
+      { p1: 1, p2: 0 },
     ]);
   });
 
@@ -457,7 +457,7 @@ describe('online: o replay chega depois do FINISHED', () => {
         roomMessage({
           status: 'FINISHED',
           seats: SEATS,
-          score: { p1: 1, p2: 0, draws: 0 },
+          score: { p1: 1, p2: 0 },
           outcome: { gameNo: 1, result: win('p1'), cause: 'NORMAL' },
         }),
       );
@@ -519,7 +519,7 @@ describe('online: o replay chega depois do FINISHED', () => {
 
     // A revanche: a partida 2 acaba e recebe o seu; a linha da 1 continua sem.
     startGame(m, 2);
-    finish(m, { gameNo: 2, result: win('p2'), score: { p1: 1, p2: 1, draws: 0 } });
+    finish(m, { gameNo: 2, result: win('p2'), score: { p1: 1, p2: 1 } });
     deliverReplay(m, 2, replayOf('dois'));
     // Um replay atrasado da partida 1 também não entra, nem na linha da 1 nem na da 2.
     deliverReplay(m, 1, replayOf('um-atrasado'));

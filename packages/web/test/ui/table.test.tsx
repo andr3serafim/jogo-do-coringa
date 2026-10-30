@@ -66,7 +66,7 @@ function mount(spec: ViewSpec = DRAFT, options: MountOptions = {}) {
   const room = roomMessage({
     status: 'PLAYING',
     seats: me === 'p1' ? [seatOf('p1', 'André'), seatOf('p2', 'Duda')] : [seatOf('p1', 'Duda'), seatOf('p2', 'André')],
-    score: { p1: 1, p2: 0, draws: 0 },
+    score: { p1: 1, p2: 0 },
     ...options.room,
   });
   const connection = new FakeConnection({ playerId: me, room, state: stateMessage(view, options.state), now: 0 });
@@ -361,7 +361,7 @@ describe('mesa: faixa central (spec §3.1)', () => {
       [{ ...DRAFT, phase: 'ATTACK' }, 'Ataque · sua reação'],
       [{ ...DRAFT, phase: { kind: 'REACTION', responder: 'p2', trigger: 'ATTACK' } }, 'Ataque · Duda pode reagir'],
       [{ ...DRAFT, phase: { kind: 'EQUIP' } }, 'Equipar · os dois montam'],
-      [{ ...DRAFT, phase: { kind: 'GAME_OVER', result: { kind: 'DRAW', reason: 'ANTI_STALL' } } }, 'Fim de jogo'],
+      [{ ...DRAFT, phase: { kind: 'GAME_OVER', result: { kind: 'WIN', winner: 'p2', reason: 'EXODIA' } } }, 'Fim de jogo'],
     ];
     for (const [spec, text] of cases) {
       const { unmount } = mount(spec);
@@ -412,28 +412,11 @@ describe('mesa: faixa central (spec §3.1)', () => {
     expect(band().getByText('vazio')).toBeInTheDocument();
   });
 
-  it('as rodadas sem dano: a contagem do anti-travamento, sem Pressão da mesa (removida no sub-projeto 5)', () => {
+  it('sem contador de rodadas sem dano nem Pressão da mesa (as duas regras saíram no sub-projeto 5)', () => {
     mount(DRAFT);
-    expect(band().getByRole('group', { name: 'Rodadas sem dano: 0 de 3' })).toHaveTextContent('Sem dano0 de 3');
-    expect(band().queryByText(/Pressão/)).not.toBeInTheDocument();
-    expect(band().queryByText(/anti-travamento/)).not.toBeInTheDocument();
-  });
-
-  it('perto do anti-travamento (faltam 2 ou menos), avisa quantas rodadas faltam', () => {
-    const { view } = mount({ ...DRAFT, noDamageStreak: 1 });
-    expect(view.config.antiStallRounds).toBe(3);
-    expect(band().getByRole('group', { name: 'Rodadas sem dano: 1 de 3' })).toBeInTheDocument();
-    expect(band().getByText('faltam 2 rodadas sem dano para o fim por anti-travamento')).toBeInTheDocument();
-  });
-
-  it('a última rodada antes do anti-travamento fala no singular', () => {
-    mount({ ...DRAFT, noDamageStreak: 2 });
-    expect(band().getByText('falta 1 rodada sem dano para o fim por anti-travamento')).toBeInTheDocument();
-  });
-
-  it('sem nenhuma rodada sem dano, não avisa', () => {
-    mount({ ...DRAFT, noDamageStreak: 0 });
-    expect(band().queryByText(/anti-travamento/)).not.toBeInTheDocument();
+    expect(band().queryByText(/Sem dano/i)).not.toBeInTheDocument();
+    expect(band().queryByRole('group', { name: /Rodadas sem dano/ })).not.toBeInTheDocument();
+    expect(band().queryByText(/anti-travamento|Pressão/)).not.toBeInTheDocument();
   });
 
   it('a iniciativa diz de quem é e a ordem escolhida na rodada', () => {
@@ -924,7 +907,6 @@ describe('mesa: acessibilidade (axe)', () => {
   it('a mesa cheia, com buffs, Reflect, Defesa Absoluta e marcas, não tem violações sérias', async () => {
     const spec: ViewSpec = {
       ...DRAFT,
-      noDamageStreak: 4,
       self: {
         ...DRAFT.self,
         attackRow: [7, 7, 7, 7, 3],

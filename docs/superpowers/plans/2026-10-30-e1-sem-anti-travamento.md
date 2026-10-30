@@ -143,7 +143,7 @@ Um commit só com a tarefa 3: tirar o `DRAW` do tipo quebra o typecheck dos outr
   - `PlayerView` sem `noDamageStreak`;
   - `Score = { p1: number; p2: number }`.
 
-- [ ] **Passo 1: testes que falham ou mudam.**
+- [x] **Passo 1: testes que falham ou mudam.**
   - `turn-flow`:
     - saem `anti-travamento: 3 rodadas sem dano…`, `anti-travamento com vida igual…`, `uma rodada sem dano soma 1…` e
       `qualquer perda de vida zera…`;
@@ -155,16 +155,16 @@ Um commit só com a tarefa 3: tirar o `DRAW` do tipo quebra o typecheck dos outr
     - `validateConfig` aceita uma config com `antiStallRounds: 3` a mais e devolve `null` (foco da revisão 2).
   - `properties`: o teste "partidas aleatórias terminam" passa a jogar com um teto (400 rodadas). Ele confere conservação, vida
     e sigilo nas que acabam e nas que param no teto, e conta quantas pararam (sem exigir zero).
-- [ ] **Passo 2:** rode o motor e veja os testes novos falharem.
-- [ ] **Passo 3:** remova do motor; depois do protocolo e do servidor; depois do simulador. Siga os erros do
+- [x] **Passo 2:** rode o motor e veja os testes novos falharem.
+- [x] **Passo 3:** remova do motor; depois do protocolo e do servidor; depois do simulador. Siga os erros do
   `pnpm -r typecheck`.
-- [ ] **Passo 4:** as suítes do motor, do protocolo, do servidor e do simulador passam, menos as partidas de referência e o
+- [x] **Passo 4:** as suítes do motor, do protocolo, do servidor e do simulador passam, menos as partidas de referência e o
   digest.
-- [ ] **Passo 5:** `STATE_SCHEMA = 3` em `packages/server/src/core/timers.ts`, porque o `GameState` mudou de forma. Ajuste o
+- [x] **Passo 5:** `STATE_SCHEMA = 3` em `packages/server/src/core/timers.ts`, porque o `GameState` mudou de forma. Ajuste o
   teste dos timers, se ele fixa o número.
-- [ ] **Passo 6:** regrave as partidas de referência e o digest (como no passo 4b da tarefa 1). Toda mudança tem que vir de uma
+- [x] **Passo 6:** regrave as partidas de referência e o digest (como no passo 4b da tarefa 1). Toda mudança tem que vir de uma
   partida que acabava por anti-travamento e agora segue até a vida, a Exódia ou o `maxSteps`.
-- [ ] **Passo 7:** sem commit: segue com a tarefa 3.
+- [x] **Passo 7:** sem commit: segue com a tarefa 3.
 
 ### Tarefa 3: o anti-travamento sai da web; as partidas antigas continuam lendo
 
@@ -193,19 +193,19 @@ Um commit só com a tarefa 3: tirar o `DRAW` do tipo quebra o typecheck dos outr
   - `PastGame.result: GameResult | LegacyResult | null`;
   - `Score` guardado aceita o `draws` antigo e o ignora.
 
-- [ ] **Passo 1: testes que falham.**
+- [x] **Passo 1: testes que falham.**
   - `past-games`: uma entrada de `RULES_VERSION` 2 com `{ kind: 'DRAW', reason: 'ANTI_STALL' }` e `score.draws: 1` continua
     válida. A lista mostra "Empate" e o motivo "Anti-travamento (regra antiga)…" (foco da revisão 1).
   - `table`: a faixa central não tem mais "Sem dano".
   - `tutorial`: a sequência de dicas não tem mais `stall`, e a dica `end` continua aparecendo.
-- [ ] **Passo 2:** veja-os falhar.
-- [ ] **Passo 3:** implemente.
+- [x] **Passo 2:** veja-os falhar.
+- [x] **Passo 3:** implemente.
   - O texto de fim do legado diz que a regra saiu: "Anti-travamento (regra antiga): …".
   - Se as dicas forem numeradas na tela, renumere (o "1 de N" sai do tamanho da lista).
-- [ ] **Passo 4:** `pnpm --filter @coringa/web exec vitest run` passa.
-- [ ] **Passo 5:** `pnpm lint` e `pnpm -r typecheck` limpos.
-- [ ] **Passo 6:** confira no navegador, a 1536 × 695 e a 390 × 844, que a faixa central não quebrou.
-- [ ] **Passo 7:** commit `feat: a partida não acaba mais por anti-travamento` (motor, servidor, simulador e web). O corpo lista
+- [x] **Passo 4:** `pnpm --filter @coringa/web exec vitest run` passa.
+- [x] **Passo 5:** `pnpm lint` e `pnpm -r typecheck` limpos.
+- [x] **Passo 6:** confira no navegador, a 1536 × 695 e a 390 × 844, que a faixa central não quebrou.
+- [x] **Passo 7:** commit `feat: a partida não acaba mais por anti-travamento` (motor, servidor, simulador e web). O corpo lista
   as partidas de referência que mudaram e por quê.
 
 ### Tarefa 4: o teto do simulador e a duração nos relatórios

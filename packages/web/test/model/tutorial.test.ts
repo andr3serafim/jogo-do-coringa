@@ -26,7 +26,7 @@ import {
   type HintId,
 } from '../../src/model/tutorial.ts';
 
-const ALL: readonly HintId[] = ['equip', 'quad', 'order', 'firstAttack', 'buffs', 'trap', 'wild', 'reflect', 'stall', 'end'];
+const ALL: readonly HintId[] = ['equip', 'quad', 'order', 'firstAttack', 'buffs', 'trap', 'wild', 'reflect', 'end'];
 
 /** A dica de P1 (ou de `me`) para o estado, com os eventos da última jogada e as já vistas. */
 function hintFor(
@@ -186,11 +186,9 @@ describe('tutorialHint: cada dica na sua situação', () => {
     expect(hintFor(played.state, { events: played.events })).toBeNull();
   });
 
-  it('stall: uma rodada de Ataque sem dano já basta (a contagem do anti-travamento começou)', () => {
-    expect(hintFor(quiet({ noDamageStreak: 1 }))).toEqual({ id: 'stall', zone: 'center' });
-    expect(hintFor(quiet({ noDamageStreak: 0 }))).toBeNull();
-    expect(hintHolding(viewFor(quiet({ noDamageStreak: 0 }), P1), [], 'stall')).toBeNull();
-    expect(hintHolding(viewFor(quiet({ noDamageStreak: 1 }), P1), [], 'stall')).toEqual({ id: 'stall', zone: 'center' });
+  it('o turno de ataque comum não chama dica: a do anti-travamento saiu com a regra (E1 do sub-projeto 5)', () => {
+    expect(hintFor(quiet())).toBeNull();
+    expect(hintFor(quiet({ round: 9 }))).toBeNull();
   });
 
   it('end: partida encerrada', () => {
@@ -210,19 +208,19 @@ function reflectIds(state: GameState, who: PlayerId): { kId: string; jId: string
 describe('tutorialHint: ordem, "vista" e situação que passou', () => {
   it('no fim da partida a dica do fim vem antes de qualquer outra ainda não vista', () => {
     const result = { kind: 'WIN', winner: P1, reason: 'HP' } as const;
-    // Quadra no seu campo e uma rodada sem dano: sem o fim, seriam as dicas `quad` e `stall`.
-    const over = setup({ noDamageStreak: 1, phase: { kind: 'GAME_OVER', result }, p1: { attack: [5, 5, 5, 5] } });
+    // Quadra no seu campo: sem o fim, seria a dica `quad`.
+    const over = setup({ phase: { kind: 'GAME_OVER', result }, p1: { attack: [5, 5, 5, 5] } });
     expect(hintFor(over)).toEqual({ id: 'end', zone: 'end' });
-    expect(drain(over).map((h) => h.id)).toEqual(['end', 'quad', 'stall']);
-    // Com o QuadFormed do oponente nos eventos, ou só a sequência sem dano: o fim também vem primeiro.
-    const stalled = setup({ noDamageStreak: 2, phase: { kind: 'GAME_OVER', result } });
+    expect(drain(over).map((h) => h.id)).toEqual(['end', 'quad']);
+    // Com o QuadFormed do oponente nos eventos: o fim também vem primeiro.
+    const finished = setup({ phase: { kind: 'GAME_OVER', result } });
     const events: GameEvent[] = [{ type: 'QuadFormed', player: P2, quad: { row: 'ATK', value: 4 } }];
-    expect(hintFor(stalled, { events })).toEqual({ id: 'end', zone: 'end' });
-    expect(hintFor(stalled)).toEqual({ id: 'end', zone: 'end' });
+    expect(hintFor(finished, { events })).toEqual({ id: 'end', zone: 'end' });
+    expect(hintFor(finished)).toEqual({ id: 'end', zone: 'end' });
   });
 
   it('fora do fim a lista segue a ordem de sempre', () => {
-    expect(drain(quiet({ noDamageStreak: 1, p1: { attack: [5, 5, 5, 5] } })).map((h) => h.id)).toEqual(['quad', 'stall']);
+    expect(drain(quiet({ p1: { attack: [5, 5, 5, 5] } })).map((h) => h.id)).toEqual(['quad']);
   });
 
   it('a primeira da lista ganha quando duas valem (o primeiro ataque com J na mão: firstAttack, depois buffs)', () => {
@@ -237,8 +235,8 @@ describe('tutorialHint: ordem, "vista" e situação que passou', () => {
   });
 
   it('com várias situações valendo, as dicas saem na ordem da lista', () => {
-    const state = setup({ noDamageStreak: 1, p1: { attack: [5, 5, 5, 5], hand: ['K', 'J', 'Q', 'W'] } });
-    expect(drain(state).map((h) => h.id)).toEqual(['quad', 'firstAttack', 'buffs', 'wild', 'reflect', 'stall']);
+    const state = setup({ p1: { attack: [5, 5, 5, 5], hand: ['K', 'J', 'Q', 'W'] } });
+    expect(drain(state).map((h) => h.id)).toEqual(['quad', 'firstAttack', 'buffs', 'wild', 'reflect']);
   });
 
   it('uma dica vista não volta, e o que sobra aparece; sem sobra, nada', () => {
@@ -250,11 +248,11 @@ describe('tutorialHint: ordem, "vista" e situação que passou', () => {
   it('nada depois de todas vistas, em qualquer situação', () => {
     const states = [
       equipRound({ p1: { pending: [4, 5] } }),
-      quiet({ p1: { attack: [5, 5, 5, 5] }, noDamageStreak: 2 }),
+      quiet({ p1: { attack: [5, 5, 5, 5] } }),
       setup({ phase: { kind: 'ORDER_CHOICE', player: P1 } }),
-      setup({ noDamageStreak: 1, p1: { attack: [5, 5, 5, 5], hand: ['K', 'J', 'Q', 'W'] } }),
+      setup({ p1: { attack: [5, 5, 5, 5], hand: ['K', 'J', 'Q', 'W'] } }),
       setup({ phase: { kind: 'REACTION', responder: P1, trigger: 'ATTACK' }, p1: { hand: ['A'] }, p2: { attackBuffs: ['J'] } }),
-      setup({ phase: { kind: 'GAME_OVER', result: { kind: 'DRAW', reason: 'ANTI_STALL' } } }),
+      setup({ phase: { kind: 'GAME_OVER', result: { kind: 'WIN', winner: P2, reason: 'EXODIA' } } }),
     ];
     for (const state of states) {
       expect(hintFor(state)).not.toBeNull();
@@ -267,7 +265,7 @@ describe('tutorialHint: ordem, "vista" e situação que passou', () => {
     for (const state of [
       setup({ phase: { kind: 'ORDER_CHOICE', player: P1 } }),
       setup({ p1: { attack: [5] } }),
-      quiet({ noDamageStreak: 1 }),
+      quiet(),
       setup({ phase: { kind: 'GAME_OVER', result: { kind: 'WIN', winner: P2, reason: 'HP' } } }),
     ]) {
       expect(hintFor(state)?.id).not.toBe('equip');
@@ -278,7 +276,7 @@ describe('tutorialHint: ordem, "vista" e situação que passou', () => {
   });
 
   it('é pura: não muda a view, os eventos nem o conjunto de vistas', () => {
-    const state = setup({ noDamageStreak: 1, p1: { attack: [5, 5, 5, 5], hand: ['K', 'J', 'Q', 'W'] } });
+    const state = setup({ p1: { attack: [5, 5, 5, 5], hand: ['K', 'J', 'Q', 'W'] } });
     const view = viewFor(state, P1);
     const events: GameEvent[] = [{ type: 'QuadFormed', player: P2, quad: { row: 'ATK', value: 4 } }];
     const seen = new Set<HintId>(['quad']);
@@ -445,8 +443,8 @@ describe('advanceHint e acknowledgeHint', () => {
     const done = acknowledge(ended, over());
     expect(done.current).toBeNull();
     expect(done.seen.has('end')).toBe(true);
-    // Nem a do anti-travamento, que ainda vale no fim, volta; nem uma partida nova.
-    expect(advance(done, over({ noDamageStreak: 2 })).current).toBeNull();
+    // Nem a da quadra, que ainda vale no fim, volta; nem uma partida nova.
+    expect(advance(done, over({ p1: { attack: [5, 5, 5, 5] } })).current).toBeNull();
     expect(advance(done, equipRound({ p1: { pending: [4, 5] } })).current).toBeNull();
   });
 

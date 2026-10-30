@@ -1,5 +1,5 @@
 // A faixa central de tinta (spec §3.1 e §10.1): o que é dos dois jogadores. Rodada e tipo, de quem é a vez, o
-// relógio, as rodadas sem dano (a contagem do anti-travamento, com o aviso), a iniciativa, o monte e o cemitério. Os números
+// relógio, a iniciativa, o monte e o cemitério. Os números
 // de jogo usam a fonte de texto com algarismos tabulares e nenhuma textura (spec §10.7); a textura só vai no
 // título da rodada. O relógio (spec §3.8, §10.3): em urgência (últimos 5 s) o disco fica vermelho, com o número em papel e o
 // anel mais grosso, por cor e por forma, e nunca pisca; na janela de reação ele é grande; esgotado, diz "Tempo esgotado".
@@ -32,8 +32,6 @@ import { useTableUi } from './context.ts';
 import {
   graveyardName,
   initiativeText,
-  stallWarning,
-  streakLabel,
   turnText,
   type TableNames,
 } from './labels.ts';
@@ -71,9 +69,6 @@ export function CenterBand({
   tutorial,
   onOpenGraveyard,
 }: CenterBandProps) {
-  const ui = useTableUi();
-  const { noDamageStreak } = view;
-  const untilStall = view.config.antiStallRounds - noDamageStreak;
   const { face, live } = useClock(deadline, remainingMs, view.me, pausedTurnMs, turn);
   // A urgência soa uma vez por prazo (o `deadlineKey` identifica o prazo), e só no prazo do jogador.
   const sound = useSound();
@@ -88,7 +83,6 @@ export function CenterBand({
   return (
     <section
       aria-label="Situação da rodada"
-      data-dica={ui.hintZone === 'center' ? 'center' : undefined}
       className="flex flex-none flex-wrap items-center gap-x-2.5 gap-y-1 bg-tinta px-3 py-1.5 text-papel pc:min-h-[76px] pc:gap-x-7 pc-baixo:min-h-14 pc:px-6 pc:py-1"
     >
       <div className="flex min-w-0 max-w-[8.5rem] flex-col pc:max-w-[13rem]">
@@ -116,21 +110,7 @@ export function CenterBand({
         </p>
       ) : null}
 
-      {/* No celular, as rodadas sem dano e a iniciativa formam a segunda linha da faixa (`order-last`); no PC, ficam na linha única. */}
-      <div
-        role="group"
-        aria-label={streakLabel(noDamageStreak, view.config.antiStallRounds)}
-        className="order-last flex min-w-0 items-baseline gap-x-1.5 pc:order-none pc:flex-col pc:items-start pc:gap-0"
-      >
-        <span aria-hidden="true" className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">
-          Sem dano
-        </span>
-        <span aria-hidden="true" data-numero className="font-texto text-lg font-extrabold leading-tight tabular-nums text-ouro pc:text-xl">
-          {noDamageStreak}
-          <span className="text-[13px] font-semibold text-papel pc:text-[15px]"> de {view.config.antiStallRounds}</span>
-        </span>
-      </div>
-
+      {/* No celular, a iniciativa forma a segunda linha da faixa (`order-last`); no PC, fica na linha única. */}
       <div className="order-last flex min-w-0 items-center gap-1.5 pc:order-none">
         <InitiativeMark mine={view.initiative === view.me} />
         <div className="min-w-0 text-xs leading-tight pc:text-[15px]">
@@ -140,12 +120,6 @@ export function CenterBand({
           <span>{initiativeText(view, names)}</span>
         </div>
       </div>
-
-      {untilStall <= 2 && untilStall > 0 ? (
-        <p className="order-last basis-full text-xs font-bold leading-tight text-ouro pc:text-sm">
-          {stallWarning(untilStall)}
-        </p>
-      ) : null}
 
       <div className="ml-auto flex items-center gap-2">
         <div className="flex flex-col items-center">

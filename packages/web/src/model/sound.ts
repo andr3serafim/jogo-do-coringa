@@ -65,7 +65,6 @@ export function cueOf(beat: Beat, me: PlayerId): Cue | null {
     case 'ReactionWindowOpened':
       return event.responder === me ? 'vez' : null;
     case 'GameOver':
-      if (event.result.kind === 'DRAW') return null;
       return event.result.winner === me ? 'vitoria' : 'derrota';
     default:
       return null;

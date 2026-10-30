@@ -90,7 +90,7 @@ const entry = (over: Partial<Omit<PastGame, 'id'>> = {}): Omit<PastGame, 'id'> =
   names: { me: 'Ana', opponent: 'Bot Médio' },
   outcome: { gameNo: 1, result: { kind: 'WIN', winner: 'p1', reason: 'HP' }, cause: 'NORMAL' },
   rounds: 7,
-  score: { p1: 1, p2: 0, draws: 0 },
+  score: { p1: 1, p2: 0 },
   rulesVersion: RULES_VERSION,
   ...over,
 });
@@ -511,7 +511,6 @@ describe('lista de partidas', () => {
       ['sem score', at(['score'], GONE)],
       ['score.p1 em texto', at(['score', 'p1'], '1')],
       ['score.p2 nulo', at(['score', 'p2'], null)],
-      ['sem score.draws', at(['score', 'draws'], GONE)],
       ['rulesVersion em texto', at(['rulesVersion'], '1')],
       ['sem rulesVersion', at(['rulesVersion'], GONE)],
     ];
@@ -544,6 +543,20 @@ describe('lista de partidas', () => {
       const abandoned = { ...rawGame('abandonada'), outcome: { gameNo: 3, result: null, cause: 'ABANDONED' } };
       put(store, [full, draw, abandoned, rawGame('simples')]);
       expect(loadPastGames(store)).toEqual([full, draw, abandoned, rawGame('simples')]);
+    });
+
+    // Foco da revisão 1 da E1: as partidas guardadas até a versão 2 das regras (fim por anti-travamento, empate, placar com
+    // `draws`) continuam na lista. O `draws` fica de fora da entrada lida, e o resultado antigo passa como está.
+    it('uma entrada das regras antigas continua: fim por anti-travamento, empate e o placar com empates', () => {
+      const store = fakeStore();
+      const old = (id: string, result: unknown) => ({ ...rawGame(id), rulesVersion: 2, outcome: { gameNo: 1, result, cause: 'NORMAL' }, score: { p1: 1, p2: 0, draws: 2 } });
+      const won = old('antiga-vitoria', { kind: 'WIN', winner: 'p1', reason: 'ANTI_STALL' });
+      const draw = old('antiga-empate', { kind: 'DRAW', reason: 'ANTI_STALL' });
+      put(store, [won, draw]);
+      const games = loadPastGames(store);
+      expect(games.map((game) => game.id)).toEqual(['antiga-vitoria', 'antiga-empate']);
+      expect(games.map((game) => game.score)).toEqual([{ p1: 1, p2: 0 }, { p1: 1, p2: 0 }]);
+      expect(games.map((game) => game.outcome.result)).toEqual([won.outcome.result, draw.outcome.result]);
     });
 
     describe('no replay', () => {

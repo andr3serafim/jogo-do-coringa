@@ -27,7 +27,7 @@ describe('noPlayReason: por que a carta da mão não tem jogada (B2)', () => {
     expect(reason({ round: 1, roundKind: 'EQUIP', phase: { kind: 'EQUIP' }, p1: hand }, 'K')).toBe('EQUIP_ROUND');
     expect(reason({ phase: { kind: 'ORDER_CHOICE', player: P1 }, p1: hand }, 'J')).toBe('ORDER_CHOICE');
     expect(reason({ phase: { kind: 'ORDER_CHOICE', player: P2 }, p1: hand }, 'J')).toBe('ORDER_CHOICE');
-    const over = { kind: 'GAME_OVER' as const, result: { kind: 'DRAW' as const, reason: 'ANTI_STALL' as const } };
+    const over = { kind: 'GAME_OVER' as const, result: { kind: 'WIN' as const, winner: P2, reason: 'HP' as const } };
     expect(reason({ phase: over, p1: hand }, 'K')).toBe('GAME_OVER');
   });
 

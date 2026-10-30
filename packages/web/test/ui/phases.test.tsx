@@ -97,7 +97,7 @@ function mount(spec: ViewSpec = DRAFT, options: MountOptions = {}) {
   const room = roomMessage({
     status: 'PLAYING',
     seats: me === 'p1' ? [seatOf('p1', 'André'), seatOf('p2', 'Duda')] : [seatOf('p1', 'Duda'), seatOf('p2', 'André')],
-    score: { p1: 0, p2: 0, draws: 0 },
+    score: { p1: 0, p2: 0 },
     ...options.room,
   });
   const connection = new FakeConnection({ playerId: me, room, state: stateMessage(view, options.state), now: 0 });
@@ -1007,7 +1007,7 @@ describe('avisos (spec §3.9, §6.2)', () => {
     expect(history.queryByText('Duda voltou')).not.toBeInTheDocument();
     act(() =>
       m.connection.emitRoom(
-        roomMessage({ status: 'PLAYING', seats: [seatOf('p1', 'André'), seatOf('p2', 'Duda')], score: { p1: 0, p2: 0, draws: 0 } }),
+        roomMessage({ status: 'PLAYING', seats: [seatOf('p1', 'André'), seatOf('p2', 'Duda')], score: { p1: 0, p2: 0 } }),
       ),
     );
     expect(screen.queryByText(/Duda caiu/)).not.toBeInTheDocument();

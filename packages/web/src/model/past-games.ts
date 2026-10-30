@@ -16,6 +16,14 @@ export const DEDUPE_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 export type PastGameMode = { kind: 'training'; level: TrainingLevel } | { kind: 'online'; code: string };
 
+/**
+ * Resultado guardado pelas regras até a versão 2, quando o anti-travamento encerrava a partida: vitória de quem tinha mais vida
+ * ou empate. O motor não o produz mais (E1 do sub-projeto 5), mas a lista continua mostrando essas partidas.
+ */
+export type LegacyResult = { kind: 'WIN'; winner: PlayerId; reason: 'ANTI_STALL' } | { kind: 'DRAW'; reason: 'ANTI_STALL' };
+export type StoredResult = GameResult | LegacyResult;
+export type StoredOutcome = Omit<Outcome, 'result'> & { result: StoredResult | null };
+
 export interface PastGame {
   /** Curto e seguro para a URL (`/partidas/<id>`). */
   id: string;
@@ -27,7 +35,7 @@ export interface PastGame {
   /** O assento de quem guardou, de onde o replay é visto. */
   seat: PlayerId;
   names: { me: string; opponent: string };
-  outcome: Outcome;
+  outcome: StoredOutcome;
   rounds: number;
   /** O placar da sala depois desta partida. */
   score: Score;
@@ -41,13 +49,13 @@ export interface PastGame {
 // Cada tabela cobre todos os valores do tipo: se o tipo ganhar um valor novo, o compilador pede a linha aqui.
 const LEVELS: Record<TrainingLevel, true> = { facil: true, medio: true, dificil: true };
 const CAUSES: Record<OutcomeCause, true> = { NORMAL: true, RECONNECT_TIMEOUT: true, AFK: true, CONCEDE: true, ABANDONED: true };
-const WIN_REASONS: Record<Extract<GameResult, { kind: 'WIN' }>['reason'], true> = {
+const WIN_REASONS: Record<Extract<StoredResult, { kind: 'WIN' }>['reason'], true> = {
   HP: true,
   EXODIA: true,
   ANTI_STALL: true,
   FORFEIT: true,
 };
-const DRAW_REASONS: Record<Extract<GameResult, { kind: 'DRAW' }>['reason'], true> = { ANTI_STALL: true };
+const DRAW_REASONS: Record<Extract<StoredResult, { kind: 'DRAW' }>['reason'], true> = { ANTI_STALL: true };
 
 type Json = Record<string, unknown>;
 
@@ -63,19 +71,20 @@ function isMode(value: unknown): value is PastGameMode {
   return value.kind === 'online' && isText(value.code);
 }
 
-function isResult(value: unknown): value is GameResult | null {
+function isResult(value: unknown): value is StoredResult | null {
   if (value === null) return true;
   if (!isRecord(value)) return false;
   if (value.kind === 'WIN') return isText(value.winner) && isOneOf(WIN_REASONS, value.reason);
   return value.kind === 'DRAW' && isOneOf(DRAW_REASONS, value.reason);
 }
 
-function isOutcome(value: unknown): value is Outcome {
+function isOutcome(value: unknown): value is StoredOutcome {
   return isRecord(value) && isNumber(value.gameNo) && isOneOf(CAUSES, value.cause) && isResult(value.result);
 }
 
+/** O placar guardado até a versão 2 trazia `draws`: a entrada vale, e o campo fica de fora (`parsePastGame`). */
 function isScore(value: unknown): value is Score {
-  return isRecord(value) && isNumber(value.p1) && isNumber(value.p2) && isNumber(value.draws);
+  return isRecord(value) && isNumber(value.p1) && isNumber(value.p2);
 }
 
 function isNames(value: unknown): value is PastGame['names'] {
@@ -106,7 +115,7 @@ function parsePastGame(value: unknown): PastGame | null {
   if (!isText(id) || !isText(seat) || (key !== undefined && typeof key !== 'string')) return null;
   if (!isNumber(date) || !isNumber(rounds) || !isNumber(rulesVersion)) return null;
   if (!isMode(mode) || !isNames(names) || !isOutcome(outcome) || !isScore(score)) return null;
-  const game: PastGame = { id, date, mode, seat, names, outcome, rounds, score, rulesVersion };
+  const game: PastGame = { id, date, mode, seat, names, outcome, rounds, score: { p1: score.p1, p2: score.p2 }, rulesVersion };
   if (key !== undefined) game.key = key;
   if (replay !== undefined && isReplay(replay)) game.replay = replay;
   return game;

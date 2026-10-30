@@ -50,7 +50,7 @@ export function replayFile(path: string): ReplayOutcome {
 
 function describeResult(result: GameResult | null): string {
   if (result === null) return 'sem resultado (partida abandonada ou incompleta)';
-  return result.kind === 'WIN' ? `${result.winner} venceu (${result.reason})` : `empate (${result.reason})`;
+  return `${result.winner} venceu (${result.reason})`;
 }
 
 if (import.meta.main) {

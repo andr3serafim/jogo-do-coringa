@@ -212,7 +212,7 @@ describe('returnNote: a volta do oponente (spec §3.9)', () => {
     code: 'ABCD',
     status: 'PLAYING',
     seats: [seat('p1', 'André', true), seat('p2', 'Duda', opponentConnected)],
-    score: { p1: 0, p2: 0, draws: 0 },
+    score: { p1: 0, p2: 0 },
     gameNo: 1,
     expiresAt: 0,
     ...extra,

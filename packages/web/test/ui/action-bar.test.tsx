@@ -70,7 +70,7 @@ function mount(spec: ViewSpec = DRAFT, options: MountOptions = {}) {
   const room = roomMessage({
     status: 'PLAYING',
     seats: me === 'p1' ? [seatOf('p1', 'André'), seatOf('p2', 'Duda')] : [seatOf('p1', 'Duda'), seatOf('p2', 'André')],
-    score: { p1: 0, p2: 0, draws: 0 },
+    score: { p1: 0, p2: 0 },
   });
   const connection = new FakeConnection({ playerId: me, room, state: stateMessage(view, options.state), now: 0 });
   const session = new Session(connection, { now: () => 0, setTimer: () => 0, clearTimer: () => undefined });

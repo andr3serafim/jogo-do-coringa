@@ -33,8 +33,6 @@ import { AppLink, Button } from '../parts.tsx';
 export interface HintPanelProps {
   /** A dica no painel; `null`: nada a mostrar (a região viva segue montada, vazia). A do fim vai no painel de fim, e não aqui. */
   hint: Exclude<HintId, 'end'> | null;
-  /** `config.antiStallRounds` da partida: a dica 9 diz quantas rodadas sem dano encerram a partida. */
-  antiStallRounds: number;
   /** "Entendi": a dica fica vista, e a próxima que valer ocupa o painel. */
   onGotIt: () => void;
   /** "Pular o tutorial": grava `skipped` e esconde o painel; a partida segue. */
@@ -48,7 +46,7 @@ function focusTable(): void {
   target?.focus({ preventScroll: true });
 }
 
-export function HintPanel({ hint, antiStallRounds, onGotIt, onSkip }: HintPanelProps) {
+export function HintPanel({ hint, onGotIt, onSkip }: HintPanelProps) {
   const focusInside = useRef(false);
   const root = useRef<HTMLElement>(null);
   // O primeiro desenho vai sem dica: a região viva já está na página quando o texto entra.
@@ -98,7 +96,7 @@ export function HintPanel({ hint, antiStallRounds, onGotIt, onSkip }: HintPanelP
             <p aria-hidden="true" className="font-madeira text-sm uppercase leading-none tracking-wide">
               {HINT_PANEL_LABEL}
             </p>
-            {hintParagraphs(shown, antiStallRounds).map((text) => (
+            {hintParagraphs(shown).map((text) => (
               <p key={text} className="text-[14px] leading-snug">
                 {text}
               </p>

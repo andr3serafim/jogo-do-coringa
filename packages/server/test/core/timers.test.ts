@@ -487,7 +487,7 @@ describe('estouros e W.O. (§7.3)', () => {
     ]);
     expect(rec.status).toBe('FINISHED');
     expect(rec.outcome).toEqual({ gameNo: 1, result: { kind: 'WIN', winner: 'p2', reason: 'FORFEIT' }, cause: 'AFK', durationMs: expect.any(Number) });
-    expect(rec.score).toEqual({ p1: 0, p2: 1, draws: 0 });
+    expect(rec.score).toEqual({ p1: 0, p2: 1 });
     expect(rec.game!.steps.at(-1)).toEqual({ player: 'system', action: { type: 'FORFEIT', loser: 'p1' } });
     const evts = h.logs.map((line) => line.evt);
     expect(evts.slice(-3)).toEqual(['wo.applied', 'game.ended', 'game.replay']);
@@ -607,7 +607,7 @@ describe('schedulePhase e stateFor direto', () => {
 
     const { h } = await armed(setup({}));
     const rec = h.core.record!;
-    rec.game!.state.phase = { kind: 'GAME_OVER', result: { kind: 'DRAW', reason: 'ANTI_STALL' } };
+    rec.game!.state.phase = { kind: 'GAME_OVER', result: { kind: 'WIN', winner: 'p1', reason: 'HP' } };
     rec.game!.pausedTurnMs = 123;
     schedulePhase(rec, { key: 'outra', phase: { kind: 'EQUIP' }, deadlineAt: null }, [], h.now);
     expect(rec.game!.phaseDeadlineAt).toBeNull();
