@@ -13,6 +13,10 @@ export function cardText(card: Card): string {
 export const cardsText = (cards: Card[]): string => (cards.length === 0 ? '—' : cards.map(cardText).join(' '));
 
 export const ROW_NAME: Record<RowName, string> = { ATK: 'Ataque', DEF: 'Defesa' };
+/** A fileira com o artigo: "saiu do Ataque", "saiu da Defesa". */
+const FROM_ROW: Record<RowName, string> = { ATK: 'do Ataque', DEF: 'da Defesa' };
+/** "uma quadra no Ataque", "uma quadra na Defesa". */
+const IN_ROW: Record<RowName, string> = { ATK: 'no Ataque', DEF: 'na Defesa' };
 
 /** Nomes exibidos: "Você" / "Bot (greedy)", e a forma com "de" ("de você" / "do Bot (greedy)"). */
 export interface Names {
@@ -162,9 +166,9 @@ export function eventText(e: GameEvent, names: Names): string | null {
     case 'BuffRemoved':
       return `${who(e.player)} perdeu ${cardsText(e.cards)} dos buffs`;
     case 'CardsRemovedFromRow':
-      return e.cards.length === 0 ? null : `Saiu ${cardsText(e.cards)} do ${ROW_NAME[e.row]} ${de(e.player)}`;
+      return e.cards.length === 0 ? null : `Saiu ${cardsText(e.cards)} ${FROM_ROW[e.row]} ${de(e.player)}`;
     case 'QuadFormed':
-      return `${who(e.player)} formou uma quadra de ${e.quad.value} no ${ROW_NAME[e.quad.row]}: +${e.quad.value} e 1 Ressurreição`;
+      return `${who(e.player)} formou uma quadra de ${e.quad.value} ${IN_ROW[e.quad.row]}: +${e.quad.value} e 1 Ressurreição`;
     case 'QuadBroken':
       return `A quadra de ${e.quad.value} ${de(e.player)} se desfez`;
     case 'Resurrected':

@@ -182,10 +182,16 @@ Texto dele em `docs/memoria/decisoes.md` (2026-10-30, "Anotações novas"). As p
   - **Restrições:** não pode ser lançada contra quem está sob Defesa Absoluta. O Selvagem faz o papel do A, do J ou do Q, nunca
     do K. As cartas destruídas pela Devastação não curam.
   - **Cena:** cinematográfica, à altura, dentro da `FlashLock` e do movimento reduzido (spec da web §10.4).
-- **F4. Ataque vazio** [bug relatado pelo autor em 2026-10-30]. Ele jogou a versão de depois de 27/10 e viu a Defesa perder
-  carta depois de um atacante sem cartas no Ataque. Reproduzir e corrigir com systematic-debugging.
-- **F5. Tabuleiro quebrado** [bug de layout]. No PC de 1536 × 695 (área visível), a área dos especiais equipados (buffs e
-  Guarda) quebra quando aparecem os avisos de Ressurreição, dos Absolutos, do Reflect etc. Reproduzir nesse tamanho e corrigir.
+- **F4. Ataque vazio** [bug relatado pelo autor em 2026-10-30; investigado, sem bug no motor nem na mesa]. O motor recusa o
+  ataque com o Ataque vazio, e nenhuma Defesa perdeu carta sem ataque em 2.000 partidas simuladas nem numa partida de treino
+  jogada de tartaruga. Explicações levadas ao autor: a Defesa Absoluta, que acaba e gasta 1 Q no fim do próximo turno do
+  oponente mesmo sem ataque; ou o atacante de uma carta só, que fica com o Ataque vazio depois do golpe. Detalhes em
+  `docs/memoria/notas/revisao-das-notas.md`.
+- **F5. Tabuleiro quebrado** [corrigido]. No PC de 1536 × 695 (mesa compacta), as zonas dos especiais se espremiam
+  (`min-height: 0`) e a lista das marcas ocupava a coluna inteira (`flex-basis: 100%`, pensado para o celular). Agora nenhuma
+  zona encolhe abaixo das cartas e as marcas têm a altura delas; o campo cresce junto. Coberto por `e2e/layout.spec.ts`
+  (1536 × 695, 1366 × 657 e 1440 × 900). Com o Reflect reativo (F2), a zona "Reflect ativo" deixa de existir e a coluna
+  encolhe de novo.
 - **F6, F7 e F8** (ver todas as cartas; Absolutos e Exódia mais longos; movimentos suaves): a F6 é a E2; a F7 e a F8 entraram
   na Fase C (`bba8377`). O autor jogou depois de 27/10 e achou que nem tudo das notas foi feito: **revisar uma a uma, no jogo,
   todas as notas de 23/10 e de 30/10** (registro em `docs/memoria/notas/revisao-das-notas.md`).

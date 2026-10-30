@@ -36,6 +36,19 @@ describe('textos em pt-BR', () => {
     expect(e({ type: 'GameOver', result: { kind: 'DRAW', reason: 'ANTI_STALL' } })).toContain('empate');
   });
 
+  it('a fileira leva o artigo certo: do Ataque, da Defesa, no Ataque, na Defesa', () => {
+    const e = (event: GameEvent) => eventText(event, names);
+    const seven = { id: 's', kind: 'NUM', value: 7, suit: 'ouros' } as const;
+    expect(e({ type: 'CardsRemovedFromRow', player: P2, row: 'DEF', cards: [seven] })).toBe('Saiu 7♦ da Defesa do Bot');
+    expect(e({ type: 'CardsRemovedFromRow', player: P1, row: 'ATK', cards: [seven] })).toBe('Saiu 7♦ do Ataque de você');
+    expect(e({ type: 'QuadFormed', player: P2, quad: { row: 'DEF', value: 6 } })).toBe(
+      'Bot formou uma quadra de 6 na Defesa: +6 e 1 Ressurreição',
+    );
+    expect(e({ type: 'QuadFormed', player: P1, quad: { row: 'ATK', value: 9 } })).toBe(
+      'Você formou uma quadra de 9 no Ataque: +9 e 1 Ressurreição',
+    );
+  });
+
   it('o Selvagem na Armadilha e no Sacrifício diz o papel', () => {
     const e = (event: GameEvent) => eventText(event, names);
     const wild = { id: 'w', kind: 'WILD' } as const;

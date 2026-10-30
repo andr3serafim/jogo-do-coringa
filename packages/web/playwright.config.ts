@@ -56,7 +56,7 @@ export default defineConfig({
   projects: [
     {
       name: 'desktop',
-      testMatch: ['online.spec.ts', 'training.spec.ts', 'replay.spec.ts', 'sound.spec.ts', 'tutorial.spec.ts', 'drag.spec.ts'],
+      testMatch: ['online.spec.ts', 'training.spec.ts', 'replay.spec.ts', 'sound.spec.ts', 'tutorial.spec.ts', 'drag.spec.ts', 'layout.spec.ts'],
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
     },
     {

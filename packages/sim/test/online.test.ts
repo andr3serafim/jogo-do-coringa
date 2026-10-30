@@ -136,11 +136,12 @@ describe('askChoice e o jogo offline com AbortSignal', () => {
     // O playGame offline (semente 'roteiro', sempre a opção 1) segue idêntico ao de antes da refatoração. A saída só mudou numa
     // linha no polimento: a Armadilha do Bot com Selvagem passou a dizer o papel ("com Selvagem (como A)"); as jogadas, não. No
     // sub-projeto 5 a Pressão da mesa saiu e o anti-travamento caiu para 3 rodadas: a saída e as jogadas mudaram (a partida acaba no
-    // anti-travamento). Na Fase D (vida 500, fileiras de 8, 8 Ás) mudaram de novo.
+    // anti-travamento). Na Fase D (vida 500, fileiras de 8, 8 Ás) mudaram de novo. Em 2026-10-30 só a saída mudou: "Saiu … da
+    // Defesa" e "quadra … na Defesa" no lugar de "do Defesa" e "no Defesa".
     const game = scriptedIo(() => '1');
     const outcome = await playGame({ io: game, seed: 'roteiro', bot: 'greedy', config: makeConfig(), saveDir: null });
     const sha = (text: string) => createHash('sha256').update(text).digest('hex');
-    expect(sha(game.output.join('\n'))).toBe('3dc0f8a59b215d3088c8241f577a4867c88d2eb8314d69f7529d7f14eb4ea6f0');
+    expect(sha(game.output.join('\n'))).toBe('98e3d8d976e1d715559b0bd15d09504e1df13c4ab13c85f4dc4a57dfd6cb2b52');
     expect(sha(JSON.stringify(outcome.replay.steps))).toBe('e7ee6c59a87263f640db3c73591178caba1a09c270c936e6436699488eb28bd6');
     expect(outcome.replay.steps).toHaveLength(165);
   });

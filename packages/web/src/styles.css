@@ -357,8 +357,13 @@
       justify-content: flex-end;
     }
 
+    /*
+     * Na coluna, nenhuma zona encolhe abaixo das próprias cartas: com o Reflect ativo e as marcas, a coluna cresce e o campo
+     * cresce junto (na mesa compacta, o `min-height: 0` deixaria a Guarda e os buffs se espremerem uns sobre os outros).
+     */
     .campo-zona {
       flex-direction: row;
+      flex-shrink: 0;
       align-items: center;
       gap: 0.625rem;
       min-height: 3.5rem;
@@ -366,6 +371,12 @@
       @variant pc-baixo {
         min-height: 0;
       }
+    }
+
+    /* No celular as marcas ocupam a linha inteira (`flex-basis: 100%`); na coluna do PC isso seria a altura inteira dela. */
+    .campo-grade > .campo-zonas > .campo-estado {
+      flex-basis: auto;
+      flex-shrink: 0;
     }
 
     .campo-zona > .zona-titulo {

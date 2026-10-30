@@ -6,14 +6,17 @@
 ## Agora
 
 - **Branch:** `feat/revisao-notas`, no checkout principal `D:\andr3\jogo-coringa`, a partir da `main` em `755ddc0`.
-- **Em curso:**
-  - as respostas do autor ao lote de 2026-10-30 estão no `decisoes.md` ("2026-10-30 (2)") e na spec do sub-projeto 5 (F2, F3);
-  - investigação do bug do **Ataque vazio** (F4: a Defesa perde carta depois de um atacante sem cartas no Ataque);
-  - depois, o **tabuleiro quebrado** no PC de 1536 × 695 (F5) e a **revisão, no jogo, de todas as notas** de 23/10 e de 30/10,
-    a pedido do autor ("nem todos os pontos levantados foram feitos"). O registro da revisão vai em
-    `notas/revisao-das-notas.md`.
-- **Próximo passo exato:** reproduzir o Ataque vazio. Primeiro no motor (partidas bot × bot, procurando uma Defesa que perde
-  carta num turno em que o Ataque do atacante estava vazio), depois na web (o que a mesa mostra).
+- **Feito nesta branch:**
+  - as respostas do autor ao lote de 2026-10-30 no `decisoes.md` ("2026-10-30 (2)") e na spec (F2, F3);
+  - **F5 corrigido:** o tabuleiro quebrado no PC de 1536 × 695, no CSS, com o E2E novo `e2e/layout.spec.ts` e a fixture
+    `e2e/fixtures/especiais.json`;
+  - **F4 investigado, sem bug** no motor nem na mesa; as explicações voltaram ao autor;
+  - a revisão de todas as notas, em `notas/revisao-das-notas.md`;
+  - o histórico agora diz "da Defesa" e "na Defesa", em vez de "do Defesa" e "no Defesa".
+- **Próximo passo exato:** subir a branch (o pre-push roda o `pnpm check`), esperar a CI (check + e2e) e fazer o merge por
+  fast-forward na `main`. Depois, começar a **E1** numa branch `feat/sem-anti-travamento`.
+- **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
+  `jogar-treino.bat` do autor.
 
 ## A `main`
 
@@ -24,7 +27,7 @@
 
 ## Fila (sub-projeto 5)
 
-1. **Bugs e revisão (esta branch):** F4 Ataque vazio, F5 tabuleiro quebrado, revisão de todas as notas.
+1. **Merge desta branch** (F5, revisão das notas, textos do histórico).
 2. **E1:** sem anti-travamento e sem limite de rodadas. `RULES_VERSION`/`STATE_SCHEMA` 3, partidas de referência regravadas,
    portão do Difícil do zero.
 3. **E2:** Equipar livre.
@@ -34,6 +37,9 @@
 
 ## Esperando o autor
 
+- **F4, Ataque vazio:** qual das duas explicações bate com o que ele viu (`notas/revisao-das-notas.md`). Se for a Defesa
+  Absoluta, a decisão de regra é dele: ela continua acabando (e gastando 1 Q) sem ataque, ou só depois de um ataque de fato?
+- **Notas 6 a 8:** o que ainda parece faltar, já que as entregas da Fase C estão no jogo.
 - **[I] a confirmar, junto com os números da E3:**
   - Defesa Absoluta contra o Reflect: o Reflect segura o golpe (o dono leva 0), mas não devolve dano nem quebra Q e K do
     atacante?
