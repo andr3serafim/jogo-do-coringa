@@ -233,7 +233,8 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
             className="flex min-w-0 flex-1 list-none flex-wrap gap-2 p-1.5 pc:flex-col pc:flex-nowrap"
           >
             {options.map((destination, i) => (
-              <li key={destination} className="min-w-0 flex-1 pc:flex-none">
+              // No celular, no máximo dois por linha (com as fileiras cheias, o terceiro destino desce e ocupa a linha toda).
+              <li key={destination} className="min-w-[calc(50%-0.25rem)] flex-1 pc:min-w-0 pc:flex-none">
                 <button
                   type="button"
                   data-foco={i === 0 ? '' : undefined}
