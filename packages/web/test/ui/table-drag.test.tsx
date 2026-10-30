@@ -700,6 +700,16 @@ describe('arrastar o Equipar', () => {
     expect(equipCard().style.touchAction).toBe('');
   });
 
+  it('travada (conexão caída), as numéricas do Equipar apagam como a mão, e o toque não as escolhe', async () => {
+    const m = mount(EQUIP);
+    const second = m.view.self.pending[1]!;
+    act(() => m.connection.emitClosed(1006));
+    expect(equipCard(second.id)).toHaveAttribute('aria-disabled', 'true');
+    expect(equipCard(second.id)).toHaveClass('cursor-wait');
+    await m.user.click(equipCard(second.id));
+    expect(equipCard(second.id)).toHaveAttribute('aria-pressed', 'false');
+  });
+
   it('com a conexão caída a carta do Equipar não arrasta', () => {
     const m = mount(EQUIP);
     act(() => m.connection.emitClosed(1006));

@@ -11,6 +11,8 @@ import { actionBar, ATTACK_BUTTON, axe, equipByUi, equipPanel, expectNoHorizonta
 
 /** O tutorial sem o painel da dica: a mão do Equipar 1 vem com J, K e A, e a iniciativa da rodada 3 é sua. */
 const TRAINING = '/treino?semente=tutorial-2431&nivel=facil';
+/** Uma semente cuja rodada 1 traz 4 numéricas e nenhuma especial (Equipar livre, E2). */
+const FOUR_NUMERICS = '/treino?semente=e2-1&nivel=facil';
 
 // As zonas de soltura (`data-soltar`, `model/drag.ts`).
 const ZONE = {
@@ -189,27 +191,25 @@ test('Equipar: o botão do destino segue valendo, e as duas formas se misturam (
   guard.expectClean();
 });
 
-test('Equipar livre (E2): a última numérica arrasta primeiro e entra na frente da fila do Ataque', async ({ page }) => {
+test('Equipar livre (E2): a última das 4 numéricas arrasta primeiro e entra na frente da fila do Ataque', async ({ page }) => {
   const guard = failOnConsoleErrors(page);
-  await page.goto(TRAINING);
+  await page.goto(FOUR_NUMERICS);
   await expect(table(page)).toBeVisible();
-  await equipByUi(page);
-  await expect(roundHeading(page)).toHaveText('Rodada 2');
+  await expect(roundHeading(page)).toHaveText('Rodada 1');
   const panel = equipPanel(page);
+  await expect(panel.getByText('Faltam 4 cartas')).toBeVisible();
   const cards = panel.getByRole('list', { name: 'Suas numéricas' }).locator('[data-card-id]');
-  await expect(cards.first()).toBeVisible();
-  const total = await cards.count();
-  expect(total, 'a rodada 2 do treino traz mais de uma numérica').toBeGreaterThan(1);
+  await expect(cards).toHaveCount(4);
+  await expectNoHorizontalScroll(page);
   const lastId = await cards.last().getAttribute('data-card-id');
-  const before = await myRow(page, 'ATK').locator('[data-card-id]').count();
 
   await drag(page, cards.last(), myRow(page, 'ATK'));
-  // A carta escolhida sai da lista e entra no fim do Ataque, como rascunho, antes das que faltam.
+  // A carta escolhida sai da lista e entra no Ataque (vazio na rodada 1) como rascunho: é a primeira da fila.
   await expect(myRow(page, 'ATK').locator(`[data-rascunho][data-card-id="${lastId}"]`)).toHaveCount(1);
-  await expect(cards).toHaveCount(total - 1);
-  await expect(panel.locator(`[data-card-id="${lastId}"]`)).toHaveCount(0);
-  await expect(myRow(page, 'ATK').locator('[data-card-id]').nth(before)).toHaveAttribute('data-card-id', lastId!);
-  await expectNoHorizontalScroll(page);
+  await expect(cards).toHaveCount(3);
+  await expect(panel.getByText('Faltam 3 cartas')).toBeVisible();
+  await expect(myRow(page, 'ATK').locator('[data-card-id]').first()).toHaveAttribute('data-card-id', lastId!);
+  await axe(page);
   guard.expectClean();
 });
 

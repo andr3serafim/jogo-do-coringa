@@ -6,6 +6,19 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-10-30 (5): a E2 liberada
+
+À pergunta "Posso começar a E2 (Equipar livre)?", depois do merge da E1:
+
+> ok, pode começar a E2
+
+**Leitura:** a E2 segue a spec do sub-projeto 5 (E2) e a decisão de 2026-10-30 (2), item 8. As escolhas de interface que ele
+não descreveu ficaram como leituras **[I]**, no `estado.md` ("Esperando o autor"): sem tocar numa carta, o destino vale para a
+primeira que falta; no envio antecipado e no tempo esgotado, as que faltam entram depois das escolhidas, na ordem de compra; o
+terminal do simulador segue na ordem de compra.
+
+---
+
 ## 2026-10-30 (4): Defesa Absoluta até o ataque; Absolutos em 3 s
 
 Respostas às duas perguntas do fechamento da revisão das notas (F4 e notas 6 a 8):

@@ -5,6 +5,30 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-10-30 (4): E2, Equipar livre
+
+- **Liberação do autor:** "ok, pode começar a E2" (`decisoes.md` 2026-10-30 (5)).
+- **Plano:** `docs/superpowers/plans/2026-10-30-e2-equipar-livre.md`, executado aqui mesmo, com TDD. Commits na
+  `feat/equipar-livre`: `3a9a82a` (motor e protocolo), `ce5c897` (rascunho por carta na web), `ea567a8` e `16c56ed` (painel),
+  `7ba5bf8` (specs e `CLAUDE.md`), mais o ajuste da revisão e os de memória.
+- **Decisões técnicas:**
+  - a ação `EQUIP` ganhou `order` **opcional**; sem ela vale a ordem de compra. Os bots, o tempo esgotado, o terminal e os
+    replays guardados não mudam, as partidas de referência saíram idênticas (digest 3), e nem `RULES_VERSION` nem
+    `STATE_SCHEMA` subiram (o `GameState` não ganhou campo: ao confirmar, o motor só reordena `pending`);
+  - `legalActions` segue canônica, sem `order` (um teste amarra isso): com ordem livre seriam até 4! vezes mais lances na
+    busca do Difícil;
+  - a `order` malformada usa códigos que já existiam (`INVALID_DESTINATIONS`, `DUPLICATE_CARDS`, `INVALID_CARD`);
+  - na web, o rascunho virou uma lista de escolhas (carta + destino) e `equipChoose(destino, carta?)`; sem carta, a primeira que
+    falta, então o fluxo de um toque por destino, o tutorial e os E2E seguem iguais;
+  - o cabeçalho do painel passou de "Carta N de M" a "Faltam N cartas".
+- **Conferido no navegador embutido:** semente `e2-1` (4 numéricas na rodada 1), a 1536 × 695 e a 375 × 812, sem rolagem
+  horizontal; a 4ª carta escolhida entra na frente do Ataque.
+- **Revisão final (autorrevisão, sem revisor independente):** as numéricas do painel não apagavam com a mesa travada (pareciam
+  clicáveis); corrigido com teste. O E2E local pegou o painel alto demais no celular com 1 numérica (a fileira de Defesa saía
+  da vista): os destinos voltaram para o lado das cartas até 2 numéricas, e só embaixo com 3 ou mais.
+- **Armadilha:** um script `node` grande num heredoc do bash quebrou com crases dentro; gravar o script num arquivo do
+  scratchpad (ferramenta Write) e rodar `node arquivo` funciona.
+
 ## 2026-10-30 (3): E1, sem anti-travamento, Defesa Absoluta até o ataque, Absolutos em 3 s
 
 - **Respostas do autor:** "Espere minhas respostas" (a E1 esperou), depois "Defesa absoluta dura até o oponente atacar de

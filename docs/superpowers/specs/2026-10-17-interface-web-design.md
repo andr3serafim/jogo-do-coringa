@@ -366,7 +366,7 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
 - A escolha aparece na fileira como rascunho (carta translúcida), e os totais e a quadra se atualizam. Exemplo: "forma quadra de 7: +7 e 1 Ressurreição".
 - **Desfazer** volta um passo; **Recomeçar** volta ao início.
 - Qualquer numérica que falta também se **arrasta** até a fileira (ou até a última carta de uma fileira cheia, ou o cemitério, que são os destinos que o motor deixa); os botões de destino seguem valendo, e os dois caminhos se misturam carta a carta. Tocar numa carta só a escolhe.
-- No celular, as cartas ficam em cima e os destinos embaixo, no máximo dois por linha; no PC, os destinos em coluna ao lado das cartas.
+- Os destinos ficam em coluna ao lado das cartas. No celular, com 3 ou mais numéricas por pôr, não cabem: as cartas ficam em cima e os destinos embaixo, no máximo dois por linha.
 - Com todas posicionadas, aparece **Confirmar**, sem envio automático na hora. Depois de confirmar, aparece "Esperando Duda montar…".
 - Especiais recebidas vão para a mão e aparecem chegando lá.
 - Quem não recebeu numéricas tem o Equipar enviado pelo servidor (spec 2 §5). A interface mostra "Você não recebeu numéricas nesta rodada".

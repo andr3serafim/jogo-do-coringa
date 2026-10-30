@@ -123,6 +123,7 @@ function PendingCard({
   card,
   selected,
   enabled,
+  locked,
   zones,
   onSelect,
   onDrop,
@@ -130,6 +131,8 @@ function PendingCard({
   card: NumCard;
   selected: boolean;
   enabled: boolean;
+  /** Mesa travada (jogada em voo, reconexão, prazo esgotado): a carta apaga como a da mão, e o toque não a escolhe. */
+  locked: boolean;
   zones: () => ReadonlySet<DropKey>;
   onSelect: () => void;
   onDrop: (key: DropKey | null) => void;
@@ -143,6 +146,7 @@ function PendingCard({
         size="hand"
         animated={false}
         selected={selected}
+        disabled={locked}
         onSelect={onSelect}
         dragRef={bind}
         grabbable={enabled}
@@ -162,6 +166,8 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
   const selected = remaining.find((card) => card.id === pickedId) ?? remaining[0];
   const board = draftBoard(view, draft);
   const options = complete ? [] : nextDestinations(view, legal, draft);
+  /** Até duas numéricas por pôr, os destinos cabem ao lado delas mesmo no celular. */
+  const besideCards = remaining.length <= 2;
   const focusFirstStep = () => panelRef.current?.querySelector<HTMLElement>('[data-foco]:not(:disabled)')?.focus();
   /** As zonas do destino da próxima carta, na hora (a soltura confere de novo com a lista de agora). */
   const dropZones = () => new Set(equipDropZones(view, legal, draft).keys());
@@ -210,8 +216,9 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
           ))}
         </ol>
       ) : (
-        // No celular, as cartas em cima e os destinos embaixo, lado a lado; no PC, os destinos em coluna ao lado das cartas.
-        <div className="flex flex-col gap-2 pc:flex-row pc:items-start pc:gap-3">
+        // Os destinos em coluna ao lado das cartas, como antes da E2. No celular, com 3 ou mais numéricas por pôr não sobra largura:
+        // as cartas ficam em cima e os destinos embaixo, no máximo dois por linha. A altura do painel é curta no celular.
+        <div className={`flex gap-3 ${besideCards ? 'flex-row items-start' : 'flex-col gap-2 pc:flex-row pc:items-start pc:gap-3'}`}>
           {/* O espaço de cima é o da carta escolhida, que sobe como na mão. */}
           <ul role="list" aria-label="Suas numéricas" data-step="cartas" className="flex flex-none list-none flex-wrap gap-2 p-0 pt-3.5">
             {remaining.map((card) => (
@@ -220,6 +227,7 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
                 card={card}
                 selected={card.id === selected?.id}
                 enabled={!disabled && options.length > 0}
+                locked={disabled}
                 zones={dropZones}
                 onSelect={() => select(card.id)}
                 onDrop={dropCard(card.id)}
@@ -230,11 +238,11 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
             role="list"
             aria-label="Destinos"
             data-step="destinos"
-            className="flex min-w-0 flex-1 list-none flex-wrap gap-2 p-1.5 pc:flex-col pc:flex-nowrap"
+            className={`flex min-w-0 flex-1 list-none gap-2 p-1.5 ${besideCards ? 'flex-col' : 'flex-wrap pc:flex-col pc:flex-nowrap'}`}
           >
             {options.map((destination, i) => (
-              // No celular, no máximo dois por linha (com as fileiras cheias, o terceiro destino desce e ocupa a linha toda).
-              <li key={destination} className="min-w-[calc(50%-0.25rem)] flex-1 pc:min-w-0 pc:flex-none">
+              // Embaixo, no máximo dois por linha (com as fileiras cheias, o terceiro destino desce e ocupa a linha toda).
+              <li key={destination} className={besideCards ? undefined : 'min-w-[calc(50%-0.25rem)] flex-1 pc:min-w-0 pc:flex-none'}>
                 <button
                   type="button"
                   data-foco={i === 0 ? '' : undefined}
