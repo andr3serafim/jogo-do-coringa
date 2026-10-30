@@ -1,9 +1,9 @@
-import { viewFor, type GameEvent, type NumCard, type PlayerView, type Rank } from '@coringa/engine';
+import { viewFor, type Destination, type GameEvent, type NumCard, type PlayerView, type Rank } from '@coringa/engine';
 import type { Deadline } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
 import { ORDER_AUTO_MS, shouldAutoPass } from '../../src/model/automation.ts';
 import { AUTO_PASS_NOTICE } from '../../src/model/copy.ts';
-import { completeDraft } from '../../src/model/equip.ts';
+import { completeDraft, equipAction, type EquipPick } from '../../src/model/equip.ts';
 import { NO_MARKS, zoneKey } from '../../src/model/marks.ts';
 import { legalFor } from '../../src/model/plays.ts';
 import { Session, type SessionDeps } from '../../src/model/session.ts';
@@ -352,6 +352,9 @@ function equipView(pending: Rank[], attackRow: Rank[] = [2], defenseRow: Rank[] 
 
 const EQUIP_DEADLINE: Deadline = { kind: 'EQUIP', at: 10_000, players: ['p1', 'p2'] };
 
+/** As escolhas na ordem de compra (`pend-0`, `pend-1`, …), o fluxo de um toque por destino. */
+const picked = (...destinations: Destination[]): EquipPick[] => destinations.map((destination, i) => ({ cardId: `pend-${i}`, destination }));
+
 /** Sessão no Equipar, com `remaining` ms no relógio do servidor. */
 function equipSetup(remaining: number, pending: Rank[] = [5, 6, 4]) {
   const view = equipView(pending);
@@ -368,7 +371,7 @@ describe('Session: envio antecipado do Equipar (spec §3.5)', () => {
       {
         type: 'act',
         id: 'fake-1',
-        action: { type: 'EQUIP', destinations: completeDraft(view, ['ATK']) },
+        action: equipAction(completeDraft(view, picked('ATK'))),
         options: undefined,
       },
     ]);
@@ -390,7 +393,7 @@ describe('Session: envio antecipado do Equipar (spec §3.5)', () => {
     clock.advance(1);
     expect(connection.sent).toHaveLength(1);
     expect(connection.sent[0]).toMatchObject({
-      action: { type: 'EQUIP', destinations: completeDraft(view, ['DEF']) },
+      action: equipAction(completeDraft(view, picked('DEF'))),
       options: undefined,
     });
   });
@@ -447,9 +450,9 @@ describe('Session: rascunho do Equipar', () => {
     expect(session.snapshot().equipDraft).toEqual([]);
     session.equipChoose('ATK');
     session.equipChoose('DEF');
-    expect(session.snapshot().equipDraft).toEqual(['ATK', 'DEF']);
+    expect(session.snapshot().equipDraft).toEqual(picked('ATK', 'DEF'));
     session.equipUndo();
-    expect(session.snapshot().equipDraft).toEqual(['ATK']);
+    expect(session.snapshot().equipDraft).toEqual(picked('ATK'));
     session.equipChoose('DEF');
     session.equipReset();
     expect(session.snapshot().equipDraft).toEqual([]);
@@ -462,7 +465,34 @@ describe('Session: rascunho do Equipar', () => {
     expect(session.snapshot().equipDraft).toEqual([]);
     session.equipChoose('ATK');
     session.equipChoose('DEF');
-    expect(session.snapshot().equipDraft).toEqual(['ATK']);
+    expect(session.snapshot().equipDraft).toEqual(picked('ATK'));
+  });
+
+  it('Equipar livre (E2): escolhe a carta pelo id, em qualquer ordem; sem id, a primeira que falta', () => {
+    const { session } = equipSetup(9_000);
+    session.equipChoose('ATK', 'pend-2');
+    session.equipChoose('DEF');
+    expect(session.snapshot().equipDraft).toEqual([
+      { cardId: 'pend-2', destination: 'ATK' },
+      { cardId: 'pend-0', destination: 'DEF' },
+    ]);
+    session.equipUndo();
+    expect(session.snapshot().equipDraft).toEqual([{ cardId: 'pend-2', destination: 'ATK' }]);
+  });
+
+  it('Equipar livre (E2): carta já escolhida ou que não está pendente não entra', () => {
+    const { session } = equipSetup(9_000);
+    session.equipChoose('ATK', 'pend-1');
+    session.equipChoose('DEF', 'pend-1');
+    session.equipChoose('DEF', 'outra');
+    expect(session.snapshot().equipDraft).toEqual([{ cardId: 'pend-1', destination: 'ATK' }]);
+  });
+
+  it('Equipar livre (E2): confirmar manda a ordem escolhida, e as que faltam vêm depois, na ordem de compra', async () => {
+    const { connection, session } = equipSetup(9_000);
+    session.equipChoose('DEF', 'pend-2');
+    await session.equipConfirm();
+    expect(connection.sent[0]).toMatchObject({ action: { type: 'EQUIP', order: ['pend-2', 'pend-0', 'pend-1'] } });
   });
 
   it('desfazer e recomeçar sem nada no rascunho não mexem no snapshot', () => {
@@ -484,7 +514,7 @@ describe('Session: rascunho do Equipar', () => {
         events: [{ type: 'EquipSubmitted', player: 'p2' }],
       }),
     );
-    expect(session.snapshot().equipDraft).toEqual(['ATK']);
+    expect(session.snapshot().equipDraft).toEqual(picked('ATK'));
     expect(session.snapshot().equipConfirmed).toBe('none');
   });
 
@@ -514,17 +544,17 @@ describe('Session: rascunho do Equipar', () => {
     session.equipChoose('DEF');
     await session.equipConfirm();
     expect(connection.sent).toEqual([
-      { type: 'act', id: 'fake-1', action: { type: 'EQUIP', destinations: ['ATK', 'DEF'] }, options: undefined },
+      { type: 'act', id: 'fake-1', action: { type: 'EQUIP', destinations: ['ATK', 'DEF'], order: ['pend-0', 'pend-1'] }, options: undefined },
     ]);
     expect(session.snapshot().equipConfirmed).toBe('thisPage');
-    expect(completeDraft(view, ['ATK', 'DEF'])).toEqual(['ATK', 'DEF']);
+    expect(completeDraft(view, picked('ATK', 'DEF'))).toEqual(picked('ATK', 'DEF'));
 
     const { state } = scenarioAt({ phase: { kind: 'EQUIP' } });
     state.players.find((p) => p.id === 'p1')!.equipSubmitted = true;
     connection.emitState(stateMessage(viewFor(state, 'p1'), { epoch: 7, seq: 2 }));
     expect(session.snapshot().equipConfirmed).toBe('thisPage');
     session.equipChoose('ATK');
-    expect(session.snapshot().equipDraft).toEqual(['ATK', 'DEF']);
+    expect(session.snapshot().equipDraft).toEqual(picked('ATK', 'DEF'));
   });
 
   it('confirmar recusado (regra ou limite) libera o rascunho de novo', async () => {

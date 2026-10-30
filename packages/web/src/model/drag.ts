@@ -5,7 +5,7 @@
 // Equipar (`nextDestinations`). O gesto (ponteiro, alvo sob o dedo) é de outro módulo.
 import type { Destination, PlayerView, RowName } from '@coringa/engine';
 import type { PlayerAction } from '@coringa/protocol';
-import { nextDestinations } from './equip.ts';
+import { nextDestinations, type EquipPick } from './equip.ts';
 import type { CardPlay, TablePlays } from './plays.ts';
 
 /**
@@ -99,9 +99,10 @@ const EQUIP_ZONE: Record<Destination, DropKey> = {
 };
 
 /**
- * As zonas do Equipar para a próxima carta pendente, dado o que já foi escolhido: uma por destino que o
- * motor deixa (`nextDestinations`), na ordem dele. Sem carta restante, ou fora da vez de montar, não há zona.
+ * As zonas do Equipar para a próxima carta, dado o que já foi escolhido: uma por destino que o motor deixa
+ * (`nextDestinations`), na ordem dele. São as mesmas para qualquer carta que falte (E2: em qualquer ordem). Sem carta restante, ou
+ * fora da vez de montar, não há zona.
  */
-export function equipDropZones(view: PlayerView, legal: PlayerAction[], chosen: Destination[]): Map<DropKey, Destination> {
-  return new Map(nextDestinations(view, legal, chosen).map((destination): [DropKey, Destination] => [EQUIP_ZONE[destination], destination]));
+export function equipDropZones(view: PlayerView, legal: PlayerAction[], picks: readonly EquipPick[]): Map<DropKey, Destination> {
+  return new Map(nextDestinations(view, legal, picks).map((destination): [DropKey, Destination] => [EQUIP_ZONE[destination], destination]));
 }

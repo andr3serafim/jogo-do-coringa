@@ -597,7 +597,7 @@ describe('arrastar o Equipar', () => {
     dragTo(equipCard(), zone(DROP.defenseRow));
     expect(inEquip().getByText('Carta 2 de 3')).toBeInTheDocument();
     expect(equipCard().getAttribute('data-card-id')).not.toBe(first);
-    expect(m.session.snapshot().equipDraft).toEqual(['DEF']);
+    expect(m.session.snapshot().equipDraft.map((p) => p.destination)).toEqual(['DEF']);
     // A carta posta já está na fileira de Defesa, como rascunho.
     expect(document.querySelectorAll('[data-rascunho]')).toHaveLength(1);
   });
@@ -609,26 +609,26 @@ describe('arrastar o Equipar', () => {
     dragTo(equipCard(), zone(DROP.defenseRow));
     expect(inEquip().getByText('Tudo no lugar: confira a montagem e confirme.')).toBeInTheDocument();
     await m.user.click(inEquip().getByRole('button', { name: 'Confirmar' }));
-    expect(sentAction(m)).toEqual({ type: 'EQUIP', destinations: ['ATK', 'DEF', 'DEF'] });
+    expect(sentAction(m)).toEqual({ type: 'EQUIP', destinations: ['ATK', 'DEF', 'DEF'], order: m.view.self.pending.map((c) => c.id) });
   });
 
   it('com as fileiras cheias, até a última carta troca e até o cemitério descarta', async () => {
     const m = mount(FULL);
     dragTo(equipCard(), zone(DROP.lastAttack));
-    expect(m.session.snapshot().equipDraft).toEqual(['REPLACE_LAST_ATK']);
+    expect(m.session.snapshot().equipDraft.map((p) => p.destination)).toEqual(['REPLACE_LAST_ATK']);
     dragTo(equipCard(), zone(DROP.graveyard));
-    expect(m.session.snapshot().equipDraft).toEqual(['REPLACE_LAST_ATK', 'DISCARD']);
+    expect(m.session.snapshot().equipDraft.map((p) => p.destination)).toEqual(['REPLACE_LAST_ATK', 'DISCARD']);
     dragTo(equipCard(), zone(DROP.lastDefense));
-    expect(m.session.snapshot().equipDraft).toEqual(['REPLACE_LAST_ATK', 'DISCARD', 'REPLACE_LAST_DEF']);
+    expect(m.session.snapshot().equipDraft.map((p) => p.destination)).toEqual(['REPLACE_LAST_ATK', 'DISCARD', 'REPLACE_LAST_DEF']);
     await m.user.click(inEquip().getByRole('button', { name: 'Confirmar' }));
-    expect(sentAction(m)).toEqual({ type: 'EQUIP', destinations: ['REPLACE_LAST_ATK', 'DISCARD', 'REPLACE_LAST_DEF'] });
+    expect(sentAction(m)).toEqual({ type: 'EQUIP', destinations: ['REPLACE_LAST_ATK', 'DISCARD', 'REPLACE_LAST_DEF'], order: m.view.self.pending.map((c) => c.id) });
   });
 
   it('com vaga, soltar em cima da última carta da fileira vale a fileira (a zona de dentro não vale e não esconde a de fora)', () => {
     const m = mount(EQUIP);
     const last = zone(DROP.lastDefense).querySelector('[data-card-id]')!;
     dragTo(equipCard(), last);
-    expect(m.session.snapshot().equipDraft).toEqual(['DEF']);
+    expect(m.session.snapshot().equipDraft.map((p) => p.destination)).toEqual(['DEF']);
   });
 
   it('as zonas marcadas no ar são só as que o motor deixa: com vaga, as duas fileiras; cheias, as últimas e o cemitério', () => {
@@ -721,7 +721,7 @@ describe('os botões e o teclado seguem iguais (WCAG 2.5.7): Equipar', () => {
   it('toque: o botão do destino escolhe', async () => {
     const m = mount(EQUIP);
     await m.user.click(inEquip().getByRole('button', { name: 'Fileira de Defesa' }));
-    expect(m.session.snapshot().equipDraft).toEqual(['DEF']);
+    expect(m.session.snapshot().equipDraft.map((p) => p.destination)).toEqual(['DEF']);
     expect(inEquip().getByText('Carta 2 de 3')).toBeInTheDocument();
   });
 
@@ -729,10 +729,10 @@ describe('os botões e o teclado seguem iguais (WCAG 2.5.7): Equipar', () => {
     const m = mount(EQUIP);
     inEquip().getByRole('button', { name: 'Fileira de Ataque' }).focus();
     await m.user.keyboard('{Enter}');
-    expect(m.session.snapshot().equipDraft).toEqual(['ATK']);
+    expect(m.session.snapshot().equipDraft.map((p) => p.destination)).toEqual(['ATK']);
     expect(inEquip().getByRole('button', { name: 'Fileira de Ataque' })).toHaveFocus();
     await m.user.keyboard('{Enter}');
-    expect(m.session.snapshot().equipDraft).toEqual(['ATK', 'ATK']);
+    expect(m.session.snapshot().equipDraft.map((p) => p.destination)).toEqual(['ATK', 'ATK']);
   });
 
   it('o arrasto e o botão se misturam: uma carta por cada caminho', async () => {
@@ -740,7 +740,7 @@ describe('os botões e o teclado seguem iguais (WCAG 2.5.7): Equipar', () => {
     dragTo(equipCard(), zone(DROP.defenseRow));
     await m.user.click(inEquip().getByRole('button', { name: 'Fileira de Ataque' }));
     dragTo(equipCard(), zone(DROP.attackRow));
-    expect(m.session.snapshot().equipDraft).toEqual(['DEF', 'ATK', 'ATK']);
+    expect(m.session.snapshot().equipDraft.map((p) => p.destination)).toEqual(['DEF', 'ATK', 'ATK']);
   });
 });
 

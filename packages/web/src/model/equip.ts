@@ -1,4 +1,5 @@
-// Rascunho do Equipar carta a carta (spec §3.5). Puro: sem React nem DOM.
+// Rascunho do Equipar (spec §3.5). Puro: sem React nem DOM. Desde a E2 do sub-projeto 5 (Equipar livre), cada escolha diz a carta e
+// o destino, em qualquer ordem: a ordem das escolhas é a ordem em que as cartas entram (`order` da ação `EQUIP`).
 //
 // Nenhuma regra do jogo mora aqui. Os destinos possíveis saem do motor (`nextEquipDestinations`, o mesmo
 // do `askEquip` do terminal), quando a lista legal traz um `EQUIP`; os totais, de `attackPower`/`defensePower`;
@@ -18,17 +19,46 @@ import {
 } from '@coringa/engine';
 import type { PlayerAction } from '@coringa/protocol';
 
+/** Uma escolha do rascunho: a numérica pendente e o destino dela. */
+export interface EquipPick {
+  cardId: string;
+  destination: Destination;
+}
+
 /** Quando faltam até 1,5 s, o Equipar com escolhas feitas segue sozinho (spec §3.5). */
 export const EQUIP_AUTO_SEND_MS = 1_500;
 
 /**
  * Os destinos possíveis da próxima carta, dado o que já foi escolhido: os que a regra do motor deixa, se a lista legal traz um
  * `EQUIP` (é a sua vez de montar). Não sai da lista legal: ela traz uma montagem por resultado, e trocar duas vezes a mesma
- * fileira, que a regra aceita, não estaria nela. Sem carta restante, não sobra destino.
+ * fileira, que a regra aceita, não estaria nela. Sem carta restante, não sobra destino. Os destinos só dependem de quantas
+ * cartas cada fileira tem, então valem para qualquer carta que falte.
  */
-export function nextDestinations(view: PlayerView, legal: PlayerAction[], chosen: Destination[]): Destination[] {
+export function nextDestinations(view: PlayerView, legal: PlayerAction[], picks: readonly EquipPick[]): Destination[] {
   if (!legal.some((a) => a.type === 'EQUIP')) return [];
-  return nextEquipDestinations(view, chosen);
+  return nextEquipDestinations(
+    view,
+    validPicks(view, picks).map((pick) => pick.destination),
+  );
+}
+
+/** As escolhas que valem: cada uma de uma numérica pendente diferente (as outras são ignoradas). */
+function validPicks(view: PlayerView, picks: readonly EquipPick[]): Array<{ card: NumCard; destination: Destination }> {
+  const seen = new Set<string>();
+  const valid: Array<{ card: NumCard; destination: Destination }> = [];
+  for (const { cardId, destination } of picks) {
+    const card = view.self.pending.find((c) => c.id === cardId);
+    if (!card || seen.has(cardId)) continue;
+    seen.add(cardId);
+    valid.push({ card, destination });
+  }
+  return valid;
+}
+
+/** As numéricas pendentes ainda sem destino, na ordem de compra. */
+export function remainingCards(view: PlayerView, picks: readonly EquipPick[]): NumCard[] {
+  const chosen = new Set(validPicks(view, picks).map(({ card }) => card.id));
+  return view.self.pending.filter((card) => !chosen.has(card.id));
 }
 
 export interface DraftBoard {
@@ -43,13 +73,13 @@ export interface DraftBoard {
   newQuads: { row: RowName; value: Rank }[];
 }
 
-/** A mesa depois de aplicar as primeiras `chosen.length` cartas pendentes, sem mexer na `view`. */
-export function draftBoard(view: PlayerView, chosen: Destination[]): DraftBoard {
+/** A mesa depois de aplicar as escolhas, na ordem delas, sem mexer na `view`. */
+export function draftBoard(view: PlayerView, picks: readonly EquipPick[]): DraftBoard {
   const attackRow = [...view.self.attackRow];
   const defenseRow = [...view.self.defenseRow];
   const toGraveyard: NumCard[] = [];
-  view.self.pending.slice(0, chosen.length).forEach((card, i) => {
-    switch (chosen[i]) {
+  validPicks(view, picks).forEach(({ card, destination }) => {
+    switch (destination) {
       case 'ATK':
         attackRow.push(card);
         break;
@@ -88,12 +118,20 @@ export function draftBoard(view: PlayerView, chosen: Destination[]): DraftBoard 
   };
 }
 
-/** As escolhas feitas mais a regra de estouro do motor para as cartas que faltam (spec §1.12). */
-export function completeDraft(view: PlayerView, chosen: Destination[]): Destination[] {
-  const made = chosen.slice(0, view.self.pending.length);
+/**
+ * As escolhas feitas e, depois delas, as cartas que faltam, na ordem de compra, com a regra de estouro do motor (spec §1.12).
+ */
+export function completeDraft(view: PlayerView, picks: readonly EquipPick[]): EquipPick[] {
+  const made = validPicks(view, picks).map(({ card, destination }): EquipPick => ({ cardId: card.id, destination }));
   const draft = draftBoard(view, made);
-  const rest = view.self.pending.length - made.length;
-  return [...made, ...autoDestinations(view.config, { attack: draft.attackRow.length, defense: draft.defenseRow.length }, rest)];
+  const rest = remainingCards(view, made);
+  const auto = autoDestinations(view.config, { attack: draft.attackRow.length, defense: draft.defenseRow.length }, rest.length);
+  return [...made, ...rest.map((card, i): EquipPick => ({ cardId: card.id, destination: auto[i]! }))];
+}
+
+/** A jogada do Equipar: os destinos e a ordem das cartas (`order`), na ordem das escolhas. */
+export function equipAction(picks: readonly EquipPick[]): PlayerAction {
+  return { type: 'EQUIP', destinations: picks.map((pick) => pick.destination), order: picks.map((pick) => pick.cardId) };
 }
 
 /** Envio antecipado: só com ≤ 1500 ms, ao menos uma escolha, sem confirmar e sem ter enviado. */

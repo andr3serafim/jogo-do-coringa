@@ -28,7 +28,7 @@ import {
   UNDO_LABEL,
 } from '../../model/copy.ts';
 import { equipDropZones, type DropKey } from '../../model/drag.ts';
-import { draftBoard, nextDestinations } from '../../model/equip.ts';
+import { draftBoard, nextDestinations, remainingCards, type EquipPick } from '../../model/equip.ts';
 import type { Notice, SessionSnapshot } from '../../model/session.ts';
 import { Card } from '../cards/Card.tsx';
 import { NoticeLine, PRIMARY, PRIMARY_TITLE, SECONDARY, TwoLine } from './controls.tsx';
@@ -40,8 +40,8 @@ export interface EquipPanelProps {
   view: PlayerView;
   names: TableNames;
   legal: PlayerAction[];
-  /** Os destinos já escolhidos, na ordem das cartas pendentes (`snapshot.equipDraft`). */
-  draft: Destination[];
+  /** As escolhas feitas (carta e destino), na ordem em que entram (`snapshot.equipDraft`). */
+  draft: EquipPick[];
   confirmed: SessionSnapshot['equipConfirmed'];
   /** Uma jogada em voo: o painel diz "Enviando…". */
   pending: boolean;
@@ -58,7 +58,7 @@ export interface EquipPanelProps {
 }
 
 /** O rótulo do terminal para o destino e, na troca, a carta que sai: a última da fileira do rascunho até aqui. */
-function destinationLabel(view: PlayerView, chosen: Destination[], destination: Destination): string {
+function destinationLabel(view: PlayerView, chosen: EquipPick[], destination: Destination): string {
   const board = draftBoard(view, chosen);
   const leaving =
     destination === 'REPLACE_LAST_ATK'
@@ -140,6 +140,7 @@ function EquipCard({
 
 function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onUndo, onReset, onConfirm, panelRef, total }: EquipPanelProps & { total: number }) {
   const cards = view.self.pending;
+  const current = remainingCards(view, draft)[0];
   const index = draft.length;
   const complete = index >= total;
   const board = draftBoard(view, draft);
@@ -178,15 +179,15 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
 
       {complete ? (
         <ol role="list" aria-label="Sua montagem" data-step="resumo" className="flex list-none flex-col gap-1 p-0 text-sm">
-          {draft.map((destination, i) => (
-            <li key={cards[i]!.id} data-numero className="font-texto tabular-nums">
-              {placedText(cards[i]!, destinationLabel(view, draft.slice(0, i), destination))}
+          {draft.map((pick, i) => (
+            <li key={pick.cardId} data-numero className="font-texto tabular-nums">
+              {placedText(cards.find((c) => c.id === pick.cardId)!, destinationLabel(view, draft.slice(0, i), pick.destination))}
             </li>
           ))}
         </ol>
       ) : (
         <div className="flex items-start gap-3">
-          <EquipCard key={cards[index]!.id} card={cards[index]!} enabled={!disabled && options.length > 0} zones={dropZones} onDrop={dropCard} />
+          <EquipCard key={current!.id} card={current!} enabled={!disabled && options.length > 0} zones={dropZones} onDrop={dropCard} />
           <ul role="list" aria-label="Destinos" data-step="destinos" className="flex min-w-0 flex-1 list-none flex-col gap-2 p-1.5">
             {options.map((destination, i) => (
               <li key={destination}>

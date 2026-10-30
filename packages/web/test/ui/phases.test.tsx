@@ -177,7 +177,7 @@ describe('Equipar: carta a carta (spec §3.5)', () => {
     expect(inEquip().getByText('Carta 2 de 3')).toBeInTheDocument();
     await choose(m, 'Fileira de Ataque', 'Fileira de Defesa');
     await m.user.click(inEquip().getByRole('button', { name: 'Confirmar' }));
-    expect(sentAction(m)).toEqual({ type: 'EQUIP', destinations: ['ATK', 'ATK', 'DEF'] });
+    expect(sentAction(m)).toEqual({ type: 'EQUIP', destinations: ['ATK', 'ATK', 'DEF'], order: m.view.self.pending.map((c) => c.id) });
     // Jogada voluntária: sem `auto`.
     expect(m.connection.sent[0]).toMatchObject({ options: undefined });
   });
@@ -200,7 +200,7 @@ describe('Equipar: carta a carta (spec §3.5)', () => {
     expect(inEquip().getByText('Carta 3 de 3')).toBeInTheDocument();
     await m.user.click(inEquip().getByRole('button', { name: 'Desfazer' }));
     expect(inEquip().getByText('Carta 2 de 3')).toBeInTheDocument();
-    expect(m.session.snapshot().equipDraft).toEqual(['ATK']);
+    expect(m.session.snapshot().equipDraft.map((p) => p.destination)).toEqual(['ATK']);
     await choose(m, 'Fileira de Defesa');
     await m.user.click(inEquip().getByRole('button', { name: 'Recomeçar' }));
     expect(inEquip().getByText('Carta 1 de 3')).toBeInTheDocument();
@@ -230,7 +230,7 @@ describe('Equipar: carta a carta (spec §3.5)', () => {
     ]);
     await choose(m, 'Trocar a última carta do Ataque (sai 6♠)', 'Descartar no cemitério', 'Descartar no cemitério');
     await m.user.click(inEquip().getByRole('button', { name: 'Confirmar' }));
-    expect(sentAction(m)).toEqual({ type: 'EQUIP', destinations: ['REPLACE_LAST_ATK', 'DISCARD', 'DISCARD'] });
+    expect(sentAction(m)).toEqual({ type: 'EQUIP', destinations: ['REPLACE_LAST_ATK', 'DISCARD', 'DISCARD'], order: m.view.self.pending.map((c) => c.id) });
   });
 
   it('depois de uma troca, o "sai" é a carta do rascunho, não a da mesa', async () => {
@@ -406,7 +406,7 @@ describe('Equipar: foco e teclado (spec §7)', () => {
     await m.user.keyboard('{Enter}{Enter}');
     expect(inEquip().getByRole('button', { name: 'Confirmar' })).toHaveFocus();
     await m.user.keyboard('{Enter}');
-    expect(sentAction(m)).toEqual({ type: 'EQUIP', destinations: ['ATK', 'ATK', 'DEF'] });
+    expect(sentAction(m)).toEqual({ type: 'EQUIP', destinations: ['ATK', 'ATK', 'DEF'], order: m.view.self.pending.map((c) => c.id) });
   });
 });
 

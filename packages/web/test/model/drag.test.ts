@@ -151,7 +151,12 @@ describe('equipDropZones: onde cada destino do Equipar cai', () => {
     me.pending = options.pending.map((value, i): NumCard => ({ id: `pend-${i}`, kind: 'NUM', value, suit: 'copas' }));
     return viewFor(state, 'p1');
   }
-  const zones = (view: PlayerView, chosen: Destination[] = []) => equipDropZones(view, legalFor(view), chosen);
+  const zones = (view: PlayerView, chosen: Destination[] = []) =>
+    equipDropZones(
+      view,
+      legalFor(view),
+      chosen.map((destination, i) => ({ cardId: `pend-${i}`, destination })),
+    );
   const FULL: Rank[] = [2, 3, 4, 5, 6, 7, 8];
 
   it('com vaga nas duas fileiras: fileira:ATK e fileira:DEF', () => {

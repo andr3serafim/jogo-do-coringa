@@ -21,7 +21,7 @@ import {
 } from '@coringa/protocol';
 import { ORDER_AUTO_MS, shouldAutoPass } from './automation.ts';
 import { AUTO_PASS_NOTICE, RATE_NOTICE } from './copy.ts';
-import { completeDraft, EQUIP_AUTO_SEND_MS, nextDestinations, shouldAutoSendEquip } from './equip.ts';
+import { completeDraft, equipAction, EQUIP_AUTO_SEND_MS, nextDestinations, remainingCards, shouldAutoSendEquip, type EquipPick } from './equip.ts';
 import { appendHistory, appendNote, EMPTY_HISTORY, forGame, returnNote, roomNames, type HistoryState } from './history.ts';
 import { computeMarks, NO_MARKS, ownSpentIds, type Marks } from './marks.ts';
 import { legalFor } from './plays.ts';
@@ -58,8 +58,8 @@ export interface SessionSnapshot {
   notice: Notice | null;
   /** Relógio local (`deps.now`) da chegada do último `state`. */
   receivedAt: number;
-  /** Destinos escolhidos no Equipar, na ordem das cartas pendentes. Zera quando a época muda. */
-  equipDraft: Destination[];
+  /** As escolhas do Equipar (carta e destino), na ordem em que as cartas entram. Zera quando a época muda. */
+  equipDraft: EquipPick[];
   /** `thisPage`: esta página confirmou; `earlier`: a `view` já diz que sim (página recarregada). */
   equipConfirmed: 'none' | 'thisPage' | 'earlier';
   /** Relógio local (`deps.now`) em que a ordem sai sozinha; `null` sem confirmação agendada. */
@@ -166,7 +166,7 @@ export class Session {
   #epoch: number | null = null;
 
   // Equipar
-  #draft: Destination[] = [];
+  #draft: EquipPick[] = [];
   #equipSentEpoch: number | null = null;
   /** Época em que o envio antecipado (ou a confirmação) já foi tentado: não se tenta sozinho de novo. */
   #equipAutoEpoch: number | null = null;
@@ -287,12 +287,18 @@ export class Session {
     this.#update({});
   }
 
-  /** Escolhe o destino da próxima carta pendente, se ele leva a uma montagem legal. */
-  equipChoose(destination: Destination): void {
+  /**
+   * Põe uma numérica pendente no destino, se ele leva a uma montagem legal (E2: em qualquer ordem). Sem `cardId`, a primeira que
+   * falta, na ordem de compra; uma carta já escolhida ou que não está pendente não entra.
+   */
+  equipChoose(destination: Destination, cardId?: string): void {
     const { state, legal } = this.#snapshot;
     if (!state || !this.#canEquip()) return;
+    const remaining = remainingCards(state.view, this.#draft);
+    const card = cardId === undefined ? remaining[0] : remaining.find((c) => c.id === cardId);
+    if (!card) return;
     if (!nextDestinations(state.view, legal, this.#draft).includes(destination)) return;
-    this.#draft = [...this.#draft, destination];
+    this.#draft = [...this.#draft, { cardId: card.id, destination }];
     this.#update({});
     this.#reconcileEquip();
   }
@@ -546,13 +552,13 @@ export class Session {
     const { state, pending } = this.#snapshot;
     if (this.#disposed || !state || pending) return;
     const epoch = state.epoch;
-    const destinations = completeDraft(state.view, this.#draft);
+    const action = equipAction(completeDraft(state.view, this.#draft));
     this.#clearEquipTimer();
     this.#equipAutoEpoch = epoch;
     this.#equipSentEpoch = epoch;
     let outcome: Outcome = 'skipped';
     try {
-      outcome = await this.#send(() => this.#connection.act({ type: 'EQUIP', destinations }), { voluntary: true });
+      outcome = await this.#send(() => this.#connection.act(action), { voluntary: true });
     } finally {
       // Sem `ok`, a `view` diz o que vale (`equipSubmitted`), e o rascunho volta a poder ser confirmado.
       if (outcome !== 'ok' && this.#equipSentEpoch === epoch) {
