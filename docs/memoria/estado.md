@@ -15,10 +15,14 @@
   - o histórico agora diz "da Defesa" e "na Defesa".
 - **Em curso:** a **E1** na branch `feat/sem-anti-travamento` (a partir da `feat/memoria-espera`), pelo plano
   `docs/superpowers/plans/2026-10-30-e1-sem-anti-travamento.md`. As caixas marcadas no plano dizem o que já foi feito.
-- **Próximo passo exato:** tarefa 1 do plano da E1 (Defesa Absoluta até o ataque, com `RULES_VERSION` 3 e as partidas de
-  referência regravadas no mesmo commit). Se a `feat/memoria-espera` ainda não estiver na `main`, mescle-a por fast-forward
-  (CI verde). A E1 leva três coisas: sem anti-travamento, a **Defesa Absoluta até o ataque** e os **Absolutos em 3 s**
-  (`decisoes.md` 2026-10-30 (4); spec do sub-projeto 5, E1).
+- **Feito na E1 (branch `feat/sem-anti-travamento`, ainda sem push):** tarefa 1 (`4491726`, Defesa Absoluta até o ataque,
+  `RULES_VERSION` 3) e tarefas 2 e 3 (`f88e401`, sem anti-travamento nem empate no motor, servidor, simulador e web;
+  `STATE_SCHEMA` 3; partidas de referência na config atual). A `feat/memoria-espera` já está na `main` (`f7f26d8`).
+- **Próximo passo exato:** conferir a faixa central no navegador (1536 × 695 e 390 × 844, sem o "Sem dano"); depois a tarefa 4
+  do plano (teto de 400 rodadas no simulador e a duração nos relatórios). A E1 leva três coisas: sem anti-travamento, a
+  **Defesa Absoluta até o ataque** e os **Absolutos em 3 s** (`decisoes.md` 2026-10-30 (4); spec do sub-projeto 5, E1).
+- **Achado a levar ao autor:** sem limite de rodadas, o log de passos de uma partida online cresce sem teto. O storage aguenta
+  2 MB por chave (~20 mil passos com a margem do teste); detalhes na spec do servidor §9.4.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
