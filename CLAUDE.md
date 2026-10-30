@@ -1,5 +1,35 @@
 # Jogo do Coringa — regras do repositório
 
+## Memória compartilhada (obrigatória, para qualquer conta do Claude)
+
+O autor alterna entre contas do Claude, e uma conta não vê as conversas, a memória pessoal (`~/.claude/projects/…/memory`)
+nem as notas de sessão (AppData) da outra. **A fonte da verdade do andamento é `docs/memoria/`**, versionada no git. Se a
+memória pessoal de uma conta divergir dela, vale a do repositório (e a pessoal é corrigida para apontar para cá).
+
+- `estado.md`: onde o projeto está agora (sobrescrito a cada atualização). Branch e worktree, último commit, o que está em
+  curso (job rodando, arquivo sem commit), **o próximo passo exato** e o que espera o autor.
+- `decisoes.md`: decisões do autor, a mais nova em cima, com o texto dele entre aspas e a data, e depois a leitura (marcada
+  **[I]** onde for interpretação). Só acrescenta; uma decisão nova que substitui outra diz qual.
+- `diario.md`: uma entrada por bloco de trabalho, a mais nova em cima (o que foi feito, commits, o que ficou, armadilhas).
+- `notas/`: material de apoio (tabelas de medição, lista do playtest).
+
+Regras:
+
+1. **Ao começar, antes de qualquer outra coisa:** ache a versão mais nova do `estado.md`. Ela pode estar numa branch de
+   outro worktree, não na `main` (os worktrees partilham o mesmo `.git`):
+   `git log --all -1 --format='%h %D %ci' -- docs/memoria/estado.md` e depois `git show <hash>:docs/memoria/estado.md`.
+   Rode `git worktree list` e `git status --short` em cada worktree (trabalho sem commit da outra conta). Leia as entradas
+   recentes do `diario.md` e as decisões que o estado citar. Só então siga o "próximo passo".
+2. **Durante o trabalho:** atualize e commite o `estado.md` depois de cada commit de trabalho e **antes de cada job longo**
+   (`pnpm check`, `pnpm e2e`, `sim:calibrate`, `sim:dificil`). O limite de uso corta a conta no meio do turno, sem aviso:
+   o que não estiver commitado com o próximo passo escrito se perde. O commit da memória vai na mesma branch do trabalho
+   (`docs(memoria): …`).
+3. **Decisão do autor** entra no `decisoes.md`, com o texto dele, antes de virar spec ou código. Nunca rotule como aprovado
+   o que ele não viu.
+4. **Ao fechar um bloco:** entrada no `diario.md` e o `estado.md` com o próximo passo. Suba a branch quando o pre-push
+   passar, para a outra conta achar o estado mesmo em outra máquina.
+5. **O repositório é público:** nada de dado pessoal, e-mail, token ou segredo na memória.
+
 ## Portão de testes (sempre ligado)
 
 - Rode `pnpm check` antes de commitar: lint, typecheck, testes com cobertura e o smoke no Node puro. O hook de pre-push (simple-git-hooks) roda o mesmo comando; o de pre-commit é a versão rápida (abaixo).

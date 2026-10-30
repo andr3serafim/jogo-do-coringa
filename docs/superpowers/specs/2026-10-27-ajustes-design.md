@@ -2,7 +2,7 @@
 
 Data: 2026-10-27. Origem: a lista que o autor deixou depois de jogar contra os bots (Fácil, Médio, Difícil). Uma fase por merge na
 `main`, na ordem abaixo. O autor delegou as decisões técnicas e de interface à sessão principal ("decida e prossiga"); **as
-mudanças nas regras dele (Fases B, D e E) ele quer ver**, e nenhuma regra nova é rotulada como aprovada sem a resposta dele.
+mudanças nas regras dele (Fases B, D, E e F) ele quer ver**, e nenhuma regra nova é rotulada como aprovada sem a resposta dele.
 
 Marcas: **[feito]** já na `main`; **[decisão]** decidido pela sessão do sub-projeto por delegação; **[autor]** espera o autor.
 
@@ -95,7 +95,84 @@ escuro numa janela de 1 s; com movimento reduzido, nenhuma inversão) e sem afro
   `tutorial-2431` (o critério ganhou "ao menos uma numérica no 1º Equipar" e "a iniciativa com o jogador", que a anterior cumpria
   por sorte).
 
-## Fase E: regras novas do autor [autor]
+## Fase E: regras novas do autor [autor: respondidas em 2026-10-28, ajustadas em 2026-10-30]
 
-R1 (Healer × Steal), R4 (ver todas as cartas e escolher a ordem) e R5 (manter a carta na mão). Brainstorming → perguntas de regra em
-lote ao autor → spec → plano, numa seção própria deste arquivo quando as respostas chegarem.
+R1 (Healer × Steal), R4 (ver todas as cartas e escolher a ordem) e R5 (manter a carta na mão). As perguntas de 2026-10-27 estão
+em `docs/memoria/notas/fase-e-perguntas-2026-10-27.md`; o texto das respostas, em `docs/memoria/decisoes.md` (2026-10-30). Três
+merges, nesta ordem: E1 e E2 não dependem de medição; a E3 é medida no simulador antes de virar regra. **[I]** marca o que é
+leitura e não está nas palavras dele.
+
+### E1. Sem anti-travamento e sem limite de rodadas
+
+- O autor reprovou o teto de 60 rodadas e a regra das 3 rodadas sem dano ("este jogo não deve ter limite de rodadas"). O
+  anti-travamento sai por completo, como saiu a Pressão da mesa: `antiStallRounds` da config, o fim por anti-travamento, o
+  `noDamageStreak` (se nada mais o usar), o contador "Sem dano N de 3" da faixa central, o item do resumo das regras, a dica 9
+  do tutorial e os textos de fim. Saem também das specs 1, 3 e 4 e dos testes.
+- A partida acaba por vida ≤ 0, Exódia, desistência ou W.O. A spec 1 §1.11 perde a "terminação garantida": as invariantes "toda
+  partida termina" e "a vida nunca aumenta" (spec 1 §5) são **reescritas, não apagadas**. A primeira vira "toda partida que o
+  simulador encerra pelo teto dele é contada e reportada"; a segunda vira "a vida nunca passa da inicial" (com a E3).
+- O simulador ganha um teto **só dele** (proposta: 400 rodadas), que conta como "sem fim" nos relatórios e nunca vira regra.
+  Reportar a distribuição da duração (mediana, p95, máx.) e a fração que bate no teto, antes e depois da E3.
+- Sem o anti-travamento, a tartaruga perde a única forma de vencer parada (`docs/memoria/notas/tartaruga.md`).
+- `RULES_VERSION` 3 e `STATE_SCHEMA` 3. As partidas de referência são regravadas e passam a usar a config atual (500, 8, 8 Ás).
+  O portão do Difícil é medido do zero (`pnpm sim:dificil --recomecar`) e a calibração é refeita.
+
+### E2. Equipar livre (muda a regra original da ordem de compra)
+
+- Depois da compra, o jogador vê todas as numéricas recebidas de uma vez e as põe na fileira que quiser, na ordem que quiser
+  (a ordem define quem fica na frente da fila). Com as duas fileiras cheias, as opções de hoje continuam (trocar a última de uma
+  fileira ou descartar a nova).
+- **O que muda no motor:** a ação `EQUIP` deixa de ser "um destino por carta, na ordem de compra" e passa a dizer a ordem.
+  Cuidado com o `legalActions` e os bots: com ordem livre, as sequências crescem para k! × destinos. Os bots continuam com a
+  lista canônica (ou um Equipar por carta); a web aceita qualquer sequência válida. O tempo esgotado do Equipar segue a regra de
+  hoje (cada numérica restante vai para a fileira com menos cartas, empate → Defesa).
+- **Interface:** a tela do Equipar mostra todas as numéricas recebidas juntas, e o jogador escolhe carta e destino em qualquer
+  ordem (toque ou arraste, como hoje). Isso também atende o pedido de ver as numéricas sem ler o histórico (item 9).
+
+### E3. Roubo, cura pela Defesa e limite de especiais (medir antes)
+
+- **Ás = Armadilha ou Roubo**, à escolha na hora; qualquer naipe. O Selvagem no papel de A escolhe um dos dois.
+- **Roubo** (só na fase principal do seu turno): pega uma numérica de qualquer fileira do oponente e a põe no fim da fileira que
+  o ladrão escolher; com a fileira cheia, a última dela vai ao cemitério. O naipe vira regra (hoje é só visual).
+  - ♣/♠: o oponente leva dano igual ao **valor seco** da carta (sem buffs nem bônus de quadra). Um K na Guarda **anula esse
+    dano e não quebra**. A Defesa Absoluta anula o dano. O dano do roubo **não conta para a iniciativa** e **não mata**: a vida
+    do oponente fica em no mínimo 1.
+  - ♥/♦: quem roubou cura o valor seco, até a vida inicial.
+  - A carta que o ladrão perde com a fileira cheia cura, se cumprir a cura passiva.
+  - **[autor]** Defesa Absoluta × Roubo: bloqueia o roubo inteiro (aprovado em 28/10) ou só anula o dano (texto de 30/10)?
+- **Cura passiva:** com 2 K ou mais na Guarda **[I: "2 K" = pelo menos 2]**, cada numérica da **própria Fileira de Defesa**
+  que vai ao cemitério, de qualquer naipe, cura valor × (1 + nº de Q). A vida nunca passa da inicial.
+- **Limite de 4 especiais na mão**, com penalidade na compra (o autor: senão "o player fica juntando K até fazer o exódia").
+  Medir 2 ou 3 formas e levar ao autor com a recomendação. Exemplos: a especial que passa do limite vai direto ao cemitério; o
+  jogador escolhe qual descartar; ele compra menos cartas no Equipar seguinte. Conferir se Reflect e Devastação (3 cartas cada)
+  e o Anular continuam possíveis com 4.
+- **Medir no simulador:**
+  - taxa de vitória de quem rouba e de quem cura;
+  - duração (sem o anti-travamento);
+  - a "fazenda de cura": com 2 K, cada ataque recebido tira a 1ª carta da Defesa e cura;
+  - se um K que anula o roubo sem quebrar torna o roubo preto inútil;
+  - quantas vezes a Exódia aparece com o limite de especiais.
+- **Interface:** a mesa mostra a vida subindo (cura) e o dano do roubo; o resumo das regras, o tutorial (dicas do A, do fim e da
+  Guarda) e o teste que amarra os números acompanham.
+
+## Fase F: anotações do autor de 2026-10-30 [autor]
+
+Texto dele em `docs/memoria/decisoes.md` (2026-10-30, "Anotações novas"). As perguntas abertas estão no `docs/memoria/estado.md`.
+
+- **F1. Apagar o histórico de partidas** [decisão: só web]. Na tela `/partidas`, uma ação de apagar a lista guardada
+  (`coringa:partidas`), com confirmação. Apagar uma partida só também cabe.
+- **F2. Reflect reativo** [autor]. O Reflect deixa de ser lançado na própria vez e de ficar armado. Passa a ser resposta: atacado
+  → lança K+J+Q → o dano volta na hora → acabou. Em aberto: o destino do Anular e da Proteção por sacrifício (seriam resposta
+  de uma resposta, e o jogo não tem cadeia, spec 1 §1.7) e se o efeito de hoje (quebra os Q e K do atacante, dano refletido
+  ATK − ⌊DEF_base/2⌋) continua.
+- **F3. Devastação** [autor]. K + A + J esvazia uma Fileira de Ataque e K + A + Q uma Fileira de Defesa: todas as numéricas
+  vão ao cemitério, os buffs ficam. Só o Reflect (devolve) e a Defesa Absoluta (anula) a impedem. Uma cena cinematográfica à
+  altura (dentro da `FlashLock` e do movimento reduzido, spec da web §10.4). Em aberto: quem é atingido, a janela de reação, o
+  Selvagem e a cura passiva das cartas destruídas.
+- **F4. Ataque vazio:** já é a regra (spec 1 §1.5 item 3) e tem teste desde `af6b827`. Esperar o que o autor viu.
+- **F5. Tabuleiro quebrado com buffs e o aviso de Ressurreição** [decisão: bug de layout]. Reproduzir no navegador (celular e
+  PC) e corrigir; a arte do botão já entrou na Fase C.
+- **F6, F7 e F8** (ver todas as cartas; Absolutos e Exódia mais longos; movimentos suaves): a F6 é a E2, a F7 e a F8 entraram
+  na Fase C (`bba8377`). Esperar o autor dizer se jogou uma versão de depois de 2026-10-27.
+- **Ordem proposta:** E1 → E2 → F1 e F5 (só web) → E3 com F2 e F3 medidos juntos, porque o Reflect reativo, a Devastação, o
+  roubo, a cura e o limite de especiais mexem no mesmo equilíbrio.
