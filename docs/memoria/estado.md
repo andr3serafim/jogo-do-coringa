@@ -8,7 +8,7 @@
 - **Branch:** `feat/direcao-visual`, no checkout principal `D:andr3jogo-coringa`, a partir da `main` (`9b10ddd`).
 - **Em curso:** o brainstorming do **sub-projeto 6, direção de arte e sensação de jogo** (as respostas do autor e as leituras
   em `notas/direcao-visual.md`). Nada de código de produto até ele aprovar a spec.
-- **Próximo passo exato:** o rascunho 4 com as outras quatro especiais (Exódia, Devastação, Reflect, Ressurreição) na linha aprovada do 3 (sem a cúpula da Defesa); mostrar e colher a reação; depois, a spec do sub-projeto 6 (notas/direcao-visual.md tem tudo que ele aprovou).
+- **Próximo passo exato:** o rascunho 5: a Exódia sem os feixes dos K; a Devastação refeita como terremoto (campo desolado); o Reflect com espelho maior e o golpe que chega como cometa; a Ressurreição mais celestial, com a quadra marcada e uma carta só. Mostrar e colher a reação; depois, a spec do sub-projeto 6 (notas/direcao-visual.md).
 - **Rascunhos:** servidor do brainstorming (`.superpowers/brainstorm/`, fora do git); se cair, sobe de novo com o
   `start-server.sh` da skill de brainstorming e `--project-dir` na raiz do repositório.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o

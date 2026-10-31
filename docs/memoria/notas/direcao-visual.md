@@ -69,3 +69,21 @@ Ao "começo o brainstorming da nova direção visual?": "Sim, começar".
   - **Aprovados:** o Ataque Absoluto e a Defesa Absoluta do rascunho 3, **sem a cúpula** (o arco dourado do fim da Defesa);
     o placar de luta no topo, a espada da iniciativa com a fita de cordel e o golpe comum (aprovados desde o 2).
   - **Próximo:** levar a mesma linha às outras quatro especiais que ele citou (Exódia, Devastação, Reflect, Ressurreição).
+- **Rascunho 4** (`placar-e-cenas-v4.html`): a Exódia como coroação (4 K que viram pilares de luz, energia correndo até o
+  Coringa, aura vermelha e dourada, a coroa que desce, a vida do Bot a zero e o retrato rachado); a Devastação como um rasgo de
+  tinta que parte a fileira em cacos e deixa uma mancha; o Reflect com o golpe em câmera lenta, o K, o J e o Q formando um
+  espelho triangular e o golpe que volta dourado; a Ressurreição com a luz no cemitério e duas cartas que sobem sem cor. A
+  reação dele:
+  > * Exódia está aprovado, apenas retire os feixes de luz saindo das cartas K e indo para o coringa no centro.
+  > * Devastação não está aprovado, deve remeter a devastação pela força da natureza, algo menos genérico e feito no paint como
+  >   está. gostei da ideia da mesa ficar com visual desolado pelo efeito da devastação, apenas deixe com visual mais caprichado
+  >   e realista.
+  > * Reflect deve ter o espelho maior e o ataque que chega e reflete deve ser algo mais elaborado, mas o restante do efeito
+  >   está de acordo com o esperado.
+  > * Ressurreição está ok, dar mais ênfase ao efeito celestial e as cartas repetidas em campo acionaram a ressurreição deve
+  >   estar visualmente diferente das outras, com um efeito.
+  - **Aprovada:** a Exódia, sem os feixes de energia dos K até o Coringa.
+  - **[I]** Devastação "pela força da natureza": um terremoto (o chão racha sob a fileira, as cartas caem no abismo, poeira e
+    entulho, o campo fica desolado e sem cor), com textura de terra feita em código (`feTurbulence`), não um traço chapado.
+  - **[I]** As "cartas repetidas que acionaram a ressurreição" são a quadra (spec 1: cada quadra dá 1 Ressurreição, de uma
+    carta numérica só): a quadra ganha marca própria o tempo todo, e é ela que chama a luz na cena; sobe uma carta, não duas.
