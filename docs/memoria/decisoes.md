@@ -6,6 +6,27 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-10-30 (7): o bloco E3 + F2 + F3 liberado
+
+À pergunta "Posso começar o bloco E3 + F2 + F3 (medição no simulador)?", depois do merge da F1:
+
+> Pode começar
+
+**Leitura:** o bloco segue a spec do sub-projeto 5 (E3, F2 e F3) e as respostas de 2026-10-30 e 2026-10-30 (2). Ele vai em
+duas partes, com uma parada no meio:
+
+- **Plano 1:** o motor (Reflect reativo, Devastação, Roubo, cura passiva e o limite de especiais com 3 formas de penalidade na
+  config), o protocolo, o servidor, os bots e a medição no simulador. A web só acompanha o necessário para o `pnpm check`
+  passar.
+- **Parada:** a forma da penalidade do limite e as leituras **[I]** que mudam o comportamento de uma regra voltam a ele, com
+  os números e a recomendação, antes da interface.
+- **Plano 2, depois da resposta dele:** a interface e as cenas, o tutorial, as docs, as partidas de referência, o portão do
+  Difícil e o merge.
+
+Nada do bloco entra na `main` antes da resposta dele.
+
+---
+
 ## 2026-10-30 (6): a F1 liberada
 
 À pergunta "Posso começar a F1 (apagar o histórico de partidas)?", depois do merge da E2:
