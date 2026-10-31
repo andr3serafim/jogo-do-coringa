@@ -86,3 +86,13 @@ Relatório em `packages/sim/reports/e3.md`. A parada combinada (`decisoes.md` 20
   segue a única forma de limite 4 que faz acumular deixar de compensar.
 - **Queimadas:** 0,1 por partida no greedy; 1,8 no turtle e 1,6 no aleatório, que seguram especiais.
 - **O resto:** a Devastação segue neutra (49,7%); a cura passiva não muda a duração; a Exódia do turtle × greedy fica em ~10%.
+
+## 6. Portão do Difícil e calibração nas regras finais do bloco (2026-10-31)
+
+- **Portão do Difícil, do zero (`pnpm sim:dificil --recomecar`): APROVADO** na rodada 1. (a) hard × greedy 66,5% (limiar 58%),
+  (b) greedy × easy 82,0% (limiar 65%), p95 129 ms por decisão (limiar 300 ms).
+- **Calibração (`pnpm sim:calibrate`):** as mesmas metas passam e as mesmas falham de antes (greedy × greedy 3/4; random e turtle
+  1/4; a escolha da ordem segue sem pontos decisivos suficientes, 4% contra a meta de 20%). O que mudou: a Exódia do turtle ×
+  greedy caiu de 25,5% para 7,9% (o limite e o A a quebram), a do random × random subiu de 6,9% para 13,4% (o aleatório não gasta
+  K de propósito e a mão cheia de K fica), a quadra ("Fallen is Back") subiu de 67,5% para 75,2% no greedy (o Roubo põe numéricas
+  nas fileiras do ladrão). Duração: mediana 13 (greedy), 20 (random), 19 (turtle); nada no teto.
