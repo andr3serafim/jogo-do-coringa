@@ -7,7 +7,6 @@
 import { useEffect, useId, useState } from 'react';
 import {
   AUTO_PASS_LABEL,
-  CANCEL_LABEL,
   CLOSE_LABEL,
   CONCEDE_LABEL,
   CONCEDE_TITLE,
@@ -30,13 +29,13 @@ import { useSystemReducedMotion } from '../anim/useReducedMotion.ts';
 import { copyText } from '../clipboard.ts';
 import { Switch } from '../parts.tsx';
 import { COPY_FAILED, LINK_COPIED } from '../text.ts';
+import { ConfirmDialog } from './ConfirmDialog.tsx';
 import { Modal } from './Modal.tsx';
 import { RulesDialog } from './RulesDialog.tsx';
 
 const BASE = 'min-h-11 border-2 px-4 py-1.5 text-left font-bold disabled:opacity-60';
 const ITEM = `${BASE} border-tinta bg-papel text-tinta`;
 const DANGER = `${BASE} border-vermelho bg-papel text-vermelho`;
-const CONFIRM = `${BASE} border-vermelho bg-vermelho text-papel`;
 
 export interface MenuButtonProps {
   onClick: () => void;
@@ -224,9 +223,11 @@ export function GameMenu({
       </Modal>
 
       <RulesDialog open={open && rulesOpen} onClose={() => setRulesOpen(false)} />
-      <ConcedeDialog
+      <ConfirmDialog
         open={open && confirmOpen}
-        warning={concedeWarning}
+        title={CONCEDE_TITLE}
+        text={concedeWarning}
+        confirmLabel={CONFIRM_LABEL}
         onCancel={() => setConfirmOpen(false)}
         onConfirm={() => {
           setConfirmOpen(false);
@@ -235,36 +236,5 @@ export function GameMenu({
         }}
       />
     </>
-  );
-}
-
-interface ConcedeDialogProps {
-  open: boolean;
-  warning: string;
-  onCancel: () => void;
-  onConfirm: () => void;
-}
-
-/** A confirmação de Desistir. O "Cancelar" vem primeiro: é nele que o foco cai ao abrir (o gesto seguro). */
-function ConcedeDialog({ open, warning, onCancel, onConfirm }: ConcedeDialogProps) {
-  const titleId = useId();
-  const textId = useId();
-  return (
-    <Modal open={open} onClose={onCancel} labelledBy={titleId} describedBy={textId} className="w-[min(92vw,26rem)]">
-      <div className="flex flex-col gap-4">
-        <h2 id={titleId} className="textura font-madeira text-2xl uppercase leading-tight">
-          {CONCEDE_TITLE}
-        </h2>
-        <p id={textId}>{warning}</p>
-        <div className="flex flex-wrap justify-end gap-3">
-          <button type="button" className={ITEM} onClick={onCancel}>
-            {CANCEL_LABEL}
-          </button>
-          <button type="button" className={CONFIRM} onClick={onConfirm}>
-            {CONFIRM_LABEL}
-          </button>
-        </div>
-      </div>
-    </Modal>
   );
 }

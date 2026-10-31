@@ -1,6 +1,7 @@
 // A lista local das partidas terminadas (spec do polimento §4.1): as últimas 20 deste navegador, do treino e online, da mais
-// nova para a mais velha, cada uma com o replay quando houver; a tela `/partidas` apaga uma ou todas. Núcleo puro: o `KeyValueStore` e o relógio (`now`) entram por
-// parâmetro, e nada aqui lança. O que está guardado pode estar estragado, ser de outra versão ou não caber, e a tela segue.
+// nova para a mais velha, cada uma com o replay quando houver; a tela `/partidas` apaga uma ou todas. Núcleo puro: o
+// `KeyValueStore` e o relógio (`now`) entram por parâmetro, e nada aqui lança. O que está guardado pode estar estragado, ser de
+// outra versão ou não caber, e a tela segue.
 // `TrainingLevel` entra só como tipo: o módulo da sala local carrega os bots e fica fora do JavaScript inicial, onde este mora.
 import type { GameResult, PlayerId, Replay } from '@coringa/engine';
 import type { Outcome, OutcomeCause, Score } from '@coringa/protocol';
