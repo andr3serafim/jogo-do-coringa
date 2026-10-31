@@ -258,7 +258,10 @@ A mesa está em §3 e §4. O menu da partida tem:
   - rodada e tipo (Equipar ou Ataque);
   - de quem é a vez e o relógio;
   - ~~as rodadas sem dano, "Sem dano N de 3", e o aviso do anti-travamento~~: saíram com a regra na E1 do sub-projeto 5 (a Pressão da mesa, que também ficava aqui, já tinha saído). No celular, a iniciativa forma sozinha a segunda linha da faixa;
-  - iniciativa, com a ordem escolhida na rodada;
+  - iniciativa, com a ordem escolhida na rodada, e o **placar da iniciativa** (autor, 2026-10-31: "não tá claro pro jogador"): na
+    rodada de Ataque, o dano de cada um até agora ("Dano na rodada: você 12 · Duda 8"); fora dela, o motivo de quem a tem ("sorteada
+    no início", "mais dano na última rodada (14 × 9)", "empate na última rodada (5 × 5)"). Os números vêm do motor
+    (`damageThisRound`, `lastInitiative`), na fonte de texto com `tabular-nums`;
   - monte (quantidade);
   - cemitério: a carta de cima e a quantidade. Um toque abre a lista inteira, que é pública.
 - **No Equipar:** o oponente aparece como "montando 3 cartas…" (`pendingCount`, que é público) ou "pronto".
@@ -354,6 +357,13 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
 - Enter e Espaço escolhem, Esc cancela;
 - sem atalhos de uma tecla no MVP, para evitar jogada sem querer.
 
+- **O Roubo (E3 do sub-projeto 5):** o A (ou, sem A na mão, o Selvagem como A) ganha duas jogadas, "Roubar para o seu Ataque" e
+  "Roubar para a sua Defesa". Os alvos são as numéricas das fileiras do oponente (todas as de mesmo valor na mesma fileira, que o
+  motor aceita igual: a mesa compara o alvo por fileira e valor), destacados na mesa e listados como botões grandes ("9♦ do Ataque de
+  Duda"), com a prévia do motor (`stealPreview`) na linha de baixo: "−9 para Duda · +9 para você", "o K de Duda anula o dano · +9
+  para você", o corte do "não mata" e a vida já cheia. No arrasto, as numéricas do oponente são zonas do A; soltar ali abre as duas
+  jogadas.
+
 ### 3.5 Equipar [A + P; livre desde a E2 do sub-projeto 5]
 
 - Todas as numéricas pendentes (`self.pending`) aparecem juntas, e o cabeçalho diz quantas faltam ("Faltam 3 cartas", "Falta 1
@@ -378,7 +388,9 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
 
 ### 3.6 Escolha da iniciativa [D + A]
 
-- Para quem tem a iniciativa, a barra de ação mostra: "Você tem a iniciativa: atacar primeiro ou em segundo?".
+- Para quem tem a iniciativa, a barra de ação mostra: "Você tem a iniciativa: atacar primeiro ou em segundo?", e embaixo o motivo
+  ("Ela foi sorteada no início da partida."; "Você causou mais dano na última rodada de Ataque (14 × 9)."; "Empate em dano na última
+  rodada de Ataque (0 × 0): ela não mudou.").
   - **Atacar primeiro** vem pré-selecionado, com uma barra de 3 s. Os 3 s contam a partir de quando o painel aparece, depois das batidas da revelação do Equipar (§4.1).
   - Qualquer interação com o painel (toque, foco, mouse por cima) cancela a confirmação automática. Aí vale o prazo do servidor (10 s).
   - Sem interação, a interface envia `CHOOSE_ORDER { first: true }` com a marca `auto`.
@@ -491,7 +503,13 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
 | `Resurrected` | cemitério → fim da fileira |
 | `AbsoluteDefenseStarted` | **cena:** escudo na Defesa |
 | `AbsoluteDefenseEnded` | o escudo some; 1 Q vai para o cemitério |
-| `InitiativeChanged` | a marca da iniciativa troca de lado |
+| `InitiativeDecided` | **faixa** no fim de toda rodada de Ataque ("Duda causou mais dano (9 × 3) e ficou com a iniciativa", "… e segue com a iniciativa", "Empate em dano (5 × 5): a iniciativa segue com você"), que segura 1,2 s **fora do teto de decisão**, como as cenas raras (o Equipar que vem depois a espremia); a marca da iniciativa troca de lado só quando `changed` |
+| `CardStolen` | **faixa** ("Duda roubou o 9♥ do seu Ataque"); a carta vai da fileira do oponente para a do ladrão, o A para o cemitério |
+| `StealDamage` | o número do dano sobe no Coringa de quem foi roubado (nada, se o K anulou); a vida desce |
+| `Healed` | "+N" no ouro sobe no Coringa de quem curou (o Roubo e a cura pela Defesa); 0 passa quieto |
+| `HandLimitPenalty` | **faixa** ("Sua mão já tem 4 especiais: K♦ foi para o cemitério"); a carta queimada vai para o cemitério |
+| `DevastationCast` | **cena rara** (3 s, como os Absolutos): o K, o A e o J/Q da jogada caem em trio, raios e o carimbo "DEVASTAÇÃO!" na única inversão (0,9 s), "Duda devasta o seu Ataque" |
+| `RowDevastated` / `DevastationCanceled` | **faixa** ("O Ataque de Duda foi devastado", "A Devastação voltou: …", "Os Reflects se anularam: a Devastação não aconteceu"); as numéricas vão para o cemitério |
 | `Exodia` | **cena maior:** a partida acaba |
 | `GameOver` | o painel de fim aparece depois das batidas |
 

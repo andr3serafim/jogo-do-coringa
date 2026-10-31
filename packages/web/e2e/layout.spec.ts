@@ -1,16 +1,17 @@
 // E2E do arranjo da coluna dos especiais no PC (sub-projeto 5, F5): no notebook de 1536 × 695 do autor (mesa compacta, altura
-// abaixo de 900 px), a Guarda, os buffs, o Reflect ativo e as marcas de estado ("Ataque Absoluto armado", "1 Ressurreição
+// abaixo de 900 px), a Guarda, os buffs e as marcas de estado ("Ataque Absoluto armado", "1 Ressurreição
 // disponível") não podem encolher, se sobrepor nem sair do campo. É o que o jsdom não prova: a conta de verdade do flex e do grid.
 //
 // A partida vem de `fixtures/especiais.json`, uma entrada de "partidas anteriores" com o replay de uma partida greedy × greedy do
-// simulador (semente `layout-107`, config padrão), escolhida por juntar tudo isso no passo 75: no seu campo a Guarda, 4 J
-// (Ataque Absoluto armado), 3 Q e o Reflect ativo; no do Bot, uma Ressurreição. O replay abre direto em `/partidas/especiais`.
+// simulador (semente `layout-1188`, config padrão das regras de 2026-10-31), escolhida por juntar tudo isso no passo 99: no seu campo
+// a Guarda, 4 J (Ataque Absoluto armado) e 3 Q; no do Bot, uma Ressurreição. Com o Reflect reativo (F2), a zona do Reflect só existe
+// na janela de reação e nenhuma partida a junta com o resto: ela saiu da conta. O replay abre direto em `/partidas/especiais`.
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { failOnConsoleErrors, replayControl, replayCounter } from './helpers.ts';
 
 const FIXTURE = readFileSync(new URL('./fixtures/especiais.json', import.meta.url), 'utf8');
-const STEP = 75;
+const STEP = 99;
 
 interface Box {
   top: number;
@@ -49,7 +50,7 @@ function columnBoxes(page: Page): Promise<ColumnBoxes[]> {
 async function openAtStep(page: Page): Promise<void> {
   await page.addInitScript((games) => window.localStorage.setItem('coringa:partidas', games), FIXTURE);
   await page.goto('/partidas/especiais');
-  await page.getByRole('combobox', { name: 'Rodada' }).selectOption('17');
+  await page.getByRole('combobox', { name: 'Rodada' }).selectOption('21');
   const next = replayControl(page, 'Próximo passo');
   for (let i = 0; i < 20; i++) {
     const text = (await replayCounter(page).textContent()) ?? '';
@@ -65,13 +66,12 @@ for (const viewport of [
   { width: 1366, height: 657 },
   { width: 1440, height: 900 },
 ]) {
-  test(`especiais no PC de ${viewport.width} × ${viewport.height}: Guarda, buffs, Reflect e marcas sem encolher nem se sobrepor`, async ({
+  test(`especiais no PC de ${viewport.width} × ${viewport.height}: Guarda, buffs e marcas sem encolher nem se sobrepor`, async ({
     page,
   }) => {
     const guard = failOnConsoleErrors(page);
     await page.setViewportSize(viewport);
     await openAtStep(page);
-    await expect(page.getByRole('list', { name: 'Cartas do Reflect' })).toBeVisible();
 
     const fields = await columnBoxes(page);
     expect(fields).toHaveLength(2);

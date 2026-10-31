@@ -257,7 +257,9 @@ modelo da web. **[decisão minha]** As pistas:
 
 ### 5.3 Como ficou (entregue na fatia 4)
 
-- **Semente:** `TUTORIAL_SEED = 'tutorial-132'` (`@coringa/sim/tutorial`, sem `node:*`: a web a importa). Foi achada por
+- **Semente:** `TUTORIAL_SEED = 'tutorial-381'` desde 2026-10-31 (o critério novo está no item do bloco E3, abaixo; antes,
+  `tutorial-2431` e, na origem, `tutorial-132`). O que segue é o desenho original. A semente vem de `@coringa/sim/tutorial`, sem
+  `node:*` (a web a importa), e foi achada por
   `pnpm sim:tutorial` (job à parte, nunca no `pnpm check`), que percorre `tutorial-0`, `tutorial-1`, … e para na primeira em que
   o jogador (`p1`) recebe J, Q, K e A até o 2º Equipar, o Selvagem até o 3º e K + J + Q juntos na mão até o 3º. A conta é feita
   pela regra de repartir do motor, sem jogar rodadas: o monte é fixo pela semente, então os Equipares 1 e 2 são exatos, mas o 3º
@@ -271,7 +273,15 @@ modelo da web. **[decisão minha]** As pistas:
   (`docs/superpowers/plans/2026-10-26-polimento-fatia-4-tutorial.md`, "Textos finais das dicas") e, no código, em
   `packages/web/src/model/tutorial-copy.ts` (o E2E confere as dicas 1, 3, 4 e 10 por inteiro). A dica 9 eram duas frases independentes: a
   da Pressão da mesa saiu inteira no sub-projeto 5 (a dica virou `stall`), e a do anti-travamento saiu com a regra na E1:
-  o tutorial tem nove dicas, e a do fim continua sendo a última.
+  o tutorial tinha nove dicas.
+- **O bloco E3 + F2 + F3 (2026-10-31):** entram três dicas, e o tutorial fica com doze (a do fim continua sendo a última). Na
+  ordem: equip, quad, order, firstAttack, buffs, **steal** (o A na sua vez com uma numérica do oponente: o Roubo, o dano que o K
+  anula e que nunca mata, a cura), trap, wild, **devastation** (K + A + J/Q jogável, contorno na barra de ação), reflect, **limit**
+  (uma especial sua queimada pela BURN) e end. As de sempre acompanham as regras: a da ordem fala do placar da rodada, a dos
+  buffs da cura pela Defesa, a da Armadilha do Roubo e a do Reflect da Devastação. **A semente mudou para `tutorial-381`:** com a
+  mão limitada a 4 especiais, o critério antigo (J, Q, K e A até o 2º Equipar e o Selvagem até o 3º, sem jogar nada) ficou
+  impossível; o novo pede, até o 2º Equipar e sem nenhuma queimada, o K, o A, o Selvagem e um J ou um Q (o Reflect sai pelo
+  Selvagem). Na semente, a partida até o primeiro ataque mostra equip, order, firstAttack, buffs, steal, wild e devastation.
 - **Fluxo das dicas** (`model/tutorial.ts`, puro): a dica fica no painel até o "Entendi" ou até outra tomar o lugar. Uma dica que
   saiu de situação conta como vista e não volta; uma que ainda vale não é dada por vista. "Entendi" mostra a próxima que vale
   nesse mesmo momento (o primeiro ataque, depois J/Q/K, depois o Selvagem e o Reflect, na ordem da lista). O contorno só aparece
