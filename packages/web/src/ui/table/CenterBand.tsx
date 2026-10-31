@@ -138,7 +138,7 @@ export function CenterBand({
 
 /**
  * A marca da iniciativa (spec §4.2): um losango ouro que troca de lado, em cima para o oponente e embaixo para você (como
- * a mesa). É só enfeite do texto ao lado, que diz de quem é; o losango se mexe na batida do `InitiativeChanged`.
+ * a mesa). É só enfeite do texto ao lado, que diz de quem é; o losango se mexe na batida do `InitiativeDecided` que a muda de mão.
  */
 function InitiativeMark({ mine }: { mine: boolean }) {
   const anim = useAnim();

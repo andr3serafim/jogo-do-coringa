@@ -63,8 +63,13 @@ describe('delaysOf: quando cada elemento com layoutId se mexe', () => {
   });
 
   it('a marca da iniciativa espera a batida em que ela troca de lado', () => {
-    const delays = delaysOf(beatsOf({ type: 'TurnStarted', player: 'p1' }, { type: 'InitiativeChanged', player: 'p2' }));
+    const delays = delaysOf(beatsOf({ type: 'TurnStarted', player: 'p1' }, { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } }));
     expect(delays.get(INITIATIVE_ID)).toBe(400);
+  });
+
+  it('a decisão que não muda a iniciativa de mão não mexe na marca', () => {
+    const kept = { type: 'InitiativeDecided', player: 'p2', changed: false, damage: { p1: 0, p2: 0 } } as const;
+    expect(delaysOf(beatsOf({ type: 'TurnStarted', player: 'p1' }, kept)).has(INITIATIVE_ID)).toBe(false);
   });
 
   it('sem batidas, nada espera', () => {
@@ -263,7 +268,13 @@ describe('bannerText: a faixa de cada evento', () => {
     expect(bannerText({ type: 'ReactionWindowOpened', responder: 'p2', trigger: 'K_PLAYED' }, names)).toBe(
       'Duda pode reagir',
     );
-    expect(bannerText({ type: 'InitiativeChanged', player: 'p2' }, names)).toBe('Duda ficou com a iniciativa');
+    expect(bannerText({ type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } }, names)).toBe('Duda causou mais dano (9 × 3) e ficou com a iniciativa');
+    expect(bannerText({ type: 'InitiativeDecided', player: 'p1', changed: false, damage: { p1: 14, p2: 9 } }, names)).toBe(
+      'Você causou mais dano (14 × 9) e segue com a iniciativa',
+    );
+    expect(bannerText({ type: 'InitiativeDecided', player: 'p1', changed: false, damage: { p1: 5, p2: 5 } }, names)).toBe(
+      'Empate em dano (5 × 5): a iniciativa segue com você',
+    );
     expect(bannerText({ type: 'QuadFormed', player: 'p1', quad: { row: 'ATK', value: 7 } }, names)).toContain(
       '+7 e 1 Ressurreição',
     );

@@ -23,7 +23,7 @@
     "GuardBroken": 4,
     "GuardPlayed": 4,
     "Healed": 3,
-    "InitiativeChanged": 5,
+    "InitiativeDecided": 7,
     "OrderChosen": 8,
     "ReactionWindowClosed": 19,
     "ReactionWindowOpened": 19,

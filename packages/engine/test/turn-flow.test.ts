@@ -92,19 +92,36 @@ describe('fim da rodada de Ataque', () => {
     ]);
     expect(player(r.state, P2).hp).toBe(90);
     expect(player(r.state, P1).hp).toBe(98);
-    expect(r.events).toContainEqual({ type: 'InitiativeChanged', player: P1 });
+    const decision = { player: P1, changed: true, damage: { [P1]: 10, [P2]: 2 } };
+    expect(r.events).toContainEqual({ type: 'InitiativeDecided', ...decision });
+    expect(r.state.lastInitiative).toEqual(decision);
     expect(r.state.initiative).toBe(P1);
     expect(r.state.round).toBe(4);
     expect(r.state.phase).toEqual({ kind: 'EQUIP' });
   });
 
-  it('empate de dano mantém a iniciativa', () => {
+  it('quem já tinha a iniciativa e causou mais dano segue com ela, e o aviso sai do mesmo jeito', () => {
+    const s = setup({ initiative: P1, p1: { attack: [10] }, p2: { attack: [2] } });
+    const r = steps(s, [
+      [P1, { type: 'DECLARE_ATTACK' }],
+      [P2, { type: 'PASS' }],
+      [P2, { type: 'DECLARE_ATTACK' }],
+      [P1, { type: 'PASS' }],
+    ]);
+    expect(r.events).toContainEqual({ type: 'InitiativeDecided', player: P1, changed: false, damage: { [P1]: 10, [P2]: 2 } });
+    expect(r.state.initiative).toBe(P1);
+  });
+
+  it('empate de dano (0 × 0) mantém a iniciativa, com o aviso do empate', () => {
     const s = setup({ initiative: P2 });
+    expect(s.lastInitiative).toBeNull();
     const r = steps(s, [
       [P1, { type: 'END_TURN' }],
       [P2, { type: 'END_TURN' }],
     ]);
     expect(r.state.initiative).toBe(P2);
+    expect(r.events).toContainEqual({ type: 'InitiativeDecided', player: P2, changed: false, damage: { [P1]: 0, [P2]: 0 } });
+    expect(r.state.lastInitiative).toEqual({ player: P2, changed: false, damage: { [P1]: 0, [P2]: 0 } });
   });
 
   // O anti-travamento saiu (autor, 2026-10-30): a partida acaba por vida, Exódia ou W.O., nunca por rodadas sem dano.

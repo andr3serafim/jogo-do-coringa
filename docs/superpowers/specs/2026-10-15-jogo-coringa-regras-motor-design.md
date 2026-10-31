@@ -264,6 +264,7 @@ DEF = (soma(Defesa do defensor) + bônus) × (1 + nQ)
 
 - Ao fim de cada rodada de Ataque, quem **causou mais dano** naquela rodada (incluindo dano refletido) fica com a iniciativa da próxima **[O]**.
 - Empate (inclusive 0 × 0) → a iniciativa não muda **[I]**.
+- **Na tela [autor, 2026-10-31: "às vezes a iniciativa muda pro adversário, eu também não vejo o momento, não sei por quê"]:** a visão traz o dano de cada um na rodada (`damageThisRound`) e a última decisão (`lastInitiative`, `null` enquanto é a sorteada), e o fim de **toda** rodada de Ataque emite `InitiativeDecided`, mudando ou não, com os dois danos. O dano do Roubo não conta **[I]**.
 - **Escolha da iniciativa [N]:** quem tem a iniciativa escolhe, no início de cada rodada de Ataque, se ataca primeiro ou segundo. Ir primeiro vence corridas de dano letal; ir segundo dá informação completa antes de agir.
 - A iniciativa também define quem recebe a primeira carta na distribuição (§1.4).
 
@@ -386,7 +387,7 @@ A união `GameEvent` de `types.ts`, base para animações e histórico. Cada aç
 - **Roubo e cura (E3):** `CardStolen` (a carta, as duas fileiras e o Ás gasto), `StealDamage` (o valor seco, o dano que saiu e se um K anulou), `Healed` (quanto entrou, de onde e a carta que curou).
 - **Devastação (F3):** `DevastationCast` (as 3 cartas, a fileira e o alvo), `RowDevastated` (quem perdeu a fileira, as cartas e se foi refletida), `DevastationCanceled` (Reflect contra Reflect, ou o Reflect contra quem está sob Defesa Absoluta).
 - **Ataque:** `AttackDeclared`, `AbsoluteAttack` (antes de tudo, também contra um Reflect), `ReflectTriggered`, `DamageDealt`, `GuardBroken`, `BuffRemoved`, `CardsRemovedFromRow`, `QuadFormed`, `QuadBroken`.
-- **Estado da mesa:** `AbsoluteDefenseStarted`, `AbsoluteDefenseEnded`, `InitiativeChanged`.
+- **Estado da mesa:** `AbsoluteDefenseStarted`, `AbsoluteDefenseEnded`, `InitiativeDecided` (no fim de toda rodada de Ataque: com quem a iniciativa ficou, se mudou de mão e o dano de cada um na rodada).
 - **Fim:** `Exodia`, `GameOver`.
 
 ### 2.6 Informação oculta

@@ -61,7 +61,7 @@ const SAMPLES: { [T in GameEvent['type']]: Extract<GameEvent, { type: T }> } = {
   Resurrected: { type: 'Resurrected', player: 'p1', card: num('n4'), row: 'ATK' },
   AbsoluteDefenseStarted: { type: 'AbsoluteDefenseStarted', player: 'p2' },
   AbsoluteDefenseEnded: { type: 'AbsoluteDefenseEnded', player: 'p2' },
-  InitiativeChanged: { type: 'InitiativeChanged', player: 'p2' },
+  InitiativeDecided: { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } },
   Exodia: { type: 'Exodia', player: 'p1' },
   GameOver: { type: 'GameOver', result: { kind: 'WIN', winner: 'p1', reason: 'EXODIA' } },
 };

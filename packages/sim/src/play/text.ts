@@ -200,8 +200,13 @@ export function eventText(e: GameEvent, names: Names): string | null {
       return `DEFESA ABSOLUTA ${de(e.player)}!`;
     case 'AbsoluteDefenseEnded':
       return `A Defesa Absoluta ${de(e.player)} terminou`;
-    case 'InitiativeChanged':
-      return `${who(e.player)} ficou com a iniciativa`;
+    case 'InitiativeDecided': {
+      const other = Object.keys(e.damage).find((id) => id !== e.player);
+      const mine = e.damage[e.player] ?? 0;
+      const theirs = other === undefined ? 0 : (e.damage[other] ?? 0);
+      if (mine === theirs) return `Empate em dano (${mine} × ${theirs}): a iniciativa segue com ${e.player === names.me ? 'você' : who(e.player)}`;
+      return `${who(e.player)} causou mais dano (${mine} × ${theirs}) e ${e.changed ? 'ficou com' : 'segue com'} a iniciativa`;
+    }
     case 'Exodia':
       return `EXÓDIA ${de(e.player)}!`;
     case 'GameOver':

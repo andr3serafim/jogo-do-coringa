@@ -51,6 +51,7 @@ export function createGame(config: RulesConfig, seed: string, players: [PlayerId
     round: 0,
     roundKind: 'EQUIP',
     initiative,
+    lastInitiative: null,
     turnOrder: [a, b],
     turnIndex: 0,
     phase: { kind: 'EQUIP' },

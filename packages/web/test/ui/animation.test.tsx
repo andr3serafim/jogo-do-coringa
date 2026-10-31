@@ -236,12 +236,12 @@ describe('palco: catchUp e resync (spec §4.1)', () => {
 
   it('catchUp toca as faixas na metade do tempo', () => {
     const m = mount(THEIRS);
-    emit(m, THEIRS, [TURN, { type: 'InitiativeChanged', player: 'p2' }], { catchUp: true });
+    emit(m, THEIRS, [TURN, { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } }], { catchUp: true });
     expect(banner(m.container)).toHaveTextContent('Vez de Duda');
     advance(199);
     expect(busy(m.container)).toBe(true);
     advance(1);
-    expect(banner(m.container)).toHaveTextContent('Duda ficou com a iniciativa');
+    expect(banner(m.container)).toHaveTextContent('Duda causou mais dano (9 × 3) e ficou com a iniciativa');
     advance(200);
     expect(busy(m.container)).toBe(false);
   });
@@ -682,12 +682,12 @@ describe('efeitos da batida (spec §4.2)', () => {
     expect(m.container.querySelector('[data-dano]')).toHaveTextContent('−37');
   });
 
-  it('InitiativeChanged: a marca troca de lado (a view já é a nova)', () => {
+  it('InitiativeDecided: a marca troca de lado (a view já é a nova)', () => {
     const m = mount(THEIRS);
     expect(m.container.querySelector('[data-iniciativa]')).toHaveAttribute('data-iniciativa', 'voce');
-    emit(m, { ...THEIRS, initiative: 'opponent' }, [{ type: 'InitiativeChanged', player: 'p2' }]);
+    emit(m, { ...THEIRS, initiative: 'opponent' }, [{ type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } }]);
     expect(m.container.querySelector('[data-iniciativa]')).toHaveAttribute('data-iniciativa', 'oponente');
-    expect(banner(m.container)).toHaveTextContent('Duda ficou com a iniciativa');
+    expect(banner(m.container)).toHaveTextContent('Duda causou mais dano (9 × 3) e ficou com a iniciativa');
   });
 
   it('cada faixa mostra o texto do seu evento', () => {

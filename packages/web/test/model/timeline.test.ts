@@ -101,7 +101,7 @@ const SAMPLES: { event: GameEvent; kind: Beat['kind']; scene?: SceneKind; cards?
   { event: { type: 'Resurrected', player: 'p1', card: num('n4'), row: 'ATK' }, kind: 'move', cards: ['n4'] },
   { event: { type: 'AbsoluteDefenseStarted', player: 'p2' }, kind: 'scene', scene: 'ABSOLUTE_DEFENSE' },
   { event: { type: 'AbsoluteDefenseEnded', player: 'p2' }, kind: 'move' },
-  { event: { type: 'InitiativeChanged', player: 'p2' }, kind: 'banner' },
+  { event: { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } }, kind: 'banner' },
   { event: { type: 'Exodia', player: 'p1' }, kind: 'scene', scene: 'EXODIA' },
   { event: { type: 'GameOver', result: { kind: 'WIN', winner: 'p1', reason: 'EXODIA' } }, kind: 'banner' },
 ];

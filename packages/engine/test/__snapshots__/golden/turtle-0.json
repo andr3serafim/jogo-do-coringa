@@ -25,7 +25,7 @@
     "GuardPlayed": 4,
     "HandLimitPenalty": 1,
     "Healed": 11,
-    "InitiativeChanged": 4,
+    "InitiativeDecided": 15,
     "OrderChosen": 16,
     "ReactionWindowClosed": 31,
     "ReactionWindowOpened": 31,

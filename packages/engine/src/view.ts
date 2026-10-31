@@ -18,6 +18,7 @@ function publicPart(s: GameState, p: PlayerState): PublicPlayer {
     handCount: p.hand.length,
     pendingCount: p.pending.length,
     equipSubmitted: p.equipSubmitted,
+    damageThisRound: p.damageThisRound,
   };
 }
 
@@ -30,6 +31,7 @@ export function viewFor(s: GameState, playerId: PlayerId): PlayerView {
     round: s.round,
     roundKind: s.roundKind,
     initiative: s.initiative,
+    lastInitiative: s.lastInitiative,
     turnOrder: s.turnOrder,
     turnIndex: s.turnIndex,
     phase: s.phase,

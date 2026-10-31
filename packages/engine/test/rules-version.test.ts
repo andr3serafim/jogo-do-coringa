@@ -18,7 +18,7 @@ const RULES_DIGESTS: Record<number, string> = {
   3: '4507a11fa8301154c5b9ea32ac3acb50ff486c79066c0f50438755487207df9e',
   // 4 (bloco E3 + F2 + F3 do sub-projeto 5): o Reflect reativo (F2), a Devastação (F3), o Roubo e a cura (E3). Os commits
   // seguintes da mesma branch trocam só este digest.
-  4: '55522ea0faddc46009e8916bee1fcdfc6c9db176f22097e132c43c95ae577e0a',
+  4: '56ed17cbf482f3cb9e8ba2d51710bb1e5441023b357bca52950f1986d76553ca',
 };
 
 const GOLDEN_DIR = new URL('./__snapshots__/golden/', import.meta.url);

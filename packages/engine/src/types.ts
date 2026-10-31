@@ -144,9 +144,21 @@ export interface GameState {
   round: number;
   roundKind: 'EQUIP' | 'ATTACK';
   initiative: PlayerId;
+  /** A última decisão da iniciativa (spec §1.10); `null` enquanto ela é a sorteada na criação. */
+  lastInitiative: InitiativeDecision | null;
   turnOrder: [PlayerId, PlayerId];
   turnIndex: 0 | 1;
   phase: Phase;
+}
+
+/**
+ * O fim de uma rodada de Ataque (spec §1.10): com quem a iniciativa ficou, se mudou de mão e o dano de cada um na rodada (o que
+ * decidiu). Sai sempre, mudando ou não, para a tela dizer o porquê (autor, 2026-10-31).
+ */
+export interface InitiativeDecision {
+  player: PlayerId;
+  changed: boolean;
+  damage: Record<PlayerId, number>;
 }
 
 export type Action =
@@ -245,7 +257,7 @@ export type GameEvent =
   | { type: 'Resurrected'; player: PlayerId; card: NumCard; row: RowName }
   | { type: 'AbsoluteDefenseStarted'; player: PlayerId }
   | { type: 'AbsoluteDefenseEnded'; player: PlayerId }
-  | { type: 'InitiativeChanged'; player: PlayerId }
+  | ({ type: 'InitiativeDecided' } & InitiativeDecision)
   | { type: 'Exodia'; player: PlayerId }
   | { type: 'GameOver'; result: GameResult };
 
@@ -304,6 +316,8 @@ export interface PublicPlayer {
   handCount: number;
   pendingCount: number;
   equipSubmitted: boolean;
+  /** O dano causado nesta rodada de Ataque, que decide a iniciativa (o do Roubo não conta). */
+  damageThisRound: number;
 }
 
 export interface SelfView extends PublicPlayer {
@@ -318,6 +332,7 @@ export interface PlayerView {
   round: number;
   roundKind: 'EQUIP' | 'ATTACK';
   initiative: PlayerId;
+  lastInitiative: InitiativeDecision | null;
   turnOrder: [PlayerId, PlayerId];
   turnIndex: 0 | 1;
   phase: Phase;

@@ -24,7 +24,7 @@
     "GuardBroken": 4,
     "GuardPlayed": 5,
     "Healed": 6,
-    "InitiativeChanged": 2,
+    "InitiativeDecided": 9,
     "QuadBroken": 1,
     "QuadFormed": 1,
     "ReactionWindowClosed": 24,

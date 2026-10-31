@@ -117,9 +117,9 @@ describe('transição atrasada até a batida que moveu a carta (spec §4.1)', ()
     expect(delayOf(m.container, 'j1')).toBe('0');
   });
 
-  it('a marca da iniciativa espera a batida do InitiativeChanged', () => {
+  it('a marca da iniciativa espera a batida do InitiativeDecided', () => {
     const m = mount(THEIRS);
-    emit(m, { ...THEIRS, initiative: 'opponent' }, [TURN, { type: 'InitiativeChanged', player: 'p2' }]);
+    emit(m, { ...THEIRS, initiative: 'opponent' }, [TURN, { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } }]);
     expect(delayOf(m.container, INITIATIVE_ID)).toBe('0.4');
   });
 

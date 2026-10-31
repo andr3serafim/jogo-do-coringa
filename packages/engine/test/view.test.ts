@@ -24,6 +24,20 @@ describe('viewFor (review focus 3)', () => {
     expect(JSON.stringify(v)).not.toContain(`"${player(s, P2).pending[0].id}"`);
   });
 
+  it('mostra o dano de cada um na rodada e a última decisão da iniciativa (o placar da iniciativa)', () => {
+    const s = setup({ p1: { attack: [10] }, p2: { attack: [2] } });
+    const fresh = viewFor(s, P1);
+    expect(fresh.lastInitiative).toBeNull();
+    expect([fresh.self.damageThisRound, fresh.opponent.damageThisRound]).toEqual([0, 0]);
+    const r = steps(s, [
+      [P1, { type: 'DECLARE_ATTACK' }],
+      [P2, { type: 'PASS' }],
+    ]);
+    const v = viewFor(r.state, P2);
+    expect(v.self.damageThisRound).toBe(0);
+    expect(v.opponent.damageThisRound).toBe(10);
+  });
+
   it('é uma cópia: mexer na visão não muda o estado', () => {
     const s = setup({ p1: { hand: ['J'] } });
     viewFor(s, P1).self.hand.pop();

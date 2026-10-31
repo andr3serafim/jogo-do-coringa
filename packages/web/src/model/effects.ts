@@ -5,7 +5,7 @@ import { eventText, type Names } from '@coringa/sim/text';
 import { SCENE_TITLE } from './copy.ts';
 import type { Beat } from './timeline.ts';
 
-/** `layoutId` da marca da iniciativa: ela troca de lado na batida do `InitiativeChanged`. */
+/** `layoutId` da marca da iniciativa: ela troca de lado na batida do `InitiativeDecided` que a muda de mão. */
 export const INITIATIVE_ID = 'marca-iniciativa';
 
 /** Chave de uma fileira de um jogador, para o conjunto de fileiras acesas: "p1:ATK". */
@@ -78,7 +78,7 @@ export function delaysOf(beats: readonly Beat[]): ReadonlyMap<string, number> {
   const delays = new Map<string, number>();
   for (const beat of beats) {
     for (const id of beat.cards) delays.set(id, beat.startMs);
-    if (beat.event.type === 'InitiativeChanged') delays.set(INITIATIVE_ID, beat.startMs);
+    if (beat.event.type === 'InitiativeDecided' && beat.event.changed) delays.set(INITIATIVE_ID, beat.startMs);
   }
   return delays;
 }
@@ -127,7 +127,7 @@ export function bannerText(event: GameEvent, names: Names): string | null {
     case 'DeckReshuffled':
       return 'O cemitério virou o monte';
     case 'OrderChosen':
-    case 'InitiativeChanged':
+    case 'InitiativeDecided':
     case 'QuadFormed':
     case 'QuadBroken':
     case 'GameOver':

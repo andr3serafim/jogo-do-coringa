@@ -6,6 +6,23 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-10-31 (9): conduzir sozinho até o fim das pendências
+
+No meio do trabalho das respostas de 2026-10-31 (8):
+
+> Dou autorização para prosseguir até o termino de todos as pendências passadas até agora. estou me abstendo por algumas horas e
+> deixo em suas mãos a condução do projeto até concluir o que falta.
+
+**Leitura:** o plano 2 do bloco E3 + F2 + F3 segue até o merge na `main` (com `pnpm check` e as duas CI verdes, como já vale até
+o MVP), sem parar para perguntar. **[I]** "as pendências passadas até agora" são as do bloco (o plano 2:
+`docs/superpowers/plans/2026-10-31-e3-f2-f3-plano-2.md`), não as que só ele pode fazer (playtest, `wrangler login`, deploy, o
+VC++ Redistributable). Decisão de regra continua sendo dele: o que a medição levantar volta como pergunta no fechamento, sem
+mudar regra por conta própria. A parada combinada de (8) vira aviso: se o Roubo passar de 65% no pareado, o merge sai assim
+mesmo (a regra é a que ele pediu) e o número vai em destaque no fechamento; partida no teto ou duração muito diferente, que
+apontariam defeito, ainda param o merge.
+
+---
+
 ## 2026-10-31 (8): BURN 4, o Roubo sem naipe e a iniciativa mais clara
 
 Às perguntas da medição do plano 1 do bloco E3 + F2 + F3 (`notas/medicao-e3.md`):

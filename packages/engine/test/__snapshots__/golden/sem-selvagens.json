@@ -27,7 +27,7 @@
     "GuardBroken": 6,
     "GuardPlayed": 7,
     "Healed": 12,
-    "InitiativeChanged": 3,
+    "InitiativeDecided": 18,
     "OrderChosen": 19,
     "QuadBroken": 3,
     "QuadFormed": 3,

@@ -87,7 +87,7 @@ function classify(event: GameEvent): Classified {
     case 'TurnStarted':
     case 'OrderChosen':
     case 'ReactionWindowOpened':
-    case 'InitiativeChanged':
+    case 'InitiativeDecided':
     case 'QuadFormed':
     case 'QuadBroken':
     case 'GameOver':

@@ -104,13 +104,18 @@ function expireEffects(s: GameState, owner: PlayerState, attacked: boolean, ev: 
   }
 }
 
-/** Iniciativa (spec §1.10). Sem anti-travamento (E1 do sub-projeto 5): a rodada nunca encerra a partida. */
+/**
+ * Iniciativa (spec §1.10): fica com quem causou mais dano na rodada; no empate, não muda. A decisão sai sempre, com os dois
+ * danos (autor, 2026-10-31: a tela tem que dizer por quê). Sem anti-travamento (E1 do sub-projeto 5): a rodada nunca encerra a
+ * partida.
+ */
 function endAttackRound(s: GameState, ev: GameEvent[]): void {
   const [a, b] = s.players;
   const leader = a.damageThisRound > b.damageThisRound ? a : b.damageThisRound > a.damageThisRound ? b : null;
-  if (leader && leader.id !== s.initiative) {
-    s.initiative = leader.id;
-    ev.push({ type: 'InitiativeChanged', player: leader.id });
-  }
+  const player = leader ? leader.id : s.initiative;
+  const decision = { player, changed: player !== s.initiative, damage: { [a.id]: a.damageThisRound, [b.id]: b.damageThisRound } };
+  s.initiative = player;
+  s.lastInitiative = decision;
+  ev.push({ type: 'InitiativeDecided', ...decision });
   startRound(s, ev);
 }
