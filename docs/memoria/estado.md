@@ -5,23 +5,25 @@
 
 ## Agora
 
-- **Branch:** `feat/regras-e3`, no checkout principal `D:\andr3\jogo-coringa`, a partir da `main` (`f0ac24b`).
-- **Pronto para o merge:** os planos 1 e 2 do bloco **E3 + F2 + F3** estão feitos (registro em `diario.md` 2026-10-31 (7)), com a
-  autorização do autor para mesclar (`decisoes.md` 2026-10-31 (9)). O Difícil, a calibração e o E2E local passaram.
-- **Próximo passo exato:** push da branch (o pre-push roda o `pnpm check`), as duas CI verdes (`check` e `e2e`) e o
-  fast-forward da `main` (sem `gh` na máquina, não há PR pela linha de comando). Depois, este arquivo com "nada em curso".
+- **Nada em curso.** O bloco **E3 + F2 + F3** está na `main` (fast-forward da `feat/regras-e3`, com `pnpm check` e as duas CI
+  verdes). Planos: `docs/superpowers/plans/2026-10-30-e3-f2-f3-plano-1.md` e `…-plano-2.md`; registro em `diario.md`
+  2026-10-31 (7).
+- **Próximo passo exato:** esperar o autor (playtest das regras novas e as perguntas abaixo). A fila do sub-projeto 5 acabou; o
+  que vier depende da resposta dele.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
 ## A `main`
 
-E1, E2 e F1 mescladas (2026-10-30). Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D
-(`8d7f078`, `a5a76c5`, `bba8377`, `8cdf0a1`), a memória compartilhada, a E1, a E2 e a F1. Regras em vigor: spec 1 (`docs/superpowers/specs/2026-10-15-jogo-coringa-regras-motor-design.md`), com os ajustes da
+E1, E2, F1 (2026-10-30) e o bloco E3 + F2 + F3 (2026-10-31) mesclados. Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D
+(`8d7f078`, `a5a76c5`, `bba8377`, `8cdf0a1`), a memória compartilhada, a E1, a E2, a F1 e o bloco E3 + F2 + F3 (o Reflect
+reativo, a Devastação, o Roubo sem naipe, a cura pela Defesa, o limite de 4 especiais com a BURN e a iniciativa com o placar na
+tela). Regras em vigor: spec 1 (`docs/superpowers/specs/2026-10-15-jogo-coringa-regras-motor-design.md`), com os ajustes da
 spec do sub-projeto 5 (`2026-10-27-ajustes-design.md`).
 
 ## Fila (sub-projeto 5)
 
-1. **E3 + F2 + F3:** feito na `feat/regras-e3`, falta o merge.
+Vazia: o bloco E3 + F2 + F3 era o último item.
 
 ## Esperando o autor
 
@@ -38,6 +40,13 @@ spec do sub-projeto 5 (`2026-10-27-ajustes-design.md`).
     rara da Devastação; a faixa da queimada; as três dicas novas do tutorial (Roubo, Devastação, limite) e a semente nova
     (`tutorial-381`).
   - as 10 leituras [I] do plano 1 (`notas/medicao-e3.md`, seção 4), vistas sem comentário.
+  - **Para ele saber:** o `RULES_VERSION` ficou em 4 nas mudanças de 2026-10-31 (a produção vai de 3 para 4 de uma vez); partidas
+    de treino guardadas no navegador dele com builds desta branch (o `jogar-treino.bat` roda o checkout) abrem sem aviso de
+    versão, mas o replay delas pode divergir (o Roubo mudou). Apagar o histórico em `/partidas` resolve.
+  - **Pequenos ajustes deixados para depois** (nenhum quebra o jogo): soltar o A numa numérica do Bot abre as jogadas e não lembra
+    a carta (é preciso escolher o alvo de novo); com um A na mão, o Selvagem não oferece o Roubo (a mesa segue a fonte única que o
+    motor lista); a carta A da mão ainda diz "Armadilha" no rótulo curto; a vida conta antes de o "+N" da cura subir.
+  - **O deploy** das regras novas é dele (`pnpm deploy:server`).
 
 - **Achados da E1, para ele saber (não pedem decisão agora):**
   - sem o anti-travamento, quem se fecha na Defesa e joga todos os K chega à **Exódia em 25,5%** das partidas `turtle` ×
