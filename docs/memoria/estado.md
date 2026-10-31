@@ -5,42 +5,45 @@
 
 ## Agora
 
-- **Branch:** `feat/regras-e3`, no checkout principal `D:\andr3\jogo-coringa`, a partir da `main` (`f0ac24b`, com a F1:
-  apagar uma partida ou o histórico em `/partidas`, sempre com confirmação).
-- **Em curso:** o **plano 2** do bloco E3 + F2 + F3 (`docs/superpowers/plans/2026-10-31-e3-f2-f3-plano-2.md`), com a autorização do
-  autor para seguir até o merge sem parar (`decisoes.md` 2026-10-31 (9)). Antes dele: `e50d625` (BURN 4 no padrão, o Roubo sem
-  naipe, a semente do tutorial `tutorial-381`) e a remedição (`9152b18`; leitura em `notas/medicao-e3.md` §5: o Roubo vence 39%
-  contra quem não rouba; nada no teto; a parada combinada não disparou).
-- **Feito no plano 2:** Tarefas 1 a 7 (`3af88bb` … `d374804`), o portão do Difícil do zero (`2b1042c`: aprovado, 66,5% / 82,0% / p95 129 ms) e a calibração (`a2ef227`: nenhuma meta piorou). Leitura em `notas/medicao-e3.md` §5 e §6.
-- **Próximo passo exato:** **rodando** `pnpm e2e` local (log no scratchpad da sessão). Depois: `pnpm check` no push, CI verde nos dois jobs, a entrada do `diario.md`, PR e merge (squash ou ff).
-- **Avisos para o plano 2:** o teste de propriedade das jogadas da mesa (web) pula o `STEAL` até a interface do Roubo existir; o
-  previsor da mão do tutorial (`sim/src/tutorial-seed.ts`) só conhece a BURN e falha alto com outra forma; a CI `e2e` desta
-  branch pode estar vermelha (a interface ainda não oferece as jogadas novas).
+- **Branch:** `feat/regras-e3`, no checkout principal `D:\andr3\jogo-coringa`, a partir da `main` (`f0ac24b`).
+- **Pronto para o merge:** os planos 1 e 2 do bloco **E3 + F2 + F3** estão feitos (registro em `diario.md` 2026-10-31 (7)), com a
+  autorização do autor para mesclar (`decisoes.md` 2026-10-31 (9)). O Difícil, a calibração e o E2E local passaram.
+- **Próximo passo exato:** push da branch (o pre-push roda o `pnpm check`), as duas CI verdes (`check` e `e2e`) e o
+  fast-forward da `main` (sem `gh` na máquina, não há PR pela linha de comando). Depois, este arquivo com "nada em curso".
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
 ## A `main`
 
-E1, E2 e F1 mescladas (2026-10-30). Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D (`8d7f078`, `a5a76c5`,
-`bba8377`, `8cdf0a1`), a memória compartilhada, a E1, a E2 e a F1. Regras em vigor: spec 1
-(`docs/superpowers/specs/2026-10-15-jogo-coringa-regras-motor-design.md`), com os ajustes da spec do sub-projeto 5
-(`2026-10-27-ajustes-design.md`).
+E1, E2 e F1 mescladas (2026-10-30). Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D
+(`8d7f078`, `a5a76c5`, `bba8377`, `8cdf0a1`), a memória compartilhada, a E1, a E2 e a F1. Regras em vigor: spec 1 (`docs/superpowers/specs/2026-10-15-jogo-coringa-regras-motor-design.md`), com os ajustes da
+spec do sub-projeto 5 (`2026-10-27-ajustes-design.md`).
 
 ## Fila (sub-projeto 5)
 
-1. **E3 + F2 + F3:** roubo, cura pela Defesa, limite de 4 especiais, Reflect reativo e Devastação, medidos juntos no simulador
-   antes de virar regra. As regras estão aprovadas (spec do sub-projeto 5); falta a medição e a forma da penalidade do limite.
+1. **E3 + F2 + F3:** feito na `feat/regras-e3`, falta o merge.
 
 ## Esperando o autor
 
-- **Bloco E3 + F2 + F3 (respondido em 2026-10-31 (8); falta só confirmar no playtest):**
-  - as 10 leituras [I] do plano 1 (`notas/medicao-e3.md`, seção 4), vistas sem comentário;
-  - as [I] do Roubo novo e da iniciativa na tela (`decisoes.md` 2026-10-31 (8)).
+- **Bloco E3 + F2 + F3, para o playtest** (números em `notas/medicao-e3.md` §5 e §6):
+  - **O Roubo segue fraco:** mesmo com dano e cura, o bot que rouba vence 39% contra o que não rouba (o A vale mais como
+    Armadilha contra um K). A regra é a que ele pediu; se ele quiser o Roubo competitivo, as alavancas são o dano contar para a
+    iniciativa, o K não anular ou o Roubo valer mais.
+  - **O dano do Roubo conta para a iniciativa?** Hoje não (regra de 2026-10-30, que ele não mudou). Com o placar da iniciativa na
+    tela, ele vai ver a vida do oponente cair no Roubo sem o placar subir.
+  - **O desenho do naipe:** a regra não tem mais naipe, mas as cartas seguem desenhadas com ele ([I] em `decisoes.md` 2026-10-31
+    (8)). Tirar o desenho é outra tarefa, se ele quiser.
+  - **As [I] do plano 2:** o placar da iniciativa na faixa do centro e o motivo na pergunta da ordem; a faixa do fim de rodada
+    sempre, por 1,2 s fora do teto de decisão; o Roubo como duas jogadas do A ("para o seu Ataque", "para a sua Defesa"); a cena
+    rara da Devastação; a faixa da queimada; as três dicas novas do tutorial (Roubo, Devastação, limite) e a semente nova
+    (`tutorial-381`).
+  - as 10 leituras [I] do plano 1 (`notas/medicao-e3.md`, seção 4), vistas sem comentário.
 
 - **Achados da E1, para ele saber (não pedem decisão agora):**
   - sem o anti-travamento, quem se fecha na Defesa e joga todos os K chega à **Exódia em 25,5%** das partidas `turtle` ×
     `greedy` (era 1,7%). É o caso que ele previu; o limite de 4 especiais (E3) responde. A tartaruga deixou de compensar: o
-    líder que se fecha pontua 25 pp menos que o que segue jogando;
+    líder que se fecha pontua 25 pp menos que o que segue jogando. Com o bloco E3 (o limite com a BURN e o A que rouba), a Exódia
+    do turtle caiu para **7,9%** (calibração de 2026-10-31);
   - uma partida online sem limite de rodadas faz o log de passos crescer sem teto. O storage aguenta 2 MB por chave (~20 mil
     passos com a margem do teste, cem vezes uma partida típica), e a sala expira em 24 h. Detalhes na spec do servidor §9.4.
 - **[I] da E2 (Equipar livre), para ele confirmar no playtest:**
@@ -52,13 +55,12 @@ E1, E2 e F1 mescladas (2026-10-30). Sub-projetos 1 a 4 concluídos; sub-projeto 
   - apagar tudo não mexe no tutorial, nas preferências, no apelido nem no nível;
   - uma partida online apagada volta à lista se ele reabrir o link daquela sala terminada em até 24 h (a sala manda o
     desfecho de novo, e a junção pela `key` não acha mais a linha).
-- **[I] a confirmar, junto com os números da E3:**
+- **[I] da E1 e do Reflect, para o playtest (sem resposta dele até aqui):**
   - Defesa Absoluta até o ataque: o Ataque Absoluto e o ataque devolvido por Reflect contam como ataque; Reflect contra Reflect,
     Armadilha, Sacrifício, Roubo e Devastação não a encerram; ao acabar, sai 1 Q como hoje (`decisoes.md` 2026-10-30 (4)).
   - Defesa Absoluta contra o Reflect: o Reflect segura o golpe (o dono leva 0), mas não devolve dano nem quebra Q e K do
     atacante?
   - Reflect contra Reflect: o golpe não acontece, nenhuma carta sai das fileiras e ninguém leva dano?
-- **Forma da penalidade do limite de 4 especiais:** vai com 2 ou 3 opções medidas.
 - O lote de 2026-10-30 e as perguntas da revisão das notas (F4, notas 6 a 8) foram respondidos; tudo no `decisoes.md`.
 
 ## Só o autor

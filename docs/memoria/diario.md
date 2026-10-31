@@ -5,6 +5,42 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-10-31 (7): bloco E3 + F2 + F3, as respostas do autor e o plano 2 (interface, iniciativa clara, tutorial)
+
+- **Respostas do autor** (`decisoes.md` 2026-10-31 (8)): BURN com limite 4; o Roubo sem naipe (todo roubo dá dano e cura; o K
+  anula o dano; não mata); a iniciativa mais clara na tela. Depois, a autorização para seguir até o merge sem parar
+  (`decisoes.md` 2026-10-31 (9)). Plano 2: `docs/superpowers/plans/2026-10-31-e3-f2-f3-plano-2.md`, executado aqui mesmo.
+- **Commits na `feat/regras-e3`:** `e50d625` (BURN 4 no padrão, o Roubo sem naipe, a semente `tutorial-381`), `9152b18`
+  (`stealPreview` e a remedição), `3af88bb` (`InitiativeDecided` em toda rodada de Ataque, `lastInitiative`, `damageThisRound` na
+  visão), `6c169c9` (o Roubo na mesa), `bb24aab` (a iniciativa na tela), `3a212b8` (o Roubo, a cura, a queimada e a cena rara da
+  Devastação), `4e1adf5` (as dicas e o resumo das regras), `d374804` (a fixture do E2E e as specs), `2b1042c` (o portão do Difícil), `a2ef227` (a calibração), `eb36ddf` (os roteiros do E2E), mais os de memória.
+- **Decisões técnicas:**
+  - `RULES_VERSION` e `STATE_SCHEMA` ficaram em 4 (nada saiu da branch); só o digest da v4 mudou. O `InitiativeChanged` virou
+    `InitiativeDecided` (sai sempre, com os dois danos); os resultados das partidas de referência não mudaram com isso;
+  - a conta do Roubo mora numa função só (`stealOutcome`), usada pelo motor e pela prévia da mesa;
+  - na mesa, o Roubo são duas jogadas do A (uma por destino); o `roleKey` do alvo é `fileira:valor`, então qualquer numérica de
+    mesmo valor na mesma fileira vale (o motor lista só uma);
+  - a faixa da iniciativa segura 1,2 s fora do teto de decisão: o Equipar que vem depois do fim do Ataque a espremia em poucos ms,
+    que era parte do "não vejo o momento" do autor;
+  - a semente do tutorial: com a mão limitada a 4, o critério antigo ficou impossível; o novo pede K, A, Selvagem e J ou Q até o
+    2º Equipar, sem queimada;
+  - a fixture `especiais.json`: com o Reflect reativo nenhuma partida junta a zona do Reflect com a Guarda, 4 J e 3 Q (4 000
+    sementes); a zona saiu do teste do arranjo.
+- **Medição** (`notas/medicao-e3.md` §5): o Roubo novo vence 39% contra o bot que não rouba (o A vale mais como Armadilha); nada no
+  teto; a duração não mudou; o acumulador de K com a BURN 4 vence 45%.
+- **Portões:** o Difícil do zero aprovado (66,5% / 82,0% / p95 129 ms); a calibração sem meta pior que antes (`notas/medicao-e3.md` §6);
+  o E2E local verde (48 passaram).
+- **Armadilhas:**
+  - a BURN como padrão quebra a semente do tutorial (o critério supunha a mão sem teto);
+  - o teste de propriedade das jogadas da mesa cobre o `STEAL` de novo;
+  - a dica do Roubo vem antes da do Selvagem quando o Selvagem pode roubar como A (sem A na mão): um teste do tutorial tirou as
+    numéricas do oponente para continuar medindo a do Selvagem.
+  - os roteiros do E2E seguem uma semente e quebram com qualquer regra que mude a partida: um simulador do treino como o E2E o
+    joga (a primeira jogada de cada painel, Passar nas reações, o greedy do Médio com a semente `<semente>/bot`) reproduz a partida
+    exata e acha sementes novas sem tentativa no navegador (o script ficou só na sessão; a ideia está aqui).
+
+---
+
 ## 2026-10-30/31 (6): bloco E3 + F2 + F3, plano 1 (motor, bots e medição)
 
 - **Liberação do autor:** "Pode começar" (`decisoes.md` 2026-10-30 (7)). O bloco vai em dois planos; este é o 1, que para na
