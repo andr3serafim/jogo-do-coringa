@@ -8,21 +8,21 @@
 - **Branch:** `feat/regras-e3`, no checkout principal `D:\andr3\jogo-coringa`, a partir da `main` (`f0ac24b`, com a F1:
   apagar uma partida ou o histórico em `/partidas`, sempre com confirmação).
 - **Em curso:** o autor respondeu (`decisoes.md` 2026-10-31 (8)): **BURN 4**, o **Roubo sem naipe** (todo roubo dá dano e cura)
-  e a **iniciativa mais clara na tela**. Agora: o motor (BURN 4 no padrão e o Roubo novo), o bot e a remedição do Roubo, com a
-  parada combinada (acima de 65% no pareado, duração mudando ou partida no teto: para e volta a ele); depois, o plano 2. O plano 1
-  está em `docs/superpowers/plans/2026-10-30-e3-f2-f3-plano-1.md`.
+  e a **iniciativa mais clara na tela**. Feito: `e50d625` (BURN 4 no padrão, o Roubo novo no motor, no bot e na spec 1, as
+  partidas de referência, e a semente do tutorial `tutorial-381` com o critério novo: K, A, Selvagem e um J ou Q até o 2º
+  Equipar, sem queimada). **Rodando:** `pnpm sim:e3` (a remedição, relatório em `packages/sim/reports/e3.md`).
+- **Parada combinada:** se o Roubo passar de 65% no pareado contra o greedy sem Roubo, se a duração mudar ou aparecer partida no
+  teto, a branch para antes do merge e os números voltam ao autor. Senão, segue o plano 2 sem nova parada.
 - **Feito no plano 1:** Reflect reativo (`d165891`, `RULES_VERSION` 4 e `STATE_SCHEMA` 4), Devastação (`44b6672`), Roubo
-  (`40a19ae`), cura passiva (`966960b`, `defenseHealGuard`), limite de especiais com BURN, CHOOSE e FEWER (`76805ba`,
-  `specialLimit`; o padrão fica **sem limite** até ele escolher), a medição (`5a1061d`, `e1eff5f`: `pnpm sim:e3`, relatório em
-  `packages/sim/reports/e3.md`). A spec 1 já descreve as regras novas. A leitura dos números está em
-  `docs/memoria/notas/medicao-e3.md`.
-- **Próximo passo exato:** no motor, `DEFAULT_CONFIG.specialLimit = { max: 4, penalty: 'BURN' }` e o Roubo sem naipe
-  (`actions/main.ts` `steal`, a chave do `legal-actions`, o `stealValue` do `eval`, o `text.ts`, as métricas da `e3.ts`, a spec 1
-  §1 A); regravar as partidas de referência e trocar o digest da v4; remedir com `pnpm sim:e3`. Depois, o **plano 2**: a
-  interface (o Roubo com escolha de alvo e fileira, a cena da Devastação, o Reflect na reação, a cura e o dano do roubo na mesa,
-  a iniciativa: o dano da rodada ao vivo e o aviso de fim de rodada sempre, com o motivo), o tutorial (rever a semente sob o limite escolhido e as dicas do A, do fim, da Guarda e do Reflect), a fixture
-  `e2e/fixtures/especiais.json` (gravada nas regras antigas), o resumo das regras, as specs da web e do polimento, as partidas de
-  referência, `pnpm sim:dificil --recomecar`, a calibração, o E2E e o merge.
+  (`40a19ae`), cura passiva (`966960b`, `defenseHealGuard`), limite de especiais (`76805ba`), a medição (`5a1061d`,
+  `e1eff5f`). A leitura dos números da primeira medição está em `docs/memoria/notas/medicao-e3.md`.
+- **Próximo passo exato:** ler o `e3.md` novo (o pareado do Roubo, os limiares, a duração, o teto e o acumulador sob BURN 4),
+  acrescentar a remedição em `notas/medicao-e3.md` e aplicar a parada combinada. Depois, escrever e executar o **plano 2**: a
+  interface (o Roubo com escolha de alvo e fileira, a cena da Devastação, o Reflect na reação, a cura e o dano do roubo na mesa, a
+  queimada da BURN, a iniciativa: `damageThisRound` na visão, o dano da rodada ao vivo e um evento de fim de rodada de Ataque
+  sempre, com os dois danos e o motivo), o tutorial (as dicas do A com o Roubo, da Guarda, do Reflect e do limite), a fixture
+  `e2e/fixtures/especiais.json` (gravada nas regras antigas), o resumo das regras, as specs da web e do polimento,
+  `pnpm sim:dificil --recomecar`, a calibração, o E2E e o merge.
 - **Avisos para o plano 2:** o teste de propriedade das jogadas da mesa (web) pula o `STEAL` até a interface do Roubo existir; o
   previsor da mão do tutorial (`sim/src/tutorial-seed.ts`) só conhece a BURN e falha alto com outra forma; a CI `e2e` desta
   branch pode estar vermelha (a interface ainda não oferece as jogadas novas).
