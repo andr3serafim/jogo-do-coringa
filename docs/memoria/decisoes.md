@@ -6,6 +6,18 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-10-31 (13): a spec do sub-projeto 6 aprovada, com os sons
+
+À entrega da spec (`docs/superpowers/specs/2026-10-31-direcao-visual-design.md`, com as 21 decisões [I] listadas para ele):
+
+> aprovado, apenas inclua os sons e prossiga
+
+**Leitura:** a spec está aprovada, inclusive as [I] (ele as viu listadas). **[I]** "inclua os sons" = o som deixa de ser a última
+fatia e cada fatia sai com os sons do que ela traz (spec §10 e §14 ajustadas); fora das cenas, os sons do golpe comum, da
+espada, da fita e da quadra (§10). "Prossiga" = o plano da fatia 1.
+
+---
+
 ## 2026-10-31 (12): as cenas especiais tocam sempre inteiras
 
 Na spec do sub-projeto 6 (§7, "Repetição"), à pergunta "A cena repetida na mesma partida toca inteira sempre?":

@@ -1,7 +1,7 @@
 # Jogo do Coringa — Direção de arte e sensação de jogo (sub-projeto 6)
 
-- **Data:** 2026-10-31. **Estado:** escrita depois do brainstorming com o autor; as duas pendências respondidas por ele; espera a
-  aprovação dele.
+- **Data:** 2026-10-31. **Estado:** aprovada pelo autor em 2026-10-31 ("aprovado, apenas inclua os sons e prossiga",
+  `decisoes.md` 2026-10-31 (13)).
 - **Depende de:** a spec da web (`2026-10-17-interface-web-design.md`, sobretudo §4 animações, §10 direção visual), a do polimento
   (`2026-10-22-polimento-recursos-design.md`, sons) e as regras em vigor (spec 1 com os ajustes do sub-projeto 5).
 - **Protótipo aprovado:** `docs/superpowers/specs/2026-10-31-direcao-visual-prototipo.html` (o rascunho 5). Vale o que se vê e o
@@ -296,11 +296,14 @@ autor decidiu "Parar o relógio" (`decisoes.md` 2026-10-31 (11)), o que muda aqu
 - No treino (sem relógio), nada muda.
 - A spec do servidor (§6.2) ganha uma nota apontando para cá, quando a fatia 1 entrar.
 
-## 10. Som [I]
+## 10. Som [A]
 
-O som segue o pico de cada cena, com o sintetizador que já existe (nada de arquivo de áudio novo): um ronco que cresce na
+O autor pediu os sons junto ("apenas inclua os sons"): **cada fatia sai com os sons do que ela traz** (§14), não numa fatia
+no fim. O som segue o pico de cada cena, com o sintetizador que já existe (nada de arquivo de áudio novo): um ronco que cresce na
 preparação, o impacto no instante da inversão, o tinido do metal na Defesa e na coroa, o estrondo do chão na Devastação, o sino
-de vidro no espelho, um acorde que sobe na Ressurreição. Respeita o volume e o "sem som" que já existem, e nada toca antes de um
+de vidro no espelho, um acorde que sobe na Ressurreição. Fora das cenas **[I]**: o golpe comum com um baque seco proporcional ao
+dano, a espada da iniciativa com um zunido no voo e um tinido ao cravar, a fita com um estalo de papel, e a quadra formada com um
+acorde curto. Respeita o volume e o "sem som" que já existem, e nada toca antes de um
 gesto do usuário.
 
 ## 11. Desempenho [I]
@@ -338,12 +341,12 @@ gesto do usuário.
 
 Cada fatia é uma branch com `pnpm check`, `pnpm e2e` e as duas CI verdes, e vai para a `main` sozinha:
 
-1. **A base:** o placar de luta, a espada e a fita, o golpe comum, a textura de papel, as cartas vivas, a quadra marcada e a
-   folga de cena no servidor (§9).
-2. **Ataque e Defesa Absolutos.**
-3. **Exódia e Devastação** (com a desolação).
-4. **Reflect e Ressurreição.**
-5. **Fluidez das jogadas comuns** (§8) e o som das cenas (§10).
+1. **A base:** o placar de luta, a espada e a fita, o golpe comum, a textura de papel, as cartas vivas, a quadra marcada, a
+   folga de cena no servidor (§9) e os sons delas.
+2. **Ataque e Defesa Absolutos**, com os sons.
+3. **Exódia e Devastação** (com a desolação), com os sons.
+4. **Reflect e Ressurreição**, com os sons.
+5. **Fluidez das jogadas comuns** (§8), com os sons.
 
 ## 15. Pronto quando
 
