@@ -7,8 +7,8 @@
   },
   "rounds": 17,
   "finalHp": {
-    "p1": 376,
-    "p2": -58
+    "p1": 386,
+    "p2": -76
   },
   "events": {
     "AttackDeclared": 15,
@@ -22,14 +22,14 @@
     "GameOver": 1,
     "GuardBroken": 4,
     "GuardPlayed": 4,
-    "Healed": 2,
+    "Healed": 3,
     "InitiativeChanged": 5,
     "OrderChosen": 8,
     "ReactionWindowClosed": 19,
     "ReactionWindowOpened": 19,
     "RoundStarted": 16,
     "Sacrificed": 1,
-    "StealDamage": 1,
+    "StealDamage": 3,
     "TrapUsed": 3,
     "TurnStarted": 15
   }

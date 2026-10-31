@@ -67,7 +67,7 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
 | **Buffs de Ataque** | cartas J | 4 **[O]** | pública |
 | **Fileira de Defesa** | fila de numéricas | **8** **[M]** (ajustável; era 7 até o sub-projeto 5) | pública |
 | **Buffs de Defesa** | cartas Q | 4 **[O]** | pública |
-| **Mão** | **somente especiais** (J, Q, K, A, Selvagem) **[I]** | sem limite | oculta (oponente vê só a quantidade) |
+| **Mão** | **somente especiais** (J, Q, K, A, Selvagem) **[I]** | 4 (a que passaria vai ao cemitério, §1.4) | oculta (oponente vê só a quantidade) |
 
 - Buffs ficam em espaço próprio, **fora da fila** — não são removidos pelo consumo da fila **[M]**.
 - As fileiras são **filas**: cartas entram pelo fim; a "1ª carta" é a da frente (a mais antiga).
@@ -82,12 +82,12 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
 
 1. Cada jogador recebe **4 cartas**, distribuídas alternadamente uma a uma, começando por quem tem a iniciativa **[I]**.
 2. **Especiais** (J, Q, K, A, Selvagem) vão para a **mão**.
-   - **Limite de especiais na mão [autor, 2026-10-30; E3 do sub-projeto 5]:** no máximo **4**, com penalidade na compra (o motivo
-     dele: sem limite, o jogador junta K até a Exódia). A forma da penalidade **ainda está com o autor**, que escolhe entre três,
-     medidas no simulador: **BURN** (a especial que passaria do limite vai direto ao cemitério), **CHOOSE** (o jogador descarta o
-     excesso antes de confirmar o Equipar; no tempo esgotado saem as compradas por último **[I]**) e **FEWER** (com mais
-     especiais que o limite, ele compra `4 − excesso` cartas, no mínimo 0 **[I]**). O motor tem as três (`specialLimit` na config,
-     §2.7); até a escolha, a config padrão fica sem limite.
+   - **Limite de especiais na mão [autor, 2026-10-30; forma escolhida em 2026-10-31; E3 do sub-projeto 5]:** no máximo **4**
+     (o motivo dele: sem limite, o jogador junta K até a Exódia). A forma é a **BURN**: a especial comprada que passaria do limite
+     vai **direto ao cemitério**, sem decisão nem tela a mais. O motor guarda as duas outras formas medidas, fora do padrão:
+     **CHOOSE** (o jogador descarta o excesso antes de confirmar o Equipar; no tempo esgotado saem as compradas por último **[I]**)
+     e **FEWER** (com mais especiais que o limite, ele compra `4 − excesso` cartas, no mínimo 0 **[I]**) (`specialLimit` na
+     config, §2.7).
 3. **Numéricas vão obrigatoriamente para o campo [I]**. **Equipar livre (sub-projeto 5, E2; antes: na ordem de compra, sem o jogador organizar [O]):** o jogador vê todas as numéricas recebidas de uma vez e escolhe, para cada uma, o destino e a ordem em que entram (a primeira posta numa fileira fica na frente da fila). Os destinos possíveis:
    - Fileira de Ataque ou de Defesa (só pode escolher uma fileira que não esteja cheia);
    - se **as duas estiverem cheias** **[O]**: substituir a **última carta** (a do fim da fila) de qualquer fileira — a carta antiga vai para o cemitério — **ou** descartar a nova no cemitério **[I]**.
@@ -140,15 +140,19 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
 - **Não** pode mirar as cartas de um Reflect **[I]** (o Reflect só cai por outro Reflect). Também não responde a um Reflect.
 - **Não** pode mirar um jogador sob Defesa Absoluta **[O]**.
 
-**A — Roubo [autor, 2026-10-30; E3 do sub-projeto 5]**
+**A — Roubo [autor, 2026-10-30; sem naipe desde 2026-10-31; E3 do sub-projeto 5]**
 - O Ás serve, à escolha na hora, de **Armadilha** ou de **Roubo**, de qualquer naipe. O Coringa Selvagem no papel de A também.
 - Só na **fase principal do seu turno** (não abre janela de reação **[I]**). Pega **uma numérica** de qualquer fileira do oponente
   (em qualquer posição **[I]**) e a põe **no fim da fileira que o ladrão escolher**; com ela cheia, a **última** dela vai para o
   cemitério antes. O Ás vai para o cemitério. As quadras dos dois lados se refazem.
-- O naipe da carta roubada decide o efeito, sempre pelo **valor seco** (sem buffs nem bônus de quadra):
-  - **♣ ♠:** o oponente leva dano igual ao valor. Um **K na Guarda** dele **anula** esse dano e **não quebra**. O dano do roubo
-    **não conta para a iniciativa** e **não mata**: a vida do oponente fica em no mínimo 1.
-  - **♥ ♦:** quem roubou **cura** o valor, até a vida inicial.
+- Todo roubo, de qualquer naipe (o naipe não muda nada), tem dois efeitos, sempre pelo **valor seco** da carta roubada (sem
+  buffs nem bônus de quadra):
+  - **o dano:** o oponente leva dano igual ao valor. Um **K na Guarda** dele **anula** esse dano e **não quebra**. O dano do roubo
+    **não conta para a iniciativa** **[I]** e **não mata**: a vida do oponente fica em no mínimo 1;
+  - **a cura:** quem roubou **cura** o valor, até a vida inicial. A cura é o valor cheio mesmo quando o K anula o dano ou o "não
+    mata" o corta **[I]**.
+- Antes (2026-10-30), o naipe decidia: ♣ ♠ davam só o dano, ♥ ♦ só a cura. O autor tirou o efeito do naipe em 2026-10-31, e o
+  naipe voltou a ser só visual (§1.1).
 - A **Defesa Absoluta** do oponente **bloqueia o roubo inteiro**: nada é roubado.
 
 **Sacrifício (regra nova do autor) [M]**
@@ -401,8 +405,8 @@ RulesConfig {
   // regras novas [N] — ligadas por padrão; o simulador compara com elas desligadas
   initiativeChoice: true,
   wildJokers: true,
-  defenseHealGuard: 2 // cura passiva (E3): K na Guarda que a ligam; sem o campo (replays antigos), nada cura
-  // specialLimit?: { max: 4, penalty: 'BURN' | 'CHOOSE' | 'FEWER' } — limite de especiais (E3); sem o campo, nada limita
+  defenseHealGuard: 2, // cura passiva (E3): K na Guarda que a ligam; sem o campo (replays antigos), nada cura
+  specialLimit: { max: 4, penalty: 'BURN' } // limite de especiais (E3); CHOOSE e FEWER também valem; sem o campo, nada limita
 }
 ```
 

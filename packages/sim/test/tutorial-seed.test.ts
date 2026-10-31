@@ -13,7 +13,13 @@ const KINDS: readonly SpecialKind[] = ['J', 'Q', 'K', 'A', 'WILD'];
 
 /** Uma distribuição com tudo cedo; cada teste muda só o campo que quer provar. */
 function deal(overrides: Partial<TutorialDeal['firstEquipWithSpecial']> = {}, reflectByEquip: number | null = 2): TutorialDeal {
-  return { firstEquipWithSpecial: { J: 1, Q: 1, K: 2, A: 2, WILD: 3, ...overrides }, reflectByEquip, numericsInEquip1: 2, initiativeIsMine: true };
+  return {
+    firstEquipWithSpecial: { J: 1, Q: null, K: 2, A: 2, WILD: 2, ...overrides },
+    reflectByEquip,
+    burnedByEquip2: 0,
+    numericsInEquip1: 2,
+    initiativeIsMine: true,
+  };
 }
 
 /** Joga a partida só com o TIMEOUT do sistema (Equipar automático, ordem, ataque e janelas fechadas) até o 3º Equipar. */
@@ -38,14 +44,14 @@ const handKinds = (state: GameState): SpecialKind[] => state.players.find((p) =>
 describe('a semente do tutorial', () => {
   it('a semente do tutorial cumpre o critério', () => {
     const result = tutorialDeal(TUTORIAL_SEED);
-    for (const kind of ['J', 'Q', 'K', 'A'] as const) {
+    for (const kind of ['K', 'A', 'WILD'] as const) {
       expect(result.firstEquipWithSpecial[kind], `${kind} chega`).not.toBeNull();
       expect(result.firstEquipWithSpecial[kind], `${kind} até o 2º Equipar`).toBeLessThanOrEqual(2);
     }
-    expect(result.firstEquipWithSpecial.WILD, 'Selvagem chega').not.toBeNull();
-    expect(result.firstEquipWithSpecial.WILD, 'Selvagem até o 3º Equipar').toBeLessThanOrEqual(3);
-    expect(result.reflectByEquip, 'K + J + Q chegam').not.toBeNull();
-    expect(result.reflectByEquip, 'K + J + Q até o 3º Equipar').toBeLessThanOrEqual(3);
+    const buff = Math.min(result.firstEquipWithSpecial.J ?? Infinity, result.firstEquipWithSpecial.Q ?? Infinity);
+    expect(buff, 'um J ou um Q até o 2º Equipar').toBeLessThanOrEqual(2);
+    expect(result.reflectByEquip, 'o Reflect até o 2º Equipar').toBeLessThanOrEqual(2);
+    expect(result.burnedByEquip2, 'nenhuma especial queimada até o 2º Equipar').toBe(0);
     expect(result.numericsInEquip1, 'ao menos uma numérica no 1º Equipar (a dica do Equipar)').toBeGreaterThanOrEqual(1);
     expect(result.initiativeIsMine, 'a iniciativa com o jogador (a dica da ordem)').toBe(true);
     expect(meetsTutorialCriterion(result)).toBe(true);
@@ -68,20 +74,21 @@ describe('a semente do tutorial', () => {
 });
 
 describe('o critério da procura', () => {
-  it('aceita J, Q, K e A até o 2º Equipar, o Selvagem até o 3º e K + J + Q até o 3º', () => {
+  it('aceita K, A, o Selvagem e um J ou um Q até o 2º Equipar, com o Reflect e sem queimar nada', () => {
     expect(meetsTutorialCriterion(deal())).toBe(true);
-    expect(meetsTutorialCriterion(deal({ J: 2, Q: 2, K: 2, A: 2, WILD: 1 }, 3))).toBe(true);
+    expect(meetsTutorialCriterion(deal({ J: null, Q: 1, K: 1, A: 2, WILD: 1 }, 1))).toBe(true);
   });
 
   it('recusa especial tardia, ausente ou sem o trio do Reflect', () => {
-    for (const kind of ['J', 'Q', 'K', 'A'] as const) {
+    for (const kind of ['K', 'A', 'WILD'] as const) {
       expect(meetsTutorialCriterion(deal({ [kind]: 3 })), `${kind} no 3º`).toBe(false);
       expect(meetsTutorialCriterion(deal({ [kind]: null })), `${kind} ausente`).toBe(false);
     }
-    expect(meetsTutorialCriterion(deal({ WILD: null }))).toBe(false);
-    expect(meetsTutorialCriterion(deal({ WILD: 4 }))).toBe(false);
+    expect(meetsTutorialCriterion(deal({ J: null, Q: null })), 'sem J nem Q').toBe(false);
+    expect(meetsTutorialCriterion(deal({ J: 3, Q: 3 })), 'J e Q só no 3º').toBe(false);
     expect(meetsTutorialCriterion(deal({}, null))).toBe(false);
-    expect(meetsTutorialCriterion(deal({}, 4))).toBe(false);
+    expect(meetsTutorialCriterion(deal({}, 3))).toBe(false);
+    expect(meetsTutorialCriterion({ ...deal(), burnedByEquip2: 1 }), 'uma queimada').toBe(false);
   });
 });
 
@@ -127,14 +134,34 @@ describe('tutorialDeal e o motor', () => {
     expect(counted).toBeGreaterThan(0);
   });
 
-  it('o Reflect conta K, J e Q de verdade (sem o Selvagem no lugar de um deles)', () => {
+  it('o Reflect conta o K e o J e o Q, com o Selvagem no lugar de um deles (ou dos dois)', () => {
+    let withWild = 0;
     for (const seed of seeds) {
       const { reflectByEquip } = tutorialDeal(seed);
       if (reflectByEquip === null) continue;
       for (const holder of ['p1', 'p2'] as const) {
         const hand = tutorialHand(seed, reflectByEquip as 1 | 2 | 3, holder);
-        expect(['K', 'J', 'Q'].every((kind) => hand.includes(kind as SpecialKind)), `${seed} ${holder}`).toBe(true);
+        const count = (kind: SpecialKind): number => hand.filter((k) => k === kind).length;
+        const missing = (count('J') > 0 ? 0 : 1) + (count('Q') > 0 ? 0 : 1);
+        expect(count('K') > 0 && missing <= count('WILD'), `${seed} ${holder}`).toBe(true);
+        if (missing > 0) withWild += 1;
       }
     }
+    expect(withWild).toBeGreaterThan(0);
+  });
+
+  it('a queimada até o 2º Equipar bate com a BURN do motor (sem jogada no meio, a conta é exata)', () => {
+    let burnedSome = 0;
+    for (const seed of seeds) {
+      const created = createGame(DEFAULT_CONFIG, seed, ['p1', 'p2']);
+      if (!created.ok) throw new Error(created.error.message);
+      const result = applyAction(created.state, 'system', { type: 'TIMEOUT' });
+      if (!result.ok) throw new Error(result.error.message);
+      expect(result.state.round, seed).toBe(2);
+      const burned = result.events.reduce((n, e) => (e.type === 'HandLimitPenalty' && e.player === 'p1' ? n + e.cards.length : n), 0);
+      expect(tutorialDeal(seed).burnedByEquip2, seed).toBe(burned);
+      if (burned > 0) burnedSome += 1;
+    }
+    expect(burnedSome).toBeGreaterThan(0);
   });
 });

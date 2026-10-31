@@ -132,7 +132,7 @@ export function devastateRow(s: GameState, victim: PlayerState, row: RowName, re
 }
 
 /**
- * O dano do roubo de uma carta ♣ ♠ (E3): o valor seco, sem buffs nem quadra. Um K na Guarda da vítima anula e fica; o dano nunca
+ * O dano do roubo (E3): o valor seco da carta, sem buffs nem quadra. Um K na Guarda da vítima anula e fica; o dano nunca
  * mata (a vida fica em no mínimo 1) e não entra em `damageThisRound`, porque não conta para a iniciativa. Por isso não usa o
  * `loseHp` do combate.
  */
@@ -145,8 +145,9 @@ function stealDamage(thief: PlayerState, victim: PlayerState, card: NumCard, ev:
 
 /**
  * Roubo (E3 do sub-projeto 5), só na fase principal: o Ás (ou o Selvagem como A) leva uma numérica de qualquer fileira do oponente
- * para o fim da fileira que o ladrão escolher; com ela cheia, a última dela vai ao cemitério. ♣ ♠: o oponente leva o valor seco;
- * ♥ ♦: o ladrão cura o valor seco. A Defesa Absoluta do oponente bloqueia o roubo inteiro. Não abre janela de reação ([I]).
+ * para o fim da fileira que o ladrão escolher; com ela cheia, a última dela vai ao cemitério. Sem naipe (autor, 2026-10-31): o
+ * oponente leva o valor seco e o ladrão cura o mesmo valor, cheio, mesmo quando um K anula o dano ou o "não mata" o corta ([I]). A
+ * Defesa Absoluta do oponente bloqueia o roubo inteiro. Não abre janela de reação ([I]).
  */
 export function steal(s: GameState, p: PlayerState, cardId: string, targetId: string, row: RowName, ev: GameEvent[]): void {
   if (row !== 'ATK' && row !== 'DEF') fail('INVALID_TARGET', 'fileira inválida');
@@ -173,8 +174,8 @@ export function steal(s: GameState, p: PlayerState, cardId: string, targetId: st
   target.push(card);
   reevaluateQuads(s, victim, ev);
   reevaluateQuads(s, p, ev);
-  if (card.suit === 'espadas' || card.suit === 'paus') stealDamage(p, victim, card, ev);
-  else heal(s, p, card.value, 'STEAL', card, ev);
+  stealDamage(p, victim, card, ev);
+  heal(s, p, card.value, 'STEAL', card, ev);
 }
 
 /** Ressurreição (spec §1.8): 1 numérica do cemitério para o fim de uma fileira com espaço. */

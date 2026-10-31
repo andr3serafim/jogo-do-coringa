@@ -15,7 +15,11 @@
    },
    "initiativeChoice": true,
    "wildJokers": true,
-   "defenseHealGuard": 2
+   "defenseHealGuard": 2,
+   "specialLimit": {
+    "max": 4,
+    "penalty": "BURN"
+   }
   },
   "seed": "ouro-g0",
   "players": [
@@ -918,8 +922,8 @@
     "action": {
      "type": "STEAL",
      "cardId": "selvagem-1",
-     "targetId": "b2-ouros-9",
-     "row": "ATK"
+     "targetId": "b2-paus-10",
+     "row": "DEF"
     }
    },
    {
@@ -939,8 +943,8 @@
     "action": {
      "type": "STEAL",
      "cardId": "b2-espadas-A",
-     "targetId": "b1-copas-10",
-     "row": "ATK"
+     "targetId": "b2-espadas-10",
+     "row": "DEF"
     }
    },
    {
@@ -1099,7 +1103,7 @@
     "action": {
      "type": "TRAP",
      "cardId": "b2-paus-A",
-     "targetId": "b1-ouros-K"
+     "targetId": "b1-ouros-Q"
     }
    },
    {
@@ -1144,10 +1148,9 @@
    {
     "player": "p1",
     "action": {
-     "type": "STEAL",
+     "type": "TRAP",
      "cardId": "b1-copas-A",
-     "targetId": "b1-copas-10",
-     "row": "DEF"
+     "targetId": "b2-ouros-J"
     }
    },
    {
@@ -1204,7 +1207,7 @@
       "ATK",
       "DEF",
       "DISCARD",
-      "REPLACE_LAST_ATK"
+      "REPLACE_LAST_DEF"
      ]
     }
    },
@@ -1214,7 +1217,7 @@
      "type": "EQUIP",
      "destinations": [
       "ATK",
-      "ATK"
+      "DEF"
      ]
     }
    },
@@ -1242,15 +1245,16 @@
     "action": {
      "type": "TRAP",
      "cardId": "b1-espadas-A",
-     "targetId": "b1-ouros-Q"
+     "targetId": "b1-paus-Q"
     }
    },
    {
     "player": "p2",
     "action": {
-     "type": "TRAP",
+     "type": "STEAL",
      "cardId": "selvagem-2",
-     "targetId": "b1-paus-Q"
+     "targetId": "b1-copas-10",
+     "row": "ATK"
     }
    },
    {
@@ -1283,7 +1287,11 @@
    },
    "initiativeChoice": true,
    "wildJokers": true,
-   "defenseHealGuard": 2
+   "defenseHealGuard": 2,
+   "specialLimit": {
+    "max": 4,
+    "penalty": "BURN"
+   }
   },
   "seed": "ouro-g1",
   "players": [
@@ -1465,7 +1473,7 @@
     "action": {
      "type": "STEAL",
      "cardId": "b1-copas-A",
-     "targetId": "b2-copas-7",
+     "targetId": "b1-espadas-10",
      "row": "DEF"
     }
    },
@@ -1474,7 +1482,7 @@
     "action": {
      "type": "STEAL",
      "cardId": "b2-espadas-A",
-     "targetId": "b1-espadas-10",
+     "targetId": "b2-paus-7",
      "row": "ATK"
     }
    },
@@ -1564,13 +1572,6 @@
    {
     "player": "p2",
     "action": {
-     "type": "PLAY_Q",
-     "cardId": "b2-copas-Q"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
      "type": "DECLARE_ATTACK"
     }
    },
@@ -1597,7 +1598,7 @@
      "type": "EQUIP",
      "destinations": [
       "DEF",
-      "ATK",
+      "DEF",
       "DEF"
      ]
     }
@@ -1614,8 +1615,15 @@
     "action": {
      "type": "STEAL",
      "cardId": "b2-ouros-A",
-     "targetId": "b1-espadas-10",
+     "targetId": "b2-copas-9",
      "row": "ATK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_Q",
+     "cardId": "b2-copas-Q"
     }
    },
    {
@@ -1736,7 +1744,7 @@
      "destinations": [
       "DEF",
       "DEF",
-      "DEF",
+      "ATK",
       "DEF"
      ]
     }
@@ -1787,7 +1795,7 @@
      "type": "EQUIP",
      "destinations": [
       "ATK",
-      "ATK",
+      "DEF",
       "DEF"
      ]
     }
@@ -2172,9 +2180,9 @@
      "type": "EQUIP",
      "destinations": [
       "ATK",
-      "REPLACE_LAST_ATK",
       "DISCARD",
-      "DISCARD"
+      "DISCARD",
+      "REPLACE_LAST_ATK"
      ]
     }
    },
@@ -2183,7 +2191,6 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "DEF",
       "DEF"
      ]
     }
@@ -2212,6 +2219,13 @@
    {
     "player": "p2",
     "action": {
+     "type": "PLAY_Q",
+     "cardId": "b2-copas-Q"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
      "type": "DECLARE_ATTACK"
     }
    },
@@ -2238,9 +2252,9 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "ATK",
       "DEF",
-      "REPLACE_LAST_DEF"
+      "ATK",
+      "REPLACE_LAST_ATK"
      ]
     }
    },
@@ -2388,40 +2402,48 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
       "DEF",
       "ATK"
      ]
     }
    },
    {
-    "player": "p1",
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
     "action": {
      "type": "CHOOSE_ORDER",
-     "first": false
+     "first": true
     }
    },
    {
     "player": "p2",
     "action": {
      "type": "TRAP",
-     "cardId": "b1-espadas-A",
+     "cardId": "b2-copas-A",
      "targetId": "b1-ouros-J"
     }
    },
    {
     "player": "p2",
     "action": {
+     "type": "TRAP",
+     "cardId": "b1-copas-A",
+     "targetId": "b2-ouros-K"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
      "type": "PLAY_J",
-     "cardId": "b1-espadas-J"
+     "cardId": "b2-copas-J"
     }
    },
    {
@@ -2433,32 +2455,22 @@
    {
     "player": "p1",
     "action": {
+     "type": "TRAP",
+     "cardId": "b1-espadas-A",
+     "targetId": "b1-copas-J"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
      "type": "PASS"
     }
    },
    {
     "player": "p1",
     "action": {
-     "type": "STEAL",
-     "cardId": "b2-copas-A",
-     "targetId": "b2-copas-9",
-     "row": "DEF"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b1-copas-A",
-     "targetId": "b1-espadas-9",
-     "row": "DEF"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
      "type": "PLAY_J",
-     "cardId": "b2-copas-J"
+     "cardId": "b1-espadas-J"
     }
    },
    {
@@ -2478,7 +2490,9 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "ATK"
+      "DEF",
+      "ATK",
+      "REPLACE_LAST_ATK"
      ]
     }
    },
@@ -2493,10 +2507,18 @@
     }
    },
    {
-    "player": "p1",
+    "player": "p2",
     "action": {
      "type": "CHOOSE_ORDER",
-     "first": false
+     "first": true
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b2-paus-A",
+     "targetId": "b1-espadas-J"
     }
    },
    {
@@ -2504,7 +2526,7 @@
     "action": {
      "type": "PLAY_K",
      "cardIds": [
-      "b2-copas-K"
+      "b1-paus-K"
      ]
     }
    },
@@ -2517,22 +2539,7 @@
    {
     "player": "p2",
     "action": {
-     "type": "PLAY_Q",
-     "cardId": "b2-copas-Q"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
      "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b2-paus-A",
-     "targetId": "b1-espadas-J"
     }
    },
    {
@@ -2546,7 +2553,576 @@
     "action": {
      "type": "PLAY_K",
      "cardIds": [
-      "b1-ouros-K",
+      "b2-copas-K"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
+      "DEF",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": true
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b1-paus-A",
+     "targetId": "b2-copas-J"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b2-espadas-A",
+     "targetId": "b2-ouros-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
+      "REPLACE_LAST_ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": true
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "STEAL",
+     "cardId": "b1-ouros-A",
+     "targetId": "b1-espadas-10",
+     "row": "ATK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b1-paus-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_Q",
+     "cardId": "b1-paus-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
+      "DISCARD"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "TRAP",
+     "cardId": "selvagem-1",
+     "targetId": "b1-paus-J"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b2-ouros-J"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "SACRIFICE",
+     "cardId": "b1-ouros-Q",
+     "targetId": "b1-paus-Q"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b2-ouros-A",
+     "targetId": "b2-copas-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_Q",
+     "cardId": "b1-copas-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "RESURRECT",
+     "cardId": "b1-copas-4",
+     "row": "DEF"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "TRAP",
+     "cardId": "selvagem-2",
+     "targetId": "b1-copas-Q"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
+      "b1-ouros-K"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DISCARD",
+      "REPLACE_LAST_ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
+      "b1-copas-K"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "TRAP",
+     "cardId": "selvagem-2",
+     "targetId": "b2-ouros-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
+      "DISCARD"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "STEAL",
+     "cardId": "b2-paus-A",
+     "targetId": "b1-espadas-10",
+     "row": "ATK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b1-paus-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b2-copas-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_Q",
+     "cardId": "b1-paus-Q"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": []
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
+      "ATK",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": true
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b1-copas-A",
+     "targetId": "b2-copas-J"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b2-espadas-A",
+     "targetId": "b1-paus-J"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "RESURRECT",
+     "cardId": "b1-espadas-9",
+     "row": "DEF"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "TRAP",
+     "cardId": "selvagem-1",
+     "targetId": "b1-espadas-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
       "b1-paus-K"
      ]
     }
@@ -2586,132 +3162,7 @@
      "destinations": [
       "ATK",
       "DEF",
-      "ATK",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": true
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b1-paus-A",
-     "targetId": "b2-espadas-6",
-     "row": "DEF"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b2-espadas-A",
-     "targetId": "b1-copas-J"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "REPLACE_LAST_ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": false
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_Q",
-     "cardId": "b1-paus-Q"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_J",
-     "cardId": "b1-paus-J"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
+      "REPLACE_LAST_DEF",
       "DISCARD"
      ]
     }
@@ -2719,9 +3170,68 @@
    {
     "player": "p2",
     "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b1-ouros-A",
+     "targetId": "b1-paus-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b1-espadas-J"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
+      "ATK",
+      "REPLACE_LAST_DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
      "type": "EQUIP",
      "destinations": [
       "ATK",
+      "DEF",
       "REPLACE_LAST_DEF"
      ]
     }
@@ -2730,50 +3240,7 @@
     "player": "p1",
     "action": {
      "type": "CHOOSE_ORDER",
-     "first": false
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "TRAP",
-     "cardId": "selvagem-1",
-     "targetId": "b2-copas-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "SACRIFICE",
-     "cardId": "b2-ouros-J",
-     "targetId": "b1-paus-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b1-ouros-A",
-     "targetId": "b2-ouros-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_Q",
-     "cardId": "b1-ouros-Q"
+     "first": true
     }
    },
    {
@@ -2789,39 +3256,11 @@
     }
    },
    {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "REPLACE_LAST_ATK"
-     ]
-    }
-   },
-   {
     "player": "p2",
     "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": false
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b2-ouros-A",
-     "targetId": "b1-ouros-Q"
+     "type": "RESURRECT",
+     "cardId": "b2-copas-8",
+     "row": "DEF"
     }
    },
    {
@@ -2846,31 +3285,11 @@
    {
     "player": "p1",
     "action": {
-     "type": "TRAP",
-     "cardId": "selvagem-2",
-     "targetId": "b1-paus-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
      "type": "EQUIP",
      "destinations": [
-      "DEF",
       "ATK",
-      "REPLACE_LAST_DEF"
+      "DEF",
+      "DISCARD"
      ]
     }
    },
@@ -2879,9 +3298,9 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "DEF",
       "ATK",
-      "REPLACE_LAST_DEF"
+      "DISCARD",
+      "DISCARD"
      ]
     }
    },
@@ -2889,10 +3308,114 @@
     "player": "p1",
     "action": {
      "type": "CHOOSE_ORDER",
+     "first": true
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "STEAL",
+     "cardId": "b2-copas-A",
+     "targetId": "b1-ouros-10",
+     "row": "ATK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b2-ouros-A",
+     "targetId": "b1-espadas-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "ATK",
+      "DEF",
+      "REPLACE_LAST_DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
      "first": false
     }
    },
    {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
+      "b1-espadas-K"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_Q",
+     "cardId": "b2-copas-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
     "player": "p2",
     "action": {
      "type": "DECLARE_ATTACK"
@@ -2907,25 +3430,15 @@
    {
     "player": "p1",
     "action": {
-     "type": "TRAP",
-     "cardId": "selvagem-2",
-     "targetId": "b2-copas-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK"
+     ]
     }
    },
    {
     "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
     "action": {
      "type": "EQUIP",
      "destinations": [
@@ -2936,8 +3449,88 @@
    {
     "player": "p2",
     "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b1-espadas-A",
+     "targetId": "b1-copas-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b1-copas-J"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b1-paus-A",
+     "targetId": "b1-copas-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "SACRIFICE",
+     "cardId": "b2-ouros-Q",
+     "targetId": "b2-copas-Q"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b1-ouros-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
      "type": "EQUIP",
      "destinations": [
+      "ATK",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
       "DEF"
      ]
     }
@@ -2952,19 +3545,216 @@
    {
     "player": "p2",
     "action": {
-     "type": "STEAL",
-     "cardId": "b2-copas-A",
-     "targetId": "b2-copas-9",
-     "row": "ATK"
+     "type": "PLAY_K",
+     "cardIds": [
+      "b1-ouros-K"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_Q",
+     "cardId": "b1-ouros-Q"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "RESURRECT",
+     "cardId": "b2-paus-10",
+     "row": "DEF"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
+      "b2-ouros-K",
+      "b2-copas-K"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DISCARD",
+      "DISCARD",
+      "REPLACE_LAST_ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
     }
    },
    {
     "player": "p2",
     "action": {
      "type": "STEAL",
-     "cardId": "selvagem-1",
-     "targetId": "b2-ouros-7",
+     "cardId": "b1-copas-A",
+     "targetId": "b1-ouros-9",
+     "row": "ATK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "RESURRECT",
+     "cardId": "b1-paus-7",
      "row": "DEF"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
+      "b1-paus-K"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b2-ouros-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "ATK",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
+      "b1-espadas-K"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
     }
    },
    {
@@ -2984,46 +3774,18 @@
    {
     "player": "p2",
     "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b2-espadas-A",
-     "targetId": "b1-espadas-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "SACRIFICE",
-     "cardId": "b2-ouros-Q",
-     "targetId": "b1-copas-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_J",
-     "cardId": "b1-paus-J"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
+     "type": "PLAY_Q",
+     "cardId": "b1-paus-Q"
     }
    },
    {
     "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
     "action": {
      "type": "PASS"
     }
@@ -3035,8 +3797,8 @@
      "destinations": [
       "ATK",
       "DEF",
-      "DEF",
-      "DEF"
+      "REPLACE_LAST_ATK",
+      "DISCARD"
      ]
     }
    },
@@ -3044,14 +3806,17 @@
     "player": "p2",
     "action": {
      "type": "EQUIP",
-     "destinations": []
+     "destinations": [
+      "DEF",
+      "ATK"
+     ]
     }
    },
    {
-    "player": "p1",
+    "player": "p2",
     "action": {
      "type": "CHOOSE_ORDER",
-     "first": true
+     "first": false
     }
    },
    {
@@ -3062,6 +3827,43 @@
    },
    {
     "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b2-paus-A",
+     "targetId": "b1-espadas-K"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "STEAL",
+     "cardId": "selvagem-2",
+     "targetId": "b2-espadas-9",
+     "row": "ATK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "RESURRECT",
+     "cardId": "b1-espadas-10",
+     "row": "DEF"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
     "action": {
      "type": "PASS"
     }
@@ -3084,7 +3886,11 @@
    },
    "initiativeChoice": true,
    "wildJokers": true,
-   "defenseHealGuard": 2
+   "defenseHealGuard": 2,
+   "specialLimit": {
+    "max": 4,
+    "penalty": "BURN"
+   }
   },
   "seed": "ouro-g2",
   "players": [
@@ -3716,7 +4522,11 @@
    },
    "initiativeChoice": true,
    "wildJokers": true,
-   "defenseHealGuard": 2
+   "defenseHealGuard": 2,
+   "specialLimit": {
+    "max": 4,
+    "penalty": "BURN"
+   }
   },
   "seed": "ouro-g3",
   "players": [
@@ -3869,7 +4679,7 @@
     "action": {
      "type": "STEAL",
      "cardId": "b1-ouros-A",
-     "targetId": "b2-espadas-5",
+     "targetId": "b2-ouros-6",
      "row": "DEF"
     }
    },
@@ -3878,7 +4688,16 @@
     "action": {
      "type": "STEAL",
      "cardId": "b1-espadas-A",
-     "targetId": "b2-paus-5",
+     "targetId": "b2-espadas-5",
+     "row": "ATK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "STEAL",
+     "cardId": "b2-paus-A",
+     "targetId": "b1-ouros-4",
      "row": "ATK"
     }
    },
@@ -3901,8 +4720,8 @@
      "destinations": [
       "ATK",
       "DEF",
-      "ATK",
-      "DEF"
+      "DEF",
+      "ATK"
      ]
     }
    },
@@ -3912,8 +4731,8 @@
      "type": "EQUIP",
      "destinations": [
       "ATK",
-      "DEF",
-      "ATK"
+      "ATK",
+      "DEF"
      ]
     }
    },
@@ -3934,15 +4753,6 @@
     "player": "p2",
     "action": {
      "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b2-paus-A",
-     "targetId": "b2-ouros-9",
-     "row": "ATK"
     }
    },
    {
@@ -3989,9 +4799,9 @@
      "type": "EQUIP",
      "destinations": [
       "ATK",
-      "DEF",
-      "DEF",
-      "ATK"
+      "ATK",
+      "ATK",
+      "DEF"
      ]
     }
    },
@@ -4050,7 +4860,7 @@
      "type": "EQUIP",
      "destinations": [
       "DEF",
-      "ATK",
+      "DEF",
       "ATK"
      ]
     }
@@ -4200,8 +5010,8 @@
      "type": "EQUIP",
      "destinations": [
       "DEF",
-      "ATK",
-      "DEF"
+      "DEF",
+      "ATK"
      ]
     }
    },
@@ -4237,7 +5047,7 @@
     "action": {
      "type": "TRAP",
      "cardId": "b1-paus-A",
-     "targetId": "b1-espadas-J"
+     "targetId": "b1-ouros-J"
     }
    },
    {
@@ -4263,7 +5073,7 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "ATK",
+      "DEF",
       "ATK",
       "ATK"
      ]
@@ -4275,66 +5085,6 @@
      "type": "EQUIP",
      "destinations": [
       "DEF",
-      "DEF",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": false
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_Q",
-     "cardId": "b1-copas-Q"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
       "DEF",
       "ATK"
      ]
@@ -4350,16 +5100,8 @@
    {
     "player": "p1",
     "action": {
-     "type": "TRAP",
-     "cardId": "selvagem-2",
-     "targetId": "b1-copas-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
      "type": "PLAY_Q",
-     "cardId": "b1-ouros-Q"
+     "cardId": "b1-copas-Q"
     }
    },
    {
@@ -4372,6 +5114,54 @@
     "player": "p2",
     "action": {
      "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_Q",
+     "cardId": "b1-ouros-Q"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
     }
    },
    {
@@ -4390,6 +5180,26 @@
    {
     "player": "p1",
     "action": {
+     "type": "TRAP",
+     "cardId": "selvagem-2",
+     "targetId": "b2-ouros-J"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
      "type": "PASS"
     }
    },
@@ -4398,9 +5208,9 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "ATK",
       "DEF",
-      "DEF"
+      "DEF",
+      "ATK"
      ]
     }
    },
@@ -4409,8 +5219,8 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "DEF",
-      "ATK"
+      "ATK",
+      "DEF"
      ]
     }
    },
@@ -4450,6 +5260,14 @@
    {
     "player": "p1",
     "action": {
+     "type": "RESURRECT",
+     "cardId": "b2-copas-10",
+     "row": "DEF"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
      "type": "PLAY_K",
      "cardIds": [
       "b1-ouros-K"
@@ -4491,7 +5309,7 @@
      "destinations": [
       "ATK",
       "DEF",
-      "DISCARD",
+      "REPLACE_LAST_DEF",
       "REPLACE_LAST_ATK"
      ]
     }
@@ -4508,7 +5326,7 @@
     "action": {
      "type": "TRAP",
      "cardId": "b1-copas-A",
-     "targetId": "b2-ouros-J"
+     "targetId": "b2-copas-Q"
     }
    },
    {
@@ -4516,484 +5334,7 @@
     "action": {
      "type": "SACRIFICE",
      "cardId": "b2-ouros-Q",
-     "targetId": "b2-copas-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": true
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b1-espadas-A",
-     "targetId": "b1-paus-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_Q",
-     "cardId": "b1-espadas-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_Q",
-     "cardId": "b2-ouros-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b2-ouros-A",
-     "targetId": "b1-copas-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b2-espadas-A",
-     "targetId": "b1-ouros-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b1-paus-A",
-     "targetId": "b2-espadas-7",
-     "row": "ATK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "DEF",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": false
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_K",
-     "cardIds": [
-      "b1-ouros-K"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_Q",
-     "cardId": "b2-copas-Q"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "REPLACE_LAST_ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": false
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "SACRIFICE",
-     "cardId": "b1-copas-Q",
-     "targetId": "b2-copas-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_K",
-     "cardIds": [
-      "b1-copas-K"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b1-copas-A",
-     "targetId": "b1-paus-8",
-     "row": "ATK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "REPLACE_LAST_ATK"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": true
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b2-paus-A",
-     "targetId": "b1-espadas-9",
-     "row": "DEF"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_J",
-     "cardId": "b1-espadas-J"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "TRAP",
-     "cardId": "selvagem-2",
-     "targetId": "b1-espadas-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": true
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_K",
-     "cardIds": [
-      "b1-paus-K",
-      "b2-ouros-K"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_K",
-     "cardIds": [
-      "b1-espadas-K"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "ATK",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "DISCARD",
-      "REPLACE_LAST_ATK"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": true
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b1-ouros-A",
-     "targetId": "b2-ouros-9",
-     "row": "ATK"
+     "targetId": "b1-ouros-Q"
     }
    },
    {
@@ -5026,202 +5367,6 @@
      "type": "EQUIP",
      "destinations": [
       "DEF",
-      "DEF",
-      "DEF",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": true
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_J",
-     "cardId": "b1-paus-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": true
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "TRAP",
-     "cardId": "selvagem-1",
-     "targetId": "b1-paus-J"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_J",
-     "cardId": "b2-ouros-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "DEF",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "REPLACE_LAST_DEF"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": false
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_J",
-     "cardId": "b2-copas-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b2-copas-A",
-     "targetId": "b2-ouros-J"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
       "ATK"
      ]
     }
@@ -5243,32 +5388,33 @@
    {
     "player": "p2",
     "action": {
-     "type": "DEVASTATE",
-     "kId": "b1-copas-K",
-     "aId": "b2-copas-A",
-     "xId": "b1-copas-Q",
+     "type": "STEAL",
+     "cardId": "b2-ouros-A",
+     "targetId": "b1-espadas-10",
      "row": "DEF"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
     }
    },
    {
     "player": "p2",
     "action": {
-     "type": "RESURRECT",
-     "cardId": "b2-paus-8",
+     "type": "STEAL",
+     "cardId": "b2-espadas-A",
+     "targetId": "b2-copas-10",
      "row": "ATK"
     }
    },
    {
     "player": "p2",
     "action": {
-     "type": "PLAY_J",
-     "cardId": "b2-ouros-J"
+     "type": "PLAY_Q",
+     "cardId": "b2-ouros-Q"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_Q",
+     "cardId": "b1-ouros-Q"
     }
    },
    {
@@ -5280,13 +5426,604 @@
    {
     "player": "p1",
     "action": {
-     "type": "TRAP",
-     "cardId": "b2-espadas-A",
-     "targetId": "b2-ouros-J"
+     "type": "PASS"
     }
    },
    {
     "player": "p1",
+    "action": {
+     "type": "SACRIFICE",
+     "cardId": "b1-espadas-Q",
+     "targetId": "b1-paus-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "SACRIFICE",
+     "cardId": "b2-copas-Q",
+     "targetId": "b1-ouros-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "ATK",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b2-ouros-J"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
+      "b1-copas-K",
+      "b2-copas-K"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": true
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b2-paus-A",
+     "targetId": "b2-ouros-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DEVASTATE",
+     "kId": "b1-ouros-K",
+     "aId": "b1-copas-A",
+     "xId": "b1-ouros-J",
+     "row": "ATK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "DEF",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "ATK",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
+      "b1-paus-K"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "END_TURN"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "TRAP",
+     "cardId": "selvagem-2",
+     "targetId": "b1-copas-Q"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "DEF",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "REPLACE_LAST_DEF",
+      "REPLACE_LAST_ATK",
+      "DISCARD"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
+      "b2-ouros-K"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "END_TURN"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "REPLACE_LAST_DEF",
+      "DISCARD",
+      "REPLACE_LAST_ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "STEAL",
+     "cardId": "b1-espadas-A",
+     "targetId": "b1-copas-10",
+     "row": "DEF"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "STEAL",
+     "cardId": "selvagem-1",
+     "targetId": "b2-copas-10",
+     "row": "DEF"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "RESURRECT",
+     "cardId": "b1-ouros-10",
+     "row": "ATK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "ATK",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
+      "b1-espadas-K"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "RESURRECT",
+     "cardId": "b1-copas-8",
+     "row": "DEF"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b1-ouros-A",
+     "targetId": "b1-espadas-K"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DISCARD",
+      "REPLACE_LAST_ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "STEAL",
+     "cardId": "b1-paus-A",
+     "targetId": "b2-paus-10",
+     "row": "ATK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b1-paus-J"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b2-copas-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "ATK",
+      "ATK",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "ATK",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": true
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b2-copas-A",
+     "targetId": "b1-paus-J"
+    }
+   },
+   {
+    "player": "p2",
     "action": {
      "type": "PASS"
     }
@@ -5309,7 +6046,11 @@
    },
    "initiativeChoice": true,
    "wildJokers": true,
-   "defenseHealGuard": 2
+   "defenseHealGuard": 2,
+   "specialLimit": {
+    "max": 4,
+    "penalty": "BURN"
+   }
   },
   "seed": "ouro-t0",
   "players": [
@@ -5774,13 +6515,6 @@
    {
     "player": "p1",
     "action": {
-     "type": "PLAY_J",
-     "cardId": "b1-espadas-J"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
      "type": "DECLARE_ATTACK"
     }
    },
@@ -6039,7 +6773,7 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "DEF",
+      "ATK",
       "DEF",
       "DEF"
      ]
@@ -6050,8 +6784,8 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "ATK",
       "DEF",
+      "ATK",
       "DISCARD"
      ]
     }
@@ -6060,7 +6794,26 @@
     "player": "p1",
     "action": {
      "type": "CHOOSE_ORDER",
-     "first": false
+     "first": true
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b2-ouros-J"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
     }
    },
    {
@@ -6085,6 +6838,37 @@
    {
     "player": "p1",
     "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
+      "DEF",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
+      "REPLACE_LAST_DEF",
+      "DISCARD"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": true
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
      "type": "DECLARE_ATTACK"
     }
    },
@@ -6095,11 +6879,22 @@
     }
    },
    {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
     "player": "p1",
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "DEF",
       "DEF",
       "ATK"
      ]
@@ -6110,9 +6905,8 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "ATK",
       "DEF",
-      "DISCARD",
+      "ATK",
       "REPLACE_LAST_DEF"
      ]
     }
@@ -6127,84 +6921,10 @@
    {
     "player": "p2",
     "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_K",
-     "cardIds": [
-      "b1-ouros-K"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "ATK",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": false
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "TRAP",
+     "type": "STEAL",
      "cardId": "b1-paus-A",
-     "targetId": "b1-espadas-Q"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_J",
-     "cardId": "b1-copas-J"
+     "targetId": "b1-ouros-10",
+     "row": "DEF"
     }
    },
    {
@@ -6222,9 +6942,17 @@
    {
     "player": "p1",
     "action": {
-     "type": "SACRIFICE",
-     "cardId": "b2-ouros-J",
-     "targetId": "b1-copas-J"
+     "type": "STEAL",
+     "cardId": "b2-ouros-A",
+     "targetId": "b1-ouros-10",
+     "row": "ATK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_Q",
+     "cardId": "selvagem-1"
     }
    },
    {
@@ -6255,91 +6983,6 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": false
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b2-espadas-A",
-     "targetId": "b1-espadas-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b1-copas-A",
-     "targetId": "b1-paus-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "TRAP",
-     "cardId": "selvagem-1",
-     "targetId": "b2-copas-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b2-copas-A",
-     "targetId": "b2-copas-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
       "DEF"
      ]
     }
@@ -6354,6 +6997,36 @@
    {
     "player": "p2",
     "action": {
+     "type": "SACRIFICE",
+     "cardId": "b2-ouros-Q",
+     "targetId": "b1-espadas-Q"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
+      "b1-ouros-K"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b1-espadas-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
      "type": "DECLARE_ATTACK"
     }
    },
@@ -6367,8 +7040,8 @@
     "player": "p1",
     "action": {
      "type": "TRAP",
-     "cardId": "b2-ouros-A",
-     "targetId": "b1-copas-Q"
+     "cardId": "b2-espadas-A",
+     "targetId": "b1-ouros-K"
     }
    },
    {
@@ -6389,8 +7062,7 @@
      "type": "EQUIP",
      "destinations": [
       "ATK",
-      "DEF",
-      "DISCARD"
+      "DEF"
      ]
     }
    },
@@ -6399,224 +7071,85 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "ATK",
       "DEF",
+      "ATK",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "SACRIFICE",
+     "cardId": "b1-ouros-Q",
+     "targetId": "selvagem-1"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b1-copas-A",
+     "targetId": "b1-espadas-J"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "STEAL",
+     "cardId": "b2-copas-A",
+     "targetId": "b2-espadas-8",
+     "row": "ATK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
       "REPLACE_LAST_DEF"
      ]
     }
    },
    {
-    "player": "p1",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": false
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_Q",
-     "cardId": "b2-ouros-Q"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_Q",
-     "cardId": "selvagem-2"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "DISCARD"
-     ]
-    }
-   },
-   {
     "player": "p2",
     "action": {
      "type": "EQUIP",
      "destinations": [
       "DEF",
-      "ATK",
-      "REPLACE_LAST_ATK"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": false
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b1-espadas-A",
-     "targetId": "selvagem-2"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_K",
-     "cardIds": [
-      "b1-espadas-K"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_Q",
-     "cardId": "b1-ouros-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "DISCARD",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": false
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_K",
-     "cardIds": [
-      "b2-copas-K"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
       "DEF"
      ]
     }
@@ -6631,24 +7164,10 @@
    {
     "player": "p1",
     "action": {
-     "type": "TRAP",
-     "cardId": "b2-paus-A",
-     "targetId": "b1-paus-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_K",
-     "cardIds": [
-      "b1-paus-K"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
+     "type": "STEAL",
+     "cardId": "b1-ouros-A",
+     "targetId": "b2-ouros-7",
+     "row": "ATK"
     }
    },
    {
@@ -6660,21 +7179,13 @@
    {
     "player": "p2",
     "action": {
-     "type": "PASS"
+     "type": "TRAP",
+     "cardId": "selvagem-2",
+     "targetId": "b2-ouros-J"
     }
    },
    {
     "player": "p2",
-    "action": {
-     "type": "PLAY_K",
-     "cardIds": [
-      "b1-copas-K",
-      "b2-ouros-K"
-     ]
-    }
-   },
-   {
-    "player": "p1",
     "action": {
      "type": "PASS"
     }
@@ -6697,7 +7208,11 @@
    },
    "initiativeChoice": true,
    "wildJokers": true,
-   "defenseHealGuard": 2
+   "defenseHealGuard": 2,
+   "specialLimit": {
+    "max": 4,
+    "penalty": "BURN"
+   }
   },
   "seed": "ouro-t1",
   "players": [
@@ -6762,7 +7277,7 @@
     "action": {
      "type": "STEAL",
      "cardId": "b2-copas-A",
-     "targetId": "b2-espadas-9",
+     "targetId": "b2-copas-9",
      "row": "ATK"
     }
    },
@@ -7024,7 +7539,7 @@
     "action": {
      "type": "STEAL",
      "cardId": "b1-paus-A",
-     "targetId": "b1-ouros-7",
+     "targetId": "b2-paus-10",
      "row": "DEF"
     }
    },
@@ -7033,8 +7548,8 @@
     "action": {
      "type": "STEAL",
      "cardId": "b1-copas-A",
-     "targetId": "b1-ouros-6",
-     "row": "DEF"
+     "targetId": "b1-ouros-7",
+     "row": "ATK"
     }
    },
    {
@@ -7063,22 +7578,22 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "DEF"
+      "ATK"
      ]
     }
    },
    {
-    "player": "p2",
+    "player": "p1",
     "action": {
      "type": "CHOOSE_ORDER",
-     "first": false
+     "first": true
     }
    },
    {
     "player": "p1",
     "action": {
      "type": "PLAY_J",
-     "cardId": "b1-paus-J"
+     "cardId": "b2-copas-J"
     }
    },
    {
@@ -7086,7 +7601,7 @@
     "action": {
      "type": "PLAY_K",
      "cardIds": [
-      "b1-espadas-K"
+      "b1-ouros-K"
      ]
     }
    },
@@ -7100,7 +7615,7 @@
     "player": "p1",
     "action": {
      "type": "PLAY_Q",
-     "cardId": "b1-espadas-Q"
+     "cardId": "b1-ouros-Q"
     }
    },
    {
@@ -7113,9 +7628,9 @@
     "player": "p2",
     "action": {
      "type": "REFLECT",
-     "kId": "b1-ouros-K",
-     "jId": "b2-copas-J",
-     "qId": "b1-ouros-Q"
+     "kId": "b1-espadas-K",
+     "jId": "b1-paus-J",
+     "qId": "b1-espadas-Q"
     }
    },
    {
@@ -7142,7 +7657,7 @@
      "type": "EQUIP",
      "destinations": [
       "ATK",
-      "DEF",
+      "ATK",
       "ATK"
      ]
     }
@@ -7152,9 +7667,9 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "ATK",
       "DEF",
-      "DEF"
+      "ATK",
+      "ATK"
      ]
     }
    },
@@ -7236,7 +7751,7 @@
     "action": {
      "type": "STEAL",
      "cardId": "b1-ouros-A",
-     "targetId": "b2-espadas-10",
+     "targetId": "b2-paus-10",
      "row": "DEF"
     }
    },
@@ -7257,7 +7772,7 @@
     "action": {
      "type": "SACRIFICE",
      "cardId": "b1-ouros-J",
-     "targetId": "b1-paus-J"
+     "targetId": "b2-copas-J"
     }
    },
    {
@@ -7354,6 +7869,7 @@
      "destinations": [
       "DEF",
       "DEF",
+      "DEF",
       "DEF"
      ]
     }
@@ -7364,33 +7880,20 @@
      "type": "EQUIP",
      "destinations": [
       "ATK",
-      "ATK",
       "DEF",
       "DEF"
      ]
     }
    },
    {
-    "player": "p1",
+    "player": "p2",
     "action": {
      "type": "CHOOSE_ORDER",
-     "first": false
+     "first": true
     }
    },
    {
     "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
     "action": {
      "type": "PLAY_K",
      "cardIds": [
@@ -7399,7 +7902,19 @@
     }
    },
    {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
     "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
     "action": {
      "type": "PASS"
     }
@@ -7418,6 +7933,18 @@
    },
    {
     "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "ATK",
+      "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
     "action": {
      "type": "EQUIP",
      "destinations": [
@@ -7429,36 +7956,12 @@
    {
     "player": "p2",
     "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "ATK",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
      "type": "CHOOSE_ORDER",
-     "first": false
+     "first": true
     }
    },
    {
     "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
     "action": {
      "type": "PLAY_K",
      "cardIds": [
@@ -7467,7 +7970,26 @@
     }
    },
    {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
     "player": "p2",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b2-ouros-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
     "action": {
      "type": "PASS"
     }
@@ -7489,10 +8011,9 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
+      "ATK",
       "DEF",
-      "ATK",
-      "ATK",
-      "ATK"
+      "REPLACE_LAST_DEF"
      ]
     }
    },
@@ -7502,23 +8023,98 @@
      "type": "EQUIP",
      "destinations": [
       "ATK",
+      "ATK",
       "DEF",
       "ATK"
      ]
     }
    },
    {
-    "player": "p1",
+    "player": "p2",
     "action": {
      "type": "CHOOSE_ORDER",
      "first": false
     }
    },
    {
-    "player": "p2",
+    "player": "p1",
     "action": {
      "type": "TRAP",
      "cardId": "b1-espadas-A",
+     "targetId": "b2-ouros-J"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
+      "REPLACE_LAST_ATK",
+      "DISCARD"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "DEF",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b1-copas-A",
      "targetId": "selvagem-2"
     }
    },
@@ -7537,216 +8133,63 @@
    {
     "player": "p1",
     "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "ATK",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
      "type": "EQUIP",
      "destinations": [
       "DEF",
-      "ATK",
-      "DISCARD",
-      "REPLACE_LAST_DEF"
+      "ATK"
      ]
     }
    },
    {
-    "player": "p1",
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
     "action": {
      "type": "CHOOSE_ORDER",
      "first": false
     }
    },
    {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
     "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b1-copas-A",
-     "targetId": "b1-paus-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "REPLACE_LAST_ATK"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": false
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_K",
-     "cardIds": [
-      "b1-paus-K"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_K",
-     "cardIds": [
-      "b1-ouros-K"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": []
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": true
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b2-espadas-A",
-     "targetId": "b1-ouros-10",
-     "row": "ATK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b1-espadas-A",
-     "targetId": "b1-ouros-9",
-     "row": "DEF"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "TRAP",
-     "cardId": "selvagem-1",
-     "targetId": "b1-ouros-K"
-    }
-   },
-   {
-    "player": "p2",
     "action": {
      "type": "PLAY_J",
-     "cardId": "b1-espadas-J"
+     "cardId": "b2-ouros-J"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_Q",
+     "cardId": "b1-espadas-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "SACRIFICE",
+     "cardId": "b1-ouros-Q",
+     "targetId": "b1-espadas-Q"
     }
    },
    {
@@ -7764,9 +8207,28 @@
    {
     "player": "p1",
     "action": {
-     "type": "SACRIFICE",
-     "cardId": "b2-ouros-J",
-     "targetId": "b1-espadas-J"
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
+      "DISCARD"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
     }
    },
    {
@@ -7797,13 +8259,50 @@
     }
    },
    {
+    "player": "p2",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b2-espadas-A",
+     "targetId": "b2-ouros-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "STEAL",
+     "cardId": "selvagem-1",
+     "targetId": "b1-espadas-10",
+     "row": "ATK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b1-espadas-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
     "player": "p1",
     "action": {
      "type": "EQUIP",
      "destinations": [
+      "ATK",
       "DEF",
       "DEF",
-      "DEF"
+      "REPLACE_LAST_DEF"
      ]
     }
    },
@@ -7814,7 +8313,7 @@
      "destinations": [
       "ATK",
       "DEF",
-      "REPLACE_LAST_DEF"
+      "DEF"
      ]
     }
    },
@@ -7828,21 +8327,6 @@
    {
     "player": "p1",
     "action": {
-     "type": "PLAY_K",
-     "cardIds": [
-      "b1-espadas-K"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
      "type": "DECLARE_ATTACK"
     }
    },
@@ -7850,6 +8334,15 @@
     "player": "p2",
     "action": {
      "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "STEAL",
+     "cardId": "b2-ouros-A",
+     "targetId": "b1-copas-8",
+     "row": "DEF"
     }
    },
    {
@@ -7878,7 +8371,80 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
+      "ATK",
+      "REPLACE_LAST_ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DEVASTATE",
+     "kId": "b1-ouros-K",
+     "aId": "b1-ouros-A",
+     "xId": "b1-paus-J",
+     "row": "ATK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "STEAL",
+     "cardId": "b2-copas-A",
+     "targetId": "b2-ouros-10",
+     "row": "DEF"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "END_TURN"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
       "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "ATK",
+      "ATK",
       "ATK"
      ]
     }
@@ -7893,23 +8459,9 @@
    {
     "player": "p1",
     "action": {
-     "type": "TRAP",
-     "cardId": "b1-ouros-A",
+     "type": "SACRIFICE",
+     "cardId": "b2-ouros-Q",
      "targetId": "b2-copas-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_Q",
-     "cardId": "b2-ouros-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_Q",
-     "cardId": "b1-ouros-Q"
     }
    },
    {
@@ -7922,22 +8474,6 @@
     "player": "p2",
     "action": {
      "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b2-ouros-A",
-     "targetId": "b1-ouros-Q"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b2-copas-A",
-     "targetId": "b2-ouros-Q"
     }
    },
    {
@@ -7965,77 +8501,8 @@
      "type": "EQUIP",
      "destinations": [
       "ATK",
-      "ATK",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
       "DEF",
-      "ATK",
-      "REPLACE_LAST_DEF",
-      "REPLACE_LAST_ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": false
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_Q",
-     "cardId": "b1-copas-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "RESURRECT",
-     "cardId": "b2-paus-9",
-     "row": "DEF"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
       "DEF",
-      "ATK",
       "REPLACE_LAST_DEF"
      ]
     }
@@ -8046,8 +8513,8 @@
      "type": "EQUIP",
      "destinations": [
       "ATK",
-      "DISCARD",
-      "REPLACE_LAST_ATK"
+      "ATK",
+      "ATK"
      ]
     }
    },
@@ -8073,80 +8540,10 @@
    {
     "player": "p2",
     "action": {
-     "type": "TRAP",
-     "cardId": "selvagem-2",
-     "targetId": "b1-copas-Q"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": true
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
      "type": "STEAL",
-     "cardId": "b2-paus-A",
-     "targetId": "b2-copas-9",
+     "cardId": "b1-espadas-A",
+     "targetId": "b2-paus-9",
      "row": "ATK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "RESURRECT",
-     "cardId": "b1-copas-4",
-     "row": "DEF"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b1-paus-A",
-     "targetId": "b2-paus-10",
-     "row": "DEF"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_J",
-     "cardId": "b1-paus-J"
     }
    },
    {
@@ -8179,7 +8576,11 @@
    },
    "initiativeChoice": true,
    "wildJokers": true,
-   "defenseHealGuard": 2
+   "defenseHealGuard": 2,
+   "specialLimit": {
+    "max": 4,
+    "penalty": "BURN"
+   }
   },
   "seed": "ouro-r0",
   "players": [
@@ -8512,13 +8913,6 @@
    {
     "player": "p1",
     "action": {
-     "type": "PLAY_J",
-     "cardId": "b1-copas-J"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
      "type": "DECLARE_ATTACK"
     }
    },
@@ -8562,8 +8956,8 @@
     "action": {
      "type": "STEAL",
      "cardId": "b2-copas-A",
-     "targetId": "b2-ouros-7",
-     "row": "DEF"
+     "targetId": "b1-copas-3",
+     "row": "ATK"
     }
    },
    {
@@ -8575,15 +8969,15 @@
    {
     "player": "p1",
     "action": {
-     "type": "PASS"
+     "type": "TRAP",
+     "cardId": "b1-espadas-A",
+     "targetId": "b1-paus-J"
     }
    },
    {
     "player": "p1",
     "action": {
-     "type": "TRAP",
-     "cardId": "b1-espadas-A",
-     "targetId": "b1-paus-J"
+     "type": "PASS"
     }
    },
    {
@@ -8603,9 +8997,9 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "ATK",
-      "ATK",
-      "ATK",
+      "DEF",
+      "DEF",
+      "DEF",
       "DEF"
      ]
     }
@@ -8636,15 +9030,16 @@
    {
     "player": "p2",
     "action": {
-     "type": "TRAP",
-     "cardId": "selvagem-1",
-     "targetId": "b1-copas-J"
+     "type": "PASS"
     }
    },
    {
     "player": "p2",
     "action": {
-     "type": "PASS"
+     "type": "STEAL",
+     "cardId": "selvagem-1",
+     "targetId": "b1-copas-8",
+     "row": "DEF"
     }
    },
    {
@@ -8664,10 +9059,10 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
+      "DEF",
+      "DEF",
       "ATK",
-      "DEF",
-      "DEF",
-      "ATK"
+      "DEF"
      ]
     }
    },
@@ -8732,8 +9127,8 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "ATK",
-      "ATK"
+      "DEF",
+      "DEF"
      ]
     }
    },
@@ -8758,15 +9153,6 @@
    {
     "player": "p1",
     "action": {
-     "type": "STEAL",
-     "cardId": "b1-paus-A",
-     "targetId": "b1-ouros-5",
-     "row": "DEF"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
      "type": "PLAY_K",
      "cardIds": [
       "b2-copas-K"
@@ -8777,6 +9163,15 @@
     "player": "p2",
     "action": {
      "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "STEAL",
+     "cardId": "b1-paus-A",
+     "targetId": "b1-ouros-5",
+     "row": "DEF"
     }
    },
    {
@@ -8815,8 +9210,133 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
+      "ATK",
+      "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
+      "ATK",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
       "DEF",
       "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": true
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "STEAL",
+     "cardId": "selvagem-2",
+     "targetId": "b2-ouros-10",
+     "row": "DEF"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "SACRIFICE",
+     "cardId": "b1-ouros-Q",
+     "targetId": "b1-copas-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
+      "ATK",
       "DEF"
      ]
     }
@@ -8827,8 +9347,6 @@
      "type": "EQUIP",
      "destinations": [
       "ATK",
-      "DEF",
-      "DEF",
       "DEF"
      ]
     }
@@ -8884,8 +9402,8 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "DEF",
       "ATK",
+      "DEF",
       "ATK"
      ]
     }
@@ -8895,79 +9413,9 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "ATK",
-      "ATK",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": false
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "STEAL",
-     "cardId": "selvagem-2",
-     "targetId": "b2-espadas-2",
-     "row": "ATK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "RESURRECT",
-     "cardId": "b2-ouros-8",
-     "row": "DEF"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
       "DEF",
       "ATK",
-      "ATK",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF"
+      "DISCARD"
      ]
     }
    },
@@ -8975,27 +9423,7 @@
     "player": "p2",
     "action": {
      "type": "CHOOSE_ORDER",
-     "first": false
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "SACRIFICE",
-     "cardId": "b1-ouros-Q",
-     "targetId": "b1-espadas-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
+     "first": true
     }
    },
    {
@@ -9008,33 +9436,6 @@
     "player": "p1",
     "action": {
      "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": false
     }
    },
    {
@@ -9043,16 +9444,7 @@
      "type": "STEAL",
      "cardId": "b1-ouros-A",
      "targetId": "b1-copas-9",
-     "row": "DEF"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b1-paus-A",
-     "targetId": "b2-copas-7",
-     "row": "DEF"
+     "row": "ATK"
     }
    },
    {
@@ -9068,12 +9460,39 @@
     }
    },
    {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": true
+    }
+   },
+   {
     "player": "p2",
     "action": {
      "type": "STEAL",
-     "cardId": "selvagem-2",
-     "targetId": "b2-copas-7",
-     "row": "DEF"
+     "cardId": "selvagem-1",
+     "targetId": "b1-copas-9",
+     "row": "ATK"
     }
    },
    {
@@ -9093,75 +9512,15 @@
    {
     "player": "p2",
     "action": {
-     "type": "PLAY_J",
-     "cardId": "b2-copas-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
      "type": "DECLARE_ATTACK"
     }
    },
    {
     "player": "p1",
     "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "DEF",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": false
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "STEAL",
+     "type": "TRAP",
      "cardId": "b2-paus-A",
-     "targetId": "b1-copas-7",
-     "row": "ATK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
+     "targetId": "b2-copas-Q"
     }
    },
    {
@@ -9173,21 +9532,31 @@
    {
     "player": "p1",
     "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "ATK"
-     ]
+     "type": "DECLARE_ATTACK"
     }
    },
    {
     "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
     "action": {
      "type": "EQUIP",
      "destinations": [
       "ATK",
       "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK"
      ]
     }
    },
@@ -9201,17 +9570,76 @@
    {
     "player": "p2",
     "action": {
-     "type": "STEAL",
-     "cardId": "b1-espadas-A",
-     "targetId": "b1-copas-8",
-     "row": "ATK"
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "REFLECT",
+     "kId": "b1-copas-K",
+     "jId": "b1-ouros-J",
+     "qId": "b1-copas-Q"
     }
    },
    {
     "player": "p2",
     "action": {
-     "type": "PLAY_Q",
-     "cardId": "b1-paus-Q"
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b2-copas-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b1-paus-J"
     }
    },
    {
@@ -9219,7 +9647,7 @@
     "action": {
      "type": "PLAY_K",
      "cardIds": [
-      "b2-ouros-K"
+      "b1-ouros-K"
      ]
     }
    },
@@ -9239,8 +9667,159 @@
     "player": "p1",
     "action": {
      "type": "TRAP",
-     "cardId": "b1-copas-A",
-     "targetId": "b1-paus-Q"
+     "cardId": "selvagem-2",
+     "targetId": "b1-ouros-K"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
+      "b2-ouros-K"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": true
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "STEAL",
+     "cardId": "b2-ouros-A",
+     "targetId": "b2-espadas-4",
+     "row": "DEF"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "STEAL",
+     "cardId": "b1-paus-A",
+     "targetId": "b2-paus-10",
+     "row": "ATK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_Q",
+     "cardId": "b1-ouros-Q"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b2-copas-A",
+     "targetId": "b2-ouros-J"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
+      "DISCARD",
+      "REPLACE_LAST_DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": true
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
     }
    },
    {
@@ -9267,7 +9846,11 @@
    },
    "initiativeChoice": true,
    "wildJokers": true,
-   "defenseHealGuard": 2
+   "defenseHealGuard": 2,
+   "specialLimit": {
+    "max": 4,
+    "penalty": "BURN"
+   }
   },
   "seed": "ouro-r1",
   "players": [
@@ -9359,8 +9942,8 @@
     "action": {
      "type": "STEAL",
      "cardId": "selvagem-1",
-     "targetId": "b2-paus-8",
-     "row": "ATK"
+     "targetId": "b1-copas-8",
+     "row": "DEF"
     }
    },
    {
@@ -9423,7 +10006,7 @@
     "action": {
      "type": "STEAL",
      "cardId": "selvagem-2",
-     "targetId": "b1-copas-8",
+     "targetId": "b2-paus-8",
      "row": "ATK"
     }
    },
@@ -9444,7 +10027,7 @@
     "action": {
      "type": "STEAL",
      "cardId": "b2-ouros-A",
-     "targetId": "b2-copas-6",
+     "targetId": "b2-ouros-9",
      "row": "ATK"
     }
    },
@@ -9564,7 +10147,7 @@
      "destinations": [
       "ATK",
       "DEF",
-      "DEF",
+      "ATK",
       "ATK"
      ]
     }
@@ -9723,7 +10306,7 @@
     "action": {
      "type": "STEAL",
      "cardId": "b2-paus-A",
-     "targetId": "b2-ouros-9",
+     "targetId": "b2-paus-8",
      "row": "ATK"
     }
    },
@@ -9865,8 +10448,8 @@
     "action": {
      "type": "STEAL",
      "cardId": "b2-copas-A",
-     "targetId": "b2-ouros-4",
-     "row": "DEF"
+     "targetId": "b2-paus-6",
+     "row": "ATK"
     }
    },
    {
@@ -9940,8 +10523,8 @@
     "action": {
      "type": "STEAL",
      "cardId": "b1-copas-A",
-     "targetId": "b1-espadas-4",
-     "row": "ATK"
+     "targetId": "b2-paus-10",
+     "row": "DEF"
     }
    },
    {
@@ -10001,7 +10584,7 @@
      "destinations": [
       "ATK",
       "DEF",
-      "DEF"
+      "ATK"
      ]
     }
    },
@@ -10141,6 +10724,49 @@
     "action": {
      "type": "PASS"
     }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
+      "DEF",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
+      "REPLACE_LAST_ATK",
+      "DISCARD"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": true
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
    }
   ]
  },
@@ -10160,7 +10786,11 @@
    },
    "initiativeChoice": false,
    "wildJokers": true,
-   "defenseHealGuard": 2
+   "defenseHealGuard": 2,
+   "specialLimit": {
+    "max": 4,
+    "penalty": "BURN"
+   }
   },
   "seed": "ouro-e",
   "players": [
@@ -10476,9 +11106,10 @@
    {
     "player": "p2",
     "action": {
-     "type": "TRAP",
+     "type": "STEAL",
      "cardId": "b1-espadas-A",
-     "targetId": "b2-copas-Q"
+     "targetId": "b1-ouros-8",
+     "row": "DEF"
     }
    },
    {
@@ -10526,7 +11157,7 @@
      "type": "EQUIP",
      "destinations": [
       "DEF",
-      "ATK"
+      "DEF"
      ]
     }
    },
@@ -10557,9 +11188,10 @@
    {
     "player": "p1",
     "action": {
-     "type": "TRAP",
+     "type": "STEAL",
      "cardId": "b1-ouros-A",
-     "targetId": "b1-espadas-J"
+     "targetId": "b2-paus-10",
+     "row": "DEF"
     }
    },
    {
@@ -10605,15 +11237,16 @@
      "type": "EQUIP",
      "destinations": [
       "ATK",
-      "DEF"
+      "ATK"
      ]
     }
    },
    {
     "player": "p2",
     "action": {
-     "type": "PLAY_Q",
-     "cardId": "b2-ouros-Q"
+     "type": "SACRIFICE",
+     "cardId": "b2-ouros-Q",
+     "targetId": "b2-copas-Q"
     }
    },
    {
@@ -10679,7 +11312,7 @@
       "ATK",
       "ATK",
       "ATK",
-      "ATK"
+      "DEF"
      ]
     }
    },
@@ -10697,7 +11330,7 @@
     "action": {
      "type": "STEAL",
      "cardId": "selvagem-2",
-     "targetId": "b1-copas-10",
+     "targetId": "b2-paus-10",
      "row": "ATK"
     }
    },
@@ -10752,8 +11385,8 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "ATK",
-      "ATK",
+      "DEF",
+      "DEF",
       "ATK",
       "ATK"
      ]
@@ -10792,6 +11425,14 @@
    {
     "player": "p1",
     "action": {
+     "type": "RESURRECT",
+     "cardId": "b2-espadas-10",
+     "row": "DEF"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
      "type": "DECLARE_ATTACK"
     }
    },
@@ -10806,10 +11447,10 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "DEF",
-      "DEF",
-      "DEF",
-      "DEF"
+      "ATK",
+      "ATK",
+      "ATK",
+      "ATK"
      ]
     }
    },
@@ -10861,7 +11502,11 @@
    },
    "initiativeChoice": true,
    "wildJokers": false,
-   "defenseHealGuard": 2
+   "defenseHealGuard": 2,
+   "specialLimit": {
+    "max": 4,
+    "penalty": "BURN"
+   }
   },
   "seed": "ouro-s",
   "players": [
@@ -11023,7 +11668,7 @@
      "type": "STEAL",
      "cardId": "b1-paus-A",
      "targetId": "b1-ouros-10",
-     "row": "DEF"
+     "row": "ATK"
     }
    },
    {
@@ -11069,7 +11714,7 @@
      "destinations": [
       "ATK",
       "ATK",
-      "ATK"
+      "DEF"
      ]
     }
    },
@@ -11077,7 +11722,19 @@
     "player": "p2",
     "action": {
      "type": "CHOOSE_ORDER",
-     "first": true
+     "first": false
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
     }
    },
    {
@@ -11103,18 +11760,6 @@
    },
    {
     "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
     "action": {
      "type": "PASS"
     }
@@ -11154,8 +11799,8 @@
     "action": {
      "type": "STEAL",
      "cardId": "b2-copas-A",
-     "targetId": "b2-copas-10",
-     "row": "ATK"
+     "targetId": "b1-ouros-10",
+     "row": "DEF"
     }
    },
    {
@@ -11188,9 +11833,9 @@
      "type": "EQUIP",
      "destinations": [
       "DEF",
-      "DEF",
-      "DEF",
-      "ATK"
+      "ATK",
+      "ATK",
+      "DEF"
      ]
     }
    },
@@ -11264,9 +11909,9 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "DEF",
       "ATK",
-      "DEF"
+      "DEF",
+      "ATK"
      ]
     }
    },
@@ -11293,8 +11938,8 @@
     "action": {
      "type": "STEAL",
      "cardId": "b2-espadas-A",
-     "targetId": "b1-ouros-7",
-     "row": "ATK"
+     "targetId": "b2-copas-10",
+     "row": "DEF"
     }
    },
    {
@@ -11314,8 +11959,8 @@
     "action": {
      "type": "STEAL",
      "cardId": "b2-paus-A",
-     "targetId": "b2-copas-10",
-     "row": "ATK"
+     "targetId": "b1-ouros-10",
+     "row": "DEF"
     }
    },
    {
@@ -11343,7 +11988,7 @@
      "type": "EQUIP",
      "destinations": [
       "ATK",
-      "DEF",
+      "ATK",
       "DEF"
      ]
     }
@@ -11429,6 +12074,80 @@
      "type": "EQUIP",
      "destinations": [
       "ATK",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
+      "DEF",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": true
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b1-copas-J"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_Q",
+     "cardId": "b1-paus-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "RESURRECT",
+     "cardId": "b1-paus-10",
+     "row": "DEF"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
       "ATK",
       "ATK",
       "ATK"
@@ -11441,83 +12160,8 @@
      "type": "EQUIP",
      "destinations": [
       "ATK",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": false
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "RESURRECT",
-     "cardId": "b1-copas-5",
-     "row": "DEF"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "SACRIFICE",
-     "cardId": "b1-paus-Q",
-     "targetId": "b2-copas-Q"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_J",
-     "cardId": "b1-copas-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
       "DEF",
-      "DEF",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "DEF"
+      "DISCARD"
      ]
     }
    },
@@ -11589,8 +12233,430 @@
      "destinations": [
       "DEF",
       "DEF",
+      "ATK",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
+      "REPLACE_LAST_ATK"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "SACRIFICE",
+     "cardId": "b1-espadas-J",
+     "targetId": "b1-copas-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "DEF",
       "DEF",
       "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
+      "REPLACE_LAST_DEF"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b1-ouros-A",
+     "targetId": "b1-paus-Q"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
+      "REPLACE_LAST_DEF"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b2-espadas-A",
+     "targetId": "b1-ouros-Q"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "STEAL",
+     "cardId": "b2-ouros-A",
+     "targetId": "b1-paus-10",
+     "row": "ATK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
+      "b1-espadas-K"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b1-copas-A",
+     "targetId": "b1-paus-K"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b2-ouros-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_Q",
+     "cardId": "b1-copas-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b2-copas-A",
+     "targetId": "b2-copas-Q"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b1-ouros-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "STEAL",
+     "cardId": "b1-ouros-A",
+     "targetId": "b2-ouros-10",
+     "row": "ATK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
+      "DISCARD"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b2-copas-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_Q",
+     "cardId": "b2-ouros-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF"
      ]
     }
    },
@@ -11609,13 +12675,30 @@
     "player": "p1",
     "action": {
      "type": "CHOOSE_ORDER",
-     "first": true
+     "first": false
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b1-paus-A",
+     "targetId": "b2-ouros-Q"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
     }
    },
    {
     "player": "p1",
     "action": {
-     "type": "DECLARE_ATTACK"
+     "type": "REFLECT",
+     "kId": "b1-ouros-K",
+     "jId": "b1-espadas-J",
+     "qId": "b1-espadas-Q"
     }
    },
    {
@@ -11625,20 +12708,13 @@
     }
    },
    {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_J",
-     "cardId": "b1-espadas-J"
-    }
-   },
-   {
-    "player": "p2",
+    "player": "p1",
     "action": {
      "type": "DECLARE_ATTACK"
     }
    },
    {
-    "player": "p1",
+    "player": "p2",
     "action": {
      "type": "PASS"
     }
@@ -11648,9 +12724,10 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "DEF",
       "ATK",
-      "ATK"
+      "ATK",
+      "DEF",
+      "REPLACE_LAST_ATK"
      ]
     }
    },
@@ -11659,9 +12736,77 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
+      "ATK",
       "DEF",
+      "REPLACE_LAST_ATK"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "CHOOSE_ORDER",
+     "first": false
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
+      "b2-ouros-K"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
       "DEF",
       "ATK",
+      "DISCARD",
+      "REPLACE_LAST_DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
       "REPLACE_LAST_ATK"
      ]
     }
@@ -11670,37 +12815,37 @@
     "player": "p2",
     "action": {
      "type": "CHOOSE_ORDER",
-     "first": false
+     "first": true
     }
    },
    {
-    "player": "p1",
+    "player": "p2",
     "action": {
      "type": "TRAP",
-     "cardId": "b1-ouros-A",
-     "targetId": "b1-espadas-J"
+     "cardId": "b2-paus-A",
+     "targetId": "b1-copas-Q"
     }
    },
    {
-    "player": "p1",
+    "player": "p2",
     "action": {
      "type": "DECLARE_ATTACK"
     }
    },
    {
-    "player": "p2",
+    "player": "p1",
     "action": {
      "type": "PASS"
     }
    },
    {
-    "player": "p2",
+    "player": "p1",
     "action": {
      "type": "DECLARE_ATTACK"
     }
    },
    {
-    "player": "p1",
+    "player": "p2",
     "action": {
      "type": "PASS"
     }
@@ -11721,91 +12866,7 @@
     "player": "p2",
     "action": {
      "type": "EQUIP",
-     "destinations": [
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "CHOOSE_ORDER",
-     "first": false
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b2-ouros-A",
-     "targetId": "b1-ouros-Q"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_K",
-     "cardIds": [
-      "b1-espadas-K"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_J",
-     "cardId": "b1-espadas-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "REPLACE_LAST_DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK"
-     ]
+     "destinations": []
     }
    },
    {
@@ -11818,15 +12879,24 @@
    {
     "player": "p2",
     "action": {
-     "type": "PLAY_J",
-     "cardId": "b1-ouros-J"
+     "type": "DEVASTATE",
+     "kId": "b1-copas-K",
+     "aId": "b1-espadas-A",
+     "xId": "b1-paus-Q",
+     "row": "DEF"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
     }
    },
    {
     "player": "p2",
     "action": {
      "type": "PLAY_J",
-     "cardId": "b2-ouros-J"
+     "cardId": "b1-paus-J"
     }
    },
    {
@@ -11859,7 +12929,11 @@
    },
    "initiativeChoice": false,
    "wildJokers": false,
-   "defenseHealGuard": 2
+   "defenseHealGuard": 2,
+   "specialLimit": {
+    "max": 4,
+    "penalty": "BURN"
+   }
   },
   "seed": "ouro-x",
   "players": [
@@ -11991,8 +13065,8 @@
     "action": {
      "type": "STEAL",
      "cardId": "b1-copas-A",
-     "targetId": "b1-copas-9",
-     "row": "ATK"
+     "targetId": "b1-copas-6",
+     "row": "DEF"
     }
    },
    {
@@ -12318,10 +13392,10 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
+      "ATK",
       "DEF",
-      "ATK",
-      "ATK",
-      "DEF"
+      "DEF",
+      "ATK"
      ]
     }
    },
@@ -12388,7 +13462,7 @@
      "type": "EQUIP",
      "destinations": [
       "ATK",
-      "DEF",
+      "ATK",
       "DEF",
       "DEF"
      ]
@@ -12402,7 +13476,7 @@
       "DEF",
       "DEF",
       "DEF",
-      "DEF"
+      "ATK"
      ]
     }
    },
@@ -12610,7 +13684,8 @@
      "type": "EQUIP",
      "destinations": [
       "DEF",
-      "ATK"
+      "ATK",
+      "DISCARD"
      ]
     }
    },
@@ -12619,8 +13694,8 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "ATK",
       "DEF",
+      "ATK",
       "DEF"
      ]
     }
@@ -12628,22 +13703,22 @@
    {
     "player": "p2",
     "action": {
-     "type": "PLAY_J",
-     "cardId": "b1-ouros-J"
+     "type": "PLAY_K",
+     "cardIds": [
+      "b2-ouros-K"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
     }
    },
    {
     "player": "p2",
     "action": {
      "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b1-ouros-A",
-     "targetId": "b1-ouros-J"
     }
    },
    {
@@ -12670,7 +13745,9 @@
      "type": "EQUIP",
      "destinations": [
       "DEF",
-      "ATK"
+      "ATK",
+      "REPLACE_LAST_ATK",
+      "DISCARD"
      ]
     }
    },
@@ -12689,7 +13766,369 @@
     "action": {
      "type": "STEAL",
      "cardId": "b2-paus-A",
-     "targetId": "b2-copas-7",
+     "targetId": "b1-paus-10",
+     "row": "DEF"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
+      "REPLACE_LAST_DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
+      "b1-copas-K"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_Q",
+     "cardId": "b1-copas-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_Q",
+     "cardId": "b2-ouros-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "STEAL",
+     "cardId": "b1-paus-A",
+     "targetId": "b2-paus-4",
+     "row": "ATK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_Q",
+     "cardId": "b1-espadas-Q"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b1-ouros-A",
+     "targetId": "b2-ouros-K"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
+      "b1-espadas-K",
+      "b1-paus-K"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b2-ouros-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PLAY_J",
+     "cardId": "b1-copas-J"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b2-ouros-A",
+     "targetId": "b1-copas-Q"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
+      "b2-copas-K"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "SACRIFICE",
+     "cardId": "b1-paus-J",
+     "targetId": "b1-copas-J"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
+      "ATK",
+      "REPLACE_LAST_ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b2-espadas-A",
+     "targetId": "b1-espadas-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b1-copas-A",
+     "targetId": "b2-ouros-J"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
+      "REPLACE_LAST_DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "STEAL",
+     "cardId": "b1-espadas-A",
+     "targetId": "b1-copas-6",
      "row": "ATK"
     }
    },
@@ -12709,7 +14148,7 @@
     "player": "p1",
     "action": {
      "type": "SACRIFICE",
-     "cardId": "b2-ouros-Q",
+     "cardId": "b2-copas-Q",
      "targetId": "b1-paus-Q"
     }
    },
@@ -12718,7 +14157,6 @@
     "action": {
      "type": "PLAY_K",
      "cardIds": [
-      "b1-copas-K",
       "b1-ouros-K"
      ]
     }
@@ -12746,7 +14184,7 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "DEF",
+      "ATK",
       "ATK",
       "DEF"
      ]
@@ -12759,742 +14197,17 @@
      "destinations": [
       "DEF",
       "ATK",
-      "REPLACE_LAST_ATK"
+      "DISCARD"
      ]
     }
    },
    {
     "player": "p2",
     "action": {
-     "type": "PLAY_Q",
-     "cardId": "b1-copas-Q"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_J",
-     "cardId": "b2-ouros-J"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "REPLACE_LAST_DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "REPLACE_LAST_DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_K",
-     "cardIds": [
-      "b2-ouros-K"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b1-paus-A",
-     "targetId": "b2-ouros-K"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "SACRIFICE",
-     "cardId": "b1-copas-J",
-     "targetId": "b2-ouros-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_J",
-     "cardId": "b1-paus-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "TRAP",
+     "type": "STEAL",
      "cardId": "b2-copas-A",
-     "targetId": "b1-copas-K"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_K",
-     "cardIds": [
-      "b1-espadas-K"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "SACRIFICE",
-     "cardId": "b1-espadas-Q",
-     "targetId": "b1-copas-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_J",
-     "cardId": "b2-copas-J"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b2-espadas-A",
-     "targetId": "b2-espadas-4",
+     "targetId": "b2-copas-3",
      "row": "DEF"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b1-copas-A",
-     "targetId": "b1-ouros-4",
-     "row": "ATK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b1-espadas-A",
-     "targetId": "b2-copas-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "REPLACE_LAST_ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b2-ouros-A",
-     "targetId": "b2-ouros-4",
-     "row": "DEF"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "REPLACE_LAST_DEF",
-      "REPLACE_LAST_ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_J",
-     "cardId": "b1-espadas-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_Q",
-     "cardId": "b2-copas-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b1-copas-A",
-     "targetId": "b1-copas-9",
-     "row": "DEF"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_K",
-     "cardIds": [
-      "b2-copas-K",
-      "b1-paus-K",
-      "b1-espadas-K"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b2-copas-A",
-     "targetId": "b2-copas-K"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_Q",
-     "cardId": "b1-ouros-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "SACRIFICE",
-     "cardId": "b1-copas-J",
-     "targetId": "b1-espadas-J"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "DISCARD",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_J",
-     "cardId": "b2-copas-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_Q",
-     "cardId": "b1-paus-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "REPLACE_LAST_DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b2-paus-A",
-     "targetId": "b2-espadas-8",
-     "row": "DEF"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "REPLACE_LAST_ATK",
-      "REPLACE_LAST_DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b1-espadas-A",
-     "targetId": "b2-espadas-7",
-     "row": "ATK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_K",
-     "cardIds": [
-      "b2-ouros-K"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "ATK"
-     ]
     }
    },
    {
@@ -13513,74 +14226,6 @@
    {
     "player": "p1",
     "action": {
-     "type": "TRAP",
-     "cardId": "b1-ouros-A",
-     "targetId": "b2-copas-J"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b2-espadas-A",
-     "targetId": "b1-paus-J"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_Q",
-     "cardId": "b2-ouros-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
      "type": "PASS"
     }
    },
@@ -13602,91 +14247,6 @@
      "type": "EQUIP",
      "destinations": [
       "ATK",
-      "REPLACE_LAST_DEF"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b1-paus-A",
-     "targetId": "b2-paus-5",
-     "row": "ATK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_K",
-     "cardIds": [
-      "b1-ouros-K",
-      "b1-copas-K"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b2-ouros-A",
-     "targetId": "b1-espadas-K"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_Q",
-     "cardId": "b1-espadas-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
       "DEF"
      ]
     }
@@ -13705,30 +14265,30 @@
    {
     "player": "p2",
     "action": {
-     "type": "PLAY_J",
-     "cardId": "b2-ouros-J"
+     "type": "PLAY_Q",
+     "cardId": "b1-ouros-Q"
     }
    },
    {
     "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
     "action": {
      "type": "PLAY_Q",
      "cardId": "b2-copas-Q"
     }
    },
    {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
     "player": "p1",
     "action": {
      "type": "DECLARE_ATTACK"
@@ -13745,9 +14305,9 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "ATK",
-      "REPLACE_LAST_ATK",
-      "DISCARD"
+      "DEF",
+      "DEF",
+      "DEF"
      ]
     }
    },
@@ -13756,19 +14316,11 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "ATK",
       "DEF",
+      "ATK",
+      "REPLACE_LAST_DEF",
       "REPLACE_LAST_ATK"
      ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b2-copas-A",
-     "targetId": "b1-espadas-6",
-     "row": "ATK"
     }
    },
    {
@@ -13782,263 +14334,20 @@
     "action": {
      "type": "TRAP",
      "cardId": "b1-paus-A",
-     "targetId": "b1-paus-K"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "DEF",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b1-ouros-A",
-     "targetId": "b2-ouros-5",
-     "row": "ATK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "SACRIFICE",
-     "cardId": "b1-espadas-J",
-     "targetId": "b2-ouros-J"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PLAY_Q",
-     "cardId": "b1-copas-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "DEF",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "REPLACE_LAST_ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "DEF",
-      "DISCARD",
-      "REPLACE_LAST_ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b1-espadas-A",
-     "targetId": "b1-copas-Q"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "TRAP",
-     "cardId": "b1-copas-A",
-     "targetId": "b2-copas-Q"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "SACRIFICE",
-     "cardId": "b1-paus-J",
      "targetId": "b1-ouros-J"
     }
    },
    {
     "player": "p1",
     "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
      "type": "PASS"
     }
    },
    {
     "player": "p1",
     "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b2-ouros-A",
-     "targetId": "b2-ouros-4",
-     "row": "ATK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b2-espadas-A",
-     "targetId": "b2-ouros-4",
-     "row": "ATK"
+     "type": "PLAY_J",
+     "cardId": "b1-espadas-J"
     }
    },
    {
@@ -14065,10 +14374,8 @@
     "action": {
      "type": "EQUIP",
      "destinations": [
-      "DEF",
       "ATK",
-      "REPLACE_LAST_DEF",
-      "REPLACE_LAST_ATK"
+      "ATK"
      ]
     }
    },
@@ -14080,143 +14387,162 @@
       "DEF",
       "ATK"
      ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PLAY_J",
-     "cardId": "b1-copas-J"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "ATK"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "SACRIFICE",
-     "cardId": "b1-paus-J",
-     "targetId": "b1-copas-J"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "STEAL",
-     "cardId": "b2-paus-A",
-     "targetId": "b1-paus-6",
-     "row": "DEF"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "RESURRECT",
-     "cardId": "b1-copas-10",
-     "row": "DEF"
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "DEF",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "ATK",
-      "REPLACE_LAST_ATK",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "DECLARE_ATTACK"
     }
    },
    {
     "player": "p2",
     "action": {
      "type": "TRAP",
-     "cardId": "b1-ouros-A",
+     "cardId": "b1-espadas-A",
+     "targetId": "b1-ouros-K"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "SACRIFICE",
+     "cardId": "b1-copas-Q",
+     "targetId": "b2-copas-Q"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b2-ouros-A",
+     "targetId": "b1-ouros-Q"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
+      "b2-ouros-K"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "ATK",
+      "DEF",
+      "REPLACE_LAST_ATK",
+      "REPLACE_LAST_DEF"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "DECLARE_ATTACK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PASS"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK",
+      "DEF"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "EQUIP",
+     "destinations": [
+      "DEF",
+      "ATK"
+     ]
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "STEAL",
+     "cardId": "b2-paus-A",
+     "targetId": "b2-paus-6",
+     "row": "ATK"
+    }
+   },
+   {
+    "player": "p1",
+    "action": {
+     "type": "PLAY_K",
+     "cardIds": [
+      "b1-espadas-K"
+     ]
+    }
+   },
+   {
+    "player": "p2",
+    "action": {
+     "type": "TRAP",
+     "cardId": "b2-copas-A",
      "targetId": "b2-ouros-K"
     }
    },
@@ -14227,39 +14553,6 @@
     }
    },
    {
-    "player": "p2",
-    "action": {
-     "type": "DECLARE_ATTACK"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "PASS"
-    }
-   },
-   {
-    "player": "p1",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF",
-      "ATK",
-      "REPLACE_LAST_ATK",
-      "DISCARD"
-     ]
-    }
-   },
-   {
-    "player": "p2",
-    "action": {
-     "type": "EQUIP",
-     "destinations": [
-      "DEF"
-     ]
-    }
-   },
-   {
     "player": "p1",
     "action": {
      "type": "DECLARE_ATTACK"
@@ -14267,15 +14560,6 @@
    },
    {
     "player": "p2",
-    "action": {
-     "type": "REFLECT",
-     "kId": "b2-copas-K",
-     "jId": "b1-espadas-J",
-     "qId": "b1-ouros-Q"
-    }
-   },
-   {
-    "player": "p1",
     "action": {
      "type": "PASS"
     }

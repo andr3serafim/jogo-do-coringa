@@ -72,9 +72,12 @@ describe('cura passiva pela Defesa (E3)', () => {
   it('o ladrão que perde a última da própria Defesa cheia cura com ela ([I])', () => {
     const s = setup({ p1: { hp: 50, hand: ['A'], defense: [2, 3, 4, 5, 6, 7, 8], guard: 2 }, p2: { attack: [9] } });
     const target = player(s, P2).attackRow[0] as NumCard;
-    target.suit = 'espadas';
     const r = act(s, P1, { type: 'STEAL', cardId: handId(s, P1, 'A'), targetId: target.id, row: 'DEF' });
-    expect(healed(r.events, P1)).toEqual([expect.objectContaining({ amount: 8, source: 'DEFENSE' })]);
+    // Primeiro a carta que sai da Defesa (8), depois a cura do próprio roubo (9).
+    expect(healed(r.events, P1)).toEqual([
+      expect.objectContaining({ amount: 8, source: 'DEFENSE' }),
+      expect.objectContaining({ amount: 9, source: 'STEAL' }),
+    ]);
   });
 
   it('as cartas destruídas pela Devastação não curam', () => {

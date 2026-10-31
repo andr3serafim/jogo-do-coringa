@@ -11,7 +11,8 @@ export const DEFAULT_CONFIG: RulesConfig = {
   initiativeChoice: true,
   wildJokers: true,
   defenseHealGuard: 2,
-  // Sem `specialLimit` até o autor escolher a forma da penalidade (E3): a medição usa cada uma explicitamente.
+  // A forma escolhida pelo autor (2026-10-31): a especial que passaria de 4 na mão vai direto ao cemitério.
+  specialLimit: { max: 4, penalty: 'BURN' },
 };
 
 export type ConfigOverrides = Partial<Omit<RulesConfig, 'deck'>> & {

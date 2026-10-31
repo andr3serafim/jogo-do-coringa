@@ -143,16 +143,15 @@ function mainOptions(view: PlayerView): Action[] {
       for (const c of devastationCombos(self.hand, x)) actions.push({ type: 'DEVASTATE', kId: c.k, aId: c.a, xId: c.x, row });
     }
   }
-  // Roubo (E3), por último: uma fonte (o A; o Selvagem só sem A), um alvo por (fileira, valor, cor do naipe) e os dois destinos.
-  // Na mesma fileira, cartas de mesmo valor e cor dão o mesmo efeito: a lista traz a primeira, e o motor aceita qualquer uma.
+  // Roubo (E3), por último: uma fonte (o A; o Selvagem só sem A), um alvo por (fileira, valor) e os dois destinos. Na mesma
+  // fileira, cartas de mesmo valor dão o mesmo efeito (o naipe não conta): a lista traz a primeira, e o motor aceita qualquer uma.
   const thief = firstOf(self.hand, 'A') ?? firstOf(self.hand, 'WILD');
   if (thief && !opponent.absoluteDefense) {
     for (const cards of [opponent.attackRow, opponent.defenseRow]) {
-      const seen = new Set<string>();
+      const seen = new Set<number>();
       for (const card of cards) {
-        const key = `${card.value}:${card.suit === 'copas' || card.suit === 'ouros' ? 'vermelha' : 'preta'}`;
-        if (seen.has(key)) continue;
-        seen.add(key);
+        if (seen.has(card.value)) continue;
+        seen.add(card.value);
         for (const row of ['ATK', 'DEF'] as const) actions.push({ type: 'STEAL', cardId: thief.id, targetId: card.id, row });
       }
     }

@@ -8,6 +8,10 @@
  * e quem faz mais dano ali toma a iniciativa: de que lado do monte p1 recebe as cartas do 3º Equipar depende de como se joga.
  * Por isso o 3º Equipar só conta um especial que chega com qualquer das duas iniciativas. Sem reembaralhar (98 cartas, 24
  * compradas até o 3º Equipar), é só o Equipar que compra do monte.
+ *
+ * Com o limite de 4 especiais na mão (BURN, autor em 2026-10-31), a previsão "sem ter jogado nada" é exata até o 2º Equipar (não
+ * há jogada antes do ataque da rodada 3), mas pessimista no 3º: o jogador pode ter aberto espaço na rodada 3. Por isso o critério
+ * pede tudo até o 2º Equipar, sem nenhuma queimada.
  */
 import { type Card, createGame, DEFAULT_CONFIG, type PlayerId, type SpecialKind } from '@coringa/engine';
 
@@ -22,12 +26,15 @@ export const TUTORIAL_EQUIPS = 3;
 type EquipNo = 1 | 2 | 3;
 
 /**
- * Em que Equipar o jogador `p1` recebe pela primeira vez cada especial (e em que Equipar já tem K + J + Q juntos na mão, sem
- * ter jogado nada). `null`: não chega até o 3º Equipar, ou não chega com certeza (o 3º só conta se vale nas duas iniciativas).
+ * Em que Equipar o jogador `p1` recebe pela primeira vez cada especial (e em que Equipar já tem um Reflect na mão, sem ter
+ * jogado nada). `null`: não chega até o 3º Equipar, ou não chega com certeza (o 3º só conta se vale nas duas iniciativas).
  */
 export interface TutorialDeal {
   firstEquipWithSpecial: Record<SpecialKind, number | null>;
+  /** K + J + Q, com o Selvagem no lugar do J, do Q ou dos dois (como o motor aceita). */
   reflectByEquip: number | null;
+  /** Quantas especiais de `p1` a BURN queima até o 2º Equipar. */
+  burnedByEquip2: number;
   /** Quantas numéricas `p1` recebe no 1º Equipar: sem nenhuma, o Equipar dele sai sozinho e a dica 1 não aparece. */
   numericsInEquip1: number;
   /** `p1` começa com a iniciativa: na rodada 3 é ele quem escolhe a ordem (a dica 3). */
@@ -35,7 +42,13 @@ export interface TutorialDeal {
 }
 
 const SPECIALS: readonly SpecialKind[] = ['J', 'Q', 'K', 'A', 'WILD'];
-const REFLECT_TRIO: readonly SpecialKind[] = ['K', 'J', 'Q'];
+
+/** A mão tem um Reflect: um K, e o J e o Q, com o Selvagem cobrindo o que falta. */
+function hasReflect(hand: readonly SpecialKind[]): boolean {
+  const count = (kind: SpecialKind): number => hand.filter((k) => k === kind).length;
+  const missing = (count('J') > 0 ? 0 : 1) + (count('Q') > 0 ? 0 : 1);
+  return count('K') > 0 && missing <= count('WILD');
+}
 
 /** A `n`-ésima semente candidata, na ordem da procura (`pnpm sim:tutorial`). */
 export function tutorialSeedAt(index: number): string {
@@ -69,12 +82,17 @@ function startOfGame(seed: string): {
  * tem a iniciativa quando o 3º Equipar é distribuído; nos dois primeiros ela é a da criação e o argumento não conta.
  */
 export function tutorialHand(seed: string, equip: EquipNo, equip3Holder: PlayerId): SpecialKind[] {
+  return dealt(seed, equip, equip3Holder).hand;
+}
+
+/** A mão de `tutorialHand` e quantas especiais a BURN queimou no caminho. */
+function dealt(seed: string, equip: EquipNo, equip3Holder: PlayerId): { hand: SpecialKind[]; burned: number } {
   const { equip1, deck, initiative, perEquip } = startOfGame(seed);
   const limit = DEFAULT_CONFIG.specialLimit;
-  // A previsão conhece só a BURN: as outras formas mudam a compra (FEWER) ou o que fica na mão (CHOOSE). Quando o autor escolher a
-  // forma do limite (E3), esta conta é revista junto.
+  // A previsão conhece só a BURN, a forma do padrão: as outras mudam a compra (FEWER) ou o que fica na mão (CHOOSE).
   if (limit && limit.penalty !== 'BURN') throw new Error(`a previsão da mão do tutorial não conhece a penalidade ${limit.penalty}`);
   const hand: SpecialKind[] = [...equip1];
+  let burned = 0;
   for (let n = 2; n <= equip; n += 1) {
     const holder = n >= 3 ? equip3Holder : initiative;
     // Quem tem a iniciativa compra primeiro: as posições pares do bloco são dela, as ímpares do outro.
@@ -83,11 +101,14 @@ export function tutorialHand(seed: string, equip: EquipNo, equip3Holder: PlayerI
     block.forEach((card, i) => {
       if (i % 2 !== mine || card.kind === 'NUM') return;
       // Com a BURN (o limite de especiais da E3), a especial que passaria do limite vai ao cemitério.
-      if (limit && hand.length >= limit.max) return;
+      if (limit && hand.length >= limit.max) {
+        burned += 1;
+        return;
+      }
       hand.push(card.kind as SpecialKind);
     });
   }
-  return hand.sort();
+  return { hand: hand.sort(), burned };
 }
 
 /** A primeira vez (Equipar) em que `ok` vale em todas as iniciativas possíveis do 3º Equipar; `null` se não vale até lá. */
@@ -104,23 +125,33 @@ export function tutorialDeal(seed: string): TutorialDeal {
   for (const kind of SPECIALS) firstEquipWithSpecial[kind] = firstEquipWhere(seed, (hand) => hand.includes(kind));
   return {
     firstEquipWithSpecial,
-    reflectByEquip: firstEquipWhere(seed, (hand) => REFLECT_TRIO.every((kind) => hand.includes(kind))),
+    reflectByEquip: firstEquipWhere(seed, hasReflect),
+    // Até o 2º Equipar a iniciativa é a da criação: o `holder` não conta.
+    burnedByEquip2: dealt(seed, 2, ME).burned,
     numericsInEquip1: startOfGame(seed).numerics1,
     initiativeIsMine: startOfGame(seed).initiative === ME,
   };
 }
 
-/** A iniciativa com o jogador (a dica 3 é a escolha da ordem), ao menos uma numérica no 1º Equipar (a dica 1 é a do Equipar), J, Q, K e A até o 2º Equipar, o Selvagem até o 3º e K + J + Q até o 3º. */
+/**
+ * A iniciativa com o jogador (a dica 3 é a escolha da ordem), ao menos uma numérica no 1º Equipar (a dica 1 é a do Equipar) e,
+ * até o 2º Equipar, sem nenhuma queimada: o K, o A, o Selvagem e um J ou um Q (a mão cheia de 4, com o Reflect pelo Selvagem).
+ * Cobre as dicas dos buffs, da Armadilha, do Selvagem e do Reflect antes do primeiro ataque.
+ */
 export function meetsTutorialCriterion(result: TutorialDeal): boolean {
   const first = result.firstEquipWithSpecial;
   const by = (equip: number | null, limit: number): boolean => equip !== null && equip <= limit;
   return (
     result.initiativeIsMine &&
     result.numericsInEquip1 >= 1 &&
-    by(first.J, 2) &&
-    by(first.Q, 2) && by(first.K, 2) && by(first.A, 2) && by(first.WILD, 3) && by(result.reflectByEquip, 3)
+    result.burnedByEquip2 === 0 &&
+    by(first.K, 2) &&
+    by(first.A, 2) &&
+    by(first.WILD, 2) &&
+    (by(first.J, 2) || by(first.Q, 2)) &&
+    by(result.reflectByEquip, 2)
   );
 }
 
 /** A semente do tutorial: a de menor índice na ordem de `tutorialSeedAt` que cumpre `meetsTutorialCriterion` (`pnpm sim:tutorial`). */
-export const TUTORIAL_SEED = 'tutorial-2431';
+export const TUTORIAL_SEED = 'tutorial-381';

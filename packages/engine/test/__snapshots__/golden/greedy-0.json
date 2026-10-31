@@ -7,14 +7,12 @@
   },
   "rounds": 33,
   "finalHp": {
-    "p1": -86,
-    "p2": 369
+    "p1": -28,
+    "p2": 379
   },
   "events": {
-    "AbsoluteAttack": 1,
     "AttackDeclared": 32,
     "BuffPlayed": 14,
-    "BuffRemoved": 1,
     "CardsDealt": 32,
     "CardsPlaced": 34,
     "CardsRemovedFromRow": 65,
@@ -25,7 +23,7 @@
     "GameOver": 1,
     "GuardBroken": 7,
     "GuardPlayed": 8,
-    "Healed": 5,
+    "Healed": 8,
     "InitiativeChanged": 6,
     "OrderChosen": 16,
     "QuadBroken": 1,
@@ -35,7 +33,7 @@
     "Resurrected": 1,
     "RoundStarted": 32,
     "Sacrificed": 1,
-    "StealDamage": 3,
+    "StealDamage": 8,
     "TrapUsed": 9,
     "TurnStarted": 32
   }

@@ -16,6 +16,7 @@ describe('config', () => {
       initiativeChoice: true,
       wildJokers: true,
       defenseHealGuard: 2,
+      specialLimit: { max: 4, penalty: 'BURN' },
     });
   });
 

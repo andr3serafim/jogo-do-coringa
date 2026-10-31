@@ -10,7 +10,7 @@ describe('medição E3', () => {
     expect(report.series).toHaveLength(12);
     for (const s of report.series) {
       expect(s.metrics.games).toBe(4);
-      for (const fraction of [s.stats.blackBlocked, s.stats.healGames, s.stats.exodiaAtOnce, s.stats.exodiaBuilt]) {
+      for (const fraction of [s.stats.stealBlocked, s.stats.healGames, s.stats.exodiaAtOnce, s.stats.exodiaBuilt]) {
         expect(fraction).toBeGreaterThanOrEqual(0);
         expect(fraction).toBeLessThanOrEqual(1);
       }

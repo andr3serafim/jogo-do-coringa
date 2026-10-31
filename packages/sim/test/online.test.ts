@@ -144,8 +144,8 @@ describe('askChoice e o jogo offline com AbortSignal', () => {
     const game = scriptedIo(() => '1');
     const outcome = await playGame({ io: game, seed: 'roteiro', bot: 'greedy', config: makeConfig(), saveDir: null });
     const sha = (text: string) => createHash('sha256').update(text).digest('hex');
-    expect(sha(game.output.join('\n'))).toBe('fc34a5bb3055cf127dc6b5413dea163645e1b638bfd4bbfe3f3f4535080ff0d3');
-    expect(sha(JSON.stringify(outcome.replay.steps))).toBe('b1f66da043f297cc7bc6ae383a12a56ca799ded6d35080d83029d37c48b9298c');
+    expect(sha(game.output.join('\n'))).toBe('b1579d93fed52428bc2492acaa63830a20d22935ca9b4d504a76a2e728f11fea');
+    expect(sha(JSON.stringify(outcome.replay.steps))).toBe('3dc3cc0a89c288e209ed92ab9b59439734f00354b442c2113242b6cf10a6ee36');
     expect(outcome.replay.steps).toHaveLength(90);
   });
 

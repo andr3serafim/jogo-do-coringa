@@ -52,7 +52,7 @@ export function placeAll<T extends PublicPlayer>(p: T, pending: NumCard[], desti
 
 /**
  * O que um Roubo vale para quem rouba: a mudança na avaliação de mesa (a carta sai da fileira dele e entra no fim da minha, que
- * perde a última se estiver cheia) mais o efeito do naipe (♣ ♠: o dano, que um K dele anula e que nunca mata; ♥ ♦: a cura).
+ * perde a última se estiver cheia) mais o dano (que um K dele anula e que nunca mata) e a cura (até a vida inicial).
  */
 export function stealValue(view: PlayerView, action: Extract<Action, { type: 'STEAL' }>): number {
   const { self, opponent, config } = view;
@@ -66,9 +66,9 @@ export function stealValue(view: PlayerView, action: Extract<Action, { type: 'ST
   const mine = action.row === 'ATK' ? self.attackRow : self.defenseRow;
   const row = [...(mine.length >= config.rowLimit ? mine.slice(0, -1) : mine), card];
   const thief = action.row === 'ATK' ? { ...self, attackRow: row } : { ...self, defenseRow: row };
-  const black = card.suit === 'espadas' || card.suit === 'paus';
-  const effect = black ? (opponent.guard.length > 0 ? 0 : Math.max(0, Math.min(card.value, opponent.hp - 1))) : Math.min(card.value, config.hp - self.hp);
-  return boardScore(thief, victim) - boardScore(self, opponent) + effect;
+  const damage = opponent.guard.length > 0 ? 0 : Math.max(0, Math.min(card.value, opponent.hp - 1));
+  const heal = Math.min(card.value, config.hp - self.hp);
+  return boardScore(thief, victim) - boardScore(self, opponent) + damage + heal;
 }
 
 /** Com a fileira `row` vazia (efeito de uma Devastação). */

@@ -27,8 +27,8 @@ export const SERIES: Array<[string, [BotName, BotName]]> = [
 /** As mecânicas novas, por partida (médias) ou por fração de partidas. */
 export interface E3Stats {
   steals: number;
-  /** Dos roubos de carta ♣ ♠, a fração que um K anulou. */
-  blackBlocked: number;
+  /** Dos roubos, a fração em que um K anulou o dano. */
+  stealBlocked: number;
   stealDamage: number;
   stealHeal: number;
   defenseHeal: number;
@@ -55,11 +55,9 @@ export interface SeriesE3 {
   stats: E3Stats;
 }
 
-const black = (suit: string): boolean => suit === 'espadas' || suit === 'paus';
-
 /** Joga `games` partidas e junta as métricas de sempre com as das mecânicas novas. */
 export function measureSeries(config: RulesConfig, bots: [Bot, Bot], games: number, prefix: string): { metrics: Metrics; stats: E3Stats } {
-  const t = { steals: 0, black: 0, blocked: 0, stealDamage: 0, stealHeal: 0, defenseHeal: 0, equipHeal: 0, healGames: 0 };
+  const t = { steals: 0, blocked: 0, stealDamage: 0, stealHeal: 0, defenseHeal: 0, equipHeal: 0, healGames: 0 };
   const m = { reflects: 0, clashes: 0, devastations: 0, reflectedDev: 0, atOnce: 0, built: 0, burned: 0, discarded: 0, fewer: 0 };
   const records: GameRecord[] = [];
   for (let i = 0; i < games; i += 1) {
@@ -77,7 +75,6 @@ export function measureSeries(config: RulesConfig, bots: [Bot, Bot], games: numb
             switch (e.type) {
               case 'CardStolen':
                 t.steals += 1;
-                if (black(e.card.suit)) t.black += 1;
                 break;
               case 'StealDamage':
                 t.stealDamage += e.damage;
@@ -130,7 +127,7 @@ export function measureSeries(config: RulesConfig, bots: [Bot, Bot], games: numb
     metrics: summarize(records),
     stats: {
       steals: t.steals / n,
-      blackBlocked: t.black === 0 ? 0 : t.blocked / t.black,
+      stealBlocked: t.steals === 0 ? 0 : t.blocked / t.steals,
       stealDamage: t.stealDamage / n,
       stealHeal: t.stealHeal / n,
       defenseHeal: t.defenseHeal / n,
@@ -183,7 +180,7 @@ export const hoarder: Bot = (view, legal, rng) => {
   return BOTS.greedy(view, noKingSpent.length > 0 ? noKingSpent : keep, rng);
 };
 
-/** O greedy que só rouba quando o Roubo vale pelo menos `threshold` (mesa + dano ou cura). */
+/** O greedy que só rouba quando o Roubo vale pelo menos `threshold` (mesa + dano + cura). */
 export function stealsAbove(threshold: number): Bot {
   return (view, legal, rng) =>
     BOTS.greedy(view, legal.filter((a) => a.type !== 'STEAL' || stealValue(view, a) >= threshold), rng);
@@ -267,12 +264,12 @@ export function renderE3(report: E3Report): string {
     '## Mecânicas novas (média por partida)',
     '',
     markdownTable(
-      ['Limite', 'Série', 'Roubos', '♣♠ anulados por K', 'Dano do roubo', 'Cura (roubo · Defesa · troca)', 'Com cura passiva', 'Reflects · R×R', 'Devastações · refletidas', 'Penalidade (queimadas · descartadas · a menos)'],
+      ['Limite', 'Série', 'Roubos', 'Dano anulado por K', 'Dano do roubo', 'Cura (roubo · Defesa · troca)', 'Com cura passiva', 'Reflects · R×R', 'Devastações · refletidas', 'Penalidade (queimadas · descartadas · a menos)'],
       report.series.map((s) => [
         s.limit,
         s.label,
         n2(s.stats.steals),
-        pct(s.stats.blackBlocked),
+        pct(s.stats.stealBlocked),
         n2(s.stats.stealDamage),
         `${n2(s.stats.stealHeal)} · ${n2(s.stats.defenseHeal)} · ${n2(s.stats.equipHeal)}`,
         pct(s.stats.healGames),
@@ -282,14 +279,14 @@ export function renderE3(report: E3Report): string {
       ]),
     ),
     '',
-    '## Pareados (assentos trocados a cada partida, sem limite de especiais)',
+    '## Pareados (assentos trocados a cada partida, com o limite padrão: BURN 4)',
     '',
     markdownTable(
       ['Confronto', 'Pontos do primeiro', 'Margem (95%)'],
       report.pairs.map((p) => [p.label, pct(p.score), `±${pct(p.margin)}`]),
     ),
     '',
-    '## Cura passiva ligada × desligada (sem limite de especiais)',
+    '## Cura passiva ligada × desligada (com o limite padrão: BURN 4)',
     '',
     markdownTable(
       ['Série', 'Cura', 'Rodadas ATK (p10–med–p90 · p95 · máx)', 'No teto', 'Exódia', 'Iniciativa vence'],
@@ -306,7 +303,7 @@ export function renderE3(report: E3Report): string {
       report.hoard.map((h) => [h.limit, pct(h.exodia), pct(h.atOnce), pct(h.score), `±${pct(h.margin)}`]),
     ),
     '',
-    '## Roubo do greedy por limiar de valor × greedy sem Roubo (sem limite)',
+    '## Roubo do greedy por limiar de valor × greedy sem Roubo (com o limite padrão: BURN 4)',
     '',
     markdownTable(
       ['Rouba com valor ≥', 'Pontos de quem rouba', 'Margem (95%)'],

@@ -1,7 +1,7 @@
 // Roubo (E3 do sub-projeto 5): o Ás (ou o Selvagem como A) pega uma numérica de qualquer fileira do oponente e a põe no fim da
-// fileira que o ladrão escolher; com a fileira cheia, a última dela vai ao cemitério. ♣ ♠: o oponente leva o valor seco da carta
-// (um K na Guarda dele anula e fica; não mata; não conta para a iniciativa). ♥ ♦: o ladrão cura o valor seco, até a vida inicial.
-// A Defesa Absoluta do oponente bloqueia o roubo inteiro.
+// fileira que o ladrão escolher; com a fileira cheia, a última dela vai ao cemitério. Sem naipe (autor, 2026-10-31): o oponente
+// leva o valor seco da carta (um K na Guarda dele anula e fica; não mata; não conta para a iniciativa) e o ladrão cura o mesmo
+// valor, até a vida inicial. A Defesa Absoluta do oponente bloqueia o roubo inteiro.
 import { describe, expect, it } from 'vitest';
 import { applyAction } from '../src/apply-action.ts';
 import { legalActions } from '../src/legal-actions.ts';
@@ -10,7 +10,7 @@ import type { Action, GameState, NumCard, RowName, Suit } from '../src/types.ts'
 import { viewFor } from '../src/view.ts';
 import { P1, P2, act, actErr, handId, player, setup, values } from './helpers.ts';
 
-/** Troca o naipe da carta `card` (as cartas do cenário vêm do monte; o naipe decide o efeito do roubo). */
+/** Troca o naipe da carta `card` (as cartas do cenário vêm do monte; o naipe não muda o efeito do roubo). */
 function withSuit(card: NumCard, suit: Suit): NumCard {
   card.suit = suit;
   return card;
@@ -42,38 +42,42 @@ describe('Roubo (E3)', () => {
     expect(r.state.graveyard.map((c) => (c.kind === 'NUM' ? c.value : c.kind))).toEqual(expect.arrayContaining([8, 'A']));
   });
 
-  it('♠ de valor 10 com 3 J na fileira dele: o oponente leva 10 (o valor seco), sem contar para a iniciativa', () => {
-    const s = setup({ p1: { hand: ['A'] }, p2: { attack: [10, 2], attackBuffs: ['J', 'J', 'J'] } });
-    const card = withSuit(player(s, P2).attackRow[0]!, 'espadas');
-    const r = act(s, P1, stealOf(s, card, 'ATK'));
-    expect(player(r.state, P2).hp).toBe(90);
-    expect(player(r.state, P1).damageThisRound).toBe(0);
-    expect(r.events).toContainEqual({ type: 'StealDamage', player: P1, victim: P2, value: 10, damage: 10, blocked: false });
+  it('qualquer naipe: o oponente leva o valor seco (10, com 3 J na fileira dele) e o ladrão cura o mesmo valor, sem iniciativa', () => {
+    for (const suit of ['espadas', 'copas'] as const) {
+      const s = setup({ p1: { hand: ['A'], hp: 80 }, p2: { attack: [10, 2], attackBuffs: ['J', 'J', 'J'] } });
+      const card = withSuit(player(s, P2).attackRow[0]!, suit);
+      const r = act(s, P1, stealOf(s, card, 'ATK'));
+      expect(player(r.state, P2).hp).toBe(90);
+      expect(player(r.state, P1).hp).toBe(90);
+      expect(player(r.state, P1).damageThisRound).toBe(0);
+      expect(r.events).toContainEqual({ type: 'StealDamage', player: P1, victim: P2, value: 10, damage: 10, blocked: false });
+      expect(r.events).toContainEqual(expect.objectContaining({ type: 'Healed', player: P1, amount: 10, source: 'STEAL' }));
+    }
   });
 
-  it('♣: um K na Guarda do oponente anula o dano e não quebra', () => {
-    const s = setup({ p1: { hand: ['A'] }, p2: { attack: [9], guard: 1 } });
+  it('um K na Guarda do oponente anula só o dano (e não quebra); o ladrão cura mesmo assim', () => {
+    const s = setup({ p1: { hand: ['A'], hp: 90 }, p2: { attack: [9], guard: 1 } });
     const card = withSuit(player(s, P2).attackRow[0]!, 'paus');
     const r = act(s, P1, stealOf(s, card, 'ATK'));
     expect(player(r.state, P2).hp).toBe(100);
     expect(player(r.state, P2).guard).toHaveLength(1);
     expect(r.events).toContainEqual({ type: 'StealDamage', player: P1, victim: P2, value: 9, damage: 0, blocked: true });
+    expect(player(r.state, P1).hp).toBe(99);
   });
 
-  it('o dano do roubo não mata: a vida do oponente fica em no mínimo 1', () => {
-    const s = setup({ p1: { hand: ['A'] }, p2: { hp: 4, attack: [9] } });
+  it('o dano do roubo não mata (a vida do oponente fica em no mínimo 1), e a cura é o valor cheio', () => {
+    const s = setup({ p1: { hand: ['A'], hp: 50 }, p2: { hp: 4, attack: [9] } });
     const card = withSuit(player(s, P2).attackRow[0]!, 'espadas');
     const r = act(s, P1, stealOf(s, card, 'ATK'));
     expect(player(r.state, P2).hp).toBe(1);
+    expect(player(r.state, P1).hp).toBe(59);
     expect(r.state.phase.kind).toBe('ATTACK_MAIN');
     expect(r.events).toContainEqual(expect.objectContaining({ type: 'StealDamage', damage: 3 }));
   });
 
-  it('♥ ♦: o ladrão cura o valor seco, até a vida inicial', () => {
+  it('a cura vai até a vida inicial', () => {
     const s = setup({ p1: { hand: ['A', 'A'], hp: 95 }, p2: { attack: [8, 7] } });
     const [eight, seven] = player(s, P2).attackRow;
-    withSuit(eight!, 'ouros');
-    withSuit(seven!, 'copas');
     const first = act(s, P1, stealOf(s, eight!, 'ATK'));
     expect(player(first.state, P1).hp).toBe(100);
     expect(first.events).toContainEqual(expect.objectContaining({ type: 'Healed', player: P1, amount: 5, source: 'STEAL' }));
@@ -112,14 +116,14 @@ describe('Roubo (E3)', () => {
 });
 
 describe('Roubo nas jogadas legais', () => {
-  it('uma fonte (o A antes do Selvagem), um alvo por fileira, valor e cor, os dois destinos; tudo aceito pelo motor', () => {
+  it('uma fonte (o A antes do Selvagem), um alvo por fileira e valor (o naipe não conta), os dois destinos; tudo aceito', () => {
     const s = setup({ p1: { hand: ['A', 'W'] }, p2: { attack: [5, 5], defense: [5] } });
     const [a, b] = player(s, P2).attackRow;
     withSuit(a!, 'copas');
-    withSuit(b!, 'ouros');
+    withSuit(b!, 'espadas');
     withSuit(player(s, P2).defenseRow[0]!, 'espadas');
     const steals = legalActions(viewFor(s, P1)).filter((x) => x.type === 'STEAL');
-    // Os dois 5 vermelhos do Ataque são um alvo só; o 5 preto da Defesa é outro. Dois destinos cada.
+    // Os dois 5 do Ataque (um vermelho, um preto) são um alvo só; o 5 da Defesa é outro. Dois destinos cada.
     expect(steals).toHaveLength(4);
     expect(steals.every((x) => x.type === 'STEAL' && x.cardId === handId(s, P1, 'A'))).toBe(true);
     for (const action of steals) expect(applyAction(s, P1, action).ok).toBe(true);
