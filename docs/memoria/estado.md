@@ -5,10 +5,10 @@
 
 ## Agora
 
-- **Branch:** `feat/cura-passiva`, no checkout principal `D:andr3jogo-coringa`, a partir da `main` (`dfeb083`).
-- **Em curso:** a marca "Cura passiva" no campo enquanto houver 2 K ou mais na Guarda (`decisoes.md` 2026-10-31 (10)). O
-  autor também respondeu que o dano do Roubo fica fora da iniciativa (nada muda no código).
-- **Próximo passo exato:** `pnpm check` e `pnpm e2e` passaram; falta o push da branch, as duas CI verdes e o fast-forward da `main`, depois este arquivo com "nada em curso".
+- **Nada em curso.** A marca "Cura passiva" (pedido do autor de 2026-10-31, `decisoes.md` (10)) está na `main`
+  (fast-forward da `feat/cura-passiva`, com `pnpm check`, `pnpm e2e` e as duas CI verdes); registro em `diario.md`
+  2026-10-31 (8).
+- **Próximo passo exato:** esperar o autor (os próximos pontos do playtest e as perguntas abaixo).
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
@@ -30,6 +30,9 @@ Vazia: o bloco E3 + F2 + F3 era o último item.
   - **O Roubo segue fraco:** mesmo com dano e cura, o bot que rouba vence 39% contra o que não rouba (o A vale mais como
     Armadilha contra um K). A regra é a que ele pediu; se ele quiser o Roubo competitivo, as alavancas são o dano contar para a
     iniciativa, o K não anular ou o Roubo valer mais.
+  - **A marca "Cura passiva" ([I] de 2026-10-31 (10)):** nos dois campos, fundo de papel (o ouro é dos Absolutos), sem o
+    multiplicador dos Q; o item do resumo das regras virou "Cura passiva (pela Defesa)". O histórico segue dizendo "curou N pela
+    Defesa".
   - **O desenho do naipe:** a regra não tem mais naipe, mas as cartas seguem desenhadas com ele ([I] em `decisoes.md` 2026-10-31
     (8)). Tirar o desenho é outra tarefa, se ele quiser.
   - **As [I] do plano 2:** o placar da iniciativa na faixa do centro e o motivo na pergunta da ordem; a faixa do fim de rodada

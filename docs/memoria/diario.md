@@ -5,6 +5,24 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-10-31 (8): a marca "Cura passiva" (primeiro ponto do playtest)
+
+- **Pedido do autor** (`decisoes.md` 2026-10-31 (10)): sinalizar a cura passiva enquanto houver 2 K na Guarda. Na mesma mensagem,
+  o dano do Roubo fica fora da iniciativa (nada mudou no código: já era assim).
+- **Commits na `feat/cura-passiva`:** `338f1e8` (o predicado e a marca), mais os de memória.
+- **Decisões técnicas:**
+  - o motor ganhou `defenseHealActive(side, config)`, no padrão do `absoluteAttackArmed`; o `healFromDefense` passou a usá-lo.
+    É refatoração: as partidas de referência e o digest da regra não mudaram;
+  - a marca entra na lista de marcas de estado do campo (`Zones`, em `PlayerField.tsx`), nos dois lados, com o fundo de papel (o
+    ouro fica para os Absolutos); sem o multiplicador dos Q, que ao lado da contagem da Guarda seria lido como o número de K;
+  - o item do resumo das regras virou "Cura passiva (pela Defesa)", para o nome da marca ter onde ser achado.
+- **Conferido:** `pnpm check`, `pnpm e2e` (48 passaram) e a mesa no navegador (um replay do simulador, semente `cura-265`
+  turtle × greedy, passo 499: Defesa Absoluta, Cura passiva e Ressurreição juntas), no PC (1536 × 695) e no celular (375).
+- **Armadilha:** a fixture do E2E de layout (`especiais.json`, passo 99) tem 1 K na Guarda, então a marca nova não muda aquele
+  teste; se a fixture for regravada, confira.
+
+---
+
 ## 2026-10-31 (7): bloco E3 + F2 + F3, as respostas do autor e o plano 2 (interface, iniciativa clara, tutorial)
 
 - **Respostas do autor** (`decisoes.md` 2026-10-31 (8)): BURN com limite 4; o Roubo sem naipe (todo roubo dá dano e cura; o K
