@@ -50,6 +50,17 @@ export function heal(s: GameState, p: PlayerState, amount: number, source: 'STEA
   ev.push({ type: 'Healed', player: p.id, amount: healed, source, card });
 }
 
+/**
+ * Cura passiva (E3): com `defenseHealGuard` K ou mais na Guarda, cada numérica da própria Fileira de Defesa que vai ao cemitério
+ * cura valor × (1 + nº de Q). Conferida quando a carta chega ao cemitério, depois dos K que o mesmo golpe quebrou ([I]). A
+ * Devastação não chama: as cartas destruídas por ela não curam.
+ */
+export function healFromDefense(s: GameState, p: PlayerState, cards: NumCard[], ev: GameEvent[]): void {
+  const guard = s.config.defenseHealGuard;
+  if (guard === undefined || p.guard.length < guard) return;
+  for (const card of cards) heal(s, p, card.value * (1 + p.defenseBuffs.length), 'DEFENSE', card, ev);
+}
+
 function loseHp(s: GameState, victim: PlayerState, amount: number, dealer: PlayerState, ev: GameEvent[]): void {
   if (amount <= 0) return;
   victim.hp -= amount;
@@ -111,6 +122,7 @@ export function resolveAttack(s: GameState, attackerId: PlayerId, ev: GameEvent[
     const removedDef = defender.defenseRow.splice(0, 1);
     toGraveyard(s, removedDef);
     ev.push({ type: 'CardsRemovedFromRow', player: defender.id, row: 'DEF', cards: removedDef });
+    healFromDefense(s, defender, removedDef, ev);
   }
   if (absolute) {
     const consumed = attacker.attackBuffs.splice(0, 1);

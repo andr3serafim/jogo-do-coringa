@@ -44,6 +44,11 @@ export interface RulesConfig {
   deck: { numericCopies: number; faceCopies: number; aceCopies?: number };
   initiativeChoice: boolean;
   wildJokers: boolean;
+  /**
+   * Cura passiva (E3 do sub-projeto 5): com pelo menos este número de K na Guarda, cada numérica da própria Fileira de Defesa que
+   * vai ao cemitério cura valor × (1 + nº de Q). Sem o campo (replays de antes da E3, ou a medição sem cura), nada cura.
+   */
+  defenseHealGuard?: number;
 }
 
 export type Destination = 'ATK' | 'DEF' | 'REPLACE_LAST_ATK' | 'REPLACE_LAST_DEF' | 'DISCARD';

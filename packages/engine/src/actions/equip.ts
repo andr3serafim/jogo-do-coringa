@@ -1,3 +1,4 @@
+import { healFromDefense } from '../combat.ts';
 import { fail } from '../errors.ts';
 import { startRound } from '../flow.ts';
 import { reevaluateQuads } from '../quads.ts';
@@ -91,6 +92,8 @@ function resolveEquip(s: GameState, ev: GameEvent[]): void {
   for (const p of s.players) {
     const destinations = p.submittedDestinations ?? [];
     const placements: Placement[] = [];
+    // As que saem da própria Defesa pela troca vão ao cemitério: curam depois de as cartas entrarem (E3, [I]).
+    const leftDefense: NumCard[] = [];
     p.pending.forEach((card, i) => {
       const destination = destinations[i];
       let replaced: NumCard | undefined;
@@ -108,6 +111,7 @@ function resolveEquip(s: GameState, ev: GameEvent[]): void {
         case 'REPLACE_LAST_DEF':
           replaced = p.defenseRow.pop();
           p.defenseRow.push(card);
+          if (replaced) leftDefense.push(replaced);
           break;
         case 'DISCARD':
           toGraveyard(s, [card]);
@@ -119,6 +123,7 @@ function resolveEquip(s: GameState, ev: GameEvent[]): void {
     p.pending = [];
     p.submittedDestinations = null;
     ev.push({ type: 'CardsPlaced', player: p.id, placements });
+    healFromDefense(s, p, leftDefense, ev);
   }
   for (const p of s.players) reevaluateQuads(s, p, ev);
   startRound(s, ev);

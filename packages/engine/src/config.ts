@@ -10,6 +10,7 @@ export const DEFAULT_CONFIG: RulesConfig = {
   deck: { numericCopies: 8, faceCopies: 6, aceCopies: 8 },
   initiativeChoice: true,
   wildJokers: true,
+  defenseHealGuard: 2,
 };
 
 export type ConfigOverrides = Partial<Omit<RulesConfig, 'deck'>> & {
@@ -44,6 +45,7 @@ export function validateConfig(c: RulesConfig): ConfigError | null {
     [isInt(c.deck.numericCopies, 1, 8), 'deck.numericCopies deve ser um inteiro entre 1 e 8'],
     [isInt(c.deck.faceCopies, 0, 8), 'deck.faceCopies deve ser um inteiro entre 0 e 8'],
     [c.deck.aceCopies === undefined || isInt(c.deck.aceCopies, 0, 8), 'deck.aceCopies deve ser um inteiro entre 0 e 8'],
+    [c.defenseHealGuard === undefined || isInt(c.defenseHealGuard, 1), 'defenseHealGuard deve ser um inteiro ≥ 1'],
   ];
   for (const [ok, message] of checks) {
     if (!ok) return { code: 'INVALID_CONFIG', message };

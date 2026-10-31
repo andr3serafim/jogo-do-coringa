@@ -8,7 +8,7 @@
   "rounds": 23,
   "finalHp": {
     "p1": 314,
-    "p2": -111
+    "p2": -82
   },
   "events": {
     "AbsoluteAttack": 1,
@@ -23,7 +23,7 @@
     "GameOver": 1,
     "GuardBroken": 5,
     "GuardPlayed": 6,
-    "Healed": 5,
+    "Healed": 8,
     "InitiativeChanged": 3,
     "OrderChosen": 11,
     "ReactionWindowClosed": 28,

@@ -7,7 +7,7 @@
   },
   "rounds": 43,
   "finalHp": {
-    "p1": -30,
+    "p1": -22,
     "p2": 48
   },
   "events": {
@@ -24,7 +24,7 @@
     "GameOver": 1,
     "GuardBroken": 10,
     "GuardPlayed": 9,
-    "Healed": 2,
+    "Healed": 3,
     "InitiativeChanged": 8,
     "OrderChosen": 21,
     "QuadBroken": 1,

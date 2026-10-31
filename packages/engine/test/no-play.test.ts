@@ -87,7 +87,7 @@ describe('noPlayReason: por que a carta da mão não tem jogada (B2)', () => {
 
   it('propriedade: sem motivo ⇔ o motor aceita alguma jogada de uma carta só com ela (independente de `legalActions`)', () => {
     // Os alvos são as cartas dos dois campos (e do Reflect): o motor é quem recusa as do próprio campo.
-    const candidates = (s: GameState, card: SpecialCard): Action[] => {
+    const candidates = (s: GameState, who: string, card: SpecialCard): Action[] => {
       const targets = s.players
         .flatMap((p) => [...p.attackBuffs, ...p.defenseBuffs, ...p.guard, ...(p.reflect ? [p.reflect.k, p.reflect.j, p.reflect.q] : [])])
         .map((c) => c.id);
@@ -97,13 +97,12 @@ describe('noPlayReason: por que a carta da mão não tem jogada (B2)', () => {
         { type: 'PLAY_K', cardIds: [card.id] },
         ...targets.map((targetId): Action => ({ type: 'TRAP', cardId: card.id, targetId })),
         ...targets.map((targetId): Action => ({ type: 'SACRIFICE', cardId: card.id, targetId })),
-        // O Roubo (E3): as numéricas dos dois campos, para as duas fileiras do ladrão.
+        // O Roubo (E3): as numéricas do oponente (as próprias o motor recusa sempre), para uma fileira só: o destino não muda se o
+        // motor aceita, e cada candidato custa uma cópia do estado.
         ...s.players
+          .filter((p) => p.id !== who)
           .flatMap((p) => [...p.attackRow, ...p.defenseRow])
-          .flatMap((c): Action[] => [
-            { type: 'STEAL', cardId: card.id, targetId: c.id, row: 'ATK' },
-            { type: 'STEAL', cardId: card.id, targetId: c.id, row: 'DEF' },
-          ]),
+          .map((c): Action => ({ type: 'STEAL', cardId: card.id, targetId: c.id, row: 'ATK' })),
       ];
     };
     let checked = 0;
@@ -117,7 +116,7 @@ describe('noPlayReason: por que a carta da mão não tem jogada (B2)', () => {
             for (const who of before.players.map((p) => p.id)) {
               const view = viewFor(before, who);
               for (const card of view.self.hand) {
-                const accepted = candidates(before, card).some((action) => applyAction(before, who, action).ok);
+                const accepted = candidates(before, who, card).some((action) => applyAction(before, who, action).ok);
                 expect(noPlayReason(view, card) === null).toBe(accepted);
                 checked += 1;
               }

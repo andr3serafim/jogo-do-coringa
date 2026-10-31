@@ -15,6 +15,7 @@ describe('config', () => {
       deck: { numericCopies: 8, faceCopies: 6, aceCopies: 8 },
       initiativeChoice: true,
       wildJokers: true,
+      defenseHealGuard: 2,
     });
   });
 
@@ -53,5 +54,14 @@ describe('config', () => {
       expect(validateConfig(config as unknown as RulesConfig)?.code).toBe('INVALID_CONFIG');
     }
     expect(validateConfig(withoutDeck as unknown as RulesConfig)?.message).toContain('deck');
+  });
+});
+
+describe('cura passiva na config (E3)', () => {
+  it('defenseHealGuard: sem o campo vale (nada cura); com ele, inteiro ≥ 1', () => {
+    expect(validateConfig(makeConfig({ defenseHealGuard: undefined }))).toBeNull();
+    expect(validateConfig(makeConfig({ defenseHealGuard: 1 }))).toBeNull();
+    expect(validateConfig(makeConfig({ defenseHealGuard: 0 }))?.code).toBe('INVALID_CONFIG');
+    expect(validateConfig(makeConfig({ defenseHealGuard: 1.5 }))?.code).toBe('INVALID_CONFIG');
   });
 });

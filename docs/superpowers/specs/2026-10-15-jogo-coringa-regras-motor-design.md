@@ -121,6 +121,12 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
 - Se o dano líquido for 0, nenhum K é consumido.
 - **Não protege contra Reflect [I]:** quem é refletido tem **todos os K quebrados** e leva o dano refletido inteiro (§1.6, Reflect).
 - Podem ser jogados **vários K por turno** **[M]**; cada jogada de K abre a janela de reação do oponente.
+- **Cura passiva [autor, 2026-10-30; E3 do sub-projeto 5]:** com **2 K ou mais** na Guarda **[I: "2 K" = pelo menos 2]**, cada
+  numérica da **própria Fileira de Defesa** que vai para o cemitério, de qualquer naipe, **cura valor × (1 + nº de Q)**. A vida
+  nunca passa da inicial. Vale para a carta da frente que sai depois de um ataque (também para o dono de um Reflect), para a
+  carta trocada no Equipar (`REPLACE_LAST_DEF`) **[I]** e para a que o ladrão perde na própria Defesa cheia. As cartas
+  destruídas pela Devastação **não** curam. A conta dos K é feita quando a carta chega ao cemitério, depois dos K que o mesmo golpe
+  quebrou **[I]**: com exatamente 2 K e um ataque absorvido, sobra 1 K e a carta não cura.
 
 **A — Armadilha [M]**
 - **Destrói 1 J, Q ou K** do campo do oponente (buff ou guarda) → cemitério.
@@ -387,7 +393,8 @@ RulesConfig {
   deck: { numericCopies: 8, faceCopies: 6, aceCopies: 8 }, // sem aceCopies (replays antigos), os A têm faceCopies
   // regras novas [N] — ligadas por padrão; o simulador compara com elas desligadas
   initiativeChoice: true,
-  wildJokers: true
+  wildJokers: true,
+  defenseHealGuard: 2 // cura passiva (E3): K na Guarda que a ligam; sem o campo (replays antigos), nada cura
 }
 ```
 

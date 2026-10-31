@@ -2,7 +2,7 @@ import { fail } from '../errors.ts';
 import { endTurn, openReaction } from '../flow.ts';
 import { assertDistinct, getPlayer, opponentOf, removeById, takeFromHand, toGraveyard } from '../state.ts';
 import { reevaluateQuads, rowCards, validResurrections } from '../quads.ts';
-import { heal } from '../combat.ts';
+import { heal, healFromDefense } from '../combat.ts';
 import type { GameEvent, GameState, NumCard, PlayerId, PlayerState, ReflectState, RowName, SpecialCard } from '../types.ts';
 
 export function requireMain(s: GameState, playerId: PlayerId): PlayerState {
@@ -167,6 +167,8 @@ export function steal(s: GameState, p: PlayerState, cardId: string, targetId: st
     const displaced = target.splice(target.length - 1, 1);
     toGraveyard(s, displaced);
     ev.push({ type: 'CardsRemovedFromRow', player: p.id, row, cards: displaced });
+    // A carta que o ladrão perde na própria Defesa cura, se ele cumprir a cura passiva.
+    if (row === 'DEF') healFromDefense(s, p, displaced, ev);
   }
   target.push(card);
   reevaluateQuads(s, victim, ev);
