@@ -80,7 +80,7 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
   });
 
   describe('quebra', () => {
-    it.each(['GuardBroken', 'TrapUsed', 'Sacrificed'] as const)('%s', (type) => {
+    it.each(['GuardBroken', 'TrapUsed', 'Sacrificed', 'RowDevastated'] as const)('%s', (type) => {
       expect(cueFor(SAMPLES[type])).toBe('quebra');
     });
 
@@ -109,6 +109,11 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
       expect(cueFor(damage(amount))).toBe(cue);
     });
 
+    it('o dano do Roubo soa como golpe; anulado pelo K, mudo', () => {
+      expect(cueFor({ type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 9, blocked: false })).toBe('golpe-leve');
+      expect(cueFor({ type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 0, blocked: true })).toBeNull();
+    });
+
     it('dano 0 é mudo', () => {
       expect(cueFor(damage(0))).toBeNull();
     });
@@ -124,7 +129,7 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
       expect(cueFor(SAMPLES[type])).toBe('escudo');
     });
 
-    it.each(['AbsoluteAttack', 'Exodia'] as const)('%s → absoluto', (type) => {
+    it.each(['AbsoluteAttack', 'Exodia', 'DevastationCast'] as const)('%s → absoluto', (type) => {
       expect(cueFor(SAMPLES[type])).toBe('absoluto');
     });
   });
@@ -171,10 +176,13 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
       'TurnStarted',
       'ReactionWindowOpened',
       'GameOver',
+      'RowDevastated',
+      'StealDamage',
+      'DevastationCast',
     ]);
     const silent = (Object.keys(SAMPLES) as GameEvent['type'][]).filter((type) => !SOUNDING.has(type));
 
-    it('a lista dos mudos tem os 20 tipos restantes', () => {
+    it('a lista dos mudos tem os 17 tipos restantes', () => {
       expect(silent).toHaveLength(37 - SOUNDING.size);
     });
 

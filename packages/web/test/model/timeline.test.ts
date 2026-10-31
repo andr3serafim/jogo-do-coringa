@@ -68,19 +68,20 @@ const SAMPLES: { event: GameEvent; kind: Beat['kind']; scene?: SceneKind; cards?
   { event: { type: 'ReflectCanceled', player: 'p2', owner: 'p1' }, kind: 'move' },
   {
     event: { type: 'DevastationCast', player: 'p1', target: 'p2', row: 'ATK', k: face('k1'), a: face('a1', 'A'), x: face('j1', 'J') },
-    kind: 'move',
+    kind: 'scene',
+    scene: 'DEVASTATION',
     cards: ['k1', 'a1', 'j1'],
   },
-  { event: { type: 'RowDevastated', player: 'p2', row: 'ATK', cards: [num('n1')], reflected: false }, kind: 'move', cards: ['n1'] },
-  { event: { type: 'DevastationCanceled', player: 'p1', reason: 'REFLECT_CLASH' }, kind: 'move' },
-  { event: { type: 'HandLimitPenalty', player: 'p1', penalty: 'BURN', cards: [face('k1')], fewer: 0 }, kind: 'move', cards: ['k1'] },
+  { event: { type: 'RowDevastated', player: 'p2', row: 'ATK', cards: [num('n1')], reflected: false }, kind: 'banner', cards: ['n1'] },
+  { event: { type: 'DevastationCanceled', player: 'p1', reason: 'REFLECT_CLASH' }, kind: 'banner' },
+  { event: { type: 'HandLimitPenalty', player: 'p1', penalty: 'BURN', cards: [face('k1')], fewer: 0 }, kind: 'banner', cards: ['k1'] },
   {
     event: { type: 'CardStolen', player: 'p1', from: 'p2', card: num('n1'), fromRow: 'ATK', toRow: 'DEF', ace: face('a1', 'A') },
-    kind: 'move',
+    kind: 'banner',
     cards: ['n1', 'a1'],
   },
-  { event: { type: 'StealDamage', player: 'p1', victim: 'p2', value: 7, damage: 7, blocked: false }, kind: 'move' },
-  { event: { type: 'Healed', player: 'p1', amount: 5, source: 'STEAL', card: num('n1') }, kind: 'move' },
+  { event: { type: 'StealDamage', player: 'p1', victim: 'p2', value: 7, damage: 7, blocked: false }, kind: 'damage' },
+  { event: { type: 'Healed', player: 'p1', amount: 5, source: 'STEAL', card: num('n1') }, kind: 'damage' },
   {
     event: { type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 4 },
     kind: 'scene',
@@ -183,7 +184,23 @@ describe('mapeamento evento → batida (spec §4.2)', () => {
 
 describe('as cenas raras (U3 do sub-projeto 5)', () => {
   it('o Ataque e a Defesa Absoluta duram 3 s (o autor pediu em 2026-10-30, eram 2,6 s); a Exódia, 4,2 s', () => {
-    expect(RARE_SCENE_MS).toEqual({ EXODIA: 4_200, ABSOLUTE_ATTACK: 3_000, ABSOLUTE_DEFENSE: 3_000 });
+    expect(RARE_SCENE_MS).toEqual({ EXODIA: 4_200, ABSOLUTE_ATTACK: 3_000, ABSOLUTE_DEFENSE: 3_000, DEVASTATION: 3_000 });
+  });
+
+  it('a Devastação (F3: "cinematográfica, à altura") é rara como os Absolutos: 3 s, o carimbo e a inversão a 0,9 s', () => {
+    expect(SCENE_INVERT_LEAD_MS.DEVASTATION).toBe(900);
+    const cast: GameEvent = { type: 'DevastationCast', player: 'p1', target: 'p2', row: 'DEF', k: face('k1'), a: face('a1', 'A'), x: face('q1', 'Q') };
+    const [live] = buildTimeline([cast], { ...LIVE, decisionPending: true });
+    expect(live!.durationMs).toBe(3_000);
+    expect(live!.invert).toEqual({ atMs: 900, holdMs: 600 });
+    const [reduced] = buildTimeline([cast], { ...LIVE, reducedMotion: true });
+    expect(reduced!.invert).toBeNull();
+  });
+
+  it('a cura que não curou nada (a vida já cheia) passa quieta', () => {
+    const [beat] = buildTimeline([{ type: 'Healed', player: 'p1', amount: 0, source: 'STEAL', card: num('n1') }], LIVE);
+    expect(beat!.kind).toBe('quiet');
+    expect(beat!.durationMs).toBe(0);
   });
 
   it('nos Absolutos, o título e a inversão vêm a 0,9 s, depois do leque dos quatro J ou Q; a cena segura até o fim', () => {

@@ -14,7 +14,7 @@ export const BEAT_MS = { move: 300, damage: 600, banner: 400, scene: 1_500 } as 
  * caber nele; elas não). São raras, a Exódia acaba a partida, e o toque ou o Esc pulam na hora. Os Absolutos passaram de 2,6 s
  * para 3 s a pedido do autor (2026-10-30).
  */
-export const RARE_SCENE_MS = { EXODIA: 4_200, ABSOLUTE_ATTACK: 3_000, ABSOLUTE_DEFENSE: 3_000 } as const;
+export const RARE_SCENE_MS = { EXODIA: 4_200, ABSOLUTE_ATTACK: 3_000, ABSOLUTE_DEFENSE: 3_000, DEVASTATION: 3_000 } as const;
 /**
  * A faixa da decisão da iniciativa segura a leitura (autor, 2026-10-31: "a iniciativa muda pro adversário, eu também não vejo o
  * momento"): fica fora do teto de decisão, como as cenas raras, porque o Equipar que vem logo depois do fim da rodada de Ataque a
@@ -35,7 +35,7 @@ export const INVERT_MIN_HOLD_MS = 300;
  */
 export const INVERT_COOLDOWN_MS = 2_000;
 
-export type SceneKind = 'EXODIA' | 'ABSOLUTE_ATTACK' | 'ABSOLUTE_DEFENSE' | 'REFLECT_PLAYED' | 'REFLECT_TRIGGERED';
+export type SceneKind = 'EXODIA' | 'ABSOLUTE_ATTACK' | 'ABSOLUTE_DEFENSE' | 'DEVASTATION' | 'REFLECT_PLAYED' | 'REFLECT_TRIGGERED';
 
 /**
  * Onde, dentro da cena, a inversão acontece: na comum, logo no começo; nas raras, quando o título carimba (os J ou os Q já em
@@ -46,6 +46,7 @@ export const SCENE_INVERT_LEAD_MS: Record<SceneKind, number> = {
   REFLECT_TRIGGERED: 150,
   ABSOLUTE_ATTACK: 900,
   ABSOLUTE_DEFENSE: 900,
+  DEVASTATION: 900,
   EXODIA: 1_400,
 };
 const SCENE_INVERT_HOLD_MS = 600;
@@ -80,6 +81,8 @@ interface Classified {
 
 const move = (cards: string[] = []): Classified => ({ kind: 'move', cards, scene: null });
 const plain = (kind: 'banner' | 'damage' | 'quiet'): Classified => ({ kind, cards: [], scene: null });
+/** Faixa que também move cartas (o Roubo, a queimada, a fileira devastada). */
+const bannerMoving = (cards: string[]): Classified => ({ kind: 'banner', cards, scene: null });
 const scene = (kindOfScene: SceneKind, cards: string[] = []): Classified => ({
   kind: 'scene',
   cards,
@@ -130,16 +133,20 @@ function classify(event: GameEvent): Classified {
     case 'Sacrificed':
       return move([event.card.id, event.target.id]);
     case 'RowDevastated':
-      return move(event.cards.map((c) => c.id));
+      return bannerMoving(event.cards.map((c) => c.id));
     case 'CardStolen':
-      return move([event.card.id, event.ace.id]);
+      return bannerMoving([event.card.id, event.ace.id]);
     case 'HandLimitPenalty':
-      return move(event.cards.map((c) => c.id));
+      return bannerMoving(event.cards.map((c) => c.id));
     case 'DevastationCast':
-      return move([event.k.id, event.a.id, event.x.id]);
-    case 'StealDamage':
-    case 'Healed':
+      return scene('DEVASTATION', [event.k.id, event.a.id, event.x.id]);
     case 'DevastationCanceled':
+      return plain('banner');
+    case 'StealDamage':
+      return plain('damage');
+    case 'Healed':
+      // A cura que não curou nada (a vida já cheia) não tem número: passa quieta.
+      return plain(event.amount > 0 ? 'damage' : 'quiet');
     case 'DeckReshuffled':
     case 'ReflectCanceled':
     case 'AttackDeclared':

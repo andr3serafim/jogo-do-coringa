@@ -5,19 +5,21 @@ import * as m from 'motion/react-m';
 
 const times = [0, 0.15, 0.75, 1];
 
-/** O número do dano sobe no Coringa que apanhou. */
-export function DamageNumber({ amount, ms, reduced }: { amount: number; ms: number; reduced: boolean }) {
+/** O número do dano sobe no Coringa que apanhou; com `heal`, o da cura ("+N", no ouro) sobe no Coringa que curou. */
+export function DamageNumber({ amount, ms, reduced, heal = false }: { amount: number; ms: number; reduced: boolean; heal?: boolean }) {
   return (
     <m.span
       aria-hidden="true"
-      data-dano
+      data-dano={heal ? undefined : ''}
+      data-cura={heal ? '' : undefined}
       initial={{ opacity: 0 }}
       animate={reduced ? { opacity: [0, 1, 1, 0] } : { opacity: [0, 1, 1, 0], y: [0, -10, -22, -28] }}
       // O número sobe desacelerando (U4): rápido no começo, assentando no alto.
       transition={{ duration: ms / 1000, times, ease: 'easeOut' }}
-      className="pointer-events-none absolute -top-5 left-0 z-10 border-2 border-tinta bg-vermelho px-1.5 font-texto text-xl font-extrabold leading-tight tabular-nums text-papel pc:-top-7 pc:text-3xl"
+      className={`pointer-events-none absolute -top-5 left-0 z-10 border-2 border-tinta px-1.5 font-texto text-xl font-extrabold leading-tight tabular-nums pc:-top-7 pc:text-3xl ${heal ? 'bg-ouro text-tinta' : 'bg-vermelho text-papel'}`}
     >
-      −{amount}
+      {heal ? '+' : '−'}
+      {amount}
     </m.span>
   );
 }

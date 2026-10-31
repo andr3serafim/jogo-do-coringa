@@ -146,7 +146,7 @@ function Info({ side, view, player, name, away, equip, zone, tool }: InfoProps) 
         <span aria-hidden="true" className="font-texto text-[13px] font-semibold tabular-nums pc:text-lg">
           /{max}
         </span>
-        {damage ? <DamageNumber amount={damage.amount} ms={anim.beatMs} reduced={anim.reduced} /> : null}
+        {damage ? <DamageNumber amount={damage.amount} heal={damage.heal === true} ms={anim.beatMs} reduced={anim.reduced} /> : null}
         {marked ? (
           <span className="absolute -bottom-3 left-0">
             <NovoChip />

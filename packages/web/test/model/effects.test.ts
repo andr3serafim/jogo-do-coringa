@@ -90,6 +90,16 @@ describe('damageBeatIndex: onde a vida e os totais contam até o valor novo', ()
     expect(damageBeatIndex(beatsOf({ type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 12 }))).toBe(0);
   });
 
+  it('o dano e a cura do Roubo (E3) também contam: a vida dos dois lados conta na primeira batida deles', () => {
+    const beats = beatsOf(
+      { type: 'CardStolen', player: 'p1', from: 'p2', card: num('n1', 9), fromRow: 'ATK', toRow: 'DEF', ace: face('a1', 'A') },
+      { type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 9, blocked: false },
+      { type: 'Healed', player: 'p1', amount: 9, source: 'STEAL', card: num('n1', 9) },
+    );
+    expect(damageBeatIndex(beats)).toBe(1);
+    expect(damageBeatIndex(beatsOf({ type: 'Healed', player: 'p1', amount: 4, source: 'DEFENSE', card: num('n2') }))).toBe(0);
+  });
+
   it('sem dano, é -1', () => {
     expect(damageBeatIndex(beatsOf({ type: 'TurnStarted', player: 'p1' }))).toBe(-1);
     expect(damageBeatIndex([])).toBe(-1);
@@ -168,6 +178,16 @@ describe('effectsOf: o efeito de cada evento (spec §4.2)', () => {
     const effects = fx({ type: 'DamageDealt', attacker: 'p1', defender: 'p2', attack: 30, defense: 10, damage: 20 });
     expect(effects.rows).toEqual(new Set([rowKey('p1', 'ATK'), rowKey('p2', 'DEF')]));
     expect(effects.damage).toEqual({ target: 'p2', amount: 20 });
+  });
+
+  it('o dano do Roubo sobe no Coringa de quem foi roubado; anulado pelo K, nada sobe', () => {
+    expect(fx({ type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 9, blocked: false }).damage).toEqual({ target: 'p2', amount: 9 });
+    expect(fx({ type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 0, blocked: true }).damage).toBeNull();
+  });
+
+  it('a cura (do Roubo ou da Defesa) sobe "+N" no Coringa de quem curou', () => {
+    expect(fx({ type: 'Healed', player: 'p1', amount: 9, source: 'STEAL', card: num('n1', 9) }).damage).toEqual({ target: 'p1', amount: 9, heal: true });
+    expect(fx({ type: 'Healed', player: 'p2', amount: 12, source: 'DEFENSE', card: num('n2', 4) }).damage).toEqual({ target: 'p2', amount: 12, heal: true });
   });
 
   it('dano zero não sobe número nenhum (o ataque foi barrado)', () => {
@@ -303,6 +323,31 @@ describe('bannerText: a faixa de cada evento', () => {
     ).toBe('Você respondeu com um Reflect!');
   });
 
+  it('o Roubo, a queimada da BURN e a Devastação viram faixa', () => {
+    const nine = num('n1', 9);
+    expect(bannerText({ type: 'CardStolen', player: 'p2', from: 'p1', card: nine, fromRow: 'ATK', toRow: 'DEF', ace: face('a1', 'A') }, names)).toBe(
+      'Duda roubou o 9♥ do seu Ataque',
+    );
+    expect(bannerText({ type: 'CardStolen', player: 'p1', from: 'p2', card: nine, fromRow: 'DEF', toRow: 'ATK', ace: face('a1', 'A') }, names)).toBe(
+      'Você roubou o 9♥ da Defesa de Duda',
+    );
+    expect(bannerText({ type: 'HandLimitPenalty', player: 'p1', penalty: 'BURN', cards: [face('k1')], fewer: 0 }, names)).toBe(
+      'Sua mão já tem 4 especiais: K♦ foi para o cemitério',
+    );
+    expect(bannerText({ type: 'HandLimitPenalty', player: 'p2', penalty: 'BURN', cards: [face('k1'), face('q1', 'Q')], fewer: 0 }, names)).toBe(
+      'A mão de Duda já tem 4 especiais: K♦ e Q♦ foram para o cemitério',
+    );
+    expect(bannerText({ type: 'RowDevastated', player: 'p2', row: 'ATK', cards: [nine], reflected: false }, names)).toBe(
+      'O Ataque de Duda foi devastado',
+    );
+    expect(bannerText({ type: 'RowDevastated', player: 'p1', row: 'DEF', cards: [nine], reflected: true }, names)).toBe(
+      'A Devastação voltou: a sua Defesa foi devastada',
+    );
+    expect(bannerText({ type: 'DevastationCanceled', player: 'p1', reason: 'REFLECT_CLASH' }, names)).toBe(
+      'Os Reflects se anularam: a Devastação não aconteceu',
+    );
+  });
+
   it('um evento que não vira faixa devolve null', () => {
     expect(bannerText({ type: 'EquipSubmitted', player: 'p1' }, names)).toBeNull();
     expect(bannerText({ type: 'AttackDeclared', player: 'p1' }, names)).toBeNull();
@@ -325,6 +370,20 @@ describe('sceneText: o título e a linha de baixo de cada cena', () => {
     expect(sceneText(beat({ type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 5 }), names).title).toBe(
       'REFLECT',
     );
+  });
+
+  it('a cena da Devastação: o título e quem devasta qual fileira', () => {
+    const cast = (player: 'p1' | 'p2', row: 'ATK' | 'DEF'): GameEvent => ({
+      type: 'DevastationCast',
+      player,
+      target: player === 'p1' ? 'p2' : 'p1',
+      row,
+      k: face('k1'),
+      a: face('a1', 'A'),
+      x: face('x1', row === 'ATK' ? 'J' : 'Q'),
+    });
+    expect(sceneText(beat(cast('p2', 'ATK')), names)).toEqual({ title: 'DEVASTAÇÃO!', detail: 'Duda devasta o seu Ataque' });
+    expect(sceneText(beat(cast('p1', 'DEF')), names)).toEqual({ title: 'DEVASTAÇÃO!', detail: 'Você devasta a Defesa de Duda' });
   });
 
   it('a linha de baixo diz de quem é, com "Você" ou o apelido', () => {

@@ -11,7 +11,7 @@ import { FLASH_WINDOW_MS } from '../../src/model/flash.ts';
 import { bannerReadMs, readingMs } from '../../src/model/reading.ts';
 import { Session } from '../../src/model/session.ts';
 import { DEFAULT_PREFS } from '../../src/model/storage.ts';
-import { INVERT_COOLDOWN_MS, INVERT_MIN_HOLD_MS, RARE_SCENE_MS } from '../../src/model/timeline.ts';
+import { BEAT_MS, INVERT_COOLDOWN_MS, INVERT_MIN_HOLD_MS, RARE_SCENE_MS } from '../../src/model/timeline.ts';
 import { useBoardBusy } from '../../src/ui/anim/context.ts';
 import { Stage } from '../../src/ui/anim/Stage.tsx';
 import { deferredAck, scenarioAt, type ViewSpec } from '../fixtures.ts';
@@ -131,6 +131,20 @@ describe('cenas raras (U3): a figura, o título que carimba e os raios', () => {
     emit(m, THEIRS, [{ type: 'AbsoluteDefenseStarted', player: 'p2' }]);
     expect(figure(m.container)).toHaveAttribute('data-figura', 'wall');
     expect(figureCards(m.container).every((card) => card.getAttribute('data-card-id')!.startsWith('cena-Q-'))).toBe(true);
+  });
+
+  it('a Devastação (F3): o K, o A e o J da jogada caem em trio, com os raios, e diz quem devasta o quê', () => {
+    const m = mount(THEIRS);
+    const k = { id: 'dk', kind: 'K', suit: 'copas' } as const;
+    const a = { id: 'da', kind: 'A', suit: 'paus' } as const;
+    const j = { id: 'dj', kind: 'J', suit: 'ouros' } as const;
+    emit(m, THEIRS, [{ type: 'DevastationCast', player: 'p2', target: 'p1', row: 'ATK', k, a, x: j }]);
+    expect(scene(m.container)).toHaveAttribute('data-cena', 'DEVASTATION');
+    expect(figure(m.container)).toHaveAttribute('data-figura', 'trio');
+    expect(figureCards(m.container).map((card) => card.getAttribute('data-card-id'))).toEqual(['cena-dk', 'cena-da', 'cena-dj']);
+    expect(m.container.querySelector('[data-raios]')).not.toBeNull();
+    expect(scene(m.container)).toHaveTextContent('DEVASTAÇÃO!');
+    expect(scene(m.container)).toHaveTextContent('Duda devasta o seu Ataque');
   });
 
   it('a cena comum (o Reflect) não tem figura nem raios', () => {
@@ -680,6 +694,22 @@ describe('efeitos da batida (spec §4.2)', () => {
     expect(scene(m.container)).toHaveTextContent('O ataque voltou: 37 de dano em você');
     advance(0);
     expect(m.container.querySelector('[data-dano]')).toHaveTextContent('−37');
+  });
+
+  it('o Roubo: o dano sobe no Coringa de quem foi roubado e a cura, "+N" no ouro, no de quem roubou', () => {
+    const m = mount(MINE);
+    const nine = { id: 'n-9', kind: 'NUM', value: 9, suit: 'copas' } as const;
+    emit(m, MINE, [
+      { type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 9, blocked: false },
+      { type: 'Healed', player: 'p1', amount: 9, source: 'STEAL', card: nine },
+    ]);
+    advance(0);
+    expect(m.container.querySelector('[data-dano]')).toHaveTextContent('−9');
+    advance(BEAT_MS.damage);
+    const heal = m.container.querySelector('[data-cura]');
+    expect(heal).toHaveTextContent('+9');
+    expect(heal!.className).toContain('bg-ouro');
+    expect(heal!.className).toContain('tabular-nums');
   });
 
   it('InitiativeDecided: a marca troca de lado (a view já é a nova)', () => {

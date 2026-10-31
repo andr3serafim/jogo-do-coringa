@@ -47,11 +47,14 @@ export function cueOf(beat: Beat, me: PlayerId): Cue | null {
     case 'GuardBroken':
     case 'TrapUsed':
     case 'Sacrificed':
+    case 'RowDevastated':
       return 'quebra';
     case 'CardsRemovedFromRow':
       // Só a defesa que cai é uma quebra; a fileira de ataque é gasta no golpe, que já tem o som dele.
       return event.row === 'DEF' ? 'quebra' : null;
     case 'DamageDealt':
+      return strikeCue(event.damage);
+    case 'StealDamage':
       return strikeCue(event.damage);
     case 'ReflectPlayed':
     case 'ReflectTriggered':
@@ -59,6 +62,7 @@ export function cueOf(beat: Beat, me: PlayerId): Cue | null {
       return 'escudo';
     case 'AbsoluteAttack':
     case 'Exodia':
+    case 'DevastationCast':
       return 'absoluto';
     case 'TurnStarted':
       return event.player === me ? 'vez' : null;

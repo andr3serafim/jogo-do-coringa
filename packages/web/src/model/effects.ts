@@ -1,7 +1,7 @@
 // O que cada batida mostra (spec §4.2): efeitos nas cartas e nas fileiras, o número do dano, o texto das faixas e das
 // cenas, e o atraso das transições de layout. Puro: sem React nem DOM. Quem desenha é a interface (`ui/anim`).
 import type { GameEvent, PlayerId, PlayerView, RowName } from '@coringa/engine';
-import { eventText, type Names } from '@coringa/sim/text';
+import { cardText, eventText, type Names } from '@coringa/sim/text';
 import { SCENE_TITLE } from './copy.ts';
 import type { Beat } from './timeline.ts';
 
@@ -18,8 +18,8 @@ export interface BeatEffects {
   cards: ReadonlyMap<string, CardFx>;
   /** Fileiras acesas (`rowKey`). */
   rows: ReadonlySet<string>;
-  /** O número do dano que sobe no Coringa de `target`. */
-  damage: { target: PlayerId; amount: number } | null;
+  /** O número do dano (ou, com `heal`, o da cura: "+N") que sobe no Coringa de `target`. */
+  damage: { target: PlayerId; amount: number; heal?: true } | null;
   /** O escudo do Reflect de `owner` quebra: a `view` já não o tem, então é só uma sobreposição no Coringa dele. */
   shieldBreak: PlayerId | null;
 }
@@ -46,6 +46,10 @@ function effectsOfEvent(event: GameEvent, view: PlayerView): Partial<BeatEffects
       };
     case 'ReflectTriggered':
       return { damage: event.damage > 0 ? { target: event.attacker, amount: event.damage } : null };
+    case 'StealDamage':
+      return { damage: event.damage > 0 ? { target: event.victim, amount: event.damage } : null };
+    case 'Healed':
+      return { damage: event.amount > 0 ? { target: event.player, amount: event.amount, heal: true } : null };
     case 'GuardBroken':
       return { cards: fxMap(event.cards.map((card) => card.id), 'crack') };
     case 'TrapUsed':
@@ -107,10 +111,27 @@ export function dealsOf(beats: readonly Beat[]): Deals {
   return { cards, backs };
 }
 
-/** A batida em que a vida e os totais contam até o valor novo (o dano, ou o dano devolvido pelo Reflect); -1 sem ela. */
+/**
+ * A batida em que a vida e os totais contam até o valor novo (o dano, o dano devolvido pelo Reflect, o dano ou a cura do Roubo, a
+ * cura pela Defesa); -1 sem ela.
+ */
 export function damageBeatIndex(beats: readonly Beat[]): number {
-  return beats.findIndex((beat) => beat.event.type === 'DamageDealt' || beat.event.type === 'ReflectTriggered');
+  const counts = new Set<GameEvent['type']>(['DamageDealt', 'ReflectTriggered', 'StealDamage', 'Healed']);
+  return beats.findIndex((beat) => counts.has(beat.event.type) && beat.durationMs > 0);
 }
+
+/** A fileira com o dono: "o seu Ataque", "a Defesa de Duda"; com `from`, "do seu Ataque", "da Defesa de Duda". */
+function rowText(row: RowName, owner: PlayerId, names: Names, from = false): string {
+  const attack = row === 'ATK';
+  const lead = from ? (attack ? 'do' : 'da') : attack ? 'o' : 'a';
+  const name = attack ? 'Ataque' : 'Defesa';
+  return owner === names.me ? `${lead} ${attack ? 'seu' : 'sua'} ${name}` : `${lead} ${name} de ${names.of(owner)}`;
+}
+
+const capitalized = (text: string): string => text.charAt(0).toUpperCase() + text.slice(1);
+
+const listText = (items: string[]): string =>
+  items.length <= 1 ? (items[0] ?? '') : `${items.slice(0, -1).join(', ')} e ${items.at(-1)}`;
 
 /**
  * A faixa de um evento (spec §4.2), ou `null` se o evento não tem faixa. As cenas (Exódia, Absolutos, Reflect) também têm
@@ -126,6 +147,22 @@ export function bannerText(event: GameEvent, names: Names): string | null {
       return event.responder === names.me ? 'Você pode reagir' : `${names.of(event.responder)} pode reagir`;
     case 'DeckReshuffled':
       return 'O cemitério virou o monte';
+    case 'CardStolen':
+      return `${names.of(event.player)} roubou o ${cardText(event.card)} ${rowText(event.fromRow, event.from, names, true)}`;
+    case 'HandLimitPenalty': {
+      if (event.penalty !== 'BURN') return eventText(event, names);
+      const cards = event.cards.map(cardText);
+      const hand = event.player === names.me ? 'Sua mão' : `A mão de ${names.of(event.player)}`;
+      return `${hand} já tem 4 especiais: ${listText(cards)} ${cards.length === 1 ? 'foi' : 'foram'} para o cemitério`;
+    }
+    case 'RowDevastated': {
+      const done = `${rowText(event.row, event.player, names)} foi ${event.row === 'ATK' ? 'devastado' : 'devastada'}`;
+      return event.reflected ? `A Devastação voltou: ${done}` : capitalized(done);
+    }
+    case 'DevastationCanceled':
+      return 'Os Reflects se anularam: a Devastação não aconteceu';
+    case 'DevastationCast':
+      return `${SCENE_TITLE.DEVASTATION.replace('!', '')} de ${names.of(event.player)}!`;
     case 'OrderChosen':
     case 'InitiativeDecided':
     case 'QuadFormed':
@@ -185,6 +222,8 @@ export function sceneText(beat: Beat, names: Names): { title: string; detail: st
       const target = event.attacker === names.me ? 'você' : names.of(event.attacker);
       return { title, detail: `O ataque voltou: ${event.damage} de dano em ${target}` };
     }
+    case 'DevastationCast':
+      return { title, detail: `${names.of(event.player)} devasta ${rowText(event.row, event.target, names)}` };
     default:
       return { title, detail: '' };
   }
