@@ -15,7 +15,9 @@ import { createRng } from '@coringa/sim/rng';
 import { describe, expect, it } from 'vitest';
 import {
   attachReplay,
+  clearPastGames,
   DEDUPE_WINDOW_MS,
+  deletePastGame,
   findPastGame,
   loadPastGames,
   MAX_PAST_GAMES,
@@ -104,7 +106,8 @@ const rawGame = (id: string): Record<string, unknown> => ({ id, ...entry() });
  */
 function refusingStorage() {
   const disk = new Map<string, string>();
-  const control = { on: false };
+  /** `on`: recusa o `setItem` da lista; `remove`: recusa o `removeItem` dela. */
+  const control = { on: false, remove: false };
   const raw: Storage = {
     get length() {
       return disk.size;
@@ -112,7 +115,10 @@ function refusingStorage() {
     clear: () => disk.clear(),
     key: (index) => [...disk.keys()][index] ?? null,
     getItem: (key) => disk.get(key) ?? null,
-    removeItem: (key) => void disk.delete(key),
+    removeItem(key) {
+      if (control.remove && key === PAST_GAMES_KEY) throw new DOMException('bloqueado', 'SecurityError');
+      disk.delete(key);
+    },
     setItem(key, value) {
       if (control.on && key === PAST_GAMES_KEY) throw new DOMException('cheio', 'QuotaExceededError');
       disk.set(key, value);
@@ -954,5 +960,148 @@ describe('attachReplay', () => {
     expect(hasReplay(onDisk)).toEqual([true, true, false, false]);
     // Sem cópia pendente em memória: quem abre o mesmo Storage lê o mesmo.
     expect(store.get(PAST_GAMES_KEY)).toBe(disk.get(PAST_GAMES_KEY));
+  });
+});
+
+describe('apagar', () => {
+  describe('deletePastGame', () => {
+    it('apaga só a partida do id; as outras ficam na ordem, com os replays', () => {
+      const store = fakeStore();
+      const replay = realReplay('apagar-uma');
+      recordPastGame(store, entry({ date: 1, rounds: 1, replay }), 1);
+      recordPastGame(store, entry({ date: 2, rounds: 2 }), 2);
+      const top = recordPastGame(store, entry({ date: 3, rounds: 3, replay }), 3)!;
+
+      expect(deletePastGame(store, top.id)).toBe(true);
+      const left = loadPastGames(store);
+      expect(left.map((game) => game.rounds)).toEqual([2, 1]);
+      expect(hasReplay(left)).toEqual([false, true]);
+      expect(findPastGame(store, top.id)).toBeNull();
+    });
+
+    it('apagar a última que sobrou tira a chave', () => {
+      const store = fakeStore();
+      const only = recordPastGame(store, entry(), 1)!;
+      expect(deletePastGame(store, only.id)).toBe(true);
+      expect(store.get(PAST_GAMES_KEY)).toBeNull();
+      expect(loadPastGames(store)).toEqual([]);
+    });
+
+    it('id desconhecido não grava nada e devolve true', () => {
+      const store = fakeStore();
+      recordPastGame(store, entry(), 1);
+      const before = store.get(PAST_GAMES_KEY);
+      store.sets = 0;
+      expect(deletePastGame(store, 'zzz')).toBe(true);
+      expect(store.sets).toBe(0);
+      expect(store.get(PAST_GAMES_KEY)).toBe(before);
+    });
+
+    it('JSON estragado: devolve true sem lançar e sem gravar', () => {
+      const store = fakeStore();
+      store.set(PAST_GAMES_KEY, '{estragado');
+      store.sets = 0;
+      expect(deletePastGame(store, 'a')).toBe(true);
+      expect(store.sets).toBe(0);
+    });
+
+    it('a entrada com forma errada sai junto na regravação (a leitura já não a mostrava)', () => {
+      const store = fakeStore();
+      put(store, [rawGame('a'), { id: 'ruim' }, rawGame('b')]);
+      expect(deletePastGame(store, 'a')).toBe(true);
+      expect(JSON.parse(store.get(PAST_GAMES_KEY)!)).toEqual([rawGame('b')]);
+    });
+
+    it('com o safeStore e o Storage recusando a escrita: devolve false, e a memória fica igual ao disco', () => {
+      const { raw, disk, control } = refusingStorage();
+      const { store } = safeStore(raw);
+      recordPastGame(store, entry({ date: 1, rounds: 1 }), 1);
+      const top = recordPastGame(store, entry({ date: 2, rounds: 2 }), 2)!;
+      const onDisk = disk.get(PAST_GAMES_KEY);
+
+      control.on = true;
+      expect(deletePastGame(store, top.id)).toBe(false);
+      // O `set` recusado deixou a lista sem a partida na memória do `safeStore`: a leitura tem de voltar ao que o disco tem.
+      expect(disk.get(PAST_GAMES_KEY)).toBe(onDisk);
+      expect(store.get(PAST_GAMES_KEY)).toBe(onDisk);
+      expect(loadPastGames(store).map((game) => game.rounds)).toEqual([2, 1]);
+    });
+
+    it('com o safeStore e o Storage recusando apagar a chave: a última partida continua, e devolve false', () => {
+      const { raw, disk, control } = refusingStorage();
+      const { store } = safeStore(raw);
+      const only = recordPastGame(store, entry(), 1)!;
+      control.remove = true;
+      expect(deletePastGame(store, only.id)).toBe(false);
+      expect(disk.has(PAST_GAMES_KEY)).toBe(true);
+      expect(loadPastGames(store).map((game) => game.id)).toEqual([only.id]);
+    });
+
+    it('um armazenamento que lança na leitura não faz lançar', () => {
+      const store: KeyValueStore = {
+        get: () => {
+          throw new Error('bloqueado');
+        },
+        set: () => undefined,
+        remove: () => undefined,
+      };
+      expect(() => deletePastGame(store, 'a')).not.toThrow();
+    });
+  });
+
+  describe('clearPastGames', () => {
+    it('tira só a lista: o resto do que o jogo guarda fica', () => {
+      const store = fakeStore();
+      store.set('coringa:prefs', '{"sound":false}');
+      store.set('coringa:tutorial', 'done');
+      recordPastGame(store, entry({ replay: realReplay('apagar-tudo') }), 1);
+      recordPastGame(store, entry(), 2);
+
+      expect(clearPastGames(store)).toBe(true);
+      expect(store.get(PAST_GAMES_KEY)).toBeNull();
+      expect(loadPastGames(store)).toEqual([]);
+      expect(store.get('coringa:prefs')).toBe('{"sound":false}');
+      expect(store.get('coringa:tutorial')).toBe('done');
+    });
+
+    it('sem nada guardado devolve true', () => {
+      expect(clearPastGames(fakeStore())).toBe(true);
+    });
+
+    it('com o safeStore e o removeItem recusando: devolve false, e a lista continua igual ao disco', () => {
+      const { raw, disk, control } = refusingStorage();
+      const { store } = safeStore(raw);
+      recordPastGame(store, entry({ date: 1, rounds: 1 }), 1);
+      control.remove = true;
+      expect(clearPastGames(store)).toBe(false);
+      expect(store.get(PAST_GAMES_KEY)).toBe(disk.get(PAST_GAMES_KEY));
+      expect(loadPastGames(store).map((game) => game.rounds)).toEqual([1]);
+    });
+
+    it('com o safeStore, o que estava só na memória (escrita recusada antes) sai também', () => {
+      const { raw, disk, control } = refusingStorage();
+      const { store } = safeStore(raw);
+      control.on = true;
+      // Uma escrita recusada fora da lista das partidas (o `set` direto, sem o `restoreRaw`) deixa a cópia só na memória.
+      expect(() => store.set(PAST_GAMES_KEY, JSON.stringify([rawGame('a')]))).toThrow();
+      expect(loadPastGames(store)).toHaveLength(1);
+      expect(clearPastGames(store)).toBe(true);
+      expect(disk.has(PAST_GAMES_KEY)).toBe(false);
+      expect(loadPastGames(store)).toEqual([]);
+    });
+
+    it('um armazenamento que lança em tudo não faz lançar, e devolve false', () => {
+      const store: KeyValueStore = {
+        get: () => {
+          throw new Error('bloqueado');
+        },
+        set: () => undefined,
+        remove: () => {
+          throw new Error('bloqueado');
+        },
+      };
+      expect(() => clearPastGames(store)).not.toThrow();
+      expect(clearPastGames(store)).toBe(false);
+    });
   });
 });

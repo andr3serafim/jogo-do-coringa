@@ -1,5 +1,5 @@
 // A lista local das partidas terminadas (spec do polimento §4.1): as últimas 20 deste navegador, do treino e online, da mais
-// nova para a mais velha, cada uma com o replay quando houver. Núcleo puro: o `KeyValueStore` e o relógio (`now`) entram por
+// nova para a mais velha, cada uma com o replay quando houver; a tela `/partidas` apaga uma ou todas. Núcleo puro: o `KeyValueStore` e o relógio (`now`) entram por
 // parâmetro, e nada aqui lança. O que está guardado pode estar estragado, ser de outra versão ou não caber, e a tela segue.
 // `TrainingLevel` entra só como tipo: o módulo da sala local carrega os bots e fica fora do JavaScript inicial, onde este mora.
 import type { GameResult, PlayerId, Replay } from '@coringa/engine';
@@ -299,4 +299,53 @@ export function attachReplay(store: KeyValueStore, id: string, replay: Replay): 
   } catch {
     return null;
   }
+}
+
+// --- Apagar (F1 do sub-projeto 5) ---
+
+/**
+ * Tira a chave da lista e confere pela leitura. O `remove` do `safeStore` não lança: tira a cópia em memória e engole a recusa do
+ * `Storage`, e aí a leitura cai no disco, que ainda tem a lista. Só a leitura diz se ela saiu.
+ */
+function removeList(store: KeyValueStore): boolean {
+  try {
+    store.remove(PAST_GAMES_KEY);
+  } catch {
+    // Conferido logo abaixo, pela leitura.
+  }
+  return readRaw(store) === null;
+}
+
+/**
+ * Apaga a partida `id`. Relê o armazenamento e regrava o que sobrou, na mesma ordem (as entradas de forma errada, que a leitura já
+ * não mostrava, saem junto); sem nenhuma, tira a chave. `true` quando a lista lida depois não tem mais a partida (um `id` que não
+ * está lá não grava nada); `false` se o armazenamento recusou, e aí a gravação regrava o texto que leu no começo (`restoreRaw`): a
+ * memória do `safeStore` não fica com uma lista sem a partida que o disco ainda tem, e um recarregar mostra o mesmo que a tela.
+ * Nunca lança.
+ */
+export function deletePastGame(store: KeyValueStore, id: string): boolean {
+  try {
+    const raw = readRaw(store);
+    const games = parseList(raw);
+    const left = games.filter((game) => game.id !== id);
+    if (left.length === games.length) return true;
+    if (left.length === 0) return removeList(store);
+    try {
+      store.set(PAST_GAMES_KEY, JSON.stringify(left));
+      return true;
+    } catch {
+      restoreRaw(store, raw);
+      return false;
+    }
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Apaga a lista inteira: só a chave `coringa:partidas` (o assento das salas, as preferências, o apelido, o nível e o tutorial
+ * ficam). `true` quando a leitura depois não acha mais lista nenhuma. Nunca lança.
+ */
+export function clearPastGames(store: KeyValueStore): boolean {
+  return removeList(store);
 }
