@@ -5,10 +5,12 @@
 
 ## Agora
 
-- **Nada em curso.** A marca "Cura passiva" (pedido do autor de 2026-10-31, `decisoes.md` (10)) está na `main`
-  (fast-forward da `feat/cura-passiva`, com `pnpm check`, `pnpm e2e` e as duas CI verdes); registro em `diario.md`
-  2026-10-31 (8).
-- **Próximo passo exato:** esperar o autor (os próximos pontos do playtest e as perguntas abaixo).
+- **Branch:** `feat/direcao-visual`, no checkout principal `D:andr3jogo-coringa`, a partir da `main` (`9b10ddd`).
+- **Em curso:** o brainstorming do **sub-projeto 6, direção de arte e sensação de jogo** (as respostas do autor e as leituras
+  em `notas/direcao-visual.md`). Nada de código de produto até ele aprovar a spec.
+- **Próximo passo exato:** seguir o brainstorming com o autor: mostrar o rascunho do placar de luta no topo e de uma cena de especial, colher a reação, e só depois escrever a spec do sub-projeto 6.
+- **Rascunhos:** servidor do brainstorming (`.superpowers/brainstorm/`, fora do git); se cair, sobe de novo com o
+  `start-server.sh` da skill de brainstorming e `--project-dir` na raiz do repositório.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
