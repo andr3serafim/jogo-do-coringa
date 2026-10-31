@@ -5,6 +5,34 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-10-30 (5): F1, apagar o histórico de partidas
+
+- **Liberação do autor:** "Pode começar a F1" (`decisoes.md` 2026-10-30 (6)).
+- **Plano:** `docs/superpowers/plans/2026-10-30-f1-apagar-historico.md`, executado aqui mesmo, com TDD. Commits na
+  `feat/apagar-historico`: `5118c80` (modelo), `7bc755e` (o `ConfirmDialog` compartilhado), `492de43` (a tela), `3ea08af` (E2E),
+  mais as docs e os de memória. Só a web: sem `RULES_VERSION`, sem `STATE_SCHEMA`, sem o portão do Difícil.
+- **Decisões técnicas:**
+  - `deletePastGame` e `clearPastGames` (em `model/past-games.ts`) releem o armazenamento, nunca lançam e dizem se deu certo.
+    Com o `set` recusado, regravam o texto lido (`restoreRaw`), como a gravação e o anexo. O `remove` do `safeStore` não lança
+    (tira a cópia em memória e engole a recusa do `Storage`), então só a releitura diz se a lista saiu;
+  - a confirmação do Desistir virou o `ConfirmDialog` (`ui/table/ConfirmDialog.tsx`), com título, texto e rótulo; os 102 testes
+    do menu passaram sem mudança;
+  - o `Button` ganhou `variant="danger"` e o `Title` aceita `ref` (React 19), para a tela devolver o foco ao título;
+  - a tela relê a lista depois de apagar, avisa num `role="status"` e leva o foco ao "Apagar" da linha que tomou o lugar (o
+    `<dialog>` não tem a quem devolver o foco: o botão saiu com a linha). O efeito da tela roda depois do `close()` do `Modal`.
+- **Conferido no navegador embutido:** 4 partidas semeadas, a 1536 × 695 e a 375 × 812, sem rolagem horizontal; apagar uma
+  (foco na linha seguinte, aviso) e apagar tudo (foco no título, a chave sai do `localStorage`).
+- **Revisão final (autorrevisão, sem revisor independente):** sem achado que pedisse correção.
+- **Armadilhas:**
+  - no E2E, semear a lista com `addInitScript` a repovoaria a cada `reload`; o teste novo semeia com `page.evaluate` depois do
+    primeiro `goto`;
+  - o `expectWhollyInView` dos helpers do E2E espera o palco da mesa (`[data-palco]`) parar e reprova em tela sem mesa (foi a
+    única falha do `pnpm e2e` local); fora da mesa, `toBeInViewport({ ratio: 1 })`;
+  - um `cat > arquivo` sem entrada prende o comando do Bash até o tempo esgotar (foi parar em segundo plano). Os scripts vão
+    para o scratchpad pelo Write.
+
+---
+
 ## 2026-10-30 (4): E2, Equipar livre
 
 - **Liberação do autor:** "ok, pode começar a E2" (`decisoes.md` 2026-10-30 (5)).

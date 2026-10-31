@@ -282,18 +282,15 @@ test.describe('celular em pé, 390 × 844', () => {
     const first = page.getByRole('list').getByRole('listitem').first();
     await expect(first).toBeVisible();
     await expectNoHorizontalScroll(page);
-    await expectWhollyInView(page, {
-      'Rever': first.getByRole('button', { name: 'Rever', exact: true }),
-      'Apagar': first.getByRole('button', { name: 'Apagar', exact: true }),
-    });
+    // Inteiros na janela (`ratio: 1`). O `expectWhollyInView` não serve aqui: ele espera o palco da mesa parar, e a lista não tem mesa.
+    await expect(first.getByRole('button', { name: 'Rever', exact: true })).toBeInViewport({ ratio: 1 });
+    await expect(first.getByRole('button', { name: 'Apagar', exact: true })).toBeInViewport({ ratio: 1 });
 
     await first.getByRole('button', { name: 'Apagar', exact: true }).tap();
     const confirm = page.getByRole('dialog', { name: 'Apagar esta partida?' });
     await expect(confirm).toBeVisible();
-    await expectWhollyInView(page, {
-      'Cancelar': confirm.getByRole('button', { name: 'Cancelar' }),
-      'Apagar (na confirmação)': confirm.getByRole('button', { name: 'Apagar', exact: true }),
-    });
+    await expect(confirm.getByRole('button', { name: 'Cancelar' })).toBeInViewport({ ratio: 1 });
+    await expect(confirm.getByRole('button', { name: 'Apagar', exact: true })).toBeInViewport({ ratio: 1 });
     await expectNoHorizontalScroll(page);
     guard.expectClean();
   });

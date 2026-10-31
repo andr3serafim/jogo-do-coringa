@@ -5,40 +5,33 @@
 
 ## Agora
 
-- **Branch:** `main`, no checkout principal `D:\andr3\jogo-coringa`. A **E2** (`feat/equipar-livre`) entrou por fast-forward
-  em 2026-10-30, com a CI verde na branch (check + e2e). Ela trouxe o **Equipar livre**:
-  - a ação `EQUIP` ganhou `order` opcional (os ids das numéricas pendentes, na ordem em que entram); sem ela, a ordem de
-    compra. Os bots, o tempo esgotado, o terminal e os replays guardados não mudam; as partidas de referência saíram idênticas
-    (digest 3), sem subir `RULES_VERSION` nem `STATE_SCHEMA`; `legalActions` segue canônica, sem `order`;
-  - o painel do Equipar mostra todas as numéricas ("Faltam 3 cartas"); o toque escolhe a carta (sem toque, a primeira que
-    falta), o destino vale para ela, e qualquer uma arrasta até a fileira. No celular, com 3 ou mais por pôr, os destinos descem
-    para baixo das cartas;
-  - o resumo das regras e a dica 1 do tutorial dizem que a ordem é do jogador;
-  - o portão do Difícil foi remedido (`--ajuste`): aprovado, com as mesmas pontuações (65,0% e 78,0%) e p95 de 142 ms.
-- **Em curso:** a **F1** (apagar o histórico de partidas, só web), liberada pelo autor (`decisoes.md` 2026-10-30 (6)), na
-  branch `feat/apagar-historico`, a partir da `main` (`8146986`). Plano em
-  `docs/superpowers/plans/2026-10-30-f1-apagar-historico.md`. Não muda regra: sem `RULES_VERSION`, sem `STATE_SCHEMA`, sem o
-  portão do Difícil.
-  Feitos e commitados: o modelo (`deletePastGame`, `clearPastGames`), o `ConfirmDialog` compartilhado (saiu do `GameMenu`), a
-  tela `/partidas` (cada linha com "Apagar", e "Apagar o histórico"), conferida no navegador (375 px e 1536 × 695), e o E2E
-  novo em `e2e/replay.spec.ts`.
-- **Próximo passo exato:** rodar `pnpm e2e` (inteiro, nunca `--repeat-each`); verde, as docs (spec do polimento §4.3 e §4.4,
-  F1 "[feita]" na spec do sub-projeto 5, `CLAUDE.md`, diário e estado), a revisão final, `pnpm check`, push, CI verde e
-  fast-forward na `main`.
+- **Branch:** `main`, no checkout principal `D:\andr3\jogo-coringa`. A **F1** (`feat/apagar-historico`) entrou por
+  fast-forward em 2026-10-30, com a CI verde na branch (check + e2e). Só a web, sem regra nova (sem `RULES_VERSION`, sem
+  `STATE_SCHEMA`, sem o portão do Difícil):
+  - em `/partidas`, cada linha tem "Apagar" (abaixo do "Rever") e, abaixo da lista, "Apagar o histórico", que tira só a chave
+    `coringa:partidas`. Os dois pedem confirmação, no diálogo do Desistir (agora o `ConfirmDialog` compartilhado);
+  - `deletePastGame` e `clearPastGames` (`model/past-games.ts`) releem o armazenamento e dizem se deu certo; com o navegador
+    recusando, a partida continua na tela e o aviso diz que não deu;
+  - depois de apagar, o foco vai ao "Apagar" da linha que tomou o lugar, ou ao título quando a lista acaba.
+- **Em curso:** nada.
+- **Próximo passo exato:** o bloco **E3 + F2 + F3** (roubo, cura pela Defesa, limite de 4 especiais, Reflect reativo e
+  Devastação), medido junto no simulador antes de virar regra, numa branch nova a partir da `main`. É o maior da fila e mexe no
+  motor (sobe `RULES_VERSION`, e o `STATE_SCHEMA` se o `GameState` mudar; regrava as partidas de referência e remede o portão
+  do Difícil). Perguntar
+  ao autor antes de começar, como nas anteriores; a forma da penalidade do limite vai a ele com 2 ou 3 opções medidas.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
 ## A `main`
 
-E1 e E2 mescladas (2026-10-30). Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D (`8d7f078`, `a5a76c5`,
-`bba8377`, `8cdf0a1`), a memória compartilhada, a E1 e a E2. Regras em vigor: spec 1
+E1, E2 e F1 mescladas (2026-10-30). Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D (`8d7f078`, `a5a76c5`,
+`bba8377`, `8cdf0a1`), a memória compartilhada, a E1, a E2 e a F1. Regras em vigor: spec 1
 (`docs/superpowers/specs/2026-10-15-jogo-coringa-regras-motor-design.md`), com os ajustes da spec do sub-projeto 5
 (`2026-10-27-ajustes-design.md`).
 
 ## Fila (sub-projeto 5)
 
-1. **F1:** apagar o histórico (só web).
-2. **E3 + F2 + F3:** roubo, cura pela Defesa, limite de 4 especiais, Reflect reativo e Devastação, medidos juntos no simulador
+1. **E3 + F2 + F3:** roubo, cura pela Defesa, limite de 4 especiais, Reflect reativo e Devastação, medidos juntos no simulador
    antes de virar regra. As regras estão aprovadas (spec do sub-projeto 5); falta a medição e a forma da penalidade do limite.
 
 ## Esperando o autor
@@ -53,6 +46,11 @@ E1 e E2 mescladas (2026-10-30). Sub-projetos 1 a 4 concluídos; sub-projeto 5 co
   - sem tocar numa carta, o destino vale para a primeira que falta, na ordem de compra (o fluxo de antes segue em um toque);
   - no envio antecipado (faltam 1,5 s) e no tempo esgotado, as que faltam entram depois das escolhidas, na ordem de compra;
   - o terminal do simulador (`pnpm play`) continua perguntando na ordem de compra.
+- **[I] da F1 (apagar o histórico), para ele confirmar no playtest:**
+  - apagar uma partida só também pede confirmação;
+  - apagar tudo não mexe no tutorial, nas preferências, no apelido nem no nível;
+  - uma partida online apagada volta à lista se ele reabrir o link daquela sala terminada em até 24 h (a sala manda o
+    desfecho de novo, e a junção pela `key` não acha mais a linha).
 - **[I] a confirmar, junto com os números da E3:**
   - Defesa Absoluta até o ataque: o Ataque Absoluto e o ataque devolvido por Reflect contam como ataque; Reflect contra Reflect,
     Armadilha, Sacrifício, Roubo e Devastação não a encerram; ao acabar, sai 1 Q como hoje (`decisoes.md` 2026-10-30 (4)).

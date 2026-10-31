@@ -200,6 +200,11 @@ modelo da web. **[decisão minha]** As pistas:
 ### 4.3 Telas
 - `/partidas`: a lista (data, contra quem, resultado, modo) com "Rever" quando há replay. Entrada pela tela inicial ("Partidas
   anteriores") e pelo painel de fim ("Rever a partida").
+- **Apagar** (F1 do sub-projeto 5, 2026-10-30): cada linha tem "Apagar", e "Apagar o histórico", abaixo da lista, tira a chave
+  `coringa:partidas` inteira (o resto do que o jogo guarda fica). Os dois pedem confirmação (o mesmo diálogo do Desistir, com o
+  foco no "Cancelar"); a de uma partida diz qual é. Depois de apagar, a tela relê o que ficou guardado (com o navegador
+  recusando, a partida continua e o aviso diz que não deu), avisa num `role="status"` e leva o foco ao "Apagar" da linha que
+  tomou o lugar da apagada (ou da anterior), ou ao título quando a lista acaba.
 - `/partidas/<id>`: a mesa só de vista (sem jogadas), do seu assento, com o histórico até o passo atual e os controles
   **[decisão minha]**: início, passo anterior, próximo passo, tocar/pausar (um passo por batida, respeitando as batidas e a
   `FlashLock`), e um seletor de rodada. Teclado: os controles são botões; nada de atalho de uma tecla.
@@ -207,13 +212,15 @@ modelo da web. **[decisão minha]** As pistas:
 - As duas telas entram por `import()`.
 
 ### 4.4 Testes
-- Modelo: gravar, cortar pela quantidade e pelo tamanho, ler arquivo estragado, versão diferente.
+- Modelo: gravar, cortar pela quantidade e pelo tamanho, ler arquivo estragado, versão diferente; apagar uma e todas, inclusive
+  com o `Storage` recusando a escrita ou a remoção (a memória do `safeStore` fica igual ao disco).
 - Servidor: a mensagem `replay` no fim, no `hello` em `FINISHED`, nunca durante a partida nem na revanche em curso, e a semente
   nova a cada partida.
 - Componente: os controles do replay e o aviso de versão.
 - E2E: terminar uma partida de treino (desistindo), abrir "Rever a partida", avançar passos e voltar; e, online, duas pessoas
   numa sala, uma desiste, o painel de fim das duas oferece "Rever a partida", o replay anda um passo e a lista mostra "Sala
-  <código>" com "Rever".
+  <código>" com "Rever". Apagar (F1): uma partida e depois o histórico inteiro, com o recarregar provando que nada volta, e no
+  celular a linha com os dois botões sem rolagem lateral.
 
 ---
 

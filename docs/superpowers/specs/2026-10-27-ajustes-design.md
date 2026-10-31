@@ -181,8 +181,14 @@ leitura e não está nas palavras dele.
 
 Texto dele em `docs/memoria/decisoes.md` (2026-10-30, "Anotações novas"). As perguntas abertas estão no `docs/memoria/estado.md`.
 
-- **F1. Apagar o histórico de partidas** [decisão: só web]. Na tela `/partidas`, uma ação de apagar a lista guardada
-  (`coringa:partidas`), com confirmação. Apagar uma partida só também cabe.
+- **F1. Apagar o histórico de partidas** [decisão: só web] **[feita em 2026-10-30]**. Na tela `/partidas`, uma ação de apagar a
+  lista guardada (`coringa:partidas`), com confirmação. Apagar uma partida só também cabe.
+  - **Como ficou:** cada linha tem "Apagar" (abaixo do "Rever", para caber no celular) e, abaixo da lista, "Apagar o histórico";
+    os dois no vermelho do Desistir e com a confirmação dele (`ConfirmDialog`). Detalhes na spec do polimento §4.3. Não muda
+    regra: sem `RULES_VERSION` nem `STATE_SCHEMA`.
+  - **[I]**, para o autor confirmar: apagar uma partida só também pede confirmação; apagar tudo não mexe no tutorial, nas
+    preferências nem no apelido; uma partida online apagada volta à lista se ele reabrir o link daquela sala terminada em até
+    24 h (a sala manda o desfecho de novo, e a junção pela `key` não acha mais a linha).
 - **F2. Reflect reativo** [autor, aprovado em 2026-10-30]:
   - **Quando:** o Reflect (K+J+Q da mão) deixa de ser lançado na própria vez e de ficar armado. É jogado só na janela de
     reação, quando o oponente declara um ataque ou lança uma Devastação, e vale só para aquele golpe: atacado → lança → o dano
