@@ -1075,22 +1075,19 @@ describe('resumo das regras: o Reflect', () => {
 describe('campo do oponente: os botões de ferramenta têm a sua área na grade', () => {
   const styles = readFileSync(resolve(import.meta.dirname, '../../src/styles.css'), 'utf8');
 
-  it('a área `ferr` existe no desenho do container ≥ 56rem enquanto os botões aparecem (viewport < o ponto pc, 1024 px)', () => {
+  it('a área `ferr` existe em todo desenho do campo do oponente (nenhum arranjo do container largo a tira)', () => {
     // O jsdom não avalia container queries nem media queries: confere-se o CSS. O botão do histórico e o do menu só somem
-    // a partir de 1024 px de viewport (`pc:`), mas a grade do campo vira o desenho largo a partir de 56rem de container.
-    // O limite é o `theme(--breakpoint-pc)`, em px como o resto do arquivo: um `rem` seguiria a fonte do navegador.
-    const start = /@media\s*\(width\s*<\s*theme\(--breakpoint-pc\)\)\s*\{\s*@container\s*\(min-width:\s*56rem\)\s*\{/.exec(styles);
-    expect(start, 'falta o ajuste do container largo em viewport estreito').not.toBeNull();
-    const rule = /\.campo-grade--oponente\s*>\s*\.campo-info\s*\{([^}]*)\}/.exec(styles.slice(start!.index))?.[1];
-    expect(rule, 'falta a regra do campo do oponente').toBeDefined();
-    expect(rule).toMatch(/grid-template-areas:[^;]*\bferr\b/);
-    // A regra vem depois do desenho largo que ela corrige (mesma especificidade: vale a ordem).
-    expect(styles.indexOf('@media (width < theme(--breakpoint-pc))')).toBeGreaterThan(styles.indexOf('@container (min-width: 56rem)'));
+    // a partir de 1024 px de viewport (`pc:`), mas a grade do campo vira o desenho largo a partir de 56rem de container. Desde
+    // o placar do topo (sub-projeto 6 §3) o `.campo-info` tem um arranjo só, e ele tem a área dos botões.
+    const rules = [...styles.matchAll(/\.campo-info[^{,]*\{([^}]*)\}/g)].map((match) => match[1]!);
+    const areas = rules.filter((rule) => /grid-template-areas/.test(rule));
+    expect(areas.length).toBeGreaterThan(0);
+    for (const rule of areas) expect(rule).toMatch(/grid-template-areas:[^;]*\bferr\b/);
   });
 
   it('a mesa usa a área `ferr` para o wrapper dos botões do campo do oponente', () => {
     const m = mount({ status: 'PLAYING' });
-    const tool = m.container.querySelector('.campo-info--oponente > .area-ferr');
+    const tool = m.container.querySelector('.campo-grade--oponente .campo-info > .area-ferr');
     expect(tool).not.toBeNull();
     expect(within(tool as HTMLElement).getByRole('button', { name: /^Histórico/ })).toBeInTheDocument();
     expect(within(tool as HTMLElement).getByRole('button', { name: 'Menu da partida' })).toBeInTheDocument();

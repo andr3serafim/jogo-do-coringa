@@ -1,5 +1,6 @@
-// A mesa da Peleja desenhada a partir da `view` do último `state` (spec §3.1, §3.2, §3.3, §10): o oponente na
-// capa verde, em cima; a faixa central de tinta; você na capa rosa, embaixo, com a mão; e a coluna do histórico no
+// A mesa da Peleja desenhada a partir da `view` do último `state` (spec §3.1, §3.2, §3.3, §10): o placar de luta no topo
+// (sub-projeto 6 §3: os Coringas, as vidas e o relógio); o oponente na capa verde, em cima; a faixa central de tinta; você na
+// capa rosa, embaixo, com a mão; e a coluna do histórico no
 // PC. É só vista: as interações chegam por props (`onSelectCard`, `onSelectTarget`, `onSeen`, `onOpenGraveyard`,
 // `onOpenMenu`, `onInteract`) e a barra de ação entra pelo `actionBar`. Quem liga isso à sessão é a `PlayTable`. A textura de xilogravura vai só nos títulos e no grão do papel, por baixo
 // do conteúdo (spec §10.7). No tutorial, o `hint` traz o painel da dica (no alto da coluna do histórico no PC, no alto dos campos no
@@ -18,11 +19,13 @@ import { useMediaQuery } from '../useMediaQuery.ts';
 import { Banners } from './Banners.tsx';
 import { CenterBand } from './CenterBand.tsx';
 import { TableUiContext, type HandDrag, type TableUi } from './context.ts';
+import { FightHud } from './FightHud.tsx';
 import { MenuButton } from './GameMenu.tsx';
 import { Hand } from './Hand.tsx';
 import { HistoryButton, HistoryPanel, PC_QUERY } from './History.tsx';
 import { tableNames, type TableNames } from './labels.ts';
 import { PlayerField } from './PlayerField.tsx';
+import { useClock } from './useClock.ts';
 
 /** A dica do tutorial: o painel (a tela o monta) e a zona de que ela fala, que ganha o contorno parado (`null`: sem contorno). */
 export interface TableHint {
@@ -181,6 +184,8 @@ function TableView({
 
   const theirs = room?.seats.find((seat) => seat.playerId !== me);
   const names = tableNames(room, me);
+  // O relógio: o número mora no placar; "Tempo esgotado", o turno pausado e os anúncios, na faixa do meio.
+  const { face, live } = useClock(state.deadline, remainingMs, me, state.pausedTurnMs, turnCue(state, snapshot.legal));
 
   const closeHistory = () => {
     setHistoryOpen(false);
@@ -215,6 +220,8 @@ function TableView({
 
         <div className="flex min-h-0 flex-1 flex-col pc:flex-[0_1_1100px]">
           <Banners snapshot={snapshot} remainingMs={remainingMs} />
+          {/* O placar de luta fica sempre à vista, fora da rolagem dos campos (sub-projeto 6 §3). */}
+          <FightHud view={view} names={names} face={face} deadline={state.deadline} />
           {/* Em telas baixas os campos e a faixa rolam por dentro; a mão e a barra de ação ficam sempre à vista, e a sua vez (o foco
               no painel de baixo) não rola nada. No PC eles não crescem além do que pedem (a sobra fica com a mão, centrada), e a
               coluna do histórico, com o menu, nunca rola junto. */}
@@ -243,10 +250,8 @@ function TableView({
             <CenterBand
               view={view}
               names={names}
-              deadline={state.deadline}
-              remainingMs={remainingMs}
-              pausedTurnMs={state.pausedTurnMs}
-              turn={turnCue(state, snapshot.legal)}
+              face={face}
+              live={live}
               training={training}
               replay={replay}
               tutorial={tutorial}

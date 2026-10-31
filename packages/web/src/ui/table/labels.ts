@@ -69,12 +69,28 @@ export function initiativeText(view: PlayerView, names: TableNames): string {
  * (`damageThisRound`, `lastInitiative`).
  */
 export function initiativeScoreText(view: PlayerView, names: TableNames): string {
-  const { phase } = view;
-  if (view.roundKind === 'ATTACK' && (phase.kind === 'ATTACK_MAIN' || phase.kind === 'REACTION')) {
-    return `Dano na rodada: você ${view.self.damageThisRound} · ${names.opponent} ${view.opponent.damageThisRound}`;
-  }
+  const score = initiativeScore(view);
+  if (score) return `Dano na rodada: você ${score[0]} · ${names.opponent} ${score[1]}`;
   return initiativeReasonText(view);
 }
+
+/** O dano de cada um na rodada de Ataque (você, o oponente), que decide a próxima iniciativa; fora dela, `null`. */
+export function initiativeScore(view: PlayerView): [number, number] | null {
+  const { phase } = view;
+  if (view.roundKind !== 'ATTACK' || (phase.kind !== 'ATTACK_MAIN' && phase.kind !== 'REACTION')) return null;
+  return [view.self.damageThisRound, view.opponent.damageThisRound];
+}
+
+const PHASE_SHORT: Record<PlayerView['phase']['kind'], string> = {
+  EQUIP: 'Equipar',
+  ORDER_CHOICE: 'Ordem',
+  ATTACK_MAIN: 'Ataque',
+  REACTION: 'Reação',
+  GAME_OVER: 'Fim',
+};
+
+/** A fase na placa do placar, numa palavra (a faixa do meio diz por extenso, com de quem é a vez). */
+export const phaseShortText = (view: PlayerView): string => PHASE_SHORT[view.phase.kind];
 
 /** "sorteada no início", "mais dano na última rodada (14 × 9)", "empate na última rodada (5 × 5)": a última decisão do motor. */
 export function initiativeReasonText(view: PlayerView): string {

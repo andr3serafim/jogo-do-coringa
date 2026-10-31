@@ -134,6 +134,15 @@ describe('a partida de teste', () => {
 });
 
 describe('<ReplayScreen />: a mesa de vista e os controles', () => {
+  it('o replay mostra o placar sem relógio, com a rodada grande e o dono da iniciativa marcado', () => {
+    open();
+    const placar = screen.getByRole('region', { name: 'Placar' });
+    expect(within(placar).queryByRole('timer')).toBeNull();
+    expect(placar.querySelector('[data-rodada-grande]')).not.toBeNull();
+    expect(placar.querySelectorAll('[data-retrato][data-dono]')).toHaveLength(1);
+    expect(within(placar).getAllByRole('meter')).toHaveLength(2);
+  });
+
   it('abre no começo: "Revendo a partida", sem barra de jogadas, menu nem relógio', () => {
     const { container } = open();
     expect(screen.getByRole('main', { name: 'Mesa' })).toBeInTheDocument();

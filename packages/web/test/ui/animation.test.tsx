@@ -585,9 +585,9 @@ describe('efeitos da batida (spec §4.2)', () => {
     expect(theirsAtk).not.toHaveAttribute('data-aceso');
   });
 
-  it('o número do dano sobe no Coringa que apanhou, na batida do dano', () => {
+  it('o número do dano sobe no Coringa que apanhou (o retrato dele no placar), na batida do dano', () => {
     const m = mount(MINE);
-    const field = () => within(screen.getByRole('region', { name: 'Seu campo' }));
+    const field = () => within(m.container.querySelector<HTMLElement>('[data-retrato="voce"]')!);
     emit(m, { ...MINE, self: { ...MINE.self, hp: 137 } }, [ATTACK, HIT]);
     expect(m.container.querySelector('[data-dano]')).toBeNull();
     advance(300);
@@ -599,7 +599,7 @@ describe('efeitos da batida (spec §4.2)', () => {
 
   it('a vida espera a batida do dano, conta até o valor novo, e o leitor de tela já tem o valor da view', () => {
     const m = mount(MINE);
-    const hp = () => Number(screen.getByRole('region', { name: 'Seu campo' }).querySelector('[data-hp]')!.textContent);
+    const hp = () => Number(screen.getByRole('region', { name: 'Placar' }).querySelector('[data-hp]')!.textContent);
     const meter = () => screen.getByRole('meter', { name: 'Vida de André' });
     expect(hp()).toBe(187);
     emit(m, { ...MINE, self: { ...MINE.self, hp: 137 } }, [ATTACK, HIT]);
@@ -624,13 +624,37 @@ describe('efeitos da batida (spec §4.2)', () => {
     const m = mount(MINE);
     emit(m, { ...MINE, self: { ...MINE.self, hp: 137 } }, [ATTACK, HIT]);
     await m.user.click(stage(m.container));
-    expect(screen.getByRole('region', { name: 'Seu campo' }).querySelector('[data-hp]')).toHaveTextContent('137');
+    expect(screen.getByRole('region', { name: 'Placar' }).querySelector('[data-hp]')).toHaveTextContent('137');
   });
 
   it('com movimento reduzido a vida troca direto', () => {
     const m = mount(MINE, { prefs: { reduceMotion: true } });
     emit(m, { ...MINE, self: { ...MINE.self, hp: 137 } }, [ATTACK, HIT]);
-    expect(screen.getByRole('region', { name: 'Seu campo' }).querySelector('[data-hp]')).toHaveTextContent('137');
+    expect(screen.getByRole('region', { name: 'Placar' }).querySelector('[data-hp]')).toHaveTextContent('137');
+  });
+
+  it('o rastro vermelho fica na vida velha e escorre até a nova depois do golpe (sub-projeto 6 §3)', () => {
+    const m = mount(MINE);
+    const meter = () => screen.getByRole('meter', { name: 'Vida de André' });
+    const width = (selector: string) => parseFloat(meter().querySelector<HTMLElement>(selector)!.style.width);
+    const pct = (hp: number) => (hp / Number(meter().getAttribute('aria-valuemax'))) * 100;
+    expect(width('[data-rastro]')).toBeCloseTo(pct(187));
+    emit(m, { ...MINE, self: { ...MINE.self, hp: 137 } }, [ATTACK, HIT]);
+    advance(300);
+    advance(1);
+    advance(300);
+    // A vida já caiu (conta na batida do dano); o rastro ainda marca a vida de antes.
+    expect(width('[data-vida]')).toBeLessThan(pct(187));
+    expect(width('[data-rastro]')).toBeCloseTo(pct(187));
+    advance(1_100);
+    expect(width('[data-vida]')).toBeCloseTo(pct(137));
+    expect(width('[data-rastro]')).toBeCloseTo(pct(137));
+  });
+
+  it('com movimento reduzido, a barra não tem rastro', () => {
+    const m = mount(MINE, { prefs: { reduceMotion: true } });
+    emit(m, { ...MINE, self: { ...MINE.self, hp: 137 } }, [ATTACK, HIT]);
+    expect(screen.getByRole('meter', { name: 'Vida de André' }).querySelector('[data-rastro]')).toBeNull();
   });
 
   it('o total da fileira também espera o dano e conta até o valor do motor', () => {
@@ -1265,8 +1289,9 @@ describe('CardsDealt e Reflect (spec §4.2)', () => {
   it('o Reflect contra Reflect quebra o escudo no Coringa do dono, na batida', () => {
     const m = mount(MINE);
     emit(m, MINE, [TURN, { type: 'ReflectCanceled', player: 'p1', owner: 'p2' }]);
-    const theirs = () => screen.getByRole('region', { name: 'Campo de Duda' });
-    const mine = () => screen.getByRole('region', { name: 'Seu campo' });
+    // O Coringa de cada um mora no retrato do placar (sub-projeto 6 §3).
+    const theirs = () => m.container.querySelector('[data-retrato="oponente"]')!;
+    const mine = () => m.container.querySelector('[data-retrato="voce"]')!;
     expect(theirs().querySelector('[data-escudo-quebra]')).toBeNull();
     advance(400);
     expect(theirs().querySelector('[data-escudo-quebra]')).not.toBeNull();
@@ -1278,7 +1303,7 @@ describe('CardsDealt e Reflect (spec §4.2)', () => {
   it('o escudo que quebra também aparece no Coringa do próprio dono, com movimento reduzido só esmaecendo', () => {
     const m = mount(MINE, { prefs: { reduceMotion: true } });
     emit(m, MINE, [{ type: 'ReflectCanceled', player: 'p2', owner: 'p1' }]);
-    expect(screen.getByRole('region', { name: 'Seu campo' }).querySelector('[data-escudo-quebra]')).not.toBeNull();
+    expect(m.container.querySelector('[data-retrato="voce"] [data-escudo-quebra]')).not.toBeNull();
   });
 
   it('a conta da fileira acompanha o total mostrado: não mostra o multiplicador novo com o total velho', () => {

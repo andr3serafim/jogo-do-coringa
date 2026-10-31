@@ -1,96 +1,59 @@
-// A faixa central de tinta (spec §3.1 e §10.1): o que é dos dois jogadores. Rodada e tipo, de quem é a vez, o
-// relógio, a iniciativa, o monte e o cemitério. Os números
-// de jogo usam a fonte de texto com algarismos tabulares e nenhuma textura (spec §10.7); a textura só vai no
-// título da rodada. O relógio (spec §3.8, §10.3): em urgência (últimos 5 s) o disco fica vermelho, com o número em papel e o
-// anel mais grosso, por cor e por forma, e nunca pisca; na janela de reação ele é grande; esgotado, diz "Tempo esgotado".
-// Os anúncios para leitor de tela saem por uma região viva escondida que mora aqui, fora do relógio. Entrar na urgência no
-// seu prazo também toca a pista `urgencia`, uma vez por prazo (o do oponente, nunca). No treino (spec §2.6) não há
-// prazo: no lugar do relógio a faixa diz "Treino · Médio, sem relógio" (com o nível do bot), e a mesma região anuncia a vez
-// do jogador (`turn`). Na mesa do replay (`replay`) ela diz "Revendo a partida".
+// A faixa central de tinta (spec §3.1 e §10.1): o que é dos dois jogadores e não mora no placar do topo (sub-projeto 6 §3). A
+// fase por extenso e de quem é a vez (com "Tempo esgotado" e o turno pausado do relógio, que não cabem na placa do celular), o
+// monte e o cemitério. Os números de jogo usam a fonte de texto com algarismos tabulares e nenhuma textura (spec §10.7). Os
+// anúncios para leitor de tela saem por uma região viva escondida que mora aqui, fora do relógio (`live`, de `useClock`). No
+// treino (spec §2.6) não há prazo: a faixa diz "Treino · Médio, sem relógio" (com o nível do bot), e a mesma região anuncia a vez
+// do jogador. Na mesa do replay (`replay`) ela diz "Revendo a partida".
 import type { PlayerView } from '@coringa/engine';
-import type { Deadline } from '@coringa/protocol';
-import type { ClockFace, TurnCue } from '../../model/clock.ts';
-import {
-  CLOCK_LABEL,
-  CLOCK_URGENT_LABEL,
-  pausedTurnText,
-  REPLAY_BAND_TEXT,
-  TIMES_UP_TEXT,
-  trainingBandText,
-  TUTORIAL_BAND_TEXT,
-} from '../../model/copy.ts';
+import type { ClockFace } from '../../model/clock.ts';
+import { pausedTurnText, REPLAY_BAND_TEXT, TIMES_UP_TEXT, trainingBandText, TUTORIAL_BAND_TEXT } from '../../model/copy.ts';
 import type { TrainingLevel } from '../../model/local-room.ts';
 import { DROP } from '../../model/drag.ts';
 import * as m from 'motion/react-m';
-import { useEffect, useRef } from 'react';
 import { INITIATIVE_ID } from '../../model/effects.ts';
 import { useAnim } from '../anim/context.ts';
 import { layoutTransition } from '../anim/motion.ts';
 import { Card, cardName } from '../cards/Card.tsx';
-import { useSound } from '../sound-context.ts';
 import { useTableUi } from './context.ts';
-import {
-  graveyardName,
-  initiativeScoreText,
-  initiativeText,
-  turnText,
-  type TableNames,
-} from './labels.ts';
+import { graveyardName, turnText, type TableNames } from './labels.ts';
 import { NovoChip } from './NovoChip.tsx';
-import { deadlineKey, useClock } from './useClock.ts';
+import type { ClockLive } from './useClock.ts';
 
 export interface CenterBandProps {
   view: PlayerView;
   names: TableNames;
-  deadline: Deadline | null;
-  /** Tempo restante do prazo pelo relógio do servidor. */
-  remainingMs: (deadline: Deadline) => number;
-  /** Tempo do turno congelado durante a janela de reação. */
-  pausedTurnMs?: number;
-  /** A vez do jogador, para o anúncio quando não há prazo (o treino não tem relógio). */
-  turn?: TurnCue | null;
-  /** Treino contra o bot, e o nível dele: no lugar do relógio, a faixa diz o nível e que não há relógio. */
+  /** A face do relógio (o número mora no placar): aqui só "Tempo esgotado" e o turno pausado. */
+  face: ClockFace | null;
+  /** O anúncio do relógio ou da vez, para a região viva (`useClock`). */
+  live: ClockLive;
+  /** Treino contra o bot, e o nível dele: a faixa diz o nível e que não há relógio. */
   training?: TrainingLevel;
-  /** A mesa do replay: no lugar do relógio, a faixa diz "Revendo a partida" (vale mais que o treino). */
+  /** A mesa do replay: a faixa diz "Revendo a partida" (vale mais que o treino). */
   replay?: true;
   /** O tutorial (um treino guiado): a faixa diz "Tutorial, sem relógio", e não o nível do bot. */
   tutorial?: true;
   onOpenGraveyard?: () => void;
 }
 
-export function CenterBand({
-  view,
-  names,
-  deadline,
-  remainingMs,
-  pausedTurnMs,
-  turn = null,
-  training,
-  replay,
-  tutorial,
-  onOpenGraveyard,
-}: CenterBandProps) {
-  const { face, live } = useClock(deadline, remainingMs, view.me, pausedTurnMs, turn);
-  // A urgência soa uma vez por prazo (o `deadlineKey` identifica o prazo), e só no prazo do jogador.
-  const sound = useSound();
-  const urgentKey = face?.urgent && face.mine ? deadlineKey(deadline) : null;
-  const cuedKey = useRef<string | null>(null);
-  useEffect(() => {
-    if (urgentKey === null || urgentKey === cuedKey.current) return;
-    cuedKey.current = urgentKey;
-    sound.play('urgencia');
-  }, [urgentKey, sound]);
-
+export function CenterBand({ view, names, face, live, training, replay, tutorial, onOpenGraveyard }: CenterBandProps) {
+  const note = face?.expired
+    ? TIMES_UP_TEXT
+    : // O turno de quem espera fica congelado durante a janela de reação do outro.
+      face && face.pausedTurnSeconds !== null && !face.mine
+      ? pausedTurnText(face.pausedTurnSeconds)
+      : null;
   return (
     <section
       aria-label="Situação da rodada"
-      className="flex flex-none flex-wrap items-center gap-x-2.5 gap-y-1 bg-tinta px-3 py-1.5 text-papel pc:min-h-[76px] pc:gap-x-7 pc-baixo:min-h-14 pc:px-6 pc:py-1"
+      className="flex flex-none flex-wrap items-center gap-x-2.5 gap-y-1 bg-tinta px-3 py-1.5 text-papel pc:min-h-[68px] pc:gap-x-7 pc-baixo:min-h-14 pc:px-6 pc:py-1"
     >
-      <div className="flex min-w-0 max-w-[8.5rem] flex-col pc:max-w-[13rem]">
-        <h2 className="textura font-madeira text-[17px] uppercase leading-[1.1] tracking-[0.02em] pc:text-2xl">
-          Rodada {view.round}
-        </h2>
+      <div className="flex min-w-0 max-w-[11rem] flex-col pc:max-w-[16rem]">
         <p className="text-xs font-semibold leading-tight text-ouro pc:text-sm">{turnText(view, names)}</p>
+        {note ? (
+          <p data-numero className="font-texto text-[11px] font-bold leading-tight tabular-nums">
+            {note}
+          </p>
+        ) : null}
       </div>
 
       {/* A região viva dos anúncios fica sempre montada: uma região criada já preenchida pode não ser lida. */}
@@ -98,36 +61,18 @@ export function CenterBand({
         {live.text === '' ? null : <span key={live.id}>{live.text}</span>}
       </div>
 
-      {face ? (
-        <ClockBlock face={face} />
-      ) : replay ? (
+      {face ? null : replay ? (
         <p className="max-w-[10.5rem] text-[11px] font-bold uppercase leading-tight tracking-[0.12em] text-ouro pc:max-w-none pc:text-xs">
           {REPLAY_BAND_TEXT}
         </p>
       ) : training !== undefined ? (
-        // Sem relógio, a faixa diz por quê, no lugar dele. Não é região viva: o anúncio é o da vez, acima.
+        // Sem relógio, a faixa diz por quê. Não é região viva: o anúncio é o da vez, acima.
         <p className="max-w-[10.5rem] text-[11px] font-bold uppercase leading-tight tracking-[0.12em] text-ouro pc:max-w-none pc:text-xs">
           {tutorial ? TUTORIAL_BAND_TEXT : trainingBandText(training)}
         </p>
       ) : null}
 
-      {/* No celular, a iniciativa forma a segunda linha da faixa (`order-last`); no PC, fica na linha única. */}
-      <div className="order-last flex min-w-0 items-center gap-1.5 pc:order-none">
-        <InitiativeMark mine={view.initiative === view.me} />
-        <div className="min-w-0 text-xs leading-tight pc:text-[15px]">
-          <span className="mr-1.5 text-[10px] font-bold uppercase tracking-[0.12em] pc:mr-0 pc:block pc:text-[11px]">
-            Iniciativa
-          </span>
-          <span>{initiativeText(view, names)}</span>
-          {/* O placar (no Ataque) ou o motivo (fora dele): na mesma linha no celular, embaixo no PC. */}
-          <span aria-hidden="true" className="pc:hidden">
-            {' · '}
-          </span>
-          <span data-numero data-placar-iniciativa className="font-texto tabular-nums pc:block pc:text-xs">
-            {initiativeScoreText(view, names)}
-          </span>
-        </div>
-      </div>
+      <InitiativeMark mine={view.initiative === view.me} />
 
       <div className="ml-auto flex items-center gap-2">
         <div className="flex flex-col items-center">
@@ -170,42 +115,6 @@ function InitiativeMark({ mine }: { mine: boolean }) {
       <span className="size-2.5">{mine ? null : marker}</span>
       <span className="size-2.5">{mine ? marker : null}</span>
     </span>
-  );
-}
-
-const DISC_SMALL = 'size-12 text-lg pc:size-[60px] pc:text-[22px]';
-/** Na janela de reação o prazo é de 8 s e a decisão é urgente: o relógio cresce. */
-const DISC_BIG = 'size-16 text-3xl pc:size-[72px] pc:text-4xl';
-
-/**
- * O relógio e o que vem sob ele. Urgência por cor e por forma (disco vermelho, número em papel, anel de 7 px no lugar de
- * 4 px) e sem animação nenhuma. Os números ficam fora da textura (spec §10.7).
- */
-function ClockBlock({ face }: { face: ClockFace }) {
-  const size = face.kind === 'REACTION' ? DISC_BIG : DISC_SMALL;
-  const look = face.expired
-    ? 'border-4 border-papel/60'
-    : face.urgent
-      ? 'border-[7px] border-ouro bg-vermelho text-papel'
-      : 'border-4 border-ouro';
-  return (
-    <div className="flex max-w-[7.5rem] flex-none flex-col items-center gap-0.5 text-center">
-      <div
-        role="timer"
-        aria-label={face.urgent ? CLOCK_URGENT_LABEL : CLOCK_LABEL}
-        data-urgente={face.urgent ? 'true' : undefined}
-        className={`grid flex-none place-items-center rounded-full font-texto font-extrabold leading-none tabular-nums ${size} ${look}`}
-      >
-        {face.seconds}
-      </div>
-      {face.expired ? <p className="text-[11px] font-bold uppercase leading-tight">{TIMES_UP_TEXT}</p> : null}
-      {/* O turno de quem espera fica congelado durante a janela de reação do outro. */}
-      {face.pausedTurnSeconds !== null && !face.mine ? (
-        <p data-numero className="font-texto text-[11px] font-semibold leading-tight tabular-nums">
-          {pausedTurnText(face.pausedTurnSeconds)}
-        </p>
-      ) : null}
-    </div>
   );
 }
 

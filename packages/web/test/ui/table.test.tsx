@@ -323,40 +323,103 @@ describe('mesa: marcas de estado no Coringa (spec §3.1)', () => {
   });
 });
 
-describe('mesa: o Coringa de cada lado', () => {
-  it('apelido, rótulo "você" e vida em número e barra', () => {
-    mount();
-    const mine = within(screen.getByRole('region', { name: 'Seu campo' }));
-    expect(mine.getByRole('heading', { name: /André/ })).toHaveTextContent('André (você)');
-    const bar = mine.getByRole('meter', { name: 'Vida de André' });
-    expect(bar).toHaveAttribute('aria-valuenow', '187');
-    expect(bar).toHaveAttribute('aria-valuemax', '300');
-    expect(bar).toHaveAttribute('aria-valuetext', '187 de 300');
-    expect(mine.getByText('187')).toBeInTheDocument();
-    const theirs = within(screen.getByRole('region', { name: 'Campo de Duda' }));
-    expect(theirs.getByRole('heading', { name: 'Duda' })).toBeInTheDocument();
-    expect(theirs.getByRole('meter', { name: 'Vida de Duda' })).toHaveAttribute('aria-valuenow', '214');
+const placar = () => within(screen.getByRole('region', { name: 'Placar' }));
+
+describe('mesa: o placar de luta (sub-projeto 6 §3)', () => {
+  it('o placar mostra os dois lados, você à esquerda: apelido, vida em número e barra', () => {
+    const { container } = mount();
+    const meters = placar().getAllByRole('meter');
+    expect(meters.map((el) => el.getAttribute('aria-label'))).toEqual(['Vida de André', 'Vida de Duda']);
+    expect(meters[0]).toHaveAttribute('aria-valuenow', '187');
+    expect(meters[0]).toHaveAttribute('aria-valuemax', '300');
+    expect(meters[0]).toHaveAttribute('aria-valuetext', '187 de 300');
+    expect(meters[1]).toHaveAttribute('aria-valuenow', '214');
+    const hp = [...screen.getByRole('region', { name: 'Placar' }).querySelectorAll('[data-hp]')].map((el) => el.textContent);
+    expect(hp).toEqual(['187', '214']);
+    expect(placar().getByRole('heading', { name: /André/ })).toHaveTextContent('André (você)');
+    expect(placar().getByRole('heading', { name: 'Duda' })).toBeInTheDocument();
+    const portraits = [...container.querySelectorAll('[data-retrato]')].map((el) => el.getAttribute('data-retrato'));
+    expect(portraits).toEqual(['voce', 'oponente']);
   });
 
-  it('oponente fora da sala: a presença aparece em texto', () => {
+  it('os campos não têm mais vida nem apelido', () => {
+    mount();
+    for (const name of ['Seu campo', 'Campo de Duda']) {
+      const field = within(screen.getByRole('region', { name }));
+      expect(field.queryByRole('meter')).toBeNull();
+      expect(field.queryByRole('heading')).toBeNull();
+      expect(screen.getByRole('region', { name }).querySelector('[data-hp]')).toBeNull();
+    }
+  });
+
+  it('oponente fora da sala: a presença aparece em texto, no campo dele', () => {
     mount(DRAFT, { room: { seats: [seatOf('p1', 'André'), { ...seatOf('p2', 'Duda'), connected: false }] } });
-    expect(screen.getByText('fora da sala')).toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: 'Campo de Duda' })).getByText('fora da sala')).toBeInTheDocument();
   });
 
   it('sem a sala (ainda), os nomes são "Você" e "Oponente"', () => {
     mount(DRAFT, { snapshot: { room: null } });
-    const theirs = within(screen.getByRole('region', { name: 'Campo de Oponente' }));
-    expect(theirs.getByRole('heading', { name: 'Oponente' })).toBeInTheDocument();
-    expect(within(screen.getByRole('region', { name: 'Seu campo' })).getByRole('heading', { name: 'Você' })).toBeInTheDocument();
+    expect(placar().getByRole('heading', { name: 'Oponente' })).toBeInTheDocument();
+    expect(placar().getByRole('heading', { name: 'Você' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Campo de Oponente' })).toBeInTheDocument();
+  });
+
+  it('o relógio mora no placar; sem prazo, a rodada grande', () => {
+    const first = mount(DRAFT, { state: { deadline: { kind: 'TURN', at: 21_000, players: ['p1'] } } });
+    expect(placar().getByRole('timer')).toHaveTextContent('21');
+    expect(placar().getByRole('heading', { name: 'Rodada 7' })).toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: 'Situação da rodada' })).queryByRole('timer')).toBeNull();
+    expect(first.container.querySelector('[data-rodada-grande]')).toBeNull();
+    first.unmount();
+    mount();
+    expect(placar().queryByRole('timer')).toBeNull();
+    expect(placar().getByText('7')).toHaveAttribute('data-rodada-grande');
+    expect(placar().getByRole('heading', { name: 'Rodada 7' })).toBeInTheDocument();
+  });
+
+  it('a placa diz a fase curta', () => {
+    const cases: Array<[ViewSpec, string]> = [
+      [DRAFT, 'Ataque'],
+      [{ ...DRAFT, phase: 'ATTACK' }, 'Reação'],
+      [{ ...DRAFT, phase: { kind: 'EQUIP' } }, 'Equipar'],
+      [{ ...DRAFT, phase: { kind: 'ORDER_CHOICE', player: 'p2' } }, 'Ordem'],
+      [{ ...DRAFT, phase: { kind: 'GAME_OVER', result: { kind: 'WIN', winner: 'p2', reason: 'EXODIA' } } }, 'Fim'],
+    ];
+    for (const [spec, text] of cases) {
+      const { container, unmount } = mount(spec);
+      expect(container.querySelector('[data-fase-curta]')).toHaveTextContent(text);
+      unmount();
+    }
+  });
+
+  it('o placar de dano da iniciativa só no Ataque, você × o oponente, nos números de texto', () => {
+    const first = mount({ ...DRAFT, self: { ...DRAFT.self, damageThisRound: 37 } });
+    const score = first.container.querySelector('[data-placar-iniciativa]')!;
+    expect(score).toHaveTextContent('37 × 0');
+    expect(score.className).toContain('tabular-nums');
+    expect(placar().getByText('Dano na rodada: você 37 · Duda 0')).toHaveClass('sr-only');
+    first.unmount();
+    const equip = mount({ ...DRAFT, phase: { kind: 'EQUIP' } });
+    expect(equip.container.querySelector('[data-placar-iniciativa]')).toBeNull();
+  });
+
+  it('o retrato de quem tem a iniciativa leva a marca de dono', () => {
+    const first = mount();
+    expect(first.container.querySelector('[data-retrato="voce"]')).toHaveAttribute('data-dono');
+    expect(first.container.querySelector('[data-retrato="oponente"]')).not.toHaveAttribute('data-dono');
+    first.unmount();
+    const theirs = mount({ ...DRAFT, initiative: 'opponent' });
+    expect(theirs.container.querySelector('[data-retrato="oponente"]')).toHaveAttribute('data-dono');
+    expect(theirs.container.querySelector('[data-retrato="voce"]')).not.toHaveAttribute('data-dono');
   });
 });
 
 describe('mesa: faixa central (spec §3.1)', () => {
   const band = () => within(screen.getByRole('region', { name: 'Situação da rodada' }));
 
-  it('rodada e tipo, de quem é a vez, monte e cemitério', () => {
+  it('de quem é a vez, monte e cemitério (a rodada mora no placar)', () => {
     mount();
-    expect(band().getByRole('heading', { name: 'Rodada 7' })).toBeInTheDocument();
+    expect(band().queryByRole('heading')).toBeNull();
     expect(band().getByText('Ataque · sua vez')).toBeInTheDocument();
     const view = scenarioAt(DRAFT).view;
     expect(band().getByText(String(view.deckCount))).toBeInTheDocument();
@@ -431,67 +494,68 @@ describe('mesa: faixa central (spec §3.1)', () => {
     expect(band().queryByText(/anti-travamento|Pressão/)).not.toBeInTheDocument();
   });
 
-  it('a iniciativa diz de quem é e a ordem escolhida na rodada', () => {
+  it('a iniciativa diz de quem é e a ordem escolhida na rodada (na placa, para o leitor de tela; a faixa não a repete)', () => {
     mount();
-    expect(band().getByText('Iniciativa')).toBeInTheDocument();
-    expect(band().getByText('Você, atacando primeiro')).toBeInTheDocument();
+    expect(placar().getByText('Iniciativa: Você, atacando primeiro')).toHaveClass('sr-only');
+    expect(band().queryByText(/Iniciativa|atacando/)).toBeNull();
   });
 
   it('a iniciativa do oponente, ou a ordem em que se ataca, muda o texto', () => {
     mount({ ...DRAFT, initiative: 'opponent', firstToAttack: 'opponent' });
-    expect(band().getByText('Duda, atacando primeiro')).toBeInTheDocument();
+    expect(placar().getByText('Iniciativa: Duda, atacando primeiro')).toBeInTheDocument();
   });
 
   it('quem tem a iniciativa pode atacar em segundo', () => {
     mount({ ...DRAFT, initiative: 'opponent', firstToAttack: 'self' });
-    expect(band().getByText('Duda, atacando em segundo')).toBeInTheDocument();
+    expect(placar().getByText('Iniciativa: Duda, atacando em segundo')).toBeInTheDocument();
   });
 
   it('antes da escolha da ordem, a iniciativa não promete uma ordem', () => {
     mount({ ...DRAFT, phase: { kind: 'ORDER_CHOICE', player: 'p1' } });
-    expect(band().getByText('Você, escolhendo a ordem')).toBeInTheDocument();
+    expect(placar().getByText('Iniciativa: Você, escolhendo a ordem')).toBeInTheDocument();
   });
 
   it('no Equipar não há ordem ainda: só de quem é a iniciativa', () => {
     mount({ ...DRAFT, phase: { kind: 'EQUIP' } });
-    expect(band().getByText('Você')).toBeInTheDocument();
+    expect(placar().getByText('Iniciativa: Você')).toBeInTheDocument();
   });
 
   // O placar da iniciativa (autor, 2026-10-31: "não tá claro pro jogador").
-  it('na rodada de Ataque, a faixa mostra o dano de cada um na rodada, nos números de texto', () => {
-    mount({ ...DRAFT, self: { ...DRAFT.self, damageThisRound: 12 }, opponent: { ...DRAFT.opponent, damageThisRound: 8 } });
-    const score = band().getByText('Dano na rodada: você 12 · Duda 8');
-    expect(score.className).toContain('tabular-nums');
+  it('na rodada de Ataque, a placa diz o dano de cada um na rodada', () => {
+    const { container } = mount({ ...DRAFT, self: { ...DRAFT.self, damageThisRound: 12 }, opponent: { ...DRAFT.opponent, damageThisRound: 8 } });
+    expect(placar().getByText('Dano na rodada: você 12 · Duda 8')).toBeInTheDocument();
+    expect(container.querySelector('[data-placar-iniciativa]')).toHaveTextContent('12 × 8');
   });
 
-  it('fora do Ataque, a faixa diz por que a iniciativa está com quem está: sorteada, mais dano ou empate', () => {
+  it('fora do Ataque, a placa diz (ao leitor de tela) por que a iniciativa está com quem está: sorteada, mais dano ou empate', () => {
     const equip = { ...DRAFT, phase: { kind: 'EQUIP' } } satisfies ViewSpec;
     const first = mount(equip);
-    expect(band().getByText('sorteada no início')).toBeInTheDocument();
+    expect(placar().getByText('sorteada no início')).toBeInTheDocument();
     first.unmount();
     const lead = mount({ ...equip, lastInitiative: { holder: 'self', changed: true, self: 14, opponent: 9 } });
-    expect(band().getByText('mais dano na última rodada (14 × 9)')).toBeInTheDocument();
+    expect(placar().getByText('mais dano na última rodada (14 × 9)')).toBeInTheDocument();
     lead.unmount();
     mount({ ...equip, initiative: 'opponent', lastInitiative: { holder: 'opponent', changed: false, self: 5, opponent: 5 } });
-    expect(band().getByText('empate na última rodada (5 × 5)')).toBeInTheDocument();
+    expect(placar().getByText('empate na última rodada (5 × 5)')).toBeInTheDocument();
   });
 
-  it('na escolha da ordem, a faixa diz o motivo, não o placar zerado da rodada nova', () => {
-    mount({ ...DRAFT, phase: { kind: 'ORDER_CHOICE', player: 'p1' }, lastInitiative: { holder: 'self', changed: false, self: 20, opponent: 3 } });
-    expect(band().getByText('mais dano na última rodada (20 × 3)')).toBeInTheDocument();
-    expect(band().queryByText(/Dano na rodada/)).not.toBeInTheDocument();
+  it('na escolha da ordem, a placa diz o motivo, não o placar zerado da rodada nova', () => {
+    const { container } = mount({ ...DRAFT, phase: { kind: 'ORDER_CHOICE', player: 'p1' }, lastInitiative: { holder: 'self', changed: false, self: 20, opponent: 3 } });
+    expect(placar().getByText('mais dano na última rodada (20 × 3)')).toBeInTheDocument();
+    expect(placar().queryByText(/Dano na rodada/)).not.toBeInTheDocument();
+    expect(container.querySelector('[data-placar-iniciativa]')).toBeNull();
   });
 
   it('o relógio mostra os segundos que faltam pelo relógio do servidor', () => {
     mount(DRAFT, { state: { deadline: { kind: 'TURN', at: 21_000, players: ['p1'] } } });
-    const clock = band().getByRole('timer');
+    const clock = placar().getByRole('timer');
     expect(clock).toHaveTextContent('21');
     expect(clock).not.toHaveAttribute('aria-live', 'assertive');
   });
 
   it('sem prazo (treino, ou entre fases), não há relógio', () => {
     mount();
-    expect(band().queryByRole('timer')).not.toBeInTheDocument();
+    expect(screen.queryByRole('timer')).not.toBeInTheDocument();
   });
 });
 

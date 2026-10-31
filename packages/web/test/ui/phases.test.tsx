@@ -147,7 +147,7 @@ const inEquip = () => within(equipPanel());
 const orderPanel = () => screen.getByRole('region', { name: 'Escolha da ordem' });
 const bar = () => screen.getByRole('region', { name: 'Ações' });
 const inBar = () => within(bar());
-const band = () => within(screen.getByRole('region', { name: 'Situação da rodada' }));
+const placar = () => within(screen.getByRole('region', { name: 'Placar' }));
 const handList = () => within(screen.getByRole('list', { name: 'Sua mão' }));
 const live = () => document.querySelector('[aria-live="assertive"]') as HTMLElement;
 
@@ -572,7 +572,7 @@ describe('janela de reação (spec §3.7)', () => {
     expect(inBar().getByText('Duda declarou ataque: 84 contra sua Defesa 46 → seu K absorve')).toBeInTheDocument();
     expect(handList().getAllByRole('button')).toHaveLength(3);
     expect(inBar().getByRole('button', { name: 'Passar' })).toBeEnabled();
-    expect(band().getByRole('timer')).toHaveTextContent('8');
+    expect(placar().getByRole('timer')).toHaveTextContent('8');
   });
 
   it('na janela de reação, J, Q e K dizem que só o A responde (B2)', async () => {
@@ -584,14 +584,14 @@ describe('janela de reação (spec §3.7)', () => {
 
   it('o relógio da reação é grande, e é um só', () => {
     mount(REACTION, { state: withClock });
-    const clock = band().getByRole('timer');
-    expect(clock.className).toMatch(/size-16/);
+    const clock = placar().getByRole('timer');
+    expect(clock).toHaveAttribute('data-relogio', 'grande');
     expect(screen.getAllByRole('timer')).toHaveLength(1);
   });
 
   it('num prazo de turno o relógio é o pequeno', () => {
     mount(DRAFT, { state: { deadline: deadline('TURN', 21_000) } });
-    expect(band().getByRole('timer').className).not.toMatch(/size-16/);
+    expect(placar().getByRole('timer')).toHaveAttribute('data-relogio', 'pequeno');
   });
 
   it('o gatilho segue cada desfecho do ataque (a conta é do motor)', () => {
@@ -734,7 +734,7 @@ describe('janela de reação (spec §3.7)', () => {
       { state: { deadline: deadline('REACTION', 8_000, ['p2']), pausedTurnMs: 21_000 } },
     );
     expect(inBar().getByText('Duda pode reagir…')).toBeInTheDocument();
-    expect(band().getByRole('timer')).toHaveTextContent('8');
+    expect(placar().getByRole('timer')).toHaveTextContent('8');
     expect(screen.getByText('seu turno: 21 s, pausado')).toBeInTheDocument();
     expect(inBar().queryByRole('button', { name: 'Passar' })).not.toBeInTheDocument();
     expect(inBar().queryByText(/declarou ataque/)).not.toBeInTheDocument();
@@ -775,12 +775,12 @@ describe('relógio (spec §3.8, §10.3)', () => {
 
   it('mostra os segundos inteiros, para cima', () => {
     mount(DRAFT, { fake: true, state: turn(21_400) });
-    expect(band().getByRole('timer')).toHaveTextContent('22');
+    expect(placar().getByRole('timer')).toHaveTextContent('22');
   });
 
   it('com 4 s: disco vermelho, número em papel, anel mais grosso e o rótulo de urgência', () => {
     mount(DRAFT, { fake: true, state: turn(4_000) });
-    const clock = band().getByRole('timer');
+    const clock = placar().getByRole('timer');
     expect(clock).toHaveAttribute('data-urgente', 'true');
     expect(clock.className).toContain('bg-vermelho');
     expect(clock.className).toContain('text-papel');
@@ -791,33 +791,34 @@ describe('relógio (spec §3.8, §10.3)', () => {
 
   it('com 6 s ainda não é urgente (disco claro, anel fino); entra na urgência aos 5 s', () => {
     const m = mount(DRAFT, { fake: true, state: turn(6_000) });
-    const clock = band().getByRole('timer');
+    const clock = placar().getByRole('timer');
     expect(clock).not.toHaveAttribute('data-urgente');
     expect(clock.className).not.toContain('bg-vermelho');
     expect(clock.className).toMatch(/border-4/);
     expect(clock).toHaveAccessibleName('Tempo do prazo');
     tick(m, 1_000);
-    expect(band().getByRole('timer')).toHaveAttribute('data-urgente', 'true');
-    expect(band().getByRole('timer')).toHaveTextContent('5');
+    expect(placar().getByRole('timer')).toHaveAttribute('data-urgente', 'true');
+    expect(placar().getByRole('timer')).toHaveTextContent('5');
   });
 
   it('o relógio anda sozinho: um segundo a cada segundo do servidor', () => {
     const m = mount(DRAFT, { fake: true, state: turn(21_000) });
-    expect(band().getByRole('timer')).toHaveTextContent('21');
+    expect(placar().getByRole('timer')).toHaveTextContent('21');
     tick(m, 3_000);
-    expect(band().getByRole('timer')).toHaveTextContent('18');
+    expect(placar().getByRole('timer')).toHaveTextContent('18');
   });
 
   it('nunca pisca: nenhuma animação em modo nenhum (urgência é cor e forma)', () => {
     const m = mount(DRAFT, { fake: true, state: turn(30_000) });
     const check = () => {
-      const region = screen.getByRole('region', { name: 'Situação da rodada' });
+      // O relógio e o que mora com ele na placa (a espada, ao lado, tem o lampejo dela; o relógio, nada).
+      const region = screen.getByRole('timer').closest('[data-placa]')!;
       expect(region.querySelectorAll('[class*="animate-"], [class*="animation"]')).toHaveLength(0);
       for (const el of region.querySelectorAll<HTMLElement>('*')) expect(el.style.animation).toBe('');
     };
     check();
     tick(m, 26_000);
-    expect(band().getByRole('timer')).toHaveAttribute('data-urgente', 'true');
+    expect(placar().getByRole('timer')).toHaveAttribute('data-urgente', 'true');
     check();
     tick(m, 4_000);
     check();
@@ -833,7 +834,7 @@ describe('relógio (spec §3.8, §10.3)', () => {
     expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
     tick(m, 3_000);
     expect(screen.getByText('Tempo esgotado')).toBeInTheDocument();
-    expect(band().getByRole('timer')).toHaveTextContent('0');
+    expect(placar().getByRole('timer')).toHaveTextContent('0');
     expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toBeDisabled();
     // A mão também não escolhe mais.
     expect(handList().getAllByRole('button')).toHaveLength(3);
@@ -863,8 +864,8 @@ describe('relógio (spec §3.8, §10.3)', () => {
       expect(regions).toHaveLength(1);
       expect(regions[0]!.className).toContain('sr-only');
       expect(regions[0]).not.toHaveAttribute('role');
-      expect(band().getByRole('timer')).not.toHaveAttribute('aria-live', 'assertive');
-      expect(band().getByRole('timer').closest('[aria-live="assertive"]')).toBeNull();
+      expect(placar().getByRole('timer')).not.toHaveAttribute('aria-live', 'assertive');
+      expect(placar().getByRole('timer').closest('[aria-live="assertive"]')).toBeNull();
     });
 
     it('no começo do prazo, aos 10 s e aos 5 s', () => {

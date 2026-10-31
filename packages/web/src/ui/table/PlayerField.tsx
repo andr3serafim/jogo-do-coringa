@@ -1,19 +1,14 @@
-// A metade da mesa de um jogador, na capa colorida dele (spec §3.1 e §10.1): o Coringa com vida, a Guarda e os
-// buffs, as marcas de estado e as duas fileiras. Em cima o oponente (verde), embaixo você (rosa); os dois se
-// distinguem por posição e por rótulo, nunca só pela cor. O arranjo (celular em coluna, PC em três colunas)
-// é de CSS: a árvore é uma só.
+// A metade da mesa de um jogador, na capa colorida dele (spec §3.1 e §10.1): a Guarda e os buffs, as marcas de estado e as
+// duas fileiras; no do oponente, a mão dele (o verso das cartas), a presença e o Equipar. O Coringa, o apelido e a vida moram no
+// placar do topo (sub-projeto 6 §3). Em cima o oponente (verde), embaixo você (rosa); os dois se distinguem por posição e por
+// rótulo, nunca só pela cor. O arranjo (celular em coluna, PC em colunas) é de CSS: a árvore é uma só.
 import { absoluteAttackArmed, defenseHealActive, type PlayerView, type PublicPlayer, type SpecialCard } from '@coringa/engine';
 import { useId, type ReactNode } from 'react';
 import { cardDropKey, DROP, type DropKey } from '../../model/drag.ts';
-import { zoneKey, type MarkZone } from '../../model/marks.ts';
 import { useAnim } from '../anim/context.ts';
-import { DamageNumber, ShieldBreak } from '../anim/Effects.tsx';
-import { useCountedNumber } from '../anim/useCountedNumber.ts';
 import { CardBack } from '../cards/Card.tsx';
-import { Coringa } from '../cards/Coringa.tsx';
 import { useTableUi } from './context.ts';
 import { handCountText, resurrectionsText } from './labels.ts';
-import { NovoChip } from './NovoChip.tsx';
 import { Row } from './Row.tsx';
 import { TableCard } from './TableCard.tsx';
 
@@ -21,7 +16,7 @@ export interface PlayerFieldProps {
   side: 'self' | 'opponent';
   view: PlayerView;
   player: PublicPlayer;
-  /** Apelido; no seu campo, o rótulo "(você)" vem junto. */
+  /** Apelido (os nomes dos grupos e das listas do campo; o apelido visível mora no placar). */
   name: string;
   /** Oponente fora da sala (só no campo dele). */
   away?: boolean;
@@ -34,7 +29,6 @@ export interface PlayerFieldProps {
 export function PlayerField({ side, view, player, name, away = false, equip, tool }: PlayerFieldProps) {
   const self = side === 'self';
   const { hintZone } = useTableUi();
-  const zone: MarkZone = self ? 'selfHp' : 'opponentHp';
   const rowLabel = (kind: 'ataque' | 'defesa') => (self ? `Sua fileira de ${kind}` : `Fileira de ${kind} de ${name}`);
   const limit = view.config.rowLimit;
   const attack = (
@@ -49,7 +43,8 @@ export function PlayerField({ side, view, player, name, away = false, equip, too
     />
   );
   const defense = <Row label={rowLabel('defesa')} kind="DEF" side={player} limit={limit} droppable={self} targets={!self} />;
-  const info = <Info side={side} view={view} player={player} name={name} away={away} equip={equip} zone={zone} tool={tool} />;
+  // No seu campo não sobra nada do Coringa: a mão é a de baixo e a vida mora no placar.
+  const info = self ? null : <Info player={player} name={name} away={away} equip={equip} tool={tool} />;
   const zones = <Zones player={player} name={name} view={view} self={self} />;
 
   return (
@@ -85,87 +80,38 @@ export function PlayerField({ side, view, player, name, away = false, equip, too
 }
 
 // ---------------------------------------------------------------------------------------------
-// Coringa: avatar, apelido, vida e mão
+// O oponente: a mão (o verso das cartas), a presença, o Equipar e os botões do celular
 
 interface InfoProps {
-  side: 'self' | 'opponent';
-  view: PlayerView;
   player: PublicPlayer;
   name: string;
   away: boolean;
   equip: string | undefined;
-  zone: MarkZone;
   tool: ReactNode;
 }
 
-function Info({ side, view, player, name, away, equip, zone, tool }: InfoProps) {
-  const self = side === 'self';
-  const { zones, onSeen } = useTableUi();
-  const marked = zones.has(zone);
-  const seen = onSeen && marked ? () => onSeen(zoneKey(zone)) : undefined;
-  const max = view.config.hp;
+function Info({ player, name, away, equip, tool }: InfoProps) {
   const anim = useAnim();
-  // A vida mostrada espera a batida do dano e conta até o valor da `view`, que é a verdade (aria-valuenow).
-  const shownHp = useCountedNumber(player.hp);
-  const damage = anim.fx.damage?.target === player.id ? anim.fx.damage : null;
   const dealtBacks = anim.backs(player.id);
-  const percent = Math.max(0, Math.min(100, (shownHp / max) * 100));
-  const hpName = `Vida de ${name}`;
-
   return (
-    <div className={`campo-info ${self ? 'campo-info--voce' : 'campo-info--oponente'}`}>
-      <span className="area-avatar relative size-10 shrink-0 pc:size-16 pc-baixo:size-12">
-        <Coringa className="size-full" />
-        {anim.fx.shieldBreak === player.id ? <ShieldBreak ms={anim.beatMs} reduced={anim.reduced} /> : null}
-      </span>
-      <div className="area-nome min-w-0">
-        <h2 className="truncate text-[17px] font-bold leading-tight pc:text-2xl">
-          {name}
-          {self && name !== 'Você' ? <span className="text-sm font-normal pc:text-lg"> (você)</span> : null}
-        </h2>
-        {away ? <p className="text-xs font-bold">fora da sala</p> : null}
-        {equip ? <p className="text-xs font-bold">{equip}</p> : null}
+    <div className="campo-info">
+      <div className="area-mao flex items-center gap-1.5">
+        <span aria-hidden="true" className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">
+          Mão
+        </span>
+        <span role="img" aria-label={handCountText(name, player.handCount)} className="flex items-center gap-[3px]">
+          {Array.from({ length: player.handCount }, (_, index) => (
+            // As cartas que o `CardsDealt` traz (as últimas da mão) esmaecem na batida dela.
+            <CardBack key={index} enter={dealtBacks !== null && index >= player.handCount - dealtBacks.count ? dealtBacks.delay : null} />
+          ))}
+        </span>
       </div>
-      {self ? null : (
-        <div className="area-mao flex items-center gap-1.5">
-          <span aria-hidden="true" className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">
-            Mão
-          </span>
-          <span role="img" aria-label={handCountText(name, player.handCount)} className="flex items-center gap-[3px]">
-            {Array.from({ length: player.handCount }, (_, index) => (
-              // As cartas que o `CardsDealt` traz (as últimas da mão) esmaecem na batida dela.
-              <CardBack key={index} enter={dealtBacks !== null && index >= player.handCount - dealtBacks.count ? dealtBacks.delay : null} />
-            ))}
-          </span>
+      {away || equip ? (
+        <div className="area-nome min-w-0">
+          {away ? <p className="text-xs font-bold">fora da sala</p> : null}
+          {equip ? <p className="text-xs font-bold">{equip}</p> : null}
         </div>
-      )}
-      <span className="area-vida relative flex items-baseline gap-0.5" onPointerEnter={seen} onPointerDown={seen}>
-        <span data-hp className="font-texto text-[34px] font-extrabold leading-none tabular-nums pc:text-[56px] pc-baixo:text-[44px]">
-          {shownHp}
-        </span>
-        <span aria-hidden="true" className="font-texto text-[13px] font-semibold tabular-nums pc:text-lg">
-          /{max}
-        </span>
-        {damage ? <DamageNumber amount={damage.amount} heal={damage.heal === true} ms={anim.beatMs} reduced={anim.reduced} /> : null}
-        {marked ? (
-          <span className="absolute -bottom-3 left-0">
-            <NovoChip />
-          </span>
-        ) : null}
-      </span>
-      <div
-        role="meter"
-        aria-label={marked ? `${hpName}, novo` : hpName}
-        aria-valuemin={0}
-        aria-valuemax={max}
-        aria-valuenow={player.hp}
-        aria-valuetext={`${player.hp} de ${max}`}
-        onPointerEnter={seen}
-        onPointerDown={seen}
-        className="area-barra box-border h-3 min-w-0 rounded-[2px] border-[2.5px] border-tinta bg-[repeating-linear-gradient(135deg,var(--color-tinta)_0_1.5px,transparent_1.5px_5px)] pc:h-3.5 pc:border-[3px]"
-      >
-        <div className="h-full bg-tinta" style={{ width: `${percent}%` }} />
-      </div>
+      ) : null}
       {tool ? <div className="area-ferr">{tool}</div> : null}
     </div>
   );
