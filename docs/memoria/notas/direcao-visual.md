@@ -37,3 +37,16 @@ Ao "começo o brainstorming da nova direção visual?": "Sim, começar".
 ## Rascunhos mostrados
 
 - `.superpowers/brainstorm/` (fora do git): servidor de rascunhos do brainstorming. O que ele escolher vai registrado aqui.
+- **Rascunho 1** (`placar-e-cenas.html`): o placar de luta no topo (barras espelhadas com o rastro vermelho), o selo redondo
+  "1º · VEZ" no retrato de quem tem a iniciativa, o Ataque Absoluto como golpe (corte com raios coloridos, J em órbita, raio e
+  impacto), a Defesa Absoluta como transformação (aura de chamas, coroa, onda de choque), o golpe comum e as cartas que
+  inclinam. A reação dele:
+  > Achei semelhante os absolutos. O ataque absoluto ficou bom mas pode melhor, com as chamas atrás algo que remete a poder
+  > supremo. achei exagerado essas listras coloridas de fundo. já a defesa não deve ter as chamas, deve ter um símbolo de escudo
+  > que remete a fortaleza. observação: remover os textos pequenos das cenas especiais ("quatro J atravessam a guarda para
+  > ataque" e "nenhum dano até o próximo ataque").
+  > Golpe comum está bom e iniciativa está muito amador. remova o circulo que fica no avatar e no lugar de 1ª vez coloque a
+  > imagem de uma espada indicando ataque tudo isso com visual mais intuitivo e nível jogo indie vencedor de prêmio.
+  - **Aprovado por ele:** o golpe comum (peso, rastro vermelho, número).
+  - **A mudar:** cada especial com identidade própria (o Ataque com chamas de poder supremo; a Defesa com escudo de
+    fortaleza, sem chamas); fundo sem as listras coloridas; as cenas sem legenda; a iniciativa sem o círculo, com uma espada.
