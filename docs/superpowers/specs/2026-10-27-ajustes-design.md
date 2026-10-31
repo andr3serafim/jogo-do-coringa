@@ -151,21 +151,23 @@ leitura e não está nas palavras dele.
   - no envio antecipado (faltam 1,5 s) e no tempo esgotado, as que faltam entram depois das escolhidas, na ordem de compra;
   - o terminal do simulador (`pnpm play`) continua perguntando na ordem de compra.
 
-### E3. Roubo, cura pela Defesa e limite de especiais (medir antes)
+### E3. Roubo, cura pela Defesa e limite de especiais (medida; feita no bloco E3 + F2 + F3)
 
 - **Ás = Armadilha ou Roubo**, à escolha na hora; qualquer naipe. O Selvagem no papel de A escolhe um dos dois.
 - **Roubo** (só na fase principal do seu turno): pega uma numérica de qualquer fileira do oponente e a põe no fim da fileira que
-  o ladrão escolher; com a fileira cheia, a última dela vai ao cemitério. O naipe vira regra (hoje é só visual).
-  - ♣/♠: o oponente leva dano igual ao **valor seco** da carta (sem buffs nem bônus de quadra). Um K na Guarda **anula esse
+  o ladrão escolher; com a fileira cheia, a última dela vai ao cemitério. **Sem naipe desde 2026-10-31** (autor: "Não existe mais
+  naipe no jogo"; antes, ♣/♠ davam só o dano e ♥/♦ só a cura):
+  - o oponente leva dano igual ao **valor seco** da carta (sem buffs nem bônus de quadra). Um K na Guarda **anula esse
     dano e não quebra**. O dano do roubo **não conta para a iniciativa** e **não mata**: a vida
-    do oponente fica em no mínimo 1.
-  - ♥/♦: quem roubou cura o valor seco, até a vida inicial.
+    do oponente fica em no mínimo 1;
+  - e quem roubou cura o mesmo valor seco, cheio, até a vida inicial (mesmo quando o K anula o dano **[I]**).
   - A carta que o ladrão perde com a fileira cheia cura, se cumprir a cura passiva.
   - A Defesa Absoluta do oponente **bloqueia o roubo inteiro**: nada é roubado (autor, 2026-10-30).
 - **Cura passiva:** com 2 K ou mais na Guarda **[I: "2 K" = pelo menos 2]**, cada numérica da **própria Fileira de Defesa**
   que vai ao cemitério, de qualquer naipe, cura valor × (1 + nº de Q). A vida nunca passa da inicial.
 - **Limite de 4 especiais na mão**, com penalidade na compra (o autor: senão "o player fica juntando K até fazer o exódia").
-  Medir 2 ou 3 formas e levar ao autor com a recomendação. Exemplos: a especial que passa do limite vai direto ao cemitério; o
+  Medidas as três formas; **o autor escolheu a BURN com limite 4** (2026-10-31): a especial que passaria do limite vai direto ao
+  cemitério (`notas/medicao-e3.md` na memória). Exemplos: a especial que passa do limite vai direto ao cemitério; o
   jogador escolhe qual descartar; ele compra menos cartas no Equipar seguinte. Conferir se Reflect e Devastação (3 cartas cada)
   e o Anular continuam possíveis com 4.
 - **Medir no simulador:**

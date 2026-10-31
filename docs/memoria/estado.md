@@ -11,8 +11,8 @@
   autor para seguir até o merge sem parar (`decisoes.md` 2026-10-31 (9)). Antes dele: `e50d625` (BURN 4 no padrão, o Roubo sem
   naipe, a semente do tutorial `tutorial-381`) e a remedição (`9152b18`; leitura em `notas/medicao-e3.md` §5: o Roubo vence 39%
   contra quem não rouba; nada no teto; a parada combinada não disparou).
-- **Feito no plano 2:** Tarefa 1 (`3af88bb`: `InitiativeDecided` em toda rodada de Ataque, `lastInitiative`, `damageThisRound` na visão), Tarefa 2 (`9152b18`: `stealPreview`), Tarefa 3 (`6c169c9`: o Roubo na mesa).
-- **Próximo passo exato:** a Tarefa 4 do plano 2 (a iniciativa na tela: o placar da rodada na faixa do centro, o motivo fora do Ataque e na pergunta da ordem).
+- **Feito no plano 2:** Tarefas 1 a 7: `3af88bb` (a decisão da iniciativa no motor), `9152b18` (`stealPreview`), `6c169c9` (o Roubo na mesa), `bb24aab` (a iniciativa na tela: placar, motivo e a faixa de 1,2 s fora do teto), `3a212b8` (o Roubo, a cura, a queimada e a cena rara da Devastação), `4e1adf5` (as dicas do Roubo, da Devastação e do limite; o resumo das regras), `d374804` (a fixture `especiais.json` na partida `layout-1188`, passo 99, sem a zona do Reflect; as specs).
+- **Próximo passo exato:** a Tarefa 8: **rodando** `pnpm sim:dificil --recomecar` (sozinho na CPU; relatório em `packages/sim/reports/dificil.md`). Depois: `pnpm sim:calibrate`, `pnpm e2e` local, push, CI verde nos dois jobs, revisão final da branch, `diario.md`, PR e merge.
 - **Avisos para o plano 2:** o teste de propriedade das jogadas da mesa (web) pula o `STEAL` até a interface do Roubo existir; o
   previsor da mão do tutorial (`sim/src/tutorial-seed.ts`) só conhece a BURN e falha alto com outra forma; a CI `e2e` desta
   branch pode estar vermelha (a interface ainda não oferece as jogadas novas).
