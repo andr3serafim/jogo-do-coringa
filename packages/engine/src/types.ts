@@ -98,7 +98,17 @@ export interface PlayerState {
   damageThisRound: number;
 }
 
-export type ReactionTrigger = 'ATTACK' | 'K_PLAYED' | 'REFLECT_PLAYED';
+/** `REFLECT_PLAYED`: a resposta de quem foi refletido (F2). `DEVASTATION`: a janela aberta pela Devastação (F3). */
+export type ReactionTrigger = 'ATTACK' | 'K_PLAYED' | 'DEVASTATION' | 'REFLECT_PLAYED';
+
+/** A Devastação em curso (F3): quem lançou, a fileira do oponente que ela esvazia e as 3 cartas (K, o A e o J ou o Q). */
+export interface DevastationState {
+  player: PlayerId;
+  row: RowName;
+  k: SpecialCard;
+  a: SpecialCard;
+  x: SpecialCard;
+}
 
 /** Sem anti-travamento (E1 do sub-projeto 5) não há empate: a partida acaba por vida, Exódia ou W.O. */
 export type GameResult = { kind: 'WIN'; winner: PlayerId; reason: 'HP' | 'EXODIA' | 'FORFEIT' };
@@ -107,7 +117,8 @@ export type Phase =
   | { kind: 'EQUIP' }
   | { kind: 'ORDER_CHOICE'; player: PlayerId }
   | { kind: 'ATTACK_MAIN'; player: PlayerId }
-  | { kind: 'REACTION'; responder: PlayerId; trigger: ReactionTrigger }
+  /** `devastation`: a Devastação em curso, na janela dela e na resposta ao Reflect que a devolve. */
+  | { kind: 'REACTION'; responder: PlayerId; trigger: ReactionTrigger; devastation?: DevastationState }
   | { kind: 'GAME_OVER'; result: GameResult };
 
 export type RngState = [number, number, number, number];
@@ -144,6 +155,11 @@ export type Action =
   /** Reflect contra Reflect: só na resposta a um Reflect, com K + J + Q da mão. */
   | { type: 'CANCEL_REFLECT'; kId: string; jId: string; qId: string }
   | { type: 'RESURRECT'; cardId: string; row: RowName }
+  /**
+   * Devastação (F3): K + A + J esvazia a Fileira de Ataque do oponente, K + A + Q a de Defesa. `row` é a fileira **do oponente**;
+   * `xId` é o J (Ataque) ou o Q (Defesa). O Selvagem vale como A, J ou Q.
+   */
+  | { type: 'DEVASTATE'; kId: string; aId: string; xId: string; row: RowName }
   | { type: 'DECLARE_ATTACK' }
   | { type: 'END_TURN' }
   | { type: 'PASS' }
@@ -183,10 +199,16 @@ export type GameEvent =
   /** `as` só quando a carta sacrificada é um Selvagem (no papel de J ou de Q, o do alvo). */
   | { type: 'Sacrificed'; player: PlayerId; card: SpecialCard; as?: 'J' | 'Q'; target: SpecialCard; targetOwner: PlayerId }
   /** `against`: o golpe que o Reflect responde. */
-  | { type: 'ReflectPlayed'; player: PlayerId; reflect: ReflectState; against: 'ATTACK' }
+  | { type: 'ReflectPlayed'; player: PlayerId; reflect: ReflectState; against: 'ATTACK' | 'DEVASTATION' }
   /** Reflect contra Reflect: `player` respondeu ao Reflect de `owner`; os dois se anulam e o golpe não acontece. */
   | { type: 'ReflectCanceled'; player: PlayerId; owner: PlayerId }
   | { type: 'ReflectTriggered'; owner: PlayerId; attacker: PlayerId; damage: number }
+  /** `target`: o dono da fileira que a Devastação esvazia, se ninguém responder. */
+  | { type: 'DevastationCast'; player: PlayerId; target: PlayerId; row: RowName; k: SpecialCard; a: SpecialCard; x: SpecialCard }
+  /** `player` perdeu a fileira inteira; `reflected`: foi a própria Devastação, devolvida por um Reflect. */
+  | { type: 'RowDevastated'; player: PlayerId; row: RowName; cards: NumCard[]; reflected: boolean }
+  /** A Devastação de `player` não aconteceu: Reflect contra Reflect, ou o Reflect contra quem está sob Defesa Absoluta. */
+  | { type: 'DevastationCanceled'; player: PlayerId; reason: 'REFLECT_CLASH' | 'ABSOLUTE_DEFENSE' }
   | { type: 'ReactionWindowOpened'; responder: PlayerId; trigger: ReactionTrigger }
   | { type: 'ReactionWindowClosed'; responder: PlayerId; trigger: ReactionTrigger }
   | { type: 'AttackDeclared'; player: PlayerId }

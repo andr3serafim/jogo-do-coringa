@@ -1,6 +1,6 @@
 import { pruneResurrections } from './quads.ts';
 import { draw, getPlayer, opponentOf, toGraveyard } from './state.ts';
-import type { Card, GameEvent, GameState, PlayerId, PlayerState, ReactionTrigger } from './types.ts';
+import type { Card, DevastationState, GameEvent, GameState, PlayerId, PlayerState, ReactionTrigger } from './types.ts';
 
 /** Ciclo da spec §1.3: Equipar, Equipar, Ataque, Equipar, Ataque, … */
 export function startRound(s: GameState, ev: GameEvent[]): void {
@@ -56,8 +56,14 @@ export function startTurn(s: GameState, index: 0 | 1, ev: GameEvent[]): void {
   ev.push({ type: 'TurnStarted', player: current });
 }
 
-export function openReaction(s: GameState, responder: PlayerId, trigger: ReactionTrigger, ev: GameEvent[]): void {
-  s.phase = { kind: 'REACTION', responder, trigger };
+export function openReaction(
+  s: GameState,
+  responder: PlayerId,
+  trigger: ReactionTrigger,
+  ev: GameEvent[],
+  devastation?: DevastationState,
+): void {
+  s.phase = devastation ? { kind: 'REACTION', responder, trigger, devastation } : { kind: 'REACTION', responder, trigger };
   ev.push({ type: 'ReactionWindowOpened', responder, trigger });
 }
 

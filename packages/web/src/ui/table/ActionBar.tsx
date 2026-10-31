@@ -20,6 +20,7 @@ import {
   brokenLabel,
   CANCEL_LABEL,
   CANCEL_REFLECT_LABEL,
+  devastateLabel,
   chooseCardText,
   chooseTargetText,
   EMPTY_ATTACK_TEXT,
@@ -330,7 +331,7 @@ function TargetList({ view, names, targets, before, disabled, marked, onSeen, on
   );
 }
 
-/** Reflect, Anular o Reflect, Proteger-se e Ressuscitar: as jogadas de várias cartas, quando são possíveis. */
+/** Reflect, Anular o Reflect, Devastação e Ressuscitar: as jogadas de várias cartas, quando são possíveis. */
 function OwnPlays({ view, plays, disabled, onSend, onResurrect }: ActionBarProps) {
   const own = ownCardsById(view);
   const items: ReactNode[] = [];
@@ -358,6 +359,11 @@ function OwnPlays({ view, plays, disabled, onSend, onResurrect }: ActionBarProps
   if (cancelReflect?.type === 'CANCEL_REFLECT') {
     const cards = pickCards(own, [cancelReflect.kId, cancelReflect.jId, cancelReflect.qId]);
     if (cards) add('cancel', CANCEL_REFLECT_LABEL, leavesText(cards, 'hand'), () => onSend(cancelReflect));
+  }
+  for (const devastate of plays.devastate) {
+    if (devastate.type !== 'DEVASTATE') continue;
+    const cards = pickCards(own, [devastate.kId, devastate.aId, devastate.xId]);
+    if (cards) add(`devastate-${devastate.row}`, devastateLabel(devastate.row), leavesText(cards, 'hand'), () => onSend(devastate));
   }
   if (plays.resurrect.length > 0) {
     // A arte da Ressurreição (U2): a carta que sobe da lápide; a linha de baixo diz de onde ela vem e o que há para trazer.

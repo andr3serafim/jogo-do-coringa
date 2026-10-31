@@ -23,6 +23,22 @@ function reflectCombos(hand: SpecialCard[]): Array<{ k: string; j: string; q: st
   return combos;
 }
 
+/** K + A + (J ou Q), com Selvagens no papel de A e de J/Q: uma combinação por par de cartas distintas, como no Reflect. */
+function devastationCombos(hand: SpecialCard[], x: 'J' | 'Q'): Array<{ k: string; a: string; x: string }> {
+  const k = firstOf(hand, 'K');
+  if (!k) return [];
+  const wilds = hand.filter((c) => c.kind === 'WILD').slice(0, 2);
+  const as = [firstOf(hand, 'A'), ...wilds].filter(defined);
+  const xs = [firstOf(hand, x), ...wilds].filter(defined);
+  const combos: Array<{ k: string; a: string; x: string }> = [];
+  for (const a of as) {
+    for (const other of xs) {
+      if (a.id !== other.id) combos.push({ k: k.id, a: a.id, x: other.id });
+    }
+  }
+  return combos;
+}
+
 const REPLACE_OR_DISCARD: readonly Destination[] = ['REPLACE_LAST_ATK', 'REPLACE_LAST_DEF', 'DISCARD'];
 
 /** O que a regra (spec §1.4) deixa para uma carta com `atk` e `def` cartas nas fileiras: fileira com vaga; as duas cheias, trocar ou descartar. */
@@ -119,6 +135,13 @@ function mainOptions(view: PlayerView): Action[] {
       if (self.defenseRow.length < config.rowLimit) actions.push({ type: 'RESURRECT', cardId: card.id, row: 'DEF' });
     }
   }
+  // Devastação (F3), depois da Ressurreição: contra Defesa Absoluta não vale, e só contra fileira com carta.
+  if (!opponent.absoluteDefense) {
+    for (const [row, x] of [['ATK', 'J'], ['DEF', 'Q']] as const) {
+      if ((row === 'ATK' ? opponent.attackRow : opponent.defenseRow).length === 0) continue;
+      for (const c of devastationCombos(self.hand, x)) actions.push({ type: 'DEVASTATE', kId: c.k, aId: c.a, xId: c.x, row });
+    }
+  }
   actions.push(self.attackRow.length > 0 ? { type: 'DECLARE_ATTACK' } : { type: 'END_TURN' });
   return actions;
 }
@@ -128,6 +151,11 @@ function reactionOptions(view: PlayerView, trigger: ReactionTrigger): Action[] {
   const actions: Action[] = [{ type: 'PASS' }];
   if (trigger === 'REFLECT_PLAYED') {
     for (const c of reflectCombos(self.hand)) actions.push({ type: 'CANCEL_REFLECT', kId: c.k, jId: c.j, qId: c.q });
+    return actions;
+  }
+  if (trigger === 'DEVASTATION') {
+    // Contra a Devastação, só o Reflect responde (F3).
+    for (const c of reflectCombos(self.hand)) actions.push({ type: 'REFLECT', kId: c.k, jId: c.j, qId: c.q });
     return actions;
   }
   if (!opponent.absoluteDefense) {

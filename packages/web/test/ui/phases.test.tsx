@@ -658,6 +658,15 @@ describe('janela de reação (spec §3.7)', () => {
     expect(inBar().getByRole('button', { name: 'Passar' })).toBeInTheDocument();
   });
 
+  it('o gatilho da Devastação diz qual fileira você perde (F3)', () => {
+    const devastation = { player: 'p2', row: 'DEF' as const, k: { id: 'dk', kind: 'K' as const, suit: 'paus' as const }, a: { id: 'da', kind: 'A' as const, suit: 'paus' as const }, x: { id: 'dq', kind: 'Q' as const, suit: 'paus' as const } };
+    mount(
+      { ...DRAFT, self: { ...DRAFT.self, hand: ['K', 'J', 'Q'] }, phase: { kind: 'REACTION', responder: 'p1', trigger: 'DEVASTATION', devastation } },
+      { state: withClock },
+    );
+    expect(inBar().getByText('Duda lançou uma Devastação na sua fileira de Defesa')).toBeInTheDocument();
+  });
+
   it('Passar manda PASS, sem auto, e depois a barra diz que você passou (o servidor segura o passe)', async () => {
     const m = mount(REACTION, { state: withClock });
     await m.user.click(inBar().getByRole('button', { name: 'Passar' }));

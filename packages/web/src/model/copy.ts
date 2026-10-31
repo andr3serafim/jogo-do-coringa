@@ -56,6 +56,8 @@ export const EMPTY_ATTACK_TEXT = 'Sua fileira de Ataque está vazia';
 export const CANCEL_LABEL = 'Cancelar';
 export const REFLECT_LABEL = 'Lançar Reflect';
 export const CANCEL_REFLECT_LABEL = 'Anular o Reflect';
+/** A Devastação (F3): esvazia a fileira do oponente. */
+export const devastateLabel = (row: RowName): string => (row === 'ATK' ? 'Devastar o Ataque' : 'Devastar a Defesa');
 export const RESURRECT_LABEL = 'Ressuscitar';
 
 export const PICK_CARD_TEXT = 'Toque numa carta da mão para ver as jogadas.';
@@ -78,6 +80,8 @@ export function noPlayReasonText(card: SpecialCard, reason: NoPlayReason | null,
       return 'na janela de reação só o A (ou o Selvagem como A) responde';
     case 'REACTION_REFLECT':
       return 'contra o Reflect, só outro Reflect (K + J + Q da mão)';
+    case 'REACTION_DEVASTATION':
+      return 'contra a Devastação, só o Reflect (K + J + Q da mão)';
     case 'BUFF_LIMIT':
       return card.kind === 'Q'
         ? `seus Buffs de defesa já têm ${buffLimit} Q, o limite`
@@ -292,6 +296,9 @@ export const guardPlayedText = (opponent: string, count: number | null): string 
   `${opponent} pôs ${count === null ? '' : `${count} `}K na Guarda`;
 
 export const reflectPlayedText = (opponent: string): string => `${opponent} lançou um Reflect`;
+/** O gatilho da janela da Devastação (F3): a fileira que você perde se não responder com um Reflect. */
+export const devastationCastText = (opponent: string, row: RowName): string =>
+  `${opponent} lançou uma Devastação na sua fileira de ${row === 'ATK' ? 'Ataque' : 'Defesa'}`;
 
 /** O turno do jogador que espera, congelado durante a janela de reação. */
 export const pausedTurnText = (seconds: number): string => `seu turno: ${seconds} s, pausado`;

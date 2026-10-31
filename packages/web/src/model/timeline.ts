@@ -123,6 +123,11 @@ function classify(event: GameEvent): Classified {
     case 'TrapUsed':
     case 'Sacrificed':
       return move([event.card.id, event.target.id]);
+    case 'RowDevastated':
+      return move(event.cards.map((c) => c.id));
+    case 'DevastationCast':
+      return move([event.k.id, event.a.id, event.x.id]);
+    case 'DevastationCanceled':
     case 'DeckReshuffled':
     case 'ReflectCanceled':
     case 'AttackDeclared':

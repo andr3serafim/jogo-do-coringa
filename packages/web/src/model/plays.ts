@@ -28,6 +28,8 @@ export interface TablePlays {
   byCard: Map<string, CardPlay[]>;
   reflect: PlayerAction | null;
   cancelReflect: PlayerAction | null;
+  /** A Devastação (F3), uma por fileira do oponente: a de menos Selvagens. */
+  devastate: PlayerAction[];
   /** Um item por valor no cemitério; `rows` só com as fileiras que têm vaga. */
   resurrect: { cardId: string; value: Rank; rows: RowName[] }[];
   finish: { type: 'DECLARE_ATTACK' } | { type: 'END_TURN' } | null;
@@ -59,6 +61,8 @@ function cardIdsOf(action: PlayerAction): string[] {
     case 'REFLECT':
     case 'CANCEL_REFLECT':
       return [action.kId, action.jId, action.qId];
+    case 'DEVASTATE':
+      return [action.kId, action.aId, action.xId];
     default:
       return [];
   }
@@ -87,6 +91,8 @@ export function roleKey(action: PlayerAction, view: PlayerView): string {
       return `${action.type}|${role(action.kId)}|${role(action.jId)}|${role(action.qId)}`;
     case 'RESURRECT':
       return `RESURRECT|${role(action.cardId)}|${action.row}`;
+    case 'DEVASTATE':
+      return `DEVASTATE|${role(action.kId)}|${role(action.aId)}|${role(action.xId)}|${action.row}`;
     case 'EQUIP':
       return `EQUIP|${action.destinations.join(',')}`;
     case 'CHOOSE_ORDER':
@@ -243,6 +249,9 @@ export function tablePlays(view: PlayerView, legal: PlayerAction[]): TablePlays 
     byCard,
     reflect: fewestWilds(legal.filter((a) => a.type === 'REFLECT'), view),
     cancelReflect: fewestWilds(legal.filter((a) => a.type === 'CANCEL_REFLECT'), view),
+    devastate: (['ATK', 'DEF'] as const)
+      .map((row) => fewestWilds(legal.filter((a) => a.type === 'DEVASTATE' && a.row === row), view))
+      .filter((a): a is PlayerAction => a !== null),
     resurrect: [...resurrect.values()],
     finish: has('DECLARE_ATTACK') ? { type: 'DECLARE_ATTACK' } : has('END_TURN') ? { type: 'END_TURN' } : null,
     pass: has('PASS'),

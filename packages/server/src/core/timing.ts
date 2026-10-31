@@ -50,10 +50,13 @@ export function schedulePhase(record: RoomRecord, prev: PhaseSnapshot, events: G
     }
     case 'REACTION':
       durationMs = TIMERS.reactionMs;
-      game.pausedTurnMs =
-        prev.phase.kind === 'ATTACK_MAIN' && phase.trigger !== 'ATTACK' && prev.deadlineAt !== null
-          ? Math.max(0, prev.deadlineAt - now)
-          : null;
+      // De uma reação para outra (a Devastação respondida com Reflect, F3), o tempo guardado do turno fica para quando ele voltar.
+      if (prev.phase.kind !== 'REACTION') {
+        game.pausedTurnMs =
+          prev.phase.kind === 'ATTACK_MAIN' && phase.trigger !== 'ATTACK' && prev.deadlineAt !== null
+            ? Math.max(0, prev.deadlineAt - now)
+            : null;
+      }
       break;
     case 'GAME_OVER':
       game.pausedTurnMs = null;

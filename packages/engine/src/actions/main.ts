@@ -105,6 +105,31 @@ export function takeReflectCards(p: PlayerState, kId: string, jId: string, qId: 
   };
 }
 
+/**
+ * Devastação (F3 do sub-projeto 5): K + A + J da mão esvazia a Fileira de Ataque do oponente, K + A + Q a de Defesa. Abre a janela
+ * dele, onde só o Reflect responde. Não vale contra Defesa Absoluta nem contra fileira vazia ([I]).
+ */
+export function devastate(s: GameState, p: PlayerState, kId: string, aId: string, xId: string, row: RowName, ev: GameEvent[]): void {
+  if (row !== 'ATK' && row !== 'DEF') fail('INVALID_TARGET', 'fileira inválida');
+  const owner = opponentOf(s, p.id);
+  if (owner.absoluteDefense) fail('TARGET_PROTECTED', 'o oponente está sob Defesa Absoluta');
+  if (rowCards(owner, row).length === 0) fail('INVALID_TARGET', 'a fileira do oponente está vazia');
+  assertDistinct([kId, aId, xId]);
+  const k = takeFromHand(p, kId, ['K']);
+  const a = takeFromHand(p, aId, ['A', 'WILD']);
+  const x = takeFromHand(p, xId, row === 'ATK' ? ['J', 'WILD'] : ['Q', 'WILD']);
+  ev.push({ type: 'DevastationCast', player: p.id, target: owner.id, row, k, a, x });
+  openReaction(s, owner.id, 'DEVASTATION', ev, { player: p.id, row, k, a, x });
+}
+
+/** A fileira inteira vai ao cemitério; os buffs ficam e a quadra se desfaz. As cartas destruídas pela Devastação não curam. */
+export function devastateRow(s: GameState, victim: PlayerState, row: RowName, reflected: boolean, ev: GameEvent[]): void {
+  const cards = rowCards(victim, row).splice(0);
+  toGraveyard(s, cards);
+  ev.push({ type: 'RowDevastated', player: victim.id, row, cards, reflected });
+  reevaluateQuads(s, victim, ev);
+}
+
 /** Ressurreição (spec §1.8): 1 numérica do cemitério para o fim de uma fileira com espaço. */
 export function resurrect(s: GameState, p: PlayerState, cardId: string, row: RowName, ev: GameEvent[]): void {
   const tokens = validResurrections(s, p);

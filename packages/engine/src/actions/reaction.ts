@@ -3,7 +3,7 @@ import { fail } from '../errors.ts';
 import { endTurn, openReaction } from '../flow.ts';
 import { finishGame, getPlayer, isGameOver, opponentOf, toGraveyard } from '../state.ts';
 import type { GameEvent, GameState, PlayerId, PlayerState, ReactionTrigger } from '../types.ts';
-import { takeReflectCards, useTrap, type TargetZone } from './main.ts';
+import { devastateRow, takeReflectCards, useTrap, type TargetZone } from './main.ts';
 
 export function requireReaction(
   s: GameState,
@@ -29,6 +29,25 @@ export function closeReaction(s: GameState, ev: GameEvent[]): void {
   if (phase.trigger === 'ATTACK') {
     resolveAttack(s, actor.id, ev);
     if (!isGameOver(s)) endTurn(s, ev, true);
+  } else if (phase.trigger === 'DEVASTATION') {
+    // Ninguém respondeu à Devastação: a fileira do oponente vai ao cemitério, e quem lançou segue no turno.
+    const devastation = phase.devastation;
+    if (!devastation) throw new Error('janela da Devastação sem a Devastação');
+    devastateRow(s, getPlayer(s, phase.responder), devastation.row, false, ev);
+    toGraveyard(s, [devastation.k, devastation.a, devastation.x]);
+    s.phase = { kind: 'ATTACK_MAIN', player: actor.id };
+  } else if (phase.trigger === 'REFLECT_PLAYED' && phase.devastation) {
+    // A Devastação refletida volta para quem a lançou: perde a própria fileira do mesmo tipo, sem quebrar Q nem K. Sob Defesa
+    // Absoluta o Reflect é anulado e ninguém perde nada ([I]).
+    const { devastation } = phase;
+    const caster = getPlayer(s, phase.responder);
+    const reflect = actor.reflect;
+    if (!reflect) throw new Error('resposta ao Reflect sem Reflect na mesa');
+    actor.reflect = null;
+    if (caster.absoluteDefense) ev.push({ type: 'DevastationCanceled', player: caster.id, reason: 'ABSOLUTE_DEFENSE' });
+    else devastateRow(s, caster, devastation.row, true, ev);
+    toGraveyard(s, [devastation.k, devastation.a, devastation.x, reflect.k, reflect.j, reflect.q]);
+    s.phase = { kind: 'ATTACK_MAIN', player: caster.id };
   } else if (phase.trigger === 'REFLECT_PLAYED') {
     // Quem foi refletido não respondeu com outro Reflect: o golpe dele volta (o Reflect está na mesa do outro).
     resolveAttack(s, phase.responder, ev);
@@ -45,22 +64,25 @@ export function closeReaction(s: GameState, ev: GameEvent[]): void {
 export function reactTrap(s: GameState, playerId: PlayerId, cardId: string, targetId: string, ev: GameEvent[]): void {
   const { responder, trigger } = requireReaction(s, playerId);
   if (trigger === 'REFLECT_PLAYED') fail('WRONG_PHASE', 'o Ás não responde a um Reflect');
+  if (trigger === 'DEVASTATION') fail('WRONG_PHASE', 'contra a Devastação, só o Reflect responde');
   const zones: TargetZone[] = trigger === 'K_PLAYED' ? ['guard'] : ['attackBuffs', 'defenseBuffs', 'guard'];
   useTrap(s, responder, cardId, targetId, zones, ev);
 }
 
 /**
- * Reflect (F2 do sub-projeto 5): K + J + Q da mão, só na reação a um ataque. Fica na mesa do dono e abre a resposta de quem atacou,
- * que passa (o golpe volta) ou responde com outro Reflect. A Armadilha jogada antes, na mesma janela, vale.
+ * Reflect (F2 do sub-projeto 5): K + J + Q da mão, só na reação a um ataque ou a uma Devastação. Fica na mesa do dono e abre a
+ * resposta de quem foi refletido, que passa (o golpe volta) ou responde com outro Reflect. A Armadilha jogada antes, na janela do
+ * ataque, vale.
  */
 export function reactReflect(s: GameState, playerId: PlayerId, kId: string, jId: string, qId: string, ev: GameEvent[]): void {
   const { responder, actor, trigger } = requireReaction(s, playerId);
-  if (trigger !== 'ATTACK') fail('WRONG_PHASE', 'o Reflect só responde a um ataque');
+  if (trigger !== 'ATTACK' && trigger !== 'DEVASTATION') fail('WRONG_PHASE', 'o Reflect só responde a um ataque ou a uma Devastação');
+  const devastation = s.phase.kind === 'REACTION' ? s.phase.devastation : undefined;
   const reflect = takeReflectCards(responder, kId, jId, qId);
   responder.reflect = reflect;
-  ev.push({ type: 'ReflectPlayed', player: responder.id, reflect, against: 'ATTACK' });
+  ev.push({ type: 'ReflectPlayed', player: responder.id, reflect, against: trigger });
   ev.push({ type: 'ReactionWindowClosed', responder: responder.id, trigger });
-  openReaction(s, actor.id, 'REFLECT_PLAYED', ev);
+  openReaction(s, actor.id, 'REFLECT_PLAYED', ev, devastation);
 }
 
 /**
@@ -72,10 +94,18 @@ export function cancelReflect(s: GameState, playerId: PlayerId, kId: string, jId
   if (trigger !== 'REFLECT_PLAYED') fail('WRONG_PHASE', 'só dá para responder com Reflect a um Reflect');
   const reflect = actor.reflect;
   if (!reflect) fail('NO_REFLECT', 'o oponente não tem Reflect na mesa');
+  const devastation = s.phase.kind === 'REACTION' ? s.phase.devastation : undefined;
   const mine = takeReflectCards(responder, kId, jId, qId);
   actor.reflect = null;
   toGraveyard(s, [mine.k, mine.j, mine.q, reflect.k, reflect.j, reflect.q]);
   ev.push({ type: 'ReflectCanceled', player: responder.id, owner: actor.id });
   ev.push({ type: 'ReactionWindowClosed', responder: responder.id, trigger });
+  if (devastation) {
+    // Contra a Devastação, os dois Reflects se anulam e ela não acontece; quem a lançou segue no turno ([I]).
+    toGraveyard(s, [devastation.k, devastation.a, devastation.x]);
+    ev.push({ type: 'DevastationCanceled', player: responder.id, reason: 'REFLECT_CLASH' });
+    s.phase = { kind: 'ATTACK_MAIN', player: responder.id };
+    return;
+  }
   endTurn(s, ev, false);
 }

@@ -339,7 +339,7 @@ describe('propriedade: toda jogada montada pela mesa é aceita pelo motor', () =
         else for (const target of play.targets) actions.push(play.make(target.id));
       }
     }
-    for (const combo of [plays.reflect, plays.cancelReflect, plays.finish]) if (combo) actions.push(combo);
+    for (const combo of [plays.reflect, plays.cancelReflect, ...plays.devastate, plays.finish]) if (combo) actions.push(combo);
     for (const r of plays.resurrect) for (const row of r.rows) actions.push({ type: 'RESURRECT', cardId: r.cardId, row });
     if (plays.pass) actions.push({ type: 'PASS' });
     return actions;
@@ -372,6 +372,11 @@ describe('propriedade: toda jogada montada pela mesa é aceita pelo motor', () =
       const keys = new Set(actions.map((a) => roleKey(a, item.view)));
       for (const canonical of legal) {
         if (canonical.type === 'EQUIP' || canonical.type === 'CHOOSE_ORDER') continue;
+        if (canonical.type === 'DEVASTATE') {
+          const row = canonical.row;
+          expect(plays.devastate.some((a) => a.type === 'DEVASTATE' && a.row === row), JSON.stringify(canonical)).toBe(true);
+          continue;
+        }
         if (canonical.type === 'REFLECT' || canonical.type === 'CANCEL_REFLECT') {
           const offered = { REFLECT: 'reflect', CANCEL_REFLECT: 'cancelReflect' } as const;
           expect(plays[offered[canonical.type]], JSON.stringify(canonical)).not.toBeNull();

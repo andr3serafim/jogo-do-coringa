@@ -50,6 +50,11 @@ export function placeAll<T extends PublicPlayer>(p: T, pending: NumCard[], desti
   return { ...p, attackRow, defenseRow };
 }
 
+/** Com a fileira `row` vazia (efeito de uma Devastação). */
+export function emptied<T extends PublicPlayer>(p: T, row: 'ATK' | 'DEF'): T {
+  return row === 'ATK' ? { ...p, attackRow: [] } : { ...p, defenseRow: [] };
+}
+
 /** Sem o card `id` nos buffs e na Guarda (efeito de uma Armadilha ou Sacrifício). */
 export function without<T extends PublicPlayer>(p: T, id: string): T {
   const keep = (cards: SpecialCard[]) => cards.filter((c) => c.id !== id);

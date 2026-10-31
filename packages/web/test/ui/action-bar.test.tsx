@@ -468,6 +468,16 @@ describe('barra de ação: botões próprios (spec §3.4)', () => {
     expect(sentAction(m)).toEqual({ type: 'REFLECT', kId: k.id, jId: j.id, qId: q.id });
   });
 
+  it('Devastar o Ataque diz quais cartas saem da mão e manda DEVASTATE na fileira do oponente (F3)', async () => {
+    const m = mount(withHand(['K', 'A', 'J']));
+    const [k, a, j] = [handCards(m.view, 'K')[0]!, handCards(m.view, 'A')[0]!, handCards(m.view, 'J')[0]!];
+    expect(inBar().queryByRole('button', { name: startsWith('Devastar a Defesa') })).not.toBeInTheDocument();
+    const button = inBar().getByRole('button', { name: startsWith('Devastar o Ataque') });
+    expect(button).toHaveAccessibleName(`Devastar o Ataque sai ${cardText(k)} + ${cardText(a)} + ${cardText(j)} da sua mão`);
+    await m.user.click(button);
+    expect(sentAction(m)).toEqual({ type: 'DEVASTATE', kId: k.id, aId: a.id, xId: j.id, row: 'ATK' });
+  });
+
   it('Anular o Reflect aparece na janela de reação e manda CANCEL_REFLECT', async () => {
     const m = mount(withHand(['K', 'J', 'Q'], { phase: 'REFLECT_PLAYED', opponent: { ...DRAFT.opponent, reflect: true } }));
     expect(inBar().queryByRole('button', { name: startsWith('Lançar Reflect') })).not.toBeInTheDocument();

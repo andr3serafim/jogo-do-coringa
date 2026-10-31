@@ -66,6 +66,13 @@ const SAMPLES: { event: GameEvent; kind: Beat['kind']; scene?: SceneKind; cards?
   },
   { event: { type: 'ReflectCanceled', player: 'p2', owner: 'p1' }, kind: 'move' },
   {
+    event: { type: 'DevastationCast', player: 'p1', target: 'p2', row: 'ATK', k: face('k1'), a: face('a1', 'A'), x: face('j1', 'J') },
+    kind: 'move',
+    cards: ['k1', 'a1', 'j1'],
+  },
+  { event: { type: 'RowDevastated', player: 'p2', row: 'ATK', cards: [num('n1')], reflected: false }, kind: 'move', cards: ['n1'] },
+  { event: { type: 'DevastationCanceled', player: 'p1', reason: 'REFLECT_CLASH' }, kind: 'move' },
+  {
     event: { type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 4 },
     kind: 'scene',
     scene: 'REFLECT_TRIGGERED',
@@ -143,7 +150,7 @@ function expectPhotosafe(beats: Beat[], reducedMotion: boolean): void {
 
 describe('mapeamento evento → batida (spec §4.2)', () => {
   it('cobre todos os tipos de evento do motor', () => {
-    expect(new Set(SAMPLES.map((s) => s.event.type)).size).toBe(30);
+    expect(new Set(SAMPLES.map((s) => s.event.type)).size).toBe(33);
   });
 
   for (const { event, kind, scene, cards } of SAMPLES) {

@@ -8,7 +8,8 @@ import type { Action, PlayerView, SpecialCard, SpecialKind } from './types.ts';
  * - `ORDER_CHOICE`: a ordem dos turnos ainda está sendo escolhida.
  * - `OPPONENT_TURN`: é a vez do oponente (o turno dele ou a janela de reação dele).
  * - `REACTION_TRAP_ONLY`: na sua janela de reação só o A (ou o Selvagem como A) responde (spec §1.7).
- * - `REACTION_REFLECT`: contra um Reflect recém-lançado, só anular (K + J + Q da mão) ou se proteger (J + Q + K do campo).
+ * - `REACTION_REFLECT`: na resposta a um Reflect, só outro Reflect (K + J + Q da mão).
+ * - `REACTION_DEVASTATION`: contra uma Devastação, só o Reflect (K + J + Q da mão).
  * - `BUFF_LIMIT`: os buffs daquele papel já estão no limite, e o Sacrifício não tem alvo.
  * - `NO_TARGET`: o A não tem J, Q ou K do oponente para mirar (as cartas de um Reflect não contam).
  * - `NO_GUARD_TARGET`: contra K jogado, o A só mira a Guarda, e ela está vazia.
@@ -22,6 +23,7 @@ export type NoPlayReason =
   | 'OPPONENT_TURN'
   | 'REACTION_TRAP_ONLY'
   | 'REACTION_REFLECT'
+  | 'REACTION_DEVASTATION'
   | 'BUFF_LIMIT'
   | 'NO_TARGET'
   | 'NO_GUARD_TARGET'
@@ -68,6 +70,7 @@ export function noPlayReason(view: PlayerView, card: SpecialCard): NoPlayReason 
     case 'REACTION':
       if (phase.responder !== view.me) return 'OPPONENT_TURN';
       if (phase.trigger === 'REFLECT_PLAYED') return 'REACTION_REFLECT';
+      if (phase.trigger === 'DEVASTATION') return 'REACTION_DEVASTATION';
       if (card.kind !== 'A' && card.kind !== 'WILD') return 'REACTION_TRAP_ONLY';
       if (opponent.absoluteDefense) return 'TARGET_PROTECTED';
       return phase.trigger === 'K_PLAYED' ? 'NO_GUARD_TARGET' : 'NO_TARGET';

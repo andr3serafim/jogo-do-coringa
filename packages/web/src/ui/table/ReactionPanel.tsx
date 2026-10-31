@@ -3,7 +3,7 @@
 // barra), o botão Passar e o relógio de 8 s, grande (da faixa central). A conta da prévia é do motor (`previewAttack`).
 // Quem espera vê "Duda pode reagir…" e o próprio turno pausado, os dois na barra e na faixa central.
 import type { AttackPreview, GameEvent, PlayerView } from '@coringa/engine';
-import { attackDeclaredText, guardPlayedText, PASS_LABEL, reflectPlayedText } from '../../model/copy.ts';
+import { attackDeclaredText, devastationCastText, guardPlayedText, PASS_LABEL, reflectPlayedText } from '../../model/copy.ts';
 import { livesOf } from '../../model/preview.ts';
 import { PRIMARY, PRIMARY_TITLE, TwoLine } from './controls.tsx';
 import type { TableNames } from './labels.ts';
@@ -36,7 +36,9 @@ export function ReactionNotice({ view, names, threat, events }: ReactionNoticePr
       ? attackDeclaredText(threat, opponent, livesOf(view))
       : phase.trigger === 'K_PLAYED'
         ? guardPlayedText(opponent, kingsPlayed(view, events))
-        : reflectPlayedText(opponent);
+        : phase.trigger === 'DEVASTATION' && phase.devastation
+          ? devastationCastText(opponent, phase.devastation.row)
+          : reflectPlayedText(opponent);
   return (
     <p data-gatilho data-numero className="border-l-4 border-ouro pl-2 font-texto text-sm font-bold leading-snug tabular-nums">
       {text}

@@ -2,35 +2,36 @@
   "name": "random-1",
   "result": {
     "kind": "WIN",
-    "winner": "p2",
+    "winner": "p1",
     "reason": "HP"
   },
-  "rounds": 27,
+  "rounds": 25,
   "finalHp": {
-    "p1": -59,
-    "p2": 270
+    "p1": 42,
+    "p2": -13
   },
   "events": {
-    "AttackDeclared": 25,
-    "BuffPlayed": 9,
-    "CardsDealt": 26,
-    "CardsPlaced": 28,
-    "CardsRemovedFromRow": 47,
-    "DamageDealt": 24,
+    "AttackDeclared": 23,
+    "BuffPlayed": 12,
+    "CardsDealt": 24,
+    "CardsPlaced": 26,
+    "CardsRemovedFromRow": 42,
+    "DamageDealt": 23,
     "DeckReshuffled": 1,
-    "EquipSubmitted": 28,
+    "DevastationCast": 1,
+    "EquipSubmitted": 26,
     "GameOver": 1,
-    "GuardBroken": 2,
-    "GuardPlayed": 5,
+    "GuardBroken": 3,
+    "GuardPlayed": 6,
     "InitiativeChanged": 6,
-    "OrderChosen": 13,
-    "ReactionWindowClosed": 31,
-    "ReactionWindowOpened": 31,
-    "ReflectPlayed": 1,
-    "ReflectTriggered": 1,
-    "RoundStarted": 26,
-    "Sacrificed": 1,
-    "TrapUsed": 8,
-    "TurnStarted": 25
+    "OrderChosen": 12,
+    "QuadFormed": 1,
+    "ReactionWindowClosed": 30,
+    "ReactionWindowOpened": 30,
+    "RoundStarted": 24,
+    "RowDevastated": 1,
+    "Sacrificed": 2,
+    "TrapUsed": 7,
+    "TurnStarted": 23
   }
 }

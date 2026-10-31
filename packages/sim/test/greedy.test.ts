@@ -62,6 +62,31 @@ describe('greedy', () => {
     expect(decide(greedyBot, attacked).type).toBe('REFLECT');
   });
 
+  it('lança a Devastação quando esvaziar a fileira do oponente muda a mesa; numa fileira fraca, não', () => {
+    const strong = setup({ p1: { hand: ['K', 'A', 'J'], attack: [2], defense: [3] }, p2: { attack: [10, 10, 10], attackBuffs: ['J'] } });
+    expect(decide(greedyBot, strong)).toMatchObject({ type: 'DEVASTATE', row: 'ATK' });
+    const weak = setup({ p1: { hand: ['K', 'A', 'J'], attack: [2], defense: [9] }, p2: { attack: [2] } });
+    expect(decide(greedyBot, weak).type).not.toBe('DEVASTATE');
+  });
+
+  it('responde à Devastação com Reflect quando a fileira vale; numa fileira que não pesa, passa', () => {
+    const valuable = setup({
+      p1: { hand: ['K', 'J', 'Q'], attack: [10, 10, 10], attackBuffs: ['J'] },
+      p2: { attack: [2], defense: [2] },
+    });
+    const at = (s: typeof valuable, row: 'ATK' | 'DEF') => {
+      s.phase = { kind: 'REACTION', responder: P1, trigger: 'DEVASTATION', devastation: { player: P2, row, k: s.players[1].guard[0]!, a: s.players[1].guard[0]!, x: s.players[1].guard[0]! } };
+      return s;
+    };
+    const withGuard = (s: typeof valuable) => {
+      s.players[1].guard = [s.players[0].hand[0]!];
+      return s;
+    };
+    expect(decide(greedyBot, at(withGuard(valuable), 'ATK')).type).toBe('REFLECT');
+    const cheap = setup({ p1: { hand: ['K', 'J', 'Q'], defense: [2] }, p2: { attack: [2] } });
+    expect(decide(greedyBot, at(withGuard(cheap), 'DEF')).type).toBe('PASS');
+  });
+
   it('refletido num golpe que doeria, responde com outro Reflect; num golpe fraco, passa', () => {
     const strong = setup({
       p1: { hand: ['K', 'J', 'Q'], attack: [10, 10, 10], attackBuffs: ['J', 'J'] },

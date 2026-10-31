@@ -84,6 +84,8 @@ export function actionText(action: Action, view: PlayerView): string {
       return `Reflect contra Reflect: anular com ${t(action.kId)} + ${t(action.jId)} + ${t(action.qId)} da mão`;
     case 'RESURRECT':
       return `Ressuscitar ${t(action.cardId)} no fim da fileira de ${ROW_NAME[action.row]}`;
+    case 'DEVASTATE':
+      return `Devastação (${t(action.kId)} + ${t(action.aId)} + ${t(action.xId)}): esvaziar a fileira de ${ROW_NAME[action.row]} do oponente`;
     case 'DECLARE_ATTACK':
       return `Declarar o ataque (ATK ${attackPower(view.self)} contra DEF ${defensePower(view.opponent)})`;
     case 'END_TURN':
@@ -151,6 +153,14 @@ export function eventText(e: GameEvent, names: Names): string | null {
       return `${who(e.player)} respondeu com outro Reflect: os dois se anulam e o golpe não acontece`;
     case 'ReflectTriggered':
       return `O Reflect ${de(e.owner)} devolveu ${e.damage} de dano`;
+    case 'DevastationCast':
+      return `${who(e.player)} lançou uma Devastação na fileira de ${ROW_NAME[e.row]} ${de(e.target)}!`;
+    case 'RowDevastated':
+      return `${e.reflected ? 'A Devastação voltou: ' : ''}${who(e.player)} perdeu a fileira de ${ROW_NAME[e.row]} (${e.cards.length} carta${e.cards.length === 1 ? '' : 's'})`;
+    case 'DevastationCanceled':
+      return e.reason === 'REFLECT_CLASH'
+        ? `Reflect contra Reflect: a Devastação ${de(e.player)} não acontece`
+        : `A Defesa Absoluta ${de(e.player)} anulou o Reflect: ninguém perde a fileira`;
     case 'ReactionWindowOpened':
     case 'ReactionWindowClosed':
       return null;

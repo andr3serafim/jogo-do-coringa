@@ -158,12 +158,26 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
   fileiras, ninguém leva dano e a Defesa Absoluta do outro continua, porque não houve ataque]**. É a única resposta a uma resposta.
 - **A Proteção por sacrifício (J+Q+K do campo) saiu do jogo** (autor, 2026-10-30).
 
+**Devastação — K + A + J ou K + A + Q jogados juntos da mão [autor, 2026-10-30; F3 do sub-projeto 5]**
+- Na **fase principal do seu turno**. **K + A + J** esvazia a **Fileira de Ataque do oponente**; **K + A + Q**, a **Fileira de
+  Defesa** dele. Todas as numéricas da fileira vão para o cemitério; os buffs ficam e a quadra se desfaz. As 3 cartas vão para o
+  cemitério. Não encerra o turno.
+- O Coringa Selvagem faz o papel do **A**, do **J** ou do **Q**, nunca do K.
+- **Não pode** ser lançada contra quem está sob Defesa Absoluta, nem contra uma fileira vazia **[I]**.
+- Abre a janela de reação do oponente, e a **única resposta é o Reflect**: ele devolve a Devastação, e quem a lançou perde a
+  própria fileira do mesmo tipo, **sem quebrar Q nem K**. A Armadilha não responde.
+- **Reflect contra Reflect** na Devastação **[I]:** os dois se anulam, a Devastação não acontece (as 9 cartas vão para o cemitério)
+  e quem a lançou segue na fase principal.
+- **Quem lançou sob Defesa Absoluta [I]:** o Reflect é anulado, como contra um atacante sob Defesa Absoluta; ninguém perde fileira.
+- As cartas destruídas pela Devastação **não curam** (E3).
+
 ### 1.7 Janela de reação
 
 | O oponente… | Quem responde pode |
 |---|---|
 | declara ataque | usar **A** (quebrar J, Q ou K do atacante antes do dano) e lançar **Reflect** (K+J+Q da mão) |
 | joga K (um ou vários, inclusive o que completa a Exódia) | usar **A** (quebrar K) |
+| lança uma Devastação | só o **Reflect** (K+J+Q da mão), que a devolve |
 | responde ao seu golpe com um Reflect | responder com **outro Reflect** (K+J+Q da mão); o A não responde |
 
 - O Coringa Selvagem vale como A ou como o J/Q de um Reflect.
@@ -308,7 +322,7 @@ legalActions(view: PlayerView): Action[]
   - `EQUIP` — aguardando as submissões dos dois jogadores;
   - `ORDER_CHOICE(jogador)` — quem tem a iniciativa escolhe a ordem (só com `initiativeChoice`);
   - `ATTACK_MAIN(jogador)` — fase principal do turno;
-  - `REACTION(respondente, gatilho)` — gatilho: `ATTACK` | `K_PLAYED` | `REFLECT_PLAYED` (a resposta de quem foi refletido);
+  - `REACTION(respondente, gatilho, devastação?)` — gatilho: `ATTACK` | `K_PLAYED` | `DEVASTATION` | `REFLECT_PLAYED` (a resposta de quem foi refletido); a Devastação em curso vai junto na janela dela e na resposta ao Reflect que a devolve;
   - `GAME_OVER(resultado)`.
 - Além das zonas: vida, iniciativa, ordem da rodada, contador de rodadas, dano por jogador na rodada atual, efeitos com duração (Defesa Absoluta, Ressurreições com rodada de expiração) e o Reflect lançado, só até a resposta.
 
@@ -322,15 +336,16 @@ legalActions(view: PlayerView): Action[]
 | `PLAY_K { cardIds[] }` | `ATTACK_MAIN` |
 | `TRAP { cardId, targetId }` | `ATTACK_MAIN`, `REACTION` (gatilho ATTACK ou K_PLAYED) |
 | `SACRIFICE { cardId, targetId }` | `ATTACK_MAIN` |
-| `REFLECT { kId, jId, qId }` | `REACTION` (gatilho ATTACK) |
+| `REFLECT { kId, jId, qId }` | `REACTION` (gatilho ATTACK ou DEVASTATION) |
 | `CANCEL_REFLECT { kId, jId, qId }` (da mão; Reflect contra Reflect) | `REACTION` (gatilho REFLECT_PLAYED) |
 | `RESURRECT { cardId, row }` | `ATTACK_MAIN` |
+| `DEVASTATE { kId, aId, xId, row }` — `row` é a fileira **do oponente**; `xId` é o J (`ATK`) ou o Q (`DEF`) | `ATTACK_MAIN` |
 | `DECLARE_ATTACK` / `END_TURN` (Ataque vazio) | `ATTACK_MAIN` |
 | `PASS` | `REACTION` |
 | `TIMEOUT` (`system`) | qualquer fase com prazo |
 | `FORFEIT` (`system`) | qualquer fase |
 
-- **Coringa Selvagem:** qualquer ação que recebe o id de um J, Q ou A da mão aceita o id de um Selvagem; o papel é deduzido da ação (`PLAY_J` → J; `TRAP` → A; `SACRIFICE` → tipo do alvo; `REFLECT`/`CANCEL_REFLECT` → posição `jId`/`qId`). Nunca é aceito como `kId` nem em `PLAY_K`.
+- **Coringa Selvagem:** qualquer ação que recebe o id de um J, Q ou A da mão aceita o id de um Selvagem; o papel é deduzido da ação (`PLAY_J` → J; `TRAP` → A; `SACRIFICE` → tipo do alvo; `REFLECT`/`CANCEL_REFLECT` → posição `jId`/`qId`; `DEVASTATE` → posição `aId`/`xId`). Nunca é aceito como `kId` nem em `PLAY_K`.
 
 ### 2.5 Eventos
 
@@ -339,6 +354,7 @@ A união `GameEvent` de `types.ts`, base para animações e histórico. Cada aç
 - **Rodada e Equipar:** `RoundStarted`, `DeckReshuffled`, `CardsDealt`, `EquipSubmitted`, `CardsPlaced` (a carta que troca a última da fileira leva o `replaced`), `OrderChosen`, `TurnStarted`.
 - **Fase principal:** `BuffPlayed` (com o papel, `as`), `GuardPlayed`, `TrapUsed` e `Sacrificed` (com `as` quando a carta é um Selvagem), `Resurrected`.
 - **Janela de reação:** `ReactionWindowOpened`, `ReactionWindowClosed`, `ReflectPlayed` (com o golpe que responde, `against`), `ReflectCanceled` (Reflect contra Reflect).
+- **Devastação (F3):** `DevastationCast` (as 3 cartas, a fileira e o alvo), `RowDevastated` (quem perdeu a fileira, as cartas e se foi refletida), `DevastationCanceled` (Reflect contra Reflect, ou o Reflect contra quem está sob Defesa Absoluta).
 - **Ataque:** `AttackDeclared`, `AbsoluteAttack` (antes de tudo, também contra um Reflect), `ReflectTriggered`, `DamageDealt`, `GuardBroken`, `BuffRemoved`, `CardsRemovedFromRow`, `QuadFormed`, `QuadBroken`.
 - **Estado da mesa:** `AbsoluteDefenseStarted`, `AbsoluteDefenseEnded`, `InitiativeChanged`.
 - **Fim:** `Exodia`, `GameOver`.

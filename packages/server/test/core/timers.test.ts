@@ -290,6 +290,35 @@ describe('turno pausa na janela do oponente (§6.2)', () => {
     expect(lastState(h, p2).deadline).toEqual({ kind: 'TURN', at: h.now + 30_000, players: ['p2'] });
   });
 
+  it('Devastação → Reflect → resposta: o turno de quem lançou volta com o tempo que tinha (F3)', async () => {
+    const state = setup({ p1: { hand: ['K', 'A', 'J'] }, p2: { attack: [5], hand: ['K', 'J', 'Q'] } });
+    const { h, p1, p2 } = await armed(state);
+    h.advance(12_000);
+    await act(h, p1, 'dev', {
+      type: 'DEVASTATE',
+      kId: handId(state, 'p1', 'K'),
+      aId: handId(state, 'p1', 'A'),
+      xId: handId(state, 'p1', 'J'),
+      row: 'ATK',
+    });
+    expect(phaseOf(h)).toMatchObject({ kind: 'REACTION', responder: 'p2', trigger: 'DEVASTATION' });
+    expect(h.core.record!.game!.pausedTurnMs).toBe(18_000);
+    h.advance(TIMERS.reactionMinMs);
+    await act(h, p2, 'ref', {
+      type: 'REFLECT',
+      kId: handId(state, 'p2', 'K'),
+      jId: handId(state, 'p2', 'J'),
+      qId: handId(state, 'p2', 'Q'),
+    });
+    expect(phaseOf(h)).toMatchObject({ kind: 'REACTION', responder: 'p1', trigger: 'REFLECT_PLAYED' });
+    // De uma reação para outra, o tempo guardado do turno fica.
+    expect(h.core.record!.game!.pausedTurnMs).toBe(18_000);
+    h.advance(TIMERS.reactionMinMs);
+    await act(h, p1, 'p', { type: 'PASS' });
+    expect(phaseOf(h)).toEqual({ kind: 'ATTACK_MAIN', player: 'p1' });
+    expect(lastState(h, p1).deadline!.at).toBe(h.now + 18_000);
+  });
+
   it('a janela de um ataque não guarda tempo do turno, e o prazo do Ás na reação não muda', async () => {
     const state = setup({ p1: { attack: [9], attackBuffs: ['J'] }, p2: { hand: ['A'] } });
     const { h, p1, p2 } = await armed(state);

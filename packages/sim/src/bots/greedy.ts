@@ -5,6 +5,7 @@ import {
   best,
   boardScore,
   canHoldReflect,
+  emptied,
   defenseBase,
   hpDamage,
   placeAll,
@@ -24,6 +25,8 @@ export const GREEDY = {
   trapReaction: 10,
   /** Dano que o oponente levaria do próprio ataque, refletido, a partir do qual vale responder ao ataque com Reflect. */
   reflectAttack: 30,
+  /** Quanto a Devastação precisa mexer na avaliação de mesa (a meu favor) para valer as 3 cartas. */
+  devastation: 25,
 } as const;
 
 type Of<T extends Action['type']> = Extract<Action, { type: T }>;
@@ -89,13 +92,20 @@ function mainPhase(view: PlayerView, legal: Action[], rng: Rng): Action {
       (ties) => rng.pick(ties),
     );
   }
-  // 3. Armadilha na maior ameaça, se valer gastar o A agora.
+  // 3. Devastação na fileira cuja perda mais muda a mesa a meu favor (o Reflect do oponente fica por conta dele).
+  const devastations = ofType(legal, 'DEVASTATE');
+  if (devastations.length > 0) {
+    const gain = (a: Of<'DEVASTATE'>) => boardScore(self, emptied(opponent, a.row)) - boardScore(self, opponent);
+    const pick = best(devastations, (a) => gain(a) - wildsUsed(a, self.hand) / 2, (ties) => rng.pick(ties));
+    if (gain(pick) >= GREEDY.devastation) return pick;
+  }
+  // 4. Armadilha na maior ameaça, se valer gastar o A agora.
   const traps = ofType(legal, 'TRAP');
   if (traps.length > 0) {
     const trap = best(traps, (a) => targetValue(view, a.targetId) - wildsUsed(a, self.hand) / 2, (ties) => rng.pick(ties));
     if (targetValue(view, trap.targetId) >= GREEDY.trapMain) return trap;
   }
-  // 4. Sacrifício quando o buff do oponente vale mais que o meu.
+  // 5. Sacrifício quando o buff do oponente vale mais que o meu.
   const sacrifices = ofType(legal, 'SACRIFICE');
   const worth = sacrifices.filter((s) =>
     opponent.attackBuffs.some((c) => c.id === s.targetId)
@@ -103,10 +113,10 @@ function mainPhase(view: PlayerView, legal: Action[], rng: Rng): Action {
       : defenseBase(opponent) > defenseBase(self),
   );
   if (worth.length > 0) return cheapest(worth, view, rng);
-  // 5. Guarda: joga os K, guardando um enquanto der para montar um Reflect (a resposta a um ataque).
+  // 6. Guarda: joga os K, guardando um enquanto der para montar um Reflect (a resposta a um ataque).
   const playable = kings.length - (canHoldReflect(view) ? 1 : 0);
   if (playable > 0) return kings[playable - 1];
-  // 6. Buffs onde há fileira para multiplicar.
+  // 7. Buffs onde há fileira para multiplicar.
   const js = ofType(legal, 'PLAY_J');
   if (js.length > 0 && self.attackRow.length > 0) return cheapest(js, view, rng);
   const qs = ofType(legal, 'PLAY_Q');
@@ -117,9 +127,17 @@ function mainPhase(view: PlayerView, legal: Action[], rng: Rng): Action {
 function reaction(view: PlayerView, legal: Action[], trigger: ReactionTrigger, rng: Rng): Action {
   const { self, opponent, config } = view;
   const pass: Action = { type: 'PASS' };
+  const devastation = view.phase.kind === 'REACTION' ? view.phase.devastation : undefined;
+  /** O quanto a minha mesa piora se eu perder a fileira `row` (Devastação). */
+  const rowLoss = (row: 'ATK' | 'DEF') => boardScore(self, opponent) - boardScore(emptied(self, row), opponent);
+  if (trigger === 'DEVASTATION') {
+    const reflects = ofType(legal, 'REFLECT');
+    if (!devastation || reflects.length === 0 || rowLoss(devastation.row) < GREEDY.reflectThreat) return pass;
+    return cheapest(reflects, view, rng);
+  }
   if (trigger === 'REFLECT_PLAYED') {
-    // Fui refletido: outro Reflect anula os dois quando o golpe que volta doeria.
-    const back = reflectedDamage(self);
+    // Fui refletido: outro Reflect anula os dois quando o golpe que volta doeria (ou a fileira que eu perderia valia).
+    const back = devastation ? rowLoss(devastation.row) : reflectedDamage(self);
     if (back < GREEDY.reflectThreat && back < self.hp) return pass;
     const cancels = ofType(legal, 'CANCEL_REFLECT');
     return cancels.length > 0 ? cheapest(cancels, view, rng) : pass;

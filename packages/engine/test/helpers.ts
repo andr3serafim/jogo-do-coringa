@@ -134,6 +134,11 @@ export function allCards(s: GameState): Card[] {
     cards.push(...p.hand, ...p.pending, ...p.attackRow, ...p.defenseRow, ...p.attackBuffs, ...p.defenseBuffs, ...p.guard);
     if (p.reflect) cards.push(p.reflect.k, p.reflect.j, p.reflect.q);
   }
+  // As 3 cartas da Devastação em curso ficam na fase até ela se resolver (F3).
+  if (s.phase.kind === 'REACTION' && s.phase.devastation) {
+    const { k, a, x } = s.phase.devastation;
+    cards.push(k, a, x);
+  }
   return cards;
 }
 
