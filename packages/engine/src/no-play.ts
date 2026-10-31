@@ -11,7 +11,7 @@ import type { Action, PlayerView, SpecialCard, SpecialKind } from './types.ts';
  * - `REACTION_REFLECT`: na resposta a um Reflect, só outro Reflect (K + J + Q da mão).
  * - `REACTION_DEVASTATION`: contra uma Devastação, só o Reflect (K + J + Q da mão).
  * - `BUFF_LIMIT`: os buffs daquele papel já estão no limite, e o Sacrifício não tem alvo.
- * - `NO_TARGET`: o A não tem J, Q ou K do oponente para mirar (as cartas de um Reflect não contam).
+ * - `NO_TARGET`: o A não tem J, Q ou K do oponente para mirar (as cartas de um Reflect não contam) nem numérica para roubar.
  * - `NO_GUARD_TARGET`: contra K jogado, o A só mira a Guarda, e ela está vazia.
  * - `TARGET_PROTECTED`: o oponente está sob Defesa Absoluta (imune a Armadilha e a Sacrifício).
  * - `NO_ROLE`: o Selvagem não serve agora como J, Q nem A.
@@ -37,6 +37,7 @@ function singleCardIds(action: Action): string[] {
     case 'PLAY_Q':
     case 'TRAP':
     case 'SACRIFICE':
+    case 'STEAL':
       return [action.cardId];
     case 'PLAY_K':
       return action.cardIds;

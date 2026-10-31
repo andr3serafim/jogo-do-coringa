@@ -18,6 +18,7 @@ describe('esquemas do cliente', () => {
       { type: 'CANCEL_REFLECT', kId: 'k', jId: 'j', qId: 'q' },
       { type: 'RESURRECT', cardId: 'n', row: 'ATK' },
       { type: 'DEVASTATE', kId: 'k', aId: 'a', xId: 'j', row: 'ATK' },
+      { type: 'STEAL', cardId: 'a', targetId: 'n', row: 'DEF' },
       { type: 'DECLARE_ATTACK' },
       { type: 'END_TURN' },
       { type: 'PASS' },

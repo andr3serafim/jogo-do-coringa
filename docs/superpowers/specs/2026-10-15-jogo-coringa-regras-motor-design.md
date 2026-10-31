@@ -128,6 +128,17 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
 - **Não** pode mirar as cartas de um Reflect **[I]** (o Reflect só cai por outro Reflect). Também não responde a um Reflect.
 - **Não** pode mirar um jogador sob Defesa Absoluta **[O]**.
 
+**A — Roubo [autor, 2026-10-30; E3 do sub-projeto 5]**
+- O Ás serve, à escolha na hora, de **Armadilha** ou de **Roubo**, de qualquer naipe. O Coringa Selvagem no papel de A também.
+- Só na **fase principal do seu turno** (não abre janela de reação **[I]**). Pega **uma numérica** de qualquer fileira do oponente
+  (em qualquer posição **[I]**) e a põe **no fim da fileira que o ladrão escolher**; com ela cheia, a **última** dela vai para o
+  cemitério antes. O Ás vai para o cemitério. As quadras dos dois lados se refazem.
+- O naipe da carta roubada decide o efeito, sempre pelo **valor seco** (sem buffs nem bônus de quadra):
+  - **♣ ♠:** o oponente leva dano igual ao valor. Um **K na Guarda** dele **anula** esse dano e **não quebra**. O dano do roubo
+    **não conta para a iniciativa** e **não mata**: a vida do oponente fica em no mínimo 1.
+  - **♥ ♦:** quem roubou **cura** o valor, até a vida inicial.
+- A **Defesa Absoluta** do oponente **bloqueia o roubo inteiro**: nada é roubado.
+
 **Sacrifício (regra nova do autor) [M]**
 - Na **fase principal do seu turno** (nunca como reação), descarte um **J** da mão para destruir 1 **J** do oponente, ou um **Q** da mão para destruir 1 **Q** do oponente. Ambos vão para o cemitério.
 - **Não** funciona contra jogador sob Defesa Absoluta, enquanto ela durar **[I]**.
@@ -339,13 +350,14 @@ legalActions(view: PlayerView): Action[]
 | `REFLECT { kId, jId, qId }` | `REACTION` (gatilho ATTACK ou DEVASTATION) |
 | `CANCEL_REFLECT { kId, jId, qId }` (da mão; Reflect contra Reflect) | `REACTION` (gatilho REFLECT_PLAYED) |
 | `RESURRECT { cardId, row }` | `ATTACK_MAIN` |
+| `STEAL { cardId, targetId, row }` — o Ás (ou Selvagem) da mão, a numérica do oponente e a fileira do ladrão | `ATTACK_MAIN` |
 | `DEVASTATE { kId, aId, xId, row }` — `row` é a fileira **do oponente**; `xId` é o J (`ATK`) ou o Q (`DEF`) | `ATTACK_MAIN` |
 | `DECLARE_ATTACK` / `END_TURN` (Ataque vazio) | `ATTACK_MAIN` |
 | `PASS` | `REACTION` |
 | `TIMEOUT` (`system`) | qualquer fase com prazo |
 | `FORFEIT` (`system`) | qualquer fase |
 
-- **Coringa Selvagem:** qualquer ação que recebe o id de um J, Q ou A da mão aceita o id de um Selvagem; o papel é deduzido da ação (`PLAY_J` → J; `TRAP` → A; `SACRIFICE` → tipo do alvo; `REFLECT`/`CANCEL_REFLECT` → posição `jId`/`qId`; `DEVASTATE` → posição `aId`/`xId`). Nunca é aceito como `kId` nem em `PLAY_K`.
+- **Coringa Selvagem:** qualquer ação que recebe o id de um J, Q ou A da mão aceita o id de um Selvagem; o papel é deduzido da ação (`PLAY_J` → J; `TRAP` e `STEAL` → A; `SACRIFICE` → tipo do alvo; `REFLECT`/`CANCEL_REFLECT` → posição `jId`/`qId`; `DEVASTATE` → posição `aId`/`xId`). Nunca é aceito como `kId` nem em `PLAY_K`.
 
 ### 2.5 Eventos
 
@@ -354,6 +366,7 @@ A união `GameEvent` de `types.ts`, base para animações e histórico. Cada aç
 - **Rodada e Equipar:** `RoundStarted`, `DeckReshuffled`, `CardsDealt`, `EquipSubmitted`, `CardsPlaced` (a carta que troca a última da fileira leva o `replaced`), `OrderChosen`, `TurnStarted`.
 - **Fase principal:** `BuffPlayed` (com o papel, `as`), `GuardPlayed`, `TrapUsed` e `Sacrificed` (com `as` quando a carta é um Selvagem), `Resurrected`.
 - **Janela de reação:** `ReactionWindowOpened`, `ReactionWindowClosed`, `ReflectPlayed` (com o golpe que responde, `against`), `ReflectCanceled` (Reflect contra Reflect).
+- **Roubo e cura (E3):** `CardStolen` (a carta, as duas fileiras e o Ás gasto), `StealDamage` (o valor seco, o dano que saiu e se um K anulou), `Healed` (quanto entrou, de onde e a carta que curou).
 - **Devastação (F3):** `DevastationCast` (as 3 cartas, a fileira e o alvo), `RowDevastated` (quem perdeu a fileira, as cartas e se foi refletida), `DevastationCanceled` (Reflect contra Reflect, ou o Reflect contra quem está sob Defesa Absoluta).
 - **Ataque:** `AttackDeclared`, `AbsoluteAttack` (antes de tudo, também contra um Reflect), `ReflectTriggered`, `DamageDealt`, `GuardBroken`, `BuffRemoved`, `CardsRemovedFromRow`, `QuadFormed`, `QuadBroken`.
 - **Estado da mesa:** `AbsoluteDefenseStarted`, `AbsoluteDefenseEnded`, `InitiativeChanged`.
@@ -424,7 +437,7 @@ Bots não jogam como humanos: as metas guiam a calibração inicial; o ajuste fi
 - **Cada regra [N]** tem testes com a chave ligada e desligada.
 - **Invariantes (property-based, fast-check)** sobre partidas aleatórias:
   - todas as cartas estão sempre contabilizadas (monte + mãos + campo + cemitério), com o total **derivado da config** (98 ou 100);
-  - a vida nunca aumenta;
+  - a vida nunca passa da inicial, e só sobe com uma cura (E3);
   - a compra nunca falha por falta de cartas;
   - `viewFor`/`viewEvents` nunca expõem mão do oponente, ordem do monte nem semente;
   - determinismo (mesma semente + ações → mesmo estado);

@@ -62,6 +62,14 @@ describe('greedy', () => {
     expect(decide(greedyBot, attacked).type).toBe('REFLECT');
   });
 
+  it('rouba a numérica que mais vale (mesa + dano) quando não há alvo melhor para a Armadilha', () => {
+    const s = setup({ p1: { hand: ['A'], attack: [2], defense: [3] }, p2: { attack: [10, 2], defense: [4] } });
+    const ten = s.players[1].attackRow[0]!;
+    ten.suit = 'espadas';
+    const action = decide(greedyBot, s);
+    expect(action).toMatchObject({ type: 'STEAL', targetId: ten.id });
+  });
+
   it('lança a Devastação quando esvaziar a fileira do oponente muda a mesa; numa fileira fraca, não', () => {
     const strong = setup({ p1: { hand: ['K', 'A', 'J'], attack: [2], defense: [3] }, p2: { attack: [10, 10, 10], attackBuffs: ['J'] } });
     expect(decide(greedyBot, strong)).toMatchObject({ type: 'DEVASTATE', row: 'ATK' });

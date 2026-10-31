@@ -10,6 +10,7 @@ import {
   hpDamage,
   placeAll,
   reflectedDamage,
+  stealValue,
   wildsUsed,
   without,
 } from './eval.ts';
@@ -21,6 +22,8 @@ export const GREEDY = {
   reflectThreat: 10,
   /** Valor mínimo do alvo para gastar A na fase principal (abaixo disso, guarda para reação). */
   trapMain: 12,
+  /** Valor mínimo de um Roubo (mesa + dano ou cura) para gastar A nele. */
+  stealMain: 12,
   /** Dano evitado mínimo para gastar A na reação a um ataque. */
   trapReaction: 10,
   /** Dano que o oponente levaria do próprio ataque, refletido, a partir do qual vale responder ao ataque com Reflect. */
@@ -99,12 +102,15 @@ function mainPhase(view: PlayerView, legal: Action[], rng: Rng): Action {
     const pick = best(devastations, (a) => gain(a) - wildsUsed(a, self.hand) / 2, (ties) => rng.pick(ties));
     if (gain(pick) >= GREEDY.devastation) return pick;
   }
-  // 4. Armadilha na maior ameaça, se valer gastar o A agora.
+  // 4. O A na fase principal: Armadilha na maior ameaça ou Roubo, o que valer mais, se valer gastar o A agora.
   const traps = ofType(legal, 'TRAP');
-  if (traps.length > 0) {
-    const trap = best(traps, (a) => targetValue(view, a.targetId) - wildsUsed(a, self.hand) / 2, (ties) => rng.pick(ties));
-    if (targetValue(view, trap.targetId) >= GREEDY.trapMain) return trap;
-  }
+  const steals = ofType(legal, 'STEAL');
+  const trap = traps.length > 0 ? best(traps, (a) => targetValue(view, a.targetId) - wildsUsed(a, self.hand) / 2, (ties) => rng.pick(ties)) : null;
+  const stolen = steals.length > 0 ? best(steals, (a) => stealValue(view, a) - wildsUsed(a, self.hand) / 2, (ties) => rng.pick(ties)) : null;
+  const trapWorth = trap && targetValue(view, trap.targetId) >= GREEDY.trapMain ? targetValue(view, trap.targetId) : -Infinity;
+  const stealWorth = stolen && stealValue(view, stolen) >= GREEDY.stealMain ? stealValue(view, stolen) : -Infinity;
+  if (trap && trapWorth >= stealWorth && trapWorth > -Infinity) return trap;
+  if (stolen && stealWorth > -Infinity) return stolen;
   // 5. Sacrifício quando o buff do oponente vale mais que o meu.
   const sacrifices = ofType(legal, 'SACRIFICE');
   const worth = sacrifices.filter((s) =>

@@ -24,6 +24,7 @@ export const PlayerActionSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('CANCEL_REFLECT'), kId: cardId, jId: cardId, qId: cardId }),
   z.strictObject({ type: z.literal('RESURRECT'), cardId, row }),
   z.strictObject({ type: z.literal('DEVASTATE'), kId: cardId, aId: cardId, xId: cardId, row }),
+  z.strictObject({ type: z.literal('STEAL'), cardId, targetId: cardId, row }),
   z.strictObject({ type: z.literal('DECLARE_ATTACK') }),
   z.strictObject({ type: z.literal('END_TURN') }),
   z.strictObject({ type: z.literal('PASS') }),

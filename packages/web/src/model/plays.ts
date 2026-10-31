@@ -54,6 +54,7 @@ function cardIdsOf(action: PlayerAction): string[] {
     case 'PLAY_Q':
     case 'TRAP':
     case 'SACRIFICE':
+    case 'STEAL':
     case 'RESURRECT':
       return [action.cardId];
     case 'PLAY_K':
@@ -91,6 +92,8 @@ export function roleKey(action: PlayerAction, view: PlayerView): string {
       return `${action.type}|${role(action.kId)}|${role(action.jId)}|${role(action.qId)}`;
     case 'RESURRECT':
       return `RESURRECT|${role(action.cardId)}|${action.row}`;
+    case 'STEAL':
+      return `STEAL|${role(action.cardId)}|${action.targetId}|${action.row}`;
     case 'DEVASTATE':
       return `DEVASTATE|${role(action.kId)}|${role(action.aId)}|${role(action.xId)}|${action.row}`;
     case 'EQUIP':

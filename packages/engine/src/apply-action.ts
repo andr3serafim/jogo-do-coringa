@@ -9,6 +9,7 @@ import {
   requireMain,
   resurrect,
   sacrifice,
+  steal,
   useTrap,
 } from './actions/main.ts';
 import { chooseOrder, handleChooseOrder } from './actions/order.ts';
@@ -100,6 +101,8 @@ function applyPlayer(s: GameState, player: PlayerId, action: Action, ev: GameEve
       return resurrect(s, requireMain(s, player), action.cardId, action.row, ev);
     case 'DEVASTATE':
       return devastate(s, requireMain(s, player), action.kId, action.aId, action.xId, action.row, ev);
+    case 'STEAL':
+      return steal(s, requireMain(s, player), action.cardId, action.targetId, action.row, ev);
     case 'PASS':
       return pass(s, player, ev);
     case 'TIMEOUT':

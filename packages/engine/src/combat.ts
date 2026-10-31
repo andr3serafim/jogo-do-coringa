@@ -43,6 +43,13 @@ export function defenseValue(p: PlayerState): number {
   return defensePower(p);
 }
 
+/** Cura `amount` até a vida inicial (E3): o evento diz quanto entrou de fato. */
+export function heal(s: GameState, p: PlayerState, amount: number, source: 'STEAL' | 'DEFENSE', card: NumCard, ev: GameEvent[]): void {
+  const healed = Math.max(0, Math.min(amount, s.config.hp - p.hp));
+  p.hp += healed;
+  ev.push({ type: 'Healed', player: p.id, amount: healed, source, card });
+}
+
 function loseHp(s: GameState, victim: PlayerState, amount: number, dealer: PlayerState, ev: GameEvent[]): void {
   if (amount <= 0) return;
   victim.hp -= amount;

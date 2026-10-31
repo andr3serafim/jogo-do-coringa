@@ -398,7 +398,8 @@ describe('bannerBeatAt: a faixa que está no ar (spec §4.1, §10.4)', () => {
     const tally = { backlogs: 0, withBanner: 0, perBeatRuleFails: 0, worstPerBeatRule: 0 };
     for (const seed of ['luz-0', 'luz-1', 'luz-2', 'luz-3', 'luz-4', 'faixa-0', 'faixa-1', 'faixa-2']) {
       const events = seededSteps(seed, 400).flatMap((step) => step.events);
-      expect(events.length).toBeGreaterThan(100);
+      // Com o Roubo (E3) as partidas ficaram mais curtas: a menor das amostras tem ~100 eventos.
+      expect(events.length).toBeGreaterThan(80);
       for (const delay of [6, 10, 15, 25]) {
         for (let from = 0; from + delay <= events.length; from++) {
           for (const decisionPending of [false, true]) {

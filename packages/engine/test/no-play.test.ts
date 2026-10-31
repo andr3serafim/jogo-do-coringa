@@ -97,6 +97,13 @@ describe('noPlayReason: por que a carta da mão não tem jogada (B2)', () => {
         { type: 'PLAY_K', cardIds: [card.id] },
         ...targets.map((targetId): Action => ({ type: 'TRAP', cardId: card.id, targetId })),
         ...targets.map((targetId): Action => ({ type: 'SACRIFICE', cardId: card.id, targetId })),
+        // O Roubo (E3): as numéricas dos dois campos, para as duas fileiras do ladrão.
+        ...s.players
+          .flatMap((p) => [...p.attackRow, ...p.defenseRow])
+          .flatMap((c): Action[] => [
+            { type: 'STEAL', cardId: card.id, targetId: c.id, row: 'ATK' },
+            { type: 'STEAL', cardId: card.id, targetId: c.id, row: 'DEF' },
+          ]),
       ];
     };
     let checked = 0;

@@ -160,6 +160,8 @@ export type Action =
    * `xId` é o J (Ataque) ou o Q (Defesa). O Selvagem vale como A, J ou Q.
    */
   | { type: 'DEVASTATE'; kId: string; aId: string; xId: string; row: RowName }
+  /** Roubo (E3): o Ás (ou o Selvagem como A) leva a numérica `targetId` do oponente para o fim da fileira `row` do ladrão. */
+  | { type: 'STEAL'; cardId: string; targetId: string; row: RowName }
   | { type: 'DECLARE_ATTACK' }
   | { type: 'END_TURN' }
   | { type: 'PASS' }
@@ -209,6 +211,12 @@ export type GameEvent =
   | { type: 'RowDevastated'; player: PlayerId; row: RowName; cards: NumCard[]; reflected: boolean }
   /** A Devastação de `player` não aconteceu: Reflect contra Reflect, ou o Reflect contra quem está sob Defesa Absoluta. */
   | { type: 'DevastationCanceled'; player: PlayerId; reason: 'REFLECT_CLASH' | 'ABSOLUTE_DEFENSE' }
+  /** Roubo (E3): `player` levou `card` da fileira `fromRow` de `from` para a própria `toRow`, gastando `ace` (`as` com o Selvagem). */
+  | { type: 'CardStolen'; player: PlayerId; from: PlayerId; card: NumCard; fromRow: RowName; toRow: RowName; ace: SpecialCard; as?: 'A' }
+  /** O dano do roubo de uma carta ♣ ♠: `value` é o valor seco; `damage`, o que saiu da vida (a vida fica em no mínimo 1). */
+  | { type: 'StealDamage'; player: PlayerId; victim: PlayerId; value: number; damage: number; blocked: boolean }
+  /** Cura (E3): `amount` é o que entrou na vida (nunca passa da inicial); `card`, a carta que curou. */
+  | { type: 'Healed'; player: PlayerId; amount: number; source: 'STEAL' | 'DEFENSE'; card: NumCard }
   | { type: 'ReactionWindowOpened'; responder: PlayerId; trigger: ReactionTrigger }
   | { type: 'ReactionWindowClosed'; responder: PlayerId; trigger: ReactionTrigger }
   | { type: 'AttackDeclared'; player: PlayerId }

@@ -372,6 +372,8 @@ describe('propriedade: toda jogada montada pela mesa é aceita pelo motor', () =
       const keys = new Set(actions.map((a) => roleKey(a, item.view)));
       for (const canonical of legal) {
         if (canonical.type === 'EQUIP' || canonical.type === 'CHOOSE_ORDER') continue;
+        // O Roubo (E3) ainda não tem interface: a escolha da numérica e da fileira de destino é do plano 2 do bloco E3 + F2 + F3.
+        if (canonical.type === 'STEAL') continue;
         if (canonical.type === 'DEVASTATE') {
           const row = canonical.row;
           expect(plays.devastate.some((a) => a.type === 'DEVASTATE' && a.row === row), JSON.stringify(canonical)).toBe(true);
@@ -403,7 +405,8 @@ describe('propriedade: toda jogada montada pela mesa é aceita pelo motor', () =
     }
     expect(total).toBeGreaterThan(1500);
     expect(nonCanonical).toBeGreaterThan(50);
-    for (const type of ['PLAY_J', 'PLAY_Q', 'PLAY_K', 'TRAP', 'SACRIFICE', 'DECLARE_ATTACK', 'END_TURN', 'PASS', 'REFLECT', 'RESURRECT']) {
+    // O END_TURN (Ataque vazio) ficou raro nas partidas com o Roubo, que enche as fileiras: o teste direto dele fica acima.
+    for (const type of ['PLAY_J', 'PLAY_Q', 'PLAY_K', 'TRAP', 'SACRIFICE', 'DECLARE_ATTACK', 'PASS', 'REFLECT', 'RESURRECT', 'DEVASTATE']) {
       expect(types.has(type), type).toBe(true);
     }
   });

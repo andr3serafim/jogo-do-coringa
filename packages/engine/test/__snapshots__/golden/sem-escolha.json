@@ -7,28 +7,32 @@
   },
   "rounds": 21,
   "finalHp": {
-    "p1": -43,
-    "p2": 468
+    "p1": -29,
+    "p2": 462
   },
   "events": {
+    "AbsoluteDefenseStarted": 1,
     "AttackDeclared": 18,
-    "BuffPlayed": 8,
+    "BuffPlayed": 9,
     "CardsDealt": 20,
     "CardsPlaced": 22,
     "CardsRemovedFromRow": 33,
+    "CardStolen": 4,
     "DamageDealt": 18,
     "DevastationCast": 1,
     "EquipSubmitted": 22,
     "GameOver": 1,
-    "GuardBroken": 2,
+    "GuardBroken": 5,
     "GuardPlayed": 5,
+    "Healed": 3,
     "InitiativeChanged": 2,
     "ReactionWindowClosed": 24,
     "ReactionWindowOpened": 24,
     "RoundStarted": 20,
     "RowDevastated": 1,
-    "Sacrificed": 2,
-    "TrapUsed": 6,
+    "Sacrificed": 1,
+    "StealDamage": 1,
+    "TrapUsed": 2,
     "TurnStarted": 19
   }
 }

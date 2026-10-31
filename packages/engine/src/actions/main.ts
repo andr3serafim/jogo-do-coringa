@@ -2,7 +2,8 @@ import { fail } from '../errors.ts';
 import { endTurn, openReaction } from '../flow.ts';
 import { assertDistinct, getPlayer, opponentOf, removeById, takeFromHand, toGraveyard } from '../state.ts';
 import { reevaluateQuads, rowCards, validResurrections } from '../quads.ts';
-import type { GameEvent, GameState, PlayerId, PlayerState, ReflectState, RowName, SpecialCard } from '../types.ts';
+import { heal } from '../combat.ts';
+import type { GameEvent, GameState, NumCard, PlayerId, PlayerState, ReflectState, RowName, SpecialCard } from '../types.ts';
 
 export function requireMain(s: GameState, playerId: PlayerId): PlayerState {
   const phase = s.phase;
@@ -128,6 +129,50 @@ export function devastateRow(s: GameState, victim: PlayerState, row: RowName, re
   toGraveyard(s, cards);
   ev.push({ type: 'RowDevastated', player: victim.id, row, cards, reflected });
   reevaluateQuads(s, victim, ev);
+}
+
+/**
+ * O dano do roubo de uma carta ♣ ♠ (E3): o valor seco, sem buffs nem quadra. Um K na Guarda da vítima anula e fica; o dano nunca
+ * mata (a vida fica em no mínimo 1) e não entra em `damageThisRound`, porque não conta para a iniciativa. Por isso não usa o
+ * `loseHp` do combate.
+ */
+function stealDamage(thief: PlayerState, victim: PlayerState, card: NumCard, ev: GameEvent[]): void {
+  const blocked = victim.guard.length > 0;
+  const damage = blocked ? 0 : Math.max(0, Math.min(card.value, victim.hp - 1));
+  victim.hp -= damage;
+  ev.push({ type: 'StealDamage', player: thief.id, victim: victim.id, value: card.value, damage, blocked });
+}
+
+/**
+ * Roubo (E3 do sub-projeto 5), só na fase principal: o Ás (ou o Selvagem como A) leva uma numérica de qualquer fileira do oponente
+ * para o fim da fileira que o ladrão escolher; com ela cheia, a última dela vai ao cemitério. ♣ ♠: o oponente leva o valor seco;
+ * ♥ ♦: o ladrão cura o valor seco. A Defesa Absoluta do oponente bloqueia o roubo inteiro. Não abre janela de reação ([I]).
+ */
+export function steal(s: GameState, p: PlayerState, cardId: string, targetId: string, row: RowName, ev: GameEvent[]): void {
+  if (row !== 'ATK' && row !== 'DEF') fail('INVALID_TARGET', 'fileira inválida');
+  const victim = opponentOf(s, p.id);
+  if (victim.absoluteDefense) fail('TARGET_PROTECTED', 'o oponente está sob Defesa Absoluta');
+  const fromRow: RowName | null = victim.attackRow.some((c) => c.id === targetId)
+    ? 'ATK'
+    : victim.defenseRow.some((c) => c.id === targetId)
+      ? 'DEF'
+      : null;
+  if (fromRow === null) fail('INVALID_TARGET', 'o Roubo só leva numéricas das fileiras do oponente');
+  const ace = takeFromHand(p, cardId, ['A', 'WILD']);
+  const card = removeById(rowCards(victim, fromRow), targetId) as NumCard;
+  toGraveyard(s, [ace]);
+  ev.push({ type: 'CardStolen', player: p.id, from: victim.id, card, fromRow, toRow: row, ace, ...(ace.kind === 'WILD' ? { as: 'A' as const } : {}) });
+  const target = rowCards(p, row);
+  if (target.length >= s.config.rowLimit) {
+    const displaced = target.splice(target.length - 1, 1);
+    toGraveyard(s, displaced);
+    ev.push({ type: 'CardsRemovedFromRow', player: p.id, row, cards: displaced });
+  }
+  target.push(card);
+  reevaluateQuads(s, victim, ev);
+  reevaluateQuads(s, p, ev);
+  if (card.suit === 'espadas' || card.suit === 'paus') stealDamage(p, victim, card, ev);
+  else heal(s, p, card.value, 'STEAL', card, ev);
 }
 
 /** Ressurreição (spec §1.8): 1 numérica do cemitério para o fim de uma fileira com espaço. */

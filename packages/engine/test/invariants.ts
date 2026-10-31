@@ -8,8 +8,11 @@ export function checkInvariants(before: GameState, after: GameState, events: Gam
   const cards = allCards(after);
   if (cards.length !== totalCards(after.config)) throw new Error(`cartas: ${cards.length}`);
   if (new Set(cards.map((c) => c.id)).size !== cards.length) throw new Error('carta duplicada');
+  // Com a cura (E3) a vida pode subir, mas nunca passa da inicial, e só sobe com um `Healed`.
   after.players.forEach((p, i) => {
-    if (p.hp > before.players[i].hp) throw new Error('a vida aumentou');
+    if (p.hp > after.config.hp) throw new Error('a vida passou da inicial');
+    const healed = events.some((e) => e.type === 'Healed' && e.player === p.id && e.amount > 0);
+    if (p.hp > before.players[i].hp && !healed) throw new Error('a vida subiu sem cura');
   });
   for (const viewer of after.players) {
     const opponent = after.players.find((p) => p.id !== viewer.id);
