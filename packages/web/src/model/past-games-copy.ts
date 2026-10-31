@@ -39,6 +39,33 @@ export const myName = (name: string): string => (name === '' ? 'Você' : name);
 
 export const againstText = (opponent: string): string => `contra ${opponentName(opponent)}`;
 
+// --- Apagar (F1 do sub-projeto 5) ---
+
+/** O botão de cada linha e o de confirmar a confirmação; como no "Rever", a linha o descreve. */
+export const DELETE_LABEL = 'Apagar';
+export const CLEAR_PAST_GAMES_LABEL = 'Apagar o histórico';
+export const CLEAR_PAST_GAMES_TITLE = 'Apagar o histórico?';
+export const DELETE_PAST_GAME_TITLE = 'Apagar esta partida?';
+
+export const clearPastGamesText = (count: number): string =>
+  count === 1
+    ? 'A partida guardada neste navegador some. Não dá para desfazer.'
+    : `As ${count} partidas guardadas neste navegador somem. Não dá para desfazer.`;
+
+/** Diz qual partida é (adversário, data e resultado), e fala do replay só quando ela tem um. */
+export function deletePastGameText(
+  game: { date: number; seat: PlayerId; names: { opponent: string }; outcome: StoredOutcome },
+  withReplay: boolean,
+): string {
+  const which = `${againstText(game.names.opponent)} de ${pastGameDateText(game.date)} (${pastGameResultText(game.outcome, game.seat)})`;
+  return `A partida ${which} some deste navegador${withReplay ? ', junto com o replay' : ''}. Não dá para desfazer.`;
+}
+
+export const PAST_GAME_DELETED_TEXT = 'Partida apagada.';
+export const PAST_GAMES_CLEARED_TEXT = 'Histórico apagado.';
+/** O armazenamento recusou (bloqueio, aba privada): a lista na tela é a que continua guardada. */
+export const DELETE_FAILED_TEXT = 'O navegador não deixou apagar. Tente de novo.';
+
 // --- O visualizador ---
 
 export const REPLAY_CONTROLS_LABEL = 'Controles do replay';

@@ -5,7 +5,8 @@ import type { Outcome } from '@coringa/protocol';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PAST_GAMES_KEY, recordPastGame, type PastGame } from '../../src/model/past-games.ts';
+import { loadPastGames, PAST_GAMES_KEY, recordPastGame, type PastGame } from '../../src/model/past-games.ts';
+import { safeStore } from '../../src/model/storage.ts';
 import PastGames from '../../src/ui/screens/PastGames.tsx';
 import { realReplay } from '../fixtures.ts';
 import { memoryStore, seriousViolations } from './support.tsx';
@@ -167,5 +168,170 @@ describe('<PastGames />: o foco', () => {
     rerender(<PastGames store={store} />);
     expect(button).toHaveFocus();
     expect(title()).not.toHaveFocus();
+  });
+});
+
+describe('<PastGames />: apagar', () => {
+  const title = () => screen.getByRole('heading', { name: 'Partidas anteriores' });
+  const deleteIn = (row: HTMLElement) => within(row).getByRole('button', { name: 'Apagar' });
+  const dialog = (name: string) => screen.getByRole('dialog', { name });
+  const opponents = () => rows().map((row) => within(row).getByText(/^contra /).textContent);
+  /** Três partidas, contra A (a mais velha), B e C (a mais nova, no topo). */
+  const three = () => stored(...['A', 'B', 'C'].map((opponent) => entry({ names: { me: 'Ana', opponent } })));
+
+  it('cada linha tem "Apagar", descrito pela linha; "Apagar o histórico" só existe com partidas', () => {
+    const empty = render(<PastGames store={memoryStore()} />);
+    expect(screen.queryByRole('button', { name: 'Apagar o histórico' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Apagar' })).not.toBeInTheDocument();
+    empty.unmount();
+
+    const { store } = stored(entry({ replay: REPLAY }), entry());
+    render(<PastGames store={store} />);
+    expect(screen.getAllByRole('button', { name: 'Apagar' })).toHaveLength(2);
+    expect(deleteIn(rows()[0]!)).toHaveAccessibleDescription(/25\/10, 14:30.*Duda/);
+    expect(screen.getByRole('button', { name: 'Apagar o histórico' })).toBeInTheDocument();
+  });
+
+  it('"Apagar" pede confirmação dizendo qual partida é; Cancelar não apaga nada, e o foco volta ao botão', async () => {
+    const { store } = stored(entry({ replay: REPLAY }));
+    render(<PastGames store={store} />);
+    const button = deleteIn(rows()[0]!);
+    await userEvent.click(button);
+    const confirm = dialog('Apagar esta partida?');
+    expect(confirm).toHaveAccessibleDescription(
+      'A partida contra Duda de 25/10, 14:30 (Vitória) some deste navegador, junto com o replay. Não dá para desfazer.',
+    );
+    // O foco cai no gesto seguro.
+    expect(within(confirm).getByRole('button', { name: 'Cancelar' })).toHaveFocus();
+
+    await userEvent.click(within(confirm).getByRole('button', { name: 'Cancelar' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(rows()).toHaveLength(1);
+    expect(loadPastGames(store)).toHaveLength(1);
+    expect(button).toHaveFocus();
+  });
+
+  it('o Esc também cancela', async () => {
+    const { store } = stored(entry());
+    render(<PastGames store={store} />);
+    await userEvent.click(deleteIn(rows()[0]!));
+    await userEvent.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(loadPastGames(store)).toHaveLength(1);
+  });
+
+  it('confirmar apaga só aquela partida, avisa e leva o foco ao "Apagar" da linha que tomou o lugar dela', async () => {
+    const { store } = three();
+    render(<PastGames store={store} />);
+    expect(opponents()).toEqual(['contra C', 'contra B', 'contra A']);
+
+    await userEvent.click(deleteIn(rows()[1]!));
+    await userEvent.click(within(dialog('Apagar esta partida?')).getByRole('button', { name: 'Apagar' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(opponents()).toEqual(['contra C', 'contra A']);
+    expect(loadPastGames(store).map((game) => game.names.opponent)).toEqual(['C', 'A']);
+    expect(screen.getByRole('status')).toHaveTextContent('Partida apagada.');
+    expect(deleteIn(rows()[1]!)).toHaveFocus();
+  });
+
+  it('apagar a última linha leva o foco à anterior; apagar a única, ao título', async () => {
+    const { store } = stored(entry({ names: { me: 'Ana', opponent: 'A' } }), entry({ names: { me: 'Ana', opponent: 'B' } }));
+    render(<PastGames store={store} />);
+    await userEvent.click(deleteIn(rows()[1]!));
+    await userEvent.click(within(dialog('Apagar esta partida?')).getByRole('button', { name: 'Apagar' }));
+    expect(opponents()).toEqual(['contra B']);
+    expect(deleteIn(rows()[0]!)).toHaveFocus();
+
+    await userEvent.click(deleteIn(rows()[0]!));
+    await userEvent.click(within(dialog('Apagar esta partida?')).getByRole('button', { name: 'Apagar' }));
+    expect(screen.getByText('Nenhuma partida terminada neste navegador.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Apagar o histórico' })).not.toBeInTheDocument();
+    expect(title()).toHaveFocus();
+    expect(store.get(PAST_GAMES_KEY)).toBeNull();
+  });
+
+  it('"Apagar o histórico": Cancelar guarda tudo; confirmar esvazia a lista, avisa e leva o foco ao título', async () => {
+    const { store } = three();
+    store.set('coringa:tutorial', 'done');
+    render(<PastGames store={store} />);
+    const clear = screen.getByRole('button', { name: 'Apagar o histórico' });
+
+    await userEvent.click(clear);
+    expect(dialog('Apagar o histórico?')).toHaveAccessibleDescription(
+      'As 3 partidas guardadas neste navegador somem. Não dá para desfazer.',
+    );
+    await userEvent.click(within(dialog('Apagar o histórico?')).getByRole('button', { name: 'Cancelar' }));
+    expect(rows()).toHaveLength(3);
+    expect(clear).toHaveFocus();
+
+    await userEvent.click(clear);
+    await userEvent.click(within(dialog('Apagar o histórico?')).getByRole('button', { name: 'Apagar' }));
+    expect(screen.queryByRole('list')).not.toBeInTheDocument();
+    expect(screen.getByText('Nenhuma partida terminada neste navegador.')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Histórico apagado.');
+    expect(title()).toHaveFocus();
+    expect(store.get(PAST_GAMES_KEY)).toBeNull();
+    // Só a lista sai: o resto do que o jogo guarda fica.
+    expect(store.get('coringa:tutorial')).toBe('done');
+  });
+
+  it('o navegador que recusa a escrita: a partida continua na tela e no armazenamento, e o aviso diz que não deu', async () => {
+    const disk = new Map<string, string>();
+    let refuse = false;
+    const raw: Storage = {
+      get length() {
+        return disk.size;
+      },
+      clear: () => disk.clear(),
+      key: (index) => [...disk.keys()][index] ?? null,
+      getItem: (key) => disk.get(key) ?? null,
+      removeItem(key) {
+        if (refuse && key === PAST_GAMES_KEY) throw new DOMException('bloqueado', 'SecurityError');
+        disk.delete(key);
+      },
+      setItem(key, value) {
+        if (refuse && key === PAST_GAMES_KEY) throw new DOMException('cheio', 'QuotaExceededError');
+        disk.set(key, value);
+      },
+    };
+    const { store } = safeStore(raw);
+    recordPastGame(store, entry({ names: { me: 'Ana', opponent: 'A' } }), 1);
+    recordPastGame(store, entry({ names: { me: 'Ana', opponent: 'B' } }), 2);
+    refuse = true;
+    render(<PastGames store={store} />);
+
+    const button = deleteIn(rows()[0]!);
+    await userEvent.click(button);
+    await userEvent.click(within(dialog('Apagar esta partida?')).getByRole('button', { name: 'Apagar' }));
+    expect(opponents()).toEqual(['contra B', 'contra A']);
+    expect(screen.getByRole('status')).toHaveTextContent('O navegador não deixou apagar. Tente de novo.');
+    expect(button).toHaveFocus();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Apagar o histórico' }));
+    await userEvent.click(within(dialog('Apagar o histórico?')).getByRole('button', { name: 'Apagar' }));
+    expect(rows()).toHaveLength(2);
+    expect(screen.getByRole('status')).toHaveTextContent('O navegador não deixou apagar. Tente de novo.');
+    // O que a tela mostra é o que um recarregar mostraria.
+    expect(loadPastGames(safeStore(raw).store)).toHaveLength(2);
+  });
+
+  it('abrir uma confirmação nova tira o aviso da anterior', async () => {
+    const { store } = three();
+    render(<PastGames store={store} />);
+    await userEvent.click(deleteIn(rows()[0]!));
+    await userEvent.click(within(dialog('Apagar esta partida?')).getByRole('button', { name: 'Apagar' }));
+    expect(screen.getByRole('status')).toHaveTextContent('Partida apagada.');
+    await userEvent.click(deleteIn(rows()[0]!));
+    expect(screen.getByRole('status')).toBeEmptyDOMElement();
+  });
+
+  it('sem violações sérias de acessibilidade com a confirmação aberta', async () => {
+    const { store } = stored(entry({ replay: REPLAY }), entry());
+    const view = render(<PastGames store={store} />);
+    await userEvent.click(deleteIn(rows()[0]!));
+    expect(await seriousViolations(view.container)).toEqual([]);
+    await userEvent.click(within(dialog('Apagar esta partida?')).getByRole('button', { name: 'Cancelar' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Apagar o histórico' }));
+    expect(await seriousViolations(view.container)).toEqual([]);
   });
 });

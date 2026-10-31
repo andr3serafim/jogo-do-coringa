@@ -2,6 +2,8 @@ import type { Outcome } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
 import {
   againstText,
+  clearPastGamesText,
+  deletePastGameText,
   pastGameDateText,
   pastGameModeText,
   pastGameResultText,
@@ -60,5 +62,28 @@ describe('replayStoppedText', () => {
 
   it('no passo 0 a partida nem começou', () => {
     expect(replayStoppedText(0, 'hp deve ser um inteiro ≥ 1')).toBe('O replay não pôde começar: hp deve ser um inteiro ≥ 1.');
+  });
+});
+
+describe('apagar', () => {
+  const game = {
+    date: new Date(2026, 9, 25, 14, 30).getTime(),
+    seat: 'p1' as const,
+    names: { me: 'Ana', opponent: 'Duda' },
+    outcome: win('p1'),
+  };
+
+  it('a confirmação de todas diz quantas são, no singular e no plural', () => {
+    expect(clearPastGamesText(1)).toBe('A partida guardada neste navegador some. Não dá para desfazer.');
+    expect(clearPastGamesText(5)).toBe('As 5 partidas guardadas neste navegador somem. Não dá para desfazer.');
+  });
+
+  it('a confirmação de uma diz qual é, e fala do replay só quando ela tem um', () => {
+    expect(deletePastGameText(game, false)).toBe(
+      'A partida contra Duda de 25/10, 14:30 (Vitória) some deste navegador. Não dá para desfazer.',
+    );
+    expect(deletePastGameText({ ...game, outcome: win('p2') }, true)).toBe(
+      'A partida contra Duda de 25/10, 14:30 (Derrota) some deste navegador, junto com o replay. Não dá para desfazer.',
+    );
   });
 });

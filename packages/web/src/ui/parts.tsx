@@ -1,6 +1,6 @@
 // Peças compartilhadas das telas de início e de entrada e do menu da partida, no tema da Peleja (spec §10): capa colorida,
 // tinta, títulos em tipo de madeira e botões ouro. Alvos de toque ≥ 44 px; campos de texto com 16 px.
-import { useEffect, useId, useRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
+import { useEffect, useId, useImperativeHandle, useRef, type ComponentPropsWithoutRef, type ReactNode, type Ref } from 'react';
 import { navigate } from '../app/router.ts';
 import { SWITCH_OFF, SWITCH_ON } from '../model/copy.ts';
 
@@ -20,8 +20,19 @@ export function Screen({ children, tone = 'voce' }: { children: ReactNode; tone?
  * abrir, sem rolar a página: o teclado e o leitor de tela começam pela tela nova, e não pelo botão que a abriu, que já saiu de
  * cena. Só ao montar: um redesenho nunca devolve o foco ao título. Fica fora da ordem do Tab (`tabIndex={-1}`).
  */
-export function Title({ children, focusOnMount = false }: { children: ReactNode; focusOnMount?: boolean }) {
+export function Title({
+  children,
+  focusOnMount = false,
+  ref: outer,
+}: {
+  children: ReactNode;
+  focusOnMount?: boolean;
+  /** Para a tela levar o foco de volta ao título (a lista das partidas, quando a linha que tinha o foco sai). */
+  ref?: Ref<HTMLHeadingElement>;
+}) {
   const ref = useRef<HTMLHeadingElement>(null);
+  // O `<h1>` já está na página quando o React chama isto.
+  useImperativeHandle(outer, () => ref.current!, []);
   useEffect(() => {
     if (focusOnMount) ref.current?.focus({ preventScroll: true });
   }, [focusOnMount]);
@@ -46,15 +57,20 @@ export function Panel({ children, label }: { children: ReactNode; label?: string
 }
 
 const BUTTON_BASE =
-  'min-h-11 border-4 border-tinta px-5 py-2 font-madeira text-lg uppercase tracking-wide text-tinta disabled:cursor-wait disabled:opacity-60';
+  'min-h-11 border-4 px-5 py-2 font-madeira text-lg uppercase tracking-wide disabled:cursor-wait disabled:opacity-60';
+/** `danger`: a ação sem volta (apagar partidas), no vermelho do Desistir do menu. */
+const BUTTON_TONES = {
+  primary: 'border-tinta bg-ouro text-tinta',
+  secondary: 'border-tinta bg-papel text-tinta',
+  danger: 'border-vermelho bg-papel text-vermelho',
+} as const;
 
 export function Button({
   variant = 'primary',
   className = '',
   ...rest
-}: ComponentPropsWithoutRef<'button'> & { variant?: 'primary' | 'secondary' }) {
-  const tone = variant === 'primary' ? 'bg-ouro' : 'bg-papel';
-  return <button type="button" className={`${BUTTON_BASE} ${tone} ${className}`} {...rest} />;
+}: ComponentPropsWithoutRef<'button'> & { variant?: keyof typeof BUTTON_TONES }) {
+  return <button type="button" className={`${BUTTON_BASE} ${BUTTON_TONES[variant]} ${className}`} {...rest} />;
 }
 
 /**
