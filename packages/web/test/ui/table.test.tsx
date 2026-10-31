@@ -305,6 +305,18 @@ describe('mesa: marcas de estado no Coringa (spec §3.1)', () => {
     expect(region('Campo de Duda').queryByText('Ataque Absoluto armado')).not.toBeInTheDocument();
   });
 
+  it('Cura passiva com 2 K na Guarda; com 1 K, não', () => {
+    mount({ ...DRAFT, self: { ...DRAFT.self, guard: ['K', 'K'] } });
+    expect(region('Seu campo').getByText('Cura passiva')).toBeInTheDocument();
+    expect(region('Campo de Duda').queryByText('Cura passiva')).not.toBeInTheDocument();
+  });
+
+  it('a Cura passiva também aparece no campo do oponente', () => {
+    mount({ ...DRAFT, opponent: { ...DRAFT.opponent, guard: ['K', 'K', 'K'] } });
+    expect(region('Campo de Duda').getByText('Cura passiva')).toBeInTheDocument();
+    expect(region('Seu campo').queryByText('Cura passiva')).not.toBeInTheDocument();
+  });
+
   it('sem nenhuma, o campo não tem lista de marcas de estado', () => {
     mount();
     expect(screen.queryByRole('list', { name: /Estado do Coringa/ })).not.toBeInTheDocument();

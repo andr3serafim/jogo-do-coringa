@@ -2,7 +2,7 @@
 // buffs, as marcas de estado e as duas fileiras. Em cima o oponente (verde), embaixo você (rosa); os dois se
 // distinguem por posição e por rótulo, nunca só pela cor. O arranjo (celular em coluna, PC em três colunas)
 // é de CSS: a árvore é uma só.
-import { absoluteAttackArmed, type PlayerView, type PublicPlayer, type SpecialCard } from '@coringa/engine';
+import { absoluteAttackArmed, defenseHealActive, type PlayerView, type PublicPlayer, type SpecialCard } from '@coringa/engine';
 import { useId, type ReactNode } from 'react';
 import { cardDropKey, DROP, type DropKey } from '../../model/drag.ts';
 import { zoneKey, type MarkZone } from '../../model/marks.ts';
@@ -177,6 +177,8 @@ function Info({ side, view, player, name, away, equip, zone, tool }: InfoProps) 
 function Zones({ player, name, view, self }: { player: PublicPlayer; name: string; view: PlayerView; self: boolean }) {
   const chips: Array<{ key: string; text: string; strong: boolean }> = [];
   if (player.absoluteDefense) chips.push({ key: 'def', text: 'Defesa Absoluta', strong: true });
+  // Enquanto houver 2 K ou mais na Guarda (a regra é do motor): as numéricas da Defesa que caem curam o dono.
+  if (defenseHealActive(player, view.config)) chips.push({ key: 'cura', text: 'Cura passiva', strong: false });
   if (player.resurrectionCount > 0) {
     chips.push({ key: 'res', text: resurrectionsText(player.resurrectionCount), strong: false });
   }

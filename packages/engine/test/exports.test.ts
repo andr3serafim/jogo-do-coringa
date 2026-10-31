@@ -30,6 +30,15 @@ describe('API para bots e interface', () => {
     expect(engine.previewBetween({ ...view.self, attackRow: view.opponent.attackRow }, view.opponent, view.config).absolute).toBe(true);
   });
 
+  it('defenseHealActive: a cura passiva liga com defenseHealGuard K na Guarda, de cada lado; sem o campo, nunca', () => {
+    const s = setup({ p1: { guard: 2 }, p2: { guard: 1 } });
+    const view = viewFor(s, P1);
+    expect(engine.defenseHealActive(view.self, view.config)).toBe(true);
+    expect(engine.defenseHealActive(view.opponent, view.config)).toBe(false);
+    expect(engine.defenseHealActive(view.opponent, { defenseHealGuard: 1 })).toBe(true);
+    expect(engine.defenseHealActive(view.self, {})).toBe(false);
+  });
+
   it('o multiplicador de ataque é 1 + nJ (exemplo 6) e a quadra soma antes dele (exemplo 4)', () => {
     const s = setup({ p1: { attack: [4, 6], attackBuffs: ['J'] }, p2: { defense: [10, 3, 10, 10, 10], defenseBuffs: ['Q'] } });
     const view = viewFor(s, P2);

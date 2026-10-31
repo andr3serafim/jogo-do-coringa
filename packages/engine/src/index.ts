@@ -8,7 +8,15 @@ export { viewEvents, viewFor } from './view.ts';
 export { legalActions, nextEquipDestinations } from './legal-actions.ts';
 export { noPlayReason, type NoPlayReason } from './no-play.ts';
 export { actingPlayers } from './acting.ts';
-export { attackBase, attackPower, defenseBase, defensePower, type AttackSide, type DefenseSide } from './combat.ts';
+export {
+  attackBase,
+  attackPower,
+  defenseBase,
+  defenseHealActive,
+  defensePower,
+  type AttackSide,
+  type DefenseSide,
+} from './combat.ts';
 export { nextFloat, nextInt, seedRng, shuffle } from './rng.ts';
 export { autoDestinations } from './actions/equip.ts';
 export { quadValues } from './quads.ts';

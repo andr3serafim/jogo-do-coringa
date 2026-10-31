@@ -571,7 +571,7 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
     items: [
       'J (Buff de Ataque) e Q (Buff de Defesa): cada um soma 1 ao multiplicador de ataque ou de defesa. Cabem 4 de cada.',
       'K (Guarda): absorve o dano, como acima. Você pode jogar vários K de uma vez; o oponente ganha uma janela de reação.',
-      'Cura pela Defesa: Com 2 K ou mais na Guarda, cada numérica da sua fileira de Defesa que vai para o cemitério cura você o valor dela × (1 + número de Q), até a vida inicial. As cartas que a Devastação destrói não curam.',
+      'Cura passiva (pela Defesa): Com 2 K ou mais na Guarda, cada numérica da sua fileira de Defesa que vai para o cemitério cura você o valor dela × (1 + número de Q), até a vida inicial. As cartas que a Devastação destrói não curam.',
       'A (Armadilha ou Roubo): como Armadilha, destrói 1 J, Q ou K do campo do oponente, no seu turno ou na janela de reação. Como Roubo, só no seu turno: leva uma numérica de qualquer fileira do oponente para o fim da fileira que você escolher; ele perde o valor dela de vida (um K na Guarda dele anula esse dano; o roubo nunca mata) e você cura o mesmo valor, até a vida inicial. Nada disso alcança quem está sob Defesa Absoluta.',
       'Sacrifício: no seu turno, descarte um J da mão para destruir um J do oponente, ou um Q para destruir um Q. Não funciona contra Defesa Absoluta.',
       'Coringa Selvagem: assume o papel de J, Q ou A, nunca o de K.',

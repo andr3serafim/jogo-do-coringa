@@ -1,7 +1,7 @@
 import { previewBetween } from './preview.ts';
 import { quadBonus, reevaluateQuads } from './quads.ts';
 import { finishGame, getPlayer, isGameOver, opponentOf, toGraveyard } from './state.ts';
-import type { GameEvent, GameState, NumCard, PlayerId, PlayerState, SpecialCard } from './types.ts';
+import type { GameEvent, GameState, NumCard, PlayerId, PlayerState, RulesConfig, SpecialCard } from './types.ts';
 
 const sum = (cards: NumCard[]): number => cards.reduce((total, c) => total + c.value, 0);
 
@@ -51,13 +51,21 @@ export function heal(s: GameState, p: PlayerState, amount: number, source: 'STEA
 }
 
 /**
+ * A cura passiva está ligada (E3): `defenseHealGuard` K ou mais na Guarda. Vale de cada lado (a marca de estado da mesa); a cura
+ * usa a mesma regra. Sem o campo (replays de antes da E3), nunca.
+ */
+export function defenseHealActive(side: { guard: SpecialCard[] }, config: Pick<RulesConfig, 'defenseHealGuard'>): boolean {
+  const guard = config.defenseHealGuard;
+  return guard !== undefined && side.guard.length >= guard;
+}
+
+/**
  * Cura passiva (E3): com `defenseHealGuard` K ou mais na Guarda, cada numérica da própria Fileira de Defesa que vai ao cemitério
  * cura valor × (1 + nº de Q). Conferida quando a carta chega ao cemitério, depois dos K que o mesmo golpe quebrou ([I]). A
  * Devastação não chama: as cartas destruídas por ela não curam.
  */
 export function healFromDefense(s: GameState, p: PlayerState, cards: NumCard[], ev: GameEvent[]): void {
-  const guard = s.config.defenseHealGuard;
-  if (guard === undefined || p.guard.length < guard) return;
+  if (!defenseHealActive(p, s.config)) return;
   for (const card of cards) heal(s, p, card.value * (1 + p.defenseBuffs.length), 'DEFENSE', card, ev);
 }
 

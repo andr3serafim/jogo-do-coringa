@@ -94,6 +94,12 @@ describe('resumo das regras: a Defesa Absoluta dura até o ataque (motor: `endTu
   });
 });
 
+describe('resumo das regras: a cura passiva tem o nome da marca da mesa', () => {
+  it('o item começa por "Cura passiva", o texto da marca de estado do campo', () => {
+    expect(items.some((i) => i.startsWith('Cura passiva (pela Defesa): '))).toBe(true);
+  });
+});
+
 describe('resumo das regras: a janela de reação diz o que o motor faz', () => {
   const window = RULES_SECTIONS.find((section) => section.title === 'Janela de reação')!.items;
 

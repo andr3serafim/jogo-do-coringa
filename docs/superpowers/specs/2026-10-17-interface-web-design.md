@@ -250,7 +250,9 @@ A mesa está em §3 e §4. O menu da partida tem:
     antes, e só trocam com a mesa parada (sub-projeto 5, B1: dividir o total velho pela base nova inventava um J ou um Q que não
     estava na mesa, porque o golpe já tirou a carta da frente);
   - a quadra aparece destacada nas quatro cartas, com "+V" no total.
-- **Marcas de estado no Coringa:** Reflect ativo, Defesa Absoluta, Ressurreições disponíveis (com contagem), Ataque Absoluto armado (4 J).
+- **Marcas de estado no Coringa:** Reflect ativo, Defesa Absoluta, Cura passiva (2 K ou mais na Guarda, enquanto durar; pedida pelo
+  autor em 2026-10-31, ligada pelo `defenseHealActive` do motor), Ressurreições disponíveis (com contagem), Ataque Absoluto
+  armado (4 J).
 - **Mão:**
   - a própria, com o papel escrito em cada carta (Guarda, Buff de ataque, Buff de defesa, Armadilha, Selvagem);
   - a do oponente, só a quantidade de versos.
