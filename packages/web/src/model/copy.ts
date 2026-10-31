@@ -1,5 +1,5 @@
 // Textos das jogadas da mesa, em pt-BR (spec §3.4). Fora da meta de cobertura: é só texto.
-import type { AttackPreview, Card, NoPlayReason, PlayerId, RowName, SpecialCard } from '@coringa/engine';
+import type { AttackPreview, Card, NoPlayReason, NumCard, PlayerId, RowName, SpecialCard, StealOutcome } from '@coringa/engine';
 import type { DeadlineKind, Outcome, Score } from '@coringa/protocol';
 import { cardText, ROW_NAME } from '@coringa/sim/text';
 import type { TrainingLevel } from './local-room.ts';
@@ -8,17 +8,25 @@ import type { SceneKind } from './timeline.ts';
 
 export { cardText, ROW_NAME };
 
+/** Onde fica uma especial do oponente que pode ser alvo (Armadilha, Sacrifício). */
+export type BuffZone = 'attackBuffs' | 'defenseBuffs' | 'guard';
+/** Onde fica uma numérica do oponente que pode ser alvo (o Roubo, E3). */
+export type RowZone = 'attackRow' | 'defenseRow';
 /** Onde fica uma carta do oponente que pode ser alvo. */
-export type TargetZone = 'attackBuffs' | 'defenseBuffs' | 'guard';
+export type TargetZone = BuffZone | RowZone;
+
+export const isRowZone = (zone: TargetZone): zone is RowZone => zone === 'attackRow' || zone === 'defenseRow';
 
 const ZONE_TEXT: Record<TargetZone, string> = {
   attackBuffs: 'Buff de ataque',
   defenseBuffs: 'Buff de defesa',
   guard: 'Guarda',
+  attackRow: 'Ataque',
+  defenseRow: 'Defesa',
 };
 
-/** "K♥ (Guarda)": o alvo na lista da barra de ação. */
-export const targetText = (card: SpecialCard, zone: TargetZone): string => `${cardText(card)} (${ZONE_TEXT[zone]})`;
+/** "K♥ (Guarda)", "9♠ (Ataque)": o alvo na lista da barra de ação. */
+export const targetText = (card: Card, zone: TargetZone): string => `${cardText(card)} (${ZONE_TEXT[zone]})`;
 
 export const PLAY_TEXT = {
   PLAY_J: 'Buff de ataque',
@@ -26,6 +34,24 @@ export const PLAY_TEXT = {
   TRAP: 'Armadilha',
   SACRIFICE: 'Sacrifício',
 } as const;
+
+/** O Roubo (E3): uma jogada do A por fileira de destino, a do próprio ladrão. */
+export const STEAL_TEXT: Record<RowName, string> = {
+  ATK: 'Roubar para o seu Ataque',
+  DEF: 'Roubar para a sua Defesa',
+};
+
+/**
+ * A prévia do Roubo no botão do alvo, com a conta do motor (`stealPreview`): "−9 para Duda · +9 para você"; com o K dele,
+ * "o K de Duda anula o dano · +9 para você"; o dano cortado ("não mata") e a vida já cheia também aparecem.
+ */
+export function stealEffectText(outcome: StealOutcome, opponent: string): string {
+  const damage = outcome.blocked
+    ? `o K de ${opponent} anula o dano`
+    : `−${outcome.damage} para ${opponent}${outcome.damage < outcome.value ? ' (o roubo não mata)' : ''}`;
+  const heal = outcome.heal > 0 ? `+${outcome.heal} para você` : 'sua vida já está cheia';
+  return `${damage} · ${heal}`;
+}
 
 /** Papel que o Selvagem assume: "como J: Buff de ataque". */
 export const asRoleText = (role: 'J' | 'Q' | 'A', play: string): string => `como ${role}: ${play}`;
@@ -115,16 +141,18 @@ const TARGET_PLACE: Record<TargetZone, string> = {
   guard: 'da Guarda de',
   attackBuffs: 'dos Buffs de Ataque de',
   defenseBuffs: 'dos Buffs de Defesa de',
+  attackRow: 'do Ataque de',
+  defenseRow: 'da Defesa de',
 };
 
-const TARGET_ROLE: Record<TargetZone, 'K' | 'J' | 'Q'> = { guard: 'K', attackBuffs: 'J', defenseBuffs: 'Q' };
+const TARGET_ROLE: Record<BuffZone, 'K' | 'J' | 'Q'> = { guard: 'K', attackBuffs: 'J', defenseBuffs: 'Q' };
 
-/** O papel da carta do oponente que é alvo: o Selvagem nos buffs conta como J ou Q. */
-export const targetRole = (zone: TargetZone): 'K' | 'J' | 'Q' => TARGET_ROLE[zone];
+/** O papel da especial do oponente que é alvo: o Selvagem nos buffs conta como J ou Q. */
+export const targetRole = (zone: BuffZone): 'K' | 'J' | 'Q' => TARGET_ROLE[zone];
 
-/** O alvo como botão grande da barra: "K♣ da Guarda de Duda", "J♠ dos Buffs de Ataque de Duda". */
-export function targetButtonText(card: SpecialCard, zone: TargetZone, owner: string): string {
-  const who = card.kind === 'WILD' ? `Selvagem como ${TARGET_ROLE[zone]}` : cardText(card);
+/** O alvo como botão grande da barra: "K♣ da Guarda de Duda", "J♠ dos Buffs de Ataque de Duda", "9♦ do Ataque de Duda". */
+export function targetButtonText(card: SpecialCard | NumCard, zone: TargetZone, owner: string): string {
+  const who = card.kind === 'WILD' && !isRowZone(zone) ? `Selvagem como ${TARGET_ROLE[zone]}` : cardText(card);
   return `${who} ${TARGET_PLACE[zone]} ${owner}`;
 }
 

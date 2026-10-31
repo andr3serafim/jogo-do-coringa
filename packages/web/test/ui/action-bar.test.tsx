@@ -131,7 +131,12 @@ describe('barra de ação: tocar uma carta lista as jogadas (spec §3.4)', () =>
     await m.user.click(handCard('A'));
     expect(handCard('A')).toHaveAttribute('aria-pressed', 'true');
     expect(inBar().getAllByRole('button').map((b) => b.textContent)).toContain('Armadilha');
-    expect(inBar().getByRole('list', { name: 'Jogadas' }).querySelectorAll('button')).toHaveLength(1);
+    // A Armadilha e os dois destinos do Roubo (E3).
+    expect([...inBar().getByRole('list', { name: 'Jogadas' }).querySelectorAll('button')].map((x) => x.textContent)).toEqual([
+      'Armadilha',
+      'Roubar para o seu Ataque',
+      'Roubar para a sua Defesa',
+    ]);
 
     await m.user.click(handCard('K'));
     expect(handCard('A')).toHaveAttribute('aria-pressed', 'false');
@@ -235,6 +240,30 @@ describe('barra de ação: Armadilha e alvos (spec §3.2, §3.4)', () => {
       cardId: handCards(m.view, 'A')[0]!.id,
       targetId: m.view.opponent.guard[0]!.id,
     });
+  });
+
+  it('A → Roubar para o seu Ataque: os alvos são as numéricas de Duda, com a prévia do motor, e o toque manda STEAL', async () => {
+    const m = mount();
+    await m.user.click(handCard('A'));
+    await m.user.click(inBar().getByRole('button', { name: 'Roubar para o seu Ataque' }));
+    const { opponent } = m.view;
+    const buttons = within(inBar().getByRole('list', { name: 'Alvos' })).getAllByRole('button');
+    expect(buttons).toHaveLength(opponent.attackRow.length + opponent.defenseRow.length);
+    const nine = opponent.attackRow[1]!;
+    // Duda tem um K na Guarda: o dano do roubo é anulado, e a cura (você tem 187 de 500) vem cheia.
+    expect(buttons[1]).toHaveAccessibleName(`${cardText(nine)} do Ataque de Duda o K de Duda anula o dano · +9 para você`);
+    expect(buttons[4]).toHaveAccessibleName(startsWith(`${cardText(opponent.defenseRow[0]!)} da Defesa de Duda`));
+    await m.user.click(buttons[1]!);
+    expect(sentAction(m)).toEqual({ type: 'STEAL', cardId: handCards(m.view, 'A')[0]!.id, targetId: nine.id, row: 'ATK' });
+  });
+
+  it('sem o K de Duda, a prévia do Roubo diz o dano e a cura', async () => {
+    const m = mount({ ...DRAFT, opponent: { ...DRAFT.opponent, guard: [] } });
+    await m.user.click(handCard('A'));
+    await m.user.click(inBar().getByRole('button', { name: 'Roubar para a sua Defesa' }));
+    const ten = m.view.opponent.attackRow[3]!;
+    const button = within(inBar().getByRole('list', { name: 'Alvos' })).getAllByRole('button')[3]!;
+    expect(button).toHaveAccessibleName(`${cardText(ten)} do Ataque de Duda −10 para Duda · +10 para você`);
   });
 
   it('a barra lista os alvos como botões grandes, e a mesa destaca os mesmos', async () => {

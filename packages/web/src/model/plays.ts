@@ -4,9 +4,9 @@
 // qualquer carta da mão do mesmo tipo. Por isso a mesa compara pelo papel (`roleKey`): tipo de jogada,
 // tipo de carta e alvo, nunca o id de uma carta da mão. Nenhuma regra do jogo mora aqui: só se
 // reaproveita o que a lista legal já diz, trocando a carta canônica pela que o jogador tocou.
-import { legalActions, type Card, type PlayerView, type Rank, type RowName, type SpecialCard } from '@coringa/engine';
+import { legalActions, type Card, type NumCard, type PlayerView, type Rank, type RowName, type SpecialCard } from '@coringa/engine';
 import type { PlayerAction } from '@coringa/protocol';
-import { asRoleText, guardText, PLAY_TEXT, targetText, type TargetZone } from './copy.ts';
+import { asRoleText, guardText, PLAY_TEXT, STEAL_TEXT, targetText, type BuffZone, type RowZone, type TargetZone } from './copy.ts';
 
 export interface Target {
   id: string;
@@ -79,6 +79,14 @@ export function roleKey(action: PlayerAction, view: PlayerView): string {
   const inHand = new Map<string, string>(view.self.hand.map((c) => [c.id, c.kind]));
   for (const c of view.graveyard) if (c.kind === 'NUM') inHand.set(c.id, `NUM:${c.value}`);
   const role = (id: string): string => inHand.get(id) ?? id;
+  // O alvo do Roubo: na mesma fileira, numéricas de mesmo valor dão o mesmo roubo (o motor aceita qualquer uma).
+  const stolen = (id: string): string => {
+    for (const [row, cards] of [['ATK', view.opponent.attackRow], ['DEF', view.opponent.defenseRow]] as const) {
+      const card = cards.find((c) => c.id === id);
+      if (card) return `${row}:${card.value}`;
+    }
+    return id;
+  };
   switch (action.type) {
     case 'PLAY_J':
     case 'PLAY_Q':
@@ -96,7 +104,7 @@ export function roleKey(action: PlayerAction, view: PlayerView): string {
     case 'RESURRECT':
       return `RESURRECT|${role(action.cardId)}|${action.row}`;
     case 'STEAL':
-      return `STEAL|${role(action.cardId)}|${action.targetId}|${action.row}`;
+      return `STEAL|${role(action.cardId)}|${stolen(action.targetId)}|${action.row}`;
     case 'DEVASTATE':
       return `DEVASTATE|${role(action.kId)}|${role(action.aId)}|${role(action.xId)}|${action.row}`;
     case 'EQUIP':
@@ -127,15 +135,20 @@ interface Group {
 
 interface OpponentCard {
   id: string;
-  card: SpecialCard;
+  card: SpecialCard | NumCard;
   zone: TargetZone;
 }
 
-/** Cartas do oponente que podem ser alvo, por id. */
+/** Cartas do oponente que podem ser alvo, por id: as especiais (Armadilha, Sacrifício) e as numéricas (o Roubo). */
 function opponentTargets(view: PlayerView): Map<string, OpponentCard> {
   const out = new Map<string, OpponentCard>();
-  const zones: TargetZone[] = ['attackBuffs', 'defenseBuffs', 'guard'];
+  const zones: BuffZone[] = ['attackBuffs', 'defenseBuffs', 'guard'];
   for (const zone of zones) for (const card of view.opponent[zone]) out.set(card.id, { id: card.id, card, zone });
+  const rows: Array<[RowZone, NumCard[]]> = [
+    ['attackRow', view.opponent.attackRow],
+    ['defenseRow', view.opponent.defenseRow],
+  ];
+  for (const [zone, cards] of rows) for (const card of cards) out.set(card.id, { id: card.id, card, zone });
   return out;
 }
 
@@ -201,6 +214,20 @@ function playsOf(card: SpecialCard, view: PlayerView, legal: PlayerAction[], tar
           (targetId) => ({ type: 'SACRIFICE', cardId: card.id, targetId: targetId! }),
           target,
         );
+        break;
+      }
+      case 'STEAL': {
+        const target = targets.get(entry.targetId);
+        if (!sameKind(entry.cardId) || !target || target.card.kind !== 'NUM') break;
+        // O motor lista uma numérica por fileira e valor; a mesa oferece todas as de mesmo valor (o roubo é o mesmo).
+        const value = target.card.value;
+        const row = entry.row;
+        const build = (targetId?: string): PlayerAction => ({ type: 'STEAL', cardId: card.id, targetId: targetId!, row });
+        for (const other of targets.values()) {
+          if (other.zone === target.zone && other.card.kind === 'NUM' && other.card.value === value) {
+            add(`STEAL:${row}`, 'A', STEAL_TEXT[row], build, other);
+          }
+        }
         break;
       }
       default:

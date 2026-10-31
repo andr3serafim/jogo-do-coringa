@@ -294,14 +294,15 @@ describe('arrastar da mão: a fase principal', () => {
     expect(handCard('K').closest('li')).not.toHaveStyle({ opacity: '0.4' });
   });
 
-  it('o A marca como zonas os quatro alvos do oponente, e a Q, os Buffs de defesa e os Q do oponente (Sacrifício)', () => {
+  it('o A marca como zonas os alvos da Armadilha e os do Roubo (as numéricas do oponente), e a Q, os Buffs de defesa e os Q do oponente', () => {
     const m = mount();
     const a = handCard('A');
     press(a);
     moveTo(a, 80, 80);
     const { opponent } = m.view;
+    const special = [...opponent.attackBuffs, ...opponent.defenseBuffs, ...opponent.guard];
     expect(new Set(active())).toEqual(
-      new Set([...opponent.attackBuffs, ...opponent.defenseBuffs, ...opponent.guard].map((c) => cardDropKey(c.id))),
+      new Set([...special, ...opponent.attackRow, ...opponent.defenseRow].map((c) => cardDropKey(c.id))),
     );
     release(a, 80, 80);
     const q = handCard('Q');
@@ -790,18 +791,20 @@ describe('as zonas da mesa (data-soltar) e as chaves do modelo', () => {
 
   it('toda zona da mesa é uma chave que o modelo conhece (as fixas, ou uma carta-alvo do oponente)', () => {
     const { view } = mount(withHand(['K', 'J', 'Q', 'A', 'WILD']));
-    const targets = [...view.opponent.attackBuffs, ...view.opponent.defenseBuffs, ...view.opponent.guard].map((c) => cardDropKey(c.id));
+    const { attackBuffs, defenseBuffs, guard, attackRow, defenseRow } = view.opponent;
+    const targets = [...attackBuffs, ...defenseBuffs, ...guard, ...attackRow, ...defenseRow].map((c) => cardDropKey(c.id));
     const known = new Set<string>([...Object.values(DROP), ...targets]);
     for (const key of rendered()) expect(known, key).toContain(key);
     // E o contrário, na mesa cheia: todas as fixas e todos os alvos têm onde cair.
     expect(new Set(rendered())).toEqual(known);
   });
 
-  it('as zonas do oponente são só os alvos possíveis: a Guarda e os buffs dele, nunca a mão nem as fileiras nem o Reflect', () => {
+  it('as zonas do oponente são só os alvos possíveis: a Guarda, os buffs e as numéricas dele (o Roubo), nunca a mão nem o Reflect', () => {
     const { view } = mount({ ...DRAFT, opponent: { ...DRAFT.opponent, reflect: true } });
     const field = screen.getByRole('region', { name: 'Campo de Duda' });
     const inField = [...field.querySelectorAll('[data-soltar]')].map((el) => el.getAttribute('data-soltar'));
-    const targets = [...view.opponent.attackBuffs, ...view.opponent.defenseBuffs, ...view.opponent.guard].map((c) => cardDropKey(c.id));
+    const { attackBuffs, defenseBuffs, guard, attackRow, defenseRow } = view.opponent;
+    const targets = [...attackBuffs, ...defenseBuffs, ...guard, ...attackRow, ...defenseRow].map((c) => cardDropKey(c.id));
     expect(new Set(inField)).toEqual(new Set(targets));
   });
 

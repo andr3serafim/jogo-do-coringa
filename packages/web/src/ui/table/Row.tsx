@@ -12,7 +12,7 @@
 //
 // Na sua fileira (`droppable`), o arrasto do Equipar (fatia 5) solta a carta na fileira inteira (um lugar vago) ou na última carta
 // dela (a troca): `data-soltar`, com as chaves de `model/drag.ts`. A zona de dentro só vale quando o motor deixa trocar; sem isso o
-// gesto sobe até a fileira.
+// gesto sobe até a fileira. Na do oponente (`targets`), cada carta é uma zona `carta:<id>`: o A solta ali para roubá-la (E3).
 import {
   attackBase,
   attackPower,
@@ -23,7 +23,7 @@ import {
   type PublicPlayer,
 } from '@coringa/engine';
 import { useState } from 'react';
-import { ROW_DROP } from '../../model/drag.ts';
+import { cardDropKey, ROW_DROP } from '../../model/drag.ts';
 import { rowKey } from '../../model/effects.ts';
 import { useAnim } from '../anim/context.ts';
 import { LitRow } from '../anim/Effects.tsx';
@@ -40,6 +40,8 @@ export interface RowProps {
   aim?: 'up' | 'down';
   /** A fileira é sua: o arrasto do Equipar pode soltar a carta nela. */
   droppable?: boolean;
+  /** A fileira é do oponente: cada carta é alvo de arrasto (o Roubo). */
+  targets?: boolean;
 }
 
 const CAPTION = { ATK: 'Ataque', DEF: 'Defesa' } as const;
@@ -58,7 +60,7 @@ function useShownConta(base: number, total: number): Conta {
   return count === 'idle' ? now : before;
 }
 
-export function Row({ label, kind, side, limit, aim, droppable = false }: RowProps) {
+export function Row({ label, kind, side, limit, aim, droppable = false, targets = false }: RowProps) {
   const anim = useAnim();
   const cards: NumCard[] = kind === 'ATK' ? side.attackRow : side.defenseRow;
   const total = kind === 'ATK' ? attackPower(side) : defensePower(side);
@@ -88,7 +90,9 @@ export function Row({ label, kind, side, limit, aim, droppable = false }: RowPro
         {cards.map((card, index) => (
           <li
             key={card.id}
-            data-soltar={droppable && index === cards.length - 1 ? ROW_DROP[kind].last : undefined}
+            data-soltar={
+              droppable && index === cards.length - 1 ? ROW_DROP[kind].last : targets ? cardDropKey(card.id) : undefined
+            }
             className="relative min-w-0 [--soltar-folga:-4px]"
           >
             <TableCard card={card} size="field" front={index === 0} quad={quads.includes(card.value)} />

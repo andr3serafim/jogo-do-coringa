@@ -71,7 +71,7 @@ const HINT: Record<'K' | 'J' | 'Q' | 'A' | 'WILD' | 'NUM', string> = {
   K: 'K, Guarda: absorve o dano de um ataque e quebra. Quatro K na Guarda dão a Exódia.',
   J: 'J, Buff de ataque: soma 1 ao multiplicador do ataque. Quatro J armam o Ataque Absoluto.',
   Q: 'Q, Buff de defesa: soma 1 ao multiplicador da defesa. Quatro Q ativam a Defesa Absoluta.',
-  A: 'A, Armadilha: destrói um J, um Q ou um K do oponente.',
+  A: 'A, Armadilha ou Roubo: destrói um J, um Q ou um K do oponente, ou rouba uma numérica dele (ele perde o valor e você cura).',
   WILD: 'Coringa Selvagem: vira J, Q ou A (nunca K) quando é jogado.',
   NUM: 'Numérica: o valor soma ao total da fileira. A carta da frente é a primeira a sair.',
 };

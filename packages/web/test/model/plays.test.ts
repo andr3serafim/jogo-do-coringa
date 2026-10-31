@@ -121,6 +121,44 @@ describe('tablePlays: jogadas por carta', () => {
   });
 });
 
+describe('tablePlays: o Roubo (E3)', () => {
+  it('o A tem uma jogada por destino, e cada uma mira todas as numéricas do oponente (as de mesmo valor também)', () => {
+    const { view, legal, plays } = setup({ self: { hand: ['A'] }, opponent: { attackRow: [9, 9], defenseRow: [5] } });
+    const steals = plays.byCard.get(handCard(view, 'A').id)!.filter((p) => p.key.startsWith('STEAL'));
+    expect(steals.map((p) => [p.key, p.label])).toEqual([
+      ['STEAL:ATK', 'Roubar para o seu Ataque'],
+      ['STEAL:DEF', 'Roubar para a sua Defesa'],
+    ]);
+    const ids = [...view.opponent.attackRow, ...view.opponent.defenseRow].map((c) => c.id);
+    for (const steal of steals) {
+      expect(steal.targets!.map((t) => t.id)).toEqual(ids);
+      expect(steal.targets!.map((t) => t.zone)).toEqual(['attackRow', 'attackRow', 'defenseRow']);
+    }
+    // O segundo 9 não é o alvo canônico do motor, mas a mesa o aceita pelo papel (fileira e valor).
+    const second = steals[1]!.make(ids[1]);
+    expect(second).toEqual({ type: 'STEAL', cardId: handCard(view, 'A').id, targetId: ids[1], row: 'DEF' });
+    expect(isLegal(second, legal, view)).toBe(true);
+  });
+
+  it('o Selvagem rouba como A quando não há A na mão; sem numérica do oponente, nada de Roubo', () => {
+    const { view, plays } = setup({ self: { hand: ['WILD'] }, opponent: { attackRow: [4] } });
+    const labelsOf = labels(plays, handCard(view, 'WILD').id);
+    expect(labelsOf).toContain('como A: Roubar para o seu Ataque');
+    expect(labelsOf).toContain('como A: Roubar para a sua Defesa');
+    const empty = setup({ self: { hand: ['A'] }, opponent: { guard: ['K'] } });
+    expect(labels(empty.plays, handCard(empty.view, 'A').id).some((l) => l.includes('Roubar'))).toBe(false);
+  });
+
+  it('o alvo do Roubo não vira outra carta: o roleKey troca o id só pela fileira e pelo valor da carta do oponente', () => {
+    const { view } = setup({ self: { hand: ['A'] }, opponent: { attackRow: [9, 9], defenseRow: [9] } });
+    const [a, b] = view.opponent.attackRow;
+    const d = view.opponent.defenseRow[0]!;
+    const steal = (targetId: string) => ({ type: 'STEAL' as const, cardId: handCard(view, 'A').id, targetId, row: 'ATK' as const });
+    expect(roleKey(steal(a!.id), view)).toBe(roleKey(steal(b!.id), view));
+    expect(roleKey(steal(a!.id), view)).not.toBe(roleKey(steal(d.id), view));
+  });
+});
+
 describe('tablePlays: combinações', () => {
   it('Reflect com J, Q, K e Selvagem na mão usa o J e a Q reais', () => {
     const { state, view, plays } = setup({ phase: 'ATTACK', self: { hand: ['WILD', 'K', 'Q', 'J'] } });
@@ -372,8 +410,6 @@ describe('propriedade: toda jogada montada pela mesa é aceita pelo motor', () =
       const keys = new Set(actions.map((a) => roleKey(a, item.view)));
       for (const canonical of legal) {
         if (canonical.type === 'EQUIP' || canonical.type === 'CHOOSE_ORDER') continue;
-        // O Roubo (E3) ainda não tem interface: a escolha da numérica e da fileira de destino é do plano 2 do bloco E3 + F2 + F3.
-        if (canonical.type === 'STEAL') continue;
         if (canonical.type === 'DEVASTATE') {
           const row = canonical.row;
           expect(plays.devastate.some((a) => a.type === 'DEVASTATE' && a.row === row), JSON.stringify(canonical)).toBe(true);

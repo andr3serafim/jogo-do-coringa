@@ -10,7 +10,7 @@
 // Na janela de reação (spec §3.7) a barra ganha o gatilho com a prévia no alto e o botão Passar no lugar do principal. Depois
 // de um passe (manual ou automático) o servidor recusa qualquer outra jogada da janela, então as respostas saem da barra.
 // `disabled` desliga todos os controles (jogada em voo, reconexão, prazo esgotado); `pending` só diz "Enviando…".
-import { noPlayReason, type GameEvent, type PlayerView, type SpecialCard } from '@coringa/engine';
+import { noPlayReason, stealPreview, type GameEvent, type NumCard, type PlayerView, type SpecialCard } from '@coringa/engine';
 import type { PlayerAction } from '@coringa/protocol';
 import { useMemo, type ReactNode, type RefObject } from 'react';
 import {
@@ -25,6 +25,7 @@ import {
   chooseTargetText,
   EMPTY_ATTACK_TEXT,
   END_TURN_LABEL,
+  isRowZone,
   leavesText,
   noPlaysText,
   PASSED_TEXT,
@@ -33,6 +34,7 @@ import {
   REFLECT_LABEL,
   RESURRECT_LABEL,
   SENDING_TEXT,
+  stealEffectText,
   targetButtonText,
   targetEffectText,
   targetRole,
@@ -106,7 +108,8 @@ export function ActionBar(props: ActionBarProps) {
   const previews = useMemo(() => previewsOf(view), [view]);
   const cardPlays = card ? (plays.byCard.get(card.id) ?? []) : [];
   const targets = play?.targets ?? null;
-  const pointed = targets?.find((t) => t.id === pointedId) ?? null;
+  // A prévia "quebrando antes" é das especiais; a do Roubo já vai no botão do alvo.
+  const pointed = targets?.find((t) => t.id === pointedId && !isRowZone(t.zone)) ?? null;
   const reacting = view.phase.kind === 'REACTION';
   // Depois do passe, manual ou automático, só resta esperar a janela fechar (a `PlayTable` já conta os dois).
   const { passed } = props;
@@ -148,7 +151,7 @@ export function ActionBar(props: ActionBarProps) {
       ) : null}
 
       <div role="group" aria-label="Prévias" className="flex flex-col gap-1 text-[13px] leading-tight pc:flex-row pc:gap-6 pc:text-sm">
-        {pointed ? (
+        {pointed && !isRowZone(pointed.zone) ? (
           <PreviewRow label={brokenLabel(targetRole(pointed.zone))}>
             {brokenEffectText(previews, previewsWithout(view, pointed.id), opponent, 'long')}
           </PreviewRow>
@@ -278,17 +281,29 @@ interface TargetListProps {
   onTarget: (targetId: string) => void;
 }
 
-/** Os alvos válidos como botões grandes, cada um com o efeito de quebrá-lo (o motor, sobre a `view` sem a carta). */
+/**
+ * Os alvos válidos como botões grandes, cada um com o efeito (do motor): quebrar a especial (a `view` sem a carta) ou roubar a
+ * numérica (`stealPreview`: o dano e a cura).
+ */
 function TargetList({ view, names, targets, before, disabled, marked, onSeen, onPoint, onTarget }: TargetListProps) {
   const opponent = names.opponent;
   const cards = useMemo(() => {
-    const { attackBuffs, defenseBuffs, guard } = view.opponent;
-    return new Map<string, SpecialCard>([...attackBuffs, ...defenseBuffs, ...guard].map((c) => [c.id, c]));
+    const { attackBuffs, defenseBuffs, guard, attackRow, defenseRow } = view.opponent;
+    return new Map<string, SpecialCard | NumCard>(
+      [...attackBuffs, ...defenseBuffs, ...guard, ...attackRow, ...defenseRow].map((c) => [c.id, c]),
+    );
   }, [view]);
   const effects = useMemo(
     () =>
       new Map(
-        targets.map((t) => [t.id, brokenEffectText(before, previewsWithout(view, t.id), opponent, 'short')] as const),
+        targets.map((t) => {
+          if (isRowZone(t.zone)) {
+            const outcome = stealPreview(view, t.id);
+            return [t.id, outcome ? stealEffectText(outcome, opponent) : ''] as const;
+          }
+          const broken = brokenEffectText(before, previewsWithout(view, t.id), opponent, 'short');
+          return [t.id, targetEffectText(targetRole(t.zone), broken)] as const;
+        }),
       ),
     [view, targets, before, opponent],
   );
@@ -312,7 +327,7 @@ function TargetList({ view, names, targets, before, disabled, marked, onSeen, on
           <li key={target.id} className="min-w-0">
             <TwoLine
               title={targetButtonText(targetCard, target.zone, opponent)}
-              detail={targetEffectText(targetRole(target.zone), effects.get(target.id) ?? '')}
+              detail={effects.get(target.id) ?? ''}
               titleClass="text-[15px] font-bold leading-tight pc:text-sm"
               detailClass="text-xs font-normal leading-tight tabular-nums pc:text-[11px]"
               disabled={disabled}
