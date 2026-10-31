@@ -7,22 +7,12 @@
 
 - **Branch:** `feat/regras-e3`, no checkout principal `D:\andr3\jogo-coringa`, a partir da `main` (`f0ac24b`, com a F1:
   apagar uma partida ou o histórico em `/partidas`, sempre com confirmação).
-- **Em curso:** o autor respondeu (`decisoes.md` 2026-10-31 (8)): **BURN 4**, o **Roubo sem naipe** (todo roubo dá dano e cura)
-  e a **iniciativa mais clara na tela**. Feito: `e50d625` (BURN 4 no padrão, o Roubo novo no motor, no bot e na spec 1, as
-  partidas de referência, e a semente do tutorial `tutorial-381` com o critério novo: K, A, Selvagem e um J ou Q até o 2º
-  Equipar, sem queimada). **Rodando:** `pnpm sim:e3` (a remedição, relatório em `packages/sim/reports/e3.md`).
-- **Parada combinada:** se o Roubo passar de 65% no pareado contra o greedy sem Roubo, se a duração mudar ou aparecer partida no
-  teto, a branch para antes do merge e os números voltam ao autor. Senão, segue o plano 2 sem nova parada.
-- **Feito no plano 1:** Reflect reativo (`d165891`, `RULES_VERSION` 4 e `STATE_SCHEMA` 4), Devastação (`44b6672`), Roubo
-  (`40a19ae`), cura passiva (`966960b`, `defenseHealGuard`), limite de especiais (`76805ba`), a medição (`5a1061d`,
-  `e1eff5f`). A leitura dos números da primeira medição está em `docs/memoria/notas/medicao-e3.md`.
-- **Próximo passo exato:** ler o `e3.md` novo (o pareado do Roubo, os limiares, a duração, o teto e o acumulador sob BURN 4),
-  acrescentar a remedição em `notas/medicao-e3.md` e aplicar a parada combinada. Depois, escrever e executar o **plano 2**: a
-  interface (o Roubo com escolha de alvo e fileira, a cena da Devastação, o Reflect na reação, a cura e o dano do roubo na mesa, a
-  queimada da BURN, a iniciativa: `damageThisRound` na visão, o dano da rodada ao vivo e um evento de fim de rodada de Ataque
-  sempre, com os dois danos e o motivo), o tutorial (as dicas do A com o Roubo, da Guarda, do Reflect e do limite), a fixture
-  `e2e/fixtures/especiais.json` (gravada nas regras antigas), o resumo das regras, as specs da web e do polimento,
-  `pnpm sim:dificil --recomecar`, a calibração, o E2E e o merge.
+- **Em curso:** o **plano 2** do bloco E3 + F2 + F3 (`docs/superpowers/plans/2026-10-31-e3-f2-f3-plano-2.md`), com a autorização do
+  autor para seguir até o merge sem parar (`decisoes.md` 2026-10-31 (9)). Antes dele: `e50d625` (BURN 4 no padrão, o Roubo sem
+  naipe, a semente do tutorial `tutorial-381`) e a remedição (`9152b18`; leitura em `notas/medicao-e3.md` §5: o Roubo vence 39%
+  contra quem não rouba; nada no teto; a parada combinada não disparou).
+- **Feito no plano 2:** Tarefa 1 (`3af88bb`: `InitiativeDecided` em toda rodada de Ataque, `lastInitiative`, `damageThisRound` na visão), Tarefa 2 (`9152b18`: `stealPreview`), Tarefa 3 (`6c169c9`: o Roubo na mesa).
+- **Próximo passo exato:** a Tarefa 4 do plano 2 (a iniciativa na tela: o placar da rodada na faixa do centro, o motivo fora do Ataque e na pergunta da ordem).
 - **Avisos para o plano 2:** o teste de propriedade das jogadas da mesa (web) pula o `STEAL` até a interface do Roubo existir; o
   previsor da mão do tutorial (`sim/src/tutorial-seed.ts`) só conhece a BURN e falha alto com outra forma; a CI `e2e` desta
   branch pode estar vermelha (a interface ainda não oferece as jogadas novas).
