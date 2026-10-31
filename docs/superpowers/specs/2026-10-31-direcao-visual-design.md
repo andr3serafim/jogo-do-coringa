@@ -60,9 +60,10 @@ Três dores, três respostas:
 
 - **[OBRIGATÓRIO] Fotossensibilidade** (spec da web §10.4): no máximo 1 inversão de tela inteira por cena, mantida por ≥ 300 ms;
   nunca mais de 3 transições claro ↔ escuro numa janela de 1 s; com movimento reduzido, nenhuma inversão. Os testes da linha do
-  tempo cobrem isso e não se afrouxam. **[I]** Os raios pequenos em volta das auras (§7.1, §7.3) não contam como transição de
-  tela: cada um ocupa menos de 3% da tela e dura 70–110 ms; nenhuma cena acende uma área maior que 25% da tela fora da sua
-  única inversão.
+  tempo cobrem isso e não se afrouxam. **Os raios em volta das auras** (§7.1, §7.3) seguem a regra literal: no máximo 3 raios
+  por segundo, cada um entrando e saindo em ≥ 100 ms (sem acender de estalo); um teste da linha do tempo confere o teto. O
+  protótipo solta um raio a cada 110–140 ms e pisca de estalo: **isso não vai para o jogo**. Nenhuma cena acende uma área maior
+  que 25% da tela fora da sua única inversão.
 - **[OBRIGATÓRIO] Arte original** (spec da web §10.6): tudo desenhado em código (SVG, CSS, `feTurbulence`) ou à mão pelo
   projeto. Nada decalcado de anime, de jogo ou de xilogravura existente.
 - **[OBRIGATÓRIO] Números de jogo sem textura** (spec da web §10.7): vida, totais, dano, prévia e relógio na fonte de texto
@@ -179,6 +180,11 @@ forma) → **nome carimbado** → **impacto** → **o rastro que fica na mesa**.
   feixe, o cometa e os golpes sobem até o retrato do alvo no placar, num ângulo mais fechado. Os tamanhos encolhem na proporção da
   largura (o protótipo é um palco de 1000 × 560 px), mas a ordem dos passos e os instantes da inversão não mudam.
 
+- **Repetição (pendente: decisão do autor):** a mesma cena pode voltar na mesma partida (duas Ressurreições, dois Ataques
+  Absolutos). A recomendação é tocar sempre inteira: as seis são raras (a Exódia acaba a partida; a calibração mostra em média
+  menos de uma Devastação e menos de um Reflect por partida), e o toque já pula. A alternativa é uma versão curta (~60%, sem a
+  preparação) a partir da segunda vez.
+
 As durações abaixo são as do protótipo e entram em `RARE_SCENE_MS`; ajustes de até ~15% são do construtor.
 
 ### 7.1 Ataque Absoluto (~4,5 s) [A]
@@ -273,20 +279,24 @@ os mesmos princípios, sem cena nova:
 - **Teto:** nada disso aumenta o teto de decisão (`DECISION_CAP_MS`); o que não couber encurta.
 - Como não houve rascunho, este item fecha com o autor jogando a primeira fatia que o tiver (§14), não por protótipo.
 
-## 9. O relógio durante as cenas [I]
+## 9. O relógio durante as cenas (pendente: decisão do autor)
 
 As cenas aprovadas duram de 3 a 6 s, e o servidor hoje não para o relógio (30 s por turno, 8 s na janela de reação, 40 s no
-Equipar). Uma cena de 5 s comeria 1/6 do turno de quem joga em seguida, sem culpa dele. A proposta:
+Equipar; regra [A] da spec do servidor §6.2). Uma cena de 5 s comeria 1/6 do turno de quem joga em seguida, sem culpa dele. A
+recomendação, que muda uma regra do servidor e por isso espera o autor:
 
 - **O servidor dá folga de cena:** quando um passo produz um evento de cena rara (os seis acima), o prazo da decisão seguinte
-  ganha a duração dessa cena (a mesma tabela de durações, num lugar só, lida pelo servidor e pela web). Pular a cena não dá tempo
-  extra a ninguém: a folga é fixa. Duas cenas no mesmo passo (ex.: a Devastação refletida) somam, até um teto de 8 s. A decisão
+  ganha a duração dessa cena. A tabela de durações mora num lugar só que os dois lados importam: a entrada principal de
+  `@coringa/protocol` (fora de `schemas`, sem Zod), lida pelo núcleo do servidor e pela linha do tempo da web
+  (`RARE_SCENE_MS` passa a vir de lá). Pular a cena não dá tempo extra a ninguém: a folga é fixa. Duas cenas no mesmo passo (ex.: a Devastação refletida) somam, até um teto de 8 s. A decisão
   que ganha a folga é a que tem o prazo calculado nesse passo (o turno seguinte, a janela de reação ou o Equipar).
 - **O relógio na tela:** durante a cena, o relógio mostra o tempo da decisão sem a folga, parado, e começa a correr quando ela
   acaba (ou é pulada), para ninguém ver "35 s" num turno de 30.
 - Isso é mudança no núcleo do servidor (`timing.ts`) e na forma do prazo que a sala guarda; se estado antigo não servir, sobe
   `STATE_SCHEMA` (as salas abertas encerram no deploy, como já é a regra).
 - No treino (sem relógio), nada muda.
+- **A alternativa** é deixar o relógio correr como hoje: nada muda no servidor, e quem quiser o tempo de volta pula a cena com um
+  toque. O custo é a cena virar um castigo para quem joga em seguida, que é o oposto do que ela quer causar.
 
 ## 10. Som [I]
 
@@ -330,8 +340,8 @@ gesto do usuário.
 
 Cada fatia é uma branch com `pnpm check`, `pnpm e2e` e as duas CI verdes, e vai para a `main` sozinha:
 
-1. **A base:** o placar de luta, a espada e a fita, o golpe comum, a textura de papel, as cartas vivas, a quadra marcada e a
-   folga de cena no servidor (§9).
+1. **A base:** o placar de luta, a espada e a fita, o golpe comum, a textura de papel, as cartas vivas, a quadra marcada e,
+   se o autor escolher, a folga de cena no servidor (§9).
 2. **Ataque e Defesa Absolutos.**
 3. **Exódia e Devastação** (com a desolação).
 4. **Reflect e Ressurreição.**
