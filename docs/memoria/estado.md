@@ -8,7 +8,7 @@
 - **Branch:** `feat/cura-passiva`, no checkout principal `D:andr3jogo-coringa`, a partir da `main` (`dfeb083`).
 - **Em curso:** a marca "Cura passiva" no campo enquanto houver 2 K ou mais na Guarda (`decisoes.md` 2026-10-31 (10)). O
   autor também respondeu que o dano do Roubo fica fora da iniciativa (nada muda no código).
-- **Próximo passo exato:** o predicado `defenseHealActive` no motor (teste primeiro; `healFromDefense` passa a usá-lo, sem mudar golden), a marca "Cura passiva" em `Zones` (`PlayerField.tsx`), o item do resumo das regras renomeado, os testes da mesa; depois `pnpm check`, `pnpm e2e`, push e as duas CI.
+- **Próximo passo exato:** código e testes commitados; rodando o `pnpm check` e depois o `pnpm e2e`. Se a conta cair, rode os dois de novo e siga para o push e as duas CI.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
