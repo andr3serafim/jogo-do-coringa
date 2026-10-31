@@ -59,3 +59,13 @@ Ao "começo o brainstorming da nova direção visual?": "Sim, começar".
   > absoluta, deixe o escuto mais épico e poderoso.
   - **[I]** "Ki" = aura de energia colada ao corpo, com pontas para cima, que pulsa e cresce na transformação (raios, vento
     de energia, pedras que flutuam). A referência entra pela estrutura; o desenho continua do jogo, em ouro, papel e tinta.
+- **Rascunho 3** (`placar-e-cenas-v3.html`): o Ataque com a aura de energia (três camadas que trocam de forma a cada 70 ms e
+  pulsam, pedras que flutuam, vento de energia, a explosão na entrada dos J com o chão rachado em ouro e raios) e o feixe
+  com o dobro da espessura, que sai de uma bola de energia e segura o golpe por quase 1 s; a Defesa com o escudo maior que
+  despenca e crava (o chão racha), aro de metal gravado com 22 rebites que acendem em sequência, o emblema da coroa, a cúpula
+  de luz e os raios suaves atrás. A reação dele:
+  > ok, aprovado. apenas retire o arco dourado no fim da animação da defesa absoluta. não precise me mostrar o rascunho.
+  > prossiga.
+  - **Aprovados:** o Ataque Absoluto e a Defesa Absoluta do rascunho 3, **sem a cúpula** (o arco dourado do fim da Defesa);
+    o placar de luta no topo, a espada da iniciativa com a fita de cordel e o golpe comum (aprovados desde o 2).
+  - **Próximo:** levar a mesma linha às outras quatro especiais que ele citou (Exódia, Devastação, Reflect, Ressurreição).
