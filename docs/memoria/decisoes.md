@@ -6,6 +6,45 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-10-31 (8): BURN 4, o Roubo sem naipe e a iniciativa mais clara
+
+Às perguntas da medição do plano 1 do bloco E3 + F2 + F3 (`notas/medicao-e3.md`):
+
+> Forma de penalidade fica para o limite de especiais: BURN com limite de 4;
+>
+> pontos meus:
+>
+> 1. Mudança de regra da jogada roubo e cura com Ás: Qualquer carta Ás, independente do naipe, serve para roubar uma carta do
+>    oponente agora. Quando essa carta é roubada do oponente, subtrai o valor da carta na vida do adversário e cura quem tá
+>    roubando. Aí elimina no jogo o valor do naipe. Não existe mais naipe no jogo. k continua anulando, dano não mata.
+> 2. Fiz alguns testes e eu posso dizer que eu estou meio perdido quanto às regras de iniciativa. Às vezes eu tô jogando, eu
+>    tenho iniciativa e eu não sei por quê, não tá claro pro jogador, e às vezes a iniciativa muda pro adversário, eu também não
+>    vejo o momento, não sei por quê. Isso deveria ficar mais claro pro jogador.
+
+**Leitura:**
+
+- **Limite de especiais:** o padrão passa a ser `specialLimit: { max: 4, penalty: 'BURN' }`. A CHOOSE e a FEWER ficam na config,
+  fora do padrão.
+- **Roubo (substitui o efeito por naipe de 2026-10-30):** todo Roubo tira o valor seco da carta roubada da vida do oponente **e**
+  cura quem roubou o mesmo valor, até a vida inicial. Seguem iguais: o A (ou o Selvagem como A) de qualquer naipe, qualquer
+  numérica de qualquer fileira, a Defesa Absoluta bloqueando o roubo inteiro, o dano que não mata e o K na Guarda que anula.
+  - **[I]** o K anula **só o dano** (é o que ele anulava antes); quem roubou cura mesmo assim.
+  - **[I]** a cura é o valor cheio, mesmo quando o dano sai menor (o "não mata" ou o K).
+  - **[I]** "não existe mais naipe" vale para as regras: o naipe volta a ser só visual, como a spec 1 dizia antes do Roubo. As
+    cartas seguem desenhadas com o naipe, e os ids (`b1-copas-7`) não mudam.
+  - **[I]** o dano do Roubo segue fora da conta da iniciativa (ele não falou disso).
+- **Iniciativa:** a regra não muda (spec 1 §1.10: no fim de cada rodada de Ataque, fica com quem causou mais dano; no empate não
+  muda). O que muda é a tela. **[I]** o como: o dano de cada um na rodada aparece ao lado da marca da iniciativa durante o Ataque;
+  no fim de toda rodada de Ataque, mudando ou não, um aviso diz com quem ela ficou e por quê (os dois danos, e o empate); no
+  começo, a tela diz que ela foi sorteada.
+- **As 10 leituras [I] do plano 1** (`notas/medicao-e3.md`, seção 4): ele as viu e não comentou. Seguem como estão, para
+  confirmar no playtest; não estão aprovadas.
+- **Parada combinada:** o Roubo novo é remedido antes da interface. Se ele passar de 65% no pareado contra o bot que não rouba,
+  ou se a duração mudar ou aparecer partida no teto, a branch para antes do merge e os números voltam a ele. Senão, o plano 2
+  segue sem nova parada.
+
+---
+
 ## 2026-10-30 (7): o bloco E3 + F2 + F3 liberado
 
 À pergunta "Posso começar o bloco E3 + F2 + F3 (medição no simulador)?", depois do merge da F1:

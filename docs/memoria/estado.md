@@ -1,24 +1,26 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-10-30**, pela conta que assumiu depois do limite semanal da anterior.
+> Sobrescrito a cada atualização. **Última: 2026-10-31**, pela conta que assumiu depois do limite semanal da anterior.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
 - **Branch:** `feat/regras-e3`, no checkout principal `D:\andr3\jogo-coringa`, a partir da `main` (`f0ac24b`, com a F1:
   apagar uma partida ou o histórico em `/partidas`, sempre com confirmação).
-- **Parado, esperando o autor:** o plano 1 do bloco **E3 + F2 + F3** (motor, bots e medição) está feito e no GitHub; nada
-  entra na `main` antes da resposta dele (`decisoes.md` 2026-10-30 (7)). Plano em
-  `docs/superpowers/plans/2026-10-30-e3-f2-f3-plano-1.md`.
+- **Em curso:** o autor respondeu (`decisoes.md` 2026-10-31 (8)): **BURN 4**, o **Roubo sem naipe** (todo roubo dá dano e cura)
+  e a **iniciativa mais clara na tela**. Agora: o motor (BURN 4 no padrão e o Roubo novo), o bot e a remedição do Roubo, com a
+  parada combinada (acima de 65% no pareado, duração mudando ou partida no teto: para e volta a ele); depois, o plano 2. O plano 1
+  está em `docs/superpowers/plans/2026-10-30-e3-f2-f3-plano-1.md`.
 - **Feito no plano 1:** Reflect reativo (`d165891`, `RULES_VERSION` 4 e `STATE_SCHEMA` 4), Devastação (`44b6672`), Roubo
   (`40a19ae`), cura passiva (`966960b`, `defenseHealGuard`), limite de especiais com BURN, CHOOSE e FEWER (`76805ba`,
   `specialLimit`; o padrão fica **sem limite** até ele escolher), a medição (`5a1061d`, `e1eff5f`: `pnpm sim:e3`, relatório em
   `packages/sim/reports/e3.md`). A spec 1 já descreve as regras novas. A leitura dos números está em
   `docs/memoria/notas/medicao-e3.md`.
-- **Próximo passo exato:** esperar a resposta do autor às perguntas de "Esperando o autor" (a forma da penalidade, as leituras
-  [I] e o Roubo). Com ela: registrar no `decisoes.md`, fixar o `specialLimit` padrão e escrever o **plano 2**: a interface (o
-  Roubo com escolha de alvo e fileira, a cena da Devastação, o Reflect na reação, a cura e o dano do roubo na mesa, o descarte se
-  for a CHOOSE), o tutorial (rever a semente sob o limite escolhido e as dicas do A, do fim, da Guarda e do Reflect), a fixture
+- **Próximo passo exato:** no motor, `DEFAULT_CONFIG.specialLimit = { max: 4, penalty: 'BURN' }` e o Roubo sem naipe
+  (`actions/main.ts` `steal`, a chave do `legal-actions`, o `stealValue` do `eval`, o `text.ts`, as métricas da `e3.ts`, a spec 1
+  §1 A); regravar as partidas de referência e trocar o digest da v4; remedir com `pnpm sim:e3`. Depois, o **plano 2**: a
+  interface (o Roubo com escolha de alvo e fileira, a cena da Devastação, o Reflect na reação, a cura e o dano do roubo na mesa,
+  a iniciativa: o dano da rodada ao vivo e o aviso de fim de rodada sempre, com o motivo), o tutorial (rever a semente sob o limite escolhido e as dicas do A, do fim, da Guarda e do Reflect), a fixture
   `e2e/fixtures/especiais.json` (gravada nas regras antigas), o resumo das regras, as specs da web e do polimento, as partidas de
   referência, `pnpm sim:dificil --recomecar`, a calibração, o E2E e o merge.
 - **Avisos para o plano 2:** o teste de propriedade das jogadas da mesa (web) pula o `STEAL` até a interface do Roubo existir; o
@@ -41,17 +43,9 @@ E1, E2 e F1 mescladas (2026-10-30). Sub-projetos 1 a 4 concluídos; sub-projeto 
 
 ## Esperando o autor
 
-- **Bloco E3 + F2 + F3, a medição (detalhes em `notas/medicao-e3.md`):**
-  - **A forma da penalidade do limite de especiais.** Recomendação: **BURN com limite 4** (a especial que passaria do limite vai
-    direto ao cemitério). Contra um bot que acumula K para a Exódia, é a única forma com limite 4 que tira a vantagem de acumular
-    (o acumulador cai de 59% para 46%, e a Exódia de 30% para 19%); a CHOOSE quase não muda (52%) e a FEWER nada (59%).
-    Alternativa: **BURN 3**, que acaba com a Exódia vinda da mão (0,3%) mas deixa a mão com espaço só para um Reflect ou uma
-    Devastação.
-  - **O Roubo vale menos que guardar o A para a Armadilha:** o greedy que rouba vence 38% contra o que não rouba, e nenhum limiar
-    passa de 50%. Recomendação: manter como está e olhar no playtest.
-  - **As 10 leituras [I] do plano 1** (lista em `notas/medicao-e3.md`, seção 4).
-  - O resto sem alarme: nenhuma partida no teto, duração igual à da E1, a cura passiva não muda a duração, a Devastação é neutra
-    (49%) e a Exódia do turtle caiu de 25,5% para ~12%.
+- **Bloco E3 + F2 + F3 (respondido em 2026-10-31 (8); falta só confirmar no playtest):**
+  - as 10 leituras [I] do plano 1 (`notas/medicao-e3.md`, seção 4), vistas sem comentário;
+  - as [I] do Roubo novo e da iniciativa na tela (`decisoes.md` 2026-10-31 (8)).
 
 - **Achados da E1, para ele saber (não pedem decisão agora):**
   - sem o anti-travamento, quem se fecha na Defesa e joga todos os K chega à **Exódia em 25,5%** das partidas `turtle` ×
