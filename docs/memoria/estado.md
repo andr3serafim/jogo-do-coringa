@@ -19,9 +19,12 @@
   branch `feat/apagar-historico`, a partir da `main` (`8146986`). Plano em
   `docs/superpowers/plans/2026-10-30-f1-apagar-historico.md`. Não muda regra: sem `RULES_VERSION`, sem `STATE_SCHEMA`, sem o
   portão do Difícil.
-- **Próximo passo exato:** seguir o plano da F1 do primeiro passo sem commit (`git log feat/apagar-historico` diz até onde
-  foi): modelo (`deletePastGame`, `clearPastGames`), o diálogo de confirmação compartilhado, a tela `/partidas`, o E2E, as
-  docs; depois `pnpm check`, push, CI verde e fast-forward na `main`.
+  Feitos e commitados: o modelo (`deletePastGame`, `clearPastGames`), o `ConfirmDialog` compartilhado (saiu do `GameMenu`), a
+  tela `/partidas` (cada linha com "Apagar", e "Apagar o histórico"), conferida no navegador (375 px e 1536 × 695), e o E2E
+  novo em `e2e/replay.spec.ts`.
+- **Próximo passo exato:** rodar `pnpm e2e` (inteiro, nunca `--repeat-each`); verde, as docs (spec do polimento §4.3 e §4.4,
+  F1 "[feita]" na spec do sub-projeto 5, `CLAUDE.md`, diário e estado), a revisão final, `pnpm check`, push, CI verde e
+  fast-forward na `main`.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 

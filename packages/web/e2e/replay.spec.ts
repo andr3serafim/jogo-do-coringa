@@ -5,6 +5,7 @@
 //
 // A semente fixa do treino (`e2e2631-1`, Médio) faz a partida ser sempre a mesma; o número de passos do replay depende só de quando a
 // desistência cai, e por isso o teste a faz num ponto fixo (rodada 3, depois de o Bot escolher a ordem) e lê o total do contador.
+import { readFileSync } from 'node:fs';
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import {
   actionBar,
@@ -24,6 +25,8 @@ import {
 } from './helpers.ts';
 
 const TRAINING = '/treino?semente=e2e2631-1&nivel=medio';
+/** Uma entrada de "partidas anteriores" com replay (a mesma do `layout.spec.ts`). */
+const FIXTURE = readFileSync(new URL('./fixtures/especiais.json', import.meta.url), 'utf8');
 
 /** As linhas do histórico (no PC a coluna está à vista; no celular é uma gaveta fechada, mas as linhas seguem no DOM). */
 const historyLines = (page: Page): Locator =>
@@ -180,6 +183,73 @@ test('a tela inicial leva às partidas anteriores; vazia, a lista diz que não h
   guard.expectClean();
 });
 
+/**
+ * Duas partidas guardadas (a entrada de `fixtures/especiais.json`, com o replay), contra Ana e contra Bia (a mais nova, no topo).
+ * Gravadas uma vez, com `page.evaluate` depois do primeiro `goto`: um `addInitScript` rodaria de novo a cada `reload` e repovoaria a
+ * lista que o teste acabou de apagar.
+ */
+async function seedTwoGames(page: Page): Promise<void> {
+  await page.goto('/');
+  await page.evaluate((text) => {
+    const [game] = JSON.parse(text) as Record<string, unknown>[];
+    const copy = (id: string, opponent: string, date: number) => ({ ...game, id, date, names: { me: 'Você', opponent } });
+    const games = [copy('bia', 'Bia', 2_000_000_000_000), copy('ana', 'Ana', 1_900_000_000_000)];
+    window.localStorage.setItem('coringa:partidas', JSON.stringify(games));
+  }, FIXTURE);
+  await page.goto('/partidas');
+}
+
+test('apagar uma partida e o histórico inteiro, com confirmação; recarregar não traz nada de volta', async ({ page }) => {
+  const guard = failOnConsoleErrors(page);
+  await seedTwoGames(page);
+  const games = page.getByRole('list').getByRole('listitem');
+  const status = page.getByRole('main').getByRole('status');
+  await expect(games).toHaveCount(2);
+  await expect(games.first()).toContainText('contra Bia');
+
+  // Uma partida: o diálogo diz qual é e abre no gesto seguro; confirmar a tira da lista e do armazenamento.
+  await games.first().getByRole('button', { name: 'Apagar', exact: true }).click();
+  const confirmOne = page.getByRole('dialog', { name: 'Apagar esta partida?' });
+  await expect(confirmOne).toContainText('contra Bia');
+  await expect(confirmOne.getByRole('button', { name: 'Cancelar' })).toBeFocused();
+  await axe(page);
+  await confirmOne.getByRole('button', { name: 'Apagar', exact: true }).click();
+  await expect(confirmOne).toBeHidden();
+  await expect(games).toHaveCount(1);
+  await expect(games.first()).toContainText('contra Ana');
+  await expect(status).toHaveText('Partida apagada.');
+  // A linha que tinha o foco saiu: ele vai ao "Apagar" da que tomou o lugar dela.
+  await expect(games.first().getByRole('button', { name: 'Apagar', exact: true })).toBeFocused();
+
+  await page.reload();
+  await expect(games).toHaveCount(1);
+  await page.goto('/partidas/bia');
+  await expect(page.getByText('Esta partida não está mais neste navegador.')).toBeVisible();
+  await page.getByRole('link', { name: 'Voltar à lista' }).click();
+  await expect(page).toHaveURL(/\/partidas$/);
+
+  // O histórico inteiro: Cancelar não apaga; Apagar esvazia, e o foco vai ao título.
+  const clear = page.getByRole('button', { name: 'Apagar o histórico' });
+  const confirmAll = page.getByRole('dialog', { name: 'Apagar o histórico?' });
+  await clear.click();
+  await expect(confirmAll).toContainText('A partida guardada neste navegador some.');
+  await confirmAll.getByRole('button', { name: 'Cancelar' }).click();
+  await expect(confirmAll).toBeHidden();
+  await expect(games).toHaveCount(1);
+  await expect(clear).toBeFocused();
+
+  await clear.click();
+  await confirmAll.getByRole('button', { name: 'Apagar', exact: true }).click();
+  await expect(page.getByText('Nenhuma partida terminada neste navegador.')).toBeVisible();
+  await expect(status).toHaveText('Histórico apagado.');
+  await expect(page.getByRole('heading', { name: 'Partidas anteriores' })).toBeFocused();
+  await axe(page);
+  await page.reload();
+  await expect(page.getByText('Nenhuma partida terminada neste navegador.')).toBeVisible();
+  expect(await page.evaluate(() => window.localStorage.getItem('coringa:partidas'))).toBeNull();
+  guard.expectClean();
+});
+
 test.describe('celular em pé, 390 × 844', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 
@@ -202,6 +272,28 @@ test.describe('celular em pé, 390 × 844', () => {
 
     await replayControl(page, 'Próximo passo').tap();
     await expect(replayCounter(page)).toHaveText(/^Passo 1 de \d+$/);
+    await expectNoHorizontalScroll(page);
+    guard.expectClean();
+  });
+
+  test('a lista com "Rever" e "Apagar" cabe na tela: sem rolagem lateral, e os botões e a confirmação inteiros à vista', async ({ page }) => {
+    const guard = failOnConsoleErrors(page);
+    await seedTwoGames(page);
+    const first = page.getByRole('list').getByRole('listitem').first();
+    await expect(first).toBeVisible();
+    await expectNoHorizontalScroll(page);
+    await expectWhollyInView(page, {
+      'Rever': first.getByRole('button', { name: 'Rever', exact: true }),
+      'Apagar': first.getByRole('button', { name: 'Apagar', exact: true }),
+    });
+
+    await first.getByRole('button', { name: 'Apagar', exact: true }).tap();
+    const confirm = page.getByRole('dialog', { name: 'Apagar esta partida?' });
+    await expect(confirm).toBeVisible();
+    await expectWhollyInView(page, {
+      'Cancelar': confirm.getByRole('button', { name: 'Cancelar' }),
+      'Apagar (na confirmação)': confirm.getByRole('button', { name: 'Apagar', exact: true }),
+    });
     await expectNoHorizontalScroll(page);
     guard.expectClean();
   });
