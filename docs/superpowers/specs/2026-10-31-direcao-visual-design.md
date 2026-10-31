@@ -339,8 +339,8 @@ gesto do usuário.
 
 Cada fatia é uma branch com `pnpm check`, `pnpm e2e` e as duas CI verdes, e vai para a `main` sozinha:
 
-1. **A base:** o placar de luta, a espada e a fita, o golpe comum, a textura de papel, as cartas vivas, a quadra marcada e,
-   a folga de cena no servidor (§9).
+1. **A base:** o placar de luta, a espada e a fita, o golpe comum, a textura de papel, as cartas vivas, a quadra marcada e a
+   folga de cena no servidor (§9).
 2. **Ataque e Defesa Absolutos.**
 3. **Exódia e Devastação** (com a desolação).
 4. **Reflect e Ressurreição.**
