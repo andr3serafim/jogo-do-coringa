@@ -1,6 +1,7 @@
 # Jogo do Coringa — Direção de arte e sensação de jogo (sub-projeto 6)
 
-- **Data:** 2026-10-31. **Estado:** escrita depois do brainstorming com o autor; espera a aprovação dele.
+- **Data:** 2026-10-31. **Estado:** escrita depois do brainstorming com o autor; as duas pendências respondidas por ele; espera a
+  aprovação dele.
 - **Depende de:** a spec da web (`2026-10-17-interface-web-design.md`, sobretudo §4 animações, §10 direção visual), a do polimento
   (`2026-10-22-polimento-recursos-design.md`, sons) e as regras em vigor (spec 1 com os ajustes do sub-projeto 5).
 - **Protótipo aprovado:** `docs/superpowers/specs/2026-10-31-direcao-visual-prototipo.html` (o rascunho 5). Vale o que se vê e o
@@ -180,10 +181,8 @@ forma) → **nome carimbado** → **impacto** → **o rastro que fica na mesa**.
   feixe, o cometa e os golpes sobem até o retrato do alvo no placar, num ângulo mais fechado. Os tamanhos encolhem na proporção da
   largura (o protótipo é um palco de 1000 × 560 px), mas a ordem dos passos e os instantes da inversão não mudam.
 
-- **Repetição (pendente: decisão do autor):** a mesma cena pode voltar na mesma partida (duas Ressurreições, dois Ataques
-  Absolutos). A recomendação é tocar sempre inteira: as seis são raras (a Exódia acaba a partida; a calibração mostra em média
-  menos de uma Devastação e menos de um Reflect por partida), e o toque já pula. A alternativa é uma versão curta (~60%, sem a
-  preparação) a partir da segunda vez.
+- **Repetição [A]:** a mesma cena toca sempre inteira, também quando volta na mesma partida (duas Ressurreições, dois
+  Ataques Absolutos): "Sempre inteira" (`decisoes.md` 2026-10-31 (12)). O toque continua pulando.
 
 As durações abaixo são as do protótipo e entram em `RARE_SCENE_MS`; ajustes de até ~15% são do construtor.
 

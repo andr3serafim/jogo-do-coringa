@@ -6,6 +6,17 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-10-31 (12): as cenas especiais tocam sempre inteiras
+
+Na spec do sub-projeto 6 (§7, "Repetição"), à pergunta "A cena repetida na mesma partida toca inteira sempre?":
+
+> Sempre inteira
+
+**Leitura:** nenhuma versão curta na repetição; a mesma cena (duas Ressurreições, dois Ataques Absolutos) toca inteira toda vez,
+e o toque na mesa continua pulando. Com a decisão (11), quem joga em seguida não perde tempo com isso.
+
+---
+
 ## 2026-10-31 (11): o relógio para durante as cenas especiais
 
 Na spec do sub-projeto 6 (`docs/superpowers/specs/2026-10-31-direcao-visual-design.md` §9), à pergunta "No online, o relógio para
