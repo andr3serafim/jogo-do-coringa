@@ -5,6 +5,34 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-10-30/31 (6): bloco E3 + F2 + F3, plano 1 (motor, bots e medição)
+
+- **Liberação do autor:** "Pode começar" (`decisoes.md` 2026-10-30 (7)). O bloco vai em dois planos; este é o 1, que para na
+  medição. Plano: `docs/superpowers/plans/2026-10-30-e3-f2-f3-plano-1.md`.
+- **Commits na `feat/regras-e3`:** `d165891` (Reflect reativo), `44b6672` (Devastação), `40a19ae` (Roubo), `966960b` (cura
+  passiva), `76805ba` (limite de especiais), `5a1061d` e `e1eff5f` (medição), mais os de memória e o do relatório.
+- **Decisões técnicas:**
+  - `RULES_VERSION` 4 e `STATE_SCHEMA` 4 subiram na Tarefa 1; as outras tarefas trocaram só o digest da versão 4;
+  - o Reflect lançado fica em `PlayerState.reflect` só até a resposta; a fase `REACTION` carrega a Devastação em curso;
+  - o servidor guarda o tempo do turno de uma reação para outra (Devastação → Reflect → resposta) e não manda sozinho o Equipar
+    de quem ainda deve o descarte do limite;
+  - a config ganhou `defenseHealGuard` (2) e `specialLimit` (sem padrão até o autor escolher: a BURN provisória queimava o J que a
+    semente do tutorial garante);
+  - a web só acompanhou o necessário para o `pnpm check` passar: botões mínimos da Devastação, o texto da janela dela, e o Roubo
+    reconhecido sem interface (o teste de propriedade das jogadas da mesa o pula, com o motivo escrito).
+- **Medição** (`pnpm sim:e3`, 1000 partidas por série, ~14 min sozinha na CPU; leitura em `notas/medicao-e3.md`): as três formas
+  quase não mudam os bots de sempre, porque nenhum deles junta K na mão; contra o acumulador de K, só a BURN 4 tira a vantagem de
+  acumular (59% → 46%); o limite 3 acaba com a Exódia da mão. O Roubo vale menos que a Armadilha (38%). Nada chegou ao teto.
+- **Armadilhas:**
+  - o teste de propriedade do motivo sem jogada ficou lento com os candidatos de Roubo (cada candidato copia o estado): 78 s na
+    suíte paralela; ficou só com as numéricas do oponente e um destino;
+  - os testes de amostra da web dependem do tamanho das partidas: com o Roubo elas ficaram mais curtas, e o `END_TURN` sumiu das
+    20 partidas sorteadas (continua coberto pelo teste direto);
+  - o perfil enviesado que só joga J e Q trava com a BURN (a mão cheia de A e K queima todo J e Q novo): roda sem limite;
+  - medição com 1000 partidas por série passa dos 10 min do comando: rodar em segundo plano e esperar o aviso.
+
+---
+
 ## 2026-10-30 (5): F1, apagar o histórico de partidas
 
 - **Liberação do autor:** "Pode começar a F1" (`decisoes.md` 2026-10-30 (6)).
