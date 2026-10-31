@@ -5,20 +5,13 @@
 
 ## Agora
 
-- **Branch:** `main`, no checkout principal `D:\andr3\jogo-coringa`. A **F1** (`feat/apagar-historico`) entrou por
-  fast-forward em 2026-10-30, com a CI verde na branch (check + e2e). Só a web, sem regra nova (sem `RULES_VERSION`, sem
-  `STATE_SCHEMA`, sem o portão do Difícil):
-  - em `/partidas`, cada linha tem "Apagar" (abaixo do "Rever") e, abaixo da lista, "Apagar o histórico", que tira só a chave
-    `coringa:partidas`. Os dois pedem confirmação, no diálogo do Desistir (agora o `ConfirmDialog` compartilhado);
-  - `deletePastGame` e `clearPastGames` (`model/past-games.ts`) releem o armazenamento e dizem se deu certo; com o navegador
-    recusando, a partida continua na tela e o aviso diz que não deu;
-  - depois de apagar, o foco vai ao "Apagar" da linha que tomou o lugar, ou ao título quando a lista acaba.
-- **Em curso:** nada.
-- **Próximo passo exato:** o bloco **E3 + F2 + F3** (roubo, cura pela Defesa, limite de 4 especiais, Reflect reativo e
-  Devastação), medido junto no simulador antes de virar regra, numa branch nova a partir da `main`. É o maior da fila e mexe no
-  motor (sobe `RULES_VERSION`, e o `STATE_SCHEMA` se o `GameState` mudar; regrava as partidas de referência e remede o portão
-  do Difícil). Perguntar
-  ao autor antes de começar, como nas anteriores; a forma da penalidade do limite vai a ele com 2 ou 3 opções medidas.
+- **Branch:** `feat/regras-e3`, no checkout principal `D:\andr3\jogo-coringa`, a partir da `main` (`f0ac24b`, com a F1:
+  apagar uma partida ou o histórico em `/partidas`, sempre com confirmação).
+- **Em curso:** o bloco **E3 + F2 + F3**, liberado pelo autor (`decisoes.md` 2026-10-30 (7)). Plano 1 (motor, bots e medição)
+  em `docs/superpowers/plans/2026-10-30-e3-f2-f3-plano-1.md`. Nada do bloco entra na `main` antes da resposta do autor.
+- **Próximo passo exato:** seguir o plano 1 da primeira tarefa sem commit (`git log feat/regras-e3` diz até onde foi): 1 Reflect
+  reativo, 2 Devastação, 3 Roubo, 4 cura passiva, 5 limite de especiais, 6 bots, 7 medição. No fim, levar ao autor as formas da
+  penalidade com os números e as leituras [I] do plano, e **parar** até ele responder.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
