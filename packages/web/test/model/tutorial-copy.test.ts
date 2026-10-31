@@ -26,9 +26,21 @@ describe('hintParagraphs', () => {
     expect(equip).not.toMatch(/ordem em que saíram/);
   });
 
-  it('a dica 6 diz que, contra um K jogado, o A só destrói um K da Guarda', () => {
+  it('a dica da Armadilha diz que, contra um K jogado, o A só destrói um K da Guarda, e que no seu turno ele também rouba', () => {
     expect(hintParagraphs('trap')).toEqual([
-      'Janela de reação: quando o oponente ataca, você pode responder com um A, que destrói um J, Q ou K dele; quando ele joga K, o A só destrói um K da Guarda. Ou passar. O A também vale no seu turno.',
+      'Janela de reação: quando o oponente ataca, você pode responder com um A, que destrói um J, Q ou K dele; quando ele joga K, o A só destrói um K da Guarda. Ou passar. No seu turno, o A vale como Armadilha ou como Roubo.',
+    ]);
+  });
+
+  it('a dica do Roubo diz o dano que o K anula e que nunca mata, e a cura do mesmo valor', () => {
+    const [steal] = hintParagraphs('steal');
+    expect(steal).toContain('um K na Guarda dele anula esse dano, e o roubo nunca mata');
+    expect(steal).toContain('você cura o mesmo valor');
+  });
+
+  it('a dica do limite diz os 4 especiais e a queimada', () => {
+    expect(hintParagraphs('limit')).toEqual([
+      'Sua mão guarda no máximo 4 especiais: a que passaria disso vai direto para o cemitério. Jogue as especiais para abrir espaço.',
     ]);
   });
 

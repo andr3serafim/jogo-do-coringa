@@ -8,7 +8,7 @@ import { RULES_SECTIONS } from '../../src/model/copy.ts';
 
 const items = RULES_SECTIONS.flatMap((section) => section.items);
 const text = items.join('\n');
-const { hp, rowLimit, buffLimit, cardsPerEquip, exodiaGuard, resurrectMinRounds } = DEFAULT_CONFIG;
+const { hp, rowLimit, buffLimit, cardsPerEquip, exodiaGuard, resurrectMinRounds, specialLimit, defenseHealGuard } = DEFAULT_CONFIG;
 
 describe('resumo das regras: os números do texto seguem a config padrão do motor', () => {
   it.each([
@@ -20,6 +20,8 @@ describe('resumo das regras: os números do texto seguem a config padrão do mot
     ['o Ataque Absoluto pede buffLimit J', `Ataque Absoluto (${buffLimit} J)`],
     ['os K da Guarda da Exódia (exodiaGuard)', `Exódia (${exodiaGuard} K na Guarda)`],
     ['a garantia da Ressurreição (resurrectMinRounds)', `garantia de ${resurrectMinRounds} rodadas depois de formada`],
+    ['o limite de especiais na mão (specialLimit, BURN)', `A mão guarda no máximo ${specialLimit!.max} especiais: a que passaria disso vai direto para o cemitério.`],
+    ['os K que ligam a cura pela Defesa (defenseHealGuard)', `Com ${defenseHealGuard} K ou mais na Guarda`],
   ])('%s', (_label, phrase) => {
     expect(text).toContain(phrase);
   });
@@ -39,6 +41,31 @@ describe('resumo das regras: a Iniciativa', () => {
     expect(attack).toBeGreaterThanOrEqual(0);
     expect(rounds[attack + 1]).toMatch(/^Iniciativa: começa sorteada\./);
     expect(rounds[attack + 1]).toContain('No empate, inclusive 0 a 0, não muda.');
+  });
+});
+
+describe('resumo das regras: o bloco E3 + F2 + F3 (o motor de 2026-10-31)', () => {
+  it('a BURN do limite de especiais é a forma padrão', () => {
+    expect(specialLimit).toEqual({ max: 4, penalty: 'BURN' });
+  });
+
+  it('o Roubo: sem naipe, o dano que o K anula e que nunca mata, e a cura do mesmo valor', () => {
+    const steal = items.find((i) => i.startsWith('A (Armadilha ou Roubo)'))!;
+    expect(steal).toContain('ele perde o valor dela de vida (um K na Guarda dele anula esse dano; o roubo nunca mata) e você cura o mesmo valor');
+    expect(text).not.toMatch(/♣|♠|♥|♦|naipe/);
+  });
+
+  it('o Reflect só responde (na janela de reação), e a Devastação tem item próprio', () => {
+    const reflect = items.find((i) => i.startsWith('Reflect'))!;
+    expect(reflect).toContain('só na janela de reação');
+    expect(reflect).not.toMatch(/fica ativo|no seu turno/);
+    expect(items.some((i) => i.startsWith('Devastação (K + A + J'))).toBe(true);
+  });
+
+  it('a iniciativa: o dano do Roubo não conta, e a faixa do centro mostra o placar', () => {
+    const initiative = items.find((i) => i.startsWith('Iniciativa:'))!;
+    expect(initiative).toContain('o do Roubo, não');
+    expect(initiative).toContain('a faixa do centro mostra o dano de cada um na rodada');
   });
 });
 
@@ -70,11 +97,11 @@ describe('resumo das regras: a Defesa Absoluta dura até o ataque (motor: `endTu
 describe('resumo das regras: a janela de reação diz o que o motor faz', () => {
   const window = RULES_SECTIONS.find((section) => section.title === 'Janela de reação')!.items;
 
-  // No motor (`actions/reaction.ts`): a Armadilha (A) deixa a janela aberta, então cabem várias; anular o Reflect ou se
-  // proteger dele fecha a janela na hora (`closeReaction`); e o A é recusado na janela do Reflect.
-  it('o segundo item separa o A (quantas quiser, e depois passa; contra o K, só um K da Guarda) do Reflect (anular ou proteger fecha na hora)', () => {
+  // No motor (`actions/reaction.ts`): a Armadilha (A) deixa a janela aberta, então cabem várias; o Reflect (F2) responde ao ataque
+  // e à Devastação, e quem o levou pode responder com outro (`CANCEL_REFLECT`); a Armadilha não responde à Devastação.
+  it('o segundo item separa o A (quantas quiser, e depois passa; contra o K, só um K da Guarda) do Reflect (contra o ataque e a Devastação; outro Reflect anula)', () => {
     expect(window[1]).toBe(
-      'Quem responde pode usar A quantas vezes quiser e depois passa: contra o ataque, o A destrói um J, Q ou K de quem atacou; contra um K jogado, só um K da Guarda. Contra um Reflect, pode anulá-lo ou se proteger, e isso fecha a janela na hora. Não há resposta a uma resposta.',
+      'Quem responde pode usar A quantas vezes quiser e depois passa: contra o ataque, o A destrói um J, Q ou K de quem atacou; contra um K jogado, só um K da Guarda. Contra o ataque, também pode lançar um Reflect; contra a Devastação, o Reflect é a única resposta. Quem levou o Reflect pode responder com outro: os dois se anulam e o golpe não acontece.',
     );
   });
 

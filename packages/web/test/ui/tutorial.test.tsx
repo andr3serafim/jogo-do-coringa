@@ -534,8 +534,8 @@ describe('/tutorial: a rolagem da vez de atacar (celular e tablet) e a dica do p
   const turn = (mine: boolean) =>
     scenarioAt({
       phase: mine ? 'MAIN' : 'WAITING',
+      // O oponente sem numéricas: o Selvagem não rouba (a dica do Roubo viria antes da dele).
       self: { hand: ['WILD'], attackRow: [5], defenseRow: [3] },
-      opponent: { attackRow: [6], defenseRow: [4] },
     }).view;
 
   it('a dica que chegou nesta época segura a rolagem; uma que ficou no painel de épocas anteriores, não', async () => {

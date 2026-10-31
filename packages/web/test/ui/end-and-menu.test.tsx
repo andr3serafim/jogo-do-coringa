@@ -1065,7 +1065,7 @@ describe('resumo das regras: o Reflect', () => {
     expect(reflect).toContain('leva de volta o próprio ataque, com o multiplicador');
     expect(reflect).toContain('menos metade (arredondada para baixo) da Defesa base dele, sem o multiplicador');
     expect(reflect).toContain('nunca fica abaixo de 0');
-    expect(reflect).toContain('Você não leva nada');
+    expect(reflect).toContain('você não leva nada');
   });
 });
 

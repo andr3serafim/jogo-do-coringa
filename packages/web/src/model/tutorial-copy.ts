@@ -27,15 +27,21 @@ const HINT_TEXT: Record<HintId, string> = {
     'Suas numéricas vão para o campo na ordem que quiser: toque numa carta e depois no destino, Ataque ou Defesa (ou arraste a carta até a fileira). Cada fileira é uma fila: quando você ataca, a primeira carta do seu Ataque vai para o cemitério; quando defende, a primeira da sua Defesa.',
   quad: 'Quadra: quatro ou mais numéricas do mesmo valor na mesma fileira, seguidas ou não, somam esse valor à fileira e dão uma Ressurreição, que traz uma numérica do cemitério de volta.',
   order:
-    'Quem tem a iniciativa escolhe atacar primeiro ou em segundo. Depois de cada rodada de Ataque, ela fica com quem causou mais dano; no empate, não muda.',
+    'Quem tem a iniciativa escolhe atacar primeiro ou em segundo. Depois de cada rodada de Ataque, ela fica com quem causou mais dano; no empate, não muda. Durante o Ataque, a faixa do centro mostra o dano de cada um na rodada.',
   firstAttack:
     'Sua vez de atacar: o dano é o seu ATK menos a DEF do oponente, no mínimo 0. Com cartas no Ataque, atacar é obrigatório. O botão mostra a conta antes de você confirmar.',
   buffs:
-    'Cada J soma 1 ao multiplicador do seu ataque, e cada Q ao da sua defesa (até 4 de cada). Um K na Guarda absorve um golpe inteiro e quebra.',
-  trap: 'Janela de reação: quando o oponente ataca, você pode responder com um A, que destrói um J, Q ou K dele; quando ele joga K, o A só destrói um K da Guarda. Ou passar. O A também vale no seu turno.',
+    'Cada J soma 1 ao multiplicador do seu ataque, e cada Q ao da sua defesa (até 4 de cada). Um K na Guarda absorve um golpe inteiro e quebra; com 2 K ou mais, cada numérica que sai da sua Defesa cura você.',
+  steal:
+    'O A também rouba, no seu turno: leva uma numérica do oponente para a fileira que você escolher. Ele perde o valor dela de vida (um K na Guarda dele anula esse dano, e o roubo nunca mata), e você cura o mesmo valor. O botão do alvo mostra a conta.',
+  trap: 'Janela de reação: quando o oponente ataca, você pode responder com um A, que destrói um J, Q ou K dele; quando ele joga K, o A só destrói um K da Guarda. Ou passar. No seu turno, o A vale como Armadilha ou como Roubo.',
   wild: 'O Coringa Selvagem vale como J, Q ou A, à sua escolha. Nunca como K.',
+  devastation:
+    'Devastação: K + A + J da mão esvazia a fileira de Ataque do oponente; K + A + Q, a de Defesa. As numéricas dela vão para o cemitério, e os buffs ficam. Ele só pode responder com um Reflect, que devolve a Devastação para você.',
   reflect:
-    'Reflect é K + J + Q da mão, jogado quando o oponente ataca. Ele perde os K e Q e leva o golpe de volta, e você não leva nada. Se ele responder com outro Reflect, os dois se anulam e o golpe não acontece.',
+    'Reflect é K + J + Q da mão, jogado quando o oponente ataca ou lança uma Devastação. O ataque volta para ele, que perde os K e Q, e você não leva nada; a Devastação volta para quem a lançou. Se ele responder com outro Reflect, os dois se anulam.',
+  limit:
+    'Sua mão guarda no máximo 4 especiais: a que passaria disso vai direto para o cemitério. Jogue as especiais para abrir espaço.',
   end: END_HINT,
 };
 

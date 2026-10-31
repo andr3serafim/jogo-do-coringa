@@ -26,7 +26,20 @@ import {
   type HintId,
 } from '../../src/model/tutorial.ts';
 
-const ALL: readonly HintId[] = ['equip', 'quad', 'order', 'firstAttack', 'buffs', 'trap', 'wild', 'reflect', 'end'];
+const ALL: readonly HintId[] = [
+  'equip',
+  'quad',
+  'order',
+  'firstAttack',
+  'buffs',
+  'steal',
+  'trap',
+  'wild',
+  'devastation',
+  'reflect',
+  'limit',
+  'end',
+];
 
 /** A dica de P1 (ou de `me`) para o estado, com os eventos da última jogada e as já vistas. */
 function hintFor(
@@ -141,6 +154,30 @@ describe('tutorialHint: cada dica na sua situação', () => {
 
   it('trap: o A na sua vez não é a dica da reação', () => {
     expect(hintFor(setup({ p1: { hand: ['A'] }, p2: { attackBuffs: ['J'] } }))).toBeNull();
+  });
+
+  it('steal: na sua vez, com um A e uma numérica do oponente (o Roubo jogável)', () => {
+    expect(hintFor(setup({ p1: { hand: ['A'] }, p2: { attack: [5] } }))).toEqual({ id: 'steal', zone: 'hand' });
+  });
+
+  it('steal: não na vez do oponente, nem sem numérica do oponente para roubar', () => {
+    expect(hintFor(quiet({ p1: { attack: [5], hand: ['A'] } }))).toBeNull();
+    expect(hintFor(setup({ p1: { hand: ['A'] } }))).toBeNull();
+  });
+
+  it('devastation: na sua vez, com K + A + J na mão e a fileira de Ataque do oponente com carta', () => {
+    const state = setup({ p1: { hand: ['K', 'A', 'J'] }, p2: { attack: [5] } });
+    expect(hintFor(state, { seen: ['buffs', 'steal'] })).toEqual({ id: 'devastation', zone: 'actionBar' });
+    expect(hintFor(setup({ p1: { hand: ['K', 'A', 'J'] } }), { seen: ['buffs'] })).toBeNull();
+  });
+
+  it('limit: uma especial sua queimada pela BURN (o evento é seu); a do oponente não', () => {
+    const burned = (player: PlayerId): GameEvent[] => [
+      { type: 'HandLimitPenalty', player, penalty: 'BURN', cards: [{ id: 'k9', kind: 'K', suit: 'copas' }], fewer: 0 },
+    ];
+    const state = equipRound({ p1: { pending: [3] } });
+    expect(hintFor(state, { events: burned(P1), seen: ['equip'] })).toEqual({ id: 'limit', zone: 'hand' });
+    expect(hintFor(state, { events: burned(P2), seen: ['equip'] })).toBeNull();
   });
 
   it('wild: o Coringa Selvagem na mão, na sua vez', () => {
@@ -322,7 +359,7 @@ describe('tutorialHint na semente do tutorial', () => {
     expect(hintFor(mine.state, { events: mine.events })).toBeNull();
   });
 
-  it('do 1º Equipar ao primeiro ataque: equip, order, firstAttack, buffs, wild, uma por vez e sem voltar', () => {
+  it('do 1º Equipar ao primeiro ataque: equip, order, firstAttack, buffs, steal, wild, devastation, uma por vez e sem voltar', () => {
     const seen = new Set<HintId>();
     const shown: HintId[] = [];
     /** Como a tela: a cada `state`, a dica nova (se houver) é mostrada, e "Entendi" a marca vista. */
@@ -349,7 +386,7 @@ describe('tutorialHint na semente do tutorial', () => {
     ({ state, events } = play(state, P1, ofType('CHOOSE_ORDER')));
     read(state, events);
     expect(state.phase).toEqual({ kind: 'ATTACK_MAIN', player: P1 });
-    expect(shown).toEqual(['equip', 'order', 'firstAttack', 'buffs', 'wild']);
+    expect(shown).toEqual(['equip', 'order', 'firstAttack', 'buffs', 'steal', 'wild', 'devastation']);
   });
 });
 
@@ -538,6 +575,6 @@ describe('advanceHint e acknowledgeHint', () => {
     }
     const ordered = step(state, P1, (actions) => actions.find((a) => a.type === 'CHOOSE_ORDER')!);
     read(ordered.state, ordered.events);
-    expect(shown).toEqual(['equip', 'order', 'firstAttack', 'buffs', 'wild']);
+    expect(shown).toEqual(['equip', 'order', 'firstAttack', 'buffs', 'steal', 'wild', 'devastation']);
   });
 });

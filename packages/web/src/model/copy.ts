@@ -552,8 +552,9 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
     items: [
       'O ciclo é Equipar, Equipar, Ataque, Equipar, Ataque, e assim por diante.',
       'Equipar: cada jogador recebe 4 cartas. As especiais (J, Q, K, A e Coringa Selvagem) vão para a mão. As numéricas vão para o campo: você vê todas de uma vez e você escolhe a fileira e a ordem de cada uma, Ataque ou Defesa (8 cartas no máximo em cada); a primeira que você põe numa fileira fica na frente da fila. Com as duas cheias, a nova carta substitui a última de uma fileira (a antiga vai para o cemitério) ou é descartada. Os dois montam ao mesmo tempo, em segredo.',
+      'A mão guarda no máximo 4 especiais: a que passaria disso vai direto para o cemitério.',
       'Ataque: quem tem a iniciativa escolhe atacar primeiro ou em segundo. Cada jogador tem um turno: joga as especiais que quiser e declara o ataque, que é obrigatório se a fileira de Ataque tiver cartas.',
-      'Iniciativa: começa sorteada. No fim de cada rodada de Ataque, fica com quem causou mais dano nela (o dano devolvido por um Reflect conta para quem o lançou). No empate, inclusive 0 a 0, não muda.',
+      'Iniciativa: começa sorteada. No fim de cada rodada de Ataque, fica com quem causou mais dano nela (o dano devolvido por um Reflect conta para quem o lançou; o do Roubo, não). No empate, inclusive 0 a 0, não muda. Durante o Ataque, a faixa do centro mostra o dano de cada um na rodada.',
     ],
   },
   {
@@ -570,17 +571,19 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
     items: [
       'J (Buff de Ataque) e Q (Buff de Defesa): cada um soma 1 ao multiplicador de ataque ou de defesa. Cabem 4 de cada.',
       'K (Guarda): absorve o dano, como acima. Você pode jogar vários K de uma vez; o oponente ganha uma janela de reação.',
-      'A (Armadilha): destrói 1 J, Q ou K do campo do oponente. Vale no seu turno ou na janela de reação. Não alcança um Reflect ativo nem quem está sob Defesa Absoluta.',
+      'Cura pela Defesa: Com 2 K ou mais na Guarda, cada numérica da sua fileira de Defesa que vai para o cemitério cura você o valor dela × (1 + número de Q), até a vida inicial. As cartas que a Devastação destrói não curam.',
+      'A (Armadilha ou Roubo): como Armadilha, destrói 1 J, Q ou K do campo do oponente, no seu turno ou na janela de reação. Como Roubo, só no seu turno: leva uma numérica de qualquer fileira do oponente para o fim da fileira que você escolher; ele perde o valor dela de vida (um K na Guarda dele anula esse dano; o roubo nunca mata) e você cura o mesmo valor, até a vida inicial. Nada disso alcança quem está sob Defesa Absoluta.',
       'Sacrifício: no seu turno, descarte um J da mão para destruir um J do oponente, ou um Q para destruir um Q. Não funciona contra Defesa Absoluta.',
       'Coringa Selvagem: assume o papel de J, Q ou A, nunca o de K.',
-      'Reflect (K + J + Q da mão, no seu turno): fica ativo até o fim do próximo turno de ataque do oponente. Se ele atacar, perde todos os K e Q que tiver e leva de volta o próprio ataque, com o multiplicador, menos metade (arredondada para baixo) da Defesa base dele, sem o multiplicador (o dano nunca fica abaixo de 0). Você não leva nada. Se ele estiver sob Defesa Absoluta, perde só os K e não leva dano. Para anular o Reflect, o oponente joga K + J + Q da mão, na janela de reação do lançamento, ou sacrifica J + Q + K do próprio campo, nessa janela ou no próprio turno, antes de atacar.',
+      'Reflect (K + J + Q da mão): só na janela de reação, contra um ataque ou uma Devastação. Contra o ataque, quem atacou perde todos os K e Q que tiver e leva de volta o próprio ataque, com o multiplicador, menos metade (arredondada para baixo) da Defesa base dele, sem o multiplicador (o dano nunca fica abaixo de 0); você não leva nada. Se ele estiver sob Defesa Absoluta, o Reflect só segura o golpe. Contra a Devastação, ela volta para quem a lançou.',
+      'Devastação (K + A + J, ou K + A + Q, da mão, no seu turno): esvazia a fileira de Ataque do oponente (com o J) ou a de Defesa (com o Q). As numéricas dela vão para o cemitério, os buffs ficam. Só o Reflect responde. Não vale contra fileira vazia nem contra Defesa Absoluta. O Selvagem faz o A, o J ou o Q, nunca o K.',
     ],
   },
   {
     title: 'Janela de reação',
     items: [
-      'Abre para o oponente quando você declara ataque, joga K ou lança um Reflect, mesmo que ele não tenha resposta.',
-      'Quem responde pode usar A quantas vezes quiser e depois passa: contra o ataque, o A destrói um J, Q ou K de quem atacou; contra um K jogado, só um K da Guarda. Contra um Reflect, pode anulá-lo ou se proteger, e isso fecha a janela na hora. Não há resposta a uma resposta.',
+      'Abre para o oponente quando você declara ataque, joga K ou lança uma Devastação, mesmo que ele não tenha resposta.',
+      'Quem responde pode usar A quantas vezes quiser e depois passa: contra o ataque, o A destrói um J, Q ou K de quem atacou; contra um K jogado, só um K da Guarda. Contra o ataque, também pode lançar um Reflect; contra a Devastação, o Reflect é a única resposta. Quem levou o Reflect pode responder com outro: os dois se anulam e o golpe não acontece.',
     ],
   },
   {

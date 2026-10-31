@@ -4,7 +4,19 @@
 import { legalActions, type Action, type GameEvent, type PlayerView } from '@coringa/engine';
 
 /** As dicas, na ordem de prioridade: com duas valendo ao mesmo tempo, a primeira da lista sai e a outra espera. */
-export type HintId = 'equip' | 'quad' | 'order' | 'firstAttack' | 'buffs' | 'trap' | 'wild' | 'reflect' | 'end';
+export type HintId =
+  | 'equip'
+  | 'quad'
+  | 'order'
+  | 'firstAttack'
+  | 'buffs'
+  | 'steal'
+  | 'trap'
+  | 'wild'
+  | 'devastation'
+  | 'reflect'
+  | 'limit'
+  | 'end';
 
 /** A zona da mesa de que a dica fala (a tela a destaca). */
 export type HintZone = 'equip' | 'rows' | 'order' | 'actionBar' | 'hand' | 'reaction' | 'end';
@@ -59,18 +71,28 @@ const HINTS: ReadonlyArray<Hint & { holds: (situation: Situation) => boolean }> 
     zone: 'hand',
     holds: (situation) => inMyTurn(situation) && playsRealBuff(situation),
   },
+  // O Roubo (E3): o A na sua vez, com uma numérica do oponente para levar.
+  { id: 'steal', zone: 'hand', holds: (situation) => inMyTurn(situation) && canDo(situation.legal, 'STEAL') },
   { id: 'trap', zone: 'reaction', holds: ({ view, legal }) => view.phase.kind === 'REACTION' && canDo(legal, 'TRAP') },
   {
     id: 'wild',
     zone: 'hand',
     holds: (situation) => inMyTurn(situation) && situation.view.self.hand.some((card) => card.kind === 'WILD'),
   },
+  // A Devastação (F3): o botão dela aparece na barra de ação quando o motor a oferece.
+  { id: 'devastation', zone: 'actionBar', holds: (situation) => inMyTurn(situation) && canDo(situation.legal, 'DEVASTATE') },
   {
     // Você pode responder a um ataque com o seu, ou o oponente acabou de responder com o dele (os eventos vêm redigidos para você).
     id: 'reflect',
     zone: 'hand',
     holds: ({ view, events, legal }) =>
       canDo(legal, 'REFLECT') || events.some((event) => event.type === 'ReflectPlayed' && event.player !== view.me),
+  },
+  // O limite de 4 especiais (E3, BURN): uma especial sua acabou de ir direto ao cemitério.
+  {
+    id: 'limit',
+    zone: 'hand',
+    holds: ({ view, events }) => events.some((event) => event.type === 'HandLimitPenalty' && event.player === view.me),
   },
   { id: 'end', zone: 'end', holds: ({ view }) => view.phase.kind === 'GAME_OVER' },
 ];

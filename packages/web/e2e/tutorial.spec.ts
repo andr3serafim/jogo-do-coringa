@@ -158,7 +158,7 @@ test('tutorial: a dica do Equipar, a seguinte quando a situação muda, e "Pular
   guard.expectClean();
 });
 
-test('tutorial, o fim: a dica do fim (a 9, desde que a do anti-travamento saiu) mora DENTRO do painel de fim (diálogo modal), o leitor de tela a lê ao abrir e "Jogar com um amigo" volta ao início', async ({ page }) => {
+test('tutorial, o fim: a dica do fim (a 12, com as do Roubo, da Devastação e do limite) mora DENTRO do painel de fim (diálogo modal), o leitor de tela a lê ao abrir e "Jogar com um amigo" volta ao início', async ({ page }) => {
   const guard = failOnConsoleErrors(page);
   await openTutorial(page);
 
