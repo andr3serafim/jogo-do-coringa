@@ -123,7 +123,7 @@ describe('tablePlays: jogadas por carta', () => {
 
 describe('tablePlays: combinações', () => {
   it('Reflect com J, Q, K e Selvagem na mão usa o J e a Q reais', () => {
-    const { state, view, plays } = setup({ self: { hand: ['WILD', 'K', 'Q', 'J'] } });
+    const { state, view, plays } = setup({ phase: 'ATTACK', self: { hand: ['WILD', 'K', 'Q', 'J'] } });
     expect(plays.reflect).toEqual({
       type: 'REFLECT',
       kId: handCard(view, 'K').id,
@@ -134,7 +134,7 @@ describe('tablePlays: combinações', () => {
   });
 
   it('sem J real, o Reflect usa o Selvagem no lugar do J', () => {
-    const { state, view, plays } = setup({ self: { hand: ['K', 'Q', 'WILD'] } });
+    const { state, view, plays } = setup({ phase: 'ATTACK', self: { hand: ['K', 'Q', 'WILD'] } });
     expect(plays.reflect).toEqual({
       type: 'REFLECT',
       kId: handCard(view, 'K').id,
@@ -145,15 +145,15 @@ describe('tablePlays: combinações', () => {
   });
 
   it('só K e dois Selvagens: o Reflect usa os dois, em ids distintos', () => {
-    const { state, view, plays } = setup({ self: { hand: ['K', 'WILD', 'WILD'] } });
+    const { state, view, plays } = setup({ phase: 'ATTACK', self: { hand: ['K', 'WILD', 'WILD'] } });
     const action = plays.reflect as Extract<PlayerAction, { type: 'REFLECT' }>;
     expect(action.jId).not.toBe(action.qId);
     expect(applyAction(state, view.me, action).ok).toBe(true);
   });
 
-  it('sem K, ou com Reflect já ativo, não há Reflect', () => {
-    expect(setup({ self: { hand: ['J', 'Q'] } }).plays.reflect).toBeNull();
-    expect(setup({ self: { hand: ['K', 'J', 'Q'], reflect: true } }).plays.reflect).toBeNull();
+  it('sem K, ou fora da janela de um ataque, não há Reflect (F2)', () => {
+    expect(setup({ phase: 'ATTACK', self: { hand: ['J', 'Q'] } }).plays.reflect).toBeNull();
+    expect(setup({ self: { hand: ['K', 'J', 'Q'] } }).plays.reflect).toBeNull();
   });
 
   it('Anular o Reflect (janela de reação) prefere cartas reais', () => {
@@ -170,29 +170,6 @@ describe('tablePlays: combinações', () => {
     expect(plays.reflect).toBeNull();
     expect(plays.pass).toBe(true);
     expect(applyAction(state, view.me, plays.cancelReflect!).ok).toBe(true);
-  });
-
-  it('Proteger-se do Reflect usa J, Q e K do próprio campo', () => {
-    const { state, view, plays } = setup({
-      phase: 'REFLECT_PLAYED',
-      self: { attackBuffs: ['J'], defenseBuffs: ['Q'], guard: ['K'] },
-      opponent: { reflect: true },
-    });
-    expect(plays.protect).toEqual({
-      type: 'PROTECT_FROM_REFLECT',
-      jId: view.self.attackBuffs[0]!.id,
-      qId: view.self.defenseBuffs[0]!.id,
-      kId: view.self.guard[0]!.id,
-    });
-    expect(applyAction(state, view.me, plays.protect!).ok).toBe(true);
-  });
-
-  it('proteger na fase principal, com o Reflect do oponente ativo', () => {
-    const { plays } = setup({
-      self: { attackBuffs: ['J'], defenseBuffs: ['Q'], guard: ['K'] },
-      opponent: { reflect: true },
-    });
-    expect(plays.protect).not.toBeNull();
   });
 
   it('Ressurreição: um item por valor no cemitério, só com fileiras de vaga', () => {
@@ -261,7 +238,6 @@ describe('tablePlays: fim de turno e reação', () => {
     expect(plays.byCard.size).toBe(0);
     expect(plays.reflect).toBeNull();
     expect(plays.cancelReflect).toBeNull();
-    expect(plays.protect).toBeNull();
     expect(plays.resurrect).toEqual([]);
     expect(plays.finish).toBeNull();
     expect(plays.pass).toBe(false);
@@ -301,11 +277,9 @@ describe('roleKey e isLegal', () => {
   });
 
   it('a ordem dos campos do objeto não muda a chave', () => {
-    const view = viewAt({ self: { attackBuffs: ['J'], defenseBuffs: ['Q'], guard: ['K'] }, opponent: { reflect: true } });
-    const [j, q, k] = [view.self.attackBuffs[0]!.id, view.self.defenseBuffs[0]!.id, view.self.guard[0]!.id];
-    expect(roleKey({ type: 'PROTECT_FROM_REFLECT', kId: k, qId: q, jId: j }, view)).toBe(
-      roleKey({ type: 'PROTECT_FROM_REFLECT', jId: j, qId: q, kId: k }, view),
-    );
+    const view = viewAt({ self: { hand: ['K', 'J', 'Q'] } });
+    const [k, j, q] = (['K', 'J', 'Q'] as const).map((kind) => view.self.hand.find((c) => c.kind === kind)!.id);
+    expect(roleKey({ type: 'REFLECT', qId: q!, jId: j!, kId: k! }, view)).toBe(roleKey({ type: 'REFLECT', kId: k!, jId: j!, qId: q! }, view));
   });
 
   it('distingue o papel do Selvagem pela posição no Reflect', () => {
@@ -343,10 +317,15 @@ describe('roleKey e isLegal', () => {
     expect(isLegal({ type: 'PLAY_K', cardIds: [handCard(view, 'K', 1).id] }, legal, view)).toBe(true);
     const k1 = handCard(view, 'K', 0).id;
     expect(isLegal({ type: 'PLAY_K', cardIds: [k1, k1] }, legal, view)).toBe(false);
-    const [w1, w2] = [handCard(view, 'WILD', 0).id, handCard(view, 'WILD', 1).id];
-    expect(isLegal({ type: 'REFLECT', kId: k1, jId: w1, qId: w2 }, legal, view)).toBe(true);
-    expect(isLegal({ type: 'REFLECT', kId: k1, jId: w1, qId: w1 }, legal, view)).toBe(false);
-    expect(isLegal({ type: 'REFLECT', kId: w1, jId: j, qId: q }, legal, view)).toBe(false);
+    // O Reflect só responde a um ataque (F2): a mesma mão, na janela do ataque.
+    const attacked = viewAt({ phase: 'ATTACK', self: { hand: ['J', 'Q', 'K', 'K', 'WILD', 'WILD'] }, opponent: { guard: ['K'] } });
+    const inWindow = legalFor(attacked);
+    const [w1, w2] = [handCard(attacked, 'WILD', 0).id, handCard(attacked, 'WILD', 1).id];
+    const [rk, rj, rq] = [handCard(attacked, 'K', 0).id, handCard(attacked, 'J').id, handCard(attacked, 'Q').id];
+    expect(isLegal({ type: 'REFLECT', kId: rk, jId: w1, qId: w2 }, inWindow, attacked)).toBe(true);
+    expect(isLegal({ type: 'REFLECT', kId: rk, jId: w1, qId: w1 }, inWindow, attacked)).toBe(false);
+    expect(isLegal({ type: 'REFLECT', kId: w1, jId: rj, qId: rq }, inWindow, attacked)).toBe(false);
+    expect(isLegal({ type: 'REFLECT', kId: k1, jId: j, qId: q }, legal, view)).toBe(false);
   });
 });
 
@@ -360,7 +339,7 @@ describe('propriedade: toda jogada montada pela mesa é aceita pelo motor', () =
         else for (const target of play.targets) actions.push(play.make(target.id));
       }
     }
-    for (const combo of [plays.reflect, plays.cancelReflect, plays.protect, plays.finish]) if (combo) actions.push(combo);
+    for (const combo of [plays.reflect, plays.cancelReflect, plays.finish]) if (combo) actions.push(combo);
     for (const r of plays.resurrect) for (const row of r.rows) actions.push({ type: 'RESURRECT', cardId: r.cardId, row });
     if (plays.pass) actions.push({ type: 'PASS' });
     return actions;
@@ -393,8 +372,8 @@ describe('propriedade: toda jogada montada pela mesa é aceita pelo motor', () =
       const keys = new Set(actions.map((a) => roleKey(a, item.view)));
       for (const canonical of legal) {
         if (canonical.type === 'EQUIP' || canonical.type === 'CHOOSE_ORDER') continue;
-        if (canonical.type === 'REFLECT' || canonical.type === 'CANCEL_REFLECT' || canonical.type === 'PROTECT_FROM_REFLECT') {
-          const offered = { REFLECT: 'reflect', CANCEL_REFLECT: 'cancelReflect', PROTECT_FROM_REFLECT: 'protect' } as const;
+        if (canonical.type === 'REFLECT' || canonical.type === 'CANCEL_REFLECT') {
+          const offered = { REFLECT: 'reflect', CANCEL_REFLECT: 'cancelReflect' } as const;
           expect(plays[offered[canonical.type]], JSON.stringify(canonical)).not.toBeNull();
           continue;
         }

@@ -53,15 +53,14 @@ export function previewBetween(
   const attack = attackPower(attacker);
 
   if (defender.reflect) {
-    breaks.attackerGuard = attacker.guard.length;
     const defense = Math.floor(defenseBase(attacker) / 2);
     const net = Math.max(0, attack - defense);
-    let reflected = 0;
-    if (!attacker.absoluteDefense) {
-      breaks.attackerQueens = attacker.defenseBuffs.length;
-      reflected = net;
-    }
-    return { outcome: 'REFLECTED', attack, defense, net, damage: 0, reflected, absolute, breaks };
+    // Contra um atacante sob Defesa Absoluta o Reflect é anulado: segura o golpe (o dono leva 0), mas não devolve dano nem quebra
+    // Q e K (autor, 2026-10-30).
+    if (attacker.absoluteDefense) return { outcome: 'REFLECTED', attack, defense, net, damage: 0, reflected: 0, absolute, breaks };
+    breaks.attackerGuard = attacker.guard.length;
+    breaks.attackerQueens = attacker.defenseBuffs.length;
+    return { outcome: 'REFLECTED', attack, defense, net, damage: 0, reflected: net, absolute, breaks };
   }
 
   const defense = defensePower(defender);

@@ -85,13 +85,6 @@ function equipOptions(view: PlayerView): Destination[][] {
   return results;
 }
 
-function protectAction(view: PlayerView): Action[] {
-  const j = view.self.attackBuffs.at(0);
-  const q = view.self.defenseBuffs.at(0);
-  const k = view.self.guard.at(0);
-  return j && q && k ? [{ type: 'PROTECT_FROM_REFLECT', jId: j.id, qId: q.id, kId: k.id }] : [];
-}
-
 function mainOptions(view: PlayerView): Action[] {
   const { self, opponent, config, graveyard } = view;
   const actions: Action[] = [];
@@ -117,10 +110,6 @@ function mainOptions(view: PlayerView): Action[] {
       for (const t of opponent.defenseBuffs) actions.push({ type: 'SACRIFICE', cardId: c.id, targetId: t.id });
     }
   }
-  if (!self.reflect) {
-    for (const c of reflectCombos(self.hand)) actions.push({ type: 'REFLECT', kId: c.k, jId: c.j, qId: c.q });
-  }
-  if (opponent.reflect) actions.push(...protectAction(view));
   if (self.resurrections.length > 0) {
     const seen = new Set<number>();
     for (const card of graveyard) {
@@ -139,14 +128,18 @@ function reactionOptions(view: PlayerView, trigger: ReactionTrigger): Action[] {
   const actions: Action[] = [{ type: 'PASS' }];
   if (trigger === 'REFLECT_PLAYED') {
     for (const c of reflectCombos(self.hand)) actions.push({ type: 'CANCEL_REFLECT', kId: c.k, jId: c.j, qId: c.q });
-    actions.push(...protectAction(view));
     return actions;
   }
-  if (opponent.absoluteDefense) return actions;
-  const targets =
-    trigger === 'K_PLAYED' ? opponent.guard : [...opponent.attackBuffs, ...opponent.defenseBuffs, ...opponent.guard];
-  for (const c of sources(self.hand, 'A')) {
-    for (const t of targets) actions.push({ type: 'TRAP', cardId: c.id, targetId: t.id });
+  if (!opponent.absoluteDefense) {
+    const targets =
+      trigger === 'K_PLAYED' ? opponent.guard : [...opponent.attackBuffs, ...opponent.defenseBuffs, ...opponent.guard];
+    for (const c of sources(self.hand, 'A')) {
+      for (const t of targets) actions.push({ type: 'TRAP', cardId: c.id, targetId: t.id });
+    }
+  }
+  // O Reflect responde ao ataque (F2), também contra um atacante sob Defesa Absoluta, que o anula mas não o impede.
+  if (trigger === 'ATTACK') {
+    for (const c of reflectCombos(self.hand)) actions.push({ type: 'REFLECT', kId: c.k, jId: c.j, qId: c.q });
   }
   return actions;
 }

@@ -37,10 +37,9 @@ const SAMPLES: { [T in GameEvent['type']]: Extract<GameEvent, { type: T }> } = {
     type: 'ReflectPlayed',
     player: 'p1',
     reflect: { k: face('k1'), j: face('j1', 'J'), q: face('q1', 'Q') },
+    against: 'ATTACK',
   },
   ReflectCanceled: { type: 'ReflectCanceled', player: 'p2', owner: 'p1' },
-  ReflectProtected: { type: 'ReflectProtected', player: 'p2', owner: 'p1' },
-  ReflectExpired: { type: 'ReflectExpired', owner: 'p1' },
   ReflectTriggered: { type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 4 },
   ReactionWindowOpened: { type: 'ReactionWindowOpened', responder: 'p1', trigger: 'ATTACK' },
   ReactionWindowClosed: { type: 'ReactionWindowClosed', responder: 'p1', trigger: 'ATTACK' },
@@ -63,8 +62,8 @@ const SAMPLES: { [T in GameEvent['type']]: Extract<GameEvent, { type: T }> } = {
 const gameOver = (result: GameResult): GameEvent => ({ type: 'GameOver', result });
 
 describe('cueOf: o mapa batida → pista dos sons', () => {
-  it('a amostra cobre todos os 32 tipos de evento do motor', () => {
-    expect(Object.keys(SAMPLES)).toHaveLength(32);
+  it('a amostra cobre todos os 30 tipos de evento do motor', () => {
+    expect(Object.keys(SAMPLES)).toHaveLength(30);
   });
 
   describe('carta', () => {
@@ -168,8 +167,8 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
     ]);
     const silent = (Object.keys(SAMPLES) as GameEvent['type'][]).filter((type) => !SOUNDING.has(type));
 
-    it('a lista dos mudos tem os 15 tipos restantes', () => {
-      expect(silent).toHaveLength(32 - SOUNDING.size);
+    it('a lista dos mudos tem os 13 tipos restantes', () => {
+      expect(silent).toHaveLength(30 - SOUNDING.size);
     });
 
     it.each(silent)('%s', (type) => {

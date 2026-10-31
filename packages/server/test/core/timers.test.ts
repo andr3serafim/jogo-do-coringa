@@ -267,29 +267,27 @@ describe('turno pausa na janela do oponente (§6.2)', () => {
     expect(lastState(h, p1).deadline!.at).toBe(h.now);
   });
 
-  it('mesmo com Reflect: pausa e volta; turno novo começa com 30 s cheios', async () => {
-    const state = setup({ p1: { hand: ['K', 'J', 'Q'] } });
+  it('Reflect na reação ao ataque: a resposta do atacante tem o prazo da reação, e o turno seguinte começa cheio', async () => {
+    const state = setup({ p1: { attack: [9], attackBuffs: ['J'] }, p2: { hand: ['K', 'J', 'Q'] } });
     const { h, p1, p2 } = await armed(state);
     h.advance(12_000);
-    await act(h, p1, 'r', {
+    await act(h, p1, 'atk', { type: 'DECLARE_ATTACK' });
+    h.advance(TIMERS.reactionMinMs);
+    await act(h, p2, 'r', {
       type: 'REFLECT',
-      kId: handId(state, 'p1', 'K'),
-      jId: handId(state, 'p1', 'J'),
-      qId: handId(state, 'p1', 'Q'),
+      kId: handId(state, 'p2', 'K'),
+      jId: handId(state, 'p2', 'J'),
+      qId: handId(state, 'p2', 'Q'),
     });
     const rec = h.core.record!;
-    expect(phaseOf(h)).toMatchObject({ kind: 'REACTION', trigger: 'REFLECT_PLAYED' });
-    expect(lastState(h, p2).pausedTurnMs).toBe(18_000);
+    expect(phaseOf(h)).toMatchObject({ kind: 'REACTION', responder: 'p1', trigger: 'REFLECT_PLAYED' });
+    expect(lastState(h, p1).deadline!.at).toBe(h.now + TIMERS.reactionMs);
+    // O ataque encerra o turno: não há tempo de turno para guardar.
+    expect(rec.game!.pausedTurnMs).toBeNull();
     h.advance(TIMERS.reactionMinMs);
-    await act(h, p2, 'p', { type: 'PASS' });
-    expect(phaseOf(h)).toEqual({ kind: 'ATTACK_MAIN', player: 'p1' });
-    expect(lastState(h, p1).deadline!.at).toBe(h.now + 18_000);
-
-    // O turno acaba (sem Ataque montado) e o turno do p2 começa cheio.
-    await act(h, p1, 'e', { type: 'END_TURN' });
+    await act(h, p1, 'p', { type: 'PASS' });
     expect(phaseOf(h)).toEqual({ kind: 'ATTACK_MAIN', player: 'p2' });
     expect(lastState(h, p2).deadline).toEqual({ kind: 'TURN', at: h.now + 30_000, players: ['p2'] });
-    expect(rec.game!.pausedTurnMs).toBeNull();
   });
 
   it('a janela de um ataque não guarda tempo do turno, e o prazo do Ás na reação não muda', async () => {

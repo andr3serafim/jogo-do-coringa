@@ -649,7 +649,11 @@ describe('janela de reação (spec §3.7)', () => {
   });
 
   it('o gatilho do Reflect: "Duda lançou um Reflect"', () => {
-    mount({ ...DRAFT, phase: 'REFLECT_PLAYED', opponent: { ...DRAFT.opponent, reflect: true } }, { state: withClock });
+    // Com K + J + Q na mão há resposta (outro Reflect); sem ela, a janela passa sozinha.
+    mount(
+      { ...DRAFT, self: { ...DRAFT.self, hand: ['K', 'J', 'Q'] }, phase: 'REFLECT_PLAYED', opponent: { ...DRAFT.opponent, reflect: true } },
+      { state: withClock },
+    );
     expect(inBar().getByText('Duda lançou um Reflect')).toBeInTheDocument();
     expect(inBar().getByRole('button', { name: 'Passar' })).toBeInTheDocument();
   });

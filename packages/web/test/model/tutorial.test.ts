@@ -162,25 +162,35 @@ describe('tutorialHint: cada dica na sua situação', () => {
     expect(drain(jLimit).map((h) => h.id)).toEqual(['wild']);
   });
 
-  it('reflect: K + J + Q na mão e o Reflect jogável', () => {
-    const state = setup({ p1: { hand: ['K', 'J', 'Q'] } });
+  it('reflect: na janela do ataque, com K + J + Q na mão (o Reflect jogável)', () => {
+    const state = setup({
+      p1: { hand: ['K', 'J', 'Q'] },
+      p2: { attack: [5] },
+      phase: { kind: 'REACTION', responder: P1, trigger: 'ATTACK' },
+      turnOrder: [P2, P1],
+    });
     expect(hintFor(state, { seen: ['buffs'] })).toEqual({ id: 'reflect', zone: 'hand' });
   });
 
-  it('reflect: não com o seu Reflect já armado', () => {
-    const armed = setup({ p1: { hand: ['K', 'J', 'Q'], reflect: true } });
-    expect(hintFor(armed, { seen: ['buffs'] })).toBeNull();
+  it('reflect: não na fase principal (o Reflect só responde a um ataque)', () => {
+    const main = setup({ p1: { hand: ['K', 'J', 'Q'] } });
+    expect(hintFor(main, { seen: ['buffs'] })).toBeNull();
   });
 
   it('reflect: o ReflectPlayed do oponente, nos eventos, vale; o seu não', () => {
-    const state = setup({ p2: { hand: ['K', 'J', 'Q'] }, phase: { kind: 'ATTACK_MAIN', player: P2 }, p1: { attack: [5] } });
-    const { state: next, events } = act(state, P2, { type: 'REFLECT', ...reflectIds(state, P2) });
+    // P1 ataca e P2 responde com o Reflect: a resposta é de P1.
+    const attacked = act(setup({ p2: { hand: ['K', 'J', 'Q'] }, p1: { attack: [5] } }), P1, { type: 'DECLARE_ATTACK' }).state;
+    const { state: next, events } = act(attacked, P2, { type: 'REFLECT', ...reflectIds(attacked, P2) });
     expect(next.phase).toEqual({ kind: 'REACTION', responder: P1, trigger: 'REFLECT_PLAYED' });
     expect(hintFor(next, { events })).toEqual({ id: 'reflect', zone: 'hand' });
     // Sem os eventos a janela do Reflect não tem dica (não há TRAP nem REFLECT legal): o evento é o que vale.
     expect(hintFor(next)).toBeNull();
 
-    const mine = setup({ p1: { hand: ['K', 'J', 'Q'], attack: [5] } });
+    const mine = act(
+      setup({ p1: { hand: ['K', 'J', 'Q'] }, p2: { attack: [5] }, turnOrder: [P2, P1], phase: { kind: 'ATTACK_MAIN', player: P2 } }),
+      P2,
+      { type: 'DECLARE_ATTACK' },
+    ).state;
     const played = act(mine, P1, { type: 'REFLECT', ...reflectIds(mine, P1) });
     expect(played.events.some((e) => e.type === 'ReflectPlayed' && e.player === P1)).toBe(true);
     expect(hintFor(played.state, { events: played.events })).toBeNull();
@@ -235,8 +245,9 @@ describe('tutorialHint: ordem, "vista" e situação que passou', () => {
   });
 
   it('com várias situações valendo, as dicas saem na ordem da lista', () => {
+    // O Reflect só responde a um ataque (F2): na fase principal, a dica dele não vale.
     const state = setup({ p1: { attack: [5, 5, 5, 5], hand: ['K', 'J', 'Q', 'W'] } });
-    expect(drain(state).map((h) => h.id)).toEqual(['quad', 'firstAttack', 'buffs', 'wild', 'reflect']);
+    expect(drain(state).map((h) => h.id)).toEqual(['quad', 'firstAttack', 'buffs', 'wild']);
   });
 
   it('uma dica vista não volta, e o que sobra aparece; sem sobra, nada', () => {
@@ -311,7 +322,7 @@ describe('tutorialHint na semente do tutorial', () => {
     expect(hintFor(mine.state, { events: mine.events })).toBeNull();
   });
 
-  it('do 1º Equipar ao primeiro ataque: equip, order, firstAttack, buffs, wild, reflect, uma por vez e sem voltar', () => {
+  it('do 1º Equipar ao primeiro ataque: equip, order, firstAttack, buffs, wild, uma por vez e sem voltar', () => {
     const seen = new Set<HintId>();
     const shown: HintId[] = [];
     /** Como a tela: a cada `state`, a dica nova (se houver) é mostrada, e "Entendi" a marca vista. */
@@ -338,7 +349,7 @@ describe('tutorialHint na semente do tutorial', () => {
     ({ state, events } = play(state, P1, ofType('CHOOSE_ORDER')));
     read(state, events);
     expect(state.phase).toEqual({ kind: 'ATTACK_MAIN', player: P1 });
-    expect(shown).toEqual(['equip', 'order', 'firstAttack', 'buffs', 'wild', 'reflect']);
+    expect(shown).toEqual(['equip', 'order', 'firstAttack', 'buffs', 'wild']);
   });
 });
 
@@ -527,6 +538,6 @@ describe('advanceHint e acknowledgeHint', () => {
     }
     const ordered = step(state, P1, (actions) => actions.find((a) => a.type === 'CHOOSE_ORDER')!);
     read(ordered.state, ordered.events);
-    expect(shown).toEqual(['equip', 'order', 'firstAttack', 'buffs', 'wild', 'reflect']);
+    expect(shown).toEqual(['equip', 'order', 'firstAttack', 'buffs', 'wild']);
   });
 });

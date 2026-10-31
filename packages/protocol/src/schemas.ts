@@ -22,7 +22,6 @@ export const PlayerActionSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('SACRIFICE'), cardId, targetId: cardId }),
   z.strictObject({ type: z.literal('REFLECT'), kId: cardId, jId: cardId, qId: cardId }),
   z.strictObject({ type: z.literal('CANCEL_REFLECT'), kId: cardId, jId: cardId, qId: cardId }),
-  z.strictObject({ type: z.literal('PROTECT_FROM_REFLECT'), jId: cardId, qId: cardId, kId: cardId }),
   z.strictObject({ type: z.literal('RESURRECT'), cardId, row }),
   z.strictObject({ type: z.literal('DECLARE_ATTACK') }),
   z.strictObject({ type: z.literal('END_TURN') }),

@@ -1,19 +1,17 @@
 import { handleEquip, timeoutEquip } from './actions/equip.ts';
 import {
-  castReflect,
   declareAttack,
   endTurnAction,
   playJ,
   playK,
   playQ,
-  protectFromReflect,
   requireMain,
   resurrect,
   sacrifice,
   useTrap,
 } from './actions/main.ts';
 import { chooseOrder, handleChooseOrder } from './actions/order.ts';
-import { cancelReflect, closeReaction, pass, reactProtect, reactTrap } from './actions/reaction.ts';
+import { cancelReflect, closeReaction, pass, reactReflect, reactTrap } from './actions/reaction.ts';
 import { fail, RuleViolation } from './errors.ts';
 import { endTurn } from './flow.ts';
 import { finishGame, getPlayer, opponentOf } from './state.ts';
@@ -93,12 +91,10 @@ function applyPlayer(s: GameState, player: PlayerId, action: Action, ev: GameEve
       if (s.phase.kind === 'REACTION') return reactTrap(s, player, action.cardId, action.targetId, ev);
       return useTrap(s, requireMain(s, player), action.cardId, action.targetId, ['attackBuffs', 'defenseBuffs', 'guard'], ev);
     case 'REFLECT':
-      return castReflect(s, requireMain(s, player), action.kId, action.jId, action.qId, ev);
+      if (s.phase.kind !== 'REACTION') fail('WRONG_PHASE', 'o Reflect só se joga em resposta a um golpe');
+      return reactReflect(s, player, action.kId, action.jId, action.qId, ev);
     case 'CANCEL_REFLECT':
       return cancelReflect(s, player, action.kId, action.jId, action.qId, ev);
-    case 'PROTECT_FROM_REFLECT':
-      if (s.phase.kind === 'REACTION') return reactProtect(s, player, action.jId, action.qId, action.kId, ev);
-      return protectFromReflect(s, requireMain(s, player), action.jId, action.qId, action.kId, ev);
     case 'RESURRECT':
       return resurrect(s, requireMain(s, player), action.cardId, action.row, ev);
     case 'PASS':

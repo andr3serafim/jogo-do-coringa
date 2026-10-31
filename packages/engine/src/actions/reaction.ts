@@ -1,9 +1,9 @@
 import { resolveAttack } from '../combat.ts';
 import { fail } from '../errors.ts';
-import { endTurn } from '../flow.ts';
+import { endTurn, openReaction } from '../flow.ts';
 import { finishGame, getPlayer, isGameOver, opponentOf, toGraveyard } from '../state.ts';
 import type { GameEvent, GameState, PlayerId, PlayerState, ReactionTrigger } from '../types.ts';
-import { protectFromReflect, takeReflectCards, useTrap, type TargetZone } from './main.ts';
+import { takeReflectCards, useTrap, type TargetZone } from './main.ts';
 
 export function requireReaction(
   s: GameState,
@@ -29,6 +29,10 @@ export function closeReaction(s: GameState, ev: GameEvent[]): void {
   if (phase.trigger === 'ATTACK') {
     resolveAttack(s, actor.id, ev);
     if (!isGameOver(s)) endTurn(s, ev, true);
+  } else if (phase.trigger === 'REFLECT_PLAYED') {
+    // Quem foi refletido não respondeu com outro Reflect: o golpe dele volta (o Reflect está na mesa do outro).
+    resolveAttack(s, phase.responder, ev);
+    if (!isGameOver(s)) endTurn(s, ev, true);
   } else if (phase.trigger === 'K_PLAYED' && actor.guard.length >= s.config.exodiaGuard) {
     ev.push({ type: 'Exodia', player: actor.id });
     finishGame(s, { kind: 'WIN', winner: actor.id, reason: 'EXODIA' }, ev);
@@ -45,22 +49,33 @@ export function reactTrap(s: GameState, playerId: PlayerId, cardId: string, targ
   useTrap(s, responder, cardId, targetId, zones, ev);
 }
 
-/** Anular (spec §1.6): K+J+Q da mão, só na janela aberta pelo lançamento do Reflect. */
+/**
+ * Reflect (F2 do sub-projeto 5): K + J + Q da mão, só na reação a um ataque. Fica na mesa do dono e abre a resposta de quem atacou,
+ * que passa (o golpe volta) ou responde com outro Reflect. A Armadilha jogada antes, na mesma janela, vale.
+ */
+export function reactReflect(s: GameState, playerId: PlayerId, kId: string, jId: string, qId: string, ev: GameEvent[]): void {
+  const { responder, actor, trigger } = requireReaction(s, playerId);
+  if (trigger !== 'ATTACK') fail('WRONG_PHASE', 'o Reflect só responde a um ataque');
+  const reflect = takeReflectCards(responder, kId, jId, qId);
+  responder.reflect = reflect;
+  ev.push({ type: 'ReflectPlayed', player: responder.id, reflect, against: 'ATTACK' });
+  ev.push({ type: 'ReactionWindowClosed', responder: responder.id, trigger });
+  openReaction(s, actor.id, 'REFLECT_PLAYED', ev);
+}
+
+/**
+ * Reflect contra Reflect (F2): quem foi refletido responde com K + J + Q da mão. Os dois se anulam, as 6 cartas vão ao cemitério
+ * e o golpe não acontece: o atacante passa o turno sem ataque (a Defesa Absoluta do outro continua).
+ */
 export function cancelReflect(s: GameState, playerId: PlayerId, kId: string, jId: string, qId: string, ev: GameEvent[]): void {
   const { responder, actor, trigger } = requireReaction(s, playerId);
-  if (trigger !== 'REFLECT_PLAYED') fail('WRONG_PHASE', 'só dá para anular um Reflect logo após ele ser lançado');
+  if (trigger !== 'REFLECT_PLAYED') fail('WRONG_PHASE', 'só dá para responder com Reflect a um Reflect');
   const reflect = actor.reflect;
-  if (!reflect) fail('NO_REFLECT', 'o oponente não tem Reflect ativo');
+  if (!reflect) fail('NO_REFLECT', 'o oponente não tem Reflect na mesa');
   const mine = takeReflectCards(responder, kId, jId, qId);
   actor.reflect = null;
   toGraveyard(s, [mine.k, mine.j, mine.q, reflect.k, reflect.j, reflect.q]);
   ev.push({ type: 'ReflectCanceled', player: responder.id, owner: actor.id });
-  closeReaction(s, ev);
-}
-
-export function reactProtect(s: GameState, playerId: PlayerId, jId: string, qId: string, kId: string, ev: GameEvent[]): void {
-  const { responder, trigger } = requireReaction(s, playerId);
-  if (trigger !== 'REFLECT_PLAYED') fail('WRONG_PHASE', 'não há Reflect sendo lançado');
-  protectFromReflect(s, responder, jId, qId, kId, ev);
-  closeReaction(s, ev);
+  ev.push({ type: 'ReactionWindowClosed', responder: responder.id, trigger });
+  endTurn(s, ev, false);
 }

@@ -35,7 +35,7 @@ const HINT_TEXT: Record<HintId, string> = {
   trap: 'Janela de reação: quando o oponente ataca, você pode responder com um A, que destrói um J, Q ou K dele; quando ele joga K, o A só destrói um K da Guarda. Ou passar. O A também vale no seu turno.',
   wild: 'O Coringa Selvagem vale como J, Q ou A, à sua escolha. Nunca como K.',
   reflect:
-    'Reflect é K + J + Q da mão, no seu turno. Se o oponente atacar no turno seguinte, ele perde os K e Q e leva o golpe de volta. Você não leva nada. Se ele não atacar, o Reflect se desfaz.',
+    'Reflect é K + J + Q da mão, jogado quando o oponente ataca. Ele perde os K e Q e leva o golpe de volta, e você não leva nada. Se ele responder com outro Reflect, os dois se anulam e o golpe não acontece.',
   end: END_HINT,
 };
 

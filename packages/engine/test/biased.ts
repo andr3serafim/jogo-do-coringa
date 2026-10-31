@@ -1,4 +1,4 @@
-import type { Action, Destination, PlayerView } from '../src/types.ts';
+import type { Action, Destination } from '../src/types.ts';
 import type { Chooser } from './playout.ts';
 
 type ActionType = Action['type'];
@@ -39,10 +39,3 @@ export const exodiaProfile: Chooser = prefer(['PLAY_K', ...CLOSE], { allDefense:
 
 /** Absolutos: J e Q (e Selvagens) sempre que der; ninguém destrói buffs. */
 export const absolutesProfile: Chooser = prefer(['PLAY_J', 'PLAY_Q', ...CLOSE]);
-
-/** Reflect expirado: `reflector` lança Reflect sempre que puder; o outro só monta Defesa e nunca anula. */
-export function reflectExpiryProfile(reflector: string): Chooser {
-  const caster = prefer(['REFLECT', ...CLOSE]);
-  const turtle = prefer(CLOSE, { allDefense: true });
-  return (legal, view: PlayerView, step) => (view.me === reflector ? caster : turtle)(legal, view, step);
-}

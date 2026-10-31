@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { GameEvent } from '../src/types.ts';
-import { absolutesProfile, exodiaProfile, reflectExpiryProfile } from './biased.ts';
+import { absolutesProfile, exodiaProfile } from './biased.ts';
 import { checkInvariants } from './invariants.ts';
 import { playout, type Chooser, type PlayoutOptions } from './playout.ts';
-import { P1 } from './helpers.ts';
 
 const SEEDS = 40;
 
@@ -38,9 +37,5 @@ describe('playouts enviesados: caminhos raros sob as invariantes (spec §5)', ()
     expect(counts.AbsoluteAttack).toBeGreaterThan(0);
     expect(counts.AbsoluteDefenseStarted).toBeGreaterThan(0);
     expect(counts.AbsoluteDefenseEnded).toBeGreaterThan(0);
-  });
-
-  it('Reflect expira quando o oponente não ataca', () => {
-    expect(reach('reflect', reflectExpiryProfile(P1), ['ReflectExpired']).ReflectExpired).toBeGreaterThan(0);
   });
 });

@@ -105,36 +105,6 @@ export function takeReflectCards(p: PlayerState, kId: string, jId: string, qId: 
   };
 }
 
-/** Reflect (spec §1.6): K+J+Q da mão; ativo até o fim do próximo turno de ataque do oponente. */
-export function castReflect(s: GameState, p: PlayerState, kId: string, jId: string, qId: string, ev: GameEvent[]): void {
-  if (p.reflect) fail('REFLECT_ALREADY_ACTIVE', 'você já tem um Reflect ativo');
-  const reflect = takeReflectCards(p, kId, jId, qId);
-  p.reflect = reflect;
-  ev.push({ type: 'ReflectPlayed', player: p.id, reflect });
-  openReaction(s, opponentOf(s, p.id).id, 'REFLECT_PLAYED', ev);
-}
-
-/** Proteção por sacrifício: 1 J, 1 Q e 1 K equipados anulam o Reflect do oponente. */
-export function protectFromReflect(
-  s: GameState,
-  p: PlayerState,
-  jId: string,
-  qId: string,
-  kId: string,
-  ev: GameEvent[],
-): void {
-  const owner = opponentOf(s, p.id);
-  const reflect = owner.reflect;
-  if (!reflect) fail('NO_REFLECT', 'o oponente não tem Reflect ativo');
-  const j = removeById(p.attackBuffs, jId);
-  const q = removeById(p.defenseBuffs, qId);
-  const k = removeById(p.guard, kId);
-  if (!j || !q || !k) fail('INVALID_CARD', 'a proteção exige 1 J, 1 Q e 1 K equipados');
-  owner.reflect = null;
-  toGraveyard(s, [j, q, k, reflect.k, reflect.j, reflect.q]);
-  ev.push({ type: 'ReflectProtected', player: p.id, owner: owner.id });
-}
-
 /** Ressurreição (spec §1.8): 1 numérica do cemitério para o fim de uma fileira com espaço. */
 export function resurrect(s: GameState, p: PlayerState, cardId: string, row: RowName, ev: GameEvent[]): void {
   const tokens = validResurrections(s, p);

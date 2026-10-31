@@ -18,8 +18,9 @@ export const TIMERS = {
 /**
  * Versão do formato gravado no storage (spec §9.3). 2: o estado perdeu a `pressure` (a Pressão da mesa saiu no sub-projeto 5).
  * 3: o estado perdeu `noDamageStreak` e `hpLostThisRound`, e o placar os empates (o anti-travamento saiu na E1).
+ * 4: o Reflect deixou de ficar armado (F2): `reflect` só existe na resposta a ele, e a reação `REFLECT_PLAYED` mudou de dono.
  */
-export const STATE_SCHEMA = 3;
+export const STATE_SCHEMA = 4;
 
 /** Limites por sala (spec §4, §8). */
 export const ROOM_LIMITS = {

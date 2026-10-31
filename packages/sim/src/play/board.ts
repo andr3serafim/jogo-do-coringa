@@ -1,7 +1,7 @@
 import { attackPower, defensePower, type PlayerView, type PublicPlayer } from '@coringa/engine';
 import { cardsText, cardText, type Names } from './text.ts';
 
-const TRIGGER_TEXT = { ATTACK: 'o oponente declarou ataque', K_PLAYED: 'o oponente jogou K', REFLECT_PLAYED: 'o oponente lançou Reflect' } as const;
+const TRIGGER_TEXT = { ATTACK: 'o oponente declarou ataque', K_PLAYED: 'o oponente jogou K', REFLECT_PLAYED: 'o oponente respondeu ao seu golpe com Reflect' } as const;
 
 /** O que o jogador precisa decidir agora. */
 export function phaseText(view: PlayerView): string {
@@ -21,7 +21,7 @@ export function phaseText(view: PlayerView): string {
 }
 
 function playerBlock(label: string, p: PublicPlayer, hand: string): string[] {
-  const status = [p.reflect ? 'Reflect ativo' : '', p.absoluteDefense ? 'Defesa Absoluta' : '', p.resurrectionCount > 0 ? `Ressurreições: ${p.resurrectionCount}` : '']
+  const status = [p.reflect ? 'Reflect na mesa' : '', p.absoluteDefense ? 'Defesa Absoluta' : '', p.resurrectionCount > 0 ? `Ressurreições: ${p.resurrectionCount}` : '']
     .filter(Boolean)
     .join(' · ');
   return [

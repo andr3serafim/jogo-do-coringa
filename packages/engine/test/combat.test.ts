@@ -118,14 +118,15 @@ describe('resolveAttack', () => {
     expect(player(s, P2).damageThisRound).toBe(39);
   });
 
-  it('Reflect contra atacante sob Defesa Absoluta: K quebram, dano 0, Q intactos', () => {
+  it('Reflect contra atacante sob Defesa Absoluta: anulado, nada quebra e ninguém leva dano (F2, [I])', () => {
     const s = setup({
       p1: { attack: [10], defenseBuffs: ['Q', 'Q', 'Q', 'Q'], absoluteDefense: true, guard: 1 },
       p2: { reflect: true },
     });
     const ev = attackP1(s);
     expect(player(s, P1).hp).toBe(100);
-    expect(player(s, P1).guard).toHaveLength(0);
+    expect(player(s, P2).hp).toBe(100);
+    expect(player(s, P1).guard).toHaveLength(1);
     expect(player(s, P1).defenseBuffs).toHaveLength(4);
     expect(ev).toContainEqual({ type: 'ReflectTriggered', owner: P2, attacker: P1, damage: 0 });
   });

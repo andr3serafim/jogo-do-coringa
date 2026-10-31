@@ -56,7 +56,6 @@ export const EMPTY_ATTACK_TEXT = 'Sua fileira de Ataque está vazia';
 export const CANCEL_LABEL = 'Cancelar';
 export const REFLECT_LABEL = 'Lançar Reflect';
 export const CANCEL_REFLECT_LABEL = 'Anular o Reflect';
-export const PROTECT_LABEL = 'Proteger-se do Reflect';
 export const RESURRECT_LABEL = 'Ressuscitar';
 
 export const PICK_CARD_TEXT = 'Toque numa carta da mão para ver as jogadas.';
@@ -78,7 +77,7 @@ export function noPlayReasonText(card: SpecialCard, reason: NoPlayReason | null,
     case 'REACTION_TRAP_ONLY':
       return 'na janela de reação só o A (ou o Selvagem como A) responde';
     case 'REACTION_REFLECT':
-      return 'contra o Reflect, só Anular (K + J + Q da mão) ou Proteger-se (J + Q + K do seu campo)';
+      return 'contra o Reflect, só outro Reflect (K + J + Q da mão)';
     case 'BUFF_LIMIT':
       return card.kind === 'Q'
         ? `seus Buffs de defesa já têm ${buffLimit} Q, o limite`

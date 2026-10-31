@@ -50,9 +50,31 @@ describe('greedy', () => {
     expect(decide(greedyBot, comQ)).toEqual({ type: 'EQUIP', destinations: ['DEF'] });
   });
 
-  it('lança Reflect quando o ataque do oponente é alto', () => {
-    const s = setup({ p1: { hand: ['K', 'J', 'Q'], attack: [2] }, p2: { attack: [10, 10, 10], attackBuffs: ['J', 'J'] } });
-    expect(decide(greedyBot, s).type).toBe('REFLECT');
+  it('na fase principal não há Reflect; na reação a um ataque forte, responde com ele', () => {
+    const main = setup({ p1: { hand: ['K', 'J', 'Q'], attack: [2] }, p2: { attack: [10, 10, 10], attackBuffs: ['J', 'J'] } });
+    expect(decide(greedyBot, main).type).not.toBe('REFLECT');
+    const attacked = setup({
+      p1: { hand: ['K', 'J', 'Q'], defense: [2] },
+      p2: { attack: [10, 10, 10], attackBuffs: ['J', 'J'] },
+      phase: { kind: 'REACTION', responder: P1, trigger: 'ATTACK' },
+      turnOrder: [P2, P1],
+    });
+    expect(decide(greedyBot, attacked).type).toBe('REFLECT');
+  });
+
+  it('refletido num golpe que doeria, responde com outro Reflect; num golpe fraco, passa', () => {
+    const strong = setup({
+      p1: { hand: ['K', 'J', 'Q'], attack: [10, 10, 10], attackBuffs: ['J', 'J'] },
+      p2: { reflect: true },
+      phase: { kind: 'REACTION', responder: P1, trigger: 'REFLECT_PLAYED' },
+    });
+    expect(decide(greedyBot, strong).type).toBe('CANCEL_REFLECT');
+    const weak = setup({
+      p1: { hand: ['K', 'J', 'Q'], attack: [2], defense: [10] },
+      p2: { reflect: true },
+      phase: { kind: 'REACTION', responder: P1, trigger: 'REFLECT_PLAYED' },
+    });
+    expect(decide(greedyBot, weak).type).toBe('PASS');
   });
 
   it('sacrifica J quando o J do oponente vale mais que o próprio', () => {

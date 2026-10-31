@@ -7,12 +7,16 @@ import { P1, P2, act, handId, player, setup, type PlayerSetup } from './helpers.
 
 const equipPhase = { round: 1, roundKind: 'EQUIP' as const, phase: { kind: 'EQUIP' as const } };
 
+/** P2 ataca e P1 responde com um Reflect: a resposta agora é de P2 (F2). */
 function reflectState(): GameState {
   const s = setup({
     p1: { hand: ['K', 'J', 'Q'] },
-    p2: { hand: ['K', 'J', 'Q'], attackBuffs: ['J'], defenseBuffs: ['Q'], guard: 1 },
+    p2: { hand: ['K', 'J', 'Q', 'A'], attack: [5], attackBuffs: ['J'], defenseBuffs: ['Q'], guard: 1 },
+    turnOrder: [P2, P1],
+    phase: { kind: 'ATTACK_MAIN', player: P2 },
   });
-  return act(s, P1, { type: 'REFLECT', kId: handId(s, P1, 'K'), jId: handId(s, P1, 'J'), qId: handId(s, P1, 'Q') }).state;
+  const attack = act(s, P2, { type: 'DECLARE_ATTACK' }).state;
+  return act(attack, P1, { type: 'REFLECT', kId: handId(s, P1, 'K'), jId: handId(s, P1, 'J'), qId: handId(s, P1, 'Q') }).state;
 }
 
 describe('legalActions', () => {
@@ -115,17 +119,33 @@ describe('legalActions', () => {
     expect(legal).toContainEqual({ type: 'END_TURN' });
   });
 
-  it('janela de Reflect: passar, anular ou proteger', () => {
+  it('resposta ao Reflect: passar ou outro Reflect, e nada mais (nem o A)', () => {
     const legal = legalActions(viewFor(reflectState(), P2));
     expect(legal[0]).toEqual({ type: 'PASS' });
     expect(legal.some((a) => a.type === 'CANCEL_REFLECT')).toBe(true);
-    expect(legal.some((a) => a.type === 'PROTECT_FROM_REFLECT')).toBe(true);
+    expect(legal.every((a) => a.type === 'PASS' || a.type === 'CANCEL_REFLECT')).toBe(true);
+  });
+
+  it('o Reflect só aparece na janela do ataque, nunca na fase principal', () => {
+    const main = setup({ p1: { hand: ['K', 'J', 'Q'], attack: [5] } });
+    expect(legalActions(viewFor(main, P1)).some((a) => a.type === 'REFLECT')).toBe(false);
+    const window = act(setup({ p1: { attack: [5] }, p2: { hand: ['K', 'J', 'Q'] } }), P1, { type: 'DECLARE_ATTACK' }).state;
+    expect(legalActions(viewFor(window, P2)).some((a) => a.type === 'REFLECT')).toBe(true);
+    // Contra um atacante sob Defesa Absoluta, o A não tem alvo, mas o Reflect segue possível (ele segura o golpe).
+    const absolute = act(
+      setup({ p1: { attack: [5], defenseBuffs: ['Q', 'Q', 'Q', 'Q'], absoluteDefense: true }, p2: { hand: ['K', 'J', 'Q', 'A'] } }),
+      P1,
+      { type: 'DECLARE_ATTACK' },
+    ).state;
+    const legal = legalActions(viewFor(absolute, P2));
+    expect(legal.some((a) => a.type === 'TRAP')).toBe(false);
+    expect(legal.some((a) => a.type === 'REFLECT')).toBe(true);
   });
 
   it('toda ação listada é aceita pelo motor', () => {
     const resurrection = setup({ p1: { attack: [7, 7, 7, 7], hand: ['W', 'J', 'Q', 'K'] }, graveyard: [5, 5, 6] });
     player(resurrection, P1).resurrections = [{ row: 'ATK', value: 7, formedAtRound: 3 }];
-    const attackWindow = act(setup({ p1: { attack: [9], attackBuffs: ['J'], guard: 1 }, p2: { hand: ['A', 'W'] } }), P1, {
+    const attackWindow = act(setup({ p1: { attack: [9], attackBuffs: ['J'], guard: 1 }, p2: { hand: ['A', 'W', 'K', 'Q'] } }), P1, {
       type: 'DECLARE_ATTACK',
     }).state;
     const cases: Array<[GameState, PlayerId]> = [

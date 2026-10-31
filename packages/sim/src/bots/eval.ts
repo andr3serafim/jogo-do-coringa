@@ -58,11 +58,11 @@ export function without<T extends PublicPlayer>(p: T, id: string): T {
 
 export const count = (hand: SpecialCard[], kind: SpecialCard['kind']): number => hand.filter((c) => c.kind === kind).length;
 
-/** Dá para lançar um Reflect (K + J + Q, com Selvagens no papel de J/Q)? */
-export function canCastReflect(view: PlayerView): boolean {
+/** A mão tem um Reflect (K + J + Q, com Selvagens no papel de J/Q) para responder a um ataque? */
+export function canHoldReflect(view: PlayerView): boolean {
   const hand = view.self.hand;
   const [k, j, q, w] = [count(hand, 'K'), count(hand, 'J'), count(hand, 'Q'), count(hand, 'WILD')];
-  return !view.self.reflect && k > 0 && j + w > 0 && q + w > 0 && j + q + w >= 2;
+  return k > 0 && j + w > 0 && q + w > 0 && j + q + w >= 2;
 }
 
 /** Quantos Selvagens a jogada gasta: desempate para guardar o Selvagem, que é mais flexível. */

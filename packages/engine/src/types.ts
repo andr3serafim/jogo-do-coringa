@@ -87,6 +87,10 @@ export interface PlayerState {
   /** Q ou Selvagem no papel de Q. */
   defenseBuffs: SpecialCard[];
   guard: SpecialCard[];
+  /**
+   * O Reflect lançado e ainda não resolvido (F2 do sub-projeto 5): ele só existe entre o lançamento, na reação a um golpe, e a
+   * resposta de quem é refletido. Nunca fica armado de um turno para outro.
+   */
   reflect: ReflectState | null;
   absoluteDefense: boolean;
   quads: Quad[];
@@ -135,9 +139,10 @@ export type Action =
   | { type: 'PLAY_K'; cardIds: string[] }
   | { type: 'TRAP'; cardId: string; targetId: string }
   | { type: 'SACRIFICE'; cardId: string; targetId: string }
+  /** Só na reação a um golpe (F2): K + J + Q da mão. */
   | { type: 'REFLECT'; kId: string; jId: string; qId: string }
+  /** Reflect contra Reflect: só na resposta a um Reflect, com K + J + Q da mão. */
   | { type: 'CANCEL_REFLECT'; kId: string; jId: string; qId: string }
-  | { type: 'PROTECT_FROM_REFLECT'; jId: string; qId: string; kId: string }
   | { type: 'RESURRECT'; cardId: string; row: RowName }
   | { type: 'DECLARE_ATTACK' }
   | { type: 'END_TURN' }
@@ -177,10 +182,10 @@ export type GameEvent =
   | { type: 'TrapUsed'; player: PlayerId; card: SpecialCard; as?: 'A'; target: SpecialCard; targetOwner: PlayerId }
   /** `as` só quando a carta sacrificada é um Selvagem (no papel de J ou de Q, o do alvo). */
   | { type: 'Sacrificed'; player: PlayerId; card: SpecialCard; as?: 'J' | 'Q'; target: SpecialCard; targetOwner: PlayerId }
-  | { type: 'ReflectPlayed'; player: PlayerId; reflect: ReflectState }
+  /** `against`: o golpe que o Reflect responde. */
+  | { type: 'ReflectPlayed'; player: PlayerId; reflect: ReflectState; against: 'ATTACK' }
+  /** Reflect contra Reflect: `player` respondeu ao Reflect de `owner`; os dois se anulam e o golpe não acontece. */
   | { type: 'ReflectCanceled'; player: PlayerId; owner: PlayerId }
-  | { type: 'ReflectProtected'; player: PlayerId; owner: PlayerId }
-  | { type: 'ReflectExpired'; owner: PlayerId }
   | { type: 'ReflectTriggered'; owner: PlayerId; attacker: PlayerId; damage: number }
   | { type: 'ReactionWindowOpened'; responder: PlayerId; trigger: ReactionTrigger }
   | { type: 'ReactionWindowClosed'; responder: PlayerId; trigger: ReactionTrigger }
@@ -214,7 +219,6 @@ export type RuleErrorCode =
   | 'BUFF_LIMIT'
   | 'INVALID_TARGET'
   | 'TARGET_PROTECTED'
-  | 'REFLECT_ALREADY_ACTIVE'
   | 'NO_REFLECT'
   | 'INVALID_DESTINATIONS'
   | 'ALREADY_SUBMITTED'

@@ -518,11 +518,13 @@ async function simulate(options: SimulateOptions): Promise<MatchTrace> {
     if (main && c.latest!.view.self.resurrections.length > 0 && me[row === 'ATK' ? 'attackRow' : 'defenseRow'].length < state.config.rowLimit) {
       templates.push({ slot: 'cardId', build: (id) => ({ type: 'RESURRECT', cardId: id, row }) });
     }
-    if (main && !me.reflect) {
+    // O Reflect só responde a um ataque (F2 do sub-projeto 5).
+    const reflectPhase = reaction && phase.kind === 'REACTION' && phase.trigger === 'ATTACK';
+    if (reflectPhase) {
       templates.push({ slot: 'kId', build: (id) => ({ type: 'REFLECT', kId: id, jId: 'nao-existe-j', qId: 'nao-existe-q' }) });
     }
     const king = own('K');
-    if (main && !me.reflect && king) {
+    if (reflectPhase && king) {
       templates.push({ slot: 'jId', build: (id) => ({ type: 'REFLECT', kId: king, jId: id, qId: 'nao-existe-q' }) });
     }
     if (!main && !reaction) {

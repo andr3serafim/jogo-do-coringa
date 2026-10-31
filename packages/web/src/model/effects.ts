@@ -53,8 +53,6 @@ function effectsOfEvent(event: GameEvent, view: PlayerView): Partial<BeatEffects
       // A carta usada vai até o alvo e o alvo quebra (as duas vão para o cemitério pelo `layoutId`).
       return { cards: fxMap([event.target.id], 'crack') };
     case 'ReflectCanceled':
-    case 'ReflectProtected':
-    case 'ReflectExpired':
       return { shieldBreak: event.owner };
     case 'ReflectPlayed':
       return { cards: fxMap([event.reflect.k.id, event.reflect.j.id, event.reflect.q.id], 'shield') };

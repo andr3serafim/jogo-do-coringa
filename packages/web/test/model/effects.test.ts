@@ -56,7 +56,7 @@ describe('delaysOf: quando cada elemento com layoutId se mexe', () => {
     const delays = delaysOf(
       beatsOf(
         { type: 'TurnStarted', player: 'p1' },
-        { type: 'ReflectPlayed', player: 'p1', reflect: { k: face('k1'), j: face('j1', 'J'), q: face('q1', 'Q') } },
+        { type: 'ReflectPlayed', player: 'p1', reflect: { k: face('k1'), j: face('j1', 'J'), q: face('q1', 'Q') }, against: 'ATTACK' },
       ),
     );
     expect(delays.get('k1')).toBe(400);
@@ -188,10 +188,8 @@ describe('effectsOf: o efeito de cada evento (spec §4.2)', () => {
     );
   });
 
-  it('o escudo do Reflect do dono quebra ao ser anulado, protegido ou expirar', () => {
+  it('o escudo do Reflect do dono quebra no Reflect contra Reflect', () => {
     expect(fx({ type: 'ReflectCanceled', player: 'p1', owner: 'p2' }).shieldBreak).toBe('p2');
-    expect(fx({ type: 'ReflectProtected', player: 'p2', owner: 'p1' }).shieldBreak).toBe('p1');
-    expect(fx({ type: 'ReflectExpired', owner: 'p2' }).shieldBreak).toBe('p2');
     expect(fx({ type: 'TurnStarted', player: 'p1' }).shieldBreak).toBeNull();
   });
 
@@ -207,6 +205,7 @@ describe('effectsOf: o efeito de cada evento (spec §4.2)', () => {
       type: 'ReflectPlayed',
       player: 'p1',
       reflect: { k: face('k1'), j: face('j1', 'J'), q: face('q1', 'Q') },
+      against: 'ATTACK',
     });
     expect(effects.cards).toEqual(
       new Map([
@@ -289,8 +288,8 @@ describe('bannerText: a faixa de cada evento', () => {
     expect(bannerText({ type: 'AbsoluteDefenseStarted', player: 'p2' }, names)).toBe('DEFESA ABSOLUTA de Duda!');
     expect(bannerText({ type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 5 }, names)).toContain('devolveu 5');
     expect(
-      bannerText({ type: 'ReflectPlayed', player: 'p1', reflect: { k: face('k1'), j: face('j1', 'J'), q: face('q1', 'Q') } }, names),
-    ).toBe('Você lançou um Reflect!');
+      bannerText({ type: 'ReflectPlayed', player: 'p1', reflect: { k: face('k1'), j: face('j1', 'J'), q: face('q1', 'Q') }, against: 'ATTACK' }, names),
+    ).toBe('Você respondeu com um Reflect!');
   });
 
   it('um evento que não vira faixa devolve null', () => {
@@ -308,7 +307,7 @@ describe('sceneText: o título e a linha de baixo de cada cena', () => {
     expect(sceneText(beat({ type: 'AbsoluteDefenseStarted', player: 'p1' }), names).title).toBe('DEFESA ABSOLUTA');
     expect(
       sceneText(
-        beat({ type: 'ReflectPlayed', player: 'p1', reflect: { k: face('k1'), j: face('j1', 'J'), q: face('q1', 'Q') } }),
+        beat({ type: 'ReflectPlayed', player: 'p1', reflect: { k: face('k1'), j: face('j1', 'J'), q: face('q1', 'Q') }, against: 'ATTACK' }),
         names,
       ).title,
     ).toBe('REFLECT');
@@ -321,7 +320,7 @@ describe('sceneText: o título e a linha de baixo de cada cena', () => {
     expect(sceneText(beat({ type: 'AbsoluteAttack', player: 'p1' }), names).detail).toBe('Você');
     expect(
       sceneText(
-        beat({ type: 'ReflectPlayed', player: 'p2', reflect: { k: face('k1'), j: face('j1', 'J'), q: face('q1', 'Q') } }),
+        beat({ type: 'ReflectPlayed', player: 'p2', reflect: { k: face('k1'), j: face('j1', 'J'), q: face('q1', 'Q') }, against: 'ATTACK' }),
         names,
       ).detail,
     ).toBe('Duda armou o escudo');

@@ -42,11 +42,11 @@ Legenda das marcações: **[O]** original · **[I]** interpretação aprovada ·
 
 Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **[I]** no texto.
 
-1. **Reflect × K (leitura do item 2):** quem ataca um Reflect ativo tem **todos os K quebrados** e **leva o dano refletido inteiro** — o K não absorve.
-2. **Reflect × atacante sob Defesa Absoluta:** os K do atacante quebram (o Reflect sempre quebra K), mas ele leva **0** de dano e **não perde os Q** — coerente com "imune a qualquer dano" da Defesa Absoluta.
+1. **Reflect × K (leitura do item 2):** quem é refletido tem **todos os K quebrados** e **leva o dano refletido inteiro** — o K não absorve.
+2. **Reflect × atacante sob Defesa Absoluta:** ~~os K do atacante quebram~~ — **substituído pelo autor em 2026-10-30 (F2 do sub-projeto 5):** o Reflect contra um atacante sob Defesa Absoluta é anulado. **[I], a confirmar:** ele segura o golpe (o dono leva 0), mas não devolve dano e não quebra Q nem K do atacante.
 3. **Rodada sem dano × K:** ~~dano absorvido por K não conta como dano~~ — sem efeito desde a E1 do sub-projeto 5: a Pressão da mesa e o anti-travamento, que contavam rodadas sem dano, saíram (§1.11). O bot `turtle` continua jogando K.
 4. ~~**Pressão da mesa fixa na rodada.**~~ Removido com a Pressão da mesa (sub-projeto 5).
-5. **Defesa Absoluta × proteção contra Reflect (decidido em 2026-10-16):** quem está sob Defesa Absoluta e sacrifica 1 Q do campo para se proteger de um Reflect **mantém a imunidade da rodada inteira** — ela é garantida. O Q sacrificado **conta como o Q consumido** no fim da Defesa Absoluta: ao terminar, sobram 3 Q. A exceção continua sendo o Ataque Absoluto, que segue a conta normal (§1.8).
+5. ~~**Defesa Absoluta × proteção contra Reflect (decidido em 2026-10-16).**~~ Sem efeito: a Proteção por sacrifício saiu do jogo com o Reflect reativo (F2 do sub-projeto 5, autor em 2026-10-30).
 
 ### 1.1 Componentes
 
@@ -99,14 +99,12 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
    - jogar **K** — um ou vários em uma única jogada **[M]** → abre **janela de reação** do oponente (§1.7);
    - usar **A** (Armadilha) — §1.6;
    - fazer **Sacrifício** — §1.6;
-   - lançar **Reflect** (K+J+Q da mão) → abre janela de reação do oponente — §1.6;
-   - **proteger-se de um Reflect** do oponente sacrificando J+Q+K do próprio campo — §1.6;
    - usar uma **Ressurreição** disponível — §1.8.
    - O **Coringa Selvagem** pode ser usado em qualquer dessas jogadas no papel de J, Q ou A (§1.6).
 3. **Encerramento do turno:**
    - se a Fileira de Ataque tiver cartas, o jogador **declara o ataque** (obrigatório) → janela de reação do oponente → resolução do dano (§1.9);
    - se estiver vazia, o turno termina sem ataque e **nenhuma carta é removida**.
-4. **Ao fim de cada turno de ataque** (com ou sem ataque), expiram os efeitos do **outro** jogador que duravam "até o fim do próximo turno de ataque do oponente": Reflect não disparado vai para o cemitério **[I]**. A Defesa Absoluta do outro termina só se houve ataque neste turno, e então 1 Q vai para o cemitério (§1.8; autor, 2026-10-30).
+4. **Ao fim de cada turno de ataque**, a Defesa Absoluta do **outro** jogador termina só se houve ataque neste turno, e então 1 Q vai para o cemitério (§1.8; autor, 2026-10-30). (O Reflect não fica mais armado de um turno para outro: F2 do sub-projeto 5.)
 5. Ao fim da rodada de Ataque, define-se a iniciativa (§1.10). (O anti-travamento, que também se atualizava aqui, saiu na E1 do sub-projeto 5, §1.11.)
 
 ### 1.6 Cartas especiais
@@ -121,13 +119,13 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
 **K — Guarda do Coringa [M]**
 - Vai para a Guarda. Quando um ataque causaria dano (> 0) ao Coringa, **1 K absorve todo o dano e quebra** (vai para o cemitério; quebra o K mais antigo).
 - Se o dano líquido for 0, nenhum K é consumido.
-- **Não protege contra Reflect [I]:** quem ataca um Reflect ativo tem **todos os K quebrados** e leva o dano refletido inteiro (§1.6, Reflect).
+- **Não protege contra Reflect [I]:** quem é refletido tem **todos os K quebrados** e leva o dano refletido inteiro (§1.6, Reflect).
 - Podem ser jogados **vários K por turno** **[M]**; cada jogada de K abre a janela de reação do oponente.
 
 **A — Armadilha [M]**
 - **Destrói 1 J, Q ou K** do campo do oponente (buff ou guarda) → cemitério.
 - Pode ser usado na **fase principal do seu turno** ou na **janela de reação** quando o oponente **declara ataque** ou **joga K**.
-- **Não** pode mirar as cartas de um Reflect ativo **[I]** (o Reflect só cai pelas contra-jogadas próprias).
+- **Não** pode mirar as cartas de um Reflect **[I]** (o Reflect só cai por outro Reflect). Também não responde a um Reflect.
 - **Não** pode mirar um jogador sob Defesa Absoluta **[O]**.
 
 **Sacrifício (regra nova do autor) [M]**
@@ -136,37 +134,41 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
 
 **Coringa Selvagem [N]**
 - Especial (vai para a mão). Ao ser jogado, assume o papel de **J, Q ou A** — **nunca K** (a Exódia não pode ser completada por sorte).
-- O papel é definido pela jogada em que é usado: como buff (J/Q), Armadilha (A), Sacrifício (como J ou Q), componente J ou Q de um Reflect ou de um cancelamento de Reflect.
-- Em campo, vale **exatamente como a carta cujo papel assumiu**: conta para multiplicadores e Absolutos, pode ser destruído por A/Sacrifício e sacrificado na proteção contra Reflect como J ou Q.
+- O papel é definido pela jogada em que é usado: como buff (J/Q), Armadilha (A), Sacrifício (como J ou Q), componente J ou Q de um Reflect (também do Reflect contra Reflect).
+- Em campo, vale **exatamente como a carta cujo papel assumiu**: conta para multiplicadores e Absolutos e pode ser destruído por A/Sacrifício como J ou Q.
 - Ao ir para o cemitério ou voltar ao monte, volta a ser um Coringa Selvagem.
 
-**Reflect — K + J + Q jogados juntos da mão [O, refinado]**
-- Lançado na fase principal do seu turno. Fica **ativo até o fim do próximo turno de ataque do oponente**. Máximo de 1 Reflect ativo por jogador **[I]**.
-- **Se o oponente atacar enquanto o Reflect estiver ativo:**
+**Reflect — K + J + Q jogados juntos da mão [O, refinado; reativo desde a F2 do sub-projeto 5, autor em 2026-10-30]**
+- **Só como reação** a um golpe: na janela aberta quando o oponente **declara um ataque** (e, com a F3, quando ele lança uma
+  Devastação). Nunca na fase principal, e nunca fica armado: atacado → lança → o dano volta na hora → acabou. A Armadilha jogada
+  antes, na mesma janela, vale.
+- Lançado o Reflect, **quem foi refletido** ganha uma resposta (§1.7): passar (o golpe volta) ou responder com **outro Reflect**.
+- **Se o golpe volta** (contra um ataque):
   1. todos os **Q** do atacante quebram **[O]**;
   2. todos os **K** do atacante quebram **[I]**;
   3. o atacante recebe **dano refletido = max(0, ATK_atacante − ⌊DEF_base_atacante / 2⌋)** **[O]**, onde ATK é o ataque completo (com multiplicador) e DEF_base é a soma da Defesa do atacante + bônus de quadra, **sem multiplicador**;
   4. o dono do Reflect recebe **0**; nenhum outro efeito do ataque se aplica a ele (nem quebra de K por Ataque Absoluto) **[I]**;
   5. a remoção de cartas da fila ocorre normalmente (§1.9 passo 8) — inclusive a 1ª da Defesa do dono do Reflect **[I]**;
-  6. as 3 cartas do Reflect vão para o cemitério.
-- Atacante sob Defesa Absoluta: os K quebram, mas ele leva 0 de dano e não perde os Q (§1.0 item 2) **[I]**.
+  6. as 3 cartas do Reflect vão para o cemitério, e o turno do atacante acaba (o ataque aconteceu).
+- **Atacante sob Defesa Absoluta:** o Reflect é anulado (autor, 2026-10-30). **[I], a confirmar:** segura o golpe (o dono leva 0),
+  mas não devolve dano e não quebra Q nem K do atacante.
 - O dano refletido **conta como dano causado pelo dono do Reflect** para a iniciativa **[I]**.
-- Se o oponente não atacar (Fileira de Ataque vazia), o Reflect expira ao fim do turno dele e vai para o cemitério **[I]**.
-- **Contra-jogadas:**
-  - **Anular [O]:** na janela de reação aberta quando o Reflect é lançado, o oponente joga **K+J+Q da mão** → os dois conjuntos (6 cartas) vão para o cemitério.
-  - **Proteção por sacrifício [O do autor]:** o oponente que tiver **1 J, 1 Q e 1 K equipados** pode sacrificá-los para anular o Reflect — na janela de reação do lançamento **ou** na fase principal do próprio turno, antes de declarar o ataque **[I]**. O Reflect e as 3 cartas sacrificadas vão para o cemitério.
+- **Reflect contra Reflect [autor, 2026-10-30; é o Anular de antes]:** quem é refletido responde com **K+J+Q da mão**. Os dois se
+  anulam, as 6 cartas vão para o cemitério e **o atacante passa o turno**: o golpe não acontece **[I: nenhuma carta sai das
+  fileiras, ninguém leva dano e a Defesa Absoluta do outro continua, porque não houve ataque]**. É a única resposta a uma resposta.
+- **A Proteção por sacrifício (J+Q+K do campo) saiu do jogo** (autor, 2026-10-30).
 
 ### 1.7 Janela de reação
 
 | O oponente… | Quem responde pode |
 |---|---|
-| declara ataque | usar **A** (quebrar J, Q ou K do atacante antes do dano) |
+| declara ataque | usar **A** (quebrar J, Q ou K do atacante antes do dano) e lançar **Reflect** (K+J+Q da mão) |
 | joga K (um ou vários, inclusive o que completa a Exódia) | usar **A** (quebrar K) |
-| lança Reflect | **anular** (K+J+Q da mão) ou **proteger** (sacrificar J+Q+K do campo) |
+| responde ao seu golpe com um Reflect | responder com **outro Reflect** (K+J+Q da mão); o A não responde |
 
-- O Coringa Selvagem vale como A ou como o J/Q do cancelamento.
+- O Coringa Selvagem vale como A ou como o J/Q de um Reflect.
 - Dentro da janela, o respondente pode fazer quantas respostas válidas quiser; a janela fecha quando ele passa ou o tempo acaba.
-- **Sem cadeia [M]:** não existe resposta a uma resposta.
+- **Sem cadeia [M]**, com uma exceção: o Reflect contra Reflect é a única resposta a uma resposta (F2 do sub-projeto 5). Lançado o Reflect, a janela do respondente fecha e a de quem foi refletido abre.
 - **A janela sempre abre** — mesmo que o respondente não tenha resposta válida — e tem **duração mínima fixa** imposta pelo servidor **[M]**. Abrir só quando há resposta (ou fechar instantaneamente) vazaria a mão pelo tempo.
 
 ### 1.8 Combos
@@ -183,19 +185,18 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
   ataque (Ataque vazio) não a encerra **[autor, 2026-10-30; substitui "até o fim do próximo turno de ataque do oponente", de
   2026-10-15]**. O Ataque Absoluto e o ataque devolvido por um Reflect contam como ataque **[I]**.
 - Enquanto ativa: imune a dano **[O]**, a **A** **[O]** e a **Sacrifício** **[I]**; **nenhuma carta da Fileira de Defesa vai para o cemitério** **[O]**.
-- A imunidade da rodada é garantida mesmo que o próprio jogador sacrifique 1 Q para se proteger de um Reflect **[I]** (§1.0 item 5).
-- Ao terminar (depois do ataque do oponente): **apenas 1 Q** (o mais antigo) vai para o cemitério **[O do autor]**; os outros 3 continuam (multiplicador 4×). Se um Q já foi sacrificado na proteção contra Reflect durante a Defesa Absoluta, ele conta como esse Q e nenhum outro é consumido **[I]**. Novo Q → nova Defesa Absoluta.
+- Ao terminar (depois do ataque do oponente): **apenas 1 Q** (o mais antigo) vai para o cemitério **[O do autor]**; os outros 3 continuam (multiplicador 4×). Novo Q → nova Defesa Absoluta.
 
 **Ataque Absoluto — 4 J nos Buffs de Ataque**
 - Vale no ataque declarado com 4 J (multiplicador 1 + 4 = **5×**).
 - **Quebra todos os K** do alvo e o dano é calculado **normalmente**: ATK − DEF **[O do autor]**.
 - Após o ataque: **apenas 1 J** (o mais antigo) vai para o cemitério **[O do autor]**.
 - **Absoluto contra Absoluto [I]:** se o alvo estiver sob Defesa Absoluta, os K dele quebram e o dano é a conta normal (ATK×5 − DEF×5). A Fileira de Defesa dele continua protegida.
-- Contra Reflect ativo: o Reflect intercepta tudo — o ×5 volta para o atacante e os K do dono do Reflect não quebram **[I]**.
+- Contra um Reflect: o Reflect intercepta tudo — o ×5 volta para o atacante e os K do dono do Reflect não quebram **[I]**.
 
 **Exódia — 4 K na Guarda [O + contra-jogo M]**
 - Após a janela de reação da jogada de K, se a Guarda tiver **4 ou mais K**, **o jogo acaba na hora** e quem a montou vence.
-- Contra-jogo: a janela de reação permite ao oponente quebrar K com **A**. Fora isso, K quebra ao absorver dano ou ao atacar um Reflect.
+- Contra-jogo: a janela de reação permite ao oponente quebrar K com **A**. Fora isso, K quebra ao absorver dano ou ao ser refletido.
 - O Coringa Selvagem **nunca** conta como K.
 
 ### 1.9 Resolução de um ataque
@@ -207,9 +208,9 @@ ATK = (soma(Ataque do atacante) + bônus) × (1 + nJ)
 DEF = (soma(Defesa do defensor) + bônus) × (1 + nQ)
 ```
 
-1. Janela de reação do defensor (pode usar A) — o estado resultante é o usado no cálculo.
+1. Janela de reação do defensor (pode usar A e lançar Reflect; contra o Reflect, a resposta do atacante) — o estado resultante é o usado no cálculo. Reflect contra Reflect: não há golpe e o turno passa.
 2. Calcula ATK e DEF.
-3. **Reflect ativo no defensor** → resolve como em §1.6, aplica o dano refletido ao atacante (vida ≤ 0 → fim de jogo imediato) e pula para o passo 8.
+3. **Reflect lançado pelo defensor** → resolve como em §1.6, aplica o dano refletido ao atacante (vida ≤ 0 → fim de jogo imediato) e pula para o passo 8.
 4. **Ataque Absoluto** (nJ = 4) → todos os K do defensor quebram.
 5. **Defesa Absoluta no defensor:** sem Ataque Absoluto → dano = 0; com Ataque Absoluto → `dano = max(0, ATK − DEF)`. Segue para o passo 7.
 6. **Caso geral** (sem Reflect e sem Defesa Absoluta): `líquido = max(0, ATK − DEF)`. Se `líquido > 0` e o defensor ainda tiver K → 1 K quebra e dano = 0; senão dano = líquido.
@@ -222,7 +223,7 @@ DEF = (soma(Defesa do defensor) + bônus) × (1 + nQ)
 
 - Ao fim de cada rodada de Ataque, quem **causou mais dano** naquela rodada (incluindo dano refletido) fica com a iniciativa da próxima **[O]**.
 - Empate (inclusive 0 × 0) → a iniciativa não muda **[I]**.
-- **Escolha da iniciativa [N]:** quem tem a iniciativa escolhe, no início de cada rodada de Ataque, se ataca primeiro ou segundo. Ir primeiro vence corridas de dano letal e cobre o oponente com um Reflect na mesma rodada; ir segundo dá informação completa antes de agir.
+- **Escolha da iniciativa [N]:** quem tem a iniciativa escolhe, no início de cada rodada de Ataque, se ataca primeiro ou segundo. Ir primeiro vence corridas de dano letal; ir segundo dá informação completa antes de agir.
 - A iniciativa também define quem recebe a primeira carta na distribuição (§1.4).
 
 ### 1.11 Fim de jogo (sem anti-travamento)
@@ -249,7 +250,7 @@ DEF = (soma(Defesa do defensor) + bônus) × (1 + nQ)
 
 1. **Dano simples.** Ataque [3, 7, 9] + 1 J → 19 × 2 = **38**. Defesa do alvo [5, 8], sem Q → **13**. Dano **25**. Saem o 3 do atacante e o 5 do defensor.
 2. **Guarda.** ATK 30 contra DEF 20 → líquido 10. O defensor tem 2 K → 1 K quebra, dano 0.
-3. **Reflect.** O oponente, com 2 K na Guarda, ataca com [6, 8, 9] + 1 J = **46** contra um Reflect ativo. Os 2 K e o Q dele quebram; Defesa [4, 10] → ⌊14 / 2⌋ = 7. **Ele leva 39**. O dono do Reflect leva 0; saem o 6 do atacante e a 1ª carta da Defesa do dono do Reflect.
+3. **Reflect.** O oponente, com 2 K na Guarda, ataca com [6, 8, 9] + 1 J = **46**, e o defensor responde com um Reflect. Os 2 K e o Q dele quebram; Defesa [4, 10] → ⌊14 / 2⌋ = 7. **Ele leva 39**. O dono do Reflect leva 0; saem o 6 do atacante e a 1ª carta da Defesa do dono do Reflect.
 4. **Quadra.** Defesa [10, 3, 10, 10, 10] → 43 + bônus 10 = 53; com 1 Q → **106**.
 5. **Absoluto × Absoluto.** Ataque [5, 6, 7] com 4 J → 18 × 5 = **90**. Defesa [8, 9] com 4 Q → 17 × 5 = **85**. Os K do defensor quebram; dano **5**; o defensor não perde carta de Defesa; o atacante perde o 5 e 1 J. Ao fim do turno, a Defesa Absoluta expira e 1 Q do defensor vai para o cemitério.
 6. **Só os J multiplicam.** Ataque [4, 6] + 1 J → 10 × (1 + 1) = **20** (com a Pressão da mesa, removida no sub-projeto 5, eram 40).
@@ -264,10 +265,10 @@ DEF = (soma(Defesa do defensor) + bônus) × (1 + nQ)
 | Fileiras | sem limite | 7 numéricas cada (calibrável) |
 | Equipar | — | simultâneo e secreto; numéricas obrigatórias, na ordem que o jogador escolher (E2) |
 | Iniciativa | quem causou mais dano começa | quem causou mais dano **escolhe** atacar 1º ou 2º |
-| K | bloqueia todo dano enquanto equipado | absorve 1 ataque com dano e quebra; todos quebram ao atacar um Reflect |
+| K | bloqueia todo dano enquanto equipado | absorve 1 ataque com dano e quebra; todos quebram quando o dono é refletido |
 | A | elimina um especial | armadilha: também como reação a ataque ou jogada de K |
 | Sacrifício | — | J/Q da mão abate J/Q do oponente (só no seu turno) |
-| Reflect | "em aprovação" | regras fechadas; quebra Q e K do atacante; proteção por sacrifício de J+Q+K do campo |
+| Reflect | "em aprovação" | só como reação a um golpe; quebra Q e K de quem é refletido; Reflect contra Reflect anula os dois |
 | Fallen is Back | qualquer carta do cemitério | só numéricas; "juntas" = mesma fileira |
 | Absolutos | sem custo definido | consomem 1 Q / 1 J ao terminar |
 | Exódia | instantânea | instantânea após janela de reação (A) |
@@ -307,9 +308,9 @@ legalActions(view: PlayerView): Action[]
   - `EQUIP` — aguardando as submissões dos dois jogadores;
   - `ORDER_CHOICE(jogador)` — quem tem a iniciativa escolhe a ordem (só com `initiativeChoice`);
   - `ATTACK_MAIN(jogador)` — fase principal do turno;
-  - `REACTION(respondente, gatilho)` — gatilho: `ATTACK` | `K_PLAYED` | `REFLECT_PLAYED`;
+  - `REACTION(respondente, gatilho)` — gatilho: `ATTACK` | `K_PLAYED` | `REFLECT_PLAYED` (a resposta de quem foi refletido);
   - `GAME_OVER(resultado)`.
-- Além das zonas: vida, iniciativa, ordem da rodada, contador de rodadas, dano por jogador na rodada atual, efeitos com duração (Reflect, Defesa Absoluta, Ressurreições com rodada de expiração).
+- Além das zonas: vida, iniciativa, ordem da rodada, contador de rodadas, dano por jogador na rodada atual, efeitos com duração (Defesa Absoluta, Ressurreições com rodada de expiração) e o Reflect lançado, só até a resposta.
 
 ### 2.4 Ações
 
@@ -321,9 +322,8 @@ legalActions(view: PlayerView): Action[]
 | `PLAY_K { cardIds[] }` | `ATTACK_MAIN` |
 | `TRAP { cardId, targetId }` | `ATTACK_MAIN`, `REACTION` (gatilho ATTACK ou K_PLAYED) |
 | `SACRIFICE { cardId, targetId }` | `ATTACK_MAIN` |
-| `REFLECT { kId, jId, qId }` | `ATTACK_MAIN` |
-| `CANCEL_REFLECT { kId, jId, qId }` (da mão) | `REACTION` (gatilho REFLECT_PLAYED) |
-| `PROTECT_FROM_REFLECT { jId, qId, kId }` (do campo) | `ATTACK_MAIN`, `REACTION` (gatilho REFLECT_PLAYED) |
+| `REFLECT { kId, jId, qId }` | `REACTION` (gatilho ATTACK) |
+| `CANCEL_REFLECT { kId, jId, qId }` (da mão; Reflect contra Reflect) | `REACTION` (gatilho REFLECT_PLAYED) |
 | `RESURRECT { cardId, row }` | `ATTACK_MAIN` |
 | `DECLARE_ATTACK` / `END_TURN` (Ataque vazio) | `ATTACK_MAIN` |
 | `PASS` | `REACTION` |
@@ -337,8 +337,8 @@ legalActions(view: PlayerView): Action[]
 A união `GameEvent` de `types.ts`, base para animações e histórico. Cada ação devolve os seus, em ordem. Um teste do motor (`test/spec-events.test.ts`) confere que esta lista e a união têm os mesmos nomes.
 
 - **Rodada e Equipar:** `RoundStarted`, `DeckReshuffled`, `CardsDealt`, `EquipSubmitted`, `CardsPlaced` (a carta que troca a última da fileira leva o `replaced`), `OrderChosen`, `TurnStarted`.
-- **Fase principal:** `BuffPlayed` (com o papel, `as`), `GuardPlayed`, `TrapUsed` e `Sacrificed` (com `as` quando a carta é um Selvagem), `ReflectPlayed`, `ReflectCanceled`, `ReflectProtected`, `ReflectExpired`, `Resurrected`.
-- **Janela de reação:** `ReactionWindowOpened`, `ReactionWindowClosed`.
+- **Fase principal:** `BuffPlayed` (com o papel, `as`), `GuardPlayed`, `TrapUsed` e `Sacrificed` (com `as` quando a carta é um Selvagem), `Resurrected`.
+- **Janela de reação:** `ReactionWindowOpened`, `ReactionWindowClosed`, `ReflectPlayed` (com o golpe que responde, `against`), `ReflectCanceled` (Reflect contra Reflect).
 - **Ataque:** `AttackDeclared`, `AbsoluteAttack` (antes de tudo, também contra um Reflect), `ReflectTriggered`, `DamageDealt`, `GuardBroken`, `BuffRemoved`, `CardsRemovedFromRow`, `QuadFormed`, `QuadBroken`.
 - **Estado da mesa:** `AbsoluteDefenseStarted`, `AbsoluteDefenseEnded`, `InitiativeChanged`.
 - **Fim:** `Exodia`, `GameOver`.
@@ -372,7 +372,7 @@ RulesConfig {
 
 - **Bots:**
   - `random` — qualquer ação legal;
-  - `greedy` — heurísticas: destino da numérica que maximiza ATK−DEF esperado; A na maior ameaça; Reflect quando o ATK do oponente é alto; Sacrifício quando o buff do oponente vale mais que o próprio; escolha de ordem pela situação de vida;
+  - `greedy` — heurísticas: destino da numérica que maximiza ATK−DEF esperado; A na maior ameaça; Reflect, na reação, quando o golpe refletido doeria bastante; Sacrifício quando o buff do oponente vale mais que o próprio; escolha de ordem pela situação de vida;
   - `turtle` — quando está na frente em vida, põe tudo na Defesa, deixa o Ataque vazio e joga todos os K que tiver (testa a brecha da tartaruga, que a Pressão da mesa fechava antes de sair no sub-projeto 5, inclusive via K). O Equipar só permite trocar/descartar com as duas fileiras cheias (§1.4): com a Defesa cheia e espaço no Ataque, a numérica vai para o Ataque à força e o ataque passa a ser obrigatório. A própria regra já limita a tartaruga; o relatório separa as vitórias dela por motivo (vida, Exódia, sem fim).
 - Interface: `Bot = (view: PlayerView, legal: Action[], rng) => Action`. O `rng` é do bot, com semente própria — nunca o da partida, nunca `Math.random`.
 - **Runner:** N partidas por configuração com sementes reprodutíveis; varredura de parâmetros (`hp`, `rowLimit`, composição do baralho); **comparação liga/desliga de cada regra [N]**, uma por vez a partir do padrão e com as mesmas sementes; saída em tabela no terminal + JSON em `packages/sim/reports/`.
@@ -416,7 +416,7 @@ Bots não jogam como humanos: as metas guiam a calibração inicial; o ajuste fi
 - **Comando único `pnpm check`:** lint + typecheck + testes com cobertura (meta ≥ 90% de linhas e branches no motor) + smoke no Node puro (motor e simulador carregados sem bundler).
 - **Portão automático contra regressões:** hooks versionados (pre-commit e pre-push) rodam o `pnpm check`; a CI roda o mesmo comando em push e PR, e precisa estar verde antes do merge. Quando o check passar de ~45 s, o pre-commit vira a versão rápida (lint, typecheck e testes relacionados) e o pre-push mantém o completo.
 - **Partidas de referência:** replays gravados (semente + ações) reexecutados no motor, com snapshot de um resumo de cada partida. Mudança de regra que torna uma ação ilegal falha no passo exato; mudança de resultado só entra aceitando o snapshot de propósito.
-- **Playouts enviesados:** políticas que forçam Exódia, Absolutos e Reflect expirado, com as invariantes checadas a cada passo; o teste falha se o evento-alvo não acontecer em nenhuma das sementes fixas.
+- **Playouts enviesados:** políticas que forçam Exódia e Absolutos, com as invariantes checadas a cada passo; o teste falha se o evento-alvo não acontecer em nenhuma das sementes fixas.
 
 ## 6. Critérios de pronto (sub-projeto 1)
 

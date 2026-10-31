@@ -59,14 +59,12 @@ const SAMPLES: { event: GameEvent; kind: Beat['kind']; scene?: SceneKind; cards?
     cards: ['q1', 'k1'],
   },
   {
-    event: { type: 'ReflectPlayed', player: 'p1', reflect: { k: face('k1'), j: face('j1', 'J'), q: face('q1', 'Q') } },
+    event: { type: 'ReflectPlayed', player: 'p1', reflect: { k: face('k1'), j: face('j1', 'J'), q: face('q1', 'Q') }, against: 'ATTACK' },
     kind: 'scene',
     scene: 'REFLECT_PLAYED',
     cards: ['k1', 'j1', 'q1'],
   },
   { event: { type: 'ReflectCanceled', player: 'p2', owner: 'p1' }, kind: 'move' },
-  { event: { type: 'ReflectProtected', player: 'p2', owner: 'p1' }, kind: 'move' },
-  { event: { type: 'ReflectExpired', owner: 'p1' }, kind: 'move' },
   {
     event: { type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 4 },
     kind: 'scene',
@@ -109,6 +107,7 @@ const REFLECT_PLAYED: GameEvent = {
   type: 'ReflectPlayed',
   player: 'p1',
   reflect: { k: face('k1'), j: face('j1', 'J'), q: face('q1', 'Q') },
+  against: 'ATTACK',
 };
 const REFLECT_TRIGGERED: GameEvent = { type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 30 };
 
@@ -144,7 +143,7 @@ function expectPhotosafe(beats: Beat[], reducedMotion: boolean): void {
 
 describe('mapeamento evento → batida (spec §4.2)', () => {
   it('cobre todos os tipos de evento do motor', () => {
-    expect(new Set(SAMPLES.map((s) => s.event.type)).size).toBe(32);
+    expect(new Set(SAMPLES.map((s) => s.event.type)).size).toBe(30);
   });
 
   for (const { event, kind, scene, cards } of SAMPLES) {

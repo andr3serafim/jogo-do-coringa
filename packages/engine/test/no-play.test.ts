@@ -78,9 +78,11 @@ describe('noPlayReason: por que a carta da mão não tem jogada (B2)', () => {
     });
     expect(reasonOf(protectedOpponent, P1, 'A')).toBe('TARGET_PROTECTED');
 
-    const s = setup({ p1: { hand: ['K', 'J', 'Q'] }, p2: { hand: ['K', 'J', 'Q', 'A'], guard: 1 } });
-    const cast = act(s, P1, { type: 'REFLECT', kId: handId(s, P1, 'K'), jId: handId(s, P1, 'J'), qId: handId(s, P1, 'Q') }).state;
-    for (const kind of ['K', 'J', 'Q', 'A'] as const) expect(reasonOf(cast, P2, kind)).toBe('REACTION_REFLECT');
+    // P1 ataca e P2 responde com Reflect: na resposta de P1, nenhuma carta sozinha joga (só outro Reflect, de três).
+    const s = setup({ p1: { hand: ['K', 'J', 'Q', 'A'], attack: [5], guard: 1 }, p2: { hand: ['K', 'J', 'Q'] } });
+    const declared = act(s, P1, { type: 'DECLARE_ATTACK' }).state;
+    const cast = act(declared, P2, { type: 'REFLECT', kId: handId(s, P2, 'K'), jId: handId(s, P2, 'J'), qId: handId(s, P2, 'Q') }).state;
+    for (const kind of ['K', 'J', 'Q', 'A'] as const) expect(reasonOf(cast, P1, kind)).toBe('REACTION_REFLECT');
   });
 
   it('propriedade: sem motivo ⇔ o motor aceita alguma jogada de uma carta só com ela (independente de `legalActions`)', () => {

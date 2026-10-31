@@ -666,7 +666,7 @@ describe('efeitos da batida (spec §4.2)', () => {
     const m = mount(MINE);
     const spec: ViewSpec = { ...MINE, self: { ...MINE.self, reflect: true } };
     const reflect = scenarioAt(spec).view.self.reflect!;
-    emit(m, spec, [{ type: 'ReflectPlayed', player: 'p1', reflect }]);
+    emit(m, spec, [{ type: 'ReflectPlayed', player: 'p1', reflect, against: 'ATTACK' }]);
     expect(scene(m.container)).toHaveAttribute('data-cena', 'REFLECT_PLAYED');
     expect(scene(m.container)?.querySelector('svg')).not.toBeNull();
     const zone = within(screen.getByRole('list', { name: 'Cartas do Reflect' }));
@@ -1232,7 +1232,7 @@ describe('CardsDealt e Reflect (spec §4.2)', () => {
     expect(document.activeElement).toBe(m.container.querySelector('[data-painel]'));
   });
 
-  it('anular, proteger ou expirar o Reflect quebra o escudo no Coringa do dono, na batida', () => {
+  it('o Reflect contra Reflect quebra o escudo no Coringa do dono, na batida', () => {
     const m = mount(MINE);
     emit(m, MINE, [TURN, { type: 'ReflectCanceled', player: 'p1', owner: 'p2' }]);
     const theirs = () => screen.getByRole('region', { name: 'Campo de Duda' });
@@ -1245,9 +1245,9 @@ describe('CardsDealt e Reflect (spec §4.2)', () => {
     expect(theirs().querySelector('[data-escudo-quebra]')).toBeNull();
   });
 
-  it('o escudo que quebra também aparece no Coringa de quem o expirou, com movimento reduzido só esmaecendo', () => {
+  it('o escudo que quebra também aparece no Coringa do próprio dono, com movimento reduzido só esmaecendo', () => {
     const m = mount(MINE, { prefs: { reduceMotion: true } });
-    emit(m, MINE, [{ type: 'ReflectExpired', owner: 'p1' }]);
+    emit(m, MINE, [{ type: 'ReflectCanceled', player: 'p2', owner: 'p1' }]);
     expect(screen.getByRole('region', { name: 'Seu campo' }).querySelector('[data-escudo-quebra]')).not.toBeNull();
   });
 

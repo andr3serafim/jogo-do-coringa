@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { previewAttack, previewBetween, type AttackOutcome, type AttackPreview } from '../src/preview.ts';
 import { viewFor } from '../src/view.ts';
-import type { Action, GameEvent, PlayerId } from '../src/types.ts';
+import type { Action, GameEvent } from '../src/types.ts';
 import { P1, setup } from './helpers.ts';
 import { playout } from './playout.ts';
 
@@ -67,14 +67,15 @@ describe('previewAttack: outros desfechos', () => {
     });
   });
 
-  it('atacante sob Defesa Absoluta contra Reflect: não perde Q nem leva dano, mas perde os K', () => {
+  it('atacante sob Defesa Absoluta contra Reflect: o Reflect é anulado; nada quebra e nada volta (F2, [I])', () => {
     const p = preview({
       p1: { attack: [9, 9], defense: [4], defenseBuffs: ['Q', 'Q'], guard: 3, absoluteDefense: true },
       p2: { reflect: true },
     });
     expect(p.outcome).toBe('REFLECTED');
     expect(p.reflected).toBe(0);
-    expect(p.breaks).toEqual({ attackerGuard: 3, attackerQueens: 0, defenderGuard: 0 });
+    expect(p.damage).toBe(0);
+    expect(p.breaks).toEqual({ attackerGuard: 0, attackerQueens: 0, defenderGuard: 0 });
   });
 
   it('ataque que não vence a defesa causa dano 0 e não gasta K', () => {
@@ -117,21 +118,27 @@ describe('preview bate com a resolução', () => {
         x = (Math.imul(x, 1103515245) + 12345) >>> 0;
         return x >>> 8;
       });
-      let pending: { attacker: PlayerId; preview: AttackPreview } | null = null;
+      // A prévia vale para o passo que resolve o golpe: o PASS de quem defende (sem Reflect) ou o de quem foi refletido.
+      let pending: { preview: AttackPreview } | null = null;
       playout({
         seed: `preview-${game}`,
         choices,
         chooser: (legal: Action[], view, step) => {
           if (view.phase.kind === 'REACTION' && view.phase.trigger === 'ATTACK') {
+            const reflect = legal.find((a) => a.type === 'REFLECT');
+            if (reflect && choices[step % choices.length] % 2 === 0) return reflect;
+            pending = { preview: previewAttack(view, 'opponent') };
             return legal.find((a) => a.type === 'PASS') ?? legal[0];
           }
-          const action = legal[choices[step % choices.length] % legal.length];
-          if (action.type === 'DECLARE_ATTACK') pending = { attacker: view.me, preview: previewAttack(view, 'self') };
-          return action;
+          if (view.phase.kind === 'REACTION' && view.phase.trigger === 'REFLECT_PLAYED') {
+            pending = { preview: previewAttack(view, 'self') };
+            return { type: 'PASS' };
+          }
+          return legal[choices[step % choices.length] % legal.length];
         },
         onStep: (_before, _after, events: GameEvent[]) => {
-          if (!events.some((e) => e.type === 'ReactionWindowClosed' && e.trigger === 'ATTACK')) return;
-          if (!pending) throw new Error('janela de ataque fechada sem prévia guardada');
+          if (!events.some((e) => e.type === 'DamageDealt' || e.type === 'ReflectTriggered')) return;
+          if (!pending) throw new Error('golpe resolvido sem prévia guardada');
           const { preview: p } = pending;
           pending = null;
           const dealt = events.find((e) => e.type === 'DamageDealt');

@@ -125,8 +125,6 @@ function classify(event: GameEvent): Classified {
       return move([event.card.id, event.target.id]);
     case 'DeckReshuffled':
     case 'ReflectCanceled':
-    case 'ReflectProtected':
-    case 'ReflectExpired':
     case 'AttackDeclared':
     case 'AbsoluteDefenseEnded':
       return move();

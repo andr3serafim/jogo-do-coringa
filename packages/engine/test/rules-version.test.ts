@@ -16,6 +16,8 @@ const RULES_DIGESTS: Record<number, string> = {
   // 3 (E1 do sub-projeto 5): sem anti-travamento (nem empate), a Defesa Absoluta dura até o oponente atacar, e as partidas de
   // referência passaram à config atual (vida 500, fileiras de 8, 8 Ás).
   3: '4507a11fa8301154c5b9ea32ac3acb50ff486c79066c0f50438755487207df9e',
+  // 4 (bloco E3 + F2 + F3 do sub-projeto 5): o Reflect reativo (F2). Os commits seguintes da mesma branch trocam só este digest.
+  4: '787be45baf7d9dcebe90095b3fb79df168d6278d6c90af2d459355e97d403a54',
 };
 
 const GOLDEN_DIR = new URL('./__snapshots__/golden/', import.meta.url);

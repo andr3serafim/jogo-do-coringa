@@ -62,7 +62,7 @@ export function openReaction(s: GameState, responder: PlayerId, trigger: Reactio
 }
 
 /**
- * Fim de um turno de ataque: expira os efeitos do OUTRO jogador (spec §1.5 item 4) e avança. `attacked` diz se houve ataque
+ * Fim de um turno de ataque: encerra a Defesa Absoluta do OUTRO jogador, se houve ataque (spec §1.5 item 4), e avança. `attacked` diz se houve ataque
  * neste turno: só ele encerra a Defesa Absoluta do outro (spec §1.8, autor em 2026-10-30).
  */
 export function endTurn(s: GameState, ev: GameEvent[], attacked: boolean): void {
@@ -73,14 +73,9 @@ export function endTurn(s: GameState, ev: GameEvent[], attacked: boolean): void 
 }
 
 function expireEffects(s: GameState, owner: PlayerState, attacked: boolean, ev: GameEvent[]): void {
-  if (owner.reflect) {
-    toGraveyard(s, [owner.reflect.k, owner.reflect.j, owner.reflect.q]);
-    owner.reflect = null;
-    ev.push({ type: 'ReflectExpired', owner: owner.id });
-  }
   if (owner.absoluteDefense && attacked) {
     owner.absoluteDefense = false;
-    // Um Q sacrificado na proteção contra Reflect já conta como o Q consumido (spec §1.8): sobram 3.
+    // O Q mais antigo vai ao cemitério (spec §1.8). Sob Defesa Absoluta os Q não saem por Armadilha, Sacrifício nem Reflect.
     const consumed = owner.defenseBuffs.length >= s.config.buffLimit ? owner.defenseBuffs.splice(0, 1) : [];
     toGraveyard(s, consumed);
     ev.push({ type: 'AbsoluteDefenseEnded', player: owner.id });

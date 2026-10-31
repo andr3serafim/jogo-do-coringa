@@ -28,7 +28,6 @@ export interface TablePlays {
   byCard: Map<string, CardPlay[]>;
   reflect: PlayerAction | null;
   cancelReflect: PlayerAction | null;
-  protect: PlayerAction | null;
   /** Um item por valor no cemitério; `rows` só com as fileiras que têm vaga. */
   resurrect: { cardId: string; value: Rank; rows: RowName[] }[];
   finish: { type: 'DECLARE_ATTACK' } | { type: 'END_TURN' } | null;
@@ -59,7 +58,6 @@ function cardIdsOf(action: PlayerAction): string[] {
       return action.cardIds;
     case 'REFLECT':
     case 'CANCEL_REFLECT':
-    case 'PROTECT_FROM_REFLECT':
       return [action.kId, action.jId, action.qId];
     default:
       return [];
@@ -87,8 +85,6 @@ export function roleKey(action: PlayerAction, view: PlayerView): string {
     case 'REFLECT':
     case 'CANCEL_REFLECT':
       return `${action.type}|${role(action.kId)}|${role(action.jId)}|${role(action.qId)}`;
-    case 'PROTECT_FROM_REFLECT':
-      return `${action.type}|${role(action.jId)}|${role(action.qId)}|${role(action.kId)}`;
     case 'RESURRECT':
       return `RESURRECT|${role(action.cardId)}|${action.row}`;
     case 'EQUIP':
@@ -247,7 +243,6 @@ export function tablePlays(view: PlayerView, legal: PlayerAction[]): TablePlays 
     byCard,
     reflect: fewestWilds(legal.filter((a) => a.type === 'REFLECT'), view),
     cancelReflect: fewestWilds(legal.filter((a) => a.type === 'CANCEL_REFLECT'), view),
-    protect: fewestWilds(legal.filter((a) => a.type === 'PROTECT_FROM_REFLECT'), view),
     resurrect: [...resurrect.values()],
     finish: has('DECLARE_ATTACK') ? { type: 'DECLARE_ATTACK' } : has('END_TURN') ? { type: 'END_TURN' } : null,
     pass: has('PASS'),

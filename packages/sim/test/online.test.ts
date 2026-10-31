@@ -138,11 +138,12 @@ describe('askChoice e o jogo offline com AbortSignal', () => {
     // sub-projeto 5 a Pressão da mesa saiu e o anti-travamento caiu para 3 rodadas: a saída e as jogadas mudaram (a partida acaba no
     // anti-travamento). Na Fase D (vida 500, fileiras de 8, 8 Ás) mudaram de novo. Em 2026-10-30 só a saída mudou: "Saiu … da
     // Defesa" e "quadra … na Defesa" no lugar de "do Defesa" e "no Defesa". Na E1 (sem anti-travamento) também só a saída: a mesa
-    // não mostra mais "N de 3 sem dano"; a partida já acabava pela vida.
+    // não mostra mais "N de 3 sem dano"; a partida já acabava pela vida. No Reflect reativo (F2) também só a saída: o texto da
+    // janela do Reflect. Os digests novos saem de `node packages/sim/scripts/roteiro-digest.ts`.
     const game = scriptedIo(() => '1');
     const outcome = await playGame({ io: game, seed: 'roteiro', bot: 'greedy', config: makeConfig(), saveDir: null });
     const sha = (text: string) => createHash('sha256').update(text).digest('hex');
-    expect(sha(game.output.join('\n'))).toBe('b160711bf12d663187e066d5faa40e115e1f6a5604e92c336803e633b34df0df');
+    expect(sha(game.output.join('\n'))).toBe('dd4373d7dabf2f18bd9b7daccc4afedf93d0315027a9ba9f6edcd66b56e7fcd7');
     expect(sha(JSON.stringify(outcome.replay.steps))).toBe('e7ee6c59a87263f640db3c73591178caba1a09c270c936e6436699488eb28bd6');
     expect(outcome.replay.steps).toHaveLength(165);
   });

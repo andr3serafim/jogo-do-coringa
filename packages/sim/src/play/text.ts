@@ -79,11 +79,9 @@ export function actionText(action: Action, view: PlayerView): string {
     case 'SACRIFICE':
       return `Sacrificar ${t(action.cardId)} para destruir ${t(action.targetId)} do oponente`;
     case 'REFLECT':
-      return `Lançar Reflect (${t(action.kId)} + ${t(action.jId)} + ${t(action.qId)})`;
+      return `Responder com Reflect (${t(action.kId)} + ${t(action.jId)} + ${t(action.qId)})`;
     case 'CANCEL_REFLECT':
-      return `Anular o Reflect com ${t(action.kId)} + ${t(action.jId)} + ${t(action.qId)} da mão`;
-    case 'PROTECT_FROM_REFLECT':
-      return `Proteger-se do Reflect sacrificando ${t(action.jId)} + ${t(action.qId)} + ${t(action.kId)} do campo`;
+      return `Reflect contra Reflect: anular com ${t(action.kId)} + ${t(action.jId)} + ${t(action.qId)} da mão`;
     case 'RESURRECT':
       return `Ressuscitar ${t(action.cardId)} no fim da fileira de ${ROW_NAME[action.row]}`;
     case 'DECLARE_ATTACK':
@@ -148,13 +146,9 @@ export function eventText(e: GameEvent, names: Names): string | null {
     case 'Sacrificed':
       return `${who(e.player)} sacrificou ${cardText(e.card)}${e.as ? ` (como ${e.as})` : ''} e destruiu ${cardText(e.target)} ${de(e.targetOwner)}`;
     case 'ReflectPlayed':
-      return `${who(e.player)} lançou um Reflect!`;
+      return `${who(e.player)} respondeu com um Reflect!`;
     case 'ReflectCanceled':
-      return `${who(e.player)} anulou o Reflect ${de(e.owner)}`;
-    case 'ReflectProtected':
-      return `${who(e.player)} se protegeu do Reflect ${de(e.owner)}`;
-    case 'ReflectExpired':
-      return `O Reflect ${de(e.owner)} expirou`;
+      return `${who(e.player)} respondeu com outro Reflect: os dois se anulam e o golpe não acontece`;
     case 'ReflectTriggered':
       return `O Reflect ${de(e.owner)} devolveu ${e.damage} de dano`;
     case 'ReactionWindowOpened':

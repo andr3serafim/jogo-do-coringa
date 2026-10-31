@@ -56,6 +56,13 @@ const withHand = (hand: SideSpec['hand'], extra: Partial<ViewSpec> = {}): ViewSp
   self: { ...DRAFT.self, ...extra.self, hand },
 });
 
+/** Com uma Ressurreição: o botão próprio que a fase principal oferece (o Reflect só responde a um ataque, F2). */
+const WITH_RESURRECTION: ViewSpec = {
+  ...withHand(['K', 'J', 'Q']),
+  self: { ...DRAFT.self, hand: ['K', 'J', 'Q'], resurrections: [{ row: 'ATK', value: 7 }] },
+  graveyard: [7, 3],
+};
+
 interface MountOptions {
   state?: Partial<Omit<StateMessage, 't' | 'view'>>;
   /** Fora da mesa, antes dela na árvore (um campo de texto, por exemplo). */
@@ -450,8 +457,8 @@ describe('barra de ação: prévias e o botão principal (spec §3.4)', () => {
 });
 
 describe('barra de ação: botões próprios (spec §3.4)', () => {
-  it('Lançar Reflect diz quais cartas saem da mão, prefere as reais ao Selvagem e manda REFLECT', async () => {
-    const m = mount(withHand(['K', 'J', 'Q', 'WILD']));
+  it('na janela do ataque, Lançar Reflect diz quais cartas saem da mão, prefere as reais ao Selvagem e manda REFLECT', async () => {
+    const m = mount(withHand(['K', 'J', 'Q', 'WILD'], { phase: 'ATTACK' }));
     const k = handCards(m.view, 'K')[0]!;
     const j = handCards(m.view, 'J')[0]!;
     const q = handCards(m.view, 'Q')[0]!;
@@ -473,35 +480,24 @@ describe('barra de ação: botões próprios (spec §3.4)', () => {
     expect(sentAction(m)).toEqual({ type: 'CANCEL_REFLECT', kId: k.id, jId: j.id, qId: q.id });
   });
 
-  it('Proteger-se do Reflect diz quais cartas do campo saem e manda PROTECT_FROM_REFLECT', async () => {
-    const m = mount({ ...DRAFT, opponent: { ...DRAFT.opponent, reflect: true } });
-    const j = m.view.self.attackBuffs[0]!;
-    const q = m.view.self.defenseBuffs[0]!;
-    const k = m.view.self.guard[0]!;
-    const button = inBar().getByRole('button', { name: startsWith('Proteger-se do Reflect') });
-    expect(button).toHaveAccessibleName(`Proteger-se do Reflect sai ${cardText(j)} + ${cardText(q)} + ${cardText(k)} do seu campo`);
-    await m.user.click(button);
-    expect(sentAction(m)).toEqual({ type: 'PROTECT_FROM_REFLECT', jId: j.id, qId: q.id, kId: k.id });
-  });
-
   it('sem essas jogadas, os botões não aparecem', () => {
     mount();
-    for (const name of ['Lançar Reflect', 'Anular o Reflect', 'Proteger-se do Reflect', 'Ressuscitar']) {
+    for (const name of ['Lançar Reflect', 'Anular o Reflect', 'Ressuscitar']) {
       expect(inBar().queryByRole('button', { name: startsWith(name) })).not.toBeInTheDocument();
     }
   });
 
   it('com uma carta escolhida os botões próprios saem da barra, e voltam ao cancelar', async () => {
-    const m = mount(withHand(['K', 'J', 'Q']));
-    expect(inBar().getByRole('button', { name: startsWith('Lançar Reflect') })).toBeInTheDocument();
+    const m = mount(WITH_RESURRECTION);
+    expect(inBar().getByRole('button', { name: startsWith('Ressuscitar') })).toBeInTheDocument();
     await m.user.click(handCard('J'));
-    expect(inBar().queryByRole('button', { name: startsWith('Lançar Reflect') })).not.toBeInTheDocument();
+    expect(inBar().queryByRole('button', { name: startsWith('Ressuscitar') })).not.toBeInTheDocument();
     await m.user.click(inBar().getByRole('button', { name: 'Cancelar' }));
-    expect(inBar().getByRole('button', { name: startsWith('Lançar Reflect') })).toBeInTheDocument();
+    expect(inBar().getByRole('button', { name: startsWith('Ressuscitar') })).toBeInTheDocument();
   });
 
   it('os botões próprios têm altura de alvo de toque', () => {
-    mount(withHand(['K', 'J', 'Q']));
+    mount(withHand(['K', 'J', 'Q'], { phase: 'ATTACK' }));
     expect(inBar().getByRole('button', { name: startsWith('Lançar Reflect') }).className).toContain('min-h-11');
   });
 });
@@ -712,14 +708,14 @@ describe('barra de ação: cancelar e o teclado (spec §3.4, §7)', () => {
 
 describe('barra de ação: enviando (spec §1.5)', () => {
   it('com a jogada em voo, os botões ficam desligados, a mão não escolhe e a barra diz "Enviando…"', async () => {
-    const m = mount(withHand(['K', 'J', 'Q']));
+    const m = mount(WITH_RESURRECTION);
     const ack = deferredAck();
     m.connection.acks = [ack.promise];
     expect(screen.queryByText('Enviando…')).not.toBeInTheDocument();
     await m.user.click(inBar().getByRole('button', { name: ATTACK_BUTTON }));
     expect(screen.getByText('Enviando…')).toBeInTheDocument();
     expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toBeDisabled();
-    expect(inBar().getByRole('button', { name: startsWith('Lançar Reflect') })).toBeDisabled();
+    expect(inBar().getByRole('button', { name: startsWith('Ressuscitar') })).toBeDisabled();
     // Um segundo toque não manda nada, nem escolhe carta.
     await m.user.click(inBar().getByRole('button', { name: ATTACK_BUTTON }));
     await m.user.click(handCard('K'));

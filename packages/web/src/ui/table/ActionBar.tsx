@@ -28,7 +28,6 @@ import {
   noPlaysText,
   PASSED_TEXT,
   PICK_CARD_TEXT,
-  PROTECT_LABEL,
   reactingText,
   REFLECT_LABEL,
   RESURRECT_LABEL,
@@ -350,7 +349,7 @@ function OwnPlays({ view, plays, disabled, onSend, onResurrect }: ActionBarProps
       />,
     );
 
-  const { reflect, cancelReflect, protect } = plays;
+  const { reflect, cancelReflect } = plays;
   // Uma carta que não está na mão nem no campo não pode ser descrita: sem a lista de quem sai, o botão não aparece.
   if (reflect?.type === 'REFLECT') {
     const cards = pickCards(own, [reflect.kId, reflect.jId, reflect.qId]);
@@ -359,10 +358,6 @@ function OwnPlays({ view, plays, disabled, onSend, onResurrect }: ActionBarProps
   if (cancelReflect?.type === 'CANCEL_REFLECT') {
     const cards = pickCards(own, [cancelReflect.kId, cancelReflect.jId, cancelReflect.qId]);
     if (cards) add('cancel', CANCEL_REFLECT_LABEL, leavesText(cards, 'hand'), () => onSend(cancelReflect));
-  }
-  if (protect?.type === 'PROTECT_FROM_REFLECT') {
-    const cards = pickCards(own, [protect.jId, protect.qId, protect.kId]);
-    if (cards) add('protect', PROTECT_LABEL, leavesText(cards, 'field'), () => onSend(protect));
   }
   if (plays.resurrect.length > 0) {
     // A arte da Ressurreição (U2): a carta que sobe da lápide; a linha de baixo diz de onde ela vem e o que há para trazer.

@@ -4,7 +4,7 @@ import {
   attackBase,
   best,
   boardScore,
-  canCastReflect,
+  canHoldReflect,
   defenseBase,
   hpDamage,
   placeAll,
@@ -16,13 +16,13 @@ import type { Bot } from './types.ts';
 
 /** Limiares das heurísticas (spec §3). Mudar um deles muda o bot, não a regra. */
 export const GREEDY = {
-  /** Dano refletido a partir do qual vale anular ou se proteger de um Reflect. */
+  /** Dano refletido a partir do qual vale responder ao Reflect do oponente com outro Reflect. */
   reflectThreat: 10,
   /** Valor mínimo do alvo para gastar A na fase principal (abaixo disso, guarda para reação). */
   trapMain: 12,
   /** Dano evitado mínimo para gastar A na reação a um ataque. */
   trapReaction: 10,
-  /** Dano que o oponente levaria do próprio ataque a partir do qual vale lançar Reflect. */
+  /** Dano que o oponente levaria do próprio ataque, refletido, a partir do qual vale responder ao ataque com Reflect. */
   reflectAttack: 30,
 } as const;
 
@@ -51,15 +51,14 @@ function chooseEquip(view: PlayerView, legal: Action[], rng: Rng): Action {
   );
 }
 
-/** Escolha da ordem pela situação de vida: 1º com letal ou com Reflect contra um ataque forte; senão, 1º só se estiver atrás. */
+/** Escolha da ordem pela situação de vida: 1º com letal; senão, 1º só se estiver atrás. */
 export function prefersFirst(view: PlayerView): boolean {
   const { self, opponent, config } = view;
   if (hpDamage(self, opponent, config.buffLimit) >= opponent.hp) return true;
-  if (canCastReflect(view) && reflectedDamage(opponent) >= GREEDY.reflectAttack) return true;
   return self.hp < opponent.hp;
 }
 
-/** Valor de destruir um J/Q/K do oponente (A na maior ameaça). Com o meu Reflect ativo, o J dele não vale nada: quanto mais forte o ataque, mais ele leva de volta. */
+/** Valor de destruir um J/Q/K do oponente (A na maior ameaça). */
 export function targetValue(view: PlayerView, targetId: string): number {
   const { self, opponent, config } = view;
   if (opponent.guard.some((c) => c.id === targetId)) {
@@ -67,7 +66,6 @@ export function targetValue(view: PlayerView, targetId: string): number {
     return opponent.guard.length === 1 ? hpDamage(self, without(opponent, targetId), config.buffLimit) : 0;
   }
   if (opponent.attackBuffs.some((c) => c.id === targetId)) {
-    if (self.reflect) return 0;
     return attackBase(opponent) + (opponent.attackBuffs.length >= config.buffLimit ? 100 : 0);
   }
   return defenseBase(opponent);
@@ -79,13 +77,7 @@ function mainPhase(view: PlayerView, legal: Action[], rng: Rng): Action {
   const allKings = kings.at(-1);
   // 1. Exódia: se os K da mão completam a Guarda, joga todos.
   if (allKings && self.guard.length + allKings.cardIds.length >= config.exodiaGuard) return allKings;
-  // 2. Proteção contra o Reflect do oponente antes de um ataque que doeria.
-  const protect = ofType(legal, 'PROTECT_FROM_REFLECT')[0];
-  if (protect && self.attackRow.length > 0) {
-    const reflected = reflectedDamage(self);
-    if (reflected >= GREEDY.reflectThreat || reflected >= self.hp) return protect;
-  }
-  // 3. Ressurreição: sempre, no lugar que mais melhora a mesa.
+  // 2. Ressurreição: sempre, no lugar que mais melhora a mesa.
   const resurrections = ofType(legal, 'RESURRECT');
   if (resurrections.length > 0) {
     return best(
@@ -97,27 +89,24 @@ function mainPhase(view: PlayerView, legal: Action[], rng: Rng): Action {
       (ties) => rng.pick(ties),
     );
   }
-  // 4. Reflect quando o ataque do oponente é alto.
-  const reflects = ofType(legal, 'REFLECT');
-  if (reflects.length > 0 && reflectedDamage(opponent) >= GREEDY.reflectAttack) return cheapest(reflects, view, rng);
-  // 5. Armadilha na maior ameaça, se valer gastar o A agora.
+  // 3. Armadilha na maior ameaça, se valer gastar o A agora.
   const traps = ofType(legal, 'TRAP');
   if (traps.length > 0) {
     const trap = best(traps, (a) => targetValue(view, a.targetId) - wildsUsed(a, self.hand) / 2, (ties) => rng.pick(ties));
     if (targetValue(view, trap.targetId) >= GREEDY.trapMain) return trap;
   }
-  // 6. Sacrifício quando o buff do oponente vale mais que o meu (nunca o J dele com o meu Reflect ativo).
+  // 4. Sacrifício quando o buff do oponente vale mais que o meu.
   const sacrifices = ofType(legal, 'SACRIFICE');
   const worth = sacrifices.filter((s) =>
     opponent.attackBuffs.some((c) => c.id === s.targetId)
-      ? !self.reflect && attackBase(opponent) > attackBase(self)
+      ? attackBase(opponent) > attackBase(self)
       : defenseBase(opponent) > defenseBase(self),
   );
   if (worth.length > 0) return cheapest(worth, view, rng);
-  // 7. Guarda: joga os K, guardando um enquanto der para montar um Reflect.
-  const playable = kings.length - (canCastReflect(view) ? 1 : 0);
+  // 5. Guarda: joga os K, guardando um enquanto der para montar um Reflect (a resposta a um ataque).
+  const playable = kings.length - (canHoldReflect(view) ? 1 : 0);
   if (playable > 0) return kings[playable - 1];
-  // 8. Buffs onde há fileira para multiplicar.
+  // 6. Buffs onde há fileira para multiplicar.
   const js = ofType(legal, 'PLAY_J');
   if (js.length > 0 && self.attackRow.length > 0) return cheapest(js, view, rng);
   const qs = ofType(legal, 'PLAY_Q');
@@ -129,10 +118,17 @@ function reaction(view: PlayerView, legal: Action[], trigger: ReactionTrigger, r
   const { self, opponent, config } = view;
   const pass: Action = { type: 'PASS' };
   if (trigger === 'REFLECT_PLAYED') {
-    if (self.attackRow.length === 0 || reflectedDamage(self) < GREEDY.reflectThreat) return pass;
+    // Fui refletido: outro Reflect anula os dois quando o golpe que volta doeria.
+    const back = reflectedDamage(self);
+    if (back < GREEDY.reflectThreat && back < self.hp) return pass;
     const cancels = ofType(legal, 'CANCEL_REFLECT');
-    if (cancels.length > 0) return cheapest(cancels, view, rng);
-    return ofType(legal, 'PROTECT_FROM_REFLECT')[0] ?? pass;
+    return cancels.length > 0 ? cheapest(cancels, view, rng) : pass;
+  }
+  // Contra um ataque, o Reflect vem antes da Armadilha: tirar um J do atacante diminuiria o que volta para ele.
+  const reflects = ofType(legal, 'REFLECT');
+  if (trigger === 'ATTACK' && reflects.length > 0) {
+    const lethal = hpDamage(opponent, self, config.buffLimit) >= self.hp;
+    if (reflectedDamage(opponent) >= GREEDY.reflectAttack || lethal) return cheapest(reflects, view, rng);
   }
   const traps = ofType(legal, 'TRAP');
   if (traps.length === 0) return pass;

@@ -16,7 +16,6 @@ describe('esquemas do cliente', () => {
       { type: 'SACRIFICE', cardId: 'a', targetId: 'b' },
       { type: 'REFLECT', kId: 'k', jId: 'j', qId: 'q' },
       { type: 'CANCEL_REFLECT', kId: 'k', jId: 'j', qId: 'q' },
-      { type: 'PROTECT_FROM_REFLECT', jId: 'j', qId: 'q', kId: 'k' },
       { type: 'RESURRECT', cardId: 'n', row: 'ATK' },
       { type: 'DECLARE_ATTACK' },
       { type: 'END_TURN' },
@@ -24,7 +23,8 @@ describe('esquemas do cliente', () => {
     ];
     for (const action of ok)
       expect(parseClientMessage(JSON.stringify({ t: 'act', id: 'x1', epoch: 3, action }))).not.toBeNull();
-    for (const action of [{ type: 'TIMEOUT' }, { type: 'FORFEIT', loser: 'p2' }])
+    // A Proteção por sacrifício saiu do jogo (F2 do sub-projeto 5): o servidor recusa a ação antes do motor.
+    for (const action of [{ type: 'TIMEOUT' }, { type: 'FORFEIT', loser: 'p2' }, { type: 'PROTECT_FROM_REFLECT', jId: 'j', qId: 'q', kId: 'k' }])
       expect(parseClientMessage(JSON.stringify({ t: 'act', id: 'x1', epoch: 3, action }))).toBeNull();
   });
 

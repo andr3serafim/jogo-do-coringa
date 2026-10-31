@@ -66,7 +66,7 @@ const HINTS: ReadonlyArray<Hint & { holds: (situation: Situation) => boolean }> 
     holds: (situation) => inMyTurn(situation) && situation.view.self.hand.some((card) => card.kind === 'WILD'),
   },
   {
-    // Você pode armar o seu, ou o oponente acabou de armar o dele (os eventos vêm redigidos para você).
+    // Você pode responder a um ataque com o seu, ou o oponente acabou de responder com o dele (os eventos vêm redigidos para você).
     id: 'reflect',
     zone: 'hand',
     holds: ({ view, events, legal }) =>
