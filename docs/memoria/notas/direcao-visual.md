@@ -50,3 +50,12 @@ Ao "começo o brainstorming da nova direção visual?": "Sim, começar".
   - **Aprovado por ele:** o golpe comum (peso, rastro vermelho, número).
   - **A mudar:** cada especial com identidade própria (o Ataque com chamas de poder supremo; a Defesa com escudo de
     fortaleza, sem chamas); fundo sem as listras coloridas; as cenas sem legenda; a iniciativa sem o círculo, com uma espada.
+- **Rascunho 2** (`placar-e-cenas-v2.html`): o Ataque com fogo em três camadas que "ferve" (desenho trocado a cada 110 ms),
+  brasas, os J absorvidos e os olhos acesos; a Defesa com a muralha que sobe, o escudo de ameias entalhado, os 4 Q cravando
+  nos quartos e a insígnia no retrato; a espada da iniciativa que gira e crava, com a fita de cordel; textura de papel na mesa.
+  A reação dele (aceitou a espada e a estrutura, pediu ajustes):
+  > ok, ajustes que quero que faça: ajuste para que o feixe de luz do ataque absoluto seja mais grosso, dando a impressão de
+  > mais poder e o fogo atrás do coringa seja algo como o Ki do Goku quando se transforma de super sayadin. E quando a defesa
+  > absoluta, deixe o escuto mais épico e poderoso.
+  - **[I]** "Ki" = aura de energia colada ao corpo, com pontas para cima, que pulsa e cresce na transformação (raios, vento
+    de energia, pedras que flutuam). A referência entra pela estrutura; o desenho continua do jogo, em ouro, papel e tinta.
