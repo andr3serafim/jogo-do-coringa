@@ -14,7 +14,7 @@ import { ORDER_AUTO_MS } from '../../model/automation.ts';
 import { ORDER_AUTO_TEXT, ORDER_MANUAL_NO_CLOCK_TEXT, ORDER_MANUAL_TEXT, ORDER_QUESTION, orderWaitingText } from '../../model/copy.ts';
 import type { Notice } from '../../model/session.ts';
 import { NoticeLine, PRIMARY, PRIMARY_TITLE, SECONDARY, TwoLine } from './controls.tsx';
-import type { TableNames } from './labels.ts';
+import { orderReasonText, type TableNames } from './labels.ts';
 
 export interface OrderPanelProps {
   view: PlayerView;
@@ -56,7 +56,12 @@ export function OrderPanel({ view, names, choosing, autoAt, now, hasDeadline, di
       onFocus={onInteract}
       className="flex flex-col gap-2.5 text-papel"
     >
-      <p className="text-sm leading-snug">{ORDER_QUESTION}</p>
+      <div>
+        <p className="text-sm leading-snug">{ORDER_QUESTION}</p>
+        <p data-numero className="font-texto text-xs leading-snug tabular-nums">
+          {orderReasonText(view)}
+        </p>
+      </div>
       <div className="flex flex-wrap gap-2">
         <TwoLine
           title={actionText({ type: 'CHOOSE_ORDER', first: true }, view)}

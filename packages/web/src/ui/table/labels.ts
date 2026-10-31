@@ -63,6 +63,45 @@ export function initiativeText(view: PlayerView, names: TableNames): string {
   return `${holder}, atacando ${view.turnOrder[0] === view.initiative ? 'primeiro' : 'em segundo'}`;
 }
 
+/**
+ * O placar da iniciativa (autor, 2026-10-31: "eu tenho iniciativa e eu não sei por quê"): na rodada de Ataque, o dano de cada um
+ * até agora, que decide a próxima; fora dela (Equipar, escolha da ordem, fim), o motivo de quem a tem. Os números são do motor
+ * (`damageThisRound`, `lastInitiative`).
+ */
+export function initiativeScoreText(view: PlayerView, names: TableNames): string {
+  const { phase } = view;
+  if (view.roundKind === 'ATTACK' && (phase.kind === 'ATTACK_MAIN' || phase.kind === 'REACTION')) {
+    return `Dano na rodada: você ${view.self.damageThisRound} · ${names.opponent} ${view.opponent.damageThisRound}`;
+  }
+  return initiativeReasonText(view);
+}
+
+/** "sorteada no início", "mais dano na última rodada (14 × 9)", "empate na última rodada (5 × 5)": a última decisão do motor. */
+export function initiativeReasonText(view: PlayerView): string {
+  const last = view.lastInitiative;
+  if (last === null) return 'sorteada no início';
+  const [holder, other] = lastInitiativeDamage(view);
+  return `${last.changed || holder !== other ? 'mais dano' : 'empate'} na última rodada (${holder} × ${other})`;
+}
+
+/** O dano de quem ficou com a iniciativa e o do outro, na última rodada de Ataque. */
+export function lastInitiativeDamage(view: PlayerView): [number, number] {
+  const last = view.lastInitiative;
+  if (last === null) return [0, 0];
+  const other = last.player === view.me ? view.opponent.id : view.me;
+  return [last.damage[last.player] ?? 0, last.damage[other] ?? 0];
+}
+
+/** Sob a pergunta da ordem (só quem tem a iniciativa a vê): por que ela é sua. */
+export function orderReasonText(view: PlayerView): string {
+  const last = view.lastInitiative;
+  if (last === null) return 'Ela foi sorteada no início da partida.';
+  const [holder, other] = lastInitiativeDamage(view);
+  return last.changed || holder !== other
+    ? `Você causou mais dano na última rodada de Ataque (${holder} × ${other}).`
+    : `Empate em dano na última rodada de Ataque (${holder} × ${other}): ela não mudou.`;
+}
+
 /** O nome acessível do botão do histórico, com a contagem do que é novo. */
 export const historyButtonName = (news: number): string =>
   news === 0 ? 'Histórico' : `Histórico, ${news} ${plural(news, 'novo', 'novos')}`;

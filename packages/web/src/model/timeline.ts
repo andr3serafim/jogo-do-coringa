@@ -15,6 +15,12 @@ export const BEAT_MS = { move: 300, damage: 600, banner: 400, scene: 1_500 } as 
  * para 3 s a pedido do autor (2026-10-30).
  */
 export const RARE_SCENE_MS = { EXODIA: 4_200, ABSOLUTE_ATTACK: 3_000, ABSOLUTE_DEFENSE: 3_000 } as const;
+/**
+ * A faixa da decisão da iniciativa segura a leitura (autor, 2026-10-31: "a iniciativa muda pro adversário, eu também não vejo o
+ * momento"): fica fora do teto de decisão, como as cenas raras, porque o Equipar que vem logo depois do fim da rodada de Ataque a
+ * espremia em poucos ms. No `catchUp` (reconexão), anda como as outras.
+ */
+export const INITIATIVE_BANNER_MS = 1_200;
 /** Teto de uma linha do tempo que antecede uma decisão do jogador. */
 export const DECISION_CAP_MS = 1_000;
 /** Teto de uma linha do tempo de `catchUp` (eventos perdidos na reconexão). */
@@ -161,16 +167,17 @@ export function buildTimeline(events: GameEvent[], options: TimelineOptions): Be
     const flattened = catchUp && classified.kind === 'scene';
     const kind = flattened ? 'banner' : classified.kind;
     const scene = flattened ? null : classified.scene;
-    const baseMs = baseDuration(kind, scene) / (catchUp ? 2 : 1);
-    return { event, kind, cards: classified.cards, scene, baseMs, rare: isRare(scene) };
+    const held = !catchUp && event.type === 'InitiativeDecided';
+    const baseMs = held ? INITIATIVE_BANNER_MS : baseDuration(kind, scene) / (catchUp ? 2 : 1);
+    return { event, kind, cards: classified.cards, scene, baseMs, uncapped: held || isRare(scene) };
   });
 
-  // 2. Escala proporcional para caber no teto (o menor dos que valem). As cenas raras ficam de fora: não encolhem nem contam
-  // no teto. Arredonda para baixo, para nunca passar do teto por causa do arredondamento.
+  // 2. Escala proporcional para caber no teto (o menor dos que valem). As cenas raras e a faixa da iniciativa ficam de fora: não
+  // encolhem nem contam no teto. Arredonda para baixo, para nunca passar do teto por causa do arredondamento.
   const caps: number[] = [];
   if (catchUp) caps.push(CATCH_UP_CAP_MS);
   if (options.decisionPending) caps.push(DECISION_CAP_MS);
-  const totalMs = items.reduce((sum, item) => sum + (item.rare ? 0 : item.baseMs), 0);
+  const totalMs = items.reduce((sum, item) => sum + (item.uncapped ? 0 : item.baseMs), 0);
   const cap = Math.min(...caps, Infinity);
   const scale = totalMs > cap ? cap / totalMs : 1;
 
@@ -181,7 +188,7 @@ export function buildTimeline(events: GameEvent[], options: TimelineOptions): Be
   let startMs = 0;
   let lastInvertEndMs = -Infinity;
   for (const item of items) {
-    const itemScale = item.rare ? 1 : scale;
+    const itemScale = item.uncapped ? 1 : scale;
     const durationMs = Math.floor(item.baseMs * itemScale);
     let invert: Beat['invert'] = null;
     const yields = reflected && item.scene === 'ABSOLUTE_ATTACK';

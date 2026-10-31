@@ -465,6 +465,17 @@ describe('escolha da ordem (spec §3.6)', () => {
     expect(m.session.snapshot().orderAutoAt).toBe(13_000);
   });
 
+  it('a pergunta diz por que a iniciativa é sua: sorteada, mais dano ou empate na última rodada de Ataque', () => {
+    const first = mount(ORDER, { fake: true });
+    expect(within(orderPanel()).getByText('Ela foi sorteada no início da partida.')).toBeInTheDocument();
+    first.unmount();
+    const lead = mount({ ...ORDER, lastInitiative: { holder: 'self', changed: true, self: 14, opponent: 9 } }, { fake: true });
+    expect(within(orderPanel()).getByText('Você causou mais dano na última rodada de Ataque (14 × 9).')).toBeInTheDocument();
+    lead.unmount();
+    mount({ ...ORDER, lastInitiative: { holder: 'self', changed: false, self: 0, opponent: 0 } }, { fake: true });
+    expect(within(orderPanel()).getByText('Empate em dano na última rodada de Ataque (0 × 0): ela não mudou.')).toBeInTheDocument();
+  });
+
   it('a barra esvazia até o instante da confirmação automática', () => {
     const m = mount(ORDER, { fake: true });
     const fill = () => orderPanel().querySelector<HTMLElement>('[data-auto-barra] > *')!;

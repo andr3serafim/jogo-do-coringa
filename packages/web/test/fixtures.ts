@@ -128,6 +128,8 @@ export interface SideSpec {
   reflect?: boolean;
   absoluteDefense?: boolean;
   resurrections?: Array<{ row: RowName; value: Rank }>;
+  /** O dano causado nesta rodada de Ataque (o placar da iniciativa). */
+  damageThisRound?: number;
 }
 
 export interface ViewSpec {
@@ -149,6 +151,11 @@ export interface ViewSpec {
   opponent?: SideSpec;
   /** Números viram numéricas; objetos entram como estão. */
   graveyard?: Array<Rank | Card>;
+  /**
+   * A última decisão da iniciativa: com quem ficou (`self`/`opponent`), se mudou de mão e o dano de cada lado. Sem o campo, a
+   * iniciativa é a sorteada (`null`).
+   */
+  lastInitiative?: { holder: 'self' | 'opponent'; changed: boolean; self: number; opponent: number };
 }
 
 const SUITS: readonly Suit[] = ['copas', 'ouros', 'espadas', 'paus'];
@@ -205,11 +212,16 @@ export function scenarioAt(spec: ViewSpec = {}): { state: GameState; view: Playe
     p.absoluteDefense = side.absoluteDefense ?? false;
     p.quads = [];
     p.resurrections = (side.resurrections ?? []).map((r) => ({ ...r, formedAtRound: state.round }));
+    p.damageThisRound = side.damageThisRound ?? 0;
   };
 
   state.round = spec.round ?? 10;
   state.roundKind = 'ATTACK';
   state.initiative = spec.initiative === 'opponent' ? other : me;
+  const last = spec.lastInitiative;
+  state.lastInitiative = last
+    ? { player: last.holder === 'opponent' ? other : me, changed: last.changed, damage: { [me]: last.self, [other]: last.opponent } }
+    : null;
   state.turnOrder = spec.firstToAttack === 'opponent' ? [other, me] : [me, other];
   state.turnIndex = 0;
   state.graveyard = (spec.graveyard ?? []).map((c, i): Card =>

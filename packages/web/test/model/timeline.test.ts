@@ -5,6 +5,7 @@ import {
   CATCH_UP_CAP_MS,
   DECISION_CAP_MS,
   INVERT_COOLDOWN_MS,
+  INITIATIVE_BANNER_MS,
   INVERT_MIN_HOLD_MS,
   RARE_SCENE_MS,
   SCENE_INVERT_LEAD_MS,
@@ -127,8 +128,11 @@ const REFLECT_PLAYED: GameEvent = {
 const REFLECT_TRIGGERED: GameEvent = { type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 30 };
 
 /** A soma das cenas raras, que não contam no teto de decisão. */
+/** O que fica fora do teto de decisão: as cenas raras e a faixa da iniciativa (fora do `catchUp`). */
 const rareMs = (beats: Beat[]): number =>
-  beats.filter((b) => b.scene !== null && b.scene in RARE_SCENE_MS).reduce((sum, b) => sum + b.durationMs, 0);
+  beats
+    .filter((b) => (b.scene !== null && b.scene in RARE_SCENE_MS) || (b.event.type === 'InitiativeDecided' && b.durationMs === INITIATIVE_BANNER_MS))
+    .reduce((sum, b) => sum + b.durationMs, 0);
 
 /** Maior número de trocas dentro de uma janela fechada de 1000 ms. */
 function maxSwitchesPerSecond(switches: number[]): number {
@@ -170,7 +174,8 @@ describe('mapeamento evento → batida (spec §4.2)', () => {
       expect(beat!.scene).toBe(scene ?? null);
       if (cards) expect(beat!.cards).toEqual(cards);
       const rare = scene !== undefined && scene in RARE_SCENE_MS ? RARE_SCENE_MS[scene as keyof typeof RARE_SCENE_MS] : null;
-      expect(beat!.durationMs).toBe(kind === 'quiet' ? 0 : (rare ?? BEAT_MS[kind]));
+      const held = event.type === 'InitiativeDecided' ? INITIATIVE_BANNER_MS : null;
+      expect(beat!.durationMs).toBe(kind === 'quiet' ? 0 : (rare ?? held ?? BEAT_MS[kind]));
       expect(beat!.invert !== null).toBe(kind === 'scene');
     });
   }
@@ -241,6 +246,19 @@ describe('buildTimeline', () => {
       ['banner', BEAT_MS.banner / 2],
       ['banner', BEAT_MS.banner / 2],
     ]);
+  });
+
+  it('a faixa da iniciativa segura 1,2 s fora do teto de decisão (o Equipar que vem logo depois a espremia); no catchUp, anda como as outras', () => {
+    const decided: GameEvent = { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } };
+    const events: GameEvent[] = [...ATTACK, DAMAGE, decided, { type: 'RoundStarted', round: 4, kind: 'EQUIP' }];
+    const beats = buildTimeline(events, { ...LIVE, decisionPending: true });
+    const banner = beats.find((b) => b.event.type === 'InitiativeDecided')!;
+    expect(banner.kind).toBe('banner');
+    expect(banner.durationMs).toBe(INITIATIVE_BANNER_MS);
+    expect(INITIATIVE_BANNER_MS).toBe(1_200);
+    expect(timelineMs(beats) - banner.durationMs).toBeLessThanOrEqual(DECISION_CAP_MS);
+    const caught = buildTimeline(events, { ...LIVE, mode: 'catchUp' }).find((b) => b.event.type === 'InitiativeDecided')!;
+    expect(caught.durationMs).toBeLessThan(INITIATIVE_BANNER_MS);
   });
 
   it('resync: nenhuma batida', () => {

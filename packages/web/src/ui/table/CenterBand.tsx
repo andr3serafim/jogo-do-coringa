@@ -31,6 +31,7 @@ import { useSound } from '../sound-context.ts';
 import { useTableUi } from './context.ts';
 import {
   graveyardName,
+  initiativeScoreText,
   initiativeText,
   turnText,
   type TableNames,
@@ -118,6 +119,13 @@ export function CenterBand({
             Iniciativa
           </span>
           <span>{initiativeText(view, names)}</span>
+          {/* O placar (no Ataque) ou o motivo (fora dele): na mesma linha no celular, embaixo no PC. */}
+          <span aria-hidden="true" className="pc:hidden">
+            {' · '}
+          </span>
+          <span data-numero data-placar-iniciativa className="font-texto tabular-nums pc:block pc:text-xs">
+            {initiativeScoreText(view, names)}
+          </span>
         </div>
       </div>
 

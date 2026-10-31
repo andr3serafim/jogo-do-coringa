@@ -445,6 +445,31 @@ describe('mesa: faixa central (spec §3.1)', () => {
     expect(band().getByText('Você')).toBeInTheDocument();
   });
 
+  // O placar da iniciativa (autor, 2026-10-31: "não tá claro pro jogador").
+  it('na rodada de Ataque, a faixa mostra o dano de cada um na rodada, nos números de texto', () => {
+    mount({ ...DRAFT, self: { ...DRAFT.self, damageThisRound: 12 }, opponent: { ...DRAFT.opponent, damageThisRound: 8 } });
+    const score = band().getByText('Dano na rodada: você 12 · Duda 8');
+    expect(score.className).toContain('tabular-nums');
+  });
+
+  it('fora do Ataque, a faixa diz por que a iniciativa está com quem está: sorteada, mais dano ou empate', () => {
+    const equip = { ...DRAFT, phase: { kind: 'EQUIP' } } satisfies ViewSpec;
+    const first = mount(equip);
+    expect(band().getByText('sorteada no início')).toBeInTheDocument();
+    first.unmount();
+    const lead = mount({ ...equip, lastInitiative: { holder: 'self', changed: true, self: 14, opponent: 9 } });
+    expect(band().getByText('mais dano na última rodada (14 × 9)')).toBeInTheDocument();
+    lead.unmount();
+    mount({ ...equip, initiative: 'opponent', lastInitiative: { holder: 'opponent', changed: false, self: 5, opponent: 5 } });
+    expect(band().getByText('empate na última rodada (5 × 5)')).toBeInTheDocument();
+  });
+
+  it('na escolha da ordem, a faixa diz o motivo, não o placar zerado da rodada nova', () => {
+    mount({ ...DRAFT, phase: { kind: 'ORDER_CHOICE', player: 'p1' }, lastInitiative: { holder: 'self', changed: false, self: 20, opponent: 3 } });
+    expect(band().getByText('mais dano na última rodada (20 × 3)')).toBeInTheDocument();
+    expect(band().queryByText(/Dano na rodada/)).not.toBeInTheDocument();
+  });
+
   it('o relógio mostra os segundos que faltam pelo relógio do servidor', () => {
     mount(DRAFT, { state: { deadline: { kind: 'TURN', at: 21_000, players: ['p1'] } } });
     const clock = band().getByRole('timer');
