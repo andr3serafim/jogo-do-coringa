@@ -16,7 +16,10 @@ export {
   absoluteAttackArmed,
   previewAttack,
   previewBetween,
+  stealOutcome,
+  stealPreview,
   type AttackOutcome,
   type AttackPreview,
   type CombatSide,
+  type StealOutcome,
 } from './preview.ts';

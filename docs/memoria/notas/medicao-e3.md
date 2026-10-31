@@ -68,3 +68,21 @@ vez. Contra o greedy:
 8. O Reflect contra um atacante sob Defesa Absoluta segura o golpe, sem devolver dano nem quebrar Q e K (já era [I]).
 9. Na CHOOSE, no tempo esgotado saem as especiais compradas por último.
 10. Na FEWER, quem tem mais especiais que o limite compra `4 − excesso`.
+
+## 5. Remedição depois das respostas de 2026-10-31 (BURN 4 no padrão, o Roubo sem naipe)
+
+Mesmo `pnpm sim:e3` (1000 partidas por série), com o Roubo novo (todo roubo dá dano e cura) e o bot avaliando os dois efeitos.
+Relatório em `packages/sim/reports/e3.md`. A parada combinada (`decisoes.md` 2026-10-31 (8)) **não disparou**.
+
+- **O Roubo continua a jogada mais fraca do A:** o greedy que rouba vence **39,2% (±3,0)** contra o que não rouba (antes, 38,3%).
+  Roubando só acima de um limiar, a melhor marca é 48,5% (limiar 60, quase nunca roubar). Cada roubo agora mexe ~15 de vida (o
+  dano médio de ~54 e a cura de ~60 por partida, em ~7 roubos), mas o A guardado para a Armadilha contra um K da Guarda (que
+  absorve um ataque inteiro) vale mais. O K anula o dano em 19% a 29% dos roubos. **Leitura:** a regra é a que o autor pediu e
+  fica; vai a ele como aviso. Se ele quiser o Roubo competitivo, as alavancas são o dano contar para a iniciativa, o K não
+  anular, ou o Roubo valer o dobro.
+- **Duração e teto sem mudança:** greedy × greedy com mediana de 13 a 14 rodadas de Ataque, turtle × greedy de 19 a 21; nenhuma
+  partida no teto.
+- **BURN 4 contra o acumulador de K:** o acumulador vence 44,7% e chega à Exódia em 20,6% (sem limite: 56,2% e 29,6%). A BURN
+  segue a única forma de limite 4 que faz acumular deixar de compensar.
+- **Queimadas:** 0,1 por partida no greedy; 1,8 no turtle e 1,6 no aleatório, que seguram especiais.
+- **O resto:** a Devastação segue neutra (49,7%); a cura passiva não muda a duração; a Exódia do turtle × greedy fica em ~10%.

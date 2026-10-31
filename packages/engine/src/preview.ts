@@ -83,3 +83,35 @@ export function previewAttack(view: PlayerView, attacker: 'self' | 'opponent'): 
     ? previewBetween(view.self, view.opponent, view.config)
     : previewBetween(view.opponent, view.self, view.config);
 }
+
+/** O efeito de um Roubo na vida (E3, sem naipe desde 2026-10-31): o valor seco, o dano que sai de fato e a cura. */
+export interface StealOutcome {
+  value: number;
+  /** 0 com um K na Guarda da vítima (`blocked`); nunca mata: a vida dela fica em no mínimo 1. */
+  damage: number;
+  /** A cura de quem rouba, cheia mesmo quando o dano sai menor, até a vida inicial. */
+  heal: number;
+  blocked: boolean;
+}
+
+/** A conta do Roubo, a mesma do motor e da prévia da mesa. */
+export function stealOutcome(
+  value: number,
+  victim: { hp: number; guard: readonly unknown[] },
+  thief: { hp: number },
+  config: Pick<RulesConfig, 'hp'>,
+): StealOutcome {
+  const blocked = victim.guard.length > 0;
+  return {
+    value,
+    damage: blocked ? 0 : Math.max(0, Math.min(value, victim.hp - 1)),
+    heal: Math.max(0, Math.min(value, config.hp - thief.hp)),
+    blocked,
+  };
+}
+
+/** A prévia de roubar a carta `targetId` das fileiras do oponente; `null` se ela não está lá. */
+export function stealPreview(view: PlayerView, targetId: string): StealOutcome | null {
+  const card = [...view.opponent.attackRow, ...view.opponent.defenseRow].find((c) => c.id === targetId);
+  return card ? stealOutcome(card.value, view.opponent, view.self, view.config) : null;
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { previewAttack, previewBetween, type AttackOutcome, type AttackPreview } from '../src/preview.ts';
+import { previewAttack, previewBetween, stealPreview, type AttackOutcome, type AttackPreview } from '../src/preview.ts';
 import { viewFor } from '../src/view.ts';
 import type { Action, GameEvent } from '../src/types.ts';
 import { P1, setup } from './helpers.ts';
@@ -162,5 +162,29 @@ describe('preview bate com a resolução', () => {
     expect(counts.DAMAGE).toBeGreaterThanOrEqual(1);
     expect(counts.GUARD_ABSORBS).toBeGreaterThanOrEqual(1);
     expect(counts.REFLECTED).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe('stealPreview (E3, o Roubo sem naipe)', () => {
+  const targetOf = (s: ReturnType<typeof setup>) => s.players[1].attackRow[0]!.id;
+
+  it('o oponente perde o valor seco e quem rouba cura o mesmo', () => {
+    const s = setup({ p1: { hp: 80 }, p2: { attack: [9], attackBuffs: ['J', 'J'] } });
+    expect(stealPreview(viewFor(s, P1), targetOf(s))).toEqual({ value: 9, damage: 9, heal: 9, blocked: false });
+  });
+
+  it('o K na Guarda do oponente anula só o dano; a cura fica cheia', () => {
+    const s = setup({ p1: { hp: 80 }, p2: { attack: [9], guard: 1 } });
+    expect(stealPreview(viewFor(s, P1), targetOf(s))).toEqual({ value: 9, damage: 0, heal: 9, blocked: true });
+  });
+
+  it('o dano não mata (o corte aparece) e a cura para na vida inicial', () => {
+    const s = setup({ p1: { hp: 96 }, p2: { hp: 4, attack: [9] } });
+    expect(stealPreview(viewFor(s, P1), targetOf(s))).toEqual({ value: 9, damage: 3, heal: 4, blocked: false });
+  });
+
+  it('um alvo fora das fileiras do oponente não tem prévia', () => {
+    const s = setup({ p1: { attack: [5] }, p2: { attack: [9] } });
+    expect(stealPreview(viewFor(s, P1), s.players[0].attackRow[0]!.id)).toBeNull();
   });
 });

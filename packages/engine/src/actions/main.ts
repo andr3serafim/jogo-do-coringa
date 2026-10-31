@@ -3,6 +3,7 @@ import { endTurn, openReaction } from '../flow.ts';
 import { assertDistinct, getPlayer, opponentOf, removeById, takeFromHand, toGraveyard } from '../state.ts';
 import { reevaluateQuads, rowCards, validResurrections } from '../quads.ts';
 import { heal, healFromDefense } from '../combat.ts';
+import { stealOutcome } from '../preview.ts';
 import type { GameEvent, GameState, NumCard, PlayerId, PlayerState, ReflectState, RowName, SpecialCard } from '../types.ts';
 
 export function requireMain(s: GameState, playerId: PlayerId): PlayerState {
@@ -136,9 +137,8 @@ export function devastateRow(s: GameState, victim: PlayerState, row: RowName, re
  * mata (a vida fica em no mínimo 1) e não entra em `damageThisRound`, porque não conta para a iniciativa. Por isso não usa o
  * `loseHp` do combate.
  */
-function stealDamage(thief: PlayerState, victim: PlayerState, card: NumCard, ev: GameEvent[]): void {
-  const blocked = victim.guard.length > 0;
-  const damage = blocked ? 0 : Math.max(0, Math.min(card.value, victim.hp - 1));
+function stealDamage(s: GameState, thief: PlayerState, victim: PlayerState, card: NumCard, ev: GameEvent[]): void {
+  const { damage, blocked } = stealOutcome(card.value, victim, thief, s.config);
   victim.hp -= damage;
   ev.push({ type: 'StealDamage', player: thief.id, victim: victim.id, value: card.value, damage, blocked });
 }
@@ -174,7 +174,7 @@ export function steal(s: GameState, p: PlayerState, cardId: string, targetId: st
   target.push(card);
   reevaluateQuads(s, victim, ev);
   reevaluateQuads(s, p, ev);
-  stealDamage(p, victim, card, ev);
+  stealDamage(s, p, victim, card, ev);
   heal(s, p, card.value, 'STEAL', card, ev);
 }
 
