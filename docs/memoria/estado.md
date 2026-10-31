@@ -5,11 +5,10 @@
 
 ## Agora
 
-- **Nada em curso.** O bloco **E3 + F2 + F3** está na `main` (fast-forward da `feat/regras-e3`, com `pnpm check` e as duas CI
-  verdes). Planos: `docs/superpowers/plans/2026-10-30-e3-f2-f3-plano-1.md` e `…-plano-2.md`; registro em `diario.md`
-  2026-10-31 (7).
-- **Próximo passo exato:** esperar o autor (playtest das regras novas e as perguntas abaixo). A fila do sub-projeto 5 acabou; o
-  que vier depende da resposta dele.
+- **Branch:** `feat/cura-passiva`, no checkout principal `D:andr3jogo-coringa`, a partir da `main` (`dfeb083`).
+- **Em curso:** a marca "Cura passiva" no campo enquanto houver 2 K ou mais na Guarda (`decisoes.md` 2026-10-31 (10)). O
+  autor também respondeu que o dano do Roubo fica fora da iniciativa (nada muda no código).
+- **Próximo passo exato:** o predicado `defenseHealActive` no motor (teste primeiro; `healFromDefense` passa a usá-lo, sem mudar golden), a marca "Cura passiva" em `Zones` (`PlayerField.tsx`), o item do resumo das regras renomeado, os testes da mesa; depois `pnpm check`, `pnpm e2e`, push e as duas CI.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
@@ -31,8 +30,6 @@ Vazia: o bloco E3 + F2 + F3 era o último item.
   - **O Roubo segue fraco:** mesmo com dano e cura, o bot que rouba vence 39% contra o que não rouba (o A vale mais como
     Armadilha contra um K). A regra é a que ele pediu; se ele quiser o Roubo competitivo, as alavancas são o dano contar para a
     iniciativa, o K não anular ou o Roubo valer mais.
-  - **O dano do Roubo conta para a iniciativa?** Hoje não (regra de 2026-10-30, que ele não mudou). Com o placar da iniciativa na
-    tela, ele vai ver a vida do oponente cair no Roubo sem o placar subir.
   - **O desenho do naipe:** a regra não tem mais naipe, mas as cartas seguem desenhadas com ele ([I] em `decisoes.md` 2026-10-31
     (8)). Tirar o desenho é outra tarefa, se ele quiser.
   - **As [I] do plano 2:** o placar da iniciativa na faixa do centro e o motivo na pergunta da ordem; a faixa do fim de rodada

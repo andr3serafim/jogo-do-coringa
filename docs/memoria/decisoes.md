@@ -6,6 +6,25 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-10-31 (10): o dano do Roubo fora da iniciativa; a cura passiva sinalizada
+
+Depois do merge do bloco E3 + F2 + F3 (resposta à pergunta do fechamento e o primeiro ponto do playtest):
+
+> O dano do Roubo não deve contar para a iniciativa. Prossiga.
+>
+> Pontos meus após jogar:
+>
+> 1. quando 2 K estiverem equipados, sinalizar ao jogador cura passiva ativa (enquanto durar).
+
+**Leitura:** a regra de 2026-10-30 fica como está: o placar da iniciativa soma só o dano do Ataque, e o Roubo não entra. A cura
+passiva (2 K ou mais na Guarda, regra da E3) ganha uma marca de estado no campo, ao lado da Guarda, que aparece quando o segundo
+K entra e some quando a Guarda cai abaixo de 2. **[I]** A marca vale para os dois lados (é informação pública, como a Defesa
+Absoluta), diz só "Cura passiva" (sem o multiplicador dos Q, que ao lado da contagem da Guarda seria lido como o número de K), e
+quem decide se está ligada é o motor, não a tela. O item do resumo das regras passa a se chamar "Cura passiva (pela Defesa)",
+para o jogador achar o nome da marca. Nada muda na regra.
+
+---
+
 ## 2026-10-31 (9): conduzir sozinho até o fim das pendências
 
 No meio do trabalho das respostas de 2026-10-31 (8):
