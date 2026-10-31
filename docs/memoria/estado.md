@@ -14,6 +14,9 @@
   Tarefa 2, a Devastação (`44b6672`), com os botões mínimos na web (a cena é do plano 2). Tarefa 3, o Roubo (`40a19ae`): a web
   só reconhece a jogada e os eventos; a escolha do alvo e da fileira de destino é do plano 2 (o teste de propriedade das jogadas
   da mesa pula o `STEAL`, com o motivo escrito). Tarefa 4, a cura passiva (`966960b`), com `defenseHealGuard` na config.
+  Tarefa 5, o limite de especiais (`76805ba`): `specialLimit` com BURN, CHOOSE e FEWER; **o padrão fica sem limite até o autor
+  escolher** (decisão minha na execução, no ledger e no plano: a BURN no padrão queimava o J que a semente do tutorial garante).
+  Achado para o relatório: com a BURN, uma mão cheia de especiais que o jogador não usa queima toda especial nova.
 - **Próximo passo exato:** seguir o plano 1 da primeira tarefa sem commit (`git log feat/regras-e3` diz até onde foi): 4 cura passiva, 5 limite de especiais, 6 bots, 7 medição. Cada regra nova regrava as partidas de
   referência e troca só o digest da versão 4. No fim, levar ao autor as formas da penalidade com os números e as leituras [I] do
   plano, e **parar** até ele responder.
