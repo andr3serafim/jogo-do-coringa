@@ -136,6 +136,7 @@ export function finishGame(record: RoomRecord, cause: OutcomeCause, now: number)
   if (result) record.score[result.winner as SeatId] += 1;
   game.cause = cause;
   game.phaseDeadlineAt = null;
+  game.clockRunsFrom = null;
   game.pausedTurnMs = null;
   game.heldPass = null;
   record.agenda = withoutKinds(record.agenda, ['phase', 'reactionMin', 'reconnect', 'presenceSweep']);

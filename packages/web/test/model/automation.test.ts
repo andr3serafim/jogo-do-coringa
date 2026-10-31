@@ -398,6 +398,18 @@ describe('Session: envio antecipado do Equipar (spec §3.5)', () => {
     });
   });
 
+  it('com folga de cena (runsFrom), o envio espera o prazo de verdade, não o relógio parado (sub-projeto 6 §9)', () => {
+    // Relógio parado até 7 s; o prazo é 10 s. Faltam 8 s de verdade, embora a tela mostre 3 s.
+    const { connection, clock, session } = setup({ now: 2_000 });
+    connection.emitState(stateMessage(equipView([5, 6, 4]), { epoch: 7, deadline: { ...EQUIP_DEADLINE, runsFrom: 7_000 } }));
+    expect(connection.remainingMs({ ...EQUIP_DEADLINE, runsFrom: 7_000 })).toBe(3_000);
+    session.equipChoose('DEF');
+    clock.advance(6_499);
+    expect(connection.sent).toHaveLength(0);
+    clock.advance(1);
+    expect(connection.sent).toHaveLength(1);
+  });
+
   it('desfazer até zero cancela o envio', () => {
     const { connection, clock, session } = equipSetup(5_000);
     session.equipChoose('ATK');

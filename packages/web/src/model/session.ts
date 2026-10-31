@@ -521,7 +521,9 @@ export class Session {
     };
     // Com tempo de sobra, `shouldAutoSendEquip` só diz se as outras condições valem.
     if (!shouldAutoSendEquip({ ...gates, remainingMs: 0 })) return;
-    const remainingMs = this.#connection.remainingMs(state.deadline);
+    // O tempo de verdade até o prazo, sem o relógio parado da folga de cena (que mostra menos do que falta).
+    const { kind, at, players } = state.deadline;
+    const remainingMs = this.#connection.remainingMs({ kind, at, players });
     if (shouldAutoSendEquip({ ...gates, remainingMs })) {
       void this.#sendEquip().catch(noop);
       return;

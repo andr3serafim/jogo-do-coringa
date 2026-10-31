@@ -603,6 +603,28 @@ describe('RoomClient: relógio do servidor', () => {
     const { client, clock } = setup();
     expect(client.remainingMs({ kind: 'TURN', at: clock.time + 4_000, players: [] })).toBe(4_000);
   });
+
+  it('com folga de cena, o relógio fica parado até runsFrom e depois corre', () => {
+    const { client, clock, last } = connected();
+    const t = 1_000_000;
+    clock.time = t + 180_000;
+    last().serverSend(stateMsg(1, { serverNow: t }));
+    const deadline = { kind: 'TURN' as const, at: t + 33_000, players: [], runsFrom: t + 3_000 };
+    expect(client.remainingMs(deadline)).toBe(30_000);
+    clock.time += 2_000;
+    expect(client.remainingMs(deadline)).toBe(30_000);
+    clock.time += 2_000;
+    expect(client.remainingMs(deadline)).toBe(29_000);
+  });
+
+  it('runsFrom no passado vale o de hoje (reconexão no meio da folga), e o tempo nunca fica negativo', () => {
+    const { client, clock, last } = connected();
+    clock.time = 50_000;
+    last().serverSend(stateMsg(1, { serverNow: 50_000 }));
+    expect(client.remainingMs({ kind: 'TURN', at: 60_000, players: [], runsFrom: 45_000 })).toBe(10_000);
+    expect(client.remainingMs({ kind: 'TURN', at: 49_000, players: [], runsFrom: 40_000 })).toBe(0);
+    expect(client.remainingMs({ kind: 'TURN', at: 52_000, players: [], runsFrom: 55_000 })).toBe(0);
+  });
 });
 
 describe('RoomClient: reconexão', () => {

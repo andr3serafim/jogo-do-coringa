@@ -62,7 +62,7 @@ export interface RoomConnection {
   /** `options.auto` marca a jogada como automática (passe ou ordem confirmados sem o jogador). */
   act(action: PlayerAction, options?: { auto?: boolean }): Promise<AckMessage>;
   concede(): Promise<AckMessage>;
-  /** Tempo que falta para o prazo, pelo relógio do servidor (nunca negativo). */
+  /** Tempo que falta para o prazo, pelo relógio do servidor (nunca negativo); parado até `runsFrom`. */
   remainingMs(deadline: Deadline): number;
 }
 
@@ -223,7 +223,9 @@ export class RoomClient implements RoomConnection {
   }
 
   remainingMs(deadline: Deadline): number {
-    return Math.max(0, deadline.at - (this.#now() + this.#clockOffset));
+    // Parado durante a folga de cena: até `runsFrom`, o tempo mostrado é o da decisão inteira.
+    const serverNow = this.#now() + this.#clockOffset;
+    return Math.max(0, deadline.at - Math.max(serverNow, deadline.runsFrom ?? -Infinity));
   }
 
   /** Cada listener isolado: a exceção de um vai ao `console.error` e não impede os outros nem o resto do cliente. */

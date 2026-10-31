@@ -1,5 +1,6 @@
 import { actingPlayers, applyAction, createGame, legalActions, viewFor } from '@coringa/engine';
 import type { GameState } from '@coringa/engine';
+import { SCENE_MS } from '@coringa/protocol';
 import type { PlayerAction, StateMessage } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
 import { handId, setup, values } from '@coringa/engine/testing';
@@ -281,13 +282,20 @@ describe('turno pausa na janela do oponente (§6.2)', () => {
     });
     const rec = h.core.record!;
     expect(phaseOf(h)).toMatchObject({ kind: 'REACTION', responder: 'p1', trigger: 'REFLECT_PLAYED' });
-    expect(lastState(h, p1).deadline!.at).toBe(h.now + TIMERS.reactionMs);
+    // A cena do Reflect entra como folga de cena (sub-projeto 6 §9).
+    expect(lastState(h, p1).deadline!.at).toBe(h.now + TIMERS.reactionMs + SCENE_MS.ReflectPlayed!);
     // O ataque encerra o turno: não há tempo de turno para guardar.
     expect(rec.game!.pausedTurnMs).toBeNull();
     h.advance(TIMERS.reactionMinMs);
     await act(h, p1, 'p', { type: 'PASS' });
     expect(phaseOf(h)).toEqual({ kind: 'ATTACK_MAIN', player: 'p2' });
-    expect(lastState(h, p2).deadline).toEqual({ kind: 'TURN', at: h.now + 30_000, players: ['p2'] });
+    // O ataque refletido (`ReflectTriggered`) também tem cena: o turno começa cheio, mais a folga dela.
+    expect(lastState(h, p2).deadline).toEqual({
+      kind: 'TURN',
+      at: h.now + 30_000 + SCENE_MS.ReflectTriggered!,
+      players: ['p2'],
+      runsFrom: h.now + SCENE_MS.ReflectTriggered!,
+    });
   });
 
   it('Devastação → Reflect → resposta: o turno de quem lançou volta com o tempo que tinha (F3)', async () => {
@@ -627,6 +635,62 @@ describe('nenhum TIMEOUT injetado é recusado pelo motor', () => {
   });
 });
 
+describe('folga de cena (sub-projeto 6 §9)', () => {
+  const attack = SCENE_MS.AbsoluteAttack!;
+  const defense = SCENE_MS.AbsoluteDefenseStarted!;
+
+  it('ataque com 4 J: o turno seguinte começa com 30 s mais a folga do Ataque Absoluto', async () => {
+    const state = setup({ p1: { attack: [5, 6, 7], attackBuffs: ['J', 'J', 'J', 'J'] }, p2: { defense: [8, 9] } });
+    const { h, p1, p2 } = await armed(state);
+    await act(h, p1, 'atk', { type: 'DECLARE_ATTACK' });
+    h.advance(TIMERS.reactionMinMs);
+    await act(h, p2, 'p', { type: 'PASS' });
+    expect(phaseOf(h)).toEqual({ kind: 'ATTACK_MAIN', player: 'p2' });
+    for (const sock of [p1, p2]) {
+      const st = lastState(h, sock);
+      expect(st.deadline!.at - st.serverNow).toBe(TIMERS.turnMs + attack);
+      expect(st.deadline!.runsFrom).toBe(st.serverNow + attack);
+    }
+    // Passada a folga, quem volta à sala recebe o prazo sem `runsFrom` (o relógio já corre).
+    h.advance(attack);
+    expect(stateFor(h.core.record!, 'p2', [], h.now).deadline).not.toHaveProperty('runsFrom');
+    // O estouro vem no prazo com a folga, mais a margem de rede.
+    h.advance(TIMERS.turnMs + TIMERS.graceMs - 1);
+    expect(phaseOf(h)).toEqual({ kind: 'ATTACK_MAIN', player: 'p2' });
+    h.advance(1);
+    expect(phaseOf(h)).not.toEqual({ kind: 'ATTACK_MAIN', player: 'p2' });
+  });
+
+  it('folga de cena na mesma fase: o 4º Q estende o prazo do turno, sem trocar a época', async () => {
+    const state = setup({ p1: { hand: ['Q'], defenseBuffs: ['Q', 'Q', 'Q'] } });
+    const { h, p1 } = await armed(state);
+    const rec = h.core.record!;
+    const epoch = rec.epoch;
+    const before = rec.game!.phaseDeadlineAt!;
+    h.advance(10_000);
+    await act(h, p1, 'q', { type: 'PLAY_Q', cardId: handId(state, 'p1', 'Q') });
+    expect(rec.epoch).toBe(epoch);
+    expect(rec.game!.phaseDeadlineAt).toBe(before + defense);
+    expect(lastState(h, p1).deadline).toEqual({ kind: 'TURN', at: before + defense, players: ['p1'], runsFrom: h.now + defense });
+    expect(rec.agenda.filter((item) => item.kind === 'phase')).toEqual([{ kind: 'phase', at: before + defense + TIMERS.graceMs, epoch }]);
+    h.advance(before + defense + TIMERS.graceMs - h.now - 1);
+    expect(phaseOf(h)).toEqual({ kind: 'ATTACK_MAIN', player: 'p1' });
+    h.advance(1);
+    expect(phaseOf(h)).not.toEqual({ kind: 'ATTACK_MAIN', player: 'p1' });
+  });
+
+  it('passo sem cena não ganha folga', async () => {
+    const { h, p1, p2 } = await armed(setup({ p1: { attack: [5] } }));
+    await act(h, p1, 'atk', { type: 'DECLARE_ATTACK' });
+    h.advance(TIMERS.reactionMinMs);
+    await act(h, p2, 'p', { type: 'PASS' });
+    const st = lastState(h, p2);
+    expect(st.deadline).toEqual({ kind: 'TURN', at: st.serverNow + TIMERS.turnMs, players: ['p2'] });
+    expect(st.deadline).not.toHaveProperty('runsFrom');
+    expect(h.core.record!.game!.clockRunsFrom ?? null).toBeNull();
+  });
+});
+
 describe('schedulePhase e stateFor direto', () => {
   it('sem partida lança; GAME_OVER não tem prazo nem item na agenda', async () => {
     const lobby = await Harness.lobby();
@@ -636,9 +700,11 @@ describe('schedulePhase e stateFor direto', () => {
     const rec = h.core.record!;
     rec.game!.state.phase = { kind: 'GAME_OVER', result: { kind: 'WIN', winner: 'p1', reason: 'HP' } };
     rec.game!.pausedTurnMs = 123;
-    schedulePhase(rec, { key: 'outra', phase: { kind: 'EQUIP' }, deadlineAt: null }, [], h.now);
+    rec.game!.clockRunsFrom = h.now + 5_000;
+    schedulePhase(rec, { key: 'outra', phase: { kind: 'EQUIP' }, deadlineAt: null }, [{ type: 'AbsoluteAttack', player: 'p1' }], h.now);
     expect(rec.game!.phaseDeadlineAt).toBeNull();
     expect(rec.game!.pausedTurnMs).toBeNull();
+    expect(rec.game!.clockRunsFrom).toBeNull();
     expect(rec.agenda.some((item) => item.kind === 'phase')).toBe(false);
     expect(stateFor(rec, 'p1', [], h.now).deadline).toBeNull();
   });

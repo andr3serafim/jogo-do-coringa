@@ -1,4 +1,5 @@
 import type { GameEvent, Phase } from '@coringa/engine';
+import { sceneAllowanceMs } from '@coringa/protocol';
 import { withItem, withoutKinds } from './agenda.ts';
 import { phaseKey } from './epoch.ts';
 import { TIMERS } from './timers.ts';
@@ -23,11 +24,23 @@ export interface PhaseSnapshot {
  * - A janela aberta por K ou Reflect no turno do oponente guarda o que sobrou do turno; a de um ataque, não
  *   (o turno acaba junto com ela).
  * - `GAME_OVER` não tem prazo.
+ *
+ * Folga de cena (sub-projeto 6 §9): o passo com cena rara (`sceneAllowanceMs` dos eventos) soma a cena ao prazo, e o relógio
+ * fica parado até `clockRunsFrom`. Na mesma época (a Defesa Absoluta no próprio turno), o prazo que já existia cresce e o
+ * alarme o acompanha; numa época nova, a folga entra na duração da fase.
  */
 export function schedulePhase(record: RoomRecord, prev: PhaseSnapshot, events: GameEvent[], now: number): void {
   const game = record.game;
   if (!game) throw new Error('schedulePhase sem partida');
-  if (phaseKey(game.state) === prev.key) return;
+  const allowance = sceneAllowanceMs(events);
+  if (phaseKey(game.state) === prev.key) {
+    if (allowance > 0 && game.phaseDeadlineAt !== null) {
+      game.phaseDeadlineAt += allowance;
+      game.clockRunsFrom = Math.max(now, game.clockRunsFrom ?? now) + allowance;
+      armPhaseAlarm(record, game.phaseDeadlineAt);
+    }
+    return;
+  }
 
   const phase = game.state.phase;
   game.phaseStartedAt = now;
@@ -65,13 +78,19 @@ export function schedulePhase(record: RoomRecord, prev: PhaseSnapshot, events: G
 
   if (durationMs === null) {
     game.phaseDeadlineAt = null;
+    game.clockRunsFrom = null;
     return;
   }
-  game.phaseDeadlineAt = now + durationMs;
-  // O prazo mostrado é `phaseDeadlineAt`; o `TIMEOUT` só vale depois da margem de rede (spec §6.6).
-  record.agenda = withItem(record.agenda, {
+  game.phaseDeadlineAt = now + durationMs + allowance;
+  game.clockRunsFrom = allowance > 0 ? now + allowance : null;
+  armPhaseAlarm(record, game.phaseDeadlineAt);
+}
+
+/** O prazo mostrado é `deadlineAt`; o `TIMEOUT` só vale depois da margem de rede (spec §6.6). Troca o item `phase` que houver. */
+function armPhaseAlarm(record: RoomRecord, deadlineAt: number): void {
+  record.agenda = withItem(withoutKinds(record.agenda, ['phase']), {
     kind: 'phase',
-    at: game.phaseDeadlineAt + TIMERS.graceMs,
+    at: deadlineAt + TIMERS.graceMs,
     epoch: record.epoch,
   });
 }

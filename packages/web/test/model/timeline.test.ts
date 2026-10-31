@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { GameEvent, NumCard, SpecialCard } from '@coringa/engine';
+import { SCENE_MS } from '@coringa/protocol';
 import {
   BEAT_MS,
   CATCH_UP_CAP_MS,
@@ -185,6 +186,17 @@ describe('mapeamento evento → batida (spec §4.2)', () => {
 describe('as cenas raras (U3 do sub-projeto 5)', () => {
   it('o Ataque e a Defesa Absoluta duram 3 s (o autor pediu em 2026-10-30, eram 2,6 s); a Exódia, 4,2 s', () => {
     expect(RARE_SCENE_MS).toEqual({ EXODIA: 4_200, ABSOLUTE_ATTACK: 3_000, ABSOLUTE_DEFENSE: 3_000, DEVASTATION: 3_000 });
+  });
+
+  it('os tempos das cenas são os da tabela do protocolo, a mesma que o servidor usa na folga (sub-projeto 6 §9)', () => {
+    expect(RARE_SCENE_MS).toEqual({
+      EXODIA: SCENE_MS.Exodia,
+      ABSOLUTE_ATTACK: SCENE_MS.AbsoluteAttack,
+      ABSOLUTE_DEFENSE: SCENE_MS.AbsoluteDefenseStarted,
+      DEVASTATION: SCENE_MS.DevastationCast,
+    });
+    expect(BEAT_MS.scene).toBe(SCENE_MS.ReflectPlayed);
+    expect(SCENE_MS.ReflectTriggered).toBe(SCENE_MS.ReflectPlayed);
   });
 
   it('a Devastação (F3: "cinematográfica, à altura") é rara como os Absolutos: 3 s, o carimbo e a inversão a 0,9 s', () => {

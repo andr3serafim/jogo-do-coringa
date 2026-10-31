@@ -362,8 +362,9 @@ export class FakeConnection implements RoomConnection {
     return this.#answer(id);
   }
 
+  /** Como o `RoomClient`: parado até `runsFrom` (folga de cena), depois corre. */
   remainingMs(deadline: Deadline): number {
-    return Math.max(0, deadline.at - this.now);
+    return Math.max(0, deadline.at - Math.max(this.now, deadline.runsFrom ?? -Infinity));
   }
 
   #nextId(): string {

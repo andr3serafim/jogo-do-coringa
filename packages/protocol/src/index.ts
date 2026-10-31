@@ -4,3 +4,4 @@ export type * from './messages.ts';
 export * from './code.ts';
 export * from './nickname.ts';
 export * from './client.ts';
+export * from './scenes.ts';

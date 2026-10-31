@@ -32,6 +32,11 @@ export interface GameRecord {
   recent: StepRecord[];
   phaseStartedAt: number;
   phaseDeadlineAt: number | null;
+  /**
+   * Folga de cena (sub-projeto 6 §9): até este instante o relógio da decisão fica parado (a cena rara está tocando). Opcional:
+   * o registro de antes do campo vale `null`.
+   */
+  clockRunsFrom?: number | null;
   /** Tempo de turno que sobrou quando K ou Reflect abriram a janela de reação no meio do turno (turno pausado durante a janela). */
   pausedTurnMs: number | null;
   /** PASS guardado durante a janela de reação mínima; `auto` marca o passe automático, que não zera os estouros. */

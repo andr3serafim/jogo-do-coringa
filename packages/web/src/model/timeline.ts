@@ -6,15 +6,24 @@
 // As batidas são contíguas: `startMs` da batida i+1 = `startMs + durationMs` da batida i. Não há
 // sobreposição; o número de dano, a faixa e a tremida acontecem dentro da duração da própria batida.
 import type { GameEvent } from '@coringa/engine';
+import { SCENE_MS } from '@coringa/protocol';
+
+/** Duração de uma cena na tabela do protocolo (a mesma que dá a folga do relógio no servidor, sub-projeto 6 §9). */
+const sceneMs = (type: GameEvent['type']): number => SCENE_MS[type] ?? 0;
 
 /** Duração base de cada tipo de batida (spec §4.1). `scene` é a cena comum (o Reflect); as raras têm a sua, em `RARE_SCENE_MS`. */
-export const BEAT_MS = { move: 300, damage: 600, banner: 400, scene: 1_500 } as const;
+export const BEAT_MS = { move: 300, damage: 600, banner: 400, scene: sceneMs('ReflectPlayed') } as const;
 /**
  * As cenas raras (sub-projeto 5, U3): mais longas que a comum, e fora do teto de decisão (o resto da linha do tempo encolhe para
  * caber nele; elas não). São raras, a Exódia acaba a partida, e o toque ou o Esc pulam na hora. Os Absolutos passaram de 2,6 s
- * para 3 s a pedido do autor (2026-10-30).
+ * para 3 s a pedido do autor (2026-10-30). Os tempos vêm da tabela do protocolo.
  */
-export const RARE_SCENE_MS = { EXODIA: 4_200, ABSOLUTE_ATTACK: 3_000, ABSOLUTE_DEFENSE: 3_000, DEVASTATION: 3_000 } as const;
+export const RARE_SCENE_MS = {
+  EXODIA: sceneMs('Exodia'),
+  ABSOLUTE_ATTACK: sceneMs('AbsoluteAttack'),
+  ABSOLUTE_DEFENSE: sceneMs('AbsoluteDefenseStarted'),
+  DEVASTATION: sceneMs('DevastationCast'),
+} as const;
 /**
  * A faixa da decisão da iniciativa segura a leitura (autor, 2026-10-31: "a iniciativa muda pro adversário, eu também não vejo o
  * momento"): fica fora do teto de decisão, como as cenas raras, porque o Equipar que vem logo depois do fim da rodada de Ataque a

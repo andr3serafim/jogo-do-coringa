@@ -39,6 +39,11 @@ export interface Deadline {
   /** Instante (relógio do servidor, em ms) do prazo. */
   at: number;
   players: PlayerId[];
+  /**
+   * Folga de cena (sub-projeto 6 §9): instante (relógio do servidor) em que o relógio começa a correr. Antes dele, o tempo
+   * mostrado fica parado em `at − runsFrom`. Só vem quando ainda está no futuro.
+   */
+  runsFrom?: number;
 }
 
 /** Cliente → servidor (§4.3). */

@@ -94,6 +94,9 @@ export function stateFor(
     ...flags,
   };
   if (game.state.phase.kind === 'REACTION' && game.pausedTurnMs !== null) message.pausedTurnMs = game.pausedTurnMs;
+  // Folga de cena: o relógio parado só vai enquanto ainda está no futuro (quem volta depois dela recebe o prazo correndo).
+  const runsFrom = game.clockRunsFrom ?? null;
+  if (deadline && runsFrom !== null && runsFrom > now) deadline.runsFrom = runsFrom;
   return message;
 }
 
