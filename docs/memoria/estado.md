@@ -11,8 +11,10 @@
   em `docs/superpowers/plans/2026-10-30-e3-f2-f3-plano-1.md`. Nada do bloco entra na `main` antes da resposta do autor.
 - **Feito:** Tarefa 1, o Reflect reativo (`d165891`): `RULES_VERSION` 4 e `STATE_SCHEMA` 4; a spec 1 já descreve a regra nova.
   O teste do roteiro do terminal (`sim/test/online.test.ts`) tira os digests de `node packages/sim/scripts/roteiro-digest.ts`.
-  Tarefa 2, a Devastação (`44b6672`), com os botões mínimos na web (a cena é do plano 2).
-- **Próximo passo exato:** seguir o plano 1 da primeira tarefa sem commit (`git log feat/regras-e3` diz até onde foi): 3 Roubo, 4 cura passiva, 5 limite de especiais, 6 bots, 7 medição. Cada regra nova regrava as partidas de
+  Tarefa 2, a Devastação (`44b6672`), com os botões mínimos na web (a cena é do plano 2). Tarefa 3, o Roubo (`40a19ae`): a web
+  só reconhece a jogada e os eventos; a escolha do alvo e da fileira de destino é do plano 2 (o teste de propriedade das jogadas
+  da mesa pula o `STEAL`, com o motivo escrito).
+- **Próximo passo exato:** seguir o plano 1 da primeira tarefa sem commit (`git log feat/regras-e3` diz até onde foi): 4 cura passiva, 5 limite de especiais, 6 bots, 7 medição. Cada regra nova regrava as partidas de
   referência e troca só o digest da versão 4. No fim, levar ao autor as formas da penalidade com os números e as leituras [I] do
   plano, e **parar** até ele responder.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
