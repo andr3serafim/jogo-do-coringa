@@ -113,6 +113,12 @@ Substitui o nome e a barra de vida que hoje ficam em cada campo. É uma faixa de
 - **O que sai dos campos:** o nome, a barra e o número de vida de cada campo (o resto do campo fica). As marcas de estado (Defesa
   Absoluta, Cura passiva, Ressurreição, Ataque Absoluto armado) continuam no campo. **[I]** A Defesa Absoluta ativa também
   aparece no placar como uma insígnia de escudo no canto do retrato (§7.2).
+- **O relógio [I]:** sai da faixa do meio e vai para a placa do placar, como o cronômetro entre as barras de um jogo de luta: o
+  número grande no meio, "RODADA 7" em cima, a fase embaixo. Sem relógio (treino), o número da rodada fica grande no lugar dele.
+  A urgência dos últimos 5 s segue a de hoje (cor e forma, sem piscar).
+- **A faixa do meio [I]:** fica com o monte, o cemitério e a linha da fase por extenso ("Ataque · sua vez"). A marca e o texto da
+  iniciativa saem dela (a espada os substitui, §4); o anúncio para leitor de tela (`aria-live`) continua, com o mesmo texto.
+- **Os controles da mesa** (menu, histórico, som) ficam onde estão hoje.
 
 ## 4. A iniciativa: a espada e a fita [A]
 
@@ -165,6 +171,13 @@ forma) → **nome carimbado** → **impacto** → **o rastro que fica na mesa**.
   espelha: o personagem e a aura saem do lado dele, os golpes vão para o seu retrato, a insígnia e o rastro ficam no campo dele.
 - **Pular:** um toque na mesa encerra a cena e mostra o estado final (o que já existe para as cenas raras).
 - **Uma inversão por cena**, no instante indicado em cada uma (na Ressurreição, nenhuma).
+- **As cartas da cena são cópias [I]:** os J que entram no Coringa, os Q que cravam no escudo, os K dos pilares e o K, o J e o Q
+  do espelho são desenhos da cena. Quando ela acaba, cada carta de verdade está onde o motor diz (o J gasto pelo Ataque Absoluto
+  no cemitério e os outros nos buffs; os Q nos buffs; as cartas do Reflect no cemitério), pelas batidas de movimento que já
+  existem.
+- **No celular em pé [I]:** a faixa da cena ocupa a altura entre o placar e a mão; o personagem fica no meio, na horizontal; o
+  feixe, o cometa e os golpes sobem até o retrato do alvo no placar, num ângulo mais fechado. Os tamanhos encolhem na proporção da
+  largura (o protótipo é um palco de 1000 × 560 px), mas a ordem dos passos e os instantes da inversão não mudam.
 
 As durações abaixo são as do protótipo e entram em `RARE_SCENE_MS`; ajustes de até ~15% são do construtor.
 
@@ -193,7 +206,7 @@ As durações abaixo são as do protótipo e entram em `RARE_SCENE_MS`; ajustes 
 
 ### 7.3 Exódia (~5,8 s) [A]
 
-1. Os 4 K chegam um por um, girando, e cada um ergue um **pilar de luz** do chão. **Sem feixes** de energia dos K até o
+1. Os 4 K saem da Guarda e chegam um por um, girando, e cada um ergue um **pilar de luz** do chão. **Sem feixes** de energia dos K até o
    Coringa [A].
 2. O Coringa no centro ganha uma aura vermelha e dourada (a mesma técnica do Ataque, nas cores da Exódia), que cresce.
 3. Uma **coroa** de metal desce do alto e crava na cabeça dele: a aura explode, os pilares estouram para os lados, uma onda de
@@ -203,6 +216,7 @@ As durações abaixo são as do protótipo e entram em `RARE_SCENE_MS`; ajustes 
 
 ### 7.4 Devastação: o terremoto (~3,1 s) [A]
 
+0. As cartas usadas para lançar (`DevastationCast`) vão ao cemitério como hoje, antes da cena.
 1. **A terra ronca:** o campo do alvo escurece um pouco, o tremor cresce durante ~1 s, pedrinhas pulam na mesa e as cartas da
    fileira-alvo sacodem. O retrato de quem lançou brilha em vermelho.
 2. Uma fenda corre ao longo da fileira.
@@ -266,7 +280,10 @@ Equipar). Uma cena de 5 s comeria 1/6 do turno de quem joga em seguida, sem culp
 
 - **O servidor dá folga de cena:** quando um passo produz um evento de cena rara (os seis acima), o prazo da decisão seguinte
   ganha a duração dessa cena (a mesma tabela de durações, num lugar só, lida pelo servidor e pela web). Pular a cena não dá tempo
-  extra a ninguém: a folga é fixa.
+  extra a ninguém: a folga é fixa. Duas cenas no mesmo passo (ex.: a Devastação refletida) somam, até um teto de 8 s. A decisão
+  que ganha a folga é a que tem o prazo calculado nesse passo (o turno seguinte, a janela de reação ou o Equipar).
+- **O relógio na tela:** durante a cena, o relógio mostra o tempo da decisão sem a folga, parado, e começa a correr quando ela
+  acaba (ou é pulada), para ninguém ver "35 s" num turno de 30.
 - Isso é mudança no núcleo do servidor (`timing.ts`) e na forma do prazo que a sala guarda; se estado antigo não servir, sobe
   `STATE_SCHEMA` (as salas abertas encerram no deploy, como já é a regra).
 - No treino (sem relógio), nada muda.
