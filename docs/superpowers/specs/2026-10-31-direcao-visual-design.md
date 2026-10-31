@@ -279,11 +279,11 @@ os mesmos princípios, sem cena nova:
 - **Teto:** nada disso aumenta o teto de decisão (`DECISION_CAP_MS`); o que não couber encurta.
 - Como não houve rascunho, este item fecha com o autor jogando a primeira fatia que o tiver (§14), não por protótipo.
 
-## 9. O relógio durante as cenas (pendente: decisão do autor)
+## 9. O relógio para durante as cenas [A]
 
 As cenas aprovadas duram de 3 a 6 s, e o servidor hoje não para o relógio (30 s por turno, 8 s na janela de reação, 40 s no
-Equipar; regra [A] da spec do servidor §6.2). Uma cena de 5 s comeria 1/6 do turno de quem joga em seguida, sem culpa dele. A
-recomendação, que muda uma regra do servidor e por isso espera o autor:
+Equipar; regra [A] da spec do servidor §6.2). Uma cena de 5 s comeria 1/6 do turno de quem joga em seguida, sem culpa dele. O
+autor decidiu "Parar o relógio" (`decisoes.md` 2026-10-31 (11)), o que muda aquela regra do servidor:
 
 - **O servidor dá folga de cena:** quando um passo produz um evento de cena rara (os seis acima), o prazo da decisão seguinte
   ganha a duração dessa cena. A tabela de durações mora num lugar só que os dois lados importam: a entrada principal de
@@ -295,8 +295,7 @@ recomendação, que muda uma regra do servidor e por isso espera o autor:
 - Isso é mudança no núcleo do servidor (`timing.ts`) e na forma do prazo que a sala guarda; se estado antigo não servir, sobe
   `STATE_SCHEMA` (as salas abertas encerram no deploy, como já é a regra).
 - No treino (sem relógio), nada muda.
-- **A alternativa** é deixar o relógio correr como hoje: nada muda no servidor, e quem quiser o tempo de volta pula a cena com um
-  toque. O custo é a cena virar um castigo para quem joga em seguida, que é o oposto do que ela quer causar.
+- A spec do servidor (§6.2) ganha uma nota apontando para cá, quando a fatia 1 entrar.
 
 ## 10. Som [I]
 
@@ -341,7 +340,7 @@ gesto do usuário.
 Cada fatia é uma branch com `pnpm check`, `pnpm e2e` e as duas CI verdes, e vai para a `main` sozinha:
 
 1. **A base:** o placar de luta, a espada e a fita, o golpe comum, a textura de papel, as cartas vivas, a quadra marcada e,
-   se o autor escolher, a folga de cena no servidor (§9).
+   a folga de cena no servidor (§9).
 2. **Ataque e Defesa Absolutos.**
 3. **Exódia e Devastação** (com a desolação).
 4. **Reflect e Ressurreição.**

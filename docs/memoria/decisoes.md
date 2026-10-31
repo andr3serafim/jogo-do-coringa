@@ -6,6 +6,22 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-10-31 (11): o relógio para durante as cenas especiais
+
+Na spec do sub-projeto 6 (`docs/superpowers/specs/2026-10-31-direcao-visual-design.md` §9), à pergunta "No online, o relógio para
+durante as cenas especiais?":
+
+> Parar o relógio
+
+**Leitura:** muda a regra [A] da spec do servidor §6.2 (o relógio só pausava na janela de reação do oponente). Quando um passo
+produz um evento de cena rara (Ataque Absoluto, Defesa Absoluta, Exódia, Devastação, Reflect, Ressurreição), o prazo da decisão
+calculada nesse passo ganha a duração da cena; duas cenas no mesmo passo somam, até 8 s **[I]**. Pular a cena não dá tempo extra
+(a folga é fixa) **[I]**. A tabela de durações fica num lugar só, na entrada principal de `@coringa/protocol` **[I]**. Se o estado
+antigo das salas não servir, sobe `STATE_SCHEMA`. O antes/depois de todo o sub-projeto 6 está em
+`docs/memoria/notas/direcao-visual.md`.
+
+---
+
 ## 2026-10-31 (10): o dano do Roubo fora da iniciativa; a cura passiva sinalizada
 
 Depois do merge do bloco E3 + F2 + F3 (resposta à pergunta do fechamento e o primeiro ponto do playtest):
