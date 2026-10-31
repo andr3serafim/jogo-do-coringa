@@ -2,7 +2,7 @@
 import { BOTS } from '../src/bots/index.ts';
 import { makeConfig } from '@coringa/engine';
 import { describe, expect, it } from 'vitest';
-import { e3Experiment, measureSeries, paired, renderE3, without } from '../src/experiments/e3.ts';
+import { e3Experiment, hoarder, measureSeries, paired, renderE3, without } from '../src/experiments/e3.ts';
 
 describe('medição E3', () => {
   it('roda pequena, com as séries das quatro formas e as seções do relatório', () => {
@@ -16,7 +16,9 @@ describe('medição E3', () => {
       }
     }
     const markdown = renderE3(report);
-    for (const section of ['## Duração e fim', '## Mecânicas novas', '## Pareados', '## Cura passiva ligada × desligada', '## Como ler']) {
+    expect(report.hoard.map((h) => h.limit)).toEqual(['sem limite', 'BURN 4', 'CHOOSE 4', 'FEWER 4', 'BURN 3', 'CHOOSE 3']);
+    expect(report.stealThresholds.map((s) => s.threshold)).toEqual([12, 25, 40, 60]);
+    for (const section of ['## Duração e fim', '## Mecânicas novas', '## Pareados', '## Cura passiva ligada × desligada', '## Acumulador de K', '## Roubo do greedy por limiar', '## Como ler']) {
       expect(markdown).toContain(section);
     }
   });
@@ -28,6 +30,11 @@ describe('medição E3', () => {
     const pair = paired(makeConfig(), BOTS.greedy, noSteal, 6, 'e3-teste-par');
     expect(pair.score).toBeGreaterThanOrEqual(0);
     expect(pair.score).toBeLessThanOrEqual(1);
+  });
+
+  it('o acumulador fecha Exódias com os 4 K de uma vez (o "aos poucos" que aparece é do greedy do outro lado)', () => {
+    const { stats } = measureSeries(makeConfig(), [hoarder, BOTS.greedy], 30, 'e3-teste-acumulador');
+    expect(stats.exodiaAtOnce).toBeGreaterThan(0);
   });
 
   it('as penalidades aparecem quando o limite está ligado', () => {

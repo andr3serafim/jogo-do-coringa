@@ -2,6 +2,7 @@
 // limite de especiais. Séries por forma (sem limite, BURN, CHOOSE, FEWER), pareados de bots sem Roubo ou sem Devastação e a cura
 // ligada contra desligada. Sementes pareadas entre as variantes (o mesmo prefixo dá as mesmas partidas e os mesmos bots).
 import { makeConfig, type Action, type ConfigOverrides, type PlayerId, type RulesConfig } from '@coringa/engine';
+import { stealValue } from '../bots/eval.ts';
 import { BOTS, type Bot, type BotName } from '../bots/index.ts';
 import { PLAYERS, runGame, type GameRecord } from '../match.ts';
 import { summarize, type Metrics } from '../metrics.ts';
@@ -170,11 +171,40 @@ export function paired(config: RulesConfig, base: Bot, variant: Bot, games: numb
   return { score: p, margin: 1.96 * Math.sqrt((p * (1 - p)) / Math.max(1, games)) };
 }
 
+/**
+ * O acumulador de K (o caso que o autor descreveu: "o player fica juntando K até fazer o exódia"): joga como o greedy, mas só põe
+ * K na Guarda quando a mão tem os K que fecham a Exódia de uma vez, e não gasta K em Reflect nem em Devastação.
+ */
+export const hoarder: Bot = (view, legal, rng) => {
+  const kings = view.self.hand.filter((c) => c.kind === 'K').length;
+  const need = view.config.exodiaGuard - view.self.guard.length;
+  const keep = legal.filter((a) => a.type !== 'PLAY_K' || kings >= need);
+  const noKingSpent = keep.filter((a) => a.type !== 'REFLECT' && a.type !== 'CANCEL_REFLECT' && a.type !== 'DEVASTATE');
+  return BOTS.greedy(view, noKingSpent.length > 0 ? noKingSpent : keep, rng);
+};
+
+/** O greedy que só rouba quando o Roubo vale pelo menos `threshold` (mesa + dano ou cura). */
+export function stealsAbove(threshold: number): Bot {
+  return (view, legal, rng) =>
+    BOTS.greedy(view, legal.filter((a) => a.type !== 'STEAL' || stealValue(view, a) >= threshold), rng);
+}
+
+/** Os limites do acumulador: as três formas com 4 e as duas que cortam a mão em 3. */
+export const HOARD_LIMITS: Array<[string, RulesConfig['specialLimit']]> = [
+  ...LIMITS.map(([label, limit]): [string, RulesConfig['specialLimit']] => [limit ? `${label} 4` : label, limit]),
+  ['BURN 3', { max: 3, penalty: 'BURN' }],
+  ['CHOOSE 3', { max: 3, penalty: 'CHOOSE' }],
+];
+
 export interface E3Report {
   games: number;
   series: SeriesE3[];
   pairs: Array<{ label: string; score: number; margin: number }>;
   heal: Array<{ label: string; on: Metrics; off: Metrics }>;
+  /** O acumulador de K contra o greedy, por limite: a Exódia e os pontos dele (assentos trocados). */
+  hoard: Array<{ limit: string; exodia: number; atOnce: number; score: number; margin: number }>;
+  /** O greedy que rouba só acima de um limiar, contra o que não rouba. */
+  stealThresholds: Array<{ threshold: number; score: number; margin: number }>;
 }
 
 export function e3Experiment(games: number, log: (line: string) => void = () => {}): E3Report {
@@ -198,7 +228,16 @@ export function e3Experiment(games: number, log: (line: string) => void = () => 
     on: measureSeries(makeConfig(), [BOTS[a], BOTS[b]], games, `e3-cura-${label}`).metrics,
     off: measureSeries(makeConfig({ defenseHealGuard: undefined }), [BOTS[a], BOTS[b]], games, `e3-cura-${label}`).metrics,
   }));
-  return { games, series, pairs, heal };
+  log('acumulador de K');
+  const hoard = HOARD_LIMITS.map(([limit, specialLimit]) => {
+    const limited = makeConfig({ specialLimit });
+    const { metrics, stats } = measureSeries(limited, [hoarder, BOTS.greedy], games, 'e3-acumulador');
+    return { limit, exodia: metrics.endReasons.EXODIA, atOnce: stats.exodiaAtOnce, ...paired(limited, hoarder, BOTS.greedy, games, 'e3-acumulador-par') };
+  });
+  log('limiares do Roubo');
+  const noSteal = without(BOTS.greedy, ['STEAL']);
+  const stealThresholds = [12, 25, 40, 60].map((threshold) => ({ threshold, ...paired(config, stealsAbove(threshold), noSteal, games, 'e3-limiar-roubo') }));
+  return { games, series, pairs, heal, hoard, stealThresholds };
 }
 
 const rounds = (m: Metrics): string =>
@@ -260,12 +299,27 @@ export function renderE3(report: E3Report): string {
       ]),
     ),
     '',
+    '## Acumulador de K × greedy (o caso do autor), por limite',
+    '',
+    markdownTable(
+      ['Limite', 'Exódia', 'Dela, os 4 K de uma vez', 'Pontos do acumulador', 'Margem (95%)'],
+      report.hoard.map((h) => [h.limit, pct(h.exodia), pct(h.atOnce), pct(h.score), `±${pct(h.margin)}`]),
+    ),
+    '',
+    '## Roubo do greedy por limiar de valor × greedy sem Roubo (sem limite)',
+    '',
+    markdownTable(
+      ['Rouba com valor ≥', 'Pontos de quem rouba', 'Margem (95%)'],
+      report.stealThresholds.map((s) => [s.threshold, pct(s.score), `±${pct(s.margin)}`]),
+    ),
+    '',
     '## Como ler',
     '',
     '- **Política de descarte da CHOOSE (greedy):** sai primeiro o J ou o Q sem lugar (buffs no limite), depois Q, J, A, Selvagem e K.',
     '  O resultado da CHOOSE depende dela; um jogador que guarda K mantém a Exódia da mão possível.',
     '- **Exódia "de uma vez":** os 4 K saíram numa jogada só (estavam juntos na mão); "aos poucos": a Guarda já tinha K.',
     '- **No teto:** a partida passou de 400 rodadas no simulador (sem anti-travamento, nada garante o fim).',
+    '- **Acumulador de K:** o greedy que só põe K na Guarda quando fecha a Exódia de uma vez (e não gasta K em Reflect nem\n  Devastação). É o bot que mede a preocupação do autor; os outros bots jogam os K assim que podem.',
     '',
   ];
   return lines.join('\n');
