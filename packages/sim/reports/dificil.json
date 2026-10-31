@@ -12,7 +12,12 @@
       "aceCopies": 8
     },
     "initiativeChoice": true,
-    "wildJokers": true
+    "wildJokers": true,
+    "defenseHealGuard": 2,
+    "specialLimit": {
+      "max": 4,
+      "penalty": "BURN"
+    }
   },
   "seedPrefix": "dificil",
   "seeds": 100,
@@ -37,46 +42,46 @@
       "easyBlunder": 0.7,
       "hardVsGreedy": {
         "games": 200,
-        "rate": 0.65,
-        "se": 0.033726843908080104,
-        "wins": 130,
-        "losses": 70,
+        "rate": 0.665,
+        "se": 0.0333747659167821,
+        "wins": 133,
+        "losses": 67,
         "unfinished": 0,
         "withInitiative": {
           "games": 100,
-          "rate": 0.68
+          "rate": 0.67
         },
         "withoutInitiative": {
           "games": 100,
-          "rate": 0.62
+          "rate": 0.66
         }
       },
       "greedyVsEasy": {
         "games": 200,
-        "rate": 0.78,
-        "se": 0.029291637031753616,
-        "wins": 156,
-        "losses": 44,
+        "rate": 0.82,
+        "se": 0.027166155414412252,
+        "wins": 164,
+        "losses": 36,
         "unfinished": 0,
         "withInitiative": {
           "games": 100,
-          "rate": 0.8
+          "rate": 0.82
         },
         "withoutInitiative": {
           "games": 100,
-          "rate": 0.76
+          "rate": 0.82
         }
       },
       "timing": {
-        "decisions": 10333,
-        "p50Ms": 71.48600000003353,
-        "p95Ms": 150.1330999999991,
-        "maxMs": 393.4195999999938,
+        "decisions": 8766,
+        "p50Ms": 74.00690000000759,
+        "p95Ms": 128.71889999997802,
+        "maxMs": 234.55950000000303,
         "searching": {
-          "decisions": 7502,
-          "p50Ms": 87.80040000000736,
-          "p95Ms": 158.9941000000108,
-          "maxMs": 393.4195999999938
+          "decisions": 6773,
+          "p50Ms": 84.52129999996396,
+          "p95Ms": 132.34130000000005,
+          "maxMs": 234.55950000000303
         }
       },
       "passes": {
@@ -85,71 +90,7 @@
         "p95": true
       },
       "approved": true,
-      "seconds": 695.3821165999999
-    },
-    {
-      "label": "E2: ordem livre no Equipar (order opcional na ação EQUIP); bots inalterados",
-      "notes": [],
-      "hard": {
-        "rolloutsPerCandidate": 8,
-        "maxCandidates": 4,
-        "horizon": {
-          "EQUIP": 2,
-          "ATTACK_MAIN": 3
-        }
-      },
-      "easyBlunder": 0.7,
-      "hardVsGreedy": {
-        "games": 200,
-        "rate": 0.65,
-        "se": 0.033726843908080104,
-        "wins": 130,
-        "losses": 70,
-        "unfinished": 0,
-        "withInitiative": {
-          "games": 100,
-          "rate": 0.68
-        },
-        "withoutInitiative": {
-          "games": 100,
-          "rate": 0.62
-        }
-      },
-      "greedyVsEasy": {
-        "games": 200,
-        "rate": 0.78,
-        "se": 0.029291637031753616,
-        "wins": 156,
-        "losses": 44,
-        "unfinished": 0,
-        "withInitiative": {
-          "games": 100,
-          "rate": 0.8
-        },
-        "withoutInitiative": {
-          "games": 100,
-          "rate": 0.76
-        }
-      },
-      "timing": {
-        "decisions": 10333,
-        "p50Ms": 67.76000000000931,
-        "p95Ms": 141.53609999991022,
-        "maxMs": 376.29019999998854,
-        "searching": {
-          "decisions": 7502,
-          "p50Ms": 82.5737000000081,
-          "p95Ms": 150.9108000000124,
-          "maxMs": 376.29019999998854
-        }
-      },
-      "passes": {
-        "hardVsGreedy": true,
-        "greedyVsEasy": true,
-        "p95": true
-      },
-      "approved": true,
-      "seconds": 658.7521151
+      "seconds": 572.7842014
     }
   ]
 }

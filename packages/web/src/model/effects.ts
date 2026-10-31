@@ -117,7 +117,8 @@ export function dealsOf(beats: readonly Beat[]): Deals {
  */
 export function damageBeatIndex(beats: readonly Beat[]): number {
   const counts = new Set<GameEvent['type']>(['DamageDealt', 'ReflectTriggered', 'StealDamage', 'Healed']);
-  return beats.findIndex((beat) => counts.has(beat.event.type) && beat.durationMs > 0);
+  // A cura de 0 (a vida já cheia) é batida quieta: não é ela que conta.
+  return beats.findIndex((beat) => counts.has(beat.event.type) && beat.kind !== 'quiet');
 }
 
 /** A fileira com o dono: "o seu Ataque", "a Defesa de Duda"; com `from`, "do seu Ataque", "da Defesa de Duda". */
