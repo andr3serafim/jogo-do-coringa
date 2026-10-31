@@ -48,12 +48,13 @@ export function FightHud({ view, names, face, deadline, children }: FightHudProp
     <section aria-label="Placar" className="placar relative flex-none bg-tinta text-papel">
       <Side side="voce" view={view} player={view.self} name={names.self} holder={mine} />
       <div data-placa className="placar-placa flex flex-col items-center text-center">
-        <h2 className="textura font-madeira text-[10px] uppercase leading-[1.1] tracking-[0.14em] text-papel/75 pc:text-xs">
+        {/* Letra lisa, como no protótipo: a textura de madeira borra o rótulo nesse tamanho. O número grande é tipo de madeira. */}
+        <h2 className="text-[9px] font-bold uppercase leading-[1.15] tracking-[0.16em] text-papel/70 pc:text-xs">
           Rodada{' '}
           {face ? (
             view.round
           ) : (
-            <span data-rodada-grande className="block text-[26px] leading-none text-papel pc:text-[34px]">
+            <span data-rodada-grande className="block font-madeira text-[26px] leading-none tracking-normal text-papel pc:text-[34px]">
               {view.round}
             </span>
           )}
