@@ -1,3 +1,4 @@
+import { discardsOwed } from './config.ts';
 import type { Action, Destination, PlayerView, ReactionTrigger, SpecialCard, SpecialKind } from './types.ts';
 
 const firstOf = (cards: SpecialCard[], kind: SpecialKind): SpecialCard | undefined => cards.find((c) => c.kind === kind);
@@ -186,14 +187,40 @@ function reactionOptions(view: PlayerView, trigger: ReactionTrigger): Action[] {
   return actions;
 }
 
+/**
+ * Os descartes do limite de especiais (`CHOOSE`, E3): uma combinação por multiconjunto de tipos de carta, com as cartas compradas
+ * por último de cada tipo (as do mesmo tipo dão o mesmo resultado).
+ */
+function discardOptions(hand: SpecialCard[], owed: number): Action[] {
+  const byKind = new Map<SpecialKind, SpecialCard[]>();
+  for (const card of hand) byKind.set(card.kind, [...(byKind.get(card.kind) ?? []), card]);
+  const kinds = [...byKind.keys()];
+  const options: Action[] = [];
+  const walk = (i: number, left: number, picked: string[]): void => {
+    if (left === 0) {
+      options.push({ type: 'DISCARD', cardIds: picked });
+      return;
+    }
+    if (i === kinds.length) return;
+    const cards = byKind.get(kinds[i]!)!;
+    for (let n = Math.min(left, cards.length); n >= 0; n -= 1) walk(i + 1, left - n, [...picked, ...cards.slice(cards.length - n).map((c) => c.id)]);
+  };
+  walk(0, owed, []);
+  return options;
+}
+
 /** Jogadas canônicas disponíveis para quem vê `view`. Lista vazia = não é a vez dele. */
 export function legalActions(view: PlayerView): Action[] {
   const phase = view.phase;
   switch (phase.kind) {
     case 'GAME_OVER':
       return [];
-    case 'EQUIP':
-      return view.self.equipSubmitted ? [] : equipOptions(view).map((destinations): Action => ({ type: 'EQUIP', destinations }));
+    case 'EQUIP': {
+      if (view.self.equipSubmitted) return [];
+      const owed = discardsOwed(view.config, view.self.hand.length);
+      if (owed > 0) return discardOptions(view.self.hand, owed);
+      return equipOptions(view).map((destinations): Action => ({ type: 'EQUIP', destinations }));
+    }
     case 'ORDER_CHOICE':
       return phase.player === view.me
         ? [

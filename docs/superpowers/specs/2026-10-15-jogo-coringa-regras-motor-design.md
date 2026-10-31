@@ -82,6 +82,12 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
 
 1. Cada jogador recebe **4 cartas**, distribuídas alternadamente uma a uma, começando por quem tem a iniciativa **[I]**.
 2. **Especiais** (J, Q, K, A, Selvagem) vão para a **mão**.
+   - **Limite de especiais na mão [autor, 2026-10-30; E3 do sub-projeto 5]:** no máximo **4**, com penalidade na compra (o motivo
+     dele: sem limite, o jogador junta K até a Exódia). A forma da penalidade **ainda está com o autor**, que escolhe entre três,
+     medidas no simulador: **BURN** (a especial que passaria do limite vai direto ao cemitério), **CHOOSE** (o jogador descarta o
+     excesso antes de confirmar o Equipar; no tempo esgotado saem as compradas por último **[I]**) e **FEWER** (com mais
+     especiais que o limite, ele compra `4 − excesso` cartas, no mínimo 0 **[I]**). O motor tem as três (`specialLimit` na config,
+     §2.7); até a escolha, a config padrão fica sem limite.
 3. **Numéricas vão obrigatoriamente para o campo [I]**. **Equipar livre (sub-projeto 5, E2; antes: na ordem de compra, sem o jogador organizar [O]):** o jogador vê todas as numéricas recebidas de uma vez e escolhe, para cada uma, o destino e a ordem em que entram (a primeira posta numa fileira fica na frente da fila). Os destinos possíveis:
    - Fileira de Ataque ou de Defesa (só pode escolher uma fileira que não esteja cheia);
    - se **as duas estiverem cheias** **[O]**: substituir a **última carta** (a do fim da fila) de qualquer fileira — a carta antiga vai para o cemitério — **ou** descartar a nova no cemitério **[I]**.
@@ -348,6 +354,7 @@ legalActions(view: PlayerView): Action[]
 | Ação | Quando |
 |---|---|
 | `EQUIP { destinations[], order? }` — um destino por numérica recebida: `ATK` \| `DEF` \| `REPLACE_LAST_ATK` \| `REPLACE_LAST_DEF` \| `DISCARD`. `order` (E2) traz os ids das numéricas pendentes na ordem em que entram, e `destinations[i]` vale para a carta `order[i]`; precisa ser uma permutação delas (senão `INVALID_DESTINATIONS`, `DUPLICATE_CARDS` ou `INVALID_CARD`). Sem `order`, a ordem de compra. `legalActions` traz só a lista canônica, sem `order` | `EQUIP` |
+| `DISCARD { cardIds[] }` — o limite de especiais com a penalidade CHOOSE: exatamente o excesso da mão | `EQUIP` (antes do `EQUIP`) |
 | `CHOOSE_ORDER { first: boolean }` | `ORDER_CHOICE` |
 | `PLAY_J`, `PLAY_Q { cardId }` | `ATTACK_MAIN` |
 | `PLAY_K { cardIds[] }` | `ATTACK_MAIN` |
@@ -369,7 +376,7 @@ legalActions(view: PlayerView): Action[]
 
 A união `GameEvent` de `types.ts`, base para animações e histórico. Cada ação devolve os seus, em ordem. Um teste do motor (`test/spec-events.test.ts`) confere que esta lista e a união têm os mesmos nomes.
 
-- **Rodada e Equipar:** `RoundStarted`, `DeckReshuffled`, `CardsDealt`, `EquipSubmitted`, `CardsPlaced` (a carta que troca a última da fileira leva o `replaced`), `OrderChosen`, `TurnStarted`.
+- **Rodada e Equipar:** `RoundStarted`, `DeckReshuffled`, `CardsDealt`, `HandLimitPenalty` (o limite de especiais, E3), `EquipSubmitted`, `CardsPlaced` (a carta que troca a última da fileira leva o `replaced`), `OrderChosen`, `TurnStarted`.
 - **Fase principal:** `BuffPlayed` (com o papel, `as`), `GuardPlayed`, `TrapUsed` e `Sacrificed` (com `as` quando a carta é um Selvagem), `Resurrected`.
 - **Janela de reação:** `ReactionWindowOpened`, `ReactionWindowClosed`, `ReflectPlayed` (com o golpe que responde, `against`), `ReflectCanceled` (Reflect contra Reflect).
 - **Roubo e cura (E3):** `CardStolen` (a carta, as duas fileiras e o Ás gasto), `StealDamage` (o valor seco, o dano que saiu e se um K anulou), `Healed` (quanto entrou, de onde e a carta que curou).
@@ -395,6 +402,7 @@ RulesConfig {
   initiativeChoice: true,
   wildJokers: true,
   defenseHealGuard: 2 // cura passiva (E3): K na Guarda que a ligam; sem o campo (replays antigos), nada cura
+  // specialLimit?: { max: 4, penalty: 'BURN' | 'CHOOSE' | 'FEWER' } — limite de especiais (E3); sem o campo, nada limita
 }
 ```
 

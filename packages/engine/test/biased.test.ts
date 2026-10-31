@@ -33,7 +33,11 @@ describe('playouts enviesados: caminhos raros sob as invariantes (spec §5)', ()
   });
 
   it('Ataque Absoluto e Defesa Absoluta acontecem e expiram', () => {
-    const counts = reach('absolutos', absolutesProfile, ['AbsoluteAttack', 'AbsoluteDefenseStarted', 'AbsoluteDefenseEnded']);
+    // Sem o limite de especiais: o perfil nunca joga A nem K, e com a mão cheia deles a penalidade BURN queima todo J e Q novo; as
+    // fileiras travam e a partida não acaba (o relatório da E3 conta isso como risco da BURN).
+    const counts = reach('absolutos', absolutesProfile, ['AbsoluteAttack', 'AbsoluteDefenseStarted', 'AbsoluteDefenseEnded'], {
+      specialLimit: undefined,
+    });
     expect(counts.AbsoluteAttack).toBeGreaterThan(0);
     expect(counts.AbsoluteDefenseStarted).toBeGreaterThan(0);
     expect(counts.AbsoluteDefenseEnded).toBeGreaterThan(0);

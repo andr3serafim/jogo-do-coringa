@@ -58,6 +58,7 @@ function cardIdsOf(action: PlayerAction): string[] {
     case 'RESURRECT':
       return [action.cardId];
     case 'PLAY_K':
+    case 'DISCARD':
       return action.cardIds;
     case 'REFLECT':
     case 'CANCEL_REFLECT':
@@ -84,6 +85,8 @@ export function roleKey(action: PlayerAction, view: PlayerView): string {
       return `${action.type}|${role(action.cardId)}`;
     case 'PLAY_K':
       return `PLAY_K|${action.cardIds.map(role).join(',')}`;
+    case 'DISCARD':
+      return `DISCARD|${action.cardIds.map(role).sort().join(',')}`;
     case 'TRAP':
     case 'SACRIFICE':
       return `${action.type}|${role(action.cardId)}|${action.targetId}`;

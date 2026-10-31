@@ -1,4 +1,4 @@
-import { handleEquip, timeoutEquip } from './actions/equip.ts';
+import { handleDiscard, handleEquip, timeoutEquip } from './actions/equip.ts';
 import {
   declareAttack,
   devastate,
@@ -75,6 +75,8 @@ function applyPlayer(s: GameState, player: PlayerId, action: Action, ev: GameEve
   switch (action.type) {
     case 'EQUIP':
       return handleEquip(s, player, action.destinations, action.order, ev);
+    case 'DISCARD':
+      return handleDiscard(s, player, action.cardIds, ev);
     case 'CHOOSE_ORDER':
       return handleChooseOrder(s, player, action.first, ev);
     case 'PLAY_J':

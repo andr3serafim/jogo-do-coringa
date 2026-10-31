@@ -70,6 +70,10 @@ function startOfGame(seed: string): {
  */
 export function tutorialHand(seed: string, equip: EquipNo, equip3Holder: PlayerId): SpecialKind[] {
   const { equip1, deck, initiative, perEquip } = startOfGame(seed);
+  const limit = DEFAULT_CONFIG.specialLimit;
+  // A previsão conhece só a BURN: as outras formas mudam a compra (FEWER) ou o que fica na mão (CHOOSE). Quando o autor escolher a
+  // forma do limite (E3), esta conta é revista junto.
+  if (limit && limit.penalty !== 'BURN') throw new Error(`a previsão da mão do tutorial não conhece a penalidade ${limit.penalty}`);
   const hand: SpecialKind[] = [...equip1];
   for (let n = 2; n <= equip; n += 1) {
     const holder = n >= 3 ? equip3Holder : initiative;
@@ -77,7 +81,10 @@ export function tutorialHand(seed: string, equip: EquipNo, equip3Holder: PlayerI
     const mine = holder === ME ? 0 : 1;
     const block = deck.slice((n - 2) * 2 * perEquip, (n - 1) * 2 * perEquip);
     block.forEach((card, i) => {
-      if (i % 2 === mine && card.kind !== 'NUM') hand.push(card.kind as SpecialKind);
+      if (i % 2 !== mine || card.kind === 'NUM') return;
+      // Com a BURN (o limite de especiais da E3), a especial que passaria do limite vai ao cemitério.
+      if (limit && hand.length >= limit.max) return;
+      hand.push(card.kind as SpecialKind);
     });
   }
   return hand.sort();

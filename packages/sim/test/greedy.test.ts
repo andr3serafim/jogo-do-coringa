@@ -153,3 +153,20 @@ describe('greedy', () => {
   });
 });
 
+
+describe('greedy: descarte do limite de especiais (CHOOSE, E3)', () => {
+  it('descarta primeiro o J ou o Q sem lugar, depois Q, J, A, Selvagem e K', () => {
+    const s = setup({
+      config: { specialLimit: { max: 4, penalty: 'CHOOSE' } },
+      round: 4,
+      roundKind: 'EQUIP',
+      phase: { kind: 'EQUIP' },
+      p1: { hand: ['K', 'W', 'A', 'J', 'Q', 'J'], attackBuffs: ['J', 'J', 'J', 'J'], pending: [5] },
+    });
+    const action = decide(greedyBot, s);
+    expect(action.type).toBe('DISCARD');
+    const kinds = action.type === 'DISCARD' ? action.cardIds.map((id) => s.players[0].hand.find((c) => c.id === id)!.kind) : [];
+    // Os J não têm lugar (4 J nos buffs): saem os dois.
+    expect(kinds).toEqual(['J', 'J']);
+  });
+});

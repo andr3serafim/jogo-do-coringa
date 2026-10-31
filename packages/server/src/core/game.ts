@@ -1,4 +1,4 @@
-import { DEFAULT_CONFIG, actingPlayers, applyAction, createGame, makeConfig } from '@coringa/engine';
+import { DEFAULT_CONFIG, discardsOwed, actingPlayers, applyAction, createGame, makeConfig } from '@coringa/engine';
 import type { Action, GameEvent, GameResult, GameState } from '@coringa/engine';
 import type { AckMessage, OutcomeCause, PlayerAction, StateMessage } from '@coringa/protocol';
 import { withItem, withoutKinds } from './agenda.ts';
@@ -219,7 +219,10 @@ export function autoSteps(record: RoomRecord, now: number): StateStep[] {
       return steps;
     }
     if (state.phase.kind !== 'EQUIP') return steps;
-    const idle = state.players.find((player) => !player.equipSubmitted && player.pending.length === 0);
+    // Quem passou do limite de especiais (CHOOSE, E3) ainda tem o descarte a fazer: o Equipar vazio dele não sai sozinho.
+    const idle = state.players.find(
+      (player) => !player.equipSubmitted && player.pending.length === 0 && discardsOwed(state.config, player.hand.length) === 0,
+    );
     if (!idle) return steps;
     steps.push(injectStep(record, idle.id as SeatId, { type: 'EQUIP', destinations: [] }, now, { automatic: true }));
   }

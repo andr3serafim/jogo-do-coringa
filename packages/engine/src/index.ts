@@ -1,6 +1,6 @@
 export * from './types.ts';
 export { RULES_VERSION } from './version.ts';
-export { DEFAULT_CONFIG, makeConfig, validateConfig, type ConfigOverrides } from './config.ts';
+export { DEFAULT_CONFIG, discardsOwed, makeConfig, validateConfig, type ConfigOverrides } from './config.ts';
 export { buildDeck, totalCards } from './deck.ts';
 export { createGame } from './create-game.ts';
 export { applyAction } from './apply-action.ts';

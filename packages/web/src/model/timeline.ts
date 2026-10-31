@@ -127,6 +127,8 @@ function classify(event: GameEvent): Classified {
       return move(event.cards.map((c) => c.id));
     case 'CardStolen':
       return move([event.card.id, event.ace.id]);
+    case 'HandLimitPenalty':
+      return move(event.cards.map((c) => c.id));
     case 'DevastationCast':
       return move([event.k.id, event.a.id, event.x.id]);
     case 'StealDamage':

@@ -11,6 +11,7 @@ export const DEFAULT_CONFIG: RulesConfig = {
   initiativeChoice: true,
   wildJokers: true,
   defenseHealGuard: 2,
+  // Sem `specialLimit` até o autor escolher a forma da penalidade (E3): a medição usa cada uma explicitamente.
 };
 
 export type ConfigOverrides = Partial<Omit<RulesConfig, 'deck'>> & {
@@ -29,6 +30,15 @@ export function makeConfig(overrides: ConfigOverrides = {}): RulesConfig {
 const isInt = (n: number, min: number, max = Number.MAX_SAFE_INTEGER): boolean =>
   Number.isInteger(n) && n >= min && n <= max;
 
+/**
+ * Quantas especiais a mão de `handCount` cartas ainda deve descartar na rodada de Equipar: só com a penalidade `CHOOSE` do limite
+ * de especiais (E3); nas outras formas (e sem limite), 0.
+ */
+export function discardsOwed(config: Pick<RulesConfig, 'specialLimit'>, handCount: number): number {
+  const limit = config.specialLimit;
+  return limit?.penalty === 'CHOOSE' ? Math.max(0, handCount - limit.max) : 0;
+}
+
 export function validateConfig(c: RulesConfig): ConfigError | null {
   // A config pode vir de JSON ou de outro pacote: sem o objeto (ou sem o baralho), a resposta é o erro, não um TypeError.
   if (typeof c !== 'object' || c === null) return { code: 'INVALID_CONFIG', message: 'a config deve ser um objeto' };
@@ -46,6 +56,14 @@ export function validateConfig(c: RulesConfig): ConfigError | null {
     [isInt(c.deck.faceCopies, 0, 8), 'deck.faceCopies deve ser um inteiro entre 0 e 8'],
     [c.deck.aceCopies === undefined || isInt(c.deck.aceCopies, 0, 8), 'deck.aceCopies deve ser um inteiro entre 0 e 8'],
     [c.defenseHealGuard === undefined || isInt(c.defenseHealGuard, 1), 'defenseHealGuard deve ser um inteiro ≥ 1'],
+    [
+      c.specialLimit === undefined ||
+        (typeof c.specialLimit === 'object' &&
+          c.specialLimit !== null &&
+          isInt(c.specialLimit.max, 3) &&
+          ['BURN', 'CHOOSE', 'FEWER'].includes(c.specialLimit.penalty)),
+      'specialLimit deve ser { max: inteiro ≥ 3, penalty: BURN | CHOOSE | FEWER }',
+    ],
   ];
   for (const [ok, message] of checks) {
     if (!ok) return { code: 'INVALID_CONFIG', message };

@@ -13,6 +13,7 @@ export const MECHANICS: GameEvent['type'][] = [
   'ReflectTriggered',
   'ReflectCanceled',
   'Resurrected',
+  'HandLimitPenalty',
   'CardStolen',
   'StealDamage',
   'Healed',

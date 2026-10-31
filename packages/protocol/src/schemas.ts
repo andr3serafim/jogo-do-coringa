@@ -14,6 +14,7 @@ export const PlayerActionSchema = z.discriminatedUnion('type', [
     destinations: z.array(destination).max(LIMITS.destinations),
     order: z.array(cardId).max(LIMITS.destinations).optional(),
   }),
+  z.strictObject({ type: z.literal('DISCARD'), cardIds: z.array(cardId).min(1).max(LIMITS.discardCards) }),
   z.strictObject({ type: z.literal('CHOOSE_ORDER'), first: z.boolean() }),
   z.strictObject({ type: z.literal('PLAY_J'), cardId }),
   z.strictObject({ type: z.literal('PLAY_Q'), cardId }),

@@ -17,6 +17,8 @@ export const turtleBot: Bot = (view, legal, rng) => {
   const phase = view.phase;
   if (phase.kind === 'EQUIP') {
     const options = legal.filter((a): a is Equip => a.type === 'EQUIP');
+    // O descarte do limite de especiais (CHOOSE, E3) vem antes do Equipar: o do greedy.
+    if (options.length === 0) return greedyBot(view, legal, rng);
     return best(
       options,
       (a) => defenseBase(placeAll(view.self, view.self.pending, a.destinations)) - 1000 * attackPlacements(a),

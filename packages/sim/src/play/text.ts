@@ -66,6 +66,8 @@ export function actionText(action: Action, view: PlayerView): string {
       return `Equipar: ${equipCards(action, view)
         .map((c, i) => `${c ? cardText(c) : '?'} → ${DESTINATION_TEXT[action.destinations[i]]}`)
         .join(', ')}`;
+    case 'DISCARD':
+      return `Descartar ${action.cardIds.map(t).join(' + ')} (limite de especiais na mão)`;
     case 'CHOOSE_ORDER':
       return action.first ? 'Atacar primeiro' : 'Atacar em segundo';
     case 'PLAY_J':
@@ -155,6 +157,10 @@ export function eventText(e: GameEvent, names: Names): string | null {
       return `${who(e.player)} respondeu com outro Reflect: os dois se anulam e o golpe não acontece`;
     case 'ReflectTriggered':
       return `O Reflect ${de(e.owner)} devolveu ${e.damage} de dano`;
+    case 'HandLimitPenalty':
+      return e.penalty === 'FEWER'
+        ? `${who(e.player)} comprou ${e.fewer} carta${e.fewer === 1 ? '' : 's'} a menos (limite de especiais na mão)`
+        : `${e.penalty === 'BURN' ? 'Passou do limite de especiais' : 'Descarte do limite de especiais'}: ${cardsText(e.cards)} ${de(e.player)} ao cemitério`;
     case 'CardStolen':
       return `${who(e.player)} roubou ${cardText(e.card)} da fileira de ${ROW_NAME[e.fromRow]} ${de(e.from)} com ${cardText(e.ace)}${e.as ? ` (como ${e.as})` : ''} e a pôs na fileira de ${ROW_NAME[e.toRow]}`;
     case 'StealDamage':

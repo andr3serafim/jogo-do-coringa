@@ -8,6 +8,7 @@ describe('esquemas do cliente', () => {
     const ok: PlayerAction[] = [
       { type: 'EQUIP', destinations: ['ATK', 'DEF', 'DISCARD'] },
       { type: 'EQUIP', destinations: ['ATK', 'DEF'], order: ['b1-copas-7', 'b1-ouros-3'] },
+      { type: 'DISCARD', cardIds: ['k', 'q'] },
       { type: 'CHOOSE_ORDER', first: true },
       { type: 'PLAY_J', cardId: 'b1-copas-J' },
       { type: 'PLAY_Q', cardId: 'b1-copas-Q' },

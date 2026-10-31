@@ -16,6 +16,8 @@ export const LIMITS = {
   cardIdLength: 32,
   destinations: 16,
   kCards: 8,
+  /** O descarte do limite de especiais (CHOOSE, E3): o excesso da mão; 8 cobre qualquer mão. */
+  discardCards: 8,
   nicknameLength: 20,
   tokenLength: 43,
 } as const;

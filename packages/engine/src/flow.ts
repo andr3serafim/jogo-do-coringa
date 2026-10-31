@@ -1,6 +1,6 @@
 import { pruneResurrections } from './quads.ts';
 import { draw, getPlayer, opponentOf, toGraveyard } from './state.ts';
-import type { Card, DevastationState, GameEvent, GameState, PlayerId, PlayerState, ReactionTrigger } from './types.ts';
+import type { Card, DevastationState, GameEvent, GameState, PlayerId, PlayerState, ReactionTrigger, SpecialCard } from './types.ts';
 
 /** Ciclo da spec §1.3: Equipar, Equipar, Ataque, Equipar, Ataque, … */
 export function startRound(s: GameState, ev: GameEvent[]): void {
@@ -13,23 +13,38 @@ export function startRound(s: GameState, ev: GameEvent[]): void {
   else startAttackRound(s, ev);
 }
 
-/** Distribui `cardsPerEquip` cartas, uma a uma, alternando a partir de quem tem a iniciativa (spec §1.4). */
+/**
+ * Distribui `cardsPerEquip` cartas, uma a uma, alternando a partir de quem tem a iniciativa (spec §1.4). Com o limite de especiais
+ * (E3): na `FEWER`, quem está acima do limite compra menos; na `BURN`, a especial que passaria do limite vai direto ao cemitério.
+ */
 function startEquipRound(s: GameState, ev: GameEvent[]): void {
   const order: PlayerState[] = [getPlayer(s, s.initiative), opponentOf(s, s.initiative)];
   const dealt: Card[][] = [[], []];
+  const limit = s.config.specialLimit;
+  const per = s.config.cardsPerEquip;
+  const counts = order.map((p) => (limit?.penalty === 'FEWER' ? Math.max(0, per - Math.max(0, p.hand.length - limit.max)) : per));
   for (const p of s.players) {
     p.equipSubmitted = false;
     p.submittedDestinations = null;
   }
-  for (let i = 0; i < s.config.cardsPerEquip; i += 1) {
-    for (let idx = 0; idx < order.length; idx += 1) dealt[idx].push(draw(s, ev));
+  for (let i = 0; i < per; i += 1) {
+    for (let idx = 0; idx < order.length; idx += 1) {
+      if (i < counts[idx]) dealt[idx].push(draw(s, ev));
+    }
   }
   order.forEach((p, idx) => {
+    const burned: SpecialCard[] = [];
     for (const card of dealt[idx]) {
       if (card.kind === 'NUM') p.pending.push(card);
+      else if (limit?.penalty === 'BURN' && p.hand.length >= limit.max) burned.push(card);
       else p.hand.push(card);
     }
     ev.push({ type: 'CardsDealt', player: p.id, count: dealt[idx].length, cards: dealt[idx] });
+    if (burned.length > 0) {
+      toGraveyard(s, burned);
+      ev.push({ type: 'HandLimitPenalty', player: p.id, penalty: 'BURN', cards: burned, fewer: 0 });
+    }
+    if (counts[idx] < per) ev.push({ type: 'HandLimitPenalty', player: p.id, penalty: 'FEWER', cards: [], fewer: per - counts[idx] });
   });
   s.phase = { kind: 'EQUIP' };
 }

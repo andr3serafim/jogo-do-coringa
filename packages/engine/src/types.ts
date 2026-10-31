@@ -49,6 +49,12 @@ export interface RulesConfig {
    * vai ao cemitério cura valor × (1 + nº de Q). Sem o campo (replays de antes da E3, ou a medição sem cura), nada cura.
    */
   defenseHealGuard?: number;
+  /**
+   * Limite de especiais na mão (E3), com a penalidade na compra: `BURN`, a especial que passa do limite vai direto ao cemitério;
+   * `CHOOSE`, o jogador descarta o excesso (`DISCARD`) antes de confirmar o Equipar; `FEWER`, quem passou do limite compra menos
+   * no Equipar seguinte. Sem o campo (replays antigos), nada limita. A forma fica com o autor, depois da medição.
+   */
+  specialLimit?: { max: number; penalty: 'BURN' | 'CHOOSE' | 'FEWER' };
 }
 
 export type Destination = 'ATK' | 'DEF' | 'REPLACE_LAST_ATK' | 'REPLACE_LAST_DEF' | 'DISCARD';
@@ -165,6 +171,8 @@ export type Action =
    * `xId` é o J (Ataque) ou o Q (Defesa). O Selvagem vale como A, J ou Q.
    */
   | { type: 'DEVASTATE'; kId: string; aId: string; xId: string; row: RowName }
+  /** Limite de especiais com a penalidade `CHOOSE` (E3): descarta exatamente o excesso da mão, na rodada de Equipar. */
+  | { type: 'DISCARD'; cardIds: string[] }
   /** Roubo (E3): o Ás (ou o Selvagem como A) leva a numérica `targetId` do oponente para o fim da fileira `row` do ladrão. */
   | { type: 'STEAL'; cardId: string; targetId: string; row: RowName }
   | { type: 'DECLARE_ATTACK' }
@@ -222,6 +230,8 @@ export type GameEvent =
   | { type: 'StealDamage'; player: PlayerId; victim: PlayerId; value: number; damage: number; blocked: boolean }
   /** Cura (E3): `amount` é o que entrou na vida (nunca passa da inicial); `card`, a carta que curou. */
   | { type: 'Healed'; player: PlayerId; amount: number; source: 'STEAL' | 'DEFENSE'; card: NumCard }
+  /** Penalidade do limite de especiais (E3): `cards` foram ao cemitério (BURN, CHOOSE); `fewer`, as cartas a menos na compra (FEWER). */
+  | { type: 'HandLimitPenalty'; player: PlayerId; penalty: 'BURN' | 'CHOOSE' | 'FEWER'; cards: SpecialCard[]; fewer: number }
   | { type: 'ReactionWindowOpened'; responder: PlayerId; trigger: ReactionTrigger }
   | { type: 'ReactionWindowClosed'; responder: PlayerId; trigger: ReactionTrigger }
   | { type: 'AttackDeclared'; player: PlayerId }
@@ -260,7 +270,8 @@ export type RuleErrorCode =
   | 'NO_RESURRECTION'
   | 'ROW_FULL'
   | 'ATTACK_ROW_EMPTY'
-  | 'ATTACK_ROW_NOT_EMPTY';
+  | 'ATTACK_ROW_NOT_EMPTY'
+  | 'HAND_LIMIT';
 
 export interface RuleError {
   code: RuleErrorCode;

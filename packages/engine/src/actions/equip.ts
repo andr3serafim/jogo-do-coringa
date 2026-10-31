@@ -2,7 +2,8 @@ import { healFromDefense } from '../combat.ts';
 import { fail } from '../errors.ts';
 import { startRound } from '../flow.ts';
 import { reevaluateQuads } from '../quads.ts';
-import { assertDistinct, getPlayer, toGraveyard } from '../state.ts';
+import { discardsOwed } from '../config.ts';
+import { assertDistinct, getPlayer, removeById, toGraveyard } from '../state.ts';
 import type { Destination, GameEvent, GameState, NumCard, Placement, PlayerId, PlayerState, RulesConfig } from '../types.ts';
 
 const DESTINATIONS: readonly Destination[] = ['ATK', 'DEF', 'REPLACE_LAST_ATK', 'REPLACE_LAST_DEF', 'DISCARD'];
@@ -73,6 +74,8 @@ export function handleEquip(s: GameState, playerId: PlayerId, destinations: Dest
   if (s.phase.kind !== 'EQUIP') fail('WRONG_PHASE', 'não é a rodada de Equipar');
   const p = getPlayer(s, playerId);
   if (p.equipSubmitted) fail('ALREADY_SUBMITTED', 'você já confirmou o Equipar desta rodada');
+  const owed = discardsOwed(s.config, p.hand.length);
+  if (owed > 0) fail('HAND_LIMIT', `descarte ${owed} especial${owed === 1 ? '' : 'is'} da mão antes de confirmar`);
   validateDestinations(s.config, p, destinations);
   // A revelação casa `destinations[i]` com `pending[i]`: confirmar com `order` deixa as pendentes na ordem escolhida.
   p.pending = orderedPending(p, order);
@@ -80,8 +83,30 @@ export function handleEquip(s: GameState, playerId: PlayerId, destinations: Dest
   if (s.players.every((pl) => pl.equipSubmitted)) resolveEquip(s, ev);
 }
 
+/** Limite de especiais com a penalidade `CHOOSE` (E3): descarta exatamente o excesso da mão, antes de confirmar o Equipar. */
+export function handleDiscard(s: GameState, playerId: PlayerId, cardIds: string[], ev: GameEvent[]): void {
+  if (s.phase.kind !== 'EQUIP') fail('WRONG_PHASE', 'não é a rodada de Equipar');
+  const p = getPlayer(s, playerId);
+  if (p.equipSubmitted) fail('ALREADY_SUBMITTED', 'você já confirmou o Equipar desta rodada');
+  const owed = discardsOwed(s.config, p.hand.length);
+  if (!Array.isArray(cardIds) || owed === 0 || cardIds.length !== owed) {
+    fail('HAND_LIMIT', owed === 0 ? 'a sua mão está no limite' : `descarte exatamente ${owed} especial${owed === 1 ? '' : 'is'}`);
+  }
+  assertDistinct(cardIds);
+  const cards = cardIds.map((id) => removeById(p.hand, id) ?? fail('CARD_NOT_IN_HAND', `a carta ${String(id)} não está na sua mão`));
+  toGraveyard(s, cards);
+  ev.push({ type: 'HandLimitPenalty', player: p.id, penalty: 'CHOOSE', cards, fewer: 0 });
+}
+
 export function timeoutEquip(s: GameState, ev: GameEvent[]): void {
   for (const p of s.players) {
+    // No tempo esgotado, saem as especiais compradas por último (E3, [I]).
+    const owed = p.equipSubmitted ? 0 : discardsOwed(s.config, p.hand.length);
+    if (owed > 0) {
+      const cards = p.hand.splice(p.hand.length - owed, owed);
+      toGraveyard(s, cards);
+      ev.push({ type: 'HandLimitPenalty', player: p.id, penalty: 'CHOOSE', cards, fewer: 0 });
+    }
     if (!p.equipSubmitted) submit(p, autoDestinations(s.config, { attack: p.attackRow.length, defense: p.defenseRow.length }, p.pending.length), ev);
   }
   resolveEquip(s, ev);

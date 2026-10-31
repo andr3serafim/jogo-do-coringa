@@ -1,4 +1,4 @@
-import type { Action, PlayerView, ReactionTrigger } from '@coringa/engine';
+import type { Action, PlayerView, ReactionTrigger, SpecialCard } from '@coringa/engine';
 import type { Rng } from '../rng.ts';
 import {
   attackBase,
@@ -48,8 +48,24 @@ function closing(legal: Action[]): Action {
   return end;
 }
 
-/** Equipar: os destinos que maximizam a avaliação de mesa no próximo ataque. */
+/**
+ * O que cada especial vale na mão, para o descarte do limite (CHOOSE, E3): sai primeiro o J ou o Q sem lugar (buffs no limite),
+ * depois Q, J, A, Selvagem e K. A política decide o resultado da medição da CHOOSE e vai escrita no relatório.
+ */
+export function keepValue(view: PlayerView, kind: SpecialCard['kind']): number {
+  const { self, config } = view;
+  if (kind === 'J') return self.attackBuffs.length >= config.buffLimit ? 0 : 2;
+  if (kind === 'Q') return self.defenseBuffs.length >= config.buffLimit ? 0 : 1;
+  return { A: 3, WILD: 4, K: 5 }[kind];
+}
+
+/** Equipar: os destinos que maximizam a avaliação de mesa no próximo ataque; antes, o descarte do limite, se houver. */
 function chooseEquip(view: PlayerView, legal: Action[], rng: Rng): Action {
+  const discards = ofType(legal, 'DISCARD');
+  if (discards.length > 0) {
+    const kinds = new Map(view.self.hand.map((c) => [c.id, c.kind]));
+    return best(discards, (a) => -a.cardIds.reduce((sum, id) => sum + keepValue(view, kinds.get(id)!), 0), (ties) => rng.pick(ties));
+  }
   return best(
     ofType(legal, 'EQUIP'),
     (a) => boardScore(placeAll(view.self, view.self.pending, a.destinations), view.opponent),
