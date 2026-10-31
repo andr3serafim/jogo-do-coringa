@@ -16,6 +16,7 @@
     "sim": "node packages/sim/src/cli/sim.ts",
     "sim:calibrate": "node packages/sim/src/cli/calibrate.ts",
     "sim:dificil": "node packages/sim/src/cli/hard-gate.ts",
+    "sim:e3": "node packages/sim/src/cli/e3.ts",
     "sim:tutorial": "node packages/sim/src/cli/tutorial-seed.ts",
     "play": "node packages/sim/src/cli/play.ts",
     "bot": "node packages/sim/src/cli/bot.ts",

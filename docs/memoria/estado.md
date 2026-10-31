@@ -17,6 +17,9 @@
   Tarefa 5, o limite de especiais (`76805ba`): `specialLimit` com BURN, CHOOSE e FEWER; **o padrão fica sem limite até o autor
   escolher** (decisão minha na execução, no ledger e no plano: a BURN no padrão queimava o J que a semente do tutorial garante).
   Achado para o relatório: com a BURN, uma mão cheia de especiais que o jogador não usa queima toda especial nova.
+  Tarefas 6 e 7: a medição (`packages/sim/src/experiments/e3.ts`, `pnpm sim:e3 [--partidas N]`, relatório em
+  `packages/sim/reports/e3.md`). **Em curso:** `pnpm sim:e3` com 1000 partidas por série; se a conta cortar no meio, rode de
+  novo (sozinho na CPU) e siga para a leitura.
 - **Próximo passo exato:** seguir o plano 1 da primeira tarefa sem commit (`git log feat/regras-e3` diz até onde foi): 4 cura passiva, 5 limite de especiais, 6 bots, 7 medição. Cada regra nova regrava as partidas de
   referência e troca só o digest da versão 4. No fim, levar ao autor as formas da penalidade com os números e as leituras [I] do
   plano, e **parar** até ele responder.
