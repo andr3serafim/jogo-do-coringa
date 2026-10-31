@@ -6,6 +6,19 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-10-30 (6): a F1 liberada
+
+À pergunta "Posso começar a F1 (apagar o histórico de partidas)?", depois do merge da E2:
+
+> Pode começar a F1
+
+**Leitura:** a F1 segue a spec do sub-projeto 5 (F1) e a leitura do item 1 das anotações de 2026-10-30: só a web, na tela
+`/partidas`, apagar a lista `coringa:partidas` com confirmação, e uma partida só. Não muda regra: sem `RULES_VERSION`, sem
+`STATE_SCHEMA` e sem o portão do Difícil. As escolhas que ele não descreveu ficam como **[I]** no `estado.md` ("Esperando o
+autor").
+
+---
+
 ## 2026-10-30 (5): a E2 liberada
 
 À pergunta "Posso começar a E2 (Equipar livre)?", depois do merge da E1:

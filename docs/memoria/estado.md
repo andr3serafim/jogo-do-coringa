@@ -15,10 +15,13 @@
     para baixo das cartas;
   - o resumo das regras e a dica 1 do tutorial dizem que a ordem é do jogador;
   - o portão do Difícil foi remedido (`--ajuste`): aprovado, com as mesmas pontuações (65,0% e 78,0%) e p95 de 142 ms.
-- **Em curso:** nada.
-- **Próximo passo exato:** a **F1** (apagar o histórico de partidas, só web: na tela `/partidas`, apagar a lista
-  `coringa:partidas` com confirmação, e apagar uma partida só), numa branch `feat/apagar-historico` a partir da `main`.
-  Perguntar ao autor antes de começar, como nas anteriores.
+- **Em curso:** a **F1** (apagar o histórico de partidas, só web), liberada pelo autor (`decisoes.md` 2026-10-30 (6)), na
+  branch `feat/apagar-historico`, a partir da `main` (`8146986`). Plano em
+  `docs/superpowers/plans/2026-10-30-f1-apagar-historico.md`. Não muda regra: sem `RULES_VERSION`, sem `STATE_SCHEMA`, sem o
+  portão do Difícil.
+- **Próximo passo exato:** seguir o plano da F1 do primeiro passo sem commit (`git log feat/apagar-historico` diz até onde
+  foi): modelo (`deletePastGame`, `clearPastGames`), o diálogo de confirmação compartilhado, a tela `/partidas`, o E2E, as
+  docs; depois `pnpm check`, push, CI verde e fast-forward na `main`.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
