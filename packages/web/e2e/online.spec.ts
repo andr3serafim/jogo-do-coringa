@@ -179,14 +179,13 @@ test('duas pessoas jogam uma sala: do lobby ao fim, com queda e revanche', async
     return (await mainButton(ana).count()) === 1 ? ana : duda;
   };
 
-  await test.step('o atacante ataca e quem responde passa sozinho', async () => {
+  await test.step('o primeiro ataque: quem responde tem o Reflect e passa à mão', async () => {
     const attacker = await whoActs();
     // A mão e a barra de quem ataca passam pelo axe antes do clique (na semente, a mão de Duda tem Armadilhas); a vez dele tem 30 s.
     await axe(attacker.page);
     await mainButton(attacker).click();
-    // Na semente `e2e` só `PASS` é legal para quem responde (nenhuma Armadilha tem alvo), então o passe é o automático. Um sorteio
-    // com resposta possível cairia em "manual", e esta conferência avisaria que a semente não valeu.
-    expect(await answerReaction(opponentOf(attacker).page), 'a semente deixa só PASS legal na primeira reação').toBe('auto');
+    // Na semente `e2e`, quem responde tem K + Q + Selvagem: o Reflect responde ao ataque (F2), então o passe é à mão.
+    expect(await answerReaction(opponentOf(attacker).page), 'a semente deixa o Reflect na primeira reação').toBe('manual');
   });
 
   // A queda vem agora, na vez do outro: o relógio do turno (30 s) corre contra quem joga, e quem cai só espera. Se num runner lento ele
@@ -211,6 +210,14 @@ test('duas pessoas jogam uma sala: do lobby ao fim, com queda e revanche', async
     const round = await roundNumber(duda.page);
     expect(round, 'a rodada não volta atrás').toBeGreaterThanOrEqual(before.round);
     if (round === before.round) expect(await handIds(duda.page)).toEqual(before.hand);
+  });
+
+  await test.step('o segundo ataque: quem responde não tem resposta e passa sozinho', async () => {
+    const attacker = await whoActs();
+    await mainButton(attacker).click();
+    // Agora quem responde só tem A, J e Q sem alvo (o atacante não tem J, Q nem K em campo, e falta o K do Reflect): só `PASS` é
+    // legal e o passe é o automático. Um sorteio com resposta possível cairia em "manual", e esta conferência avisaria.
+    expect(await answerReaction(opponentOf(attacker).page), 'a semente deixa só PASS legal na segunda reação').toBe('auto');
   });
 
   await test.step('o resto da rodada 3 e o começo da seguinte, pelo que a tela oferece', async () => {

@@ -20,6 +20,11 @@ import {
 } from './helpers.ts';
 
 const TRAINING = '/treino?semente=e2e2631-1&nivel=medio';
+/**
+ * A semente da mesa do Equipar à fileira cheia (regras de 2026-10-31): a rodada 3 é sua com o cemitério vazio, a ordem da rodada 5
+ * também, com 6 cartas no Ataque, e a fileira chega a 8 na rodada 7. Achada simulando o treino como o E2E o joga.
+ */
+const FULL_ROW_TRAINING = '/treino?semente=e2e-movel-72&nivel=medio';
 const MIN_TARGET = 44;
 
 /** Todo botão que `buttons` encontra tem pelo menos 44 × 44 px (`boundingBox`). Devolve quantos conferiu: zero seria uma conferência vazia. */
@@ -120,7 +125,7 @@ for (const size of [
 
     test('a mesa: do Equipar à fileira cheia, sem rolagem de lado e com alvos de toque grandes na barra', async ({ page }) => {
       const guard = failOnConsoleErrors(page);
-      await page.goto(TRAINING);
+      await page.goto(FULL_ROW_TRAINING);
       await expect(table(page)).toBeVisible();
       await expect(roundHeading(page)).toHaveText('Rodada 1');
       await expect(equipPanel(page)).toBeVisible();

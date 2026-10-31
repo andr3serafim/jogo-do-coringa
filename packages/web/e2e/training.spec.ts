@@ -23,6 +23,12 @@ import {
 
 /** Treino com semente fixa e nível Médio: a distribuição, as jogadas do bot e os danos são sempre os mesmos (o `?nivel=` pula a escolha). */
 const TRAINING = '/treino?semente=e2e2631-1&nivel=medio';
+/**
+ * A semente do teste do axe por estado (regras de 2026-10-31): com as numéricas da rodada 1 na Defesa, a rodada 3 é sua (a ordem
+ * sai sozinha aos 3 s), a mão tem J, Q e K (o Reflect na reação ao ataque do Bot) e a Defesa perde carta no ataque dele; a ordem
+ * da rodada 5 também é sua. Achada simulando o treino como o E2E o joga.
+ */
+const AXE_TRAINING = '/treino?semente=e2e-axe-1925&nivel=medio';
 
 const history = (page: Page) => page.getByRole('complementary', { name: 'Histórico da partida' });
 const levelGroup = (page: Page) => page.getByRole('group', { name: 'Nível do bot' });
@@ -54,8 +60,11 @@ test('treino: três rodadas determinísticas pela interface, sem relógio', asyn
   await axe(page);
   await playUntil(page, async (p) => (await roundNumber(p).catch(() => 0)) >= 4, { order: 'wait' });
   await expect(history(page)).toContainText('Ataque de você: 37 contra 0 → 37 de dano');
-  await expect(history(page)).toContainText('Ataque de Bot: 34 contra 0 → 34 de dano');
-  await expect.poll(() => lives(page)).toEqual([463, 466]);
+  // Na vez dele o Bot rouba duas numéricas suas com os A (o dano e a cura do Roubo, E3) e ataca com J e Q.
+  await expect(history(page)).toContainText('Bot roubou 9♦ da fileira de Ataque de você com A♠');
+  await expect(history(page)).toContainText('Ataque de Bot: 50 contra 0 → 50 de dano');
+  await expect(history(page)).toContainText('Bot causou mais dano (50 × 37) e segue com a iniciativa');
+  await expect.poll(() => lives(page)).toEqual([480, 433]);
 
   guard.expectClean();
 });
@@ -83,9 +92,9 @@ test('treino sem nível: a escolha vem antes da mesa; escolher "Fácil" abre a m
   guard.expectClean();
 });
 
-test('axe em cada estado da mesa: mão, Reflect, janela de reação, cemitério (com o chip e o diálogo) e a mão com J, Q e K', async ({ page }) => {
+test('axe em cada estado da mesa: mão, janela de reação com o Reflect, cemitério (com o chip e o diálogo) e a mão com J, Q e K', async ({ page }) => {
   const guard = failOnConsoleErrors(page);
-  await page.goto(TRAINING);
+  await page.goto(AXE_TRAINING);
   await expect(table(page)).toBeVisible();
   // As numéricas da rodada 1 vão para a Defesa: o ataque do Bot na rodada 3 gasta uma delas, que vai ao cemitério por mão dele, e é
   // isso que acende o chip "novo" no cemitério (o que sai do seu campo por ataque seu, o Ataque Absoluto incluído, não fica marcado).
@@ -95,19 +104,22 @@ test('axe em cada estado da mesa: mão, Reflect, janela de reação, cemitério 
   await expect(roundHeading(page)).toHaveText('Rodada 3');
   const hand = page.getByRole('list', { name: 'Sua mão' });
 
-  // Rodada 3, sua vez: a mão (Q, K e o Selvagem) em botões, "Lançar Reflect" (K + Selvagem + Q) e o botão principal, de duas linhas.
+  // Rodada 3, sua vez (a ordem sai sozinha aos 3 s): a mão (J, Q e K) em botões e o botão principal, de duas linhas. O Reflect só
+  // responde a um ataque (F2): na sua vez ele não aparece.
   const attack = actionBar(page).getByRole('button', { name: ATTACK_BUTTON });
   await expect(attack).toBeEnabled();
-  await expect(actionBar(page).getByRole('button', { name: /^Lançar Reflect / })).toBeVisible();
+  await expect(actionBar(page).getByRole('button', { name: /^Lançar Reflect / })).toHaveCount(0);
   await expect(hand.getByRole('button', { name: /^Q, Buff de defesa, de / })).toBeVisible();
   await expect(hand.getByRole('button', { name: /^K, Guarda, de / })).toBeVisible();
   await axe(page);
   await attack.click();
 
-  // A janela de reação: o Bot declara o ataque dele (sem relógio, sem passe automático) e a barra oferece "Passar".
+  // A janela de reação: o Bot declara o ataque dele (sem relógio, sem passe automático) e a barra oferece "Lançar Reflect" (K + J +
+  // Q da mão) e "Passar".
   await expect(page.locator('[data-gatilho]')).toBeVisible();
   const pass = actionBar(page).getByRole('button', { name: 'Passar', exact: true });
   await expect(pass).toBeEnabled();
+  await expect(actionBar(page).getByRole('button', { name: /^Lançar Reflect / })).toBeVisible();
   await axe(page);
   await pass.click();
 
@@ -123,7 +135,7 @@ test('axe em cada estado da mesa: mão, Reflect, janela de reação, cemitério 
   await expect(page.getByRole('button', { name: /^Cemitério \d+, a de cima é / })).toBeVisible();
 
   // Rodada 5: a escolha da ordem é sua (o foco no painel cancela a confirmação de 3 s e deixa a tela parada para o axe), e depois a mão
-  // tem J, Q, K e o Selvagem, de novo em botões.
+  // tem J, Q e K, de novo em botões.
   await equipByUi(page);
   await expect(roundHeading(page)).toHaveText('Rodada 5');
   const first = orderPanel(page).getByRole('button', { name: 'Atacar primeiro' });
@@ -133,7 +145,6 @@ test('axe em cada estado da mesa: mão, Reflect, janela de reação, cemitério 
   await first.click();
   await expect(attack).toBeEnabled();
   await expect(hand.getByRole('button', { name: /^J, Buff de ataque, de / })).toBeVisible();
-  // Duas Q na mão nesta rodada (a semente): basta a primeira.
   await expect(hand.getByRole('button', { name: /^Q, Buff de defesa, de / }).first()).toBeVisible();
   await expect(hand.getByRole('button', { name: /^K, Guarda, de / })).toBeVisible();
   await axe(page);

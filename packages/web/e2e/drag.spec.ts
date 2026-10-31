@@ -1,5 +1,5 @@
-// E2E de arrastar cartas (spec do polimento §6, fatia 5): no treino, sem servidor e com semente, a mão do Equipar 1 traz J, K e A, e a
-// carta numérica da vez é um 7. O arrasto é um caminho a MAIS (WCAG 2.5.7): os botões e o teclado seguem valendo, e aqui só se
+// E2E de arrastar cartas (spec do polimento §6, fatia 5): no treino, sem servidor e com semente, a mão chega à rodada 3 com o Selvagem,
+// Q, K e A (com o limite de 4 especiais, a BURN queima o J e o outro A do 2º Equipar), e a carta numérica da vez é um 7. O arrasto é um caminho a MAIS (WCAG 2.5.7): os botões e o teclado seguem valendo, e aqui só se
 // confere, no navegador de verdade, o que o jsdom não faz: o ponteiro real, a zona sob o dedo (`elementFromPoint`), o `touch-action`,
 // o clique que o navegador manda depois do gesto e o que a página faz com o dedo (a mesa inteira não rola, os campos rolam).
 //
@@ -9,7 +9,7 @@
 import { expect, test, type CDPSession, type Locator, type Page } from '@playwright/test';
 import { actionBar, ATTACK_BUTTON, axe, equipByUi, equipPanel, expectNoHorizontalScroll, failOnConsoleErrors, orderPanel, roundHeading, table } from './helpers.ts';
 
-/** O tutorial sem o painel da dica: a mão do Equipar 1 vem com J, K e A, e a iniciativa da rodada 3 é sua. */
+/** A antiga semente do tutorial, sem o painel da dica: a mão da rodada 3 tem o Selvagem, Q, K e A, e a iniciativa é sua. */
 const TRAINING = '/treino?semente=tutorial-2431&nivel=facil';
 /** Uma semente cuja rodada 1 traz 4 numéricas e nenhuma especial (Equipar livre, E2). */
 const FOUR_NUMERICS = '/treino?semente=e2-1&nivel=facil';
@@ -25,13 +25,14 @@ const hand = (page: Page): Locator => page.getByRole('list', { name: 'Sua mão' 
 // A primeira carta da mão com o nome (a semente do tutorial pode dar duas Q).
 const handCard = (page: Page, name: RegExp): Locator => hand(page).getByRole('button', { name }).first();
 const K = /^K, Guarda, de /;
-const J = /^J, Buff de ataque, de /;
 const Q = /^Q, Buff de defesa, de /;
-/** A Armadilha: sem alvo (o oponente não tem J, Q nem K em campo), não tem jogada e não arrasta. */
-const TRAP = /^A, Armadilha, de /;
+/** O A: sem alvo para a Armadilha (o oponente não tem J, Q nem K em campo), mas rouba (E3): as numéricas do oponente são as zonas dele. */
+const ACE = /^A, Armadilha, de /;
 const myField = (page: Page): Locator => page.getByRole('region', { name: 'Seu campo' });
 const myGuard = (page: Page): Locator => myField(page).getByRole('list', { name: 'Guarda' });
 const myRow = (page: Page, kind: 'ATK' | 'DEF'): Locator => page.getByRole('group', { name: kind === 'ATK' ? 'Sua fileira de ataque' : 'Sua fileira de defesa' });
+/** As numéricas das fileiras do Bot (sem o fantasma, que mora no `body`). */
+const theirNumerics = (page: Page): Locator => page.getByRole('group', { name: /^Fileira de (ataque|defesa) de Bot$/ }).locator('[data-card-id]');
 /** O fantasma da carta no ar: um clone numa camada fixa do `body`, só desenho. */
 const ghost = (page: Page): Locator => page.locator('[data-fantasma]');
 /** As zonas marcadas como destino possível enquanto a carta está no ar. */
@@ -216,35 +217,44 @@ test('Equipar livre (E2): a última das 4 numéricas arrasta primeiro e entra na
 test('fase principal: o K arrasta até a Guarda; a zona errada e fora de zona não mandam nada', async ({ page }) => {
   const guard = failOnConsoleErrors(page);
   await toMainPhase(page);
-  const j = handCard(page, J);
+  const q = handCard(page, Q);
   const k = handCard(page, K);
-  await expect(hand(page).getByRole('button')).toHaveCount(6);
+  await expect(hand(page).getByRole('button')).toHaveCount(4);
   expect(await css(k, 'cursor'), 'a carta que arrasta mostra a mãozinha').toBe('grab');
   expect(await css(k, 'touchAction')).toBe('none');
-  // A Armadilha não tem alvo (o oponente não tem J, Q nem K em campo): sem jogada, não arrasta, e o cursor segue o de botão.
-  const trap = handCard(page, TRAP).first();
-  expect(await css(trap, 'touchAction'), 'sem jogada, o dedo rola como sempre').toBe('auto');
-  expect(await css(trap, 'cursor')).toBe('pointer');
+  // O A não tem alvo para a Armadilha, mas rouba (E3): arrasta, e no ar as zonas dele são as numéricas do Bot. Solto fora de zona, nada.
+  const ace = handCard(page, ACE);
+  expect(await css(ace, 'touchAction')).toBe('none');
+  expect(await css(ace, 'cursor')).toBe('grab');
+  const numerics = await theirNumerics(page).count();
+  expect(numerics, 'o Bot tem numéricas para roubar').toBeGreaterThan(0);
+  await pickUp(page, ace);
+  await carryTo(page, await hitPoint(roundHeading(page)));
+  await expect(valid(page)).toHaveCount(numerics);
+  await letGo(page);
+  await expect(ghost(page)).toHaveCount(0);
+  await expect(hand(page).getByRole('button')).toHaveCount(4);
+  expect(await pressed(ace)).toBe('false');
   await axe(page);
 
   // O celular rola os campos para a Guarda aparecer por cima da mão (no PC a mesa cabe e `scrollIntoView` não rola nada).
   await myGuard(page).scrollIntoViewIfNeeded();
   await expect(page.locator(ZONE.guard)).toBeInViewport();
 
-  // O J só vale nos Buffs de ataque: no ar, só eles ficam marcados; soltar na Guarda não manda nada nem escolhe a carta.
-  await pickUp(page, j);
+  // A Q só vale nos Buffs de defesa: no ar, só eles ficam marcados; soltar na Guarda não manda nada nem escolhe a carta.
+  await pickUp(page, q);
   await carryTo(page, await hitPoint(page.locator(ZONE.guard)));
   await expect(ghost(page)).toHaveCount(1);
   await expect(valid(page)).toHaveCount(1);
-  await expect(page.locator(ZONE.attackBuffs)).toHaveAttribute('data-soltar-ativo', '');
+  await expect(page.locator(ZONE.defenseBuffs)).toHaveAttribute('data-soltar-ativo', '');
   await expect(under(page)).toHaveCount(0);
   await letGo(page);
   await expect(ghost(page)).toHaveCount(0);
   await expect(valid(page)).toHaveCount(0);
-  await expect(hand(page).getByRole('button')).toHaveCount(6);
+  await expect(hand(page).getByRole('button')).toHaveCount(4);
   await expect(myGuard(page).locator('[data-card-id]')).toHaveCount(0);
   // O clique que o navegador manda depois do gesto não escolheu a carta (seria um toque a mais).
-  expect(await pressed(j)).toBe('false');
+  expect(await pressed(q)).toBe('false');
   await expect(actionBar(page)).toContainText('Toque numa carta da mão para ver as jogadas.');
 
   // O K na Guarda: a zona leva o contorno de "sob o dedo", e a jogada sai (o K sai da mão e entra na Guarda).
@@ -340,7 +350,6 @@ test.describe('celular: o dedo (eventos de toque pelo CDP)', () => {
     const guard = failOnConsoleErrors(page);
     await toMainPhase(page);
     expect(await css(handCard(page, K), 'touchAction')).toBe('none');
-    expect(await css(handCard(page, TRAP).first(), 'touchAction')).toBe('auto');
     expect(await page.locator('[data-campos]').evaluate((fields) => getComputedStyle(fields).touchAction)).toBe('auto');
     expect(await page.locator('[data-fileira] [data-card-id]').first().evaluate((el) => getComputedStyle(el).touchAction), 'uma carta de fileira').toBe('auto');
 
