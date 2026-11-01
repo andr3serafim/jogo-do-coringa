@@ -847,6 +847,17 @@ describe('efeitos da batida (spec §4.2)', () => {
       expect(busy(m.container)).toBe(false);
     });
 
+    it('com a cena desenhada, o número do golpe é o dela, acima de tudo, e o placar não repete', () => {
+      // A mesa é um contexto de empilhamento próprio (o grão de papel atrás dela): nada do placar passa por cima da cena, que cobre a
+      // área dos campos, onde o número do placar fica pendurado. Como no protótipo, o número grande do Ataque Absoluto é da cena.
+      const m = mount(THEIRS);
+      emit(m, { ...THEIRS, self: { ...THEIRS.self, hp: 137 } }, [ABSOLUTE, blast(50)]);
+      toImpact();
+      const numbers = m.container.querySelectorAll('[data-dano]');
+      expect(numbers).toHaveLength(1);
+      expect(numbers[0]!.closest('[data-camada-cena]')).not.toBeNull();
+    });
+
     it('o pulo no meio da cena mostra a vida final na hora', () => {
       const m = mount(THEIRS);
       emit(m, { ...THEIRS, self: { ...THEIRS.self, hp: 137 } }, [ABSOLUTE, blast(50)]);
@@ -1662,18 +1673,19 @@ describe('o painel da cena esmaece (spec §4.1 e §10.4: nada de troca brusca de
     // Montado desde o começo, apagado: o primeiro aparecer também é um esmaecimento.
     expect(first.className).toContain('transition-opacity');
     expect(first.className).toContain('opacity-0');
-    emit(m, THEIRS, [ABSOLUTE]);
+    // O Reflect segue com o painel; o Ataque Absoluto ganhou desenho próprio no sub-projeto 6 (fatia 2).
+    emit(m, THEIRS, [SCENE]);
     expect(panel(m.container)).toBe(first);
     expect(first.className).toContain('opacity-100');
     expect(first.className).not.toContain('opacity-0');
     expect(first).toHaveAttribute('data-ativo', 'true');
-    advance(RARE_SCENE_MS.ABSOLUTE_ATTACK + 100);
+    advance(BEAT_MS.scene + 100);
     // No fim da cena o painel continua na página, com o texto dela, só apagado.
     expect(panel(m.container)).toBe(first);
     expect(first.className).toContain('opacity-0');
     expect(first.className).toContain('transition-opacity');
     expect(first).not.toHaveAttribute('data-ativo');
-    expect(first).toHaveTextContent('ATAQUE ABSOLUTO');
+    expect(first).toHaveTextContent('REFLECT');
   });
 
   it('com a cortina negada o painel também esmaece, e nenhuma cortina sobe', async () => {

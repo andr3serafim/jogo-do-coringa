@@ -31,6 +31,7 @@ import { cueOf } from '../../model/sound.ts';
 import type { Beat } from '../../model/timeline.ts';
 import { useSound } from '../sound-context.ts';
 import { AnimContext, IDLE_LIFE, type Anim, type CountPhase, type LifeCount } from './context.ts';
+import { useScenes } from './scenes-loader.ts';
 import { BeatOverlay } from './Scene.tsx';
 import { useBeatPlayer } from './useBeatPlayer.ts';
 
@@ -85,6 +86,9 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
         ? 'count'
         : 'hold';
   const countMs = run.beats[run.damageIndex]?.durationMs ?? 0;
+  // A cena desenhada (o módulo das cenas já chegou) mostra o número do golpe que absorveu: o placar fica embaixo dela.
+  const scenes = useScenes();
+  const drawnScene = beat?.scene ? scenes?.[beat.scene] !== undefined : false;
   // O golpe que a cena do Ataque Absoluto absorveu conta na cena, uma vez só: a batida absorvida não conta.
   const lifeSteps = useMemo(
     () => run.beats.map((b) => (b.absorbed ? null : lifeChange(b.hit ? b.hit.event : b.event))),
@@ -166,7 +170,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       // O `resync` troca a mesa de uma vez: uma carta que está nos dois quadros (o salto do replay, a volta da reconexão) não desliza.
       instant: (id) => jump || released.instant.has(id),
       layoutKey: `${seq}:${busy ? 'tocando' : 'parado'}`,
-      fx: state ? effectsOf(beat, state.view, hitLanded) : NO_EFFECTS,
+      fx: state ? effectsOf(beat, state.view, hitLanded, drawnScene) : NO_EFFECTS,
       ribbon,
       beatMs: beat?.durationMs ?? 0,
       count,
@@ -174,7 +178,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       life,
       insignia,
     }),
-    [busy, reducedMotion, run, released, remounted, seq, jump, state, beat, ribbon, count, countMs, life, insignia, hitLanded],
+    [busy, reducedMotion, run, released, remounted, seq, jump, state, beat, ribbon, count, countMs, life, insignia, hitLanded, drawnScene],
   );
 
   // O golpe treme a mesa na batida dele (a animação do CSS roda uma vez quando a marca entra); nada com movimento reduzido.

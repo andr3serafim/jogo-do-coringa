@@ -2,10 +2,17 @@
 // testes. Sem `globals: true`, a Testing Library não registra o `cleanup` sozinha.
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
-import { afterEach } from 'vitest';
+import { afterEach, beforeAll } from 'vitest';
+import { loadScenes } from '../src/ui/anim/scenes-loader.ts';
 
 afterEach(() => {
   cleanup();
+});
+
+// As cenas do sub-projeto 6 moram num chunk que a mesa pré-carrega quando monta; aqui ele já chega carregado, para o que a mesa
+// desenha não depender de quando o `import()` resolve (a sobreposição sem a mesa medida segue mostrando o painel).
+beforeAll(async () => {
+  await loadScenes();
 });
 
 // O jsdom não implementa estes dois; o `navigate` rola para o topo e o axe sonda o canvas. Sem o aviso no log.

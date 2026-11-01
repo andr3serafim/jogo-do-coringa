@@ -91,15 +91,16 @@ function effectsOfEvent(event: GameEvent, view: PlayerView): Partial<BeatEffects
 /** Os efeitos da batida em curso, sobre a `view` do `state` que a trouxe. Sem batida, nenhum. */
 /**
  * Os efeitos da batida. Na cena do Ataque Absoluto, depois que o feixe acerta (`landed`), somam-se os do golpe que ela absorveu
- * (o número, os respingos, as fileiras), e o tremor é sempre o forte (sub-projeto 6 §7.1), qualquer que seja o dano.
+ * (o número, os respingos, as fileiras), e o tremor é sempre o forte (sub-projeto 6 §7.1), qualquer que seja o dano. Com
+ * `sceneNumber`, a cena desenhada mostra o número ela mesma (o placar não passa por cima dela) e o placar não o repete.
  */
-export function effectsOf(beat: Beat | null, view: PlayerView, landed = false): BeatEffects {
+export function effectsOf(beat: Beat | null, view: PlayerView, landed = false, sceneNumber = false): BeatEffects {
   if (beat === null) return NO_EFFECTS;
   const own = effectsOfEvent(beat.event, view);
   if (beat.hit === null || !landed) return { ...NO_EFFECTS, ...own };
   const hit = effectsOfEvent(beat.hit.event, view);
   const impact = hit.impact ? { target: hit.impact.target, force: 'forte' as const } : null;
-  return { ...NO_EFFECTS, ...own, ...hit, impact };
+  return { ...NO_EFFECTS, ...own, ...hit, impact, damage: sceneNumber ? null : (hit.damage ?? null) };
 }
 
 /**

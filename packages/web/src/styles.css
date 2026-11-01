@@ -642,3 +642,30 @@
 .brilho-quadra {
   animation: brilho-quadra 3.2s ease-in-out infinite;
 }
+
+/*
+ * As cenas do sub-projeto 6 (fatia 2): a onda de choque da transformação e a bola de energia do Ataque Absoluto. Tocam uma vez
+ * (nenhuma sem fim), só com `transform` e `opacity`.
+ */
+@keyframes onda-cena {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(18);
+  }
+}
+
+@keyframes bola-cena {
+  from {
+    transform: scale(0);
+  }
+  80% {
+    transform: scale(1.1);
+  }
+  to {
+    transform: scale(0.9);
+  }
+}

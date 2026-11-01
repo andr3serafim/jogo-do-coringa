@@ -10,6 +10,7 @@
  *   está no inicial, e o `synth.ts` entra por `import()` dinâmico no primeiro gesto. Mesma dupla de conferências do bot.
  * - as duas telas das partidas anteriores (a lista e o visualizador do replay) também: entram por `React.lazy`. Mesma dupla.
  * - a tela do tutorial (o painel, os textos das dicas e a semente) também: entra por `React.lazy`. Mesma dupla.
+ * - as cenas refeitas no sub-projeto 6 (`src/ui/scenes/`) também: entram por `import()` dinâmico (`loadScenes`). Mesma dupla.
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -27,6 +28,8 @@ const BOT_TEXT_MARK = 'fase principal sem DECLARE_ATTACK/END_TURN';
 /** Idem para a busca do Difícil (`packages/sim/src/bots/hard.ts`): um erro lançado dentro dela. Ela também só entra com o treino. */
 const HARD_TEXT_MARK = 'hardSearch sem ação legal';
 const BOT_MARKS = [BOT_NAME_MARK, BOT_TEXT_MARK, HARD_TEXT_MARK];
+/** Marca das cenas do sub-projeto 6: o atributo do quadro onde a cena é desenhada (`SceneFrame.tsx`), um literal que sobrevive à minificação. */
+const SCENES_MARK = 'data-palco-cena';
 /**
  * Marcas do sintetizador. Nenhuma sobrevive só no nome de um identificador nosso (o minificador renomeia): `createDynamicsCompressor`
  * é o método do Web Audio que monta o limitador (nome de propriedade do navegador, que não se renomeia) e `sawtooth` é um literal de
@@ -125,6 +128,9 @@ for (const url of initial) {
   for (const { screen, mark } of TUTORIAL_SCREEN_MARKS) {
     if (source.includes(mark)) problems.push(`${url} contém ${screen} ("${mark}"): o tutorial tem que entrar por React.lazy, fora do inicial`);
   }
+  if (source.includes(SCENES_MARK)) {
+    problems.push(`${url} contém as cenas do sub-projeto 6 ("${SCENES_MARK}"): elas têm que entrar por import() dinâmico, fora do inicial`);
+  }
 }
 console.log(`  total: ${kb(total)} de ${kb(BUDGET_BYTES)}`);
 if (total > BUDGET_BYTES) problems.push(`JavaScript inicial com ${kb(total)} gzip passa do orçamento de ${kb(BUDGET_BYTES)}`);
@@ -183,6 +189,14 @@ for (const { screen, mark } of TUTORIAL_SCREEN_MARKS) {
   } else {
     console.log(`Tutorial, ${screen} (fora do inicial): ${chunks.map(fromDist).join(', ')}`);
   }
+}
+
+// As cenas do sub-projeto 6 têm que existir em algum chunk que não é o inicial, pelo mesmo motivo.
+const sceneChunks = all.filter((path) => !initialPaths.has(path) && readFileSync(path).includes(SCENES_MARK));
+if (sceneChunks.length === 0) {
+  problems.push(`as cenas do sub-projeto 6 ("${SCENES_MARK}") não estão em nenhum chunk carregado sob demanda: o import() dinâmico sumiu, ou a marca mudou`);
+} else {
+  console.log(`Cenas do sub-projeto 6 (fora do inicial): ${sceneChunks.map(fromDist).join(', ')}`);
 }
 
 if (problems.length > 0) throw new Error(`smoke da web falhou:\n- ${problems.join('\n- ')}`);

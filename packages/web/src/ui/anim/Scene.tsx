@@ -69,15 +69,18 @@ function SceneLayer({ scene, curtain, names, reduced, me, hitLanded }: BeatOverl
   const layer = useRef<HTMLDivElement>(null);
   const box = useSceneBox(layer, scene !== null || curtain);
   const scenes = useScenes();
-  const Drawn = scene?.scene ? scenes?.[scene.scene] : undefined;
+  // A cena com desenho próprio precisa do módulo carregado e da mesa medida; sem um dos dois, vale o painel.
+  const Drawn = scene?.scene && box ? scenes?.[scene.scene] : undefined;
   // O painel fica montado depois da primeira cena e só esmaece (220 ms), com o texto da última enquanto some: sem troca
   // brusca de luminância, e o esmaecimento é o que o movimento reduzido mantém (texto parado que aparece e some). A cena com
   // desenho próprio não passa pelo painel.
   const panelScene = Drawn ? null : scene;
   const [last, setLast] = useState<Beat | null>(panelScene);
   // Cada cena nova remonta a figura e o título, para a entrada tocar de novo (duas cenas iguais seguidas também).
+  const [seen, setSeen] = useState<Beat | null>(scene);
   const [serial, setSerial] = useState(0);
-  if (scene !== null && scene !== last) {
+  if (scene !== null && scene !== seen) {
+    setSeen(scene);
     if (panelScene !== null) setLast(panelScene);
     setSerial((n) => n + 1);
   }
