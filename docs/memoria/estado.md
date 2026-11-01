@@ -5,13 +5,15 @@
 
 ## Agora
 
-- **Branch:** `feat/direcao-visual-fatia-3`, a partir da `main` (`cd75b0d`), no checkout principal. Só o plano commitado.
-- **Esperando o autor:** revisar o plano da **fatia 3** (`docs/superpowers/plans/2026-11-01-direcao-visual-fatia-3.md`: a Exódia e a
-  Devastação, com a desolação e os sons). As escolhas para ele ver estão no fim desta seção.
+- **Branch:** `feat/direcao-visual-fatia-3`, a partir da `main` (`cd75b0d`), no checkout principal.
+- **Em curso:** a execução do plano da **fatia 3** (`docs/superpowers/plans/2026-11-01-direcao-visual-fatia-3.md`), aprovado em
+  `decisoes.md` 2026-11-01 (4). O andamento fica no ledger `.superpowers/sdd/2026-11-01-direcao-visual-fatia-3/progress.md`
+  (fora do git) e nos commits da branch: cada Task fecha com o commit `feat(web)`/`test(web)` dela, com o nome do plano.
 - **Feito por último:** a **fatia 2 do sub-projeto 6** (as cenas do Ataque e da Defesa Absolutos, a insígnia e os sons), mesclada
   por fast-forward com as duas CI verdes. Detalhes no `diario.md` (2026-11-01 (2)); medição em `notas/medicao-fatia-2.md`.
-- **Próximo passo exato:** com o "ok" dele (ou os ajustes), executar o plano da fatia 3 tarefa por tarefa, como na fatia 2.
-- **Escolhas do plano da fatia 3 para o autor ver:**
+- **Próximo passo exato:** a primeira Task do plano sem commit na branch (veja `git log main..HEAD`); depois a revisão final, a CI
+  e o fast-forward.
+- **Escolhas do plano da fatia 3 (aprovadas):**
   - a Devastação passa a acontecer quando a fileira cai (`RowDevastated`), no próprio campo, sem tarjas nem cortina (como no
     protótipo); o lançamento (`DevastationCast`) vira uma faixa;
   - a cancelada é uma cena curta (1,4 s, sem inversão nem nome), com a fita do motivo;
