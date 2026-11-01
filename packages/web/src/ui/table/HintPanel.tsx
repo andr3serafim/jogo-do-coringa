@@ -87,17 +87,19 @@ export function HintPanel({ hint, onGotIt, onSkip }: HintPanelProps) {
       className={
         shown === null
           ? 'sr-only'
-          : 'flex flex-col gap-2 border-4 border-tinta bg-papel p-3 text-tinta max-pc:mx-3 max-pc:mb-1 max-pc:mt-2'
+          : // No celular baixo (abaixo de 700 px de altura) o painel aperta: o placar do topo (sub-projeto 6 §3) tira 64 px da janela
+            // dos campos, e a dica mais longa tem de caber nela inteira.
+            'flex flex-col gap-2 border-4 border-tinta bg-papel p-3 text-tinta max-pc:mx-3 max-pc:mb-1 max-pc:mt-2 max-pc:[@media(height<700px)]:mt-1 max-pc:[@media(height<700px)]:gap-1 max-pc:[@media(height<700px)]:p-2'
       }
     >
-      <div aria-live="polite" aria-atomic="true" className="flex flex-col gap-2">
+      <div aria-live="polite" aria-atomic="true" className="flex flex-col gap-2 max-pc:[@media(height<700px)]:gap-1">
         {shown === null ? null : (
           <>
             <p aria-hidden="true" className="font-madeira text-sm uppercase leading-none tracking-wide">
               {HINT_PANEL_LABEL}
             </p>
             {hintParagraphs(shown).map((text) => (
-              <p key={text} className="text-[14px] leading-snug">
+              <p key={text} className="text-[14px] leading-snug max-pc:[@media(height<700px)]:text-[13px] max-pc:[@media(height<700px)]:leading-tight">
                 {text}
               </p>
             ))}

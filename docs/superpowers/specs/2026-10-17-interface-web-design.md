@@ -237,6 +237,12 @@ A mesa está em §3 e §4. O menu da partida tem:
 
 ## 3. A mesa
 
+> **Sub-projeto 6, fatia 1 (2026-10-31):** o Coringa, o apelido, a vida e o relógio saíram dos campos e da faixa central e foram para
+> o **placar de luta no topo** (você à esquerda, o oponente à direita, a rodada e o relógio na placa do meio); a marca da iniciativa
+> virou a **espada** no retrato do dono, e as faixas viraram a **fita de cordel** sob o placar. A faixa central ficou com a fase por
+> extenso, "Tempo esgotado", o turno pausado, o monte e o cemitério. O que vale está em
+> `2026-10-31-direcao-visual-design.md` §3 a §6; o resto desta seção segue valendo.
+
 ### 3.1 O que aparece (para cada jogador) [P]
 
 - **Coringa:** avatar, apelido, vida (número e barra), presença do oponente.
@@ -431,6 +437,9 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
 - `deadline.players` diz de quem é o prazo. No Equipar são os dois.
 - **Fim do prazo:** o servidor injeta o estouro em `at + 500 ms`. Até chegar o `state`, a interface mostra "tempo esgotado" e mantém os controles desligados.
 - O relógio local só decide duas coisas: o envio antecipado do Equipar e a confirmação automática da ordem. Nada mais.
+- **Folga de cena (sub-projeto 6 §9, 2026-10-31):** durante uma cena rara o relógio fica parado. O prazo traz `runsFrom` (o instante
+  em que o relógio volta a correr) e o `remainingMs` mostra `at − max(agora, runsFrom)`. O envio antecipado do Equipar agenda pelo
+  tempo de verdade até `at`, não pelo relógio parado.
 
 ### 3.9 Presença do oponente [P]
 
@@ -747,6 +756,10 @@ Na partida online a semente só sai do servidor depois do fim, no `replay` (spec
 ---
 
 ## 10. Direção visual [A]
+
+> **Sub-projeto 6 (2026-10-31):** a direção de arte e a sensação de jogo (o placar de luta, a espada e a fita, o golpe com peso, a
+> mesa viva e as cenas especiais) estão em `2026-10-31-direcao-visual-design.md`, que continua as regras daqui (§10.4 a §10.7 valem
+> para tudo). A fatia 1 foi entregue em 2026-10-31.
 
 ### 10.1 A escolha: "A Peleja do Coringa" (xilogravura de cordel) [A]
 

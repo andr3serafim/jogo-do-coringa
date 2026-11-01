@@ -342,7 +342,7 @@ gesto do usuário.
 Cada fatia é uma branch com `pnpm check`, `pnpm e2e` e as duas CI verdes, e vai para a `main` sozinha:
 
 1. **A base:** o placar de luta, a espada e a fita, o golpe comum, a textura de papel, as cartas vivas, a quadra marcada, a
-   folga de cena no servidor (§9) e os sons delas.
+   folga de cena no servidor (§9) e os sons delas. **Entregue em 2026-10-31** (plano `plans/2026-10-31-direcao-visual-fatia-1.md`).
 2. **Ataque e Defesa Absolutos**, com os sons.
 3. **Exódia e Devastação** (com a desolação), com os sons.
 4. **Reflect e Ressurreição**, com os sons.

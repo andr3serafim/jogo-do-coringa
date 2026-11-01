@@ -168,7 +168,15 @@ function Side({ side, view, player, name, holder }: SideProps) {
         <Coringa className="size-[82%]" />
         {anim.fx.shieldBreak === player.id ? <ShieldBreak ms={anim.beatMs} reduced={anim.reduced} /> : null}
         {impact ? <InkSplat force={impact.force} ms={anim.beatMs} reduced={anim.reduced} /> : null}
-        {damage ? <DamageNumber amount={damage.amount} heal={damage.heal === true} ms={anim.beatMs} reduced={anim.reduced} /> : null}
+        {damage ? (
+          <DamageNumber
+            amount={damage.amount}
+            heal={damage.heal === true}
+            ms={anim.beatMs}
+            reduced={anim.reduced}
+            edge={self ? 'left' : 'right'}
+          />
+        ) : null}
       </span>
       <div className="placar-info">
         <h2 className="w-full truncate font-madeira text-xs leading-tight uppercase tracking-[0.02em] pc:text-[17px]">

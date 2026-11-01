@@ -6,6 +6,19 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-10-31 (14): o plano da fatia 1 do sub-projeto 6 aprovado
+
+À entrega do plano (`docs/superpowers/plans/2026-10-31-direcao-visual-fatia-1.md`), com a recomendação de executar aqui mesmo,
+tarefa por tarefa, e o desvio deliberado do relógio (parado até o fim da folga mesmo com a cena pulada):
+
+> Aprovado o plano da fatia 1. prossiga
+
+**Leitura:** o plano está aprovado como foi entregue, inclusive o desvio do relógio; a execução é a recomendada (inline, sem
+subagente, com a revisão final feita por quem executou). **[I]** "prossiga" vale até o fast-forward na `main` com as duas CI
+verdes, como nos blocos anteriores (`decisoes.md` 2026-10-31 (9)); as decisões técnicas da execução ficam no diário.
+
+---
+
 ## 2026-10-31 (13): a spec do sub-projeto 6 aprovada, com os sons
 
 À entrega da spec (`docs/superpowers/specs/2026-10-31-direcao-visual-design.md`, com as 21 decisões [I] listadas para ele):

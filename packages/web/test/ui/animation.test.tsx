@@ -646,6 +646,17 @@ describe('efeitos da batida (spec §4.2)', () => {
     expect(m.container.querySelector('[data-respingo]')).toBeNull();
   });
 
+  it('o número do dano fica preso à borda de dentro do retrato: não sai da tela no canto (sub-projeto 6 §5)', () => {
+    const m = mount(MINE);
+    emit(m, { ...MINE, self: { ...MINE.self, hp: 30 } }, [{ type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 200, defense: 43, damage: 157 }]);
+    const mine = m.container.querySelector('[data-retrato="voce"] [data-dano]')!;
+    expect(mine.className).toMatch(/(^| )left-0( |$)/);
+    expect(mine.className).not.toContain('left-1/2');
+    const theirs = mount(MINE);
+    emit(theirs, { ...MINE, opponent: { ...MINE.opponent, hp: 60 } }, [{ type: 'DamageDealt', attacker: 'p1', defender: 'p2', attack: 200, defense: 46, damage: 154 }]);
+    expect(theirs.container.querySelector('[data-retrato="oponente"] [data-dano]')!.className).toMatch(/(^| )right-0( |$)/);
+  });
+
   it('o golpe forte treme mais e respinga mais', () => {
     const m = mount(MINE);
     emit(m, { ...MINE, self: { ...MINE.self, hp: 30 } }, [{ type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 200, defense: 43, damage: 157 }]);

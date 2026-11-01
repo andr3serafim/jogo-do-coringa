@@ -304,6 +304,11 @@ Fica no núcleo do servidor, fixo para todas as salas [A]. O motor continua sem 
 - **O turno pausa durante a janela do oponente** [A]. Quando o dono do turno joga K ou Reflect e a janela abre, o servidor guarda o que sobrou do turno (`prazo − agora`). Quando a janela fecha e o turno do mesmo jogador continua (o passo não tem evento `TurnStarted`), o novo prazo é `agora + o que sobrou`. Sem piso: quem jogou K com 0,3 s restante volta com 0,3 s [P].
 - Turno novo (evento `TurnStarted`) começa com 30 s cheios.
 - O relógio **não pausa** quando alguém cai [A] (§7.2).
+- **Folga de cena** [A] (sub-projeto 6 §9, 2026-10-31): o passo com cena rara (a tabela `SCENE_MS` de `@coringa/protocol`, a mesma
+  que a interface usa) soma a cena ao prazo, até 8 s por passo. Numa fase nova, o prazo é `agora + duração + folga`; na mesma época
+  (a Defesa Absoluta no próprio turno), o prazo que já existia cresce pela folga e o alarme acompanha. O `Deadline` leva `runsFrom`
+  (o fim da folga) enquanto ela não venceu, e a interface mostra o relógio parado até lá. `STATE_SCHEMA` não muda: o campo novo é
+  opcional.
 
 ### 6.3 Janela de reação: duração mínima [A]
 

@@ -24,6 +24,11 @@ const ZONE = {
 const hand = (page: Page): Locator => page.getByRole('list', { name: 'Sua mão' });
 // A primeira carta da mão com o nome (a semente do tutorial pode dar duas Q).
 const handCard = (page: Page, name: RegExp): Locator => hand(page).getByRole('button', { name }).first();
+/**
+ * As cartas da mão respiram (sub-projeto 6 §6): sobem e descem 3 px sem parar, e o `click` e o `tap` do Playwright esperam a caixa
+ * ficar parada, o que nunca acontece. `force` pula só essa espera: o clique e o toque continuam de verdade, no meio da carta.
+ */
+const ON_BREATHING_CARD = { force: true } as const;
 const K = /^K, Guarda, de /;
 const Q = /^Q, Buff de defesa, de /;
 /** O A: sem alvo para a Armadilha (o oponente não tem J, Q nem K em campo), mas rouba (E3): as numéricas do oponente são as zonas dele. */
@@ -276,10 +281,10 @@ test('fase principal: o toque, o Enter e o arrasto que volta à própria carta e
   const q = handCard(page, Q);
 
   // O toque (o clique do mouse): escolhe, e o clique que vem depois do gesto não escolhe duas vezes (e não alterna de volta).
-  await q.click();
+  await q.click(ON_BREATHING_CARD);
   await expect(q).toHaveAttribute('aria-pressed', 'true');
   await expect(actionBar(page).getByRole('list', { name: 'Jogadas' }).getByRole('button', { name: 'Buff de defesa' })).toBeVisible();
-  await q.click();
+  await q.click(ON_BREATHING_CARD);
   await expect(q).toHaveAttribute('aria-pressed', 'false');
 
   // O teclado: Enter na carta a escolhe (o `click` do Enter não tem ponteiro, e o gesto não o engole), e Esc desfaz.
@@ -403,7 +408,7 @@ test.describe('celular: o dedo (eventos de toque pelo CDP)', () => {
     const guard = failOnConsoleErrors(page);
     await toMainPhase(page);
     const q = handCard(page, Q);
-    await q.tap();
+    await q.tap(ON_BREATHING_CARD);
     await expect(q).toHaveAttribute('aria-pressed', 'true');
     // O dedo mexe um pouco no toque (menos de 8 px): continua sendo um toque.
     const cdp = await touchSession(page);
@@ -429,7 +434,7 @@ test.describe('celular: o dedo (eventos de toque pelo CDP)', () => {
       // Na janela, em captura: o clique chega aqui mesmo que um ouvinte do gesto o engula depois.
       for (const type of ['pointerup', 'mousedown', 'click']) window.addEventListener(type, () => w.__toque.push(type), true);
     });
-    await q.tap();
+    await q.tap(ON_BREATHING_CARD);
     // Espera o fim do gesto (o clique de compatibilidade é a última peça) e deixa o React e o foco assentarem.
     await expect.poll(() => page.evaluate(() => (window as unknown as { __toque: string[] }).__toque.includes('click'))).toBe(true);
     await page.evaluate(() => new Promise<void>((done) => requestAnimationFrame(() => requestAnimationFrame(() => done()))));

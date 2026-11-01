@@ -9,9 +9,23 @@ const times = [0, 0.15, 0.75, 1];
 
 /**
  * O número do dano, carimbado logo abaixo do retrato de quem apanhou (sub-projeto 6 §5): entra grande e girado, assenta e sobe.
- * Com `heal`, o da cura ("+N", no ouro) sobe no retrato de quem curou, sem carimbo. Com movimento reduzido, só esmaece.
+ * Com `heal`, o da cura ("+N", no ouro) sobe no retrato de quem curou, sem carimbo. Com movimento reduzido, só esmaece. `edge`
+ * prende o número à borda de dentro do retrato (o da esquerda à esquerda, o da direita à direita): centrado, um dano de três
+ * dígitos sairia da tela no canto.
  */
-export function DamageNumber({ amount, ms, reduced, heal = false }: { amount: number; ms: number; reduced: boolean; heal?: boolean }) {
+export function DamageNumber({
+  amount,
+  ms,
+  reduced,
+  heal = false,
+  edge,
+}: {
+  amount: number;
+  ms: number;
+  reduced: boolean;
+  heal?: boolean;
+  edge: 'left' | 'right';
+}) {
   const animate = reduced
     ? { opacity: [0, 1, 1, 0] }
     : heal
@@ -26,7 +40,7 @@ export function DamageNumber({ amount, ms, reduced, heal = false }: { amount: nu
       animate={animate}
       // O número sobe desacelerando (U4): rápido no começo, assentando no alto.
       transition={{ duration: ms / 1000, times: reduced || heal ? times : [0, 0.14, 0.22, 0.82, 1], ease: 'easeOut' }}
-      className={`pointer-events-none absolute left-1/2 top-full z-30 mt-1 -translate-x-1/2 border-2 border-tinta px-1.5 font-texto text-xl font-extrabold leading-tight tabular-nums shadow-[3px_3px_0_var(--color-tinta)] pc:mt-1.5 pc:border-[3px] pc:px-2 pc:text-3xl ${heal ? 'bg-ouro text-tinta' : 'bg-vermelho text-papel'}`}
+      className={`pointer-events-none absolute ${edge === 'left' ? 'left-0 origin-top-left' : 'right-0 origin-top-right'} top-full z-30 mt-1 border-2 border-tinta px-1.5 font-texto text-xl font-extrabold leading-tight tabular-nums shadow-[3px_3px_0_var(--color-tinta)] pc:mt-1.5 pc:border-[3px] pc:px-2 pc:text-3xl ${heal ? 'bg-ouro text-tinta' : 'bg-vermelho text-papel'}`}
     >
       {heal ? '+' : '−'}
       {amount}
