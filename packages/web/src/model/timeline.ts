@@ -71,6 +71,11 @@ export const SCENE_INVERT_LEAD_MS: Record<SceneKind, number> = {
 };
 /** As cenas sem inversão: a Devastação cancelada (a terra ronca e para, sem abismo; sub-projeto 6 §7.4). */
 export const NO_INVERT: ReadonlySet<SceneKind> = new Set(['DEVASTATION_CANCELED']);
+/**
+ * As cenas de campo: acontecem sobre a fileira atingida, sem cortina nem faixa (sub-projeto 6 §7.4; escurecer a mesa esconderia o que
+ * cai, como no protótipo).
+ */
+export const FIELD_SCENES: ReadonlySet<SceneKind> = new Set(['DEVASTATION', 'DEVASTATION_CANCELED']);
 const SCENE_INVERT_HOLD_MS = 600;
 
 const isRare = (scene: SceneKind | null): scene is keyof typeof RARE_SCENE_MS => scene !== null && scene in RARE_SCENE_MS;

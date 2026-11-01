@@ -26,7 +26,7 @@ import type { PlayerId, SpecialCard, Suit } from '@coringa/engine';
 import type { Names } from '@coringa/sim/text';
 import * as m from 'motion/react-m';
 import { useRef, useState, type ReactNode } from 'react';
-import { sceneText } from '../../model/effects.ts';
+import { sceneText, type FieldTarget } from '../../model/effects.ts';
 import { SCENE_INVERT_LEAD_MS, type Beat, type SceneKind } from '../../model/timeline.ts';
 import { Card } from '../cards/Card.tsx';
 import { useSceneBox } from './scene-box.ts';
@@ -43,6 +43,8 @@ export interface BeatOverlayProps {
   me: PlayerId;
   /** O golpe absorvido pela cena já acendeu. */
   hitLanded: boolean;
+  /** A fileira das cenas de campo (a Devastação). */
+  field?: FieldTarget | null;
 }
 
 /** A sobreposição da cena de agora, ou nada (a camada fica, só esmaece). */
@@ -64,7 +66,7 @@ function Shield() {
   );
 }
 
-function SceneLayer({ scene, curtain, names, reduced, me, hitLanded }: BeatOverlayProps) {
+function SceneLayer({ scene, curtain, names, reduced, me, hitLanded, field = null }: BeatOverlayProps) {
   const layer = useRef<HTMLDivElement>(null);
   const box = useSceneBox(layer, scene !== null || curtain);
   const scenes = useScenes();
@@ -73,7 +75,8 @@ function SceneLayer({ scene, curtain, names, reduced, me, hitLanded }: BeatOverl
   // O painel fica montado depois da primeira cena e só esmaece (220 ms), com o texto da última enquanto some: sem troca
   // brusca de luminância, e o esmaecimento é o que o movimento reduzido mantém (texto parado que aparece e some). A cena com
   // desenho próprio não passa pelo painel.
-  const panelScene = Drawn ? null : scene;
+  // A Devastação cancelada não tem nome no painel: sem o desenho, só a fita diz o motivo.
+  const panelScene = Drawn || scene?.scene === 'DEVASTATION_CANCELED' ? null : scene;
   const [last, setLast] = useState<Beat | null>(panelScene);
   // Cada cena nova remonta a figura e o título, para a entrada tocar de novo (duas cenas iguais seguidas também).
   const [seen, setSeen] = useState<Beat | null>(scene);
@@ -103,7 +106,7 @@ function SceneLayer({ scene, curtain, names, reduced, me, hitLanded }: BeatOverl
         className={`absolute inset-x-0 bottom-0 bg-tinta/60 transition-opacity duration-[220ms] ease-out ${curtain ? 'opacity-100' : 'opacity-0'}`}
       />
       {Drawn && scene && box ? (
-        <Drawn key={serial} beat={scene} names={names} reduced={reduced} me={me} hitLanded={hitLanded} box={box} />
+        <Drawn key={serial} beat={scene} names={names} reduced={reduced} me={me} hitLanded={hitLanded} box={box} field={field} />
       ) : null}
       {/* Sempre montado: até o primeiro aparecer é um esmaecimento, não um pulo de opacidade. */}
       <div

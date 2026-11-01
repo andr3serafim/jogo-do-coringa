@@ -1,6 +1,6 @@
 // O que cada batida mostra (spec §4.2): efeitos nas cartas e nas fileiras, o número do dano, o texto das faixas e das
 // cenas, e o atraso das transições de layout. Puro: sem React nem DOM. Quem desenha é a interface (`ui/anim`).
-import type { GameEvent, PlayerId, PlayerView, RowName } from '@coringa/engine';
+import type { DevastationState, GameEvent, PlayerId, PlayerView, RowName } from '@coringa/engine';
 import { cardText, eventText, type Names } from '@coringa/sim/text';
 import { initiativeRibbon, SCENE_TITLE, type Ribbon } from './copy.ts';
 import { impactForce, type ImpactForce } from './impact.ts';
@@ -112,6 +112,24 @@ export function insigniaShown(beats: readonly Beat[], index: number, player: Pla
   const ahead = (type: 'AbsoluteDefenseStarted' | 'AbsoluteDefenseEnded', from: number) =>
     beats.some((beat, i) => i >= from && beat.event.type === type && beat.event.player === player);
   return active ? !ahead('AbsoluteDefenseStarted', index) : ahead('AbsoluteDefenseEnded', index + 1);
+}
+
+/** A fileira onde a cena de campo acontece. */
+export interface FieldTarget {
+  player: PlayerId;
+  row: RowName;
+}
+
+/**
+ * A fileira da cena de campo (sub-projeto 6 §7.4): a que caiu, ou a que a cancelada ia derrubar. A cancelada não traz a fileira:
+ * ela vem da Devastação em curso no `state` de antes (`cast`), e o dono é o alvo (nos Reflects) ou quem lançou, para quem ela tinha
+ * voltado (na Defesa Absoluta). `null` sem isso.
+ */
+export function fieldTarget(event: GameEvent, cast: Pick<DevastationState, 'row'> | null, me: PlayerId, opponent: PlayerId): FieldTarget | null {
+  if (event.type === 'RowDevastated') return { player: event.player, row: event.row };
+  if (event.type !== 'DevastationCanceled' || cast === null) return null;
+  const other = event.player === me ? opponent : me;
+  return { player: event.reason === 'ABSOLUTE_DEFENSE' ? event.player : other, row: cast.row };
 }
 
 /**

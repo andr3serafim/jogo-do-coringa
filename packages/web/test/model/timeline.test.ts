@@ -5,6 +5,7 @@ import {
   BEAT_MS,
   CATCH_UP_CAP_MS,
   DECISION_CAP_MS,
+  FIELD_SCENES,
   INVERT_COOLDOWN_MS,
   INITIATIVE_BANNER_MS,
   INVERT_MIN_HOLD_MS,
@@ -270,6 +271,10 @@ describe('a Exódia e a Devastação (sub-projeto 6 §7.3, §7.4)', () => {
       expect(beat!).toMatchObject({ kind: 'scene', scene: 'DEVASTATION_CANCELED', durationMs: 1_400, invert: null });
     }
     expect(NO_INVERT.has('DEVASTATION_CANCELED')).toBe(true);
+  });
+
+  it('as duas são cenas de campo (sem cortina nem faixa); as outras, não', () => {
+    expect([...FIELD_SCENES].sort()).toEqual(['DEVASTATION', 'DEVASTATION_CANCELED']);
   });
 
   it('a refletida: a cena do Reflect e depois a fileira de quem lançou, as duas inversões dentro da regra', () => {

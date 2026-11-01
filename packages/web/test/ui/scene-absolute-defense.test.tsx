@@ -13,6 +13,7 @@ const BOX: SceneBox = {
   band: { x: 0, y: 96, w: 1000, h: 360 },
   hudBottom: 96,
   portrait: { voce: { x: 40, y: 48 }, oponente: { x: 960, y: 48 } },
+  row: () => null,
 };
 const M = SCENE_MOMENTS.ABSOLUTE_DEFENSE;
 
@@ -30,7 +31,7 @@ const advance = (ms: number) =>
 
 function show(player: 'p1' | 'p2', reduced = false) {
   const [beat] = buildTimeline([{ type: 'AbsoluteDefenseStarted', player }], { mode: 'live', reducedMotion: reduced, decisionPending: false });
-  return render(<AbsoluteDefense beat={beat!} names={roomNames('p1', [])} reduced={reduced} me="p1" hitLanded={false} box={BOX} />);
+  return render(<AbsoluteDefense beat={beat!} names={roomNames('p1', [])} reduced={reduced} me="p1" hitLanded={false} box={BOX} field={null} />);
 }
 
 const q = (selector: string) => document.querySelector<HTMLElement>(selector);

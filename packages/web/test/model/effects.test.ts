@@ -8,6 +8,7 @@ import {
   dealsOf,
   delaysOf,
   effectsOf,
+  fieldTarget,
   insigniaShown,
   NO_EFFECTS,
   rowKey,
@@ -60,6 +61,40 @@ describe('a insígnia da Defesa Absoluta na linha do tempo (sub-projeto 6 §7.2)
     const beats = buildTimeline([started('p2')], LIVE_OPTS);
     expect(insigniaShown(beats, 0, 'p1', true)).toBe(true);
     expect(insigniaShown(beats, 0, 'p1', false)).toBe(false);
+  });
+});
+
+describe('onde a cena de campo acontece (sub-projeto 6 §7.4)', () => {
+  const cast = { player: 'p1', row: 'DEF', k: face('k1'), a: face('a1', 'A'), x: face('q1', 'Q') } as const;
+
+  it('a fileira que cai é a do evento, sua ou do oponente, de Ataque ou de Defesa', () => {
+    for (const player of ['p1', 'p2'] as const) {
+      for (const row of ['ATK', 'DEF'] as const) {
+        const event: GameEvent = { type: 'RowDevastated', player, row, cards: [], reflected: false };
+        expect(fieldTarget(event, null, 'p1', 'p2')).toEqual({ player, row });
+      }
+    }
+  });
+
+  it('refletida, é a fileira de quem lançou: o evento já diz', () => {
+    const event: GameEvent = { type: 'RowDevastated', player: 'p1', row: 'ATK', cards: [], reflected: true };
+    expect(fieldTarget(event, cast, 'p1', 'p2')).toEqual({ player: 'p1', row: 'ATK' });
+  });
+
+  it('cancelada pelos Reflects: a fileira do alvo, com a fileira da Devastação em curso', () => {
+    const event: GameEvent = { type: 'DevastationCanceled', player: 'p1', reason: 'REFLECT_CLASH' };
+    expect(fieldTarget(event, cast, 'p1', 'p2')).toEqual({ player: 'p2', row: 'DEF' });
+    expect(fieldTarget(event, cast, 'p2', 'p1')).toEqual({ player: 'p2', row: 'DEF' });
+  });
+
+  it('cancelada pela Defesa Absoluta: a de quem lançou, para onde ela tinha voltado', () => {
+    const event: GameEvent = { type: 'DevastationCanceled', player: 'p1', reason: 'ABSOLUTE_DEFENSE' };
+    expect(fieldTarget(event, cast, 'p1', 'p2')).toEqual({ player: 'p1', row: 'DEF' });
+  });
+
+  it('sem a Devastação em curso (a cancelada não diz a fileira), ou em outro evento, nada', () => {
+    expect(fieldTarget({ type: 'DevastationCanceled', player: 'p1', reason: 'REFLECT_CLASH' }, null, 'p1', 'p2')).toBeNull();
+    expect(fieldTarget({ type: 'Exodia', player: 'p1' }, cast, 'p1', 'p2')).toBeNull();
   });
 });
 

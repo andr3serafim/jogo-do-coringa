@@ -3,6 +3,13 @@
 import type { SceneModule } from '../anim/scenes-loader.ts';
 import { AbsoluteAttack } from './AbsoluteAttack.tsx';
 import { AbsoluteDefense } from './AbsoluteDefense.tsx';
+import { Devastation } from './Devastation.tsx';
 import { Exodia } from './Exodia.tsx';
 
-export const SCENES: SceneModule = { ABSOLUTE_ATTACK: AbsoluteAttack, ABSOLUTE_DEFENSE: AbsoluteDefense, EXODIA: Exodia };
+export const SCENES: SceneModule = {
+  ABSOLUTE_ATTACK: AbsoluteAttack,
+  ABSOLUTE_DEFENSE: AbsoluteDefense,
+  EXODIA: Exodia,
+  DEVASTATION: Devastation,
+  DEVASTATION_CANCELED: Devastation,
+};

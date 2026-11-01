@@ -30,6 +30,7 @@
 import type { StateMessage } from '@coringa/protocol';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { bannerBeatAt, damageBeatIndex, dealsOf, delaysOf, type Deals } from '../../model/effects.ts';
+import { FIELD_SCENES } from '../../model/timeline.ts';
 import { FLASH_WINDOW_MS, FlashLock } from '../../model/flash.ts';
 import { buildTimeline, timelineMs, type Beat, type TimelineOptions } from '../../model/timeline.ts';
 
@@ -123,6 +124,9 @@ export interface BeatPlayer {
   /** Termina as batidas na hora (toque na mesa, Esc): a `view` já é a de depois. */
   skip(): void;
 }
+
+/** A batida sobe a cortina: toda cena, menos as de campo (a Devastação acontece na mesa, à vista). */
+const curtained = (beat: Beat): boolean => beat.kind === 'scene' && beat.scene !== null && !FIELD_SCENES.has(beat.scene);
 
 export interface BeatPlayerOptions {
   reducedMotion: boolean;
@@ -252,7 +256,8 @@ export function useBeatPlayer(
   // --- Faixa ---
   const beat = current.done ? null : (run.beats[current.index] ?? null);
   const bannerBeat = current.done ? null : bannerBeatAt(run.beats, current.index, run.catchUp);
-  const sceneNow = beat?.kind === 'scene' && beat.scene !== null;
+  // A Devastação cancelada não carimba nome: a fita diz o motivo durante a cena (sub-projeto 6 §7.4).
+  const sceneNow = beat?.kind === 'scene' && beat.scene !== null && beat.scene !== 'DEVASTATION_CANCELED';
   // A faixa que ainda não completou o tempo de leitura (U1), só ao vivo (o `catchUp` é um resumo, e o histórico guarda tudo). A
   // batida com faixa começa a contar; outra faixa recomeça a conta; o pulo, uma cena ou a cortina a encerram.
   const [lingering, setLingering] = useState<Beat | null>(null);
@@ -339,7 +344,7 @@ export function useBeatPlayer(
       }
       // O golpe que a cena do Ataque Absoluto absorveu acende no impacto do feixe (sub-projeto 6 §7.1), no mesmo relógio da inversão.
       if (beat.hit) at(beat.hit.atMs, () => setLanded({ run, index: i }));
-      if (beat.kind === 'scene' && beat.scene !== null) {
+      if (curtained(beat)) {
         at(beat.startMs, raiseCurtain);
         at(beat.startMs + beat.durationMs, () => lowerCurtain(CURTAIN_MIN_HOLD_MS));
       }
@@ -354,7 +359,7 @@ export function useBeatPlayer(
 
   // Um `state` novo trocou a linha do tempo no meio de uma cena: a cortina que ficou no ar desce, a não ser que a nova
   // linha também tenha cena (a cena dela a segura, e o fim dela a baixa). A descida respeita a espera mínima e a trava.
-  const hasScene = run.beats.some((beat) => beat.kind === 'scene' && beat.scene !== null);
+  const hasScene = run.beats.some(curtained);
   useEffect(() => {
     if (!hasScene) lowerCurtain(CURTAIN_MIN_HOLD_MS);
   }, [run, hasScene, lowerCurtain]);

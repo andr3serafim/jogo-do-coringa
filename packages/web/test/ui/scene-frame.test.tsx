@@ -15,6 +15,7 @@ const BOX: SceneBox = {
   band: { x: 0, y: 96, w: 1000, h: 360 },
   hudBottom: 96,
   portrait: { voce: { x: 40, y: 48 }, oponente: { x: 960, y: 48 } },
+  row: () => null,
 };
 
 beforeEach(() => {

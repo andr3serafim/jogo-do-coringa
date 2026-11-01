@@ -14,6 +14,7 @@ const BOX: SceneBox = {
   band: { x: 0, y: 96, w: 1000, h: 360 },
   hudBottom: 96,
   portrait: { voce: { x: 40, y: 48 }, oponente: { x: 960, y: 48 } },
+  row: () => null,
 };
 const M = SCENE_MOMENTS.EXODIA;
 
@@ -31,7 +32,7 @@ const advance = (ms: number) =>
 
 function show(reduced = false) {
   const [beat] = buildTimeline([{ type: 'Exodia', player: 'p2' }], { mode: 'live', reducedMotion: reduced, decisionPending: false });
-  return render(<Exodia beat={beat!} names={roomNames('p1', [])} reduced={reduced} me="p1" hitLanded={false} box={BOX} />);
+  return render(<Exodia beat={beat!} names={roomNames('p1', [])} reduced={reduced} me="p1" hitLanded={false} box={BOX} field={null} />);
 }
 
 const q = (selector: string) => document.querySelector<HTMLElement>(selector);

@@ -13,7 +13,7 @@ import { Session } from '../../src/model/session.ts';
 import { DEFAULT_PREFS } from '../../src/model/storage.ts';
 import { BEAT_MS, INVERT_COOLDOWN_MS, INVERT_MIN_HOLD_MS, RARE_SCENE_MS } from '../../src/model/timeline.ts';
 import { SCENE_MOMENTS } from '../../src/model/scene-moments.ts';
-import { useBoardBusy } from '../../src/ui/anim/context.ts';
+import { useAnim, useBoardBusy } from '../../src/ui/anim/context.ts';
 import { Stage } from '../../src/ui/anim/Stage.tsx';
 import { deferredAck, scenarioAt, type ViewSpec } from '../fixtures.ts';
 import {
@@ -181,8 +181,72 @@ describe('cenas raras (U3): a figura, o título que carimba e os raios', () => {
     advance(3_000);
     emit(m, THEIRS, [{ type: 'RowDevastated', player: 'p1', row: 'ATK', cards: [], reflected: false }]);
     expect(scene(m.container)).toHaveAttribute('data-cena', 'DEVASTATION');
+    expect(m.container.querySelector('[data-campo-cena="DEVASTATION"]')).not.toBeNull();
+    advance(SCENE_MOMENTS.DEVASTATION.titleAt);
     expect(scene(m.container)).toHaveTextContent('DEVASTAÇÃO!');
-    expect(scene(m.container)).toHaveTextContent('O seu Ataque foi devastado');
+  });
+
+  it('a Devastação é no campo: a cortina não sobe e o painel não aparece', () => {
+    const m = mount(THEIRS);
+    emit(m, THEIRS, [{ type: 'RowDevastated', player: 'p1', row: 'ATK', cards: [], reflected: false }]);
+    advance(100);
+    expect(curtainUp(m.container)).toBe(false);
+    expect(m.container.querySelector('[data-painel-cena][data-ativo]')).toBeNull();
+  });
+
+  it('a cancelada: sem cortina nem painel, e a fita diz o motivo durante a cena', () => {
+    const m = mount(THEIRS);
+    const reaction: ViewSpec = { ...THEIRS, phase: { kind: 'REACTION', responder: 'p2', trigger: 'REFLECT_PLAYED', devastation: { player: 'p1', row: 'DEF', k: { id: 'dk', kind: 'K', suit: 'copas' }, a: { id: 'da', kind: 'A', suit: 'paus' }, x: { id: 'dq', kind: 'Q', suit: 'ouros' } } } };
+    emit(m, reaction, [TURN]);
+    advance(3_000);
+    emit(m, THEIRS, [{ type: 'DevastationCanceled', player: 'p1', reason: 'REFLECT_CLASH' }]);
+    advance(250);
+    expect(scene(m.container)).toHaveAttribute('data-cena', 'DEVASTATION_CANCELED');
+    expect(curtainUp(m.container)).toBe(false);
+    expect(m.container.querySelector('[data-painel-cena][data-ativo]')).toBeNull();
+    expect(banner(m.container)).toHaveTextContent('Os Reflects se anularam: a Devastação não aconteceu');
+    // A fileira da cancelada vem da Devastação em curso no `state` de antes.
+    advance(SCENE_MOMENTS.DEVASTATION_CANCELED.crackAt);
+    expect(m.container.querySelector('[data-fenda]')).not.toBeNull();
+  });
+
+  it('as cartas da fileira vão ao cemitério sem voar: instantâneas (sub-projeto 6 §7.4)', () => {
+    const seen: boolean[] = [];
+    const Probe = () => {
+      seen.push(useAnim().instant('n-caida'));
+      return null;
+    };
+    const { session, connection } = connect(THEIRS);
+    const ui = () => (
+      <Stage snapshot={session.snapshot()} reducedMotion={false}>
+        <Probe />
+      </Stage>
+    );
+    const view = render(ui());
+    expect(seen.at(-1)).toBe(false);
+    emit({ connection }, THEIRS, [{ type: 'RowDevastated', player: 'p1', row: 'ATK', cards: [{ id: 'n-caida', kind: 'NUM', value: 5, suit: 'copas' }], reflected: false }]);
+    view.rerender(ui());
+    expect(seen.at(-1)).toBe(true);
+    advance(RARE_SCENE_MS.DEVASTATION + 100);
+    view.rerender(ui());
+    expect(seen.at(-1)).toBe(false);
+  });
+
+  it('no celular, a cena rola os campos até a fileira atingida, na hora, e nada rola de lado', () => {
+    const m = mount(THEIRS);
+    const fields = m.container.querySelector<HTMLElement>('[data-campos]')!;
+    fields.scrollTop = 0;
+    fields.scrollLeft = 0;
+    const row = m.container.querySelector('[data-fileira="p1:DEF"]')!;
+    const spy = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+      if (this === fields) return new DOMRect(0, 100, 360, 300);
+      if (this === row) return new DOMRect(0, 500 - fields.scrollTop, 360, 100);
+      return new DOMRect(0, 0, 360, 0);
+    });
+    emit(m, THEIRS, [{ type: 'RowDevastated', player: 'p1', row: 'DEF', cards: [], reflected: false }]);
+    expect(fields.scrollTop).toBeGreaterThanOrEqual(200);
+    expect(fields.scrollLeft).toBe(0);
+    spy.mockRestore();
   });
 
   it('a cena comum (o Reflect) não tem figura nem raios', () => {

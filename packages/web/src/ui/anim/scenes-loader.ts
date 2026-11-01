@@ -4,6 +4,7 @@
 import type { PlayerId } from '@coringa/engine';
 import type { Names } from '@coringa/sim/text';
 import { useSyncExternalStore, type ComponentType } from 'react';
+import type { FieldTarget } from '../../model/effects.ts';
 import type { Beat, SceneKind } from '../../model/timeline.ts';
 import type { SceneBox } from './scene-box.ts';
 
@@ -17,6 +18,8 @@ export interface SceneProps {
   /** O golpe absorvido já acendeu (o feixe do Ataque Absoluto acertou). */
   hitLanded: boolean;
   box: SceneBox;
+  /** A fileira das cenas de campo (a Devastação); `null` nas outras, ou sem ela. */
+  field: FieldTarget | null;
 }
 
 export type SceneModule = Partial<Record<SceneKind, ComponentType<SceneProps>>>;

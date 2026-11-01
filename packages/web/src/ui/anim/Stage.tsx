@@ -18,11 +18,11 @@
 //   chegam sem a transição de layout (`instant`), e não deslizam do quadro de antes. O `catchUp` e o passo ao vivo animam.
 // - O Motion vem com `LazyMotion`: o recurso de layout (`layoutId` das cartas) só existe no `domMax`, carregado por
 //   `import()` à parte, fora do JavaScript inicial (spec §12).
-import type { PlayerId } from '@coringa/engine';
+import type { DevastationState, PlayerId } from '@coringa/engine';
 import { LazyMotion, MotionConfig } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
 import type { Ribbon } from '../../model/copy.ts';
-import { bannerRibbon, effectsOf, insigniaShown, lifeChange, NO_EFFECTS, ribbonText } from '../../model/effects.ts';
+import { bannerRibbon, effectsOf, fieldTarget, insigniaShown, lifeChange, NO_EFFECTS, ribbonText } from '../../model/effects.ts';
 import { roomNames } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import type { ImpactForce } from '../../model/impact.ts';
@@ -140,6 +140,16 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
   }, [busy, index, run, exodia]);
   const defeated = useCallback((_who: PlayerId, lost: boolean) => lost && exodiaStage() >= 2, [exodiaStage]);
   const drained = useCallback((_who: PlayerId, lost: boolean) => lost && exodiaStage() >= 1, [exodiaStage]);
+  // As cartas da fileira devastada vão ao cemitério na hora: quem cai é a cópia da cena (sub-projeto 6 §7.4).
+  const fallen = useMemo(
+    () => new Set(run.beats.flatMap((b) => (b.event.type === 'RowDevastated' ? b.event.cards.map((card) => card.id) : []))),
+    [run],
+  );
+  // A Devastação em curso (`phase.devastation`) fica guardada: a cancelada não diz a fileira, e ela já saiu da `view` que a traz.
+  const phaseNow = state?.view.phase;
+  const castNow = phaseNow?.kind === 'REACTION' ? (phaseNow.devastation ?? null) : null;
+  const [lastCast, setLastCast] = useState<DevastationState | null>(castNow);
+  if (castNow !== null && castNow !== lastCast) setLastCast(castNow);
   const seq = state?.seq ?? 0;
   const jump = state?.resync === true;
   const remounted = useMemo(() => ({ serial: released.serial, ids: released.batch }), [released]);
@@ -186,7 +196,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       remounted,
       markOf: (id) => released.marks.get(id) ?? 0,
       // O `resync` troca a mesa de uma vez: uma carta que está nos dois quadros (o salto do replay, a volta da reconexão) não desliza.
-      instant: (id) => jump || released.instant.has(id),
+      instant: (id) => jump || released.instant.has(id) || (busy && fallen.has(id)),
       layoutKey: `${seq}:${busy ? 'tocando' : 'parado'}`,
       fx: state ? effectsOf(beat, state.view, hitLanded, drawnScene) : NO_EFFECTS,
       ribbon,
@@ -217,6 +227,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       drained,
       hitLanded,
       drawnScene,
+      fallen,
     ],
   );
 
@@ -301,6 +312,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
               reduced={reducedMotion}
               me={me}
               hitLanded={hitLanded}
+              field={scene && state ? fieldTarget(scene.event, lastCast, state.view.me, state.view.opponent.id) : null}
             />
           </div>
         </AnimContext>

@@ -8,7 +8,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { SCENE_TITLE } from '../../model/copy.ts';
 import { SCENE_MOMENTS, TITLE_MS } from '../../model/scene-moments.ts';
-import { RARE_SCENE_MS } from '../../model/timeline.ts';
+import { RARE_SCENE_MS, type SceneKind } from '../../model/timeline.ts';
 import type { SceneBox } from '../anim/scene-box.ts';
 
 export type FramedScene = 'ABSOLUTE_ATTACK' | 'ABSOLUTE_DEFENSE' | 'EXODIA';
@@ -152,15 +152,20 @@ export function SceneFrame({
   );
 }
 
-/** O nome carimbado (Alfa Slab One, a fonte dos carimbos; sem legenda embaixo, §7). */
-function Stamp({ kind, reduced, className }: { kind: FramedScene; reduced: boolean; className: string }) {
+/** O nome carimbado (Alfa Slab One, a fonte dos carimbos; sem legenda embaixo, §7). Sem `top`, fica na parte de baixo da faixa. */
+export function Stamp({ kind, reduced, className, top }: { kind: SceneKind; reduced: boolean; className: string; top?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const motion = ref.current?.animate?.(stampKeyframes(reduced), { duration: TITLE_MS, easing: 'ease-out', fill: 'both' });
     return () => motion?.cancel();
   }, [reduced]);
   return (
-    <div ref={ref} data-carimbo={kind} className="absolute inset-x-0 bottom-[16%] z-20 text-center">
+    <div
+      ref={ref}
+      data-carimbo={kind}
+      className={`absolute inset-x-0 z-20 text-center ${top === undefined ? 'bottom-[16%]' : ''}`}
+      style={top === undefined ? undefined : { top: `${top}px` }}
+    >
       <span
         className={`inline-block border-[5px] pb-0.5 pt-1.5 font-madeira uppercase leading-none tracking-[0.03em] shadow-[8px_8px_0_var(--color-tinta)] ${className}`}
       >

@@ -3,7 +3,7 @@
 // saem da mesma conta do protótipo aprovado, com as mesmas sementes: pontas viradas para cima, maiores no alto, quase nada embaixo.
 
 /** Gerador de Park–Miller, o do protótipo: a mesma semente dá sempre o mesmo desenho. */
-function rng(seed: number): () => number {
+export function rng(seed: number): () => number {
   let s = seed;
   return () => (s = (s * 16807) % 2147483647) / 2147483647;
 }
