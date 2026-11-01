@@ -37,6 +37,8 @@ const FALL_DELAY_MS = 80;
 const FALL_STAGGER_MS = 90;
 /** O tremor grande do chão que se abre. */
 const OPEN_SHAKE_MS = 950;
+/** A altura que o nome carimbado ocupa, no máximo. */
+const STAMP_ROOM = 88;
 const STAMP_LOOK = 'border-vermelho px-4 text-3xl -rotate-[4deg] bg-tinta text-papel [text-shadow:4px_4px_0_var(--color-vermelho)] pc:px-6 pc:text-6xl';
 
 /** O tremor que cresce de `from` a `to` px (ou morre, ao contrário), ao longo da duração da animação. */
@@ -345,7 +347,10 @@ export function Devastation({ beat, me, reduced, box, field }: SceneProps) {
 
   const casterSide = casterIsMe ? 'voce' : 'oponente';
   const portrait = box.portrait[casterSide];
-  const stampTop = Math.min(Math.max(8, yc - 34), Math.max(8, box.band.h - 96));
+  // O nome carimba ao lado da fileira, sem cobrir as cartas que caem: embaixo dela, ou em cima se não couber.
+  const rowTop = layout?.slots[0]?.y ?? yc;
+  const rowBottom = rowTop + (layout?.slots[0]?.h ?? 0);
+  const stampTop = rowBottom + 8 + STAMP_ROOM <= box.band.h ? rowBottom + 8 : Math.max(8, rowTop - 8 - STAMP_ROOM);
   return (
     <>
       <span ref={anchor} hidden />
