@@ -5,7 +5,7 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
-## 2026-11-01 (4): sub-projeto 6, fatia 3 em execução (a Exódia e a Devastação), Tasks 1 a 5 feitas
+## 2026-11-01 (4): sub-projeto 6, fatia 3 em execução (a Exódia e a Devastação), as 6 tarefas feitas
 
 - **Pedido do autor** (`decisoes.md` 2026-11-01 (4) e (5)): "ok, pode seguir o plano da fatia 3", e que a outra conta consiga
   retomar sem perda nenhuma. Plano em `docs/superpowers/plans/2026-11-01-direcao-visual-fatia-3.md`, na branch
@@ -62,10 +62,24 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 - **Task 5, os sons** (`263e6ce`): as receitas `exodia`, `devastacao` e `devastacao-cancelada` nos instantes da tabela. A pista `absoluto`
   ficou sem uso e saiu (`Cue`, `synth.ts` e `synth.test.ts`; o plano não a mencionava). O som só foi conferido pelos instantes das
   vozes, não pelo ouvido.
+- **Task 6, o E2E, a medição e os docs:**
+  - a fixture `e2e/fixtures/exodia-devastacao.json` é uma só partida com as duas cenas (semente `fatia3-0`, turtle × turtle, achada com um
+    script temporário). A Devastação vai do passo 210 para o 211, e a Exódia do 407 para o 408;
+  - `e2e/scenes.spec.ts` ganhou os dois casos, a 1366 × 768 e a 360 × 640 (8 testes, verdes);
+  - **ver no navegador achou o que os testes não acham** (`58f1157`): o tremor do campo abria uma barra de rolagem de lado nos campos. Os
+    campos agora não rolam de lado, e o E2E confere. Também: a fenda corre por cima das cartas, a rolagem até a fileira deixa 12 px de
+    folga (o tremor a empurrava para fora da janela), a terra revirada ficou mais visível e o carimbo fica ao lado da fileira, sem cobrir
+    as cartas que caem;
+  - a medição está em `notas/medicao-fatia-3.md`: ≥ 87 quadros por segundo com a CPU 4×, e no máximo 30 partículas.
 - **O que quem continua precisa saber:**
-  - **Task 6:** falta ver tudo no navegador. Confira a Exódia e a Devastação com a fixture, a 1366 × 768 e a 360 × 640, e meça a CPU 4×;
+  - **não conferido de verdade:** o som (só os instantes), a cancelada e a refletida (só testes de unidade: nas 467 Devastações da busca
+    com bots, nenhuma foi cancelada, e a refletida não foi procurada) e o movimento reduzido;
+  - **para ver as cenas sem esperar no treino:** importe a fixture e abra `/partidas/exodia-devastacao`, passo 210 (a Devastação) e passo
+    407 (a Exódia), e clique em "Próximo passo";
   - **a revisão final** (tarefa do `executing-plans`) foi feita por quem escreveu o código nas fatias anteriores, sem subagente, e isso
     é dito ao autor;
+  - **no E2E com o `wrangler dev` do autor na 8787:** copie o `playwright.config.ts` para um arquivo temporário com `PORT = 8788`, rode com
+    `-c` e apague (não mexa no de verdade);
   - **nos testes:** o `act` agrupa um `advance` inteiro, e a contagem por quadros só parte no fim dele. Para ver a vida descer, avance
     em dois passos (como o teste do golpe). As cenas de faixa recebem `field={null}`, e as caixas falsas têm `row: () => null`.
 - **Sem pendência escondida:** todo o trabalho acima está commitado, sem arquivo solto (fora o `.claude/launch.json` e o

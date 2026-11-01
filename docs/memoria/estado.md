@@ -8,16 +8,13 @@
 - **Branch:** `feat/direcao-visual-fatia-3`, a partir da `main` (`cd75b0d`), no checkout principal. Sobe para o `origin` a cada bloco.
 - **Em curso:** a execução do plano da **fatia 3** (`docs/superpowers/plans/2026-11-01-direcao-visual-fatia-3.md`), aprovado em
   `decisoes.md` 2026-11-01 (4), aqui mesmo, tarefa por tarefa, com o teste primeiro. Cada tarefa fecha com o commit dela.
-- **Andamento das 6 tarefas:**
-  - **Feitas:** Task 1 (`d0458b8`: os tempos e as batidas), Task 2 (`7cd2a48`: a cena da Exódia e o retrato que racha) , Task 3
-    (`4f58fb5`: a Devastação no campo, com a refletida e a cancelada) , Task 4 (`7c3b011`: a desolação) e Task 5 (`263e6ce`: os sons). As
-    escolhas técnicas de cada uma estão no `diario.md` 2026-11-01 (4).
-  - **Falta:** Task 6 (o E2E, a medição e os docs), a revisão final, a CI e o fast-forward.
-- **Próximo passo exato:** a **Task 6** do plano: achar com o simulador uma partida com Devastação que derruba uma fileira e uma com
-  Exódia, gravar a fixture, escrever o E2E, ver as cenas no navegador e medir. O que ela precisa levar em conta está no `diario.md`
-  2026-11-01 (4), em "O que quem continua precisa saber".
-- **Nada da fatia 3 foi visto no navegador ainda:** só os testes de unidade (a web inteira verde: 65 arquivos, 2250 testes). O visual
-  da Exódia e da Devastação será conferido na Task 6, com a fixture. O autor ainda não viu nada desta fatia.
+- **Andamento:** as **6 tarefas estão feitas** (`git log main..HEAD`; as escolhas técnicas de cada uma estão no `diario.md` 2026-11-01 (4)).
+  - **Falta:** a revisão final, a `pnpm check` no pre-push, as duas CI e o fast-forward na `main`.
+- **Próximo passo exato:** subir a branch, ler a CI (`check` e `e2e`) pela API do GitHub com `curl` e, verdes, fazer o fast-forward.
+  Depois, avisar o autor para jogar a fatia 3. O próximo trabalho, depois do "ok" dele, é o plano da fatia 4 (o Reflect e a Ressurreição).
+- **Visto no navegador** (`notas/medicao-fatia-3.md`): a Devastação e a Exódia inteiras, no PC; a Devastação no celular. **Medido:** ≥ 87
+  quadros por segundo com a CPU 4×. **Não conferido de verdade:** o som (só os instantes), a cancelada e a refletida (só testes: nenhuma
+  partida da busca com bots cancelou, e a refletida não foi procurada) e o movimento reduzido (só testes).
 - **Sem conflito de regra:** `RULES_VERSION` e `STATE_SCHEMA` não mudam; muda só a tabela da folga de cena (`SCENE_MS`).
 - **Feito antes:** a **fatia 2 do sub-projeto 6** e o conserto do corte da cena, na `main` com as duas CI verdes (`diario.md`
   2026-11-01 (2) e (3)); medição em `notas/medicao-fatia-2.md`.

@@ -467,10 +467,10 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
   - batida comum: 250 a 350 ms;
   - número de dano: ~600 ms;
   - cena comum (Reflect lançado e disparado): ~1,5 s;
-  - cenas raras (sub-projeto 5, U3): Ataque Absoluto e Defesa Absoluta 3 s (eram 2,6 s; o autor pediu 3 s em 2026-10-30; os quatro J
-    em leque, os quatro Q em muro, 0,18 s entre uma carta e a seguinte, o título e a inversão a 0,9 s), Exódia
-    4,2 s (os quatro K sobem um a um até a cruz). O título carimba, com mola, no instante da única inversão da cena; raios de
-    xilogravura giram devagar atrás do painel. Elas **não encolhem nem contam no teto de decisão** (o resto da linha do tempo encolhe
+  - cenas raras (sub-projeto 5, U3; os tempos e os desenhos de hoje são os do sub-projeto 6: `SCENE_MS` e `SCENE_MOMENTS`): Ataque
+    Absoluto 4,5 s, Defesa Absoluta 4,8 s, Exódia 5,8 s e Devastação 3,1 s (a cancelada, 1,4 s). Sem o módulo das cenas carregado, vale
+    o painel de antes: o título carimba, com mola, no instante da inversão da cena, e raios de xilogravura giram devagar atrás dele.
+    Elas **não encolhem nem contam no teto de decisão** (o resto da linha do tempo encolhe
     para caber nele): são raras, a Exódia acaba a partida, e o toque ou o Esc pulam na hora. No `catchUp` viram faixa, como as outras;
   - um ataque inteiro: ~2 s.
 - **Movimento (sub-projeto 5, U4):** as cartas e a marca da iniciativa deslizam com mola (`type: 'spring'`, `visualDuration` 0,42 s,
@@ -526,9 +526,10 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
 | `StealDamage` | o número do dano sobe no Coringa de quem foi roubado (nada, se o K anulou); a vida desce |
 | `Healed` | "+N" no ouro sobe no Coringa de quem curou (o Roubo e a cura pela Defesa); 0 passa quieto |
 | `HandLimitPenalty` | **faixa** ("Sua mão já tem 4 especiais: K♦ foi para o cemitério"); a carta queimada vai para o cemitério |
-| `DevastationCast` | **cena rara** (3 s, como os Absolutos): o K, o A e o J/Q da jogada caem em trio, raios e o carimbo "DEVASTAÇÃO!" na única inversão (0,9 s), "Duda devasta o seu Ataque" |
-| `RowDevastated` / `DevastationCanceled` | **faixa** ("O Ataque de Duda foi devastado", "A Devastação voltou: …", "Os Reflects se anularam: a Devastação não aconteceu"); as numéricas vão para o cemitério |
-| `Exodia` | **cena maior:** a partida acaba |
+| `DevastationCast` | **faixa** ("DEVASTAÇÃO de Duda!") com as três cartas indo ao cemitério: só abre a janela de reação do alvo (sub-projeto 6 §7.4) |
+| `RowDevastated` | **cena de campo** (3,1 s, sub-projeto 6 §7.4): o terremoto sobre a fileira, sem tarjas nem cortina; a inversão no chão que se abre, e o carimbo "DEVASTAÇÃO!". As numéricas vão ao cemitério na hora, e a cena desenha as cópias caindo. O campo fica desolado até uma carta voltar. No `catchUp`, faixa ("O Ataque de Duda foi devastado", "A Devastação voltou: …") |
+| `DevastationCanceled` | **cena de campo** curta (1,4 s), sem inversão nem nome; a **fita** diz o motivo ("Os Reflects se anularam: a Devastação não aconteceu", "A Defesa Absoluta de Duda segurou a Devastação devolvida") |
+| `Exodia` | **cena maior** (5,8 s, sub-projeto 6 §7.3): os 4 K, os pilares, a coroa; a vida do perdedor escorre a 0, e o retrato dele racha. A partida acaba |
 | `GameOver` | o painel de fim aparece depois das batidas |
 
 ---

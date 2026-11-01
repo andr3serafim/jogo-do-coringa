@@ -359,7 +359,18 @@ Cada fatia é uma branch com `pnpm check`, `pnpm e2e` e as duas CI verdes, e vai
      - o número desse golpe é desenhado pela cena, porque a mesa é um contexto de empilhamento próprio e o número do placar
        ficaria embaixo dela.
    - Medição: `docs/memoria/notas/medicao-fatia-2.md` (≥ 52 quadros/s com a CPU 4× nas duas telas).
-3. **Exódia e Devastação** (com a desolação), com os sons.
+3. **Exódia e Devastação** (com a desolação), com os sons. **Entregue em 2026-11-01** (plano
+   `plans/2026-11-01-direcao-visual-fatia-3.md`).
+   - O que a execução decidiu e vale para as fatias seguintes:
+     - a Devastação acontece quando a fileira cai (`RowDevastated`, 3,1 s), e o lançamento (`DevastationCast`) é uma faixa, sem folga de
+       cena: ele só abre a janela de reação do alvo. A cancelada (`DevastationCanceled`) é uma cena de 1,4 s, sem inversão nem nome;
+     - **desvio da letra do §7, aprovado no plano:** a Devastação é uma cena de campo (`FIELD_SCENES`), sem tarjas nem cortina, como no
+       protótipo;
+     - o que treme é o campo do alvo e os campos inteiros, por `transform`. A tela não treme na Exódia;
+     - a desolação é estado da sessão (`desolationAfter`), e some se a página recarregar; a partida nova a zera, e o replay a calcula
+       pelos quadros;
+     - os campos (`[data-campos]`) não rolam de lado: o tremor abria uma barra.
+   - Medição: `docs/memoria/notas/medicao-fatia-3.md` (≥ 87 quadros/s com a CPU 4× nas duas telas).
 4. **Reflect e Ressurreição**, com os sons.
 5. **Fluidez das jogadas comuns** (§8), com os sons.
 

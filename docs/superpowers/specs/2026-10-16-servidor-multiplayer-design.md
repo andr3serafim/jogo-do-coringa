@@ -309,7 +309,9 @@ Fica no núcleo do servidor, fixo para todas as salas [A]. O motor continua sem 
   (a Defesa Absoluta no próprio turno), o prazo que já existia cresce pela folga e o alarme acompanha. O `Deadline` leva `runsFrom`
   (o fim da folga) enquanto ela não venceu, e a interface mostra o relógio parado até lá. `STATE_SCHEMA` não muda: o campo novo é
   opcional. A fatia 2 do sub-projeto 6 (2026-11-01) deu ao Ataque Absoluto e à Defesa Absoluta as cenas do protótipo, e a
-  tabela passou a 4,5 s e 4,8 s para eles.
+  tabela passou a 4,5 s e 4,8 s para eles. A fatia 3 (2026-11-01) deu à Exódia 5,8 s e levou a folga da Devastação para quando a
+  fileira cai (`RowDevastated`, 3,1 s) ou para a cancelada (`DevastationCanceled`, 1,4 s). O lançamento (`DevastationCast`) não rende
+  mais folga: ele só abre a janela de reação do alvo.
 
 ### 6.3 Janela de reação: duração mínima [A]
 
