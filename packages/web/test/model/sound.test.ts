@@ -1,6 +1,7 @@
 import type { GameEvent, GameResult, NumCard, PlayerId, SpecialCard } from '@coringa/engine';
 import { describe, expect, it } from 'vitest';
-import { DAMAGE_BANDS, cueOf, type Cue } from '../../src/model/sound.ts';
+import { DAMAGE_BANDS } from '../../src/model/impact.ts';
+import { cueOf, type Cue } from '../../src/model/sound.ts';
 import { buildTimeline, type Beat, type TimelineOptions } from '../../src/model/timeline.ts';
 
 const num = (id: string): NumCard => ({ id, kind: 'NUM', value: 5, suit: 'copas' });

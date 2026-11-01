@@ -2,6 +2,7 @@
 // React, DOM nem Audio. Quem toca é a interface (o `Stage`, que chama `cueOf` na hora de tocar a batida); o que cada pista
 // é (síntese, volume, quando fica mudo) é problema do player de áudio, não deste módulo.
 import type { PlayerId } from '@coringa/engine';
+import { impactForce } from './impact.ts';
 import type { Beat } from './timeline.ts';
 
 /** Uma pista de som: o nome é o do gesto do jogo, não o do arquivo ou do sintetizador. */
@@ -18,15 +19,10 @@ export type Cue =
   | 'derrota'
   | 'urgencia';
 
-/** Onde o golpe muda de peso, em pontos de dano: abaixo de `medio` é leve; de `medio` até `forte`, médio; de `forte` em diante, forte. */
-export const DAMAGE_BANDS = { medio: 40, forte: 100 } as const;
-
-/** A pista do golpe de `damage` pontos; dano zero (a defesa segurou tudo) é mudo. */
+/** A pista do golpe de `damage` pontos, pelo peso dele (`impactForce`, o mesmo do tremor); dano zero (a defesa segurou tudo) é mudo. */
 function strikeCue(damage: number): Cue | null {
-  if (damage <= 0) return null;
-  if (damage >= DAMAGE_BANDS.forte) return 'golpe-forte';
-  if (damage >= DAMAGE_BANDS.medio) return 'golpe-medio';
-  return 'golpe-leve';
+  const force = impactForce(damage);
+  return force === null ? null : `golpe-${force}`;
 }
 
 /**

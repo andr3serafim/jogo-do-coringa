@@ -3,6 +3,7 @@
 import type { GameEvent, PlayerId, PlayerView, RowName } from '@coringa/engine';
 import { cardText, eventText, type Names } from '@coringa/sim/text';
 import { initiativeRibbon, SCENE_TITLE, type Ribbon } from './copy.ts';
+import { impactForce, type ImpactForce } from './impact.ts';
 import type { Beat } from './timeline.ts';
 
 /** Chave de uma fileira de um jogador, para o conjunto de fileiras acesas: "p1:ATK". */
@@ -24,9 +25,11 @@ export interface BeatEffects {
    * mesmo) na batida, e não quando o `state` chega.
    */
   initiative: { holder: PlayerId; changed: boolean } | null;
+  /** O golpe (sub-projeto 6 §5): quem apanhou e com que peso. A mesa treme e respinga tinta no retrato dele. */
+  impact: { target: PlayerId; force: ImpactForce } | null;
 }
 
-export const NO_EFFECTS: BeatEffects = { cards: new Map(), rows: new Set(), damage: null, shieldBreak: null, initiative: null };
+export const NO_EFFECTS: BeatEffects = { cards: new Map(), rows: new Set(), damage: null, shieldBreak: null, initiative: null, impact: null };
 
 /** As cartas da fileira da quadra: as da fileira com o valor dela (a `view` já é a de depois do evento). */
 function quadCards(view: PlayerView, player: PlayerId, row: RowName, value: number): string[] {
@@ -35,6 +38,12 @@ function quadCards(view: PlayerView, player: PlayerId, row: RowName, value: numb
 }
 
 const fxMap = (ids: string[], fx: CardFx): ReadonlyMap<string, CardFx> => new Map(ids.map((id) => [id, fx] as const));
+
+/** O golpe em `target`, se o dano pesa alguma coisa. */
+function impactOn(target: PlayerId, damage: number): BeatEffects['impact'] {
+  const force = impactForce(damage);
+  return force === null ? null : { target, force };
+}
 
 function effectsOfEvent(event: GameEvent, view: PlayerView): Partial<BeatEffects> {
   switch (event.type) {
@@ -45,11 +54,18 @@ function effectsOfEvent(event: GameEvent, view: PlayerView): Partial<BeatEffects
       return {
         rows: new Set([rowKey(event.attacker, 'ATK'), rowKey(event.defender, 'DEF')]),
         damage: event.damage > 0 ? { target: event.defender, amount: event.damage } : null,
+        impact: impactOn(event.defender, event.damage),
       };
     case 'ReflectTriggered':
-      return { damage: event.damage > 0 ? { target: event.attacker, amount: event.damage } : null };
+      return {
+        damage: event.damage > 0 ? { target: event.attacker, amount: event.damage } : null,
+        impact: impactOn(event.attacker, event.damage),
+      };
     case 'StealDamage':
-      return { damage: event.damage > 0 ? { target: event.victim, amount: event.damage } : null };
+      return {
+        damage: event.damage > 0 ? { target: event.victim, amount: event.damage } : null,
+        impact: impactOn(event.victim, event.damage),
+      };
     case 'Healed':
       return { damage: event.amount > 0 ? { target: event.player, amount: event.amount, heal: true } : null };
     case 'GuardBroken':

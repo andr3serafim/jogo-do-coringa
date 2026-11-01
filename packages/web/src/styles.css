@@ -562,3 +562,31 @@
     }
   }
 }
+
+/*
+ * O tremor do golpe (sub-projeto 6 §5): a mesa se desloca alguns pixels e volta, uma vez, quando o palco ganha a marca
+ * `data-tremor` na batida do dano. O tamanho e a duração vêm do `Stage` (`SHAKE_PX`, `SHAKE_MS`). Deslocamento, não luz: não
+ * conta como troca claro ↔ escuro (spec da web §10.4). Com movimento reduzido o palco não ganha a marca.
+ */
+@keyframes tremor {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  20% {
+    translate: calc(var(--tremor) * -1) calc(var(--tremor) * 0.5);
+  }
+  40% {
+    translate: var(--tremor) calc(var(--tremor) * -0.5);
+  }
+  60% {
+    translate: calc(var(--tremor) * -0.6) calc(var(--tremor) * 0.3);
+  }
+  80% {
+    translate: calc(var(--tremor) * 0.4) 0;
+  }
+}
+
+[data-palco][data-tremor] {
+  animation: tremor var(--tremor-ms, 200ms) linear;
+}

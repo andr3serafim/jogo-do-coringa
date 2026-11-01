@@ -19,11 +19,12 @@
 // - O Motion vem com `LazyMotion`: o recurso de layout (`layoutId` das cartas) só existe no `domMax`, carregado por
 //   `import()` à parte, fora do JavaScript inicial (spec §12).
 import { LazyMotion, MotionConfig } from 'motion/react';
-import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
 import type { Ribbon } from '../../model/copy.ts';
 import { bannerRibbon, effectsOf, NO_EFFECTS, ribbonText } from '../../model/effects.ts';
 import { roomNames } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
+import type { ImpactForce } from '../../model/impact.ts';
 import { bannerReadMs } from '../../model/reading.ts';
 import { cueOf } from '../../model/sound.ts';
 import type { Beat } from '../../model/timeline.ts';
@@ -44,6 +45,10 @@ const OWN_CONTROL = '[data-sem-pulo]';
 const isOwnControl = (target: EventTarget | null): boolean => target instanceof Element && target.closest(OWN_CONTROL) !== null;
 
 const loadMotionFeatures = () => import('./motion-features.ts').then((module) => module.default);
+
+/** O tremor do golpe (sub-projeto 6 §5): quanto a mesa se desloca e por quanto tempo, por peso. Deslocamento, não luz (spec §10.4). */
+export const SHAKE_PX: Record<ImpactForce, number> = { leve: 3, medio: 4, forte: 6 };
+export const SHAKE_MS: Record<ImpactForce, number> = { leve: 200, medio: 200, forte: 260 };
 
 export interface StageProps {
   snapshot: SessionSnapshot;
@@ -134,6 +139,10 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
     [busy, reducedMotion, run, released, remounted, seq, jump, state, beat, ribbon, count, countMs],
   );
 
+  // O golpe treme a mesa na batida dele (a animação do CSS roda uma vez quando a marca entra); nada com movimento reduzido.
+  const impact = reducedMotion ? null : anim.fx.impact;
+  const shake = impact ? { '--tremor': `${SHAKE_PX[impact.force]}px`, '--tremor-ms': `${SHAKE_MS[impact.force]}ms` } : null;
+
   // Esc pula as batidas (o Esc que um diálogo ou a gaveta do histórico já tratou não conta).
   useEffect(() => {
     if (!busy) return;
@@ -189,7 +198,8 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
             data-palco
             data-ocupado={busy ? 'true' : undefined}
             data-invertido={inverted ? 'true' : undefined}
-            style={inverted ? { filter: 'invert(1)' } : undefined}
+            data-tremor={impact?.force}
+            style={inverted || shake ? ({ ...(inverted ? { filter: 'invert(1)' } : {}), ...shake } as CSSProperties) : undefined}
             onPointerDownCapture={onPointerDown}
             onPointerUpCapture={onPointerUp}
             onPointerCancelCapture={clearTouch}

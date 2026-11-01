@@ -13,7 +13,7 @@ import type { ClockFace } from '../../model/clock.ts';
 import { CLOCK_LABEL, CLOCK_URGENT_LABEL } from '../../model/copy.ts';
 import { zoneKey, type MarkZone } from '../../model/marks.ts';
 import { useAnim, type Anim } from '../anim/context.ts';
-import { DamageNumber, ShieldBreak } from '../anim/Effects.tsx';
+import { DamageNumber, InkSplat, ShieldBreak } from '../anim/Effects.tsx';
 import { RibbonLayer } from '../anim/Ribbon.tsx';
 import { useCountedNumber } from '../anim/useCountedNumber.ts';
 import { Coringa } from '../cards/Coringa.tsx';
@@ -155,6 +155,7 @@ function Side({ side, view, player, name, holder }: SideProps) {
   // A vida mostrada espera a batida do dano e conta até o valor da `view`, que é a verdade (aria-valuenow).
   const shownHp = useCountedNumber(player.hp);
   const damage = anim.fx.damage?.target === player.id ? anim.fx.damage : null;
+  const impact = anim.fx.impact?.target === player.id ? anim.fx.impact : null;
   const hpName = `Vida de ${name}`;
 
   return (
@@ -166,6 +167,7 @@ function Side({ side, view, player, name, holder }: SideProps) {
       >
         <Coringa className="size-[82%]" />
         {anim.fx.shieldBreak === player.id ? <ShieldBreak ms={anim.beatMs} reduced={anim.reduced} /> : null}
+        {impact ? <InkSplat force={impact.force} ms={anim.beatMs} reduced={anim.reduced} /> : null}
         {damage ? <DamageNumber amount={damage.amount} heal={damage.heal === true} ms={anim.beatMs} reduced={anim.reduced} /> : null}
       </span>
       <div className="placar-info">

@@ -633,6 +633,37 @@ describe('efeitos da batida (spec §4.2)', () => {
     expect(screen.getByRole('region', { name: 'Placar' }).querySelector('[data-hp]')).toHaveTextContent('137');
   });
 
+  it('o golpe treme a mesa e respinga no retrato de quem apanhou (sub-projeto 6 §5)', () => {
+    const m = mount(MINE);
+    const hit: GameEvent = { type: 'DamageDealt', attacker: 'p1', defender: 'p2', attack: 100, defense: 50, damage: 50 };
+    emit(m, { ...MINE, opponent: { ...MINE.opponent, hp: 164 } }, [hit]);
+    expect(stage(m.container)).toHaveAttribute('data-tremor', 'medio');
+    const theirs = m.container.querySelector('[data-retrato="oponente"]')!;
+    expect(theirs.querySelectorAll('[data-respingo] [data-pingo]')).toHaveLength(7);
+    expect(m.container.querySelector('[data-retrato="voce"] [data-respingo]')).toBeNull();
+    advance(700);
+    expect(stage(m.container)).not.toHaveAttribute('data-tremor');
+    expect(m.container.querySelector('[data-respingo]')).toBeNull();
+  });
+
+  it('o golpe forte treme mais e respinga mais', () => {
+    const m = mount(MINE);
+    emit(m, { ...MINE, self: { ...MINE.self, hp: 30 } }, [{ type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 200, defense: 43, damage: 157 }]);
+    advance(300);
+    expect(stage(m.container)).toHaveAttribute('data-tremor', 'forte');
+    expect(m.container.querySelectorAll('[data-retrato="voce"] [data-respingo] [data-pingo]')).toHaveLength(10);
+  });
+
+  it('com movimento reduzido, nem tremor nem respingo', () => {
+    const m = mount(MINE, { prefs: { reduceMotion: true } });
+    const hit: GameEvent = { type: 'DamageDealt', attacker: 'p1', defender: 'p2', attack: 100, defense: 50, damage: 50 };
+    emit(m, { ...MINE, opponent: { ...MINE.opponent, hp: 164 } }, [hit]);
+    expect(stage(m.container)).not.toHaveAttribute('data-tremor');
+    expect(m.container.querySelector('[data-respingo]')).toBeNull();
+    // O número do dano continua (só esmaece).
+    expect(m.container.querySelector('[data-dano]')).toHaveTextContent('−50');
+  });
+
   it('o rastro vermelho fica na vida velha e escorre até a nova depois do golpe (sub-projeto 6 §3)', () => {
     const m = mount(MINE);
     const meter = () => screen.getByRole('meter', { name: 'Vida de André' });

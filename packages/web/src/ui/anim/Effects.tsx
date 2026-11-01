@@ -1,26 +1,70 @@
-// Os efeitos de uma batida sobre a mesa (spec §4.2) que não são de carta: o número do dano que sobe no Coringa e a
-// fileira acesa. Só usam opacidade e deslocamento, sobem e descem uma vez dentro da batida (sem pisca-pisca), e ficam
-// escondidos do leitor de tela (o histórico registra tudo). Os números de jogo seguem sem textura (spec §10.7).
+// Os efeitos de uma batida sobre a mesa (spec §4.2) que não são de carta: o número do dano que é carimbado sob o retrato do
+// Coringa, os respingos de tinta do golpe (sub-projeto 6 §5) e a fileira acesa. Só usam opacidade, escala e deslocamento,
+// acontecem uma vez dentro da batida (sem pisca-pisca), e ficam escondidos do leitor de tela (o histórico registra tudo). Os
+// números de jogo seguem sem textura (spec §10.7).
 import * as m from 'motion/react-m';
+import type { ImpactForce } from '../../model/impact.ts';
 
 const times = [0, 0.15, 0.75, 1];
 
-/** O número do dano sobe no Coringa que apanhou; com `heal`, o da cura ("+N", no ouro) sobe no Coringa que curou. */
+/**
+ * O número do dano, carimbado logo abaixo do retrato de quem apanhou (sub-projeto 6 §5): entra grande e girado, assenta e sobe.
+ * Com `heal`, o da cura ("+N", no ouro) sobe no retrato de quem curou, sem carimbo. Com movimento reduzido, só esmaece.
+ */
 export function DamageNumber({ amount, ms, reduced, heal = false }: { amount: number; ms: number; reduced: boolean; heal?: boolean }) {
+  const animate = reduced
+    ? { opacity: [0, 1, 1, 0] }
+    : heal
+      ? { opacity: [0, 1, 1, 0], y: [0, -10, -22, -28] }
+      : { opacity: [0, 1, 1, 1, 0], scale: [2.4, 0.92, 1, 1, 1], rotate: [-8, -3, -3, -3, -3], y: [0, 0, 0, -16, -26] };
   return (
     <m.span
       aria-hidden="true"
       data-dano={heal ? undefined : ''}
       data-cura={heal ? '' : undefined}
       initial={{ opacity: 0 }}
-      animate={reduced ? { opacity: [0, 1, 1, 0] } : { opacity: [0, 1, 1, 0], y: [0, -10, -22, -28] }}
+      animate={animate}
       // O número sobe desacelerando (U4): rápido no começo, assentando no alto.
-      transition={{ duration: ms / 1000, times, ease: 'easeOut' }}
-      className={`pointer-events-none absolute -top-5 left-0 z-10 border-2 border-tinta px-1.5 font-texto text-xl font-extrabold leading-tight tabular-nums pc:-top-7 pc:text-3xl ${heal ? 'bg-ouro text-tinta' : 'bg-vermelho text-papel'}`}
+      transition={{ duration: ms / 1000, times: reduced || heal ? times : [0, 0.14, 0.22, 0.82, 1], ease: 'easeOut' }}
+      className={`pointer-events-none absolute left-1/2 top-full z-30 mt-1 -translate-x-1/2 border-2 border-tinta px-1.5 font-texto text-xl font-extrabold leading-tight tabular-nums shadow-[3px_3px_0_var(--color-tinta)] pc:mt-1.5 pc:border-[3px] pc:px-2 pc:text-3xl ${heal ? 'bg-ouro text-tinta' : 'bg-vermelho text-papel'}`}
     >
       {heal ? '+' : '−'}
       {amount}
     </m.span>
+  );
+}
+
+/** Quantos pingos cada peso de golpe solta. */
+const DROPS: Record<ImpactForce, number> = { leve: 5, medio: 7, forte: 10 };
+
+/**
+ * Os respingos de tinta do golpe (sub-projeto 6 §5): pingos que saem do retrato de quem apanhou, se espalham e caem. Posições
+ * fixas (sem sorteio), para o desenho ser o mesmo em toda batida. Cabem na batida (`ms`, até 0,9 s). Nada com movimento reduzido.
+ */
+export function InkSplat({ force, ms, reduced }: { force: ImpactForce; ms: number; reduced: boolean }) {
+  if (reduced) return null;
+  const count = DROPS[force];
+  return (
+    <span aria-hidden="true" data-respingo className="pointer-events-none absolute inset-0 z-20">
+      {Array.from({ length: count }, (_, i) => {
+        const angle = (i / count) * 2 * Math.PI + (i % 2 === 0 ? 0.3 : -0.25);
+        const reach = 40 + ((i * 37) % 110);
+        const size = 6 + ((i * 7) % 9);
+        const dx = Math.cos(angle) * reach;
+        const dy = Math.sin(angle) * reach;
+        return (
+          <m.span
+            key={i}
+            data-pingo
+            className="absolute left-1/2 top-1/2 rounded-full bg-tinta"
+            style={{ width: size, height: size, marginLeft: -size / 2, marginTop: -size / 2 }}
+            initial={{ x: 0, y: 0, scale: 0.2, opacity: 1 }}
+            animate={{ x: [0, dx, dx * 1.15], y: [0, dy, dy * 1.15 + 18], scale: [0.2, 1, 0.9], opacity: [1, 1, 0] }}
+            transition={{ duration: Math.min(0.9, ms / 1000), times: [0, 0.35, 1], ease: [0.1, 0.8, 0.3, 1] }}
+          />
+        );
+      })}
+    </span>
   );
 }
 

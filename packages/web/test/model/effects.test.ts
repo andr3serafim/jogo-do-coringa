@@ -13,6 +13,7 @@ import {
   sceneText,
 } from '../../src/model/effects.ts';
 import { initiativeRibbon } from '../../src/model/copy.ts';
+import { DAMAGE_BANDS, impactForce } from '../../src/model/impact.ts';
 import { withinFlashLimit } from '../../src/model/flash.ts';
 import { roomNames } from '../../src/model/history.ts';
 import { buildTimeline, luminanceSwitches, timelineMs, type Beat } from '../../src/model/timeline.ts';
@@ -538,5 +539,32 @@ describe('a fita da iniciativa (sub-projeto 6 §4)', () => {
     expect(effectsOf(beat!, view).initiative).toEqual({ holder: 'p2', changed: true });
     expect(effectsOf(beatsOf(decided('p1', false, 9, 3))[0]!, view).initiative).toEqual({ holder: 'p1', changed: false });
     expect(effectsOf(beatsOf({ type: 'TurnStarted', player: 'p1' })[0]!, view).initiative).toBeNull();
+  });
+});
+
+describe('o peso do golpe (sub-projeto 6 §5)', () => {
+  it('a força do golpe segue as faixas do som: leve, médio a partir de 40, forte a partir de 100; zero não é golpe', () => {
+    expect(DAMAGE_BANDS).toEqual({ medio: 40, forte: 100 });
+    expect(impactForce(0)).toBeNull();
+    expect(impactForce(1)).toBe('leve');
+    expect(impactForce(39)).toBe('leve');
+    expect(impactForce(40)).toBe('medio');
+    expect(impactForce(99)).toBe('medio');
+    expect(impactForce(100)).toBe('forte');
+  });
+
+  it('o dano marca o impacto em quem apanhou, com a força dele', () => {
+    const hit = (damage: number) =>
+      effectsOf(beatsOf({ type: 'DamageDealt', attacker: 'p1', defender: 'p2', attack: 0, defense: 0, damage })[0]!, view).impact;
+    expect(hit(37)).toEqual({ target: 'p2', force: 'leve' });
+    expect(hit(154)).toEqual({ target: 'p2', force: 'forte' });
+    expect(hit(0)).toBeNull();
+  });
+
+  it('o Roubo e o ataque que volta pelo Reflect também batem; a cura não', () => {
+    const fx = (event: GameEvent) => effectsOf(beatsOf(event)[0]!, view).impact;
+    expect(fx({ type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 9, blocked: false })).toEqual({ target: 'p2', force: 'leve' });
+    expect(fx({ type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 60 })).toEqual({ target: 'p1', force: 'medio' });
+    expect(fx({ type: 'Healed', player: 'p1', amount: 9, source: 'STEAL', card: num('n9', 9) })).toBeNull();
   });
 });
