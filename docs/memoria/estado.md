@@ -11,8 +11,8 @@
   aprovado pelo autor em 2026-10-31: "Aprovado o plano da fatia 1. prossiga"), inline, tarefa por tarefa, com teste primeiro.
   O registro de progresso (ledger) fica em `.superpowers/sdd/2026-10-31-direcao-visual-fatia-1/progress.md` (fora do git; se
   sumir, o `git log` da branch diz o que já foi feito: um commit `feat(...)` por tarefa).
-- **Feito:** Tarefas 1 a 6: a folga de cena (`ea30bbb`), o placar de luta (`64332e4`, `c53e756`), a espada e a fita (`2493188`), o golpe comum (`466613f`), a mesa viva (`49c319e`) e os sons (último commit de código da fatia), conferidos na tela.
-- **Próximo passo exato:** Tarefa 7 do plano: os E2E no endereço novo (região Placar) e o E2E do celular, as notas nas specs da web e do servidor, a conferência na tela e a medida com a CPU 4× mais lenta, `pnpm check`, `pnpm e2e`, a CI e o fast-forward na `main`.
+- **Feito:** Tarefas 1 a 6 (código) e os E2E no endereço novo, com o teste do placar no celular (`test(e2e)`). Em curso: o `pnpm e2e` local (log em `.superpowers/sdd/.../t7-e2e.log`).
+- **Próximo passo exato:** terminar a Tarefa 7: ver o resultado do `pnpm e2e`, as notas nas specs (web §3/§10, servidor §6.2, spec 6 §14), a medida com a CPU 4× mais lenta, `pnpm check`, push, as duas CI e o fast-forward na `main`.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
