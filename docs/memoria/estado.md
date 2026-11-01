@@ -1,24 +1,27 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-10-31**, pela conta que assumiu depois do limite semanal da anterior.
+> Sobrescrito a cada atualização. **Última: 2026-11-01**, pela conta que assumiu depois do limite semanal da anterior.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `feat/direcao-visual-fatia-1`, no checkout principal `D:/andr3/jogo-coringa`, cortada da
-  `feat/direcao-visual` (`669e4c9`, a spec e o plano do sub-projeto 6, ainda fora da `main`).
-- **Em curso:** a execução da **fatia 1 do sub-projeto 6** (plano `docs/superpowers/plans/2026-10-31-direcao-visual-fatia-1.md`,
-  aprovado pelo autor em 2026-10-31: "Aprovado o plano da fatia 1. prossiga"), inline, tarefa por tarefa, com teste primeiro.
-  O registro de progresso (ledger) fica em `.superpowers/sdd/2026-10-31-direcao-visual-fatia-1/progress.md` (fora do git; se
-  sumir, o `git log` da branch diz o que já foi feito: um commit `feat(...)` por tarefa).
-- **Feito:** as Tarefas 1 a 7 no código, a otimização do golpe (`cc60be4`) e o conserto do tempo esgotado com folga de cena (achado na revisão). E2E local: 50 passaram; o online falhou só porque um `wrangler dev` do autor (sem a semente) estava na porta 8787 e o Playwright o reaproveitou (na rodada anterior, com servidor próprio, ele passou).
-- **Próximo passo exato:** `git push` (o pre-push roda o `pnpm check` completo), as duas CI verdes na `feat/direcao-visual-fatia-1` (o `e2e` da CI sobe servidor próprio, com a semente) e o fast-forward da `main` depois de conferir que ela ainda é `9b10ddd`; depois, a memória com "nada em curso" e o próximo passo (o plano da fatia 2).
+- **Branch:** `main` (`063ef46` mais o commit desta memória), no checkout principal `D:/andr3/jogo-coringa`. Nada em curso.
+- **Feito por último:** a **fatia 1 do sub-projeto 6** (direção de arte), mesclada por fast-forward com as duas CI verdes: o placar
+  de luta no topo, a espada da iniciativa e a fita de cordel, o golpe comum com peso, a mesa viva (grão, mão que respira, quadra
+  marcada), o relógio que para durante as cenas raras (folga de cena no servidor) e os sons da espada, da fita e da quadra. A
+  spec e o plano do sub-projeto 6 entraram junto (a `feat/direcao-visual` era a base). Detalhes, consertos e medidas no
+  `diario.md` (2026-10-31 (9)).
+- **Próximo passo exato:** o autor joga a fatia 1 (o `jogar-treino.bat` roda o checkout) e diz o que achou; com o "ok" dele (ou
+  os ajustes), o plano da **fatia 2** (Ataque e Defesa Absolutos, spec 6 §7.1 e §7.2, com os sons), pelo
+  `superpowers:writing-plans`, numa branch nova a partir da `main`.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
+- **Para quem assumir:** um `wrangler dev` do autor (sem a semente do E2E) pode estar na porta 8787; o Playwright o reaproveita
+  e o E2E online falha pela semente. Com ele aberto, rode o E2E pela CI ou peça ao autor para fechá-lo.
 
 ## A `main`
 
-E1, E2, F1 (2026-10-30) e o bloco E3 + F2 + F3 (2026-10-31) mesclados. Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D
+E1, E2, F1 (2026-10-30), o bloco E3 + F2 + F3 (2026-10-31), a marca "Cura passiva" e a fatia 1 do sub-projeto 6 (2026-11-01) mesclados. Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D
 (`8d7f078`, `a5a76c5`, `bba8377`, `8cdf0a1`), a memória compartilhada, a E1, a E2, a F1 e o bloco E3 + F2 + F3 (o Reflect
 reativo, a Devastação, o Roubo sem naipe, a cura pela Defesa, o limite de 4 especiais com a BURN e a iniciativa com o placar na
 tela). Regras em vigor: spec 1 (`docs/superpowers/specs/2026-10-15-jogo-coringa-regras-motor-design.md`), com os ajustes da
@@ -29,6 +32,19 @@ spec do sub-projeto 5 (`2026-10-27-ajustes-design.md`).
 Vazia: o bloco E3 + F2 + F3 era o último item.
 
 ## Esperando o autor
+
+- **Sub-projeto 6, fatia 1, para ele jogar e dizer o que achou** (o que mudou da letra da spec, para ele ver):
+  - **o tremor do golpe sacode a mesa (o placar e os campos), não a tela inteira:** a mão, a barra e o histórico ficam parados.
+    Sacudir tudo custava ~9 quadros por segundo com a CPU 4× mais lenta, e a mão parada também se joga melhor;
+  - **a mão que respira e o lampejo da espada pausam durante as batidas** (os controles estão travados nelas);
+  - o relógio fica parado até o fim da folga mesmo com a cena pulada (o desvio que ele aprovou no plano);
+  - "Tempo esgotado" e o turno pausado moram na faixa do meio, junto da fase (não cabem na placa do celular);
+  - no PC o campo passou a ter duas colunas (fileiras | zonas); a fita de cordel desce do placar, centrada na placa;
+  - **não conferido de verdade:** a quadra marcada só foi vista montada na tela (não saiu quadra nas partidas de teste), e o
+    movimento reduzido pelo menu só nos testes de unidade; a revisão final foi de quem escreveu o código (sem revisor à parte);
+  - **pequenos, para depois:** a Defesa Absoluta que estende o prazo faz o leitor de tela anunciar o relógio de novo; dois golpes
+    colados tremem uma vez só; o quadro em que a jogada chega pesa ~200 ms com a CPU 4× mais lenta (a `main` antes: ~83 ms),
+    candidato à fatia 5 (fluidez).
 
 - **Bloco E3 + F2 + F3, para o playtest** (números em `notas/medicao-e3.md` §5 e §6):
   - **O Roubo segue fraco:** mesmo com dano e cura, o bot que rouba vence 39% contra o que não rouba (o A vale mais como

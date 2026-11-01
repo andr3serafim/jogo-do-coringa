@@ -5,14 +5,23 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
-## 2026-10-31 (9): sub-projeto 6, fatia 1 (o placar de luta, a espada e a fita, o golpe, a mesa viva, a folga de cena e os sons)
+## 2026-10-31 (9) a 2026-11-01: sub-projeto 6, fatia 1 (o placar de luta, a espada e a fita, o golpe, a mesa viva, a folga de cena e os sons)
 
 - **Pedido do autor** (`decisoes.md` 2026-10-31 (14)): "Aprovado o plano da fatia 1. prossiga". Executado aqui mesmo, tarefa por
   tarefa, com teste primeiro; o registro de cada decisão técnica ficou no ledger (`.superpowers/sdd/2026-10-31-direcao-visual-fatia-1/`,
   fora do git) e o resumo vai aqui.
 - **Commits na `feat/direcao-visual-fatia-1`** (cortada da `feat/direcao-visual`, que tem a spec e o plano): `ea30bbb` (a folga de
   cena), `64332e4` e `c53e756` (o placar), `2493188` (a espada e a fita), `466613f` (o golpe), `49c319e` (a mesa viva), `34af728`
-  (os sons), o dos E2E e os de memória e de ajuste final.
+  (os sons), o dos E2E, `1782bca` (os ajustes vistos na tela e nos E2E), `cc60be4` (o desempenho do golpe), `18f7907` (o tempo
+  esgotado com folga de cena) e os de memória.
+- **Achado na revisão final** (uma segunda opinião sobre o fechamento): o `useDeadlineExpired` agendava o "tempo esgotado" pelo
+  relógio parado e travaria os controles até 3 s antes do prazo do servidor depois de uma cena rara. Consertado com teste.
+- **Portões:** `pnpm check` completo no pre-push (2092 testes da web; JavaScript inicial 153,9 KB de 200). `pnpm e2e` local: na
+  primeira rodada completa caíram os 4 testes de toque (a mão que respira nunca fica "parada" para o Playwright: `force` nos
+  cliques nas cartas da mão) e o da dica 5 no celular de 640 px (o painel aperta abaixo de 700 px de altura); na última, 50
+  passaram e o online falhou só porque um `wrangler dev` do autor (sem a semente) estava na porta 8787 e o Playwright o
+  reaproveitou. O E2E da CI sobe servidor próprio: as duas CI ficaram verdes, e a `main` foi a `063ef46` por fast-forward
+  (o push caiu duas vezes por DNS logo depois do hook; na terceira, foi).
 - **Decisões técnicas:**
   - a tabela das cenas (`SCENE_MS`) mora no `@coringa/protocol`; o servidor soma a folga ao prazo (na mesma época, estende o prazo
     e o alarme), o `Deadline` leva `runsFrom` e o `RoomClient` mostra o relógio parado até lá. O envio antecipado do Equipar
