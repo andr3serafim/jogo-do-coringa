@@ -1,5 +1,6 @@
-// As sobreposições das batidas (spec §4.2, §10.1): a cena (a tela escurece e o título aparece no meio) e a faixa. Ficam
-// escondidas do leitor de tela: o histórico (região polida) é o registro acessível de tudo o que aconteceu.
+// As sobreposições das batidas (spec §4.2, §10.1): a cena (a tela escurece e o título aparece no meio). A faixa virou a fita de
+// cordel e mora sob o placar (`Ribbon.tsx`, sub-projeto 6 §4), mas segue as regras daqui. Ficam escondidas do leitor de tela: o
+// histórico (região polida) é o registro acessível de tudo o que aconteceu.
 //
 // Sem pisca-pisca (spec §10.4: nunca mais de 3 trocas claro ↔ escuro por segundo, somando tudo o que estiver na tela):
 // as camadas ficam montadas o tempo todo e só trocam de opacidade (esmaecimento de 220 ms, com `ease-out`: U4). A cortina escura da cena (a
@@ -22,15 +23,11 @@ import type { SpecialCard, Suit } from '@coringa/engine';
 import type { Names } from '@coringa/sim/text';
 import * as m from 'motion/react-m';
 import { useState, type ReactNode } from 'react';
-import { bannerText, sceneText } from '../../model/effects.ts';
+import { sceneText } from '../../model/effects.ts';
 import { SCENE_INVERT_LEAD_MS, type Beat, type SceneKind } from '../../model/timeline.ts';
 import { Card } from '../cards/Card.tsx';
 
 export interface BeatOverlayProps {
-  /** A batida cuja faixa vale agora (`bannerBeatAt`), ou `null`: o texto vem dela. */
-  bannerBeat: Beat | null;
-  /** A camada da faixa está no ar (decidido pelo `useBeatPlayer`, pela trava de flash). */
-  banner: boolean;
   /** A cena que o painel mostra (a de agora, ou a última enquanto a cortina segura). */
   scene: Beat | null;
   /** A cortina escura está no ar (decidido pelo `useBeatPlayer`). */
@@ -39,18 +36,9 @@ export interface BeatOverlayProps {
   reduced: boolean;
 }
 
-/** A sobreposição da batida de agora: cena, faixa, ou nada (as camadas ficam, só esmaecem). */
-export function BeatOverlay({ bannerBeat, banner, scene, curtain, names, reduced }: BeatOverlayProps) {
-  // A trava pode segurar a faixa no ar depois da batida dela: fica o texto da última que passou.
-  const text = bannerBeat === null ? null : bannerText(bannerBeat.event, names);
-  const [last, setLast] = useState<string | null>(text);
-  if (text !== null && text !== last) setLast(text);
-  return (
-    <>
-      <SceneLayer scene={scene} curtain={curtain} names={names} reduced={reduced} />
-      <BannerLayer text={banner ? (text ?? last) : null} />
-    </>
-  );
+/** A sobreposição da cena de agora, ou nada (a camada fica, só esmaece). */
+export function BeatOverlay({ scene, curtain, names, reduced }: BeatOverlayProps) {
+  return <SceneLayer scene={scene} curtain={curtain} names={names} reduced={reduced} />;
 }
 
 function Shield() {
@@ -119,21 +107,6 @@ function SceneLayer({
         </Stamp>
         {detail ? <p className="relative mt-2 text-base font-bold pc:text-xl">{detail}</p> : null}
       </div>
-    </div>
-  );
-}
-
-function BannerLayer({ text }: { text: string | null }) {
-  return (
-    <div
-      aria-hidden="true"
-      data-camada-faixa
-      data-faixa={text ?? undefined}
-      className={`pointer-events-none absolute inset-x-0 top-1/2 z-40 -translate-y-1/2 border-y-4 border-ouro bg-tinta px-3 py-2 text-center transition-opacity duration-[220ms] ease-out ${text === null ? 'opacity-0' : 'opacity-100'}`}
-    >
-      {text === null ? null : (
-        <p className="font-madeira text-2xl uppercase leading-tight text-ouro pc:text-3xl">{text}</p>
-      )}
     </div>
   );
 }

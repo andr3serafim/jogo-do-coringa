@@ -31,7 +31,7 @@ vi.mock('motion/react-m', async () => {
         'data-layout-dep': layoutDependency,
       });
     };
-  return { div: make('div'), button: make('button'), span: make('span'), svg: make('svg'), p: make('p') };
+  return { div: make('div'), button: make('button'), span: make('span'), svg: make('svg'), p: make('p'), rect: make('rect') };
 });
 
 beforeEach(() => {

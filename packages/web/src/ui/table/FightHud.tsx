@@ -4,18 +4,22 @@
 // o relógio (o número grande; sem prazo, a rodada fica grande no lugar dele), a fase curta e, no Ataque, o placar de dano que
 // decide a iniciativa. Os números de jogo usam a fonte de texto com algarismos tabulares (spec da web §10.7). O relógio segue o de
 // antes (spec da web §3.8): urgência por cor e forma, sem piscar; na reação, maior; a pista `urgencia` toca uma vez por prazo seu.
+// Sobre o placar moram a espada da iniciativa (§4: ela e a moldura de ouro trocam de dono na batida da decisão, não quando o
+// `state` chega) e a fita de cordel das batidas, que desce logo abaixo dele, centrada na placa.
 import type { PlayerView, PublicPlayer } from '@coringa/engine';
 import type { Deadline } from '@coringa/protocol';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ClockFace } from '../../model/clock.ts';
 import { CLOCK_LABEL, CLOCK_URGENT_LABEL } from '../../model/copy.ts';
 import { zoneKey, type MarkZone } from '../../model/marks.ts';
-import { useAnim } from '../anim/context.ts';
+import { useAnim, type Anim } from '../anim/context.ts';
 import { DamageNumber, ShieldBreak } from '../anim/Effects.tsx';
+import { RibbonLayer } from '../anim/Ribbon.tsx';
 import { useCountedNumber } from '../anim/useCountedNumber.ts';
 import { Coringa } from '../cards/Coringa.tsx';
 import { useSound } from '../sound-context.ts';
 import { useTableUi } from './context.ts';
+import { InitiativeSword, SWORD_FLIGHT_MS, type SwordMove, type SwordSide } from './InitiativeSword.tsx';
 import { initiativeScore, initiativeScoreText, initiativeText, phaseShortText, type TableNames } from './labels.ts';
 import { NovoChip } from './NovoChip.tsx';
 import { deadlineKey } from './useClock.ts';
@@ -27,11 +31,9 @@ export interface FightHudProps {
   face: ClockFace | null;
   /** O prazo da face: identifica o prazo para a pista de urgência tocar uma vez só. */
   deadline: Deadline | null;
-  /** O que mora sobre o placar (a espada da iniciativa). */
-  children?: ReactNode;
 }
 
-export function FightHud({ view, names, face, deadline, children }: FightHudProps) {
+export function FightHud({ view, names, face, deadline }: FightHudProps) {
   // A urgência soa uma vez por prazo (o `deadlineKey` identifica o prazo), e só no prazo do jogador.
   const sound = useSound();
   const urgentKey = face?.urgent && face.mine ? deadlineKey(deadline) : null;
@@ -42,11 +44,13 @@ export function FightHud({ view, names, face, deadline, children }: FightHudProp
     sound.play('urgencia');
   }, [urgentKey, sound]);
 
-  const mine = view.initiative === view.me;
+  const anim = useAnim();
+  const hud = useRef<HTMLElement>(null);
+  const sword = useSword(view, anim);
   const score = initiativeScore(view);
   return (
-    <section aria-label="Placar" className="placar relative flex-none bg-tinta text-papel">
-      <Side side="voce" view={view} player={view.self} name={names.self} holder={mine} />
+    <section ref={hud} aria-label="Placar" className="placar relative flex-none bg-tinta text-papel">
+      <Side side="voce" view={view} player={view.self} name={names.self} holder={sword.shown === 'voce'} />
       <div data-placa className="placar-placa flex flex-col items-center text-center">
         {/* Letra lisa, como no protótipo: a textura de madeira borra o rótulo nesse tamanho. O número grande é tipo de madeira. */}
         <h2 className="text-[9px] font-bold uppercase leading-[1.15] tracking-[0.16em] text-papel/70 pc:text-xs">
@@ -77,10 +81,55 @@ export function FightHud({ view, names, face, deadline, children }: FightHudProp
         <p className="sr-only">Iniciativa: {initiativeText(view, names)}</p>
         <p className="sr-only">{initiativeScoreText(view, names)}</p>
       </div>
-      <Side side="oponente" view={view} player={view.opponent} name={names.opponent} holder={!mine} />
-      {children}
+      <Side side="oponente" view={view} player={view.opponent} name={names.opponent} holder={sword.shown === 'oponente'} />
+      <InitiativeSword holder={sword.shown} move={sword.move} reduced={anim.reduced} hud={hud} />
+      <RibbonLayer ribbon={anim.ribbon} reduced={anim.reduced} />
     </section>
   );
+}
+
+interface SwordState {
+  shown: SwordSide;
+  /** O voo em curso (de onde a espada saiu), ou `null`. */
+  flight: { from: SwordSide; serial: number } | null;
+  serial: number;
+}
+
+/**
+ * Quem a espada (e a moldura de ouro) mostra como dono, e o que ela faz agora. Na batida da decisão (`fx.initiative`) ela voa
+ * para o dono novo ou salta no mesmo; fora das batidas (a mesa parada, o pulo, o `resync`, o primeiro desenho) ela já está no
+ * dono da `view`, sem voo. Como a inversão e a cortina (`useBeatPlayer`), o voo segue o relógio dele depois de começar: no treino
+ * o bot responde logo e o `state` dele troca a linha do tempo no meio da batida da decisão, mas a espada termina de cravar.
+ */
+function useSword(view: PlayerView, anim: Anim): { shown: SwordSide; move: SwordMove } {
+  const holder: SwordSide = view.initiative === view.me ? 'voce' : 'oponente';
+  const [sword, setSword] = useState<SwordState>({ shown: holder, flight: null, serial: 0 });
+  const decided = anim.fx.initiative;
+  const target: SwordSide | null = decided?.changed ? (decided.holder === view.me ? 'voce' : 'oponente') : null;
+  let current = sword;
+  if (target !== null && target !== sword.shown) {
+    const serial = sword.serial + 1;
+    current = { shown: target, flight: anim.reduced ? null : { from: sword.shown, serial }, serial };
+    setSword(current);
+  } else if (!anim.busy && current.flight === null && holder !== sword.shown) {
+    current = { ...sword, shown: holder };
+    setSword(current);
+  }
+  const flightSerial = current.flight?.serial ?? null;
+  useEffect(() => {
+    if (flightSerial === null) return;
+    const id = setTimeout(
+      () => setSword((now) => (now.flight?.serial === flightSerial ? { ...now, flight: null } : now)),
+      SWORD_FLIGHT_MS + 120,
+    );
+    return () => clearTimeout(id);
+  }, [flightSerial]);
+  const move: SwordMove = current.flight
+    ? { kind: 'fly', ...current.flight }
+    : decided && !decided.changed
+      ? { kind: 'hop' }
+      : { kind: 'rest' };
+  return { shown: current.shown, move };
 }
 
 // ---------------------------------------------------------------------------------------------

@@ -7,8 +7,7 @@ import type { SpecialCard } from '@coringa/engine';
 import { screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { LAYOUT_SPRING } from '../../src/ui/anim/motion.ts';
-import { INITIATIVE_ID } from '../../src/model/effects.ts';
-import { advance, busy, cleanup, emit, mount, MINE, TURN, THEIRS, stage } from './anim-harness.tsx';
+import { advance, busy, cleanup, emit, mount, MINE, TURN, stage } from './anim-harness.tsx';
 import type { ViewSpec } from '../fixtures.ts';
 
 const probe = vi.hoisted(() => ({ mounts: new Map<string, number>() }));
@@ -37,7 +36,7 @@ vi.mock('motion/react-m', async () => {
         'data-layout-dep': layoutDependency,
       });
     };
-  return { div: make('div'), button: make('button'), span: make('span'), svg: make('svg'), p: make('p') };
+  return { div: make('div'), button: make('button'), span: make('span'), svg: make('svg'), p: make('p'), rect: make('rect') };
 });
 
 beforeEach(() => probe.mounts.clear());
@@ -84,11 +83,6 @@ describe('layoutId das cartas (spec §4.1)', () => {
     expect(inside.length).toBeGreaterThan(0);
     for (const card of inside) expect(card).not.toHaveAttribute('data-layout-id');
   });
-
-  it('a marca da iniciativa também tem `layoutId`', () => {
-    const m = mount(THEIRS);
-    expect(layoutOf(m.container, INITIATIVE_ID)).not.toBeNull();
-  });
 });
 
 describe('transição atrasada até a batida que moveu a carta (spec §4.1)', () => {
@@ -115,12 +109,6 @@ describe('transição atrasada até a batida que moveu a carta (spec §4.1)', ()
     const m = mount(BEFORE, { prefs: { reduceMotion: true } });
     emit(m, AFTER, [TURN, BUFF]);
     expect(delayOf(m.container, 'j1')).toBe('0');
-  });
-
-  it('a marca da iniciativa espera a batida do InitiativeDecided', () => {
-    const m = mount(THEIRS);
-    emit(m, { ...THEIRS, initiative: 'opponent' }, [TURN, { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } }]);
-    expect(delayOf(m.container, INITIATIVE_ID)).toBe('0.4');
   });
 
   it('o Motion mede a mesa uma vez por `state` e uma vez quando as batidas acabam', () => {
@@ -217,13 +205,6 @@ describe('o salto (resync) troca a mesa sem deslizar', () => {
     expect(busy(m.container)).toBe(false);
     expect(durations(m.container).length).toBeGreaterThan(10);
     expect(new Set(durations(m.container))).toEqual(new Set(['0']));
-  });
-
-  it('a marca da iniciativa também troca de lado de uma vez', () => {
-    const m = mount(THEIRS);
-    expect(durationOf(m.container, INITIATIVE_ID)).toBe(String(LAYOUT_SPRING.visualDuration));
-    emit(m, { ...THEIRS, initiative: 'opponent' }, [], { resync: true });
-    expect(durationOf(m.container, INITIATIVE_ID)).toBe('0');
   });
 
   it('o passo ao vivo e o catchUp seguintes voltam a animar como antes', () => {

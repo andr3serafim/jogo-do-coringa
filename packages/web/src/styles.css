@@ -430,6 +430,26 @@
     min-width: 3.5rem;
   }
 
+  /*
+   * A espada da iniciativa (§4): posta pelo `InitiativeSword` com `x`/`y` (o centro dela) a partir do canto do placar; a margem
+   * negativa centra o desenho no ponto. No celular ela acompanha o retrato de 40 px.
+   */
+  .espada {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 20;
+    width: 15px;
+    height: 49px;
+    margin: -24.5px 0 0 -7.5px;
+    filter: drop-shadow(1.5px 2px 0 var(--color-tinta));
+  }
+
+  /* O salto da decisão que não muda: a espada brilha no mesmo retrato. */
+  .espada--brilho {
+    filter: drop-shadow(1.5px 2px 0 var(--color-tinta)) drop-shadow(0 0 8px var(--color-ouro));
+  }
+
   .placar-barra {
     position: relative;
     box-sizing: border-box;
@@ -509,6 +529,23 @@
 
     .placar-placa {
       min-width: 6.25rem;
+    }
+
+    .espada {
+      width: 27px;
+      height: 88px;
+      margin: -44px 0 0 -13.5px;
+      filter: drop-shadow(2px 3px 0 var(--color-tinta));
+
+      @variant pc-baixo {
+        width: 23px;
+        height: 75px;
+        margin: -37.5px 0 0 -11.5px;
+      }
+    }
+
+    .espada--brilho {
+      filter: drop-shadow(2px 3px 0 var(--color-tinta)) drop-shadow(0 0 12px var(--color-ouro));
     }
 
     .placar-barra {

@@ -1,7 +1,17 @@
 // Textos das jogadas da mesa, em pt-BR (spec §3.4). Fora da meta de cobertura: é só texto.
-import type { AttackPreview, Card, NoPlayReason, NumCard, PlayerId, RowName, SpecialCard, StealOutcome } from '@coringa/engine';
+import type {
+  AttackPreview,
+  Card,
+  GameEvent,
+  NoPlayReason,
+  NumCard,
+  PlayerId,
+  RowName,
+  SpecialCard,
+  StealOutcome,
+} from '@coringa/engine';
 import type { DeadlineKind, Outcome, Score } from '@coringa/protocol';
-import { cardText, ROW_NAME } from '@coringa/sim/text';
+import { cardText, ROW_NAME, type Names } from '@coringa/sim/text';
 import type { TrainingLevel } from './local-room.ts';
 import { previewChanged, type Lives, type Previews } from './preview.ts';
 import type { SceneKind } from './timeline.ts';
@@ -371,6 +381,27 @@ export const droppedText = (opponent: string, remaining: string | null): string 
 /** A versão fixa do aviso, para a região viva do leitor de tela (a contagem não é anunciada). */
 export const droppedAnnouncement = (opponent: string): string =>
   `${opponent} caiu. Se não voltar a tempo, você vence por W.O.`;
+
+/** Uma faixa da mesa em forma de fita de cordel (sub-projeto 6 §4): o título e, se houver, o motivo em letra menor. */
+export interface Ribbon {
+  title: string;
+  reason: string | null;
+}
+
+/**
+ * A fita da decisão da iniciativa (sub-projeto 6 §4): quem ataca primeiro na próxima rodada e por quê, com o dano de quem ficou
+ * com ela primeiro. Substitui a frase do bloco E3 ("Duda causou mais dano (9 × 3) e ficou com a iniciativa").
+ */
+export function initiativeRibbon(event: Extract<GameEvent, { type: 'InitiativeDecided' }>, names: Names): Ribbon {
+  const holder = names.of(event.player);
+  const other = Object.keys(event.damage).find((id) => id !== event.player);
+  const mine = event.damage[event.player] ?? 0;
+  const theirs = other === undefined ? 0 : (event.damage[other] ?? 0);
+  return {
+    title: event.changed ? `${holder} ataca primeiro` : `${holder} segue atacando primeiro`,
+    reason: mine === theirs ? `empate em dano · ${mine} × ${theirs}` : `causou mais dano na rodada · ${mine} × ${theirs}`,
+  };
+}
 
 /** O título grande de cada cena (spec §10.1). */
 export const SCENE_TITLE: Record<SceneKind, string> = {

@@ -9,10 +9,6 @@ import type { ClockFace } from '../../model/clock.ts';
 import { pausedTurnText, REPLAY_BAND_TEXT, TIMES_UP_TEXT, trainingBandText, TUTORIAL_BAND_TEXT } from '../../model/copy.ts';
 import type { TrainingLevel } from '../../model/local-room.ts';
 import { DROP } from '../../model/drag.ts';
-import * as m from 'motion/react-m';
-import { INITIATIVE_ID } from '../../model/effects.ts';
-import { useAnim } from '../anim/context.ts';
-import { layoutTransition } from '../anim/motion.ts';
 import { Card, cardName } from '../cards/Card.tsx';
 import { useTableUi } from './context.ts';
 import { graveyardName, turnText, type TableNames } from './labels.ts';
@@ -72,8 +68,6 @@ export function CenterBand({ view, names, face, live, training, replay, tutorial
         </p>
       ) : null}
 
-      <InitiativeMark mine={view.initiative === view.me} />
-
       <div className="ml-auto flex items-center gap-2">
         <div className="flex flex-col items-center">
           <span className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">Monte</span>
@@ -88,35 +82,6 @@ export function CenterBand({ view, names, face, live, training, replay, tutorial
 }
 
 // ---------------------------------------------------------------------------------------------
-
-/**
- * A marca da iniciativa (spec §4.2): um losango ouro que troca de lado, em cima para o oponente e embaixo para você (como
- * a mesa). É só enfeite do texto ao lado, que diz de quem é; o losango se mexe na batida do `InitiativeDecided` que a muda de mão.
- */
-function InitiativeMark({ mine }: { mine: boolean }) {
-  const anim = useAnim();
-  const marker = (
-    <m.span
-      key={anim.markOf(INITIATIVE_ID)}
-      layoutId={INITIATIVE_ID}
-      layoutDependency={anim.layoutKey}
-      transition={{
-        layout: layoutTransition(anim.delayOf(INITIATIVE_ID), anim.instant(INITIATIVE_ID)),
-      }}
-      className="block size-2.5 rotate-45 bg-ouro"
-    />
-  );
-  return (
-    <span
-      aria-hidden="true"
-      data-iniciativa={mine ? 'voce' : 'oponente'}
-      className="flex h-6 w-3.5 flex-none flex-col justify-between border-l-2 border-papel/50 pl-[3px]"
-    >
-      <span className="size-2.5">{mine ? null : marker}</span>
-      <span className="size-2.5">{mine ? marker : null}</span>
-    </span>
-  );
-}
 
 function Graveyard({ view, onOpen }: { view: PlayerView; onOpen: (() => void) | undefined }) {
   const { marked, onSeen } = useTableUi();

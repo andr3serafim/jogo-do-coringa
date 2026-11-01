@@ -403,6 +403,17 @@ describe('mesa: o placar de luta (sub-projeto 6 §3)', () => {
     expect(equip.container.querySelector('[data-placar-iniciativa]')).toBeNull();
   });
 
+  it('a faixa do meio não tem mais a iniciativa: a espada mora no retrato do dono, no placar', () => {
+    const { container } = mount();
+    const band = screen.getByRole('region', { name: 'Situação da rodada' });
+    expect(within(band).queryByText('Iniciativa')).toBeNull();
+    expect(band.querySelector('[data-iniciativa]')).toBeNull();
+    const sword = screen.getByRole('region', { name: 'Placar' }).querySelector('[data-espada]');
+    expect(sword).toHaveAttribute('data-iniciativa', 'voce');
+    expect(sword).toHaveAttribute('aria-hidden', 'true');
+    expect(container.querySelectorAll('[data-espada]')).toHaveLength(1);
+  });
+
   it('o retrato de quem tem a iniciativa leva a marca de dono', () => {
     const first = mount();
     expect(first.container.querySelector('[data-retrato="voce"]')).toHaveAttribute('data-dono');

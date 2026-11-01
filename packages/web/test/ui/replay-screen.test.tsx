@@ -134,13 +134,16 @@ describe('a partida de teste', () => {
 });
 
 describe('<ReplayScreen />: a mesa de vista e os controles', () => {
-  it('o replay mostra o placar sem relógio, com a rodada grande e o dono da iniciativa marcado', () => {
+  it('o replay mostra o placar sem relógio, com a rodada grande e a espada no dono da iniciativa', () => {
     open();
     const placar = screen.getByRole('region', { name: 'Placar' });
     expect(within(placar).queryByRole('timer')).toBeNull();
     expect(placar.querySelector('[data-rodada-grande]')).not.toBeNull();
-    expect(placar.querySelectorAll('[data-retrato][data-dono]')).toHaveLength(1);
+    const owner = placar.querySelectorAll('[data-retrato][data-dono]');
+    expect(owner).toHaveLength(1);
     expect(within(placar).getAllByRole('meter')).toHaveLength(2);
+    // A espada está no dono.
+    expect(placar.querySelector('[data-espada]')).toHaveAttribute('data-iniciativa', owner[0]!.getAttribute('data-retrato')!);
   });
 
   it('abre no começo: "Revendo a partida", sem barra de jogadas, menu nem relógio', () => {

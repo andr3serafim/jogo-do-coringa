@@ -3,6 +3,7 @@
 // testes de vista, a carta solta) vale o `IDLE_ANIM`: sem batida, sem atraso, sem efeito.
 import type { PlayerId } from '@coringa/engine';
 import { createContext, useContext } from 'react';
+import type { Ribbon } from '../../model/copy.ts';
 import { NO_EFFECTS, type BeatEffects } from '../../model/effects.ts';
 
 /** Fase da contagem dos números (vida e totais): a espera pela batida do dano, a contagem e o valor novo. */
@@ -39,6 +40,11 @@ export interface Anim {
   layoutKey: string;
   /** Efeitos da batida de agora. */
   fx: BeatEffects;
+  /**
+   * A fita no ar (sub-projeto 6 §4), ou `null`: o placar a desenha, logo abaixo dele. Quem decide quando ela sobe e desce é o
+   * `useBeatPlayer`, pela mesma trava de flash da cena (spec §10.4); entre uma faixa e a seguinte só o texto troca.
+   */
+  ribbon: Ribbon | null;
   /** Duração, em ms, da batida de agora (os efeitos acendem e apagam dentro dela). */
   beatMs: number;
   count: CountPhase;
@@ -57,6 +63,7 @@ export const IDLE_ANIM: Anim = {
   instant: () => false,
   layoutKey: '',
   fx: NO_EFFECTS,
+  ribbon: null,
   beatMs: 0,
   count: 'idle',
   countMs: 0,

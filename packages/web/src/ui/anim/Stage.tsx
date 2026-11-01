@@ -20,7 +20,8 @@
 //   `import()` à parte, fora do JavaScript inicial (spec §12).
 import { LazyMotion, MotionConfig } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
-import { bannerText, effectsOf, NO_EFFECTS } from '../../model/effects.ts';
+import type { Ribbon } from '../../model/copy.ts';
+import { bannerRibbon, effectsOf, NO_EFFECTS, ribbonText } from '../../model/effects.ts';
 import { roomNames } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import { bannerReadMs } from '../../model/reading.ts';
@@ -58,7 +59,10 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
   // A decisão do jogador espera se há jogada legal para ele neste `state` (spec §4.1: tudo cabe em ~1 s).
   const names = useMemo(() => roomNames(state?.view.me ?? 'p1', room?.seats ?? []), [state, room]);
   // A faixa fica no ar ao menos o tempo de leitura do texto dela (U1).
-  const readBanner = useCallback((beat: Beat) => bannerReadMs(bannerText(beat.event, names) ?? ''), [names]);
+  const readBanner = useCallback((beat: Beat) => {
+    const ribbon = bannerRibbon(beat.event, names);
+    return bannerReadMs(ribbon === null ? '' : ribbonText(ribbon));
+  }, [names]);
   const player = useBeatPlayer(
     state,
     { reducedMotion, decisionPending: snapshot.legal.length > 0, bannerReadMs: readBanner },
@@ -96,6 +100,13 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
   if (sceneNow !== null && sceneNow !== lastScene) setLastScene(sceneNow);
   const scene = sceneNow ?? (curtain && busy ? lastScene : null);
 
+  // A fita (sub-projeto 6 §4): a trava pode segurá-la no ar depois da batida dela, então fica a última que passou. O objeto só
+  // troca quando o texto troca (o `anim` não muda a cada desenho por causa dela).
+  const ribbonNow = bannerBeat === null ? null : bannerRibbon(bannerBeat.event, names);
+  const [lastRibbon, setLastRibbon] = useState<Ribbon | null>(ribbonNow);
+  if (ribbonNow !== null && (lastRibbon === null || ribbonText(ribbonNow) !== ribbonText(lastRibbon))) setLastRibbon(ribbonNow);
+  const ribbon = banner ? lastRibbon : null;
+
   const anim = useMemo<Anim>(
     () => ({
       busy,
@@ -115,11 +126,12 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       instant: (id) => jump || released.instant.has(id),
       layoutKey: `${seq}:${busy ? 'tocando' : 'parado'}`,
       fx: state ? effectsOf(beat, state.view) : NO_EFFECTS,
+      ribbon,
       beatMs: beat?.durationMs ?? 0,
       count,
       countMs,
     }),
-    [busy, reducedMotion, run, released, remounted, seq, jump, state, beat, count, countMs],
+    [busy, reducedMotion, run, released, remounted, seq, jump, state, beat, ribbon, count, countMs],
   );
 
   // Esc pula as batidas (o Esc que um diálogo ou a gaveta do histórico já tratou não conta).
@@ -186,8 +198,6 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
           >
             {children}
             <BeatOverlay
-              bannerBeat={bannerBeat}
-              banner={banner}
               scene={scene}
               curtain={curtain}
               names={names}

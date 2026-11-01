@@ -2,16 +2,17 @@ import { applyAction, viewFor, type GameEvent, type NumCard, type SpecialCard } 
 import { describe, expect, it } from 'vitest';
 import {
   bannerBeatAt,
+  bannerRibbon,
   bannerText,
   damageBeatIndex,
   dealsOf,
   delaysOf,
   effectsOf,
-  INITIATIVE_ID,
   NO_EFFECTS,
   rowKey,
   sceneText,
 } from '../../src/model/effects.ts';
+import { initiativeRibbon } from '../../src/model/copy.ts';
 import { withinFlashLimit } from '../../src/model/flash.ts';
 import { roomNames } from '../../src/model/history.ts';
 import { buildTimeline, luminanceSwitches, timelineMs, type Beat } from '../../src/model/timeline.ts';
@@ -62,14 +63,9 @@ describe('delaysOf: quando cada elemento com layoutId se mexe', () => {
     expect(delays.get('k1')).toBe(400);
   });
 
-  it('a marca da iniciativa espera a batida em que ela troca de lado', () => {
-    const delays = delaysOf(beatsOf({ type: 'TurnStarted', player: 'p1' }, { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } }));
-    expect(delays.get(INITIATIVE_ID)).toBe(400);
-  });
-
-  it('a decisão que não muda a iniciativa de mão não mexe na marca', () => {
-    const kept = { type: 'InitiativeDecided', player: 'p2', changed: false, damage: { p1: 0, p2: 0 } } as const;
-    expect(delaysOf(beatsOf({ type: 'TurnStarted', player: 'p1' }, kept)).has(INITIATIVE_ID)).toBe(false);
+  it('a decisão da iniciativa não atrasa nenhum layout (a espada troca de retrato pelo efeito da batida)', () => {
+    const changed = { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } } as const;
+    expect(delaysOf(beatsOf({ type: 'TurnStarted', player: 'p1' }, changed)).size).toBe(0);
   });
 
   it('sem batidas, nada espera', () => {
@@ -494,5 +490,53 @@ describe('bannerBeatAt: a faixa que está no ar (spec §4.1, §10.4)', () => {
     // Garante que a propriedade pegou o defeito: com a regra de uma faixa por batida, muitos atrasos passavam do limite.
     expect(tally.perBeatRuleFails).toBeGreaterThan(100);
     expect(tally.worstPerBeatRule).toBeGreaterThan(4);
+  });
+});
+
+describe('a fita da iniciativa (sub-projeto 6 §4)', () => {
+  const decided = (player: 'p1' | 'p2', changed: boolean, p1: number, p2: number) =>
+    ({ type: 'InitiativeDecided', player, changed, damage: { p1, p2 } }) as const;
+
+  it('mudou para você: "Você ataca primeiro", e o seu dano primeiro', () => {
+    expect(initiativeRibbon(decided('p1', true, 50, 37), names)).toEqual({
+      title: 'Você ataca primeiro',
+      reason: 'causou mais dano na rodada · 50 × 37',
+    });
+  });
+
+  it('mudou para o outro: o nome dele, e o dano dele primeiro', () => {
+    expect(initiativeRibbon(decided('p2', true, 37, 50), names)).toEqual({
+      title: 'Duda ataca primeiro',
+      reason: 'causou mais dano na rodada · 50 × 37',
+    });
+  });
+
+  it('não mudou: "segue atacando primeiro", com o mesmo motivo', () => {
+    expect(initiativeRibbon(decided('p1', false, 50, 37), names)).toEqual({
+      title: 'Você segue atacando primeiro',
+      reason: 'causou mais dano na rodada · 50 × 37',
+    });
+    expect(initiativeRibbon(decided('p2', false, 37, 50), names).title).toBe('Duda segue atacando primeiro');
+  });
+
+  it('empate: o título de "não mudou" e o motivo do empate', () => {
+    expect(initiativeRibbon(decided('p2', false, 40, 40), names)).toEqual({
+      title: 'Duda segue atacando primeiro',
+      reason: 'empate em dano · 40 × 40',
+    });
+  });
+
+  it('as outras faixas são fitas sem motivo, com o texto de hoje', () => {
+    const stolen = { type: 'CardStolen', player: 'p2', from: 'p1', card: num('n9', 9), fromRow: 'ATK', toRow: 'DEF', ace: face('a1', 'A') } as const;
+    expect(bannerRibbon(stolen, names)).toEqual({ title: bannerText(stolen, names), reason: null });
+    expect(bannerRibbon(decided('p2', true, 3, 9), names)).toEqual(initiativeRibbon(decided('p2', true, 3, 9), names));
+    expect(bannerRibbon({ type: 'CardsDealt', player: 'p1', count: 2 }, names)).toBeNull();
+  });
+
+  it('a batida da iniciativa diz à espada quem ficou com ela e se mudou', () => {
+    const [, beat] = beatsOf({ type: 'TurnStarted', player: 'p1' }, decided('p2', true, 3, 9));
+    expect(effectsOf(beat!, view).initiative).toEqual({ holder: 'p2', changed: true });
+    expect(effectsOf(beatsOf(decided('p1', false, 9, 3))[0]!, view).initiative).toEqual({ holder: 'p1', changed: false });
+    expect(effectsOf(beatsOf({ type: 'TurnStarted', player: 'p1' })[0]!, view).initiative).toBeNull();
   });
 });

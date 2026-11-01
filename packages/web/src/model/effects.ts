@@ -2,11 +2,8 @@
 // cenas, e o atraso das transições de layout. Puro: sem React nem DOM. Quem desenha é a interface (`ui/anim`).
 import type { GameEvent, PlayerId, PlayerView, RowName } from '@coringa/engine';
 import { cardText, eventText, type Names } from '@coringa/sim/text';
-import { SCENE_TITLE } from './copy.ts';
+import { initiativeRibbon, SCENE_TITLE, type Ribbon } from './copy.ts';
 import type { Beat } from './timeline.ts';
-
-/** `layoutId` da marca da iniciativa: ela troca de lado na batida do `InitiativeDecided` que a muda de mão. */
-export const INITIATIVE_ID = 'marca-iniciativa';
 
 /** Chave de uma fileira de um jogador, para o conjunto de fileiras acesas: "p1:ATK". */
 export const rowKey = (player: PlayerId, row: RowName): string => `${player}:${row}`;
@@ -22,9 +19,14 @@ export interface BeatEffects {
   damage: { target: PlayerId; amount: number; heal?: true } | null;
   /** O escudo do Reflect de `owner` quebra: a `view` já não o tem, então é só uma sobreposição no Coringa dele. */
   shieldBreak: PlayerId | null;
+  /**
+   * A decisão da iniciativa (sub-projeto 6 §4): quem ficou com ela e se mudou de mão. A espada voa para o retrato novo (ou salta no
+   * mesmo) na batida, e não quando o `state` chega.
+   */
+  initiative: { holder: PlayerId; changed: boolean } | null;
 }
 
-export const NO_EFFECTS: BeatEffects = { cards: new Map(), rows: new Set(), damage: null, shieldBreak: null };
+export const NO_EFFECTS: BeatEffects = { cards: new Map(), rows: new Set(), damage: null, shieldBreak: null, initiative: null };
 
 /** As cartas da fileira da quadra: as da fileira com o valor dela (a `view` já é a de depois do evento). */
 function quadCards(view: PlayerView, player: PlayerId, row: RowName, value: number): string[] {
@@ -58,6 +60,8 @@ function effectsOfEvent(event: GameEvent, view: PlayerView): Partial<BeatEffects
       return { cards: fxMap([event.target.id], 'crack') };
     case 'ReflectCanceled':
       return { shieldBreak: event.owner };
+    case 'InitiativeDecided':
+      return { initiative: { holder: event.player, changed: event.changed } };
     case 'ReflectPlayed':
       return { cards: fxMap([event.reflect.k.id, event.reflect.j.id, event.reflect.q.id], 'shield') };
     case 'QuadFormed':
@@ -75,14 +79,13 @@ export function effectsOf(beat: Beat | null, view: PlayerView): BeatEffects {
 }
 
 /**
- * Quando cada elemento com `layoutId` (as cartas e a marca da iniciativa) começa a se mexer: o início, em ms, da
+ * Quando cada elemento com `layoutId` (as cartas) começa a se mexer: o início, em ms, da
  * batida que o move. Se mais de uma batida mexe na carta, vale a última: a carta fica onde estava até lá.
  */
 export function delaysOf(beats: readonly Beat[]): ReadonlyMap<string, number> {
   const delays = new Map<string, number>();
   for (const beat of beats) {
     for (const id of beat.cards) delays.set(id, beat.startMs);
-    if (beat.event.type === 'InitiativeDecided' && beat.event.changed) delays.set(INITIATIVE_ID, beat.startMs);
   }
   return delays;
 }
@@ -179,6 +182,19 @@ export function bannerText(event: GameEvent, names: Names): string | null {
       return null;
   }
 }
+
+/**
+ * A faixa de um evento como fita de cordel (sub-projeto 6 §4: a fita é o padrão de todas as faixas da mesa): a da iniciativa
+ * tem título e motivo; as outras, o texto de `bannerText` como título.
+ */
+export function bannerRibbon(event: GameEvent, names: Names): Ribbon | null {
+  if (event.type === 'InitiativeDecided') return initiativeRibbon(event, names);
+  const title = bannerText(event, names);
+  return title === null ? null : { title, reason: null };
+}
+
+/** A fita numa linha: o título e, se houver, " · " e o motivo (o `data-faixa` e o tempo de leitura). */
+export const ribbonText = (ribbon: Ribbon): string => (ribbon.reason === null ? ribbon.title : `${ribbon.title} · ${ribbon.reason}`);
 
 /** A batida mostra uma faixa? As cenas só chegam aqui no `catchUp` (viram `banner`); o `DeckReshuffled` é `move` com faixa. */
 function hasBanner(beat: Beat): boolean {
