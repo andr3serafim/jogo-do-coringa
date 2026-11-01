@@ -5,7 +5,7 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
-## 2026-11-01 (4): sub-projeto 6, fatia 3 em execução (a Exódia e a Devastação), as 6 tarefas feitas
+## 2026-11-01 (4): sub-projeto 6, fatia 3 em execução (a Exódia e a Devastação), entregue
 
 - **Pedido do autor** (`decisoes.md` 2026-11-01 (4) e (5)): "ok, pode seguir o plano da fatia 3", e que a outra conta consiga
   retomar sem perda nenhuma. Plano em `docs/superpowers/plans/2026-11-01-direcao-visual-fatia-3.md`, na branch
@@ -76,6 +76,8 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   - se a janela mudar de tamanho com o abismo aberto, as cartas voltam a cair do começo;
   - as rachaduras são menos ásperas que as do protótipo, e a Exódia não treme a tela (o autor confere jogando se falta peso);
   - no replay, os controles no meio de uma cena não cortam o som dela (o mesmo da fatia 2).
+- **Entrega:** fast-forward na `main` (`fefcb15`), com as duas CI verdes no último commit da branch (run `41344406298`: `check` e `e2e`). O autor
+  ainda vai jogar.
 - **O que quem continua precisa saber:**
   - **não conferido de verdade:** o som (só os instantes), a cancelada e a refletida (só testes de unidade: nas 467 Devastações da busca
     com bots, nenhuma foi cancelada, e a refletida não foi procurada) e o movimento reduzido;

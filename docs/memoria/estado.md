@@ -5,26 +5,18 @@
 
 ## Agora
 
-- **Branch:** `feat/direcao-visual-fatia-3`, a partir da `main` (`cd75b0d`), no checkout principal. Sobe para o `origin` a cada bloco.
-- **Em curso:** a execução do plano da **fatia 3** (`docs/superpowers/plans/2026-11-01-direcao-visual-fatia-3.md`), aprovado em
-  `decisoes.md` 2026-11-01 (4), aqui mesmo, tarefa por tarefa, com o teste primeiro. Cada tarefa fecha com o commit dela.
-- **Andamento:** as **6 tarefas estão feitas** (`git log main..HEAD`; as escolhas técnicas de cada uma estão no `diario.md` 2026-11-01 (4)).
-  - **Falta:** a revisão final, a `pnpm check` no pre-push, as duas CI e o fast-forward na `main`.
-- **Próximo passo exato:** subir a branch, ler a CI (`check` e `e2e`) pela API do GitHub com `curl` e, verdes, fazer o fast-forward.
-  Depois, avisar o autor para jogar a fatia 3. O próximo trabalho, depois do "ok" dele, é o plano da fatia 4 (o Reflect e a Ressurreição).
-- **Visto no navegador** (`notas/medicao-fatia-3.md`): a Devastação e a Exódia inteiras, no PC; a Devastação no celular. **Medido:** ≥ 87
-  quadros por segundo com a CPU 4×. **Não conferido de verdade:** o som (só os instantes), a cancelada e a refletida (só testes: nenhuma
-  partida da busca com bots cancelou, e a refletida não foi procurada) e o movimento reduzido (só testes).
-- **Sem conflito de regra:** `RULES_VERSION` e `STATE_SCHEMA` não mudam; muda só a tabela da folga de cena (`SCENE_MS`).
-- **Feito antes:** a **fatia 2 do sub-projeto 6** e o conserto do corte da cena, na `main` com as duas CI verdes (`diario.md`
-  2026-11-01 (2) e (3)); medição em `notas/medicao-fatia-2.md`.
-- **Escolhas do plano da fatia 3 (aprovadas):**
-  - a Devastação passa a acontecer quando a fileira cai (`RowDevastated`), no próprio campo, sem tarjas nem cortina (como no
-    protótipo); o lançamento (`DevastationCast`) vira uma faixa;
-  - a cancelada é uma cena curta (1,4 s, sem inversão nem nome), com a fita do motivo;
-  - na Exódia, o retrato do perdedor racha, e a vida dele mostra 0, também para o leitor de tela;
-  - a desolação dura até uma carta voltar à fileira, e é guardada pela sessão (some se a página recarregar);
-  - no celular, a cena rola os campos até a fileira atingida.
+- **Branch:** `main` (`fefcb15`), no checkout principal, sem trabalho em curso. A branch `feat/direcao-visual-fatia-3` já foi mesclada.
+- **Esperando o autor:** jogar a **fatia 3 do sub-projeto 6** (a Exódia e a Devastação, com a desolação e os sons) e dizer o que achou. As
+  escolhas para ele conferir estão em "Esperando o autor", logo abaixo.
+- **Feito por último:** a fatia 3, mesclada por fast-forward com as duas CI verdes (run `41344406298`). Plano em
+  `docs/superpowers/plans/2026-11-01-direcao-visual-fatia-3.md`; detalhes e cada escolha técnica no `diario.md` 2026-11-01 (4); medição em
+  `notas/medicao-fatia-3.md`.
+- **Próximo passo exato:** com o "ok" dele (ou depois dos ajustes que ele pedir), escrever o **plano da fatia 4** (o Reflect e a Ressurreição,
+  com os sons; spec `2026-10-31-direcao-visual-design.md` §7.5, §7.6 e §14), registrar a aprovação em `decisoes.md` e executar como as
+  fatias 2 e 3. Nada de código da fatia 4 antes da aprovação do plano.
+- **Para ver as cenas da fatia 3 sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave
+  `coringa:partidas` e abra `/partidas/exodia-devastacao`. No passo 210, "Próximo passo" toca a Devastação (a sua, na Defesa do Bot); no
+  passo 407, a Exódia do Bot.
 - **Para ver as cenas da fatia 2 sem esperar um Ataque Absoluto no treino:** importe a partida da fixture do E2E
   (`packages/web/e2e/fixtures/absolutos.json`) e abra `/partidas/absolutos`, rodada 11 (o Ataque Absoluto do Bot) e rodada 13 (a
   sua Defesa Absoluta).
@@ -51,6 +43,23 @@ spec do sub-projeto 5 (`2026-10-27-ajustes-design.md`).
 Vazia: o bloco E3 + F2 + F3 era o último item.
 
 ## Esperando o autor
+
+- **Sub-projeto 6, fatia 3, para ele jogar e dizer o que achou.** O que ele aprovou no plano (`decisoes.md` 2026-11-01 (4)) está na spec §14. O
+  que a execução decidiu, e o que muda em relação ao plano:
+  - **a fita da cancelada pela Defesa Absoluta tem texto próprio:** "A sua Defesa Absoluta / A Defesa Absoluta de X segurou a Devastação
+    devolvida". O plano dizia para manter o texto, mas ele falava dos Reflects, errado para esse motivo;
+  - **a vida do perdedor da Exódia escorre a 0 meio segundo antes de o retrato rachar** (como no protótipo; o plano só falava da rachadura);
+  - **a Exódia não treme a tela,** e a coroa tem a sombra desenhada, sem `drop-shadow`. Se faltar peso, é fácil pôr o tremor;
+  - **o carimbo da Devastação fica ao lado da fileira,** para não cobrir as cartas que caem;
+  - **os campos não rolam mais de lado:** o tremor abria uma barra de rolagem (achado só no navegador);
+  - **a partida nova zera a desolação,** e o replay a calcula pelos quadros;
+  - **a fenda e as rachaduras** correm por escala e opacidade, sem filtro (§11): ficam menos ásperas que as do protótipo;
+  - **não conferido de verdade:** o som (só os instantes), a cancelada e a refletida no navegador (só testes: nenhuma partida da busca com
+    bots cancelou, e a refletida não foi procurada) e o movimento reduzido no navegador. A revisão final foi de quem escreveu o código, sem
+    subagente;
+  - **pequenos, para depois:**
+    - se a janela mudar de tamanho com o abismo aberto, as cartas voltam a cair do começo;
+    - no replay, os controles no meio de uma cena não cortam o som dela (o mesmo da fatia 2).
 
 - **Sub-projeto 6, fatia 2: jogada e aprovada em 2026-11-01, com o conserto do corte da cena** (`decisoes.md` 2026-11-01 (3)). As
   escolhas que ele aprovou no plano e o que a execução decidiu:
