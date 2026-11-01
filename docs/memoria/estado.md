@@ -5,7 +5,7 @@
 
 ## Agora
 
-- **Branch:** `fix/cena-ataque-cortada`, a partir da `main` (`9d1f211`), no checkout principal. Em curso: o conserto do corte da cena
+- **Branch:** `feat/cena-ataque-cortada`, a partir da `main` (`9d1f211`), no checkout principal. Em curso: o conserto do corte da cena
   do Ataque Absoluto (`decisoes.md` 2026-11-01 (3); `f21f9ff`: o bot do treino espera a folga das cenas antes de jogar). Falta a
   CI verde e o fast-forward; depois, o plano da fatia 3.
 - **Feito por último:** a **fatia 2 do sub-projeto 6** (as cenas do Ataque e da Defesa Absolutos, a insígnia e os sons), mesclada
