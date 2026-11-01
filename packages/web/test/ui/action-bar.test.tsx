@@ -334,6 +334,26 @@ describe('barra de ação: Armadilha e alvos (spec §3.2, §3.4)', () => {
     expect(inBar().queryByText('Quebrando o K antes')).not.toBeInTheDocument();
   });
 
+  it('apontar um alvo não mexe no layout da barra: a prévia flutua, fora do fluxo, e descreve o botão apontado', async () => {
+    // No PC a linha a mais empurrava o botão para fora do ponteiro, que saía, a linha sumia, o botão voltava: um tremor sem fim.
+    const m = mount();
+    await m.user.click(handCard('A'));
+    await m.user.click(inBar().getByRole('button', { name: 'Armadilha' }));
+    const previews = inBar().getByRole('group', { name: 'Prévias' });
+    const inFlow = previews.innerHTML;
+    const kButton = inBar().getByRole('button', { name: startsWith(guardTarget(m.view)) });
+    await m.user.hover(kButton);
+    const tip = inBar().getByRole('tooltip');
+    expect(tip).toHaveTextContent(/^Quebrando o K antes/);
+    expect(tip).toHaveClass('absolute', 'pointer-events-none');
+    expect(previews).not.toContainElement(tip);
+    expect(previews.innerHTML).toBe(inFlow);
+    expect(kButton).toHaveAttribute('aria-describedby', tip.id);
+    await m.user.unhover(kButton);
+    expect(inBar().queryByRole('tooltip')).not.toBeInTheDocument();
+    expect(kButton).not.toHaveAttribute('aria-describedby');
+  });
+
   it('na janela de reação a Armadilha só mira o que o gatilho permite (K posto: só a Guarda)', async () => {
     const m = mount({ ...DRAFT, phase: 'K_PLAYED' });
     await m.user.click(handCard('A'));

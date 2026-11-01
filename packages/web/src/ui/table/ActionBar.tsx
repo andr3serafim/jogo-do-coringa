@@ -10,9 +10,12 @@
 // Na janela de reação (spec §3.7) a barra ganha o gatilho com a prévia no alto e o botão Passar no lugar do principal. Depois
 // de um passe (manual ou automático) o servidor recusa qualquer outra jogada da janela, então as respostas saem da barra.
 // `disabled` desliga todos os controles (jogada em voo, reconexão, prazo esgotado); `pending` só diz "Enviando…".
+//
+// A prévia do alvo apontado ("Quebrando o K antes") flutua acima da barra, fora do fluxo: apontar não muda a altura de nada. Uma
+// linha a mais nas prévias empurrava, no PC, o botão para fora do ponteiro; a linha sumia, o botão voltava, e a barra tremia sem fim.
 import { noPlayReason, stealPreview, type GameEvent, type NumCard, type PlayerView, type SpecialCard } from '@coringa/engine';
 import type { PlayerAction } from '@coringa/protocol';
-import { useMemo, type ReactNode, type RefObject } from 'react';
+import { useId, useMemo, type ReactNode, type RefObject } from 'react';
 import {
   ATTACK_LABEL,
   attackPreviewText,
@@ -117,9 +120,21 @@ export function ActionBar(props: ActionBarProps) {
   // O gatilho já traz a prévia do ataque: a ameaça não se repete.
   const triggered = reacting && open && view.phase.kind === 'REACTION' && view.phase.trigger === 'ATTACK';
   const canPass = reacting && open && plays.pass;
+  const tipId = useId();
 
   return (
-    <section ref={barRef} data-painel tabIndex={-1} aria-label="Ações" className="flex flex-col gap-2.5 text-papel pc:gap-1.5">
+    <section ref={barRef} data-painel tabIndex={-1} aria-label="Ações" className="relative flex flex-col gap-2.5 text-papel pc:gap-1.5">
+      {open && targets && pointed && !isRowZone(pointed.zone) ? (
+        <div
+          role="tooltip"
+          id={tipId}
+          className="pointer-events-none absolute inset-x-0 bottom-full z-40 mb-2 border-2 border-ouro bg-tinta px-2.5 py-1.5 text-[13px] leading-tight shadow-[3px_3px_0_var(--color-tinta)] pc:text-sm"
+        >
+          <PreviewLine label={brokenLabel(targetRole(pointed.zone))}>
+            {brokenEffectText(previews, previewsWithout(view, pointed.id), opponent, 'long')}
+          </PreviewLine>
+        </div>
+      ) : null}
       {reacting && open ? <ReactionNotice view={view} names={names} threat={previews.threat} events={props.events} /> : null}
 
       <Status {...{ view, names, acting, pending, card, play, cardPlays, plays, notice, passed }} />
@@ -144,6 +159,7 @@ export function ActionBar(props: ActionBarProps) {
           before={previews}
           disabled={disabled}
           marked={props.marked}
+          described={pointed ? { id: pointed.id, by: tipId } : null}
           onSeen={props.onSeen}
           onPoint={props.onPoint}
           onTarget={props.onTarget}
@@ -151,11 +167,6 @@ export function ActionBar(props: ActionBarProps) {
       ) : null}
 
       <div role="group" aria-label="Prévias" className="flex flex-col gap-1 text-[13px] leading-tight pc:flex-row pc:gap-6 pc:text-sm">
-        {pointed && !isRowZone(pointed.zone) ? (
-          <PreviewRow label={brokenLabel(targetRole(pointed.zone))}>
-            {brokenEffectText(previews, previewsWithout(view, pointed.id), opponent, 'long')}
-          </PreviewRow>
-        ) : null}
         {previews.threat.outcome !== 'NO_ATTACK' && !triggered ? (
           <PreviewRow label={threatLabel(opponent)}>{threatPreviewText(previews.threat, opponent, previews.lives)}</PreviewRow>
         ) : null}
@@ -197,13 +208,21 @@ export function ActionBar(props: ActionBarProps) {
 
 // ---------------------------------------------------------------------------------------------
 
-function PreviewRow({ label, children }: { label: string; children: ReactNode }) {
+function PreviewLine({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <p>
+    <>
       <span className="mr-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-ouro pc:text-[11px]">{label}</span>
       <span data-numero className="font-texto tabular-nums">
         {children}
       </span>
+    </>
+  );
+}
+
+function PreviewRow({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <p>
+      <PreviewLine label={label}>{children}</PreviewLine>
     </p>
   );
 }
@@ -276,6 +295,8 @@ interface TargetListProps {
   before: Previews;
   disabled: boolean;
   marked: ReadonlySet<string>;
+  /** O alvo apontado e a dica flutuante que o descreve (`aria-describedby`). */
+  described: { id: string; by: string } | null;
   onSeen: (id: string) => void;
   onPoint: (id: string | null) => void;
   onTarget: (targetId: string) => void;
@@ -285,7 +306,7 @@ interface TargetListProps {
  * Os alvos válidos como botões grandes, cada um com o efeito (do motor): quebrar a especial (a `view` sem a carta) ou roubar a
  * numérica (`stealPreview`: o dano e a cura).
  */
-function TargetList({ view, names, targets, before, disabled, marked, onSeen, onPoint, onTarget }: TargetListProps) {
+function TargetList({ view, names, targets, before, disabled, marked, described, onSeen, onPoint, onTarget }: TargetListProps) {
   const opponent = names.opponent;
   const cards = useMemo(() => {
     const { attackBuffs, defenseBuffs, guard, attackRow, defenseRow } = view.opponent;
@@ -331,6 +352,7 @@ function TargetList({ view, names, targets, before, disabled, marked, onSeen, on
               titleClass="text-[15px] font-bold leading-tight pc:text-sm"
               detailClass="text-xs font-normal leading-tight tabular-nums pc:text-[11px]"
               disabled={disabled}
+              aria-describedby={described?.id === target.id ? described.by : undefined}
               onClick={() => onTarget(target.id)}
               onPointerEnter={point}
               onPointerDown={seen}
