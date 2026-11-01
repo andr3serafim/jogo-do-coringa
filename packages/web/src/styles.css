@@ -13,6 +13,9 @@
   --color-capa-voce: #ee9db5;
   --color-vermelho: #b8261c;
   --color-ouro: #f5c238;
+  /* A cura (decisoes.md 2026-11-01 (1)): o "+N" e o trecho da barra que ela devolve. Outro verde que não o da capa do oponente,
+   * para não parecer "do Bot"; o papel sobre ele tem 5,1:1. */
+  --color-cura: #2a7339;
 
   /* Tipo de madeira: títulos, botões e valor das cartas. Texto e números de jogo: Archivo, com `tabular-nums`. */
   --font-madeira: 'Alfa Slab One', serif;
@@ -358,8 +361,9 @@
       flex-shrink: 0;
     }
 
+    /* A figura do título (decisoes.md 2026-11-01 (1)) ganha a sua largura: "Buffs de ataque" segue em duas linhas. */
     .campo-zona > .zona-titulo {
-      width: 4.6rem;
+      width: 5.9rem;
       flex: none;
     }
   }

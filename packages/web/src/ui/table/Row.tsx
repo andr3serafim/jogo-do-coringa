@@ -28,6 +28,7 @@ import { rowKey } from '../../model/effects.ts';
 import { useAnim } from '../anim/context.ts';
 import { LitRow } from '../anim/Effects.tsx';
 import { useCountedNumber } from '../anim/useCountedNumber.ts';
+import { AttackIcon, DefenseIcon } from './icons.tsx';
 import { TableCard } from './TableCard.tsx';
 
 export interface RowProps {
@@ -45,6 +46,8 @@ export interface RowProps {
 }
 
 const CAPTION = { ATK: 'Ataque', DEF: 'Defesa' } as const;
+/** A figura antes do total (decisoes.md 2026-11-01 (1)): a palavra fica só para o leitor de tela. */
+const FIGURE = { ATK: AttackIcon, DEF: DefenseIcon } as const;
 
 interface Conta {
   base: number;
@@ -71,6 +74,7 @@ export function Row({ label, kind, side, limit, aim, droppable = false, targets 
   const shownTotal = useCountedNumber(total);
   const conta = useShownConta(base, total);
   const lit = anim.fx.rows.has(rowKey(side.id, kind));
+  const Figure = FIGURE[kind];
 
   return (
     <div
@@ -107,10 +111,13 @@ export function Row({ label, kind, side, limit, aim, droppable = false, targets 
           />
         ))}
       </ul>
-      <div className="flex w-[52px] shrink-0 flex-col items-end text-right pc:w-24">
-        <span className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">{CAPTION[kind]}</span>
-        <span data-total className="font-texto text-[22px] font-extrabold leading-[1.1] tabular-nums pc:text-3xl">
-          {shownTotal}
+      <div className="flex w-[58px] shrink-0 flex-col items-end text-right pc:w-24">
+        <span className="flex items-center gap-0.5 pc:gap-1.5">
+          <Figure className="size-3.5 pc:size-6" />
+          <span className="sr-only">{CAPTION[kind]}</span>
+          <span data-total className="font-texto text-[22px] font-extrabold leading-[1.1] tabular-nums pc:text-3xl">
+            {shownTotal}
+          </span>
         </span>
         {conta.base > 0 ? (
           <span data-conta className="font-texto text-[11px] font-semibold tabular-nums pc:text-[13px]">

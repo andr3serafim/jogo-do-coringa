@@ -176,6 +176,14 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
     expect(labels).toEqual(['Fileira de Ataque', 'Fileira de Defesa']);
   });
 
+  it('os destinos de fileira trazem a figura dela (espadas, escudo), escondida do leitor de tela', () => {
+    mount(EQUIP);
+    const buttons = within(inEquip().getByRole('list', { name: 'Destinos' })).getAllByRole('button');
+    expect(buttons.map((b) => b.querySelector('svg[data-arte]')?.getAttribute('data-arte'))).toEqual(['ataque', 'defesa']);
+    expect(buttons.map((b) => b.querySelector('svg')?.getAttribute('aria-hidden'))).toEqual(['true', 'true']);
+    expect(buttons[0]).toHaveAccessibleName('Fileira de Ataque');
+  });
+
   it('escolher Ataque, Ataque, Defesa e Confirmar manda EQUIP com esses destinos', async () => {
     const m = mount(EQUIP);
     await choose(m, 'Fileira de Ataque');

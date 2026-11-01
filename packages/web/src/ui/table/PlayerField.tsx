@@ -8,7 +8,17 @@ import { cardDropKey, DROP, type DropKey } from '../../model/drag.ts';
 import { useAnim } from '../anim/context.ts';
 import { CardBack } from '../cards/Card.tsx';
 import { useTableUi } from './context.ts';
+import {
+  AbsoluteAttackIcon,
+  AbsoluteDefenseIcon,
+  AttackBuffIcon,
+  DefenseBuffIcon,
+  GuardIcon,
+  HealIcon,
+  ReflectIcon,
+} from './icons.tsx';
 import { handCountText, resurrectionsText } from './labels.ts';
+import { ResurrectIcon } from './ResurrectIcon.tsx';
 import { Row } from './Row.tsx';
 import { TableCard } from './TableCard.tsx';
 
@@ -121,26 +131,50 @@ function Info({ player, name, away, equip, tool }: InfoProps) {
 // Guarda, buffs, Reflect e as marcas de estado
 
 function Zones({ player, name, view, self }: { player: PublicPlayer; name: string; view: PlayerView; self: boolean }) {
-  const chips: Array<{ key: string; text: string; strong: boolean }> = [];
-  if (player.absoluteDefense) chips.push({ key: 'def', text: 'Defesa Absoluta', strong: true });
+  // Cada marca com a sua figura e o nome curto ao lado (decisoes.md 2026-11-01 (1)): a figura sozinha não ensina o que é.
+  const chips: Array<{ key: string; text: string; strong: boolean; icon: ReactNode }> = [];
+  const icon = 'size-4 pc:size-[18px]';
+  if (player.absoluteDefense) {
+    chips.push({ key: 'def', text: 'Defesa Absoluta', strong: true, icon: <AbsoluteDefenseIcon className={icon} /> });
+  }
   // Enquanto houver 2 K ou mais na Guarda (a regra é do motor): as numéricas da Defesa que caem curam o dono.
-  if (defenseHealActive(player, view.config)) chips.push({ key: 'cura', text: 'Cura passiva', strong: false });
+  if (defenseHealActive(player, view.config)) {
+    chips.push({ key: 'cura', text: 'Cura passiva', strong: false, icon: <HealIcon className={icon} /> });
+  }
   if (player.resurrectionCount > 0) {
-    chips.push({ key: 'res', text: resurrectionsText(player.resurrectionCount), strong: false });
+    chips.push({
+      key: 'res',
+      text: resurrectionsText(player.resurrectionCount),
+      strong: false,
+      icon: <ResurrectIcon className={icon} />,
+    });
   }
   if (absoluteAttackArmed(player, view.config)) {
-    chips.push({ key: 'atk', text: 'Ataque Absoluto armado', strong: true });
+    chips.push({ key: 'atk', text: 'Ataque Absoluto armado', strong: true, icon: <AbsoluteAttackIcon className={icon} /> });
   }
 
   return (
     <div className="campo-zonas">
       {/* No seu campo, a zona inteira recebe a carta da mão (J, Q, K); no do oponente, cada carta é um alvo possível (A, Selvagem, Sacrifício). */}
-      <Zone label="Guarda" cards={player.guard} count drop={self ? DROP.guard : 'targets'} />
-      <Zone label="Buffs de ataque" cards={player.attackBuffs} wildAs="J" drop={self ? DROP.attackBuffs : 'targets'} />
-      <Zone label="Buffs de defesa" cards={player.defenseBuffs} wildAs="Q" drop={self ? DROP.defenseBuffs : 'targets'} />
+      <Zone label="Guarda" icon={<GuardIcon className={ZONE_ICON} />} cards={player.guard} count drop={self ? DROP.guard : 'targets'} />
+      <Zone
+        label="Buffs de ataque"
+        icon={<AttackBuffIcon className={ZONE_ICON} />}
+        cards={player.attackBuffs}
+        wildAs="J"
+        drop={self ? DROP.attackBuffs : 'targets'}
+      />
+      <Zone
+        label="Buffs de defesa"
+        icon={<DefenseBuffIcon className={ZONE_ICON} />}
+        cards={player.defenseBuffs}
+        wildAs="Q"
+        drop={self ? DROP.defenseBuffs : 'targets'}
+      />
       {player.reflect ? (
         <Zone
           label="Reflect ativo"
+          icon={<ReflectIcon className={ZONE_ICON} />}
           listLabel="Cartas do Reflect"
           cards={[player.reflect.k, player.reflect.j, player.reflect.q]}
           wildAs={{ 1: 'J', 2: 'Q' }}
@@ -151,9 +185,10 @@ function Zones({ player, name, view, self }: { player: PublicPlayer; name: strin
           {chips.map((chip) => (
             <li
               key={chip.key}
-              className={`border-2 border-tinta px-1.5 py-0.5 text-[11px] font-bold uppercase leading-tight pc:text-xs ${chip.strong ? 'bg-ouro' : 'bg-papel'}`}
+              className={`flex items-center gap-1 border-2 border-tinta py-0.5 pl-1 pr-1.5 text-[11px] font-bold uppercase leading-tight pc:text-xs ${chip.strong ? 'bg-ouro' : 'bg-papel'}`}
             >
-              {chip.text}
+              {chip.icon}
+              <span>{chip.text}</span>
             </li>
           ))}
         </ul>
@@ -162,8 +197,13 @@ function Zones({ player, name, view, self }: { player: PublicPlayer; name: strin
   );
 }
 
+/** O tamanho da figura no título de uma zona. */
+const ZONE_ICON = 'size-3.5 pc:size-4';
+
 interface ZoneProps {
   label: string;
+  /** A figura antes do rótulo (decisoes.md 2026-11-01 (1)). */
+  icon: ReactNode;
   /** Nome da lista, quando difere do rótulo visível. */
   listLabel?: string;
   cards: SpecialCard[];
@@ -175,7 +215,7 @@ interface ZoneProps {
   drop?: DropKey | 'targets';
 }
 
-function Zone({ label, listLabel, cards, wildAs, count = false, drop }: ZoneProps) {
+function Zone({ label, icon, listLabel, cards, wildAs, count = false, drop }: ZoneProps) {
   const labelId = useId();
   // Só uma Guarda grande (muitos K) precisa de cartas sobrepostas para caber na linha.
   const overlap = cards.length > 4;
@@ -185,7 +225,8 @@ function Zone({ label, listLabel, cards, wildAs, count = false, drop }: ZoneProp
       className="campo-zona [--soltar-folga:-4px]"
       data-soltar={drop !== undefined && drop !== 'targets' ? drop : undefined}
     >
-      <div className="zona-titulo flex items-baseline gap-1">
+      <div className="zona-titulo flex items-center gap-1">
+        {icon}
         <span id={labelId} className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">
           {label}
         </span>

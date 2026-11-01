@@ -343,6 +343,64 @@ describe('mesa: marcas de estado no Coringa (spec §3.1)', () => {
   });
 });
 
+describe('mesa: as figuras no lugar do texto (decisoes.md 2026-11-01 (1))', () => {
+  const region = (name: string) => within(screen.getByRole('region', { name }));
+  const arts = (root: Element, selector: string) =>
+    [...root.querySelectorAll(`${selector} svg[data-arte]`)].map((svg) => svg.getAttribute('data-arte'));
+
+  it('o total de cada fileira vem depois da figura (espadas no Ataque, escudo na Defesa); a palavra fica para o leitor de tela', () => {
+    mount();
+    const rows = [
+      ['Sua fileira de ataque', 'ataque', 'Ataque'],
+      ['Sua fileira de defesa', 'defesa', 'Defesa'],
+      ['Fileira de ataque de Duda', 'ataque', 'Ataque'],
+      ['Fileira de defesa de Duda', 'defesa', 'Defesa'],
+    ] as const;
+    for (const [name, art, word] of rows) {
+      const row = group(name);
+      const total = row.querySelector('[data-total]')!;
+      const figure = total.parentElement!.querySelector(`svg[data-arte="${art}"]`)!;
+      expect(figure).toHaveAttribute('aria-hidden', 'true');
+      expect(figure.compareDocumentPosition(total) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(within(row).getByText(word)).toHaveClass('sr-only');
+    }
+  });
+
+  it('cada marca de estado tem a sua figura, com o nome curto ao lado', () => {
+    mount({
+      ...DRAFT,
+      self: {
+        ...DRAFT.self,
+        absoluteDefense: true,
+        guard: ['K', 'K'],
+        attackBuffs: ['J', 'J', 'J', 'J'],
+        resurrections: [{ row: 'ATK', value: 7 }],
+      },
+    });
+    const list = region('Seu campo').getByRole('list', { name: /Estado do Coringa/ });
+    const marks = within(list)
+      .getAllByRole('listitem')
+      .map((item) => [item.querySelector('svg[data-arte]')?.getAttribute('data-arte'), item.textContent]);
+    expect(marks).toEqual([
+      ['defesa-absoluta', 'Defesa Absoluta'],
+      ['cura', 'Cura passiva'],
+      ['ressurreicao', '1 Ressurreição disponível'],
+      ['ataque-absoluto', 'Ataque Absoluto armado'],
+    ]);
+  });
+
+  it('o título de cada zona do campo tem figura: Guarda, buffs de Ataque e de Defesa, Reflect', () => {
+    mount({ ...DRAFT, opponent: { ...DRAFT.opponent, reflect: true } });
+    expect(arts(screen.getByRole('region', { name: 'Seu campo' }), '.zona-titulo')).toEqual(['guarda', 'buff-ataque', 'buff-defesa']);
+    expect(arts(screen.getByRole('region', { name: 'Campo de Duda' }), '.zona-titulo')).toEqual([
+      'guarda',
+      'buff-ataque',
+      'buff-defesa',
+      'reflect',
+    ]);
+  });
+});
+
 const placar = () => within(screen.getByRole('region', { name: 'Placar' }));
 
 describe('mesa: a mão viva (sub-projeto 6 §6)', () => {

@@ -36,6 +36,7 @@ import type { Notice, SessionSnapshot } from '../../model/session.ts';
 import { Card } from '../cards/Card.tsx';
 import { NoticeLine, PRIMARY, PRIMARY_TITLE, SECONDARY, TwoLine } from './controls.tsx';
 import { DragGhost } from './DragGhost.tsx';
+import { AttackIcon, DefenseIcon } from './icons.tsx';
 import type { TableNames } from './labels.ts';
 import { useCardDrag } from './useCardDrag.ts';
 
@@ -59,6 +60,13 @@ export interface EquipPanelProps {
   onConfirm: () => void;
   /** O próprio painel, para a mesa levar o foco a ele quando a rodada abre. */
   panelRef: RefObject<HTMLElement | null>;
+}
+
+/** A figura da fileira do destino (decisoes.md 2026-11-01 (1)); o descarte não tem. */
+function DestinationIcon({ destination }: { destination: Destination }) {
+  if (destination === 'ATK' || destination === 'REPLACE_LAST_ATK') return <AttackIcon className="size-5" />;
+  if (destination === 'DEF' || destination === 'REPLACE_LAST_DEF') return <DefenseIcon className="size-5" />;
+  return null;
 }
 
 /** O rótulo do terminal para o destino e, na troca, a carta que sai: a última da fileira do rascunho até aqui. */
@@ -248,8 +256,9 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
                   data-foco={i === 0 ? '' : undefined}
                   disabled={disabled}
                   onClick={() => onChoose(destination, selected?.id)}
-                  className={`${SECONDARY} w-full`}
+                  className={`${SECONDARY} flex w-full items-center gap-2`}
                 >
+                  <DestinationIcon destination={destination} />
                   {destinationLabel(view, draft, destination)}
                 </button>
               </li>
