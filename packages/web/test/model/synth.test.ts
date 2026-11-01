@@ -159,7 +159,6 @@ const ALL_CUES: Record<Cue, true> = {
   'golpe-medio': true,
   'golpe-forte': true,
   escudo: true,
-  absoluto: true,
   vez: true,
   vitoria: true,
   derrota: true,
@@ -223,6 +222,38 @@ describe('os sons das cenas absolutas seguem o pico de cada uma (sub-projeto 6 �
     expect(times).toContain(m.lockAt / 1000);
   });
 
+  it('a Exódia: um baque em cada K, o ronco até a coroa, o tinido e o estrondo dela, e o acorde que desce com a vida', () => {
+    const { play } = setup();
+    const times = startsAt(play('exodia'));
+    const m = SCENE_MOMENTS.EXODIA;
+    expect(times).toContain(m.barsIn / 1000);
+    for (const ms of m.kingsAt) expect(times).toContain(ms / 1000);
+    expect(times).toContain(m.crownAt / 1000);
+    expect(times).toContain(m.drainAt / 1000);
+  });
+
+  it('a Devastação: o ronco que cresce desde o começo, o estalo da fenda, o estrondo do chão e o entulho logo depois', () => {
+    const { play } = setup();
+    const times = startsAt(play('devastacao'));
+    const m = SCENE_MOMENTS.DEVASTATION;
+    expect(times).toContain(0);
+    expect(times).toContain(m.crackAt / 1000);
+    expect(times).toContain(m.openAt / 1000);
+    expect(times.some((t) => t > m.openAt / 1000)).toBe(true);
+  });
+
+  it('a cancelada: o ronco cresce e morre quando a fenda para, sem estrondo', () => {
+    const { play } = setup();
+    const sources = play('devastacao-cancelada').filter(isSource);
+    const m = SCENE_MOMENTS.DEVASTATION_CANCELED;
+    expect(startsAt(sources)).toContain(0);
+    expect(startsAt(sources)).toContain(m.crackAt / 1000);
+    for (const source of sources) {
+      expect(source.startedAt! - NOW).toBeLessThan(m.stopAt / 1000);
+      expect(source.stoppedAt! - NOW).toBeLessThanOrEqual(m.stopAt / 1000 + 1e-9);
+    }
+  });
+
   it('cut() leva a saída das pistas tocando a zero em 80 ms (o pulo da cena corta o som dela)', () => {
     const { synth, play, ctx } = setup();
     const nodes = play('ataque-absoluto');
@@ -268,8 +299,8 @@ describe('createSynth', () => {
     expect(touching).toEqual(compressors);
   });
 
-  // As longas: o absoluto (a onda que cresce e desaba) e a espada (o voo de ~0,85 s e o tinido de quando ela crava).
-  const LONG: ReadonlySet<Cue> = new Set(['absoluto', 'espada']);
+  // A longa: a espada (o voo de ~0,85 s e o tinido de quando ela crava).
+  const LONG: ReadonlySet<Cue> = new Set(['espada']);
   /** As pistas das cenas absolutas (sub-projeto 6 §10) acompanham a cena inteira: terminam antes do fim dela. */
   const SCENE: Partial<Record<Cue, number>> = {
     'ataque-absoluto': 4.5,
@@ -279,7 +310,7 @@ describe('createSynth', () => {
     'devastacao-cancelada': 1.4,
   };
 
-  it.each(CUES)('%s: dura no máximo 600 ms (o absoluto e a espada, 1,2 s; as das cenas, a cena) e começa agora', (cue) => {
+  it.each(CUES)('%s: dura no máximo 600 ms (a espada, 1,2 s; as das cenas, a cena) e começa agora', (cue) => {
     const { play } = setup();
     const sources = play(cue).filter(isSource);
     const limit = SCENE[cue] ?? (LONG.has(cue) ? 1.2 : 0.6);
@@ -310,7 +341,7 @@ describe('createSynth', () => {
     const { ctx, play } = setup();
     expect(ctx.buffers).toHaveLength(1);
     play('quebra');
-    play('absoluto');
+    play('exodia');
     expect(ctx.buffers).toHaveLength(1);
     const samples = ctx.buffers[0]!.data;
     expect(samples.some((sample) => sample !== 0)).toBe(true);

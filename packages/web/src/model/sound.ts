@@ -13,7 +13,6 @@ export type Cue =
   | 'golpe-medio'
   | 'golpe-forte'
   | 'escudo'
-  | 'absoluto'
   | 'vez'
   | 'vitoria'
   | 'derrota'

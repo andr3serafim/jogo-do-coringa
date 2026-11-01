@@ -105,12 +105,15 @@ function playNoise(ctx: AudioContext, out: AudioNode, buffer: AudioBuffer, spec:
 
 const ATK = SCENE_MOMENTS.ABSOLUTE_ATTACK;
 const DEF = SCENE_MOMENTS.ABSOLUTE_DEFENSE;
+const EXO = SCENE_MOMENTS.EXODIA;
+const DEV = SCENE_MOMENTS.DEVASTATION;
+const NOPE = SCENE_MOMENTS.DEVASTATION_CANCELED;
 /** Um instante da cena (ms desde o começo dela), em segundos de pista. */
 const s = (ms: number): number => ms / 1000;
 
 /**
- * As receitas, uma por pista. Todas até 600 ms, menos o `absoluto` e a `espada` (até 1,2 s) e as das cenas absolutas, que
- * acompanham a cena inteira com as vozes nos instantes dela (`SCENE_MOMENTS`). Timbres livres (spec §9): o que importa é
+ * As receitas, uma por pista. Todas até 600 ms, menos a `espada` (até 1,2 s) e as das cenas raras, que acompanham a cena inteira
+ * com as vozes nos instantes dela (`SCENE_MOMENTS`). Timbres livres (spec §9): o que importa é
  * curto, original e sem pico. Golpes mais pesados são mais graves, mais longos e mais cheios.
  */
 const RECIPES: Record<Cue, (voices: Voices) => void> = {
@@ -144,14 +147,6 @@ const RECIPES: Record<Cue, (voices: Voices) => void> = {
     tone({ wave: 'triangle', from: 1046, length: 0.35, peak: 0.2 });
     tone({ wave: 'sine', from: 1568, length: 0.25, peak: 0.12 });
     noise({ filter: 'bandpass', from: 5000, q: 2, length: 0.03, peak: 0.2 });
-  },
-  // O golpe absoluto: uma onda que cresce por uns 700 ms e desaba num impacto grave. É a única pista que passa de 600 ms.
-  absoluto: ({ tone, noise }) => {
-    tone({ wave: 'sawtooth', from: 70, to: 210, attack: 0.6, length: 1.0, peak: 0.12 });
-    tone({ wave: 'sine', from: 55, attack: 0.5, length: 1.15, peak: 0.25 });
-    noise({ filter: 'bandpass', from: 300, to: 3000, q: 1.2, attack: 0.7, length: 1.0, peak: 0.15 });
-    tone({ wave: 'sine', from: 100, to: 40, at: 0.7, length: 0.45, peak: 0.3 });
-    noise({ filter: 'lowpass', from: 2000, to: 200, at: 0.7, length: 0.4, peak: 0.2 });
   },
   // A sua vez: dois toques de sino, o segundo uma quinta acima.
   vez: ({ tone }) => {
@@ -226,10 +221,46 @@ const RECIPES: Record<Cue, (voices: Voices) => void> = {
     tone({ wave: 'sine', from: 1568, at: s(DEF.lockAt), length: 0.5, peak: 0.1 });
     tone({ wave: 'sine', from: 90, to: 45, at: s(DEF.lockAt), length: 0.4, peak: 0.25 });
   },
-  // A Exódia e a Devastação (fatia 3) soam como o golpe absoluto até as receitas delas.
-  exodia: (voices) => RECIPES.absoluto(voices),
-  devastacao: (voices) => RECIPES.absoluto(voices),
-  'devastacao-cancelada': (voices) => RECIPES.absoluto(voices),
+  // A Exódia: um baque grave a cada K, o ronco que cresce até a coroa, o zunido dela caindo, o tinido de metal e o estrondo quando
+  // ela crava (no instante da inversão), e o acorde grave que desce junto com a vida do perdedor.
+  exodia: ({ tone, noise }) => {
+    const rise = s(EXO.crownAt - EXO.barsIn);
+    noise({ filter: 'lowpass', from: 240, to: 520, at: s(EXO.barsIn), attack: rise * 0.9, length: rise, peak: 0.18 });
+    tone({ wave: 'sine', from: 48, to: 62, at: s(EXO.barsIn), attack: rise * 0.9, length: rise + 0.05, peak: 0.16 });
+    for (const ms of EXO.kingsAt) {
+      tone({ wave: 'sine', from: 130, to: 48, at: s(ms), length: 0.28, peak: 0.36 });
+      noise({ filter: 'lowpass', from: 1400, to: 200, at: s(ms), length: 0.16, peak: 0.2 });
+    }
+    noise({ filter: 'bandpass', from: 500, to: 2400, q: 1.5, at: s(EXO.crownAt - 380), attack: 0.34, length: 0.38, peak: 0.12 });
+    tone({ wave: 'triangle', from: 1319, at: s(EXO.crownAt), length: 0.8, peak: 0.2 });
+    tone({ wave: 'sine', from: 1976, at: s(EXO.crownAt), length: 0.6, peak: 0.12 });
+    tone({ wave: 'sine', from: 110, to: 32, at: s(EXO.crownAt), length: 0.7, peak: 0.42 });
+    tone({ wave: 'sawtooth', from: 80, to: 35, at: s(EXO.crownAt), length: 0.5, peak: 0.14 });
+    noise({ filter: 'lowpass', from: 2800, to: 160, at: s(EXO.crownAt), length: 0.6, peak: 0.34 });
+    for (const hz of [196, 233, 294]) tone({ wave: 'triangle', from: hz, to: hz / 2, at: s(EXO.drainAt), length: 0.9, peak: 0.13 });
+  },
+  // A Devastação: o ronco da terra que cresce até a fenda, o estalo dela, o estrondo do chão que se abre (no instante da inversão), e
+  // o entulho que cai e a poeira que assenta logo depois.
+  devastacao: ({ tone, noise }) => {
+    const rise = s(DEV.openAt);
+    noise({ filter: 'lowpass', from: 120, to: 380, attack: rise * 0.85, length: rise, peak: 0.24 });
+    tone({ wave: 'sine', from: 42, to: 58, attack: rise * 0.85, length: rise, peak: 0.2 });
+    noise({ filter: 'highpass', from: 2600, to: 900, at: s(DEV.crackAt), length: 0.09, peak: 0.4 });
+    tone({ wave: 'sawtooth', from: 300, to: 80, at: s(DEV.crackAt), length: 0.12, peak: 0.18 });
+    tone({ wave: 'sine', from: 90, to: 28, at: s(DEV.openAt), length: 0.8, peak: 0.45 });
+    tone({ wave: 'sawtooth', from: 70, to: 30, at: s(DEV.openAt), length: 0.6, peak: 0.14 });
+    noise({ filter: 'lowpass', from: 2400, to: 120, at: s(DEV.openAt), length: 0.8, peak: 0.38 });
+    noise({ filter: 'bandpass', from: 1800, to: 500, q: 1, at: s(DEV.openAt) + 0.2, length: 0.5, peak: 0.16 });
+    noise({ filter: 'bandpass', from: 1400, to: 400, q: 1, at: s(DEV.openAt) + 0.45, length: 0.35, peak: 0.1 });
+    noise({ filter: 'lowpass', from: 400, to: 120, at: s(DEV.openAt) + 0.1, attack: 0.05, length: 1.2, peak: 0.14 });
+  },
+  // A cancelada: o mesmo ronco, um estalo curto da fenda que começa, e tudo morre quando ela para. Sem estrondo.
+  'devastacao-cancelada': ({ tone, noise }) => {
+    const rise = s(NOPE.stopAt);
+    noise({ filter: 'lowpass', from: 120, to: 300, attack: rise * 0.8, length: rise, peak: 0.22 });
+    tone({ wave: 'sine', from: 42, to: 54, attack: rise * 0.8, length: rise, peak: 0.18 });
+    noise({ filter: 'highpass', from: 2600, to: 1400, at: s(NOPE.crackAt), length: 0.09, peak: 0.25 });
+  },
 };
 
 /** Quanto o corte leva para zerar o que está soando. */
