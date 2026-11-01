@@ -13,14 +13,16 @@
 //
 // Com movimento reduzido, a cena é o mesmo texto parado que aparece e some (esmaecimento), sem escala nem deslocamento.
 //
-// As cenas refeitas no sub-projeto 6 (fatia 2: o Ataque e a Defesa Absolutos) têm desenho próprio, num módulo carregado sob
-// demanda (`scenes-loader.ts`). Quando ele já chegou, a cena dele toma o lugar do painel; enquanto não chega, vale o painel. A
-// cortina começa onde o placar acaba (§7: o placar fica à vista para ver a vida cair), em todas as cenas.
+// As cenas refeitas no sub-projeto 6 (fatia 2: o Ataque e a Defesa Absolutos; fatia 3: a Exódia e a Devastação) têm desenho próprio,
+// num módulo carregado sob demanda (`scenes-loader.ts`). Quando ele já chegou, a cena dele toma o lugar do painel; enquanto não
+// chega, vale o painel. A cortina começa onde o placar acaba (§7: o placar fica à vista para ver a vida cair), nas cenas que a sobem;
+// a Devastação acontece no campo, sem cortina (`FIELD_SCENES`).
 //
 // As cenas raras (U3 do sub-projeto 5: Ataque Absoluto, Defesa Absoluta, Exódia) são mais longas e têm figura: os quatro J
 // entram em leque, os quatro Q formam um muro, os quatro K da Exódia sobem um a um até a cruz; o título carimba (escala, com
 // mola) no instante em que a linha do tempo põe a única inversão da cena (`SCENE_INVERT_LEAD_MS`), e raios de xilogravura giram
-// devagar atrás do painel. A Devastação (a fileira que cai, sub-projeto 6 fatia 3) vale o painel simples até ter o desenho dela. As cartas são desenhos (`Card` sem `layoutId`), não as da mesa. Nada disso muda a luminância da tela: o
+// devagar atrás do painel. Sem o módulo, a Devastação vale o painel simples, e a cancelada só a fita. As cartas são desenhos (`Card`
+// sem `layoutId`), não as da mesa. Nada disso muda a luminância da tela: o
 // painel é escuro do começo ao fim, e os raios são traço sobre ele. Com movimento reduzido, tudo já parado no lugar.
 import type { PlayerId, SpecialCard, Suit } from '@coringa/engine';
 import type { Names } from '@coringa/sim/text';

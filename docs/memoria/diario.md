@@ -71,6 +71,11 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     folga (o tremor a empurrava para fora da janela), a terra revirada ficou mais visível e o carimbo fica ao lado da fileira, sem cobrir
     as cartas que caem;
   - a medição está em `notas/medicao-fatia-3.md`: ≥ 87 quadros por segundo com a CPU 4×, e no máximo 30 partículas.
+- **Revisão final:** feita por quem escreveu o código, sem subagente (a regra do projeto é só com pedido do autor), contra o Review Focus
+  do plano. Achou só um comentário desatualizado. **Pequenos, para depois:**
+  - se a janela mudar de tamanho com o abismo aberto, as cartas voltam a cair do começo;
+  - as rachaduras são menos ásperas que as do protótipo, e a Exódia não treme a tela (o autor confere jogando se falta peso);
+  - no replay, os controles no meio de uma cena não cortam o som dela (o mesmo da fatia 2).
 - **O que quem continua precisa saber:**
   - **não conferido de verdade:** o som (só os instantes), a cancelada e a refletida (só testes de unidade: nas 467 Devastações da busca
     com bots, nenhuma foi cancelada, e a refletida não foi procurada) e o movimento reduzido;
