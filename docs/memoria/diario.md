@@ -5,6 +5,49 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-10-31 (9): sub-projeto 6, fatia 1 (o placar de luta, a espada e a fita, o golpe, a mesa viva, a folga de cena e os sons)
+
+- **Pedido do autor** (`decisoes.md` 2026-10-31 (14)): "Aprovado o plano da fatia 1. prossiga". Executado aqui mesmo, tarefa por
+  tarefa, com teste primeiro; o registro de cada decisão técnica ficou no ledger (`.superpowers/sdd/2026-10-31-direcao-visual-fatia-1/`,
+  fora do git) e o resumo vai aqui.
+- **Commits na `feat/direcao-visual-fatia-1`** (cortada da `feat/direcao-visual`, que tem a spec e o plano): `ea30bbb` (a folga de
+  cena), `64332e4` e `c53e756` (o placar), `2493188` (a espada e a fita), `466613f` (o golpe), `49c319e` (a mesa viva), `34af728`
+  (os sons), o dos E2E e os de memória e de ajuste final.
+- **Decisões técnicas:**
+  - a tabela das cenas (`SCENE_MS`) mora no `@coringa/protocol`; o servidor soma a folga ao prazo (na mesma época, estende o prazo
+    e o alarme), o `Deadline` leva `runsFrom` e o `RoomClient` mostra o relógio parado até lá. O envio antecipado do Equipar
+    agenda pelo tempo de verdade até `at` (pelo relógio parado, sairia a folga inteira antes da hora: achado ao ler o código);
+  - o placar (`FightHud`) sai dos campos: o Coringa, o apelido, a vida e o relógio. "Tempo esgotado" e o turno pausado foram para
+    a linha da fase na faixa do meio (não cabem na placa do celular). No PC o campo passou a ter duas colunas (fileiras | zonas);
+  - a espada troca de retrato pelo efeito da batida da decisão (não pelo `layoutId` do losango): o voo é um arco com duas voltas.
+    Ela segue o próprio relógio depois de começar, como a inversão e a cortina: no treino o bot responde logo e cortava o voo em
+    60 ms (achado medindo o voo quadro a quadro). A posição em repouso é um `transform` medido dos retratos (`ResizeObserver`);
+  - a fita mora sob o placar (centrada na placa), não no palco: no PC, com a coluna do histórico, o centro do palco fica ~200 px
+    à direita da placa;
+  - o tremor do golpe é CSS (`translate`) no palco com `data-tremor`; o número do dano é carimbado sob o retrato, preso à borda
+    de dentro (centrado, um dano de 3 dígitos saía da tela no canto);
+  - a mão respira e a quadra brilha em CSS: o teste do relógio que proibia qualquer animação sem fim agora aceita só essas duas.
+- **Conferido na tela** (Chrome DevTools, o painel do app estava escondido): PC 1440 × 900 e 1280 × 800, celular de 360 px (o
+  placar com 64 px, as barras com 86 px, sem rolagem de lado); o voo da espada gravado quadro a quadro (do seu retrato ao do bot
+  passando pelo meio da mesa em ~0,82 s), a fita, o golpe leve e o médio (tremor, pingos, número carimbado), a mão inclinando e
+  respirando, a quadra marcada (montada na fileira para a captura: o losango cobria o naipe e foi para o canto de cima).
+- **Desempenho (spec 6 §11), medido com a CPU 4× mais lenta no Chromium (Chrome DevTools), na build de produção, num replay
+  (sem o bot do treino, que calcula no fio principal e mascara a medida):** a primeira versão derrubava a animação do golpe de 65
+  (a `main`, o mesmo replay, num worktree temporário) para 36 quadros por segundo. Achado por eliminação (desligando as peças por
+  CSS injetado) e pelo trace: o tremor do palco inteiro (~9 q/s), a mão respirando durante as batidas (~7), o lampejo da espada
+  (~2), os pingos animados pelo Motion em JavaScript e o rastro por `width`. Consertos: o tremor desloca só o placar e os campos (a
+  mão e a barra ficam paradas), a mão e o lampejo pausam durante as batidas, os pingos viraram Web Animations e a barra encolhe
+  por `scaleX`. Resultado: **50 e 53 q/s** em duas medidas (mediana de 17 ms, a mesma da `main`; p90 de 33 ms contra 25). O voo
+  da espada: 69 q/s. **Fica:** o quadro em que o passo chega pesa ~200 ms contra ~83 ms na `main` (o React desenha mais coisa, e o
+  histórico já forçava um reflow a cada linha nova: `scrollTop = scrollHeight`); candidato à fatia 5 (fluidez).
+- **Ficou (miúdo, no ledger):** a extensão do prazo na mesma época faz o leitor de tela anunciar o relógio de novo; dois golpes
+  colados sem batida entre eles tremem uma vez só.
+- **Armadilhas:** o `useLayoutEffect` do filho roda antes de o React ligar o `ref` do pai (a espada nunca media); o Motion só
+  aplica a posição depois de carregar os recursos sob demanda; clique durante as batidas pula as animações (um script que clica
+  sem esperar a mesa parar nunca vê o voo).
+
+---
+
 ## 2026-10-31 (8): a marca "Cura passiva" (primeiro ponto do playtest)
 
 - **Pedido do autor** (`decisoes.md` 2026-10-31 (10)): sinalizar a cura passiva enquanto houver 2 K na Guarda. Na mesma mensagem,

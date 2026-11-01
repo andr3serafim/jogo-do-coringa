@@ -468,25 +468,25 @@
       color-mix(in oklab, var(--color-papel) 6%, var(--color-tinta));
   }
 
+  /* O ouro e o rastro cobrem a barra inteira e encolhem por `scaleX` na direção do retrato (a origem fica do lado dele). */
   .placar-barra > [data-vida],
   .placar-barra > [data-rastro] {
     position: absolute;
-    top: 0;
-    bottom: 0;
+    inset: 0;
   }
 
   .placar-lado--voce .placar-barra > * {
-    left: 0;
+    transform-origin: left center;
   }
 
   .placar-lado--oponente .placar-barra > * {
-    right: 0;
+    transform-origin: right center;
   }
 
   /* O rastro do golpe escorre até a vida nova; quando ele parte, quem decide é o `useHpTrail` (`TRAIL_HOLD_MS`). */
   .placar-barra > [data-rastro] {
     background: var(--color-vermelho);
-    transition: width 600ms cubic-bezier(0.3, 0, 0.2, 1);
+    transition: transform 600ms cubic-bezier(0.3, 0, 0.2, 1);
   }
 
   .placar-barra > [data-vida] {
@@ -565,8 +565,9 @@
 }
 
 /*
- * O tremor do golpe (sub-projeto 6 §5): a mesa se desloca alguns pixels e volta, uma vez, quando o palco ganha a marca
- * `data-tremor` na batida do dano. O tamanho e a duração vêm do `Stage` (`SHAKE_PX`, `SHAKE_MS`). Deslocamento, não luz: não
+ * O tremor do golpe (sub-projeto 6 §5): a mesa (o placar e os campos) se desloca alguns pixels e volta, uma vez, quando o palco
+ * ganha a marca `data-tremor` na batida do dano. A mão, a barra e o histórico ficam parados: deslocar o palco inteiro custava ~9
+ * quadros por segundo com a CPU 4× mais lenta, e a mão parada também se joga melhor. O tamanho e a duração vêm do `Stage` (`SHAKE_PX`, `SHAKE_MS`). Deslocamento, não luz: não
  * conta como troca claro ↔ escuro (spec da web §10.4). Com movimento reduzido o palco não ganha a marca.
  */
 @keyframes tremor {
@@ -588,7 +589,7 @@
   }
 }
 
-[data-palco][data-tremor] {
+[data-palco][data-tremor] :is([data-placar], [data-campos]) {
   animation: tremor var(--tremor-ms, 200ms) linear;
 }
 
@@ -611,6 +612,11 @@
 [data-respira] {
   animation: respira 3.6s ease-in-out infinite;
   animation-delay: calc(var(--respira-i, 0) * -0.9s);
+}
+
+/* Durante as batidas a carta para onde está (e volta do mesmo ponto quando a mesa para). */
+[data-respira][data-respira-pausa] {
+  animation-play-state: paused;
 }
 
 @keyframes brilho-quadra {

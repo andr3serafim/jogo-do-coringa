@@ -657,6 +657,28 @@ describe('efeitos da batida (spec §4.2)', () => {
     expect(theirs.container.querySelector('[data-retrato="oponente"] [data-dano]')!.className).toMatch(/(^| )right-0( |$)/);
   });
 
+  it('durante as batidas a mão para de respirar (pausa onde está) e volta quando a mesa para (sub-projeto 6 §6)', () => {
+    const m = mount(MINE);
+    const cards = () => [...screen.getByRole('list', { name: 'Sua mão' }).querySelectorAll<HTMLElement>(':scope > li')];
+    expect(cards().every((li) => li.hasAttribute('data-respira') && !li.hasAttribute('data-respira-pausa'))).toBe(true);
+    emit(m, { ...MINE, self: { ...MINE.self, hp: 137 } }, [ATTACK, HIT]);
+    expect(busy(m.container)).toBe(true);
+    expect(cards().every((li) => li.hasAttribute('data-respira') && li.hasAttribute('data-respira-pausa'))).toBe(true);
+    advance(3_000);
+    expect(busy(m.container)).toBe(false);
+    expect(cards().some((li) => li.hasAttribute('data-respira-pausa'))).toBe(false);
+  });
+
+  it('o lampejo da espada some durante as batidas e volta quando a mesa para (sub-projeto 6 §4)', () => {
+    const m = mount(MINE);
+    const flash = () => m.container.querySelector('[data-espada] [data-lampejo]');
+    expect(flash()).not.toBeNull();
+    emit(m, { ...MINE, self: { ...MINE.self, hp: 137 } }, [ATTACK, HIT]);
+    expect(flash()).toBeNull();
+    advance(3_000);
+    expect(flash()).not.toBeNull();
+  });
+
   it('o golpe forte treme mais e respinga mais', () => {
     const m = mount(MINE);
     emit(m, { ...MINE, self: { ...MINE.self, hp: 30 } }, [{ type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 200, defense: 43, damage: 157 }]);
@@ -678,7 +700,11 @@ describe('efeitos da batida (spec §4.2)', () => {
   it('o rastro vermelho fica na vida velha e escorre até a nova depois do golpe (sub-projeto 6 §3)', () => {
     const m = mount(MINE);
     const meter = () => screen.getByRole('meter', { name: 'Vida de André' });
-    const width = (selector: string) => parseFloat(meter().querySelector<HTMLElement>(selector)!.style.width);
+    // A largura desenhada, em % da barra: a barra encolhe por `scaleX` (sem layout a cada quadro).
+    const width = (selector: string) => {
+      const scale = /scaleX\(([\d.]+)\)/.exec(meter().querySelector<HTMLElement>(selector)!.style.transform)?.[1];
+      return Number(scale) * 100;
+    };
     const pct = (hp: number) => (hp / Number(meter().getAttribute('aria-valuemax'))) * 100;
     expect(width('[data-rastro]')).toBeCloseTo(pct(187));
     emit(m, { ...MINE, self: { ...MINE.self, hp: 137 } }, [ATTACK, HIT]);

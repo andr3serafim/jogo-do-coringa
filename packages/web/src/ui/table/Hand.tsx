@@ -93,7 +93,7 @@ interface HandCardProps {
 
 function HandCard({ card, index, count, selected }: HandCardProps) {
   const { onSelectCard, handDrag, locked } = useTableUi();
-  const { reduced } = useAnim();
+  const { reduced, busy } = useAnim();
   const tilt = useRef<HTMLSpanElement>(null);
   const zones = () => handDrag?.zones(card.id) ?? NO_ZONES;
   // O mesmo `locked` que apaga a carta e o toque; sem zona (nenhuma jogada com ela agora) não há o que arrastar.
@@ -144,7 +144,14 @@ function HandCard({ card, index, count, selected }: HandCardProps) {
     if (event.pointerType === 'touch' || event.type === 'pointerleave') rest();
   };
   return (
-    <li className="relative flex-none" style={style} data-respira={reduced ? undefined : ''}>
+    // Durante as batidas a respiração pausa onde está (os controles estão travados, e a mesa fica com o golpe): com a CPU 4× mais
+    // lenta, as cartas respirando no meio do golpe custavam ~7 quadros por segundo.
+    <li
+      className="relative flex-none"
+      style={style}
+      data-respira={reduced ? undefined : ''}
+      data-respira-pausa={!reduced && busy ? '' : undefined}
+    >
       <span
         ref={tilt}
         data-inclina

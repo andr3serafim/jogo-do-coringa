@@ -78,11 +78,14 @@ export function InitiativeSword({
   holder,
   move,
   reduced,
+  busy,
   hud,
 }: {
   holder: SwordSide;
   move: SwordMove;
   reduced: boolean;
+  /** Há batida tocando: o lampejo some (a mesa fica com o golpe, e ele custava quadros com a CPU lenta). */
+  busy: boolean;
   /** O placar: a espada mede os retratos dentro dele. */
   hud: RefObject<HTMLElement | null>;
 }) {
@@ -155,7 +158,7 @@ export function InitiativeSword({
         animate={hopping ? { y: [0, -12, 0], scale: [1, 1.15, 1] } : { y: 0, scale: 1 }}
         transition={hopping ? { duration: 0.45, ease: 'easeOut' } : { duration: 0 }}
       >
-        <SwordArt flash={!reduced} />
+        <SwordArt flash={!reduced && !busy} />
       </m.div>
     </div>
   );
@@ -208,7 +211,7 @@ function SwordArt({ flash }: { flash: boolean }) {
               <stop offset="1" stopColor="#fff" stopOpacity="0" />
             </linearGradient>
           </defs>
-          <g clipPath="url(#espada-lamina)">
+          <g clipPath="url(#espada-lamina)" data-lampejo>
             <g transform="skewY(-30)">
               <m.rect
                 x="0"

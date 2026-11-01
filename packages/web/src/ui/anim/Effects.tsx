@@ -3,6 +3,7 @@
 // acontecem uma vez dentro da batida (sem pisca-pisca), e ficam escondidos do leitor de tela (o histórico registra tudo). Os
 // números de jogo seguem sem textura (spec §10.7).
 import * as m from 'motion/react-m';
+import { useEffect, useRef } from 'react';
 import type { ImpactForce } from '../../model/impact.ts';
 
 const times = [0, 0.15, 0.75, 1];
@@ -54,27 +55,43 @@ const DROPS: Record<ImpactForce, number> = { leve: 5, medio: 7, forte: 10 };
 /**
  * Os respingos de tinta do golpe (sub-projeto 6 §5): pingos que saem do retrato de quem apanhou, se espalham e caem. Posições
  * fixas (sem sorteio), para o desenho ser o mesmo em toda batida. Cabem na batida (`ms`, até 0,9 s). Nada com movimento reduzido.
+ *
+ * Animados pelo próprio navegador (Web Animations, só `transform` e `opacity`), e não pelo Motion: assim correm no compositor,
+ * sem trabalho no fio principal a cada quadro. Com a CPU 4× mais lenta, os pingos quadro a quadro em JavaScript, somados ao
+ * tremor e ao rastro, derrubavam o golpe para ~37 quadros por segundo.
  */
 export function InkSplat({ force, ms, reduced }: { force: ImpactForce; ms: number; reduced: boolean }) {
-  if (reduced) return null;
+  const box = useRef<HTMLSpanElement>(null);
   const count = DROPS[force];
+  useEffect(() => {
+    const drops = box.current ? [...box.current.querySelectorAll<HTMLElement>('[data-pingo]')] : [];
+    const animations = drops.map((drop, i) => {
+      const angle = (i / count) * 2 * Math.PI + (i % 2 === 0 ? 0.3 : -0.25);
+      const reach = 40 + ((i * 37) % 110);
+      const dx = Math.cos(angle) * reach;
+      const dy = Math.sin(angle) * reach;
+      return drop.animate?.(
+        [
+          { transform: 'translate(0, 0) scale(0.2)', opacity: 1 },
+          { transform: `translate(${dx}px, ${dy}px) scale(1)`, opacity: 1, offset: 0.35 },
+          { transform: `translate(${dx * 1.15}px, ${dy * 1.15 + 18}px) scale(0.9)`, opacity: 0 },
+        ],
+        { duration: Math.min(900, ms), easing: 'cubic-bezier(0.1, 0.8, 0.3, 1)', fill: 'forwards' },
+      );
+    });
+    return () => animations.forEach((animation) => animation?.cancel());
+  }, [count, ms]);
+  if (reduced) return null;
   return (
-    <span aria-hidden="true" data-respingo className="pointer-events-none absolute inset-0 z-20">
+    <span ref={box} aria-hidden="true" data-respingo className="pointer-events-none absolute inset-0 z-20">
       {Array.from({ length: count }, (_, i) => {
-        const angle = (i / count) * 2 * Math.PI + (i % 2 === 0 ? 0.3 : -0.25);
-        const reach = 40 + ((i * 37) % 110);
         const size = 6 + ((i * 7) % 9);
-        const dx = Math.cos(angle) * reach;
-        const dy = Math.sin(angle) * reach;
         return (
-          <m.span
+          <span
             key={i}
             data-pingo
             className="absolute left-1/2 top-1/2 rounded-full bg-tinta"
-            style={{ width: size, height: size, marginLeft: -size / 2, marginTop: -size / 2 }}
-            initial={{ x: 0, y: 0, scale: 0.2, opacity: 1 }}
-            animate={{ x: [0, dx, dx * 1.15], y: [0, dy, dy * 1.15 + 18], scale: [0.2, 1, 0.9], opacity: [1, 1, 0] }}
-            transition={{ duration: Math.min(0.9, ms / 1000), times: [0, 0.35, 1], ease: [0.1, 0.8, 0.3, 1] }}
+            style={{ width: size, height: size, marginLeft: -size / 2, marginTop: -size / 2, transform: 'scale(0.2)' }}
           />
         );
       })}

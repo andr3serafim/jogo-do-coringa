@@ -49,7 +49,7 @@ export function FightHud({ view, names, face, deadline }: FightHudProps) {
   const sword = useSword(view, anim);
   const score = initiativeScore(view);
   return (
-    <section ref={hud} aria-label="Placar" className="placar relative flex-none bg-tinta text-papel">
+    <section ref={hud} aria-label="Placar" data-placar className="placar relative flex-none bg-tinta text-papel">
       <Side side="voce" view={view} player={view.self} name={names.self} holder={sword.shown === 'voce'} />
       <div data-placa className="placar-placa flex flex-col items-center text-center">
         {/* Letra lisa, como no protótipo: a textura de madeira borra o rótulo nesse tamanho. O número grande é tipo de madeira. */}
@@ -82,7 +82,7 @@ export function FightHud({ view, names, face, deadline }: FightHudProps) {
         <p className="sr-only">{initiativeScoreText(view, names)}</p>
       </div>
       <Side side="oponente" view={view} player={view.opponent} name={names.opponent} holder={sword.shown === 'oponente'} />
-      <InitiativeSword holder={sword.shown} move={sword.move} reduced={anim.reduced} hud={hud} />
+      <InitiativeSword holder={sword.shown} move={sword.move} reduced={anim.reduced} busy={anim.busy} hud={hud} />
       <RibbonLayer ribbon={anim.ribbon} reduced={anim.reduced} />
     </section>
   );
@@ -248,8 +248,9 @@ function HpBar({
       onPointerDown={onSeen}
       className="placar-barra"
     >
-      {reduced ? null : <div data-rastro style={{ width: `${percentOf(trail, max)}%` }} />}
-      <div data-vida style={{ width: `${percentOf(shown, max)}%` }} />
+      {/* `scaleX`, e não `width`: a contagem e o rastro mudam a barra a cada quadro, e a escala não refaz o layout. */}
+      {reduced ? null : <div data-rastro style={{ transform: `scaleX(${percentOf(trail, max) / 100})` }} />}
+      <div data-vida style={{ transform: `scaleX(${percentOf(shown, max) / 100})` }} />
     </div>
   );
 }
