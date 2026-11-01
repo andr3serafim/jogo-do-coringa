@@ -97,6 +97,16 @@ describe('a Devastação', () => {
     expect(all('[data-rachadura]')).toHaveLength(12);
   });
 
+  it('a fenda corre por cima das cartas, e o abismo toma o lugar dela', () => {
+    show(fell('p2'));
+    advance(M.crackAt);
+    const crack = q('[data-fenda]')!;
+    const copy = q('[data-carta-caindo]')!;
+    expect(copy.compareDocumentPosition(crack) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    advance(M.openAt - M.crackAt);
+    expect(q('[data-fenda]')).toBeNull();
+  });
+
   it('as cartas da fileira: uma cópia por carta do evento, na vaga dela, relativa à faixa', () => {
     show(fell('p2'));
     const copies = all('[data-carta-caindo]');

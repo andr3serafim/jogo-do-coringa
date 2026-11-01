@@ -391,18 +391,6 @@ export function Devastation({ beat, me, reduced, box, field }: SceneProps) {
               </g>
             </svg>
           ) : null}
-          {crack ? (
-            <svg
-              ref={fenda}
-              data-fenda
-              data-parada={stopped ? '' : undefined}
-              className="absolute inset-0 size-full"
-              style={{ transformOrigin: `${originX}px ${layout.yc}px`, transform: canceled && reduced ? 'scaleX(0.55)' : undefined }}
-              aria-hidden="true"
-            >
-              <path d={layout.paths.crack} fill="none" stroke="#120c08" strokeWidth="3" />
-            </svg>
-          ) : null}
           {open ? (
             <svg
               ref={abyss}
@@ -450,6 +438,19 @@ export function Devastation({ beat, me, reduced, box, field }: SceneProps) {
               })}
             </div>
           )}
+          {/* A fenda corre por cima das cartas, e o abismo toma o lugar dela. */}
+          {crack && !open ? (
+            <svg
+              ref={fenda}
+              data-fenda
+              data-parada={stopped ? '' : undefined}
+              className="absolute inset-0 size-full"
+              style={{ transformOrigin: `${originX}px ${layout.yc}px`, transform: canceled && reduced ? 'scaleX(0.55)' : undefined }}
+              aria-hidden="true"
+            >
+              <path d={layout.paths.crack} fill="none" stroke="#120c08" strokeWidth="3" />
+            </svg>
+          ) : null}
           <div ref={particles} data-particulas className="absolute inset-0" />
           {stamp ? <Stamp kind="DEVASTATION" reduced={reduced} className={STAMP_LOOK} top={stampTop} /> : null}
         </div>

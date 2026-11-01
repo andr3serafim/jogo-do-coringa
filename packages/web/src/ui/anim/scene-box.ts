@@ -37,6 +37,9 @@ export interface SceneBox {
   row(player: PlayerId, row: RowName): SceneRow | null;
 }
 
+/** A folga em volta da fileira rolada: o tremor da cena não a empurra para fora da janela. */
+const REVEAL_MARGIN = 12;
+
 const rowSelector = (player: PlayerId, row: RowName): string => `[data-fileira="${rowKey(player, row)}"]`;
 
 /**
@@ -49,8 +52,8 @@ export function revealRow(palco: HTMLElement, player: PlayerId, row: RowName): v
   if (fields === null || target === null) return;
   const port = fields.getBoundingClientRect();
   const rect = target.getBoundingClientRect();
-  if (rect.top < port.top) fields.scrollTop -= port.top - rect.top;
-  else if (rect.bottom > port.bottom) fields.scrollTop += rect.bottom - port.bottom;
+  if (rect.top < port.top) fields.scrollTop -= port.top - rect.top + REVEAL_MARGIN;
+  else if (rect.bottom > port.bottom) fields.scrollTop += rect.bottom - port.bottom + REVEAL_MARGIN;
 }
 
 /** Mede a caixa dentro do palco; `null` sem a mesa (o placar e os campos) montada. */

@@ -99,10 +99,18 @@ for (const viewport of [
       const inView = await page.evaluate(() => {
         const port = document.querySelector('[data-campos]')!.getBoundingClientRect();
         const row = document.querySelector('[data-fileira="p2:DEF"]')!.getBoundingClientRect();
-        return row.top >= port.top - 1 && row.bottom <= port.bottom + 1;
+        // O tremor do campo mexe a fileira em até 4 px.
+        return row.top >= port.top - 4 && row.bottom <= port.bottom + 4;
       });
       expect(inView, 'a fileira atingida fica à vista').toBe(true);
       await expectNoSideScroll(page);
+      // O tremor do campo não pode criar uma barra de rolagem nos campos (visto no navegador, 2026-11-01).
+      const { bar, overflow } = await page.locator('[data-campos]').evaluate((fields) => ({
+        bar: (fields as HTMLElement).offsetHeight - fields.clientHeight,
+        overflow: getComputedStyle(fields).overflowX,
+      }));
+      expect(bar, 'sem barra de rolagem de lado nos campos').toBe(0);
+      expect(overflow).toBe('hidden');
       await tapTable(page);
       await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1, { timeout: 500 });
       await expect(page.locator('[data-fileira="p2:DEF"][data-desolada]')).toHaveCount(1, { timeout: 500 });

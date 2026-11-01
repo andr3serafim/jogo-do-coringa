@@ -70,11 +70,11 @@ export function RowDesolation({ closing }: { closing: boolean }) {
       className="pointer-events-none absolute -inset-x-10 inset-y-0 z-0"
       style={{ gridColumn: '1 / -1', gridRow: 1 }}
     >
-      <svg data-terra className="absolute inset-0 size-full overflow-visible mix-blend-multiply">
+      <svg data-terra className="absolute inset-x-0 -top-4 h-[calc(100%+2rem)] w-full overflow-visible mix-blend-multiply">
         <defs>
           <filter id={earth} x="0" y="0" width="100%" height="100%">
             <feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="4" seed="9" result="n" />
-            <feColorMatrix in="n" type="matrix" values="0 0 0 0 .22  0 0 0 0 .16  0 0 0 0 .1  0 0 0 2 -.75" />
+            <feColorMatrix in="n" type="matrix" values="0 0 0 0 .22  0 0 0 0 .16  0 0 0 0 .1  0 0 0 2.6 -.85" />
           </filter>
           <radialGradient id={earthFade}>
             <stop offset=".25" stopColor="#fff" />
