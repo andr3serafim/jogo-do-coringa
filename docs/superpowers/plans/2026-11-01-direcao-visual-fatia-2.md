@@ -57,8 +57,9 @@ Playwright, Web Audio.
 
 1. **Ataque Absoluto contra Reflect** (`AbsoluteAttack`, depois `ReflectTriggered`): não há golpe para absorver. A cena toca
    inteira sem número de dano, e a do Reflect perde a inversão pela trava de 2 s → teste "Ataque Absoluto refletido" (Task 1).
-2. **Ataque Absoluto contra Defesa Absoluta** (`DamageDealt` com dano 0): o golpe é absorvido, mas sem número, sem respingo e
-   sem tremor, e a vida não mexe → teste da Task 2.
+2. **Ataque Absoluto contra uma Guarda** (o motor quebra a Guarda inteira, `preview.ts:68`, e emite `GuardBroken` entre o
+   `AbsoluteAttack` e o `DamageDealt`): o golpe tem de ser absorvido mesmo assim, e a vida conta uma vez só → testes das Tasks 1 e
+   2. Contra a Defesa Absoluta, o Ataque Absoluto causa dano normal (`preview.ts:69-71`).
 3. **O oponente joga** (o espelho): a aura sai do lado dele, o feixe vai para o seu retrato, e a insígnia fica no retrato dele
    → testes das Tasks 4 e 5.
 4. **Pular no meio** (toque, Esc, "Passo anterior" no replay, `resync`): a mesa mostra o estado final (a vida final, a insígnia
@@ -108,6 +109,9 @@ Playwright, Web Audio.
       nada fica `absorbed`, e no máximo uma inversão começa em cada janela de 2 s.
     - **"no catchUp nada é absorvido":** a cena vira faixa, e o `DamageDealt` volta a ser batida de dano.
     - **"outro atacante não é absorvido":** o `DamageDealt` de p2 depois do `AbsoluteAttack` de p1 segue batida própria.
+    - **"a Guarda quebrada no meio não impede":** com `[AbsoluteAttack p1, GuardBroken p2 (2 K), DamageDealt p1→p2]`, o
+      `DamageDealt` é absorvido pela cena, e o `GuardBroken` fica como batida de movimento logo depois dela (os K racham e vão ao
+      cemitério depois do impacto).
     - **"Defesa Absoluta: a inversão é na trava":** `invert.atMs === startMs + 2_700`.
     - **Durações:** `RARE_SCENE_MS.ABSOLUTE_ATTACK` é `4_500` e `RARE_SCENE_MS.ABSOLUTE_DEFENSE` é `4_800`, e os testes de
       fotossensibilidade que já existem seguem valendo, sem afrouxar.
@@ -124,8 +128,9 @@ Playwright, Web Audio.
 
 - [ ] **Step 3: Implementar**
   - **Na `buildTimeline`, no passo 1:**
-    - um `DamageDealt` é absorvido quando a última batida não quieta antes dele é uma cena `ABSOLUTE_ATTACK` do mesmo
-      `attacker`, e o modo não é `catchUp` nem `resync`;
+    - um `DamageDealt` é absorvido quando a última batida não quieta antes dele, pulando os `GuardBroken`, é uma cena
+      `ABSOLUTE_ATTACK` do mesmo `attacker`, e o modo não é `catchUp` nem `resync`. O motor quebra a Guarda inteira entre os
+      dois (`preview.ts:68`, `combat.ts` `resolveAttack`);
     - o absorvido vira `quiet`, com `baseMs` 0, e a cena guarda o evento.
   - **No passo 3:** `hit.atMs = start + SCENE_MOMENTS.ABSOLUTE_ATTACK.hitAt`.
   - **`damageBeatIndex`** já pula batidas `quiet`: o absorvido fica de fora sem mudança. Confira com um teste.
@@ -155,8 +160,10 @@ Playwright, Web Audio.
   - `effectsOf(beat, view, landed = false)`: numa cena com `hit` e `landed`, soma os efeitos de `effectsOfEvent(hit.event)` (o
     número, os respingos, as fileiras acesas). O golpe absorvido treme **forte** com qualquer dano > 0 (spec 6 §7.1: "tremor
     forte"), e não pelo peso do dano.
-  - A vida (`life()` do `Stage`): a batida da cena conta o `lifeChange(hit.event)`, mas só depois de `hitLanded`, com `ms = 700`.
-    Antes disso, `step` vale 0.
+  - **A vida (`life()` do `Stage`).** As mudanças por batida (`lifeSteps`) dão à batida da cena com `hit` o
+    `lifeChange(hit.event)`, e à batida `absorbed` o `null`: o golpe conta **uma vez só** no `done` e no `total`. Contado em dobro,
+    o `before + total` não fecharia com a vida da `view`, e o recurso do `useCountedLife` entraria em todo Ataque Absoluto. O
+    `step` da batida da cena vale 0 até `hitLanded`; depois, a mudança, contada em `ms = 700`.
   - `insigniaShown(beats, index, player, active): boolean` (puro). `active` é o `absoluteDefense` da `view`:
     - com `active`, a insígnia aparece salvo se a linha do tempo ainda vai tocar o `AbsoluteDefenseStarted` desse jogador (no
       índice atual ou depois);
@@ -171,7 +178,9 @@ Playwright, Web Audio.
       `[data-respingo]`, e a vida desce até 137 em 700 ms;
     - um número só em toda a linha do tempo (o absorvido não repete);
     - o pulo aos 1 000 ms mostra 137 na hora.
-  - "Defesa Absoluta segura o Ataque Absoluto": com dano 0, nada de número, tremor ou respingo, e a vida segue 187.
+  - "golpe de 0 (a Defesa cobre a conta)": com dano 0, nada de número, tremor ou respingo, e a vida segue 187.
+  - "com a Guarda quebrada no meio, a vida conta uma vez só": com `[AbsoluteAttack p2, GuardBroken p1, DamageDealt p2→p1 dano
+    50]`, a vida mostrada nunca fica abaixo de 137 nem volta acima do valor que já mostrou.
   - "com movimento reduzido o número aparece no impacto, sem tremor".
   - `effects.test.ts`, os casos de `insigniaShown`:
     - a Defesa começa nesta linha do tempo: `false` até a batida dela passar, `true` depois;
@@ -311,8 +320,8 @@ Playwright, Web Audio.
 
 **Interfaces:**
 - Consumes: `SceneFrame`, `useSceneBox`, `SCENE_MOMENTS.ABSOLUTE_DEFENSE` e `Anim.insignia` (Task 2).
-- Produces: `Insignia({ className })` (SVG, `aria-hidden`, `data-insignia`). O retrato ganha, no nome do medidor de vida, o sufixo
-  ", Defesa Absoluta" quando ela está ativa (o leitor de tela fica sabendo; o texto vem de `copy.ts`).
+- Produces: `Insignia({ className })` (SVG, `aria-hidden`, `data-insignia`). O nome do medidor de vida **não muda** (contrato da
+  fatia 1). O leitor de tela já sabe da Defesa Absoluta pela marca de estado "Defesa Absoluta", na lista "Estado do Coringa".
 
 - [ ] **Step 1: Testes que falham**
   - `scene-absolute-defense.test.tsx`:
@@ -325,7 +334,7 @@ Playwright, Web Audio.
     - com `reduced`, as peças aparecem no lugar, sem queda.
   - `table.test.tsx`:
     - **"a insígnia da Defesa Absoluta":** com `absoluteDefense` na `view` parada, `[data-insignia]` dentro de
-      `[data-retrato="voce"]`, e o medidor se chama "Vida de André, Defesa Absoluta";
+      `[data-retrato="voce"]`, e o medidor segue "Vida de André";
     - sem ela, nenhum `[data-insignia]`;
     - do lado do oponente, no retrato dele.
   - `animation.test.tsx`:
