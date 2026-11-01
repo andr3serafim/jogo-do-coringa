@@ -9,6 +9,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { appendNote } from '../../src/model/history.ts';
+import { AnimContext, IDLE_ANIM } from '../../src/ui/anim/context.ts';
 import { zoneKey } from '../../src/model/marks.ts';
 import { Session, type SessionSnapshot } from '../../src/model/session.ts';
 import { Card, cardName, QUAD_FACE } from '../../src/ui/cards/Card.tsx';
@@ -58,6 +59,8 @@ interface MountOptions {
   /** Troca campos do snapshot (marcas, `marksBaseSeq`…). */
   snapshot?: Partial<SessionSnapshot>;
   props?: Partial<TableProps>;
+  /** Movimento reduzido (o que o `Stage` diria à mesa). */
+  reduced?: boolean;
 }
 
 function mount(spec: ViewSpec = DRAFT, options: MountOptions = {}) {
@@ -77,7 +80,8 @@ function mount(spec: ViewSpec = DRAFT, options: MountOptions = {}) {
     remainingMs: (deadline: Deadline) => session.remainingMs(deadline),
     ...options.props,
   };
-  const view$ = render(<Table {...props} />);
+  const table = <Table {...props} />;
+  const view$ = render(options.reduced ? <AnimContext value={{ ...IDLE_ANIM, reduced: true }}>{table}</AnimContext> : table);
   return { game, view, session, connection, snapshot, props, ...view$ };
 }
 
@@ -166,6 +170,22 @@ describe('mesa: as quatro fileiras (spec §3.1)', () => {
     expect(row.querySelector('[data-quadra]')).toHaveTextContent('+7');
     // O total já inclui o bônus (o motor soma): 7×4 + 2 + 3 + 7 = 40, vezes o multiplicador.
     expect(row.querySelector('[data-total]')).toHaveTextContent(String(attackPower(view.self)));
+  });
+
+  it('a carta da quadra tem a moldura de ouro, o losango e o brilho; com movimento reduzido, sem o brilho (sub-projeto 6 §6)', () => {
+    const spec: ViewSpec = { ...DRAFT, self: { ...DRAFT.self, attackRow: [7, 2, 7, 7, 7, 3] } };
+    const first = mount(spec);
+    const row = group('Sua fileira de ataque');
+    expect(row.querySelectorAll('[data-quad="true"] [data-losango]')).toHaveLength(4);
+    expect(row.querySelectorAll('[data-quad="true"] [data-anel-quadra]')).toHaveLength(4);
+    expect(row.querySelectorAll('[data-quad="true"] [data-brilho-quadra]')).toHaveLength(4);
+    // As cartas fora da quadra não têm nada disso.
+    expect(row.querySelectorAll('[data-losango]')).toHaveLength(4);
+    first.unmount();
+    mount(spec, { reduced: true });
+    const still = group('Sua fileira de ataque');
+    expect(still.querySelectorAll('[data-quad="true"] [data-losango]')).toHaveLength(4);
+    expect(still.querySelectorAll('[data-brilho-quadra]')).toHaveLength(0);
   });
 
   it('sem quadra, nenhuma carta é destacada', () => {
@@ -324,6 +344,44 @@ describe('mesa: marcas de estado no Coringa (spec §3.1)', () => {
 });
 
 const placar = () => within(screen.getByRole('region', { name: 'Placar' }));
+
+describe('mesa: a mão viva (sub-projeto 6 §6)', () => {
+  it('as cartas da mão respiram, cada uma no seu tempo; com movimento reduzido, não', () => {
+    const first = mount();
+    const cards = screen.getByRole('list', { name: 'Sua mão' }).querySelectorAll<HTMLElement>(':scope > li');
+    expect(cards.length).toBe(3);
+    expect([...cards].every((li) => li.hasAttribute('data-respira'))).toBe(true);
+    expect([...cards].map((li) => li.style.getPropertyValue('--respira-i'))).toEqual(['0', '1', '2']);
+    first.unmount();
+    mount(DRAFT, { reduced: true });
+    expect(screen.getByRole('list', { name: 'Sua mão' }).querySelectorAll('[data-respira]')).toHaveLength(0);
+  });
+
+  it('a carta inclina sob o mouse e volta quando ele sai; com movimento reduzido, não inclina', () => {
+    const first = mount(DRAFT, { props: { onSelectCard: vi.fn() } });
+    const card = screen.getByRole('list', { name: 'Sua mão' }).querySelector('button')!;
+    const tilt = card.closest<HTMLElement>('[data-inclina]')!;
+    fireEvent.pointerMove(card, { pointerId: 1, pointerType: 'mouse', clientX: 4, clientY: 4 });
+    expect(tilt.style.transform).toMatch(/rotateX\(.+\) rotateY\(/);
+    fireEvent.pointerLeave(tilt, { pointerId: 1, pointerType: 'mouse' });
+    expect(tilt.style.transform).toBe('');
+    first.unmount();
+    mount(DRAFT, { props: { onSelectCard: vi.fn() }, reduced: true });
+    const still = screen.getByRole('list', { name: 'Sua mão' }).querySelector('button')!;
+    fireEvent.pointerMove(still, { pointerId: 1, pointerType: 'mouse', clientX: 4, clientY: 4 });
+    expect(still.closest<HTMLElement>('[data-inclina]')!.style.transform).toBe('');
+  });
+
+  it('no toque, a carta tocada sobe e inclina para o lado do dedo enquanto ele está nela', () => {
+    mount(DRAFT, { props: { onSelectCard: vi.fn() } });
+    const card = screen.getByRole('list', { name: 'Sua mão' }).querySelector('button')!;
+    const tilt = card.closest<HTMLElement>('[data-inclina]')!;
+    fireEvent.pointerDown(card, { pointerId: 2, pointerType: 'touch', clientX: 4, clientY: 4 });
+    expect(tilt.style.transform).toMatch(/translateY\(-8px\)/);
+    fireEvent.pointerUp(card, { pointerId: 2, pointerType: 'touch', clientX: 4, clientY: 4 });
+    expect(tilt.style.transform).toBe('');
+  });
+});
 
 describe('mesa: o placar de luta (sub-projeto 6 §3)', () => {
   it('o placar mostra os dois lados, você à esquerda: apelido, vida em número e barra', () => {

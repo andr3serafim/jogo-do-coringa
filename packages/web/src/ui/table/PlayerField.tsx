@@ -52,7 +52,7 @@ export function PlayerField({ side, view, player, name, away = false, equip, too
       aria-label={self ? 'Seu campo' : `Campo de ${name}`}
       className={`campo relative isolate px-3 py-2.5 pc:min-h-[286px] pc:px-6 pc:py-5 pc-baixo:min-h-0 pc-baixo:py-2.5 ${self ? 'bg-capa-voce' : 'pc:flex pc:flex-col pc:justify-end bg-capa-oponente'}`}
     >
-      <span aria-hidden="true" data-grao className="grao pointer-events-none absolute inset-0 -z-10 opacity-20" />
+      <span aria-hidden="true" data-grao className="grao pointer-events-none absolute inset-0 -z-10 opacity-45 mix-blend-multiply" />
       <div className={`campo-grade ${self ? 'campo-grade--voce' : 'campo-grade--oponente'}`}>
         {self ? (
           <>

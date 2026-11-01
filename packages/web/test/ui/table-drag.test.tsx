@@ -935,3 +935,21 @@ describe('acessibilidade do arrasto', () => {
     release(card, 80, 80);
   });
 });
+
+describe('a mão viva e o arrasto (sub-projeto 6 §6)', () => {
+  it('inclinar não atrapalha o arrasto: com a carta no ar, nada de inclinação, e o fantasma é um só', () => {
+    mount();
+    const card = handCard('K');
+    const tilt = card.closest<HTMLElement>('[data-inclina]')!;
+    fireEvent.pointerMove(card, { ...POINTER, pointerType: 'mouse', clientX: 5, clientY: 5 });
+    expect(tilt.style.transform).toMatch(/rotate/);
+    press(card);
+    moveTo(card, 60, 60);
+    expect(ghost()).not.toBeNull();
+    expect(document.querySelectorAll('[data-fantasma]')).toHaveLength(1);
+    expect(tilt.style.transform).toBe('');
+    fireEvent.pointerMove(card, { ...POINTER, pointerType: 'mouse', clientX: 70, clientY: 70 });
+    expect(tilt.style.transform).toBe('');
+    release(card);
+  });
+});

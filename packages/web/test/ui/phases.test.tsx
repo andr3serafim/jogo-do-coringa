@@ -822,9 +822,12 @@ describe('relógio (spec §3.8, §10.3)', () => {
     check();
     tick(m, 4_000);
     check();
-    // E a folha de estilos não tem nenhuma animação infinita.
+    // E a folha de estilos só tem as animações sem fim da mesa viva (sub-projeto 6 §6: a mão que respira e o brilho da quadra),
+    // nenhuma no relógio nem em outro lugar.
     const css = readFileSync(resolve(import.meta.dirname, '../../src/styles.css'), 'utf8');
-    expect(css).not.toMatch(/infinite/);
+    const endless = [...css.matchAll(/animation:\s*([\w-]+)[^;]*\binfinite\b/g)].map((match) => match[1]);
+    expect(endless.sort()).toEqual(['brilho-quadra', 'respira']);
+    expect(css.match(/\binfinite\b/g)).toHaveLength(2);
     expect(css).not.toMatch(/animation-iteration-count/);
   });
 

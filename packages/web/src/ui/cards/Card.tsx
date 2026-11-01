@@ -270,6 +270,7 @@ export function Card({
         />
       ) : null}
       <Face card={card} size={size} as={as} roleText={roleText} />
+      {quad ? <QuadMarks reduced={anim.reduced} /> : null}
       {marked ? (
         <span aria-hidden="true" data-marca-novo className="absolute bottom-[3px] left-[3px] h-[4px] w-[46%] bg-vermelho" />
       ) : null}
@@ -297,6 +298,37 @@ export function Card({
     <m.div key={animated ? anim.markOf(card.id) : undefined} ref={dragRef} role="img" {...common}>
       {inside}
     </m.div>
+  );
+}
+
+/**
+ * A quadra marcada (sub-projeto 6 §6): as quatro cartas ficam diferentes das outras o tempo todo. Além do fundo dourado claro
+ * (`QUAD_FACE`), uma moldura de ouro de 2 px por fora da borda, um losango de ouro no canto de baixo e um brilho que passa a cada
+ * 3,2 s (a animação mora no CSS, `.brilho-quadra`; sem brilho com movimento reduzido). Tudo decorativo: o nome da carta já diz
+ * "quadra".
+ */
+function QuadMarks({ reduced }: { reduced: boolean }) {
+  return (
+    <>
+      <span
+        aria-hidden="true"
+        data-anel-quadra
+        className="pointer-events-none absolute -inset-[4px] rounded-[5px_7px_6px_8px] border-2 border-ouro shadow-[0_0_12px_2px_color-mix(in_oklab,var(--color-ouro)_50%,transparent)]"
+      />
+      {reduced ? null : (
+        <span aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+          <span
+            data-brilho-quadra
+            className="brilho-quadra absolute -inset-[20%] bg-[linear-gradient(115deg,transparent_40%,color-mix(in_oklab,white_85%,transparent)_50%,transparent_60%)]"
+          />
+        </span>
+      )}
+      <span
+        aria-hidden="true"
+        data-losango
+        className="pointer-events-none absolute bottom-[4px] right-[4px] size-2 rotate-45 border-[1.5px] border-tinta bg-ouro"
+      />
+    </>
   );
 }
 

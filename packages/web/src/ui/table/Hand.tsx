@@ -10,9 +10,15 @@
 // compatibilidade vem antes do clique). O `onTap` é só do arrasto que escorrega além do limiar e solta de volta sobre a carta: faz o
 // mesmo que o clique, que o gesto então engole, e a carta não é escolhida duas vezes. A carta de origem esmaece enquanto está no ar (na
 // `<li>`: o Motion põe `opacity` inline na carta, e uma regra de CSS perderia para ele).
+//
+// A mão viva (sub-projeto 6 §6): cada carta respira (`data-respira`, a animação mora no CSS), cada uma num tempo. Sob o mouse ela
+// inclina em 3D (até 13°), com a sombra acompanhando; no toque, a carta tocada sobe ~8 px e inclina para o lado do dedo enquanto ele
+// está nela. A inclinação mora num invólucro (`data-inclina`), fora da carta, cujo `transform` é do Motion (o deslize de layout), e
+// é escrita direto no estilo (sem redesenhar a cada movimento). Arrastando, nada inclina; com movimento reduzido, nada disso.
 import type { SpecialCard } from '@coringa/engine';
-import type { CSSProperties } from 'react';
+import { useEffect, useRef, type CSSProperties, type PointerEvent } from 'react';
 import type { DropKey } from '../../model/drag.ts';
+import { useAnim } from '../anim/context.ts';
 import { useTableUi } from './context.ts';
 import { DragGhost } from './DragGhost.tsx';
 import { HAND_ROLE } from './labels.ts';
@@ -23,6 +29,20 @@ const NO_ZONES: ReadonlySet<DropKey> = new Set();
 
 /** A carta de origem, no ar. */
 const DRAGGED_OPACITY = 0.4;
+
+/** A inclinação máxima sob o mouse e, no toque, para o lado do dedo (graus); quanto a carta tocada sobe (px). */
+const TILT_MOUSE_DEG = 13;
+const TILT_TOUCH_DEG = 6;
+const TOUCH_LIFT_PX = 8;
+
+/** Onde o ponteiro está na carta, de -0,5 a 0,5 em cada eixo (o centro sem medida, no jsdom). */
+function pointerSpot(event: PointerEvent<HTMLElement>): { x: number; y: number } {
+  const box = event.currentTarget.getBoundingClientRect();
+  return {
+    x: box.width > 0 ? (event.clientX - box.left) / box.width - 0.5 : 0,
+    y: box.height > 0 ? (event.clientY - box.top) / box.height - 0.5 : 0,
+  };
+}
 
 export function Hand({ cards }: { cards: SpecialCard[] }) {
   const { selectedCardId, hintZone, onSelectCard, handNote } = useTableUi();
@@ -73,6 +93,8 @@ interface HandCardProps {
 
 function HandCard({ card, index, count, selected }: HandCardProps) {
   const { onSelectCard, handDrag, locked } = useTableUi();
+  const { reduced } = useAnim();
+  const tilt = useRef<HTMLSpanElement>(null);
   const zones = () => handDrag?.zones(card.id) ?? NO_ZONES;
   // O mesmo `locked` que apaga a carta e o toque; sem zona (nenhuma jogada com ela agora) não há o que arrastar.
   const enabled = handDrag !== undefined && onSelectCard !== undefined && !locked && zones().size > 0;
@@ -87,9 +109,54 @@ function HandCard({ card, index, count, selected }: HandCardProps) {
     style.marginLeft = `clamp(calc(var(--hand-w) * -0.6), calc((100% - ${count} * var(--hand-w)) / ${count - 1}), 10px)`;
   }
   if (dragging) style.opacity = DRAGGED_OPACITY;
+  if (!reduced) (style as Record<string, string>)['--respira-i'] = String(index);
+
+  const lean = (transform: string, shadow: string) => {
+    if (!tilt.current) return;
+    tilt.current.style.transform = transform;
+    tilt.current.style.filter = shadow;
+  };
+  const rest = () => lean('', '');
+  const still = reduced || dragging;
+  // A carta que passa a ser arrastada (ou que entra no movimento reduzido) volta reta: o fantasma é que voa.
+  useEffect(() => {
+    if (!still || !tilt.current) return;
+    tilt.current.style.transform = '';
+    tilt.current.style.filter = '';
+  }, [still]);
+  const onPointerMove = (event: PointerEvent<HTMLSpanElement>) => {
+    if (still || event.pointerType !== 'mouse') return;
+    const { x, y } = pointerSpot(event);
+    lean(
+      `perspective(600px) rotateX(${(-y * 2 * TILT_MOUSE_DEG).toFixed(1)}deg) rotateY(${(x * 2 * TILT_MOUSE_DEG).toFixed(1)}deg)`,
+      `drop-shadow(${(-x * 8).toFixed(1)}px ${(4 - y * 6).toFixed(1)}px 0 color-mix(in oklab, var(--color-tinta) 35%, transparent))`,
+    );
+  };
+  const onPointerDown = (event: PointerEvent<HTMLSpanElement>) => {
+    if (still || event.pointerType !== 'touch') return;
+    const { x } = pointerSpot(event);
+    lean(
+      `translateY(-${TOUCH_LIFT_PX}px) perspective(600px) rotateY(${(x * 2 * TILT_TOUCH_DEG).toFixed(1)}deg)`,
+      'drop-shadow(0 6px 0 color-mix(in oklab, var(--color-tinta) 30%, transparent))',
+    );
+  };
+  const onPointerEnd = (event: PointerEvent<HTMLSpanElement>) => {
+    if (event.pointerType === 'touch' || event.type === 'pointerleave') rest();
+  };
   return (
-    <li className="relative flex-none" style={style}>
-      <TableCard card={card} size="hand" inHand selected={selected} roleText={HAND_ROLE[card.kind]} dragRef={bind} grabbable={enabled} />
+    <li className="relative flex-none" style={style} data-respira={reduced ? undefined : ''}>
+      <span
+        ref={tilt}
+        data-inclina
+        className="block transition-[transform,filter] duration-150 ease-out"
+        onPointerMove={onPointerMove}
+        onPointerLeave={onPointerEnd}
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerEnd}
+        onPointerCancel={onPointerEnd}
+      >
+        <TableCard card={card} size="hand" inHand selected={selected} roleText={HAND_ROLE[card.kind]} dragRef={bind} grabbable={enabled} />
+      </span>
       <DragGhost ghost={ghost} />
     </li>
   );
