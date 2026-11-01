@@ -6,6 +6,22 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-01 (5): a continuidade entre as contas é fundamental
+
+No meio da execução da fatia 3:
+
+> É fundamental que a memória e os arquivos de contexto persistente sejam devidamente atualizados e consolidados, garantindo que o
+> Claude, na minha outra conta, consiga retomar o trabalho exatamente de onde paramos, com todo o histórico, as decisões e os
+> detalhes relevantes preservados. O objetivo é assegurar uma continuidade integral do desenvolvimento do projeto, sem perda de
+> contexto, retrabalho, retrocessos ou qualquer impacto negativo sobre o que já foi construído.
+
+**Leitura:**
+- Reforça a regra da memória compartilhada (`CLAUDE.md`), e a execução da fatia 3 segue depois da consolidação.
+- **[I]** O ledger `.superpowers/sdd/…` fica fora do git, e a outra conta pode não o ver. Por isso, as escolhas técnicas de cada
+  tarefa também vão para o `diario.md`, e a branch sobe depois de cada bloco (regra 6, no `CLAUDE.md`).
+
+---
+
 ## 2026-11-01 (4): o plano da fatia 3 do sub-projeto 6 aprovado
 
 À entrega do plano (`docs/superpowers/plans/2026-11-01-direcao-visual-fatia-3.md`), com as escolhas listadas para ele:

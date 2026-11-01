@@ -5,6 +5,67 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-01 (4): sub-projeto 6, fatia 3 em execução (a Exódia e a Devastação), Tasks 1 a 3 feitas
+
+- **Pedido do autor** (`decisoes.md` 2026-11-01 (4) e (5)): "ok, pode seguir o plano da fatia 3", e que a outra conta consiga
+  retomar sem perda nenhuma. Plano em `docs/superpowers/plans/2026-11-01-direcao-visual-fatia-3.md`, na branch
+  `feat/direcao-visual-fatia-3`.
+- **Task 1, os tempos e as batidas** (`d0458b8`):
+  - `SCENE_MS`: Exódia 5,8 s, `RowDevastated` 3,1 s, `DevastationCanceled` 1,4 s; o `DevastationCast` saiu da tabela;
+  - `SCENE_MOMENTS` ganhou `EXODIA`, `DEVASTATION` e `DEVASTATION_CANCELED`; a inversão é na coroa e no chão que se abre;
+  - o `RowDevastated` é a cena `DEVASTATION`, sem cartas de movimento; a cancelada é cena sem inversão (`NO_INVERT`); o
+    lançamento é faixa com as três cartas e soa `quebra`;
+  - **Escolhas:**
+    - a fita da cancelada pela Defesa Absoluta dizia "Os Reflects se anularam", errado para esse motivo. Agora: "A sua Defesa
+      Absoluta / A Defesa Absoluta de X segurou a Devastação devolvida". O plano dizia para manter o texto, mas o texto só servia
+      ao outro motivo;
+    - as pistas novas soam como `absoluto` até a Task 5, porque o `synth.test` exige pista não vazia (o plano dizia receitas vazias);
+    - o painel antigo da Devastação perdeu o trio de cartas (o `RowDevastated` não traz K, A e X);
+    - o teste do servidor do Reflect contra a Devastação ganhou a folga de 3,1 s: a resposta derruba a fileira.
+- **Task 2, a Exódia** (`7cd2a48`):
+  - `ui/scenes/Exodia.tsx`: os 4 K e os pilares (até 45% de opacidade), a aura `auraVariants(EXODIA_AURA, 401)`, a coroa, a onda e os
+    raios por `boltTimes`, sem feixes. O carimbo é de ouro sobre tinta, com filete de ouro e sombra vermelha;
+  - o `aura.ts` passou a ter `AuraSpec` (`ATTACK_AURA`, `EXODIA_AURA`), e o `rng` é exportado;
+  - **Escolhas:**
+    - além de `Anim.defeated` (a rachadura em `crackAt`), entrou `Anim.drained`: a vida escorre a 0 a partir de `drainAt`, em 500 ms,
+      pelo `useCountedLife(player, value, drained)`. O protótipo escorre antes de rachar, e o plano só previa o `defeated`;
+    - o medidor diz 0 também para o leitor de tela (`lost` vem da `view`: `GAME_OVER`, `EXODIA`, outro vencedor);
+    - a tela não treme na Exódia, e a coroa tem a sombra desenhada (sem `drop-shadow`, §11). O autor confere se falta peso;
+    - os testes do painel antigo da Exódia foram para o caso "sem o módulo das cenas" (`scene-frame.test.tsx`), onde ele ainda vale.
+- **Task 3, a Devastação** (`4f58fb5`):
+  - `ui/scenes/Devastation.tsx` e `chasm.ts` (`chasmEdges`, `crackBranch`, `chasmBranches`, `chasmPaths`); `FIELD_SCENES` não sobe a
+    cortina; `SceneBox.row` (`{ rect, slots, field }`) e `revealRow` (rola os campos até a fileira); `data-campo` no `PlayerField`;
+    `Stamp` exportado do `SceneFrame`, com `top`; as cartas do `RowDevastated` chegam ao cemitério sem voar (`busy && fallen` no
+    `instant`);
+  - **Escolhas:**
+    - **a cancelada não traz a fileira no evento:** ela vem de `phase.devastation` da `view` de antes, guardada no `Stage` (`lastCast`),
+      e o `fieldTarget` (`model/effects.ts`) acha o dono: o alvo nos Reflects, quem lançou na Defesa Absoluta. Sem isso (raro: abrir
+      o replay exatamente nesse passo), só a fita aparece. O plano não dizia de onde vinha;
+    - `SceneProps` ganhou `field` (`null` nas cenas de faixa);
+    - **desempenho:** a fenda corre por `scaleX`, as rachaduras acendem por opacidade, sem filtro e sem `stroke-dashoffset`, e a poeira
+      não tem `blur`. O filtro só existe no abismo, num `<svg>` próprio animado por fora. Custo: as rachaduras ficam menos ásperas
+      que no protótipo;
+    - a fita da cancelada aparece durante a cena (o `useBeatPlayer` não a bloqueia), e o painel de reserva não mostra essa cena.
+- **O que quem continua precisa saber:**
+  - **Task 4 (a desolação):**
+    - hoje, no fim da cena, o abismo some de uma vez. A desolação tem de deixar a fenda desenhada na fileira, para não haver salto.
+      Use `chasmEdges` com as sementes da cena (`EDGE_SEED` 31) ou uma versão parecida;
+    - a desolação aparece em `settleAt` (1,6 s), debaixo da cena, e o pulo a mostra na hora. Faça como `Anim.defeated`: um método no
+      contexto, com o timer no `Stage`;
+    - o `.campo` é `isolate`, e o `data-tremendo` é posto e tirado pela cena direto no DOM (o React não mexe nele);
+  - **Task 5 (os sons):** troque as três receitas provisórias do `synth.ts` (`exodia`, `devastacao`, `devastacao-cancelada`, que hoje
+    chamam `RECIPES.absoluto`). A pista `absoluto` fica sem uso depois: tire do `Cue`, do `synth.ts` e do `synth.test.ts`
+    (`ALL_CUES`, `LONG` e o teste do ruído);
+  - **Task 6:** falta ver tudo no navegador. Confira a Exódia e a Devastação com a fixture, a 1366 × 768 e a 360 × 640, e meça a CPU 4×;
+  - **a revisão final** (tarefa do `executing-plans`) foi feita por quem escreveu o código nas fatias anteriores, sem subagente, e isso
+    é dito ao autor;
+  - **nos testes:** o `act` agrupa um `advance` inteiro, e a contagem por quadros só parte no fim dele. Para ver a vida descer, avance
+    em dois passos (como o teste do golpe). As cenas de faixa recebem `field={null}`, e as caixas falsas têm `row: () => null`.
+- **Sem pendência escondida:** todo o trabalho acima está commitado, sem arquivo solto (fora o `.claude/launch.json` e o
+  `jogar-treino.bat`, de propósito).
+
+---
+
 ## 2026-11-01 (3): a cena do Ataque Absoluto cortada pela jogada do bot
 
 - **Pedido do autor** (`decisoes.md` 2026-11-01 (3)): na mesma partida, a Defesa Absoluta tocou inteira, mas o Ataque Absoluto

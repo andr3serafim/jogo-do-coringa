@@ -29,6 +29,9 @@ Regras:
 4. **Ao fechar um bloco:** entrada no `diario.md` e o `estado.md` com o próximo passo. Suba a branch quando o pre-push
    passar, para a outra conta achar o estado mesmo em outra máquina.
 5. **O repositório é público:** nada de dado pessoal, e-mail, token ou segredo na memória.
+6. **O ledger não é memória:** `.superpowers/sdd/<plano>/` fica fora do git, e a outra conta pode não o ver. A cada tarefa de um
+   plano, as escolhas técnicas (`Ruling:`) e o que falta conferir também vão para o `diario.md`, e a branch sobe. Quem assume tem
+   de conseguir continuar só com o repositório, sem esta conversa e sem repetir trabalho (`decisoes.md` 2026-11-01 (5)).
 
 ## Portão de testes (sempre ligado)
 

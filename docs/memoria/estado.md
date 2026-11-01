@@ -5,14 +5,21 @@
 
 ## Agora
 
-- **Branch:** `feat/direcao-visual-fatia-3`, a partir da `main` (`cd75b0d`), no checkout principal.
+- **Branch:** `feat/direcao-visual-fatia-3`, a partir da `main` (`cd75b0d`), no checkout principal. Sobe para o `origin` a cada bloco.
 - **Em curso:** a execução do plano da **fatia 3** (`docs/superpowers/plans/2026-11-01-direcao-visual-fatia-3.md`), aprovado em
-  `decisoes.md` 2026-11-01 (4). O andamento fica no ledger `.superpowers/sdd/2026-11-01-direcao-visual-fatia-3/progress.md`
-  (fora do git) e nos commits da branch: cada Task fecha com o commit `feat(web)`/`test(web)` dela, com o nome do plano.
-- **Feito por último:** a **fatia 2 do sub-projeto 6** (as cenas do Ataque e da Defesa Absolutos, a insígnia e os sons), mesclada
-  por fast-forward com as duas CI verdes. Detalhes no `diario.md` (2026-11-01 (2)); medição em `notas/medicao-fatia-2.md`.
-- **Próximo passo exato:** a primeira Task do plano sem commit na branch (veja `git log main..HEAD`); depois a revisão final, a CI
-  e o fast-forward.
+  `decisoes.md` 2026-11-01 (4), aqui mesmo, tarefa por tarefa, com o teste primeiro. Cada tarefa fecha com o commit dela.
+- **Andamento das 6 tarefas:**
+  - **Feitas:** Task 1 (`d0458b8`: os tempos e as batidas), Task 2 (`7cd2a48`: a cena da Exódia e o retrato que racha) e Task 3
+    (`4f58fb5`: a Devastação no campo, com a refletida e a cancelada). As escolhas técnicas de cada uma estão no `diario.md`
+    2026-11-01 (4).
+  - **Falta:** Task 4 (a desolação), Task 5 (os sons), Task 6 (o E2E, a medição e os docs), a revisão final, a CI e o fast-forward.
+- **Próximo passo exato:** a **Task 4** do plano, começando pelos testes (`test/model/desolation.test.ts`, `table.test.tsx`,
+  `session.test.ts`). O que ela precisa levar em conta está no `diario.md` 2026-11-01 (4), em "O que quem continua precisa saber".
+- **Nada da fatia 3 foi visto no navegador ainda:** só os testes de unidade (a web inteira verde: 64 arquivos, 2230 testes). O visual
+  da Exódia e da Devastação será conferido na Task 6, com a fixture. O autor ainda não viu nada desta fatia.
+- **Sem conflito de regra:** `RULES_VERSION` e `STATE_SCHEMA` não mudam; muda só a tabela da folga de cena (`SCENE_MS`).
+- **Feito antes:** a **fatia 2 do sub-projeto 6** e o conserto do corte da cena, na `main` com as duas CI verdes (`diario.md`
+  2026-11-01 (2) e (3)); medição em `notas/medicao-fatia-2.md`.
 - **Escolhas do plano da fatia 3 (aprovadas):**
   - a Devastação passa a acontecer quando a fileira cai (`RowDevastated`), no próprio campo, sem tarjas nem cortina (como no
     protótipo); o lançamento (`DevastationCast`) vira uma faixa;
@@ -28,7 +35,10 @@
 - **Para quem assumir:**
   - um `wrangler dev` do autor pode estar na porta 8787. O Playwright o reaproveita, e o E2E falha (o online pela semente; o das
     cenas porque ele não serve `/partidas/...`). Com ele aberto, rode o E2E pela CI ou troque a porta só naquela execução;
-  - não edite nada enquanto o pre-push roda.
+  - não edite nada enquanto o pre-push roda;
+  - não há Python nesta máquina, e heredoc grande no shell às vezes quebra (crase, aspas): para editar vários arquivos, escreva um
+    script `.mjs` com a ferramenta de escrita e rode com `node`;
+  - o ledger `.superpowers/sdd/…` fica fora do git: vale o `diario.md` e o `git log` (regra 6 do `CLAUDE.md`).
 
 ## A `main`
 
@@ -44,7 +54,8 @@ Vazia: o bloco E3 + F2 + F3 era o último item.
 
 ## Esperando o autor
 
-- **Sub-projeto 6, fatia 2, para ele jogar e dizer o que achou.** As escolhas que ele aprovou no plano e o que a execução decidiu:
+- **Sub-projeto 6, fatia 2: jogada e aprovada em 2026-11-01, com o conserto do corte da cena** (`decisoes.md` 2026-11-01 (3)). As
+  escolhas que ele aprovou no plano e o que a execução decidiu:
   - **o número do golpe do Ataque Absoluto é desenhado pela cena,** perto do retrato do alvo, e não pelo placar. A mesa é um
     contexto de empilhamento próprio (o grão de papel atrás dela), e o número do placar ficaria embaixo da cena;
   - **a cortina deixa o placar à vista em todas as cenas,** inclusive a Exódia, a Devastação e o Reflect, que seguem com o painel
