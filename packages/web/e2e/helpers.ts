@@ -108,7 +108,9 @@ export async function expectWhollyInView(page: Page, places: Record<string, Loca
 
 export const table = (page: Page): Locator => page.getByRole('main', { name: 'Mesa' });
 export const band = (page: Page): Locator => page.getByRole('region', { name: 'Situação da rodada' });
-export const roundHeading = (page: Page): Locator => band(page).getByRole('heading', { name: /^Rodada \d+$/ });
+/** O placar de luta no topo (sub-projeto 6 §3): os retratos, as vidas, a rodada e o relógio. */
+export const placar = (page: Page): Locator => page.getByRole('region', { name: 'Placar' });
+export const roundHeading = (page: Page): Locator => placar(page).getByRole('heading', { name: /^Rodada \d+$/ });
 export const equipPanel = (page: Page): Locator => page.getByRole('region', { name: 'Equipar' });
 export const actionBar = (page: Page): Locator => page.getByRole('region', { name: 'Ações' });
 export const orderPanel = (page: Page): Locator => page.getByRole('region', { name: 'Escolha da ordem' });
@@ -141,7 +143,28 @@ export const openMenu = (page: Page): Promise<Locator> => openDialog(menuButton(
 export const ATTACK_BUTTON = /^Atacar(?! primeiro| em segundo)/;
 export const END_TURN_BUTTON = /^Encerrar turno/;
 
-/** O número da rodada que a faixa central mostra. */
+/**
+ * O placar cabe na tela (sub-projeto 6 §3): no máximo `maxHeight` de altura, as duas barras de vida (e o relógio, quando há prazo)
+ * inteiras dentro da largura, e a página sem rolagem de lado.
+ */
+export async function expectHudFits(page: Page, maxHeight: number): Promise<void> {
+  const width = page.viewportSize()!.width;
+  const hud = await placar(page).boundingBox();
+  expect(hud, 'o placar tem caixa').not.toBeNull();
+  expect(hud!.height, 'a altura do placar').toBeLessThanOrEqual(maxHeight + 0.5);
+  const parts = [...(await placar(page).getByRole('meter').all()), ...(await placar(page).getByRole('timer').all())];
+  expect(parts.length, 'as duas barras (e o relógio, se houver)').toBeGreaterThanOrEqual(2);
+  for (const part of parts) {
+    const box = await part.boundingBox();
+    const name = (await part.getAttribute('aria-label')) ?? '?';
+    expect(box, `"${name}" tem caixa`).not.toBeNull();
+    expect(box!.x, `"${name}" começa dentro da tela`).toBeGreaterThanOrEqual(-0.5);
+    expect(box!.x + box!.width, `"${name}" acaba dentro da tela`).toBeLessThanOrEqual(width + 0.5);
+  }
+  await expectNoHorizontalScroll(page);
+}
+
+/** O número da rodada que o placar mostra. */
 export async function roundNumber(page: Page): Promise<number> {
   const text = await roundHeading(page).innerText();
   return Number(/\d+/.exec(text)?.[0]);

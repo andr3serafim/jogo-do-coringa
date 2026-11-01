@@ -17,10 +17,12 @@ import {
   END_TURN_BUTTON,
   equipByUi,
   equipPanel,
+  expectHudFits,
   failOnConsoleErrors,
   handIds,
   openMenu,
   orderPanel,
+  placar,
   playUntil,
   replayControl,
   replayCounter,
@@ -137,6 +139,14 @@ test('duas pessoas jogam uma sala: do lobby ao fim, com queda e revanche', async
       await expect(roundHeading(player.page)).toHaveText('Rodada 1');
       await expect(equipPanel(player.page)).toBeVisible();
     }
+  });
+
+  await test.step('rodada 1 (Equipar): o placar com o relógio cabe num celular de 360 px (sub-projeto 6 §3)', async () => {
+    const before = duda.page.viewportSize()!;
+    await duda.page.setViewportSize({ width: 360, height: 740 });
+    await expect(placar(duda.page).getByRole('timer')).toBeVisible();
+    await expectHudFits(duda.page, 64);
+    await duda.page.setViewportSize(before);
   });
 
   await test.step('rodada 1 (Equipar): os dois equipam pelos destinos oferecidos e confirmam', async () => {

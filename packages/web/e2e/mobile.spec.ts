@@ -8,11 +8,13 @@ import {
   equipByUi,
   equipPanel,
   actionBar,
+  expectHudFits,
   expectNoHorizontalScroll,
   expectWhollyInView,
   failOnConsoleErrors,
   openMenu,
   orderPanel,
+  placar,
   playUntil,
   roundHeading,
   roundNumber,
@@ -192,6 +194,18 @@ for (const size of [
       await axe(page);
       guard.expectClean();
     });
+  });
+}
+
+for (const width of [360, 390, 430]) {
+  test(`o placar cabe a ${width} px com vidas de 3 dígitos, sem rolar de lado (sub-projeto 6 §3)`, async ({ page }) => {
+    const guard = failOnConsoleErrors(page);
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto(TRAINING);
+    await expect(table(page)).toBeVisible();
+    await expect(placar(page).locator('[data-hp]')).toHaveText(['500', '500']);
+    await expectHudFits(page, 64);
+    guard.expectClean();
   });
 }
 

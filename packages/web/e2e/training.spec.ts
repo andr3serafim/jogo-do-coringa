@@ -15,6 +15,7 @@ import {
   openDialog,
   openMenu,
   orderPanel,
+  placar,
   playUntil,
   roundHeading,
   roundNumber,
@@ -41,7 +42,8 @@ test('treino: três rodadas determinísticas pela interface, sem relógio', asyn
   await expect(roundHeading(page)).toHaveText('Rodada 1');
   await expect(band(page)).toContainText('Treino · Médio, sem relógio');
   await expect(page.getByRole('timer')).toHaveCount(0);
-  expect(await lives(page), 'vida do Bot e a sua').toEqual([500, 500]);
+  // No placar, você à esquerda e o Bot à direita (sub-projeto 6 §3).
+  expect(await lives(page), 'a sua vida e a do Bot').toEqual([500, 500]);
 
   // Rodada 1 e 2 (Equipar): quantas numéricas vêm é da semente.
   await expect(equipPanel(page)).toContainText('Faltam 3 cartas');
@@ -64,7 +66,7 @@ test('treino: três rodadas determinísticas pela interface, sem relógio', asyn
   await expect(history(page)).toContainText('Bot roubou 9♦ da fileira de Ataque de você com A♠');
   await expect(history(page)).toContainText('Ataque de Bot: 50 contra 0 → 50 de dano');
   await expect(history(page)).toContainText('Bot causou mais dano (50 × 37) e segue com a iniciativa');
-  await expect.poll(() => lives(page)).toEqual([480, 433]);
+  await expect.poll(() => lives(page)).toEqual([433, 480]);
 
   guard.expectClean();
 });
@@ -284,10 +286,10 @@ for (const size of [
       const guard = failOnConsoleErrors(page);
       await page.goto(TRAINING);
       await expect(table(page)).toBeVisible();
-      const opponent = page.getByRole('region', { name: 'Campo de Bot' });
+      // A vida e o nome do oponente moram no placar do topo (sub-projeto 6 §3).
       const top = {
-        'a vida do oponente': opponent.locator('[data-hp]'),
-        'o nome do oponente': opponent.getByRole('heading', { name: 'Bot' }),
+        'a vida do oponente': placar(page).locator('[data-lado="oponente"] [data-hp]'),
+        'o nome do oponente': placar(page).getByRole('heading', { name: 'Bot' }),
         'o botão do menu': menuButton(page),
       };
       const hand = page.getByRole('list', { name: 'Sua mão' });
