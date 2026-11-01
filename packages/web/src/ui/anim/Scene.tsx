@@ -95,7 +95,7 @@ function SceneLayer({ scene, curtain, names, reduced, me, hitLanded }: BeatOverl
       data-camada-cena
       data-cena={scene?.scene ?? undefined}
       data-reduzido={reduced ? 'true' : undefined}
-      className="pointer-events-none absolute inset-0 z-50 grid place-items-center px-4"
+      className="pointer-events-none absolute inset-0 z-50 grid place-items-center overflow-hidden px-4"
     >
       <div
         data-cortina

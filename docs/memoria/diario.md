@@ -5,6 +5,44 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-01 (2): sub-projeto 6, fatia 2 (as cenas do Ataque e da Defesa Absolutos, a insígnia e os sons)
+
+- **Pedido do autor** (`decisoes.md` 2026-11-01 (2)): "Aprovado, siga". Plano em
+  `docs/superpowers/plans/2026-11-01-direcao-visual-fatia-2.md`, executado aqui mesmo, tarefa por tarefa, com teste primeiro.
+  O ledger com cada decisão técnica ficou em `.superpowers/sdd/2026-11-01-direcao-visual-fatia-2/` (fora do git).
+- **O que entrou (branch `feat/direcao-visual-fatia-2`):**
+  - **Os instantes** (`909502a`): `model/scene-moments.ts` é a fonte única. A folga de cena passa a 4,5 s (Ataque) e 4,8 s
+    (Defesa). A inversão cai no impacto do feixe (3,2 s) e na trava do escudo (2,7 s). O `DamageDealt` que vem depois do Ataque
+    Absoluto vira o golpe da cena (`Beat.hit`), mesmo com a Guarda quebrada no meio, porque o motor quebra a Guarda inteira.
+  - **O golpe no impacto** (`94bedf2`): o `useBeatPlayer` acende o golpe no instante dele, como a inversão. O tremor é sempre
+    forte, a vida desce em 700 ms, e o golpe conta uma vez só. A insígnia segue a linha do tempo (`insigniaShown`).
+  - **A moldura comum** (`4fe825d`): as tarjas, a faixa (um quadro de 1000 × 360 escalado para a área dos campos) e o nome
+    carimbado. O módulo das cenas é carregado sob demanda e pré-carregado pela mesa. A cortina começa embaixo do placar.
+  - **As cenas e os sons:** o Ataque Absoluto (`ee1ae26`), a Defesa Absoluta com a insígnia no retrato (`d4c2f13`) e os sons
+    das duas, com o corte no pulo (`5e6e1a7`).
+  - **Task 7:** o E2E (`e2e/scenes.spec.ts`, com a fixture `absolutos.json`), a medição (`notas/medicao-fatia-2.md`) e as
+    notas nas specs.
+- **Achados no caminho (corrigidos):**
+  - **O número do golpe ficava embaixo da cena.** A mesa (`main`) é `isolate`, para o grão ficar atrás dela, e nada dela passa
+    por cima da camada da cena. O número do Ataque Absoluto passou a ser desenhado pela cena, como no protótipo.
+  - **Laço de desenho na sobreposição:** com a cena desenhada, o contador da cena remontava sem parar.
+  - **Timers de partícula** que sobravam depois de a cena desmontar.
+  - **A camada da cena ganhou `overflow-hidden`:** o feixe que passa do retrato da direita faria a página rolar de lado.
+- **Medição** (CPU 4×, build de produção): o Ataque roda a 52 quadros/s e a Defesa a 88–89, no PC e no celular. As partículas
+  ficam em até 25 no pico.
+- **Armadilhas:**
+  - **Não edite nada enquanto o pre-push roda:** o `pnpm check` lê os arquivos de teste no meio, e uma edição feita durante ele
+    reprova o push.
+  - **O teste do servidor "hibernação no meio da partida" é instável:** depende da mão sorteada (com o p2 sem numéricas, não há
+    Equipar). Falhou uma vez no pre-push e passou 3 de 3 depois.
+  - **O E2E local não roda com o `wrangler dev` do autor aberto na 8787:** a porta é fixa. Rodei com a porta trocada para 8788
+    só naquela execução e voltei a config.
+  - **Os testes de interface já sobem com o módulo das cenas carregado** (`setup-ui.ts`). Sem isso, o que a mesa desenha
+    dependia de quando o `import()` resolvia.
+  - **Na pasta `test/ui` só entram arquivos `.test.tsx`.**
+
+---
+
 ## 2026-11-01 (1): os três ajustes da fatia 1 (o tremor da barra, as figuras, a cura em verde)
 
 - **Pedido do autor** (`decisoes.md` 2026-11-01 (1)): jogou a fatia 1, aprovou e apontou três pontos. Branch

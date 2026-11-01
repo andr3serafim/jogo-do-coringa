@@ -350,7 +350,15 @@ Cada fatia é uma branch com `pnpm check`, `pnpm e2e` e as duas CI verdes, e vai
        mexe nela (o golpe desce, a cura sobe com o "+N"); antes, tudo contava na primeira batida de dano, e a cura pela Defesa
        subia no golpe;
      - a prévia do alvo apontado flutua fora do fluxo (spec da web §3.4): acaba o tremor da barra no PC.
-2. **Ataque e Defesa Absolutos**, com os sons.
+2. **Ataque e Defesa Absolutos**, com os sons. **Entregue em 2026-11-01** (plano `plans/2026-11-01-direcao-visual-fatia-2.md`).
+   - O que a execução decidiu e vale para as fatias seguintes:
+     - os instantes de cada cena moram em `model/scene-moments.ts`;
+     - os desenhos ficam no chunk `ui/scenes/`, pré-carregado pela mesa;
+     - a moldura comum é o `SceneFrame`;
+     - o golpe do Ataque Absoluto é absorvido pela cena e acende no impacto;
+     - o número desse golpe é desenhado pela cena, porque a mesa é um contexto de empilhamento próprio e o número do placar
+       ficaria embaixo dela.
+   - Medição: `docs/memoria/notas/medicao-fatia-2.md` (≥ 52 quadros/s com a CPU 4× nas duas telas).
 3. **Exódia e Devastação** (com a desolação), com os sons.
 4. **Reflect e Ressurreição**, com os sons.
 5. **Fluidez das jogadas comuns** (§8), com os sons.
