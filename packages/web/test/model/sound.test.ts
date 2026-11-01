@@ -135,6 +135,20 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
     });
   });
 
+  describe('a espada, a fita e a quadra (sub-projeto 6 §10)', () => {
+    it('a iniciativa que muda de mão é a espada (voa e crava); a que fica é a fita', () => {
+      expect(cueFor({ type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } })).toBe('espada');
+      expect(cueFor({ type: 'InitiativeDecided', player: 'p1', changed: false, damage: { p1: 14, p2: 9 } })).toBe('fita');
+      expect(cueFor({ type: 'InitiativeDecided', player: 'p1', changed: false, damage: { p1: 5, p2: 5 } }, 'p2')).toBe('fita');
+    });
+
+    it('a quadra formada soa o acorde; a quebrada, não', () => {
+      expect(cueFor(SAMPLES.QuadFormed)).toBe('quadra');
+      expect(cueFor(SAMPLES.QuadFormed, 'p2')).toBe('quadra');
+      expect(cueFor(SAMPLES.QuadBroken)).toBeNull();
+    });
+  });
+
   describe('vez', () => {
     it('TurnStarted é a pista só quando a vez é minha', () => {
       expect(cueFor({ type: 'TurnStarted', player: 'p1' }, 'p1')).toBe('vez');
@@ -180,10 +194,12 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
       'RowDevastated',
       'StealDamage',
       'DevastationCast',
+      'InitiativeDecided',
+      'QuadFormed',
     ]);
     const silent = (Object.keys(SAMPLES) as GameEvent['type'][]).filter((type) => !SOUNDING.has(type));
 
-    it('a lista dos mudos tem os 17 tipos restantes', () => {
+    it('a lista dos mudos tem os 15 tipos restantes', () => {
       expect(silent).toHaveLength(37 - SOUNDING.size);
     });
 

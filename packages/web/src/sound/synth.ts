@@ -103,7 +103,7 @@ function playNoise(ctx: AudioContext, out: AudioNode, buffer: AudioBuffer, spec:
 }
 
 /**
- * As receitas, uma por pista. Todas até 600 ms, menos o `absoluto` (até 1,2 s). Timbres livres (spec §9): o que importa é
+ * As receitas, uma por pista. Todas até 600 ms, menos o `absoluto` e a `espada` (até 1,2 s). Timbres livres (spec §9): o que importa é
  * curto, original e sem pico. Golpes mais pesados são mais graves, mais longos e mais cheios.
  */
 const RECIPES: Record<Cue, (voices: Voices) => void> = {
@@ -166,6 +166,23 @@ const RECIPES: Record<Cue, (voices: Voices) => void> = {
   urgencia: ({ tone }) => {
     tone({ wave: 'sine', from: 1200, length: 0.05, peak: 0.15 });
     tone({ wave: 'sine', from: 1200, at: 0.13, length: 0.05, peak: 0.15 });
+  },
+  // A espada da iniciativa (sub-projeto 6 §10): o zunido do voo, ruído num passa-faixa que sobe de 400 a 2200 Hz, e, quando ela
+  // crava (aos 0,8 s), um tinido de lâmina (1318 e 1976 Hz, uma quinta acima).
+  espada: ({ tone, noise }) => {
+    noise({ filter: 'bandpass', from: 400, to: 2200, q: 2, attack: 0.2, length: 0.45, peak: 0.22 });
+    noise({ filter: 'bandpass', from: 900, to: 2600, q: 3, at: 0.35, attack: 0.15, length: 0.4, peak: 0.12 });
+    tone({ wave: 'triangle', from: 1318, at: 0.8, length: 0.25, peak: 0.2 });
+    tone({ wave: 'sine', from: 1976, at: 0.8, length: 0.2, peak: 0.12 });
+  },
+  // A fita de cordel: um estalo de papel (ruído passa-altas a 2500 Hz) e um segundo, mais curto, logo atrás.
+  fita: ({ noise }) => {
+    noise({ filter: 'highpass', from: 2500, length: 0.06, peak: 0.3 });
+    noise({ filter: 'highpass', from: 3000, at: 0.05, length: 0.04, peak: 0.2 });
+  },
+  // A quadra formada: um acorde curto de dó maior (523, 659 e 784 Hz), as vozes entrando de 40 em 40 ms.
+  quadra: ({ tone }) => {
+    [523, 659, 784].forEach((hz, i) => tone({ wave: 'triangle', from: hz, at: i * 0.04, length: 0.5 - i * 0.04, peak: 0.16 }));
   },
 };
 

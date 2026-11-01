@@ -163,6 +163,9 @@ const ALL_CUES: Record<Cue, true> = {
   vitoria: true,
   derrota: true,
   urgencia: true,
+  espada: true,
+  fita: true,
+  quadra: true,
 };
 const CUES = Object.keys(ALL_CUES) as Cue[];
 
@@ -229,10 +232,13 @@ describe('createSynth', () => {
     expect(touching).toEqual(compressors);
   });
 
-  it.each(CUES)('%s: dura no máximo 600 ms (o absoluto, 1,2 s) e começa agora', (cue) => {
+  // As longas: o absoluto (a onda que cresce e desaba) e a espada (o voo de ~0,85 s e o tinido de quando ela crava).
+  const LONG: ReadonlySet<Cue> = new Set(['absoluto', 'espada']);
+
+  it.each(CUES)('%s: dura no máximo 600 ms (o absoluto e a espada, 1,2 s) e começa agora', (cue) => {
     const { play } = setup();
     const sources = play(cue).filter(isSource);
-    const limit = cue === 'absoluto' ? 1.2 : 0.6;
+    const limit = LONG.has(cue) ? 1.2 : 0.6;
     for (const source of sources) {
       expect(source.startedAt!).toBeGreaterThanOrEqual(NOW);
       expect(source.stoppedAt!).toBeLessThanOrEqual(NOW + limit + 1e-9);

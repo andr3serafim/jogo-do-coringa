@@ -17,7 +17,10 @@ export type Cue =
   | 'vez'
   | 'vitoria'
   | 'derrota'
-  | 'urgencia';
+  | 'urgencia'
+  | 'espada'
+  | 'fita'
+  | 'quadra';
 
 /** A pista do golpe de `damage` pontos, pelo peso dele (`impactForce`, o mesmo do tremor); dano zero (a defesa segurou tudo) é mudo. */
 function strikeCue(damage: number): Cue | null {
@@ -27,7 +30,8 @@ function strikeCue(damage: number): Cue | null {
 
 /**
  * A pista da batida, ou `null` se ela é muda. Só alguns eventos soam; o resto (distribuir cartas, a limpeza da fileira de
- * ataque, o aviso de iniciativa...) passa em silêncio. `me` é o jogador deste lado da tela: a vez e a janela
+ * ataque...) passa em silêncio. A decisão da iniciativa soa (sub-projeto 6 §10): a espada que voa e crava quando muda de mão, o
+ * estalo da fita quando fica; a quadra formada, um acorde curto. `me` é o jogador deste lado da tela: a vez e a janela
  * de reação só soam para quem tem de jogar, e o fim da partida soa como vitória ou derrota conforme o lado.
  *
  * A pista `urgencia` não vem de nenhuma batida (é o relógio, quando falta pouco): quem a toca é o player.
@@ -66,6 +70,10 @@ export function cueOf(beat: Beat, me: PlayerId): Cue | null {
       return event.responder === me ? 'vez' : null;
     case 'GameOver':
       return event.result.winner === me ? 'vitoria' : 'derrota';
+    case 'InitiativeDecided':
+      return event.changed ? 'espada' : 'fita';
+    case 'QuadFormed':
+      return 'quadra';
     default:
       return null;
   }
