@@ -1,7 +1,7 @@
 // A caixa das cenas refeitas no sub-projeto 6 (§7, "Gramática comum"): onde a faixa da cena fica (a área dos campos, entre o
 // placar e a mão), onde o placar acaba (a cortina escurece só daí para baixo: o placar fica à vista para ver a vida cair) e onde
 // está o centro de cada retrato (o feixe do Ataque Absoluto vai até o do alvo; o escudo da Defesa encolhe até o do dono). Tudo
-// relativo ao `[data-palco]`, medido quando uma cena começa e de novo se a janela mudar de tamanho durante ela.
+// relativo ao `[data-palco]`, medido quando a mesa monta, quando uma cena começa e quando o palco muda de tamanho.
 import { useEffect, useState, type RefObject } from 'react';
 
 export interface ScenePoint {
@@ -37,12 +37,15 @@ export function measureSceneBox(palco: HTMLElement): SceneBox | null {
   };
 }
 
-/** A caixa medida enquanto `active` (uma cena no ar); fora dela, a última medida. `ref` é um elemento dentro do palco. */
+/**
+ * A caixa medida já na montagem e de novo quando `active` liga (uma cena começa) ou o palco muda de tamanho. Medir só no começo da
+ * cena deixaria a primeira cena sem caixa por um quadro, e ela cairia no painel de antes. `ref` é um elemento dentro do palco.
+ */
 export function useSceneBox(ref: RefObject<HTMLElement | null>, active: boolean): SceneBox | null {
   const [box, setBox] = useState<SceneBox | null>(null);
   useEffect(() => {
     const palco = ref.current?.closest<HTMLElement>('[data-palco]') ?? null;
-    if (!active || palco === null) return;
+    if (palco === null) return;
     const measure = () => setBox(measureSceneBox(palco));
     measure();
     const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);

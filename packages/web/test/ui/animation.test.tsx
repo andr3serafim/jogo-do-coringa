@@ -510,6 +510,20 @@ describe('a cortina das cenas deixa o placar à vista (sub-projeto 6 §7)', () =
     expect(m.container.querySelector<HTMLElement>('[data-cortina]')!.style.top).toBe('96px');
     spy.mockRestore();
   });
+
+  it('a caixa já é medida quando a mesa monta, antes da primeira cena (sem ela, a primeira cena cairia no painel por um quadro)', () => {
+    const rect = (top: number, height: number) =>
+      ({ x: 0, y: top, top, left: 0, width: 800, height, right: 800, bottom: top + height, toJSON: () => ({}) }) as DOMRect;
+    const spy = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+      if (this.matches('[data-placar]')) return rect(0, 96);
+      if (this.matches('[data-campos]')) return rect(96, 400);
+      return rect(0, 0);
+    });
+    const m = mount(THEIRS);
+    advance(1);
+    expect(m.container.querySelector<HTMLElement>('[data-cortina]')!.style.top).toBe('96px');
+    spy.mockRestore();
+  });
 });
 
 describe('palco: trava global de flash (spec §10.4)', () => {
