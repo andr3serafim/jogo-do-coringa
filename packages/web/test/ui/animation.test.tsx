@@ -12,6 +12,7 @@ import { bannerReadMs, readingMs } from '../../src/model/reading.ts';
 import { Session } from '../../src/model/session.ts';
 import { DEFAULT_PREFS } from '../../src/model/storage.ts';
 import { BEAT_MS, INVERT_COOLDOWN_MS, INVERT_MIN_HOLD_MS, RARE_SCENE_MS } from '../../src/model/timeline.ts';
+import { SCENE_MOMENTS } from '../../src/model/scene-moments.ts';
 import { useBoardBusy } from '../../src/ui/anim/context.ts';
 import { Stage } from '../../src/ui/anim/Stage.tsx';
 import { deferredAck, scenarioAt, type ViewSpec } from '../fixtures.ts';
@@ -52,6 +53,9 @@ afterEach(cleanup);
 // ---------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------
 
+/** A coroa crava na Exódia: o instante da inversão dela (sub-projeto 6 §7.3). */
+const CROWN = SCENE_MOMENTS.EXODIA.crownAt;
+
 describe('palco: a cena inverte a tela inteira uma vez (spec §10.1, §10.4)', () => {
   it('Exódia: o palco recebe a inversão uma vez e a retira depois de ≥ 300 ms', () => {
     const m = mount(THEIRS);
@@ -59,9 +63,9 @@ describe('palco: a cena inverte a tela inteira uma vez (spec §10.1, §10.4)', (
     emit(m, EXODIA_OVER, [EXODIA]);
     expect(busy(m.container)).toBe(true);
     const trace = watchInversion(m.container);
-    trace.run(4_300);
-    // Liga aos 1400 ms (a chegada do quarto K), desliga 600 ms depois: uma inversão só, mantida bem mais que o piso de 300 ms.
-    expect(trace.flips).toEqual([1_400, 2_000]);
+    trace.run(RARE_SCENE_MS.EXODIA + 100);
+    // Liga quando a coroa crava, desliga 600 ms depois: uma inversão só, mantida bem mais que o piso de 300 ms.
+    expect(trace.flips).toEqual([CROWN, CROWN + 600]);
     expect(trace.flips[1]! - trace.flips[0]!).toBeGreaterThanOrEqual(INVERT_MIN_HOLD_MS);
     expect(busy(m.container)).toBe(false);
   });
@@ -70,7 +74,7 @@ describe('palco: a cena inverte a tela inteira uma vez (spec §10.1, §10.4)', (
     const m = mount(THEIRS);
     emit(m, EXODIA_OVER, [EXODIA]);
     expect(stage(m.container).style.filter).toBe('');
-    advance(1_400);
+    advance(CROWN);
     expect(stage(m.container).style.filter).toBe('invert(1)');
     expect(inverted(m.container)).toBe(true);
     advance(599);
@@ -86,7 +90,7 @@ describe('palco: a cena inverte a tela inteira uma vez (spec §10.1, §10.4)', (
     expect(scene(m.container)).toHaveAttribute('data-cena', 'EXODIA');
     expect(scene(m.container)).toHaveTextContent('EXÓDIA!');
     expect(scene(m.container)).toHaveTextContent('Duda reuniu os quatro K');
-    advance(4_199);
+    advance(RARE_SCENE_MS.EXODIA - 1);
     expect(scene(m.container)).not.toBeNull();
     advance(1);
     expect(scene(m.container)).toBeNull();
@@ -134,18 +138,19 @@ describe('cenas raras (U3): a figura, o título que carimba e os raios', () => {
     expect(panelOn()).toBeNull();
   });
 
-  it('a Devastação (F3): o K, o A e o J da jogada caem em trio, com os raios, e diz quem devasta o quê', () => {
+  it('a Devastação (sub-projeto 6 fatia 3): o lançamento é a fita, sem cena; a cena é a da fileira que cai', () => {
     const m = mount(THEIRS);
     const k = { id: 'dk', kind: 'K', suit: 'copas' } as const;
     const a = { id: 'da', kind: 'A', suit: 'paus' } as const;
     const j = { id: 'dj', kind: 'J', suit: 'ouros' } as const;
     emit(m, THEIRS, [{ type: 'DevastationCast', player: 'p2', target: 'p1', row: 'ATK', k, a, x: j }]);
+    expect(scene(m.container)).toBeNull();
+    expect(banner(m.container)).toHaveTextContent('DEVASTAÇÃO de Duda!');
+    advance(3_000);
+    emit(m, THEIRS, [{ type: 'RowDevastated', player: 'p1', row: 'ATK', cards: [], reflected: false }]);
     expect(scene(m.container)).toHaveAttribute('data-cena', 'DEVASTATION');
-    expect(figure(m.container)).toHaveAttribute('data-figura', 'trio');
-    expect(figureCards(m.container).map((card) => card.getAttribute('data-card-id'))).toEqual(['cena-dk', 'cena-da', 'cena-dj']);
-    expect(m.container.querySelector('[data-raios]')).not.toBeNull();
     expect(scene(m.container)).toHaveTextContent('DEVASTAÇÃO!');
-    expect(scene(m.container)).toHaveTextContent('Duda devasta o seu Ataque');
+    expect(scene(m.container)).toHaveTextContent('O seu Ataque foi devastado');
   });
 
   it('a cena comum (o Reflect) não tem figura nem raios', () => {
@@ -186,7 +191,7 @@ describe('palco: movimento reduzido (spec §4.1, §10.4)', () => {
     const m = mount(THEIRS);
     emit(m, EXODIA_OVER, [EXODIA]);
     const trace = watchInversion(m.container);
-    trace.run(4_300);
+    trace.run(RARE_SCENE_MS.EXODIA + 100);
     expect(trace.flips).toEqual([]);
     expect(scene(m.container)).toBeNull();
   });
@@ -201,8 +206,8 @@ describe('palco: movimento reduzido (spec §4.1, §10.4)', () => {
     const m = mount(THEIRS);
     emit(m, EXODIA_OVER, [EXODIA]);
     const trace = watchInversion(m.container);
-    trace.run(4_300);
-    expect(trace.flips).toEqual([1_400, 2_000]);
+    trace.run(RARE_SCENE_MS.EXODIA + 100);
+    expect(trace.flips).toEqual([CROWN, CROWN + 600]);
   });
 
   it('o sistema que liga o movimento reduzido com a partida aberta vale no `state` seguinte', () => {
@@ -319,7 +324,7 @@ describe('palco: pular as batidas (spec §4.1)', () => {
   it('pular com a inversão no ar a desliga na hora', async () => {
     const m = mount(THEIRS);
     emit(m, EXODIA_OVER, [EXODIA]);
-    advance(1_500);
+    advance(CROWN + 100);
     expect(inverted(m.container)).toBe(true);
     await m.user.click(stage(m.container));
     expect(inverted(m.container)).toBe(false);
@@ -532,17 +537,9 @@ describe('palco: trava global de flash (spec §10.4)', () => {
     const trace = watchInversion(m.container);
     emit(m, THEIRS, [SCENE]);
     trace.run(200);
-    // A Devastação inverte a 0,9 s, dentro dos 2 s de espera da trava. (Os Absolutos da fatia 2 invertem a 2,7 s e a 3,2 s,
-    // depois da espera: a trava não teria o que segurar.)
-    const devastation: GameEvent = {
-      type: 'DevastationCast',
-      player: 'p2',
-      target: 'p1',
-      row: 'DEF',
-      k: { id: 'dv-k', kind: 'K', suit: 'ouros' },
-      a: { id: 'dv-a', kind: 'A', suit: 'paus' },
-      x: { id: 'dv-q', kind: 'Q', suit: 'copas' },
-    };
+    // A Devastação inverte quando o chão se abre (1,17 s), dentro dos 2 s de espera da trava. (Os Absolutos da fatia 2 invertem
+    // a 2,7 s e a 3,2 s, depois da espera: a trava não teria o que segurar.)
+    const devastation: GameEvent = { type: 'RowDevastated', player: 'p1', row: 'DEF', cards: [], reflected: false };
     emit(m, THEIRS, [devastation]);
     // A segunda cena toca (título na tela), mas sem inversão.
     expect(scene(m.container)).toHaveAttribute('data-cena', 'DEVASTATION');

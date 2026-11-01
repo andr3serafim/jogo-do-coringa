@@ -226,6 +226,10 @@ const RECIPES: Record<Cue, (voices: Voices) => void> = {
     tone({ wave: 'sine', from: 1568, at: s(DEF.lockAt), length: 0.5, peak: 0.1 });
     tone({ wave: 'sine', from: 90, to: 45, at: s(DEF.lockAt), length: 0.4, peak: 0.25 });
   },
+  // A Exódia e a Devastação (fatia 3) soam como o golpe absoluto até as receitas delas.
+  exodia: (voices) => RECIPES.absoluto(voices),
+  devastacao: (voices) => RECIPES.absoluto(voices),
+  'devastacao-cancelada': (voices) => RECIPES.absoluto(voices),
 };
 
 /** Quanto o corte leva para zerar o que está soando. */

@@ -17,11 +17,10 @@
 // demanda (`scenes-loader.ts`). Quando ele já chegou, a cena dele toma o lugar do painel; enquanto não chega, vale o painel. A
 // cortina começa onde o placar acaba (§7: o placar fica à vista para ver a vida cair), em todas as cenas.
 //
-// As cenas raras (U3 do sub-projeto 5: Ataque Absoluto, Defesa Absoluta, Exódia; F3: a Devastação) são mais longas e têm figura:
-// os quatro J entram em leque, os quatro Q formam um muro, os quatro K da Exódia sobem um a um até a cruz, e o K, o A e o J (ou
-// o Q) da Devastação caem em trio, as cartas de verdade da jogada (como desenho); o título carimba (escala, com mola) no
-// instante em que a linha do tempo põe a única inversão da cena (`SCENE_INVERT_LEAD_MS`), e raios de xilogravura giram devagar
-// atrás do painel. As cartas são desenhos (`Card` sem `layoutId`), não as da mesa. Nada disso muda a luminância da tela: o
+// As cenas raras (U3 do sub-projeto 5: Ataque Absoluto, Defesa Absoluta, Exódia) são mais longas e têm figura: os quatro J
+// entram em leque, os quatro Q formam um muro, os quatro K da Exódia sobem um a um até a cruz; o título carimba (escala, com
+// mola) no instante em que a linha do tempo põe a única inversão da cena (`SCENE_INVERT_LEAD_MS`), e raios de xilogravura giram
+// devagar atrás do painel. A Devastação (a fileira que cai, sub-projeto 6 fatia 3) vale o painel simples até ter o desenho dela. As cartas são desenhos (`Card` sem `layoutId`), não as da mesa. Nada disso muda a luminância da tela: o
 // painel é escuro do começo ao fim, e os raios são traço sobre ele. Com movimento reduzido, tudo já parado no lugar.
 import type { PlayerId, SpecialCard, Suit } from '@coringa/engine';
 import type { Names } from '@coringa/sim/text';
@@ -115,7 +114,7 @@ function SceneLayer({ scene, curtain, names, reduced, me, hitLanded }: BeatOverl
       >
         {rare ? <Rays reduced={reduced} /> : null}
         {reflect ? <Shield /> : null}
-        {rare ? <Figure key={serial} rare={rare} beat={shown} reduced={reduced} /> : null}
+        {rare ? <Figure key={serial} rare={rare} reduced={reduced} /> : null}
         <Stamp key={`titulo-${serial}`} delay={rare?.titleAt ?? 0} reduced={reduced || rare === null}>
           <p className="textura relative font-madeira text-4xl uppercase leading-none pc:text-6xl">{title}</p>
         </Stamp>
@@ -128,13 +127,13 @@ function SceneLayer({ scene, curtain, names, reduced, me, hitLanded }: BeatOverl
 // ---------------------------------------------------------------------------------------------
 // As cenas raras (U3)
 
-type RareKind = Extract<SceneKind, 'EXODIA' | 'ABSOLUTE_ATTACK' | 'ABSOLUTE_DEFENSE' | 'DEVASTATION'>;
+type RareKind = Extract<SceneKind, 'EXODIA' | 'ABSOLUTE_ATTACK' | 'ABSOLUTE_DEFENSE'>;
 
 interface RareScene {
-  /** As quatro cartas iguais da figura; na Devastação as cartas vêm do evento. */
+  /** As quatro cartas iguais da figura. */
   kind: 'J' | 'Q' | 'K';
-  /** Leque (os J), muro (os Q), cruz (os K da Exódia) ou trio (K, A e J/Q da Devastação). */
-  layout: 'fan' | 'wall' | 'cross' | 'trio';
+  /** Leque (os J), muro (os Q) ou cruz (os K da Exódia). */
+  layout: 'fan' | 'wall' | 'cross';
   /** Segundos entre a entrada de uma carta e a da seguinte. */
   stagger: number;
   /** Segundos até o título carimbar: o instante da inversão da cena (a mesma conta da linha do tempo). */
@@ -145,7 +144,6 @@ const RARE: Record<RareKind, RareScene> = {
   ABSOLUTE_ATTACK: { kind: 'J', layout: 'fan', stagger: 0.18, titleAt: SCENE_INVERT_LEAD_MS.ABSOLUTE_ATTACK / 1000 },
   ABSOLUTE_DEFENSE: { kind: 'Q', layout: 'wall', stagger: 0.18, titleAt: SCENE_INVERT_LEAD_MS.ABSOLUTE_DEFENSE / 1000 },
   EXODIA: { kind: 'K', layout: 'cross', stagger: 0.3, titleAt: SCENE_INVERT_LEAD_MS.EXODIA / 1000 },
-  DEVASTATION: { kind: 'K', layout: 'trio', stagger: 0.22, titleAt: SCENE_INVERT_LEAD_MS.DEVASTATION / 1000 },
 };
 
 const SUITS: readonly Suit[] = ['copas', 'ouros', 'espadas', 'paus'];
@@ -170,26 +168,17 @@ const PLACES: Record<RareScene['layout'], ReadonlyArray<{ x: number; y: number; 
     { x: 1.1, y: 0, rotate: 6 },
     { x: 0, y: 0.85, rotate: 0 },
   ],
-  trio: [
-    { x: -1.15, y: 0.12, rotate: -16 },
-    { x: 0, y: -0.05, rotate: 0 },
-    { x: 1.15, y: 0.12, rotate: 16 },
-  ],
 };
 
-/** As cartas da figura: as da jogada na Devastação (com outro id, para não repetir as da mesa), as quatro iguais nas outras. */
-function figureCards(rare: RareScene, beat: Beat | null): SpecialCard[] {
-  const event = beat?.event;
-  if (rare.layout === 'trio' && event?.type === 'DevastationCast') {
-    return [event.k, event.a, event.x].map((card) => ({ ...card, id: `cena-${card.id}` }));
-  }
+/** As quatro cartas iguais da figura (com outro id, para não repetir as da mesa). */
+function figureCards(rare: RareScene): SpecialCard[] {
   return PLACES[rare.layout].map((_, i) => ({ id: `cena-${rare.kind}-${i}`, kind: rare.kind, suit: SUITS[i]! }));
 }
 
 /** As cartas da cena rara: entram uma a uma, com mola; com movimento reduzido, já paradas no lugar. */
-function Figure({ rare, beat, reduced }: { rare: RareScene; beat: Beat | null; reduced: boolean }) {
+function Figure({ rare, reduced }: { rare: RareScene; reduced: boolean }) {
   const tall = rare.layout === 'cross';
-  const cards = figureCards(rare, beat);
+  const cards = figureCards(rare);
   return (
     <div
       data-figura={rare.layout}

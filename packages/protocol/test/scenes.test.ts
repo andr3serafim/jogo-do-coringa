@@ -9,8 +9,15 @@ describe('folga de cena (sub-projeto 6 §9)', () => {
     expect(sceneAllowanceMs([])).toBe(0);
   });
 
+  it('a Devastação rende quando a fileira cai, ou a cena curta da cancelada; o lançamento não rende (fatia 3)', () => {
+    expect(sceneAllowanceMs([{ type: 'RowDevastated' }])).toBe(3_100);
+    expect(sceneAllowanceMs([{ type: 'DevastationCanceled' }])).toBe(1_400);
+    expect(sceneAllowanceMs([{ type: 'Exodia' }])).toBe(5_800);
+    expect(sceneAllowanceMs([{ type: 'DevastationCast' }])).toBe(0);
+  });
+
   it('duas cenas no mesmo passo somam', () => {
-    expect(sceneAllowanceMs([{ type: 'ReflectTriggered' }, { type: 'DamageDealt' }, { type: 'DevastationCast' }])).toBe(4_500);
+    expect(sceneAllowanceMs([{ type: 'ReflectTriggered' }, { type: 'DamageDealt' }, { type: 'RowDevastated' }])).toBe(4_600);
   });
 
   it('a soma para no teto de 8 s', () => {
@@ -18,12 +25,13 @@ describe('folga de cena (sub-projeto 6 §9)', () => {
     expect(sceneAllowanceMs(Array.from({ length: 6 }, () => ({ type: 'Exodia' })))).toBe(8_000);
   });
 
-  it('a tabela tem as seis cenas; os Absolutos com os tempos do protótipo (fatia 2: 4,5 s e 4,8 s)', () => {
+  it('a tabela tem as cenas com os tempos do protótipo (fatia 2: os Absolutos; fatia 3: a Exódia e a Devastação)', () => {
     expect(SCENE_MS).toEqual({
-      Exodia: 4_200,
+      Exodia: 5_800,
       AbsoluteAttack: 4_500,
       AbsoluteDefenseStarted: 4_800,
-      DevastationCast: 3_000,
+      RowDevastated: 3_100,
+      DevastationCanceled: 1_400,
       ReflectPlayed: 1_500,
       ReflectTriggered: 1_500,
     });

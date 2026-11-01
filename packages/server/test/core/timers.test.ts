@@ -324,7 +324,8 @@ describe('turno pausa na janela do oponente (§6.2)', () => {
     h.advance(TIMERS.reactionMinMs);
     await act(h, p1, 'p', { type: 'PASS' });
     expect(phaseOf(h)).toEqual({ kind: 'ATTACK_MAIN', player: 'p1' });
-    expect(lastState(h, p1).deadline!.at).toBe(h.now + 18_000);
+    // A Devastação volta e derruba a fileira de quem lançou: o passo ganha a folga da cena dela (sub-projeto 6 §9, fatia 3).
+    expect(lastState(h, p1).deadline!.at).toBe(h.now + SCENE_MS.RowDevastated! + 18_000);
   });
 
   it('a janela de um ataque não guarda tempo do turno, e o prazo do Ás na reação não muda', async () => {

@@ -409,6 +409,8 @@ export const SCENE_TITLE: Record<SceneKind, string> = {
   ABSOLUTE_ATTACK: 'ATAQUE ABSOLUTO',
   ABSOLUTE_DEFENSE: 'DEFESA ABSOLUTA',
   DEVASTATION: 'DEVASTAÇÃO!',
+  // A cancelada não carimba nome: a terra ronca e para, e o motivo vai na fita (sub-projeto 6 §7.4).
+  DEVASTATION_CANCELED: '',
   REFLECT_PLAYED: 'REFLECT',
   REFLECT_TRIGGERED: 'REFLECT',
 };

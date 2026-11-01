@@ -8,6 +8,7 @@ import {
   INVERT_COOLDOWN_MS,
   INITIATIVE_BANNER_MS,
   INVERT_MIN_HOLD_MS,
+  NO_INVERT,
   RARE_SCENE_MS,
   SCENE_INVERT_LEAD_MS,
   buildTimeline,
@@ -71,12 +72,21 @@ const SAMPLES: { event: GameEvent; kind: Beat['kind']; scene?: SceneKind; cards?
   { event: { type: 'ReflectCanceled', player: 'p2', owner: 'p1' }, kind: 'move' },
   {
     event: { type: 'DevastationCast', player: 'p1', target: 'p2', row: 'ATK', k: face('k1'), a: face('a1', 'A'), x: face('j1', 'J') },
-    kind: 'scene',
-    scene: 'DEVASTATION',
+    kind: 'banner',
     cards: ['k1', 'a1', 'j1'],
   },
-  { event: { type: 'RowDevastated', player: 'p2', row: 'ATK', cards: [num('n1')], reflected: false }, kind: 'banner', cards: ['n1'] },
-  { event: { type: 'DevastationCanceled', player: 'p1', reason: 'REFLECT_CLASH' }, kind: 'banner' },
+  {
+    event: { type: 'RowDevastated', player: 'p2', row: 'ATK', cards: [num('n1')], reflected: false },
+    kind: 'scene',
+    scene: 'DEVASTATION',
+    cards: [],
+  },
+  {
+    event: { type: 'DevastationCanceled', player: 'p1', reason: 'REFLECT_CLASH' },
+    kind: 'scene',
+    scene: 'DEVASTATION_CANCELED',
+    cards: [],
+  },
   { event: { type: 'HandLimitPenalty', player: 'p1', penalty: 'BURN', cards: [face('k1')], fewer: 0 }, kind: 'banner', cards: ['k1'] },
   {
     event: { type: 'CardStolen', player: 'p1', from: 'p2', card: num('n1'), fromRow: 'ATK', toRow: 'DEF', ace: face('a1', 'A') },
@@ -180,14 +190,20 @@ describe('mapeamento evento → batida (spec §4.2)', () => {
       const rare = scene !== undefined && scene in RARE_SCENE_MS ? RARE_SCENE_MS[scene as keyof typeof RARE_SCENE_MS] : null;
       const held = event.type === 'InitiativeDecided' ? INITIATIVE_BANNER_MS : null;
       expect(beat!.durationMs).toBe(kind === 'quiet' ? 0 : (rare ?? held ?? BEAT_MS[kind]));
-      expect(beat!.invert !== null).toBe(kind === 'scene');
+      expect(beat!.invert !== null).toBe(kind === 'scene' && !NO_INVERT.has(scene!));
     });
   }
 });
 
 describe('as cenas raras (U3 do sub-projeto 5)', () => {
-  it('o Ataque Absoluto dura 4,5 s e a Defesa Absoluta 4,8 s (as cenas do protótipo, sub-projeto 6 fatia 2); a Exódia, 4,2 s', () => {
-    expect(RARE_SCENE_MS).toEqual({ EXODIA: 4_200, ABSOLUTE_ATTACK: 4_500, ABSOLUTE_DEFENSE: 4_800, DEVASTATION: 3_000 });
+  it('as cenas raras com os tempos do protótipo (sub-projeto 6: os Absolutos na fatia 2, a Exódia e a Devastação na 3)', () => {
+    expect(RARE_SCENE_MS).toEqual({
+      EXODIA: 5_800,
+      ABSOLUTE_ATTACK: 4_500,
+      ABSOLUTE_DEFENSE: 4_800,
+      DEVASTATION: 3_100,
+      DEVASTATION_CANCELED: 1_400,
+    });
   });
 
   it('os tempos das cenas são os da tabela do protocolo, a mesma que o servidor usa na folga (sub-projeto 6 §9)', () => {
@@ -195,20 +211,11 @@ describe('as cenas raras (U3 do sub-projeto 5)', () => {
       EXODIA: SCENE_MS.Exodia,
       ABSOLUTE_ATTACK: SCENE_MS.AbsoluteAttack,
       ABSOLUTE_DEFENSE: SCENE_MS.AbsoluteDefenseStarted,
-      DEVASTATION: SCENE_MS.DevastationCast,
+      DEVASTATION: SCENE_MS.RowDevastated,
+      DEVASTATION_CANCELED: SCENE_MS.DevastationCanceled,
     });
     expect(BEAT_MS.scene).toBe(SCENE_MS.ReflectPlayed);
     expect(SCENE_MS.ReflectTriggered).toBe(SCENE_MS.ReflectPlayed);
-  });
-
-  it('a Devastação (F3: "cinematográfica, à altura") é rara como os Absolutos: 3 s, o carimbo e a inversão a 0,9 s', () => {
-    expect(SCENE_INVERT_LEAD_MS.DEVASTATION).toBe(900);
-    const cast: GameEvent = { type: 'DevastationCast', player: 'p1', target: 'p2', row: 'DEF', k: face('k1'), a: face('a1', 'A'), x: face('q1', 'Q') };
-    const [live] = buildTimeline([cast], { ...LIVE, decisionPending: true });
-    expect(live!.durationMs).toBe(3_000);
-    expect(live!.invert).toEqual({ atMs: 900, holdMs: 600 });
-    const [reduced] = buildTimeline([cast], { ...LIVE, reducedMotion: true });
-    expect(reduced!.invert).toBeNull();
   });
 
   it('a cura que não curou nada (a vida já cheia) passa quieta', () => {
@@ -229,6 +236,53 @@ describe('as cenas raras (U3 do sub-projeto 5)', () => {
   it('a Defesa Absoluta inverte na trava', () => {
     const [beat] = buildTimeline([{ type: 'AbsoluteDefenseStarted', player: 'p1' }], LIVE);
     expect(beat!.invert).toEqual({ atMs: beat!.startMs + 2_700, holdMs: 600 });
+  });
+});
+
+describe('a Exódia e a Devastação (sub-projeto 6 §7.3, §7.4)', () => {
+  const cast: GameEvent = { type: 'DevastationCast', player: 'p1', target: 'p2', row: 'DEF', k: face('k1'), a: face('a1', 'A'), x: face('q1', 'Q') };
+  const fell: GameEvent = { type: 'RowDevastated', player: 'p2', row: 'DEF', cards: [num('n1'), num('n2')], reflected: false };
+
+  it('a Exódia dura 5,8 s e inverte quando a coroa crava', () => {
+    expect(SCENE_INVERT_LEAD_MS.EXODIA).toBe(SCENE_MOMENTS.EXODIA.crownAt);
+    const [beat] = buildTimeline([EXODIA], LIVE);
+    expect(beat!.durationMs).toBe(5_800);
+    expect(beat!.invert).toEqual({ atMs: SCENE_MOMENTS.EXODIA.crownAt, holdMs: 600 });
+  });
+
+  it('a fileira que cai é a cena da Devastação: 3,1 s, sem cartas de movimento, e inverte quando o chão se abre', () => {
+    expect(SCENE_INVERT_LEAD_MS.DEVASTATION).toBe(SCENE_MOMENTS.DEVASTATION.openAt);
+    const [beat] = buildTimeline([fell], { ...LIVE, decisionPending: true });
+    expect(beat!).toMatchObject({ kind: 'scene', scene: 'DEVASTATION', durationMs: 3_100, cards: [] });
+    expect(beat!.invert).toEqual({ atMs: SCENE_MOMENTS.DEVASTATION.openAt, holdMs: 600 });
+    const [reduced] = buildTimeline([fell], { ...LIVE, reducedMotion: true });
+    expect(reduced!.invert).toBeNull();
+  });
+
+  it('o lançamento é uma faixa que leva as três cartas: o alvo fica sabendo, e a reação segue na barra', () => {
+    const [beat] = buildTimeline([cast], LIVE);
+    expect(beat!).toMatchObject({ kind: 'banner', scene: null, cards: ['k1', 'a1', 'q1'], invert: null });
+  });
+
+  it('a cancelada é uma cena curta de 1,4 s, sem inversão', () => {
+    for (const reason of ['REFLECT_CLASH', 'ABSOLUTE_DEFENSE'] as const) {
+      const [beat] = buildTimeline([{ type: 'DevastationCanceled', player: 'p1', reason }], LIVE);
+      expect(beat!).toMatchObject({ kind: 'scene', scene: 'DEVASTATION_CANCELED', durationMs: 1_400, invert: null });
+    }
+    expect(NO_INVERT.has('DEVASTATION_CANCELED')).toBe(true);
+  });
+
+  it('a refletida: a cena do Reflect e depois a fileira de quem lançou, as duas inversões dentro da regra', () => {
+    const reflected: GameEvent[] = [
+      { type: 'ReflectPlayed', player: 'p2', reflect: { k: face('k2'), j: face('j2', 'J'), q: face('q2', 'Q') }, against: 'DEVASTATION' },
+      { type: 'ReactionWindowClosed', responder: 'p2', trigger: 'DEVASTATION' },
+      { type: 'RowDevastated', player: 'p1', row: 'DEF', cards: [num('n3')], reflected: true },
+    ];
+    for (const reducedMotion of [false, true]) {
+      const beats = buildTimeline(reflected, { ...LIVE, reducedMotion });
+      expectPhotosafe(beats, reducedMotion);
+      expect(beats.at(-1)!.scene).toBe('DEVASTATION');
+    }
   });
 });
 
@@ -318,14 +372,14 @@ describe('buildTimeline', () => {
     expect(luminanceSwitches(beats)).toEqual([]);
   });
 
-  it('Exodia gera uma cena longa (a rara, U3) com uma inversão de pelo menos 300 ms, na chegada do quarto K', () => {
+  it('Exodia gera uma cena longa (a rara, U3) com uma inversão de pelo menos 300 ms, quando a coroa crava (sub-projeto 6 §7.3)', () => {
     const beats = buildTimeline([EXODIA], LIVE);
     expect(beats).toHaveLength(1);
     const [beat] = beats;
     expect(beat!.kind).toBe('scene');
     expect(beat!.scene).toBe('EXODIA');
     expect(beat!.durationMs).toBe(RARE_SCENE_MS.EXODIA);
-    expect(beat!.invert!.atMs).toBe(1_400);
+    expect(beat!.invert!.atMs).toBe(SCENE_MOMENTS.EXODIA.crownAt);
     expect(beat!.invert!.holdMs).toBeGreaterThanOrEqual(INVERT_MIN_HOLD_MS);
     expect(luminanceSwitches(beats)).toEqual([beat!.invert!.atMs, beat!.invert!.atMs + beat!.invert!.holdMs]);
   });

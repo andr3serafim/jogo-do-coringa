@@ -23,7 +23,8 @@ export const RARE_SCENE_MS = {
   EXODIA: sceneMs('Exodia'),
   ABSOLUTE_ATTACK: sceneMs('AbsoluteAttack'),
   ABSOLUTE_DEFENSE: sceneMs('AbsoluteDefenseStarted'),
-  DEVASTATION: sceneMs('DevastationCast'),
+  DEVASTATION: sceneMs('RowDevastated'),
+  DEVASTATION_CANCELED: sceneMs('DevastationCanceled'),
 } as const;
 /**
  * A faixa da decisão da iniciativa segura a leitura (autor, 2026-10-31: "a iniciativa muda pro adversário, eu também não vejo o
@@ -45,21 +46,31 @@ export const INVERT_MIN_HOLD_MS = 300;
  */
 export const INVERT_COOLDOWN_MS = 2_000;
 
-export type SceneKind = 'EXODIA' | 'ABSOLUTE_ATTACK' | 'ABSOLUTE_DEFENSE' | 'DEVASTATION' | 'REFLECT_PLAYED' | 'REFLECT_TRIGGERED';
+export type SceneKind =
+  | 'EXODIA'
+  | 'ABSOLUTE_ATTACK'
+  | 'ABSOLUTE_DEFENSE'
+  | 'DEVASTATION'
+  | 'DEVASTATION_CANCELED'
+  | 'REFLECT_PLAYED'
+  | 'REFLECT_TRIGGERED';
 
 /**
- * Onde, dentro da cena, a inversão acontece: na comum, logo no começo; na Exódia e na Devastação, quando o título carimba. Nos
- * Absolutos refeitos no sub-projeto 6 (fatia 2), no pico da cena: o feixe que acerta o retrato e a trava do escudo
- * (`SCENE_MOMENTS`). A inversão dura sempre o mesmo, e é uma só por cena.
+ * Onde, dentro da cena, a inversão acontece: na comum, logo no começo. Nas refeitas no sub-projeto 6, no pico da cena
+ * (`SCENE_MOMENTS`): o feixe que acerta o retrato, a trava do escudo, a coroa que crava na Exódia e o chão que se abre na
+ * Devastação. A inversão dura sempre o mesmo, e é uma só por cena. A cancelada não tem (`NO_INVERT`).
  */
 export const SCENE_INVERT_LEAD_MS: Record<SceneKind, number> = {
   REFLECT_PLAYED: 150,
   REFLECT_TRIGGERED: 150,
   ABSOLUTE_ATTACK: SCENE_MOMENTS.ABSOLUTE_ATTACK.hitAt,
   ABSOLUTE_DEFENSE: SCENE_MOMENTS.ABSOLUTE_DEFENSE.lockAt,
-  DEVASTATION: 900,
-  EXODIA: 1_400,
+  DEVASTATION: SCENE_MOMENTS.DEVASTATION.openAt,
+  DEVASTATION_CANCELED: 0,
+  EXODIA: SCENE_MOMENTS.EXODIA.crownAt,
 };
+/** As cenas sem inversão: a Devastação cancelada (a terra ronca e para, sem abismo; sub-projeto 6 §7.4). */
+export const NO_INVERT: ReadonlySet<SceneKind> = new Set(['DEVASTATION_CANCELED']);
 const SCENE_INVERT_HOLD_MS = 600;
 
 const isRare = (scene: SceneKind | null): scene is keyof typeof RARE_SCENE_MS => scene !== null && scene in RARE_SCENE_MS;
@@ -99,7 +110,7 @@ interface Classified {
 
 const move = (cards: string[] = []): Classified => ({ kind: 'move', cards, scene: null });
 const plain = (kind: 'banner' | 'damage' | 'quiet'): Classified => ({ kind, cards: [], scene: null });
-/** Faixa que também move cartas (o Roubo, a queimada, a fileira devastada). */
+/** Faixa que também move cartas (o Roubo, a queimada, o lançamento da Devastação). */
 const bannerMoving = (cards: string[]): Classified => ({ kind: 'banner', cards, scene: null });
 const scene = (kindOfScene: SceneKind, cards: string[] = []): Classified => ({
   kind: 'scene',
@@ -151,15 +162,17 @@ function classify(event: GameEvent): Classified {
     case 'Sacrificed':
       return move([event.card.id, event.target.id]);
     case 'RowDevastated':
-      return bannerMoving(event.cards.map((c) => c.id));
+      // A cena desenha as cópias caindo no abismo; as cartas da mesa vão ao cemitério na hora (sub-projeto 6 §7.4).
+      return scene('DEVASTATION');
     case 'CardStolen':
       return bannerMoving([event.card.id, event.ace.id]);
     case 'HandLimitPenalty':
       return bannerMoving(event.cards.map((c) => c.id));
     case 'DevastationCast':
-      return scene('DEVASTATION', [event.k.id, event.a.id, event.x.id]);
+      // Só abre a janela de reação do alvo: a cena é a da fileira que cai (`RowDevastated`) ou a cancelada.
+      return bannerMoving([event.k.id, event.a.id, event.x.id]);
     case 'DevastationCanceled':
-      return plain('banner');
+      return scene('DEVASTATION_CANCELED');
     case 'StealDamage':
       return plain('damage');
     case 'Healed':
@@ -234,7 +247,7 @@ export function buildTimeline(events: GameEvent[], options: TimelineOptions): Be
     const durationMs = Math.floor(item.baseMs * itemScale);
     let invert: Beat['invert'] = null;
     const yields = reflected && item.scene === 'ABSOLUTE_ATTACK';
-    if (item.scene !== null && !options.reducedMotion && !yields) {
+    if (item.scene !== null && !NO_INVERT.has(item.scene) && !options.reducedMotion && !yields) {
       const holdMs = Math.floor(SCENE_INVERT_HOLD_MS * itemScale);
       const atMs = startMs + Math.floor(SCENE_INVERT_LEAD_MS[item.scene] * itemScale);
       if (holdMs >= INVERT_MIN_HOLD_MS && atMs - lastInvertEndMs >= INVERT_COOLDOWN_MS) {

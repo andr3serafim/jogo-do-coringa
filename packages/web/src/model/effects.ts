@@ -189,6 +189,12 @@ function rowText(row: RowName, owner: PlayerId, names: Names, from = false): str
 
 const capitalized = (text: string): string => text.charAt(0).toUpperCase() + text.slice(1);
 
+/** "O Ataque de Duda foi devastado"; refletida, "A Devastação voltou: a sua Defesa foi devastada". */
+function devastatedText(event: Extract<GameEvent, { type: 'RowDevastated' }>, names: Names): string {
+  const done = `${rowText(event.row, event.player, names)} foi ${event.row === 'ATK' ? 'devastado' : 'devastada'}`;
+  return event.reflected ? `A Devastação voltou: ${done}` : capitalized(done);
+}
+
 const listText = (items: string[]): string =>
   items.length <= 1 ? (items[0] ?? '') : `${items.slice(0, -1).join(', ')} e ${items.at(-1)}`;
 
@@ -214,12 +220,14 @@ export function bannerText(event: GameEvent, names: Names): string | null {
       const hand = event.player === names.me ? 'Sua mão' : `A mão de ${names.of(event.player)}`;
       return `${hand} já tem 4 especiais: ${listText(cards)} ${cards.length === 1 ? 'foi' : 'foram'} para o cemitério`;
     }
-    case 'RowDevastated': {
-      const done = `${rowText(event.row, event.player, names)} foi ${event.row === 'ATK' ? 'devastado' : 'devastada'}`;
-      return event.reflected ? `A Devastação voltou: ${done}` : capitalized(done);
+    case 'RowDevastated':
+      return devastatedText(event, names);
+    case 'DevastationCanceled': {
+      if (event.reason === 'REFLECT_CLASH') return 'Os Reflects se anularam: a Devastação não aconteceu';
+      // A Devastação refletida voltou para quem a lançou, e a Defesa Absoluta dele a segurou.
+      const defense = event.player === names.me ? 'A sua Defesa Absoluta' : `A Defesa Absoluta de ${names.of(event.player)}`;
+      return `${defense} segurou a Devastação devolvida`;
     }
-    case 'DevastationCanceled':
-      return 'Os Reflects se anularam: a Devastação não aconteceu';
     case 'DevastationCast':
       return `${SCENE_TITLE.DEVASTATION.replace('!', '')} de ${names.of(event.player)}!`;
     case 'OrderChosen':
@@ -251,9 +259,12 @@ export function bannerRibbon(event: GameEvent, names: Names): Ribbon | null {
 /** A fita numa linha: o título e, se houver, " · " e o motivo (o `data-faixa` e o tempo de leitura). */
 export const ribbonText = (ribbon: Ribbon): string => (ribbon.reason === null ? ribbon.title : `${ribbon.title} · ${ribbon.reason}`);
 
-/** A batida mostra uma faixa? As cenas só chegam aqui no `catchUp` (viram `banner`); o `DeckReshuffled` é `move` com faixa. */
+/**
+ * A batida mostra uma faixa? As cenas só chegam aqui no `catchUp` (viram `banner`), menos a Devastação cancelada, que não
+ * carimba nome e diz o motivo na fita (sub-projeto 6 §7.4); o `DeckReshuffled` é `move` com faixa.
+ */
 function hasBanner(beat: Beat): boolean {
-  return beat.kind === 'banner' || beat.event.type === 'DeckReshuffled';
+  return beat.kind === 'banner' || beat.event.type === 'DeckReshuffled' || beat.scene === 'DEVASTATION_CANCELED';
 }
 
 /**
@@ -294,8 +305,8 @@ export function sceneText(beat: Beat, names: Names): { title: string; detail: st
       const target = event.attacker === names.me ? 'você' : names.of(event.attacker);
       return { title, detail: `O ataque voltou: ${event.damage} de dano em ${target}` };
     }
-    case 'DevastationCast':
-      return { title, detail: `${names.of(event.player)} devasta ${rowText(event.row, event.target, names)}` };
+    case 'RowDevastated':
+      return { title, detail: devastatedText(event, names) };
     default:
       return { title, detail: '' };
   }

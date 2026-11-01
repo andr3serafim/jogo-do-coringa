@@ -72,11 +72,19 @@ const gameOver = (result: GameResult): GameEvent => ({ type: 'GameOver', result 
 describe('as pistas das cenas absolutas (sub-projeto 6 §10)', () => {
   const beatOf = (event: GameEvent) => buildTimeline([event], { mode: 'live', reducedMotion: false, decisionPending: false })[0]!;
 
-  it('o Ataque Absoluto e a Defesa Absoluta têm a pista da cena deles; a Exódia, a Devastação e o Reflect seguem com as de antes', () => {
+  it('o Ataque Absoluto e a Defesa Absoluta têm a pista da cena deles; o Reflect segue com a de antes', () => {
     expect(cueOf(beatOf({ type: 'AbsoluteAttack', player: 'p1' }), 'p1')).toBe('ataque-absoluto');
     expect(cueOf(beatOf({ type: 'AbsoluteDefenseStarted', player: 'p2' }), 'p1')).toBe('defesa-absoluta');
-    expect(cueOf(beatOf({ type: 'Exodia', player: 'p1' }), 'p1')).toBe('absoluto');
     expect(cueOf(beatOf({ type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 10 }), 'p1')).toBe('escudo');
+  });
+
+  it('a Exódia e a Devastação têm a pista da cena delas (fatia 3); o lançamento é a quebra das cartas que saem da mão', () => {
+    expect(cueOf(beatOf({ type: 'Exodia', player: 'p1' }), 'p1')).toBe('exodia');
+    expect(cueOf(beatOf({ type: 'RowDevastated', player: 'p2', row: 'ATK', cards: [num('n1')], reflected: false }), 'p1')).toBe('devastacao');
+    expect(cueOf(beatOf({ type: 'DevastationCanceled', player: 'p1', reason: 'REFLECT_CLASH' }), 'p1')).toBe('devastacao-cancelada');
+    expect(cueOf(beatOf({ type: 'DevastationCast', player: 'p1', target: 'p2', row: 'ATK', k: face('k1'), a: face('a1', 'A'), x: face('j1', 'J') }), 'p1')).toBe(
+      'quebra',
+    );
   });
 });
 
@@ -106,7 +114,7 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
   });
 
   describe('quebra', () => {
-    it.each(['GuardBroken', 'TrapUsed', 'Sacrificed', 'RowDevastated'] as const)('%s', (type) => {
+    it.each(['GuardBroken', 'TrapUsed', 'Sacrificed', 'DevastationCast'] as const)('%s', (type) => {
       expect(cueFor(SAMPLES[type])).toBe('quebra');
     });
 
@@ -150,14 +158,11 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
     });
   });
 
-  describe('escudo e absoluto', () => {
+  describe('escudo', () => {
     it.each(['ReflectPlayed', 'ReflectTriggered'] as const)('%s → escudo', (type) => {
       expect(cueFor(SAMPLES[type])).toBe('escudo');
     });
 
-    it.each(['Exodia', 'DevastationCast'] as const)('%s → absoluto', (type) => {
-      expect(cueFor(SAMPLES[type])).toBe('absoluto');
-    });
   });
 
   describe('a espada, a fita e a quadra (sub-projeto 6 §10)', () => {
@@ -219,12 +224,13 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
       'RowDevastated',
       'StealDamage',
       'DevastationCast',
+      'DevastationCanceled',
       'InitiativeDecided',
       'QuadFormed',
     ]);
     const silent = (Object.keys(SAMPLES) as GameEvent['type'][]).filter((type) => !SOUNDING.has(type));
 
-    it('a lista dos mudos tem os 15 tipos restantes', () => {
+    it('a lista dos mudos tem os 14 tipos restantes', () => {
       expect(silent).toHaveLength(37 - SOUNDING.size);
     });
 

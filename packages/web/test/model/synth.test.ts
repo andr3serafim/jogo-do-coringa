@@ -169,6 +169,9 @@ const ALL_CUES: Record<Cue, true> = {
   quadra: true,
   'ataque-absoluto': true,
   'defesa-absoluta': true,
+  exodia: true,
+  devastacao: true,
+  'devastacao-cancelada': true,
 };
 const CUES = Object.keys(ALL_CUES) as Cue[];
 
@@ -268,7 +271,13 @@ describe('createSynth', () => {
   // As longas: o absoluto (a onda que cresce e desaba) e a espada (o voo de ~0,85 s e o tinido de quando ela crava).
   const LONG: ReadonlySet<Cue> = new Set(['absoluto', 'espada']);
   /** As pistas das cenas absolutas (sub-projeto 6 §10) acompanham a cena inteira: terminam antes do fim dela. */
-  const SCENE: Partial<Record<Cue, number>> = { 'ataque-absoluto': 4.5, 'defesa-absoluta': 4.8 };
+  const SCENE: Partial<Record<Cue, number>> = {
+    'ataque-absoluto': 4.5,
+    'defesa-absoluta': 4.8,
+    exodia: 5.8,
+    devastacao: 3.1,
+    'devastacao-cancelada': 1.4,
+  };
 
   it.each(CUES)('%s: dura no máximo 600 ms (o absoluto e a espada, 1,2 s; as das cenas, a cena) e começa agora', (cue) => {
     const { play } = setup();

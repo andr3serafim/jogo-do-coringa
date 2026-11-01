@@ -287,8 +287,8 @@ describe('fim de partida: o resultado e o motivo', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     advance(2_000);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    // A cena da Exódia é longa (U3): 4,2 s.
-    advance(2_400);
+    // A cena da Exódia é longa (sub-projeto 6 §7.3): 5,8 s.
+    advance(4_000);
     expect(screen.getByRole('dialog', { name: 'Duda venceu' })).toBeInTheDocument();
   });
 });

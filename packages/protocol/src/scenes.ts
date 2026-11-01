@@ -4,13 +4,16 @@ import type { GameEvent } from '@coringa/engine';
 
 /**
  * Duração (ms) da cena de cada evento que tem uma. Cada fatia do sub-projeto 6 atualiza o valor da cena que refaz: a fatia 2 deu
- * ao Ataque e à Defesa Absolutos os tempos do protótipo (4,5 s e 4,8 s).
+ * ao Ataque e à Defesa Absolutos os tempos do protótipo (4,5 s e 4,8 s); a fatia 3, à Exódia (5,8 s) e à Devastação, que passou a
+ * ser a da fileira que cai (`RowDevastated`, 3,1 s) ou a cancelada (1,4 s). O lançamento (`DevastationCast`) só abre a janela de
+ * reação do alvo, e não tem cena.
  */
 export const SCENE_MS: Readonly<Partial<Record<GameEvent['type'], number>>> = {
-  Exodia: 4_200,
+  Exodia: 5_800,
   AbsoluteAttack: 4_500,
   AbsoluteDefenseStarted: 4_800,
-  DevastationCast: 3_000,
+  RowDevastated: 3_100,
+  DevastationCanceled: 1_400,
   ReflectPlayed: 1_500,
   ReflectTriggered: 1_500,
 };

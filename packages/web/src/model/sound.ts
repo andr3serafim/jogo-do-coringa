@@ -22,7 +22,10 @@ export type Cue =
   | 'fita'
   | 'quadra'
   | 'ataque-absoluto'
-  | 'defesa-absoluta';
+  | 'defesa-absoluta'
+  | 'exodia'
+  | 'devastacao'
+  | 'devastacao-cancelada';
 
 /** A pista do golpe de `damage` pontos, pelo peso dele (`impactForce`, o mesmo do tremor); dano zero (a defesa segurou tudo) é mudo. */
 function strikeCue(damage: number): Cue | null {
@@ -51,7 +54,7 @@ export function cueOf(beat: Beat, me: PlayerId): Cue | null {
     case 'GuardBroken':
     case 'TrapUsed':
     case 'Sacrificed':
-    case 'RowDevastated':
+    case 'DevastationCast':
       return 'quebra';
     case 'CardsRemovedFromRow':
       // Só a defesa que cai é uma quebra; a fileira de ataque é gasta no golpe, que já tem o som dele.
@@ -63,14 +66,17 @@ export function cueOf(beat: Beat, me: PlayerId): Cue | null {
     case 'ReflectPlayed':
     case 'ReflectTriggered':
       return 'escudo';
-    // As cenas refeitas no sub-projeto 6 (fatia 2) têm a pista delas, que segue o pico de cada uma (§10).
+    // As cenas refeitas no sub-projeto 6 (fatias 2 e 3) têm a pista delas, que segue o pico de cada uma (§10).
     case 'AbsoluteAttack':
       return 'ataque-absoluto';
     case 'AbsoluteDefenseStarted':
       return 'defesa-absoluta';
     case 'Exodia':
-    case 'DevastationCast':
-      return 'absoluto';
+      return 'exodia';
+    case 'RowDevastated':
+      return 'devastacao';
+    case 'DevastationCanceled':
+      return 'devastacao-cancelada';
     case 'TurnStarted':
       return event.player === me ? 'vez' : null;
     case 'ReactionWindowOpened':

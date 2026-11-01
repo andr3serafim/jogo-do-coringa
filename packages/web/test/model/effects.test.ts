@@ -105,6 +105,14 @@ describe('delaysOf: quando cada elemento com layoutId se mexe', () => {
   it('sem batidas, nada espera', () => {
     expect(delaysOf([]).size).toBe(0);
   });
+
+  it('as cartas da fileira devastada não esperam: vão ao cemitério na hora, e a cena desenha as cópias caindo (sub-projeto 6 §7.4)', () => {
+    const delays = delaysOf(
+      beatsOf({ type: 'TurnStarted', player: 'p1' }, { type: 'RowDevastated', player: 'p2', row: 'ATK', cards: [num('n1'), num('n2')], reflected: false }),
+    );
+    expect(delays.has('n1')).toBe(false);
+    expect(delays.has('n2')).toBe(false);
+  });
 });
 
 describe('damageBeatIndex: onde a vida e os totais contam até o valor novo', () => {
@@ -376,6 +384,12 @@ describe('bannerText: a faixa de cada evento', () => {
     expect(bannerText({ type: 'DevastationCanceled', player: 'p1', reason: 'REFLECT_CLASH' }, names)).toBe(
       'Os Reflects se anularam: a Devastação não aconteceu',
     );
+    expect(bannerText({ type: 'DevastationCanceled', player: 'p2', reason: 'ABSOLUTE_DEFENSE' }, names)).toBe(
+      'A Defesa Absoluta de Duda segurou a Devastação devolvida',
+    );
+    expect(bannerText({ type: 'DevastationCanceled', player: 'p1', reason: 'ABSOLUTE_DEFENSE' }, names)).toBe(
+      'A sua Defesa Absoluta segurou a Devastação devolvida',
+    );
   });
 
   it('um evento que não vira faixa devolve null', () => {
@@ -402,18 +416,15 @@ describe('sceneText: o título e a linha de baixo de cada cena', () => {
     );
   });
 
-  it('a cena da Devastação: o título e quem devasta qual fileira', () => {
-    const cast = (player: 'p1' | 'p2', row: 'ATK' | 'DEF'): GameEvent => ({
-      type: 'DevastationCast',
-      player,
-      target: player === 'p1' ? 'p2' : 'p1',
-      row,
-      k: face('k1'),
-      a: face('a1', 'A'),
-      x: face('x1', row === 'ATK' ? 'J' : 'Q'),
-    });
-    expect(sceneText(beat(cast('p2', 'ATK')), names)).toEqual({ title: 'DEVASTAÇÃO!', detail: 'Duda devasta o seu Ataque' });
-    expect(sceneText(beat(cast('p1', 'DEF')), names)).toEqual({ title: 'DEVASTAÇÃO!', detail: 'Você devasta a Defesa de Duda' });
+  it('a cena da Devastação é a da fileira que cai: o título e qual fileira caiu (sub-projeto 6 §7.4)', () => {
+    const fell = (player: 'p1' | 'p2', row: 'ATK' | 'DEF', reflected = false): GameEvent => ({ type: 'RowDevastated', player, row, cards: [num('n1')], reflected });
+    expect(sceneText(beat(fell('p1', 'ATK')), names)).toEqual({ title: 'DEVASTAÇÃO!', detail: 'O seu Ataque foi devastado' });
+    expect(sceneText(beat(fell('p2', 'DEF')), names)).toEqual({ title: 'DEVASTAÇÃO!', detail: 'A Defesa de Duda foi devastada' });
+    expect(sceneText(beat(fell('p1', 'DEF', true)), names).detail).toBe('A Devastação voltou: a sua Defesa foi devastada');
+  });
+
+  it('a cancelada não carimba nome: o motivo vai na fita', () => {
+    expect(sceneText(beat({ type: 'DevastationCanceled', player: 'p1', reason: 'REFLECT_CLASH' }), names)).toEqual({ title: '', detail: '' });
   });
 
   it('a linha de baixo diz de quem é, com "Você" ou o apelido', () => {
@@ -468,6 +479,23 @@ describe('bannerBeatAt: a faixa que está no ar (spec §4.1, §10.4)', () => {
     expect(bannerBeatAt(withBanner, -1, true)).toBeNull();
     expect(bannerBeatAt(withBanner, 1, true)).toBeNull();
     expect(bannerBeatAt([], 0, false)).toBeNull();
+  });
+
+  it('ao vivo, a cena da Devastação cancelada tem a fita do motivo, nos dois motivos (sub-projeto 6 §7.4)', () => {
+    for (const [reason, text] of [
+      ['REFLECT_CLASH', 'Os Reflects se anularam: a Devastação não aconteceu'],
+      ['ABSOLUTE_DEFENSE', 'A sua Defesa Absoluta segurou a Devastação devolvida'],
+    ] as const) {
+      const beats = beatsOf(move('n1'), { type: 'DevastationCanceled', player: 'p1', reason }, move('n2'));
+      expect(beats[1]!.scene).toBe('DEVASTATION_CANCELED');
+      expect(bannerBeatAt(beats, 1, false)).toBe(beats[1]);
+      expect(textsAt(beats, false)).toEqual([null, text, null]);
+    }
+  });
+
+  it('a cena da fileira que cai não tem fita: o nome carimba no campo', () => {
+    const beats = beatsOf({ type: 'RowDevastated', player: 'p2', row: 'ATK', cards: [num('n1')], reflected: false });
+    expect(bannerBeatAt(beats, 0, false)).toBeNull();
   });
 
   it('as cenas viram faixa no catchUp e entram na mesma subida', () => {
