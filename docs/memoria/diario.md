@@ -5,7 +5,7 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
-## 2026-11-01 (4): sub-projeto 6, fatia 3 em execução (a Exódia e a Devastação), Tasks 1 a 3 feitas
+## 2026-11-01 (4): sub-projeto 6, fatia 3 em execução (a Exódia e a Devastação), Tasks 1 a 4 feitas
 
 - **Pedido do autor** (`decisoes.md` 2026-11-01 (4) e (5)): "ok, pode seguir o plano da fatia 3", e que a outra conta consiga
   retomar sem perda nenhuma. Plano em `docs/superpowers/plans/2026-11-01-direcao-visual-fatia-3.md`, na branch
@@ -46,13 +46,20 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
       não tem `blur`. O filtro só existe no abismo, num `<svg>` próprio animado por fora. Custo: as rachaduras ficam menos ásperas
       que no protótipo;
     - a fita da cancelada aparece durante a cena (o `useBeatPlayer` não a bloqueia), e o painel de reserva não mostra essa cena.
+- **Task 4, a desolação** (`7c3b011`):
+  - `model/desolation.ts` (`desolationAfter`), `SessionSnapshot.desolated`, `desolationShown` e `Anim.desolated` (aparece em `settleAt`; o
+    pulo a mostra na hora), `ui/table/RowDesolation.tsx` (a fenda, a terra em `multiply` e as pedras) e `data-apagado` no campo;
+  - **Escolhas:**
+    - **a partida nova zera a desolação** (`#syncGame`), e o replay a calcula dobrando os quadros até o atual: o salto também a mostra,
+      e voltar para antes da queda a tira. O plano não falava desses dois casos;
+    - a desolação mora num `<li aria-hidden>` absoluto sobre todas as colunas da grade, porque assim a fenda acompanha as vagas no
+      celular e no PC. A `SceneBox.row` não o conta como vaga. Ela passa 40 px de cada lado, como a da cena: a Task 6 confere que
+      nada rola de lado a 360 × 640;
+    - a fenda da fileira usa as mesmas sementes da cena num quadro de 1000 × 100 esticado, com 42% da altura para cada lado, para não
+      haver salto quando a cena acaba;
+    - a cor do campo volta por `transition: filter 600ms` no `.campo`. É o único `filter` que anima na fatia, uma vez por fileira, e o
+      Chrome o faz no compositor. A Task 6 mede se pesa.
 - **O que quem continua precisa saber:**
-  - **Task 4 (a desolação):**
-    - hoje, no fim da cena, o abismo some de uma vez. A desolação tem de deixar a fenda desenhada na fileira, para não haver salto.
-      Use `chasmEdges` com as sementes da cena (`EDGE_SEED` 31) ou uma versão parecida;
-    - a desolação aparece em `settleAt` (1,6 s), debaixo da cena, e o pulo a mostra na hora. Faça como `Anim.defeated`: um método no
-      contexto, com o timer no `Stage`;
-    - o `.campo` é `isolate`, e o `data-tremendo` é posto e tirado pela cena direto no DOM (o React não mexe nele);
   - **Task 5 (os sons):** troque as três receitas provisórias do `synth.ts` (`exodia`, `devastacao`, `devastacao-cancelada`, que hoje
     chamam `RECIPES.absoluto`). A pista `absoluto` fica sem uso depois: tire do `Cue`, do `synth.ts` e do `synth.test.ts`
     (`ALL_CUES`, `LONG` e o teste do ruído);
