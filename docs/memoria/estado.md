@@ -5,13 +5,15 @@
 
 ## Agora
 
-- **Branch:** `feat/ajustes-fatia-1`, a partir da `main` (`b9784d0`), no checkout principal `D:/andr3/jogo-coringa`.
-- **Feito, commitado:** os três ajustes que o autor pediu depois de jogar a fatia 1 (`decisoes.md` 2026-11-01 (1); detalhes no
-  `diario.md` 2026-11-01 (1)): o tremor da barra no PC (`412d4ed`), as figuras (`9956fdc`) e a cura em verde na batida dela
-  (`73b4e1f`), mais as notas nas specs (web §3.4 e §10.3; sub-projeto 6 §14).
-- **Próximo passo exato:** push (o pre-push roda o `pnpm check`), as duas CI verdes e o fast-forward na `main`. Depois, o plano
-  da **fatia 2** (Ataque e Defesa Absolutos, spec 6 §7.1 e §7.2, com os sons), pelo `superpowers:writing-plans`, numa branch
-  nova a partir da `main`.
+- **Branch:** `main` (`949f7de` mais o commit desta memória), no checkout principal `D:/andr3/jogo-coringa`. Nada em curso.
+- **Feito por último:** os três ajustes que o autor pediu depois de jogar a fatia 1 (`decisoes.md` 2026-11-01 (1); detalhes no
+  `diario.md` 2026-11-01 (1)), mesclados por fast-forward com as duas CI verdes:
+  - o tremor da barra no PC (`412d4ed`);
+  - as figuras (`9956fdc`);
+  - a cura em verde, na batida dela (`73b4e1f`, `f16057a`);
+  - as notas nas specs (web §3.4 e §10.3; sub-projeto 6 §14).
+- **Próximo passo exato:** o plano da **fatia 2** (Ataque e Defesa Absolutos, spec 6 §7.1 e §7.2, com os sons), pelo
+  `superpowers:writing-plans`, numa branch nova a partir da `main` (`feat/direcao-visual-fatia-2`). Depois, o autor revisa o plano.
 - **Para reproduzir o tremor:** treino `semente=hover1&nivel=facil` a 1366 × 768. Jogue até o A♦ (rodada 3) e escolha
   Armadilha: o alvo é o J♣ do Bot.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
