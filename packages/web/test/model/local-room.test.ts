@@ -11,7 +11,7 @@ import {
   type PlayerView,
   type Replay,
 } from '@coringa/engine';
-import type { ConnectionEvent, PlayerAction, ReplayMessage, RoomMessage, StateMessage } from '@coringa/protocol';
+import { sceneAllowanceMs, type ConnectionEvent, type PlayerAction, type ReplayMessage, type RoomMessage, type StateMessage } from '@coringa/protocol';
 import { BOTS, runHard } from '@coringa/sim/bots';
 import { createRng } from '@coringa/sim/rng';
 import { describe, expect, it, vi } from 'vitest';
@@ -263,8 +263,8 @@ describe('LocalRoom', () => {
     expect(bad1.id).not.toBe(bad2.id);
   });
 
-  it('o bot pensa thinkMs (600 por padrão) e responde às janelas de reação sem esperar', async () => {
-    const { room, timers } = setup('treino-1');
+  it('o bot pensa thinkMs (600 por padrão) e responde às janelas de reação sem esperar (além da folga de uma cena no ar)', async () => {
+    const { room, timers, events } = setup('treino-1');
     room.connect();
     // Equipar: o bot confirma o dele depois de 600 ms.
     expect(timers.delays).toEqual([600]);
@@ -273,13 +273,42 @@ describe('LocalRoom', () => {
       const view = room.state!.view;
       if (view.phase.kind === 'REACTION' && view.phase.responder === 'p2') {
         sawReaction = true;
-        expect(timers.delays.at(-1)).toBe(0);
+        // Sem cena no ar, na hora; com uma cena no ar, só a folga dela (decisoes.md 2026-11-01 (3)).
+        expect(timers.delays.at(-1)).toBeLessThanOrEqual(sceneAllowanceMs(states(events).at(-1)!.events));
       }
       if (myTurn(view)) await room.act(legalActions(view)[0] as PlayerAction);
       else timers.runNext();
     }
     expect(sawReaction).toBe(true);
-    expect(timers.delays.filter((d) => d !== 0 && d !== 600)).toEqual([]);
+    // Fora 0 e 600 ms, só a espera de uma cena (a mais curta, o Reflect, tem 1,5 s).
+    expect(timers.delays.filter((d) => d !== 0 && d !== 600).every((d) => d >= 1_500)).toBe(true);
+  });
+
+  it('o bot espera a folga das cenas raras antes de pensar: a jogada dele não corta a cena (decisoes.md 2026-11-01 (3))', async () => {
+    // Na semente `cena-74`, com o jogador jogando como o greedy, o Bot joga logo depois de um Ataque Absoluto e de um Reflect.
+    const scheduled: Array<{ delay: number; allowance: number }> = [];
+    let published: ConnectionEvent[] = [];
+    let base: FakeTimers['setTimer'] = () => undefined;
+    const { room, timers, events } = setup('cena-74', {
+      setTimer: (fn, ms) => {
+        const last = states(published).at(-1);
+        scheduled.push({ delay: ms, allowance: last ? sceneAllowanceMs(last.events) : 0 });
+        return base(fn, ms);
+      },
+    });
+    published = events;
+    base = timers.setTimer;
+    room.connect();
+    const rng = createRng('cena-74/me');
+    for (let i = 0; i < 6000 && room.room?.status !== 'FINISHED'; i++) {
+      const view = room.state!.view;
+      if (myTurn(view) && (view.phase.kind !== 'EQUIP' || view.self.pending.length > 0)) {
+        await room.act(BOTS.greedy(view, legalActions(view), rng) as PlayerAction);
+      } else if (!timers.runNext()) break;
+    }
+    const afterScenes = scheduled.filter((entry) => entry.allowance > 0);
+    expect(afterScenes.length).toBeGreaterThanOrEqual(2);
+    for (const { delay, allowance } of afterScenes) expect(delay).toBeGreaterThanOrEqual(allowance + 600);
   });
 
   it('thinkMs configurável, em qualquer nível', () => {

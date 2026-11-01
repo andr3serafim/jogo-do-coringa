@@ -213,6 +213,9 @@ A mesa está em §3 e §4. O menu da partida tem:
 - **Escolha do nível:** `/treino` sem `?nivel=<facil|medio|dificil>` mostra, antes da mesa, três botões grandes (nome e uma linha que diz o que o bot faz: "Erra bastante: bom para aprender", "Pensa só na jogada da vez", "Pensa nas próximas rodadas"). O último nível escolhido fica em `coringa:nivel` e vem focado (sem ele, o Médio). Com `?nivel=` válido a tela vai direto à mesa, sem gravar nada. O módulo da sala local (com o bot e a busca) continua num chunk carregado por `import()`.
 - **Sem relógio:** `deadline` é sempre `null`, e a faixa central diz "Treino · Médio, sem relógio" (com o nível); o menu da partida mostra "Treino · Médio". O passe automático e o envio antecipado do Equipar não se aplicam.
 - O bot "pensa" ~600 ms antes de cada jogada, para dar para acompanhar. Na janela de reação, ele responde na hora.
+  - **Nota (2026-11-01, `decisoes.md` 2026-11-01 (3)):** antes de pensar, ele assiste ao fim das cenas raras no ar: espera a mesma
+    folga de cena que estende o prazo no online (`sceneAllowanceMs`). Sem isso, a jogada dele trocava a linha do tempo e cortava a
+    cena do Ataque Absoluto de quem o atacou. Quando o jogador joga, a espera zera: ele já pulou ou viu a cena.
 - Emite um `room` sintético: assentos "Você" e "Bot", status `PLAYING` e `FINISHED`, placar local. A revanche começa outra partida com outra semente.
 - Usa as mesmas telas da mesa e do fim. Não tem lobby.
 - Também é a base dos testes de componentes e de um E2E determinístico (§9).

@@ -6,6 +6,22 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-01 (3): a fatia 2 jogada; a cena do Ataque Absoluto cortada
+
+Depois de jogar a fatia 2:
+
+> A cena da defesa absoluta ocorreu primeiro e estava como esperado, já a cena em seguida do ataque absoluto, na mesma partida,
+> iniciou na hora do ataque mas foi cortada precipitadamente. corrija e pode prosseguir. aprovado, siga
+
+**Leitura:**
+- A fatia 2 está aprovada, com o conserto do corte, e o próximo passo é o plano da fatia 3.
+- **[I]** A causa é a jogada seguinte do bot: ele joga 600 ms depois de a vez chegar a ele, e um `state` novo troca a linha do
+  tempo no meio da cena. A Defesa não foi cortada porque, depois dela, a vez seguiu dele.
+- **[I]** O conserto: o bot do treino espera a folga da cena (a mesma tabela `sceneAllowanceMs` que estende o prazo no online)
+  antes de pensar. Vale para as seis cenas.
+
+---
+
 ## 2026-11-01 (2): o plano da fatia 2 do sub-projeto 6 aprovado
 
 À entrega do plano (`docs/superpowers/plans/2026-11-01-direcao-visual-fatia-2.md`), com as escolhas listadas para ele:

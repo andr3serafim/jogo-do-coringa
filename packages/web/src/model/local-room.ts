@@ -16,7 +16,7 @@ import {
   type PlayerId,
   type ReplayStep,
 } from '@coringa/engine';
-import { HP_CHOICES } from '@coringa/protocol';
+import { HP_CHOICES, sceneAllowanceMs } from '@coringa/protocol';
 import type {
   AckMessage,
   ConnectionEvent,
@@ -125,6 +125,8 @@ export class LocalRoom implements RoomConnection {
   #steps: ReplayStep[] = [];
   /** O timer do bot: o do "pensar" antes da decisão, ou o da próxima fatia da busca do Difícil. Um por vez. */
   #botTimer: unknown = null;
+  /** Até quando (no `now` injetado) vão as cenas raras publicadas: o bot assiste a elas antes de pensar (decisoes.md 2026-11-01 (3)). */
+  #sceneUntil = 0;
   /** A busca do Difícil em curso (a decisão ainda não saiu). `null` fora dela; quando não é `null`, há uma fatia agendada em `#botTimer`. */
   #search: Generator<void, Action> | null = null;
   #connected = false;
@@ -220,6 +222,8 @@ export class LocalRoom implements RoomConnection {
     if (!result.ok) {
       return Promise.resolve({ t: 'ack', id, ok: false, code: result.error.code, message: result.error.message });
     }
+    // Quem joga já não está vendo a cena de antes (ela acabou ou foi pulada): o bot não a espera mais, só a desta jogada.
+    this.#sceneUntil = 0;
     const seq = this.#commit({ player: LOCAL_ME, action }, result.state, result.events);
     return Promise.resolve({ t: 'ack', id, ok: true, seq });
   }
@@ -295,6 +299,9 @@ export class LocalRoom implements RoomConnection {
     this.#seq += 1;
     if (phaseKey(next) !== keyBefore) this.#epoch += 1;
     const seq = this.#seq;
+    // A folga de cena, como o prazo do servidor (spec do servidor §6.2): duas cenas seguidas somam.
+    const allowance = sceneAllowanceMs(events);
+    if (allowance > 0) this.#sceneUntil = Math.max(this.#sceneUntil, this.#options.now()) + allowance;
     this.#publishState(events);
     if (next.phase.kind === 'GAME_OVER') {
       this.#cancelBot();
@@ -378,14 +385,17 @@ export class LocalRoom implements RoomConnection {
   }
 
   /**
-   * O bot joga quando é a vez dele: depois de `thinkMs`, ou já (0 ms) numa janela de reação. Um timer por vez. O Difícil começa
+   * O bot joga quando é a vez dele: depois de `thinkMs`, ou já (0 ms) numa janela de reação. Antes, ele assiste ao fim das cenas
+   * raras que estão no ar (a folga de cena): um `state` novo troca a linha do tempo da mesa, e a jogada dele em 600 ms cortava a
+   * cena do Ataque Absoluto de quem o atacou (decisoes.md 2026-11-01 (3)). Um timer por vez. O Difícil começa
    * a busca quando esse timer dispara e a continua em fatias (`#searchSlice`); na reação e na ordem do ataque não há busca, e a
    * decisão sai na primeira fatia.
    */
   #scheduleBot(): void {
     if (this.#closed || this.#botTimer !== null) return;
     if (!actingPlayers(this.#game).includes(BOT_SEAT)) return;
-    const delay = this.#game.phase.kind === 'REACTION' ? 0 : this.#think;
+    const scene = Math.max(0, this.#sceneUntil - this.#options.now());
+    const delay = scene + (this.#game.phase.kind === 'REACTION' ? 0 : this.#think);
     this.#botTimer = this.#options.setTimer(() => {
       this.#botTimer = null;
       this.#botPlay();
