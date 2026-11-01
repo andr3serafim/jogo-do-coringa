@@ -27,6 +27,7 @@ import { roomNames } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import type { ImpactForce } from '../../model/impact.ts';
 import { bannerReadMs } from '../../model/reading.ts';
+import { SCENE_MOMENTS } from '../../model/scene-moments.ts';
 import { cueOf } from '../../model/sound.ts';
 import type { Beat } from '../../model/timeline.ts';
 import { useSound } from '../sound-context.ts';
@@ -117,6 +118,28 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
     (who: PlayerId, active: boolean): boolean => (busy && index >= 0 ? insigniaShown(run.beats, index, who, active) : active),
     [busy, index, run],
   );
+  // O fim da Exódia no retrato do perdedor (sub-projeto 6 §7.3): a vida escorre em `drainAt` e o retrato racha em `crackAt`. Até a
+  // batida dela, nada; depois dela (ou parado, ou no pulo), tudo.
+  const [exodia, setExodia] = useState<{ beat: Beat; stage: 1 | 2 } | null>(null);
+  useEffect(() => {
+    if (beat?.scene !== 'EXODIA') return;
+    const ids = [
+      window.setTimeout(() => setExodia({ beat, stage: 1 }), SCENE_MOMENTS.EXODIA.drainAt),
+      window.setTimeout(() => setExodia({ beat, stage: 2 }), SCENE_MOMENTS.EXODIA.crackAt),
+    ];
+    return () => ids.forEach((id) => window.clearTimeout(id));
+  }, [beat]);
+  const exodiaStage = useCallback((): number => {
+    if (!busy || index < 0) return 2;
+    const at = run.beats.findIndex((b) => b.event.type === 'Exodia');
+    if (at < 0 || index > at) return 2;
+    if (index < at) return 0;
+    // No `catchUp` a Exódia é faixa, sem cena: vale na batida dela.
+    if (run.beats[at]!.scene === null) return 2;
+    return exodia?.beat === run.beats[at] ? exodia.stage : 0;
+  }, [busy, index, run, exodia]);
+  const defeated = useCallback((_who: PlayerId, lost: boolean) => lost && exodiaStage() >= 2, [exodiaStage]);
+  const drained = useCallback((_who: PlayerId, lost: boolean) => lost && exodiaStage() >= 1, [exodiaStage]);
   const seq = state?.seq ?? 0;
   const jump = state?.resync === true;
   const remounted = useMemo(() => ({ serial: released.serial, ids: released.batch }), [released]);
@@ -172,8 +195,29 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       countMs,
       life,
       insignia,
+      defeated,
+      drained,
     }),
-    [busy, reducedMotion, run, released, remounted, seq, jump, state, beat, ribbon, count, countMs, life, insignia, hitLanded, drawnScene],
+    [
+      busy,
+      reducedMotion,
+      run,
+      released,
+      remounted,
+      seq,
+      jump,
+      state,
+      beat,
+      ribbon,
+      count,
+      countMs,
+      life,
+      insignia,
+      defeated,
+      drained,
+      hitLanded,
+      drawnScene,
+    ],
   );
 
   // O golpe treme a mesa na batida dele (a animação do CSS roda uma vez quando a marca entra); nada com movimento reduzido.

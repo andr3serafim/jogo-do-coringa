@@ -11,7 +11,7 @@ import { SCENE_MOMENTS, TITLE_MS } from '../../model/scene-moments.ts';
 import { RARE_SCENE_MS } from '../../model/timeline.ts';
 import type { SceneBox } from '../anim/scene-box.ts';
 
-export type FramedScene = 'ABSOLUTE_ATTACK' | 'ABSOLUTE_DEFENSE';
+export type FramedScene = 'ABSOLUTE_ATTACK' | 'ABSOLUTE_DEFENSE' | 'EXODIA';
 
 /** O quadro do protótipo, em unidades. */
 export const STAGE_W = 1000;
@@ -36,21 +36,38 @@ export function stampKeyframes(reduced: boolean): Keyframe[] {
   ];
 }
 
-/** O corte, o fundo, por onde a faixa entra, quando ela sai, e a cor do carimbo de cada cena (§7). */
-const LOOK: Record<FramedScene, { clip: string; glow: string; from: string; outAt: number; stamp: string }> = {
+/** O tamanho e o contorno do carimbo das cenas; o da Exódia é maior, com filete de ouro (§7). */
+const STAMP_SIZE = 'border-tinta px-4 text-3xl pc:px-6 pc:text-6xl';
+
+/**
+ * O corte, o fundo (o brilho do meio, a mistura com o papel e com o vermelho), por onde a faixa entra, quando ela sai, e o carimbo
+ * de cada cena (§7).
+ */
+const LOOK: Record<FramedScene, { clip: string; glow: string; warm: string; from: string; outAt: number; stamp: string }> = {
   ABSOLUTE_ATTACK: {
     clip: 'polygon(0 5%, 100% 0, 100% 95%, 0 100%)',
     glow: '50% 50%',
+    warm: 'var(--color-papel) 6%',
     from: 'translateX(-100%)',
     outAt: SCENE_MOMENTS.ABSOLUTE_ATTACK.bandOut,
-    stamp: '-rotate-3 bg-vermelho text-papel [text-shadow:3px_3px_0_var(--color-tinta)]',
+    stamp: `${STAMP_SIZE} -rotate-3 bg-vermelho text-papel [text-shadow:3px_3px_0_var(--color-tinta)]`,
   },
   ABSOLUTE_DEFENSE: {
     clip: 'polygon(0 0, 100% 5%, 100% 100%, 0 95%)',
     glow: '50% 60%',
+    warm: 'var(--color-papel) 6%',
     from: 'translateY(40px)',
     outAt: SCENE_MOMENTS.ABSOLUTE_DEFENSE.insigniaAt,
-    stamp: 'rotate-2 bg-papel text-tinta outline-4 -outline-offset-[11px] outline-ouro',
+    stamp: `${STAMP_SIZE} rotate-2 bg-papel text-tinta outline-4 -outline-offset-[11px] outline-ouro`,
+  },
+  EXODIA: {
+    clip: 'polygon(0 3%, 100% 0, 100% 97%, 0 100%)',
+    glow: '50% 62%',
+    warm: 'var(--color-vermelho) 16%',
+    from: 'translateY(50px)',
+    outAt: SCENE_MOMENTS.EXODIA.bandOut,
+    stamp:
+      'border-ouro px-6 text-4xl -rotate-2 bg-tinta text-ouro [text-shadow:4px_4px_0_var(--color-vermelho)] pc:px-9 pc:text-7xl',
   },
 };
 
@@ -115,7 +132,7 @@ export function SceneFrame({
         className="absolute inset-0"
         style={{
           clipPath: look.clip,
-          background: `radial-gradient(ellipse at ${look.glow}, color-mix(in oklab, var(--color-tinta), var(--color-papel) 6%), var(--color-tinta) 78%)`,
+          background: `radial-gradient(ellipse at ${look.glow}, color-mix(in oklab, var(--color-tinta), ${look.warm}), var(--color-tinta) 78%)`,
         }}
       >
         <div
@@ -145,7 +162,7 @@ function Stamp({ kind, reduced, className }: { kind: FramedScene; reduced: boole
   return (
     <div ref={ref} data-carimbo={kind} className="absolute inset-x-0 bottom-[16%] z-20 text-center">
       <span
-        className={`inline-block border-[5px] border-tinta px-4 pb-0.5 pt-1.5 font-madeira text-3xl uppercase leading-none tracking-[0.03em] shadow-[8px_8px_0_var(--color-tinta)] pc:px-6 pc:text-6xl ${className}`}
+        className={`inline-block border-[5px] pb-0.5 pt-1.5 font-madeira uppercase leading-none tracking-[0.03em] shadow-[8px_8px_0_var(--color-tinta)] ${className}`}
       >
         {SCENE_TITLE[kind]}
       </span>

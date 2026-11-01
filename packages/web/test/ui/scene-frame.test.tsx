@@ -79,6 +79,18 @@ describe('<SceneFrame>', () => {
     expect(screen.getByText('DEFESA ABSOLUTA').closest('[data-carimbo]')).toHaveAttribute('data-carimbo', 'ABSOLUTE_DEFENSE');
   });
 
+  it('o carimbo da Exódia (§7.3): ouro sobre tinta, com filete de ouro e sombra vermelha, maior que os outros', () => {
+    render(<SceneFrame kind="EXODIA" box={BOX} reduced={false} />);
+    advance(SCENE_MOMENTS.EXODIA.titleAt);
+    const stamp = screen.getByText('EXÓDIA!');
+    expect(stamp.closest('[data-carimbo]')).toHaveAttribute('data-carimbo', 'EXODIA');
+    expect(stamp.className).toMatch(/\bbg-tinta\b/);
+    expect(stamp.className).toMatch(/\btext-ouro\b/);
+    expect(stamp.className).toMatch(/\bborder-ouro\b/);
+    expect(stamp.className).toContain('var(--color-vermelho)');
+    expect(stamp.className).toMatch(/\bpc:text-7xl\b/);
+  });
+
   it('o carimbo entra grande e assenta; com movimento reduzido, só esmaece (nenhuma transformação)', () => {
     const full = stampKeyframes(false);
     expect(full[0]).toMatchObject({ opacity: 0, transform: 'scale(3)' });
@@ -105,5 +117,31 @@ describe('sem o módulo das cenas carregado', () => {
     const panel = document.querySelector('[data-painel-cena]')!;
     expect(panel).toHaveAttribute('data-ativo', 'true');
     expect(panel).toHaveTextContent('ATAQUE ABSOLUTO');
+  });
+
+  it('a Exódia mostra o painel com os quatro K em cruz, os raios girando e o título com "e vence!"', () => {
+    const [beat] = buildTimeline([{ type: 'Exodia', player: 'p2' } satisfies GameEvent], {
+      mode: 'live',
+      reducedMotion: false,
+      decisionPending: false,
+    });
+    const names = roomNames('p1', [{ playerId: 'p2', nickname: 'Duda' }]);
+    render(<BeatOverlay scene={beat!} curtain names={names} reduced={false} me="p1" hitLanded={false} />);
+    expect(document.querySelector('[data-figura]')).toHaveAttribute('data-figura', 'cross');
+    const cards = [...document.querySelectorAll('[data-figura] [data-card-id]')].map((card) => card.getAttribute('data-card-id'));
+    expect(cards).toEqual(['cena-K-0', 'cena-K-1', 'cena-K-2', 'cena-K-3']);
+    expect(document.querySelector('[data-raios]')!.getAttribute('class')).toContain('animate-[spin');
+    expect(document.querySelector('[data-painel-cena]')).toHaveTextContent('Duda reuniu os quatro K e vence!');
+  });
+
+  it('com movimento reduzido, a figura já parada e os raios parados', () => {
+    const [beat] = buildTimeline([{ type: 'Exodia', player: 'p2' } satisfies GameEvent], {
+      mode: 'live',
+      reducedMotion: true,
+      decisionPending: false,
+    });
+    render(<BeatOverlay scene={beat!} curtain names={roomNames('p1', [])} reduced me="p1" hitLanded={false} />);
+    expect(document.querySelectorAll('[data-figura] [data-card-id]')).toHaveLength(4);
+    expect(document.querySelector('[data-raios]')!.getAttribute('class')).not.toContain('animate-');
   });
 });

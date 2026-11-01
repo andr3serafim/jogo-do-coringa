@@ -419,6 +419,12 @@
       0 0 14px 2px color-mix(in oklab, var(--color-ouro) 45%, transparent);
   }
 
+  /* O perdedor da Exódia (sub-projeto 6 §7.3): o retrato racha (a fenda é desenhada) e perde a cor. */
+  .placar-retrato[data-derrotado] {
+    filter: grayscale(1) brightness(0.75);
+    transition: filter 600ms;
+  }
+
   .placar-info {
     display: flex;
     min-width: 0;

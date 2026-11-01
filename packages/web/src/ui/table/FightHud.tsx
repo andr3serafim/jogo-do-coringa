@@ -153,8 +153,13 @@ function Side({ side, view, player, name, holder }: SideProps) {
   const seen = onSeen && marked ? () => onSeen(zoneKey(zone)) : undefined;
   const max = view.config.hp;
   const anim = useAnim();
+  // A Exódia do outro acabou a partida (sub-projeto 6 §7.3): a vida vai a zero, também para o leitor de tela, e o retrato racha.
+  const { phase } = view;
+  const lost = phase.kind === 'GAME_OVER' && phase.result.reason === 'EXODIA' && phase.result.winner !== player.id;
+  const hp = lost ? 0 : player.hp;
+  const defeated = anim.defeated(player.id, lost);
   // A vida mostrada conta na batida que mexe nela (o golpe, a cura) até o valor da `view`, que é a verdade (aria-valuenow).
-  const { shown: shownHp, target: hpTarget } = useCountedLife(player.id, player.hp);
+  const { shown: shownHp, target: hpTarget } = useCountedLife(player.id, player.hp, anim.drained(player.id, lost));
   const damage = anim.fx.damage?.target === player.id ? anim.fx.damage : null;
   const impact = anim.fx.impact?.target === player.id ? anim.fx.impact : null;
   const hpName = `Vida de ${name}`;
@@ -164,9 +169,11 @@ function Side({ side, view, player, name, holder }: SideProps) {
       <span
         data-retrato={side}
         data-dono={holder ? '' : undefined}
+        data-derrotado={defeated ? '' : undefined}
         className={`placar-retrato ${self ? 'bg-capa-voce' : 'bg-capa-oponente'}`}
       >
         <Coringa className="size-[82%]" />
+        {defeated ? <PortraitCrack reduced={anim.reduced} /> : null}
         {/* A insígnia da Defesa Absoluta (sub-projeto 6 §7.2), no canto de baixo, por fora: a espada da iniciativa fica no de cima. */}
         {anim.insignia(player.id, player.absoluteDefense) ? (
           <Insignia className={`absolute -bottom-2 z-10 h-[20px] w-[17px] drop-shadow-[1px_1px_0_var(--color-tinta)] pc:-bottom-3 pc:h-[32px] pc:w-[27px] ${self ? '-left-2 pc:-left-3' : '-right-2 pc:-right-3'}`} />
@@ -190,7 +197,7 @@ function Side({ side, view, player, name, holder }: SideProps) {
         </h2>
         <HpBar
           label={marked ? `${hpName}, novo` : hpName}
-          hp={player.hp}
+          hp={hp}
           shown={shownHp}
           target={hpTarget}
           max={max}
@@ -208,6 +215,26 @@ function Side({ side, view, player, name, holder }: SideProps) {
         </p>
       </div>
     </div>
+  );
+}
+
+/**
+ * A fenda de tinta do retrato do perdedor da Exódia (sub-projeto 6 §7.3, o desenho do protótipo): entra grande e assenta; o
+ * retrato perde a cor (`[data-derrotado]`, no CSS). Com movimento reduzido, só aparece.
+ */
+function PortraitCrack({ reduced }: { reduced: boolean }) {
+  const ref = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    if (reduced) return;
+    const motion = ref.current?.animate?.([{ opacity: 0, transform: 'scale(1.4)' }, { opacity: 1, transform: 'none' }], { duration: 220 });
+    return () => motion?.cancel();
+  }, [reduced]);
+  const crack = 'M38 0 L34 18 L44 30 L30 44 L40 58 L34 76';
+  return (
+    <svg ref={ref} data-fenda-retrato viewBox="0 0 76 76" aria-hidden="true" className="pointer-events-none absolute inset-0 size-full">
+      <path d={`${crack} M44 30 L62 26 L76 34 M30 44 L12 50 L0 46`} fill="none" stroke="var(--color-tinta)" strokeWidth="4" />
+      <path d={crack} fill="none" stroke="var(--color-papel)" strokeWidth="1.2" />
+    </svg>
   );
 }
 

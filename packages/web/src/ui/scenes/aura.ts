@@ -1,6 +1,6 @@
-// A aura de energia do Ataque Absoluto (sub-projeto 6 §7.1) e os raios pequenos em volta dela. A aura "ferve" trocando o `d` de 3
-// caminhos entre 4 formas calculadas uma vez (§11: nada de calcular forma a cada quadro). As formas saem da mesma conta do
-// protótipo aprovado, com as mesmas sementes: pontas viradas para cima, maiores no alto, quase nada embaixo.
+// As auras de energia do Ataque Absoluto e da Exódia (sub-projeto 6 §7.1, §7.3) e os raios pequenos em volta delas. A aura
+// "ferve" trocando o `d` de 3 caminhos entre 4 formas calculadas uma vez (§11: nada de calcular forma a cada quadro). As formas
+// saem da mesma conta do protótipo aprovado, com as mesmas sementes: pontas viradas para cima, maiores no alto, quase nada embaixo.
 
 /** Gerador de Park–Miller, o do protótipo: a mesma semente dá sempre o mesmo desenho. */
 function rng(seed: number): () => number {
@@ -36,24 +36,52 @@ function auraPath(rx: number, ry: number, n: number, maxL: number, seed: number)
   return `${d} Z`;
 }
 
-/** As três camadas, de fora para dentro: ouro com contorno de tinta, ouro claro, branco-quente (papel). */
-export const AURA_LAYERS = [
-  { rx: 100, ry: 108, n: 20, maxL: 100 },
-  { rx: 86, ry: 94, n: 17, maxL: 70 },
-  { rx: 70, ry: 80, n: 14, maxL: 44 },
-] as const;
+/** As camadas de uma aura, de fora para dentro, e o passo da semente entre camadas e entre as 4 formas de cada uma. */
+export interface AuraSpec {
+  layers: ReadonlyArray<{ rx: number; ry: number; n: number; maxL: number }>;
+  layerStep: number;
+  frameStep: number;
+}
+
+/** A do Ataque Absoluto: ouro com contorno de tinta, ouro claro, branco-quente (papel). */
+export const ATTACK_AURA: AuraSpec = {
+  layers: [
+    { rx: 100, ry: 108, n: 20, maxL: 100 },
+    { rx: 86, ry: 94, n: 17, maxL: 70 },
+    { rx: 70, ry: 80, n: 14, maxL: 44 },
+  ],
+  layerStep: 47,
+  frameStep: 13,
+};
+
+/** A da Exódia (§7.3), maior e com mais pontas: vermelho com contorno de tinta, ouro, branco-quente. Semente-base 401. */
+export const EXODIA_AURA: AuraSpec = {
+  layers: [
+    { rx: 104, ry: 112, n: 22, maxL: 110 },
+    { rx: 88, ry: 96, n: 18, maxL: 76 },
+    { rx: 70, ry: 80, n: 14, maxL: 46 },
+  ],
+  layerStep: 53,
+  frameStep: 17,
+};
 
 /** Quanto tempo cada forma fica antes da próxima (a aura "ferve"). */
 export const AURA_BOIL_MS = 70;
 
-let cached: string[][] | null = null;
+const cached = new Map<AuraSpec, Map<number, string[][]>>();
 
-/** As 4 formas de cada camada (3 × 4), calculadas uma vez. */
-export function auraVariants(): string[][] {
-  cached ??= AURA_LAYERS.map((layer, i) =>
-    [0, 1, 2, 3].map((k) => auraPath(layer.rx, layer.ry, layer.n, layer.maxL, 211 + i * 47 + k * 13)),
-  );
-  return cached;
+/** As 4 formas de cada camada (3 × 4), calculadas uma vez por aura e semente. */
+export function auraVariants(aura: AuraSpec = ATTACK_AURA, seedBase = 211): string[][] {
+  const bySeed = cached.get(aura) ?? new Map<number, string[][]>();
+  cached.set(aura, bySeed);
+  let variants = bySeed.get(seedBase);
+  if (variants === undefined) {
+    variants = aura.layers.map((layer, i) =>
+      [0, 1, 2, 3].map((k) => auraPath(layer.rx, layer.ry, layer.n, layer.maxL, seedBase + i * aura.layerStep + k * aura.frameStep)),
+    );
+    bySeed.set(seedBase, variants);
+  }
+  return variants;
 }
 
 /** Um raio a cada 340 ms, no máximo (spec 6 §1: até 3 por segundo; o protótipo soltava um a cada 110–140 ms e não vai). */

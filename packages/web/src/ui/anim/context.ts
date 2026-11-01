@@ -76,6 +76,13 @@ export interface Anim {
    * as batidas tocando, a insígnia espera a cena dela e some na batida do fim dela.
    */
   insignia(player: PlayerId, active: boolean): boolean;
+  /**
+   * O retrato de `player` racha (sub-projeto 6 §7.3). `lost` diz se a `view` acabou com a Exódia do outro: parado, vale ele; com a
+   * batida da Exódia tocando, só a partir de `crackAt` (e no pulo, na hora).
+   */
+  defeated(player: PlayerId, lost: boolean): boolean;
+  /** A vida de `player` escorre até zero: como `defeated`, mas a partir de `drainAt`, um pouco antes da rachadura. */
+  drained(player: PlayerId, lost: boolean): boolean;
 }
 
 export const IDLE_ANIM: Anim = {
@@ -95,6 +102,8 @@ export const IDLE_ANIM: Anim = {
   countMs: 0,
   life: () => IDLE_LIFE,
   insignia: (_player, active) => active,
+  defeated: (_player, lost) => lost,
+  drained: (_player, lost) => lost,
 };
 
 export const AnimContext = createContext<Anim>(IDLE_ANIM);

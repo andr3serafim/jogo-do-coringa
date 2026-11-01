@@ -492,6 +492,23 @@ describe('mesa: o placar de luta (sub-projeto 6 §3)', () => {
     expect(portraits).toEqual(['voce', 'oponente']);
   });
 
+  it('a Exódia do oponente: o seu retrato racha e a vida mostra 0, também no medidor (sub-projeto 6 §7.3)', () => {
+    const { container } = mount({ ...DRAFT, phase: { kind: 'GAME_OVER', result: { kind: 'WIN', winner: 'p2', reason: 'EXODIA' } } });
+    expect(container.querySelector('[data-retrato="voce"]')).toHaveAttribute('data-derrotado');
+    expect(container.querySelector('[data-retrato="oponente"]')).not.toHaveAttribute('data-derrotado');
+    const meter = placar().getByRole('meter', { name: 'Vida de André' });
+    expect(meter).toHaveAttribute('aria-valuenow', '0');
+    expect(meter).toHaveAttribute('aria-valuetext', '0 de 300');
+    const hp = [...container.querySelectorAll('[data-placar] [data-hp]')].map((el) => el.textContent);
+    expect(hp).toEqual(['0', '214']);
+  });
+
+  it('o fim pela vida não racha retrato nenhum', () => {
+    const { container } = mount({ ...DRAFT, phase: { kind: 'GAME_OVER', result: { kind: 'WIN', winner: 'p2', reason: 'HP' } } });
+    expect(container.querySelector('[data-derrotado]')).toBeNull();
+    expect(placar().getByRole('meter', { name: 'Vida de André' })).toHaveAttribute('aria-valuenow', '187');
+  });
+
   it('os campos não têm mais vida nem apelido', () => {
     mount();
     for (const name of ['Seu campo', 'Campo de Duda']) {

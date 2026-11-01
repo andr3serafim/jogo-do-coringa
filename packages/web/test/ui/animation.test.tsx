@@ -84,13 +84,14 @@ describe('palco: a cena inverte a tela inteira uma vez (spec §10.1, §10.4)', (
     expect(stage(m.container).style.filter).toBe('');
   });
 
-  it('a cena mostra o título e some no fim da batida', () => {
+  it('a cena carimba o título no instante dele e some no fim da batida', () => {
     const m = mount(THEIRS);
     emit(m, EXODIA_OVER, [EXODIA]);
     expect(scene(m.container)).toHaveAttribute('data-cena', 'EXODIA');
+    expect(scene(m.container)).not.toHaveTextContent('EXÓDIA!');
+    advance(SCENE_MOMENTS.EXODIA.titleAt);
     expect(scene(m.container)).toHaveTextContent('EXÓDIA!');
-    expect(scene(m.container)).toHaveTextContent('Duda reuniu os quatro K');
-    advance(RARE_SCENE_MS.EXODIA - 1);
+    advance(RARE_SCENE_MS.EXODIA - SCENE_MOMENTS.EXODIA.titleAt - 1);
     expect(scene(m.container)).not.toBeNull();
     advance(1);
     expect(scene(m.container)).toBeNull();
@@ -113,17 +114,48 @@ describe('palco: a cena inverte a tela inteira uma vez (spec §10.1, §10.4)', (
   });
 });
 
-describe('cenas raras (U3): a figura, o título que carimba e os raios', () => {
-  const figure = (container: HTMLElement) => container.querySelector('[data-figura]');
-  const figureCards = (container: HTMLElement) => [...container.querySelectorAll('[data-figura] [data-card-id]')];
+describe('o retrato do perdedor na Exódia (sub-projeto 6 §7.3)', () => {
+  const cracked = (container: HTMLElement) => container.querySelector('[data-retrato="voce"][data-derrotado]') !== null;
+  const hp = (container: HTMLElement) => container.querySelector('[data-lado="voce"] [data-hp]')!.textContent;
 
-  it('a Exódia: os quatro K em cruz, os raios girando, e o título com "e vence!"', () => {
+  it('racha só no instante dele, dentro da cena; antes, a vida escorre até 0', () => {
     const m = mount(THEIRS);
     emit(m, EXODIA_OVER, [EXODIA]);
-    expect(figure(m.container)).toHaveAttribute('data-figura', 'cross');
-    expect(figureCards(m.container).map((card) => card.getAttribute('data-card-id'))).toEqual(['cena-K-0', 'cena-K-1', 'cena-K-2', 'cena-K-3']);
-    expect(m.container.querySelector('[data-raios]')!.getAttribute('class')).toContain('animate-[spin');
-    expect(scene(m.container)).toHaveTextContent('Duda reuniu os quatro K e vence!');
+    advance(SCENE_MOMENTS.EXODIA.drainAt - 1);
+    expect(cracked(m.container)).toBe(false);
+    expect(hp(m.container)).not.toBe('0');
+    advance(1);
+    advance(SCENE_MOMENTS.EXODIA.crackAt - SCENE_MOMENTS.EXODIA.drainAt - 1);
+    expect(cracked(m.container)).toBe(false);
+    // A vida já escorre (a contagem parte no desenho seguinte: uma folga de alguns quadros, como a do golpe).
+    expect(Number(hp(m.container))).toBeLessThan(187);
+    advance(1);
+    expect(cracked(m.container)).toBe(true);
+    advance(100);
+    expect(hp(m.container)).toBe('0');
+    advance(RARE_SCENE_MS.EXODIA);
+    expect(cracked(m.container)).toBe(true);
+  });
+
+  it('o pulo mostra o retrato rachado na hora', async () => {
+    const m = mount(THEIRS);
+    emit(m, EXODIA_OVER, [EXODIA]);
+    advance(500);
+    expect(cracked(m.container)).toBe(false);
+    await m.user.click(stage(m.container));
+    expect(cracked(m.container)).toBe(true);
+    expect(hp(m.container)).toBe('0');
+  });
+});
+
+describe('cenas raras (U3): a figura, o título que carimba e os raios', () => {
+  const figure = (container: HTMLElement) => container.querySelector('[data-figura]');
+
+  it('a Exódia tem desenho próprio (sub-projeto 6, fatia 3): a faixa da cena no lugar do painel', () => {
+    const m = mount(THEIRS);
+    emit(m, EXODIA_OVER, [EXODIA]);
+    expect(m.container.querySelector('[data-faixa-cena="EXODIA"]')).not.toBeNull();
+    expect(m.container.querySelector('[data-painel-cena][data-ativo]')).toBeNull();
   });
 
   it('o Ataque e a Defesa Absolutos têm desenho próprio (sub-projeto 6, fatia 2): a faixa da cena no lugar do painel', () => {
@@ -161,19 +193,14 @@ describe('cenas raras (U3): a figura, o título que carimba e os raios', () => {
     expect(m.container.querySelector('[data-raios]')).toBeNull();
   });
 
-  it('com movimento reduzido, a figura já parada e os raios parados', () => {
-    const m = mount(THEIRS, { prefs: { reduceMotion: true } });
-    emit(m, EXODIA_OVER, [EXODIA]);
-    expect(figureCards(m.container)).toHaveLength(4);
-    expect(m.container.querySelector('[data-raios]')!.getAttribute('class')).not.toContain('animate-');
-  });
 });
 
 describe('palco: movimento reduzido (spec §4.1, §10.4)', () => {
-  it('pela preferência do menu: a cena vira texto parado com esmaecimento, sem inversão', () => {
+  it('pela preferência do menu: a cena reduzida (o nome só esmaece), sem inversão', () => {
     const m = mount(THEIRS, { prefs: { reduceMotion: true } });
     emit(m, EXODIA_OVER, [EXODIA]);
     expect(scene(m.container)).toHaveAttribute('data-reduzido', 'true');
+    advance(SCENE_MOMENTS.EXODIA.titleAt);
     expect(scene(m.container)).toHaveTextContent('EXÓDIA!');
     const trace = watchInversion(m.container);
     trace.run(4_300);

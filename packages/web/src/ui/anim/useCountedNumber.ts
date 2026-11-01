@@ -3,7 +3,11 @@
 // contagem durante ela e o valor novo em seguida (ou na hora, se não há batida de dano, com movimento reduzido ou no pulo).
 import type { PlayerId } from '@coringa/engine';
 import { useEffect, useState } from 'react';
+import { SCENE_MOMENTS } from '../../model/scene-moments.ts';
 import { useAnim } from './context.ts';
+
+/** A vida do perdedor da Exódia escorre de `drainAt` até a rachadura do retrato. */
+const DRAIN_MS = SCENE_MOMENTS.EXODIA.crackAt - SCENE_MOMENTS.EXODIA.drainAt;
 
 export function useCountedNumber(value: number): number {
   const { count, countMs } = useAnim();
@@ -42,7 +46,7 @@ export function useCountedNumber(value: number): number {
  * chegou com a mesa ainda tocando), vale a de depois menos as mudanças. Os eventos trazem a mudança exata da vida do motor
  * (conferido em 2026-11-01 nas partidas de referência), e o golpe que mata a leva abaixo de 0, como a `view`.
  */
-export function useCountedLife(player: PlayerId, value: number): { shown: number; target: number } {
+export function useCountedLife(player: PlayerId, value: number, drained = false): { shown: number; target: number } {
   const { life } = useAnim();
   const { playing, done, step, ms, total } = life(player);
   const [before, setBefore] = useState(value);
@@ -50,14 +54,16 @@ export function useCountedLife(player: PlayerId, value: number): { shown: number
   if (!playing && before !== value) setBefore(value);
   const start = before + total === value ? before : value - total;
   const from = start + done;
-  const to = from + step;
+  // A Exódia leva a vida do perdedor a zero (sub-projeto 6 §7.3), escorrendo até a rachadura do retrato.
+  const to = drained ? 0 : from + step;
+  const span = drained ? DRAIN_MS : ms;
 
   useEffect(() => {
     if (!playing || from === to) return;
     const begin = performance.now();
     let frame = 0;
     const tick = () => {
-      const t = Math.min(1, (performance.now() - begin) / Math.max(1, ms));
+      const t = Math.min(1, (performance.now() - begin) / Math.max(1, span));
       setTween(Math.round(from + (to - from) * t));
       if (t < 1) frame = requestAnimationFrame(tick);
     };
@@ -66,8 +72,8 @@ export function useCountedLife(player: PlayerId, value: number): { shown: number
       cancelAnimationFrame(frame);
       setTween(null);
     };
-  }, [playing, from, to, ms]);
+  }, [playing, from, to, span]);
 
-  if (!playing) return { shown: value, target: value };
+  if (!playing) return drained ? { shown: 0, target: 0 } : { shown: value, target: value };
   return { shown: tween ?? from, target: to };
 }
