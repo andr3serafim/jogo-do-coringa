@@ -39,7 +39,8 @@ export function useCountedNumber(value: number): number {
  * batida de agora a leva: abaixo de `shown`, um golpe (o rastro espera e escorre até lá); acima, uma cura (o trecho verde).
  *
  * A vida de antes é a última que a mesa mostrou parada. Se ela não fecha com as mudanças da linha do tempo (um `state` novo
- * chegou com a mesa ainda tocando), vale a de depois menos as mudanças. Nunca abaixo de 0: o golpe que mata conta só até 0.
+ * chegou com a mesa ainda tocando), vale a de depois menos as mudanças. Os eventos trazem a mudança exata da vida do motor
+ * (conferido em 2026-11-01 nas partidas de referência), e o golpe que mata a leva abaixo de 0, como a `view`.
  */
 export function useCountedLife(player: PlayerId, value: number): { shown: number; target: number } {
   const { life } = useAnim();
@@ -47,9 +48,9 @@ export function useCountedLife(player: PlayerId, value: number): { shown: number
   const [before, setBefore] = useState(value);
   const [tween, setTween] = useState<number | null>(null);
   if (!playing && before !== value) setBefore(value);
-  const start = Math.max(0, before + total) === value ? before : value - total;
-  const from = Math.max(0, start + done);
-  const to = Math.max(0, start + done + step);
+  const start = before + total === value ? before : value - total;
+  const from = start + done;
+  const to = from + step;
 
   useEffect(() => {
     if (!playing || from === to) return;

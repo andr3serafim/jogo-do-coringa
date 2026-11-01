@@ -829,6 +829,36 @@ describe('efeitos da batida (spec §4.2)', () => {
       expect(hp()).toBe(143);
     });
 
+    it('um state novo no meio da contagem: a vida segue de onde a conta fecha, sem voltar à de antes', () => {
+      const m = mount(THEIRS);
+      emit(m, { ...THEIRS, self: { ...THEIRS.self, hp: 137 } }, [ATTACK, HIT]);
+      advance(300);
+      advance(1);
+      advance(300);
+      const midway = hp();
+      expect(midway).toBeLessThan(187);
+      // O segundo golpe chega com a mesa ainda tocando o primeiro (o bot responde logo).
+      emit(m, { ...THEIRS, self: { ...THEIRS.self, hp: 87 } }, [ATTACK, HIT]);
+      expect(hp()).toBeLessThanOrEqual(midway);
+      advance(300);
+      advance(1);
+      advance(600);
+      expect(hp()).toBe(87);
+    });
+
+    it('o golpe que mata conta até a vida do motor, mesmo abaixo de 0', () => {
+      const m = mount(THEIRS);
+      const kill: GameEvent = { type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 300, defense: 100, damage: 200 };
+      emit(m, { ...THEIRS, self: { ...THEIRS.self, hp: -13 } }, [ATTACK, kill]);
+      advance(300);
+      advance(1);
+      // Perto do fim da batida a contagem já passou de 0, como a vida do motor (o placar sempre mostrou a vida da `view`).
+      advance(580);
+      expect(hp()).toBeLessThan(0);
+      advance(100);
+      expect(hp()).toBe(-13);
+    });
+
     it('com movimento reduzido, a vida vai direto à nova, sem o trecho verde', () => {
       const m = mount(THEIRS, { prefs: { reduceMotion: true } });
       emit(m, { ...THEIRS, self: { ...THEIRS.self, hp: 193 } }, [ATTACK, removed, healed]);
