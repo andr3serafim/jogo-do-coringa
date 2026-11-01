@@ -15,6 +15,7 @@ import { newLineCount, type HistoryLine } from '../../model/history.ts';
 import type { TrainingLevel } from '../../model/local-room.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import type { HintZone } from '../../model/tutorial.ts';
+import { loadScenes } from '../anim/scenes-loader.ts';
 import { useMediaQuery } from '../useMediaQuery.ts';
 import { Banners } from './Banners.tsx';
 import { CenterBand } from './CenterBand.tsx';
@@ -139,6 +140,10 @@ function TableView({
   const seenCount = seen.first === history.lines[0] ? seen.count : 0;
 
   // Enquanto a mesa está montada, o puxar-para-atualizar da página não recarrega a partida (spec §3.2).
+  // As cenas refeitas no sub-projeto 6 moram num chunk à parte: pré-carregado já, para a primeira cena não esperar a rede.
+  useEffect(() => {
+    void loadScenes();
+  }, []);
   useEffect(() => {
     document.documentElement.classList.add('mesa-ativa');
     return () => document.documentElement.classList.remove('mesa-ativa');

@@ -250,6 +250,8 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
               curtain={curtain}
               names={names}
               reduced={reducedMotion}
+              me={me}
+              hitLanded={hitLanded}
             />
           </div>
         </AnimContext>

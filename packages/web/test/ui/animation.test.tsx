@@ -494,6 +494,23 @@ describe('palco: os controles durante as batidas (spec §4.1)', () => {
   });
 });
 
+describe('a cortina das cenas deixa o placar à vista (sub-projeto 6 §7)', () => {
+  it('a cortina começa no fim do placar medido', () => {
+    const rect = (top: number, height: number) =>
+      ({ x: 0, y: top, top, left: 0, width: 800, height, right: 800, bottom: top + height, toJSON: () => ({}) }) as DOMRect;
+    const spy = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+      if (this.matches('[data-placar]')) return rect(0, 96);
+      if (this.matches('[data-campos]')) return rect(96, 400);
+      return rect(0, 0);
+    });
+    const m = mount(THEIRS);
+    emit(m, THEIRS, [SCENE]);
+    advance(1);
+    expect(m.container.querySelector<HTMLElement>('[data-cortina]')!.style.top).toBe('96px');
+    spy.mockRestore();
+  });
+});
+
 describe('palco: trava global de flash (spec §10.4)', () => {
   it('dois `state`s com cena a 200 ms: a segunda cena não inverte, e nenhuma janela de 1 s passa de 3 trocas', () => {
     const m = mount(THEIRS);
@@ -821,7 +838,8 @@ describe('efeitos da batida (spec §4.2)', () => {
       expect(m.container.querySelector('[data-dano]')).toHaveTextContent('−50');
       expect(stage(m.container)).toHaveAttribute('data-tremor', 'forte');
       expect(m.container.querySelector('[data-respingo]')).not.toBeNull();
-      advance(700);
+      // A contagem (700 ms) parte no desenho seguinte ao impacto: uma folga de alguns quadros.
+      advance(760);
       expect(hp()).toBe(137);
       // O golpe absorvido não repete o número depois da cena.
       advance(1_400);

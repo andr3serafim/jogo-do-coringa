@@ -13,19 +13,25 @@
 //
 // Com movimento reduzido, a cena é o mesmo texto parado que aparece e some (esmaecimento), sem escala nem deslocamento.
 //
+// As cenas refeitas no sub-projeto 6 (fatia 2: o Ataque e a Defesa Absolutos) têm desenho próprio, num módulo carregado sob
+// demanda (`scenes-loader.ts`). Quando ele já chegou, a cena dele toma o lugar do painel; enquanto não chega, vale o painel. A
+// cortina começa onde o placar acaba (§7: o placar fica à vista para ver a vida cair), em todas as cenas.
+//
 // As cenas raras (U3 do sub-projeto 5: Ataque Absoluto, Defesa Absoluta, Exódia; F3: a Devastação) são mais longas e têm figura:
 // os quatro J entram em leque, os quatro Q formam um muro, os quatro K da Exódia sobem um a um até a cruz, e o K, o A e o J (ou
 // o Q) da Devastação caem em trio, as cartas de verdade da jogada (como desenho); o título carimba (escala, com mola) no
 // instante em que a linha do tempo põe a única inversão da cena (`SCENE_INVERT_LEAD_MS`), e raios de xilogravura giram devagar
 // atrás do painel. As cartas são desenhos (`Card` sem `layoutId`), não as da mesa. Nada disso muda a luminância da tela: o
 // painel é escuro do começo ao fim, e os raios são traço sobre ele. Com movimento reduzido, tudo já parado no lugar.
-import type { SpecialCard, Suit } from '@coringa/engine';
+import type { PlayerId, SpecialCard, Suit } from '@coringa/engine';
 import type { Names } from '@coringa/sim/text';
 import * as m from 'motion/react-m';
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { sceneText } from '../../model/effects.ts';
 import { SCENE_INVERT_LEAD_MS, type Beat, type SceneKind } from '../../model/timeline.ts';
 import { Card } from '../cards/Card.tsx';
+import { useSceneBox } from './scene-box.ts';
+import { useScenes } from './scenes-loader.ts';
 
 export interface BeatOverlayProps {
   /** A cena que o painel mostra (a de agora, ou a última enquanto a cortina segura). */
@@ -34,11 +40,15 @@ export interface BeatOverlayProps {
   curtain: boolean;
   names: Names;
   reduced: boolean;
+  /** O jogador deste lado da tela (as cenas com desenho próprio se espelham pelo lado de quem joga). */
+  me: PlayerId;
+  /** O golpe absorvido pela cena já acendeu. */
+  hitLanded: boolean;
 }
 
 /** A sobreposição da cena de agora, ou nada (a camada fica, só esmaece). */
-export function BeatOverlay({ scene, curtain, names, reduced }: BeatOverlayProps) {
-  return <SceneLayer scene={scene} curtain={curtain} names={names} reduced={reduced} />;
+export function BeatOverlay(props: BeatOverlayProps) {
+  return <SceneLayer {...props} />;
 }
 
 function Shield() {
@@ -55,32 +65,29 @@ function Shield() {
   );
 }
 
-function SceneLayer({
-  scene,
-  curtain,
-  names,
-  reduced,
-}: {
-  scene: Beat | null;
-  curtain: boolean;
-  names: Names;
-  reduced: boolean;
-}) {
+function SceneLayer({ scene, curtain, names, reduced, me, hitLanded }: BeatOverlayProps) {
+  const layer = useRef<HTMLDivElement>(null);
+  const box = useSceneBox(layer, scene !== null || curtain);
+  const scenes = useScenes();
+  const Drawn = scene?.scene ? scenes?.[scene.scene] : undefined;
   // O painel fica montado depois da primeira cena e só esmaece (220 ms), com o texto da última enquanto some: sem troca
-  // brusca de luminância, e o esmaecimento é o que o movimento reduzido mantém (texto parado que aparece e some).
-  const [last, setLast] = useState<Beat | null>(scene);
+  // brusca de luminância, e o esmaecimento é o que o movimento reduzido mantém (texto parado que aparece e some). A cena com
+  // desenho próprio não passa pelo painel.
+  const panelScene = Drawn ? null : scene;
+  const [last, setLast] = useState<Beat | null>(panelScene);
   // Cada cena nova remonta a figura e o título, para a entrada tocar de novo (duas cenas iguais seguidas também).
   const [serial, setSerial] = useState(0);
   if (scene !== null && scene !== last) {
-    setLast(scene);
+    if (panelScene !== null) setLast(panelScene);
     setSerial((n) => n + 1);
   }
-  const shown = scene ?? last;
+  const shown = panelScene ?? last;
   const { title, detail } = shown === null ? { title: '', detail: '' } : sceneText(shown, names);
   const reflect = shown?.scene === 'REFLECT_PLAYED' || shown?.scene === 'REFLECT_TRIGGERED';
   const rare = shown !== null && shown.scene !== null && shown.scene in RARE ? RARE[shown.scene as RareKind] : null;
   return (
     <div
+      ref={layer}
       aria-hidden="true"
       data-camada-cena
       data-cena={scene?.scene ?? undefined}
@@ -90,14 +97,18 @@ function SceneLayer({
       <div
         data-cortina
         data-ativa={curtain ? 'true' : undefined}
-        className={`absolute inset-0 bg-tinta/60 transition-opacity duration-[220ms] ease-out ${curtain ? 'opacity-100' : 'opacity-0'}`}
+        style={{ top: `${box?.hudBottom ?? 0}px` }}
+        className={`absolute inset-x-0 bottom-0 bg-tinta/60 transition-opacity duration-[220ms] ease-out ${curtain ? 'opacity-100' : 'opacity-0'}`}
       />
+      {Drawn && scene && box ? (
+        <Drawn key={serial} beat={scene} names={names} reduced={reduced} me={me} hitLanded={hitLanded} box={box} />
+      ) : null}
       {/* Sempre montado: até o primeiro aparecer é um esmaecimento, não um pulo de opacidade. */}
       <div
         data-painel-cena
-        data-ativo={scene === null ? undefined : 'true'}
+        data-ativo={panelScene === null ? undefined : 'true'}
         data-rara={rare ? shown?.scene : undefined}
-        className={`relative overflow-hidden border-[5px] border-papel bg-tinta px-6 py-4 text-center text-papel transition-opacity duration-[220ms] ease-out ${scene === null ? 'opacity-0' : 'opacity-100'} ${rare ? 'w-[min(92vw,34rem)] py-6' : ''}`}
+        className={`relative overflow-hidden border-[5px] border-papel bg-tinta px-6 py-4 text-center text-papel transition-opacity duration-[220ms] ease-out ${panelScene === null ? 'opacity-0' : 'opacity-100'} ${rare ? 'w-[min(92vw,34rem)] py-6' : ''}`}
       >
         {rare ? <Rays reduced={reduced} /> : null}
         {reflect ? <Shield /> : null}

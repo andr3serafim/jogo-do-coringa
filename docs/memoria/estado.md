@@ -10,8 +10,8 @@
   2026-11-01 (`decisoes.md` 2026-11-01 (2)). É inline, tarefa por tarefa, com o ledger em
   `.superpowers/sdd/2026-11-01-direcao-visual-fatia-2/progress.md` (fora do git). Uma tarefa com linha "complete" no ledger
   está feita.
-- **Progresso:** Tasks 1 e 2 feitas (os instantes e o golpe absorvido; o golpe no impacto e a insígnia na linha do tempo). Próxima: a
-  Task 3 (a moldura comum e o módulo sob demanda).
+- **Progresso:** Tasks 1 a 3 feitas (os instantes e o golpe absorvido; o golpe no impacto e a insígnia na linha do tempo; a moldura
+  comum e o módulo sob demanda). Próxima: a Task 4 (a cena do Ataque Absoluto).
 - **Feito por último:** os três ajustes que o autor pediu depois de jogar a fatia 1 (`decisoes.md` 2026-11-01 (1); detalhes no
   `diario.md` 2026-11-01 (1)), mesclados por fast-forward com as duas CI verdes:
   - o tremor da barra no PC (`412d4ed`);
