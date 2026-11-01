@@ -5,38 +5,25 @@
 
 ## Agora
 
-- **Branch:** `feat/direcao-visual-fatia-2`, a partir da `main` (`f55317d`), no checkout principal `D:/andr3/jogo-coringa`.
-- **Em curso:** a execução do plano da fatia 2 (`docs/superpowers/plans/2026-11-01-direcao-visual-fatia-2.md`), aprovado em
-  2026-11-01 (`decisoes.md` 2026-11-01 (2)). É inline, tarefa por tarefa, com o ledger em
-  `.superpowers/sdd/2026-11-01-direcao-visual-fatia-2/progress.md` (fora do git). Uma tarefa com linha "complete" no ledger
-  está feita.
-- **Progresso:** as 7 tarefas feitas, e a revisão final (feita por quem escreveu, sem subagente) corrigiu um achado (`c02549e`).
-  Falta a CI verde no último commit e o fast-forward na `main`.
-- **Feito por último:** os três ajustes que o autor pediu depois de jogar a fatia 1 (`decisoes.md` 2026-11-01 (1); detalhes no
-  `diario.md` 2026-11-01 (1)), mesclados por fast-forward com as duas CI verdes:
-  - o tremor da barra no PC (`412d4ed`);
-  - as figuras (`9956fdc`);
-  - a cura em verde, na batida dela (`73b4e1f`, `f16057a`);
-  - as notas nas specs (web §3.4 e §10.3; sub-projeto 6 §14).
-- **Próximo passo exato:** com o plano aprovado, a Task 1 (os instantes das cenas e o golpe que a cena absorve).
-- **Decisões do plano para o autor ver:**
-  - o golpe do Ataque Absoluto entra na cena (o `DamageDealt` absorvido, mesmo com a Guarda quebrada no meio) e treme sempre
-    forte;
-  - o clarão do protótipo sai, pela regra dos 25%;
-  - os raios ficam em 1 a cada 340 ms;
-  - a cortina deixa o placar à vista em todas as cenas;
-  - o pulo corta o som da cena;
-  - a insígnia fica no canto de baixo do retrato.
-- **Para reproduzir o tremor:** treino `semente=hover1&nivel=facil` a 1366 × 768. Jogue até o A♦ (rodada 3) e escolha
-  Armadilha: o alvo é o J♣ do Bot.
+- **Branch:** `main` (`4b7c46b` mais o commit desta memória), no checkout principal `D:/andr3/jogo-coringa`. Nada em curso.
+- **Feito por último:** a **fatia 2 do sub-projeto 6** (as cenas do Ataque e da Defesa Absolutos, a insígnia e os sons), mesclada
+  por fast-forward com as duas CI verdes. Detalhes no `diario.md` (2026-11-01 (2)); medição em `notas/medicao-fatia-2.md`.
+- **Próximo passo exato:** o autor joga a fatia 2 e diz o que achou.
+  - Para ver as cenas sem esperar um Ataque Absoluto no treino: importe a partida da fixture do E2E
+    (`packages/web/e2e/fixtures/absolutos.json`) e abra `/partidas/absolutos`, rodada 11 (o Ataque Absoluto do Bot) e rodada 13
+    (a sua Defesa Absoluta).
+  - Com o "ok" dele (ou os ajustes), o plano da **fatia 3** (Exódia e Devastação, com a desolação; spec 6 §7.3 e §7.4, com os
+    sons), pelo `superpowers:writing-plans`, numa branch nova a partir da `main`.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
-- **Para quem assumir:** um `wrangler dev` do autor (sem a semente do E2E) pode estar na porta 8787; o Playwright o reaproveita
-  e o E2E online falha pela semente. Com ele aberto, rode o E2E pela CI ou peça ao autor para fechá-lo.
+- **Para quem assumir:**
+  - um `wrangler dev` do autor pode estar na porta 8787. O Playwright o reaproveita, e o E2E falha (o online pela semente; o das
+    cenas porque ele não serve `/partidas/...`). Com ele aberto, rode o E2E pela CI ou troque a porta só naquela execução;
+  - não edite nada enquanto o pre-push roda.
 
 ## A `main`
 
-E1, E2, F1 (2026-10-30), o bloco E3 + F2 + F3 (2026-10-31), a marca "Cura passiva" e a fatia 1 do sub-projeto 6 (2026-11-01) mesclados. Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D
+E1, E2, F1 (2026-10-30), o bloco E3 + F2 + F3 (2026-10-31), a marca "Cura passiva", a fatia 1 do sub-projeto 6, os ajustes dela e a fatia 2 (2026-11-01) mesclados. Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D
 (`8d7f078`, `a5a76c5`, `bba8377`, `8cdf0a1`), a memória compartilhada, a E1, a E2, a F1 e o bloco E3 + F2 + F3 (o Reflect
 reativo, a Devastação, o Roubo sem naipe, a cura pela Defesa, o limite de 4 especiais com a BURN e a iniciativa com o placar na
 tela). Regras em vigor: spec 1 (`docs/superpowers/specs/2026-10-15-jogo-coringa-regras-motor-design.md`), com os ajustes da
@@ -48,7 +35,23 @@ Vazia: o bloco E3 + F2 + F3 era o último item.
 
 ## Esperando o autor
 
-- **Sub-projeto 6, fatia 1: jogada e aprovada em 2026-11-01, com três ajustes** (em curso, acima). O que mudou da letra da spec,
+- **Sub-projeto 6, fatia 2, para ele jogar e dizer o que achou.** As escolhas que ele aprovou no plano e o que a execução decidiu:
+  - **o número do golpe do Ataque Absoluto é desenhado pela cena,** perto do retrato do alvo, e não pelo placar. A mesa é um
+    contexto de empilhamento próprio (o grão de papel atrás dela), e o número do placar ficaria embaixo da cena;
+  - **a cortina deixa o placar à vista em todas as cenas,** inclusive a Exódia, a Devastação e o Reflect, que seguem com o painel
+    antigo até as fatias delas;
+  - **os raios de luz da trava ficam em 35% de opacidade,** em cunhas finas, e o brilho em volta do Coringa em até 45%: nada passa
+    de 25% da tela fora da inversão;
+  - **não conferido de verdade:** o som (os testes conferem os instantes das vozes, não o ouvido), o movimento reduzido no
+    navegador (só nos testes de unidade) e o Ataque Absoluto que é seu (a fixture tem o do Bot). A revisão final foi de quem
+    escreveu o código (sem subagente);
+  - **pequenos, para depois:**
+    - os controles do replay no meio de uma cena não cortam o som dela;
+    - se a janela mudar de tamanho no meio do Ataque Absoluto, as partículas reagendam dali;
+    - o teste do servidor "hibernação no meio da partida" é instável (depende da mão sorteada);
+    - o quadro da chegada do passo pesa 115 a 270 ms com a CPU 4× (o mesmo da fatia 1; candidato à fatia 5).
+
+- **Sub-projeto 6, fatia 1: jogada e aprovada em 2026-11-01, com três ajustes** (na `main`). O que mudou da letra da spec,
   que ele viu jogando:
   - **o tremor do golpe sacode a mesa (o placar e os campos), não a tela inteira:** a mão, a barra e o histórico ficam parados.
     Sacudir tudo custava ~9 quadros por segundo com a CPU 4× mais lenta, e a mão parada também se joga melhor;
