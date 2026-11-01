@@ -799,3 +799,32 @@ describe('Session: preferências no snapshot', () => {
     expect(calls).toBe(0);
   });
 });
+
+describe('a desolação na sessão (sub-projeto 6 §7.4)', () => {
+  const fell: GameEvent = { type: 'RowDevastated', player: 'p2', row: 'DEF', cards: [{ id: 'n1', kind: 'NUM', value: 5, suit: 'copas' }], reflected: false };
+  const emptyRows = { self: { attackRow: [], defenseRow: [] }, opponent: { attackRow: [], defenseRow: [] } };
+
+  it('a fileira que cai fica desolada, e a carta que volta a tira', () => {
+    const { connection, session } = setup({ playerId: 'p1', room: roomOf(1) });
+    expect([...session.snapshot().desolated]).toEqual([]);
+    connection.emitState(stateMessage(viewAt(emptyRows), { seq: 1, events: [fell] }));
+    expect([...session.snapshot().desolated]).toEqual(['p2:DEF']);
+    connection.emitState(stateMessage(viewAt(emptyRows), { seq: 2, events: [] }));
+    expect([...session.snapshot().desolated]).toEqual(['p2:DEF']);
+    connection.emitState(stateMessage(viewAt({ ...emptyRows, opponent: { attackRow: [], defenseRow: [5] } }), { seq: 3, events: [] }));
+    expect([...session.snapshot().desolated]).toEqual([]);
+  });
+
+  it('a partida nova (outro gameNo) começa sem desolação', () => {
+    const { connection, session } = setup({ playerId: 'p1', room: roomOf(1) });
+    connection.emitState(stateMessage(viewAt(emptyRows), { seq: 1, events: [fell] }));
+    expect([...session.snapshot().desolated]).toEqual(['p2:DEF']);
+    connection.emitRoom(roomOf(2));
+    expect([...session.snapshot().desolated]).toEqual([]);
+  });
+
+  it('o state com que a sessão abre também conta', () => {
+    const { session } = setup({ playerId: 'p1', room: roomOf(1), state: stateMessage(viewAt(emptyRows), { seq: 1, events: [fell] }) });
+    expect([...session.snapshot().desolated]).toEqual(['p2:DEF']);
+  });
+});

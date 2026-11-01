@@ -22,7 +22,7 @@ import type { DevastationState, PlayerId } from '@coringa/engine';
 import { LazyMotion, MotionConfig } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
 import type { Ribbon } from '../../model/copy.ts';
-import { bannerRibbon, effectsOf, fieldTarget, insigniaShown, lifeChange, NO_EFFECTS, ribbonText } from '../../model/effects.ts';
+import { bannerRibbon, desolationShown, effectsOf, fieldTarget, insigniaShown, lifeChange, NO_EFFECTS, ribbonText } from '../../model/effects.ts';
 import { roomNames } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import type { ImpactForce } from '../../model/impact.ts';
@@ -140,6 +140,17 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
   }, [busy, index, run, exodia]);
   const defeated = useCallback((_who: PlayerId, lost: boolean) => lost && exodiaStage() >= 2, [exodiaStage]);
   const drained = useCallback((_who: PlayerId, lost: boolean) => lost && exodiaStage() >= 1, [exodiaStage]);
+  // A desolação da fileira que caiu aparece quando a poeira assenta (sub-projeto 6 §7.4).
+  const [settled, setSettled] = useState<Beat | null>(null);
+  useEffect(() => {
+    if (beat?.scene !== 'DEVASTATION') return;
+    const id = window.setTimeout(() => setSettled(beat), SCENE_MOMENTS.DEVASTATION.settleAt);
+    return () => window.clearTimeout(id);
+  }, [beat]);
+  const desolated = useCallback(
+    (key: string, stored: boolean): boolean => (busy && index >= 0 ? desolationShown(run.beats, index, key, stored, settled) : stored),
+    [busy, index, run, settled],
+  );
   // As cartas da fileira devastada vão ao cemitério na hora: quem cai é a cópia da cena (sub-projeto 6 §7.4).
   const fallen = useMemo(
     () => new Set(run.beats.flatMap((b) => (b.event.type === 'RowDevastated' ? b.event.cards.map((card) => card.id) : []))),
@@ -207,6 +218,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       insignia,
       defeated,
       drained,
+      desolated,
     }),
     [
       busy,
@@ -225,6 +237,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       insignia,
       defeated,
       drained,
+      desolated,
       hitLanded,
       drawnScene,
       fallen,

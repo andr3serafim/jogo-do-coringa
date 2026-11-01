@@ -194,6 +194,27 @@ describe('cenas raras (U3): a figura, o título que carimba e os raios', () => {
     expect(m.container.querySelector('[data-painel-cena][data-ativo]')).toBeNull();
   });
 
+  it('a desolação aparece quando a poeira assenta; o pulo a mostra na hora', async () => {
+    const emptied: ViewSpec = { ...THEIRS, self: { ...THEIRS.self, defenseRow: [] } };
+    const fell: GameEvent = { type: 'RowDevastated', player: 'p1', row: 'DEF', cards: [{ id: 'n-d', kind: 'NUM', value: 5, suit: 'copas' }], reflected: false };
+    const desolate = (container: HTMLElement) => container.querySelector('[data-fileira="p1:DEF"][data-desolada]') !== null;
+    const m = mount(THEIRS);
+    emit(m, emptied, [fell]);
+    advance(SCENE_MOMENTS.DEVASTATION.settleAt - 1);
+    expect(desolate(m.container)).toBe(false);
+    expect(m.container.querySelector('[data-campo="p1"][data-apagado]')).toBeNull();
+    advance(1);
+    expect(desolate(m.container)).toBe(true);
+    expect(m.container.querySelector('[data-campo="p1"][data-apagado]')).not.toBeNull();
+    cleanup();
+    const again = mount(THEIRS);
+    emit(again, emptied, [fell]);
+    advance(100);
+    expect(desolate(again.container)).toBe(false);
+    await again.user.click(stage(again.container));
+    expect(desolate(again.container)).toBe(true);
+  });
+
   it('a cancelada: sem cortina nem painel, e a fita diz o motivo durante a cena', () => {
     const m = mount(THEIRS);
     const reaction: ViewSpec = { ...THEIRS, phase: { kind: 'REACTION', responder: 'p2', trigger: 'REFLECT_PLAYED', devastation: { player: 'p1', row: 'DEF', k: { id: 'dk', kind: 'K', suit: 'copas' }, a: { id: 'da', kind: 'A', suit: 'paus' }, x: { id: 'dq', kind: 'Q', suit: 'ouros' } } } };

@@ -17,6 +17,7 @@ import {
 } from '@coringa/engine';
 import type { RoomMessage, StateMessage } from '@coringa/protocol';
 import type { Names } from '@coringa/sim/text';
+import { desolationAfter } from './desolation.ts';
 import { appendHistory, EMPTY_HISTORY, forGame, type HistoryState } from './history.ts';
 import { NO_MARKS } from './marks.ts';
 import type { SessionSnapshot } from './session.ts';
@@ -165,6 +166,10 @@ export function replaySnapshot(track: ReplayTrack, message: StateMessage, frame:
     marks: NO_MARKS,
     marksBaseSeq: null,
     history: forGame(frameAt(track, frame).history, room.gameNo),
+    // Sai dos passos até o quadro: o salto também a mostra, e voltar para antes da queda a tira.
+    desolated: track.frames
+      .slice(0, frame + 1)
+      .reduce<ReadonlySet<string>>((rows, { state }) => desolationAfter(rows, state.events, state.view), new Set()),
     prefs,
   };
 }

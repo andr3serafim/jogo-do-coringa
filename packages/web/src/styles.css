@@ -237,6 +237,15 @@
     container-type: inline-size;
   }
 
+  /* O campo com uma fileira desolada perde a cor (sub-projeto 6 §7.4), e ela volta devagar. */
+  .campo {
+    transition: filter 600ms;
+  }
+
+  .campo[data-apagado] {
+    filter: saturate(0.35) sepia(0.4);
+  }
+
   .campo-grade {
     display: grid;
     gap: 0.5rem;

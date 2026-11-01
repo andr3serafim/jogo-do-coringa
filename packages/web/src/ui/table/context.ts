@@ -38,6 +38,8 @@ export interface TableUi {
   onSeen?: (key: string) => void;
   /** A zona de que a dica do tutorial fala, que ganha o contorno parado (`data-dica`); `null` fora do tutorial e sem dica valendo. */
   hintZone: HintZone | null;
+  /** As fileiras desoladas (`rowKey`), da sessão (sub-projeto 6 §7.4). */
+  desolated: ReadonlySet<string>;
 }
 
 export const TableUiContext = createContext<TableUi>({
@@ -48,6 +50,7 @@ export const TableUiContext = createContext<TableUi>({
   selectedCardId: null,
   draftIds: new Set(),
   hintZone: null,
+  desolated: new Set(),
 });
 
 export const useTableUi = (): TableUi => useContext(TableUiContext);

@@ -475,6 +475,62 @@ describe('mesa: o tremor do golpe (sub-projeto 6 §5)', () => {
   });
 });
 
+describe('mesa: o campo desolado (sub-projeto 6 §7.4)', () => {
+  const EMPTY_DEF: ViewSpec = { ...DRAFT, opponent: { ...DRAFT.opponent, defenseRow: [] } };
+
+  it('a fileira desolada tem a terra revirada, e o campo do dono fica apagado', () => {
+    const { container } = mount(EMPTY_DEF, { snapshot: { desolated: new Set(['p2:DEF']) } });
+    const row = container.querySelector('[data-fileira="p2:DEF"]')!;
+    expect(row).toHaveAttribute('data-desolada');
+    expect(row.querySelector('[data-terra]')).not.toBeNull();
+    expect(row.querySelectorAll('[data-pedra]').length).toBeGreaterThan(0);
+    expect(row.querySelector('[data-fenda-fileira]')).not.toBeNull();
+    expect(container.querySelector('[data-campo="p2"]')).toHaveAttribute('data-apagado');
+    expect(container.querySelector('[data-campo="p1"]')).not.toHaveAttribute('data-apagado');
+    expect(container.querySelector('[data-fileira="p2:ATK"]')).not.toHaveAttribute('data-desolada');
+  });
+
+  it('sem desolação, nada disso', () => {
+    const { container } = mount();
+    expect(container.querySelector('[data-desolada]')).toBeNull();
+    expect(container.querySelector('[data-apagado]')).toBeNull();
+    expect(container.querySelector('[data-desolacao]')).toBeNull();
+  });
+
+  it('a desolação não conta como vaga nem esconde as vagas da fileira', () => {
+    const { container, view } = mount(EMPTY_DEF, { snapshot: { desolated: new Set(['p2:DEF']) } });
+    expect(container.querySelectorAll('[data-fileira="p2:DEF"] [data-vaga]')).toHaveLength(view.config.rowLimit);
+  });
+
+  it('quando a carta volta, a fenda se fecha devagar e a cor volta; com movimento reduzido, só some', () => {
+    vi.useFakeTimers();
+    try {
+      const closes = (reduced: boolean) => {
+        const first = mount(EMPTY_DEF, { snapshot: { desolated: new Set(['p2:DEF']) }, reduced });
+        const table = (snapshot: SessionSnapshot) => {
+          const ui = <Table {...first.props} snapshot={snapshot} />;
+          return reduced ? <AnimContext value={{ ...IDLE_ANIM, reduced: true }}>{ui}</AnimContext> : ui;
+        };
+        first.rerender(table({ ...first.snapshot, desolated: new Set() }));
+        return first;
+      };
+      const full = closes(false);
+      expect(full.container.querySelector('[data-desolada]')).toBeNull();
+      expect(full.container.querySelector('[data-apagado]')).toBeNull();
+      expect(full.container.querySelector('[data-desolacao][data-fechando]')).not.toBeNull();
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
+      expect(full.container.querySelector('[data-desolacao]')).toBeNull();
+      full.unmount();
+      const calm = closes(true);
+      expect(calm.container.querySelector('[data-desolacao]')).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
 describe('mesa: o placar de luta (sub-projeto 6 §3)', () => {
   it('o placar mostra os dois lados, você à esquerda: apelido, vida em número e barra', () => {
     const { container } = mount();

@@ -22,6 +22,7 @@ import {
 import { ORDER_AUTO_MS, shouldAutoPass } from './automation.ts';
 import { AUTO_PASS_NOTICE, RATE_NOTICE } from './copy.ts';
 import { completeDraft, equipAction, EQUIP_AUTO_SEND_MS, nextDestinations, remainingCards, shouldAutoSendEquip, type EquipPick } from './equip.ts';
+import { desolationAfter } from './desolation.ts';
 import { appendHistory, appendNote, EMPTY_HISTORY, forGame, returnNote, roomNames, type HistoryState } from './history.ts';
 import { computeMarks, NO_MARKS, ownSpentIds, type Marks } from './marks.ts';
 import { legalFor } from './plays.ts';
@@ -74,12 +75,14 @@ export interface SessionSnapshot {
   marksBaseSeq: number | null;
   /** As linhas da partida em curso, em ordem (spec §3.1). */
   history: HistoryState;
+  /** As fileiras desoladas (`rowKey`), da Devastação até uma carta voltar (sub-projeto 6 §7.4). Some se a página recarregar. */
+  desolated: ReadonlySet<string>;
   /** As preferências do jogador (a mesa lê "reduzir animações" daqui; o menu as troca por `setPrefs`). */
   prefs: Prefs;
 }
 
 /** Campos que a sessão deriva do que guarda por dentro: nunca entram num `patch`. */
-type Derived = 'equipDraft' | 'equipConfirmed' | 'orderAutoAt' | 'marks' | 'marksBaseSeq' | 'history' | 'prefs';
+type Derived = 'equipDraft' | 'equipConfirmed' | 'orderAutoAt' | 'marks' | 'marksBaseSeq' | 'history' | 'desolated' | 'prefs';
 
 export interface SessionDeps {
   now(): number;
@@ -188,6 +191,7 @@ export class Session {
   #spent: ReadonlySet<string> = new Set();
   // Histórico: as linhas de todo `state` que chegou (a sessão vê todos, ao contrário de um componente).
   #history: HistoryState = EMPTY_HISTORY;
+  #desolated: ReadonlySet<string> = new Set();
   #marksCache: {
     view: PlayerView | null;
     base: PlayerView | null;
@@ -205,7 +209,10 @@ export class Session {
     const state = connection.state;
     this.#epoch = state?.epoch ?? null;
     if (connection.room) this.#history = forGame(this.#history, connection.room.gameNo);
-    if (state) this.#history = appendHistory(this.#history, state, this.#names(state, connection.room));
+    if (state) {
+      this.#history = appendHistory(this.#history, state, this.#names(state, connection.room));
+      this.#desolated = desolationAfter(this.#desolated, state.events, state.view);
+    }
     this.#snapshot = this.#derive({
       status: 'connecting',
       stop: null,
@@ -398,6 +405,7 @@ export class Session {
         const { state } = event;
         this.#deps.onSeq?.(state.seq);
         this.#history = appendHistory(this.#history, state, this.#names(state, this.#snapshot.room));
+        this.#desolated = desolationAfter(this.#desolated, state.events, state.view);
         const spent = ownSpentIds(state.events, state.view.me);
         if (spent.length > 0) this.#spent = new Set([...this.#spent, ...spent]);
         const newEpoch = state.epoch !== this.#epoch;
@@ -436,6 +444,7 @@ export class Session {
     this.#baseSeq = null;
     this.#seen = new Set();
     this.#spent = new Set();
+    this.#desolated = new Set();
   }
 
   #names(state: StateMessage, room: RoomMessage | null) {
@@ -617,6 +626,7 @@ export class Session {
       marks: this.#marksFor(snapshot.state),
       marksBaseSeq: this.#baseSeq,
       history: this.#history,
+      desolated: this.#desolated,
       prefs: this.#prefs,
     };
   }

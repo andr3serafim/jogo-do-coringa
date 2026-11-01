@@ -7,6 +7,7 @@ import {
   damageBeatIndex,
   dealsOf,
   delaysOf,
+  desolationShown,
   effectsOf,
   fieldTarget,
   insigniaShown,
@@ -95,6 +96,36 @@ describe('onde a cena de campo acontece (sub-projeto 6 §7.4)', () => {
   it('sem a Devastação em curso (a cancelada não diz a fileira), ou em outro evento, nada', () => {
     expect(fieldTarget({ type: 'DevastationCanceled', player: 'p1', reason: 'REFLECT_CLASH' }, null, 'p1', 'p2')).toBeNull();
     expect(fieldTarget({ type: 'Exodia', player: 'p1' }, cast, 'p1', 'p2')).toBeNull();
+  });
+});
+
+describe('a desolação na linha do tempo (sub-projeto 6 §7.4)', () => {
+  const fell: GameEvent = { type: 'RowDevastated', player: 'p2', row: 'DEF', cards: [num('n1')], reflected: false };
+  const turn: GameEvent = { type: 'TurnStarted', player: 'p1' };
+
+  it('fora da sessão, nada', () => {
+    expect(desolationShown(beatsOf(fell), 0, 'p2:DEF', false, null)).toBe(false);
+  });
+
+  it('a fileira já estava desolada antes desta linha do tempo: aparece', () => {
+    expect(desolationShown(beatsOf(turn), 0, 'p2:DEF', true, null)).toBe(true);
+  });
+
+  it('a cena dela está nesta linha do tempo: espera a batida e a poeira assentar', () => {
+    const beats = beatsOf(turn, fell, turn);
+    expect(desolationShown(beats, 0, 'p2:DEF', true, null)).toBe(false);
+    expect(desolationShown(beats, 1, 'p2:DEF', true, null)).toBe(false);
+    expect(desolationShown(beats, 1, 'p2:DEF', true, beats[1]!)).toBe(true);
+    expect(desolationShown(beats, 2, 'p2:DEF', true, null)).toBe(true);
+  });
+
+  it('a queda de outra fileira não a segura', () => {
+    expect(desolationShown(beatsOf(fell), 0, 'p1:ATK', true, null)).toBe(true);
+  });
+
+  it('no catchUp a queda é faixa, sem cena: vale na batida dela', () => {
+    const beats = buildTimeline([fell], { mode: 'catchUp', reducedMotion: false, decisionPending: false });
+    expect(desolationShown(beats, 0, 'p2:DEF', true, null)).toBe(true);
   });
 });
 

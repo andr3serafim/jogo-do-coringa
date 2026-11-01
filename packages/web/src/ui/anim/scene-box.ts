@@ -77,7 +77,7 @@ export function measureSceneBox(palco: HTMLElement): SceneBox | null {
       const target = palco.querySelector(rowSelector(player, row));
       const field = palco.querySelector(`[data-campo="${player}"]`);
       if (target === null || field === null) return null;
-      return { rect: relative(target), slots: [...target.querySelectorAll('ul > li')].map(relative), field: relative(field) };
+      return { rect: relative(target), slots: [...target.querySelectorAll('ul > li:not([data-desolacao])')].map(relative), field: relative(field) };
     },
   };
 }

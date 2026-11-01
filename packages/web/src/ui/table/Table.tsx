@@ -185,6 +185,7 @@ function TableView({
     handDrag,
     onSeen,
     hintZone,
+    desolated: snapshot.desolated,
   };
 
   const theirs = room?.seats.find((seat) => seat.playerId !== me);

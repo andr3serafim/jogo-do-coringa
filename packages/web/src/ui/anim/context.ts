@@ -83,6 +83,11 @@ export interface Anim {
   defeated(player: PlayerId, lost: boolean): boolean;
   /** A vida de `player` escorre até zero: como `defeated`, mas a partir de `drainAt`, um pouco antes da rachadura. */
   drained(player: PlayerId, lost: boolean): boolean;
+  /**
+   * A fileira `key` aparece desolada (sub-projeto 6 §7.4). `stored` é a da sessão: parado, vale ela; com a queda da fileira tocando,
+   * só quando a poeira assenta (`settleAt`), e no pulo, na hora.
+   */
+  desolated(key: string, stored: boolean): boolean;
 }
 
 export const IDLE_ANIM: Anim = {
@@ -104,6 +109,7 @@ export const IDLE_ANIM: Anim = {
   insignia: (_player, active) => active,
   defeated: (_player, lost) => lost,
   drained: (_player, lost) => lost,
+  desolated: (_key, stored) => stored,
 };
 
 export const AnimContext = createContext<Anim>(IDLE_ANIM);

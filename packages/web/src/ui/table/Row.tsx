@@ -29,6 +29,8 @@ import { useAnim } from '../anim/context.ts';
 import { LitRow } from '../anim/Effects.tsx';
 import { useCountedNumber } from '../anim/useCountedNumber.ts';
 import { AttackIcon, DefenseIcon } from './icons.tsx';
+import { useTableUi } from './context.ts';
+import { RowDesolation, useDesolationClosing } from './RowDesolation.tsx';
 import { TableCard } from './TableCard.tsx';
 
 export interface RowProps {
@@ -73,24 +75,30 @@ export function Row({ label, kind, side, limit, aim, droppable = false, targets 
   // O total mostrado espera a batida do dano e conta até o valor do motor.
   const shownTotal = useCountedNumber(total);
   const conta = useShownConta(base, total);
-  const lit = anim.fx.rows.has(rowKey(side.id, kind));
+  const key = rowKey(side.id, kind);
+  const lit = anim.fx.rows.has(key);
   const Figure = FIGURE[kind];
+  const { desolated: desolatedRows } = useTableUi();
+  const desolated = anim.desolated(key, desolatedRows.has(key));
+  const closing = useDesolationClosing(desolated, anim.reduced);
 
   return (
     <div
       role="group"
       aria-label={label}
-      data-fileira={rowKey(side.id, kind)}
+      data-fileira={key}
       data-aceso={lit ? 'true' : undefined}
+      data-desolada={desolated ? '' : undefined}
       data-soltar={droppable ? ROW_DROP[kind].row : undefined}
       className="relative flex items-center gap-2 [--soltar-folga:-2px]"
     >
       {lit ? <LitRow aim={kind === 'ATK' ? aim : undefined} ms={anim.beatMs} /> : null}
       <ul
         role="list"
-        className="grid min-w-0 flex-1 list-none gap-1 p-0 pl-[10px] pc:gap-1.5 pc:pl-[14px]"
+        className="relative grid min-w-0 flex-1 list-none gap-1 p-0 pl-[10px] pc:gap-1.5 pc:pl-[14px]"
         style={{ gridTemplateColumns: `repeat(${limit}, minmax(0, var(--card-w)))` }}
       >
+        {desolated || closing ? <RowDesolation closing={closing} /> : null}
         {cards.map((card, index) => (
           <li
             key={card.id}

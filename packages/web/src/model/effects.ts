@@ -114,6 +114,19 @@ export function insigniaShown(beats: readonly Beat[], index: number, player: Pla
   return active ? !ahead('AbsoluteDefenseStarted', index) : ahead('AbsoluteDefenseEnded', index + 1);
 }
 
+/**
+ * A desolação da fileira `key` na batida `index` (sub-projeto 6 §7.4). `stored` é a da sessão, que já é a de depois da linha do tempo:
+ * com a queda da fileira nesta linha, ela espera a batida da queda e a poeira assentar (`settled`: a batida em que isso já aconteceu).
+ */
+export function desolationShown(beats: readonly Beat[], index: number, key: string, stored: boolean, settled: Beat | null): boolean {
+  if (!stored) return false;
+  const fall = beats.findLastIndex((beat) => beat.event.type === 'RowDevastated' && rowKey(beat.event.player, beat.event.row) === key);
+  if (fall < 0 || index > fall) return true;
+  if (index < fall) return false;
+  // No `catchUp` a queda é faixa, sem cena: vale na batida dela.
+  return beats[fall]!.scene === null || settled === beats[fall];
+}
+
 /** A fileira onde a cena de campo acontece. */
 export interface FieldTarget {
   player: PlayerId;

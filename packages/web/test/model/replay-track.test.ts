@@ -343,6 +343,19 @@ describe('buildTrack: o motor recusa ou falha', () => {
   });
 });
 
+describe('a desolação no replay (sub-projeto 6 §7.4)', () => {
+  it('sai dos passos até o quadro: o salto também a mostra, e voltar antes da queda a tira', () => {
+    const base = TRACK.frames[1]!;
+    const empty = { ...base.state.view, opponent: { ...base.state.view.opponent, defenseRow: [] } };
+    const fell: GameEvent = { type: 'RowDevastated', player: base.state.view.opponent.id, row: 'DEF', cards: [], reflected: false };
+    const frames = [TRACK.frames[0]!, { ...base, state: { ...base.state, view: empty, events: [fell] } }, { ...base, state: { ...base.state, view: empty, events: [] } }];
+    const track = { ...TRACK, frames };
+    const key = `${base.state.view.opponent.id}:DEF`;
+    expect([...replaySnapshot(track, frames[0]!.state, 0, room(1), DEFAULT_PREFS).desolated]).not.toContain(key);
+    expect([...replaySnapshot(track, frames[2]!.state, 2, room(1), DEFAULT_PREFS).desolated]).toContain(key);
+  });
+});
+
 describe('replaySnapshot', () => {
   const frame = EVENTFUL + 2;
 
@@ -367,6 +380,7 @@ describe('replaySnapshot', () => {
       marks: NO_MARKS,
       marksBaseSeq: null,
       history: { ...TRACK.frames[frame]!.history, gameNo: 1 },
+      desolated: expect.any(Set),
       prefs: DEFAULT_PREFS,
     });
     expect(snapshot.state).toBe(message);

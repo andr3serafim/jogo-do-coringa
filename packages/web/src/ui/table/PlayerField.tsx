@@ -5,6 +5,7 @@
 import { absoluteAttackArmed, defenseHealActive, type PlayerView, type PublicPlayer, type SpecialCard } from '@coringa/engine';
 import { useId, type ReactNode } from 'react';
 import { cardDropKey, DROP, type DropKey } from '../../model/drag.ts';
+import { rowKey } from '../../model/effects.ts';
 import { useAnim } from '../anim/context.ts';
 import { CardBack } from '../cards/Card.tsx';
 import { useTableUi } from './context.ts';
@@ -38,7 +39,8 @@ export interface PlayerFieldProps {
 
 export function PlayerField({ side, view, player, name, away = false, equip, tool }: PlayerFieldProps) {
   const self = side === 'self';
-  const { hintZone } = useTableUi();
+  const { hintZone, desolated: desolatedRows } = useTableUi();
+  const anim = useAnim();
   const rowLabel = (kind: 'ataque' | 'defesa') => (self ? `Sua fileira de ${kind}` : `Fileira de ${kind} de ${name}`);
   const limit = view.config.rowLimit;
   const attack = (
@@ -53,6 +55,11 @@ export function PlayerField({ side, view, player, name, away = false, equip, too
     />
   );
   const defense = <Row label={rowLabel('defesa')} kind="DEF" side={player} limit={limit} droppable={self} targets={!self} />;
+  // O campo com uma fileira desolada perde a cor (sub-projeto 6 §7.4).
+  const apagado = (['ATK', 'DEF'] as const).some((kind) => {
+    const key = rowKey(player.id, kind);
+    return anim.desolated(key, desolatedRows.has(key));
+  });
   // No seu campo não sobra nada do Coringa: a mão é a de baixo e a vida mora no placar.
   const info = self ? null : <Info player={player} name={name} away={away} equip={equip} tool={tool} />;
   const zones = <Zones player={player} name={name} view={view} self={self} />;
@@ -61,6 +68,7 @@ export function PlayerField({ side, view, player, name, away = false, equip, too
     <section
       aria-label={self ? 'Seu campo' : `Campo de ${name}`}
       data-campo={player.id}
+      data-apagado={apagado ? '' : undefined}
       className={`campo relative isolate px-3 py-2.5 pc:min-h-[286px] pc:px-6 pc:py-5 pc-baixo:min-h-0 pc-baixo:py-2.5 ${self ? 'bg-capa-voce' : 'pc:flex pc:flex-col pc:justify-end bg-capa-oponente'}`}
     >
       <span aria-hidden="true" data-grao className="grao pointer-events-none absolute inset-0 -z-10 opacity-45 mix-blend-multiply" />
