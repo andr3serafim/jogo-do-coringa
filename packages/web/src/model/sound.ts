@@ -20,7 +20,9 @@ export type Cue =
   | 'urgencia'
   | 'espada'
   | 'fita'
-  | 'quadra';
+  | 'quadra'
+  | 'ataque-absoluto'
+  | 'defesa-absoluta';
 
 /** A pista do golpe de `damage` pontos, pelo peso dele (`impactForce`, o mesmo do tremor); dano zero (a defesa segurou tudo) é mudo. */
 function strikeCue(damage: number): Cue | null {
@@ -60,9 +62,12 @@ export function cueOf(beat: Beat, me: PlayerId): Cue | null {
       return strikeCue(event.damage);
     case 'ReflectPlayed':
     case 'ReflectTriggered':
-    case 'AbsoluteDefenseStarted':
       return 'escudo';
+    // As cenas refeitas no sub-projeto 6 (fatia 2) têm a pista delas, que segue o pico de cada uma (§10).
     case 'AbsoluteAttack':
+      return 'ataque-absoluto';
+    case 'AbsoluteDefenseStarted':
+      return 'defesa-absoluta';
     case 'Exodia':
     case 'DevastationCast':
       return 'absoluto';

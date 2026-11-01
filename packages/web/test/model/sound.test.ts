@@ -69,6 +69,17 @@ const SAMPLES: { [T in GameEvent['type']]: Extract<GameEvent, { type: T }> } = {
 
 const gameOver = (result: GameResult): GameEvent => ({ type: 'GameOver', result });
 
+describe('as pistas das cenas absolutas (sub-projeto 6 §10)', () => {
+  const beatOf = (event: GameEvent) => buildTimeline([event], { mode: 'live', reducedMotion: false, decisionPending: false })[0]!;
+
+  it('o Ataque Absoluto e a Defesa Absoluta têm a pista da cena deles; a Exódia, a Devastação e o Reflect seguem com as de antes', () => {
+    expect(cueOf(beatOf({ type: 'AbsoluteAttack', player: 'p1' }), 'p1')).toBe('ataque-absoluto');
+    expect(cueOf(beatOf({ type: 'AbsoluteDefenseStarted', player: 'p2' }), 'p1')).toBe('defesa-absoluta');
+    expect(cueOf(beatOf({ type: 'Exodia', player: 'p1' }), 'p1')).toBe('absoluto');
+    expect(cueOf(beatOf({ type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 10 }), 'p1')).toBe('escudo');
+  });
+});
+
 describe('o golpe que a cena do Ataque Absoluto absorve (sub-projeto 6 fatia 2)', () => {
   it('não soa: o som do impacto é o da cena', () => {
     const beats = buildTimeline(
@@ -140,11 +151,11 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
   });
 
   describe('escudo e absoluto', () => {
-    it.each(['ReflectPlayed', 'ReflectTriggered', 'AbsoluteDefenseStarted'] as const)('%s → escudo', (type) => {
+    it.each(['ReflectPlayed', 'ReflectTriggered'] as const)('%s → escudo', (type) => {
       expect(cueFor(SAMPLES[type])).toBe('escudo');
     });
 
-    it.each(['AbsoluteAttack', 'Exodia', 'DevastationCast'] as const)('%s → absoluto', (type) => {
+    it.each(['Exodia', 'DevastationCast'] as const)('%s → absoluto', (type) => {
       expect(cueFor(SAMPLES[type])).toBe('absoluto');
     });
   });

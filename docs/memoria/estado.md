@@ -10,8 +10,8 @@
   2026-11-01 (`decisoes.md` 2026-11-01 (2)). É inline, tarefa por tarefa, com o ledger em
   `.superpowers/sdd/2026-11-01-direcao-visual-fatia-2/progress.md` (fora do git). Uma tarefa com linha "complete" no ledger
   está feita.
-- **Progresso:** Tasks 1 a 5 feitas (os instantes e o golpe absorvido; o golpe no impacto e a insígnia na linha do tempo; a moldura
-  comum e o módulo sob demanda; as cenas do Ataque e da Defesa Absolutos, com a insígnia no retrato). Próxima: a Task 6 (os sons).
+- **Progresso:** Tasks 1 a 6 feitas (os instantes e o golpe absorvido; o golpe no impacto e a insígnia; a moldura e o módulo sob
+  demanda; as cenas do Ataque e da Defesa Absolutos; os sons, com o corte no pulo). Próxima: a Task 7 (E2E, medição e docs).
   A fixture do E2E da Task 7 já está gravada, sem commit: `packages/web/e2e/fixtures/absolutos.json` (semente `absolutos-40`,
   greedy × greedy; o Ataque Absoluto que acerta no passo 50 e a Defesa no 58).
 - **Feito por último:** os três ajustes que o autor pediu depois de jogar a fatia 1 (`decisoes.md` 2026-11-01 (1); detalhes no

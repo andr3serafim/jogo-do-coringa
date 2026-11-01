@@ -34,6 +34,8 @@ interface Rig {
   contexts: FakeContext[];
   synthLoads: number;
   played: Cue[];
+  /** Quantas pistas tinham tocado a cada `cut`. */
+  cuts: number[];
   /** Termina o carregamento do sintetizador que está no ar (o `import()` do navegador). */
   finishLoad(): Promise<void>;
   failLoad(): Promise<void>;
@@ -44,17 +46,22 @@ function rig(options: { enabled?: boolean; contextState?: AudioContextLike['stat
   const contexts: FakeContext[] = [];
   const pending: { resolve(synth: Synth): void; reject(error: Error): void }[] = [];
   const played: Cue[] = [];
+  const cuts: number[] = [];
   const state: Rig = {
     controller: undefined as unknown as SoundController,
     target: new EventTarget(),
     contexts,
     synthLoads: 0,
     played,
+    cuts,
     async finishLoad() {
       pending.shift()?.resolve({
         play(cue) {
           if (options.throwOnPlay) throw new Error('nó inválido');
           played.push(cue);
+        },
+        cut() {
+          cuts.push(played.length);
         },
       });
       await flush();
@@ -84,6 +91,19 @@ function rig(options: { enabled?: boolean; contextState?: AudioContextLike['stat
 
 const flush = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 const gesture = (target: EventTarget, type: string = 'click') => target.dispatchEvent(new Event(type));
+
+describe('SoundController: o corte das pistas (sub-projeto 6 §10)', () => {
+  it('cut repassa ao sintetizador; antes dele carregar, não faz nada', async () => {
+    const r = rig();
+    r.controller.cut();
+    expect(r.cuts).toEqual([]);
+    gesture(r.target);
+    await r.finishLoad();
+    r.controller.play('ataque-absoluto');
+    r.controller.cut();
+    expect(r.cuts).toEqual([1]);
+  });
+});
 
 describe('SoundController', () => {
   it('os eventos de ativação são os que o navegador conta como gesto do usuário', () => {

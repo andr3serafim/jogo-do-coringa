@@ -20,6 +20,8 @@ export interface AudioContextLike {
 /** O sintetizador toca uma pista agora, num contexto que já existe. */
 export interface Synth {
   play(cue: Cue): void;
+  /** Corta o que está soando (o pulo das batidas: o som da cena pulada não segue tocando). */
+  cut?(): void;
 }
 
 export interface SoundControllerDeps {
@@ -82,6 +84,15 @@ export class SoundController {
       this.synth.play(cue);
     } catch {
       // O som é enfeite: um nó que o navegador recusa nunca derruba a partida.
+    }
+  }
+
+  /** Corta as pistas que estão soando (o pulo das batidas, sub-projeto 6 §10). Sem sintetizador, não há o que cortar. */
+  cut(): void {
+    try {
+      this.synth?.cut?.();
+    } catch {
+      // Idem: o som nunca derruba a partida.
     }
   }
 

@@ -8,9 +8,11 @@ import type { Cue } from '../model/sound.ts';
 export interface SoundApi {
   play(cue: Cue): void;
   setEnabled(on: boolean): void;
+  /** Corta o que está soando: o pulo das batidas leva junto o som delas (sub-projeto 6 §10). */
+  cut(): void;
 }
 
-const SILENT: SoundApi = { play() {}, setEnabled() {} };
+const SILENT: SoundApi = { play() {}, setEnabled() {}, cut() {} };
 
 export const SoundContext = createContext<SoundApi>(SILENT);
 

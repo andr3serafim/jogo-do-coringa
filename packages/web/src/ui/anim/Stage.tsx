@@ -180,16 +180,22 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
   const impact = reducedMotion ? null : anim.fx.impact;
   const shake = impact ? { '--tremor': `${SHAKE_PX[impact.force]}px`, '--tremor-ms': `${SHAKE_MS[impact.force]}ms` } : null;
 
+  // O pulo leva junto o som das batidas puladas (sub-projeto 6 §10: a pista da cena acompanha a cena inteira).
+  const skipNow = useCallback(() => {
+    sound.cut();
+    skip();
+  }, [sound, skip]);
+
   // Esc pula as batidas (o Esc que um diálogo ou a gaveta do histórico já tratou não conta).
   useEffect(() => {
     if (!busy) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape' || event.defaultPrevented || document.querySelector('dialog[open]')) return;
-      skip();
+      skipNow();
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [busy, skip]);
+  }, [busy, skipNow]);
 
   // O toque que pulou as batidas não vira clique na barra, na mão nem em carta nenhuma. O clique do mesmo gesto chega logo
   // depois do `pointerup`; se não chegar (rolagem, `pointercancel`, o navegador que descarta o clique num botão
@@ -211,7 +217,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
     if (isOwnControl(event.target)) return;
     clearTouch();
     skippedByTouch.current = busy;
-    if (busy) skip();
+    if (busy) skipNow();
   };
   const onPointerUp = () => {
     if (skippedByTouch.current) forgetTouch.current = window.setTimeout(clearTouch, CLICK_GRACE_MS);
@@ -224,7 +230,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       event.preventDefault();
       return;
     }
-    if (busy) skip();
+    if (busy) skipNow();
   };
 
   return (

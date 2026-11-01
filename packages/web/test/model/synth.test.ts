@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Cue } from '../../src/model/sound.ts';
+import { SCENE_MOMENTS } from '../../src/model/scene-moments.ts';
 import createSynthDefault, { createSynth } from '../../src/sound/synth.ts';
 
 // O Node não tem Web Audio: um `AudioContext` falso, mínimo, que guarda o grafo (quem liga em quem) e a agenda dos parâmetros.
@@ -166,6 +167,8 @@ const ALL_CUES: Record<Cue, true> = {
   espada: true,
   fita: true,
   quadra: true,
+  'ataque-absoluto': true,
+  'defesa-absoluta': true,
 };
 const CUES = Object.keys(ALL_CUES) as Cue[];
 
@@ -197,6 +200,36 @@ function everyPathEndsAtLimiter(node: FakeNode, destination: FakeNode, limiter: 
 }
 
 const isSource = (node: FakeNode): node is FakeSource => node instanceof FakeSource;
+
+describe('os sons das cenas absolutas seguem o pico de cada uma (sub-projeto 6 §10)', () => {
+  const startsAt = (nodes: FakeNode[]) => nodes.filter(isSource).map((source) => Number((source.startedAt! - NOW).toFixed(3)));
+
+  it('o Ataque Absoluto: o ronco desde as tarjas, o estrondo da transformação, a carga da bola e o impacto do feixe', () => {
+    const { play } = setup();
+    const times = startsAt(play('ataque-absoluto'));
+    const m = SCENE_MOMENTS.ABSOLUTE_ATTACK;
+    for (const ms of [m.barsIn, m.transformAt, m.ballAt, m.hitAt]) expect(times).toContain(ms / 1000);
+  });
+
+  it('a Defesa Absoluta: o baque do escudo, um tinido em cada Q e o clangor da trava', () => {
+    const { play } = setup();
+    const times = startsAt(play('defesa-absoluta'));
+    const m = SCENE_MOMENTS.ABSOLUTE_DEFENSE;
+    expect(times).toContain(m.shieldLandsAt / 1000);
+    for (const ms of m.queensAt) expect(times).toContain(ms / 1000);
+    expect(times).toContain(m.lockAt / 1000);
+  });
+
+  it('cut() leva a saída das pistas tocando a zero em 80 ms (o pulo da cena corta o som dela)', () => {
+    const { synth, play, ctx } = setup();
+    const nodes = play('ataque-absoluto');
+    // O primeiro ganho criado é o volume geral; o da pista é o que a pista liga nele.
+    const master = ctx.created.find((node) => node instanceof FakeGain)!;
+    const bus = nodes.find((node) => node instanceof FakeGain && node.connections.includes(master));
+    synth.cut();
+    expect((bus as FakeGain).gain.scheduled.at(-1)).toBe(0);
+  });
+});
 
 describe('createSynth', () => {
   it('o módulo exporta o sintetizador também como default (é o que o import() dinâmico usa)', () => {
@@ -234,11 +267,13 @@ describe('createSynth', () => {
 
   // As longas: o absoluto (a onda que cresce e desaba) e a espada (o voo de ~0,85 s e o tinido de quando ela crava).
   const LONG: ReadonlySet<Cue> = new Set(['absoluto', 'espada']);
+  /** As pistas das cenas absolutas (sub-projeto 6 §10) acompanham a cena inteira: terminam antes do fim dela. */
+  const SCENE: Partial<Record<Cue, number>> = { 'ataque-absoluto': 4.5, 'defesa-absoluta': 4.8 };
 
-  it.each(CUES)('%s: dura no máximo 600 ms (o absoluto e a espada, 1,2 s) e começa agora', (cue) => {
+  it.each(CUES)('%s: dura no máximo 600 ms (o absoluto e a espada, 1,2 s; as das cenas, a cena) e começa agora', (cue) => {
     const { play } = setup();
     const sources = play(cue).filter(isSource);
-    const limit = LONG.has(cue) ? 1.2 : 0.6;
+    const limit = SCENE[cue] ?? (LONG.has(cue) ? 1.2 : 0.6);
     for (const source of sources) {
       expect(source.startedAt!).toBeGreaterThanOrEqual(NOW);
       expect(source.stoppedAt!).toBeLessThanOrEqual(NOW + limit + 1e-9);

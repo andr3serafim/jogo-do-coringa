@@ -2,6 +2,7 @@
 // e por isso mora num chunk à parte. Tudo sai de código: osciladores, ruído filtrado e envelopes curtos do Web Audio, sem
 // arquivo de áudio e sem licença a conferir. Cada pista é uma receita de poucas vozes (um tom ou uma rajada de ruído); todas
 // passam por um volume geral moderado e por um compressor que faz de limitador, então nada fura o teto.
+import { SCENE_MOMENTS } from '../model/scene-moments.ts';
 import type { Cue } from '../model/sound.ts';
 import type { Synth } from './controller.ts';
 
@@ -102,8 +103,14 @@ function playNoise(ctx: AudioContext, out: AudioNode, buffer: AudioBuffer, spec:
   stopAt(source, gain, start + spec.length);
 }
 
+const ATK = SCENE_MOMENTS.ABSOLUTE_ATTACK;
+const DEF = SCENE_MOMENTS.ABSOLUTE_DEFENSE;
+/** Um instante da cena (ms desde o começo dela), em segundos de pista. */
+const s = (ms: number): number => ms / 1000;
+
 /**
- * As receitas, uma por pista. Todas até 600 ms, menos o `absoluto` e a `espada` (até 1,2 s). Timbres livres (spec §9): o que importa é
+ * As receitas, uma por pista. Todas até 600 ms, menos o `absoluto` e a `espada` (até 1,2 s) e as das cenas absolutas, que
+ * acompanham a cena inteira com as vozes nos instantes dela (`SCENE_MOMENTS`). Timbres livres (spec §9): o que importa é
  * curto, original e sem pico. Golpes mais pesados são mais graves, mais longos e mais cheios.
  */
 const RECIPES: Record<Cue, (voices: Voices) => void> = {
@@ -184,10 +191,48 @@ const RECIPES: Record<Cue, (voices: Voices) => void> = {
   quadra: ({ tone }) => {
     [523, 659, 784].forEach((hz, i) => tone({ wave: 'triangle', from: hz, at: i * 0.04, length: 0.5 - i * 0.04, peak: 0.16 }));
   },
+  // O Ataque Absoluto (sub-projeto 6 §10): um ronco que cresce enquanto a aura junta energia, o estrondo grave quando os J entram
+  // no Coringa, a carga aguda da bola e o impacto do feixe no instante da inversão.
+  'ataque-absoluto': ({ tone, noise }) => {
+    const prep = s(ATK.transformAt - ATK.barsIn);
+    tone({ wave: 'sine', from: 55, at: s(ATK.barsIn), attack: prep, length: prep + 0.15, peak: 0.22 });
+    tone({ wave: 'sawtooth', from: 70, to: 140, at: s(ATK.barsIn), attack: prep, length: prep + 0.15, peak: 0.09 });
+    noise({ filter: 'lowpass', from: 200, to: 700, at: s(ATK.barsIn), attack: prep - 0.05, length: prep + 0.15, peak: 0.12 });
+    tone({ wave: 'sine', from: 90, to: 40, at: s(ATK.transformAt), length: 0.5, peak: 0.32 });
+    noise({ filter: 'lowpass', from: 1800, to: 200, at: s(ATK.transformAt), length: 0.4, peak: 0.2 });
+    const charge = s(ATK.hitAt - ATK.ballAt);
+    tone({ wave: 'sawtooth', from: 200, to: 900, at: s(ATK.ballAt), attack: charge, length: charge + 0.02, peak: 0.08 });
+    noise({ filter: 'bandpass', from: 600, to: 4000, q: 1.2, at: s(ATK.ballAt), attack: charge - 0.04, length: charge + 0.02, peak: 0.12 });
+    tone({ wave: 'sine', from: 110, to: 34, at: s(ATK.hitAt), length: 0.6, peak: 0.4 });
+    tone({ wave: 'sawtooth', from: 80, to: 35, at: s(ATK.hitAt), length: 0.45, peak: 0.14 });
+    noise({ filter: 'lowpass', from: 2600, to: 180, at: s(ATK.hitAt), length: 0.5, peak: 0.34 });
+  },
+  // A Defesa Absoluta: o ronco da muralha, o zunido do escudo caindo e o baque dele no chão, um tinido de metal em cada Q que
+  // crava, e o clangor da trava (um acorde de metal, sol e ré, sobre um grave) no instante da inversão.
+  'defesa-absoluta': ({ tone, noise }) => {
+    const rise = s(DEF.shieldLandsAt - 340 - DEF.barsIn);
+    noise({ filter: 'lowpass', from: 300, to: 150, at: s(DEF.barsIn), attack: rise * 0.6, length: rise, peak: 0.2 });
+    tone({ wave: 'sine', from: 50, at: s(DEF.barsIn), attack: rise * 0.6, length: rise + 0.05, peak: 0.15 });
+    noise({ filter: 'bandpass', from: 400, to: 1800, q: 1.5, at: s(DEF.shieldLandsAt - 340), attack: 0.3, length: 0.34, peak: 0.12 });
+    tone({ wave: 'sine', from: 120, to: 45, at: s(DEF.shieldLandsAt), length: 0.4, peak: 0.38 });
+    noise({ filter: 'lowpass', from: 2000, to: 250, at: s(DEF.shieldLandsAt), length: 0.3, peak: 0.3 });
+    for (const ms of DEF.queensAt) {
+      tone({ wave: 'triangle', from: 1175, at: s(ms), length: 0.3, peak: 0.16 });
+      tone({ wave: 'sine', from: 1760, at: s(ms), length: 0.22, peak: 0.1 });
+      noise({ filter: 'bandpass', from: 5000, q: 2, at: s(ms), length: 0.03, peak: 0.15 });
+    }
+    tone({ wave: 'triangle', from: 784, at: s(DEF.lockAt), length: 0.9, peak: 0.2 });
+    tone({ wave: 'sine', from: 1175, at: s(DEF.lockAt), length: 0.7, peak: 0.14 });
+    tone({ wave: 'sine', from: 1568, at: s(DEF.lockAt), length: 0.5, peak: 0.1 });
+    tone({ wave: 'sine', from: 90, to: 45, at: s(DEF.lockAt), length: 0.4, peak: 0.25 });
+  },
 };
 
+/** Quanto o corte leva para zerar o que está soando. */
+const CUT_SECONDS = 0.08;
+
 /** O sintetizador sobre `ctx`: a cadeia de saída (volume geral e limitador) é montada uma vez, e cada pista liga as vozes nela. */
-export function createSynth(ctx: AudioContext): Synth {
+export function createSynth(ctx: AudioContext): Required<Synth> {
   const master = ctx.createGain();
   master.gain.value = MASTER_GAIN;
   const limiter = ctx.createDynamicsCompressor();
@@ -199,11 +244,44 @@ export function createSynth(ctx: AudioContext): Synth {
   master.connect(limiter).connect(ctx.destination);
 
   const noise = noiseBuffer(ctx);
-  const voices: Voices = {
-    tone: (spec) => playTone(ctx, master, spec),
-    noise: (spec) => playNoise(ctx, master, noise, spec),
+  // Cada pista passa por um ganho próprio, para o corte (`cut`) zerar o que ainda soa sem mexer no volume geral. O ganho fica na
+  // lista até a última voz da pista acabar.
+  const live: Array<{ bus: GainNode; end: number }> = [];
+  const prune = () => {
+    for (let i = live.length - 1; i >= 0; i--) if (live[i]!.end <= ctx.currentTime) live.splice(i, 1);
   };
-  return { play: (cue) => RECIPES[cue](voices) };
+  return {
+    play: (cue) => {
+      prune();
+      const bus = ctx.createGain();
+      bus.gain.value = 1;
+      bus.connect(master);
+      let end = ctx.currentTime;
+      const track = (spec: Voice) => {
+        end = Math.max(end, ctx.currentTime + (spec.at ?? 0) + spec.length);
+      };
+      RECIPES[cue]({
+        tone: (spec) => {
+          track(spec);
+          playTone(ctx, bus, spec);
+        },
+        noise: (spec) => {
+          track(spec);
+          playNoise(ctx, bus, noise, spec);
+        },
+      });
+      live.push({ bus, end });
+    },
+    cut: () => {
+      const now = ctx.currentTime;
+      for (const { bus } of live) {
+        bus.gain.cancelScheduledValues?.(now);
+        bus.gain.setValueAtTime(bus.gain.value, now);
+        bus.gain.linearRampToValueAtTime(0, now + CUT_SECONDS);
+      }
+      live.length = 0;
+    },
+  };
 }
 
 export default createSynth;

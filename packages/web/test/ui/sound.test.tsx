@@ -24,11 +24,13 @@ afterEach(cleanup);
 function fakeSound() {
   const played: Cue[] = [];
   const enabled: boolean[] = [];
+  const cuts: number[] = [];
   const api: SoundApi = {
     play: (cue) => void played.push(cue),
     setEnabled: (on) => void enabled.push(on),
+    cut: () => void cuts.push(played.length),
   };
-  return { api, played, enabled };
+  return { api, played, enabled, cuts };
 }
 
 function mountTable(spec: ViewSpec = THEIRS, options: MountOptions & { props?: Partial<PlayTableProps> } = {}) {
@@ -57,6 +59,28 @@ const THEIR_TURN: GameEvent = { type: 'TurnStarted', player: 'p2' };
 const strike = (damage: number): GameEvent => ({ type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: damage + 10, defense: 10, damage });
 const DEF_BROKEN: GameEvent = { type: 'CardsRemovedFromRow', player: 'p1', row: 'DEF', cards: [] };
 const BOTH: GameEvent[] = [MY_TURN, strike(120)];
+
+describe('o pulo de uma cena corta o som dela (sub-projeto 6 §10)', () => {
+  it('um toque na mesa no meio do Ataque Absoluto chama cut, depois da pista da cena', () => {
+    const m = mountTable();
+    emit(m, THEIRS, [{ type: 'AbsoluteAttack', player: 'p2' }]);
+    run(500);
+    expect(m.sound.played).toContain('ataque-absoluto');
+    expect(m.sound.cuts).toEqual([]);
+    act(() => {
+      stage(m.container).click();
+    });
+    expect(m.sound.cuts).toHaveLength(1);
+  });
+
+  it('sem batidas tocando, o toque não corta nada', () => {
+    const m = mountTable();
+    act(() => {
+      stage(m.container).click();
+    });
+    expect(m.sound.cuts).toEqual([]);
+  });
+});
 
 describe('as batidas tocam a pista delas', () => {
   it('ao vivo, [a sua vez, golpe de 120] toca "vez" e depois "golpe-forte", uma pista por batida', () => {
