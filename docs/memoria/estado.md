@@ -5,18 +5,22 @@
 
 ## Agora
 
-- **Branch:** `main` (`1708e75` mais o commit desta memória), no checkout principal. O conserto do corte da cena do Ataque Absoluto
-  entrou (`decisoes.md` 2026-11-01 (3), `diario.md` 2026-11-01 (3)). Em curso: o plano da **fatia 3** (Exódia e Devastação, com a
-  desolação; spec 6 §7.3 e §7.4, com os sons), numa branch nova a partir da `main` (`feat/direcao-visual-fatia-3`).
+- **Branch:** `feat/direcao-visual-fatia-3`, a partir da `main` (`cd75b0d`), no checkout principal. Só o plano commitado.
+- **Esperando o autor:** revisar o plano da **fatia 3** (`docs/superpowers/plans/2026-11-01-direcao-visual-fatia-3.md`: a Exódia e a
+  Devastação, com a desolação e os sons). As escolhas para ele ver estão no fim desta seção.
 - **Feito por último:** a **fatia 2 do sub-projeto 6** (as cenas do Ataque e da Defesa Absolutos, a insígnia e os sons), mesclada
   por fast-forward com as duas CI verdes. Detalhes no `diario.md` (2026-11-01 (2)); medição em `notas/medicao-fatia-2.md`.
-- **Próximo passo exato:** escrever o plano da fatia 3 e entregá-lo ao autor para revisão. A fatia 2 foi jogada e aprovada com o
-  conserto do corte (`decisoes.md` 2026-11-01 (3)).
-  - Para ver as cenas sem esperar um Ataque Absoluto no treino: importe a partida da fixture do E2E
-    (`packages/web/e2e/fixtures/absolutos.json`) e abra `/partidas/absolutos`, rodada 11 (o Ataque Absoluto do Bot) e rodada 13
-    (a sua Defesa Absoluta).
-  - Com o "ok" dele (ou os ajustes), o plano da **fatia 3** (Exódia e Devastação, com a desolação; spec 6 §7.3 e §7.4, com os
-    sons), pelo `superpowers:writing-plans`, numa branch nova a partir da `main`.
+- **Próximo passo exato:** com o "ok" dele (ou os ajustes), executar o plano da fatia 3 tarefa por tarefa, como na fatia 2.
+- **Escolhas do plano da fatia 3 para o autor ver:**
+  - a Devastação passa a acontecer quando a fileira cai (`RowDevastated`), no próprio campo, sem tarjas nem cortina (como no
+    protótipo); o lançamento (`DevastationCast`) vira uma faixa;
+  - a cancelada é uma cena curta (1,4 s, sem inversão nem nome), com a fita do motivo;
+  - na Exódia, o retrato do perdedor racha, e a vida dele mostra 0, também para o leitor de tela;
+  - a desolação dura até uma carta voltar à fileira, e é guardada pela sessão (some se a página recarregar);
+  - no celular, a cena rola os campos até a fileira atingida.
+- **Para ver as cenas da fatia 2 sem esperar um Ataque Absoluto no treino:** importe a partida da fixture do E2E
+  (`packages/web/e2e/fixtures/absolutos.json`) e abra `/partidas/absolutos`, rodada 11 (o Ataque Absoluto do Bot) e rodada 13 (a
+  sua Defesa Absoluta).
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 - **Para quem assumir:**
