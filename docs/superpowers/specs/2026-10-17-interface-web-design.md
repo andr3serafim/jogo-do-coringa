@@ -358,6 +358,10 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
 
 - os alvos válidos ganham destaque na mesa e aparecem em lista na barra;
 - ao apontar um alvo, a prévia mostra o efeito ("quebrando o K: 110 de dano").
+  - **Nota (2026-11-01, `decisoes.md` 2026-11-01 (1)):** a linha longa ("Quebrando o K antes") é uma dica flutuante acima da
+    barra, fora do fluxo, e descreve o botão apontado (`aria-describedby`). Antes ela entrava nas prévias: a barra crescia, o
+    botão saía de baixo do ponteiro e a barra tremia sem parar no PC. A segunda linha de cada botão de alvo continua (no toque
+    não há hover).
 
 **Teclado:**
 
@@ -798,6 +802,7 @@ O autor escolheu a direção A entre os três rascunhos (celular e PC) do artifa
 | `capa-voce` | `#EE9DB5` | a sua metade da mesa |
 | `vermelho` | `#B8261C` | naipes vermelhos, marca "novo" (§10.5), urgência do relógio |
 | `ouro` | `#F5C238` | seleção, alvos, botão principal, anel do relógio |
+| `cura` | `#2A7339` | o "+N" da cura, o trecho da barra de vida que ela devolve, o coração da Cura passiva (2026-11-01) |
 
 - O verde ficou mais escuro que o do rascunho (`#86BC84` → `#6FA86C`) para abrir diferença de luminosidade em relação ao rosa (≈ 0,33 contra ≈ 0,46). Assim, as duas metades não se confundem para quem não distingue verde de rosa.
 - **Contrastes conferidos:**

@@ -6,13 +6,12 @@
 ## Agora
 
 - **Branch:** `feat/ajustes-fatia-1`, a partir da `main` (`b9784d0`), no checkout principal `D:/andr3/jogo-coringa`.
-- **Em curso:** os três ajustes que o autor pediu depois de jogar a fatia 1 (`decisoes.md` 2026-11-01 (1)), nesta ordem:
-  1. o tremor dos botões de alvo no PC (a linha "Quebrando o X antes" vira dica flutuante, fora do layout);
-  2. as figuras no lugar do texto (espadas e escudo nos totais, as marcas de estado, as zonas e os destinos do Equipar);
-  3. a cura em verde (o "+N" e o trecho da barra; a cor nova `cura`, #2a7339).
-- **Próximo passo exato:** terminar os três com TDD, `pnpm check`, push, as duas CI verdes e o fast-forward na `main`. Depois, o
-  plano da **fatia 2** (Ataque e Defesa Absolutos, spec 6 §7.1 e §7.2, com os sons), pelo `superpowers:writing-plans`, numa
-  branch nova a partir da `main`.
+- **Feito, commitado:** os três ajustes que o autor pediu depois de jogar a fatia 1 (`decisoes.md` 2026-11-01 (1); detalhes no
+  `diario.md` 2026-11-01 (1)): o tremor da barra no PC (`412d4ed`), as figuras (`9956fdc`) e a cura em verde na batida dela
+  (`73b4e1f`), mais as notas nas specs (web §3.4 e §10.3; sub-projeto 6 §14).
+- **Próximo passo exato:** push (o pre-push roda o `pnpm check`), as duas CI verdes e o fast-forward na `main`. Depois, o plano
+  da **fatia 2** (Ataque e Defesa Absolutos, spec 6 §7.1 e §7.2, com os sons), pelo `superpowers:writing-plans`, numa branch
+  nova a partir da `main`.
 - **Para reproduzir o tremor:** treino `semente=hover1&nivel=facil` a 1366 × 768. Jogue até o A♦ (rodada 3) e escolha
   Armadilha: o alvo é o J♣ do Bot.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
@@ -67,7 +66,8 @@ Vazia: o bloco E3 + F2 + F3 era o último item.
     versão, mas o replay delas pode divergir (o Roubo mudou). Apagar o histórico em `/partidas` resolve.
   - **Pequenos ajustes deixados para depois** (nenhum quebra o jogo): soltar o A numa numérica do Bot abre as jogadas e não lembra
     a carta (é preciso escolher o alvo de novo); com um A na mão, o Selvagem não oferece o Roubo (a mesa segue a fonte única que o
-    motor lista); a carta A da mão ainda diz "Armadilha" no rótulo curto; a vida conta antes de o "+N" da cura subir.
+    motor lista); a carta A da mão ainda diz "Armadilha" no rótulo curto. (A vida que contava antes de o "+N" da cura subir foi
+    resolvida em 2026-11-01.)
   - **O deploy** das regras novas é dele (`pnpm deploy:server`).
 
 - **Achados da E1, para ele saber (não pedem decisão agora):**

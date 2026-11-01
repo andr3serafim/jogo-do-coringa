@@ -343,6 +343,13 @@ Cada fatia é uma branch com `pnpm check`, `pnpm e2e` e as duas CI verdes, e vai
 
 1. **A base:** o placar de luta, a espada e a fita, o golpe comum, a textura de papel, as cartas vivas, a quadra marcada, a
    folga de cena no servidor (§9) e os sons delas. **Entregue em 2026-10-31** (plano `plans/2026-10-31-direcao-visual-fatia-1.md`).
+   - **Ajustes depois de o autor jogar** (`decisoes.md` 2026-11-01 (1)), entregues em 2026-11-01:
+     - figuras no lugar do texto: espadas cruzadas e escudo antes dos totais, uma figura por marca de estado (com o nome curto
+       ao lado), nos títulos das zonas e nos destinos do Equipar;
+     - a cura em verde (cor nova `cura`): o "+N" e o trecho da barra que ela devolve. Cada jogador conta a vida na batida que
+       mexe nela (o golpe desce, a cura sobe com o "+N"); antes, tudo contava na primeira batida de dano, e a cura pela Defesa
+       subia no golpe;
+     - a prévia do alvo apontado flutua fora do fluxo (spec da web §3.4): acaba o tremor da barra no PC.
 2. **Ataque e Defesa Absolutos**, com os sons.
 3. **Exódia e Devastação** (com a desolação), com os sons.
 4. **Reflect e Ressurreição**, com os sons.

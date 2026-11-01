@@ -5,6 +5,55 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-01 (1): os três ajustes da fatia 1 (o tremor da barra, as figuras, a cura em verde)
+
+- **Pedido do autor** (`decisoes.md` 2026-11-01 (1)): jogou a fatia 1, aprovou e apontou três pontos. Branch
+  `feat/ajustes-fatia-1`, a partir da `main` (`b9784d0`).
+- **O tremor da barra no PC** (`412d4ed`):
+  - **Causa, medida no Chromium a 1366 × 768:** a linha "Quebrando o J antes" entrava nas prévias quando o mouse apontava um
+    alvo. A barra crescia 17,5 px e o botão subia 17,5 px. Com o ponteiro no terço de baixo do botão, o ponteiro saía, a linha
+    sumia, o botão voltava e o ciclo recomeçava.
+  - **O que mudou:** a linha virou uma dica flutuante (`role="tooltip"`) acima da barra, fora do fluxo, ligada ao botão por
+    `aria-describedby`.
+  - **Conferido:** com o mouse no alvo, o botão ficou em 523 px antes e depois, e a barra manteve a altura.
+  - Os textos pequenos dos botões não eram a causa e ficaram: no toque não há hover.
+  - **Para reproduzir:** treino `semente=hover1&nivel=facil`; o A♦ chega na rodada 3, e a Armadilha mira o J♣ do Bot.
+- **As figuras** (`9956fdc`):
+  - **Onde entraram:** `ui/table/icons.tsx`, com 9 desenhos originais no traço do `ResurrectIcon`, que vale nos dois fundos
+    (tinta com contorno de papel, papel com contorno de tinta).
+  - **Totais:** espadas cruzadas antes do total de Ataque, escudo antes do de Defesa. A palavra virou `sr-only`.
+  - **Marcas de estado:** uma figura cada, com o nome curto ao lado; a da Ressurreição reaproveita o `ResurrectIcon`.
+  - **Também com figura:** os títulos das zonas e os destinos do Equipar.
+  - **Celular:** a coluna do total passou de 52 para 58 px, e a figura tem 14 px. Com "152" a 360 px, figura e número somam
+    57 px, sem rolagem de lado.
+  - **PC:** o título da zona passou de 4,6 para 5,9 rem, para "Buffs de ataque" seguir em duas linhas.
+  - **Conferido:** uma folha de prova com as 10 figuras em 5 fundos, olhada no Chrome.
+- **A cura em verde** (`73b4e1f`):
+  - **O que não funcionava:** o "+N" existia, mas era ouro e passava despercebido. A vida contava inteira na primeira batida
+    de dano da jogada. Na cura pela Defesa, depois de um golpe (mesmo de 0), a barra já subia no golpe, e o "+N" vinha duas
+    batidas depois, com a vida parada. Era o "pequeno ajuste" que o `estado.md` já listava ("a vida conta antes de o +N da
+    cura subir").
+  - **Contagem:** cada jogador conta a vida na batida que mexe nela (`lifeChange` em `model/effects.ts`, `life()` no
+    contexto da animação, `useCountedLife`): o golpe desce, a cura sobe.
+  - **Vida de antes:** é a última mostrada parada. Se ela não fecha com as mudanças da linha do tempo (um `state` novo com a
+    mesa tocando), vale a de depois menos as mudanças.
+  - **Visual:** o "+N" da cura é verde (cor nova `cura`, #2a7339, 5,1:1 com o papel), cresce e sobe. A barra mostra em verde
+    o trecho devolvido, à frente do ouro.
+  - **Não mudou:** os totais das fileiras seguem contando na batida do dano.
+  - **Conferido:** no replay da partida `cura-265`, passo 84 (o Bot cura 3 pela Defesa).
+- **Testes novos:**
+  - a prévia flutuante, que não mexe nas prévias;
+  - as figuras dos totais, das marcas, das zonas e do Equipar;
+  - a cura que espera a batida dela;
+  - golpe e cura no mesmo jogador;
+  - a cura com movimento reduzido.
+  - A suíte da web passou inteira (2.100 testes) antes do `pnpm check`.
+- **Armadilha:** a contagem por `requestAnimationFrame` só parte no desenho seguinte. Nos testes com timers falsos, um único
+  `advance` que atravessa a troca de batida não deixa a contagem andar: separe em `advance(até a troca)`, `advance(1)` e depois o
+  resto, como já fazia o teste do rastro.
+
+---
+
 ## 2026-10-31 (9) a 2026-11-01: sub-projeto 6, fatia 1 (o placar de luta, a espada e a fita, o golpe, a mesa viva, a folga de cena e os sons)
 
 - **Pedido do autor** (`decisoes.md` 2026-10-31 (14)): "Aprovado o plano da fatia 1. prossiga". Executado aqui mesmo, tarefa por
