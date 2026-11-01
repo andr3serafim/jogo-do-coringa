@@ -5,7 +5,9 @@
 
 ## Agora
 
-- **Branch:** `main` (`4b7c46b` mais o commit desta memória), no checkout principal `D:/andr3/jogo-coringa`. Nada em curso.
+- **Branch:** `fix/cena-ataque-cortada`, a partir da `main` (`9d1f211`), no checkout principal. Em curso: o conserto do corte da cena
+  do Ataque Absoluto (`decisoes.md` 2026-11-01 (3); `f21f9ff`: o bot do treino espera a folga das cenas antes de jogar). Falta a
+  CI verde e o fast-forward; depois, o plano da fatia 3.
 - **Feito por último:** a **fatia 2 do sub-projeto 6** (as cenas do Ataque e da Defesa Absolutos, a insígnia e os sons), mesclada
   por fast-forward com as duas CI verdes. Detalhes no `diario.md` (2026-11-01 (2)); medição em `notas/medicao-fatia-2.md`.
 - **Próximo passo exato:** o autor joga a fatia 2 e diz o que achou.
