@@ -10,8 +10,8 @@
   2026-11-01 (`decisoes.md` 2026-11-01 (2)). É inline, tarefa por tarefa, com o ledger em
   `.superpowers/sdd/2026-11-01-direcao-visual-fatia-2/progress.md` (fora do git). Uma tarefa com linha "complete" no ledger
   está feita.
-- **Progresso:** as 7 tarefas feitas e commitadas (detalhes no `diario.md` 2026-11-01 (2)). Falta a revisão final da branch, a CI
-  verde e o fast-forward na `main`.
+- **Progresso:** as 7 tarefas feitas, e a revisão final (feita por quem escreveu, sem subagente) corrigiu um achado (`c02549e`).
+  Falta a CI verde no último commit e o fast-forward na `main`.
 - **Feito por último:** os três ajustes que o autor pediu depois de jogar a fatia 1 (`decisoes.md` 2026-11-01 (1); detalhes no
   `diario.md` 2026-11-01 (1)), mesclados por fast-forward com as duas CI verdes:
   - o tremor da barra no PC (`412d4ed`);
