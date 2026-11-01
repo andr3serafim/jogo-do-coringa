@@ -38,6 +38,8 @@ function strikeCue(damage: number): Cue | null {
  */
 export function cueOf(beat: Beat, me: PlayerId): Cue | null {
   const { event } = beat;
+  // O golpe que a cena do Ataque Absoluto absorveu soa dentro dela, no impacto do feixe.
+  if (beat.absorbed) return null;
   switch (event.type) {
     case 'CardsPlaced':
     case 'BuffPlayed':

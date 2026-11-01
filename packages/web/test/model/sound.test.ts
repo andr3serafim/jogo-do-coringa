@@ -69,6 +69,20 @@ const SAMPLES: { [T in GameEvent['type']]: Extract<GameEvent, { type: T }> } = {
 
 const gameOver = (result: GameResult): GameEvent => ({ type: 'GameOver', result });
 
+describe('o golpe que a cena do Ataque Absoluto absorve (sub-projeto 6 fatia 2)', () => {
+  it('não soa: o som do impacto é o da cena', () => {
+    const beats = buildTimeline(
+      [
+        { type: 'AbsoluteAttack', player: 'p1' },
+        { type: 'DamageDealt', attacker: 'p1', defender: 'p2', attack: 200, defense: 46, damage: 154 },
+      ],
+      { mode: 'live', reducedMotion: false, decisionPending: false },
+    );
+    expect(beats[1]!.absorbed).toBe(true);
+    expect(cueOf(beats[1]!, 'p1')).toBeNull();
+  });
+});
+
 describe('cueOf: o mapa batida → pista dos sons', () => {
   it('a amostra cobre todos os 37 tipos de evento do motor', () => {
     expect(Object.keys(SAMPLES)).toHaveLength(37);

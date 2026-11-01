@@ -17,6 +17,8 @@ import {
   type SceneKind,
   type TimelineOptions,
 } from '../../src/model/timeline.ts';
+import { SCENE_MOMENTS } from '../../src/model/scene-moments.ts';
+import { damageBeatIndex } from '../../src/model/effects.ts';
 import { BOTS, type BotName } from '@coringa/sim/bots';
 import { createRng } from '@coringa/sim/rng';
 import { seededSteps } from '../fixtures.ts';
@@ -184,8 +186,8 @@ describe('mapeamento evento → batida (spec §4.2)', () => {
 });
 
 describe('as cenas raras (U3 do sub-projeto 5)', () => {
-  it('o Ataque e a Defesa Absoluta duram 3 s (o autor pediu em 2026-10-30, eram 2,6 s); a Exódia, 4,2 s', () => {
-    expect(RARE_SCENE_MS).toEqual({ EXODIA: 4_200, ABSOLUTE_ATTACK: 3_000, ABSOLUTE_DEFENSE: 3_000, DEVASTATION: 3_000 });
+  it('o Ataque Absoluto dura 4,5 s e a Defesa Absoluta 4,8 s (as cenas do protótipo, sub-projeto 6 fatia 2); a Exódia, 4,2 s', () => {
+    expect(RARE_SCENE_MS).toEqual({ EXODIA: 4_200, ABSOLUTE_ATTACK: 4_500, ABSOLUTE_DEFENSE: 4_800, DEVASTATION: 3_000 });
   });
 
   it('os tempos das cenas são os da tabela do protocolo, a mesma que o servidor usa na folga (sub-projeto 6 §9)', () => {
@@ -215,11 +217,80 @@ describe('as cenas raras (U3 do sub-projeto 5)', () => {
     expect(beat!.durationMs).toBe(0);
   });
 
-  it('nos Absolutos, o título e a inversão vêm a 0,9 s, depois do leque dos quatro J ou Q; a cena segura até o fim', () => {
-    expect(SCENE_INVERT_LEAD_MS.ABSOLUTE_ATTACK).toBe(900);
-    expect(SCENE_INVERT_LEAD_MS.ABSOLUTE_DEFENSE).toBe(900);
-    // A inversão (600 ms) acaba bem antes do fim da cena: sobra 1,5 s com o título no ar.
-    expect(RARE_SCENE_MS.ABSOLUTE_ATTACK - SCENE_INVERT_LEAD_MS.ABSOLUTE_ATTACK - 600).toBe(1_500);
+  it('nos Absolutos, a inversão é no impacto do feixe (3,2 s) e na trava do escudo (2,7 s), e acaba antes do fim da cena', () => {
+    expect(SCENE_INVERT_LEAD_MS.ABSOLUTE_ATTACK).toBe(SCENE_MOMENTS.ABSOLUTE_ATTACK.hitAt);
+    expect(SCENE_INVERT_LEAD_MS.ABSOLUTE_ATTACK).toBe(3_200);
+    expect(SCENE_INVERT_LEAD_MS.ABSOLUTE_DEFENSE).toBe(SCENE_MOMENTS.ABSOLUTE_DEFENSE.lockAt);
+    expect(SCENE_INVERT_LEAD_MS.ABSOLUTE_DEFENSE).toBe(2_700);
+    expect(SCENE_INVERT_LEAD_MS.ABSOLUTE_ATTACK + 600).toBeLessThan(RARE_SCENE_MS.ABSOLUTE_ATTACK);
+    expect(SCENE_INVERT_LEAD_MS.ABSOLUTE_DEFENSE + 600).toBeLessThan(RARE_SCENE_MS.ABSOLUTE_DEFENSE);
+  });
+
+  it('a Defesa Absoluta inverte na trava', () => {
+    const [beat] = buildTimeline([{ type: 'AbsoluteDefenseStarted', player: 'p1' }], LIVE);
+    expect(beat!.invert).toEqual({ atMs: beat!.startMs + 2_700, holdMs: 600 });
+  });
+});
+
+describe('o golpe dentro do Ataque Absoluto (sub-projeto 6 §7.1)', () => {
+  const HIT: GameEvent = { type: 'DamageDealt', attacker: 'p1', defender: 'p2', attack: 200, defense: 46, damage: 154 };
+  const REMOVED: GameEvent = { type: 'CardsRemovedFromRow', player: 'p1', row: 'ATK', cards: [num('n1')] };
+
+  it('o DamageDealt logo depois vira o golpe da cena: quieto, sem duração, e a cena o guarda no instante do impacto', () => {
+    const beats = buildTimeline([ABS_ATTACK, HIT, REMOVED], LIVE);
+    const [scene, absorbed, removed] = beats;
+    expect(scene!.hit).toEqual({ event: HIT, atMs: scene!.startMs + SCENE_MOMENTS.ABSOLUTE_ATTACK.hitAt });
+    expect(absorbed).toMatchObject({ kind: 'quiet', durationMs: 0, absorbed: true, hit: null });
+    expect(removed!.absorbed).toBe(false);
+    expect(timelineMs(beats)).toBe(RARE_SCENE_MS.ABSOLUTE_ATTACK + BEAT_MS.move);
+  });
+
+  it('a inversão é no impacto', () => {
+    const [scene] = buildTimeline([ABS_ATTACK, HIT], LIVE);
+    expect(scene!.invert!.atMs).toBe(scene!.hit!.atMs);
+  });
+
+  it('a Guarda quebrada no meio não impede: o golpe é absorvido e a quebra fica como batida depois da cena', () => {
+    const broken: GameEvent = { type: 'GuardBroken', player: 'p2', cards: [face('k1'), face('k2')] };
+    const beats = buildTimeline([ABS_ATTACK, broken, HIT], LIVE);
+    expect(beats[0]!.hit?.event).toEqual(HIT);
+    expect(beats[1]).toMatchObject({ kind: 'move', absorbed: false });
+    expect(beats[2]).toMatchObject({ kind: 'quiet', absorbed: true });
+  });
+
+  it('Ataque Absoluto refletido: não há golpe para absorver', () => {
+    const triggered: GameEvent = { type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 40 };
+    const beats = buildTimeline([ABS_ATTACK, { type: 'GuardBroken', player: 'p1', cards: [] }, triggered], LIVE);
+    expect(beats[0]!.hit).toBeNull();
+    expect(beats.some((b) => b.absorbed)).toBe(false);
+    expectPhotosafe(beats, false);
+  });
+
+  it('no catchUp nada é absorvido: a cena vira faixa e o golpe volta a ser batida de dano', () => {
+    const beats = buildTimeline([ABS_ATTACK, HIT], { ...LIVE, mode: 'catchUp' });
+    expect(beats.map((b) => [b.kind, b.absorbed, b.hit])).toEqual([
+      ['banner', false, null],
+      ['damage', false, null],
+    ]);
+  });
+
+  it('outro atacante não é absorvido', () => {
+    const theirs: GameEvent = { type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 50, defense: 10, damage: 40 };
+    const beats = buildTimeline([ABS_ATTACK, theirs], LIVE);
+    expect(beats[0]!.hit).toBeNull();
+    expect(beats[1]).toMatchObject({ kind: 'damage', absorbed: false });
+  });
+
+  it('com movimento reduzido o golpe também é absorvido (a informação é a mesma), sem inversão', () => {
+    const [scene, absorbed] = buildTimeline([ABS_ATTACK, HIT], { ...LIVE, reducedMotion: true });
+    expect(scene!.hit?.event).toEqual(HIT);
+    expect(scene!.invert).toBeNull();
+    expect(absorbed!.absorbed).toBe(true);
+  });
+
+  it('a batida que conta os totais não é a do golpe absorvido', () => {
+    const beats = buildTimeline([ABS_ATTACK, HIT, REMOVED], LIVE);
+    expect(damageBeatIndex(beats)).toBe(-1);
   });
 });
 

@@ -852,7 +852,8 @@ describe('<ReplayViewer />: cenas de Ataque Absoluto em passos seguidos', () => 
       trace.run(100);
     }
     expect(counter()).toBe('Passo 3 de 3');
-    trace.run(3_500);
+    // A inversão do Ataque Absoluto é no impacto do feixe (3,2 s, sub-projeto 6 fatia 2): a conta vai até o fim da cena.
+    trace.run(4_500);
     expect(trace.all.length).toBeGreaterThan(0);
     expectFlashSafe(trace.all);
     // A inversão em si: uma só (liga e desliga), as outras cenas cedem.

@@ -500,9 +500,20 @@ describe('palco: trava global de flash (spec §10.4)', () => {
     const trace = watchInversion(m.container);
     emit(m, THEIRS, [SCENE]);
     trace.run(200);
-    emit(m, THEIRS, [{ type: 'AbsoluteDefenseStarted', player: 'p2' }]);
+    // A Devastação inverte a 0,9 s, dentro dos 2 s de espera da trava. (Os Absolutos da fatia 2 invertem a 2,7 s e a 3,2 s,
+    // depois da espera: a trava não teria o que segurar.)
+    const devastation: GameEvent = {
+      type: 'DevastationCast',
+      player: 'p2',
+      target: 'p1',
+      row: 'DEF',
+      k: { id: 'dv-k', kind: 'K', suit: 'ouros' },
+      a: { id: 'dv-a', kind: 'A', suit: 'paus' },
+      x: { id: 'dv-q', kind: 'Q', suit: 'copas' },
+    };
+    emit(m, THEIRS, [devastation]);
     // A segunda cena toca (título na tela), mas sem inversão.
-    expect(scene(m.container)).toHaveAttribute('data-cena', 'ABSOLUTE_DEFENSE');
+    expect(scene(m.container)).toHaveAttribute('data-cena', 'DEVASTATION');
     trace.run(4_000);
     // Uma inversão só: liga aos 150 ms e desliga aos 750 ms, a da primeira cena.
     expect(trace.flips).toEqual([150, 750]);
@@ -1340,7 +1351,7 @@ describe('cortina e inversão contam juntas (spec §10.4: no máximo 3 trocas po
     }
     emit(m, MINE, [{ type: 'ReactionWindowClosed', responder: 'p1', trigger: 'ATTACK' }, ABSOLUTE]);
     trace.sample();
-    trace.run(3_000);
+    trace.run(RARE_SCENE_MS.ABSOLUTE_ATTACK);
     expectFlashSafe(trace.all);
     // Mesmo com uma decisão minha esperando, a cena rara não encolhe (U3): a inversão cabe dentro dela.
     expectInvertedWithinScene(trace.flips[2]!, elapsed, elapsed + RARE_SCENE_MS.ABSOLUTE_ATTACK);

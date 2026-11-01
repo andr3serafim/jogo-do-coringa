@@ -2,11 +2,14 @@
 // (que estende o prazo da decisão pela folga) e pela linha do tempo da web (que toca a cena nesse tempo).
 import type { GameEvent } from '@coringa/engine';
 
-/** Duração (ms) da cena de cada evento que tem uma. Cada fatia do sub-projeto 6 atualiza o valor da cena que refaz. */
+/**
+ * Duração (ms) da cena de cada evento que tem uma. Cada fatia do sub-projeto 6 atualiza o valor da cena que refaz: a fatia 2 deu
+ * ao Ataque e à Defesa Absolutos os tempos do protótipo (4,5 s e 4,8 s).
+ */
 export const SCENE_MS: Readonly<Partial<Record<GameEvent['type'], number>>> = {
   Exodia: 4_200,
-  AbsoluteAttack: 3_000,
-  AbsoluteDefenseStarted: 3_000,
+  AbsoluteAttack: 4_500,
+  AbsoluteDefenseStarted: 4_800,
   DevastationCast: 3_000,
   ReflectPlayed: 1_500,
   ReflectTriggered: 1_500,

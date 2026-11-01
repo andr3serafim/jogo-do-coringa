@@ -7,6 +7,7 @@
 // sobreposição; o número de dano, a faixa e a tremida acontecem dentro da duração da própria batida.
 import type { GameEvent } from '@coringa/engine';
 import { SCENE_MS } from '@coringa/protocol';
+import { SCENE_MOMENTS } from './scene-moments.ts';
 
 /** Duração de uma cena na tabela do protocolo (a mesma que dá a folga do relógio no servidor, sub-projeto 6 §9). */
 const sceneMs = (type: GameEvent['type']): number => SCENE_MS[type] ?? 0;
@@ -47,14 +48,15 @@ export const INVERT_COOLDOWN_MS = 2_000;
 export type SceneKind = 'EXODIA' | 'ABSOLUTE_ATTACK' | 'ABSOLUTE_DEFENSE' | 'DEVASTATION' | 'REFLECT_PLAYED' | 'REFLECT_TRIGGERED';
 
 /**
- * Onde, dentro da cena, a inversão acontece: na comum, logo no começo; nas raras, quando o título carimba (os J ou os Q já em
- * leque; na Exódia, a chegada do quarto K). A inversão dura sempre o mesmo, e é uma só por cena.
+ * Onde, dentro da cena, a inversão acontece: na comum, logo no começo; na Exódia e na Devastação, quando o título carimba. Nos
+ * Absolutos refeitos no sub-projeto 6 (fatia 2), no pico da cena: o feixe que acerta o retrato e a trava do escudo
+ * (`SCENE_MOMENTS`). A inversão dura sempre o mesmo, e é uma só por cena.
  */
 export const SCENE_INVERT_LEAD_MS: Record<SceneKind, number> = {
   REFLECT_PLAYED: 150,
   REFLECT_TRIGGERED: 150,
-  ABSOLUTE_ATTACK: 900,
-  ABSOLUTE_DEFENSE: 900,
+  ABSOLUTE_ATTACK: SCENE_MOMENTS.ABSOLUTE_ATTACK.hitAt,
+  ABSOLUTE_DEFENSE: SCENE_MOMENTS.ABSOLUTE_DEFENSE.lockAt,
   DEVASTATION: 900,
   EXODIA: 1_400,
 };
@@ -73,6 +75,13 @@ export interface Beat {
   scene: SceneKind | null;
   /** Inversão da tela inteira; `atMs` é absoluto, como `startMs`. Sempre `null` fora de cena. */
   invert: { atMs: number; holdMs: number } | null;
+  /**
+   * O golpe que a cena do Ataque Absoluto absorveu (sub-projeto 6 §7.1): o `DamageDealt` que vem logo depois dela acontece dentro
+   * dela, no instante em que o feixe acerta (`atMs`, absoluto). Sempre `null` fora dessa cena.
+   */
+  hit: { event: Extract<GameEvent, { type: 'DamageDealt' }>; atMs: number } | null;
+  /** É o `DamageDealt` que virou o golpe da cena: batida quieta, de 0 ms, sem som nem efeito. */
+  absorbed: boolean;
 }
 
 export interface TimelineOptions {
@@ -181,11 +190,28 @@ export function buildTimeline(events: GameEvent[], options: TimelineOptions): Be
   const items = events.map((event) => {
     const classified = classify(event);
     const flattened = catchUp && classified.kind === 'scene';
-    const kind = flattened ? 'banner' : classified.kind;
+    const kind: Beat['kind'] = flattened ? 'banner' : classified.kind;
     const scene = flattened ? null : classified.scene;
     const held = !catchUp && event.type === 'InitiativeDecided';
     const baseMs = held ? INITIATIVE_BANNER_MS : baseDuration(kind, scene) / (catchUp ? 2 : 1);
-    return { event, kind, cards: classified.cards, scene, baseMs, uncapped: held || isRare(scene) };
+    return { event, kind, cards: classified.cards, scene, baseMs, uncapped: held || isRare(scene), hit: null as Beat['hit'], absorbed: false };
+  });
+  // O golpe do Ataque Absoluto acontece dentro da cena dele (sub-projeto 6 §7.1): o `DamageDealt` do mesmo atacante que vem
+  // depois da cena vira o golpe dela. Entre os dois só pode haver a Guarda que o Ataque Absoluto quebra inteira (`GuardBroken`,
+  // que segue como batida própria) e batidas quietas.
+  items.forEach((item, i) => {
+    if (item.scene !== 'ABSOLUTE_ATTACK' || item.event.type !== 'AbsoluteAttack') return;
+    const attacker = item.event.player;
+    for (const next of items.slice(i + 1)) {
+      if (next.kind === 'quiet' || next.event.type === 'GuardBroken') continue;
+      if (next.event.type === 'DamageDealt' && next.event.attacker === attacker) {
+        item.hit = { event: next.event, atMs: 0 };
+        next.kind = 'quiet';
+        next.baseMs = 0;
+        next.absorbed = true;
+      }
+      return;
+    }
   });
 
   // 2. Escala proporcional para caber no teto (o menor dos que valem). As cenas raras e a faixa da iniciativa ficam de fora: não
@@ -216,7 +242,8 @@ export function buildTimeline(events: GameEvent[], options: TimelineOptions): Be
         lastInvertEndMs = atMs + holdMs;
       }
     }
-    beats.push({ event: item.event, kind: item.kind, startMs, durationMs, cards: item.cards, scene: item.scene, invert });
+    const hit = item.hit && { event: item.hit.event, atMs: startMs + Math.floor(SCENE_MOMENTS.ABSOLUTE_ATTACK.hitAt * itemScale) };
+    beats.push({ event: item.event, kind: item.kind, startMs, durationMs, cards: item.cards, scene: item.scene, invert, hit, absorbed: item.absorbed });
     startMs += durationMs;
   }
   return beats;
