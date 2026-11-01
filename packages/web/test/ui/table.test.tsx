@@ -343,6 +343,29 @@ describe('mesa: marcas de estado no Coringa (spec §3.1)', () => {
   });
 });
 
+describe('mesa: a insígnia da Defesa Absoluta (sub-projeto 6 §7.2)', () => {
+  const portrait = (side: 'voce' | 'oponente') =>
+    screen.getByRole('region', { name: 'Placar' }).querySelector(`[data-retrato="${side}"]`)!;
+
+  it('com a Defesa Absoluta ativa, a insígnia fica no seu retrato, e o nome do medidor não muda', () => {
+    mount({ ...DRAFT, self: { ...DRAFT.self, absoluteDefense: true } });
+    expect(portrait('voce').querySelector('[data-insignia]')).not.toBeNull();
+    expect(portrait('oponente').querySelector('[data-insignia]')).toBeNull();
+    expect(screen.getByRole('meter', { name: 'Vida de André' })).toBeInTheDocument();
+  });
+
+  it('sem ela, nenhuma insígnia', () => {
+    mount();
+    expect(document.querySelector('[data-insignia]')).toBeNull();
+  });
+
+  it('a do oponente fica no retrato dele', () => {
+    mount({ ...DRAFT, opponent: { ...DRAFT.opponent, absoluteDefense: true } });
+    expect(portrait('oponente').querySelector('[data-insignia]')).not.toBeNull();
+    expect(portrait('voce').querySelector('[data-insignia]')).toBeNull();
+  });
+});
+
 describe('mesa: as figuras no lugar do texto (decisoes.md 2026-11-01 (1))', () => {
   const region = (name: string) => within(screen.getByRole('region', { name }));
   const arts = (root: Element, selector: string) =>

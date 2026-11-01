@@ -122,15 +122,16 @@ describe('cenas raras (U3): a figura, o título que carimba e os raios', () => {
     expect(scene(m.container)).toHaveTextContent('Duda reuniu os quatro K e vence!');
   });
 
-  it('o Ataque Absoluto abre os J em leque, e a Defesa Absoluta faz um muro de Q', () => {
+  it('o Ataque e a Defesa Absolutos têm desenho próprio (sub-projeto 6, fatia 2): a faixa da cena no lugar do painel', () => {
     const m = mount(THEIRS);
+    const panelOn = () => m.container.querySelector('[data-painel-cena][data-ativo]');
     emit(m, THEIRS, [ABSOLUTE]);
-    expect(figure(m.container)).toHaveAttribute('data-figura', 'fan');
-    expect(figureCards(m.container)).toHaveLength(4);
+    expect(m.container.querySelector('[data-faixa-cena="ABSOLUTE_ATTACK"]')).not.toBeNull();
+    expect(panelOn()).toBeNull();
     advance(RARE_SCENE_MS.ABSOLUTE_ATTACK + 1_100);
     emit(m, THEIRS, [{ type: 'AbsoluteDefenseStarted', player: 'p2' }]);
-    expect(figure(m.container)).toHaveAttribute('data-figura', 'wall');
-    expect(figureCards(m.container).every((card) => card.getAttribute('data-card-id')!.startsWith('cena-Q-'))).toBe(true);
+    expect(m.container.querySelector('[data-faixa-cena="ABSOLUTE_DEFENSE"]')).not.toBeNull();
+    expect(panelOn()).toBeNull();
   });
 
   it('a Devastação (F3): o K, o A e o J da jogada caem em trio, com os raios, e diz quem devasta o quê', () => {
@@ -896,6 +897,29 @@ describe('efeitos da batida (spec §4.2)', () => {
       toImpact();
       expect(m.container.querySelector('[data-dano]')).toHaveTextContent('−50');
       expect(stage(m.container)).not.toHaveAttribute('data-tremor');
+    });
+  });
+
+  describe('a insígnia da Defesa Absoluta no placar (sub-projeto 6 §7.2)', () => {
+    const insignia = () => screen.getByRole('region', { name: 'Placar' }).querySelector('[data-retrato="voce"] [data-insignia]');
+
+    it('espera o fim da cena', () => {
+      const m = mount(THEIRS);
+      emit(m, { ...THEIRS, self: { ...THEIRS.self, absoluteDefense: true } }, [{ type: 'AbsoluteDefenseStarted', player: 'p1' }]);
+      advance(RARE_SCENE_MS.ABSOLUTE_DEFENSE - 100);
+      expect(insignia()).toBeNull();
+      advance(200);
+      expect(busy(m.container)).toBe(false);
+      expect(insignia()).not.toBeNull();
+    });
+
+    it('o pulo no meio da cena mostra a insígnia na hora', () => {
+      const m = mount(THEIRS);
+      emit(m, { ...THEIRS, self: { ...THEIRS.self, absoluteDefense: true } }, [{ type: 'AbsoluteDefenseStarted', player: 'p1' }]);
+      advance(1_000);
+      expect(insignia()).toBeNull();
+      fireEvent.click(stage(m.container));
+      expect(insignia()).not.toBeNull();
     });
   });
 
@@ -1694,7 +1718,8 @@ describe('o painel da cena esmaece (spec §4.1 e §10.4: nada de troca brusca de
     advance(400);
     await m.user.click(stage(m.container));
     advance(700);
-    emit(m, THEIRS, [{ type: 'AbsoluteDefenseStarted', player: 'p2' }]);
+    // Uma cena que segue com o painel (a Defesa Absoluta ganhou desenho próprio no sub-projeto 6).
+    emit(m, THEIRS, [SCENE_2]);
     expect(curtainUp(m.container)).toBe(false);
     expect(panel(m.container).className).toContain('opacity-100');
     expect(panel(m.container).className).toContain('transition-opacity');

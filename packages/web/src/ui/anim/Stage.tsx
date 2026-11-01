@@ -113,14 +113,9 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
     },
     [busy, reducedMotion, lifeSteps, index, run, hitLanded],
   );
-  const view = state?.view ?? null;
   const insignia = useCallback(
-    (who: PlayerId): boolean => {
-      if (view === null) return false;
-      const active = (view.me === who ? view.self : view.opponent).absoluteDefense;
-      return busy && index >= 0 ? insigniaShown(run.beats, index, who, active) : active;
-    },
-    [view, busy, index, run],
+    (who: PlayerId, active: boolean): boolean => (busy && index >= 0 ? insigniaShown(run.beats, index, who, active) : active),
+    [busy, index, run],
   );
   const seq = state?.seq ?? 0;
   const jump = state?.resync === true;

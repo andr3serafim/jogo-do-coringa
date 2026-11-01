@@ -19,6 +19,7 @@ import { useCountedLife } from '../anim/useCountedNumber.ts';
 import { Coringa } from '../cards/Coringa.tsx';
 import { useSound } from '../sound-context.ts';
 import { useTableUi } from './context.ts';
+import { Insignia } from './Insignia.tsx';
 import { InitiativeSword, SWORD_FLIGHT_MS, type SwordMove, type SwordSide } from './InitiativeSword.tsx';
 import { initiativeScore, initiativeScoreText, initiativeText, phaseShortText, type TableNames } from './labels.ts';
 import { NovoChip } from './NovoChip.tsx';
@@ -166,6 +167,10 @@ function Side({ side, view, player, name, holder }: SideProps) {
         className={`placar-retrato ${self ? 'bg-capa-voce' : 'bg-capa-oponente'}`}
       >
         <Coringa className="size-[82%]" />
+        {/* A insígnia da Defesa Absoluta (sub-projeto 6 §7.2), no canto de baixo, por fora: a espada da iniciativa fica no de cima. */}
+        {anim.insignia(player.id, player.absoluteDefense) ? (
+          <Insignia className={`absolute -bottom-2 z-10 h-[20px] w-[17px] drop-shadow-[1px_1px_0_var(--color-tinta)] pc:-bottom-3 pc:h-[32px] pc:w-[27px] ${self ? '-left-2 pc:-left-3' : '-right-2 pc:-right-3'}`} />
+        ) : null}
         {anim.fx.shieldBreak === player.id ? <ShieldBreak ms={anim.beatMs} reduced={anim.reduced} /> : null}
         {impact ? <InkSplat force={impact.force} ms={anim.beatMs} reduced={anim.reduced} /> : null}
         {damage ? (

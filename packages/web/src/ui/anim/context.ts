@@ -71,8 +71,11 @@ export interface Anim {
   countMs: number;
   /** A vida de `player` na linha do tempo. */
   life(player: PlayerId): LifeCount;
-  /** A insígnia da Defesa Absoluta no retrato de `player` (sub-projeto 6 §7.2): espera a cena dela e some no fim dela. */
-  insignia(player: PlayerId): boolean;
+  /**
+   * A insígnia da Defesa Absoluta no retrato de `player` (sub-projeto 6 §7.2). `active` é a Defesa da `view`: parado, vale ela; com
+   * as batidas tocando, a insígnia espera a cena dela e some na batida do fim dela.
+   */
+  insignia(player: PlayerId, active: boolean): boolean;
 }
 
 export const IDLE_ANIM: Anim = {
@@ -91,7 +94,7 @@ export const IDLE_ANIM: Anim = {
   count: 'idle',
   countMs: 0,
   life: () => IDLE_LIFE,
-  insignia: () => false,
+  insignia: (_player, active) => active,
 };
 
 export const AnimContext = createContext<Anim>(IDLE_ANIM);
