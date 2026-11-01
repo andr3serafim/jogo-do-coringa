@@ -41,6 +41,11 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     o trecho devolvido, à frente do ouro.
   - **Não mudou:** os totais das fileiras seguem contando na batida do dano.
   - **Conferido:** no replay da partida `cura-265`, passo 84 (o Bot cura 3 pela Defesa).
+  - **Conferido também:** os eventos trazem a mudança exata da vida (as 11 partidas de referência mais a `cura-265`, 2.361
+    passos, 427 mudanças de vida: todas batem). O golpe que mata deixa a vida do motor negativa, e a contagem vai até ela, como a
+    `view` (um primeiro corte em 0 foi tirado: `f16057a`).
+  - **Coberto por teste:** um `state` novo chegando com a mesa tocando segue de onde a conta fecha, sem voltar à vida de antes.
+  - **Ninguém mais conta a vida:** o painel do fim e o replay usam o mesmo placar.
 - **Testes novos:**
   - a prévia flutuante, que não mexe nas prévias;
   - as figuras dos totais, das marcas, das zonas e do Equipar;
