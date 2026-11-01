@@ -11,8 +11,8 @@
   aprovado pelo autor em 2026-10-31: "Aprovado o plano da fatia 1. prossiga"), inline, tarefa por tarefa, com teste primeiro.
   O registro de progresso (ledger) fica em `.superpowers/sdd/2026-10-31-direcao-visual-fatia-1/progress.md` (fora do git; se
   sumir, o `git log` da branch diz o que já foi feito: um commit `feat(...)` por tarefa).
-- **Feito:** as Tarefas 1 a 7 no código (último: `cc60be4`, a otimização do golpe: 50–53 quadros por segundo com a CPU 4× mais lenta), os E2E no endereço novo, as notas nas specs e o diário. Em curso: o `pnpm e2e` completo.
-- **Próximo passo exato:** ver o `pnpm e2e`; então `git push` (o pre-push roda o `pnpm check`), as duas CI verdes na `feat/direcao-visual-fatia-1` e o fast-forward da `main` (ela recebe junto a spec e o plano da `feat/direcao-visual`); depois, a memória com "nada em curso" e o próximo passo (o plano da fatia 2).
+- **Feito:** as Tarefas 1 a 7 no código, a otimização do golpe (`cc60be4`) e o conserto do tempo esgotado com folga de cena (achado na revisão). E2E local: 50 passaram; o online falhou só porque um `wrangler dev` do autor (sem a semente) estava na porta 8787 e o Playwright o reaproveitou (na rodada anterior, com servidor próprio, ele passou).
+- **Próximo passo exato:** `git push` (o pre-push roda o `pnpm check` completo), as duas CI verdes na `feat/direcao-visual-fatia-1` (o `e2e` da CI sobe servidor próprio, com a semente) e o fast-forward da `main` depois de conferir que ela ainda é `9b10ddd`; depois, a memória com "nada em curso" e o próximo passo (o plano da fatia 2).
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
