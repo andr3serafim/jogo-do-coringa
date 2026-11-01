@@ -10,11 +10,12 @@
   `decisoes.md` 2026-11-01 (4), aqui mesmo, tarefa por tarefa, com o teste primeiro. Cada tarefa fecha com o commit dela.
 - **Andamento das 6 tarefas:**
   - **Feitas:** Task 1 (`d0458b8`: os tempos e as batidas), Task 2 (`7cd2a48`: a cena da Exódia e o retrato que racha) , Task 3
-    (`4f58fb5`: a Devastação no campo, com a refletida e a cancelada) e Task 4 (`7c3b011`: a desolação). As escolhas técnicas de
-    cada uma estão no `diario.md` 2026-11-01 (4).
-  - **Falta:** Task 5 (os sons), Task 6 (o E2E, a medição e os docs), a revisão final, a CI e o fast-forward.
-- **Próximo passo exato:** a **Task 5** do plano, começando pelos testes (`test/model/synth.test.ts`). O que ela precisa levar em
-  conta está no `diario.md` 2026-11-01 (4), em "O que quem continua precisa saber".
+    (`4f58fb5`: a Devastação no campo, com a refletida e a cancelada) , Task 4 (`7c3b011`: a desolação) e Task 5 (`263e6ce`: os sons). As
+    escolhas técnicas de cada uma estão no `diario.md` 2026-11-01 (4).
+  - **Falta:** Task 6 (o E2E, a medição e os docs), a revisão final, a CI e o fast-forward.
+- **Próximo passo exato:** a **Task 6** do plano: achar com o simulador uma partida com Devastação que derruba uma fileira e uma com
+  Exódia, gravar a fixture, escrever o E2E, ver as cenas no navegador e medir. O que ela precisa levar em conta está no `diario.md`
+  2026-11-01 (4), em "O que quem continua precisa saber".
 - **Nada da fatia 3 foi visto no navegador ainda:** só os testes de unidade (a web inteira verde: 65 arquivos, 2250 testes). O visual
   da Exódia e da Devastação será conferido na Task 6, com a fixture. O autor ainda não viu nada desta fatia.
 - **Sem conflito de regra:** `RULES_VERSION` e `STATE_SCHEMA` não mudam; muda só a tabela da folga de cena (`SCENE_MS`).

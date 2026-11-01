@@ -5,7 +5,7 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
-## 2026-11-01 (4): sub-projeto 6, fatia 3 em execução (a Exódia e a Devastação), Tasks 1 a 4 feitas
+## 2026-11-01 (4): sub-projeto 6, fatia 3 em execução (a Exódia e a Devastação), Tasks 1 a 5 feitas
 
 - **Pedido do autor** (`decisoes.md` 2026-11-01 (4) e (5)): "ok, pode seguir o plano da fatia 3", e que a outra conta consiga
   retomar sem perda nenhuma. Plano em `docs/superpowers/plans/2026-11-01-direcao-visual-fatia-3.md`, na branch
@@ -59,10 +59,10 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
       haver salto quando a cena acaba;
     - a cor do campo volta por `transition: filter 600ms` no `.campo`. É o único `filter` que anima na fatia, uma vez por fileira, e o
       Chrome o faz no compositor. A Task 6 mede se pesa.
+- **Task 5, os sons** (`263e6ce`): as receitas `exodia`, `devastacao` e `devastacao-cancelada` nos instantes da tabela. A pista `absoluto`
+  ficou sem uso e saiu (`Cue`, `synth.ts` e `synth.test.ts`; o plano não a mencionava). O som só foi conferido pelos instantes das
+  vozes, não pelo ouvido.
 - **O que quem continua precisa saber:**
-  - **Task 5 (os sons):** troque as três receitas provisórias do `synth.ts` (`exodia`, `devastacao`, `devastacao-cancelada`, que hoje
-    chamam `RECIPES.absoluto`). A pista `absoluto` fica sem uso depois: tire do `Cue`, do `synth.ts` e do `synth.test.ts`
-    (`ALL_CUES`, `LONG` e o teste do ruído);
   - **Task 6:** falta ver tudo no navegador. Confira a Exódia e a Devastação com a fixture, a 1366 × 768 e a 360 × 640, e meça a CPU 4×;
   - **a revisão final** (tarefa do `executing-plans`) foi feita por quem escreveu o código nas fatias anteriores, sem subagente, e isso
     é dito ao autor;
