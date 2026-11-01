@@ -8,6 +8,7 @@ import {
   dealsOf,
   delaysOf,
   effectsOf,
+  insigniaShown,
   NO_EFFECTS,
   rowKey,
   sceneText,
@@ -29,6 +30,38 @@ const names = roomNames('p1', [
   { playerId: 'p2', nickname: 'Duda' },
 ]);
 const view = scenarioAt({ self: { attackRow: [7, 7, 7, 7, 3], defenseRow: [4, 4] }, opponent: { attackRow: [9, 9] } }).view;
+
+describe('a insígnia da Defesa Absoluta na linha do tempo (sub-projeto 6 §7.2)', () => {
+  const LIVE_OPTS = { mode: 'live', reducedMotion: false, decisionPending: false } as const;
+  const started = (player: 'p1' | 'p2'): GameEvent => ({ type: 'AbsoluteDefenseStarted', player });
+
+  it('a Defesa começa nesta linha do tempo: não aparece até a batida dela passar', () => {
+    const beats = buildTimeline([started('p1'), { type: 'TurnStarted', player: 'p2' }], LIVE_OPTS);
+    expect(insigniaShown(beats, 0, 'p1', true)).toBe(false);
+    expect(insigniaShown(beats, 1, 'p1', true)).toBe(true);
+  });
+
+  it('a Defesa já estava ativa: aparece', () => {
+    const beats = buildTimeline([{ type: 'TurnStarted', player: 'p2' }], LIVE_OPTS);
+    expect(insigniaShown(beats, 0, 'p1', true)).toBe(true);
+  });
+
+  it('ela termina nesta linha do tempo: aparece até a batida do fim, e some nela', () => {
+    const beats = buildTimeline(
+      [{ type: 'AttackDeclared', player: 'p2' }, { type: 'AbsoluteDefenseEnded', player: 'p1' }, { type: 'TurnStarted', player: 'p1' }],
+      LIVE_OPTS,
+    );
+    expect(insigniaShown(beats, 0, 'p1', false)).toBe(true);
+    expect(insigniaShown(beats, 1, 'p1', false)).toBe(false);
+    expect(insigniaShown(beats, 2, 'p1', false)).toBe(false);
+  });
+
+  it('a Defesa do outro jogador não conta', () => {
+    const beats = buildTimeline([started('p2')], LIVE_OPTS);
+    expect(insigniaShown(beats, 0, 'p1', true)).toBe(true);
+    expect(insigniaShown(beats, 0, 'p1', false)).toBe(false);
+  });
+});
 
 describe('delaysOf: quando cada elemento com layoutId se mexe', () => {
   it('a carta espera o início da batida que a move', () => {

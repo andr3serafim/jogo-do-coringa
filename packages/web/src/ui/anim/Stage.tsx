@@ -22,7 +22,7 @@ import type { PlayerId } from '@coringa/engine';
 import { LazyMotion, MotionConfig } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
 import type { Ribbon } from '../../model/copy.ts';
-import { bannerRibbon, effectsOf, lifeChange, NO_EFFECTS, ribbonText } from '../../model/effects.ts';
+import { bannerRibbon, effectsOf, insigniaShown, lifeChange, NO_EFFECTS, ribbonText } from '../../model/effects.ts';
 import { roomNames } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import type { ImpactForce } from '../../model/impact.ts';
@@ -50,6 +50,8 @@ const loadMotionFeatures = () => import('./motion-features.ts').then((module) =>
 /** O tremor do golpe (sub-projeto 6 §5): quanto a mesa se desloca e por quanto tempo, por peso. Deslocamento, não luz (spec §10.4). */
 export const SHAKE_PX: Record<ImpactForce, number> = { leve: 3, medio: 4, forte: 6 };
 export const SHAKE_MS: Record<ImpactForce, number> = { leve: 200, medio: 200, forte: 260 };
+/** Quanto a vida leva para descer depois que o feixe do Ataque Absoluto acerta (o protótipo conta em 700 ms). */
+export const HIT_COUNT_MS = 700;
 
 export interface StageProps {
   snapshot: SessionSnapshot;
@@ -74,7 +76,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
     { reducedMotion, decisionPending: snapshot.legal.length > 0, bannerReadMs: readBanner },
     onSettled,
   );
-  const { run, beat, index, busy, inverted, curtain, bannerBeat, banner, released, skip } = player;
+  const { run, beat, index, busy, inverted, curtain, bannerBeat, banner, released, skip, hitLanded } = player;
 
   const count: CountPhase =
     !busy || reducedMotion || run.damageIndex < 0 || index > run.damageIndex
@@ -83,7 +85,11 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
         ? 'count'
         : 'hold';
   const countMs = run.beats[run.damageIndex]?.durationMs ?? 0;
-  const lifeSteps = useMemo(() => run.beats.map((b) => lifeChange(b.event)), [run]);
+  // O golpe que a cena do Ataque Absoluto absorveu conta na cena, uma vez só: a batida absorvida não conta.
+  const lifeSteps = useMemo(
+    () => run.beats.map((b) => (b.absorbed ? null : lifeChange(b.hit ? b.hit.event : b.event))),
+    [run],
+  );
   const life = useCallback(
     (who: PlayerId): LifeCount => {
       if (!busy || reducedMotion) return IDLE_LIFE;
@@ -95,10 +101,22 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
         if (i < index) done += change.delta;
       });
       const now = lifeSteps[index];
-      const step = now?.player === who ? now.delta : 0;
-      return { playing: true, done, step, ms: run.beats[index]?.durationMs ?? 0, total };
+      const hit = run.beats[index]?.hit ?? null;
+      // Na cena com golpe, a vida espera o feixe acertar e desce em `HIT_COUNT_MS`.
+      const step = now?.player === who && (hit === null || hitLanded) ? now.delta : 0;
+      const ms = hit === null ? (run.beats[index]?.durationMs ?? 0) : HIT_COUNT_MS;
+      return { playing: true, done, step, ms, total };
     },
-    [busy, reducedMotion, lifeSteps, index, run],
+    [busy, reducedMotion, lifeSteps, index, run, hitLanded],
+  );
+  const view = state?.view ?? null;
+  const insignia = useCallback(
+    (who: PlayerId): boolean => {
+      if (view === null) return false;
+      const active = (view.me === who ? view.self : view.opponent).absoluteDefense;
+      return busy && index >= 0 ? insigniaShown(run.beats, index, who, active) : active;
+    },
+    [view, busy, index, run],
   );
   const seq = state?.seq ?? 0;
   const jump = state?.resync === true;
@@ -148,14 +166,15 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       // O `resync` troca a mesa de uma vez: uma carta que está nos dois quadros (o salto do replay, a volta da reconexão) não desliza.
       instant: (id) => jump || released.instant.has(id),
       layoutKey: `${seq}:${busy ? 'tocando' : 'parado'}`,
-      fx: state ? effectsOf(beat, state.view) : NO_EFFECTS,
+      fx: state ? effectsOf(beat, state.view, hitLanded) : NO_EFFECTS,
       ribbon,
       beatMs: beat?.durationMs ?? 0,
       count,
       countMs,
       life,
+      insignia,
     }),
-    [busy, reducedMotion, run, released, remounted, seq, jump, state, beat, ribbon, count, countMs, life],
+    [busy, reducedMotion, run, released, remounted, seq, jump, state, beat, ribbon, count, countMs, life, insignia, hitLanded],
   );
 
   // O golpe treme a mesa na batida dele (a animação do CSS roda uma vez quando a marca entra); nada com movimento reduzido.

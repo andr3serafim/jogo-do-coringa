@@ -799,6 +799,77 @@ describe('efeitos da batida (spec §4.2)', () => {
     expect(m.container.querySelector('[data-dano]')).toHaveTextContent('−37');
   });
 
+  describe('o golpe do Ataque Absoluto (sub-projeto 6 §7.1)', () => {
+    const blast = (damage: number): GameEvent => ({ type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 100, defense: 50, damage });
+    const hp = () => Number(screen.getByRole('region', { name: 'Placar' }).querySelector('[data-lado="voce"] [data-hp]')!.textContent);
+    /** Chega ao impacto do feixe (3,2 s) e deixa a contagem partir (o `act` à parte). */
+    const toImpact = () => {
+      advance(3_100);
+      advance(100);
+      advance(1);
+    };
+
+    it('nada do golpe antes do impacto; no impacto, o número, o tremor forte, os respingos, e a vida desce em 700 ms', () => {
+      const m = mount(THEIRS);
+      emit(m, { ...THEIRS, self: { ...THEIRS.self, hp: 137 } }, [ABSOLUTE, blast(50)]);
+      advance(3_100);
+      expect(m.container.querySelector('[data-dano]')).toBeNull();
+      expect(stage(m.container)).not.toHaveAttribute('data-tremor');
+      expect(hp()).toBe(187);
+      advance(100);
+      advance(1);
+      expect(m.container.querySelector('[data-dano]')).toHaveTextContent('−50');
+      expect(stage(m.container)).toHaveAttribute('data-tremor', 'forte');
+      expect(m.container.querySelector('[data-respingo]')).not.toBeNull();
+      advance(700);
+      expect(hp()).toBe(137);
+      // O golpe absorvido não repete o número depois da cena.
+      advance(1_400);
+      expect(m.container.querySelector('[data-dano]')).toBeNull();
+      expect(busy(m.container)).toBe(false);
+    });
+
+    it('o pulo no meio da cena mostra a vida final na hora', () => {
+      const m = mount(THEIRS);
+      emit(m, { ...THEIRS, self: { ...THEIRS.self, hp: 137 } }, [ABSOLUTE, blast(50)]);
+      advance(1_000);
+      fireEvent.click(stage(m.container));
+      expect(busy(m.container)).toBe(false);
+      expect(hp()).toBe(137);
+    });
+
+    it('golpe de 0 (a Defesa cobre a conta): nada de número, tremor ou respingo, e a vida não mexe', () => {
+      const m = mount(THEIRS);
+      emit(m, THEIRS, [ABSOLUTE, blast(0)]);
+      toImpact();
+      expect(m.container.querySelector('[data-dano]')).toBeNull();
+      expect(stage(m.container)).not.toHaveAttribute('data-tremor');
+      expect(m.container.querySelector('[data-respingo]')).toBeNull();
+      expect(hp()).toBe(187);
+    });
+
+    it('com a Guarda quebrada no meio, a vida conta uma vez só: nunca abaixo de 137, nunca de volta para cima', () => {
+      const m = mount(THEIRS);
+      const broken: GameEvent = { type: 'GuardBroken', player: 'p1', cards: [{ id: 'gk-1', kind: 'K', suit: 'ouros' }] };
+      emit(m, { ...THEIRS, self: { ...THEIRS.self, hp: 137, guard: [] } }, [ABSOLUTE, broken, blast(50)]);
+      const seen: number[] = [];
+      for (let t = 0; t < 5_200; t += 50) {
+        advance(50);
+        seen.push(hp());
+      }
+      expect(Math.min(...seen)).toBe(137);
+      expect(seen.every((v, i) => i === 0 || v <= seen[i - 1]!)).toBe(true);
+    });
+
+    it('com movimento reduzido, o número aparece no impacto, sem tremor', () => {
+      const m = mount(THEIRS, { prefs: { reduceMotion: true } });
+      emit(m, { ...THEIRS, self: { ...THEIRS.self, hp: 137 } }, [ABSOLUTE, blast(50)]);
+      toImpact();
+      expect(m.container.querySelector('[data-dano]')).toHaveTextContent('−50');
+      expect(stage(m.container)).not.toHaveAttribute('data-tremor');
+    });
+  });
+
   describe('a cura em verde, na batida dela (decisoes.md 2026-11-01 (1))', () => {
     const six = { id: 'n-6', kind: 'NUM', value: 6, suit: 'paus' } as const;
     const removed: GameEvent = { type: 'CardsRemovedFromRow', player: 'p1', row: 'DEF', cards: [six] };

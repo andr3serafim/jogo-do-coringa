@@ -108,6 +108,8 @@ export interface BeatPlayer {
   beat: Beat | null;
   /** Índice dela em `run.beats` (-1 fora das batidas). */
   index: number;
+  /** O golpe que a cena do Ataque Absoluto absorveu já acendeu (o feixe acertou; sub-projeto 6 §7.1). */
+  hitLanded: boolean;
   busy: boolean;
   inverted: boolean;
   /** A cortina escura da cena está no ar (ela segura um pouco além da batida, e a regra de flash pode segurá-la mais). */
@@ -302,6 +304,8 @@ export function useBeatPlayer(
 
   // --- Batidas ---
   const timers = useRef<number[]>([]);
+  /** O golpe absorvido que já acendeu: o da batida `index` da linha do tempo `run`. */
+  const [landed, setLanded] = useState<{ run: Run; index: number } | null>(null);
   /** A linha do tempo cujos timers ainda valem: o pulo a solta, e o que ela agendou deixa de acontecer. */
   const live = useRef<Run | null>(null);
   useEffect(() => {
@@ -333,6 +337,8 @@ export function useBeatPlayer(
           });
         tryInvert(atMs, false);
       }
+      // O golpe que a cena do Ataque Absoluto absorveu acende no impacto do feixe (sub-projeto 6 §7.1), no mesmo relógio da inversão.
+      if (beat.hit) at(beat.hit.atMs, () => setLanded({ run, index: i }));
       if (beat.kind === 'scene' && beat.scene !== null) {
         at(beat.startMs, raiseCurtain);
         at(beat.startMs + beat.durationMs, () => lowerCurtain(CURTAIN_MIN_HOLD_MS));
@@ -391,6 +397,7 @@ export function useBeatPlayer(
     run,
     beat,
     index: current.done ? -1 : current.index,
+    hitLanded: !current.done && landed !== null && landed.run === run && landed.index === current.index,
     busy: !current.done,
     inverted,
     curtain,

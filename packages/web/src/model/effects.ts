@@ -89,9 +89,28 @@ function effectsOfEvent(event: GameEvent, view: PlayerView): Partial<BeatEffects
 }
 
 /** Os efeitos da batida em curso, sobre a `view` do `state` que a trouxe. Sem batida, nenhum. */
-export function effectsOf(beat: Beat | null, view: PlayerView): BeatEffects {
+/**
+ * Os efeitos da batida. Na cena do Ataque Absoluto, depois que o feixe acerta (`landed`), somam-se os do golpe que ela absorveu
+ * (o número, os respingos, as fileiras), e o tremor é sempre o forte (sub-projeto 6 §7.1), qualquer que seja o dano.
+ */
+export function effectsOf(beat: Beat | null, view: PlayerView, landed = false): BeatEffects {
   if (beat === null) return NO_EFFECTS;
-  return { ...NO_EFFECTS, ...effectsOfEvent(beat.event, view) };
+  const own = effectsOfEvent(beat.event, view);
+  if (beat.hit === null || !landed) return { ...NO_EFFECTS, ...own };
+  const hit = effectsOfEvent(beat.hit.event, view);
+  const impact = hit.impact ? { target: hit.impact.target, force: 'forte' as const } : null;
+  return { ...NO_EFFECTS, ...own, ...hit, impact };
+}
+
+/**
+ * A insígnia da Defesa Absoluta no retrato de `player` na batida `index` (sub-projeto 6 §7.2). `active` é a Defesa da `view`, que
+ * já é a de depois da linha do tempo: com ela, a insígnia espera a cena do `AbsoluteDefenseStarted` passar; sem ela, fica até a
+ * batida do `AbsoluteDefenseEnded`.
+ */
+export function insigniaShown(beats: readonly Beat[], index: number, player: PlayerId, active: boolean): boolean {
+  const ahead = (type: 'AbsoluteDefenseStarted' | 'AbsoluteDefenseEnded', from: number) =>
+    beats.some((beat, i) => i >= from && beat.event.type === type && beat.event.player === player);
+  return active ? !ahead('AbsoluteDefenseStarted', index) : ahead('AbsoluteDefenseEnded', index + 1);
 }
 
 /**
