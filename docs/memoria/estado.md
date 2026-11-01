@@ -5,12 +5,13 @@
 
 ## Agora
 
-- **Branch:** `feat/cena-ataque-cortada`, a partir da `main` (`9d1f211`), no checkout principal. Em curso: o conserto do corte da cena
-  do Ataque Absoluto (`decisoes.md` 2026-11-01 (3); `f21f9ff`: o bot do treino espera a folga das cenas antes de jogar). Falta a
-  CI verde e o fast-forward; depois, o plano da fatia 3.
+- **Branch:** `main` (`1708e75` mais o commit desta memória), no checkout principal. O conserto do corte da cena do Ataque Absoluto
+  entrou (`decisoes.md` 2026-11-01 (3), `diario.md` 2026-11-01 (3)). Em curso: o plano da **fatia 3** (Exódia e Devastação, com a
+  desolação; spec 6 §7.3 e §7.4, com os sons), numa branch nova a partir da `main` (`feat/direcao-visual-fatia-3`).
 - **Feito por último:** a **fatia 2 do sub-projeto 6** (as cenas do Ataque e da Defesa Absolutos, a insígnia e os sons), mesclada
   por fast-forward com as duas CI verdes. Detalhes no `diario.md` (2026-11-01 (2)); medição em `notas/medicao-fatia-2.md`.
-- **Próximo passo exato:** o autor joga a fatia 2 e diz o que achou.
+- **Próximo passo exato:** escrever o plano da fatia 3 e entregá-lo ao autor para revisão. A fatia 2 foi jogada e aprovada com o
+  conserto do corte (`decisoes.md` 2026-11-01 (3)).
   - Para ver as cenas sem esperar um Ataque Absoluto no treino: importe a partida da fixture do E2E
     (`packages/web/e2e/fixtures/absolutos.json`) e abra `/partidas/absolutos`, rodada 11 (o Ataque Absoluto do Bot) e rodada 13
     (a sua Defesa Absoluta).

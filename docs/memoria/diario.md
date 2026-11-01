@@ -5,6 +5,30 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-01 (3): a cena do Ataque Absoluto cortada pela jogada do bot
+
+- **Pedido do autor** (`decisoes.md` 2026-11-01 (3)): na mesma partida, a Defesa Absoluta tocou inteira, mas o Ataque Absoluto
+  começou e foi cortado antes do fim.
+- **Causa:**
+  - o bot do treino joga 600 ms depois de a vez chegar a ele, e cada `state` novo troca a linha do tempo da mesa no meio das
+    batidas (regra do `useBeatPlayer`);
+  - depois do seu ataque, a vez passa ao bot, e a jogada dele cortava a cena;
+  - a Defesa não foi cortada porque, depois dela, a vez continuou sua.
+- **Conserto** (`f21f9ff`, branch `feat/cena-ataque-cortada`, CI verde, fast-forward):
+  - a sala do treino guarda até quando vão as cenas raras publicadas, com a mesma `sceneAllowanceMs` que estende o prazo no
+    online;
+  - o bot espera esse fim antes dos 600 ms de pensar (e antes de responder numa janela de reação);
+  - quando o jogador joga, a espera zera: ele já viu ou pulou a cena;
+  - vale para as seis cenas.
+- **Teste:** a partida da semente `cena-74` (o jogador jogando como o greedy) tem um Ataque Absoluto e um Reflect seguidos de
+  uma jogada do bot. O bot esperava 600 ms e agora espera a folga mais 600 ms. O teste antigo da reação agora também prova que a
+  espera zera.
+- **Armadilha:** a CI só roda na `main`, nas `feat/**` e nos PRs. Uma branch `fix/` não roda (renomeei).
+- **Fica para o online:** um oponente humano que pula a cena e joga corta a sua, como antes. O prazo do servidor já dá a folga a
+  ele; só pular de propósito corta.
+
+---
+
 ## 2026-11-01 (2): sub-projeto 6, fatia 2 (as cenas do Ataque e da Defesa Absolutos, a insígnia e os sons)
 
 - **Pedido do autor** (`decisoes.md` 2026-11-01 (2)): "Aprovado, siga". Plano em
