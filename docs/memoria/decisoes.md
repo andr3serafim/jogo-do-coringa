@@ -6,6 +6,24 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-01 (4): o plano da fatia 3 do sub-projeto 6 aprovado
+
+À entrega do plano (`docs/superpowers/plans/2026-11-01-direcao-visual-fatia-3.md`), com as escolhas listadas para ele:
+- a Devastação acontece quando a fileira cai (`RowDevastated`), no próprio campo, sem tarjas nem cortina; o lançamento vira
+  faixa;
+- a cancelada é uma cena curta (1,4 s, sem inversão nem nome), com a fita do motivo;
+- na Exódia, o retrato do perdedor racha e a vida dele mostra 0, também para o leitor de tela;
+- a desolação dura até uma carta voltar à fileira, guardada pela sessão;
+- no celular, a cena rola os campos até a fileira atingida;
+- a recomendação de executar aqui mesmo, tarefa por tarefa, com a revisão no fim.
+
+> ok,  pode seguir o plano da fatia 3
+
+**Leitura:** o plano está aprovado como foi entregue, com as escolhas listadas, e a execução é a recomendada. **[I]** Vale até o
+fast-forward na `main` com as duas CI verdes, como nas fatias anteriores.
+
+---
+
 ## 2026-11-01 (3): a fatia 2 jogada; a cena do Ataque Absoluto cortada
 
 Depois de jogar a fatia 2:
