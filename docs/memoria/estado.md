@@ -6,9 +6,10 @@
 ## Agora
 
 - **Branch:** `feat/direcao-visual-fatia-2`, a partir da `main` (`f55317d`), no checkout principal `D:/andr3/jogo-coringa`.
-  Só o plano commitado.
-- **Esperando o autor:** revisar o plano da fatia 2 (`docs/superpowers/plans/2026-11-01-direcao-visual-fatia-2.md`). Com o
-  "ok" dele (ou os ajustes), executar tarefa por tarefa, como na fatia 1.
+- **Em curso:** a execução do plano da fatia 2 (`docs/superpowers/plans/2026-11-01-direcao-visual-fatia-2.md`), aprovado em
+  2026-11-01 (`decisoes.md` 2026-11-01 (2)). É inline, tarefa por tarefa, com o ledger em
+  `.superpowers/sdd/2026-11-01-direcao-visual-fatia-2/progress.md` (fora do git). Uma tarefa com linha "complete" no ledger
+  está feita.
 - **Feito por último:** os três ajustes que o autor pediu depois de jogar a fatia 1 (`decisoes.md` 2026-11-01 (1); detalhes no
   `diario.md` 2026-11-01 (1)), mesclados por fast-forward com as duas CI verdes:
   - o tremor da barra no PC (`412d4ed`);

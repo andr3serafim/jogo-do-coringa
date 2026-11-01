@@ -6,6 +6,24 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-01 (2): o plano da fatia 2 do sub-projeto 6 aprovado
+
+À entrega do plano (`docs/superpowers/plans/2026-11-01-direcao-visual-fatia-2.md`), com as escolhas listadas para ele:
+- o golpe do Ataque Absoluto dentro da cena, sempre com tremor forte;
+- o clarão do protótipo fora, pela regra dos 25%;
+- os raios a cada 340 ms;
+- a cortina que deixa o placar à vista em todas as cenas;
+- o pulo que corta o som;
+- a insígnia no canto de baixo do retrato;
+- a recomendação de executar aqui mesmo, tarefa por tarefa, com a revisão no fim.
+
+> Aprovado, siga
+
+**Leitura:** o plano está aprovado como foi entregue, inclusive as escolhas listadas, e a execução é a recomendada. **[I]**
+"siga" vale até o fast-forward na `main` com as duas CI verdes, como nos blocos anteriores (`decisoes.md` 2026-10-31 (14)).
+
+---
+
 ## 2026-11-01 (1): a fatia 1 jogada; três ajustes antes da fatia 2
 
 Depois de jogar a fatia 1 do sub-projeto 6:
