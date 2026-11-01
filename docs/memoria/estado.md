@@ -5,15 +5,16 @@
 
 ## Agora
 
-- **Branch:** `main` (`063ef46` mais o commit desta memória), no checkout principal `D:/andr3/jogo-coringa`. Nada em curso.
-- **Feito por último:** a **fatia 1 do sub-projeto 6** (direção de arte), mesclada por fast-forward com as duas CI verdes: o placar
-  de luta no topo, a espada da iniciativa e a fita de cordel, o golpe comum com peso, a mesa viva (grão, mão que respira, quadra
-  marcada), o relógio que para durante as cenas raras (folga de cena no servidor) e os sons da espada, da fita e da quadra. A
-  spec e o plano do sub-projeto 6 entraram junto (a `feat/direcao-visual` era a base). Detalhes, consertos e medidas no
-  `diario.md` (2026-10-31 (9)).
-- **Próximo passo exato:** o autor joga a fatia 1 (o `jogar-treino.bat` roda o checkout) e diz o que achou; com o "ok" dele (ou
-  os ajustes), o plano da **fatia 2** (Ataque e Defesa Absolutos, spec 6 §7.1 e §7.2, com os sons), pelo
-  `superpowers:writing-plans`, numa branch nova a partir da `main`.
+- **Branch:** `feat/ajustes-fatia-1`, a partir da `main` (`b9784d0`), no checkout principal `D:/andr3/jogo-coringa`.
+- **Em curso:** os três ajustes que o autor pediu depois de jogar a fatia 1 (`decisoes.md` 2026-11-01 (1)), nesta ordem:
+  1. o tremor dos botões de alvo no PC (a linha "Quebrando o X antes" vira dica flutuante, fora do layout);
+  2. as figuras no lugar do texto (espadas e escudo nos totais, as marcas de estado, as zonas e os destinos do Equipar);
+  3. a cura em verde (o "+N" e o trecho da barra; a cor nova `cura`, #2a7339).
+- **Próximo passo exato:** terminar os três com TDD, `pnpm check`, push, as duas CI verdes e o fast-forward na `main`. Depois, o
+  plano da **fatia 2** (Ataque e Defesa Absolutos, spec 6 §7.1 e §7.2, com os sons), pelo `superpowers:writing-plans`, numa
+  branch nova a partir da `main`.
+- **Para reproduzir o tremor:** treino `semente=hover1&nivel=facil` a 1366 × 768. Jogue até o A♦ (rodada 3) e escolha
+  Armadilha: o alvo é o J♣ do Bot.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 - **Para quem assumir:** um `wrangler dev` do autor (sem a semente do E2E) pode estar na porta 8787; o Playwright o reaproveita
@@ -33,7 +34,8 @@ Vazia: o bloco E3 + F2 + F3 era o último item.
 
 ## Esperando o autor
 
-- **Sub-projeto 6, fatia 1, para ele jogar e dizer o que achou** (o que mudou da letra da spec, para ele ver):
+- **Sub-projeto 6, fatia 1: jogada e aprovada em 2026-11-01, com três ajustes** (em curso, acima). O que mudou da letra da spec,
+  que ele viu jogando:
   - **o tremor do golpe sacode a mesa (o placar e os campos), não a tela inteira:** a mão, a barra e o histórico ficam parados.
     Sacudir tudo custava ~9 quadros por segundo com a CPU 4× mais lenta, e a mão parada também se joga melhor;
   - **a mão que respira e o lampejo da espada pausam durante as batidas** (os controles estão travados nelas);

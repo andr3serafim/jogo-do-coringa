@@ -6,6 +6,53 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-01 (1): a fatia 1 jogada; três ajustes antes da fatia 2
+
+Depois de jogar a fatia 1 do sub-projeto 6:
+
+> ok, está seguindo como o esperado. apenas pontuei alguns pontos:
+>
+> 1. "Ataque" e "Defesa" na mesa estão escritos como textos comuns. Seria interessante inserir figuras representativas como um
+>    espada cruzada antes do valor de ataque e um escudo antes do valor da defesa para ficar mais intuitivo e visualmente melhor
+>    de entender. O mesmo para quando tiver ressurreição disponível, cura passiva e outros.. deve haver uma figura representando
+>    cada coisa ao invés de um texto simples. Visão é sempre tem a melhor UX e UI.
+> 2. Quando cura passiva está ativada, deve haver uma animação de +[valor] verde curando os pontos de vida do player quando
+>    houver cura.
+> 3. Em pc, quando eu aciono uma carta coringa para jogar por exemplo, as opções de jogadas são exibidas, essas opções (botões)
+>    tem textos pequenos abaixo, que, ao passar o mouse entre os botões, a tela fica tremenda infinitas vezes muito
+>    rapidamente, vários flicks, isso é um bug que ocorre desde sempre, seria bom deixar esses textos sendo exibidos via tooltip
+>    com hover, ou outra forma que você achar mais adaptável.
+>
+> pode prosseguir.
+
+**Leitura:** a fatia 1 está aprovada como entrou na `main`, e os três pontos vêm antes da fatia 2, numa branch curta com os
+mesmos portões (`pnpm check`, as duas CI, fast-forward).
+
+1. **Figuras no lugar do texto:**
+   - Espadas cruzadas antes do total de Ataque e um escudo antes do de Defesa, nas quatro fileiras. **[I]** A palavra "Ataque" e
+     a palavra "Defesa" saem da tela e ficam só para o leitor de tela.
+   - Uma figura para cada marca de estado: Defesa Absoluta, Cura passiva, Ressurreições, Ataque Absoluto armado. **[I]** O nome
+     curto continua ao lado da figura: só a figura não ensina a quem joga pela primeira vez o que é "Cura passiva".
+   - **[I]** "e outros" também cobre os títulos das zonas do campo (Guarda, buffs de Ataque e de Defesa, Reflect) e os
+     destinos do Equipar (Fileira de Ataque e de Defesa).
+   - Os desenhos são originais (spec 6 §1), no traço da mesa.
+2. **A cura em verde:**
+   - O "+N" já existia, mas em ouro e por ~0,5 s: no replay de uma partida com cura passiva, o "+3" do Bot aparecia e sumia sem
+     chamar atenção.
+   - O "+N" passa a verde, e a barra de vida mostra em verde o trecho que a cura devolve antes do ouro encher. Vale também para
+     a cura do Roubo (o mesmo número).
+   - **[I]** O verde é uma cor nova na paleta (`cura`, #2a7339). É diferente do verde da capa do oponente, para não parecer "do
+     Bot", e o papel sobre ela tem contraste de 5,1:1. O sinal "+" fica, para o sentido não depender só da cor.
+3. **O tremor no PC:**
+   - A causa não são os textos pequenos dos botões. É a linha "Quebrando o J antes" que aparece nas prévias quando o mouse
+     aponta um alvo.
+   - Ela faz a barra crescer 17,5 px (medido no Chromium, 1366 × 768) e empurra o botão para fora do ponteiro. A linha some e o
+     botão volta para baixo do ponteiro, sem parar.
+   - **[I]** A linha vira uma dica flutuante, fora do layout: apontar não muda mais a altura de nada. A segunda linha dos botões
+     fica: no toque não existe hover, e ela é o único lugar onde o celular mostra o efeito do alvo.
+
+---
+
 ## 2026-10-31 (14): o plano da fatia 1 do sub-projeto 6 aprovado
 
 À entrega do plano (`docs/superpowers/plans/2026-10-31-direcao-visual-fatia-1.md`), com a recomendação de executar aqui mesmo,
