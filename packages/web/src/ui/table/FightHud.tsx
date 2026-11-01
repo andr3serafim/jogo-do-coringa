@@ -15,7 +15,7 @@ import { zoneKey, type MarkZone } from '../../model/marks.ts';
 import { useAnim, type Anim } from '../anim/context.ts';
 import { DamageNumber, InkSplat, ShieldBreak } from '../anim/Effects.tsx';
 import { RibbonLayer } from '../anim/Ribbon.tsx';
-import { useCountedNumber } from '../anim/useCountedNumber.ts';
+import { useCountedLife } from '../anim/useCountedNumber.ts';
 import { Coringa } from '../cards/Coringa.tsx';
 import { useSound } from '../sound-context.ts';
 import { useTableUi } from './context.ts';
@@ -152,8 +152,8 @@ function Side({ side, view, player, name, holder }: SideProps) {
   const seen = onSeen && marked ? () => onSeen(zoneKey(zone)) : undefined;
   const max = view.config.hp;
   const anim = useAnim();
-  // A vida mostrada espera a batida do dano e conta até o valor da `view`, que é a verdade (aria-valuenow).
-  const shownHp = useCountedNumber(player.hp);
+  // A vida mostrada conta na batida que mexe nela (o golpe, a cura) até o valor da `view`, que é a verdade (aria-valuenow).
+  const { shown: shownHp, target: hpTarget } = useCountedLife(player.id, player.hp);
   const damage = anim.fx.damage?.target === player.id ? anim.fx.damage : null;
   const impact = anim.fx.impact?.target === player.id ? anim.fx.impact : null;
   const hpName = `Vida de ${name}`;
@@ -187,6 +187,7 @@ function Side({ side, view, player, name, holder }: SideProps) {
           label={marked ? `${hpName}, novo` : hpName}
           hp={player.hp}
           shown={shownHp}
+          target={hpTarget}
           max={max}
           reduced={anim.reduced}
           onSeen={seen}
@@ -215,13 +216,15 @@ const percentOf = (hp: number, max: number): number => Math.max(0, Math.min(100,
 
 /**
  * A barra espelhada (o lado vem do `.placar-lado`): o ouro encolhe na direção do retrato; a vida perdida fica hachurada. No golpe,
- * o ouro cai com o número (`shown`) e o rastro vermelho fica na vida de antes, escorrendo até a nova (`hp`) depois de
- * `TRAIL_HOLD_MS`. Na cura o rastro só acompanha, por baixo do ouro. Com movimento reduzido, sem rastro.
+ * o ouro cai com o número (`shown`) e o rastro vermelho fica na vida de antes, escorrendo até onde o golpe a leva (`target`)
+ * depois de `TRAIL_HOLD_MS`. Na cura (decisoes.md 2026-11-01 (1)) o trecho que ela devolve aparece em verde, à frente do ouro,
+ * que enche atrás dele. Com movimento reduzido, sem rastro nem verde.
  */
 function HpBar({
   label,
   hp,
   shown,
+  target,
   max,
   reduced,
   onSeen,
@@ -229,13 +232,16 @@ function HpBar({
   label: string;
   /** A vida da `view` (a verdade, para o leitor de tela). */
   hp: number;
-  /** A vida que a tela mostra agora (`useCountedNumber`). */
+  /** A vida que a tela mostra agora (`useCountedLife`). */
   shown: number;
+  /** Onde a batida de agora leva a vida: abaixo de `shown`, um golpe; acima, uma cura. */
+  target: number;
   max: number;
   reduced: boolean;
   onSeen: (() => void) | undefined;
 }) {
-  const trail = useHpTrail(shown, hp, reduced);
+  const trail = useHpTrail(shown, target, reduced);
+  const healing = !reduced && target > shown;
   return (
     <div
       role="meter"
@@ -250,6 +256,7 @@ function HpBar({
     >
       {/* `scaleX`, e não `width`: a contagem e o rastro mudam a barra a cada quadro, e a escala não refaz o layout. */}
       {reduced ? null : <div data-rastro style={{ transform: `scaleX(${percentOf(trail, max) / 100})` }} />}
+      {healing ? <div data-cura-barra style={{ transform: `scaleX(${percentOf(target, max) / 100})` }} /> : null}
       <div data-vida style={{ transform: `scaleX(${percentOf(shown, max) / 100})` }} />
     </div>
   );
@@ -257,19 +264,19 @@ function HpBar({
 
 /**
  * A vida que o rastro marca. Parado ou na cura, a mesma da tela. Quando a da tela cai abaixo dele, o rastro espera
- * `TRAIL_HOLD_MS` contados do começo da queda (não de cada passo da contagem) e vai direto para a vida nova.
+ * `TRAIL_HOLD_MS` contados do começo da queda (não de cada passo da contagem) e vai direto para onde o golpe leva a vida.
  */
-function useHpTrail(shown: number, hp: number, reduced: boolean): number {
+function useHpTrail(shown: number, to: number, reduced: boolean): number {
   const [trail, setTrail] = useState(shown);
-  // Sem queda em curso (a vida da `view` não está abaixo da mostrada): o rastro acompanha a tela.
-  const follow = reduced ? trail !== shown : hp >= shown && shown > trail;
+  // Sem queda em curso (a batida de agora não leva a vida abaixo da mostrada): o rastro acompanha a tela.
+  const follow = reduced ? trail !== shown : to >= shown && shown > trail;
   if (follow) setTrail(shown);
   const dropping = !reduced && shown < trail;
-  // O alvo do rastro é a vida da `view` no momento em que ele parte (um segundo golpe durante a espera também conta).
-  const target = useRef(hp);
+  // O alvo do rastro é onde a vida está indo no momento em que ele parte (um segundo golpe durante a espera também conta).
+  const target = useRef(to);
   useEffect(() => {
-    target.current = hp;
-  }, [hp]);
+    target.current = to;
+  }, [to]);
   useEffect(() => {
     if (!dropping) return;
     const id = setTimeout(() => setTrail(target.current), TRAIL_HOLD_MS);

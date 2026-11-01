@@ -788,7 +788,56 @@ describe('efeitos da batida (spec §4.2)', () => {
     expect(m.container.querySelector('[data-dano]')).toHaveTextContent('−37');
   });
 
-  it('o Roubo: o dano sobe no Coringa de quem foi roubado e a cura, "+N" no ouro, no de quem roubou', () => {
+  describe('a cura em verde, na batida dela (decisoes.md 2026-11-01 (1))', () => {
+    const six = { id: 'n-6', kind: 'NUM', value: 6, suit: 'paus' } as const;
+    const removed: GameEvent = { type: 'CardsRemovedFromRow', player: 'p1', row: 'DEF', cards: [six] };
+    const healed: GameEvent = { type: 'Healed', player: 'p1', amount: 6, source: 'DEFENSE', card: six };
+    const hp = () => Number(screen.getByRole('region', { name: 'Placar' }).querySelector('[data-lado="voce"] [data-hp]')!.textContent);
+    const meter = () => screen.getByRole('meter', { name: 'Vida de André' });
+    const scaleOf = (selector: string) => Number(/scaleX\(([\d.]+)\)/.exec(meter().querySelector<HTMLElement>(selector)!.style.transform)?.[1]);
+    const max = () => Number(meter().getAttribute('aria-valuemax'));
+
+    it('a cura pela Defesa depois de um golpe sem dano: a vida espera a batida da cura e sobe com o "+N" verde', () => {
+      // A mesa parada: a batida do golpe (0 a 300 a declaração, 300 a 900 o golpe), a carta que cai (900 a 1200), a cura (1200 a 1800).
+      const m = mount(THEIRS);
+      const blocked: GameEvent = { type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 40, defense: 50, damage: 0 };
+      emit(m, { ...THEIRS, self: { ...THEIRS.self, hp: 193 } }, [ATTACK, blocked, removed, healed]);
+      advance(1_150);
+      expect(hp()).toBe(187);
+      expect(meter().querySelector('[data-cura-barra]')).toBeNull();
+      // A batida da cura começa aos 1200 ms; o `act` à parte deixa a contagem partir antes de o tempo correr.
+      advance(50);
+      advance(1);
+      advance(300);
+      const heal = m.container.querySelector('[data-cura]');
+      expect(heal).toHaveTextContent('+6');
+      expect(heal!.className).toContain('bg-cura');
+      // O trecho que a cura devolve aparece em verde à frente do ouro, que enche atrás dele.
+      expect(scaleOf('[data-cura-barra]')).toBeCloseTo(193 / max());
+      expect(hp()).toBeGreaterThan(187);
+      advance(400);
+      expect(hp()).toBe(193);
+      expect(meter().querySelector('[data-cura-barra]')).toBeNull();
+    });
+
+    it('golpe e cura no mesmo jogador: a vida desce no golpe e sobe na cura', () => {
+      const m = mount(THEIRS);
+      emit(m, { ...THEIRS, self: { ...THEIRS.self, hp: 143 } }, [ATTACK, HIT, removed, healed]);
+      advance(1_150);
+      expect(hp()).toBe(137);
+      advance(700);
+      expect(hp()).toBe(143);
+    });
+
+    it('com movimento reduzido, a vida vai direto à nova, sem o trecho verde', () => {
+      const m = mount(THEIRS, { prefs: { reduceMotion: true } });
+      emit(m, { ...THEIRS, self: { ...THEIRS.self, hp: 193 } }, [ATTACK, removed, healed]);
+      expect(hp()).toBe(193);
+      expect(meter().querySelector('[data-cura-barra]')).toBeNull();
+    });
+  });
+
+  it('o Roubo: o dano sobe no Coringa de quem foi roubado e a cura, "+N" em verde, no de quem roubou', () => {
     const m = mount(MINE);
     const nine = { id: 'n-9', kind: 'NUM', value: 9, suit: 'copas' } as const;
     emit(m, MINE, [
@@ -800,7 +849,7 @@ describe('efeitos da batida (spec §4.2)', () => {
     advance(BEAT_MS.damage);
     const heal = m.container.querySelector('[data-cura]');
     expect(heal).toHaveTextContent('+9');
-    expect(heal!.className).toContain('bg-ouro');
+    expect(heal!.className).toContain('bg-cura');
     expect(heal!.className).toContain('tabular-nums');
   });
 

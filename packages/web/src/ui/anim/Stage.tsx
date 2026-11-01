@@ -18,10 +18,11 @@
 //   chegam sem a transição de layout (`instant`), e não deslizam do quadro de antes. O `catchUp` e o passo ao vivo animam.
 // - O Motion vem com `LazyMotion`: o recurso de layout (`layoutId` das cartas) só existe no `domMax`, carregado por
 //   `import()` à parte, fora do JavaScript inicial (spec §12).
+import type { PlayerId } from '@coringa/engine';
 import { LazyMotion, MotionConfig } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
 import type { Ribbon } from '../../model/copy.ts';
-import { bannerRibbon, effectsOf, NO_EFFECTS, ribbonText } from '../../model/effects.ts';
+import { bannerRibbon, effectsOf, lifeChange, NO_EFFECTS, ribbonText } from '../../model/effects.ts';
 import { roomNames } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import type { ImpactForce } from '../../model/impact.ts';
@@ -29,7 +30,7 @@ import { bannerReadMs } from '../../model/reading.ts';
 import { cueOf } from '../../model/sound.ts';
 import type { Beat } from '../../model/timeline.ts';
 import { useSound } from '../sound-context.ts';
-import { AnimContext, type Anim, type CountPhase } from './context.ts';
+import { AnimContext, IDLE_LIFE, type Anim, type CountPhase, type LifeCount } from './context.ts';
 import { BeatOverlay } from './Scene.tsx';
 import { useBeatPlayer } from './useBeatPlayer.ts';
 
@@ -82,6 +83,23 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
         ? 'count'
         : 'hold';
   const countMs = run.beats[run.damageIndex]?.durationMs ?? 0;
+  const lifeSteps = useMemo(() => run.beats.map((b) => lifeChange(b.event)), [run]);
+  const life = useCallback(
+    (who: PlayerId): LifeCount => {
+      if (!busy || reducedMotion) return IDLE_LIFE;
+      let done = 0;
+      let total = 0;
+      lifeSteps.forEach((change, i) => {
+        if (change?.player !== who) return;
+        total += change.delta;
+        if (i < index) done += change.delta;
+      });
+      const now = lifeSteps[index];
+      const step = now?.player === who ? now.delta : 0;
+      return { playing: true, done, step, ms: run.beats[index]?.durationMs ?? 0, total };
+    },
+    [busy, reducedMotion, lifeSteps, index, run],
+  );
   const seq = state?.seq ?? 0;
   const jump = state?.resync === true;
   const remounted = useMemo(() => ({ serial: released.serial, ids: released.batch }), [released]);
@@ -135,8 +153,9 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       beatMs: beat?.durationMs ?? 0,
       count,
       countMs,
+      life,
     }),
-    [busy, reducedMotion, run, released, remounted, seq, jump, state, beat, ribbon, count, countMs],
+    [busy, reducedMotion, run, released, remounted, seq, jump, state, beat, ribbon, count, countMs, life],
   );
 
   // O golpe treme a mesa na batida dele (a animação do CSS roda uma vez quando a marca entra); nada com movimento reduzido.

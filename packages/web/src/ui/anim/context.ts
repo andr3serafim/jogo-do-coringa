@@ -6,8 +6,27 @@ import { createContext, useContext } from 'react';
 import type { Ribbon } from '../../model/copy.ts';
 import { NO_EFFECTS, type BeatEffects } from '../../model/effects.ts';
 
-/** Fase da contagem dos números (vida e totais): a espera pela batida do dano, a contagem e o valor novo. */
+/** Fase da contagem dos totais das fileiras: a espera pela batida do dano, a contagem e o valor novo. */
 export type CountPhase = 'idle' | 'hold' | 'count';
+
+/**
+ * A vida de um jogador na linha do tempo (decisoes.md 2026-11-01 (1)): cada um conta na batida que mexe na vida dele, o golpe
+ * descendo e a cura subindo, em vez de tudo na primeira batida de dano.
+ */
+export interface LifeCount {
+  /** Há batidas tocando (sem isso, ou com movimento reduzido, a vida é a da `view`). */
+  playing: boolean;
+  /** A soma das mudanças das batidas que já passaram nesta linha do tempo. */
+  done: number;
+  /** A mudança da batida de agora, se ela mexe na vida deste jogador; 0 sem ela. */
+  step: number;
+  /** Quanto dura a batida de agora: o tempo da contagem do `step`. */
+  ms: number;
+  /** A soma de todas as mudanças da linha do tempo (para achar a vida de antes a partir da de depois). */
+  total: number;
+}
+
+export const IDLE_LIFE: LifeCount = { playing: false, done: 0, step: 0, ms: 0, total: 0 };
 
 export interface Anim {
   /** Há batida em curso: os controles ficam desligados (spec §4.1). */
@@ -48,8 +67,10 @@ export interface Anim {
   /** Duração, em ms, da batida de agora (os efeitos acendem e apagam dentro dela). */
   beatMs: number;
   count: CountPhase;
-  /** Duração, em ms, da batida do dano (a contagem dos números). */
+  /** Duração, em ms, da batida do dano (a contagem dos totais). */
   countMs: number;
+  /** A vida de `player` na linha do tempo. */
+  life(player: PlayerId): LifeCount;
 }
 
 export const IDLE_ANIM: Anim = {
@@ -67,6 +88,7 @@ export const IDLE_ANIM: Anim = {
   beatMs: 0,
   count: 'idle',
   countMs: 0,
+  life: () => IDLE_LIFE,
 };
 
 export const AnimContext = createContext<Anim>(IDLE_ANIM);

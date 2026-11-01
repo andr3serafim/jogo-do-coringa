@@ -140,6 +140,25 @@ export function damageBeatIndex(beats: readonly Beat[]): number {
   return beats.findIndex((beat) => counts.has(beat.event.type) && beat.kind !== 'quiet');
 }
 
+/**
+ * O quanto o evento muda a vida, e de quem: o golpe, o dano devolvido pelo Reflect, o do Roubo e a cura. Cada jogador conta a
+ * vida na batida que mexe nela (decisoes.md 2026-11-01 (1)): a cura sobe junto com o "+N", e não na batida do golpe.
+ */
+export function lifeChange(event: GameEvent): { player: PlayerId; delta: number } | null {
+  switch (event.type) {
+    case 'DamageDealt':
+      return event.damage > 0 ? { player: event.defender, delta: -event.damage } : null;
+    case 'ReflectTriggered':
+      return event.damage > 0 ? { player: event.attacker, delta: -event.damage } : null;
+    case 'StealDamage':
+      return event.damage > 0 ? { player: event.victim, delta: -event.damage } : null;
+    case 'Healed':
+      return event.amount > 0 ? { player: event.player, delta: event.amount } : null;
+    default:
+      return null;
+  }
+}
+
 /** A fileira com o dono: "o seu Ataque", "a Defesa de Duda"; com `from`, "do seu Ataque", "da Defesa de Duda". */
 function rowText(row: RowName, owner: PlayerId, names: Names, from = false): string {
   const attack = row === 'ATK';
