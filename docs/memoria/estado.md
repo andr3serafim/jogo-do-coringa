@@ -11,8 +11,8 @@
   aprovado pelo autor em 2026-10-31: "Aprovado o plano da fatia 1. prossiga"), inline, tarefa por tarefa, com teste primeiro.
   O registro de progresso (ledger) fica em `.superpowers/sdd/2026-10-31-direcao-visual-fatia-1/progress.md` (fora do git; se
   sumir, o `git log` da branch diz o que já foi feito: um commit `feat(...)` por tarefa).
-- **Feito:** Tarefas 1 a 4: a folga de cena (`ea30bbb`), o placar de luta (`64332e4`, `c53e756`), a espada e a fita (`2493188`) e o golpe comum (`466613f`), conferidos na tela (Chrome DevTools).
-- **Próximo passo exato:** Tarefa 5 do plano, a mesa viva (grão de papel, a mão que respira e inclina, a quadra marcada).
+- **Feito:** Tarefas 1 a 5: a folga de cena (`ea30bbb`), o placar de luta (`64332e4`, `c53e756`), a espada e a fita (`2493188`), o golpe comum (`466613f`) e a mesa viva (`49c319e`), conferidos na tela (Chrome DevTools).
+- **Próximo passo exato:** Tarefa 6 do plano, os sons da fatia (espada, fita, quadra).
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app, `pnpm dev:web`) e o
   `jogar-treino.bat` do autor.
 
