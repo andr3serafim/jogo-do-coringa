@@ -847,6 +847,19 @@ describe('relógio (spec §3.8, §10.3)', () => {
     expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
   });
 
+  it('com folga de cena (runsFrom), o tempo esgotado espera o prazo de verdade, não o relógio parado (sub-projeto 6 §9)', () => {
+    // Relógio parado até 3 s (a cena rara); o prazo é 33 s. A tela mostra 30 s parados, e o servidor só estoura aos 33 s.
+    const m = mount(DRAFT, { fake: true, state: { deadline: { kind: 'TURN', at: 33_000, players: ['p1'], runsFrom: 3_000 } } });
+    expect(placar().getByRole('timer')).toHaveTextContent('30');
+    tick(m, 30_500);
+    expect(placar().getByRole('timer')).toHaveTextContent('3');
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
+    expect(screen.queryByText('Tempo esgotado')).not.toBeInTheDocument();
+    tick(m, 2_500);
+    expect(screen.getByText('Tempo esgotado')).toBeInTheDocument();
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toBeDisabled();
+  });
+
   it('com a mão desligada pelo tempo esgotado, tocar numa carta não escolhe', async () => {
     const m = mount(DRAFT, { fake: true, state: turn(3_000) });
     tick(m, 3_000);

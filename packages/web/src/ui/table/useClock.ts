@@ -99,7 +99,10 @@ export function useDeadlineExpired(deadline: Deadline | null, remainingMs: (dead
 
   useEffect(() => {
     if (deadline === null || key === null) return;
-    const id = setTimeout(() => setExpiredKey(key), remainingMs(deadline));
+    // Pelo tempo de verdade até `at`, sem o relógio parado da folga de cena (sub-projeto 6 §9): parado, ele mostra menos do que
+    // falta, e o prazo venceria na mesa antes de vencer no servidor.
+    const { kind, at, players } = deadline;
+    const id = setTimeout(() => setExpiredKey(key), remainingMs({ kind, at, players }));
     return () => clearTimeout(id);
   }, [deadline, key, remainingMs]);
 
