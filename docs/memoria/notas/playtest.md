@@ -27,7 +27,7 @@ risca aqui e diz no `diario.md`.
   Safari e no Firefox. Um toque que escorrega entre 8 px e a folga do navegador e volta sobre a carta escolhe no `pointerup`.
 - **Reconexão:** logo depois de uma reconexão fora do anel (`resync`), o rascunho do Equipar reordena a fileira sem deslizar até
   o próximo `state` (`Stage.tsx`).
-- **Cenas raras:** Ataque e Defesa Absoluta (2,6 s) e Exódia (4,2 s) não encolhem quando há decisão esperando (decisão da
+- **Cenas raras:** Ataque Absoluto (4,5 s), Defesa Absoluta (4,8 s) e Exódia (5,8 s) não encolhem quando há decisão esperando (decisão da
   conta anterior, por delegação); um toque na mesa pula a cena.
 - **E2E na CI:** a falha intermitente de 27/10 foi corrigida em `af6b827` (o botão "Atacar" sumia entre o `isVisible` e o
   `isEnabled`). Se `e2e/drag.spec.ts` ficar instável, esperar duas leituras iguais da rolagem antes de comparar.

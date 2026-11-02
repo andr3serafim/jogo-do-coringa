@@ -5,6 +5,20 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-01 (5): a fatia 3 aprovada e a passagem para a outra conta
+
+- **Pedido do autor** (`decisoes.md` 2026-11-01 (6)): "testado aprovado"; o limite semanal está acabando, a outra conta assume, e as
+  tarefas pendentes devem ser encurtadas para nada ficar pela metade.
+- **Feito, só memória, nenhum código:**
+  - a aprovação em `decisoes.md`;
+  - o `estado.md` com a sequência da retomada e o mapa do que o plano da fatia 4 precisa decidir;
+  - a duração atual das cenas em `notas/playtest.md` (dizia 2,6 s e 4,2 s, de antes do sub-projeto 6).
+- **Não feito, de propósito:** o plano da fatia 4. Não existe branch, plano nem arquivo dela.
+- **Conferido:** todas as branches locais já estão mescladas na `main`, e o `push-merge até o MVP` está em `decisoes.md`, não só na memória
+  pessoal desta conta.
+
+---
+
 ## 2026-11-01 (4): sub-projeto 6, fatia 3 em execução (a Exódia e a Devastação), entregue
 
 - **Pedido do autor** (`decisoes.md` 2026-11-01 (4) e (5)): "ok, pode seguir o plano da fatia 3", e que a outra conta consiga
