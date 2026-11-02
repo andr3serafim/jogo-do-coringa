@@ -8,9 +8,11 @@
 // (filtro), que não disputa o `box-shadow`.
 import type { Card as EngineCard } from '@coringa/engine';
 import * as m from 'motion/react-m';
-import type { ReactNode } from 'react';
+import { useCallback, useEffect, useRef, type ReactNode } from 'react';
 import type { CardFx } from '../../model/effects.ts';
+import { TABLE_MOTION } from '../../model/table-motion.ts';
 import { useAnim } from '../anim/context.ts';
+import { useFxLayer } from '../anim/FxLayer.tsx';
 import { layoutTransition } from '../anim/motion.ts';
 import { Coringa } from './Coringa.tsx';
 import { isRedSuit, Suit } from './Suit.tsx';
@@ -204,8 +206,22 @@ export function Card({
   const anim = useAnim();
   const fx = animated ? anim.fx.cards.get(card.id) : undefined;
   const shake = fx === 'crack' && !anim.reduced;
-  // Carta que o `CardsDealt` traz: fica apagada e esmaece na batida dela (só opacidade: vale com movimento reduzido).
-  const enter = animated ? anim.enterDelay(card.id) : null;
+  const landing = animated ? anim.landAt(card.id) : null;
+  // Carta que o `CardsDealt` traz, ou que cai no destino por não ter de onde voar (a do Bot, sub-projeto 6 §8): fica apagada e esmaece na
+  // batida dela (só opacidade: vale com movimento reduzido).
+  const dealt = animated ? anim.enterDelay(card.id) : null;
+  const dropAt = landing?.drop ? landing.at - TABLE_MOTION.dropMs / 1000 : null;
+  const enter = dealt ?? dropAt;
+  const enterSeconds = dealt === null && dropAt !== null ? TABLE_MOTION.dropMs / 1000 : 0.25;
+  const self = useRef<HTMLElement | null>(null);
+  const bindRef = useCallback(
+    (el: HTMLElement | null) => {
+      self.current = el;
+      dragRef?.(el);
+    },
+    [dragRef],
+  );
+  useTableMotion(self, animated ? anim.recoilAt(card.id) : null, landing, animated ? anim.markOf(card.id) : 0, anim.reduced);
   const name = cardLabel(card, as, roleText);
   const waiting = disabled && onSelect !== undefined;
   if (front) name.push('sai primeiro');
@@ -255,7 +271,7 @@ export function Card({
           transition: {
             layout: layoutTransition(anim.delayOf(card.id), anim.instant(card.id)),
             rotate: { duration: anim.beatMs / 1000 },
-            opacity: { delay: enter ?? 0, duration: 0.25 },
+            opacity: { delay: enter ?? 0, duration: enterSeconds },
           },
         }
       : {}),
@@ -283,7 +299,7 @@ export function Card({
       <m.button
         key={animated ? anim.markOf(card.id) : undefined}
         type="button"
-        ref={dragRef}
+        ref={bindRef}
         {...common}
         aria-pressed={selected}
         aria-disabled={disabled || undefined}
@@ -295,10 +311,68 @@ export function Card({
     );
   }
   return (
-    <m.div key={animated ? anim.markOf(card.id) : undefined} ref={dragRef} role="img" {...common}>
+    <m.div key={animated ? anim.markOf(card.id) : undefined} ref={bindRef} role="img" {...common}>
       {inside}
     </m.div>
   );
+}
+
+/**
+ * O movimento da jogada na carta (sub-projeto 6 §8, fatia 5), pela Web Animations, nas propriedades CSS `translate` e `scale`: o
+ * `transform` da carta é do Motion (a projeção do `layoutId`), e as duas se compõem com ele sem disputá-lo.
+ * - O recuo: a carta que sai da sua mão desce 6 px e volta no começo da batida dela; o voo do `layoutId` espera o recuo (`delayOf`).
+ * - A queda: a carta sem de onde voar (a do Bot) cai de 14 px no destino, na batida dela.
+ * - O pouso: um achatamento leve (1 → 1,06 → 1) e um sopro de poeira, quando a mola já assentou e a projeção voltou à identidade.
+ * O pulo apaga `recoilAt` e `landAt` (e muda a `key` da carta): o que ficou agendado cai na limpeza. Com movimento reduzido, nada disso.
+ */
+function useTableMotion(
+  self: { current: HTMLElement | null },
+  recoilAt: number | null,
+  landing: { at: number; drop: boolean } | null,
+  mark: number,
+  reduced: boolean,
+): void {
+  const fxLayer = useFxLayer();
+  useEffect(() => {
+    const el = self.current;
+    if (el === null || recoilAt === null || reduced) return;
+    const recoil = el.animate?.([{ translate: '0 0' }, { translate: `0 ${TABLE_MOTION.recoilPx}px` }, { translate: '0 0' }], {
+      duration: TABLE_MOTION.recoilMs,
+      delay: recoilAt * 1000,
+      easing: 'ease-in-out',
+    });
+    return () => recoil?.cancel();
+  }, [self, recoilAt, mark, reduced]);
+  const landAt = landing?.at ?? null;
+  const drop = landing?.drop ?? false;
+  useEffect(() => {
+    const el = self.current;
+    if (el === null || landAt === null || reduced) return;
+    const ms = landAt * 1000;
+    const moves: (Animation | undefined)[] = [];
+    if (drop) {
+      moves.push(
+        el.animate?.([{ translate: `0 -${TABLE_MOTION.dropPx}px` }, { translate: '0 0' }], {
+          duration: TABLE_MOTION.dropMs,
+          delay: ms - TABLE_MOTION.dropMs,
+          easing: 'ease-in',
+          fill: 'backwards',
+        }),
+      );
+    }
+    moves.push(
+      el.animate?.([{ scale: '1' }, { scale: String(TABLE_MOTION.squash), offset: 0.35 }, { scale: '1' }], {
+        duration: TABLE_MOTION.squashMs,
+        delay: ms,
+        easing: 'ease-out',
+      }),
+    );
+    const timer = window.setTimeout(() => fxLayer.burst('dust', el, TABLE_MOTION.dust), ms);
+    return () => {
+      moves.forEach((move) => move?.cancel());
+      window.clearTimeout(timer);
+    };
+  }, [self, landAt, drop, mark, reduced, fxLayer]);
 }
 
 /**

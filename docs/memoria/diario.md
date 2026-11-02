@@ -28,7 +28,14 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     - o `Run` separa as cartas movidas (`moved`, que o pulo remonta) das vizinhas que só esperam a batida da saída. Remontar as vizinhas tiraria o foco do teclado da mão, contrato que um teste guarda. Depois de um pulo, uma vizinha pode deslizar no tempo original dela, até o fim da batida;
     - o `draftShown` vem do `equipConfirmed` do desenho anterior, num estado (o lint barra ler `ref` no desenho), como o `lastCast` do `Stage`;
     - dois testes de layout mudaram para o contrato novo: a carta que sai da sua mão espera também o recuo (0,49 s em vez de 0,4), e a vizinha da mão espera a batida da saída.
-- **A seguir:** a Task 4 (a jogada: recuo, voo e assentamento).
+- **Task 4, a jogada:** `useTableMotion` no `Card`. O recuo (`translate`, 6 px, 90 ms, no começo da batida), a queda da carta sem origem (`translate` de −14 px a 0 em 220 ms, com a carta apagada até a batida pelo mesmo `data-entra` da compra) e o pouso (`scale` 1 → 1,06 → 1 em 160 ms e 5 poeiras), tudo pela Web Animations nas propriedades CSS `translate` e `scale`.
+  - **Escolhas:**
+    - o pouso é por tempo (`landAt`), e não pelo `onLayoutAnimationComplete`. Nas fotos do PC (a sua jogada de K na Guarda, fixture `especiais`, rodada 3, passo 6), a carta voa e assenta na vaga, sem deslocamento do `scale`: a troca prevista no plano não foi preciso;
+    - o tremor e o traço da rachadura do `crack` ficam na carta até a Task 5, que os passa para a cópia (cada commit fica coerente);
+    - nos testes, o `animate` falso mora em `HTMLElement.prototype`: o Motion decide usar a Web Animations olhando só o `Element.prototype` (`supportsWaapi`), e lá ele trocaria de modo.
+  - **Medida da jogada, depois:** 60 quadros/s nas duas telas, chegada de 50 ms no PC e 33 ms a 360 px, e 5 partículas no pico.
+  - **No celular,** nesse passo o seu campo está rolado para fora da vista: o pouso não aparece na foto. É o layout de hoje.
+- **A seguir:** a Task 5 (a saída e os estilhaços).
 
 ---
 
