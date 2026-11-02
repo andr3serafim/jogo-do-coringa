@@ -35,6 +35,8 @@ export interface SceneBox {
   portrait: Record<'voce' | 'oponente', ScenePoint>;
   /** Mede a fileira de `player`; `null` sem ela. */
   row(player: PlayerId, row: RowName): SceneRow | null;
+  /** Mede o espelho pequeno da zona "Reflect ativo" de `player`; `null` sem ele. */
+  reflectZone(player: PlayerId): SceneRect | null;
 }
 
 /** A folga em volta da fileira rolada: o tremor da cena não a empurra para fora da janela. */
@@ -81,6 +83,10 @@ export function measureSceneBox(palco: HTMLElement): SceneBox | null {
       const field = palco.querySelector(`[data-campo="${player}"]`);
       if (target === null || field === null) return null;
       return { rect: relative(target), slots: [...target.querySelectorAll('ul > li:not([data-desolacao])')].map(relative), field: relative(field) };
+    },
+    reflectZone: (player) => {
+      const mark = palco.querySelector(`[data-espelho-zona="${player}"]`);
+      return mark === null ? null : relative(mark);
     },
   };
 }

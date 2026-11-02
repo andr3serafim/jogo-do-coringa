@@ -24,6 +24,7 @@ import { Card } from '../cards/Card.tsx';
 import { rng } from './aura.ts';
 import { chasmBranches, chasmEdges, chasmPaths } from './chasm.ts';
 import { Stamp } from './SceneFrame.tsx';
+import { shakeFrames, spawn } from './particles.ts';
 
 const M = SCENE_MOMENTS.DEVASTATION;
 const C = SCENE_MOMENTS.DEVASTATION_CANCELED;
@@ -40,25 +41,6 @@ const OPEN_SHAKE_MS = 950;
 /** A altura que o nome carimbado ocupa, no máximo. */
 const STAMP_ROOM = 88;
 const STAMP_LOOK = 'border-vermelho px-4 text-3xl -rotate-[4deg] bg-tinta text-papel [text-shadow:4px_4px_0_var(--color-vermelho)] pc:px-6 pc:text-6xl';
-
-/** O tremor que cresce de `from` a `to` px (ou morre, ao contrário), ao longo da duração da animação. */
-function shakeFrames(from: number, to: number): Keyframe[] {
-  const steps = 14;
-  return Array.from({ length: steps + 1 }, (_, i) => {
-    if (i === 0 || i === steps) return { transform: 'none' };
-    const amount = from + (to - from) * (i / steps);
-    const side = i % 2 ? 1 : -1;
-    return { transform: `translate(${(side * amount).toFixed(1)}px, ${(-side * amount * 0.5).toFixed(1)}px)` };
-  });
-}
-
-/** Solta uma partícula no `parent`: ela anima pelo navegador e sai sozinha no fim de `lifeMs` (o timer vai para `timers`). */
-function spawn(timers: number[], parent: Element, node: HTMLElement, keyframes: Keyframe[], lifeMs: number, easing = 'ease-out') {
-  node.setAttribute('data-particula', '');
-  parent.appendChild(node);
-  node.animate?.(keyframes, { duration: lifeMs, easing, fill: 'forwards' });
-  timers.push(window.setTimeout(() => node.remove(), lifeMs));
-}
 
 export function Devastation({ beat, me, reduced, box, field }: SceneProps) {
   const { event } = beat;

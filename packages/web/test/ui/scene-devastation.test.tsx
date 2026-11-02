@@ -24,6 +24,7 @@ function fakeBox(asked: string[] = []): SceneBox {
     band: { x: 0, y: 96, w: 1000, h: 360 },
     hudBottom: 96,
     portrait: { voce: { x: 40, y: 48 }, oponente: { x: 960, y: 48 } },
+    reflectZone: () => null,
     row: (player, row) => {
       asked.push(`${player}:${row}`);
       return {

@@ -22,6 +22,7 @@ import { handCountText, resurrectionsText } from './labels.ts';
 import { ResurrectIcon } from './ResurrectIcon.tsx';
 import { Row } from './Row.tsx';
 import { TableCard } from './TableCard.tsx';
+import { MirrorMark } from './MirrorMark.tsx';
 
 export interface PlayerFieldProps {
   side: 'self' | 'opponent';
@@ -185,6 +186,7 @@ function Zones({ player, name, view, self }: { player: PublicPlayer; name: strin
           label="Reflect ativo"
           icon={<ReflectIcon className={ZONE_ICON} />}
           listLabel="Cartas do Reflect"
+          mark={<MirrorMark owner={player.id} />}
           cards={[player.reflect.k, player.reflect.j, player.reflect.q]}
           wildAs={{ 1: 'J', 2: 'Q' }}
         />
@@ -220,20 +222,23 @@ interface ZoneProps {
   wildAs?: 'J' | 'Q' | Record<number, 'J' | 'Q'>;
   /** Mostra a contagem ao lado do rótulo. */
   count?: boolean;
+  /** O que fica no canto da zona, sem mudar a altura dela (o espelho do Reflect). */
+  mark?: ReactNode;
   /** O arrasto: a chave da zona inteira (a sua), `'targets'` (cada carta é uma zona `carta:<id>`, a do oponente) ou nada (o Reflect). */
   drop?: DropKey | 'targets';
 }
 
-function Zone({ label, icon, listLabel, cards, wildAs, count = false, drop }: ZoneProps) {
+function Zone({ label, icon, listLabel, cards, wildAs, count = false, mark, drop }: ZoneProps) {
   const labelId = useId();
   // Só uma Guarda grande (muitos K) precisa de cartas sobrepostas para caber na linha.
   const overlap = cards.length > 4;
   const roleAt = (index: number) => (typeof wildAs === 'object' ? wildAs[index] : wildAs);
   return (
     <div
-      className="campo-zona [--soltar-folga:-4px]"
+      className={`campo-zona [--soltar-folga:-4px] ${mark ? 'relative' : ''}`}
       data-soltar={drop !== undefined && drop !== 'targets' ? drop : undefined}
     >
+      {mark}
       <div className="zona-titulo flex items-center gap-1">
         {icon}
         <span id={labelId} className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">

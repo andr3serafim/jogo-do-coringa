@@ -17,6 +17,7 @@ import { SCENE_MOMENTS } from '../../model/scene-moments.ts';
 import type { SceneProps } from '../anim/scenes-loader.ts';
 import { Coringa } from '../cards/Coringa.tsx';
 import { AURA_BOIL_MS, auraVariants, BOLT_FADE_MS, BOLT_HOLD_MS, boltTimes, EXODIA_AURA } from './aura.ts';
+import { spawn } from './particles.ts';
 import { SceneFrame } from './SceneFrame.tsx';
 
 const M = SCENE_MOMENTS.EXODIA;
@@ -43,14 +44,6 @@ const CROWN = { x: 500, y: 118, w: 190, h: 130 };
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const AURA_FILL = ['var(--color-vermelho)', 'var(--color-ouro)', 'var(--color-papel)'];
 const CROWN_SHAPE = 'M14 108 L24 34 L62 80 L86 14 L110 66 L134 14 L158 80 L196 34 L206 108 Z';
-
-/** Solta uma partícula no `parent`: ela anima pelo navegador e sai sozinha no fim de `lifeMs` (o timer vai para `timers`). */
-function spawn(timers: number[], parent: Element, node: Element, keyframes: Keyframe[], lifeMs: number, easing = 'ease-out') {
-  node.setAttribute('data-particula', '');
-  parent.appendChild(node);
-  (node as HTMLElement).animate?.(keyframes, { duration: lifeMs, easing, fill: 'forwards' });
-  timers.push(window.setTimeout(() => node.remove(), lifeMs));
-}
 
 /** O instante (fração da vida da aura, de `barsIn` a `bandOut`) de cada ms da cena. */
 const auraOffset = (ms: number) => (ms - M.barsIn) / (M.bandOut - M.barsIn);

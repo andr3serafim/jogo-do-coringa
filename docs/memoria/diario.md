@@ -21,6 +21,15 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     - **sem cena encolhida no teto de decisão,** os testes "sob o teto de 1 s" viraram: a cena fica inteira, e a cortina desce e sobe entre duas cenas
       separadas por uma faixa. Entrou o caso real do Ataque Absoluto contra Reflect, com uma inversão só;
     - **o golpe de cena treme sempre forte,** também o dano devolvido, como o do Ataque Absoluto.
+- **Task 2, o espelho:**
+  - `ui/scenes/mirror.ts`: o tamanho (300 px no PC, na proporção da faixa no celular, nunca menos de 140), o centro a 60% do caminho, as pontas e as paradas do cometa, tudo preso à faixa;
+  - `ui/scenes/ReflectPlayed.tsx`: as cópias voam às pontas, o espelho se forma com faíscas e lampejo e encolhe até a zona. `ui/table/MirrorMark.tsx` é o espelho pequeno, que sai de `player.reflect`;
+  - **Escolhas:**
+    - a `spawn` e o `shakeFrames` passaram para `ui/scenes/particles.ts`, com as faíscas (a Exódia e a Devastação tinham cópias);
+    - as cópias são a carta pequena com a letra, como a dos K da Exódia, e não o `Card`;
+    - as cartas saem da sua mão (de baixo da faixa) ou do retrato do oponente, que não mostra a dele;
+    - o `MirrorMark` fica no canto da zona, em posição absoluta, para não mudar a altura dela no celular;
+    - o `SCENE_INVERT_LEAD_MS` do lançamento é 0, porque a tabela exige a chave, e ele está em `NO_INVERT`.
 
 ---
 

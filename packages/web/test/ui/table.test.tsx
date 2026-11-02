@@ -301,6 +301,9 @@ describe('mesa: marcas de estado no Coringa (spec §3.1)', () => {
     const cards = within(theirs.getByRole('list', { name: 'Cartas do Reflect' })).getAllByRole('img');
     expect(cards.map((el) => el.getAttribute('aria-label')?.[0])).toEqual(['K', 'J', 'Q']);
     expect(region('Seu campo').queryByText('Reflect ativo')).not.toBeInTheDocument();
+    // O espelho pequeno da zona sai da `view`: só o dono do Reflect o tem (sub-projeto 6 §7.5).
+    expect(document.querySelector('[data-espelho-zona="p2"]')).not.toBeNull();
+    expect(document.querySelector('[data-espelho-zona="p1"]')).toBeNull();
   });
 
   it('Defesa Absoluta', () => {

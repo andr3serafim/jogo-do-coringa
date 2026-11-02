@@ -9,6 +9,7 @@ import { FLASH_MAX_SWITCHES, FLASH_WINDOW_MS } from '../../src/model/flash.ts';
 import { Session } from '../../src/model/session.ts';
 import { DEFAULT_PREFS, type Prefs } from '../../src/model/storage.ts';
 import { NO_INVERT, SCENE_INVERT_LEAD_MS, type SceneKind } from '../../src/model/timeline.ts';
+import { SCENES } from '../../src/ui/scenes/index.ts';
 import { PlayTable } from '../../src/ui/table/PlayTable.tsx';
 import { FakeConnection, scenarioAt, stateMessage, type ViewSpec } from '../fixtures.ts';
 import { roomMessage } from './support.tsx';
@@ -65,16 +66,25 @@ const probeCard = (id: string, kind: 'K' | 'J' | 'Q') => ({ id, kind, suit: 'cop
 export const SCENE: GameEvent = { type: 'ReflectPlayed', player: 'p1', reflect: { k: probeCard('s-k', 'K'), j: probeCard('s-j', 'J'), q: probeCard('s-q', 'Q') }, against: 'ATTACK' };
 /** Outra cena de sonda (a de Duda). */
 export const SCENE_2: GameEvent = { type: 'ReflectPlayed', player: 'p2', reflect: { k: probeCard('s2-k', 'K'), j: probeCard('s2-j', 'J'), q: probeCard('s2-q', 'Q') }, against: 'ATTACK' };
-/** Liga a sonda em cada teste do arquivo que a chama; a tabela volta ao normal no fim de cada um. */
+/**
+ * Liga a sonda em cada teste do arquivo que a chama; a tabela volta ao normal no fim de cada um. O desenho das cenas do Reflect fica de
+ * fora: nestes testes elas seguem com o painel, o que vale enquanto o módulo das cenas não chega. Os desenhos têm os testes deles.
+ */
 export function installFlashProbe(): void {
   const silent = NO_INVERT as Set<SceneKind>;
+  const kinds = ['REFLECT_PLAYED', 'REFLECT_TRIGGERED', 'REFLECT_CANCELED'] as const;
+  const drawn = kinds.map((kind) => SCENES[kind]);
   beforeEach(() => {
     SCENE_INVERT_LEAD_MS.REFLECT_PLAYED = 150;
     silent.delete('REFLECT_PLAYED');
+    kinds.forEach((kind) => delete SCENES[kind]);
   });
   afterEach(() => {
     SCENE_INVERT_LEAD_MS.REFLECT_PLAYED = 0;
     silent.add('REFLECT_PLAYED');
+    kinds.forEach((kind, i) => {
+      if (drawn[i]) SCENES[kind] = drawn[i];
+    });
   });
 }
 export const TURN: GameEvent = { type: 'TurnStarted', player: 'p2' };

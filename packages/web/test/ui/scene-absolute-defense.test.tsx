@@ -14,6 +14,7 @@ const BOX: SceneBox = {
   hudBottom: 96,
   portrait: { voce: { x: 40, y: 48 }, oponente: { x: 960, y: 48 } },
   row: () => null,
+  reflectZone: () => null,
 };
 const M = SCENE_MOMENTS.ABSOLUTE_DEFENSE;
 
