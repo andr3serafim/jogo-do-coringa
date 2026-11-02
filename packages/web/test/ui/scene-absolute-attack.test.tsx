@@ -64,6 +64,19 @@ describe('o Ataque Absoluto do seu lado', () => {
     expect(q('[data-olhos]')).toHaveAttribute('data-aceso');
   });
 
+  it('interceptado por um Reflect, o feixe não dispara: nada o acerta (§7.5)', () => {
+    const [beat] = buildTimeline(
+      [
+        { type: 'AbsoluteAttack', player: 'p1' },
+        { type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 40 },
+      ],
+      { mode: 'live', reducedMotion: false, decisionPending: false },
+    );
+    render(<AbsoluteAttack beat={beat!} names={roomNames('p1', [])} reduced={false} me="p1" hitLanded={false} box={BOX} field={null} />);
+    advance(M.hitAt + 1);
+    expect(q('[data-feixe]')).toBeNull();
+  });
+
   it('o feixe só existe em volta do impacto, e aponta da bola para o retrato do alvo', () => {
     show('p1');
     advance(M.hitAt - BEAM_LEAD_MS - 1);

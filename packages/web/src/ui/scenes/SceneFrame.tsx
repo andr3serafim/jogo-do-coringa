@@ -37,7 +37,7 @@ export function stampKeyframes(reduced: boolean): Keyframe[] {
 }
 
 /** O tamanho e o contorno do carimbo das cenas; o da Exódia é maior, com filete de ouro (§7). */
-const STAMP_SIZE = 'border-tinta px-4 text-3xl pc:px-6 pc:text-6xl';
+export const STAMP_SIZE = 'border-tinta px-4 text-3xl pc:px-6 pc:text-6xl';
 
 /**
  * O corte, o fundo (o brilho do meio, a mistura com o papel e com o vermelho), por onde a faixa entra, quando ela sai, e o carimbo

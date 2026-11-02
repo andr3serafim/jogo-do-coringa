@@ -30,6 +30,14 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     - as cartas saem da sua mão (de baixo da faixa) ou do retrato do oponente, que não mostra a dele;
     - o `MirrorMark` fica no canto da zona, em posição absoluta, para não mudar a altura dela no celular;
     - o `SCENE_INVERT_LEAD_MS` do lançamento é 0, porque a tabela exige a chave, e ele está em `NO_INVERT`.
+- **Task 3, o cometa e a anulação:**
+  - `ui/scenes/ReflectTriggered.tsx`: a carga, o cometa, o tempo lento, a batida, a volta dourada, os cacos, o número e o nome. Sem dano, ele se desfaz no vidro. `ui/scenes/ReflectCanceled.tsx`: dois espelhos que trincam e somem;
+  - o Ataque Absoluto com `beat.intercepted` não dispara o feixe;
+  - **Escolhas:**
+    - o lugar do espelho e do cometa é medido uma vez, na montagem da cena: a janela que muda de tamanho não recomeça o voo;
+    - uma brasa a cada 70 ms na ida e a cada 40 ms na volta, numa agenda de sementes fixas (o protótipo soltava 2 a cada 28 ms, lendo o `left` e o `top` do cometa);
+    - as trincas reaproveitam o `crackBranch` do abismo; a anulação usa espelhos de 70% do tamanho, porque são dois na mesa;
+    - o `HitNumber` do Ataque Absoluto é o mesmo do dano devolvido.
 
 ---
 

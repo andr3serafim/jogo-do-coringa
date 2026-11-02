@@ -5,7 +5,9 @@ import { AbsoluteAttack } from './AbsoluteAttack.tsx';
 import { AbsoluteDefense } from './AbsoluteDefense.tsx';
 import { Devastation } from './Devastation.tsx';
 import { Exodia } from './Exodia.tsx';
+import { ReflectCanceled } from './ReflectCanceled.tsx';
 import { ReflectPlayed } from './ReflectPlayed.tsx';
+import { ReflectTriggered } from './ReflectTriggered.tsx';
 
 export const SCENES: SceneModule = {
   ABSOLUTE_ATTACK: AbsoluteAttack,
@@ -14,4 +16,6 @@ export const SCENES: SceneModule = {
   DEVASTATION: Devastation,
   DEVASTATION_CANCELED: Devastation,
   REFLECT_PLAYED: ReflectPlayed,
+  REFLECT_TRIGGERED: ReflectTriggered,
+  REFLECT_CANCELED: ReflectCanceled,
 };

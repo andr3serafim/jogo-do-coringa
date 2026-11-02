@@ -100,12 +100,12 @@ export function AbsoluteAttack({ beat, me, reduced, box, hitLanded }: SceneProps
     const ids = [
       at(M.transformAt, () => setTransformed(true)),
       at(M.ballAt, () => setBall(true)),
-      at(M.hitAt - BEAM_LEAD_MS, () => setBeam(true)),
-      at(M.hitAt + BEAM_HOLD_MS, () => setBeam(false)),
+      // O Reflect intercepta o golpe: o feixe não dispara no retrato do alvo, porque nada o acerta (§7.5). O cometa é a cena seguinte.
+      ...(beat.intercepted ? [] : [at(M.hitAt - BEAM_LEAD_MS, () => setBeam(true)), at(M.hitAt + BEAM_HOLD_MS, () => setBeam(false))]),
       at(M.hitAt + BALL_OUT_MS, () => setBall(false)),
     ];
     return () => ids.forEach((id) => window.clearTimeout(id));
-  }, []);
+  }, [beat.intercepted]);
 
   // A aura ferve (troca de forma, por atributo, fora do React) e cresce; parada com movimento reduzido.
   useEffect(() => {
@@ -332,7 +332,7 @@ export function AbsoluteAttack({ beat, me, reduced, box, hitLanded }: SceneProps
  * O número do golpe, carimbado logo abaixo do placar, do lado do retrato do alvo: entra grande e girado, assenta e sobe (o mesmo
  * carimbo do golpe comum, maior). Com movimento reduzido, só esmaece. Números de jogo na fonte de texto, com `tabular-nums`.
  */
-function HitNumber({ amount, at, below, left, reduced }: { amount: number; at: ScenePoint; below: number; left: boolean; reduced: boolean }) {
+export function HitNumber({ amount, at, below, left, reduced }: { amount: number; at: ScenePoint; below: number; left: boolean; reduced: boolean }) {
   const ref = useRef<HTMLSpanElement>(null);
   useEffect(() => {
     const motion = ref.current?.animate?.(
