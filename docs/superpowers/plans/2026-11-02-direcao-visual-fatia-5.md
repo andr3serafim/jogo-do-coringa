@@ -23,7 +23,7 @@
 Cada uma tem a recomendação de quem escreveu. Nenhuma foi aprovada ainda.
 
 - **E1. O quadro da chegada entra?** Ele pesa de 100 a 225 ms com a CPU 4× em todas as medições (`notas/medicao-fatia-*.md`), e o §8 não o cita. A Task 1 mede sempre: os efeitos novos disparam nesse mesmo quadro, e somar efeito ao pior quadro sem uma linha de base é arriscado. **Recomendo:** consertar se a causa for nossa e local, com a meta de ≤ 100 ms com a CPU 4×. Se a causa for o próprio Motion, ou se o conserto pedir mudar a forma da mesa, a Task 1 para, registra e volta a você.
-- **E2. As cartas que saem antes da hora.** **Recomendo:** segurar as cópias até a batida delas e levá-las ao cemitério nela. É o mesmo mecanismo dos estilhaços, e sem ele os K que não são o de cima nem teriam o que estourar. A Task 1 confirma pelas fotos antes de qualquer código.
+- **E2. As cartas que saem antes da hora.** **Recomendo:** segurar as cópias até a batida delas e levá-las ao cemitério nela. As vizinhas que deslizam para a vaga esperam a mesma batida. É o mesmo mecanismo dos estilhaços, e sem ele os K que não são o de cima nem teriam o que estourar. A Task 1 confirma pelas fotos antes de qualquer código.
 - **E3. A carta do Bot.** **Recomendo:** ela espera a batida dela e cai no destino, de 14 px acima, com o achatamento e a poeira. A outra opção era voar dos versos da mão dele, no placar: custa a medida de mais um lugar e de longe se lê pouco.
 - **E4. O recuo, na batida e não no toque.** A carta escolhida já sobe na mão (`selected`). O recuo de 90 ms (6 px para baixo e de volta) acontece quando a jogada volta do motor, e o voo começa logo depois.
 - **E5. Os estilhaços no lugar do tremor.** A cópia mostra o traço da rachadura que já existe, treme 120 ms e estoura em até 10 cacos de papel, no máximo 40 por batida (4 K, 10 cada). A carta de verdade vai direto ao cemitério e fica escondida até o estouro.
@@ -54,7 +54,7 @@ Cada uma tem a recomendação de quem escreveu. Nenhuma foi aprovada ainda.
 
 1. **4 K quebrando juntos** (o Ataque Absoluto quebra a Guarda inteira, num `GuardBroken` que é batida própria, depois da cena): 4 cópias que estouram, ≤ 60 partículas no pico → teste da Task 5.
 2. **A jogada do Bot contra a sua:** a carta dele nunca aparece antes da batida dela, e o seu J que voa não achata a carta dele → testes da Task 4.
-3. **A carta que só desliza** (outra saiu da frente da fileira): desliza como hoje, sem achatar nem soltar poeira → teste da Task 4.
+3. **A carta que só desliza** (outra saiu da frente dela): desliza na batida da carta que saiu, nunca por baixo da cópia, e sem achatar nem soltar poeira → testes das Tasks 2 e 4.
 4. **O pulo, o `state` novo no meio, o `catchUp` e o `resync`:** nenhuma cópia órfã, nenhum timer que dispara depois, e a carta de verdade nunca fica escondida → testes das Tasks 4 e 5.
 5. **O celular a 360 px:** o monte, a mão e o cemitério longe um do outro; as cópias e os cacos presos à camada; nada rola de lado → E2E da Task 8.
 
@@ -93,10 +93,11 @@ Cada uma tem a recomendação de quem escreveu. Nenhuma foi aprovada ainda.
 - Produces:
   - `TABLE_MOTION = { recoilMs: 90, recoilPx: 6, landAfterMs: 420, squash: 1.06, squashMs: 160, dropPx: 14, dropMs: 220, dust: 5, dustMs: 520, crackShakeMs: 120, shards: 10, shardBudget: 40, shardMs: 650, exitMs: 360, fanStaggerMs: 40, dealFlightMs: 320 }`.
   - `recoilsOf(beats: readonly Beat[], me: PlayerId): ReadonlyMap<string, number>`: id → início da batida, para as suas cartas que saem da sua mão (`BuffPlayed.card`, `GuardPlayed.cards`, `TrapUsed.card`, `Sacrificed.card`, `CardStolen.ace`, `DevastationCast` k, a e x, com `player === me`).
-  - `landingsOf(beats: readonly Beat[], me: PlayerId): ReadonlyMap<string, { atMs: number; drop: boolean }>`:
+  - `landingsOf(beats: readonly Beat[], me: PlayerId, draftShown: boolean): ReadonlyMap<string, { atMs: number; drop: boolean }>`:
     - a sua carta que voa da mão (`BuffPlayed`, `GuardPlayed`) e a numérica roubada (`CardStolen.card`): `startMs + recoilMs + landAfterMs` (a roubada sem o `recoilMs`), sem queda;
     - a carta do Bot (`BuffPlayed`, `GuardPlayed`): `startMs + dropMs`, com queda;
-    - as do Equipar (`CardsPlaced`, a `card` de cada `placement`): `startMs + dropMs`. As do Bot caem; as suas já estão no lugar, como rascunho, e só achatam.
+    - as do Equipar (`CardsPlaced`, a `card` de cada `placement`): `startMs + dropMs`. As do Bot caem. As suas só achatam se o rascunho estava à vista, ou seja, se você confirmou nesta página (`Table.tsx:153`). `draftShown` é o `equipConfirmed === 'thisPage'` do snapshot de antes do `state` da revelação, que o `Stage` guarda. Confirmadas antes de recarregar, não há rascunho, e elas caem como as do Bot.
+  - `shiftDelaysOf(beats: readonly Beat[], view: PlayerView): ReadonlyMap<string, number>`: as cartas que ficam no lugar de onde outra sai (a mesma fileira, a Guarda, a zona de buffs ou a sua mão) esperam o `startMs` da batida da saída para deslizar. O lugar vem do evento (`CardsRemovedFromRow.row`, `GuardBroken`, `BuffRemoved`, o alvo de `TrapUsed` e `Sacrificed`, o `replaced` de `CardsPlaced`, as suas cartas que saem da mão), e as que ficam vêm da `view`. Sem isso, com as cópias da E2 seguradas até a batida, as vizinhas deslizariam para a vaga por baixo delas. O `run.delays` junta os dois mapas; vale o do `delaysOf` quando a carta está nos dois.
   - `leavingOf(beats: readonly Beat[]): ReadonlyMap<string, { startMs: number; shatter: boolean }>`: as cartas que vão ao cemitério numa batida que não é cena.
     - `CardsRemovedFromRow`, `BuffRemoved`, `HandLimitPenalty`, o `replaced` dos `CardsPlaced`, `DevastationCast` (k, a, x), `CardStolen.ace` e as cartas usadas de `TrapUsed` e `Sacrificed`: sem estouro;
     - `GuardBroken` e os alvos de `TrapUsed` e `Sacrificed` (os mesmos do `crack` de hoje): com estouro.
@@ -104,7 +105,8 @@ Cada uma tem a recomendação de quem escreveu. Nenhuma foi aprovada ainda.
 
 - [ ] **Step 1: Escrever os testes que falham**
   - `recoilsOf`: o seu `BuffPlayed` dá o id no `startMs` da batida; o do Bot, nada; o seu `DevastationCast`, os três ids.
-  - `landingsOf`: o seu `BuffPlayed` em `startMs + 510`, sem queda; o do Bot em `startMs + 220`, com queda; os seus `CardsPlaced` em `startMs + 220`, sem queda; os do Bot, com queda; a numérica do `CardStolen` em `startMs + 420`.
+  - `landingsOf`: o seu `BuffPlayed` em `startMs + 510`, sem queda; o do Bot em `startMs + 220`, com queda; os seus `CardsPlaced` em `startMs + 220`, sem queda com `draftShown` e com queda sem ele; os do Bot, com queda; a numérica do `CardStolen` em `startMs + 420`.
+  - `shiftDelaysOf`: a carta da frente da Defesa sai (`CardsRemovedFromRow`), e as outras da Defesa esperam o início dessa batida; uma carta do Ataque não espera; o seu J sai da mão (`BuffPlayed`), e as outras da mão esperam; 2 K de 4 quebram, e os 2 que ficam na Guarda esperam.
   - `leavingOf`: `GuardBroken` com 4 K dá 4 com estouro; `TrapUsed` dá a carta sem estouro e o alvo com; `CardsRemovedFromRow`, sem estouro; `RowDevastated` e `ReflectPlayed` (cenas) não dão nada.
   - `shardsPerCard`: 1 → 10, 4 → 10, 5 → 8.
   - **O teto:** para uma jogada comum seguida do golpe, com `decisionPending`, as durações do `buildTimeline` são as de hoje (valores escritos no teste), e `timelineMs` ≤ `DECISION_CAP_MS`.
@@ -135,7 +137,7 @@ Expected: PASS.
   - `dust(timers: number[], layer: Element, box: SceneRect, count: number, random: () => number): void` (o `SceneRect` de `ui/anim/scene-box.ts`): puffs que saem da borda de baixo de `box`, cada um com `data-poeira` e `data-particula`, e que saem sozinhos em até `dustMs`;
   - `shards(timers: number[], layer: Element, box: SceneRect, count: number, random: () => number): void`: cacos de papel com borda de tinta, recortados como o entulho do protótipo, com `data-caco` e `data-particula`, que saem em até `shardMs`;
   - `FxLayer`: `<div data-camada-fx aria-hidden>`, absoluta sobre a mesa, sem toque, abaixo da cena (`BeatOverlay`), e `useFxLayer(): { burst(kind: 'dust' | 'shards', el: Element, count: number): void; layer: HTMLElement | null }`. O `burst` converte o retângulo do elemento para a camada e, com movimento reduzido, não faz nada;
-  - `Run` ganha `recoils`, `landings` e `leaving`, vazios no `catchUp` e no `resync`; `run.delays` soma o `recoilMs` às cartas de `recoils` (o voo espera o recuo);
+  - `Run` ganha `recoils`, `landings` e `leaving`, vazios no `catchUp` e no `resync`; `run.delays` junta o `shiftDelaysOf` e soma o `recoilMs` às cartas de `recoils` (o voo espera o recuo);
   - `Anim` ganha `recoilAt(id): number | null` e `landAt(id): { at: number; drop: boolean } | null`, em segundos, como o `delayOf`.
 
 - [ ] **Step 1: Escrever os testes que falham** (`bursts.test.tsx`, com timers falsos):
@@ -205,8 +207,10 @@ Expected: PASS.
 - Produces: `Leaving`, um componente de classe no palco que recebe `run`, `reduced` e `released`. As cópias levam `data-saindo` e `data-saindo-id` (nunca `data-card-id`), e a carta de verdade escondida leva `data-esperando-estouro`.
 
 O que acontece:
+- **Só quando a linha do tempo muda** (`prevProps.run !== this.props.run`): o palco redesenha a cada batida, e as cópias não podem nascer de novo a cada desenho.
 - **No `getSnapshotBeforeUpdate`** (o DOM ainda é o de antes): o retângulo e um `cloneNode(true)` de cada carta de `run.leaving` que está na mesa.
-- **No `componentDidUpdate`:** a cópia entra na camada, no lugar antigo, para cada carta que já não está na mesa, e também para as que estouram mesmo que estejam (o topo do cemitério). Nesse caso, a de verdade fica com `visibility: hidden` até o estouro, como na Ressurreição.
+- **No `componentDidUpdate`:** a cópia entra na camada, no lugar antigo, para cada carta que já não está na mesa, e também para as que estouram mesmo que estejam (o topo do cemitério).
+- **O topo do cemitério que estoura** entra no `instant`, como o `fallen` da Devastação: chega ao cemitério sem transição. Só esconder não basta, porque o Motion o faria voar do lugar antigo a partir da batida, e ele reapareceria no meio do voo. Ele fica com `visibility: hidden` até o estouro, como na Ressurreição.
 - **Na batida da carta:**
   - **sem estouro:** a cópia voa até o centro de `[data-cemiterio]` (`translate`, `scale` até 0,5 e opacidade) em 360 ms e sai;
   - **com estouro:** a cópia mostra o traço da rachadura, treme 120 ms (`transform: rotate`, ±4°) e estoura em `shardsPerCard(n)` cacos, sendo `n` o número de cartas que estouram na batida. Depois sai;
@@ -216,7 +220,8 @@ O que acontece:
 - [ ] **Step 1: Escrever os testes que falham**
   - um K da Guarda quebrada que não é o topo: a cópia está lá desde a chegada, até a batida; na batida, depois de 120 ms, 10 `[data-caco]`, e a cópia sai;
   - 4 K: 4 cópias e 40 cacos, com ≤ 60 `[data-particula]` no pico;
-  - o topo do cemitério que estoura: `visibility: hidden` até o estouro; com o pulo no meio, volta a aparecer na hora;
+  - o topo do cemitério que estoura: `instant` (sem transição de layout), e `visibility: hidden` até o estouro; com o pulo no meio, volta a aparecer na hora;
+  - um `state` que redesenha o palco sem trocar a linha do tempo não cria cópias novas;
   - `CardsRemovedFromRow`: a cópia voa ao cemitério na batida, sem cacos;
   - `RowDevastated` e `ReflectPlayed`: nenhuma cópia, porque a cena desenha as dela;
   - movimento reduzido, `catchUp`, `resync` e o `state` novo no meio: como descrito acima;

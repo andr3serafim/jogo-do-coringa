@@ -6,7 +6,7 @@
 ## Agora
 
 - **Branch:** `main`, no checkout principal, sem código em curso. Todas as branches locais já estão mescladas. A fatia 5 tem plano e ainda não tem branch.
-- **Feito por último:** o **plano da fatia 5** (a fluidez das jogadas comuns, com os sons), `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-5.md`, commitado na `main` (`diario.md` 2026-11-02 (7)). Antes dele, a fatia 4b (a Ressurreição), aprovada sem ajustes (`decisoes.md` 2026-11-02 (5)): **as seis cenas especiais do §7 estão entregues e aprovadas.**
+- **Feito por último:** o **plano da fatia 5** (a fluidez das jogadas comuns, com os sons), `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-5.md`, commitado na `main` (`diario.md` 2026-11-02 (7)), com as correções da revisão num segundo commit. No caminho, o ESLint passou a ignorar `.claude/**` (`6103b52`), porque um worktree sem `pnpm install` reprovava todos os arquivos. Antes dele, a fatia 4b (a Ressurreição), aprovada sem ajustes (`decisoes.md` 2026-11-02 (5)): **as seis cenas especiais do §7 estão entregues e aprovadas.**
 - **Esperando o autor:** aprovar o plano da fatia 5, ou mudar alguma das escolhas **E1 a E9**, listadas no começo dele. **Nenhuma foi aprovada.** A resposta dele entra em `decisoes.md`, com o texto dele, antes de qualquer código.
 - **Ajuste depois da aprovação da 4b:** as cartas da quadra perderam o losango de ouro do canto (`decisoes.md` 2026-11-02 (6)); o fundo dourado, a moldura, o brilho e o selo ficam. Não mude isso de volta seguindo a letra antiga do §6.
 - **Próximo passo exato:**
@@ -42,7 +42,7 @@
 O mapa que estava aqui virou o plano (`docs/superpowers/plans/2026-11-02-direcao-visual-fatia-5.md`). **Nada nele foi aprovado pelo autor.** Em oito tarefas:
 
 1. a linha de base: medir os passos comuns e o quadro da chegada (100 a 225 ms com a CPU 4×), com o perfil; consertar só se a causa for nossa e local (E1);
-2. o modelo (`model/table-motion.ts`): recuo, pouso, saída, estouro e os tempos, com teste que trava as durações da linha do tempo;
+2. o modelo (`model/table-motion.ts`): recuo, pouso, saída, estouro, as vizinhas que esperam a batida da saída (`shiftDelaysOf`) e os tempos, com teste que trava as durações da linha do tempo;
 3. as partículas saem de `ui/scenes/` para `ui/anim/particles.ts`, e a mesa ganha a camada dos efeitos (`FxLayer`);
 4. a jogada: recuo de 90 ms, voo na mola e pouso com achatamento (1,06 → 1) e poeira; a carta do Bot cai na batida dela (E3);
 5. a saída e os estilhaços: cópias lidas no `getSnapshotBeforeUpdate` seguram as cartas que saem até a batida delas (E2), e as que quebram estouram em cacos (E5);
@@ -206,7 +206,7 @@ Playtest online, `wrangler login` + `pnpm deploy:server`, proteção da `main`, 
   - `D:\andr3\jogo-coringa`: checkout principal.
   - `.claude/worktrees/inspiring-sammet-387417` (`feat/ajustes`, limpo): o da conta anterior.
   - `D:\andr3\jogo-coringa-v5` (HEAD solto, limpo): era o checkout limpo dos pushes da conta anterior. O `git worktree list` o marca como `prunable`.
-  - `.claude/worktrees/youthful-elgamal-3d5e8a` (`claude/inspiring-sammet-387417`, limpo, já mesclada): sobra de uma sessão antiga.
+  - `.claude/worktrees/youthful-elgamal-3d5e8a` (`claude/inspiring-sammet-387417`, num commit de 2026-10-27, limpo): criado em 2026-11-02 às 17:00, sem `pnpm install`, provavelmente por outra sessão do app. **Não apague:** pode ser de uma sessão aberta. Ele reprovava o ESLint, que agora ignora `.claude/**` (`6103b52`).
 - **Branches que sobraram:** todas as locais já estão mescladas na `main` (conferido em 2026-11-01), inclusive
   `claude/inspiring-sammet-387417` e `feat/ajustes-fase-a`. Só o trabalho novo precisa de branch nova.
 - **Arquivo solto:** o `jogar-treino.bat` na raiz é o lançador do autor. Não mexer nem commitar.

@@ -17,7 +17,11 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   - **o tremor de dois golpes colados:** a animação do CSS não recomeça quando o valor de `data-tremor` se repete;
   - **o orçamento:** `ui/scenes/particles.ts` não importa nada; o plano o move, com o `rng` da `aura.ts`, para `ui/anim/particles.ts`;
   - **a compra:** o Equipar compra 4 cartas por jogador (`cardsPerEquip`), e o leque cabe na batida dele.
-- **O conselho de um revisor** (sem subagente; o modelo de apoio da sessão) mudou a ordem do plano. A Task 1 mede os passos comuns e o quadro da chegada antes de qualquer efeito, porque os efeitos novos disparam nesse mesmo quadro.
+- **O conselho de um revisor** (sem subagente; o modelo de apoio da sessão) mudou a ordem do plano. A Task 1 mede os passos comuns e o quadro da chegada antes de qualquer efeito, porque os efeitos novos disparam nesse mesmo quadro. Na revisão do plano pronto, ele achou dois furos na Task 5, corrigidos num segundo commit:
+  - **as vizinhas deslizariam por baixo da cópia:** quem fica no lugar de onde uma carta sai desliza na hora (`delayOf` = 0), o que só funciona porque a que sai some. Com a cópia segurada até a batida, elas esperam a mesma batida (`shiftDelaysOf`, Task 2);
+  - **o topo do cemitério que estoura** precisa entrar no `instant`, como o `fallen` da Devastação. Só escondido, o Motion o faria voar do lugar antigo, e ele reapareceria no meio do voo;
+  - **o rascunho do Equipar** só fica à vista depois de confirmar nesta página (`Table.tsx:153`). Confirmadas antes de recarregar, as suas numéricas também chegam sem origem e caem como as do Bot (`draftShown`).
+- **O ESLint reprovava todos os arquivos** no pre-commit (705 erros de "multiple candidate TSConfigRootDirs"). A causa é o worktree `.claude/worktrees/youthful-elgamal-3d5e8a`, criado em 2026-11-02 às 17:00 sem `pnpm install`, provavelmente por outra sessão do app: o ESLint 10 lê a config dele, que resolve o `typescript-eslint` no `node_modules` da raiz, e o pacote passa a ver duas raízes. **Conserto:** `.claude/**` nos `ignores` do `eslint.config.js` (`6103b52`), direto na `main`, sem branch e PR, por ser de 3 linhas. O worktree não foi apagado.
 - **Fica:** o autor aprova o plano (ou muda as escolhas); depois, a execução na branch `feat/direcao-visual-fatia-5`.
 
 ---
