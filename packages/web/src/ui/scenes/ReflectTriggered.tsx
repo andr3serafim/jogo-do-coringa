@@ -15,6 +15,7 @@ import type { ScenePoint } from '../anim/scene-box.ts';
 import type { SceneProps } from '../anim/scenes-loader.ts';
 import { HitNumber } from './AbsoluteAttack.tsx';
 import { rng } from './aura.ts';
+import { useMeasuredBox } from './measured-box.ts';
 import { MIRROR_CARD_CLASS, MIRROR_CARDS, MirrorArt, mirrorCardSize } from './MirrorArt.tsx';
 import { cometStops, mirrorLayout, mirrorTips, reflectFrom } from './mirror.ts';
 import { shakeFrames, sparks, spawn } from './particles.ts';
@@ -39,7 +40,7 @@ const place = (at: ScenePoint, angle: number, scale: number, k: number) => `tran
 const angleOf = (from: ScenePoint, to: ScenePoint) => (Math.atan2(to.y - from.y, to.x - from.x) * 180) / Math.PI;
 
 /** Onde o cometa está, `ms` depois do começo da cena, na ida: a mesma conta das animações, em linha reta por trecho. */
-export function cometAt(ms: number, start: ScenePoint, stops: { p1: ScenePoint; p2: ScenePoint; hit: ScenePoint }): ScenePoint {
+function cometAt(ms: number, start: ScenePoint, stops: { p1: ScenePoint; p2: ScenePoint; hit: ScenePoint }): ScenePoint {
   if (ms <= M.slowAt) return lerp(start, stops.p1, Math.max(0, ms - M.launchAt) / (M.slowAt - M.launchAt));
   if (ms <= M.slowUntil) return lerp(stops.p1, stops.p2, (ms - M.slowAt) / (M.slowUntil - M.slowAt));
   return lerp(stops.p2, stops.hit, Math.min(1, (ms - M.slowUntil) / (M.mirrorHitAt - M.slowUntil)));
@@ -78,7 +79,16 @@ function Comet({ gold, reduced }: { gold: boolean; reduced: boolean }) {
   );
 }
 
-export function ReflectTriggered({ beat, me, reduced, hitLanded, box }: SceneProps) {
+export function ReflectTriggered(props: SceneProps) {
+  const { anchor, measured } = useMeasuredBox(props.box);
+  return (
+    <div ref={anchor} className="absolute inset-0">
+      {measured ? <CometStrike {...props} box={measured} /> : null}
+    </div>
+  );
+}
+
+function CometStrike({ beat, me, reduced, hitLanded, box }: SceneProps) {
   const { event } = beat;
   const owner = event.type === 'ReflectTriggered' ? event.owner : me;
   const attacker = event.type === 'ReflectTriggered' ? event.attacker : me;

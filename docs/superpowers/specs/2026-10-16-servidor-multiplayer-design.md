@@ -311,7 +311,8 @@ Fica no núcleo do servidor, fixo para todas as salas [A]. O motor continua sem 
   opcional. A fatia 2 do sub-projeto 6 (2026-11-01) deu ao Ataque Absoluto e à Defesa Absoluta as cenas do protótipo, e a
   tabela passou a 4,5 s e 4,8 s para eles. A fatia 3 (2026-11-01) deu à Exódia 5,8 s e levou a folga da Devastação para quando a
   fileira cai (`RowDevastated`, 3,1 s) ou para a cancelada (`DevastationCanceled`, 1,4 s). O lançamento (`DevastationCast`) não rende
-  mais folga: ele só abre a janela de reação do alvo.
+  mais folga: ele só abre a janela de reação do alvo. A fatia 4 (2026-11-02) deu ao gatilho do Reflect (`ReflectTriggered`) 3,8 s e à anulação
+  (`ReflectCanceled`) 1,4 s; o lançamento (`ReflectPlayed`) segue com 1,5 s. O Ataque Absoluto contra um Reflect soma 8,3 s de cena, e a folga para no teto de 8 s.
 
 ### 6.3 Janela de reação: duração mínima [A]
 

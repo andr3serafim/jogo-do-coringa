@@ -36,6 +36,8 @@ import { buildTimeline, timelineMs, type Beat, type TimelineOptions } from '../.
 
 /** A cortina fica no ar pelo menos 1 s: a subida e a descida não cabem numa janela de 1 s com a inversão no meio. */
 export const CURTAIN_MIN_HOLD_MS = FLASH_WINDOW_MS;
+/** A cortina recusada só tenta de novo se ainda faltar isto de cena: nas curtas, ela subiria para logo descer. */
+const CURTAIN_RETRY_LEFT_MS = 2 * FLASH_WINDOW_MS;
 
 export interface Run {
   state: StateMessage | null;
@@ -219,16 +221,20 @@ export function useBeatPlayer(
   const curtainSince = useRef(0);
   const fallTimer = useRef<number | null>(null);
 
-  /** Uma cena começa: a cortina sobe (se a regra deixa) ou, se já está no ar, fica (cancela a descida marcada). */
-  const raiseCurtain = useCallback(() => {
+  /**
+   * Uma cena começa: a cortina sobe (se a regra deixa) ou, se já está no ar, fica (cancela a descida marcada). Recusada, devolve quanto
+   * falta para a regra deixar; senão, `null`.
+   */
+  const raiseCurtain = useCallback((): number | null => {
     if (fallTimer.current !== null) window.clearTimeout(fallTimer.current);
     fallTimer.current = null;
-    if (curtainUp.current) return;
+    if (curtainUp.current) return null;
     const now = clock();
-    if (!lock.toggle(now)) return;
+    if (!lock.toggle(now)) return lock.nextAllowed(now) - now;
     curtainUp.current = true;
     curtainSince.current = now;
     setCurtain(true);
+    return null;
   }, [lock]);
 
   /** Nenhuma cena segura a cortina: ela desce depois de `minHoldMs` no ar, e só quando a regra de flash deixa. */
@@ -345,7 +351,15 @@ export function useBeatPlayer(
       // O golpe que a cena do Ataque Absoluto absorveu acende no impacto do feixe (sub-projeto 6 §7.1), no mesmo relógio da inversão.
       if (beat.hit) at(beat.hit.atMs, () => setLanded({ run, index: i }));
       if (curtained(beat)) {
-        at(beat.startMs, raiseCurtain);
+        // A cortina recusada tenta de novo quando a regra deixa, se ainda faltar bastante cena: numa cena longa, ela não fica de fora só
+        // porque a anterior acabou há pouco. A espera confere o relógio de novo: um timer atrasado não a sobe no fim.
+        const sceneEnd = startedAt + beat.startMs + beat.durationMs;
+        const tryRaise = (delayMs: number) =>
+          at(delayMs, () => {
+            const waitMs = raiseCurtain();
+            if (waitMs !== null && clock() + waitMs + CURTAIN_RETRY_LEFT_MS <= sceneEnd) tryRaise(waitMs);
+          });
+        tryRaise(beat.startMs);
         at(beat.startMs + beat.durationMs, () => lowerCurtain(CURTAIN_MIN_HOLD_MS));
       }
     });

@@ -1,4 +1,4 @@
-// E2E das cenas raras refeitas no sub-projeto 6 (fatia 2: os Absolutos; fatia 3: a Devastação e a Exódia): a cena desenhada aparece,
+// E2E das cenas raras refeitas no sub-projeto 6 (fatia 2: os Absolutos; fatia 3: a Devastação e a Exódia; fatia 4: o Reflect): a cena desenhada aparece,
 // nada rola de lado durante ela (no PC e no celular em pé de 360 × 640), e um toque na mesa a pula, mostrando o estado final na hora.
 // É o que o jsdom não prova: o módulo das cenas carregado de verdade (o chunk à parte), a caixa medida e o pulo pelo toque.
 //
@@ -10,12 +10,17 @@
 // A Devastação e a Exódia vêm de `fixtures/exodia-devastacao.json`, turtle × turtle (semente `fatia3-0`, config padrão das regras de
 // 2026-10-31): no passo 211 (rodada 43) a sua Devastação derruba a Defesa do Bot, com 8 cartas; no passo 408 (rodada 83) o Bot fecha a
 // Exódia, e a partida acaba.
+//
+// O Reflect vem de `fixtures/reflect.json`, greedy × turtle (semente `fatia4-220`, config padrão das regras de 2026-10-31): do passo 175
+// para o 176 (rodada 37) o Bot joga o Reflect contra o seu ataque; do 176 para o 177, o golpe volta (49 de dano em você); do 358 para o 359
+// (rodada 73), a sua Devastação refletida abre o chão no seu campo.
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { failOnConsoleErrors, placar, replayControl, replayCounter } from './helpers.ts';
 
 const ABSOLUTES = readFileSync(new URL('./fixtures/absolutos.json', import.meta.url), 'utf8');
 const SLICE_3 = readFileSync(new URL('./fixtures/exodia-devastacao.json', import.meta.url), 'utf8');
+const REFLECT = readFileSync(new URL('./fixtures/reflect.json', import.meta.url), 'utf8');
 
 /** Abre o replay parado no passo `step` (a rodada `round` é o atalho até perto dele). */
 async function openAt(page: Page, round: number, step: number, game: { id: string; fixture: string } = { id: 'absolutos', fixture: ABSOLUTES }): Promise<void> {
@@ -33,6 +38,17 @@ async function openAt(page: Page, round: number, step: number, game: { id: strin
 }
 
 const SLICE_3_GAME = { id: 'exodia-devastacao', fixture: SLICE_3 };
+const REFLECT_GAME = { id: 'reflect', fixture: REFLECT };
+
+/** O espelho inteiro dentro da janela. */
+async function expectMirrorInView(page: Page): Promise<void> {
+  const mirror = (await page.locator('[data-espelho]').boundingBox())!;
+  const window = page.viewportSize()!;
+  expect(mirror.x, 'o espelho não sai pela esquerda').toBeGreaterThanOrEqual(0);
+  expect(mirror.y, 'o espelho não sai por cima').toBeGreaterThanOrEqual(0);
+  expect(mirror.x + mirror.width, 'o espelho não sai pela direita').toBeLessThanOrEqual(window.width);
+  expect(mirror.y + mirror.height, 'o espelho não sai por baixo').toBeLessThanOrEqual(window.height);
+}
 
 /** Nada rola de lado: a página não é mais larga que a janela. */
 async function expectNoSideScroll(page: Page): Promise<void> {
@@ -117,6 +133,70 @@ for (const viewport of [
       await expect(page.locator('[data-campo="p2"][data-apagado]')).toHaveCount(1);
       await expect(page.locator('[data-carta-caindo]')).toHaveCount(0);
       await expectNoSideScroll(page);
+      guard.expectClean();
+    });
+
+    test('o Reflect do Bot se forma: o espelho à vista, sem tarjas nem rolar de lado, e fica pequeno na zona dele', async ({ page }) => {
+      const guard = failOnConsoleErrors(page);
+      await openAt(page, 37, 175, REFLECT_GAME);
+      await replayControl(page, 'Próximo passo').click();
+      await expect(page.locator('[data-cena="REFLECT_PLAYED"]')).toHaveCount(1);
+      await expect(page.locator('[data-espelho]')).toHaveCount(1);
+      await expect(page.locator('[data-carta-cena]')).toHaveCount(3);
+      await expect(page.locator('[data-tarja]')).toHaveCount(0);
+      await expect(page.locator('[data-cortina][data-ativa]')).toHaveCount(1);
+      await expect(page.locator('[data-carimbo]')).toHaveCount(0);
+      await expectMirrorInView(page);
+      await expectNoSideScroll(page);
+      await tapTable(page);
+      await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1, { timeout: 500 });
+      await expect(page.locator('[data-espelho]')).toHaveCount(0);
+      await expect(page.locator('[data-espelho-zona="p2"]')).toHaveCount(1);
+      guard.expectClean();
+    });
+
+    test('o cometa volta do espelho: a volta dourada, o número e o nome, e o toque pula para a vida final, sem o espelho', async ({ page }) => {
+      const guard = failOnConsoleErrors(page);
+      await openAt(page, 37, 176, REFLECT_GAME);
+      await expect(page.locator('[data-espelho-zona="p2"]')).toHaveCount(1);
+      const before = Number(await placar(page).locator('[data-lado="voce"] [data-hp]').textContent());
+      // A volta dura menos de meio segundo, e as consultas de fora podem cair antes e depois dela: a própria página a procura a cada quadro.
+      const sawReturn = page.evaluate(
+        () =>
+          new Promise<boolean>((resolve) => {
+            const look = () => (document.querySelector('[data-cometa][data-volta]') ? resolve(true) : requestAnimationFrame(look));
+            look();
+          }),
+      );
+      await replayControl(page, 'Próximo passo').click();
+      await expect(page.locator('[data-cena="REFLECT_TRIGGERED"]')).toHaveCount(1);
+      await expect(page.locator('[data-carga]')).toHaveCount(1);
+      await expectMirrorInView(page);
+      expect(await sawReturn, 'o cometa volta dourado').toBe(true);
+      await expect(page.locator('[data-dano]')).toHaveText('−49', { timeout: 2_000 });
+      await expect(page.locator('[data-carimbo="REFLECT_TRIGGERED"]')).toBeVisible();
+      await expect(page.locator('[data-cacos]')).toHaveCount(1);
+      expect(await page.locator('[data-particula]').count(), 'as partículas ficam no limite').toBeLessThanOrEqual(60);
+      await expectNoSideScroll(page);
+      await tapTable(page);
+      await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1, { timeout: 500 });
+      await expect(placar(page).locator('[data-lado="voce"] [data-hp]')).toHaveText(String(before - 49), { timeout: 500 });
+      await expect(page.locator('[data-espelho-zona]')).toHaveCount(0);
+      await expect(page.locator('[data-cometa]')).toHaveCount(0);
+      guard.expectClean();
+    });
+
+    test('a Devastação refletida: o chão se abre no campo de quem lançou, sem cometa', async ({ page }) => {
+      const guard = failOnConsoleErrors(page);
+      await openAt(page, 73, 358, REFLECT_GAME);
+      await replayControl(page, 'Próximo passo').click();
+      await expect(page.locator('[data-cena="DEVASTATION"]')).toHaveCount(1);
+      await expect(page.locator('[data-cometa]')).toHaveCount(0);
+      await expectNoSideScroll(page);
+      await tapTable(page);
+      await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1, { timeout: 500 });
+      await expect(page.locator('[data-campo="p1"][data-apagado]')).toHaveCount(1);
+      await expect(page.locator('[data-espelho-zona]')).toHaveCount(0);
       guard.expectClean();
     });
 

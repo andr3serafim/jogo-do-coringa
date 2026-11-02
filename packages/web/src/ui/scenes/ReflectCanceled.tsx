@@ -6,6 +6,7 @@ import { SCENE_MOMENTS } from '../../model/scene-moments.ts';
 import type { SceneProps } from '../anim/scenes-loader.ts';
 import { rng } from './aura.ts';
 import { crackBranch } from './chasm.ts';
+import { useMeasuredBox } from './measured-box.ts';
 import { MirrorArt } from './MirrorArt.tsx';
 import { mirrorLayout, otherPlayer, reflectFrom } from './mirror.ts';
 import { sparks } from './particles.ts';
@@ -26,7 +27,16 @@ const CRACK_PATHS = CRACKS.map(({ seed, x, y, dir, len }) => crackBranch(seed, x
 /** O espelho menor que o do lançamento: há dois na mesa. */
 const SIZE_FACTOR = 0.7;
 
-export function ReflectCanceled({ beat, me, reduced, box }: SceneProps) {
+export function ReflectCanceled(props: SceneProps) {
+  const { anchor, measured } = useMeasuredBox(props.box);
+  return (
+    <div ref={anchor} className="absolute inset-0">
+      {measured ? <MirrorsCracking {...props} box={measured} /> : null}
+    </div>
+  );
+}
+
+function MirrorsCracking({ beat, me, reduced, box }: SceneProps) {
   const owner = beat.event.type === 'ReflectCanceled' ? beat.event.owner : me;
   const [cracked, setCracked] = useState(false);
   const [fading, setFading] = useState(false);

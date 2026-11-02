@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import { SCENE_MOMENTS } from '../../model/scene-moments.ts';
 import type { SceneProps } from '../anim/scenes-loader.ts';
 import { rng } from './aura.ts';
+import { useMeasuredBox } from './measured-box.ts';
 import { MIRROR_CARD_CLASS, MIRROR_CARDS, MirrorArt, mirrorCardSize } from './MirrorArt.tsx';
 import { mirrorLayout, mirrorTips, otherPlayer, reflectFrom } from './mirror.ts';
 import { shakeFrames, sparks } from './particles.ts';
@@ -22,7 +23,16 @@ const SPARKS_PER_TIP = 8;
 const FLASH_DELAY_MS = 160;
 const FLASH_MS = 460;
 
-export function ReflectPlayed({ beat, me, reduced, box }: SceneProps) {
+export function ReflectPlayed(props: SceneProps) {
+  const { anchor, measured } = useMeasuredBox(props.box);
+  return (
+    <div ref={anchor} className="absolute inset-0">
+      {measured ? <MirrorForming {...props} box={measured} /> : null}
+    </div>
+  );
+}
+
+function MirrorForming({ beat, me, reduced, box }: SceneProps) {
   const owner = beat.event.type === 'ReflectPlayed' ? beat.event.player : me;
   const { origin, target } = reflectFrom(box, owner, otherPlayer(owner), me);
   const { center, size } = mirrorLayout(origin, target, box.band);

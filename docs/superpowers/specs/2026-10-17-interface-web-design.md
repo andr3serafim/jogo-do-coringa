@@ -507,9 +507,9 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
 | `BuffPlayed` | mão → buffs; o Selvagem ganha a etiqueta do papel |
 | `GuardPlayed` | mão → Guarda |
 | `TrapUsed` / `Sacrificed` | a carta usada vai até o alvo, o alvo quebra, os dois vão para o cemitério |
-| `ReflectPlayed` | **cena:** as três cartas formam um escudo no Coringa |
-| `ReflectCanceled` / `ReflectProtected` / `ReflectExpired` | o escudo quebra ou some |
-| `ReflectTriggered` | **cena:** o ataque volta para o atacante; dano nele |
+| `ReflectPlayed` | **cena** (sub-projeto 6 §7.5): as três cartas formam o espelho, que encolhe até a zona "Reflect ativo" |
+| `ReflectCanceled` | **cena** (sub-projeto 6 §7.5): dois espelhos trincam e somem, com a fita "Os Reflects se anularam" |
+| `ReflectTriggered` | **cena** (sub-projeto 6 §7.5): o cometa bate no espelho e volta ao retrato de quem atacou, com o dano; sem dano, ele se desfaz no vidro |
 | `ReactionWindowOpened` / `Closed` | aviso e relógio da janela aparecem e somem |
 | `AttackDeclared` | a fileira de Ataque acende e aponta para o Coringa do outro |
 | `AbsoluteAttack` | **cena** |

@@ -39,6 +39,18 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     - as trincas reaproveitam o `crackBranch` do abismo; a anulação usa espelhos de 70% do tamanho, porque são dois na mesa;
     - o `HitNumber` do Ataque Absoluto é o mesmo do dano devolvido.
 - **Task 4, os sons:** quatro pistas no lugar da `escudo`, que saiu: `reflect-armado` (os tinidos e o sino de vidro), `reflect-cometa` (a ida, a volta, o baque e o vidro), `reflect-segurado` (a mesma ida, e depois só o vidro) e `reflect-cancelado` (dois estalos de vidro). **Não conferidos de ouvido:** os testes medem os instantes e os limites de volume.
+- **Task 5, E2E, medição e documentação:**
+  - a busca limitada rodou 3.771 partidas: Reflect com dano em 900, Devastação refletida em 40, dano 0 em 5, e **nenhum** Reflect contra Reflect (os bots não usam `CANCEL_REFLECT`). A fixture `e2e/fixtures/reflect.json` é a semente `fatia4-220`, greedy × turtle, com o Reflect do Bot e uma Devastação refletida, que fecha a refletida que a fatia 3 não tinha visto no navegador;
+  - o E2E das cenas passou a 14 testes, no PC e a 360 × 640: o espelho inteiro na janela, a volta dourada, o número, o nome, o pulo e a vida final;
+  - medição em `notas/medicao-fatia-4.md`: 52 a 56 quadros/s com a CPU 4×, pico de 34 partículas;
+  - **Dois defeitos achados pelas fotos, com teste ou correção:**
+    - **o espelho e o cometa fora do lugar:** a cena media durante o render, com a mesa velha, e a zona que entra e sai muda a altura dos campos. Agora mede num `useLayoutEffect` (`ui/scenes/measured-box.ts`). **Sem teste de unidade:** o jsdom não tem layout; o E2E só garante o espelho dentro da janela, e o resto foi visto nas fotos;
+    - **a cena longa sem cortina:** a trava de flash recusava a subida, e ela não tentava de novo. Agora tenta quando a regra deixa, se faltarem 2 s de cena (`CURTAIN_RETRY_LEFT_MS`). Dois testes antigos, que fixavam a Defesa Absoluta sem cortina depois de um pulo, foram atualizados: o limite de 3 trocas segue valendo;
+  - **Escolhas:**
+    - a volta dourada dura menos de meio segundo, e as consultas do Playwright a perdiam: o E2E procura dentro da página, a cada quadro;
+    - nas Tasks 3 a 5, parte dos testes foi escrita junto com o código; no feixe interceptado, uma mutação confirmou que o teste pega o erro.
+- **Não visto de verdade:** o som; Reflect contra Reflect, dano 0, o seu próprio Reflect, o Ataque Absoluto contra Reflect e o movimento reduzido só têm testes de unidade.
+- **Pequenos, para depois:** os controles do replay no meio de uma cena não cortam o som dela (o mesmo das fatias 2 e 3).
 
 ---
 

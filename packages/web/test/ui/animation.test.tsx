@@ -14,7 +14,7 @@ import { DEFAULT_PREFS } from '../../src/model/storage.ts';
 import { BEAT_MS, INVERT_COOLDOWN_MS, INVERT_MIN_HOLD_MS, NO_INVERT, RARE_SCENE_MS, type SceneKind } from '../../src/model/timeline.ts';
 import { SCENE_MOMENTS } from '../../src/model/scene-moments.ts';
 import { useAnim, useBoardBusy } from '../../src/ui/anim/context.ts';
-import { Stage } from '../../src/ui/anim/Stage.tsx';
+import { HIT_COUNT_MS, Stage } from '../../src/ui/anim/Stage.tsx';
 import { deferredAck, scenarioAt, type ViewSpec } from '../fixtures.ts';
 import {
   ABSOLUTE,
@@ -116,6 +116,44 @@ describe('palco: a cena inverte a tela inteira uma vez (spec §10.1, §10.4)', (
     expect(busy(m.container)).toBe(true);
     trace.run(200);
     expect(busy(m.container)).toBe(false);
+  });
+});
+
+describe('o gatilho do Reflect na mesa (sub-projeto 6 §7.5)', () => {
+  const T = SCENE_MOMENTS.REFLECT_TRIGGERED;
+  const hp = (container: HTMLElement) => Number(container.querySelector('[data-lado="voce"] [data-hp]')!.textContent);
+  const trigger: GameEvent = { type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 37 };
+
+  it('a vida de quem atacou só desce depois de a volta do cometa acertar', () => {
+    const m = mount(THEIRS);
+    const start = hp(m.container);
+    emit(m, { ...THEIRS, self: { ...THEIRS.self, hp: start - 37 } }, [trigger]);
+    advance(T.returnHitAt - 1);
+    expect(hp(m.container)).toBe(start);
+    advance(1);
+    // A contagem parte no desenho seguinte, como a do golpe.
+    advance(HIT_COUNT_MS + 100);
+    expect(hp(m.container)).toBe(start - 37);
+  });
+
+  it('na partida que acaba com o dano devolvido, a mesa só libera depois da cena', () => {
+    const m = mount(THEIRS);
+    const result = { kind: 'WIN', winner: 'p2', reason: 'HP' } as const;
+    emit(m, { ...THEIRS, self: { ...THEIRS.self, hp: 0 }, phase: { kind: 'GAME_OVER', result } }, [trigger, { type: 'GameOver', result }]);
+    advance(RARE_SCENE_MS.REFLECT_TRIGGERED - 1);
+    expect(busy(m.container)).toBe(true);
+    expect(scene(m.container)).toHaveAttribute('data-cena', 'REFLECT_TRIGGERED');
+    advance(BEAT_MS.banner + 100);
+    expect(busy(m.container)).toBe(false);
+  });
+
+  it('na reconexão (catchUp) não há cena: vira faixa, e o espelho pequeno sai com a `view`', () => {
+    const m = mount({ ...THEIRS, opponent: { ...THEIRS.opponent, reflect: true } });
+    expect(m.container.querySelector('[data-espelho-zona="p2"]')).not.toBeNull();
+    emit(m, THEIRS, [trigger], { catchUp: true });
+    expect(scene(m.container)).toBeNull();
+    expect(banner(m.container)).not.toBeNull();
+    expect(m.container.querySelector('[data-espelho-zona]')).toBeNull();
   });
 });
 
@@ -1506,6 +1544,42 @@ describe('cortina e inversão contam juntas (spec §10.4: no máximo 3 trocas po
     expectFlashSafe(trace.all);
   });
 
+  it('numa cena longa, a cortina que a conta recusou sobe assim que a regra deixa, e nada passa de 3 por segundo', () => {
+    // O espelho, a faixa da janela de reação e o gatilho logo depois (visto no navegador, 2026-11-02): a cortina desceu, a faixa subiu e
+    // desceu, e a subida de agora seria a quarta troca em 1 s.
+    const m = mount(THEIRS);
+    const trace = watchMany([() => curtainUp(m.container), () => inverted(m.container)]);
+    const silent = NO_INVERT as Set<SceneKind>;
+    silent.add('REFLECT_PLAYED');
+    emit(m, THEIRS, [SCENE, TURN]);
+    silent.delete('REFLECT_PLAYED');
+    trace.sample();
+    trace.run(1_950);
+    expect(curtainUp(m.container)).toBe(false);
+    emit(m, THEIRS, [{ type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 40 }]);
+    trace.sample();
+    expect(curtainUp(m.container)).toBe(false);
+    trace.run(1_000);
+    expect(curtainUp(m.container)).toBe(true);
+    trace.run(RARE_SCENE_MS.REFLECT_TRIGGERED + 1_500);
+    expect(curtainUp(m.container)).toBe(false);
+    expectFlashSafe(trace.all);
+  });
+
+  it('numa cena curta demais para ela valer a pena, a cortina recusada não sobe', () => {
+    const m = mount(THEIRS);
+    const trace = watchMany([() => curtainUp(m.container)]);
+    const silent = NO_INVERT as Set<SceneKind>;
+    silent.add('REFLECT_PLAYED');
+    emit(m, THEIRS, [SCENE, TURN]);
+    trace.sample();
+    trace.run(1_950);
+    emit(m, THEIRS, [SCENE]);
+    silent.delete('REFLECT_PLAYED');
+    trace.run(1_490);
+    expect(curtainUp(m.container)).toBe(false);
+  });
+
   it('o Ataque Absoluto que bate num Reflect: uma inversão só, a do cometa, e nada passa de 3 por segundo', () => {
     const m = mount(MINE);
     const trace = watchMany([() => curtainUp(m.container), () => inverted(m.container)]);
@@ -1531,7 +1605,7 @@ describe('cortina e inversão contam juntas (spec §10.4: no máximo 3 trocas po
     expect(curtainUp(m.container)).toBe(false);
   });
 
-  it('a regra cheia: a cena aparece sem a cortina (só o painel) e sem inversão', async () => {
+  it('a regra cheia: a cena longa começa sem a cortina e sem inversão, e a cortina sobe quando a regra deixa', async () => {
     const m = mount(THEIRS);
     const trace = watchMany([() => curtainUp(m.container), () => inverted(m.container)]);
     emit(m, THEIRS, [SCENE]); // a cortina sobe em 0 e a inversão liga em 150
@@ -1543,9 +1617,10 @@ describe('cortina e inversão contam juntas (spec §10.4: no máximo 3 trocas po
     expect(curtainUp(m.container)).toBe(false);
     emit(m, THEIRS, [{ type: 'AbsoluteDefenseStarted', player: 'p2' }]);
     trace.sample();
+    expect(curtainUp(m.container)).toBe(false);
     trace.run(1_700);
-    // A segunda cena não ganha cortina (quebraria o limite) nem inversão (resfriamento), mas o painel aparece.
-    expect(trace.flips[0]).toHaveLength(2);
+    // A cortina da segunda cena espera a conta (subir na hora quebraria o limite); a inversão, não: o resfriamento a tira.
+    expect(trace.flips[0]).toHaveLength(3);
     expect(trace.flips[1]).toEqual([150, 400]);
     expectFlashSafe(trace.all);
   });
@@ -1641,7 +1716,7 @@ describe('cortina e inversão contam juntas (spec §10.4: no máximo 3 trocas po
     await m.user.click(stage(m.container));
     advance(700);
     emit(m, THEIRS, [{ type: 'AbsoluteDefenseStarted', player: 'p2' }]);
-    advance(50);
+    advance(0);
     expect(scene(m.container)).toHaveAttribute('data-cena', 'ABSOLUTE_DEFENSE');
     expect(curtainUp(m.container)).toBe(false);
     expect(inverted(m.container)).toBe(false);
