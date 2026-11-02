@@ -205,7 +205,6 @@ export function Card({
 }: CardProps) {
   const anim = useAnim();
   const fx = animated ? anim.fx.cards.get(card.id) : undefined;
-  const shake = fx === 'crack' && !anim.reduced;
   const landing = animated ? anim.landAt(card.id) : null;
   // Carta que o `CardsDealt` traz, ou que cai no destino por não ter de onde voar (a do Bot, sub-projeto 6 §8): fica apagada e esmaece na
   // batida dela (só opacidade: vale com movimento reduzido).
@@ -267,10 +266,9 @@ export function Card({
           layoutId: card.id,
           layoutDependency: anim.layoutKey,
           initial: enter === null ? undefined : { opacity: 0 },
-          animate: enter !== null ? { opacity: 1 } : shake ? { rotate: [0, -4, 4, -3, 3, 0] } : undefined,
+          animate: enter !== null ? { opacity: 1 } : undefined,
           transition: {
             layout: layoutTransition(anim.delayOf(card.id), anim.instant(card.id)),
-            rotate: { duration: anim.beatMs / 1000 },
             opacity: { delay: enter ?? 0, duration: enterSeconds },
           },
         }
@@ -401,8 +399,8 @@ function QuadMarks({ reduced }: { reduced: boolean }) {
 }
 
 /**
- * O efeito de uma batida sobre a carta (spec §4.2): o K que racha, a carta do escudo do Reflect, a carta da quadra que
- * acende. Dura a batida, sobe e desce uma vez (sem pisca-pisca) e só usa opacidade.
+ * O efeito de uma batida sobre a carta (spec §4.2): a carta do escudo do Reflect, a carta da quadra que acende. Dura a batida, sobe e desce
+ * uma vez (sem pisca-pisca) e só usa opacidade. A carta que quebra racha na cópia dela (`ui/anim/Leaving.tsx`).
  */
 function FxOverlay({ fx, ms }: { fx: CardFx; ms: number }) {
   const motion = {
@@ -413,14 +411,7 @@ function FxOverlay({ fx, ms }: { fx: CardFx; ms: number }) {
     transition: { duration: ms / 1000, times: [0, 0.2, 0.8, 1], ease: 'linear' as const },
   };
   if (fx === 'light') return <m.span {...motion} className="pointer-events-none absolute inset-0 bg-ouro/70" />;
-  if (fx === 'shield') {
-    return <m.span {...motion} className="pointer-events-none absolute -inset-1 rounded-[8px] border-4 border-ouro" />;
-  }
-  return (
-    <m.svg {...motion} viewBox="0 0 40 56" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 size-full">
-      <path d="M22 0 L15 15 L26 24 L12 38 L21 56" fill="none" stroke="var(--color-tinta)" strokeWidth="3.5" strokeLinejoin="miter" />
-    </m.svg>
-  );
+  return <m.span {...motion} className="pointer-events-none absolute -inset-1 rounded-[8px] border-4 border-ouro" />;
 }
 
 /** O verso de uma carta que você não vê (a mão do oponente): sem nome, sem id. */

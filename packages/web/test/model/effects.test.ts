@@ -256,10 +256,8 @@ describe('Ataque Absoluto contra um Reflect (eventos do motor): o Reflect interc
   it('nenhuma batida racha um K seu: a cena do Absoluto só acende o Ataque de quem ataca', () => {
     const absolute = beats.find((beat) => beat.scene === 'ABSOLUTE_ATTACK')!;
     expect(effectsOf(absolute, after)).toMatchObject({ rows: new Set([rowKey('p2', 'ATK')]), cards: new Map() });
-    for (const beat of beats) {
-      const cracked = [...effectsOf(beat, after).cards].filter(([, fx]) => fx === 'crack').map(([id]) => id);
-      expect(cracked.filter((id) => myGuard.includes(id))).toEqual([]);
-    }
+    // Nenhum efeito de carta cai na sua Guarda (a carta que quebra racha na cópia dela, fatia 5).
+    for (const beat of beats) expect([...effectsOf(beat, after).cards.keys()].filter((id) => myGuard.includes(id))).toEqual([]);
     expect(after.self.guard.map((card) => card.id)).toEqual(myGuard);
   });
 });
@@ -413,14 +411,8 @@ describe('effectsOf: o efeito de cada evento (spec §4.2)', () => {
     expect(effectsOf(beat, view, true).damage).toEqual({ target: 'p1', amount: 12 });
   });
 
-  it('GuardBroken racha os K', () => {
-    const effects = fx({ type: 'GuardBroken', player: 'p2', cards: [face('k1'), face('k2')] });
-    expect(effects.cards).toEqual(
-      new Map([
-        ['k1', 'crack'],
-        ['k2', 'crack'],
-      ]),
-    );
+  it('GuardBroken não põe efeito na carta: quem racha e estoura é a cópia dela (fatia 5)', () => {
+    expect(fx({ type: 'GuardBroken', player: 'p2', cards: [face('k1'), face('k2')] }).cards.size).toBe(0);
   });
 
   it('o escudo do Reflect do dono quebra no Reflect contra Reflect', () => {
@@ -428,10 +420,9 @@ describe('effectsOf: o efeito de cada evento (spec §4.2)', () => {
     expect(fx({ type: 'TurnStarted', player: 'p1' }).shieldBreak).toBeNull();
   });
 
-  it('Armadilha e Sacrifício racham o alvo', () => {
+  it('Armadilha e Sacrifício não põem efeito na carta: o alvo estoura na cópia dele (fatia 5)', () => {
     for (const type of ['TrapUsed', 'Sacrificed'] as const) {
-      const effects = fx({ type, player: 'p1', card: face('a1', 'A'), target: face('k9'), targetOwner: 'p2' });
-      expect(effects.cards).toEqual(new Map([['k9', 'crack']]));
+      expect(fx({ type, player: 'p1', card: face('a1', 'A'), target: face('k9'), targetOwner: 'p2' }).cards.size).toBe(0);
     }
   });
 

@@ -9,8 +9,11 @@ import { RIBBON_SCENES, type Beat } from './timeline.ts';
 /** Chave de uma fileira de um jogador, para o conjunto de fileiras acesas: "p1:ATK". */
 export const rowKey = (player: PlayerId, row: RowName): string => `${player}:${row}`;
 
-/** O efeito numa carta: o K que racha, a carta do escudo do Reflect, a carta da quadra que acende. */
-export type CardFx = 'crack' | 'shield' | 'light';
+/**
+ * O efeito numa carta: a carta do escudo do Reflect, a carta da quadra que acende. A carta que quebra (o K da Guarda, o alvo da Armadilha e
+ * do Sacrifício) não tem efeito aqui: quem racha e estoura é a cópia dela, no lugar antigo (`ui/anim/Leaving.tsx`, sub-projeto 6 §8).
+ */
+export type CardFx = 'shield' | 'light';
 
 export interface BeatEffects {
   cards: ReadonlyMap<string, CardFx>;
@@ -68,12 +71,6 @@ function effectsOfEvent(event: GameEvent, view: PlayerView): Partial<BeatEffects
       };
     case 'Healed':
       return { damage: event.amount > 0 ? { target: event.player, amount: event.amount, heal: true } : null };
-    case 'GuardBroken':
-      return { cards: fxMap(event.cards.map((card) => card.id), 'crack') };
-    case 'TrapUsed':
-    case 'Sacrificed':
-      // A carta usada vai até o alvo e o alvo quebra (as duas vão para o cemitério pelo `layoutId`).
-      return { cards: fxMap([event.target.id], 'crack') };
     case 'ReflectCanceled':
       return { shieldBreak: event.owner };
     case 'InitiativeDecided':

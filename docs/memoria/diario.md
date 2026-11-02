@@ -35,7 +35,18 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     - nos testes, o `animate` falso mora em `HTMLElement.prototype`: o Motion decide usar a Web Animations olhando só o `Element.prototype` (`supportsWaapi`), e lá ele trocaria de modo.
   - **Medida da jogada, depois:** 60 quadros/s nas duas telas, chegada de 50 ms no PC e 33 ms a 360 px, e 5 partículas no pico.
   - **No celular,** nesse passo o seu campo está rolado para fora da vista: o pouso não aparece na foto. É o layout de hoje.
-- **A seguir:** a Task 5 (a saída e os estilhaços).
+- **Task 5, a saída e os estilhaços:** `ui/anim/Leaving.tsx`, um componente de classe dentro da `FxLayer`.
+  - No `getSnapshotBeforeUpdate` (o DOM ainda é o de antes), ele lê o lugar e um clone de cada carta de `run.leaving`. No `componentDidUpdate`, põe a cópia na camada para cada carta que sumiu da mesa e para as que estouram, mesmo as que ficaram (o topo do cemitério). A cópia segura o lugar até a batida e então voa ao cemitério ou racha, treme 120 ms e estoura em `shardsPerCard(n)` cacos;
+  - o topo do cemitério que estoura entra no `instant` do `Stage` e fica `visibility: hidden` até o estouro;
+  - o `crack` saiu do `CardFx`, e o tremor e o traço saíram da carta: a cópia desenha a rachadura (`data-rachadura`);
+  - **Escolhas:**
+    - a cópia é o clone da carta sem `data-card-id` (vira `data-saindo-id`), com largura e altura explícitas (a lição da 4b) e sem o `transform` que o Motion deixou;
+    - o voo ao cemitério mede o `[data-cemiterio]` uma vez, na chegada do `state`;
+    - com movimento reduzido, a rachadura aparece e a cópia esmaece em 200 ms, sem tremor nem cacos;
+    - dois testes antigos (o K e a Armadilha "racham" pelo `data-fx`) passaram a conferir a cópia e a carta escondida.
+  - **Visto nas fotos** (fixture `especiais`): a cópia do J♥ rachada no lugar, os cacos aos 160 ms, o J♥ no topo do cemitério depois, e a cópia do seu A♣ indo ao cemitério. No ataque, o 8♠ gasto e o 9♣ do Bot seguram o lugar até a batida deles: antes, a fileira sumia antes do golpe.
+  - **Medidas, depois das Tasks 4 e 5:** a armadilha com 57–58 quadros/s, chegada de 50–67 ms e 10 cacos no pico; o ataque com 55–58 quadros/s e chegada de 67–83 ms.
+- **A seguir:** a Task 6 (o leque da compra e do Equipar).
 
 ---
 

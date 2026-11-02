@@ -997,26 +997,29 @@ describe('efeitos da batida (spec §4.2)', () => {
     expect(total()).toBeLessThan(before);
   });
 
-  it('GuardBroken racha o K que foi para o cemitério', () => {
+  it('GuardBroken: o K que foi para o topo do cemitério fica escondido, e a cópia dele racha no lugar antigo (fatia 5)', () => {
     const k = { id: 'k-quebrado', kind: 'K', suit: 'ouros' } as const;
-    const m = mount(MINE);
-    emit(m, { ...MINE, graveyard: [3, 5, 8, k] }, [{ type: 'GuardBroken', player: 'p1', cards: [k] }]);
-    const card = m.container.querySelector('[data-card-id="k-quebrado"]')!;
-    expect(card).toHaveAttribute('data-fx', 'crack');
-    expect(card.querySelector('[data-fx-overlay="crack"]')).not.toBeNull();
-    advance(400);
+    const m = mount({ ...MINE, self: { ...MINE.self, guard: [k] } });
+    emit(m, { ...MINE, self: { ...MINE.self, guard: [] }, graveyard: [3, 5, 8, k] }, [{ type: 'GuardBroken', player: 'p1', cards: [k] }]);
+    const card = m.container.querySelector<HTMLElement>('[data-card-id="k-quebrado"]')!;
     expect(card).not.toHaveAttribute('data-fx');
-    expect(card.querySelector('[data-fx-overlay]')).toBeNull();
+    expect(card.style.visibility).toBe('hidden');
+    // A rachadura aparece no começo da batida (aqui, a primeira).
+    advance(1);
+    expect(m.container.querySelector('[data-camada-fx] [data-saindo-id="k-quebrado"] [data-rachadura]')).not.toBeNull();
+    advance(400);
+    expect(card.style.visibility).toBe('');
   });
 
-  it('Armadilha: a carta usada vai até o alvo e o alvo racha ao chegar no cemitério', () => {
+  it('Armadilha: o alvo que foi para o topo do cemitério estoura na cópia dele', () => {
     const trap = { id: 'a-usada', kind: 'A', suit: 'paus' } as const;
     const target = { id: 'k-alvo', kind: 'K', suit: 'copas' } as const;
-    const m = mount(MINE);
-    emit(m, { ...MINE, graveyard: [3, 5, 8, trap, target] }, [
+    const m = mount({ ...MINE, self: { ...MINE.self, hand: [trap] }, opponent: { ...MINE.opponent, guard: [target] } });
+    emit(m, { ...MINE, self: { ...MINE.self, hand: [] }, opponent: { ...MINE.opponent, guard: [] }, graveyard: [3, 5, 8, trap, target] }, [
       { type: 'TrapUsed', player: 'p1', card: trap, target, targetOwner: 'p2' },
     ]);
-    expect(m.container.querySelector('[data-card-id="k-alvo"]')).toHaveAttribute('data-fx', 'crack');
+    expect(m.container.querySelector('[data-card-id="k-alvo"]')).not.toHaveAttribute('data-fx');
+    expect(m.container.querySelector('[data-camada-fx] [data-saindo-id="k-alvo"]')).not.toBeNull();
   });
 
   it('QuadFormed acende as quatro cartas da quadra', () => {

@@ -34,6 +34,7 @@ import { useSound } from '../sound-context.ts';
 import { AnimContext, IDLE_LIFE, type Anim, type CountPhase, type LifeCount } from './context.ts';
 import { useScenes } from './scenes-loader.ts';
 import { FxLayer } from './FxLayer.tsx';
+import { Leaving } from './Leaving.tsx';
 import { BeatOverlay } from './Scene.tsx';
 import { useBeatPlayer } from './useBeatPlayer.ts';
 
@@ -225,7 +226,8 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       remounted,
       markOf: (id) => released.marks.get(id) ?? 0,
       // O `resync` troca a mesa de uma vez: uma carta que está nos dois quadros (o salto do replay, a volta da reconexão) não desliza.
-      instant: (id) => jump || released.instant.has(id) || (busy && fallen.has(id)),
+      // A carta que estoura e segue na mesa (o topo do cemitério) chega lá sem voar: quem estoura é a cópia dela, no lugar antigo (fatia 5).
+      instant: (id) => jump || released.instant.has(id) || (busy && (fallen.has(id) || run.leaving.get(id)?.shatter === true)),
       layoutKey: `${seq}:${busy ? 'tocando' : 'parado'}`,
       fx: state ? effectsOf(beat, state.view, hitLanded, drawnScene) : NO_EFFECTS,
       ribbon,
@@ -348,7 +350,10 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
             onClickCapture={onClick}
             className="relative isolate"
           >
-            <FxLayer reduced={reducedMotion}>{children}</FxLayer>
+            <FxLayer reduced={reducedMotion}>
+              {children}
+              <Leaving run={run} cut={cut} reduced={reducedMotion} />
+            </FxLayer>
             <BeatOverlay
               scene={scene}
               curtain={curtain}

@@ -13,7 +13,7 @@ export interface FxLayerApi {
 }
 
 const NO_LAYER: FxLayerApi = { burst: () => {}, layer: () => null };
-const FxLayerContext = createContext<FxLayerApi>(NO_LAYER);
+export const FxLayerContext = createContext<FxLayerApi>(NO_LAYER);
 
 export const useFxLayer = (): FxLayerApi => useContext(FxLayerContext);
 
