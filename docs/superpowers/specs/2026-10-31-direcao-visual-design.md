@@ -153,8 +153,9 @@ parecer muito maiores que ele.
   ponteiro (até ~13°), com a sombra acompanhando. No toque, **[I]** a carta tocada sobe e se inclina levemente para o dedo. Sem
   nada disso com movimento reduzido.
 - **A quadra marcada [A]:** as quatro cartas de uma quadra ficam diferentes das outras o tempo todo: moldura de ouro, fundo
-  dourado claro, um losango de ouro no canto e um brilho que passa a cada ~3,2 s. Substitui o destaque atual da quadra (spec da
-  web §3, "a quadra aparece destacada nas quatro cartas"); o "+V" no total continua.
+  dourado claro e um brilho que passa a cada ~3,2 s. O autor tirou o losango de ouro do canto em 2026-11-02 (`decisoes.md`
+  2026-11-02 (6)). Substitui o destaque atual da quadra (spec da web §3, "a quadra aparece destacada nas quatro cartas"); o "+V" no
+  total continua.
 
 ## 7. As seis cenas especiais
 

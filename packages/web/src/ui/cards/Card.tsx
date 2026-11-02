@@ -303,9 +303,8 @@ export function Card({
 
 /**
  * A quadra marcada (sub-projeto 6 §6): as quatro cartas ficam diferentes das outras o tempo todo. Além do fundo dourado claro
- * (`QUAD_FACE`), uma moldura de ouro de 2 px por fora da borda, um losango de ouro no canto de cima (o de baixo é do naipe, que ele
- * cobriria) e um brilho que passa a cada 3,2 s (a animação mora no CSS, `.brilho-quadra`; sem brilho com movimento reduzido). Tudo
- * decorativo: o nome da carta já diz "quadra".
+ * (`QUAD_FACE`), uma moldura de ouro de 2 px por fora da borda e um brilho que passa a cada 3,2 s (a animação mora no CSS,
+ * `.brilho-quadra`; sem brilho com movimento reduzido). Tudo decorativo: o nome da carta já diz "quadra".
  */
 function QuadMarks({ reduced }: { reduced: boolean }) {
   return (
@@ -323,11 +322,6 @@ function QuadMarks({ reduced }: { reduced: boolean }) {
           />
         </span>
       )}
-      <span
-        aria-hidden="true"
-        data-losango
-        className="pointer-events-none absolute right-[4px] top-[4px] size-2 rotate-45 border-[1.5px] border-tinta bg-ouro"
-      />
     </>
   );
 }

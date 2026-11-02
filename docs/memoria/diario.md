@@ -5,6 +5,14 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-02 (6): a quadra sem o losango
+
+- **Pedido do autor** (`decisoes.md` 2026-11-02 (6)): tirar o losango amarelo das cartas da quadra, e nada mais.
+- **Feito:** `QuadMarks` (`ui/cards/Card.tsx`) perdeu o losango; a spec 6 §6 foi atualizada. O teste da mesa falhou antes (4 losangos, contra 0) e passa depois.
+- **O próximo passo não mudou:** o plano da fatia 5, no `estado.md`.
+
+---
+
 ## 2026-11-02 (5): a Ressurreição aprovada, e a passagem para a outra conta
 
 - **Pedido do autor** (`decisoes.md` 2026-11-02 (5)): "Joguei, aprovado. vou continuar da outra conta".

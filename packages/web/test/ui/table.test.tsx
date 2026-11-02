@@ -172,19 +172,21 @@ describe('mesa: as quatro fileiras (spec §3.1)', () => {
     expect(row.querySelector('[data-total]')).toHaveTextContent(String(attackPower(view.self)));
   });
 
-  it('a carta da quadra tem a moldura de ouro, o losango e o brilho; com movimento reduzido, sem o brilho (sub-projeto 6 §6)', () => {
+  it('a carta da quadra tem a moldura de ouro e o brilho, sem losango; com movimento reduzido, sem o brilho (sub-projeto 6 §6)', () => {
     const spec: ViewSpec = { ...DRAFT, self: { ...DRAFT.self, attackRow: [7, 2, 7, 7, 7, 3] } };
     const first = mount(spec);
     const row = group('Sua fileira de ataque');
-    expect(row.querySelectorAll('[data-quad="true"] [data-losango]')).toHaveLength(4);
     expect(row.querySelectorAll('[data-quad="true"] [data-anel-quadra]')).toHaveLength(4);
     expect(row.querySelectorAll('[data-quad="true"] [data-brilho-quadra]')).toHaveLength(4);
+    // O autor tirou o losango do canto (decisoes.md 2026-11-02 (6)).
+    expect(row.querySelectorAll('[data-losango]')).toHaveLength(0);
     // As cartas fora da quadra não têm nada disso.
-    expect(row.querySelectorAll('[data-losango]')).toHaveLength(4);
+    expect(row.querySelectorAll('[data-anel-quadra]')).toHaveLength(4);
     first.unmount();
     mount(spec, { reduced: true });
     const still = group('Sua fileira de ataque');
-    expect(still.querySelectorAll('[data-quad="true"] [data-losango]')).toHaveLength(4);
+    expect(still.querySelectorAll('[data-quad="true"] [data-anel-quadra]')).toHaveLength(4);
+    expect(still.querySelectorAll('[data-losango]')).toHaveLength(0);
     expect(still.querySelectorAll('[data-brilho-quadra]')).toHaveLength(0);
   });
 

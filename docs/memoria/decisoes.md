@@ -6,6 +6,16 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-02 (6): a quadra sem o losango
+
+Com uma foto das cartas da quadra na fileira:
+
+> faça um ajuste pontual: remova apenas esses losangos amarelos de cartas que formam a quadra e ativam a ressurreição.
+
+**Leitura:** sai só o losango do canto de cima. O fundo dourado claro, a moldura de ouro, o brilho e o selo "QUADRA +N" ficam. Muda a spec 6 §6, que ele tinha aprovado com o losango.
+
+---
+
 ## 2026-11-02 (5): a Ressurreição aprovada, e a outra conta assume
 
 Depois de jogar a fatia 4b:

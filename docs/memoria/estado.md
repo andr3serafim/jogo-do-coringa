@@ -9,6 +9,7 @@
 - **Branch:** `main`, no checkout principal, sem trabalho em curso. Todas as branches locais já estão mescladas, e a fatia 5 não tem branch, plano nem arquivo.
 - **Feito por último:** a **fatia 4b do sub-projeto 6** (a Ressurreição, com o som), na `main`, com as duas CI verdes (run `41465757404`), **jogada e aprovada pelo autor, sem ajustes** (`decisoes.md` 2026-11-02 (5)). Plano em `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4b.md`; cada escolha técnica no `diario.md` 2026-11-02 (4); medição em `notas/medicao-fatia-4b.md`. **As seis cenas especiais do §7 estão entregues e aprovadas.**
 - **Esperando o autor:** nada agora. Ele volta pela outra conta.
+- **Ajuste depois da aprovação:** as cartas da quadra perderam o losango de ouro do canto (`decisoes.md` 2026-11-02 (6)); o fundo dourado, a moldura, o brilho e o selo ficam. Não mude isso de volta seguindo a letra antiga do §6.
 - **Próximo passo exato: escrever o plano da fatia 5** (a fluidez das jogadas comuns, com os sons), a última do sub-projeto 6:
   1. Leia a spec `docs/superpowers/specs/2026-10-31-direcao-visual-design.md`: §1, §8, §10, §11, §13 e §14, e o mapa logo abaixo. O §8 não tem protótipo: ele fecha com o autor jogando.
   2. Escreva o plano com `superpowers:writing-plans`, em `docs/superpowers/plans/AAAA-MM-DD-direcao-visual-fatia-5.md`, no formato do `2026-11-02-direcao-visual-fatia-4b.md`. Commite assim que estiver pronto e entregue ao autor com as escolhas listadas. **Nada de código antes da aprovação,** que entra em `decisoes.md`.
