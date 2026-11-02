@@ -125,6 +125,7 @@ function Graveyard({ view, onOpen }: { view: PlayerView; onOpen: (() => void) | 
     // caixa, e não só em volta do texto.
     return (
       <div
+        data-cemiterio=""
         data-soltar={DROP.graveyard}
         className={`${box} relative has-[:focus-visible]:shadow-[0_0_0_6px_var(--color-tinta)] has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-ouro`}
       >
@@ -144,7 +145,7 @@ function Graveyard({ view, onOpen }: { view: PlayerView; onOpen: (() => void) | 
     );
   }
   return (
-    <div data-soltar={DROP.graveyard} className={box} onPointerEnter={seen} onPointerDown={seen}>
+    <div data-cemiterio="" data-soltar={DROP.graveyard} className={box} onPointerEnter={seen} onPointerDown={seen}>
       {card}
       {label}
     </div>

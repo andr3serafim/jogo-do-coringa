@@ -22,7 +22,7 @@ import type { DevastationState, PlayerId } from '@coringa/engine';
 import { LazyMotion, MotionConfig } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
 import type { Ribbon } from '../../model/copy.ts';
-import { bannerRibbon, desolationShown, effectsOf, fieldTarget, insigniaShown, lifeChange, NO_EFFECTS, ribbonText } from '../../model/effects.ts';
+import { bannerRibbon, desolationShown, effectsOf, fieldTarget, insigniaShown, lifeChange, NO_EFFECTS, resurrectionInfo, ribbonText } from '../../model/effects.ts';
 import { roomNames } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import type { ImpactForce } from '../../model/impact.ts';
@@ -326,6 +326,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
               me={me}
               hitLanded={hitLanded}
               field={scene && state ? fieldTarget(scene.event, lastCast, state.view.me, state.view.opponent.id) : null}
+              rising={scene && state ? resurrectionInfo(scene.event, state.view) : null}
             />
           </div>
         </AnimContext>

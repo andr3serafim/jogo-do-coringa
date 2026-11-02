@@ -4,13 +4,17 @@
 import { useLayoutEffect, useRef, useState, type RefObject } from 'react';
 import { measureSceneBox, type SceneBox } from '../anim/scene-box.ts';
 
-/** `anchor` vai num elemento da cena, dentro do palco; `measured` chega antes da pintura. Sem a mesa montada, vale a caixa que veio. */
-export function useMeasuredBox(box: SceneBox): { anchor: RefObject<HTMLDivElement | null>; measured: SceneBox | null } {
+/**
+ * `anchor` vai num elemento da cena, dentro do palco; `measured` chega antes da pintura. Sem a mesa montada, vale a caixa que veio. `before` roda
+ * antes da medida: é onde a cena rola os campos até a fileira dela.
+ */
+export function useMeasuredBox(box: SceneBox, before?: (palco: HTMLElement) => void): { anchor: RefObject<HTMLDivElement | null>; measured: SceneBox | null } {
   const anchor = useRef<HTMLDivElement>(null);
   const [measured, setMeasured] = useState<SceneBox | null>(null);
   useLayoutEffect(() => {
     const read = () => {
       const palco = anchor.current?.closest<HTMLElement>('[data-palco]');
+      if (palco) before?.(palco);
       setMeasured((palco ? measureSceneBox(palco) : null) ?? box);
     };
     read();

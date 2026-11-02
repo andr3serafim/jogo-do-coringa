@@ -37,6 +37,8 @@ export interface SceneBox {
   row(player: PlayerId, row: RowName): SceneRow | null;
   /** Mede o espelho pequeno da zona "Reflect ativo" de `player`; `null` sem ele. */
   reflectZone(player: PlayerId): SceneRect | null;
+  /** Mede o cemitério; `null` sem ele. */
+  graveyard(): SceneRect | null;
 }
 
 /** A folga em volta da fileira rolada: o tremor da cena não a empurra para fora da janela. */
@@ -87,6 +89,10 @@ export function measureSceneBox(palco: HTMLElement): SceneBox | null {
     reflectZone: (player) => {
       const mark = palco.querySelector(`[data-espelho-zona="${player}"]`);
       return mark === null ? null : relative(mark);
+    },
+    graveyard: () => {
+      const pile = palco.querySelector('[data-cemiterio]');
+      return pile === null ? null : relative(pile);
     },
   };
 }

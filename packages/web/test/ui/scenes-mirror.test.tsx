@@ -68,6 +68,7 @@ describe('quem é quem no Reflect', () => {
     hudBottom: 96,
     portrait: { voce: { x: 40, y: 48 }, oponente: { x: 1_500, y: 48 } },
     reflectZone: () => null,
+    graveyard: () => null,
     row: (player) =>
       rows
         ? {

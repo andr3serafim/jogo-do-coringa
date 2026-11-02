@@ -157,6 +157,29 @@ describe('o gatilho do Reflect na mesa (sub-projeto 6 §7.5)', () => {
   });
 });
 
+describe('a Ressurreição na mesa (sub-projeto 6 §7.6)', () => {
+  const REVIVED: GameEvent = { type: 'Resurrected', player: 'p2', card: { id: 'volta', kind: 'NUM', value: 9, suit: 'copas' }, row: 'DEF' };
+
+  it('a cena nunca inverte a tela, e a cortina sobe e desce uma vez', () => {
+    const m = mount(THEIRS);
+    const trace = watchMany([() => curtainUp(m.container), () => inverted(m.container)]);
+    emit(m, THEIRS, [REVIVED]);
+    expect(scene(m.container)).toHaveAttribute('data-cena', 'RESURRECTED');
+    trace.sample();
+    trace.run(RARE_SCENE_MS.RESURRECTED + 1_000);
+    expect(trace.flips[1]).toEqual([]);
+    expect(trace.flips[0]).toHaveLength(2);
+    expectFlashSafe(trace.all);
+  });
+
+  it('na reconexão (catchUp) não há cena: vira faixa', () => {
+    const m = mount(THEIRS);
+    emit(m, THEIRS, [REVIVED], { catchUp: true });
+    expect(scene(m.container)).toBeNull();
+    expect(banner(m.container)).toHaveTextContent('ressuscitou');
+  });
+});
+
 describe('o retrato do perdedor na Exódia (sub-projeto 6 §7.3)', () => {
   const cracked = (container: HTMLElement) => container.querySelector('[data-retrato="voce"][data-derrotado]') !== null;
   const hp = (container: HTMLElement) => container.querySelector('[data-lado="voce"] [data-hp]')!.textContent;

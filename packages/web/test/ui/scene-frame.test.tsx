@@ -17,6 +17,7 @@ const BOX: SceneBox = {
   portrait: { voce: { x: 40, y: 48 }, oponente: { x: 960, y: 48 } },
   row: () => null,
   reflectZone: () => null,
+  graveyard: () => null,
 };
 
 beforeEach(() => {

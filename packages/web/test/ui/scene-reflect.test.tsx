@@ -30,6 +30,7 @@ function fakeBox(asked: string[] = [], zone = true): SceneBox {
     band: { x: 0, y: 96, w: 1000, h: 500 },
     hudBottom: 96,
     portrait: { voce: { x: 40, y: 48 }, oponente: { x: 960, y: 48 } },
+    graveyard: () => null,
     reflectZone: (player) => {
       asked.push(player);
       return zone ? { x: 800, y: 500, w: 40, h: 40 } : null;

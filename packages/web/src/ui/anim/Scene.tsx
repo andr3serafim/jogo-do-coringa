@@ -13,7 +13,7 @@
 //
 // Com movimento reduzido, a cena é o mesmo texto parado que aparece e some (esmaecimento), sem escala nem deslocamento.
 //
-// As cenas refeitas no sub-projeto 6 (fatia 2: o Ataque e a Defesa Absolutos; fatia 3: a Exódia e a Devastação; fatia 4: o Reflect) têm desenho próprio,
+// As cenas refeitas no sub-projeto 6 (fatia 2: o Ataque e a Defesa Absolutos; fatia 3: a Exódia e a Devastação; fatia 4: o Reflect; fatia 4b: a Ressurreição) têm desenho próprio,
 // num módulo carregado sob demanda (`scenes-loader.ts`). Quando ele já chegou, a cena dele toma o lugar do painel; enquanto não
 // chega, vale o painel. A cortina começa onde o placar acaba (§7: o placar fica à vista para ver a vida cair), nas cenas que a sobem;
 // a Devastação e os Reflects que se anulam acontecem no campo, sem cortina (`FIELD_SCENES`).
@@ -28,7 +28,7 @@ import type { PlayerId, SpecialCard, Suit } from '@coringa/engine';
 import type { Names } from '@coringa/sim/text';
 import * as m from 'motion/react-m';
 import { useRef, useState, type ReactNode } from 'react';
-import { sceneText, type FieldTarget } from '../../model/effects.ts';
+import { sceneText, type FieldTarget, type RisingInfo } from '../../model/effects.ts';
 import { RIBBON_SCENES, SCENE_INVERT_LEAD_MS, type Beat, type SceneKind } from '../../model/timeline.ts';
 import { Card } from '../cards/Card.tsx';
 import { useSceneBox } from './scene-box.ts';
@@ -47,6 +47,8 @@ export interface BeatOverlayProps {
   hitLanded: boolean;
   /** A fileira das cenas de campo (a Devastação). */
   field?: FieldTarget | null;
+  /** O que a mesa diz da Ressurreição. */
+  rising?: RisingInfo | null;
 }
 
 /** A sobreposição da cena de agora, ou nada (a camada fica, só esmaece). */
@@ -68,7 +70,7 @@ function Shield() {
   );
 }
 
-function SceneLayer({ scene, curtain, names, reduced, me, hitLanded, field = null }: BeatOverlayProps) {
+function SceneLayer({ scene, curtain, names, reduced, me, hitLanded, field = null, rising = null }: BeatOverlayProps) {
   const layer = useRef<HTMLDivElement>(null);
   const box = useSceneBox(layer, scene !== null || curtain);
   const scenes = useScenes();
@@ -108,7 +110,7 @@ function SceneLayer({ scene, curtain, names, reduced, me, hitLanded, field = nul
         className={`absolute inset-x-0 bottom-0 bg-tinta/60 transition-opacity duration-[220ms] ease-out ${curtain ? 'opacity-100' : 'opacity-0'}`}
       />
       {Drawn && scene && box ? (
-        <Drawn key={serial} beat={scene} names={names} reduced={reduced} me={me} hitLanded={hitLanded} box={box} field={field} />
+        <Drawn key={serial} beat={scene} names={names} reduced={reduced} me={me} hitLanded={hitLanded} box={box} field={field} rising={rising} />
       ) : null}
       {/* Sempre montado: até o primeiro aparecer é um esmaecimento, não um pulo de opacidade. */}
       <div

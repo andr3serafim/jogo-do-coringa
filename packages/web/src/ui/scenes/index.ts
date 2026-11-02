@@ -8,6 +8,7 @@ import { Exodia } from './Exodia.tsx';
 import { ReflectCanceled } from './ReflectCanceled.tsx';
 import { ReflectPlayed } from './ReflectPlayed.tsx';
 import { ReflectTriggered } from './ReflectTriggered.tsx';
+import { Resurrection } from './Resurrection.tsx';
 
 export const SCENES: SceneModule = {
   ABSOLUTE_ATTACK: AbsoluteAttack,
@@ -18,4 +19,5 @@ export const SCENES: SceneModule = {
   REFLECT_PLAYED: ReflectPlayed,
   REFLECT_TRIGGERED: ReflectTriggered,
   REFLECT_CANCELED: ReflectCanceled,
+  RESURRECTED: Resurrection,
 };

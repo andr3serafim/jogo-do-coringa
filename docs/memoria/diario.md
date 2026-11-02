@@ -14,6 +14,15 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   - `resurrectionInfo` (`model/effects.ts`) lê da `view` a vaga da carta e a quadra que acende, primeiro na fileira de destino, a de maior valor, sem contar a carta que volta;
   - **Escolha:** com duas quadras na mesma fileira, a de maior valor: é a que mais soma na conta que o jogador vê.
 
+- **Task 2, a cena:**
+  - `ui/scenes/sky.ts` (o portal, o chão e o alto, presos à faixa) e `ui/scenes/Resurrection.tsx`. O `SceneBox` mede o cemitério (`[data-cemiterio]`), e o `Stage` passa `rising` às cenas;
+  - **Escolhas:**
+    - a carta de verdade fica com `visibility: hidden` por um `useLayoutEffect` da cena, que a devolve ao pousar ou ao desmontar (o pulo). As cópias usam ids `cena-…`, para esse seletor nunca pegar uma delas;
+    - a carta cinza é o `Card` com `grave`, o mesmo desenho do cemitério, e a cor volta por opacidade;
+    - as cópias da quadra ficam até o céu sumir: se saíssem antes, a carta "apagaria" de repente sob a cortina;
+    - o `useMeasuredBox` ganhou `before`, para rolar os campos antes de medir;
+  - **Achado:** o Vitest da web só roda `test/ui/**/*.test.tsx`. O `scenes-mirror.test.ts` da fatia 4 **nunca tinha rodado**, nem na CI, e o `scenes-sky` também não rodaria. Os dois viraram `.tsx` e passam: o Reflect não tinha defeito escondido ali.
+
 ---
 
 ## 2026-11-02 (3): o Reflect aprovado, e o plano da Ressurreição

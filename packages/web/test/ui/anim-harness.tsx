@@ -67,12 +67,12 @@ export const SCENE: GameEvent = { type: 'ReflectPlayed', player: 'p1', reflect: 
 /** Outra cena de sonda (a de Duda). */
 export const SCENE_2: GameEvent = { type: 'ReflectPlayed', player: 'p2', reflect: { k: probeCard('s2-k', 'K'), j: probeCard('s2-j', 'J'), q: probeCard('s2-q', 'Q') }, against: 'ATTACK' };
 /**
- * Liga a sonda em cada teste do arquivo que a chama; a tabela volta ao normal no fim de cada um. O desenho das cenas do Reflect fica de
- * fora: nestes testes elas seguem com o painel, o que vale enquanto o módulo das cenas não chega. Os desenhos têm os testes deles.
+ * Liga a sonda em cada teste do arquivo que a chama; a tabela volta ao normal no fim de cada um. O desenho das cenas do Reflect e da
+ * Ressurreição fica de fora: nestes testes elas seguem com o painel, o que vale enquanto o módulo das cenas não chega. Os desenhos têm os testes deles.
  */
 export function installFlashProbe(): void {
   const silent = NO_INVERT as Set<SceneKind>;
-  const kinds = ['REFLECT_PLAYED', 'REFLECT_TRIGGERED', 'REFLECT_CANCELED'] as const;
+  const kinds = ['REFLECT_PLAYED', 'REFLECT_TRIGGERED', 'REFLECT_CANCELED', 'RESURRECTED'] as const;
   const drawn = kinds.map((kind) => SCENES[kind]);
   beforeEach(() => {
     SCENE_INVERT_LEAD_MS.REFLECT_PLAYED = 150;
