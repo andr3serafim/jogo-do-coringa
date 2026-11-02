@@ -31,6 +31,9 @@ export default defineConfig(
       '**/test-results/**',
       '**/worker-configuration.d.ts',
       '**/.wrangler/**',
+      // Os worktrees que o app do Claude cria dentro do repositório: cada um tem a própria config e o próprio `tsconfig`, e um
+      // worktree sem `pnpm install` faz o typescript-eslint achar duas raízes e reprovar todos os arquivos.
+      '.claude/**',
     ],
   },
   {
