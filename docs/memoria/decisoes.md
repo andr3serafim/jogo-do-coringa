@@ -6,6 +6,20 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-02 (3): o Reflect aprovado; agora a Ressurreição
+
+Depois de jogar a fatia 4:
+
+> aprovado, prossiga para ressureição. lembre que a memória e os arquivos de contexto persistente devem ser devidamente atualizados e consolidados
+
+**Leitura:**
+- A fatia 4 está aprovada como foi entregue, sem ajustes.
+- **[I]** "prossiga" é o próximo passo do `estado.md`: escrever o plano da fatia 4b, entregar e só escrever código depois do ok dele.
+- **[I]** Ele não disse quais caminhos viu. O que a execução não conferiu (o som de ouvido; Reflect contra Reflect, o dano 0, o próprio Reflect, o Ataque Absoluto contra
+  Reflect e o movimento reduzido no navegador) segue marcado como não conferido por nós.
+
+---
+
 ## 2026-11-02 (2): o plano do Reflect aprovado
 
 À entrega do plano (`docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4.md`), com as escolhas listadas para ele:

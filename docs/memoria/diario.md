@@ -5,6 +5,19 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-02 (3): o Reflect aprovado, e o plano da Ressurreição
+
+- **Pedido do autor** (`decisoes.md` 2026-11-02 (3)): "aprovado, prossiga para ressureição", com a memória consolidada.
+- **Feito:** o plano, `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4b.md`, esperando a aprovação. Nenhum código, e nenhuma branch.
+- **O que a leitura do código deu ao plano:**
+  - **qual quadra acende:** o motor gasta a Ressurreição mais antiga ainda válida (`tokens[0]`, `actions/main.ts`), mas o evento `Resurrected` não diz qual é, e a `view` só tem `resurrectionCount`. As partidas de referência guardam os eventos e entram no digest do `RULES_VERSION` (`rules-version.test.ts`): pôr a quadra no evento obrigaria a subir a versão de 4 para 5, com aviso em todo replay guardado, sem mudar nenhuma regra. O plano escolhe a quadra pela mesa (`resurrectionInfo`). **O custo:** com duas quadras na mesa, pode acender a outra. Se o autor quiser a exata, é a mudança no evento;
+  - **a carta de verdade aparece cedo demais:** o `state` a põe na fileira no commit em que a cena começa, e a cópia ainda vai subir. A cena esconde o elemento dela (`[data-card-id]`) até pousar;
+  - **4,6 s, e não ~4,9 s:** o `wait` do protótipo soma 4,55 s; a spec permite ajustes de até 15%;
+  - **as fixtures bastam:** `exodia-devastacao.json` tem 13 Ressurreições.
+- **Ao ler:** o Reflect foi aprovado sem ajustes; o que não foi conferido segue no `estado.md`.
+
+---
+
 ## 2026-11-02 (2): sub-projeto 6, fatia 4 em execução (o Reflect)
 
 - **Pedido do autor** (`decisoes.md` 2026-11-02 (2)): "Aprovado, execute". Plano em `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4.md`, na

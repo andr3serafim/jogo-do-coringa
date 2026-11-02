@@ -380,7 +380,7 @@ Cada fatia é uma branch com `pnpm check`, `pnpm e2e` e as duas CI verdes, e vai
      - a cena que depende de onde as coisas estão mede depois de a mesa assentar (`useMeasuredBox`), porque o `state` que a traz muda a mesa no mesmo commit;
      - numa cena com 2 s ou mais pela frente, a cortina recusada pela trava de flash sobe quando a regra deixa.
    - Medição: `docs/memoria/notas/medicao-fatia-4.md` (≥ 52 quadros/s com a CPU 4× nas duas telas, em tela de 60 Hz).
-   - **4b. Ressurreição**, com os sons.
+   - **4b. Ressurreição**, com os sons (plano `plans/2026-11-02-direcao-visual-fatia-4b.md`).
 5. **Fluidez das jogadas comuns** (§8), com os sons.
 
 ## 15. Pronto quando

@@ -1,17 +1,19 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-02**, com o Reflect na `main`. A conta que escreveu isto está no fim do limite semanal, e a
+> Sobrescrito a cada atualização. **Última: 2026-11-02**, com o Reflect aprovado e o plano da Ressurreição escrito. A conta que escreveu isto está no fim do limite semanal, e a
 > próxima pode assumir daqui. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do
 > `CLAUDE.md`).
 
 ## Agora
 
 - **Branch:** `main`, no checkout principal, sem trabalho em curso. A branch `feat/direcao-visual-fatia-4` já foi mesclada.
-- **Feito por último:** a **fatia 4 do sub-projeto 6** (o Reflect, com os sons), por fast-forward com as duas CI verdes (run `41390496730`). Plano em
-  `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4.md`; cada escolha técnica no `diario.md` 2026-11-02 (2); medição em `notas/medicao-fatia-4.md`.
-- **Esperando o autor:** jogar o Reflect e dizer o que achou. O que conferir está em "Esperando o autor", logo abaixo.
-- **Próximo passo exato:** com o "ok" dele (ou depois dos ajustes que ele pedir), registrar em `decisoes.md` e escrever o **plano da fatia 4b** (a Ressurreição, §7.6;
-  o mapa está logo abaixo). Nada de código antes da aprovação do plano.
+- **Feito por último:** a **fatia 4 do sub-projeto 6** (o Reflect, com os sons), na `main`, **jogada e aprovada pelo autor, sem ajustes** (`decisoes.md` 2026-11-02 (3)).
+  Plano em `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4.md`; cada escolha técnica no `diario.md` 2026-11-02 (2); medição em `notas/medicao-fatia-4.md`.
+- **Esperando o autor:** aprovar o plano da Ressurreição, `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4b.md`. O mais importante para ele conferir: a interface
+  escolhe a quadra que acende pela mesa, sem mudar o motor (o custo está no plano e no diário 2026-11-02 (3)).
+- **Próximo passo exato:** com o "ok" dele (ou os ajustes dele), registrar a aprovação em `decisoes.md` e executar o plano: branch `feat/direcao-visual-fatia-4b`, aqui mesmo, tarefa
+  por tarefa (`superpowers:executing-plans`), sem subagente salvo pedido dele. As escolhas vão para o diário a cada tarefa (regra 6), e o fast-forward na `main` exige as duas CI
+  verdes. Depois, ele joga. **Nada de código antes da aprovação.**
 - **Para ver as cenas do Reflect sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/reflect.json` para a chave `coringa:partidas` e abra
   `/partidas/reflect`. Na rodada 37, "Próximo passo" no passo 175 mostra o espelho do Bot, e no passo 176 o cometa; na rodada 73, no passo 358, a Devastação refletida.
 - **Depois da Ressurreição:** o plano da fatia 5 (a fluidez das jogadas comuns, §8), que fecha o sub-projeto 6.
@@ -31,20 +33,6 @@
     script `.mjs` com a ferramenta de escrita e rode com `node`;
   - o ledger `.superpowers/sdd/…` fica fora do git: vale o `diario.md` e o `git log` (regra 6 do `CLAUDE.md`).
 
-## O que o plano da fatia 4b precisa decidir (mapa, não plano)
-
-Levantado do código e da spec em 2026-11-01, para poupar a releitura. **Nada aqui foi aprovado pelo autor.** O que era do Reflect foi para o plano
-dele.
-
-- **Os tempos:** o `SCENE_MS` (`packages/protocol/src/scenes.ts`) não tem `Resurrected`, e a spec pede ~4,9 s. Na `timeline.ts`, o `Resurrected` é
-  uma batida de movimento (`move`): vira cena rara. **Sem inversão** (`NO_INVERT`).
-- **A Ressurreição não diz de qual quadra veio:** o evento é `{ player, card, row }` (`packages/engine/src/types.ts:257`), e o §7.6 acende "a
-  que gerou a Ressurreição usada". O plano precisa dizer como saber isso, ou usar a saída que o próprio §7.6 prevê para a quadra desfeita (os
-  fios saem do lugar, sem cartas acesas).
-- **A fixture de E2E:** as três atuais (`packages/web/e2e/fixtures/`) guardam jogadas, não eventos, e todas têm `RESURRECT`
-  (`exodia-devastacao.json` tem 13). Não é preciso procurar outra partida.
-- **Os sons:** as receitas moram em `sound/synth.ts` e as pistas em `model/sound.ts`, nos instantes de `model/scene-moments.ts`.
-
 ## A `main`
 
 E1, E2, F1 (2026-10-30), o bloco E3 + F2 + F3 (2026-10-31), a marca "Cura passiva", as fatias 1, 2 e 3 do sub-projeto 6, os ajustes da fatia 1 (2026-11-01) e a fatia 4 (2026-11-02) mesclados. Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D
@@ -59,7 +47,7 @@ Vazia: o bloco E3 + F2 + F3 era o último item.
 
 ## Esperando o autor
 
-- **Sub-projeto 6, fatia 4 (o Reflect), para ele jogar e dizer o que achou.** O que ele aprovou no plano está em `decisoes.md` 2026-11-02 (2). O que a execução decidiu:
+- **Sub-projeto 6, fatia 4 (o Reflect): jogada e aprovada em 2026-11-02, sem ajustes** (`decisoes.md` 2026-11-02 (3)). O que ele aprovou no plano está em `decisoes.md` 2026-11-02 (2). O que a execução decidiu:
   - **a cortina recusada tenta de novo:** numa cena com 2 s ou mais pela frente, ela sobe assim que a trava de flash deixa. Vale também para os Absolutos e a Exódia. O
     limite de 3 trocas por segundo não mudou;
   - **a cena mede depois de a mesa assentar:** sem isso, o cometa saía ~60 px abaixo da fileira. Achado só nas fotos: o jsdom não tem layout, e o teste é o olho;
