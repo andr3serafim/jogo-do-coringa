@@ -59,8 +59,9 @@ Levantado do código e da spec ao fechar a fatia 3, para poupar a releitura. **N
 - **A Ressurreição não diz de qual quadra veio:** o evento é `{ player, card, row }` (`packages/engine/src/types.ts:257`), e o §7.6 acende "a
   que gerou a Ressurreição usada". O plano precisa dizer como saber isso, ou usar a saída que o próprio §7.6 prevê para a quadra desfeita (os
   fios saem do lugar, sem cartas acesas). **Sem inversão** nessa cena.
-- **A fixture de E2E:** nenhuma das três atuais tem Reflect nem `Resurrected` (`especiais.json` e `exodia-devastacao.json` servem de modelo). A
-  busca com bots pode procurar também a Devastação refletida e a cancelada, e isso fecha o que a fatia 3 não conferiu no navegador.
+- **A fixture de E2E:** as três atuais (`packages/web/e2e/fixtures/`) guardam jogadas, não eventos. Todas têm `RESURRECT` (`exodia-devastacao.json`
+  tem 13), e nenhuma tem `REFLECT` nem `CANCEL_REFLECT`: para o Reflect, falta procurar uma partida com bots. A mesma busca pode achar a
+  Devastação refletida e a cancelada, e isso fecha o que a fatia 3 não conferiu no navegador.
 - **Os sons:** as receitas moram em `sound/synth.ts` e as pistas em `model/sound.ts`, nos instantes de `model/scene-moments.ts`.
 
 ## A `main`
