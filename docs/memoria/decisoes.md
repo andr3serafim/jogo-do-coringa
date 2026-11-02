@@ -6,6 +6,20 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-02 (1): a fatia 4 se divide: o Reflect agora, a Ressurreição depois
+
+Depois de a passagem para a outra conta ficar pronta:
+
+> prossiga, acredito que dá para fazer pelo menos reflect. vamos fazer ressurreição posteriormente.
+
+**Leitura:**
+- Muda a ordem do §14 da spec da direção visual: a fatia 4 é só o Reflect, com os sons.
+- **[I]** A Ressurreição vira a fatia 4b, antes da fluidez (a fatia 5, que mantém o número porque as notas já a citam assim). Ele só disse
+  "posteriormente".
+- **[I]** "prossiga" é o próximo passo do `estado.md`: escrever o plano, entregar e só escrever código depois do ok dele.
+
+---
+
 ## 2026-11-01 (6): a fatia 3 aprovada, e a outra conta assume
 
 Depois de jogar a fatia 3:

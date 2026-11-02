@@ -1,27 +1,23 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-01**, ao fechar a fatia 3. A conta que escreveu isto está no fim do limite semanal, e a
-> próxima assume daqui. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do
+> Sobrescrito a cada atualização. **Última: 2026-11-02**, com o plano do Reflect escrito. A conta que escreveu isto está no fim do limite
+> semanal, e a próxima pode assumir daqui. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do
 > `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `main`, no checkout principal, sem trabalho em curso. Não existe branch, plano nem arquivo da fatia 4.
+- **Branch:** `main`, no checkout principal, sem trabalho em curso. A fatia 4 tem plano, mas ainda não tem branch nem código.
 - **Feito por último:** a **fatia 3 do sub-projeto 6** (a Exódia e a Devastação, com a desolação e os sons), na `main` com as duas CI verdes
   (run `41346331555`, em `b8171a8`), **jogada e aprovada pelo autor, sem ajustes** (`decisoes.md` 2026-11-01 (6)). Plano em
   `docs/superpowers/plans/2026-11-01-direcao-visual-fatia-3.md`; cada escolha técnica no `diario.md` 2026-11-01 (4); medição em
   `notas/medicao-fatia-3.md`.
-- **Esperando o autor:** nada agora. Ele volta pela outra conta.
-- **Próximo passo exato: escrever o plano da fatia 4** (o Reflect e a Ressurreição, com os sons):
-  1. Leia a spec `docs/superpowers/specs/2026-10-31-direcao-visual-design.md`: §1, a gramática do §7, §7.5, §7.6, §9 a §11, §13 e §14. Veja
-     as duas cenas no protótipo aprovado (`2026-10-31-direcao-visual-prototipo.html`; a linha 9 da spec diz como abrir). Use o plano da
-     fatia 3 como modelo de formato.
-  2. Escreva o plano com `superpowers:writing-plans`, em `docs/superpowers/plans/AAAA-MM-DD-direcao-visual-fatia-4.md`. Commite assim que
-     estiver pronto, e entregue ao autor com as escolhas listadas. **Nada de código antes da aprovação,** que entra em `decisoes.md`.
-  3. Execute como nas fatias 2 e 3: branch `feat/direcao-visual-fatia-4`, aqui mesmo, tarefa por tarefa (`superpowers:executing-plans`), sem
-     subagente salvo pedido dele. As escolhas vão para o diário a cada tarefa (regra 6), e o fast-forward na `main` exige as duas CI verdes.
-     Depois, ele joga.
-  4. Por último, a fatia 5 (a fluidez das jogadas comuns, §8), que fecha o sub-projeto 6.
+- **Esperando o autor:** aprovar o plano do Reflect, `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4.md`. Ele dividiu a fatia: o Reflect
+  agora, a Ressurreição depois (`decisoes.md` 2026-11-02 (1)).
+- **Próximo passo exato:** com o "ok" dele (ou os ajustes dele), registrar a aprovação em `decisoes.md` e executar o plano do Reflect:
+  branch `feat/direcao-visual-fatia-4`, aqui mesmo, tarefa por tarefa (`superpowers:executing-plans`), sem subagente salvo pedido dele. As
+  escolhas vão para o diário a cada tarefa (regra 6), e o fast-forward na `main` exige as duas CI verdes. Depois, ele joga.
+- **Depois do Reflect:** escrever o plano da fatia 4b (a Ressurreição, §7.6) e, por último, o da fatia 5 (a fluidez das jogadas comuns, §8), que
+  fecha o sub-projeto 6.
 - **Para ver as cenas da fatia 3 sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave
   `coringa:partidas` e abra `/partidas/exodia-devastacao`. No passo 210, "Próximo passo" toca a Devastação (a sua, na Defesa do Bot); no
   passo 407, a Exódia do Bot.
@@ -38,30 +34,18 @@
     script `.mjs` com a ferramenta de escrita e rode com `node`;
   - o ledger `.superpowers/sdd/…` fica fora do git: vale o `diario.md` e o `git log` (regra 6 do `CLAUDE.md`).
 
-## O que o plano da fatia 4 precisa decidir (mapa, não plano)
+## O que o plano da fatia 4b precisa decidir (mapa, não plano)
 
-Levantado do código e da spec ao fechar a fatia 3, para poupar a releitura. **Nada aqui foi aprovado pelo autor.**
+Levantado do código e da spec em 2026-11-01, para poupar a releitura. **Nada aqui foi aprovado pelo autor.** O que era do Reflect foi para o plano
+dele.
 
-- **Os tempos:** o `SCENE_MS` (`packages/protocol/src/scenes.ts`) dá 1,5 s a `ReflectPlayed` e a `ReflectTriggered`, e não tem `Resurrected`.
-  A spec pede ~3,7 s no Reflect (falta dividir entre os dois eventos) e ~4,9 s na Ressurreição. Cuidados:
-  - o `BEAT_MS.scene` (`model/timeline.ts:16`) sai do `ReflectPlayed`, então mudar esse tempo mexe nele;
-  - duas cenas no mesmo passo somam até o teto de 8 s (§9);
-  - a tabela vive também nos testes `timers.test.ts` (servidor) e `scenes.test.ts` (protocolo). Na fatia 3, mudá-la não subiu o `STATE_SCHEMA`.
-- **Hoje, na linha do tempo:** `Resurrected` e `ReflectCanceled` são batidas de movimento (`move`), não cenas; `ReflectPlayed` já leva o K, o J
-  e o Q, e os dois Reflects ainda usam o painel antigo (`ui/anim/Scene.tsx`).
-- **O espelho fica na mesa** entre o `ReflectPlayed` e o `ReflectTriggered`, no lugar da zona "Reflect ativo": é estado na mesa, não só cena.
-  Deve sair da `view` (nada de regra na interface).
-- **Os casos do Reflect:**
-  - cancelado (`ReflectCanceled`): os dois espelhos trincam, sem cometa;
-  - contra a Defesa Absoluta: o cometa se desfaz, sem voltar;
-  - o Ataque Absoluto que bate num Reflect já cede a inversão à cena do Reflect (`timeline.ts:244`);
-  - a Devastação refletida vem logo depois da cena do Reflect: as inversões respeitam a trava de 2 s.
+- **Os tempos:** o `SCENE_MS` (`packages/protocol/src/scenes.ts`) não tem `Resurrected`, e a spec pede ~4,9 s. Na `timeline.ts`, o `Resurrected` é
+  uma batida de movimento (`move`): vira cena rara. **Sem inversão** (`NO_INVERT`).
 - **A Ressurreição não diz de qual quadra veio:** o evento é `{ player, card, row }` (`packages/engine/src/types.ts:257`), e o §7.6 acende "a
   que gerou a Ressurreição usada". O plano precisa dizer como saber isso, ou usar a saída que o próprio §7.6 prevê para a quadra desfeita (os
-  fios saem do lugar, sem cartas acesas). **Sem inversão** nessa cena.
-- **A fixture de E2E:** as três atuais (`packages/web/e2e/fixtures/`) guardam jogadas, não eventos. Todas têm `RESURRECT` (`exodia-devastacao.json`
-  tem 13), e nenhuma tem `REFLECT` nem `CANCEL_REFLECT`: para o Reflect, falta procurar uma partida com bots. A mesma busca pode achar a
-  Devastação refletida e a cancelada, e isso fecha o que a fatia 3 não conferiu no navegador.
+  fios saem do lugar, sem cartas acesas).
+- **A fixture de E2E:** as três atuais (`packages/web/e2e/fixtures/`) guardam jogadas, não eventos, e todas têm `RESURRECT`
+  (`exodia-devastacao.json` tem 13). Não é preciso procurar outra partida.
 - **Os sons:** as receitas moram em `sound/synth.ts` e as pistas em `model/sound.ts`, nos instantes de `model/scene-moments.ts`.
 
 ## A `main`

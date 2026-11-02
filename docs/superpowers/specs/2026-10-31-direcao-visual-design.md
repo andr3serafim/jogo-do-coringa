@@ -371,7 +371,8 @@ Cada fatia é uma branch com `pnpm check`, `pnpm e2e` e as duas CI verdes, e vai
        pelos quadros;
      - os campos (`[data-campos]`) não rolam de lado: o tremor abria uma barra.
    - Medição: `docs/memoria/notas/medicao-fatia-3.md` (≥ 87 quadros/s com a CPU 4× nas duas telas).
-4. **Reflect e Ressurreição**, com os sons.
+4. **Reflect**, com os sons (plano `plans/2026-11-02-direcao-visual-fatia-4.md`). O autor separou a Ressurreição em 2026-11-02 (`decisoes.md` 2026-11-02 (1)).
+   - **4b. Ressurreição**, com os sons.
 5. **Fluidez das jogadas comuns** (§8), com os sons.
 
 ## 15. Pronto quando

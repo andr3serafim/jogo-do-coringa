@@ -5,6 +5,21 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-02 (1): o plano do Reflect (a fatia 4 dividida)
+
+- **Pedido do autor** (`decisoes.md` 2026-11-02 (1)): "prossiga, acredito que dá para fazer pelo menos reflect. vamos fazer ressurreição
+  posteriormente." A spec §14 ganhou a fatia 4b.
+- **Feito:** o plano, `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4.md`, esperando a aprovação. Nenhum código, e nenhuma branch.
+- **O que a leitura do código deu ao plano:**
+  - o motor não solta `ReflectTriggered` na Devastação refletida: depois do espelho vem direto o `RowDevastated`, sem cometa;
+  - hoje os Reflects encolhem com uma decisão pendente (não são raras), e a cena de 3,8 s pede que sejam;
+  - o Ataque Absoluto contra Reflect dispara o feixe no retrato sem acertar nada: o plano o desliga (`Beat.intercepted`);
+  - no gatilho, a vista já não tem o Reflect, e por isso a cena desenha o espelho sozinha;
+  - a `spawn` das partículas tem duas cópias, que passam para um módulo comum.
+- **O `estado.md`:** o mapa agora é só o da Ressurreição; o que era do Reflect foi para o plano.
+
+---
+
 ## 2026-11-01 (5): a fatia 3 aprovada e a passagem para a outra conta
 
 - **Pedido do autor** (`decisoes.md` 2026-11-01 (6)): "testado aprovado"; o limite semanal está acabando, a outra conta assume, e as
