@@ -5,7 +5,7 @@
 // Mora num `<li>` escondido do leitor de tela, fora do fluxo, sobre todas as colunas da grade da fileira: assim o `<svg>` da fenda
 // acompanha o tamanho das vagas, no celular e no PC, e passa 40 px de cada lado, como a da cena.
 import { useEffect, useId, useRef, useState } from 'react';
-import { rng } from '../scenes/aura.ts';
+import { rng } from '../anim/particles.ts';
 import { chasmEdges, chasmPaths } from '../scenes/chasm.ts';
 
 /** Quanto a fenda leva para se fechar. */

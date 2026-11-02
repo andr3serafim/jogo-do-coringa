@@ -7,6 +7,7 @@ import type { SpecialCard } from '@coringa/engine';
 import { screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { LAYOUT_SPRING } from '../../src/ui/anim/motion.ts';
+import { TABLE_MOTION } from '../../src/model/table-motion.ts';
 import { advance, busy, cleanup, emit, mount, MINE, TURN, stage } from './anim-harness.tsx';
 import type { ViewSpec } from '../fixtures.ts';
 
@@ -86,13 +87,14 @@ describe('layoutId das cartas (spec §4.1)', () => {
 });
 
 describe('transição atrasada até a batida que moveu a carta (spec §4.1)', () => {
-  it('a carta espera o início da sua batida e, no fim das batidas, volta a não esperar', () => {
+  it('a carta espera o início da sua batida (e, saindo da sua mão, o recuo de 90 ms) e, no fim das batidas, volta a não esperar', () => {
     const m = mount(BEFORE);
     expect(delayOf(m.container, 'j1')).toBe('0');
     emit(m, AFTER, [TURN, BUFF]);
-    expect(delayOf(m.container, 'j1')).toBe('0.4');
-    // As que não são movidas por batida nenhuma não esperam.
-    expect(delayOf(m.container, 'k1')).toBe('0');
+    expect(delayOf(m.container, 'j1')).toBe('0.49');
+    // A vizinha da mão espera a batida da carta que sai, para não deslizar antes dela (fatia 5); as de outro lugar não esperam.
+    expect(delayOf(m.container, 'k1')).toBe('0.4');
+    expect(delayOf(m.container, 'x-p1-ATK-0')).toBe('0');
     advance(700);
     expect(delayOf(m.container, 'j1')).toBe('0');
   });
@@ -102,7 +104,8 @@ describe('transição atrasada até a batida que moveu a carta (spec §4.1)', ()
     emit(m, AFTER, [TURN, TURN, TURN, TURN, BUFF]); // 4 × 400 + 300 = 1900 ms, escalados para 1000
     const delay = Number(delayOf(m.container, 'j1'));
     expect(delay).toBeGreaterThan(0.5);
-    expect(delay).toBeLessThan(0.9);
+    // O recuo (fatia 5) não encolhe: ele é da carta, não da linha do tempo.
+    expect(delay).toBeLessThan(0.9 + TABLE_MOTION.recoilMs / 1000);
   });
 
   it('com movimento reduzido nada espera: a troca é direta', () => {
@@ -214,7 +217,7 @@ describe('o salto (resync) troca a mesa sem deslizar', () => {
 
     emit(m, BEFORE, [TURN, BUFF]);
     expect(durationOf(m.container, 'j1')).toBe(String(LAYOUT_SPRING.visualDuration));
-    expect(delayOf(m.container, 'j1')).toBe('0.4');
+    expect(delayOf(m.container, 'j1')).toBe('0.49');
     advance(1_000);
 
     emit(m, AFTER, [], { resync: true });

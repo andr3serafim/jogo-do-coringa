@@ -4,12 +4,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { SCENE_MOMENTS } from '../../model/scene-moments.ts';
 import type { SceneProps } from '../anim/scenes-loader.ts';
-import { rng } from './aura.ts';
 import { crackBranch } from './chasm.ts';
 import { useMeasuredBox } from './measured-box.ts';
 import { MirrorArt } from './MirrorArt.tsx';
 import { mirrorLayout, otherPlayer, reflectFrom } from './mirror.ts';
-import { sparks } from './particles.ts';
+import { rng, sparks } from '../anim/particles.ts';
 
 const M = SCENE_MOMENTS.REFLECT_CANCELED;
 const APPEAR_MS = 200;

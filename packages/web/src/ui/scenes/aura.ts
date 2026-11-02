@@ -1,12 +1,8 @@
 // As auras de energia do Ataque Absoluto e da Exódia (sub-projeto 6 §7.1, §7.3) e os raios pequenos em volta delas. A aura
 // "ferve" trocando o `d` de 3 caminhos entre 4 formas calculadas uma vez (§11: nada de calcular forma a cada quadro). As formas
 // saem da mesma conta do protótipo aprovado, com as mesmas sementes: pontas viradas para cima, maiores no alto, quase nada embaixo.
+import { rng } from '../anim/particles.ts';
 
-/** Gerador de Park–Miller, o do protótipo: a mesma semente dá sempre o mesmo desenho. */
-export function rng(seed: number): () => number {
-  let s = seed;
-  return () => (s = (s * 16807) % 2147483647) / 2147483647;
-}
 
 /** Um contorno fechado de `n` pontas em volta de uma elipse `rx` × `ry`, com pontas de até `maxL` viradas para cima. */
 function auraPath(rx: number, ry: number, n: number, maxL: number, seed: number): string {

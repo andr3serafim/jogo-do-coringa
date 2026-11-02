@@ -27,11 +27,13 @@
 //
 // O pulo cancela os timers da linha do tempo (nenhuma inversão, cortina ou batida chega depois dele), e a inversão confere
 // o movimento reduzido na hora de ligar: ligá-lo com a linha do tempo no ar também vale.
+import type { PlayerId } from '@coringa/engine';
 import type { StateMessage } from '@coringa/protocol';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { bannerBeatAt, damageBeatIndex, dealsOf, delaysOf, type Deals } from '../../model/effects.ts';
 import { FIELD_SCENES, RIBBON_SCENES } from '../../model/timeline.ts';
 import { FLASH_WINDOW_MS, FlashLock } from '../../model/flash.ts';
+import { landingsOf, leavingOf, recoilsOf, shiftDelaysOf, TABLE_MOTION, type Landing, type Leaving } from '../../model/table-motion.ts';
 import { buildTimeline, timelineMs, type Beat, type TimelineOptions } from '../../model/timeline.ts';
 
 /** A cortina fica no ar pelo menos 1 s: a subida e a descida não cabem numa janela de 1 s com a inversão no meio. */
@@ -45,12 +47,33 @@ export interface Run {
   /** Os eventos vieram de uma reconexão (`catchUp`): a faixa fica no ar da primeira à última faixa, sem subir e descer a cada batida. */
   catchUp: boolean;
   totalMs: number;
-  /** Atraso (ms) de cada `layoutId` que as batidas mexem. */
+  /**
+   * Atraso (ms) de cada `layoutId` que as batidas mexem: o início da batida, mais o recuo da carta que sai da sua mão; e as vizinhas de uma
+   * carta que sai esperam a batida da saída (`shiftDelaysOf`), para não deslizarem por baixo da cópia dela (fatia 5).
+   */
   delays: ReadonlyMap<string, number>;
+  /**
+   * As cartas que as batidas movem de verdade (as de `delaysOf`): o pulo as remonta, para chegarem na hora. As vizinhas que só esperam
+   * a batida da saída ficam montadas (o foco do teclado não se perde) e deslizam no tempo delas.
+   */
+  moved: ReadonlySet<string>;
   /** Índice da batida do dano (onde a vida e os totais contam), ou -1. */
   damageIndex: number;
   /** As cartas que entram na batida do `CardsDealt`. */
   deals: Deals;
+  /** O movimento das jogadas comuns (sub-projeto 6 §8), só ao vivo: o recuo, o pouso e as cartas que saem para o cemitério. */
+  recoils: ReadonlyMap<string, number>;
+  landings: ReadonlyMap<string, Landing>;
+  leaving: ReadonlyMap<string, Leaving>;
+}
+
+const NOTHING = new Map<string, never>();
+
+/** Os atrasos das transições de layout: as vizinhas que esperam, depois as cartas que as batidas mexem (com o recuo antes do voo). */
+function layoutDelays(beats: Beat[], recoils: ReadonlyMap<string, number>, shifts: ReadonlyMap<string, number>): Map<string, number> {
+  const delays = new Map(shifts);
+  for (const [id, ms] of delaysOf(beats)) delays.set(id, ms + (recoils.has(id) ? TABLE_MOTION.recoilMs : 0));
+  return delays;
 }
 
 interface Machine {
@@ -80,24 +103,32 @@ function release(prev: Released, ended: Run | null, next: Run | null): Released 
   if (ended === null) return prev.instant.size === 0 ? prev : { ...prev, instant: new Set() };
   const marks = new Map(prev.marks);
   const instant = new Set<string>();
-  for (const id of ended.delays.keys()) {
+  for (const id of ended.moved) {
     marks.set(id, (marks.get(id) ?? 0) + 1);
     // O que a linha nova também mexe se anima de verdade, a partir de onde a velha o deixou.
-    if (!next?.delays.has(id)) instant.add(id);
+    if (!next?.moved.has(id)) instant.add(id);
   }
-  return { marks, instant, serial: prev.serial + 1, batch: new Set(ended.delays.keys()) };
+  return { marks, instant, serial: prev.serial + 1, batch: new Set(ended.moved) };
 }
 
-function makeMachine(state: StateMessage | null, options: TimelineOptions | null): Machine {
+function makeMachine(state: StateMessage | null, options: TimelineOptions | null, draftShown = false): Machine {
   const beats = state !== null && options !== null ? buildTimeline(state.events, options) : [];
+  // O recuo, o pouso e as cópias das cartas que saem são do passo ao vivo: o `catchUp` e o `resync` trocam a mesa como sempre.
+  const live = state !== null && options?.mode === 'live';
+  const me: PlayerId = state?.view.me ?? 'p1';
+  const recoils = live ? recoilsOf(beats, me) : NOTHING;
   const run: Run = {
     state,
     beats,
     catchUp: options?.mode === 'catchUp',
     totalMs: timelineMs(beats),
-    delays: delaysOf(beats),
+    delays: layoutDelays(beats, recoils, live ? shiftDelaysOf(beats, state.view) : NOTHING),
+    moved: new Set(delaysOf(beats).keys()),
     damageIndex: damageBeatIndex(beats),
     deals: dealsOf(beats),
+    recoils,
+    landings: live ? landingsOf(beats, me, draftShown) : NOTHING,
+    leaving: live ? leavingOf(beats) : NOTHING,
   };
   return { run, index: beats.findIndex((beat) => beat.durationMs > 0), done: run.totalMs === 0 };
 }
@@ -123,6 +154,11 @@ export interface BeatPlayer {
   banner: boolean;
   /** As transições de layout que acabaram na hora (pulo, ou `state` novo no meio das batidas). */
   released: Released;
+  /**
+   * A linha do tempo de agora foi pulada. O pouso, a poeira e as cópias das cartas que saem podem passar do fim natural das batidas (a mola
+   * assenta depois delas), mas o pulo os encerra.
+   */
+  cut: boolean;
   /** Termina as batidas na hora (toque na mesa, Esc): a `view` já é a de depois. */
   skip(): void;
 }
@@ -136,13 +172,15 @@ export interface BeatPlayerOptions {
   decisionPending: boolean;
   /** O tempo de leitura da faixa de uma batida, em ms (U1): ela fica no ar ao menos isso, contado de quando a batida começa. */
   bannerReadMs?: (beat: Beat) => number;
+  /** O rascunho do Equipar estava à vista antes deste `state` (você confirmou nesta página): as suas cartas só assentam, sem cair. */
+  draftShown?: boolean;
 }
 
 const NO_READING = (): number => 0;
 
 export function useBeatPlayer(
   state: StateMessage | null,
-  { reducedMotion, decisionPending, bannerReadMs = NO_READING }: BeatPlayerOptions,
+  { reducedMotion, decisionPending, bannerReadMs = NO_READING, draftShown = false }: BeatPlayerOptions,
   onSettled?: () => void,
 ): BeatPlayer {
   // O `state` com que a mesa abre (recarregar a página, entrar na partida) já está feito: não há de onde animar.
@@ -151,7 +189,7 @@ export function useBeatPlayer(
   let current = machine;
   if (machine.run.state !== state) {
     const mode = state?.resync ? 'resync' : state?.catchUp ? 'catchUp' : 'live';
-    current = makeMachine(state, { mode, reducedMotion, decisionPending });
+    current = makeMachine(state, { mode, reducedMotion, decisionPending }, draftShown);
     setMachine(current);
     // Um `state` novo no meio das batidas encerra as transições que a linha velha ainda tinha no ar.
     const ended = machine.done ? null : machine.run;
@@ -388,8 +426,10 @@ export function useBeatPlayer(
     [],
   );
 
+  const [cutRun, setCutRun] = useState<Run | null>(null);
   const skip = useCallback(() => {
     if (!current.done) setReleased((prev) => release(prev, current.run, null));
+    setCutRun(current.run);
     timers.current.forEach((timer) => window.clearTimeout(timer));
     timers.current = [];
     live.current = null;
@@ -423,6 +463,7 @@ export function useBeatPlayer(
     bannerBeat,
     banner,
     released,
+    cut: cutRun === run,
     skip,
   };
 }

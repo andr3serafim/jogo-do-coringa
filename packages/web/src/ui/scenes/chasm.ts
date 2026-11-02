@@ -1,6 +1,6 @@
 // As contas do abismo da Devastação (sub-projeto 6 §7.4): as bordas irregulares e os ramos das rachaduras, calculados uma vez, de
 // sementes fixas (§11: nada de calcular forma a cada quadro). A mesma conta do protótipo aprovado. Puro: sem React nem DOM.
-import { rng } from './aura.ts';
+import { rng } from '../anim/particles.ts';
 
 export interface Point {
   x: number;

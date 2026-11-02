@@ -40,6 +40,13 @@ export interface Anim {
    * `null` se nenhuma batida a traz.
    */
   enterDelay(id: string): number | null;
+  /** A carta recua no começo da batida que a tira da sua mão (sub-projeto 6 §8): em segundos, ou `null` (e com movimento reduzido). */
+  recoilAt(id: string): number | null;
+  /**
+   * Quando a carta pousa (em segundos) e se ela cai no destino por não ter de onde voar (sub-projeto 6 §8), ou `null`. Vale além do fim
+   * natural das batidas, porque a mola assenta depois delas; o pulo o apaga.
+   */
+  landAt(id: string): { at: number; drop: boolean } | null;
   /** Quantas cartas de verso (a mão do oponente) entram na batida, e depois de quantos segundos; `null` sem batida. */
   backs(player: PlayerId): { count: number; delay: number } | null;
   /** O último encerramento na hora de transições (pulo, `state` novo): quais cartas remontaram. A mesa devolve o foco. */
@@ -95,6 +102,8 @@ export const IDLE_ANIM: Anim = {
   reduced: false,
   delayOf: () => 0,
   enterDelay: () => null,
+  recoilAt: () => null,
+  landAt: () => null,
   backs: () => null,
   remounted: { serial: 0, ids: new Set() },
   markOf: () => 0,

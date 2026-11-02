@@ -1,5 +1,12 @@
-// O que as cenas soltam fora do React: as partículas, animadas pelo navegador (Web Animations, só `transform` e `opacity`), e o tremor
-// dos campos. Cada partícula sai sozinha no fim da vida dela.
+// O que as cenas e a mesa soltam fora do React: as partículas, animadas pelo navegador (Web Animations, só `transform` e `opacity`), e o
+// tremor dos campos. Cada partícula sai sozinha no fim da vida dela. Mora fora de `ui/scenes/` e não importa nada: a mesa (no JavaScript
+// inicial) o usa sem puxar o chunk das cenas.
+
+/** Gerador de Park–Miller, o do protótipo: a mesma semente dá sempre o mesmo desenho. */
+export function rng(seed: number): () => number {
+  let s = seed;
+  return () => (s = (s * 16807) % 2147483647) / 2147483647;
+}
 
 /** Solta uma partícula no `parent`: ela anima pelo navegador e sai sozinha no fim de `lifeMs` (o timer vai para `timers`). */
 export function spawn(timers: number[], parent: Element, node: Element, keyframes: Keyframe[], lifeMs: number, easing = 'ease-out'): void {

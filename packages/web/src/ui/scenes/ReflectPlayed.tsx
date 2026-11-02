@@ -8,11 +8,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { SCENE_MOMENTS } from '../../model/scene-moments.ts';
 import type { SceneProps } from '../anim/scenes-loader.ts';
-import { rng } from './aura.ts';
 import { useMeasuredBox } from './measured-box.ts';
 import { MIRROR_CARD_CLASS, MIRROR_CARDS, MirrorArt, mirrorCardSize } from './MirrorArt.tsx';
 import { mirrorLayout, mirrorTips, otherPlayer, reflectFrom } from './mirror.ts';
-import { shakeFrames, sparks } from './particles.ts';
+import { rng, shakeFrames, sparks } from '../anim/particles.ts';
 
 const M = SCENE_MOMENTS.REFLECT_PLAYED;
 const CARD_FLIGHT_MS = 220;

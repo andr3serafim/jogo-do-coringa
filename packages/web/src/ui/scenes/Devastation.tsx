@@ -21,10 +21,9 @@ import { RARE_SCENE_MS } from '../../model/timeline.ts';
 import { revealRow, type SceneRect, type SceneRow } from '../anim/scene-box.ts';
 import type { SceneProps } from '../anim/scenes-loader.ts';
 import { Card } from '../cards/Card.tsx';
-import { rng } from './aura.ts';
 import { chasmBranches, chasmEdges, chasmPaths } from './chasm.ts';
 import { Stamp } from './SceneFrame.tsx';
-import { shakeFrames, spawn } from './particles.ts';
+import { rng, shakeFrames, spawn } from '../anim/particles.ts';
 
 const M = SCENE_MOMENTS.DEVASTATION;
 const C = SCENE_MOMENTS.DEVASTATION_CANCELED;

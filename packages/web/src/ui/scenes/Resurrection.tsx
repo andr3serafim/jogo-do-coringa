@@ -15,9 +15,8 @@ import { SCENE_MOMENTS, TITLE_MS } from '../../model/scene-moments.ts';
 import { revealRow, type ScenePoint, type SceneRect, type SceneRow } from '../anim/scene-box.ts';
 import type { SceneProps } from '../anim/scenes-loader.ts';
 import { Card } from '../cards/Card.tsx';
-import { rng } from './aura.ts';
 import { useMeasuredBox } from './measured-box.ts';
-import { shakeFrames, spawn } from './particles.ts';
+import { rng, shakeFrames, spawn } from '../anim/particles.ts';
 import { STAMP_SIZE, Stamp } from './SceneFrame.tsx';
 import { skyLayout } from './sky.ts';
 

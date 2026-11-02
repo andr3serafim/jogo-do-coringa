@@ -33,6 +33,7 @@ import type { Beat } from '../../model/timeline.ts';
 import { useSound } from '../sound-context.ts';
 import { AnimContext, IDLE_LIFE, type Anim, type CountPhase, type LifeCount } from './context.ts';
 import { useScenes } from './scenes-loader.ts';
+import { FxLayer } from './FxLayer.tsx';
 import { BeatOverlay } from './Scene.tsx';
 import { useBeatPlayer } from './useBeatPlayer.ts';
 
@@ -81,12 +82,13 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
     const ribbon = bannerRibbon(beat.event, names);
     return bannerReadMs(ribbon === null ? '' : ribbonText(ribbon));
   }, [names]);
-  const player = useBeatPlayer(
-    state,
-    { reducedMotion, decisionPending: snapshot.legal.length > 0, bannerReadMs: readBanner },
-    onSettled,
-  );
-  const { run, beat, index, busy, inverted, curtain, bannerBeat, banner, released, skip, hitLanded } = player;
+  // O rascunho do Equipar estava à vista no desenho de antes deste `state` (você confirmou nesta página): as suas cartas só assentam.
+  // O valor guardado ainda é o do desenho anterior quando o `state` novo chega; a troca dele só vale do desenho seguinte em diante.
+  const [confirmedBefore, setConfirmedBefore] = useState(snapshot.equipConfirmed);
+  const draftShown = confirmedBefore === 'thisPage';
+  if (confirmedBefore !== snapshot.equipConfirmed) setConfirmedBefore(snapshot.equipConfirmed);
+  const player = useBeatPlayer(state, { reducedMotion, decisionPending: snapshot.legal.length > 0, bannerReadMs: readBanner, draftShown }, onSettled);
+  const { run, beat, index, busy, inverted, curtain, bannerBeat, banner, released, skip, hitLanded, cut } = player;
 
   const count: CountPhase =
     !busy || reducedMotion || run.damageIndex < 0 || index > run.damageIndex
@@ -204,6 +206,14 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       busy,
       reduced: reducedMotion,
       delayOf: (id) => (busy && !reducedMotion ? (run.delays.get(id) ?? 0) / 1000 : 0),
+      recoilAt: (id) => {
+        const startMs = busy && !reducedMotion && !cut ? run.recoils.get(id) : undefined;
+        return startMs === undefined ? null : startMs / 1000;
+      },
+      landAt: (id) => {
+        const landing = cut ? undefined : run.landings.get(id);
+        return landing === undefined ? null : { at: landing.atMs / 1000, drop: landing.drop };
+      },
       enterDelay: (id) => {
         const startMs = busy ? run.deals.cards.get(id) : undefined;
         return startMs === undefined ? null : startMs / 1000;
@@ -249,6 +259,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       hitLanded,
       drawnScene,
       fallen,
+      cut,
     ],
   );
 
@@ -337,7 +348,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
             onClickCapture={onClick}
             className="relative isolate"
           >
-            {children}
+            <FxLayer reduced={reducedMotion}>{children}</FxLayer>
             <BeatOverlay
               scene={scene}
               curtain={curtain}

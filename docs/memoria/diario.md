@@ -20,7 +20,15 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   - **o resto não é local:** o desenho do React com a mesa inteira e as projeções do Motion em toda carta com `layoutId`. Mexer nisso é mudar a forma da mesa: fica registrado para o autor decidir, como a E1 previa. A meta de ≤ 100 ms não foi atingida no ataque.
 - **Task 2, o modelo** (`model/table-motion.ts`, puro): `TABLE_MOTION`, `recoilsOf`, `landingsOf` (com `draftShown`), `leavingOf`, `shardsPerCard` e `shiftDelaysOf`, com 17 testes, entre eles o que trava as durações de uma jogada seguida do golpe sob o teto de 1 s.
   - **Escolhas:** as batidas de cena ficam de fora de tudo (as cenas desenham as próprias cópias). Na saída do Bônus (`BuffRemoved`), o J espera só na zona de ataque e o Q só na de defesa; o Selvagem, que o evento não diz em que papel estava, faz esperar as duas. Com duas saídas no mesmo lugar, vale a última batida: a carta desliza uma vez só, até o lugar final.
-- **A seguir:** a Task 3 (as partículas, a camada e o palco).
+- **Task 3, as partículas, a camada e o palco:**
+  - `ui/scenes/particles.ts` mudou para `ui/anim/particles.ts`, junto com o `rng` da `aura.ts`. **Achado:** o `RowDesolation` (da mesa, no JavaScript inicial) importava o `rng` de `ui/scenes/aura.ts`; agora importa de `ui/anim/particles.ts`;
+  - `ui/anim/bursts.ts` (a poeira e os cacos de papel) e `ui/anim/FxLayer.tsx` (a camada `data-camada-fx`, entre a mesa e a cena, com `useFxLayer().burst`);
+  - o `Run` ganhou `recoils`, `landings` e `leaving`, só ao vivo, e o `useBeatPlayer` diz se a linha do tempo foi pulada (`cut`). O `Anim` ganhou `recoilAt` e `landAt`: o pouso vale além do fim natural das batidas (a mola assenta depois delas), e o pulo o apaga;
+  - **Escolhas:**
+    - o `Run` separa as cartas movidas (`moved`, que o pulo remonta) das vizinhas que só esperam a batida da saída. Remontar as vizinhas tiraria o foco do teclado da mão, contrato que um teste guarda. Depois de um pulo, uma vizinha pode deslizar no tempo original dela, até o fim da batida;
+    - o `draftShown` vem do `equipConfirmed` do desenho anterior, num estado (o lint barra ler `ref` no desenho), como o `lastCast` do `Stage`;
+    - dois testes de layout mudaram para o contrato novo: a carta que sai da sua mão espera também o recuo (0,49 s em vez de 0,4), e a vizinha da mão espera a batida da saída.
+- **A seguir:** a Task 4 (a jogada: recuo, voo e assentamento).
 
 ---
 

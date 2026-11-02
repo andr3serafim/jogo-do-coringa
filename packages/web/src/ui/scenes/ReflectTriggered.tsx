@@ -14,11 +14,10 @@ import { SCENE_MOMENTS, TITLE_MS } from '../../model/scene-moments.ts';
 import type { ScenePoint } from '../anim/scene-box.ts';
 import type { SceneProps } from '../anim/scenes-loader.ts';
 import { HitNumber } from './AbsoluteAttack.tsx';
-import { rng } from './aura.ts';
 import { useMeasuredBox } from './measured-box.ts';
 import { MIRROR_CARD_CLASS, MIRROR_CARDS, MirrorArt, mirrorCardSize } from './MirrorArt.tsx';
 import { cometStops, mirrorLayout, mirrorTips, reflectFrom } from './mirror.ts';
-import { shakeFrames, sparks, spawn } from './particles.ts';
+import { rng, shakeFrames, sparks, spawn } from '../anim/particles.ts';
 import { STAMP_SIZE, Stamp } from './SceneFrame.tsx';
 
 const M = SCENE_MOMENTS.REFLECT_TRIGGERED;
