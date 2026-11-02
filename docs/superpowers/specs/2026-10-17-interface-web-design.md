@@ -42,7 +42,7 @@ Fechar o MVP: dois amigos jogam uma partida online pelo navegador, entrando por 
 3. **Jogar uma carta:** toca na carta, aparecem as jogadas possíveis, toca no alvo. O mesmo gesto vale no celular e no PC, e tudo funciona pelo teclado. Arrastar a carta até a zona entrou depois, no polimento, como um caminho a mais: o toque e o teclado seguem como estão (§3.4, e a spec do polimento, §6).
 4. **Jogadas automáticas levam a marca `auto`.** O servidor não zera a contagem de estouros por elas (§5). Com essa marca:
    - a) a janela de reação **passa sozinha** quando não há resposta possível. A chave vem ligada e pode ser desligada (para blefar);
-   - b) a Escolha da iniciativa **confirma "atacar primeiro" sozinha** depois de ~3 s sem interação.
+   - b) a Escolha da iniciativa **confirma "atacar primeiro" sozinha** depois de ~3 s sem interação. **Saiu em 2026-11-02** (§3.6).
 5. **Equipar:**
    - todas as numéricas à vista, em qualquer ordem (E2 do sub-projeto 5), com prévia de ATK/DEF, Desfazer e Confirmar;
    - 1,5 s antes do prazo, o navegador envia o que o jogador escolheu e completa o resto pela regra de estouro;
@@ -250,7 +250,7 @@ A mesa está em §3 e §4. O menu da partida tem:
 
 - **Coringa:** avatar, apelido, vida (número e barra), presença do oponente.
 - **Guarda:** os K, com a contagem.
-- **Buffs de Ataque** (J, até 4) e **Buffs de Defesa** (Q, até 4). O Selvagem aparece com o papel que assumiu.
+- **Buffs de Ataque** (J, até 4) e **Buffs de Defesa** (Q, até 4). **Desde 2026-11-02 o texto da tela diz "Bônus de Ataque" e "Bônus de Defesa"** (e "Bônus de ataque", "Bônus de defesa" no papel das cartas), para quem nunca jogou (`decisoes.md` 2026-11-02 (9), ponto 8); os identificadores do código seguem com `buff`. O Selvagem aparece com o papel que assumiu.
 - **Fileira de Ataque** e **Fileira de Defesa**:
   - até 8 cartas (eram 7 até o sub-projeto 5), com as vagas vazias desenhadas até o limite;
   - a carta da frente traz a marca "sai primeiro" (as fileiras são filas, spec 1 §1.2);
@@ -403,6 +403,9 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
 
 ### 3.6 Escolha da iniciativa [D + A]
 
+> **Mudou em 2026-11-02** (`decisoes.md` 2026-11-02 (9), ponto 7): saíram a barra de 3 s e a confirmação automática. Quem tem a iniciativa
+> escolhe quando quiser ("Escolha quando quiser", e "dentro do prazo" no online, onde vale o prazo do servidor). O texto abaixo é o de antes.
+
 - Para quem tem a iniciativa, a barra de ação mostra: "Você tem a iniciativa: atacar primeiro ou em segundo?", e embaixo o motivo
   ("Ela foi sorteada no início da partida."; "Você causou mais dano na última rodada de Ataque (14 × 9)."; "Empate em dano na última
   rodada de Ataque (0 × 0): ela não mudou.").
@@ -443,7 +446,7 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
 - O relógio aparece em segundos inteiros. Faltando 5 s, entra em urgência (cor e forma). Os anúncios para leitor de tela saem no começo do prazo e aos 10 e 5 s, só nos prazos do próprio jogador.
 - `deadline.players` diz de quem é o prazo. No Equipar são os dois.
 - **Fim do prazo:** o servidor injeta o estouro em `at + 500 ms`. Até chegar o `state`, a interface mostra "tempo esgotado" e mantém os controles desligados.
-- O relógio local só decide duas coisas: o envio antecipado do Equipar e a confirmação automática da ordem. Nada mais.
+- O relógio local só decide duas coisas: o envio antecipado do Equipar e a confirmação automática da ordem. Nada mais. (A ordem automática saiu em 2026-11-02, §3.6: sobrou o envio antecipado.)
 - **Folga de cena (sub-projeto 6 §9, 2026-10-31):** durante uma cena rara o relógio fica parado. O prazo traz `runsFrom` (o instante
   em que o relógio volta a correr) e o `remainingMs` mostra `at − max(agora, runsFrom)`. O envio antecipado do Equipar agenda pelo
   tempo de verdade até `at`, não pelo relógio parado.
@@ -514,7 +517,7 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
 | `AttackDeclared` | a fileira de Ataque acende e aponta para o Coringa do outro |
 | `AbsoluteAttack` | **cena** |
 | `DamageDealt` | ATK contra DEF; o número do dano sobe no Coringa; a vida desce |
-| `GuardBroken` | o K racha e vai para o cemitério |
+| `GuardBroken` | o K racha e vai para o cemitério (sub-projeto 6, fatia 5: a cópia dele racha, treme e estoura em cacos de papel no lugar antigo) |
 | `BuffRemoved` | o buff vai para o cemitério |
 | `CardsRemovedFromRow` | a carta da frente vai para o cemitério |
 | `QuadFormed` / `QuadBroken` | as quatro cartas acendem e apagam, com "+V e 1 Ressurreição" |
@@ -545,7 +548,7 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
   - todo o resto é igual: `ack`, PASS guardado, época, limite por conexão;
   - **o PASS guardado leva a marca.** O passe automático sai assim que a janela abre, então quase sempre chega antes do piso de 2 s e fica guardado (`heldPass`). Quando o prazo `reactionMin` vence e o servidor aplica o PASS guardado, a contagem só pode ser zerada se o PASS **não** era `auto`. Por isso o registro do PASS guardado (`heldPass`, hoje `{ epoch, id }`) passa a guardar `auto`, e o caminho do alarme o repassa à lógica de estouros (a checagem de `options.automatic` em `core/game.ts`). Sem isso, a marca falharia sem aviso justamente no caso para o qual existe;
   - a spec 2 §7.3 ganha essa exceção na lista do que **não** zera. A edição entra no mesmo commit que aprova esta spec.
-- **Usos:** o passe automático (§3.7) e a confirmação automática da ordem (§3.6). Nenhum outro. O envio antecipado do Equipar não é `auto`.
+- **Usos:** o passe automático (§3.7) e a confirmação automática da ordem (§3.6), que saiu em 2026-11-02. Nenhum outro. O envio antecipado do Equipar não é `auto`.
 - **Testes do núcleo:**
   - três estouros com passes `auto` no meio ainda dão W.O. por ausência, com os passes chegando **antes** dos 2 s (guardados e aplicados pelo alarme) e também depois deles;
   - um PASS manual continua zerando;

@@ -237,8 +237,11 @@ export async function answerReaction(page: Page): Promise<'auto' | 'manual'> {
 export interface PlayOptions {
   /** Tempo máximo até o predicado ficar verdadeiro (padrão 60 s). */
   timeoutMs?: number;
-  /** Na escolha da ordem: `click` escolhe a primeira oferta (padrão); `wait` deixa a confirmação automática agir. */
-  order?: 'click' | 'wait';
+  /**
+   * Na escolha da ordem: `click` escolhe a primeira oferta (padrão); `leave` deixa o painel para o teste, que escolhe quando quiser (desde
+   * 2026-11-02 a ordem não sai sozinha).
+   */
+  order?: 'click' | 'leave';
 }
 
 /**
@@ -266,7 +269,7 @@ async function playOnce(page: Page, options: PlayOptions): Promise<string | null
   return (
     (await attempt('destino do Equipar', destination)) ??
     (await attempt('Confirmar o Equipar', confirm)) ??
-    (options.order === 'wait' ? null : await attempt('ordem', order)) ??
+    (options.order === 'leave' ? null : await attempt('ordem', order)) ??
     (await attempt('Passar', pass)) ??
     (await attempt('Atacar', attack)) ??
     (await attempt('Encerrar turno', endTurn))

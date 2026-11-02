@@ -232,7 +232,7 @@ test('duas pessoas jogam uma sala: do lobby ao fim, com queda e revanche', async
 
   await test.step('o resto da rodada 3 e o começo da seguinte, pelo que a tela oferece', async () => {
     const nextRound = async (page: Page) => (await roundNumber(page).catch(() => 0)) >= 4;
-    await Promise.all(players.map((player) => playUntil(player.page, nextRound, { order: 'wait' })));
+    await Promise.all(players.map((player) => playUntil(player.page, nextRound)));
     await axe(ana.page);
   });
 

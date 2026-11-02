@@ -278,6 +278,20 @@ os mesmos princípios, sem cena nova:
 - **Compra e Equipar:** as cartas chegam do monte em leque, uma depois da outra (~40 ms de diferença), não juntas.
 - **Teto:** nada disso aumenta o teto de decisão (`DECISION_CAP_MS`); o que não couber encurta.
 - Como não houve rascunho, este item fecha com o autor jogando a primeira fatia que o tiver (§14), não por protótipo.
+- **O que a execução decidiu (fatia 5, 2026-11-02;** plano `plans/2026-11-02-direcao-visual-fatia-5.md`, escolhas E1 a E9 aprovadas em
+  `decisoes.md` 2026-11-02 (9)):
+  - **a linha do tempo não mudou:** os efeitos correm por cima das batidas, e um teste trava as durações sob o teto de 1 s;
+  - **o recuo e o pouso** são Web Animations nas propriedades CSS `translate` e `scale`, que se compõem com o `transform` do Motion (a
+    projeção do `layoutId`): recuo de 6 px em 90 ms, achatamento 1 → 1,06 → 1 em 160 ms e 5 puffs de poeira. A carta do oponente, sem de
+    onde voar, espera a batida dela e cai de 14 px no destino;
+  - **as cartas que saem para o cemitério** seguram o lugar até a batida delas: uma cópia lida antes de o React mexer no DOM (`Leaving`).
+    Antes, a que não ficava no topo do cemitério sumia quando o `state` chegava. As vizinhas esperam a mesma batida para deslizar;
+  - **os estilhaços:** a cópia da carta que quebra racha, treme 120 ms e estoura em até 10 cacos de papel (no máximo 40 por batida);
+  - **o leque:** a compra voa do número do monte, 40 ms uma depois da outra, encolhendo o intervalo para caber na batida; só o verso que
+    acabou de entrar na mão do oponente voa;
+  - **o quadro da chegada** (E1): o tremor do golpe recalculava o estilo da mesa inteira (uma variável CSS herdada no palco) e virou uma
+    animação no placar e nos campos. O resto do peso é o desenho do React e as projeções do Motion: medido e deixado para o autor
+    (`notas/medicao-fatia-5.md`).
 
 ## 9. O relógio para durante as cenas [A]
 
@@ -388,7 +402,13 @@ Cada fatia é uma branch com `pnpm check`, `pnpm e2e` e as duas CI verdes, e vai
        - a carta de verdade fica escondida até a cópia pousar, ou até a cena ser pulada; as cópias usam ids `cena-…`;
        - o Vitest da web só roda `test/ui/**/*.test.tsx`: teste puro em `test/ui` também leva `.tsx`.
      - Medição: `docs/memoria/notas/medicao-fatia-4b.md` (≥ 57 quadros/s com a CPU 4× nas duas telas, em tela de 60 Hz).
-5. **Fluidez das jogadas comuns** (§8), com os sons.
+5. **Fluidez das jogadas comuns** (§8), com os sons. Em execução desde 2026-11-02 (plano `plans/2026-11-02-direcao-visual-fatia-5.md`).
+   - O que a execução decidiu está no §8. Entraram também os pontos diretos do playtest de 2026-11-02 (`decisoes.md` 2026-11-02 (9)):
+     sem seleção de texto na mesa, sem a "Ameaça de X" na barra, sem a ordem automática, "Bônus" no lugar de "Buff" e o total da fileira que
+     espera a carta pousar e então cresce.
+   - Os sons: `carta` com o sopro do voo e a batida no pouso, `pouso` e `compra` novas, `quebra` no estouro; os controles do replay cortam
+     o som da cena.
+   - Medição: `docs/memoria/notas/medicao-fatia-5.md`.
 
 ## 15. Pronto quando
 

@@ -64,7 +64,13 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   - **7:** saíram a ordem automática da `Session` (`autoOrder`, `orderAutoAt`, `interact`), o `ORDER_AUTO_MS`, a barra (`AutoBar`), a frase e o `onInteract` da mesa e do painel, que só a cancelavam. O painel diz "Escolha quando quiser" (com "dentro do prazo" no online). O E2E do jogo online agora escolhe "Atacar primeiro" com um clique. O `CLAUDE.md` foi corrigido (o tutorial nascia com `autoOrder: false`);
   - **8:** "Bônus de ataque" e "Bônus de defesa" em todo texto (na mão, nas zonas, nas jogadas, nos motivos, nos alvos, no `HINT`, nas regras, nas dicas, no histórico e no terminal do `pnpm play`). Os identificadores ficam. Um teste varre os arquivos de texto atrás de "Buff". **O digest da saída do `pnpm play`** (`sim/test/online.test.ts`) mudou só pelo texto: as jogadas seguem com o mesmo digest;
   - **12:** o `Row` calcula o total (pelo motor) sem as cartas que ainda vão pousar, na fileira e nos bônus dela (`useLandingHold`), e no pouso o número cresce até 1,3 e volta em 320 ms, em ouro (`data-subiu`). Com movimento reduzido, só a troca do número e a cor. **Escolha:** vale também para o J ou o Q que sobe o total, pela coerência que o autor pediu no ponto 10; a marca "quadra +N" do total segue a mesma conta.
-- **A seguir:** a Task 9 (o E2E, a medição de depois, as fotos e a documentação).
+- **Task 9 (pela metade, cortada pelo limite de uso):**
+  - `e2e/fluidez.spec.ts`: a poeira da jogada, a cópia e os cacos da Armadilha e o voo da compra, no PC e a 360 × 640, vigiados pela página a cada quadro; 6 de 6 verdes; entrou na lista `testMatch` do PC;
+  - **os E2E que contavam com a ordem automática** falharam (3 de 79) e foram ajustados: o `training` e o `mobile` escolhem "Atacar primeiro" na rodada 3; o `playUntil` trocou `order: 'wait'` por `order: 'leave'` (deixa o painel para o teste);
+  - **a medida dos alvos de toque** (`mobile.spec.ts`) espera as animações finitas acabarem: o voo da compra encolhia a numérica do Equipar (41 px) no meio do voo;
+  - as specs: a 6 §8 e §14 com o que a execução decidiu; a da interface com notas da ordem (§3.6), do "Bônus" e do `GuardBroken`;
+  - **para rodar o E2E com a 8787 ocupada:** uma configuração no scratchpad importava o `playwright.config.ts` por caminho absoluto e trocava a porta para 8797 (`testDir` e `cwd` absolutos, `reuseExistingServer: false`);
+  - **falta:** o E2E inteiro de novo, a medição "Depois", o `pnpm check`, o push, a CI, a revisão e o fast-forward.
 
 ---
 

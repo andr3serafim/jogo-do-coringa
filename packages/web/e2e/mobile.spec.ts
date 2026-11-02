@@ -23,14 +23,19 @@ import {
 
 const TRAINING = '/treino?semente=e2e2631-1&nivel=medio';
 /**
- * A semente da mesa do Equipar à fileira cheia (regras de 2026-10-31): a rodada 3 é sua com o cemitério vazio, a ordem da rodada 5
- * também, com 6 cartas no Ataque, e a fileira chega a 8 na rodada 7. Achada simulando o treino como o E2E o joga.
+ * A semente da mesa do Equipar à fileira cheia (regras de 2026-10-31): a rodada 3 é sua com o cemitério vazio (você escolhe a ordem), a
+ * ordem da rodada 5 também, com 6 cartas no Ataque, e a fileira chega a 8 na rodada 7. Achada simulando o treino como o E2E o joga.
  */
 const FULL_ROW_TRAINING = '/treino?semente=e2e-movel-72&nivel=medio';
 const MIN_TARGET = 44;
 
 /** Todo botão que `buttons` encontra tem pelo menos 44 × 44 px (`boundingBox`). Devolve quantos conferiu: zero seria uma conferência vazia. */
 async function expectTouchTargets(buttons: Locator): Promise<number> {
+  // O alvo se mede com a mesa parada: o voo da compra (sub-projeto 6 §8) encolhe a carta enquanto ela chega do monte. As animações sem fim
+  // (a mão que respira, o brilho da quadra) não contam.
+  await buttons.page().waitForFunction(() =>
+    document.getAnimations().every((animation) => animation.playState !== 'running' || animation.effect?.getTiming().iterations === Infinity),
+  );
   const found = await buttons.all();
   expect(found.length, 'há botões para conferir').toBeGreaterThan(0);
   for (const button of found) {
@@ -146,6 +151,7 @@ for (const size of [
       await expectTouchTargets(equipPanel(page).getByRole('button'));
       await equipByUi(page);
       await expect(roundHeading(page)).toHaveText('Rodada 3');
+      await orderPanel(page).getByRole('button', { name: 'Atacar primeiro' }).click();
       await expect(actionBar(page).getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
       await expectTouchTargets(actionBar(page).getByRole('button'));
       await expectGraveyardTarget(page); // vazio: "Cemitério vazio"
@@ -153,10 +159,9 @@ for (const size of [
       await axe(page);
 
       // Até a rodada 5: a fileira de Ataque tem 6 cartas e a escolha da ordem é sua.
-      await playUntil(page, async (p) => (await roundNumber(p).catch(() => 0)) >= 5, { order: 'wait' });
+      await playUntil(page, async (p) => (await roundNumber(p).catch(() => 0)) >= 5, { order: 'leave' });
       const first = orderPanel(page).getByRole('button', { name: 'Atacar primeiro' });
       await expect(first).toBeVisible();
-      // O foco no painel cancela a confirmação automática de 3 s (spec §3.6): sem isso a ordem sairia no meio das medidas.
       await first.focus();
       await expect(page.getByRole('group', { name: 'Sua fileira de ataque' }).locator('[data-card-id]')).toHaveCount(6);
       await expectNoHorizontalScroll(page);
@@ -167,7 +172,7 @@ for (const size of [
       // A fileira de Ataque cheia (8 cartas, o limite desde o sub-projeto 5): a mesa mais larga, e nada rola de lado.
       await first.click();
       const attackRow = page.getByRole('group', { name: 'Sua fileira de ataque' }).locator('[data-card-id]');
-      await playUntil(page, async () => (await attackRow.count()) >= 8, { order: 'wait' });
+      await playUntil(page, async () => (await attackRow.count()) >= 8);
       await expect(attackRow).toHaveCount(8);
       await expectNoHorizontalScroll(page);
       await axe(page);

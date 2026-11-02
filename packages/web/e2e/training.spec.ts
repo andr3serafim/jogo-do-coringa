@@ -25,8 +25,8 @@ import {
 /** Treino com semente fixa e nível Médio: a distribuição, as jogadas do bot e os danos são sempre os mesmos (o `?nivel=` pula a escolha). */
 const TRAINING = '/treino?semente=e2e2631-1&nivel=medio';
 /**
- * A semente do teste do axe por estado (regras de 2026-10-31): com as numéricas da rodada 1 na Defesa, a rodada 3 é sua (a ordem
- * sai sozinha aos 3 s), a mão tem J, Q e K (o Reflect na reação ao ataque do Bot) e a Defesa perde carta no ataque dele; a ordem
+ * A semente do teste do axe por estado (regras de 2026-10-31): com as numéricas da rodada 1 na Defesa, a rodada 3 é sua (você
+ * escolhe "Atacar primeiro"), a mão tem J, Q e K (o Reflect na reação ao ataque do Bot) e a Defesa perde carta no ataque dele; a ordem
  * da rodada 5 também é sua. Achada simulando o treino como o E2E o joga.
  */
 const AXE_TRAINING = '/treino?semente=e2e-axe-1925&nivel=medio';
@@ -60,7 +60,7 @@ test('treino: três rodadas determinísticas pela interface, sem relógio', asyn
   await expect(history(page)).toContainText('Bot escolheu atacar em segundo');
   await expect(actionBar(page).getByRole('button', { name: ATTACK_BUTTON })).toBeEnabled();
   await axe(page);
-  await playUntil(page, async (p) => (await roundNumber(p).catch(() => 0)) >= 4, { order: 'wait' });
+  await playUntil(page, async (p) => (await roundNumber(p).catch(() => 0)) >= 4);
   await expect(history(page)).toContainText('Ataque de você: 37 contra 0 → 37 de dano');
   // Na vez dele o Bot rouba duas numéricas suas com os A (o dano e a cura do Roubo, E3) e ataca com J e Q.
   await expect(history(page)).toContainText('Bot roubou 9♦ da fileira de Ataque de você com A♠');
@@ -106,8 +106,9 @@ test('axe em cada estado da mesa: mão, janela de reação com o Reflect, cemit�
   await expect(roundHeading(page)).toHaveText('Rodada 3');
   const hand = page.getByRole('list', { name: 'Sua mão' });
 
-  // Rodada 3, sua vez (a ordem sai sozinha aos 3 s): a mão (J, Q e K) em botões e o botão principal, de duas linhas. O Reflect só
-  // responde a um ataque (F2): na sua vez ele não aparece.
+  // Rodada 3, sua vez: você escolhe "Atacar primeiro" (a ordem não sai mais sozinha, decisoes.md 2026-11-02 (9)), e então a mão (J, Q e K)
+  // em botões e o botão principal, de duas linhas. O Reflect só responde a um ataque (F2): na sua vez ele não aparece.
+  await orderPanel(page).getByRole('button', { name: 'Atacar primeiro' }).click();
   const attack = actionBar(page).getByRole('button', { name: ATTACK_BUTTON });
   await expect(attack).toBeEnabled();
   await expect(actionBar(page).getByRole('button', { name: /^Lançar Reflect / })).toHaveCount(0);
@@ -136,7 +137,7 @@ test('axe em cada estado da mesa: mão, janela de reação com o Reflect, cemit�
   await expect(dialog).toBeHidden();
   await expect(page.getByRole('button', { name: /^Cemitério \d+, a de cima é / })).toBeVisible();
 
-  // Rodada 5: a escolha da ordem é sua (o foco no painel cancela a confirmação de 3 s e deixa a tela parada para o axe), e depois a mão
+  // Rodada 5: a escolha da ordem é sua (o painel espera o jogador, e a tela fica parada para o axe), e depois a mão
   // tem J, Q e K, de novo em botões.
   await equipByUi(page);
   await expect(roundHeading(page)).toHaveText('Rodada 5');
