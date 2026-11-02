@@ -1,4 +1,4 @@
-// E2E das cenas raras refeitas no sub-projeto 6 (fatia 2: os Absolutos; fatia 3: a Devastação e a Exódia; fatia 4: o Reflect): a cena desenhada aparece,
+// E2E das cenas raras refeitas no sub-projeto 6 (fatia 2: os Absolutos; fatia 3: a Devastação e a Exódia; fatia 4: o Reflect; fatia 4b: a Ressurreição): a cena desenhada aparece,
 // nada rola de lado durante ela (no PC e no celular em pé de 360 × 640), e um toque na mesa a pula, mostrando o estado final na hora.
 // É o que o jsdom não prova: o módulo das cenas carregado de verdade (o chunk à parte), a caixa medida e o pulo pelo toque.
 //
@@ -14,6 +14,9 @@
 // O Reflect vem de `fixtures/reflect.json`, greedy × turtle (semente `fatia4-220`, config padrão das regras de 2026-10-31): do passo 175
 // para o 176 (rodada 37) o Bot joga o Reflect contra o seu ataque; do 176 para o 177, o golpe volta (49 de dano em você); do 358 para o 359
 // (rodada 73), a sua Devastação refletida abre o chão no seu campo.
+//
+// A Ressurreição vem da mesma `exodia-devastacao.json`: do passo 27 para o 28 (rodada 7) a sua, com a quadra de 9 na fileira de destino; do 182 para o 183
+// (rodada 37) a do Bot, sem quadra na mesa.
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { failOnConsoleErrors, placar, replayControl, replayCounter } from './helpers.ts';
@@ -39,6 +42,33 @@ async function openAt(page: Page, round: number, step: number, game: { id: strin
 
 const SLICE_3_GAME = { id: 'exodia-devastacao', fixture: SLICE_3 };
 const REFLECT_GAME = { id: 'reflect', fixture: REFLECT };
+
+/** O id da carta que a jogada do passo `step` da `exodia-devastacao.json` ressuscita. */
+const revivedAt = (step: number): string => (JSON.parse(SLICE_3) as Array<{ replay: { steps: Array<{ action: { cardId: string } }> } }>)[0]!.replay.steps[step]!.action.cardId;
+
+/** A partir daqui, a própria página anota, a cada quadro, se a tela inverteu: as consultas de fora poderiam cair entre duas trocas. */
+async function watchInversion(page: Page): Promise<() => Promise<boolean>> {
+  await page.evaluate(() => {
+    const flags = window as unknown as { inverteu: boolean };
+    flags.inverteu = false;
+    const look = () => {
+      if (document.querySelector('[data-palco][data-invertido]')) flags.inverteu = true;
+      requestAnimationFrame(look);
+    };
+    look();
+  });
+  return () => page.evaluate(() => (window as unknown as { inverteu: boolean }).inverteu);
+}
+
+/** O elemento inteiro dentro da janela. */
+async function expectInView(page: Page, selector: string): Promise<void> {
+  const box = (await page.locator(selector).first().boundingBox())!;
+  const window = page.viewportSize()!;
+  expect(box.x + box.width / 2, `${selector}: no meio, dentro da largura`).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width / 2, `${selector}: no meio, dentro da largura`).toBeLessThanOrEqual(window.width);
+  expect(box.y + box.height / 2, `${selector}: no meio, dentro da altura`).toBeGreaterThanOrEqual(0);
+  expect(box.y + box.height / 2, `${selector}: no meio, dentro da altura`).toBeLessThanOrEqual(window.height);
+}
 
 /** O espelho inteiro dentro da janela. */
 async function expectMirrorInView(page: Page): Promise<void> {
@@ -197,6 +227,50 @@ for (const viewport of [
       await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1, { timeout: 500 });
       await expect(page.locator('[data-campo="p1"][data-apagado]')).toHaveCount(1);
       await expect(page.locator('[data-espelho-zona]')).toHaveCount(0);
+      guard.expectClean();
+    });
+
+    test('a sua Ressurreição: a quadra acende, o céu abre, nunca inverte, e o toque pula para a carta de verdade na fileira', async ({ page }) => {
+      const guard = failOnConsoleErrors(page);
+      await openAt(page, 7, 27, SLICE_3_GAME);
+      const inverted = await watchInversion(page);
+      await replayControl(page, 'Próximo passo').click();
+      await expect(page.locator('[data-cena="RESURRECTED"]')).toHaveCount(1);
+      await expect(page.locator('[data-quadra-cena]')).toHaveCount(4);
+      // A cópia tem o tamanho da carta, e não encolhe até virar um ponto (visto no navegador, 2026-11-02).
+      const copy = (await page.locator('[data-quadra-cena] [role="img"]').first().boundingBox())!;
+      expect(copy.width, 'a cópia da quadra tem largura de carta').toBeGreaterThan(20);
+      await expect(page.locator('[data-tarja]')).toHaveCount(0);
+      await expect(page.locator('[data-cortina][data-ativa]')).toHaveCount(1);
+      // A carta de verdade espera a cópia pousar.
+      await expect(page.locator(`[data-card-id="${revivedAt(27)}"]`)).toBeHidden();
+      await expect(page.locator('[data-portal]')).toHaveCount(1, { timeout: 2_000 });
+      await expectInView(page, '[data-portal]');
+      await expect(page.locator('[data-carta-cena]')).toHaveCount(1, { timeout: 2_000 });
+      await expectInView(page, '[data-carta-cena]');
+      await expect(page.locator('[data-carimbo="RESURRECTED"]')).toBeVisible({ timeout: 2_000 });
+      expect(await page.locator('[data-particula]').count(), 'as partículas ficam no limite').toBeLessThanOrEqual(60);
+      await expectNoSideScroll(page);
+      await tapTable(page);
+      await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1, { timeout: 500 });
+      await expect(page.locator(`[data-card-id="${revivedAt(27)}"]`)).toBeVisible();
+      await expect(page.locator('[data-portal]')).toHaveCount(0);
+      expect(await inverted(), 'a Ressurreição não inverte a tela').toBe(false);
+      guard.expectClean();
+    });
+
+    test('a Ressurreição do Bot sem quadra na mesa: nenhuma carta acende, os fios saem da fileira, e ela pousa sozinha', async ({ page }) => {
+      const guard = failOnConsoleErrors(page);
+      await openAt(page, 37, 182, SLICE_3_GAME);
+      const inverted = await watchInversion(page);
+      await replayControl(page, 'Próximo passo').click();
+      await expect(page.locator('[data-cena="RESURRECTED"]')).toHaveCount(1);
+      await expect(page.locator('[data-fio]')).toHaveCount(4, { timeout: 2_000 });
+      await expect(page.locator('[data-quadra-cena]')).toHaveCount(0);
+      await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1, { timeout: 7_000 });
+      await expect(page.locator(`[data-card-id="${revivedAt(182)}"]`)).toBeVisible();
+      await expectNoSideScroll(page);
+      expect(await inverted(), 'a Ressurreição não inverte a tela').toBe(false);
       guard.expectClean();
     });
 

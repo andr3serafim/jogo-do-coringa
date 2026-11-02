@@ -10,9 +10,10 @@
 - **Feito por último:** a **fatia 4 do sub-projeto 6** (o Reflect, com os sons), na `main`, **jogada e aprovada pelo autor, sem ajustes** (`decisoes.md` 2026-11-02 (3)).
   Plano em `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4.md`; cada escolha técnica no `diario.md` 2026-11-02 (2); medição em `notas/medicao-fatia-4.md`.
 - **Esperando o autor:** nada agora; ele aprovou o plano (`decisoes.md` 2026-11-02 (4)).
-- **Próximo passo exato:** executar `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4b.md` a partir da primeira tarefa sem entrada no `diario.md` 2026-11-02 (4), aqui mesmo, tarefa
-  por tarefa (`superpowers:executing-plans`), sem subagente salvo pedido dele. As escolhas vão para o diário a cada tarefa (regra 6), e o fast-forward na `main` exige as duas CI verdes.
-  Depois, ele joga.
+- **Próximo passo exato:** as 4 tarefas do plano estão commitadas na branch (diário 2026-11-02 (4)). Falta: subir a branch com o pre-push, ver as duas CI verdes (a API pública do GitHub,
+  com `curl`), revisar a branch inteira (revisão de quem escreveu, como o autor aprovou), fazer o fast-forward na `main` e pedir a ele para jogar.
+- **Para ver a Ressurreição sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave `coringa:partidas` e abra `/partidas/exodia-devastacao`. "Próximo
+  passo" na rodada 7, passo 27, mostra a sua, com a quadra; na rodada 23, passo 107, a do Bot, com a quadra na outra fileira; na rodada 37, passo 182, a do Bot sem quadra.
 - **Para ver as cenas do Reflect sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/reflect.json` para a chave `coringa:partidas` e abra
   `/partidas/reflect`. Na rodada 37, "Próximo passo" no passo 175 mostra o espelho do Bot, e no passo 176 o cometa; na rodada 73, no passo 358, a Devastação refletida.
 - **Depois da Ressurreição:** o plano da fatia 5 (a fluidez das jogadas comuns, §8), que fecha o sub-projeto 6.

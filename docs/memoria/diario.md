@@ -25,6 +25,14 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 - **Task 3, o som:** a pista `ressurreicao`: o brilho dos fios, o sopro do portal, a escala que sobe com a carta, o acorde maior na cor e o toque ao pousar. **Não conferida de ouvido:** os testes medem os instantes e o volume. No caminho, as funções de apoio do Reflect subiram para antes do comentário das receitas.
 
+- **Task 4, E2E, medição e documentação:**
+  - nenhuma partida nova: a `exodia-devastacao.json` tem a sua com a quadra (passo 27), a do Bot com a quadra na outra fileira (107) e a do Bot sem quadra (182);
+  - o E2E das cenas passou a 18 testes, no PC e a 360 × 640: a cena, a cortina sem tarjas, a carta de verdade escondida e depois visível, o portal e a carta na janela, nenhuma inversão (a própria página vigia a cada quadro) e o pulo;
+  - medição em `notas/medicao-fatia-4b.md`: 57 a 60 quadros/s com a CPU 4×, pico de 45 partículas;
+  - **Defeito achado pelas fotos, com o teste que falhou antes (6 px contra > 20):** as cópias da quadra colapsavam num ponto, porque a carta usa `w-full` e o elemento em volta encolhia até o conteúdo.
+- **Não visto de verdade:** o som; o movimento reduzido e o caso de duas quadras na mesa só têm testes de unidade.
+- **Pequeno, para depois:** o total da fileira já conta a carta no começo da cena (o autor viu essa escolha no plano); os controles do replay no meio de uma cena não cortam o som dela (o mesmo das fatias anteriores).
+
 ---
 
 ## 2026-11-02 (3): o Reflect aprovado, e o plano da Ressurreição

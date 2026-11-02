@@ -398,7 +398,7 @@ function Rising({ beat, me, reduced, box, rising = null }: SceneProps) {
               className="absolute -inset-3 rounded-[10px] bg-[radial-gradient(closest-side,rgba(255,243,196,.95),rgba(245,194,56,.55)_65%,rgba(245,194,56,0))]"
               style={{ opacity: reduced ? 0.8 : 0 }}
             />
-            <div className="relative">
+            <div className="relative size-full">
               <Card card={copy} size="field" animated={false} />
             </div>
           </div>

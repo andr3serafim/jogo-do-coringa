@@ -518,7 +518,7 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
 | `BuffRemoved` | o buff vai para o cemitério |
 | `CardsRemovedFromRow` | a carta da frente vai para o cemitério |
 | `QuadFormed` / `QuadBroken` | as quatro cartas acendem e apagam, com "+V e 1 Ressurreição" |
-| `Resurrected` | cemitério → fim da fileira |
+| `Resurrected` | **cena** (sub-projeto 6 §7.6): a quadra chama o céu, e a carta sobe do cemitério, recebe a cor e pousa no fim da fileira |
 | `AbsoluteDefenseStarted` | **cena:** escudo na Defesa |
 | `AbsoluteDefenseEnded` | o escudo some; 1 Q vai para o cemitério |
 | `InitiativeDecided` | **faixa** no fim de toda rodada de Ataque ("Duda causou mais dano (9 × 3) e ficou com a iniciativa", "… e segue com a iniciativa", "Empate em dano (5 × 5): a iniciativa segue com você"), que segura 1,2 s **fora do teto de decisão**, como as cenas raras (o Equipar que vem depois a espremia); a marca da iniciativa troca de lado só quando `changed` |
