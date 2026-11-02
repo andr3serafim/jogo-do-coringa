@@ -28,6 +28,7 @@ export const RARE_SCENE_MS = {
   REFLECT_PLAYED: sceneMs('ReflectPlayed'),
   REFLECT_TRIGGERED: sceneMs('ReflectTriggered'),
   REFLECT_CANCELED: sceneMs('ReflectCanceled'),
+  RESURRECTED: sceneMs('Resurrected'),
 } as const;
 /**
  * A faixa da decisão da iniciativa segura a leitura (autor, 2026-10-31: "a iniciativa muda pro adversário, eu também não vejo o
@@ -57,7 +58,8 @@ export type SceneKind =
   | 'DEVASTATION_CANCELED'
   | 'REFLECT_PLAYED'
   | 'REFLECT_TRIGGERED'
-  | 'REFLECT_CANCELED';
+  | 'REFLECT_CANCELED'
+  | 'RESURRECTED';
 
 /**
  * Onde, dentro da cena, a inversão acontece: no pico dela (`SCENE_MOMENTS`): o feixe que acerta o retrato, a trava do escudo, a
@@ -68,6 +70,7 @@ export const SCENE_INVERT_LEAD_MS: Record<SceneKind, number> = {
   REFLECT_PLAYED: 0,
   REFLECT_TRIGGERED: SCENE_MOMENTS.REFLECT_TRIGGERED.mirrorHitAt,
   REFLECT_CANCELED: 0,
+  RESURRECTED: 0,
   ABSOLUTE_ATTACK: SCENE_MOMENTS.ABSOLUTE_ATTACK.hitAt,
   ABSOLUTE_DEFENSE: SCENE_MOMENTS.ABSOLUTE_DEFENSE.lockAt,
   DEVASTATION: SCENE_MOMENTS.DEVASTATION.openAt,
@@ -76,9 +79,9 @@ export const SCENE_INVERT_LEAD_MS: Record<SceneKind, number> = {
 };
 /**
  * As cenas sem inversão: a Devastação cancelada (a terra ronca e para, sem abismo; sub-projeto 6 §7.4), o espelho que se forma e os
- * dois que trincam (§7.5: o negativo da gravura fica com o cometa que bate).
+ * dois que trincam (§7.5: o negativo da gravura fica com o cometa que bate) e a Ressurreição (§7).
  */
-export const NO_INVERT: ReadonlySet<SceneKind> = new Set(['DEVASTATION_CANCELED', 'REFLECT_PLAYED', 'REFLECT_CANCELED']);
+export const NO_INVERT: ReadonlySet<SceneKind> = new Set(['DEVASTATION_CANCELED', 'REFLECT_PLAYED', 'REFLECT_CANCELED', 'RESURRECTED']);
 /**
  * As cenas de campo: acontecem sobre a fileira atingida, sem cortina nem faixa (sub-projeto 6 §7.4; escurecer a mesa esconderia o que
  * cai, como no protótipo). Os dois espelhos que trincam também acontecem na mesa, à vista.
@@ -172,8 +175,9 @@ function classify(event: GameEvent): Classified {
     case 'CardsPlaced':
       return move(event.placements.flatMap((p) => (p.replaced ? [p.card.id, p.replaced.id] : [p.card.id])));
     case 'BuffPlayed':
-    case 'Resurrected':
       return move([event.card.id]);
+    case 'Resurrected':
+      return scene('RESURRECTED', [event.card.id]);
     case 'GuardPlayed':
     case 'GuardBroken':
     case 'BuffRemoved':

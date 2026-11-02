@@ -6,6 +6,22 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-02 (4): o plano da Ressurreição aprovado
+
+À entrega do plano (`docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4b.md`), com as escolhas listadas para ele:
+- qual quadra acende sai da mesa, sem mudar o motor: com duas quadras, pode acender a outra; sem quadra, os fios saem da fileira de destino. A alternativa, exata, subiria o
+  `RULES_VERSION` de 4 para 5, com aviso em todo replay guardado;
+- 4,6 s, e não ~4,9 s; a cena inteira a cada vez, como ele decidiu, e o toque pula;
+- sem tarjas de cinema; a carta de verdade escondida até a cópia pousar; no celular, o céu preso à área visível;
+- o total da fileira já conta a carta no começo da cena;
+- a execução aqui mesmo, tarefa por tarefa, com a revisão final de quem escreveu o código.
+
+> Aprovado, execute
+
+**Leitura:** o plano está aprovado como foi entregue, com as escolhas listadas. **[I]** Vale até o fast-forward na `main` com as duas CI verdes, como nas fatias anteriores.
+
+---
+
 ## 2026-11-02 (3): o Reflect aprovado; agora a Ressurreição
 
 Depois de jogar a fatia 4:

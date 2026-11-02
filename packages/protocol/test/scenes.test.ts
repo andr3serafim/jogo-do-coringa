@@ -27,7 +27,7 @@ describe('folga de cena (sub-projeto 6 §9)', () => {
     expect(sceneAllowanceMs([{ type: 'AbsoluteAttack' }, { type: 'ReflectTriggered' }])).toBe(8_000);
   });
 
-  it('a tabela tem as cenas com os tempos do protótipo (fatia 2: os Absolutos; fatia 3: a Exódia e a Devastação; fatia 4: o Reflect)', () => {
+  it('a tabela tem as cenas com os tempos do protótipo (fatia 2: os Absolutos; fatia 3: a Exódia e a Devastação; fatia 4: o Reflect; fatia 4b: a Ressurreição)', () => {
     expect(SCENE_MS).toEqual({
       Exodia: 5_800,
       AbsoluteAttack: 4_500,
@@ -37,6 +37,7 @@ describe('folga de cena (sub-projeto 6 §9)', () => {
       ReflectPlayed: 1_500,
       ReflectTriggered: 3_800,
       ReflectCanceled: 1_400,
+      Resurrected: 4_600,
     });
   });
 });

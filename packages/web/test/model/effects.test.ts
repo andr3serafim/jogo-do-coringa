@@ -12,6 +12,7 @@ import {
   fieldTarget,
   insigniaShown,
   NO_EFFECTS,
+  resurrectionInfo,
   rowKey,
   sceneText,
 } from '../../src/model/effects.ts';
@@ -260,6 +261,81 @@ describe('Ataque Absoluto contra um Reflect (eventos do motor): o Reflect interc
       expect(cracked.filter((id) => myGuard.includes(id))).toEqual([]);
     }
     expect(after.self.guard.map((card) => card.id)).toEqual(myGuard);
+  });
+});
+
+describe('o que a mesa diz da Ressurreição (sub-projeto 6 §7.6)', () => {
+  type Side = { attackRow?: number[]; defenseRow?: number[] };
+  const viewOf = (self: Side, opponent: Side = {}) =>
+    scenarioAt({ self: { attackRow: [], defenseRow: [], ...self }, opponent: { attackRow: [], defenseRow: [], ...opponent } } as Parameters<typeof scenarioAt>[0]).view;
+  const revive = (player: 'p1' | 'p2', row: 'ATK' | 'DEF', card: NumCard): GameEvent => ({ type: 'Resurrected', player, row, card });
+
+  it('a quadra na fileira de destino: os 4 índices e as 4 cartas, e a carta pousa no fim da fileira', () => {
+    const view = viewOf({ attackRow: [8, 8, 5, 8, 8, 3] });
+    const info = resurrectionInfo(revive('p1', 'ATK', view.self.attackRow.at(-1)!), view)!;
+    expect(info.landIndex).toBe(5);
+    expect(info.quad).toEqual({ row: 'ATK', indices: [0, 1, 3, 4], cards: [0, 1, 3, 4].map((i) => view.self.attackRow[i]) });
+  });
+
+  it('a quadra na outra fileira: acende a de lá', () => {
+    const view = viewOf({ attackRow: [3], defenseRow: [9, 9, 9, 9] });
+    const info = resurrectionInfo(revive('p1', 'ATK', view.self.attackRow[0]!), view)!;
+    expect(info.landIndex).toBe(0);
+    expect(info.quad?.row).toBe('DEF');
+    expect(info.quad?.indices).toEqual([0, 1, 2, 3]);
+  });
+
+  it('quadras nas duas fileiras: a da fileira de destino', () => {
+    const view = viewOf({ attackRow: [6, 6, 6, 6], defenseRow: [9, 9, 9, 9, 3] });
+    expect(resurrectionInfo(revive('p1', 'DEF', view.self.defenseRow.at(-1)!), view)!.quad?.row).toBe('DEF');
+  });
+
+  it('duas quadras na mesma fileira: a de maior valor', () => {
+    const view = viewOf({ attackRow: [6, 6, 6, 6, 9, 9, 9, 9, 3] });
+    const info = resurrectionInfo(revive('p1', 'ATK', view.self.attackRow.at(-1)!), view)!;
+    expect(info.quad?.indices).toEqual([4, 5, 6, 7]);
+  });
+
+  it('nenhuma quadra na mesa (a Ressurreição vale mesmo com ela desfeita): nenhuma carta acende', () => {
+    const view = viewOf({ attackRow: [2, 3] });
+    expect(resurrectionInfo(revive('p1', 'ATK', view.self.attackRow[1]!), view)).toEqual({ landIndex: 1, quad: null });
+  });
+
+  it('a carta que volta não conta: três 8 e o quarto voltando não são a quadra que chamou o céu', () => {
+    const view = viewOf({ attackRow: [8, 8, 8, 8] });
+    expect(resurrectionInfo(revive('p1', 'ATK', view.self.attackRow[3]!), view)!.quad).toBeNull();
+  });
+
+  it('cinco iguais depois da volta: 4 índices, sem a que volta', () => {
+    const view = viewOf({ attackRow: [8, 8, 8, 8, 8] });
+    const info = resurrectionInfo(revive('p1', 'ATK', view.self.attackRow[4]!), view)!;
+    expect(info.landIndex).toBe(4);
+    expect(info.quad?.indices).toEqual([0, 1, 2, 3]);
+  });
+
+  it('a do oponente lê o campo dele', () => {
+    const view = viewOf({ attackRow: [7, 7, 7, 7] }, { defenseRow: [2, 2, 2, 2, 5] });
+    const info = resurrectionInfo(revive('p2', 'DEF', view.opponent.defenseRow.at(-1)!), view)!;
+    expect(info.landIndex).toBe(4);
+    expect(info.quad).toMatchObject({ row: 'DEF', indices: [0, 1, 2, 3] });
+  });
+
+  it('a carta que não está mais na fileira: não pousa em lugar nenhum', () => {
+    const view = viewOf({ attackRow: [2] });
+    expect(resurrectionInfo(revive('p1', 'DEF', view.self.attackRow[0]!), view)!.landIndex).toBe(-1);
+  });
+
+  it('outro evento: nada', () => {
+    expect(resurrectionInfo({ type: 'TurnStarted', player: 'p1' }, viewOf({}))).toBeNull();
+  });
+
+  it('o texto: na faixa da reconexão e no painel de reserva', () => {
+    const names = roomNames('p1', [{ playerId: 'p2', nickname: 'Duda', connected: true }] as never);
+    const event = revive('p2', 'DEF', num('n9', 9));
+    expect(bannerText(event, names)).toContain('ressuscitou');
+    const [beat] = buildTimeline([event], { mode: 'live', reducedMotion: false, decisionPending: false });
+    expect(sceneText(beat!, names)).toMatchObject({ title: 'RESSURREIÇÃO' });
+    expect(sceneText(beat!, names).detail).toContain('ressuscitou');
   });
 });
 

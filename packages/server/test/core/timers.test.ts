@@ -640,6 +640,16 @@ describe('folga de cena (sub-projeto 6 §9)', () => {
   const attack = SCENE_MS.AbsoluteAttack!;
   const defense = SCENE_MS.AbsoluteDefenseStarted!;
 
+  it('a Ressurreição no próprio turno: o prazo que já corria cresce pela folga dela (fatia 4b)', async () => {
+    const state = setup({ p1: { attack: [7, 7, 7, 7] }, graveyard: [5] });
+    state.players[0]!.resurrections = [{ row: 'ATK', value: 7, formedAtRound: state.round }];
+    const { h, p1 } = await armed(state);
+    await act(h, p1, 'r', { type: 'RESURRECT', cardId: state.graveyard[0]!.id, row: 'DEF' });
+    const st = lastState(h, p1);
+    expect(st.deadline!.at - st.serverNow).toBe(TIMERS.turnMs + SCENE_MS.Resurrected!);
+    expect(st.deadline!.runsFrom).toBe(st.serverNow + SCENE_MS.Resurrected!);
+  });
+
   it('ataque com 4 J: o turno seguinte começa com 30 s mais a folga do Ataque Absoluto', async () => {
     const state = setup({ p1: { attack: [5, 6, 7], attackBuffs: ['J', 'J', 'J', 'J'] }, p2: { defense: [8, 9] } });
     const { h, p1, p2 } = await armed(state);

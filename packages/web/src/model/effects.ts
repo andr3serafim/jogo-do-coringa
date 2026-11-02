@@ -1,6 +1,6 @@
 // O que cada batida mostra (spec §4.2): efeitos nas cartas e nas fileiras, o número do dano, o texto das faixas e das
 // cenas, e o atraso das transições de layout. Puro: sem React nem DOM. Quem desenha é a interface (`ui/anim`).
-import type { DevastationState, GameEvent, PlayerId, PlayerView, RowName } from '@coringa/engine';
+import { quadValues, type DevastationState, type GameEvent, type NumCard, type PlayerId, type PlayerView, type RowName } from '@coringa/engine';
 import { cardText, eventText, type Names } from '@coringa/sim/text';
 import { initiativeRibbon, SCENE_TITLE, type Ribbon } from './copy.ts';
 import { impactForce, type ImpactForce } from './impact.ts';
@@ -128,6 +128,32 @@ export function desolationShown(beats: readonly Beat[], index: number, key: stri
   if (index < fall) return false;
   // No `catchUp` a queda é faixa, sem cena: vale na batida dela.
   return beats[fall]!.scene === null || settled === beats[fall];
+}
+
+/** O que a cena da Ressurreição lê da mesa: a vaga onde a carta pousa (`-1` sem ela) e a quadra que acende. */
+export interface RisingInfo {
+  landIndex: number;
+  quad: { row: RowName; indices: number[]; cards: NumCard[] } | null;
+}
+
+/**
+ * Lê da `view` a Ressurreição (sub-projeto 6 §7.6). O evento não diz de qual quadra ela veio, e dizer mudaria as partidas de referência e o
+ * `RULES_VERSION` por um detalhe visual (`decisoes.md` 2026-11-02 (4)): acende a quadra que estiver na mesa, primeiro na fileira de destino,
+ * a de maior valor. A carta que volta não conta, porque ela ainda não pousou. Sem quadra (ela pode ter se desfeito), nenhuma carta acende.
+ */
+export function resurrectionInfo(event: GameEvent, view: PlayerView): RisingInfo | null {
+  if (event.type !== 'Resurrected') return null;
+  const side = view.me === event.player ? view.self : view.opponent;
+  const rowOf = (row: RowName): NumCard[] => (row === 'ATK' ? side.attackRow : side.defenseRow);
+  const landIndex = rowOf(event.row).findIndex((card) => card.id === event.card.id);
+  for (const row of [event.row, event.row === 'ATK' ? 'DEF' : 'ATK'] as const) {
+    const cards = rowOf(row);
+    const value = quadValues(cards.filter((card) => card.id !== event.card.id)).at(-1);
+    if (value === undefined) continue;
+    const indices = cards.flatMap((card, i) => (card.value === value && card.id !== event.card.id ? [i] : [])).slice(0, 4);
+    return { landIndex, quad: { row, indices, cards: indices.map((i) => cards[i]!) } };
+  }
+  return { landIndex, quad: null };
 }
 
 /** A fileira onde a cena de campo acontece. */
@@ -276,6 +302,7 @@ export function bannerText(event: GameEvent, names: Names): string | null {
     case 'AbsoluteDefenseStarted':
     case 'ReflectPlayed':
     case 'ReflectTriggered':
+    case 'Resurrected':
       return eventText(event, names);
     default:
       return null;
@@ -343,6 +370,8 @@ export function sceneText(beat: Beat, names: Names): { title: string; detail: st
     }
     case 'RowDevastated':
       return { title, detail: devastatedText(event, names) };
+    case 'Resurrected':
+      return { title, detail: eventText(event, names) ?? '' };
     default:
       return { title, detail: '' };
   }

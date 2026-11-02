@@ -1,19 +1,18 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-02**, com o Reflect aprovado e o plano da Ressurreição escrito. A conta que escreveu isto está no fim do limite semanal, e a
+> Sobrescrito a cada atualização. **Última: 2026-11-02**, com a Ressurreição em execução. A conta que escreveu isto está no fim do limite semanal, e a
 > próxima pode assumir daqui. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do
 > `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `main`, no checkout principal, sem trabalho em curso. A branch `feat/direcao-visual-fatia-4` já foi mesclada.
+- **Branch:** `feat/direcao-visual-fatia-4b`, no checkout principal, com a Ressurreição em execução. A `main` está no plano (`a9331b3`).
 - **Feito por último:** a **fatia 4 do sub-projeto 6** (o Reflect, com os sons), na `main`, **jogada e aprovada pelo autor, sem ajustes** (`decisoes.md` 2026-11-02 (3)).
   Plano em `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4.md`; cada escolha técnica no `diario.md` 2026-11-02 (2); medição em `notas/medicao-fatia-4.md`.
-- **Esperando o autor:** aprovar o plano da Ressurreição, `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4b.md`. O mais importante para ele conferir: a interface
-  escolhe a quadra que acende pela mesa, sem mudar o motor (o custo está no plano e no diário 2026-11-02 (3)).
-- **Próximo passo exato:** com o "ok" dele (ou os ajustes dele), registrar a aprovação em `decisoes.md` e executar o plano: branch `feat/direcao-visual-fatia-4b`, aqui mesmo, tarefa
-  por tarefa (`superpowers:executing-plans`), sem subagente salvo pedido dele. As escolhas vão para o diário a cada tarefa (regra 6), e o fast-forward na `main` exige as duas CI
-  verdes. Depois, ele joga. **Nada de código antes da aprovação.**
+- **Esperando o autor:** nada agora; ele aprovou o plano (`decisoes.md` 2026-11-02 (4)).
+- **Próximo passo exato:** executar `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4b.md` a partir da primeira tarefa sem entrada no `diario.md` 2026-11-02 (4), aqui mesmo, tarefa
+  por tarefa (`superpowers:executing-plans`), sem subagente salvo pedido dele. As escolhas vão para o diário a cada tarefa (regra 6), e o fast-forward na `main` exige as duas CI verdes.
+  Depois, ele joga.
 - **Para ver as cenas do Reflect sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/reflect.json` para a chave `coringa:partidas` e abra
   `/partidas/reflect`. Na rodada 37, "Próximo passo" no passo 175 mostra o espelho do Bot, e no passo 176 o cometa; na rodada 73, no passo 358, a Devastação refletida.
 - **Depois da Ressurreição:** o plano da fatia 5 (a fluidez das jogadas comuns, §8), que fecha o sub-projeto 6.

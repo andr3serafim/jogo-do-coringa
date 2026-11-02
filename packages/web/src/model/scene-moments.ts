@@ -1,5 +1,5 @@
 // Os instantes das cenas raras refeitas no sub-projeto 6 (fatia 2: o Ataque e a Defesa Absolutos; fatia 3: a Exódia e a
-// Devastação; fatia 4: o Reflect), em ms desde o começo da cena. Medidos no protótipo aprovado
+// Devastação; fatia 4: o Reflect; fatia 4b: a Ressurreição), em ms desde o começo da cena. Medidos no protótipo aprovado
 // (`docs/superpowers/specs/2026-10-31-direcao-visual-prototipo.html`) e arredondados. É a fonte única: a linha do tempo (a
 // inversão e o golpe), o palco, os desenhos e os sons leem daqui, para o pico de cada um cair no mesmo instante. Puro: sem React
 // nem DOM.
@@ -107,6 +107,27 @@ export interface ReflectCanceledMoments {
   fadeAt: number;
 }
 
+/** A Ressurreição (spec 6 §7.6): 4,6 s (`SCENE_MS.Resurrected`), sem inversão. No começo, as cartas da quadra acendem. */
+export interface ResurrectedMoments {
+  /** Os fios de luz saem das cartas da quadra até o alto. */
+  threadsAt: number;
+  /** O portal abre, os raios aparecem e as plumas descem. */
+  portalAt: number;
+  /** A coluna de luz desce até o cemitério. */
+  columnAt: number;
+  /** A carta sobe do cemitério, ainda sem cor. */
+  riseAt: number;
+  /** A cor volta, com o anel de luz. */
+  colorAt: number;
+  titleAt: number;
+  /** A carta voa até a vaga dela. */
+  flightAt: number;
+  /** Ela pousa: a carta de verdade reaparece embaixo. */
+  landAt: number;
+  /** O portal, a coluna e os fios somem. */
+  fadeAt: number;
+}
+
 export const SCENE_MOMENTS: {
   ABSOLUTE_ATTACK: AttackMoments;
   ABSOLUTE_DEFENSE: DefenseMoments;
@@ -116,6 +137,7 @@ export const SCENE_MOMENTS: {
   REFLECT_PLAYED: ReflectPlayedMoments;
   REFLECT_TRIGGERED: ReflectTriggeredMoments;
   REFLECT_CANCELED: ReflectCanceledMoments;
+  RESURRECTED: ResurrectedMoments;
 } = {
   ABSOLUTE_ATTACK: { barsIn: 280, transformAt: 1_430, titleAt: 1_700, ballAt: 2_740, hitAt: 3_200, bandOut: 4_050 },
   ABSOLUTE_DEFENSE: {
@@ -132,6 +154,7 @@ export const SCENE_MOMENTS: {
   REFLECT_PLAYED: { cardsAt: [0, 120, 240], mirrorAt: 440, settledAt: 740, shrinkAt: 1_100, doneAt: 1_400 },
   REFLECT_TRIGGERED: { launchAt: 540, slowAt: 840, slowUntil: 1_890, mirrorHitAt: 1_980, returnHitAt: 2_300, titleAt: 2_300 },
   REFLECT_CANCELED: { crackAt: 500, fadeAt: 900 },
+  RESURRECTED: { threadsAt: 200, portalAt: 620, columnAt: 1_000, riseAt: 1_380, colorAt: 2_360, titleAt: 2_360, flightAt: 3_010, landAt: 3_530, fadeAt: 4_030 },
 };
 
 /** Quanto o nome carimbado fica na tela: entra (escala 3 → 1 com quique), segura ~1,2 s e sai crescendo (spec 6 §7). */

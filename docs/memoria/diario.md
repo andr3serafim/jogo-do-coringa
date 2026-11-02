@@ -5,6 +5,17 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-02 (4): sub-projeto 6, fatia 4b em execução (a Ressurreição)
+
+- **Pedido do autor** (`decisoes.md` 2026-11-02 (4)): "Aprovado, execute". Plano em `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4b.md`, na branch
+  `feat/direcao-visual-fatia-4b`.
+- **Task 1, os tempos e o que a mesa diz:**
+  - `SCENE_MS.Resurrected`: 4,6 s; os instantes moram em `SCENE_MOMENTS.RESURRECTED`; o `Resurrected` virou cena rara, sem inversão;
+  - `resurrectionInfo` (`model/effects.ts`) lê da `view` a vaga da carta e a quadra que acende, primeiro na fileira de destino, a de maior valor, sem contar a carta que volta;
+  - **Escolha:** com duas quadras na mesma fileira, a de maior valor: é a que mais soma na conta que o jogador vê.
+
+---
+
 ## 2026-11-02 (3): o Reflect aprovado, e o plano da Ressurreição
 
 - **Pedido do autor** (`decisoes.md` 2026-11-02 (3)): "aprovado, prossiga para ressureição", com a memória consolidada.

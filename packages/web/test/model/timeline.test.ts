@@ -114,7 +114,7 @@ const SAMPLES: { event: GameEvent; kind: Beat['kind']; scene?: SceneKind; cards?
   { event: { type: 'CardsRemovedFromRow', player: 'p2', row: 'DEF', cards: [num('n9')] }, kind: 'move', cards: ['n9'] },
   { event: { type: 'QuadFormed', player: 'p1', quad: { row: 'ATK', value: 7 } }, kind: 'banner' },
   { event: { type: 'QuadBroken', player: 'p1', quad: { row: 'ATK', value: 7 } }, kind: 'banner' },
-  { event: { type: 'Resurrected', player: 'p1', card: num('n4'), row: 'ATK' }, kind: 'move', cards: ['n4'] },
+  { event: { type: 'Resurrected', player: 'p1', card: num('n4'), row: 'ATK' }, kind: 'scene', scene: 'RESURRECTED', cards: ['n4'] },
   { event: { type: 'AbsoluteDefenseStarted', player: 'p2' }, kind: 'scene', scene: 'ABSOLUTE_DEFENSE' },
   { event: { type: 'AbsoluteDefenseEnded', player: 'p2' }, kind: 'move' },
   { event: { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } }, kind: 'banner' },
@@ -209,6 +209,7 @@ describe('as cenas raras (U3 do sub-projeto 5)', () => {
       REFLECT_PLAYED: 1_500,
       REFLECT_TRIGGERED: 3_800,
       REFLECT_CANCELED: 1_400,
+      RESURRECTED: 4_600,
     });
   });
 
@@ -222,6 +223,7 @@ describe('as cenas raras (U3 do sub-projeto 5)', () => {
       REFLECT_PLAYED: SCENE_MS.ReflectPlayed,
       REFLECT_TRIGGERED: SCENE_MS.ReflectTriggered,
       REFLECT_CANCELED: SCENE_MS.ReflectCanceled,
+      RESURRECTED: SCENE_MS.Resurrected,
     });
   });
 
@@ -527,6 +529,33 @@ describe('as cenas do Reflect (sub-projeto 6 §7.5)', () => {
 
   it('muitos gatilhos seguidos ficam dentro dos limites de fotossensibilidade', () => {
     expectPhotosafe(buildTimeline(Array.from({ length: 12 }, () => REFLECT_TRIGGERED), LIVE), false);
+  });
+});
+
+describe('a Ressurreição (sub-projeto 6 §7.6)', () => {
+  const REVIVED: GameEvent = { type: 'Resurrected', player: 'p1', card: num('n4'), row: 'ATK' };
+
+  it('é uma cena de 4,6 s, com a carta que volta, sem inversão nem cortina negada pelo teto', () => {
+    const [beat] = buildTimeline([REVIVED], LIVE);
+    expect(beat).toMatchObject({ kind: 'scene', scene: 'RESURRECTED', durationMs: 4_600, cards: ['n4'], invert: null, hit: null });
+    expect(NO_INVERT.has('RESURRECTED')).toBe(true);
+    expect(FIELD_SCENES.has('RESURRECTED')).toBe(false);
+  });
+
+  it('com uma decisão esperando, ela não encolhe', () => {
+    expect(buildTimeline([REVIVED], { ...LIVE, decisionPending: true })[0]!.durationMs).toBe(4_600);
+  });
+
+  it('no catchUp vira faixa', () => {
+    expect(buildTimeline([REVIVED], { ...LIVE, mode: 'catchUp' })[0]).toMatchObject({ kind: 'banner', scene: null });
+  });
+
+  it('muitas seguidas não trocam claro e escuro, com ou sem movimento reduzido', () => {
+    for (const reducedMotion of [false, true]) {
+      const beats = buildTimeline(Array.from({ length: 12 }, () => REVIVED), { ...LIVE, reducedMotion });
+      expect(luminanceSwitches(beats)).toEqual([]);
+      expectPhotosafe(beats, reducedMotion);
+    }
   });
 });
 
