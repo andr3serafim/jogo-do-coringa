@@ -107,9 +107,13 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
   });
 
   describe('carta', () => {
-    it.each(['CardsPlaced', 'BuffPlayed', 'GuardPlayed', 'Resurrected'] as const)('%s', (type) => {
+    it.each(['CardsPlaced', 'BuffPlayed', 'GuardPlayed'] as const)('%s', (type) => {
       expect(cueFor(SAMPLES[type])).toBe('carta');
     });
+  });
+
+  it('a Ressurreição tem a pista da cena dela (sub-projeto 6 §10)', () => {
+    expect(cueFor(SAMPLES.Resurrected)).toBe('ressurreicao');
   });
 
   describe('quebra', () => {

@@ -174,6 +174,7 @@ const ALL_CUES: Record<Cue, true> = {
   'reflect-cometa': true,
   'reflect-segurado': true,
   'reflect-cancelado': true,
+  ressurreicao: true,
 };
 const CUES = Object.keys(ALL_CUES) as Cue[];
 
@@ -294,6 +295,16 @@ describe('os sons das cenas absolutas seguem o pico de cada uma (sub-projeto 6 �
     expect(times.some((t) => t > m.crackAt / 1000)).toBe(true);
   });
 
+  it('a Ressurreição: o brilho dos fios, o sopro do portal, a escala que sobe com a carta, o acorde na cor e o toque ao pousar', () => {
+    const { play } = setup();
+    const times = startsAt(play('ressurreicao'));
+    const m = SCENE_MOMENTS.RESURRECTED;
+    for (const ms of [m.threadsAt, m.portalAt, m.riseAt, m.colorAt, m.landAt]) expect(times).toContain(ms / 1000);
+    // O acorde é de várias vozes juntas, e a escala sobe nota a nota antes dele.
+    expect(times.filter((t) => t === m.colorAt / 1000).length).toBeGreaterThanOrEqual(3);
+    expect(times.filter((t) => t > m.riseAt / 1000 && t < m.colorAt / 1000).length).toBeGreaterThanOrEqual(3);
+  });
+
   it('cut() leva a saída das pistas tocando a zero em 80 ms (o pulo da cena corta o som dela)', () => {
     const { synth, play, ctx } = setup();
     const nodes = play('ataque-absoluto');
@@ -352,6 +363,7 @@ describe('createSynth', () => {
     'reflect-cometa': 3.8,
     'reflect-segurado': 3.8,
     'reflect-cancelado': 1.4,
+    ressurreicao: 4.6,
   };
 
   it.each(CUES)('%s: dura no máximo 600 ms (a espada, 1,2 s; as das cenas, a cena) e começa agora', (cue) => {

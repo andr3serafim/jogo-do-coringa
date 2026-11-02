@@ -23,6 +23,8 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     - o `useMeasuredBox` ganhou `before`, para rolar os campos antes de medir;
   - **Achado:** o Vitest da web só roda `test/ui/**/*.test.tsx`. O `scenes-mirror.test.ts` da fatia 4 **nunca tinha rodado**, nem na CI, e o `scenes-sky` também não rodaria. Os dois viraram `.tsx` e passam: o Reflect não tinha defeito escondido ali.
 
+- **Task 3, o som:** a pista `ressurreicao`: o brilho dos fios, o sopro do portal, a escala que sobe com a carta, o acorde maior na cor e o toque ao pousar. **Não conferida de ouvido:** os testes medem os instantes e o volume. No caminho, as funções de apoio do Reflect subiram para antes do comentário das receitas.
+
 ---
 
 ## 2026-11-02 (3): o Reflect aprovado, e o plano da Ressurreição

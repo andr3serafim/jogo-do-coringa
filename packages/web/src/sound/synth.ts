@@ -111,16 +111,12 @@ const NOPE = SCENE_MOMENTS.DEVASTATION_CANCELED;
 const RP = SCENE_MOMENTS.REFLECT_PLAYED;
 const RT = SCENE_MOMENTS.REFLECT_TRIGGERED;
 const RC = SCENE_MOMENTS.REFLECT_CANCELED;
+const RES = SCENE_MOMENTS.RESURRECTED;
 /** Quanto cada carta leva para chegar à ponta do espelho (o voo da cena). */
 const MIRROR_CARD_MS = 220;
 /** Um instante da cena (ms desde o começo dela), em segundos de pista. */
 const s = (ms: number): number => ms / 1000;
 
-/**
- * As receitas, uma por pista. Todas até 600 ms, menos a `espada` (até 1,2 s) e as das cenas raras, que acompanham a cena inteira
- * com as vozes nos instantes dela (`SCENE_MOMENTS`). Timbres livres (spec §9): o que importa é
- * curto, original e sem pico. Golpes mais pesados são mais graves, mais longos e mais cheios.
- */
 /** O sino de vidro: parciais agudas e longas, sem alma de metal. */
 function glassBell({ tone, noise }: Voices, at: number): void {
   tone({ wave: 'sine', from: 1319, at, length: 0.8, peak: 0.2 });
@@ -150,6 +146,11 @@ function cometWay(voices: Voices): void {
   noise({ filter: 'lowpass', from: 3000, to: 200, at: s(RT.mirrorHitAt), length: 0.4, peak: 0.32 });
 }
 
+/**
+ * As receitas, uma por pista. Todas até 600 ms, menos a `espada` (até 1,2 s) e as das cenas raras, que acompanham a cena inteira
+ * com as vozes nos instantes dela (`SCENE_MOMENTS`). Timbres livres (spec §9): o que importa é
+ * curto, original e sem pico. Golpes mais pesados são mais graves, mais longos e mais cheios.
+ */
 const RECIPES: Record<Cue, (voices: Voices) => void> = {
   // A carta chega à mesa: um estalo de papel e uma batida seca.
   carta: ({ tone, noise }) => {
@@ -314,6 +315,18 @@ const RECIPES: Record<Cue, (voices: Voices) => void> = {
       noise({ filter: 'highpass', from: 4800, to: 2400, at, length: 0.1, peak: 0.26 });
       tone({ wave: 'triangle', from: 2794, to: 1760, at, length: 0.14, peak: 0.1 });
     }
+  },
+  // A Ressurreição: o brilho agudo de cada fio, o sopro que abre com o portal, a escala que sobe com a carta, o acorde maior quando a cor volta (o
+  // "acorde que sobe" do §10) e o toque da carta que pousa.
+  ressurreicao: ({ tone, noise }) => {
+    [1568, 1760, 1976, 2349].forEach((hz, i) => tone({ wave: 'sine', from: hz, at: s(RES.threadsAt) + i * 0.09, length: 0.35, peak: 0.07 }));
+    noise({ filter: 'bandpass', from: 400, to: 1600, q: 1, at: s(RES.portalAt), attack: 0.4, length: s(RES.riseAt - RES.portalAt) + 0.2, peak: 0.12 });
+    const climb = [523, 587, 659, 784, 880];
+    climb.forEach((hz, i) => tone({ wave: 'triangle', from: hz, at: s(RES.riseAt) + (i * s(RES.colorAt - RES.riseAt)) / climb.length, length: 0.3, peak: 0.12 }));
+    for (const hz of [523, 659, 784, 1047]) tone({ wave: 'triangle', from: hz, at: s(RES.colorAt), length: 1.1, peak: 0.13 });
+    tone({ wave: 'sine', from: 2093, at: s(RES.colorAt), length: 0.7, peak: 0.07 });
+    tone({ wave: 'sine', from: 180, to: 90, at: s(RES.landAt), length: 0.16, peak: 0.3 });
+    noise({ filter: 'bandpass', from: 1800, q: 1.2, at: s(RES.landAt), length: 0.05, peak: 0.18 });
   },
 };
 

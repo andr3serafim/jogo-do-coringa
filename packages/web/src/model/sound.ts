@@ -27,7 +27,8 @@ export type Cue =
   | 'reflect-armado'
   | 'reflect-cometa'
   | 'reflect-segurado'
-  | 'reflect-cancelado';
+  | 'reflect-cancelado'
+  | 'ressurreicao';
 
 /** A pista do golpe de `damage` pontos, pelo peso dele (`impactForce`, o mesmo do tremor); dano zero (a defesa segurou tudo) é mudo. */
 function strikeCue(damage: number): Cue | null {
@@ -51,7 +52,6 @@ export function cueOf(beat: Beat, me: PlayerId): Cue | null {
     case 'CardsPlaced':
     case 'BuffPlayed':
     case 'GuardPlayed':
-    case 'Resurrected':
       return 'carta';
     case 'GuardBroken':
     case 'TrapUsed':
@@ -65,7 +65,7 @@ export function cueOf(beat: Beat, me: PlayerId): Cue | null {
       return strikeCue(event.damage);
     case 'StealDamage':
       return strikeCue(event.damage);
-    // As cenas refeitas no sub-projeto 6 (fatias 2 a 4) têm a pista delas, que segue o pico de cada uma (§10).
+    // As cenas refeitas no sub-projeto 6 (fatias 2 a 4b) têm a pista delas, que segue o pico de cada uma (§10).
     case 'ReflectPlayed':
       return 'reflect-armado';
     case 'ReflectTriggered':
@@ -73,6 +73,8 @@ export function cueOf(beat: Beat, me: PlayerId): Cue | null {
       return event.damage > 0 ? 'reflect-cometa' : 'reflect-segurado';
     case 'ReflectCanceled':
       return 'reflect-cancelado';
+    case 'Resurrected':
+      return 'ressurreicao';
     case 'AbsoluteAttack':
       return 'ataque-absoluto';
     case 'AbsoluteDefenseStarted':
