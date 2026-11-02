@@ -6,6 +6,24 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-02 (2): o plano do Reflect aprovado
+
+À entrega do plano (`docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4.md`), com as escolhas listadas para ele:
+- o espelho grande encolhe até a zona "Reflect ativo" e fica lá, pequeno, até o ataque;
+- a sequência soma 5,3 s (1,5 s ao jogar e 3,8 s na batida), e o primeiro corte, se ficar longo, é o tempo lento do cometa;
+- a inversão e o nome só na batida; sem tarjas de cinema, como no protótipo;
+- sem dano de volta, o cometa se desfaz no espelho, que quebra mesmo assim;
+- o Ataque Absoluto contra Reflect não dispara o feixe, e a folga para em 8 s;
+- a Devastação refletida não tem cometa;
+- K, J e Q da cena são desenhos genéricos;
+- a execução aqui mesmo, tarefa por tarefa, com a revisão final de quem escreveu o código.
+
+> Aprovado, execute
+
+**Leitura:** o plano está aprovado como foi entregue, com as escolhas listadas. **[I]** Vale até o fast-forward na `main` com as duas CI verdes, como nas fatias anteriores.
+
+---
+
 ## 2026-11-02 (1): a fatia 4 se divide: o Reflect agora, a Ressurreição depois
 
 Depois de a passagem para a outra conta ficar pronta:

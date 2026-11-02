@@ -1,21 +1,20 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-02**, com o plano do Reflect escrito. A conta que escreveu isto está no fim do limite
-> semanal, e a próxima pode assumir daqui. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do
+> Sobrescrito a cada atualização. **Última: 2026-11-02**, com o Reflect em execução. A conta que escreveu isto está no fim do limite semanal, e a
+> próxima pode assumir daqui. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do
 > `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `main`, no checkout principal, sem trabalho em curso. A fatia 4 tem plano, mas ainda não tem branch nem código.
+- **Branch:** `feat/direcao-visual-fatia-4`, no checkout principal, com o Reflect em execução. A `main` está no plano (`cc2e8ea`).
 - **Feito por último:** a **fatia 3 do sub-projeto 6** (a Exódia e a Devastação, com a desolação e os sons), na `main` com as duas CI verdes
   (run `41346331555`, em `b8171a8`), **jogada e aprovada pelo autor, sem ajustes** (`decisoes.md` 2026-11-01 (6)). Plano em
   `docs/superpowers/plans/2026-11-01-direcao-visual-fatia-3.md`; cada escolha técnica no `diario.md` 2026-11-01 (4); medição em
   `notas/medicao-fatia-3.md`.
-- **Esperando o autor:** aprovar o plano do Reflect, `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4.md`. Ele dividiu a fatia: o Reflect
-  agora, a Ressurreição depois (`decisoes.md` 2026-11-02 (1)).
-- **Próximo passo exato:** com o "ok" dele (ou os ajustes dele), registrar a aprovação em `decisoes.md` e executar o plano do Reflect:
-  branch `feat/direcao-visual-fatia-4`, aqui mesmo, tarefa por tarefa (`superpowers:executing-plans`), sem subagente salvo pedido dele. As
-  escolhas vão para o diário a cada tarefa (regra 6), e o fast-forward na `main` exige as duas CI verdes. Depois, ele joga.
+- **Esperando o autor:** nada agora; ele aprovou o plano (`decisoes.md` 2026-11-02 (2)).
+- **Próximo passo exato:** executar `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4.md` a partir da primeira tarefa sem entrada no `diario.md`
+  2026-11-02 (2), aqui mesmo, tarefa por tarefa (`superpowers:executing-plans`), sem subagente salvo pedido dele. As escolhas vão para o diário a cada
+  tarefa (regra 6), e o fast-forward na `main` exige as duas CI verdes. Depois, ele joga.
 - **Depois do Reflect:** escrever o plano da fatia 4b (a Ressurreição, §7.6) e, por último, o da fatia 5 (a fluidez das jogadas comuns, §8), que
   fecha o sub-projeto 6.
 - **Para ver as cenas da fatia 3 sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave

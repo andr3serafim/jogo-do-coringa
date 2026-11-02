@@ -11,7 +11,7 @@ import { FLASH_WINDOW_MS } from '../../src/model/flash.ts';
 import { bannerReadMs, readingMs } from '../../src/model/reading.ts';
 import { Session } from '../../src/model/session.ts';
 import { DEFAULT_PREFS } from '../../src/model/storage.ts';
-import { BEAT_MS, INVERT_COOLDOWN_MS, INVERT_MIN_HOLD_MS, RARE_SCENE_MS } from '../../src/model/timeline.ts';
+import { BEAT_MS, INVERT_COOLDOWN_MS, INVERT_MIN_HOLD_MS, NO_INVERT, RARE_SCENE_MS, type SceneKind } from '../../src/model/timeline.ts';
 import { SCENE_MOMENTS } from '../../src/model/scene-moments.ts';
 import { useAnim, useBoardBusy } from '../../src/ui/anim/context.ts';
 import { Stage } from '../../src/ui/anim/Stage.tsx';
@@ -45,6 +45,7 @@ import {
   TURN,
   watchInversion,
   watchMany,
+  installFlashProbe,
 } from './anim-harness.tsx';
 import { ATTACK_BUTTON, roomMessage, seriousViolations } from './support.tsx';
 
@@ -55,6 +56,8 @@ afterEach(cleanup);
 
 /** A coroa crava na Exódia: o instante da inversão dela (sub-projeto 6 §7.3). */
 const CROWN = SCENE_MOMENTS.EXODIA.crownAt;
+
+installFlashProbe();
 
 describe('palco: a cena inverte a tela inteira uma vez (spec §10.1, §10.4)', () => {
   it('Exódia: o palco recebe a inversão uma vez e a retira depois de ≥ 300 ms', () => {
@@ -103,13 +106,15 @@ describe('palco: a cena inverte a tela inteira uma vez (spec §10.1, §10.4)', (
     expect(scene(m.container)).toHaveAttribute('aria-hidden', 'true');
   });
 
-  it('uma cena comum dentro do teto de 1 s (decisão esperando) inverte uma vez, por 400 ms (a escala 2/3 de 150 e 600)', () => {
+  it('com uma decisão esperando, a cena não encolhe: inverte uma vez, por 600 ms, e a mesa só libera no fim dela', () => {
     const m = mount(MINE);
     emit(m, MINE, [SCENE]);
     const trace = watchInversion(m.container);
-    trace.run(1_100);
-    expect(trace.flips).toEqual([100, 500]);
+    trace.run(1_400);
+    expect(trace.flips).toEqual([150, 750]);
     expect(trace.flips[1]! - trace.flips[0]!).toBeGreaterThanOrEqual(INVERT_MIN_HOLD_MS);
+    expect(busy(m.container)).toBe(true);
+    trace.run(200);
     expect(busy(m.container)).toBe(false);
   });
 });
@@ -449,22 +454,25 @@ describe('palco: pular as batidas (spec §4.1)', () => {
   it('o pulo com a inversão no ar depois de uma cena anterior não a desliga antes de a conta deixar', async () => {
     const m = mount(MINE);
     const trace = watchMany([() => curtainUp(m.container), () => inverted(m.container)]);
-    // Estado 1: cena, faixa e cena sob o teto de 1 s. A inversão fica suprimida; a cortina sobe em 0 e desce em 1000.
-    emit(m, MINE, [SCENE, TURN, SCENE_2]);
+    // Estado 1: uma cena sem inversão (o espelho que se forma); a cortina sobe em 0 e desce em 1500.
+    const silent = NO_INVERT as Set<SceneKind>;
+    silent.add('REFLECT_PLAYED');
+    emit(m, MINE, [SCENE]);
+    silent.delete('REFLECT_PLAYED');
     trace.sample();
-    trace.run(1_250);
-    // Estado 2, sem teto: a cortina sobe em 1250 e a inversão liga em 1400, por 600 ms (a quarta troca a exatos 1 s da primeira).
+    trace.run(1_750);
+    // Estado 2: a cortina sobe em 1750 e a inversão liga em 1900, por 600 ms.
     emit(m, THEIRS, [SCENE]);
     trace.run(250);
     expect(inverted(m.container)).toBe(true);
-    // O jogador pula aos 1500: desligar agora faria 4 trocas em 500 ms (1000, 1250, 1400, 1500).
+    // O jogador pula aos 2000: desligar agora faria 4 trocas em 500 ms (1500, 1750, 1900, 2000).
     await m.user.click(stage(m.container));
     trace.sample();
     expect(busy(m.container)).toBe(false);
     expect(inverted(m.container)).toBe(true); // a mesa já está livre, só o visual segura
     trace.run(2_500);
-    expect(trace.flips[1]).toEqual([1_400, 2_000]);
-    expect(trace.flips[0]).toHaveLength(4); // 0 sobe, 1000 desce, 1250 sobe, e a descida depois do pulo
+    expect(trace.flips[1]).toEqual([1_910, 2_510]);
+    expect(trace.flips[0]).toHaveLength(4); // 0 sobe, 1500 desce, 1750 sobe, e a descida depois do pulo
     expectFlashSafe(trace.all);
   });
 
@@ -936,7 +944,10 @@ describe('efeitos da batida (spec §4.2)', () => {
     emit(m, { ...MINE, self: { ...MINE.self, hp: 150 } }, [{ type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 37 }]);
     expect(scene(m.container)).toHaveAttribute('data-cena', 'REFLECT_TRIGGERED');
     expect(scene(m.container)).toHaveTextContent('O ataque voltou: 37 de dano em você');
-    advance(0);
+    // O número espera a volta do cometa acertar o retrato.
+    advance(SCENE_MOMENTS.REFLECT_TRIGGERED.returnHitAt - 1);
+    expect(m.container.querySelector('[data-dano]')).toBeNull();
+    advance(1);
     expect(m.container.querySelector('[data-dano]')).toHaveTextContent('−37');
   });
 
@@ -1484,21 +1495,25 @@ describe('cortina e inversão contam juntas (spec §10.4: no máximo 3 trocas po
     expect(trace.all[3]! - trace.all[0]!).toBeGreaterThanOrEqual(FLASH_WINDOW_MS - SAMPLE_MS);
   });
 
-  it('cena, faixa e cena sob o teto de 1 s: uma subida e uma descida da cortina, o painel fica, e nada passa de 3 por segundo', () => {
+  it('cena, faixa e cena no mesmo `state`: a cortina desce e sobe entre elas, a segunda perde a inversão e nada passa de 3 por segundo', () => {
     const m = mount(MINE);
-    const trace = watchMany([
-      () => curtainUp(m.container),
-      () => scene(m.container) !== null,
-      () => banner(m.container) !== null,
-      () => inverted(m.container),
-    ]);
+    const trace = watchMany([() => curtainUp(m.container), () => inverted(m.container)]);
     emit(m, MINE, [SCENE, TURN, SCENE_2]);
     trace.sample();
-    trace.run(2_000);
-    expect(trace.flips[0]).toHaveLength(2); // a cortina
-    expect(trace.flips[1]).toHaveLength(2); // o painel da cena: não some na faixa do meio
-    expect(trace.flips[2]).toEqual([]); // a faixa do meio espera a cortina
-    expect(trace.flips[0]![1]! - trace.flips[0]![0]!).toBeGreaterThanOrEqual(FLASH_WINDOW_MS - SAMPLE_MS);
+    trace.run(4_500);
+    expect(trace.flips[0]).toHaveLength(4);
+    expect(trace.flips[1]).toEqual([150, 750]);
+    expectFlashSafe(trace.all);
+  });
+
+  it('o Ataque Absoluto que bate num Reflect: uma inversão só, a do cometa, e nada passa de 3 por segundo', () => {
+    const m = mount(MINE);
+    const trace = watchMany([() => curtainUp(m.container), () => inverted(m.container)]);
+    emit(m, MINE, [ABSOLUTE, { type: 'GuardBroken', player: 'p2', cards: [] }, { type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 40 }]);
+    trace.sample();
+    trace.run(RARE_SCENE_MS.ABSOLUTE_ATTACK + RARE_SCENE_MS.REFLECT_TRIGGERED + 1_500);
+    expect(trace.flips[1]).toHaveLength(2);
+    expect(trace.flips[1]![1]! - trace.flips[1]![0]!).toBeGreaterThanOrEqual(INVERT_MIN_HOLD_MS);
     expectFlashSafe(trace.all);
   });
 
@@ -1756,7 +1771,7 @@ describe('CardsDealt e Reflect (spec §4.2)', () => {
     advance(400);
     expect(theirs().querySelector('[data-escudo-quebra]')).not.toBeNull();
     expect(mine().querySelector('[data-escudo-quebra]')).toBeNull();
-    advance(300);
+    advance(RARE_SCENE_MS.REFLECT_CANCELED);
     expect(theirs().querySelector('[data-escudo-quebra]')).toBeNull();
   });
 
@@ -1826,7 +1841,7 @@ describe('o painel da cena esmaece (spec §4.1 e §10.4: nada de troca brusca de
     expect(first.className).toContain('opacity-100');
     expect(first.className).not.toContain('opacity-0');
     expect(first).toHaveAttribute('data-ativo', 'true');
-    advance(BEAT_MS.scene + 100);
+    advance(RARE_SCENE_MS.REFLECT_PLAYED + 100);
     // No fim da cena o painel continua na página, com o texto dela, só apagado.
     expect(panel(m.container)).toBe(first);
     expect(first.className).toContain('opacity-0');

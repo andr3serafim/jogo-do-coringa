@@ -17,15 +17,17 @@ describe('folga de cena (sub-projeto 6 §9)', () => {
   });
 
   it('duas cenas no mesmo passo somam', () => {
-    expect(sceneAllowanceMs([{ type: 'ReflectTriggered' }, { type: 'DamageDealt' }, { type: 'RowDevastated' }])).toBe(4_600);
+    expect(sceneAllowanceMs([{ type: 'ReflectCanceled' }, { type: 'DamageDealt' }, { type: 'DevastationCanceled' }])).toBe(2_800);
   });
 
   it('a soma para no teto de 8 s', () => {
     expect(SCENE_ALLOWANCE_CAP_MS).toBe(8_000);
     expect(sceneAllowanceMs(Array.from({ length: 6 }, () => ({ type: 'Exodia' })))).toBe(8_000);
+    // O Ataque Absoluto que bate num Reflect: 8,3 s de cena, e o relógio volta 0,3 s antes do fim.
+    expect(sceneAllowanceMs([{ type: 'AbsoluteAttack' }, { type: 'ReflectTriggered' }])).toBe(8_000);
   });
 
-  it('a tabela tem as cenas com os tempos do protótipo (fatia 2: os Absolutos; fatia 3: a Exódia e a Devastação)', () => {
+  it('a tabela tem as cenas com os tempos do protótipo (fatia 2: os Absolutos; fatia 3: a Exódia e a Devastação; fatia 4: o Reflect)', () => {
     expect(SCENE_MS).toEqual({
       Exodia: 5_800,
       AbsoluteAttack: 4_500,
@@ -33,7 +35,8 @@ describe('folga de cena (sub-projeto 6 §9)', () => {
       RowDevastated: 3_100,
       DevastationCanceled: 1_400,
       ReflectPlayed: 1_500,
-      ReflectTriggered: 1_500,
+      ReflectTriggered: 3_800,
+      ReflectCanceled: 1_400,
     });
   });
 });

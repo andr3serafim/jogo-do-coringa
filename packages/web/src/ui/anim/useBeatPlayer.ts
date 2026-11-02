@@ -30,7 +30,7 @@
 import type { StateMessage } from '@coringa/protocol';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { bannerBeatAt, damageBeatIndex, dealsOf, delaysOf, type Deals } from '../../model/effects.ts';
-import { FIELD_SCENES } from '../../model/timeline.ts';
+import { FIELD_SCENES, RIBBON_SCENES } from '../../model/timeline.ts';
 import { FLASH_WINDOW_MS, FlashLock } from '../../model/flash.ts';
 import { buildTimeline, timelineMs, type Beat, type TimelineOptions } from '../../model/timeline.ts';
 
@@ -256,8 +256,8 @@ export function useBeatPlayer(
   // --- Faixa ---
   const beat = current.done ? null : (run.beats[current.index] ?? null);
   const bannerBeat = current.done ? null : bannerBeatAt(run.beats, current.index, run.catchUp);
-  // A Devastação cancelada não carimba nome: a fita diz o motivo durante a cena (sub-projeto 6 §7.4).
-  const sceneNow = beat?.kind === 'scene' && beat.scene !== null && beat.scene !== 'DEVASTATION_CANCELED';
+  // As canceladas não carimbam nome: a fita diz o motivo durante a cena (sub-projeto 6 §7.4, §7.5).
+  const sceneNow = beat?.kind === 'scene' && beat.scene !== null && !RIBBON_SCENES.has(beat.scene);
   // A faixa que ainda não completou o tempo de leitura (U1), só ao vivo (o `catchUp` é um resumo, e o histórico guarda tudo). A
   // batida com faixa começa a contar; outra faixa recomeça a conta; o pulo, uma cena ou a cortina a encerram.
   const [lingering, setLingering] = useState<Beat | null>(null);

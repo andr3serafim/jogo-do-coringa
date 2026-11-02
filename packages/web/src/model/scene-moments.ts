@@ -1,5 +1,5 @@
 // Os instantes das cenas raras refeitas no sub-projeto 6 (fatia 2: o Ataque e a Defesa Absolutos; fatia 3: a Exódia e a
-// Devastação), em ms desde o começo da cena. Medidos no protótipo aprovado
+// Devastação; fatia 4: o Reflect), em ms desde o começo da cena. Medidos no protótipo aprovado
 // (`docs/superpowers/specs/2026-10-31-direcao-visual-prototipo.html`) e arredondados. É a fonte única: a linha do tempo (a
 // inversão e o golpe), o palco, os desenhos e os sons leem daqui, para o pico de cada um cair no mesmo instante. Puro: sem React
 // nem DOM.
@@ -70,12 +70,52 @@ export interface CanceledMoments {
   stopAt: number;
 }
 
+/** O Reflect jogado (spec 6 §7.5): 1,5 s (`SCENE_MS.ReflectPlayed`). Cada carta voa por 220 ms até a sua ponta. */
+export interface ReflectPlayedMoments {
+  /** O K, o J e o Q saem, um a um. */
+  cardsAt: readonly [number, number, number];
+  /** O espelho começa a se formar: faíscas nas três pontas. */
+  mirrorAt: number;
+  /** O espelho assentou. */
+  settledAt: number;
+  /** Ele começa a encolher até a zona "Reflect ativo". */
+  shrinkAt: number;
+  /** Ele já está na zona. */
+  doneAt: number;
+}
+
+/** O ataque que bate no Reflect (spec 6 §7.5): 3,8 s (`SCENE_MS.ReflectTriggered`). Até `launchAt`, a esfera junta energia. */
+export interface ReflectTriggeredMoments {
+  /** O cometa parte. */
+  launchAt: number;
+  /** O tempo quase para: o cometa se arrasta. */
+  slowAt: number;
+  /** O tempo volta. */
+  slowUntil: number;
+  /** O cometa bate no espelho: a inversão, a ondulação, e ele volta dourado (ou se desfaz, sem dano). */
+  mirrorHitAt: number;
+  /** A volta acerta o retrato de quem atacou: o número, a vida, os cacos. */
+  returnHitAt: number;
+  titleAt: number;
+}
+
+/** Reflect contra Reflect (spec 6 §7.5): 1,4 s (`SCENE_MS.ReflectCanceled`), sem cometa, nome nem inversão. */
+export interface ReflectCanceledMoments {
+  /** Os dois espelhos trincam. */
+  crackAt: number;
+  /** Eles somem. */
+  fadeAt: number;
+}
+
 export const SCENE_MOMENTS: {
   ABSOLUTE_ATTACK: AttackMoments;
   ABSOLUTE_DEFENSE: DefenseMoments;
   EXODIA: ExodiaMoments;
   DEVASTATION: DevastationMoments;
   DEVASTATION_CANCELED: CanceledMoments;
+  REFLECT_PLAYED: ReflectPlayedMoments;
+  REFLECT_TRIGGERED: ReflectTriggeredMoments;
+  REFLECT_CANCELED: ReflectCanceledMoments;
 } = {
   ABSOLUTE_ATTACK: { barsIn: 280, transformAt: 1_430, titleAt: 1_700, ballAt: 2_740, hitAt: 3_200, bandOut: 4_050 },
   ABSOLUTE_DEFENSE: {
@@ -89,6 +129,9 @@ export const SCENE_MOMENTS: {
   EXODIA: { barsIn: 280, kingsAt: [480, 770, 1_060, 1_350], crownAt: 2_550, titleAt: 2_850, drainAt: 3_800, crackAt: 4_300, bandOut: 5_200 },
   DEVASTATION: { rumbleUntil: 950, crackAt: 950, openAt: 1_170, titleAt: 1_520, settleAt: 1_600 },
   DEVASTATION_CANCELED: { rumbleUntil: 950, crackAt: 950, stopAt: 1_100 },
+  REFLECT_PLAYED: { cardsAt: [0, 120, 240], mirrorAt: 440, settledAt: 740, shrinkAt: 1_100, doneAt: 1_400 },
+  REFLECT_TRIGGERED: { launchAt: 540, slowAt: 840, slowUntil: 1_890, mirrorHitAt: 1_980, returnHitAt: 2_300, titleAt: 2_300 },
+  REFLECT_CANCELED: { crackAt: 500, fadeAt: 900 },
 };
 
 /** Quanto o nome carimbado fica na tela: entra (escala 3 → 1 com quique), segura ~1,2 s e sai crescendo (spec 6 §7). */

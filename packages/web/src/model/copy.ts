@@ -413,6 +413,8 @@ export const SCENE_TITLE: Record<SceneKind, string> = {
   DEVASTATION_CANCELED: '',
   REFLECT_PLAYED: 'REFLECT',
   REFLECT_TRIGGERED: 'REFLECT',
+  // Os dois espelhos trincam sem nome: o motivo vai na fita (sub-projeto 6 §7.5).
+  REFLECT_CANCELED: '',
 };
 
 // ---------------------------------------------------------------------------------------------

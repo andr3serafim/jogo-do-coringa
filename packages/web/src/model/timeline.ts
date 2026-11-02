@@ -12,11 +12,11 @@ import { SCENE_MOMENTS } from './scene-moments.ts';
 /** Duração de uma cena na tabela do protocolo (a mesma que dá a folga do relógio no servidor, sub-projeto 6 §9). */
 const sceneMs = (type: GameEvent['type']): number => SCENE_MS[type] ?? 0;
 
-/** Duração base de cada tipo de batida (spec §4.1). `scene` é a cena comum (o Reflect); as raras têm a sua, em `RARE_SCENE_MS`. */
-export const BEAT_MS = { move: 300, damage: 600, banner: 400, scene: sceneMs('ReflectPlayed') } as const;
+/** Duração base de cada tipo de batida (spec §4.1). As cenas têm a sua, em `RARE_SCENE_MS`. */
+export const BEAT_MS = { move: 300, damage: 600, banner: 400 } as const;
 /**
- * As cenas raras (sub-projeto 5, U3): mais longas que a comum, e fora do teto de decisão (o resto da linha do tempo encolhe para
- * caber nele; elas não). São raras, a Exódia acaba a partida, e o toque ou o Esc pulam na hora. Os Absolutos passaram de 2,6 s
+ * As cenas raras (sub-projeto 5, U3): longas, e fora do teto de decisão (o resto da linha do tempo encolhe para
+ * caber nele; elas não). Desde a fatia 4 do sub-projeto 6 são todas as cenas. São raras, a Exódia acaba a partida, e o toque ou o Esc pulam na hora. Os Absolutos passaram de 2,6 s
  * para 3 s a pedido do autor (2026-10-30). Os tempos vêm da tabela do protocolo.
  */
 export const RARE_SCENE_MS = {
@@ -25,6 +25,9 @@ export const RARE_SCENE_MS = {
   ABSOLUTE_DEFENSE: sceneMs('AbsoluteDefenseStarted'),
   DEVASTATION: sceneMs('RowDevastated'),
   DEVASTATION_CANCELED: sceneMs('DevastationCanceled'),
+  REFLECT_PLAYED: sceneMs('ReflectPlayed'),
+  REFLECT_TRIGGERED: sceneMs('ReflectTriggered'),
+  REFLECT_CANCELED: sceneMs('ReflectCanceled'),
 } as const;
 /**
  * A faixa da decisão da iniciativa segura a leitura (autor, 2026-10-31: "a iniciativa muda pro adversário, eu também não vejo o
@@ -53,32 +56,42 @@ export type SceneKind =
   | 'DEVASTATION'
   | 'DEVASTATION_CANCELED'
   | 'REFLECT_PLAYED'
-  | 'REFLECT_TRIGGERED';
+  | 'REFLECT_TRIGGERED'
+  | 'REFLECT_CANCELED';
 
 /**
- * Onde, dentro da cena, a inversão acontece: na comum, logo no começo. Nas refeitas no sub-projeto 6, no pico da cena
- * (`SCENE_MOMENTS`): o feixe que acerta o retrato, a trava do escudo, a coroa que crava na Exódia e o chão que se abre na
- * Devastação. A inversão dura sempre o mesmo, e é uma só por cena. A cancelada não tem (`NO_INVERT`).
+ * Onde, dentro da cena, a inversão acontece: no pico dela (`SCENE_MOMENTS`): o feixe que acerta o retrato, a trava do escudo, a
+ * coroa que crava na Exódia, o chão que se abre na Devastação e o cometa que bate no espelho. A inversão dura sempre o mesmo, e é uma
+ * só por cena. As canceladas e o espelho que se forma não têm (`NO_INVERT`).
  */
 export const SCENE_INVERT_LEAD_MS: Record<SceneKind, number> = {
-  REFLECT_PLAYED: 150,
-  REFLECT_TRIGGERED: 150,
+  REFLECT_PLAYED: 0,
+  REFLECT_TRIGGERED: SCENE_MOMENTS.REFLECT_TRIGGERED.mirrorHitAt,
+  REFLECT_CANCELED: 0,
   ABSOLUTE_ATTACK: SCENE_MOMENTS.ABSOLUTE_ATTACK.hitAt,
   ABSOLUTE_DEFENSE: SCENE_MOMENTS.ABSOLUTE_DEFENSE.lockAt,
   DEVASTATION: SCENE_MOMENTS.DEVASTATION.openAt,
   DEVASTATION_CANCELED: 0,
   EXODIA: SCENE_MOMENTS.EXODIA.crownAt,
 };
-/** As cenas sem inversão: a Devastação cancelada (a terra ronca e para, sem abismo; sub-projeto 6 §7.4). */
-export const NO_INVERT: ReadonlySet<SceneKind> = new Set(['DEVASTATION_CANCELED']);
+/**
+ * As cenas sem inversão: a Devastação cancelada (a terra ronca e para, sem abismo; sub-projeto 6 §7.4), o espelho que se forma e os
+ * dois que trincam (§7.5: o negativo da gravura fica com o cometa que bate).
+ */
+export const NO_INVERT: ReadonlySet<SceneKind> = new Set(['DEVASTATION_CANCELED', 'REFLECT_PLAYED', 'REFLECT_CANCELED']);
 /**
  * As cenas de campo: acontecem sobre a fileira atingida, sem cortina nem faixa (sub-projeto 6 §7.4; escurecer a mesa esconderia o que
- * cai, como no protótipo).
+ * cai, como no protótipo). Os dois espelhos que trincam também acontecem na mesa, à vista.
  */
-export const FIELD_SCENES: ReadonlySet<SceneKind> = new Set(['DEVASTATION', 'DEVASTATION_CANCELED']);
+export const FIELD_SCENES: ReadonlySet<SceneKind> = new Set(['DEVASTATION', 'DEVASTATION_CANCELED', 'REFLECT_CANCELED']);
+/** As cenas sem nome carimbado: o motivo vai na fita, no ar durante a cena (§7.4, §7.5). */
+export const RIBBON_SCENES: ReadonlySet<SceneKind> = new Set(['DEVASTATION_CANCELED', 'REFLECT_CANCELED']);
+/** O instante, dentro da cena, em que o golpe dela acende: o feixe no retrato ou a volta dourada do cometa. */
+const HIT_AT: Partial<Record<SceneKind, number>> = {
+  ABSOLUTE_ATTACK: SCENE_MOMENTS.ABSOLUTE_ATTACK.hitAt,
+  REFLECT_TRIGGERED: SCENE_MOMENTS.REFLECT_TRIGGERED.returnHitAt,
+};
 const SCENE_INVERT_HOLD_MS = 600;
-
-const isRare = (scene: SceneKind | null): scene is keyof typeof RARE_SCENE_MS => scene !== null && scene in RARE_SCENE_MS;
 
 export interface Beat {
   event: GameEvent;
@@ -92,12 +105,14 @@ export interface Beat {
   /** Inversão da tela inteira; `atMs` é absoluto, como `startMs`. Sempre `null` fora de cena. */
   invert: { atMs: number; holdMs: number } | null;
   /**
-   * O golpe que a cena do Ataque Absoluto absorveu (sub-projeto 6 §7.1): o `DamageDealt` que vem logo depois dela acontece dentro
-   * dela, no instante em que o feixe acerta (`atMs`, absoluto). Sempre `null` fora dessa cena.
+   * O golpe que acende dentro da cena, em `atMs` (absoluto). No Ataque Absoluto (sub-projeto 6 §7.1), é o `DamageDealt` que vem logo
+   * depois dela; no Reflect (§7.5), é o próprio `ReflectTriggered`, na volta dourada, se devolveu dano. `null` nas outras batidas.
    */
-  hit: { event: Extract<GameEvent, { type: 'DamageDealt' }>; atMs: number } | null;
+  hit: { event: Extract<GameEvent, { type: 'DamageDealt' | 'ReflectTriggered' }>; atMs: number } | null;
   /** É o `DamageDealt` que virou o golpe da cena: batida quieta, de 0 ms, sem som nem efeito. */
   absorbed: boolean;
+  /** O Ataque Absoluto que um Reflect intercepta: o feixe não dispara no retrato, porque nada o acerta (§7.5). */
+  intercepted: boolean;
 }
 
 export interface TimelineOptions {
@@ -150,6 +165,8 @@ function classify(event: GameEvent): Classified {
       return scene('REFLECT_PLAYED', [event.reflect.k.id, event.reflect.j.id, event.reflect.q.id]);
     case 'ReflectTriggered':
       return scene('REFLECT_TRIGGERED');
+    case 'ReflectCanceled':
+      return scene('REFLECT_CANCELED');
     case 'CardsDealt':
       return move(event.cards?.map((c) => c.id));
     case 'CardsPlaced':
@@ -184,7 +201,6 @@ function classify(event: GameEvent): Classified {
       // A cura que não curou nada (a vida já cheia) não tem número: passa quieta.
       return plain(event.amount > 0 ? 'damage' : 'quiet');
     case 'DeckReshuffled':
-    case 'ReflectCanceled':
     case 'AttackDeclared':
     case 'AbsoluteDefenseEnded':
       return move();
@@ -197,7 +213,7 @@ function classify(event: GameEvent): Classified {
 
 function baseDuration(kind: Beat['kind'], scene: SceneKind | null): number {
   if (kind === 'quiet') return 0;
-  return kind === 'scene' && isRare(scene) ? RARE_SCENE_MS[scene] : BEAT_MS[kind];
+  return kind === 'scene' ? RARE_SCENE_MS[scene!] : BEAT_MS[kind];
 }
 
 export function buildTimeline(events: GameEvent[], options: TimelineOptions): Beat[] {
@@ -212,12 +228,14 @@ export function buildTimeline(events: GameEvent[], options: TimelineOptions): Be
     const scene = flattened ? null : classified.scene;
     const held = !catchUp && event.type === 'InitiativeDecided';
     const baseMs = held ? INITIATIVE_BANNER_MS : baseDuration(kind, scene) / (catchUp ? 2 : 1);
-    return { event, kind, cards: classified.cards, scene, baseMs, uncapped: held || isRare(scene), hit: null as Beat['hit'], absorbed: false };
+    return { event, kind, cards: classified.cards, scene, baseMs, uncapped: held || scene !== null, hit: null as Beat['hit'], absorbed: false };
   });
   // O golpe do Ataque Absoluto acontece dentro da cena dele (sub-projeto 6 §7.1): o `DamageDealt` do mesmo atacante que vem
   // depois da cena vira o golpe dela. Entre os dois só pode haver a Guarda que o Ataque Absoluto quebra inteira (`GuardBroken`,
   // que segue como batida própria) e batidas quietas.
   items.forEach((item, i) => {
+    // O dano devolvido pelo Reflect já é o evento da cena: acende nela, na volta dourada, e não há batida a absorver.
+    if (item.scene === 'REFLECT_TRIGGERED' && item.event.type === 'ReflectTriggered' && item.event.damage > 0) item.hit = { event: item.event, atMs: 0 };
     if (item.scene !== 'ABSOLUTE_ATTACK' || item.event.type !== 'AbsoluteAttack') return;
     const attacker = item.event.player;
     for (const next of items.slice(i + 1)) {
@@ -260,8 +278,8 @@ export function buildTimeline(events: GameEvent[], options: TimelineOptions): Be
         lastInvertEndMs = atMs + holdMs;
       }
     }
-    const hit = item.hit && { event: item.hit.event, atMs: startMs + Math.floor(SCENE_MOMENTS.ABSOLUTE_ATTACK.hitAt * itemScale) };
-    beats.push({ event: item.event, kind: item.kind, startMs, durationMs, cards: item.cards, scene: item.scene, invert, hit, absorbed: item.absorbed });
+    const hit = item.hit && { event: item.hit.event, atMs: startMs + HIT_AT[item.scene!]! };
+    beats.push({ event: item.event, kind: item.kind, startMs, durationMs, cards: item.cards, scene: item.scene, invert, hit, absorbed: item.absorbed, intercepted: yields });
     startMs += durationMs;
   }
   return beats;

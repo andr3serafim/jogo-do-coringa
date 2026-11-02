@@ -29,7 +29,7 @@ import type { Names } from '@coringa/sim/text';
 import * as m from 'motion/react-m';
 import { useRef, useState, type ReactNode } from 'react';
 import { sceneText, type FieldTarget } from '../../model/effects.ts';
-import { SCENE_INVERT_LEAD_MS, type Beat, type SceneKind } from '../../model/timeline.ts';
+import { RIBBON_SCENES, SCENE_INVERT_LEAD_MS, type Beat, type SceneKind } from '../../model/timeline.ts';
 import { Card } from '../cards/Card.tsx';
 import { useSceneBox } from './scene-box.ts';
 import { useScenes } from './scenes-loader.ts';
@@ -77,8 +77,8 @@ function SceneLayer({ scene, curtain, names, reduced, me, hitLanded, field = nul
   // O painel fica montado depois da primeira cena e só esmaece (220 ms), com o texto da última enquanto some: sem troca
   // brusca de luminância, e o esmaecimento é o que o movimento reduzido mantém (texto parado que aparece e some). A cena com
   // desenho próprio não passa pelo painel.
-  // A Devastação cancelada não tem nome no painel: sem o desenho, só a fita diz o motivo.
-  const panelScene = Drawn || scene?.scene === 'DEVASTATION_CANCELED' ? null : scene;
+  // As canceladas não têm nome no painel: sem o desenho, só a fita diz o motivo.
+  const panelScene = Drawn || (scene?.scene && RIBBON_SCENES.has(scene.scene)) ? null : scene;
   const [last, setLast] = useState<Beat | null>(panelScene);
   // Cada cena nova remonta a figura e o título, para a entrada tocar de novo (duas cenas iguais seguidas também).
   const [seen, setSeen] = useState<Beat | null>(scene);

@@ -70,7 +70,7 @@ const SAMPLES: { event: GameEvent; kind: Beat['kind']; scene?: SceneKind; cards?
     scene: 'REFLECT_PLAYED',
     cards: ['k1', 'j1', 'q1'],
   },
-  { event: { type: 'ReflectCanceled', player: 'p2', owner: 'p1' }, kind: 'move' },
+  { event: { type: 'ReflectCanceled', player: 'p2', owner: 'p1' }, kind: 'scene', scene: 'REFLECT_CANCELED' },
   {
     event: { type: 'DevastationCast', player: 'p1', target: 'p2', row: 'ATK', k: face('k1'), a: face('a1', 'A'), x: face('j1', 'J') },
     kind: 'banner',
@@ -141,6 +141,8 @@ const REFLECT_PLAYED: GameEvent = {
   against: 'ATTACK',
 };
 const REFLECT_TRIGGERED: GameEvent = { type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 30 };
+const REFLECT_CANCELED: GameEvent = { type: 'ReflectCanceled', player: 'p2', owner: 'p1' };
+const ROW_DEVASTATED: GameEvent = { type: 'RowDevastated', player: 'p2', row: 'DEF', cards: [num('n1')], reflected: false };
 
 /** A soma das cenas raras, que não contam no teto de decisão. */
 /** O que fica fora do teto de decisão: as cenas raras e a faixa da iniciativa (fora do `catchUp`). */
@@ -190,7 +192,7 @@ describe('mapeamento evento → batida (spec §4.2)', () => {
       if (cards) expect(beat!.cards).toEqual(cards);
       const rare = scene !== undefined && scene in RARE_SCENE_MS ? RARE_SCENE_MS[scene as keyof typeof RARE_SCENE_MS] : null;
       const held = event.type === 'InitiativeDecided' ? INITIATIVE_BANNER_MS : null;
-      expect(beat!.durationMs).toBe(kind === 'quiet' ? 0 : (rare ?? held ?? BEAT_MS[kind]));
+      expect(beat!.durationMs).toBe(kind === 'quiet' ? 0 : (rare ?? held ?? BEAT_MS[kind as 'move']));
       expect(beat!.invert !== null).toBe(kind === 'scene' && !NO_INVERT.has(scene!));
     });
   }
@@ -204,6 +206,9 @@ describe('as cenas raras (U3 do sub-projeto 5)', () => {
       ABSOLUTE_DEFENSE: 4_800,
       DEVASTATION: 3_100,
       DEVASTATION_CANCELED: 1_400,
+      REFLECT_PLAYED: 1_500,
+      REFLECT_TRIGGERED: 3_800,
+      REFLECT_CANCELED: 1_400,
     });
   });
 
@@ -214,9 +219,10 @@ describe('as cenas raras (U3 do sub-projeto 5)', () => {
       ABSOLUTE_DEFENSE: SCENE_MS.AbsoluteDefenseStarted,
       DEVASTATION: SCENE_MS.RowDevastated,
       DEVASTATION_CANCELED: SCENE_MS.DevastationCanceled,
+      REFLECT_PLAYED: SCENE_MS.ReflectPlayed,
+      REFLECT_TRIGGERED: SCENE_MS.ReflectTriggered,
+      REFLECT_CANCELED: SCENE_MS.ReflectCanceled,
     });
-    expect(BEAT_MS.scene).toBe(SCENE_MS.ReflectPlayed);
-    expect(SCENE_MS.ReflectTriggered).toBe(SCENE_MS.ReflectPlayed);
   });
 
   it('a cura que não curou nada (a vida já cheia) passa quieta', () => {
@@ -273,8 +279,8 @@ describe('a Exódia e a Devastação (sub-projeto 6 §7.3, §7.4)', () => {
     expect(NO_INVERT.has('DEVASTATION_CANCELED')).toBe(true);
   });
 
-  it('as duas são cenas de campo (sem cortina nem faixa); as outras, não', () => {
-    expect([...FIELD_SCENES].sort()).toEqual(['DEVASTATION', 'DEVASTATION_CANCELED']);
+  it('as duas e a anulação dos Reflects são cenas de campo (sem cortina nem faixa); as outras, não', () => {
+    expect([...FIELD_SCENES].sort()).toEqual(['DEVASTATION', 'DEVASTATION_CANCELED', 'REFLECT_CANCELED']);
   });
 
   it('a refletida: a cena do Reflect e depois a fileira de quem lançou, as duas inversões dentro da regra', () => {
@@ -424,29 +430,32 @@ describe('buildTimeline', () => {
     expect(buildTimeline(SAMPLES.map((s) => s.event), { ...LIVE, mode: 'resync' })).toEqual([]);
   });
 
-  it('decisionPending com ReflectPlayed: tudo em até 1000 ms e a inversão fica', () => {
-    const beats = buildTimeline([REFLECT_PLAYED], { ...LIVE, decisionPending: true });
-    expect(timelineMs(beats)).toBeLessThanOrEqual(DECISION_CAP_MS);
-    expect(beats[0]!.scene).toBe('REFLECT_PLAYED');
-    expect(beats[0]!.invert).not.toBeNull();
-    expect(beats[0]!.invert!.holdMs).toBeGreaterThanOrEqual(INVERT_MIN_HOLD_MS);
-    expectPhotosafe(beats, false);
+  it('decisionPending: as cenas do Reflect não encolhem, porque o servidor dá a folga delas', () => {
+    for (const [event, ms] of [
+      [REFLECT_PLAYED, 1_500],
+      [REFLECT_TRIGGERED, 3_800],
+      [REFLECT_CANCELED, 1_400],
+    ] as const) {
+      const beats = buildTimeline([event], { ...LIVE, decisionPending: true });
+      expect(beats[0]!.durationMs).toBe(ms);
+      expectPhotosafe(beats, false);
+    }
   });
 
-  it('decisionPending, Reflect e a janela de reação que ele abre: cabe em 1000 ms com a inversão', () => {
+  it('decisionPending, o Reflect e a janela de reação que ele abre: só a faixa conta no teto', () => {
     const beats = buildTimeline(
       [REFLECT_PLAYED, { type: 'ReactionWindowOpened', responder: 'p2', trigger: 'REFLECT_PLAYED' }],
       { ...LIVE, decisionPending: true },
     );
-    expect(timelineMs(beats)).toBeLessThanOrEqual(DECISION_CAP_MS);
-    expect(beats[0]!.invert!.holdMs).toBeGreaterThanOrEqual(INVERT_MIN_HOLD_MS);
+    expect(timelineMs(beats)).toBe(1_500 + BEAT_MS.banner);
+    expect(beats[0]!.invert).toBeNull();
   });
 
-  it('decisionPending: inversão que ficaria com menos de 300 ms é descartada, a cena continua', () => {
+  it('decisionPending: entre duas cenas, só o dano encolhe, e a inversão do gatilho fica inteira', () => {
     const beats = buildTimeline([REFLECT_PLAYED, DAMAGE, REFLECT_TRIGGERED], { ...LIVE, decisionPending: true });
-    expect(timelineMs(beats)).toBeLessThanOrEqual(DECISION_CAP_MS);
-    expect(beats.filter((b) => b.kind === 'scene')).toHaveLength(2);
-    expect(beats.every((b) => b.invert === null)).toBe(true);
+    expect(beats.filter((b) => b.kind === 'scene').map((b) => b.durationMs)).toEqual([1_500, 3_800]);
+    expect(beats[2]!.invert!.holdMs).toBeGreaterThanOrEqual(INVERT_MIN_HOLD_MS);
+    expectPhotosafe(beats, false);
   });
 
   it('decisionPending: as cenas raras não encolhem nem contam no teto; o resto encolhe para caber nele', () => {
@@ -482,14 +491,53 @@ describe('buildTimeline', () => {
   });
 });
 
+describe('as cenas do Reflect (sub-projeto 6 §7.5)', () => {
+  it('o lançamento e a anulação não invertem; a inversão é a do gatilho, na batida do cometa no espelho', () => {
+    expect(buildTimeline([REFLECT_PLAYED], LIVE)[0]!.invert).toBeNull();
+    expect(buildTimeline([REFLECT_CANCELED], LIVE)[0]!.invert).toBeNull();
+    const beats = buildTimeline([DAMAGE, REFLECT_TRIGGERED], LIVE);
+    expect(beats[1]!.invert!.atMs).toBe(beats[1]!.startMs + SCENE_MOMENTS.REFLECT_TRIGGERED.mirrorHitAt);
+  });
+
+  it('o gatilho com dano acende o golpe na volta dourada, na própria batida; sem dano, não há golpe', () => {
+    const beats = buildTimeline([DAMAGE, REFLECT_TRIGGERED], LIVE);
+    expect(beats[1]!.hit).toEqual({ event: REFLECT_TRIGGERED, atMs: beats[1]!.startMs + SCENE_MOMENTS.REFLECT_TRIGGERED.returnHitAt });
+    expect(beats[1]!.absorbed).toBe(false);
+    const held: GameEvent = { type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 0 };
+    expect(buildTimeline([held], LIVE)[0]!.hit).toBeNull();
+  });
+
+  it('a anulação é cena de campo, sem cortina', () => {
+    expect(FIELD_SCENES.has('REFLECT_CANCELED')).toBe(true);
+    expect(NO_INVERT.has('REFLECT_CANCELED')).toBe(true);
+    expect(NO_INVERT.has('REFLECT_PLAYED')).toBe(true);
+    expect(NO_INVERT.has('REFLECT_TRIGGERED')).toBe(false);
+  });
+
+  it('o Ataque Absoluto que bate num Reflect é interceptado (o feixe não dispara); o comum, não', () => {
+    const beats = buildTimeline([ABS_ATTACK, { type: 'GuardBroken', player: 'p2', cards: [] }, REFLECT_TRIGGERED], LIVE);
+    expect(beats.map((b) => b.intercepted)).toEqual([true, false, false]);
+    expect(buildTimeline([ABS_ATTACK, DAMAGE], LIVE)[0]!.intercepted).toBe(false);
+  });
+
+  it('no catchUp as três viram faixa, sem golpe nem interceptação', () => {
+    const beats = buildTimeline([ABS_ATTACK, REFLECT_PLAYED, REFLECT_TRIGGERED, REFLECT_CANCELED], { ...LIVE, mode: 'catchUp' });
+    expect(beats.every((b) => b.kind === 'banner' && b.scene === null && b.hit === null && !b.intercepted)).toBe(true);
+  });
+
+  it('muitos gatilhos seguidos ficam dentro dos limites de fotossensibilidade', () => {
+    expectPhotosafe(buildTimeline(Array.from({ length: 12 }, () => REFLECT_TRIGGERED), LIVE), false);
+  });
+});
+
 describe('fotossensibilidade (spec §10.4)', () => {
-  it('sintético: [ReflectPlayed, DamageDealt, ReflectTriggered] — a segunda cena perde a inversão', () => {
-    const beats = buildTimeline([REFLECT_PLAYED, DAMAGE, REFLECT_TRIGGERED], LIVE);
+  it('sintético: [AbsoluteAttack, RowDevastated] — as inversões ficariam a menos de 2 s, e a segunda cena perde a dela', () => {
+    const beats = buildTimeline([ABS_ATTACK, ROW_DEVASTATED], LIVE);
     const scenes = beats.filter((b) => b.kind === 'scene');
     expect(scenes).toHaveLength(2);
     expect(scenes[0]!.invert).not.toBeNull();
     expect(scenes[1]!.invert).toBeNull();
-    expect(scenes[1]!.scene).toBe('REFLECT_TRIGGERED');
+    expect(scenes[1]!.scene).toBe('DEVASTATION');
     expect(luminanceSwitches(beats)).toHaveLength(2);
     expectPhotosafe(beats, false);
   });
@@ -516,7 +564,7 @@ describe('fotossensibilidade (spec §10.4)', () => {
   });
 
   it('cenas coladas: a segunda perde, a terceira volta a inverter depois do intervalo', () => {
-    const beats = buildTimeline([REFLECT_PLAYED, REFLECT_TRIGGERED, REFLECT_PLAYED], LIVE);
+    const beats = buildTimeline([ABS_ATTACK, ROW_DEVASTATED, ROW_DEVASTATED], LIVE);
     expect(beats.map((b) => b.invert !== null)).toEqual([true, false, true]);
     const [first, , third] = beats.map((b) => b.invert!);
     expect(third!.atMs - (first!.atMs + first!.holdMs)).toBeGreaterThanOrEqual(INVERT_COOLDOWN_MS);
@@ -524,7 +572,7 @@ describe('fotossensibilidade (spec §10.4)', () => {
   });
 
   it('cenas coladas em sequência longa: nunca duas inversões a menos de 2 s uma da outra', () => {
-    const beats = buildTimeline(Array.from({ length: 12 }, () => REFLECT_PLAYED), LIVE);
+    const beats = buildTimeline(Array.from({ length: 12 }, (_, i) => (i % 2 ? ROW_DEVASTATED : ABS_ATTACK)), LIVE);
     const inverted = beats.filter((b) => b.invert).map((b) => b.invert!);
     expect(inverted.length).toBeGreaterThan(1);
     expect(inverted.length).toBeLessThan(12);

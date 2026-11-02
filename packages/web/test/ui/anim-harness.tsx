@@ -4,10 +4,11 @@ import type { GameEvent } from '@coringa/engine';
 import type { StateMessage } from '@coringa/protocol';
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { expect, vi } from 'vitest';
+import { afterEach, beforeEach, expect, vi } from 'vitest';
 import { FLASH_MAX_SWITCHES, FLASH_WINDOW_MS } from '../../src/model/flash.ts';
 import { Session } from '../../src/model/session.ts';
 import { DEFAULT_PREFS, type Prefs } from '../../src/model/storage.ts';
+import { NO_INVERT, SCENE_INVERT_LEAD_MS, type SceneKind } from '../../src/model/timeline.ts';
 import { PlayTable } from '../../src/ui/table/PlayTable.tsx';
 import { FakeConnection, scenarioAt, stateMessage, type ViewSpec } from '../fixtures.ts';
 import { roomMessage } from './support.tsx';
@@ -55,13 +56,27 @@ export const EXODIA_OVER: ViewSpec = {
 
 export const EXODIA: GameEvent = { type: 'Exodia', player: 'p2' };
 export const ABSOLUTE: GameEvent = { type: 'AbsoluteAttack', player: 'p2' };
+const probeCard = (id: string, kind: 'K' | 'J' | 'Q') => ({ id, kind, suit: 'copas' }) as const;
 /**
- * Uma cena comum (1,5 s, a inversão aos 150 ms), para os testes da mecânica de flash. As raras (Exódia e Absolutos) são mais longas
- * e não encolhem no teto de decisão (U3 do sub-projeto 5).
+ * A cena de sonda dos testes da mecânica de flash (1,5 s, a inversão aos 150 ms): o pior caso da trava, uma cena curta que inverte
+ * logo no começo. Até a fatia 4 do sub-projeto 6 era o Reflect; nenhuma cena real inverte tão cedo agora, e os limites têm de seguir
+ * provados assim mesmo. É o `ReflectPlayed` com a tabela ajustada por `installFlashProbe`.
  */
-export const SCENE: GameEvent = { type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 40 };
-/** Outra cena comum (o Reflect de Duda devolve o seu golpe). */
-export const SCENE_2: GameEvent = { type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 10 };
+export const SCENE: GameEvent = { type: 'ReflectPlayed', player: 'p1', reflect: { k: probeCard('s-k', 'K'), j: probeCard('s-j', 'J'), q: probeCard('s-q', 'Q') }, against: 'ATTACK' };
+/** Outra cena de sonda (a de Duda). */
+export const SCENE_2: GameEvent = { type: 'ReflectPlayed', player: 'p2', reflect: { k: probeCard('s2-k', 'K'), j: probeCard('s2-j', 'J'), q: probeCard('s2-q', 'Q') }, against: 'ATTACK' };
+/** Liga a sonda em cada teste do arquivo que a chama; a tabela volta ao normal no fim de cada um. */
+export function installFlashProbe(): void {
+  const silent = NO_INVERT as Set<SceneKind>;
+  beforeEach(() => {
+    SCENE_INVERT_LEAD_MS.REFLECT_PLAYED = 150;
+    silent.delete('REFLECT_PLAYED');
+  });
+  afterEach(() => {
+    SCENE_INVERT_LEAD_MS.REFLECT_PLAYED = 0;
+    silent.add('REFLECT_PLAYED');
+  });
+}
 export const TURN: GameEvent = { type: 'TurnStarted', player: 'p2' };
 export const ATTACK: GameEvent = { type: 'AttackDeclared', player: 'p2' };
 export const HIT: GameEvent = { type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 100, defense: 50, damage: 50 };

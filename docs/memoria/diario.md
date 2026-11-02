@@ -5,6 +5,25 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-02 (2): sub-projeto 6, fatia 4 em execução (o Reflect)
+
+- **Pedido do autor** (`decisoes.md` 2026-11-02 (2)): "Aprovado, execute". Plano em `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4.md`, na
+  branch `feat/direcao-visual-fatia-4`.
+- **Task 1, os tempos e as batidas:**
+  - `SCENE_MS`: `ReflectTriggered` 3,8 s e `ReflectCanceled` 1,4 s (o `ReflectPlayed` fica em 1,5 s). Os instantes moram em `SCENE_MOMENTS`;
+  - as três cenas são raras (não encolhem no teto de decisão), e `BEAT_MS.scene` saiu;
+  - `Beat.hit` também guarda o próprio `ReflectTriggered`, com dano; `Beat.intercepted` marca o Ataque Absoluto que bate num Reflect;
+  - `RIBBON_SCENES` junta as canceladas (sem nome, com fita), e a fita "Os Reflects se anularam" entrou;
+  - **Escolhas:**
+    - **a sonda dos testes de flash:** o `animation.test` usava o Reflect como "cena de 1,5 s que inverte aos 150 ms", e nenhuma cena real inverte tão
+      cedo agora. Para não perder esses testes da trava, `installFlashProbe` (`test/ui/anim-harness.tsx`) ajusta a tabela só neles, com o `ReflectPlayed`;
+    - **o exemplo do resfriamento na linha do tempo** passou a ser `[AbsoluteAttack, RowDevastated]`, cujas inversões ficam a 1,87 s;
+    - **sem cena encolhida no teto de decisão,** os testes "sob o teto de 1 s" viraram: a cena fica inteira, e a cortina desce e sobe entre duas cenas
+      separadas por uma faixa. Entrou o caso real do Ataque Absoluto contra Reflect, com uma inversão só;
+    - **o golpe de cena treme sempre forte,** também o dano devolvido, como o do Ataque Absoluto.
+
+---
+
 ## 2026-11-02 (1): o plano do Reflect (a fatia 4 dividida)
 
 - **Pedido do autor** (`decisoes.md` 2026-11-02 (1)): "prossiga, acredito que dá para fazer pelo menos reflect. vamos fazer ressurreição

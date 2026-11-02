@@ -4,7 +4,7 @@ import type { DevastationState, GameEvent, PlayerId, PlayerView, RowName } from 
 import { cardText, eventText, type Names } from '@coringa/sim/text';
 import { initiativeRibbon, SCENE_TITLE, type Ribbon } from './copy.ts';
 import { impactForce, type ImpactForce } from './impact.ts';
-import type { Beat } from './timeline.ts';
+import { RIBBON_SCENES, type Beat } from './timeline.ts';
 
 /** Chave de uma fileira de um jogador, para o conjunto de fileiras acesas: "p1:ATK". */
 export const rowKey = (player: PlayerId, row: RowName): string => `${player}:${row}`;
@@ -90,13 +90,16 @@ function effectsOfEvent(event: GameEvent, view: PlayerView): Partial<BeatEffects
 
 /** Os efeitos da batida em curso, sobre a `view` do `state` que a trouxe. Sem batida, nenhum. */
 /**
- * Os efeitos da batida. Na cena do Ataque Absoluto, depois que o feixe acerta (`landed`), somam-se os do golpe que ela absorveu
+ * Os efeitos da batida. Na cena com golpe (o Ataque Absoluto, o gatilho do Reflect), depois que ele acerta (`landed`), somam-se os dele
  * (o número, os respingos, as fileiras), e o tremor é sempre o forte (sub-projeto 6 §7.1), qualquer que seja o dano. Com
  * `sceneNumber`, a cena desenhada mostra o número ela mesma (o placar não passa por cima dela) e o placar não o repete.
  */
 export function effectsOf(beat: Beat | null, view: PlayerView, landed = false, sceneNumber = false): BeatEffects {
   if (beat === null) return NO_EFFECTS;
-  const own = effectsOfEvent(beat.event, view);
+  // Os dois espelhos que trincam já dizem o que o escudo do placar diria.
+  if (beat.scene === 'REFLECT_CANCELED' && sceneNumber) return NO_EFFECTS;
+  // O golpe que é o próprio evento da cena (o dano devolvido pelo Reflect) só vale quando acende.
+  const own = beat.hit?.event === beat.event ? {} : effectsOfEvent(beat.event, view);
   if (beat.hit === null || !landed) return { ...NO_EFFECTS, ...own };
   const hit = effectsOfEvent(beat.hit.event, view);
   const impact = hit.impact ? { target: hit.impact.target, force: 'forte' as const } : null;
@@ -253,6 +256,8 @@ export function bannerText(event: GameEvent, names: Names): string | null {
     }
     case 'RowDevastated':
       return devastatedText(event, names);
+    case 'ReflectCanceled':
+      return 'Os Reflects se anularam';
     case 'DevastationCanceled': {
       if (event.reason === 'REFLECT_CLASH') return 'Os Reflects se anularam: a Devastação não aconteceu';
       // A Devastação refletida voltou para quem a lançou, e a Defesa Absoluta dele a segurou.
@@ -291,11 +296,11 @@ export function bannerRibbon(event: GameEvent, names: Names): Ribbon | null {
 export const ribbonText = (ribbon: Ribbon): string => (ribbon.reason === null ? ribbon.title : `${ribbon.title} · ${ribbon.reason}`);
 
 /**
- * A batida mostra uma faixa? As cenas só chegam aqui no `catchUp` (viram `banner`), menos a Devastação cancelada, que não
- * carimba nome e diz o motivo na fita (sub-projeto 6 §7.4); o `DeckReshuffled` é `move` com faixa.
+ * A batida mostra uma faixa? As cenas só chegam aqui no `catchUp` (viram `banner`), menos as que não carimbam nome e dizem o motivo
+ * na fita (`RIBBON_SCENES`); o `DeckReshuffled` é `move` com faixa.
  */
 function hasBanner(beat: Beat): boolean {
-  return beat.kind === 'banner' || beat.event.type === 'DeckReshuffled' || beat.scene === 'DEVASTATION_CANCELED';
+  return beat.kind === 'banner' || beat.event.type === 'DeckReshuffled' || (beat.scene !== null && RIBBON_SCENES.has(beat.scene));
 }
 
 /**

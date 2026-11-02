@@ -263,6 +263,38 @@ describe('Ataque Absoluto contra um Reflect (eventos do motor): o Reflect interc
   });
 });
 
+describe('os efeitos do Reflect (sub-projeto 6 §7.5)', () => {
+  const trigger: GameEvent = { type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 30 };
+  const options = { mode: 'live', reducedMotion: false, decisionPending: false } as const;
+  const view = scenarioAt({} as Parameters<typeof scenarioAt>[0]).view;
+
+  it('o dano devolvido só vale depois de a volta dourada acertar', () => {
+    const beat = buildTimeline([trigger], options)[0]!;
+    expect(effectsOf(beat, view, false).damage).toBeNull();
+    expect(effectsOf(beat, view, false).impact).toBeNull();
+    expect(effectsOf(beat, view, true).damage).toEqual({ target: 'p2', amount: 30 });
+    expect(effectsOf(beat, view, true).impact?.target).toBe('p2');
+  });
+
+  it('com a cena desenhada, o número é dela, e o placar não o repete', () => {
+    const beat = buildTimeline([trigger], options)[0]!;
+    expect(effectsOf(beat, view, true, true).damage).toBeNull();
+  });
+
+  it('a anulação desenhada não repete o escudo que quebra no placar; sem o desenho, ele fica', () => {
+    const beat = buildTimeline([{ type: 'ReflectCanceled', player: 'p2', owner: 'p1' }], options)[0]!;
+    expect(effectsOf(beat, view, false, true).shieldBreak).toBeNull();
+    expect(effectsOf(beat, view, false, false).shieldBreak).toBe('p1');
+  });
+
+  it('a anulação tem fita com o motivo, no ar durante a cena', () => {
+    const event: GameEvent = { type: 'ReflectCanceled', player: 'p2', owner: 'p1' };
+    expect(bannerText(event, { me: 'p1', of: () => 'Bot' } as never)).toBe('Os Reflects se anularam');
+    const beats = buildTimeline([event], options);
+    expect(bannerBeatAt(beats, 0, false)).toBe(beats[0]);
+  });
+});
+
 describe('effectsOf: o efeito de cada evento (spec §4.2)', () => {
   const fx = (event: GameEvent) => effectsOf(beatsOf(event)[0]!, view);
 
@@ -301,10 +333,8 @@ describe('effectsOf: o efeito de cada evento (spec §4.2)', () => {
   });
 
   it('ReflectTriggered põe o dano no atacante', () => {
-    expect(fx({ type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 12 }).damage).toEqual({
-      target: 'p1',
-      amount: 12,
-    });
+    const beat = beatsOf({ type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 12 })[0]!;
+    expect(effectsOf(beat, view, true).damage).toEqual({ target: 'p1', amount: 12 });
   });
 
   it('GuardBroken racha os K', () => {
@@ -691,7 +721,9 @@ describe('o peso do golpe (sub-projeto 6 §5)', () => {
   it('o Roubo e o ataque que volta pelo Reflect também batem; a cura não', () => {
     const fx = (event: GameEvent) => effectsOf(beatsOf(event)[0]!, view).impact;
     expect(fx({ type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 9, blocked: false })).toEqual({ target: 'p2', force: 'leve' });
-    expect(fx({ type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 60 })).toEqual({ target: 'p1', force: 'medio' });
+    // O dano devolvido acende dentro da cena, e o golpe de cena treme forte, como o do Ataque Absoluto.
+    const reflected = beatsOf({ type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 60 })[0]!;
+    expect(effectsOf(reflected, view, true).impact).toEqual({ target: 'p1', force: 'forte' });
     expect(fx({ type: 'Healed', player: 'p1', amount: 9, source: 'STEAL', card: num('n9', 9) })).toBeNull();
   });
 });

@@ -6,7 +6,8 @@ import type { GameEvent } from '@coringa/engine';
  * Duração (ms) da cena de cada evento que tem uma. Cada fatia do sub-projeto 6 atualiza o valor da cena que refaz: a fatia 2 deu
  * ao Ataque e à Defesa Absolutos os tempos do protótipo (4,5 s e 4,8 s); a fatia 3, à Exódia (5,8 s) e à Devastação, que passou a
  * ser a da fileira que cai (`RowDevastated`, 3,1 s) ou a cancelada (1,4 s). O lançamento (`DevastationCast`) só abre a janela de
- * reação do alvo, e não tem cena.
+ * reação do alvo, e não tem cena. A fatia 4 deu ao Reflect as três cenas dele: o espelho que se forma (1,5 s), o cometa que volta dele
+ * (3,8 s) e os dois espelhos que trincam (1,4 s).
  */
 export const SCENE_MS: Readonly<Partial<Record<GameEvent['type'], number>>> = {
   Exodia: 5_800,
@@ -15,7 +16,8 @@ export const SCENE_MS: Readonly<Partial<Record<GameEvent['type'], number>>> = {
   RowDevastated: 3_100,
   DevastationCanceled: 1_400,
   ReflectPlayed: 1_500,
-  ReflectTriggered: 1_500,
+  ReflectTriggered: 3_800,
+  ReflectCanceled: 1_400,
 };
 
 /** Teto da folga de um passo: duas cenas no mesmo passo somam, até aqui. */
