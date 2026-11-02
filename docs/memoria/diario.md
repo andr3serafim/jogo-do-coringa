@@ -52,6 +52,10 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 - **Não visto de verdade:** o som; Reflect contra Reflect, dano 0, o seu próprio Reflect, o Ataque Absoluto contra Reflect e o movimento reduzido só têm testes de unidade.
 - **Pequenos, para depois:** os controles do replay no meio de uma cena não cortam o som dela (o mesmo das fatias 2 e 3).
 
+- **Revisão final:** de quem escreveu o código, sem subagente, como o autor aprovou: o diff inteiro por arquivo e os cinco itens do Review Focus contra os testes. Não sobrou achado grande.
+- **Na `main` por fast-forward,** com o `pnpm check` completo no pre-push e as duas CI verdes na branch (run `41390496730`). Os testes da web seguem acima de 99% de linhas.
+- **Fica:** o autor joga. Depois, o plano da fatia 4b (a Ressurreição).
+
 ---
 
 ## 2026-11-02 (1): o plano do Reflect (a fatia 4 dividida)

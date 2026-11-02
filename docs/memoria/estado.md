@@ -1,23 +1,20 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-02**, com o Reflect em execução. A conta que escreveu isto está no fim do limite semanal, e a
+> Sobrescrito a cada atualização. **Última: 2026-11-02**, com o Reflect na `main`. A conta que escreveu isto está no fim do limite semanal, e a
 > próxima pode assumir daqui. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do
 > `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `feat/direcao-visual-fatia-4`, no checkout principal, com o Reflect em execução. A `main` está no plano (`cc2e8ea`).
-- **Feito por último:** a **fatia 3 do sub-projeto 6** (a Exódia e a Devastação, com a desolação e os sons), na `main` com as duas CI verdes
-  (run `41346331555`, em `b8171a8`), **jogada e aprovada pelo autor, sem ajustes** (`decisoes.md` 2026-11-01 (6)). Plano em
-  `docs/superpowers/plans/2026-11-01-direcao-visual-fatia-3.md`; cada escolha técnica no `diario.md` 2026-11-01 (4); medição em
-  `notas/medicao-fatia-3.md`.
-- **Esperando o autor:** nada agora; ele aprovou o plano (`decisoes.md` 2026-11-02 (2)).
-- **Próximo passo exato:** as 5 tarefas do plano estão commitadas na branch (diário 2026-11-02 (2)). Falta: subir a branch com o pre-push, ver as duas CI verdes
-  (a API pública do GitHub, com `curl`), revisar a branch inteira (revisão de quem escreveu, como o autor aprovou), fazer o fast-forward na `main` e pedir a ele para jogar.
+- **Branch:** `main`, no checkout principal, sem trabalho em curso. A branch `feat/direcao-visual-fatia-4` já foi mesclada.
+- **Feito por último:** a **fatia 4 do sub-projeto 6** (o Reflect, com os sons), por fast-forward com as duas CI verdes (run `41390496730`). Plano em
+  `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4.md`; cada escolha técnica no `diario.md` 2026-11-02 (2); medição em `notas/medicao-fatia-4.md`.
+- **Esperando o autor:** jogar o Reflect e dizer o que achou. O que conferir está em "Esperando o autor", logo abaixo.
+- **Próximo passo exato:** com o "ok" dele (ou depois dos ajustes que ele pedir), registrar em `decisoes.md` e escrever o **plano da fatia 4b** (a Ressurreição, §7.6;
+  o mapa está logo abaixo). Nada de código antes da aprovação do plano.
 - **Para ver as cenas do Reflect sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/reflect.json` para a chave `coringa:partidas` e abra
   `/partidas/reflect`. Na rodada 37, "Próximo passo" no passo 175 mostra o espelho do Bot, e no passo 176 o cometa; na rodada 73, no passo 358, a Devastação refletida.
-- **Depois do Reflect:** escrever o plano da fatia 4b (a Ressurreição, §7.6) e, por último, o da fatia 5 (a fluidez das jogadas comuns, §8), que
-  fecha o sub-projeto 6.
+- **Depois da Ressurreição:** o plano da fatia 5 (a fluidez das jogadas comuns, §8), que fecha o sub-projeto 6.
 - **Para ver as cenas da fatia 3 sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave
   `coringa:partidas` e abra `/partidas/exodia-devastacao`. No passo 210, "Próximo passo" toca a Devastação (a sua, na Defesa do Bot); no
   passo 407, a Exódia do Bot.
@@ -50,7 +47,7 @@ dele.
 
 ## A `main`
 
-E1, E2, F1 (2026-10-30), o bloco E3 + F2 + F3 (2026-10-31), a marca "Cura passiva", as fatias 1, 2 e 3 do sub-projeto 6 e os ajustes da fatia 1 (2026-11-01) mesclados. Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D
+E1, E2, F1 (2026-10-30), o bloco E3 + F2 + F3 (2026-10-31), a marca "Cura passiva", as fatias 1, 2 e 3 do sub-projeto 6, os ajustes da fatia 1 (2026-11-01) e a fatia 4 (2026-11-02) mesclados. Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D
 (`8d7f078`, `a5a76c5`, `bba8377`, `8cdf0a1`), a memória compartilhada, a E1, a E2, a F1 e o bloco E3 + F2 + F3 (o Reflect
 reativo, a Devastação, o Roubo sem naipe, a cura pela Defesa, o limite de 4 especiais com a BURN e a iniciativa com o placar na
 tela). Regras em vigor: spec 1 (`docs/superpowers/specs/2026-10-15-jogo-coringa-regras-motor-design.md`), com os ajustes da
@@ -61,6 +58,16 @@ spec do sub-projeto 5 (`2026-10-27-ajustes-design.md`).
 Vazia: o bloco E3 + F2 + F3 era o último item.
 
 ## Esperando o autor
+
+- **Sub-projeto 6, fatia 4 (o Reflect), para ele jogar e dizer o que achou.** O que ele aprovou no plano está em `decisoes.md` 2026-11-02 (2). O que a execução decidiu:
+  - **a cortina recusada tenta de novo:** numa cena com 2 s ou mais pela frente, ela sobe assim que a trava de flash deixa. Vale também para os Absolutos e a Exódia. O
+    limite de 3 trocas por segundo não mudou;
+  - **a cena mede depois de a mesa assentar:** sem isso, o cometa saía ~60 px abaixo da fileira. Achado só nas fotos: o jsdom não tem layout, e o teste é o olho;
+  - **o que o plano deixou aberto:** as cartas saem da sua mão, ou do retrato do Bot, que não mostra a dele; o espelho pequeno fica no canto da zona, sem mudar a altura dela;
+  - **não conferido de verdade:** o som (só os instantes), Reflect contra Reflect (nenhuma das 3.771 partidas de bots anulou), o dano 0, o seu próprio Reflect, o Ataque
+    Absoluto contra Reflect e o movimento reduzido: todos só nos testes de unidade. A revisão final foi de quem escreveu o código, sem subagente. Na fixture, ele vê o
+    Reflect do Bot e a Devastação refletida;
+  - **pequeno, para depois:** no replay, os controles no meio de uma cena não cortam o som dela (o mesmo das fatias 2 e 3).
 
 - **Sub-projeto 6, fatia 3: jogada e aprovada em 2026-11-01, sem ajustes** (`decisoes.md` 2026-11-01 (6)). O que ele aprovou no plano
   (`decisoes.md` 2026-11-01 (4)) está na spec §14. O que a execução decidiu, e o que muda em relação ao plano:
