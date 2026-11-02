@@ -6,6 +6,16 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-02 (7): guardar o script de medição
+
+Perguntado se o script de medição das cenas, que era temporário, deveria ficar no repositório:
+
+> Sim, guarde
+
+**Leitura:** ele fica em `packages/web/e2e/medir-cena.ts`, fora do `pnpm e2e` e da CI. **[I]** Os rascunhos 1 a 4 do protótipo seguem fora do git (`.superpowers/brainstorm/`), como recomendado: ele não pediu para guardá-los, e o aprovado, o 5, já está no repositório.
+
+---
+
 ## 2026-11-02 (6): a quadra sem o losango
 
 Com uma foto das cartas da quadra na fileira:

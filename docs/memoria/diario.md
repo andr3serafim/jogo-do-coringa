@@ -9,6 +9,8 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 - **Pedido do autor** (`decisoes.md` 2026-11-02 (6)): tirar o losango amarelo das cartas da quadra, e nada mais.
 - **Feito:** `QuadMarks` (`ui/cards/Card.tsx`) perdeu o losango; a spec 6 §6 foi atualizada. O teste da mesa falhou antes (4 losangos, contra 0) e passa depois.
+- **O script de medição** (`decisoes.md` 2026-11-02 (7)): as fotos e a medida de uma cena, por variáveis de ambiente, viraram `packages/web/e2e/medir-cena.ts`, com `medir.config.ts`. Ele fica fora do `pnpm e2e` e da CI, porque a configuração padrão lista os arquivos que roda, e foi testado na Ressurreição (59 quadros/s com a CPU 4× nas duas telas).
+- **O que a outra conta não vê, de propósito:** os rascunhos 1 a 4 do protótipo (`.superpowers/brainstorm/`, só nesta máquina). O aprovado, o 5, está no repositório, e nenhum artefato foi publicado.
 - **O próximo passo não mudou:** o plano da fatia 5, no `estado.md`.
 
 ---

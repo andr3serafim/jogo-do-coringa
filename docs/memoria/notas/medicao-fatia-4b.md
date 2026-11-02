@@ -10,7 +10,7 @@ Spec 6 §11: meta de ≥ 50 quadros por segundo nas cenas com a CPU 4× mais len
   - do passo 27 para o 28 (rodada 7), a sua Ressurreição, com a quadra de 9 na fileira de destino;
   - do passo 107 para o 108 (rodada 23), a do Bot, com a quadra de 2 na outra fileira.
 - **Medida:** um laço de `requestAnimationFrame` durante os 4,6 s da cena, sem os 5 primeiros quadros. Ele conta os quadros, o maior intervalo, o p95 e o pico de
-  `[data-particula]` vivas. O script foi temporário e não ficou no repositório.
+  `[data-particula]` vivas. O script hoje é `packages/web/e2e/medir-cena.ts`.
 
 ## Resultado
 

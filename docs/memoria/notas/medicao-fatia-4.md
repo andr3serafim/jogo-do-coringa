@@ -10,7 +10,7 @@ Spec 6 §11: meta de ≥ 50 quadros por segundo nas cenas com a CPU 4× mais len
   - do passo 175 para o 176 (rodada 37), o Bot joga o Reflect contra o seu ataque;
   - do passo 176 para o 177, o golpe volta, com 49 de dano em você.
 - **Medida:** um laço de `requestAnimationFrame` durante a cena, sem os 5 primeiros quadros. Ele conta os quadros, o maior intervalo, o p95 e o pico de
-  `[data-particula]` vivas. O script foi temporário e não ficou no repositório.
+  `[data-particula]` vivas. O script hoje é `packages/web/e2e/medir-cena.ts`.
 
 ## Resultado
 

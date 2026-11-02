@@ -34,7 +34,7 @@
   - não há Python nesta máquina, e heredoc grande no shell às vezes quebra (crase, aspas): para editar vários arquivos, escreva um
     script `.mjs` com a ferramenta de escrita e rode com `node`;
   - o ledger `.superpowers/sdd/…` fica fora do git: vale o `diario.md` e o `git log` (regra 6 do `CLAUDE.md`);
-  - **tire fotos das cenas:** o jsdom não tem layout. Nas fatias 4 e 4b, só as fotos do Playwright acharam o cometa fora do lugar, a cena sem cortina e as cópias colapsadas. Uma spec e uma config temporárias (`zz-*`, apagadas antes do commit) bastam;
+  - **tire fotos das cenas:** o jsdom não tem layout. Nas fatias 4 e 4b, só as fotos do Playwright acharam o cometa fora do lugar, a cena sem cortina e as cópias colapsadas. O `packages/web/e2e/medir-cena.ts` tira as fotos e mede a cena com a CPU 4× (o uso está no começo dele; o resultado vai para `notas/medicao-*.md`);
   - **em `test/ui`, todo teste é `.test.tsx`:** o Vitest da web não roda `.test.ts` ali, nem na CI, e nada avisa;
   - **`animation.test.tsx`** usa a sonda `installFlashProbe` (`test/ui/anim-harness.tsx`): as cenas do Reflect e da Ressurreição seguem com o painel de reserva nesse arquivo;
   - uma marca que dura menos de meio segundo escapa do `toHaveCount` do Playwright: quem procura é a própria página, a cada quadro (`e2e/scenes.spec.ts`).
