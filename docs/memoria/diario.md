@@ -18,7 +18,9 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   - **causa local achada e consertada (E1):** o palco recebia `--tremor` no estilo inline a cada golpe. Variável CSS é herdada, então a mesa inteira recalculava o estilo (530 elementos, ~100 ms). O tremor virou uma Web Animation no `translate` do placar e dos campos, disparada pelo `Stage` a cada batida com golpe, e a regra do CSS saiu. No ataque, a chegada no PC caiu de 183–200 para 117 ms, e os quadros/s subiram de 38–41 para 45–48 (três execuções de cada lado);
   - **de quebra:** dois golpes seguidos do mesmo peso tremem duas vezes. Era um item da Task 7, que agora só tem os sons e o replay;
   - **o resto não é local:** o desenho do React com a mesa inteira e as projeções do Motion em toda carta com `layoutId`. Mexer nisso é mudar a forma da mesa: fica registrado para o autor decidir, como a E1 previa. A meta de ≤ 100 ms não foi atingida no ataque.
-- **A seguir:** a Task 2 (o modelo já está escrito e testado, falta commitar).
+- **Task 2, o modelo** (`model/table-motion.ts`, puro): `TABLE_MOTION`, `recoilsOf`, `landingsOf` (com `draftShown`), `leavingOf`, `shardsPerCard` e `shiftDelaysOf`, com 17 testes, entre eles o que trava as durações de uma jogada seguida do golpe sob o teto de 1 s.
+  - **Escolhas:** as batidas de cena ficam de fora de tudo (as cenas desenham as próprias cópias). Na saída do Bônus (`BuffRemoved`), o J espera só na zona de ataque e o Q só na de defesa; o Selvagem, que o evento não diz em que papel estava, faz esperar as duas. Com duas saídas no mesmo lugar, vale a última batida: a carta desliza uma vez só, até o lugar final.
+- **A seguir:** a Task 3 (as partículas, a camada e o palco).
 
 ---
 

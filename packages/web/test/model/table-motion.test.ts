@@ -1,0 +1,132 @@
+import type { GameEvent, NumCard, SpecialCard } from '@coringa/engine';
+import { describe, expect, it } from 'vitest';
+import { landingsOf, leavingOf, recoilsOf, shardsPerCard, shiftDelaysOf, TABLE_MOTION } from '../../src/model/table-motion.ts';
+import { buildTimeline, DECISION_CAP_MS, timelineMs, type Beat } from '../../src/model/timeline.ts';
+import { scenarioAt } from '../fixtures.ts';
+
+const num = (id: string, value: NumCard['value'] = 5): NumCard => ({ id, kind: 'NUM', value, suit: 'copas' });
+const face = (id: string, kind: 'J' | 'Q' | 'K' | 'A' = 'K'): SpecialCard => ({ id, kind, suit: 'ouros' });
+
+const LIVE = { mode: 'live', reducedMotion: false, decisionPending: false } as const;
+const beatsOf = (...events: GameEvent[]): Beat[] => buildTimeline(events, LIVE);
+/** Uma faixa antes, para a batida da jogada não começar em 0. */
+const TURN: GameEvent = { type: 'TurnStarted', player: 'p1' };
+const buff = (player: 'p1' | 'p2', id = 'j1'): GameEvent => ({ type: 'BuffPlayed', player, card: face(id, 'J'), as: 'J' });
+
+describe('o recuo das cartas que saem da sua mão (§8)', () => {
+  it('o seu J: o id no início da batida dele', () => {
+    const beats = beatsOf(TURN, buff('p1'));
+    expect([...recoilsOf(beats, 'p1')]).toEqual([['j1', beats[1]!.startMs]]);
+  });
+
+  it('o J do Bot não recua: a mão dele são versos', () => {
+    expect(recoilsOf(beatsOf(buff('p2')), 'p1').size).toBe(0);
+  });
+
+  it('a sua Devastação: as três cartas recuam', () => {
+    const cast: GameEvent = { type: 'DevastationCast', player: 'p1', target: 'p2', row: 'ATK', k: face('k1', 'K'), a: face('a1', 'A'), x: face('x1', 'J') };
+    expect([...recoilsOf(beatsOf(cast), 'p1').keys()]).toEqual(['k1', 'a1', 'x1']);
+  });
+});
+
+describe('o pouso (§8)', () => {
+  it('o seu J pousa depois do recuo e da mola, sem queda', () => {
+    const beats = beatsOf(TURN, buff('p1'));
+    expect(landingsOf(beats, 'p1', false).get('j1')).toEqual({ atMs: beats[1]!.startMs + 510, drop: false });
+  });
+
+  it('o J do Bot cai no destino na batida dele', () => {
+    const beats = beatsOf(TURN, buff('p2'));
+    expect(landingsOf(beats, 'p1', false).get('j1')).toEqual({ atMs: beats[1]!.startMs + TABLE_MOTION.dropMs, drop: true });
+  });
+
+  it('as suas do Equipar só achatam com o rascunho à vista, e caem sem ele', () => {
+    const placed: GameEvent = { type: 'CardsPlaced', player: 'p1', placements: [{ card: num('n1'), destination: 'ATK' }] };
+    const beats = beatsOf(TURN, placed);
+    const at = beats[1]!.startMs + TABLE_MOTION.dropMs;
+    expect(landingsOf(beats, 'p1', true).get('n1')).toEqual({ atMs: at, drop: false });
+    expect(landingsOf(beats, 'p1', false).get('n1')).toEqual({ atMs: at, drop: true });
+  });
+
+  it('as do Bot no Equipar caem', () => {
+    const placed: GameEvent = { type: 'CardsPlaced', player: 'p2', placements: [{ card: num('n2'), destination: 'DEF' }] };
+    expect(landingsOf(beatsOf(placed), 'p1', true).get('n2')).toEqual({ atMs: TABLE_MOTION.dropMs, drop: true });
+  });
+
+  it('a numérica roubada voa da fileira do outro e pousa depois da mola, sem recuo', () => {
+    const stolen: GameEvent = { type: 'CardStolen', player: 'p1', from: 'p2', card: num('n3'), fromRow: 'ATK', toRow: 'ATK', ace: face('a1', 'A') };
+    expect(landingsOf(beatsOf(stolen), 'p1', false).get('n3')).toEqual({ atMs: TABLE_MOTION.landAfterMs, drop: false });
+  });
+});
+
+describe('as cartas que saem para o cemitério (E2, E5)', () => {
+  it('4 K da Guarda quebrada: os 4 estouram', () => {
+    const ks = ['k1', 'k2', 'k3', 'k4'].map((id) => face(id, 'K'));
+    const leaving = leavingOf(beatsOf({ type: 'GuardBroken', player: 'p2', cards: ks }));
+    expect([...leaving.values()].map((l) => l.shatter)).toEqual([true, true, true, true]);
+  });
+
+  it('a Armadilha: o A sai sem estourar, o alvo estoura', () => {
+    const trap: GameEvent = { type: 'TrapUsed', player: 'p1', card: face('a1', 'A'), target: face('j9', 'J'), targetOwner: 'p2' };
+    const leaving = leavingOf(beatsOf(TURN, trap));
+    expect(leaving.get('a1')).toMatchObject({ shatter: false });
+    expect(leaving.get('j9')).toMatchObject({ shatter: true });
+  });
+
+  it('a fileira gasta sai sem estourar, na batida dela', () => {
+    const beats = beatsOf(TURN, { type: 'CardsRemovedFromRow', player: 'p1', row: 'ATK', cards: [num('n1'), num('n2')] });
+    expect(leavingOf(beats).get('n2')).toEqual({ startMs: beats[1]!.startMs, shatter: false });
+  });
+
+  it('as cenas desenham as delas: a Devastação e o Reflect não dão cópias', () => {
+    const fallen: GameEvent = { type: 'RowDevastated', player: 'p2', row: 'ATK', cards: [num('n1')], reflected: false };
+    const reflect: GameEvent = { type: 'ReflectPlayed', player: 'p2', reflect: { k: face('k1'), j: face('j1', 'J'), q: face('q1', 'Q') }, against: 'ATTACK' };
+    expect(leavingOf(beatsOf(fallen, reflect)).size).toBe(0);
+  });
+});
+
+describe('as vizinhas esperam a batida da carta que sai', () => {
+  it('a carta da frente da Defesa sai: as outras da Defesa esperam, as do Ataque não', () => {
+    const { view } = scenarioAt({ self: { defenseRow: [4, 6], attackRow: [9] } });
+    const beats = beatsOf(TURN, { type: 'CardsRemovedFromRow', player: 'p1', row: 'DEF', cards: [num('fora')] });
+    const shifts = shiftDelaysOf(beats, view);
+    expect(shifts.get('x-p1-DEF-0')).toBe(beats[1]!.startMs);
+    expect(shifts.get('x-p1-DEF-1')).toBe(beats[1]!.startMs);
+    expect(shifts.has('x-p1-ATK-0')).toBe(false);
+  });
+
+  it('o seu J sai da mão: as outras da mão esperam', () => {
+    const { view } = scenarioAt({ self: { hand: ['Q', 'A'] } });
+    const beats = beatsOf(TURN, buff('p1'));
+    const shifts = shiftDelaysOf(beats, view);
+    expect(view.self.hand.map((card) => shifts.get(card.id))).toEqual([beats[1]!.startMs, beats[1]!.startMs]);
+  });
+
+  it('2 K de 4 quebram: os 2 que ficam na Guarda esperam', () => {
+    const { view } = scenarioAt({ opponent: { guard: ['K', 'K'] } });
+    const beats = beatsOf(TURN, { type: 'GuardBroken', player: 'p2', cards: [face('k8'), face('k9')] });
+    const shifts = shiftDelaysOf(beats, view);
+    expect(view.opponent.guard.map((card) => shifts.get(card.id))).toEqual([beats[1]!.startMs, beats[1]!.startMs]);
+  });
+});
+
+describe('os cacos por carta', () => {
+  it('cabem no teto de 40 por batida', () => {
+    expect([1, 4, 5].map(shardsPerCard)).toEqual([10, 10, 8]);
+  });
+});
+
+describe('o teto de decisão não muda (§8)', () => {
+  it('uma jogada seguida do golpe tem as durações de antes e cabe em 1 s', () => {
+    const events: GameEvent[] = [
+      buff('p1'),
+      { type: 'AttackDeclared', player: 'p1' },
+      { type: 'DamageDealt', attacker: 'p1', defender: 'p2', attack: 50, defense: 10, damage: 40 },
+      { type: 'CardsRemovedFromRow', player: 'p1', row: 'ATK', cards: [num('n1')] },
+      { type: 'TurnStarted', player: 'p2' },
+    ];
+    const beats = buildTimeline(events, { ...LIVE, decisionPending: true });
+    expect(beats.map((beat) => beat.durationMs)).toEqual([157, 157, 315, 157, 210]);
+    expect(timelineMs(beats)).toBeLessThanOrEqual(DECISION_CAP_MS);
+  });
+});
