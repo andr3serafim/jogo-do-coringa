@@ -33,6 +33,10 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 - **Não visto de verdade:** o som; o movimento reduzido e o caso de duas quadras na mesa só têm testes de unidade.
 - **Pequeno, para depois:** o total da fileira já conta a carta no começo da cena (o autor viu essa escolha no plano); os controles do replay no meio de uma cena não cortam o som dela (o mesmo das fatias anteriores).
 
+- **Revisão final:** de quem escreveu o código, sem subagente, como o autor aprovou: o diff por arquivo e os cinco itens do Review Focus contra os testes. Não sobrou achado grande.
+- **Na `main` por fast-forward,** com o `pnpm check` completo no pre-push e as duas CI verdes na branch (run `41465757404`). Com ela, as seis cenas especiais do §7 estão entregues.
+- **Fica:** o autor joga. Depois, o plano da fatia 5 (a fluidez), a última do sub-projeto 6.
+
 ---
 
 ## 2026-11-02 (3): o Reflect aprovado, e o plano da Ressurreição

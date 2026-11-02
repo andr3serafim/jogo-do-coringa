@@ -1,22 +1,20 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-02**, com a Ressurreição em execução. A conta que escreveu isto está no fim do limite semanal, e a
+> Sobrescrito a cada atualização. **Última: 2026-11-02**, com a Ressurreição na `main`. A conta que escreveu isto está no fim do limite semanal, e a
 > próxima pode assumir daqui. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do
 > `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `feat/direcao-visual-fatia-4b`, no checkout principal, com a Ressurreição em execução. A `main` está no plano (`a9331b3`).
-- **Feito por último:** a **fatia 4 do sub-projeto 6** (o Reflect, com os sons), na `main`, **jogada e aprovada pelo autor, sem ajustes** (`decisoes.md` 2026-11-02 (3)).
-  Plano em `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4.md`; cada escolha técnica no `diario.md` 2026-11-02 (2); medição em `notas/medicao-fatia-4.md`.
-- **Esperando o autor:** nada agora; ele aprovou o plano (`decisoes.md` 2026-11-02 (4)).
-- **Próximo passo exato:** as 4 tarefas do plano estão commitadas na branch (diário 2026-11-02 (4)). Falta: subir a branch com o pre-push, ver as duas CI verdes (a API pública do GitHub,
-  com `curl`), revisar a branch inteira (revisão de quem escreveu, como o autor aprovou), fazer o fast-forward na `main` e pedir a ele para jogar.
+- **Branch:** `main`, no checkout principal, sem trabalho em curso. A branch `feat/direcao-visual-fatia-4b` já foi mesclada.
+- **Feito por último:** a **fatia 4b do sub-projeto 6** (a Ressurreição, com o som), por fast-forward com as duas CI verdes (run `41465757404`). Plano em
+  `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4b.md`; cada escolha técnica no `diario.md` 2026-11-02 (4); medição em `notas/medicao-fatia-4b.md`. Com ela, **as seis cenas especiais do §7 estão na `main`**.
+- **Esperando o autor:** jogar a Ressurreição e dizer o que achou. O que conferir está em "Esperando o autor", logo abaixo.
+- **Próximo passo exato:** com o "ok" dele (ou depois dos ajustes que ele pedir), registrar em `decisoes.md` e escrever o **plano da fatia 5** (a fluidez das jogadas comuns, spec `2026-10-31-direcao-visual-design.md` §8, com os sons), a última do sub-projeto 6, como as fatias anteriores. Candidato já anotado nas medições: o quadro da chegada do passo, que pesa de 100 a 225 ms com a CPU 4×. Nada de código antes da aprovação do plano.
 - **Para ver a Ressurreição sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave `coringa:partidas` e abra `/partidas/exodia-devastacao`. "Próximo
   passo" na rodada 7, passo 27, mostra a sua, com a quadra; na rodada 23, passo 107, a do Bot, com a quadra na outra fileira; na rodada 37, passo 182, a do Bot sem quadra.
 - **Para ver as cenas do Reflect sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/reflect.json` para a chave `coringa:partidas` e abra
   `/partidas/reflect`. Na rodada 37, "Próximo passo" no passo 175 mostra o espelho do Bot, e no passo 176 o cometa; na rodada 73, no passo 358, a Devastação refletida.
-- **Depois da Ressurreição:** o plano da fatia 5 (a fluidez das jogadas comuns, §8), que fecha o sub-projeto 6.
 - **Para ver as cenas da fatia 3 sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave
   `coringa:partidas` e abra `/partidas/exodia-devastacao`. No passo 210, "Próximo passo" toca a Devastação (a sua, na Defesa do Bot); no
   passo 407, a Exódia do Bot.
@@ -35,7 +33,7 @@
 
 ## A `main`
 
-E1, E2, F1 (2026-10-30), o bloco E3 + F2 + F3 (2026-10-31), a marca "Cura passiva", as fatias 1, 2 e 3 do sub-projeto 6, os ajustes da fatia 1 (2026-11-01) e a fatia 4 (2026-11-02) mesclados. Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D
+E1, E2, F1 (2026-10-30), o bloco E3 + F2 + F3 (2026-10-31), a marca "Cura passiva", as fatias 1, 2 e 3 do sub-projeto 6, os ajustes da fatia 1 (2026-11-01) e as fatias 4 e 4b (2026-11-02) mesclados. Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D
 (`8d7f078`, `a5a76c5`, `bba8377`, `8cdf0a1`), a memória compartilhada, a E1, a E2, a F1 e o bloco E3 + F2 + F3 (o Reflect
 reativo, a Devastação, o Roubo sem naipe, a cura pela Defesa, o limite de 4 especiais com a BURN e a iniciativa com o placar na
 tela). Regras em vigor: spec 1 (`docs/superpowers/specs/2026-10-15-jogo-coringa-regras-motor-design.md`), com os ajustes da
@@ -46,6 +44,14 @@ spec do sub-projeto 5 (`2026-10-27-ajustes-design.md`).
 Vazia: o bloco E3 + F2 + F3 era o último item.
 
 ## Esperando o autor
+
+- **Sub-projeto 6, fatia 4b (a Ressurreição), para ele jogar e dizer o que achou.** O que ele aprovou no plano está em `decisoes.md` 2026-11-02 (4). O que a execução decidiu:
+  - **com duas quadras na mesma fileira, acende a de maior valor:** é a que mais soma na conta que o jogador vê;
+  - **as cópias da quadra ficam até o céu sumir,** para a carta não "apagar" de repente sob a cortina;
+  - **não conferido de verdade:** o som (só os instantes), o movimento reduzido e o caso de duas quadras na mesa: só nos testes de unidade. A revisão final foi de quem escreveu o código, sem subagente;
+  - **para reparar ao jogar:** a cena inteira a cada vez, como ele decidiu. Uma partida de bots teve 13 Ressurreições; se cansar, a decisão (`decisoes.md` 2026-10-31 (12)) é dele;
+  - **achado no caminho:** o Vitest da web só roda `test/ui/**/*.test.tsx`. O `scenes-mirror.test.ts` da fatia 4 nunca tinha rodado; virou `.tsx` e passa, sem defeito escondido;
+  - **pequenos, para depois:** o total da fileira já conta a carta no começo da cena (ele viu no plano); os controles do replay no meio de uma cena não cortam o som dela.
 
 - **Sub-projeto 6, fatia 4 (o Reflect): jogada e aprovada em 2026-11-02, sem ajustes** (`decisoes.md` 2026-11-02 (3)). O que ele aprovou no plano está em `decisoes.md` 2026-11-02 (2). O que a execução decidiu:
   - **a cortina recusada tenta de novo:** numa cena com 2 s ou mais pela frente, ela sobe assim que a trava de flash deixa. Vale também para os Absolutos e a Exódia. O
