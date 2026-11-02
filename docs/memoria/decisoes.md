@@ -6,6 +6,18 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-02 (8): a outra conta assume a fatia 5
+
+Na outra conta, com a passagem pronta na `main`:
+
+> Siga a regra 1 do CLAUDE.md: ache o estado.md mais novo e continue do próximo passo (o plano da fatia 5). [...] a passagem está pronta na main, você consegue continuar só com o repositório. Não há trabalho pela metade nem branch sem mesclar da outra conta. Vamos prosseguir
+
+**Leitura:**
+- O próximo passo do `estado.md`: escrever o plano da fatia 5, entregar com as escolhas listadas e só escrever código depois do ok dele.
+- **[I]** O plano é entregue em `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-5.md`, com as escolhas E1 a E9. Nenhuma delas foi aprovada ainda.
+
+---
+
 ## 2026-11-02 (7): guardar o script de medição
 
 Perguntado se o script de medição das cenas, que era temporário, deveria ficar no repositório:

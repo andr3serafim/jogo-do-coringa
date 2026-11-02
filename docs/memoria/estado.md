@@ -1,20 +1,18 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-02**, com a Ressurreição aprovada e o autor passando para a outra conta. A conta que escreveu isto está no fim do limite semanal, e a
-> próxima pode assumir daqui. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do
-> `CLAUDE.md`).
+> Sobrescrito a cada atualização. **Última: 2026-11-02**, na outra conta, com o plano da fatia 5 escrito e esperando a aprovação do autor. Antes de seguir, confira se não há
+> versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `main`, no checkout principal, sem trabalho em curso. Todas as branches locais já estão mescladas, e a fatia 5 não tem branch, plano nem arquivo.
-- **Feito por último:** a **fatia 4b do sub-projeto 6** (a Ressurreição, com o som), na `main`, com as duas CI verdes (run `41465757404`), **jogada e aprovada pelo autor, sem ajustes** (`decisoes.md` 2026-11-02 (5)). Plano em `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4b.md`; cada escolha técnica no `diario.md` 2026-11-02 (4); medição em `notas/medicao-fatia-4b.md`. **As seis cenas especiais do §7 estão entregues e aprovadas.**
-- **Esperando o autor:** nada agora. Ele volta pela outra conta.
-- **Ajuste depois da aprovação:** as cartas da quadra perderam o losango de ouro do canto (`decisoes.md` 2026-11-02 (6)); o fundo dourado, a moldura, o brilho e o selo ficam. Não mude isso de volta seguindo a letra antiga do §6.
-- **Próximo passo exato: escrever o plano da fatia 5** (a fluidez das jogadas comuns, com os sons), a última do sub-projeto 6:
-  1. Leia a spec `docs/superpowers/specs/2026-10-31-direcao-visual-design.md`: §1, §8, §10, §11, §13 e §14, e o mapa logo abaixo. O §8 não tem protótipo: ele fecha com o autor jogando.
-  2. Escreva o plano com `superpowers:writing-plans`, em `docs/superpowers/plans/AAAA-MM-DD-direcao-visual-fatia-5.md`, no formato do `2026-11-02-direcao-visual-fatia-4b.md`. Commite assim que estiver pronto e entregue ao autor com as escolhas listadas. **Nada de código antes da aprovação,** que entra em `decisoes.md`.
-  3. Execute como nas fatias anteriores: branch `feat/direcao-visual-fatia-5`, aqui mesmo, tarefa por tarefa (`superpowers:executing-plans`), sem subagente salvo pedido dele. As escolhas vão para o diário a cada tarefa (regra 6), e o fast-forward na `main` exige as duas CI verdes. Depois, ele joga.
-  4. Com a fatia 5 aprovada, o sub-projeto 6 acaba. O que vem depois é decisão dele (`notas/playtest.md`: o deploy e o playtest online são dele).
+- **Branch:** `main`, no checkout principal, sem código em curso. Todas as branches locais já estão mescladas. A fatia 5 tem plano e ainda não tem branch.
+- **Feito por último:** o **plano da fatia 5** (a fluidez das jogadas comuns, com os sons), `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-5.md`, commitado na `main` (`diario.md` 2026-11-02 (7)). Antes dele, a fatia 4b (a Ressurreição), aprovada sem ajustes (`decisoes.md` 2026-11-02 (5)): **as seis cenas especiais do §7 estão entregues e aprovadas.**
+- **Esperando o autor:** aprovar o plano da fatia 5, ou mudar alguma das escolhas **E1 a E9**, listadas no começo dele. **Nenhuma foi aprovada.** A resposta dele entra em `decisoes.md`, com o texto dele, antes de qualquer código.
+- **Ajuste depois da aprovação da 4b:** as cartas da quadra perderam o losango de ouro do canto (`decisoes.md` 2026-11-02 (6)); o fundo dourado, a moldura, o brilho e o selo ficam. Não mude isso de volta seguindo a letra antiga do §6.
+- **Próximo passo exato:**
+  1. Se o autor ainda não respondeu sobre o plano: entregue-o de novo, com as escolhas E1 a E9 e a recomendação de cada uma. Nada de código.
+  2. Com a aprovação (registrada em `decisoes.md`): crie a branch `feat/direcao-visual-fatia-5` a partir da `main` e execute o plano aqui mesmo, tarefa por tarefa (`superpowers:executing-plans`), sem subagente salvo pedido dele. A **Task 1** vem primeiro: medir os passos comuns e o quadro da chegada antes de qualquer efeito. As escolhas vão para o diário a cada tarefa (regra 6), e o fast-forward na `main` exige as duas CI verdes. Depois, ele joga.
+  3. Com a fatia 5 aprovada, o sub-projeto 6 acaba. O que vem depois é decisão dele (`notas/playtest.md`: o deploy e o playtest online são dele).
 - **Para ver a Ressurreição sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave `coringa:partidas` e abra `/partidas/exodia-devastacao`. "Próximo
   passo" na rodada 7, passo 27, mostra a sua, com a quadra; na rodada 23, passo 107, a do Bot, com a quadra na outra fileira; na rodada 37, passo 182, a do Bot sem quadra.
 - **Para ver as cenas do Reflect sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/reflect.json` para a chave `coringa:partidas` e abra
@@ -39,19 +37,20 @@
   - **`animation.test.tsx`** usa a sonda `installFlashProbe` (`test/ui/anim-harness.tsx`): as cenas do Reflect e da Ressurreição seguem com o painel de reserva nesse arquivo;
   - uma marca que dura menos de meio segundo escapa do `toHaveCount` do Playwright: quem procura é a própria página, a cada quadro (`e2e/scenes.spec.ts`).
 
-## O que o plano da fatia 5 precisa decidir (mapa, não plano)
+## O plano da fatia 5, em resumo
 
-Levantado do §8 e do código ao fechar a fatia 4b, para poupar a releitura. **Nada aqui foi aprovado pelo autor.**
+O mapa que estava aqui virou o plano (`docs/superpowers/plans/2026-11-02-direcao-visual-fatia-5.md`). **Nada nele foi aprovado pelo autor.** Em oito tarefas:
 
-- **O que o §8 pede:**
-  - a carta jogada sai da mão com um recuo curto, voa na mola que já existe (`LAYOUT_SPRING`) e assenta com um achatamento leve (~1,06 → 1) e um sopro de poeira pequeno;
-  - K que quebra, Armadilha e Sacrifício ganham estilhaços de carta, em menor escala que os cacos, em vez de só tremer;
-  - as cartas da compra e do Equipar chegam do monte em leque, ~40 ms uma depois da outra;
-  - **nada aumenta o `DECISION_CAP_MS` (1 s):** o que não couber encurta.
-- **O candidato das medições:** o quadro da chegada do passo pesa de 100 a 225 ms com a CPU 4× em todas as fatias (`notas/medicao-fatia-*.md`). É o único problema de fluidez já medido, e o §8 não o cita: o plano deve dizer se entra.
-- **A armadilha do orçamento:** as cenas moram num chunk à parte (`ui/scenes/`), e estas animações rodam na mesa, no JavaScript inicial (≤ 200 KB gzip, conferido pelo smoke). Importar `ui/scenes/particles.ts` da mesa precisa continuar sem puxar o resto do chunk.
-- **O que já existe:** `CardFx` e o `crack` (`model/effects.ts`, `ui/cards/Card.tsx`), `dealsOf` e `delaysOf` (`model/effects.ts`), `impactForce` (`model/impact.ts`) e os sons `carta` e `quebra` (`sound/synth.ts`).
-- **Os pequenos anotados nas fatias, candidatos a entrar:** os controles do replay no meio de uma cena não cortam o som dela; dois golpes colados tremem uma vez só; a Defesa Absoluta que estende o prazo faz o leitor de tela anunciar o relógio de novo. A lista completa está em "Esperando o autor".
+1. a linha de base: medir os passos comuns e o quadro da chegada (100 a 225 ms com a CPU 4×), com o perfil; consertar só se a causa for nossa e local (E1);
+2. o modelo (`model/table-motion.ts`): recuo, pouso, saída, estouro e os tempos, com teste que trava as durações da linha do tempo;
+3. as partículas saem de `ui/scenes/` para `ui/anim/particles.ts`, e a mesa ganha a camada dos efeitos (`FxLayer`);
+4. a jogada: recuo de 90 ms, voo na mola e pouso com achatamento (1,06 → 1) e poeira; a carta do Bot cai na batida dela (E3);
+5. a saída e os estilhaços: cópias lidas no `getSnapshotBeforeUpdate` seguram as cartas que saem até a batida delas (E2), e as que quebram estouram em cacos (E5);
+6. o leque da compra e do Equipar, do monte, 40 ms uma da outra (E6);
+7. os sons (`carta` no pouso, `pouso`, `quebra` no estouro, `compra`) e os dois pequenos (o replay corta o som da cena; dois golpes colados tremem duas vezes) (E7, E8);
+8. E2E, medição, fotos e documentação.
+
+**Achados do código que o §8 não dizia** (detalhes no `diario.md` 2026-11-02 (7)): a carta que vai ao cemitério sem ser a de cima some na chegada do `state`, antes da batida; a carta do Bot aparece também antes da batida; as numéricas do Equipar nem esmaecem; o `transform` da carta é do Motion, e o recuo e o achatamento vão para as propriedades CSS `translate` e `scale`.
 
 ## A `main`
 
@@ -206,7 +205,8 @@ Playtest online, `wrangler login` + `pnpm deploy:server`, proteção da `main`, 
 - **Worktrees:**
   - `D:\andr3\jogo-coringa`: checkout principal.
   - `.claude/worktrees/inspiring-sammet-387417` (`feat/ajustes`, limpo): o da conta anterior.
-  - `D:\andr3\jogo-coringa-v5` (HEAD solto, limpo): era o checkout limpo dos pushes da conta anterior.
+  - `D:\andr3\jogo-coringa-v5` (HEAD solto, limpo): era o checkout limpo dos pushes da conta anterior. O `git worktree list` o marca como `prunable`.
+  - `.claude/worktrees/youthful-elgamal-3d5e8a` (`claude/inspiring-sammet-387417`, limpo, já mesclada): sobra de uma sessão antiga.
 - **Branches que sobraram:** todas as locais já estão mescladas na `main` (conferido em 2026-11-01), inclusive
   `claude/inspiring-sammet-387417` e `feat/ajustes-fase-a`. Só o trabalho novo precisa de branch nova.
 - **Arquivo solto:** o `jogar-treino.bat` na raiz é o lançador do autor. Não mexer nem commitar.

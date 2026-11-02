@@ -5,6 +5,23 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-02 (7): o plano da fluidez (a fatia 5), na outra conta
+
+- **Pedido do autor** (`decisoes.md` 2026-11-02 (8)): continuar do `estado.md`, que pedia o plano da fatia 5.
+- **Feito:** o plano, `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-5.md`, esperando a aprovação, com as escolhas E1 a E9 no começo dele. Nenhum código, e nenhuma branch.
+- **O que a leitura do código deu ao plano** (nada disso estava no §8):
+  - **as cartas que saem antes da hora:** a mesa não tem `AnimatePresence`, e o cemitério só desenha a carta de cima. Toda carta que vai ao cemitério sem ser a de cima desmonta na chegada do `state`, antes da batida dela: de uma Guarda de 4 K quebrada, só 1 K voa, e a fileira de Ataque gasta some antes do golpe. A Task 1 confirma pelas fotos. O plano segura cópias delas, lidas no `getSnapshotBeforeUpdate`, até a batida;
+  - **a carta do Bot** não tem de onde voar (a mão dele são versos sem id) e aparece na chegada do `state`;
+  - **as numéricas do Equipar** (`PendingCard`, `animated={false}`) não passam pelo `enterDelay`: nem esmaecem;
+  - **o `transform` da carta é do Motion** (a projeção do `layoutId`, com a correção de tamanho mão → mini). O recuo e o achatamento vão para as propriedades CSS `translate` e `scale`, que se compõem com ele. O `scale` só depois do pouso, e a Task 4 confere nas fotos antes de seguir;
+  - **o tremor de dois golpes colados:** a animação do CSS não recomeça quando o valor de `data-tremor` se repete;
+  - **o orçamento:** `ui/scenes/particles.ts` não importa nada; o plano o move, com o `rng` da `aura.ts`, para `ui/anim/particles.ts`;
+  - **a compra:** o Equipar compra 4 cartas por jogador (`cardsPerEquip`), e o leque cabe na batida dele.
+- **O conselho de um revisor** (sem subagente; o modelo de apoio da sessão) mudou a ordem do plano. A Task 1 mede os passos comuns e o quadro da chegada antes de qualquer efeito, porque os efeitos novos disparam nesse mesmo quadro.
+- **Fica:** o autor aprova o plano (ou muda as escolhas); depois, a execução na branch `feat/direcao-visual-fatia-5`.
+
+---
+
 ## 2026-11-02 (6): a quadra sem o losango
 
 - **Pedido do autor** (`decisoes.md` 2026-11-02 (6)): tirar o losango amarelo das cartas da quadra, e nada mais.
