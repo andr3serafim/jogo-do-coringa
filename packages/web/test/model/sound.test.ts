@@ -72,10 +72,9 @@ const gameOver = (result: GameResult): GameEvent => ({ type: 'GameOver', result 
 describe('as pistas das cenas absolutas (sub-projeto 6 §10)', () => {
   const beatOf = (event: GameEvent) => buildTimeline([event], { mode: 'live', reducedMotion: false, decisionPending: false })[0]!;
 
-  it('o Ataque Absoluto e a Defesa Absoluta têm a pista da cena deles; o Reflect segue com a de antes', () => {
+  it('o Ataque Absoluto e a Defesa Absoluta têm a pista da cena deles', () => {
     expect(cueOf(beatOf({ type: 'AbsoluteAttack', player: 'p1' }), 'p1')).toBe('ataque-absoluto');
     expect(cueOf(beatOf({ type: 'AbsoluteDefenseStarted', player: 'p2' }), 'p1')).toBe('defesa-absoluta');
-    expect(cueOf(beatOf({ type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 10 }), 'p1')).toBe('escudo');
   });
 
   it('a Exódia e a Devastação têm a pista da cena delas (fatia 3); o lançamento é a quebra das cartas que saem da mão', () => {
@@ -158,11 +157,19 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
     });
   });
 
-  describe('escudo', () => {
-    it.each(['ReflectPlayed', 'ReflectTriggered'] as const)('%s → escudo', (type) => {
-      expect(cueFor(SAMPLES[type])).toBe('escudo');
+  describe('o Reflect (sub-projeto 6 §10): cada cena tem a pista dela', () => {
+    it('o espelho que se forma', () => {
+      expect(cueFor(SAMPLES.ReflectPlayed)).toBe('reflect-armado');
     });
 
+    it('o cometa: com dano ele volta; sem dano, a pista não tem a volta', () => {
+      expect(cueFor({ type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 10 })).toBe('reflect-cometa');
+      expect(cueFor({ type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 0 })).toBe('reflect-segurado');
+    });
+
+    it('os dois espelhos que trincam', () => {
+      expect(cueFor(SAMPLES.ReflectCanceled)).toBe('reflect-cancelado');
+    });
   });
 
   describe('a espada, a fita e a quadra (sub-projeto 6 §10)', () => {
@@ -214,6 +221,7 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
       'CardsRemovedFromRow',
       'DamageDealt',
       'ReflectPlayed',
+      'ReflectCanceled',
       'ReflectTriggered',
       'AbsoluteDefenseStarted',
       'AbsoluteAttack',

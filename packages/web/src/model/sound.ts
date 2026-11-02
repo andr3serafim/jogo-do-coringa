@@ -12,7 +12,6 @@ export type Cue =
   | 'golpe-leve'
   | 'golpe-medio'
   | 'golpe-forte'
-  | 'escudo'
   | 'vez'
   | 'vitoria'
   | 'derrota'
@@ -24,7 +23,11 @@ export type Cue =
   | 'defesa-absoluta'
   | 'exodia'
   | 'devastacao'
-  | 'devastacao-cancelada';
+  | 'devastacao-cancelada'
+  | 'reflect-armado'
+  | 'reflect-cometa'
+  | 'reflect-segurado'
+  | 'reflect-cancelado';
 
 /** A pista do golpe de `damage` pontos, pelo peso dele (`impactForce`, o mesmo do tremor); dano zero (a defesa segurou tudo) é mudo. */
 function strikeCue(damage: number): Cue | null {
@@ -62,10 +65,14 @@ export function cueOf(beat: Beat, me: PlayerId): Cue | null {
       return strikeCue(event.damage);
     case 'StealDamage':
       return strikeCue(event.damage);
+    // As cenas refeitas no sub-projeto 6 (fatias 2 a 4) têm a pista delas, que segue o pico de cada uma (§10).
     case 'ReflectPlayed':
+      return 'reflect-armado';
     case 'ReflectTriggered':
-      return 'escudo';
-    // As cenas refeitas no sub-projeto 6 (fatias 2 e 3) têm a pista delas, que segue o pico de cada uma (§10).
+      // Sem dano de volta, o cometa se desfaz no espelho: a pista não tem a volta nem o baque no retrato.
+      return event.damage > 0 ? 'reflect-cometa' : 'reflect-segurado';
+    case 'ReflectCanceled':
+      return 'reflect-cancelado';
     case 'AbsoluteAttack':
       return 'ataque-absoluto';
     case 'AbsoluteDefenseStarted':

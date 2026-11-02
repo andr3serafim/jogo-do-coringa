@@ -158,7 +158,6 @@ const ALL_CUES: Record<Cue, true> = {
   'golpe-leve': true,
   'golpe-medio': true,
   'golpe-forte': true,
-  escudo: true,
   vez: true,
   vitoria: true,
   derrota: true,
@@ -171,6 +170,10 @@ const ALL_CUES: Record<Cue, true> = {
   exodia: true,
   devastacao: true,
   'devastacao-cancelada': true,
+  'reflect-armado': true,
+  'reflect-cometa': true,
+  'reflect-segurado': true,
+  'reflect-cancelado': true,
 };
 const CUES = Object.keys(ALL_CUES) as Cue[];
 
@@ -254,6 +257,43 @@ describe('os sons das cenas absolutas seguem o pico de cada uma (sub-projeto 6 �
     }
   });
 
+  it('o espelho que se forma: um tinido em cada carta que chega, e o sino de vidro', () => {
+    const { play } = setup();
+    const times = startsAt(play('reflect-armado'));
+    const m = SCENE_MOMENTS.REFLECT_PLAYED;
+    for (const ms of m.cardsAt) expect(times).toContain((ms + 220) / 1000);
+    expect(times).toContain(m.mirrorAt / 1000);
+  });
+
+  it('o cometa: a carga desde o começo, o sopro, o tempo lento, a batida no espelho, a volta e o baque com o vidro', () => {
+    const { play } = setup();
+    const times = startsAt(play('reflect-cometa'));
+    const m = SCENE_MOMENTS.REFLECT_TRIGGERED;
+    for (const ms of [0, m.launchAt, m.slowAt, m.mirrorHitAt, m.returnHitAt]) expect(times).toContain(ms / 1000);
+  });
+
+  it('o cometa segurado: igual até a batida, e depois só o vidro, sem o sopro da volta nem o baque', () => {
+    const { play } = setup();
+    const m = SCENE_MOMENTS.REFLECT_TRIGGERED;
+    const full = play('reflect-cometa').filter(isSource);
+    const { play: playHeld } = setup();
+    const held = playHeld('reflect-segurado').filter(isSource);
+    const times = startsAt(held);
+    expect(times).toContain(m.mirrorHitAt / 1000);
+    expect(times).toContain(m.returnHitAt / 1000);
+    expect(held.length).toBeLessThan(full.length);
+    const atReturn = (nodes: FakeNode[]) => startsAt(nodes).filter((t) => t === m.returnHitAt / 1000).length;
+    expect(atReturn(held)).toBeLessThan(atReturn(full));
+  });
+
+  it('os dois espelhos que trincam: dois estalos de vidro, sem estrondo', () => {
+    const { play } = setup();
+    const times = startsAt(play('reflect-cancelado'));
+    const m = SCENE_MOMENTS.REFLECT_CANCELED;
+    expect(times).toContain(m.crackAt / 1000);
+    expect(times.some((t) => t > m.crackAt / 1000)).toBe(true);
+  });
+
   it('cut() leva a saída das pistas tocando a zero em 80 ms (o pulo da cena corta o som dela)', () => {
     const { synth, play, ctx } = setup();
     const nodes = play('ataque-absoluto');
@@ -308,6 +348,10 @@ describe('createSynth', () => {
     exodia: 5.8,
     devastacao: 3.1,
     'devastacao-cancelada': 1.4,
+    'reflect-armado': 1.5,
+    'reflect-cometa': 3.8,
+    'reflect-segurado': 3.8,
+    'reflect-cancelado': 1.4,
   };
 
   it.each(CUES)('%s: dura no máximo 600 ms (a espada, 1,2 s; as das cenas, a cena) e começa agora', (cue) => {

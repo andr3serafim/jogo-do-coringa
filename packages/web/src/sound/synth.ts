@@ -108,6 +108,11 @@ const DEF = SCENE_MOMENTS.ABSOLUTE_DEFENSE;
 const EXO = SCENE_MOMENTS.EXODIA;
 const DEV = SCENE_MOMENTS.DEVASTATION;
 const NOPE = SCENE_MOMENTS.DEVASTATION_CANCELED;
+const RP = SCENE_MOMENTS.REFLECT_PLAYED;
+const RT = SCENE_MOMENTS.REFLECT_TRIGGERED;
+const RC = SCENE_MOMENTS.REFLECT_CANCELED;
+/** Quanto cada carta leva para chegar à ponta do espelho (o voo da cena). */
+const MIRROR_CARD_MS = 220;
 /** Um instante da cena (ms desde o começo dela), em segundos de pista. */
 const s = (ms: number): number => ms / 1000;
 
@@ -116,6 +121,35 @@ const s = (ms: number): number => ms / 1000;
  * com as vozes nos instantes dela (`SCENE_MOMENTS`). Timbres livres (spec §9): o que importa é
  * curto, original e sem pico. Golpes mais pesados são mais graves, mais longos e mais cheios.
  */
+/** O sino de vidro: parciais agudas e longas, sem alma de metal. */
+function glassBell({ tone, noise }: Voices, at: number): void {
+  tone({ wave: 'sine', from: 1319, at, length: 0.8, peak: 0.2 });
+  tone({ wave: 'sine', from: 2637, at, length: 0.6, peak: 0.12 });
+  tone({ wave: 'sine', from: 3951, at, length: 0.4, peak: 0.07 });
+  noise({ filter: 'highpass', from: 5000, at, length: 0.06, peak: 0.2 });
+}
+
+/** O vidro que quebra: o chiado agudo que desce, e um tinido solto. */
+function glassBreak({ tone, noise }: Voices, at: number): void {
+  noise({ filter: 'highpass', from: 5200, to: 2600, at, length: 0.5, peak: 0.22 });
+  tone({ wave: 'triangle', from: 3136, to: 1568, at, length: 0.3, peak: 0.1 });
+}
+
+/** A ida do cometa, igual com ou sem dano: a carga, o sopro, o tempo lento, e a batida no espelho, com o sino e o impacto. */
+function cometWay(voices: Voices): void {
+  const { tone, noise } = voices;
+  const charge = s(RT.launchAt);
+  noise({ filter: 'lowpass', from: 180, to: 520, attack: charge * 0.85, length: charge, peak: 0.2 });
+  tone({ wave: 'sine', from: 55, to: 110, attack: charge * 0.85, length: charge, peak: 0.16 });
+  noise({ filter: 'bandpass', from: 600, to: 1800, q: 1, at: s(RT.launchAt), attack: 0.2, length: s(RT.slowAt - RT.launchAt) + 0.05, peak: 0.2 });
+  const slow = s(RT.slowUntil - RT.slowAt);
+  tone({ wave: 'sawtooth', from: 90, to: 70, at: s(RT.slowAt), attack: 0.1, length: slow, peak: 0.08 });
+  noise({ filter: 'lowpass', from: 500, to: 300, at: s(RT.slowAt), attack: 0.1, length: slow, peak: 0.1 });
+  glassBell(voices, s(RT.mirrorHitAt));
+  tone({ wave: 'sine', from: 120, to: 32, at: s(RT.mirrorHitAt), length: 0.5, peak: 0.42 });
+  noise({ filter: 'lowpass', from: 3000, to: 200, at: s(RT.mirrorHitAt), length: 0.4, peak: 0.32 });
+}
+
 const RECIPES: Record<Cue, (voices: Voices) => void> = {
   // A carta chega à mesa: um estalo de papel e uma batida seca.
   carta: ({ tone, noise }) => {
@@ -141,12 +175,6 @@ const RECIPES: Record<Cue, (voices: Voices) => void> = {
     tone({ wave: 'sine', from: 110, to: 38, length: 0.38, peak: 0.5 });
     tone({ wave: 'sawtooth', from: 90, to: 40, length: 0.3, peak: 0.15 });
     noise({ filter: 'lowpass', from: 2200, to: 250, length: 0.25, peak: 0.4 });
-  },
-  // O escudo: um tinido metálico (dois tons agudos, o segundo uma quinta acima do primeiro: 1046 Hz e 1568 Hz) e um clique de ruído.
-  escudo: ({ tone, noise }) => {
-    tone({ wave: 'triangle', from: 1046, length: 0.35, peak: 0.2 });
-    tone({ wave: 'sine', from: 1568, length: 0.25, peak: 0.12 });
-    noise({ filter: 'bandpass', from: 5000, q: 2, length: 0.03, peak: 0.2 });
   },
   // A sua vez: dois toques de sino, o segundo uma quinta acima.
   vez: ({ tone }) => {
@@ -260,6 +288,32 @@ const RECIPES: Record<Cue, (voices: Voices) => void> = {
     noise({ filter: 'lowpass', from: 120, to: 300, attack: rise * 0.8, length: rise, peak: 0.22 });
     tone({ wave: 'sine', from: 42, to: 54, attack: rise * 0.8, length: rise, peak: 0.18 });
     noise({ filter: 'highpass', from: 2600, to: 1400, at: s(NOPE.crackAt), length: 0.09, peak: 0.25 });
+  },
+  // O espelho que se forma: um tinido em cada carta que chega à ponta, e o sino de vidro.
+  'reflect-armado': (voices) => {
+    for (const ms of RP.cardsAt) voices.tone({ wave: 'triangle', from: 1568, at: s(ms + MIRROR_CARD_MS), length: 0.12, peak: 0.12 });
+    glassBell(voices, s(RP.mirrorAt));
+  },
+  // O cometa: a ida, o sopro que sobe na volta, o baque no retrato e o vidro que quebra.
+  'reflect-cometa': (voices) => {
+    cometWay(voices);
+    const { tone, noise } = voices;
+    noise({ filter: 'bandpass', from: 900, to: 3200, q: 1, at: s(RT.mirrorHitAt), attack: 0.25, length: s(RT.returnHitAt - RT.mirrorHitAt), peak: 0.2 });
+    tone({ wave: 'sine', from: 100, to: 30, at: s(RT.returnHitAt), length: 0.45, peak: 0.45 });
+    noise({ filter: 'lowpass', from: 2400, to: 160, at: s(RT.returnHitAt), length: 0.4, peak: 0.3 });
+    glassBreak(voices, s(RT.returnHitAt));
+  },
+  // O cometa que se desfaz no espelho: a mesma ida, e depois só o vidro.
+  'reflect-segurado': (voices) => {
+    cometWay(voices);
+    glassBreak(voices, s(RT.returnHitAt));
+  },
+  // Os dois espelhos que trincam: dois estalos de vidro, um logo depois do outro, sem estrondo.
+  'reflect-cancelado': ({ tone, noise }) => {
+    for (const at of [s(RC.crackAt), s(RC.crackAt) + 0.09]) {
+      noise({ filter: 'highpass', from: 4800, to: 2400, at, length: 0.1, peak: 0.26 });
+      tone({ wave: 'triangle', from: 2794, to: 1760, at, length: 0.14, peak: 0.1 });
+    }
   },
 };
 

@@ -38,6 +38,7 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     - uma brasa a cada 70 ms na ida e a cada 40 ms na volta, numa agenda de sementes fixas (o protótipo soltava 2 a cada 28 ms, lendo o `left` e o `top` do cometa);
     - as trincas reaproveitam o `crackBranch` do abismo; a anulação usa espelhos de 70% do tamanho, porque são dois na mesa;
     - o `HitNumber` do Ataque Absoluto é o mesmo do dano devolvido.
+- **Task 4, os sons:** quatro pistas no lugar da `escudo`, que saiu: `reflect-armado` (os tinidos e o sino de vidro), `reflect-cometa` (a ida, a volta, o baque e o vidro), `reflect-segurado` (a mesma ida, e depois só o vidro) e `reflect-cancelado` (dois estalos de vidro). **Não conferidos de ouvido:** os testes medem os instantes e os limites de volume.
 
 ---
 

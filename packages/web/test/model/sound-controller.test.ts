@@ -217,8 +217,8 @@ describe('SoundController', () => {
     expect(r.synthLoads).toBe(2);
     expect(r.contexts).toHaveLength(1);
     await r.finishLoad();
-    r.controller.play('escudo');
-    expect(r.played).toEqual(['escudo']);
+    r.controller.play('quebra');
+    expect(r.played).toEqual(['quebra']);
   });
 
   it('desligado, o gesto não cria contexto e play não toca', () => {
