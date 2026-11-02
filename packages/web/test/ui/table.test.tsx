@@ -472,8 +472,9 @@ describe('mesa: a mão viva (sub-projeto 6 §6)', () => {
 describe('mesa: o tremor do golpe (sub-projeto 6 §5)', () => {
   it('o tremor desloca o placar e os campos, não o palco inteiro: a mão e a barra ficam paradas (e o golpe não pesa)', () => {
     const css = readFileSync(resolve(import.meta.dirname, '../../src/styles.css'), 'utf8');
-    expect(css).toContain('[data-palco][data-tremor] :is([data-placar], [data-campos]) {\n  animation: tremor');
-    expect(css).not.toContain('[data-palco][data-tremor] {');
+    // O tremor é uma animação do `Stage` no placar e nos campos (fatia 5): nenhuma regra da folha depende de variável posta no palco.
+    expect(css).not.toContain('--tremor');
+    expect(css).not.toContain('[data-palco][data-tremor]');
     const { container } = mount();
     expect(container.querySelector('section[aria-label="Placar"]')).toHaveAttribute('data-placar');
     expect(container.querySelector('[data-campos]')).not.toBeNull();

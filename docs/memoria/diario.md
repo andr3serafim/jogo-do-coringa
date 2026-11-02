@@ -10,7 +10,15 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 - **Pedido do autor** (`decisoes.md` 2026-11-02 (9)): "Aprovado, execute", com 14 pontos do playtest. Ele escolheu encaixar os diretos (3, 4, 7, 8 e 12) nesta fatia e deixar os nove de desenho para depois, com protótipo; "Bônus" no lugar de "Buff"; e tirar a escolha automática da ordem junto com a barra.
 - **Feito:** a branch `feat/direcao-visual-fatia-5`, a partir da `main` (`35b4660`). No plano, a Task 8 nova (os pontos diretos, com as leituras [I] de `decisoes.md`), e o E2E e a medição passaram a ser a Task 9.
 - **Antes de escrever a Task 8, conferido no código:** a "Ameaça de X" mora em `ActionBar.tsx:171` (`threatLabel`), e a prévia do alvo também fala da ameaça (`copy.ts`, perto da linha 245); a ordem automática passa por `automation.ts`, `session.ts`, `replay-track.ts`, `OrderPanel.tsx`, `PlayTable.tsx`, `local-game.tsx` e `Tutorial.tsx`; "Buff" aparece em `copy.ts`, `labels.ts`, `tutorial-copy.ts`, no `HINT` do `Card.tsx`, nos títulos do `PlayerField.tsx` e no histórico, que vem de `packages/sim/src/play/text.ts`.
-- **A seguir:** a Task 1.
+- **Task 1, a linha de base e o quadro da chegada** (números em `notas/medicao-fatia-5.md`):
+  - o `medir-cena.ts` ganhou o `MEDIR_PERFIL` (o perfil do Chromium, com as amostras de JS e o rastreamento de invalidação de estilo) e a medida `chegada`; o `medir.config.ts` ganhou o `MEDIR_PORTA`, porque o `wrangler dev` do autor ocupava a 8787 e não serve o replay;
+  - **armadilha:** abrir o rastreamento dentro da janela medida travava a página por ~1 s e estragava os números. O perfil abre antes da medida, e com ele os números não valem: o perfil serve só para ver do que cada quadro é feito;
+  - os passos são da fixture `especiais`. Nenhuma fixture tem 2 K quebrando fora de cena, então a armadilha ficou no lugar dela;
+  - **a chegada pesa de 83 a 200 ms** com a CPU 4×, e o ataque comum já ficava abaixo da meta (48 e 49 quadros/s) antes de qualquer efeito;
+  - **causa local achada e consertada (E1):** o palco recebia `--tremor` no estilo inline a cada golpe. Variável CSS é herdada, então a mesa inteira recalculava o estilo (530 elementos, ~100 ms). O tremor virou uma Web Animation no `translate` do placar e dos campos, disparada pelo `Stage` a cada batida com golpe, e a regra do CSS saiu. No ataque, a chegada no PC caiu de 183–200 para 117 ms, e os quadros/s subiram de 38–41 para 45–48 (três execuções de cada lado);
+  - **de quebra:** dois golpes seguidos do mesmo peso tremem duas vezes. Era um item da Task 7, que agora só tem os sons e o replay;
+  - **o resto não é local:** o desenho do React com a mesa inteira e as projeções do Motion em toda carta com `layoutId`. Mexer nisso é mudar a forma da mesa: fica registrado para o autor decidir, como a E1 previa. A meta de ≤ 100 ms não foi atingida no ataque.
+- **A seguir:** a Task 2 (o modelo já está escrito e testado, falta commitar).
 
 ---
 

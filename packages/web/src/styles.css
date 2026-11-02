@@ -590,35 +590,6 @@
 }
 
 /*
- * O tremor do golpe (sub-projeto 6 §5): a mesa (o placar e os campos) se desloca alguns pixels e volta, uma vez, quando o palco
- * ganha a marca `data-tremor` na batida do dano. A mão, a barra e o histórico ficam parados: deslocar o palco inteiro custava ~9
- * quadros por segundo com a CPU 4× mais lenta, e a mão parada também se joga melhor. O tamanho e a duração vêm do `Stage` (`SHAKE_PX`, `SHAKE_MS`). Deslocamento, não luz: não
- * conta como troca claro ↔ escuro (spec da web §10.4). Com movimento reduzido o palco não ganha a marca.
- */
-@keyframes tremor {
-  0%,
-  100% {
-    translate: 0 0;
-  }
-  20% {
-    translate: calc(var(--tremor) * -1) calc(var(--tremor) * 0.5);
-  }
-  40% {
-    translate: var(--tremor) calc(var(--tremor) * -0.5);
-  }
-  60% {
-    translate: calc(var(--tremor) * -0.6) calc(var(--tremor) * 0.3);
-  }
-  80% {
-    translate: calc(var(--tremor) * 0.4) 0;
-  }
-}
-
-[data-palco][data-tremor] :is([data-placar], [data-campos]) {
-  animation: tremor var(--tremor-ms, 200ms) linear;
-}
-
-/*
  * A mesa viva (sub-projeto 6 §6). As cartas da mão respiram: sobem e descem 3 px num ciclo de 3,6 s, cada uma num tempo
  * (`--respira-i`, o índice dela, adianta o ciclo em 0,9 s). Na carta de quadra, um brilho passa a cada 3,2 s. As duas são as
  * únicas animações sem fim da folha (o teste do relógio confere): pouco movimento, em área pequena, sem trocar a luminância da

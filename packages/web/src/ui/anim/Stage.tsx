@@ -20,7 +20,7 @@
 //   `import()` à parte, fora do JavaScript inicial (spec §12).
 import type { DevastationState, PlayerId } from '@coringa/engine';
 import { LazyMotion, MotionConfig } from 'motion/react';
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
 import type { Ribbon } from '../../model/copy.ts';
 import { bannerRibbon, desolationShown, effectsOf, fieldTarget, insigniaShown, lifeChange, NO_EFFECTS, resurrectionInfo, ribbonText } from '../../model/effects.ts';
 import { roomNames } from '../../model/history.ts';
@@ -52,6 +52,14 @@ const loadMotionFeatures = () => import('./motion-features.ts').then((module) =>
 /** O tremor do golpe (sub-projeto 6 §5): quanto a mesa se desloca e por quanto tempo, por peso. Deslocamento, não luz (spec §10.4). */
 export const SHAKE_PX: Record<ImpactForce, number> = { leve: 3, medio: 4, forte: 6 };
 export const SHAKE_MS: Record<ImpactForce, number> = { leve: 200, medio: 200, forte: 260 };
+/** O caminho do tremor, em frações de `SHAKE_PX` (x, y): vai e volta, morrendo. */
+const SHAKE_PATH: readonly (readonly [number, number])[] = [[0, 0], [-1, 0.5], [1, -0.5], [-0.6, 0.3], [0.4, 0], [0, 0]];
+
+/** Os quadros do tremor de `force`, no `translate` (o `transform` dos campos é das cenas). */
+function shakeKeyframes(force: ImpactForce): Keyframe[] {
+  const px = SHAKE_PX[force];
+  return SHAKE_PATH.map(([x, y], i) => ({ translate: `${x * px}px ${y * px}px`, offset: i / (SHAKE_PATH.length - 1) }));
+}
 /** Quanto a vida leva para descer depois que o feixe do Ataque Absoluto acerta (o protótipo conta em 700 ms). */
 export const HIT_COUNT_MS = 700;
 
@@ -244,9 +252,20 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
     ],
   );
 
-  // O golpe treme a mesa na batida dele (a animação do CSS roda uma vez quando a marca entra); nada com movimento reduzido.
+  // O golpe treme a mesa (o placar e os campos) na batida dele, uma vez por batida: dois golpes seguidos tremem duas vezes. É uma
+  // animação nos dois elementos, e nada no palco: uma variável CSS no estilo do palco é herdada e recalculava o estilo da mesa inteira
+  // (~530 elementos, ~100 ms com a CPU 4×; `notas/medicao-fatia-5.md`). Nada com movimento reduzido.
   const impact = reducedMotion ? null : anim.fx.impact;
-  const shake = impact ? { '--tremor': `${SHAKE_PX[impact.force]}px`, '--tremor-ms': `${SHAKE_MS[impact.force]}ms` } : null;
+  const palco = useRef<HTMLDivElement>(null);
+  const shakeForce = impact?.force ?? null;
+  useEffect(() => {
+    if (shakeForce === null || palco.current === null) return;
+    const frames = shakeKeyframes(shakeForce);
+    const shakes = [...palco.current.querySelectorAll<HTMLElement>('[data-placar], [data-campos]')].map((el) =>
+      el.animate?.(frames, { duration: SHAKE_MS[shakeForce], easing: 'linear' }),
+    );
+    return () => shakes.forEach((shake) => shake?.cancel());
+  }, [beat, shakeForce]);
 
   // O pulo leva junto o som das batidas puladas (sub-projeto 6 §10: a pista da cena acompanha a cena inteira).
   const skipNow = useCallback(() => {
@@ -306,11 +325,12 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       <MotionConfig reducedMotion={reducedMotion ? 'always' : 'never'}>
         <AnimContext value={anim}>
           <div
+            ref={palco}
             data-palco
             data-ocupado={busy ? 'true' : undefined}
             data-invertido={inverted ? 'true' : undefined}
             data-tremor={impact?.force}
-            style={inverted || shake ? ({ ...(inverted ? { filter: 'invert(1)' } : {}), ...shake } as CSSProperties) : undefined}
+            style={inverted ? { filter: 'invert(1)' } : undefined}
             onPointerDownCapture={onPointerDown}
             onPointerUpCapture={onPointerUp}
             onPointerCancelCapture={clearTouch}

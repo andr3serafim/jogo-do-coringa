@@ -918,6 +918,47 @@ describe('efeitos da batida (spec §4.2)', () => {
     expect(m.container.querySelector('[data-dano]')).toHaveTextContent('−50');
   });
 
+  describe('o tremor sem recalcular a mesa (fatia 5, Task 1)', () => {
+    /** Grava as animações do placar e dos campos (o jsdom não tem `animate`; no protótipo global ele mudaria o modo do Motion). */
+    const recordShakes = (container: HTMLElement) => {
+      const calls: Array<{ target: 'placar' | 'campos'; frames: Keyframe[]; options: KeyframeAnimationOptions }> = [];
+      for (const el of container.querySelectorAll<HTMLElement>('[data-placar], [data-campos]')) {
+        el.animate = ((frames: Keyframe[], options: KeyframeAnimationOptions) => {
+          calls.push({ target: el.hasAttribute('data-placar') ? 'placar' : 'campos', frames, options });
+          return { cancel() {} } as Animation;
+        }) as HTMLElement['animate'];
+      }
+      return calls;
+    };
+    const medium = (damage = 50): GameEvent => ({ type: 'DamageDealt', attacker: 'p1', defender: 'p2', attack: 100, defense: 50, damage });
+
+    it('o golpe treme o placar e os campos pelo translate, e o palco nunca recebe variável CSS (ela recalcularia a mesa inteira)', () => {
+      const m = mount(MINE);
+      const calls = recordShakes(m.container);
+      emit(m, { ...MINE, opponent: { ...MINE.opponent, hp: 164 } }, [medium()]);
+      expect(stage(m.container).getAttribute('style') ?? '').not.toContain('--tremor');
+      expect(calls.map((call) => call.target)).toEqual(['placar', 'campos']);
+      expect(calls[0]!.frames[1]).toMatchObject({ translate: '-4px 2px' });
+      expect(calls[0]!.options).toMatchObject({ duration: 200 });
+    });
+
+    it('dois golpes seguidos do mesmo peso tremem duas vezes', () => {
+      const m = mount(MINE);
+      const calls = recordShakes(m.container);
+      emit(m, { ...MINE, opponent: { ...MINE.opponent, hp: 114 } }, [medium(), medium()]);
+      expect(calls).toHaveLength(2);
+      advance(BEAT_MS.damage);
+      expect(calls).toHaveLength(4);
+    });
+
+    it('com movimento reduzido, nada treme', () => {
+      const m = mount(MINE, { prefs: { reduceMotion: true } });
+      const calls = recordShakes(m.container);
+      emit(m, { ...MINE, opponent: { ...MINE.opponent, hp: 164 } }, [medium()]);
+      expect(calls).toHaveLength(0);
+    });
+  });
+
   it('o rastro vermelho fica na vida velha e escorre até a nova depois do golpe (sub-projeto 6 §3)', () => {
     const m = mount(MINE);
     const meter = () => screen.getByRole('meter', { name: 'Vida de André' });
