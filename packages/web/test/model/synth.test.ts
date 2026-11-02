@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Cue } from '../../src/model/sound.ts';
 import { SCENE_MOMENTS } from '../../src/model/scene-moments.ts';
+import { TABLE_MOTION } from '../../src/model/table-motion.ts';
 import createSynthDefault, { createSynth } from '../../src/sound/synth.ts';
 
 // O Node não tem Web Audio: um `AudioContext` falso, mínimo, que guarda o grafo (quem liga em quem) e a agenda dos parâmetros.
@@ -154,6 +155,8 @@ class FakeAudioContext {
 /** Toda pista, na ordem que o compilador exigir: se o `Cue` ganhar uma pista, este registro não compila sem ela. */
 const ALL_CUES: Record<Cue, true> = {
   carta: true,
+  pouso: true,
+  compra: true,
   quebra: true,
   'golpe-leve': true,
   'golpe-medio': true,
@@ -206,6 +209,31 @@ function everyPathEndsAtLimiter(node: FakeNode, destination: FakeNode, limiter: 
 }
 
 const isSource = (node: FakeNode): node is FakeSource => node instanceof FakeSource;
+
+describe('os sons das jogadas comuns seguem o movimento delas (sub-projeto 6 §8, fatia 5)', () => {
+  const startsAt = (nodes: FakeNode[]) => nodes.filter(isSource).map((source) => Number((source.startedAt! - NOW).toFixed(3)));
+
+  it('carta: o sopro do voo logo no começo, e a batida seca no pouso (depois do recuo e da mola)', () => {
+    const times = startsAt(setup().play('carta'));
+    expect(times).toContain(0);
+    expect(times).toContain((TABLE_MOTION.recoilMs + TABLE_MOTION.landAfterMs) / 1000);
+  });
+
+  it('pouso: a batida seca quando a carta assenta', () => {
+    const times = startsAt(setup().play('pouso'));
+    expect(Math.min(...times)).toBe(TABLE_MOTION.dropMs / 1000);
+  });
+
+  it('quebra: o estalo no estouro, depois do tremor', () => {
+    const times = startsAt(setup().play('quebra'));
+    expect(Math.min(...times)).toBe(TABLE_MOTION.crackShakeMs / 1000);
+  });
+
+  it('compra: quatro estalos de papel, 40 ms um depois do outro', () => {
+    const times = startsAt(setup().play('compra'));
+    expect([...new Set(times)].sort((a, b) => a - b)).toEqual([0, 0.04, 0.08, 0.12]);
+  });
+});
 
 describe('os sons das cenas absolutas seguem o pico de cada uma (sub-projeto 6 §10)', () => {
   const startsAt = (nodes: FakeNode[]) => nodes.filter(isSource).map((source) => Number((source.startedAt! - NOW).toFixed(3)));

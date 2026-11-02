@@ -3,6 +3,7 @@
 // arquivo de áudio e sem licença a conferir. Cada pista é uma receita de poucas vozes (um tom ou uma rajada de ruído); todas
 // passam por um volume geral moderado e por um compressor que faz de limitador, então nada fura o teto.
 import { SCENE_MOMENTS } from '../model/scene-moments.ts';
+import { TABLE_MOTION } from '../model/table-motion.ts';
 import type { Cue } from '../model/sound.ts';
 import type { Synth } from './controller.ts';
 
@@ -152,16 +153,32 @@ function cometWay(voices: Voices): void {
  * curto, original e sem pico. Golpes mais pesados são mais graves, mais longos e mais cheios.
  */
 const RECIPES: Record<Cue, (voices: Voices) => void> = {
-  // A carta chega à mesa: um estalo de papel e uma batida seca.
+  // A sua carta sai da mão (sub-projeto 6 §8): o sopro do papel no voo, e o estalo e a batida seca quando ela assenta (depois do recuo e da mola).
   carta: ({ tone, noise }) => {
-    noise({ filter: 'bandpass', from: 2400, to: 900, q: 0.8, length: 0.07, peak: 0.5 });
-    tone({ wave: 'triangle', from: 220, to: 130, length: 0.09, peak: 0.4 });
+    const land = (TABLE_MOTION.recoilMs + TABLE_MOTION.landAfterMs) / 1000;
+    noise({ filter: 'bandpass', from: 900, to: 2200, q: 0.6, length: 0.22, peak: 0.18, attack: 0.08 });
+    noise({ filter: 'bandpass', from: 2400, to: 900, q: 0.8, at: land, length: 0.07, peak: 0.5 });
+    tone({ wave: 'triangle', from: 220, to: 130, at: land, length: 0.09, peak: 0.4 });
   },
-  // Algo se parte: um estalo agudo que varre para baixo, um segundo estalo logo atrás e um rangido grave.
+  // A carta que cai no destino (a do Bot, as do Equipar): o estalo e a batida seca quando ela assenta.
+  pouso: ({ tone, noise }) => {
+    const land = TABLE_MOTION.dropMs / 1000;
+    noise({ filter: 'bandpass', from: 2200, to: 900, q: 0.8, at: land, length: 0.06, peak: 0.4 });
+    tone({ wave: 'triangle', from: 200, to: 120, at: land, length: 0.08, peak: 0.32 });
+  },
+  // A compra chega em leque: quatro estalos de papel, um a cada carta (o leque do Equipar compra quatro).
+  compra: ({ noise }) => {
+    for (let i = 0; i < 4; i++) {
+      noise({ filter: 'bandpass', from: 3000 - i * 250, to: 1400, q: 1.2, at: (i * TABLE_MOTION.fanStaggerMs) / 1000, length: 0.05, peak: 0.28 });
+    }
+  },
+  // A carta se parte no estouro, depois do tremor (sub-projeto 6 §8): um estalo agudo que varre para baixo, o papel que rasga e um rangido grave.
   quebra: ({ tone, noise }) => {
-    noise({ filter: 'highpass', from: 2600, to: 700, length: 0.18, peak: 0.4 });
-    noise({ filter: 'bandpass', from: 3200, q: 1.5, at: 0.07, length: 0.05, peak: 0.3 });
-    tone({ wave: 'sawtooth', from: 320, to: 70, length: 0.22, peak: 0.2 });
+    const burst = TABLE_MOTION.crackShakeMs / 1000;
+    noise({ filter: 'highpass', from: 2600, to: 700, at: burst, length: 0.18, peak: 0.4 });
+    noise({ filter: 'bandpass', from: 3200, q: 1.5, at: burst + 0.07, length: 0.05, peak: 0.3 });
+    noise({ filter: 'bandpass', from: 1600, to: 4200, q: 0.7, at: burst + 0.02, length: 0.14, peak: 0.16 });
+    tone({ wave: 'sawtooth', from: 320, to: 70, at: burst, length: 0.22, peak: 0.2 });
   },
   'golpe-leve': ({ tone, noise }) => {
     tone({ wave: 'sine', from: 180, to: 90, length: 0.12, peak: 0.5 });

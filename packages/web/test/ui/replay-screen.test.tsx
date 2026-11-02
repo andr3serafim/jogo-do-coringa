@@ -12,6 +12,7 @@ import { DEFAULT_PREFS } from '../../src/model/storage.ts';
 import { buildTimeline, timelineMs } from '../../src/model/timeline.ts';
 import ReplayScreen from '../../src/ui/screens/ReplayScreen.tsx';
 import { ReplayViewer } from '../../src/ui/screens/ReplayViewer.tsx';
+import { SoundContext, type SoundApi } from '../../src/ui/sound-context.ts';
 import { realReplay, scenarioAt, stateMessage, withStep } from '../fixtures.ts';
 import {
   ABSOLUTE,
@@ -842,6 +843,25 @@ function absoluteTrack(steps: number): ReplayTrack {
 }
 
 describe('<ReplayViewer />: cenas de Ataque Absoluto em passos seguidos', () => {
+  it('os controles no meio de uma cena cortam o som dela (o mesmo do pulo); o "Tocar" não corta', async () => {
+    const user = fakeUi();
+    const cuts: string[] = [];
+    const sound: SoundApi = { play() {}, setEnabled() {}, cut: () => void cuts.push('cut') };
+    render(
+      <SoundContext value={sound}>
+        <ReplayViewer game={GAME} track={absoluteTrack(3)} prefs={DEFAULT_PREFS} />
+      </SoundContext>,
+    );
+    await user.click(next());
+    expect(cuts).toHaveLength(1);
+    await user.click(control('Próximo passo'));
+    await user.click(control('Passo anterior'));
+    await user.click(control('Início'));
+    expect(cuts).toHaveLength(4);
+    await user.click(control('Tocar'));
+    expect(cuts).toHaveLength(4);
+  });
+
   it('cliques rápidos em "Próximo passo" por três passos não passam do limite da FlashLock (≤ 3 trocas em 1 s)', async () => {
     const user = fakeUi();
     const { container } = render(<ReplayViewer game={GAME} track={absoluteTrack(3)} prefs={DEFAULT_PREFS} />);

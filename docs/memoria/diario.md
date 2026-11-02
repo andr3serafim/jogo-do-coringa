@@ -53,7 +53,12 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     - **e um segundo, do mesmo caso:** a compra conta as numéricas que vão para o painel do Bot, e a mão dele não diz quais versos são novos. O leque conta dos versos que há (`max(0, mão − compra)`), e só voa o verso montado agora (`onlyNew`); os antigos ficam no lugar;
     - o painel próprio do replay (`ReplayEquip`) não tem leque: as numéricas dele aparecem de uma vez, como antes. O painel do jogo ao vivo tem.
   - **Medidas da compra, depois:** 57–60 quadros/s, chegada de 50–67 ms (era 183–200), 30 partículas no pico (a poeira das 6 cartas do Equipar que assentam no mesmo passo).
-- **A seguir:** a Task 7 (os sons e o corte do som no replay).
+- **Task 7, os sons e o replay:**
+  - `carta` (a sua carta da mão): o sopro do papel no voo, e o estalo e a batida seca no pouso, aos 510 ms; `pouso` (nova: a carta do Bot e as do Equipar) aos 220 ms; `quebra` agora estala no estouro (120 ms), com o papel que rasga; `compra` (nova: só na sua compra) com quatro estalos a 40 ms. A poeira e a saída ao cemitério são mudas;
+  - os controles do replay ("Início", "Passo anterior", "Próximo passo" e a rodada) cortam o som da cena, como o pulo. "Tocar" e "Pausar" não: a cena segue tocando. Era o pendente desde a fatia 2;
+  - os dois golpes colados já tinham entrado na Task 1;
+  - **não conferidos de ouvido:** os testes medem os instantes e o volume.
+- **A seguir:** a Task 8 (os pontos diretos do playtest: sem seleção de texto, sem a ameaça, sem a ordem automática, "Bônus" e o total que sobe).
 
 ---
 

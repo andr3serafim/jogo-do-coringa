@@ -8,6 +8,8 @@ import type { Beat } from './timeline.ts';
 /** Uma pista de som: o nome é o do gesto do jogo, não o do arquivo ou do sintetizador. */
 export type Cue =
   | 'carta'
+  | 'pouso'
+  | 'compra'
   | 'quebra'
   | 'golpe-leve'
   | 'golpe-medio'
@@ -49,10 +51,14 @@ export function cueOf(beat: Beat, me: PlayerId): Cue | null {
   // O golpe que a cena do Ataque Absoluto absorveu soa dentro dela, no impacto do feixe.
   if (beat.absorbed) return null;
   switch (event.type) {
-    case 'CardsPlaced':
+    // Sub-projeto 6 §8 (fatia 5): a sua carta voa da mão (o sopro e a batida no pouso); a do Bot e as do Equipar caem no destino e assentam.
     case 'BuffPlayed':
     case 'GuardPlayed':
-      return 'carta';
+      return event.player === me ? 'carta' : 'pouso';
+    case 'CardsPlaced':
+      return 'pouso';
+    case 'CardsDealt':
+      return event.player === me ? 'compra' : null;
     case 'GuardBroken':
     case 'TrapUsed':
     case 'Sacrificed':

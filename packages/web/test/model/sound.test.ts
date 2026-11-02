@@ -106,9 +106,23 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
     expect(Object.keys(SAMPLES)).toHaveLength(37);
   });
 
-  describe('carta', () => {
-    it.each(['CardsPlaced', 'BuffPlayed', 'GuardPlayed'] as const)('%s', (type) => {
+  describe('carta, pouso e compra (sub-projeto 6 §8, fatia 5)', () => {
+    it.each(['BuffPlayed', 'GuardPlayed'] as const)('o seu %s voa da mão: carta', (type) => {
       expect(cueFor(SAMPLES[type])).toBe('carta');
+    });
+
+    it.each(['BuffPlayed', 'GuardPlayed'] as const)('o %s do Bot cai no destino: pouso', (type) => {
+      expect(cueFor({ ...SAMPLES[type], player: 'p2' } as GameEvent)).toBe('pouso');
+    });
+
+    it('as cartas do Equipar, as suas e as do Bot, assentam: pouso', () => {
+      expect(cueFor(SAMPLES.CardsPlaced)).toBe('pouso');
+      expect(cueFor({ ...SAMPLES.CardsPlaced, player: 'p2' } as GameEvent)).toBe('pouso');
+    });
+
+    it('a sua compra chega em leque: compra; a do Bot é muda', () => {
+      expect(cueFor(SAMPLES.CardsDealt)).toBe('compra');
+      expect(cueFor({ type: 'CardsDealt', player: 'p2', count: 4 })).toBeNull();
     });
   });
 
@@ -215,6 +229,7 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
   describe('os outros eventos não têm pista', () => {
     // Os tipos que podem soar (alguns só em certa condição, testada acima). Todo o resto é mudo.
     const SOUNDING = new Set<GameEvent['type']>([
+      'CardsDealt',
       'CardsPlaced',
       'BuffPlayed',
       'GuardPlayed',

@@ -24,6 +24,7 @@ import type { PastGame } from '../../model/past-games.ts';
 import { diverges, frameMessage, replaySnapshot, type ReplayTrack } from '../../model/replay-track.ts';
 import type { Prefs } from '../../model/storage.ts';
 import { Stage } from '../anim/Stage.tsx';
+import { useSound } from '../sound-context.ts';
 import { useReducedMotion } from '../anim/useReducedMotion.ts';
 import { GraveyardDialog } from '../table/GraveyardDialog.tsx';
 import { Table } from '../table/Table.tsx';
@@ -175,6 +176,12 @@ function Playback({ game, track, prefs }: ReplayViewerProps) {
     dispatch({ kind: 'tick' });
   }, [dispatch]);
 
+  // Ir a outro passo no meio de uma cena corta o som dela, como o pulo (sub-projeto 6 §10). "Tocar" e "Pausar" não: a cena segue tocando.
+  const sound = useSound();
+  const goTo = (action: Parameters<typeof dispatch>[0]) => {
+    sound.cut();
+    dispatch(action);
+  };
   const controls = (
     <ReplayControls
       frame={frame}
@@ -183,11 +190,11 @@ function Playback({ game, track, prefs }: ReplayViewerProps) {
       rounds={track.rounds}
       round={track.frames[frame]!.round}
       notices={notices}
-      onStart={() => dispatch({ kind: 'to', frame: 0 })}
-      onPrevious={() => dispatch({ kind: 'by', delta: -1 })}
-      onNext={() => dispatch({ kind: 'by', delta: 1 })}
+      onStart={() => goTo({ kind: 'to', frame: 0 })}
+      onPrevious={() => goTo({ kind: 'by', delta: -1 })}
+      onNext={() => goTo({ kind: 'by', delta: 1 })}
       onToggle={() => dispatch({ kind: playing ? 'pause' : 'play' })}
-      onRound={(first) => dispatch({ kind: 'to', frame: first })}
+      onRound={(first) => goTo({ kind: 'to', frame: first })}
     />
   );
 
