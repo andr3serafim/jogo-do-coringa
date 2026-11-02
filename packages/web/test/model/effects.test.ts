@@ -220,10 +220,23 @@ describe('dealsOf: as cartas que entram na batida do CardsDealt', () => {
         { type: 'CardsDealt', player: 'p2', count: 3 },
       ),
     );
+    // Em leque (fatia 5): 40 ms uma depois da outra.
     expect(deals.cards.get('n1')).toBe(400);
-    expect(deals.cards.get('n2')).toBe(400);
-    expect(deals.backs.get('p2')).toEqual({ count: 3, startMs: 700 });
+    expect(deals.cards.get('n2')).toBe(440);
+    expect(deals.backs.get('p2')).toEqual({ count: 3, startMs: 700, staggerMs: 40 });
     expect(deals.backs.has('p1')).toBe(false);
+  });
+
+  it('o leque: 4 cartas numa batida de 300 ms entram em 0, 40, 80 e 120 ms', () => {
+    const deals = dealsOf(beatsOf({ type: 'CardsDealt', player: 'p1', count: 4, cards: ['c1', 'c2', 'c3', 'c4'].map((id) => num(id)) }));
+    expect([...deals.cards.values()]).toEqual([0, 40, 80, 120]);
+  });
+
+  it('o leque encolhe na batida encolhida pelo teto: em 100 ms, 0, 25, 50 e 75, a última antes do fim', () => {
+    const [beat] = beatsOf({ type: 'CardsDealt', player: 'p1', count: 4, cards: ['c1', 'c2', 'c3', 'c4'].map((id) => num(id)) });
+    const deals = dealsOf([{ ...beat!, durationMs: 100 }]);
+    expect([...deals.cards.values()]).toEqual([0, 25, 50, 75]);
+    expect(dealsOf([{ ...beat!, durationMs: 100 }]).cards.get('c4')!).toBeLessThan(100);
   });
 
   it('sem CardsDealt, nada entra', () => {

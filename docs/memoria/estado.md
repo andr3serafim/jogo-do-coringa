@@ -10,10 +10,10 @@
 - **O que ele escolheu nos pontos:** "Bônus" no lugar de "Buff"; sem a barra e sem a escolha automática da ordem; os nove pontos de desenho depois da fatia 5.
 - **Esperando o autor:** nada agora. Ele joga quando a fatia 5 chegar à `main`.
 - **Ajuste depois da aprovação da 4b:** as cartas da quadra perderam o losango de ouro do canto (`decisoes.md` 2026-11-02 (6)); o fundo dourado, a moldura, o brilho e o selo ficam. Não mude isso de volta seguindo a letra antiga do §6.
-- **Em curso:** as Tasks 1 a 5 estão feitas (a medição e o conserto do tremor, `notas/medicao-fatia-5.md`; o modelo `model/table-motion.ts`; as partículas, a camada `FxLayer` e o palco; o recuo, a queda e o pouso na carta; as cópias das cartas que saem e os cacos).
+- **Em curso:** as Tasks 1 a 6 estão feitas (a medição e o conserto do tremor, `notas/medicao-fatia-5.md`; o modelo `model/table-motion.ts`; as partículas, a camada `FxLayer` e o palco; o recuo, a queda e o pouso na carta; as cópias das cartas que saem e os cacos; o leque da compra).
 - **Para o autor saber (E1):** o quadro da chegada caiu no ataque (de 183–200 para 117 ms no PC), mas o resto do peso é o desenho do React com a mesa inteira e as projeções do Motion. Não é local: fica para ele decidir.
 - **Próximo passo exato:**
-  1. Seguir o plano aqui mesmo, tarefa por tarefa (`superpowers:executing-plans`, ledger em `.superpowers/sdd/2026-11-02-direcao-visual-fatia-5/progress.md`, fora do git), a partir da **Task 6**. As escolhas vão para o diário a cada tarefa (regra 6), e o `estado.md` diz a tarefa em curso.
+  1. Seguir o plano aqui mesmo, tarefa por tarefa (`superpowers:executing-plans`, ledger em `.superpowers/sdd/2026-11-02-direcao-visual-fatia-5/progress.md`, fora do git), a partir da **Task 7**. As escolhas vão para o diário a cada tarefa (regra 6), e o `estado.md` diz a tarefa em curso.
   2. No fim, o `pnpm check`, o push, as duas CI verdes, a revisão da branch inteira e o fast-forward na `main`. Depois, ele joga.
   3. **Depois da fatia 5: os nove pontos de desenho do playtest** (1, 2, 5, 6, 9, 10, 11, 13 e 14, em `decisoes.md` 2026-11-02 (9)): brainstorming (`superpowers:brainstorming`) e protótipo para ele ver, antes de spec e plano. Nenhum foi desenhado nem aprovado. O ponto 1 (a jogada especial do Bot legível sem o histórico) pode trocar a queda simples da E3.
   4. Com a fatia 5 aprovada, o sub-projeto 6 acaba. O deploy e o playtest online são dele (`notas/playtest.md`).

@@ -4,6 +4,7 @@ import { quadValues, type DevastationState, type GameEvent, type NumCard, type P
 import { cardText, eventText, type Names } from '@coringa/sim/text';
 import { initiativeRibbon, SCENE_TITLE, type Ribbon } from './copy.ts';
 import { impactForce, type ImpactForce } from './impact.ts';
+import { TABLE_MOTION } from './table-motion.ts';
 import { RIBBON_SCENES, type Beat } from './timeline.ts';
 
 /** Chave de uma fileira de um jogador, para o conjunto de fileiras acesas: "p1:ATK". */
@@ -184,24 +185,35 @@ export function delaysOf(beats: readonly Beat[]): ReadonlyMap<string, number> {
 }
 
 export interface Deals {
-  /** Cartas com id que entram (as suas): id → início da batida do `CardsDealt`, em ms. */
+  /** Cartas com id que entram (as suas): id → quando, em ms (o início da batida do `CardsDealt`, em leque). */
   cards: ReadonlyMap<string, number>;
-  /** Cartas sem id (o verso na mão do oponente): quantas entram e quando. */
-  backs: ReadonlyMap<PlayerId, { count: number; startMs: number }>;
+  /** Cartas sem id (o verso na mão do oponente): quantas entram, quando entra a primeira e o intervalo do leque. */
+  backs: ReadonlyMap<PlayerId, { count: number; startMs: number; staggerMs: number }>;
 }
 
-/** As cartas que entram na mesa na batida do `CardsDealt` (spec §4.2): esperam a batida e esmaecem, em vez de já estarem lá. */
+/**
+ * O intervalo do leque (sub-projeto 6 §8): `fanStaggerMs`, encolhido para as `count` cartas caberem na batida (a encolhida pelo teto de
+ * decisão também). Nunca aumenta a batida.
+ */
+const fanStagger = (beat: Beat, count: number): number =>
+  count <= 1 ? 0 : Math.min(TABLE_MOTION.fanStaggerMs, Math.floor(beat.durationMs / count));
+
+/**
+ * As cartas que entram na mesa na batida do `CardsDealt` (spec §4.2): esperam a batida e esmaecem, em vez de já estarem lá. Desde a fatia 5
+ * do sub-projeto 6, chegam em leque, uma depois da outra, na ordem da compra.
+ */
 export function dealsOf(beats: readonly Beat[]): Deals {
   const cards = new Map<string, number>();
-  const backs = new Map<PlayerId, { count: number; startMs: number }>();
+  const backs = new Map<PlayerId, { count: number; startMs: number; staggerMs: number }>();
   for (const beat of beats) {
     if (beat.event.type !== 'CardsDealt') continue;
     const { player, count, cards: dealt } = beat.event;
     if (dealt) {
-      for (const card of dealt) cards.set(card.id, beat.startMs);
+      const stagger = fanStagger(beat, dealt.length);
+      dealt.forEach((card, i) => cards.set(card.id, beat.startMs + i * stagger));
     } else {
       const before = backs.get(player);
-      backs.set(player, { count: (before?.count ?? 0) + count, startMs: before?.startMs ?? beat.startMs });
+      backs.set(player, before ? { ...before, count: before.count + count } : { count, startMs: beat.startMs, staggerMs: fanStagger(beat, count) });
     }
   }
   return { cards, backs };

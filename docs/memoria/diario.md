@@ -46,7 +46,14 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     - dois testes antigos (o K e a Armadilha "racham" pelo `data-fx`) passaram a conferir a cópia e a carta escondida.
   - **Visto nas fotos** (fixture `especiais`): a cópia do J♥ rachada no lugar, os cacos aos 160 ms, o J♥ no topo do cemitério depois, e a cópia do seu A♣ indo ao cemitério. No ataque, o 8♠ gasto e o 9♣ do Bot seguram o lugar até a batida deles: antes, a fileira sumia antes do golpe.
   - **Medidas, depois das Tasks 4 e 5:** a armadilha com 57–58 quadros/s, chegada de 50–67 ms e 10 cacos no pico; o ataque com 55–58 quadros/s e chegada de 67–83 ms.
-- **A seguir:** a Task 6 (o leque da compra e do Equipar).
+- **Task 6, o leque:** o `dealsOf` põe as cartas em leque (`min(40 ms, batida / quantas)`), e os versos levam o intervalo. O `useDealIn` voa do `[data-monte]` (o número do monte, na faixa do meio) até o lugar da carta, na mão, nas numéricas do painel do Equipar e nos versos do Bot.
+  - **Escolhas:**
+    - o voo tem acesso próprio no `Anim` (`dealAt`, `backsAt`), que dura além do fim natural das batidas (o voo passa dele) e cai no pulo, no `catchUp`, no `resync` e com movimento reduzido. O `enterDelay` e o `backs`, que acabam com as batidas, seguem para o esmaecer;
+    - **defeito achado só nas fotos, com teste que falhou antes:** um verso que já estava na mão do Bot ficava parado, visível, sobre o número do monte enquanto esperava (o `initial` do Motion só vale na montagem). O voo agora apaga e acende a carta (`fill: 'backwards'`);
+    - **e um segundo, do mesmo caso:** a compra conta as numéricas que vão para o painel do Bot, e a mão dele não diz quais versos são novos. O leque conta dos versos que há (`max(0, mão − compra)`), e só voa o verso montado agora (`onlyNew`); os antigos ficam no lugar;
+    - o painel próprio do replay (`ReplayEquip`) não tem leque: as numéricas dele aparecem de uma vez, como antes. O painel do jogo ao vivo tem.
+  - **Medidas da compra, depois:** 57–60 quadros/s, chegada de 50–67 ms (era 183–200), 30 partículas no pico (a poeira das 6 cartas do Equipar que assentam no mesmo passo).
+- **A seguir:** a Task 7 (os sons e o corte do som no replay).
 
 ---
 

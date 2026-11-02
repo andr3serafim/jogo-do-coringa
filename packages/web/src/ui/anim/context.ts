@@ -47,8 +47,15 @@ export interface Anim {
    * natural das batidas, porque a mola assenta depois delas; o pulo o apaga.
    */
   landAt(id: string): { at: number; drop: boolean } | null;
-  /** Quantas cartas de verso (a mão do oponente) entram na batida, e depois de quantos segundos; `null` sem batida. */
-  backs(player: PlayerId): { count: number; delay: number } | null;
+  /** Quantas cartas de verso (a mão do oponente) entram na batida, depois de quantos segundos e o intervalo do leque; `null` sem batida. */
+  backs(player: PlayerId): { count: number; delay: number; stagger: number } | null;
+  /**
+   * O voo do monte da carta que a compra traz (sub-projeto 6 §8, fatia 5): quando ela sai, em segundos, ou `null`. Vale além do fim
+   * natural das batidas (o voo passa dele); o pulo o apaga, e não há voo no `catchUp` nem com movimento reduzido.
+   */
+  dealAt(id: string): number | null;
+  /** O mesmo voo para os versos da mão de `player`. */
+  backsAt(player: PlayerId): { count: number; delay: number; stagger: number } | null;
   /** O último encerramento na hora de transições (pulo, `state` novo): quais cartas remontaram. A mesa devolve o foco. */
   remounted: { serial: number; ids: ReadonlySet<string> };
   /** `key` do elemento com este `layoutId`: muda quando as transições dele são encerradas na hora (pulo, `state` novo). */
@@ -105,6 +112,8 @@ export const IDLE_ANIM: Anim = {
   recoilAt: () => null,
   landAt: () => null,
   backs: () => null,
+  dealAt: () => null,
+  backsAt: () => null,
   remounted: { serial: 0, ids: new Set() },
   markOf: () => 0,
   instant: () => false,

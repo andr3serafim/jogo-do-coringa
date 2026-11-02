@@ -69,7 +69,8 @@ export function CenterBand({ view, names, face, live, training, replay, tutorial
       ) : null}
 
       <div className="ml-auto flex items-center gap-2">
-        <div className="flex flex-col items-center">
+        {/* O monte é de onde a compra voa (`data-monte`, sub-projeto 6 §8). */}
+        <div data-monte className="flex flex-col items-center">
           <span className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">Monte</span>
           <span data-numero className="font-texto text-[15px] font-bold tabular-nums pc:text-xl">
             {view.deckCount}

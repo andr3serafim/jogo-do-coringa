@@ -202,6 +202,8 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
   if (ribbonNow !== null && (lastRibbon === null || ribbonText(ribbonNow) !== ribbonText(lastRibbon))) setLastRibbon(ribbonNow);
   const ribbon = banner ? lastRibbon : null;
 
+  // O voo do monte é do passo ao vivo: sem ele no `catchUp`, no `resync`, com movimento reduzido e depois do pulo.
+  const flies = !reducedMotion && !cut && !run.catchUp && !jump;
   const anim = useMemo<Anim>(
     () => ({
       busy,
@@ -221,7 +223,15 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       },
       backs: (player) => {
         const deal = busy ? run.deals.backs.get(player) : undefined;
-        return deal === undefined ? null : { count: deal.count, delay: deal.startMs / 1000 };
+        return deal === undefined ? null : { count: deal.count, delay: deal.startMs / 1000, stagger: deal.staggerMs / 1000 };
+      },
+      dealAt: (id) => {
+        const startMs = flies ? run.deals.cards.get(id) : undefined;
+        return startMs === undefined ? null : startMs / 1000;
+      },
+      backsAt: (player) => {
+        const deal = flies ? run.deals.backs.get(player) : undefined;
+        return deal === undefined ? null : { count: deal.count, delay: deal.startMs / 1000, stagger: deal.staggerMs / 1000 };
       },
       remounted,
       markOf: (id) => released.marks.get(id) ?? 0,
@@ -262,6 +272,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       drawnScene,
       fallen,
       cut,
+      flies,
     ],
   );
 

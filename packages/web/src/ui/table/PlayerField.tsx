@@ -113,6 +113,14 @@ interface InfoProps {
 function Info({ player, name, away, equip, tool }: InfoProps) {
   const anim = useAnim();
   const dealtBacks = anim.backs(player.id);
+  const flyingBacks = anim.backsAt(player.id);
+  /** O atraso do verso `index` (os que chegam são os últimos da mão), em leque; `null` para os que já estavam. */
+  const backAt = (deal: { count: number; delay: number; stagger: number } | null, index: number): number | null => {
+    // A compra pode contar mais cartas que os versos novos (as numéricas vão para o painel dele): o leque conta dos versos que há.
+    const first = Math.max(0, player.handCount - (deal?.count ?? 0));
+    // Arredondado ao milissegundo: a soma em segundos deixa resto de ponto flutuante (0,7799… em vez de 0,78).
+    return deal === null || index < first ? null : Math.round((deal.delay + (index - first) * deal.stagger) * 1000) / 1000;
+  };
   return (
     <div className="campo-info">
       <div className="area-mao flex items-center gap-1.5">
@@ -121,8 +129,8 @@ function Info({ player, name, away, equip, tool }: InfoProps) {
         </span>
         <span role="img" aria-label={handCountText(name, player.handCount)} className="flex items-center gap-[3px]">
           {Array.from({ length: player.handCount }, (_, index) => (
-            // As cartas que o `CardsDealt` traz (as últimas da mão) esmaecem na batida dela.
-            <CardBack key={index} enter={dealtBacks !== null && index >= player.handCount - dealtBacks.count ? dealtBacks.delay : null} />
+            // As cartas que o `CardsDealt` traz (as últimas da mão) esmaecem na batida dela, em leque, e voam do monte (fatia 5).
+            <CardBack key={index} enter={backAt(dealtBacks, index)} fly={backAt(flyingBacks, index)} />
           ))}
         </span>
       </div>

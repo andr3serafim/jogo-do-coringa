@@ -14,6 +14,7 @@ import { TABLE_MOTION } from '../../model/table-motion.ts';
 import { useAnim } from '../anim/context.ts';
 import { useFxLayer } from '../anim/FxLayer.tsx';
 import { layoutTransition } from '../anim/motion.ts';
+import { useDealIn } from '../anim/useDealIn.ts';
 import { Coringa } from './Coringa.tsx';
 import { isRedSuit, Suit } from './Suit.tsx';
 
@@ -62,6 +63,10 @@ export interface CardProps {
   grabbable?: boolean;
   className?: string;
 }
+
+const DEAL_FLY = { fly: true, fade: false } as const;
+/** O verso: só o que acabou de entrar na mão voa (ver `useDealIn`). */
+const BACK_FLY = { fly: true, fade: false, onlyNew: true } as const;
 
 /** "7 de copas", "K de paus", "Coringa Selvagem" (com o papel em campo, "Coringa Selvagem como J"). */
 export function cardName(card: EngineCard, as?: WildRole): string {
@@ -221,6 +226,8 @@ export function Card({
     [dragRef],
   );
   useTableMotion(self, animated ? anim.recoilAt(card.id) : null, landing, animated ? anim.markOf(card.id) : 0, anim.reduced);
+  // A carta que a compra traz voa do monte, em leque; a opacidade é a do Motion (`enter`).
+  useDealIn(self, animated ? anim.dealAt(card.id) : null, DEAL_FLY);
   const name = cardLabel(card, as, roleText);
   const waiting = disabled && onSelect !== undefined;
   if (front) name.push('sai primeiro');
@@ -415,9 +422,12 @@ function FxOverlay({ fx, ms }: { fx: CardFx; ms: number }) {
 }
 
 /** O verso de uma carta que você não vê (a mão do oponente): sem nome, sem id. */
-export function CardBack({ className = '', enter = null }: { className?: string; enter?: number | null }) {
+export function CardBack({ className = '', enter = null, fly = null }: { className?: string; enter?: number | null; fly?: number | null }) {
+  const self = useRef<HTMLSpanElement>(null);
+  useDealIn(self, fly, BACK_FLY);
   return (
     <m.span
+      ref={self}
       aria-hidden="true"
       data-verso
       data-entra={enter === null ? undefined : String(enter)}

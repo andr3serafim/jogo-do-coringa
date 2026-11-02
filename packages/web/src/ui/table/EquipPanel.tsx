@@ -33,6 +33,8 @@ import {
 import { equipDropZones, type DropKey } from '../../model/drag.ts';
 import { draftBoard, nextDestinations, remainingCards, type EquipPick } from '../../model/equip.ts';
 import type { Notice, SessionSnapshot } from '../../model/session.ts';
+import { useAnim } from '../anim/context.ts';
+import { useDealIn } from '../anim/useDealIn.ts';
 import { Card } from '../cards/Card.tsx';
 import { NoticeLine, PRIMARY, PRIMARY_TITLE, SECONDARY, TwoLine } from './controls.tsx';
 import { DragGhost } from './DragGhost.tsx';
@@ -146,8 +148,15 @@ function PendingCard({
   onDrop: (key: DropKey | null) => void;
 }) {
   const { bind, dragging, ghost } = useCardDrag({ enabled, zones, onDrop, onTap: onSelect });
+  // A compra chega em leque do monte (sub-projeto 6 §8): esta carta não é do Motion, então o item esmaece e voa pela Web Animations. Com
+  // movimento reduzido (ou no `catchUp`), só esmaece, no tempo da batida.
+  const anim = useAnim();
+  const flight = anim.dealAt(card.id);
+  const enter = anim.enterDelay(card.id);
+  const item = useRef<HTMLLIElement>(null);
+  useDealIn(item, flight ?? enter, { fly: flight !== null, fade: true });
   return (
-    <li className="relative flex-none">
+    <li ref={item} data-entra={enter === null ? undefined : String(enter)} className="relative flex-none">
       {/* No ar, a de origem esmaece (esta carta não é animada, então o Motion não põe `opacity` inline nela). */}
       <Card
         card={card}
