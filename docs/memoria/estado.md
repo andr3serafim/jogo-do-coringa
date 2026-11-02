@@ -1,16 +1,19 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-02**, com a Ressurreição na `main`. A conta que escreveu isto está no fim do limite semanal, e a
+> Sobrescrito a cada atualização. **Última: 2026-11-02**, com a Ressurreição aprovada e o autor passando para a outra conta. A conta que escreveu isto está no fim do limite semanal, e a
 > próxima pode assumir daqui. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do
 > `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `main`, no checkout principal, sem trabalho em curso. A branch `feat/direcao-visual-fatia-4b` já foi mesclada.
-- **Feito por último:** a **fatia 4b do sub-projeto 6** (a Ressurreição, com o som), por fast-forward com as duas CI verdes (run `41465757404`). Plano em
-  `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4b.md`; cada escolha técnica no `diario.md` 2026-11-02 (4); medição em `notas/medicao-fatia-4b.md`. Com ela, **as seis cenas especiais do §7 estão na `main`**.
-- **Esperando o autor:** jogar a Ressurreição e dizer o que achou. O que conferir está em "Esperando o autor", logo abaixo.
-- **Próximo passo exato:** com o "ok" dele (ou depois dos ajustes que ele pedir), registrar em `decisoes.md` e escrever o **plano da fatia 5** (a fluidez das jogadas comuns, spec `2026-10-31-direcao-visual-design.md` §8, com os sons), a última do sub-projeto 6, como as fatias anteriores. Candidato já anotado nas medições: o quadro da chegada do passo, que pesa de 100 a 225 ms com a CPU 4×. Nada de código antes da aprovação do plano.
+- **Branch:** `main`, no checkout principal, sem trabalho em curso. Todas as branches locais já estão mescladas, e a fatia 5 não tem branch, plano nem arquivo.
+- **Feito por último:** a **fatia 4b do sub-projeto 6** (a Ressurreição, com o som), na `main`, com as duas CI verdes (run `41465757404`), **jogada e aprovada pelo autor, sem ajustes** (`decisoes.md` 2026-11-02 (5)). Plano em `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4b.md`; cada escolha técnica no `diario.md` 2026-11-02 (4); medição em `notas/medicao-fatia-4b.md`. **As seis cenas especiais do §7 estão entregues e aprovadas.**
+- **Esperando o autor:** nada agora. Ele volta pela outra conta.
+- **Próximo passo exato: escrever o plano da fatia 5** (a fluidez das jogadas comuns, com os sons), a última do sub-projeto 6:
+  1. Leia a spec `docs/superpowers/specs/2026-10-31-direcao-visual-design.md`: §1, §8, §10, §11, §13 e §14, e o mapa logo abaixo. O §8 não tem protótipo: ele fecha com o autor jogando.
+  2. Escreva o plano com `superpowers:writing-plans`, em `docs/superpowers/plans/AAAA-MM-DD-direcao-visual-fatia-5.md`, no formato do `2026-11-02-direcao-visual-fatia-4b.md`. Commite assim que estiver pronto e entregue ao autor com as escolhas listadas. **Nada de código antes da aprovação,** que entra em `decisoes.md`.
+  3. Execute como nas fatias anteriores: branch `feat/direcao-visual-fatia-5`, aqui mesmo, tarefa por tarefa (`superpowers:executing-plans`), sem subagente salvo pedido dele. As escolhas vão para o diário a cada tarefa (regra 6), e o fast-forward na `main` exige as duas CI verdes. Depois, ele joga.
+  4. Com a fatia 5 aprovada, o sub-projeto 6 acaba. O que vem depois é decisão dele (`notas/playtest.md`: o deploy e o playtest online são dele).
 - **Para ver a Ressurreição sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave `coringa:partidas` e abra `/partidas/exodia-devastacao`. "Próximo
   passo" na rodada 7, passo 27, mostra a sua, com a quadra; na rodada 23, passo 107, a do Bot, com a quadra na outra fileira; na rodada 37, passo 182, a do Bot sem quadra.
 - **Para ver as cenas do Reflect sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/reflect.json` para a chave `coringa:partidas` e abra
@@ -29,7 +32,25 @@
   - não edite nada enquanto o pre-push roda;
   - não há Python nesta máquina, e heredoc grande no shell às vezes quebra (crase, aspas): para editar vários arquivos, escreva um
     script `.mjs` com a ferramenta de escrita e rode com `node`;
-  - o ledger `.superpowers/sdd/…` fica fora do git: vale o `diario.md` e o `git log` (regra 6 do `CLAUDE.md`).
+  - o ledger `.superpowers/sdd/…` fica fora do git: vale o `diario.md` e o `git log` (regra 6 do `CLAUDE.md`);
+  - **tire fotos das cenas:** o jsdom não tem layout. Nas fatias 4 e 4b, só as fotos do Playwright acharam o cometa fora do lugar, a cena sem cortina e as cópias colapsadas. Uma spec e uma config temporárias (`zz-*`, apagadas antes do commit) bastam;
+  - **em `test/ui`, todo teste é `.test.tsx`:** o Vitest da web não roda `.test.ts` ali, nem na CI, e nada avisa;
+  - **`animation.test.tsx`** usa a sonda `installFlashProbe` (`test/ui/anim-harness.tsx`): as cenas do Reflect e da Ressurreição seguem com o painel de reserva nesse arquivo;
+  - uma marca que dura menos de meio segundo escapa do `toHaveCount` do Playwright: quem procura é a própria página, a cada quadro (`e2e/scenes.spec.ts`).
+
+## O que o plano da fatia 5 precisa decidir (mapa, não plano)
+
+Levantado do §8 e do código ao fechar a fatia 4b, para poupar a releitura. **Nada aqui foi aprovado pelo autor.**
+
+- **O que o §8 pede:**
+  - a carta jogada sai da mão com um recuo curto, voa na mola que já existe (`LAYOUT_SPRING`) e assenta com um achatamento leve (~1,06 → 1) e um sopro de poeira pequeno;
+  - K que quebra, Armadilha e Sacrifício ganham estilhaços de carta, em menor escala que os cacos, em vez de só tremer;
+  - as cartas da compra e do Equipar chegam do monte em leque, ~40 ms uma depois da outra;
+  - **nada aumenta o `DECISION_CAP_MS` (1 s):** o que não couber encurta.
+- **O candidato das medições:** o quadro da chegada do passo pesa de 100 a 225 ms com a CPU 4× em todas as fatias (`notas/medicao-fatia-*.md`). É o único problema de fluidez já medido, e o §8 não o cita: o plano deve dizer se entra.
+- **A armadilha do orçamento:** as cenas moram num chunk à parte (`ui/scenes/`), e estas animações rodam na mesa, no JavaScript inicial (≤ 200 KB gzip, conferido pelo smoke). Importar `ui/scenes/particles.ts` da mesa precisa continuar sem puxar o resto do chunk.
+- **O que já existe:** `CardFx` e o `crack` (`model/effects.ts`, `ui/cards/Card.tsx`), `dealsOf` e `delaysOf` (`model/effects.ts`), `impactForce` (`model/impact.ts`) e os sons `carta` e `quebra` (`sound/synth.ts`).
+- **Os pequenos anotados nas fatias, candidatos a entrar:** os controles do replay no meio de uma cena não cortam o som dela; dois golpes colados tremem uma vez só; a Defesa Absoluta que estende o prazo faz o leitor de tela anunciar o relógio de novo. A lista completa está em "Esperando o autor".
 
 ## A `main`
 
@@ -45,11 +66,11 @@ Vazia: o bloco E3 + F2 + F3 era o último item.
 
 ## Esperando o autor
 
-- **Sub-projeto 6, fatia 4b (a Ressurreição), para ele jogar e dizer o que achou.** O que ele aprovou no plano está em `decisoes.md` 2026-11-02 (4). O que a execução decidiu:
+- **Sub-projeto 6, fatia 4b (a Ressurreição): jogada e aprovada em 2026-11-02, sem ajustes** (`decisoes.md` 2026-11-02 (5)). O que ele aprovou no plano está em `decisoes.md` 2026-11-02 (4). O que a execução decidiu:
   - **com duas quadras na mesma fileira, acende a de maior valor:** é a que mais soma na conta que o jogador vê;
   - **as cópias da quadra ficam até o céu sumir,** para a carta não "apagar" de repente sob a cortina;
   - **não conferido de verdade:** o som (só os instantes), o movimento reduzido e o caso de duas quadras na mesa: só nos testes de unidade. A revisão final foi de quem escreveu o código, sem subagente;
-  - **para reparar ao jogar:** a cena inteira a cada vez, como ele decidiu. Uma partida de bots teve 13 Ressurreições; se cansar, a decisão (`decisoes.md` 2026-10-31 (12)) é dele;
+  - **a cena inteira a cada vez,** como ele decidiu (`decisoes.md` 2026-10-31 (12)). Uma partida de bots teve 13 Ressurreições; ele jogou e aprovou sem comentar, e mudar isso é decisão dele;
   - **achado no caminho:** o Vitest da web só roda `test/ui/**/*.test.tsx`. O `scenes-mirror.test.ts` da fatia 4 nunca tinha rodado; virou `.tsx` e passa, sem defeito escondido;
   - **pequenos, para depois:** o total da fileira já conta a carta no começo da cena (ele viu no plano); os controles do replay no meio de uma cena não cortam o som dela.
 

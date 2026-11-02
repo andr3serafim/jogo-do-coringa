@@ -5,6 +5,15 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-02 (5): a Ressurreição aprovada, e a passagem para a outra conta
+
+- **Pedido do autor** (`decisoes.md` 2026-11-02 (5)): "Joguei, aprovado. vou continuar da outra conta".
+- **Feito, só memória, nenhum código:** a aprovação em `decisoes.md`; o `estado.md` com o próximo passo e o mapa da fatia 5, lido do §8 da spec e do código.
+- **Não feito, de propósito:** o plano da fatia 5. Não existe branch, plano nem arquivo dela.
+- **Conferido:** as duas CI verdes no último commit de código e no de memória (runs `41465757404` e `41467788759`).
+
+---
+
 ## 2026-11-02 (4): sub-projeto 6, fatia 4b em execução (a Ressurreição)
 
 - **Pedido do autor** (`decisoes.md` 2026-11-02 (4)): "Aprovado, execute". Plano em `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4b.md`, na branch

@@ -6,6 +6,19 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-02 (5): a Ressurreição aprovada, e a outra conta assume
+
+Depois de jogar a fatia 4b:
+
+> Joguei, aprovado. vou continuar da outra conta. faça o que é necessário para que seja dado continuidade
+
+**Leitura:**
+- A fatia 4b está aprovada como foi entregue, sem ajustes: as seis cenas especiais do §7 estão entregues e aprovadas.
+- **[I]** "faça o que é necessário" é registrar e subir a memória. O plano da fatia 5 fica para a próxima conta, com o `estado.md` dizendo o passo exato.
+- **[I]** Ele jogou, mas não disse quais caminhos viu. O que a execução não conferiu (o som de ouvido, o movimento reduzido, duas quadras na mesa) segue marcado como não conferido por nós.
+
+---
+
 ## 2026-11-02 (4): o plano da Ressurreição aprovado
 
 À entrega do plano (`docs/superpowers/plans/2026-11-02-direcao-visual-fatia-4b.md`), com as escolhas listadas para ele:
