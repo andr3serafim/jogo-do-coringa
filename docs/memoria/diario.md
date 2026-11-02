@@ -5,6 +5,15 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-02 (8): sub-projeto 6, fatia 5 em execução (a fluidez)
+
+- **Pedido do autor** (`decisoes.md` 2026-11-02 (9)): "Aprovado, execute", com 14 pontos do playtest. Ele escolheu encaixar os diretos (3, 4, 7, 8 e 12) nesta fatia e deixar os nove de desenho para depois, com protótipo; "Bônus" no lugar de "Buff"; e tirar a escolha automática da ordem junto com a barra.
+- **Feito:** a branch `feat/direcao-visual-fatia-5`, a partir da `main` (`35b4660`). No plano, a Task 8 nova (os pontos diretos, com as leituras [I] de `decisoes.md`), e o E2E e a medição passaram a ser a Task 9.
+- **Antes de escrever a Task 8, conferido no código:** a "Ameaça de X" mora em `ActionBar.tsx:171` (`threatLabel`), e a prévia do alvo também fala da ameaça (`copy.ts`, perto da linha 245); a ordem automática passa por `automation.ts`, `session.ts`, `replay-track.ts`, `OrderPanel.tsx`, `PlayTable.tsx`, `local-game.tsx` e `Tutorial.tsx`; "Buff" aparece em `copy.ts`, `labels.ts`, `tutorial-copy.ts`, no `HINT` do `Card.tsx`, nos títulos do `PlayerField.tsx` e no histórico, que vem de `packages/sim/src/play/text.ts`.
+- **A seguir:** a Task 1.
+
+---
+
 ## 2026-11-02 (7): o plano da fluidez (a fatia 5), na outra conta
 
 - **Pedido do autor** (`decisoes.md` 2026-11-02 (8)): continuar do `estado.md`, que pedia o plano da fatia 5.

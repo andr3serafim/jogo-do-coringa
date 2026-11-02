@@ -20,7 +20,7 @@
 
 ## Escolhas para o autor aprovar
 
-Cada uma tem a recomendação de quem escreveu. Nenhuma foi aprovada ainda.
+Cada uma tem a recomendação de quem escreveu. **Aprovadas em 2026-11-02, como recomendadas** (`decisoes.md` 2026-11-02 (9)). Ele acrescentou os pontos diretos do playtest (3, 4, 7, 8 e 12), que são a Task 8.
 
 - **E1. O quadro da chegada entra?** Ele pesa de 100 a 225 ms com a CPU 4× em todas as medições (`notas/medicao-fatia-*.md`), e o §8 não o cita. A Task 1 mede sempre: os efeitos novos disparam nesse mesmo quadro, e somar efeito ao pior quadro sem uma linha de base é arriscado. **Recomendo:** consertar se a causa for nossa e local, com a meta de ≤ 100 ms com a CPU 4×. Se a causa for o próprio Motion, ou se o conserto pedir mudar a forma da mesa, a Task 1 para, registra e volta a você.
 - **E2. As cartas que saem antes da hora.** **Recomendo:** segurar as cópias até a batida delas e levá-las ao cemitério nela. As vizinhas que deslizam para a vaga esperam a mesma batida. É o mesmo mecanismo dos estilhaços, e sem ele os K que não são o de cima nem teriam o que estourar. A Task 1 confirma pelas fotos antes de qualquer código.
@@ -56,7 +56,7 @@ Cada uma tem a recomendação de quem escreveu. Nenhuma foi aprovada ainda.
 2. **A jogada do Bot contra a sua:** a carta dele nunca aparece antes da batida dela, e o seu J que voa não achata a carta dele → testes da Task 4.
 3. **A carta que só desliza** (outra saiu da frente dela): desliza na batida da carta que saiu, nunca por baixo da cópia, e sem achatar nem soltar poeira → testes das Tasks 2 e 4.
 4. **O pulo, o `state` novo no meio, o `catchUp` e o `resync`:** nenhuma cópia órfã, nenhum timer que dispara depois, e a carta de verdade nunca fica escondida → testes das Tasks 4 e 5.
-5. **O celular a 360 px:** o monte, a mão e o cemitério longe um do outro; as cópias e os cacos presos à camada; nada rola de lado → E2E da Task 8.
+5. **O celular a 360 px:** o monte, a mão e o cemitério longe um do outro; as cópias e os cacos presos à camada; nada rola de lado → E2E da Task 9.
 
 ---
 
@@ -310,7 +310,53 @@ Expected: PASS.
 
 - [ ] **Step 5: Commit**: `feat(web): os sons das jogadas comuns; o replay corta o som da cena`, com o diário.
 
-### Task 8: E2E, medição, fotos e documentação
+### Task 8: Os pontos diretos do playtest (3, 4, 7, 8 e 12)
+
+Pedidos pelo autor junto com a aprovação (`decisoes.md` 2026-11-02 (9)), com as leituras [I] de lá.
+
+**Files:**
+- Modify: `packages/web/src/ui/anim/Stage.tsx` e `ui/table/Hand.tsx` (ponto 3); `ui/table/ActionBar.tsx`, `model/copy.ts` (ponto 4); `ui/table/OrderPanel.tsx`, `model/automation.ts`, `model/session.ts`, `model/replay-track.ts`, `ui/screens/local-game.tsx`, `ui/screens/Tutorial.tsx`, `ui/table/PlayTable.tsx` (ponto 7); `model/copy.ts`, `model/tutorial-copy.ts`, `ui/table/labels.ts`, `ui/table/PlayerField.tsx`, `ui/cards/Card.tsx`, `packages/sim/src/play/text.ts` (ponto 8); `ui/table/Row.tsx` (ponto 12)
+- Test: os que guardam esses textos e a ordem automática (`test/model/automation.test.ts`, `test/model/replay-track.test.ts`, `test/ui/phases.test.tsx`, `test/ui/training.test.tsx`, `test/ui/tutorial.test.tsx`, `e2e/online.spec.ts`, `e2e/tutorial.spec.ts`, e os do simulador com o texto do histórico); novo `test/ui/playtest-direct.test.tsx`
+
+**Interfaces:**
+- Consumes: `Anim.landAt` (Task 3).
+- Produces: nada que outra tarefa use.
+
+O que muda:
+- **3, sem seleção de texto:** `select-none` no palco (`[data-palco]`) e na mão. Os `input`, o diálogo das regras e o histórico ficam com `select-text`.
+- **4, sem a ameaça:** sai a linha `threatLabel` da barra (`ActionBar.tsx:171`) e a parte "ameaça de X cai de A para B" da prévia do alvo (`copy.ts`, perto da linha 245). O que ficar sem uso sai junto.
+- **7, sem a ordem automática:**
+  - saem `ORDER_AUTO_MS`, o `orderAutoAt`, a `AutoBar`, o `ORDER_AUTO_TEXT`, o `onInteract` que cancelava o automático e a opção `autoOrder` da `Session` (o tutorial já nascia sem ela);
+  - o painel fica com a frase da escolha manual: `ORDER_MANUAL_TEXT` com prazo, `ORDER_MANUAL_NO_CLOCK_TEXT` sem;
+  - o `shouldAutoPass` (outra automação) fica;
+  - a spec da interface §3.6 ganha a nota da mudança.
+- **8, "Bônus":** "Buff" vira "Bônus" em todo texto visível: "Bônus de ataque" e "Bônus de defesa", no singular e no plural, na mão, nos títulos das zonas, nas jogadas, nos motivos sem jogada, nos alvos, no `HINT` da carta, no resumo das regras, nas dicas do tutorial e no histórico (`sim/src/play/text.ts`: "nos Bônus de Ataque", "perdeu ... dos bônus"). Os identificadores ficam.
+- **12, o total que sobe:**
+  - quando o total de uma fileira sobe pela carta que pousa (uma numérica nela, ou um J ou Q na zona de bônus do mesmo lado), o número cresce até 1,3 e volta a 1 em 320 ms, por `scale`, no `landAt` dessa carta. Enquanto cresce, fica em ouro;
+  - **até o pouso, o total não conta a carta:** o `Row` passa ao motor (`attackPower`, `defensePower`) o lado sem as cartas cujo pouso ainda não chegou. Sem isso, o número mudaria na chegada do `state`, antes de a carta aparecer;
+  - com movimento reduzido, só a cor;
+  - o total que cai (o golpe) segue como hoje.
+
+- [ ] **Step 1: Escrever os testes que falham** (`playtest-direct.test.tsx` e os que mudam):
+  - o palco tem `select-none`, e o histórico tem `select-text`;
+  - a barra do Ataque não tem "Ameaça de", e a prévia do alvo não fala em ameaça;
+  - o painel da ordem não tem `[data-auto-barra]`, e com timers falsos a ordem não sai sozinha depois de 3 s;
+  - um teste que varre os textos de `copy.ts`, `labels.ts`, `tutorial-copy.ts`, o `HINT` da carta e `sim/src/play/text.ts`: nenhum tem "Buff" nem "buff". Os testes que tinham o texto antigo mudam junto, também os seletores do E2E por nome acessível;
+  - os seus `CardsPlaced`: o total da fileira fica o de antes até `startMs + 220` e então anima `scale` [1, 1,3, 1]; um J que pousa sobe o total do Ataque do mesmo jeito; o golpe que derruba o total não anima `scale`; com movimento reduzido, nenhuma animação de `scale`.
+- [ ] **Step 2: Rodar e ver falhar**
+
+Run: `pnpm --filter @coringa/web exec vitest run test/ui/playtest-direct.test.tsx`
+Expected: FAIL.
+
+- [ ] **Step 3: Implementar**, um ponto por vez, rodando os testes que ele toca.
+- [ ] **Step 4: Rodar**
+
+Run: `pnpm --filter @coringa/web exec vitest run; pnpm --filter @coringa/sim exec vitest run`
+Expected: PASS.
+
+- [ ] **Step 5: Commit**: `feat(web): os pontos diretos do playtest (sem seleção, sem ameaça, sem ordem automática, "Bônus", o total que sobe)`, com o diário.
+
+### Task 9: E2E, medição, fotos e documentação
 
 **Files:**
 - Create: `packages/web/e2e/fluidez.spec.ts`; Modify: `playwright.config.ts` (a lista `testMatch` do projeto do PC e do celular)
@@ -340,4 +386,4 @@ Expected: verde. Depois, o push da branch `feat/direcao-visual-fatia-5`, as duas
 
 - **Os ajustes finos:** a cor e o tamanho dos puffs e dos cacos, as curvas de cada voo, e o recorte de cada caco.
 - **Os tempos de `TABLE_MOTION`:** ajustes de até ~15% são seus, desde que o teste do teto siga verde.
-- **O que for medido:** se a medição da Task 8 cair abaixo de 50 quadros/s no celular, corte primeiro os cacos e a poeira (§11), nunca o recuo e o pouso.
+- **O que for medido:** se a medição da Task 9 cair abaixo de 50 quadros/s no celular, corte primeiro os cacos e a poeira (§11), nunca o recuo e o pouso.

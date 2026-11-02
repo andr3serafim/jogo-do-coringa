@@ -6,6 +6,46 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-02 (9): o plano da fatia 5 aprovado, e 14 pontos do playtest
+
+À entrega do plano (`docs/superpowers/plans/2026-11-02-direcao-visual-fatia-5.md`), com as escolhas E1 a E9 listadas para ele:
+
+> Aprovado, execute.
+>
+> Pontos que observei ao testar o jogo jogando:
+>
+> 1. Fico perdido quando o oponente usa armadilhas, K, J, Q (cartas especiais no geral). Sou limitado apenas ao som "genérico" e ao log de histórico para entender o que aconteceu. Seria interessante enriquecer a experiências de jogar cartas especiais, afinal são especiais, dando assim mais profundidade e alma pro jogo. Deixar tão bom ao ponto do player não precisar ficar olhando o histórico de jogadas para saber o que aconteceu. Isso serve para os dois lados.
+> 2. Cartas especiais em mãos que estão bloqueadas no momento da jogada devem ser exibidas de forma em que o usuário entenda que no momento não podem ser usadas, pois as vezes confunde se pode usar ou não. As vezes nem é o momento de usar certas cartas especiais mas fico clicando porque a carta está sendo exibida normal. deve enriquecer este detalhe.
+> 3. as vezes arrasto o mouse e seleciono textos. isso deve ser bloqueado no jogo.
+> 4. evite exibir o texto "Ameaça de bot" acima do botão atacar, pois é o player quem deve observar esses detalhes do jogo e pensar na melhor estratégia.
+> 5. botão de atacar deve ter identidade e personalidade. o botão é simples. Isso serve para todos os botões clicáveis no fluxo de jogadas (até os botões desfazer e recomeçar).
+> 6. avisos na mesa de cura passiva, reflect, ressurreição devem ser enriquecidos visualmente. está muito simples.
+> 7. remova o contador com barra de regresso que é exibido abaixo do botão "Atacar primeiro" e "Atacar segundo".
+> 8. substitua a palavra Buff por outra mais apropriada para jogadores leigos.
+> 9. cura passiva ocorre e eu não sei o por que fui curado. talvez um efeito de cartas que vão para o cemitério virando hp e indo pro coringa quando duplo K está ativado. Pense na melhor animação se houver.
+> 10. enriquecer o detalhe deixando mais empolgante a medida que o player adicionar cartas de buffs na mesa. (1 J equipado = nenhum efeito, 2 J equipados, as cartas tem um efeito indicando mais poder, 3 J equipados, cartas com efeitos mais poderosos, tipo faícas de raios). isso serve para todas as cartas de buffs equipados. manter a coerência.
+> 11. O Player que estiver com Iniciativa 3 rodadas seguidas, o avatar do coringa deve ter uma aura minima de poder, quando tiver 5 rodadas uma aura mais forte, e quando bater 10 rodadas seguidas, deve ter uma super aura de poder - referência de dragon ball.
+> 12. quando cartas numéricas forem inseridas nas fileiras, valores de ataque e defesa devem exibir uma micro animação e aumento de tamanho indicando que o ataque ou a defesa aumentaram de valor.
+> 13. O Player que tiver o ataque maior, o ícone de espada deve ter uma áura dourada, quase como as são exibidas nas cartas quando completam quadra. O mesmo para a defesa e o ícone de escudo.
+> 14. deixar o monte e o cemitério mais centralizado. deixar cemitério com visual mais rico e com mais identidade.
+
+Perguntado como encaixar os pontos, que palavra entra no lugar de "Buff" e o que acontece com a ordem automática sem a barra, ele escolheu:
+- "Fatia 5 + diretos": a fatia 5 como aprovada, com uma tarefa a mais para os pontos diretos (3, 4, 7, 8 e 12); os outros nove (1, 2, 5, 6, 9, 10, 11, 13 e 14) num desenho novo, com protótipo, logo depois;
+- "Bônus": "Bônus de ataque" (J) e "Bônus de defesa" (Q);
+- "Tirar o automático": sai a barra e sai a escolha automática da ordem; online vale o prazo do servidor.
+
+**Leitura:**
+- O plano está aprovado como foi entregue, com as recomendações de E1 a E9. **[I]** Vale até o fast-forward na `main` com as duas CI verdes, como nas fatias anteriores.
+- A tarefa dos pontos diretos entra no plano como Task 9, antes da Task 8 (o E2E e a medição a cobrem).
+- **[I] Ponto 3:** sem seleção de texto na mesa (o palco e a mão). Os campos de texto, os diálogos de regras e o histórico seguem selecionáveis.
+- **[I] Ponto 4:** sai a "Ameaça de X" acima do Atacar e também a "ameaça de X cai de A para B" da prévia do alvo, pelo mesmo motivo. A prévia do seu próprio ataque fica.
+- **[I] Ponto 8:** só o texto muda. Os identificadores (`BuffPlayed`, `attackBuffs`...) ficam, como manda a regra de idioma do repositório. O plural é "Bônus de ataque".
+- **[I] Ponto 12:** o total da fileira cresce e assenta quando sobe, no pouso da carta que o fez subir. Pela coerência que ele pediu no ponto 10, vale também quando um J ou um Q sobe o total, não só uma numérica.
+- **[I] Ponto 1 e a E3:** a queda simples da carta do Bot (E3) segue nesta fatia como base. O desenho novo deve deixar a jogada especial do Bot legível sem o histórico, e pode trocar essa queda.
+- **[I]** Os nove pontos de desenho não foram desenhados nem aprovados: viram brainstorming e protótipo depois da fatia 5.
+
+---
+
 ## 2026-11-02 (8): a outra conta assume a fatia 5
 
 Na outra conta, com a passagem pronta na `main`:
