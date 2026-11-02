@@ -1,8 +1,8 @@
 // O tutorial (`/tutorial`, spec do polimento, fatia 4): uma partida de treino de verdade contra o bot Fácil, na semente em que as
 // especiais aparecem cedo (`TUTORIAL_SEED`), com dicas por situação num painel. É a mesma mesa do treino (`local-game.tsx` cria a
 // sala e a sessão), com a faixa "Tutorial" e o painel de dica. Não é um roteiro: o jogador joga o que quiser, e a dica certa
-// aparece quando a situação acontece (`tutorialHint`, no modelo). A ordem não sai sozinha aqui (`autoOrder: false`): quem lê a dica da
-// ordem escolhe sem pressa, na partida toda.
+// aparece quando a situação acontece (`tutorialHint`, no modelo). Como em toda partida, a ordem não sai sozinha: quem lê a dica da ordem
+// escolhe sem pressa.
 //
 // Esta tela chega por `React.lazy` (`App.tsx`), e é a única que importa o painel, os textos e a semente: nada disso pesa no
 // JavaScript inicial (`scripts/smoke.ts` confere). A semente é sempre a do tutorial, nunca a da URL, e as dicas recomeçam a cada
@@ -58,7 +58,7 @@ export default function Tutorial({ store, load = loadLocalRoom, reload = default
     load()
       .then((module) => {
         if (!live) return;
-        const game = openLocalRoom(module, { seed: TUTORIAL_SEED, level: LEVEL, store, autoOrder: false });
+        const game = openLocalRoom(module, { seed: TUTORIAL_SEED, level: LEVEL, store });
         dispose = game.dispose;
         setStep({ kind: 'playing', session: game.session, seedOf: game.seedOf });
       })

@@ -136,7 +136,7 @@ export function tutorialDeal(seed: string): TutorialDeal {
 /**
  * A iniciativa com o jogador (a dica 3 é a escolha da ordem), ao menos uma numérica no 1º Equipar (a dica 1 é a do Equipar) e,
  * até o 2º Equipar, sem nenhuma queimada: o K, o A, o Selvagem e um J ou um Q (a mão cheia de 4, com o Reflect pelo Selvagem).
- * Cobre as dicas dos buffs, da Armadilha, do Selvagem e do Reflect antes do primeiro ataque.
+ * Cobre as dicas dos bônus, da Armadilha, do Selvagem e do Reflect antes do primeiro ataque.
  */
 export function meetsTutorialCriterion(result: TutorialDeal): boolean {
   const first = result.firstEquipWithSpecial;

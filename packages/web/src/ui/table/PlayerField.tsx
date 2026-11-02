@@ -176,14 +176,14 @@ function Zones({ player, name, view, self }: { player: PublicPlayer; name: strin
       {/* No seu campo, a zona inteira recebe a carta da mão (J, Q, K); no do oponente, cada carta é um alvo possível (A, Selvagem, Sacrifício). */}
       <Zone label="Guarda" icon={<GuardIcon className={ZONE_ICON} />} cards={player.guard} count drop={self ? DROP.guard : 'targets'} />
       <Zone
-        label="Buffs de ataque"
+        label="Bônus de ataque"
         icon={<AttackBuffIcon className={ZONE_ICON} />}
         cards={player.attackBuffs}
         wildAs="J"
         drop={self ? DROP.attackBuffs : 'targets'}
       />
       <Zone
-        label="Buffs de defesa"
+        label="Bônus de defesa"
         icon={<DefenseBuffIcon className={ZONE_ICON} />}
         cards={player.defenseBuffs}
         wildAs="Q"

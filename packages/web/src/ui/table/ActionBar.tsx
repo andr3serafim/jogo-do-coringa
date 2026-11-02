@@ -41,8 +41,6 @@ import {
   targetButtonText,
   targetEffectText,
   targetRole,
-  threatLabel,
-  threatPreviewText,
   waitingText,
 } from '../../model/copy.ts';
 import { previewsOf, previewsWithout, type Previews } from '../../model/preview.ts';
@@ -117,8 +115,6 @@ export function ActionBar(props: ActionBarProps) {
   // Depois do passe, manual ou automático, só resta esperar a janela fechar (a `PlayTable` já conta os dois).
   const { passed } = props;
   const open = acting && !passed;
-  // O gatilho já traz a prévia do ataque: a ameaça não se repete.
-  const triggered = reacting && open && view.phase.kind === 'REACTION' && view.phase.trigger === 'ATTACK';
   const canPass = reacting && open && plays.pass;
   const tipId = useId();
 
@@ -166,11 +162,7 @@ export function ActionBar(props: ActionBarProps) {
         />
       ) : null}
 
-      <div role="group" aria-label="Prévias" className="flex flex-col gap-1 text-[13px] leading-tight pc:flex-row pc:gap-6 pc:text-sm">
-        {previews.threat.outcome !== 'NO_ATTACK' && !triggered ? (
-          <PreviewRow label={threatLabel(opponent)}>{threatPreviewText(previews.threat, opponent, previews.lives)}</PreviewRow>
-        ) : null}
-      </div>
+      {/* Sem a ameaça do oponente: quem joga observa a mesa e pensa a estratégia (decisoes.md 2026-11-02 (9), ponto 4). */}
 
       {/* Com uma carta escolhida a conversa é sobre ela: os botões próprios (que não usam a escolha) voltam com o Cancelar. */}
       {open && card === null ? <OwnPlays {...props} /> : null}
@@ -216,14 +208,6 @@ function PreviewLine({ label, children }: { label: string; children: ReactNode }
         {children}
       </span>
     </>
-  );
-}
-
-function PreviewRow({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <p>
-      <PreviewLine label={label}>{children}</PreviewLine>
-    </p>
   );
 }
 

@@ -19,18 +19,18 @@ function handCard(view: PlayerView, kind: SpecialCard['kind'], index = 0): Speci
 }
 
 describe('tablePlays: jogadas por carta', () => {
-  it('J dá "Buff de ataque"; o Selvagem dá um papel por entrada', () => {
+  it('J dá "Bônus de ataque"; o Selvagem dá um papel por entrada', () => {
     const { view, plays } = setup({ self: { hand: ['J', 'WILD'] } });
-    expect(labels(plays, handCard(view, 'J').id)).toEqual(['Buff de ataque']);
-    expect(labels(plays, handCard(view, 'WILD').id)).toEqual(['como J: Buff de ataque', 'como Q: Buff de defesa']);
+    expect(labels(plays, handCard(view, 'J').id)).toEqual(['Bônus de ataque']);
+    expect(labels(plays, handCard(view, 'WILD').id)).toEqual(['como J: Bônus de ataque', 'como Q: Bônus de defesa']);
   });
 
   it('com alvo, o Selvagem também dá "como A: Armadilha" e o J, Sacrifício', () => {
     const { view, plays } = setup({ self: { hand: ['J', 'WILD'] }, opponent: { attackBuffs: ['J'], guard: ['K'] } });
-    expect(labels(plays, handCard(view, 'J').id)).toEqual(['Buff de ataque', 'Sacrifício']);
+    expect(labels(plays, handCard(view, 'J').id)).toEqual(['Bônus de ataque', 'Sacrifício']);
     expect(labels(plays, handCard(view, 'WILD').id)).toEqual([
-      'como J: Buff de ataque',
-      'como Q: Buff de defesa',
+      'como J: Bônus de ataque',
+      'como Q: Bônus de defesa',
       'como A: Armadilha',
       'como J: Sacrifício',
     ]);
@@ -41,7 +41,7 @@ describe('tablePlays: jogadas por carta', () => {
     const sacrifice = plays.byCard.get(handCard(view, 'WILD').id)!.find((p) => p.key === 'SACRIFICE:Q')!;
     expect(sacrifice.label).toBe('como Q: Sacrifício');
     expect(sacrifice.targets).toEqual([
-      { id: view.opponent.defenseBuffs[0]!.id, zone: 'defenseBuffs', label: expect.stringMatching(/^Q. \(Buff de defesa\)$/) },
+      { id: view.opponent.defenseBuffs[0]!.id, zone: 'defenseBuffs', label: expect.stringMatching(/^Q. \(Bônus de defesa\)$/) },
     ]);
   });
 
@@ -110,7 +110,7 @@ describe('tablePlays: jogadas por carta', () => {
       opponent: { attackBuffs: ['J'], absoluteDefense: true },
     });
     expect(plays.byCard.has(handCard(view, 'A').id)).toBe(false);
-    expect(labels(plays, handCard(view, 'J').id)).toEqual(['Buff de ataque']);
+    expect(labels(plays, handCard(view, 'J').id)).toEqual(['Bônus de ataque']);
   });
 
   it('o alvo inválido ou a falta dele recusa o `make`', () => {

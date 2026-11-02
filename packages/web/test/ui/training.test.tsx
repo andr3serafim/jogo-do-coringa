@@ -446,8 +446,8 @@ describe('/treino: o que o §2.6 exclui (passe automático e envio antecipado do
   });
 });
 
-describe('/treino: a ordem automática segue valendo (só o tutorial a desliga)', () => {
-  it('com a iniciativa na rodada 3 (a semente do tutorial), a barra de 3 s aparece e "Atacar primeiro" sai sozinho', async () => {
+describe('/treino: a ordem não sai sozinha (decisoes.md 2026-11-02 (9), ponto 7)', () => {
+  it('com a iniciativa na rodada 3 (a semente do tutorial), o painel fica sem barra, diz "Escolha quando quiser." e espera o jogador', async () => {
     const { advance, user } = fakeClock();
     window.history.replaceState(null, '', `/treino?semente=${TUTORIAL_SEED}&nivel=facil`);
     render(<App api={fakeApi()} />);
@@ -457,26 +457,10 @@ describe('/treino: a ordem automática segue valendo (só o tutorial a desliga)'
     await equipByUi(user);
     advance(2_000);
     const order = screen.getByRole('region', { name: 'Escolha da ordem' });
-    expect(order.querySelector('[data-auto-barra]')).not.toBeNull();
-    expect(within(order).getByText(/sai sozinho/)).toBeInTheDocument();
-    expect(within(order).queryByText(/Escolha quando quiser/)).not.toBeInTheDocument();
-    advance(6_000);
-    expect(screen.queryByRole('region', { name: 'Escolha da ordem' })).not.toBeInTheDocument();
-  });
-
-  it('depois de o jogador interagir com o painel, o texto é "Escolha quando quiser." (sem prazo, sem falar em prazo)', async () => {
-    const { advance, user } = fakeClock();
-    window.history.replaceState(null, '', `/treino?semente=${TUTORIAL_SEED}&nivel=facil`);
-    render(<App api={fakeApi()} />);
-    await settle();
-    await equipByUi(user);
-    advance(2_000);
-    await equipByUi(user);
-    advance(2_000);
-    await user.click(screen.getByRole('region', { name: 'Escolha da ordem' }));
-    const order = within(screen.getByRole('region', { name: 'Escolha da ordem' }));
-    expect(order.getByText('Escolha quando quiser.')).toBeInTheDocument();
-    expect(order.queryByText(/prazo/)).not.toBeInTheDocument();
+    expect(order.querySelector('[data-auto-barra]')).toBeNull();
+    expect(within(order).queryByText(/sai sozinho/)).not.toBeInTheDocument();
+    expect(within(order).getByText('Escolha quando quiser.')).toBeInTheDocument();
+    expect(within(order).queryByText(/prazo/)).not.toBeInTheDocument();
     advance(60_000);
     expect(screen.getByRole('region', { name: 'Escolha da ordem' })).toBeInTheDocument();
   });

@@ -1,14 +1,13 @@
 import { viewFor, type Destination, type GameEvent, type NumCard, type PlayerView, type Rank } from '@coringa/engine';
 import type { Deadline } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
-import { ORDER_AUTO_MS, shouldAutoPass } from '../../src/model/automation.ts';
+import { shouldAutoPass } from '../../src/model/automation.ts';
 import { AUTO_PASS_NOTICE } from '../../src/model/copy.ts';
 import { completeDraft, equipAction, type EquipPick } from '../../src/model/equip.ts';
 import { NO_MARKS, zoneKey } from '../../src/model/marks.ts';
 import { legalFor } from '../../src/model/plays.ts';
 import { Session, type SessionDeps } from '../../src/model/session.ts';
 import { DEFAULT_PREFS, type Prefs } from '../../src/model/storage.ts';
-import { buildTimeline, timelineMs } from '../../src/model/timeline.ts';
 import { deferredAck, FakeConnection, scenarioAt, stateMessage, viewAt } from '../fixtures.ts';
 
 /** Relógio e timers falsos: o teste avança o tempo na mão. */
@@ -211,131 +210,12 @@ describe('Session: aviso e jogada nova', () => {
   });
 });
 
-describe('Session: ordem automática (spec §3.6)', () => {
-  const total = timelineMs(buildTimeline(orderEvents, { mode: 'live', reducedMotion: false, decisionPending: true }));
-
-  it('a conta é a mesma do palco (decisão pendente: tudo cabe em 1 s)', () => {
-    expect(total).toBeGreaterThan(0);
-    expect(total).toBeLessThanOrEqual(1_000);
-  });
-
-  it('sai aos timelineMs + 3000 com auto', () => {
-    const { connection, clock, session } = setup();
+describe('Session: a ordem não sai sozinha (decisoes.md 2026-11-02 (9), ponto 7)', () => {
+  it('com a escolha da ordem aberta, nada é agendado nem enviado, por mais que o tempo passe', () => {
+    const { connection, clock } = setup();
     connection.emitState(stateMessage(orderView(), { epoch: 5, events: orderEvents }));
-    expect(session.snapshot().orderAutoAt).toBe(session.snapshot().receivedAt + total + ORDER_AUTO_MS);
-    clock.advance(total + ORDER_AUTO_MS - 1);
-    expect(connection.sent).toHaveLength(0);
-    clock.advance(1);
-    expect(connection.sent).toEqual([
-      { type: 'act', id: 'fake-1', action: { type: 'CHOOSE_ORDER', first: true }, options: { auto: true } },
-    ]);
-    expect(session.snapshot().orderAutoAt).toBeNull();
-  });
-
-  it('interact() antes do prazo: nada sai e o prazo some', () => {
-    const { connection, clock, session } = setup();
-    connection.emitState(stateMessage(orderView(), { epoch: 5, events: orderEvents }));
-    session.interact();
-    expect(session.snapshot().orderAutoAt).toBeNull();
     expect(clock.timers.size).toBe(0);
-    clock.advance(10_000);
-    expect(connection.sent).toHaveLength(0);
-  });
-
-  it('interact() sem nada agendado não mexe no snapshot', () => {
-    const { session } = setup();
-    const before = session.snapshot();
-    session.interact();
-    expect(session.snapshot()).toBe(before);
-  });
-
-  it('um state da mesma época não reagenda nem reabre o que o jogador cancelou', () => {
-    const { connection, clock, session } = setup();
-    connection.emitState(stateMessage(orderView(), { epoch: 5, events: orderEvents }));
-    const at = session.snapshot().orderAutoAt;
-    clock.advance(200);
-    connection.emitState(stateMessage(orderView(), { epoch: 5, seq: 2 }));
-    expect(session.snapshot().orderAutoAt).toBe(at);
-    expect(clock.timers.size).toBe(1);
-    session.interact();
-    connection.emitState(stateMessage(orderView(), { epoch: 5, seq: 3 }));
-    expect(session.snapshot().orderAutoAt).toBeNull();
-    expect(clock.timers.size).toBe(0);
-  });
-
-  it('só para quem escolhe: o oponente escolhendo não agenda nada', () => {
-    const { connection, clock, session } = setup();
-    connection.emitState(stateMessage(orderView('p2'), { epoch: 5, events: orderEvents }));
-    expect(session.snapshot().orderAutoAt).toBeNull();
-    expect(clock.timers.size).toBe(0);
-  });
-
-  it('a fase mudando cancela o agendamento', () => {
-    const { connection, clock, session } = setup();
-    connection.emitState(stateMessage(orderView(), { epoch: 5, events: orderEvents }));
-    connection.emitState(stateMessage(viewAt(), { epoch: 6, seq: 2 }));
-    expect(session.snapshot().orderAutoAt).toBeNull();
-    expect(clock.timers.size).toBe(0);
-    clock.advance(10_000);
-    expect(connection.sent).toHaveLength(0);
-  });
-
-  it('escolher a ordem na mão cancela a automática', async () => {
-    const { connection, clock, session } = setup();
-    connection.emitState(stateMessage(orderView(), { epoch: 5, events: orderEvents }));
-    await session.play({ type: 'CHOOSE_ORDER', first: false });
-    expect(session.snapshot().orderAutoAt).toBeNull();
-    clock.advance(10_000);
-    expect(connection.sent).toHaveLength(1);
-    expect(connection.sent[0]).toMatchObject({ action: { type: 'CHOOSE_ORDER', first: false }, options: undefined });
-  });
-
-  it('catchUp usa a linha do tempo do catchUp; resync não tem batidas', () => {
-    const catchUp = timelineMs(buildTimeline(orderEvents, { mode: 'catchUp', reducedMotion: false, decisionPending: true }));
-    const a = setup();
-    a.connection.emitState(stateMessage(orderView(), { epoch: 5, events: orderEvents, catchUp: true }));
-    expect(a.session.snapshot().orderAutoAt).toBe(a.session.snapshot().receivedAt + catchUp + ORDER_AUTO_MS);
-    expect(catchUp).toBeLessThan(total);
-
-    const b = setup();
-    b.connection.emitState(stateMessage(orderView(), { epoch: 5, events: orderEvents, resync: true }));
-    expect(b.session.snapshot().orderAutoAt).toBe(b.session.snapshot().receivedAt + ORDER_AUTO_MS);
-  });
-
-  it('sem a ordem automática na sessão (o tutorial): nada agendado, orderAutoAt nulo e nada sai, e o jogador escolhe à mão', async () => {
-    const connection = new FakeConnection();
-    const clock = fakeDeps();
-    const session = new Session(connection, clock.deps, DEFAULT_PREFS, { autoOrder: false });
-    connection.emitState(stateMessage(orderView(), { epoch: 5, events: orderEvents }));
-    expect(session.snapshot().orderAutoAt).toBeNull();
-    expect(clock.timers.size).toBe(0);
-    clock.advance(60_000);
-    expect(connection.sent).toHaveLength(0);
-    expect(session.snapshot().orderAutoAt).toBeNull();
-    // Um state da mesma época e o interact() também não agendam nada.
-    connection.emitState(stateMessage(orderView(), { epoch: 5, seq: 2 }));
-    session.interact();
-    expect(clock.timers.size).toBe(0);
-    expect(session.snapshot().orderAutoAt).toBeNull();
-    // A escolha à mão segue valendo, sem a marca `auto`.
-    await session.play({ type: 'CHOOSE_ORDER', first: false });
-    expect(connection.sent).toEqual([
-      { type: 'act', id: 'fake-1', action: { type: 'CHOOSE_ORDER', first: false }, options: undefined },
-    ]);
-  });
-
-  it('autoOrder: false não mexe no passe automático: as duas opções são independentes', () => {
-    const connection = new FakeConnection();
-    new Session(connection, fakeDeps().deps, DEFAULT_PREFS, { autoOrder: false });
-    connection.emitState(stateMessage(passOnlyView(), { epoch: 3 }));
-    expect(connection.sent).toEqual([{ type: 'act', id: 'fake-1', action: PASS, options: { auto: true } }]);
-  });
-
-  it('dispose cancela o agendamento', () => {
-    const { connection, clock, session } = setup();
-    connection.emitState(stateMessage(orderView(), { epoch: 5, events: orderEvents }));
-    session.dispose();
-    expect(clock.timers.size).toBe(0);
+    expect(connection.sent).toEqual([]);
   });
 });
 

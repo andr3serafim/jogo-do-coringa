@@ -30,7 +30,7 @@ const handCard = (page: Page, name: RegExp): Locator => hand(page).getByRole('bu
  */
 const ON_BREATHING_CARD = { force: true } as const;
 const K = /^K, Guarda, de /;
-const Q = /^Q, Buff de defesa, de /;
+const Q = /^Q, Bônus de defesa, de /;
 /** O A: sem alvo para a Armadilha (o oponente não tem J, Q nem K em campo), mas rouba (E3): as numéricas do oponente são as zonas dele. */
 const ACE = /^A, Armadilha, de /;
 const myField = (page: Page): Locator => page.getByRole('region', { name: 'Seu campo' });
@@ -246,7 +246,7 @@ test('fase principal: o K arrasta até a Guarda; a zona errada e fora de zona n�
   await myGuard(page).scrollIntoViewIfNeeded();
   await expect(page.locator(ZONE.guard)).toBeInViewport();
 
-  // A Q só vale nos Buffs de defesa: no ar, só eles ficam marcados; soltar na Guarda não manda nada nem escolhe a carta.
+  // A Q só vale nos Bônus de defesa: no ar, só eles ficam marcados; soltar na Guarda não manda nada nem escolhe a carta.
   await pickUp(page, q);
   await carryTo(page, await hitPoint(page.locator(ZONE.guard)));
   await expect(ghost(page)).toHaveCount(1);
@@ -283,7 +283,7 @@ test('fase principal: o toque, o Enter e o arrasto que volta à própria carta e
   // O toque (o clique do mouse): escolhe, e o clique que vem depois do gesto não escolhe duas vezes (e não alterna de volta).
   await q.click(ON_BREATHING_CARD);
   await expect(q).toHaveAttribute('aria-pressed', 'true');
-  await expect(actionBar(page).getByRole('list', { name: 'Jogadas' }).getByRole('button', { name: 'Buff de defesa' })).toBeVisible();
+  await expect(actionBar(page).getByRole('list', { name: 'Jogadas' }).getByRole('button', { name: 'Bônus de defesa' })).toBeVisible();
   await q.click(ON_BREATHING_CARD);
   await expect(q).toHaveAttribute('aria-pressed', 'false');
 

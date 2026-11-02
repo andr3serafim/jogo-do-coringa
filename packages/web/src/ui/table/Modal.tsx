@@ -19,7 +19,7 @@ export interface ModalProps {
   children: ReactNode;
 }
 
-const BASE = 'm-auto max-h-[85dvh] overflow-y-auto border-4 border-tinta bg-papel p-5 text-tinta backdrop:bg-tinta/70';
+const BASE = 'm-auto max-h-[85dvh] select-text overflow-y-auto border-4 border-tinta bg-papel p-5 text-tinta backdrop:bg-tinta/70';
 
 export function Modal({ open, onClose, labelledBy, describedBy, className = 'w-[min(92vw,34rem)]', children }: ModalProps) {
   const ref = useRef<HTMLDialogElement>(null);

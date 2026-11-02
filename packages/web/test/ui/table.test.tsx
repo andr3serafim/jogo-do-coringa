@@ -202,11 +202,11 @@ describe('mesa: Guarda, buffs e mão (spec §3.1)', () => {
     mount();
     const mine = within(screen.getByRole('region', { name: 'Seu campo' }));
     expect(within(mine.getByRole('list', { name: 'Guarda' })).getAllByRole('img')).toHaveLength(1);
-    const buffs = within(mine.getByRole('list', { name: 'Buffs de ataque' })).getAllByRole('img');
+    const buffs = within(mine.getByRole('list', { name: 'Bônus de ataque' })).getAllByRole('img');
     expect(buffs.map((el) => el.getAttribute('aria-label'))).toEqual([expect.stringMatching(/^J de /), 'Coringa Selvagem como J']);
-    expect(within(mine.getByRole('list', { name: 'Buffs de defesa' })).getAllByRole('img')).toHaveLength(1);
+    expect(within(mine.getByRole('list', { name: 'Bônus de defesa' })).getAllByRole('img')).toHaveLength(1);
     const theirs = within(screen.getByRole('region', { name: 'Campo de Duda' }));
-    expect(within(theirs.getByRole('list', { name: 'Buffs de defesa' })).getAllByRole('img')).toHaveLength(2);
+    expect(within(theirs.getByRole('list', { name: 'Bônus de defesa' })).getAllByRole('img')).toHaveLength(2);
   });
 
   it('a minha mão mostra o papel escrito em cada carta', () => {
@@ -215,8 +215,8 @@ describe('mesa: Guarda, buffs e mão (spec §3.1)', () => {
     const names = hand.getAllByRole('img').map((el) => el.getAttribute('aria-label') ?? '');
     expect(names.map((n) => n.split(', ')[1])).toEqual([
       'Guarda',
-      'Buff de ataque',
-      'Buff de defesa',
+      'Bônus de ataque',
+      'Bônus de defesa',
       'Armadilha',
       'Selvagem',
     ]);
@@ -227,7 +227,7 @@ describe('mesa: Guarda, buffs e mão (spec §3.1)', () => {
   it('rótulo no nome (axe, WCAG 2.5.3): o texto visível da carta da mão ("K Guarda") é trecho contínuo do nome ("K, Guarda, de copas")', () => {
     mount({ ...DRAFT, self: { ...DRAFT.self, hand: ['K', 'J', 'Q', 'A', 'WILD'] } }, { props: { onSelectCard: vi.fn() } });
     const buttons = within(screen.getByRole('list', { name: 'Sua mão' })).getAllByRole('button');
-    expect(buttons.map((b) => b.textContent?.trim())).toEqual(['K Guarda', 'J Buff de ataque', 'Q Buff de defesa', 'A Armadilha', 'Selvagem']);
+    expect(buttons.map((b) => b.textContent?.trim())).toEqual(['K Guarda', 'J Bônus de ataque', 'Q Bônus de defesa', 'A Armadilha', 'Selvagem']);
     expect(buttons[0]).toHaveAccessibleName(/^K, Guarda, de (copas|ouros|espadas|paus)$/);
     expect(buttons[3]).toHaveAccessibleName(/^A, Armadilha, de (copas|ouros|espadas|paus)$/);
     expect(buttons[4]).toHaveAccessibleName('Coringa Selvagem, Selvagem');

@@ -461,16 +461,14 @@ describe('Equipar: foco e teclado (spec §7)', () => {
 // ---------------------------------------------------------------------------------------------
 
 describe('escolha da ordem (spec §3.6)', () => {
-  it('"Atacar primeiro" vem pré-selecionado, com a barra de 3 s e a confirmação automática agendada', () => {
-    const m = mount(ORDER, { fake: true });
+  it('"Atacar primeiro" vem pré-selecionado, sem barra e sem confirmação automática (decisoes.md 2026-11-02 (9), ponto 7)', () => {
+    mount(ORDER, { fake: true });
     expect(within(orderPanel()).getByText('Você tem a iniciativa: atacar primeiro ou em segundo?')).toBeInTheDocument();
     const first = within(orderPanel()).getByRole('button', { name: 'Atacar primeiro' });
     expect(first).toHaveAttribute('data-preselecionada');
     expect(within(orderPanel()).getByRole('button', { name: 'Atacar em segundo' })).not.toHaveAttribute('data-preselecionada');
-    expect(orderPanel().querySelector('[data-auto-barra]')).not.toBeNull();
-    // O foco chegou ao painel por conta da mesa: isso não é interação do jogador.
+    expect(orderPanel().querySelector('[data-auto-barra]')).toBeNull();
     expect(orderPanel()).toHaveFocus();
-    expect(m.session.snapshot().orderAutoAt).toBe(13_000);
   });
 
   it('a pergunta diz por que a iniciativa é sua: sorteada, mais dano ou empate na última rodada de Ataque', () => {
@@ -484,63 +482,22 @@ describe('escolha da ordem (spec §3.6)', () => {
     expect(within(orderPanel()).getByText('Empate em dano na última rodada de Ataque (0 × 0): ela não mudou.')).toBeInTheDocument();
   });
 
-  it('a barra esvazia até o instante da confirmação automática', () => {
+  it('sem o jogador, nada sai, por mais que o tempo passe', () => {
     const m = mount(ORDER, { fake: true });
-    const fill = () => orderPanel().querySelector<HTMLElement>('[data-auto-barra] > *')!;
-    expect(fill().style.width).toBe('100%');
-    tick(m, 1_500);
-    expect(parseFloat(fill().style.width)).toBeCloseTo(50, 0);
-    tick(m, 1_000);
-    expect(parseFloat(fill().style.width)).toBeCloseTo(16.7, 0);
-  });
-
-  it('sem interação, no fim dos 3 s a interface envia CHOOSE_ORDER { first: true } com a marca auto', () => {
-    const m = mount(ORDER, { fake: true });
-    tick(m, 2_900);
-    expect(acts(m)).toEqual([]);
-    tick(m, 200);
-    const sent = m.connection.sent;
-    expect(sent).toHaveLength(1);
-    expect(sent[0]).toMatchObject({ type: 'act', action: { type: 'CHOOSE_ORDER', first: true }, options: { auto: true } });
-    expect(applyAction(m.game, m.me, { type: 'CHOOSE_ORDER', first: true }).ok).toBe(true);
-  });
-
-  it('um clique no painel cancela o automático (orderAutoAt some do snapshot)', async () => {
-    const m = mount(ORDER, { fake: true });
-    expect(m.session.snapshot().orderAutoAt).not.toBeNull();
-    await m.user.click(orderPanel());
-    expect(m.session.snapshot().orderAutoAt).toBeNull();
-    expect(orderPanel().querySelector('[data-auto-barra]')).toBeNull();
     tick(m, 10_000);
     expect(acts(m)).toEqual([]);
   });
 
-  it('com prazo do servidor, depois de interagir o painel diz "Escolha quando quiser, dentro do prazo."', async () => {
-    const m = mount(ORDER, { fake: true, state: { deadline: deadline('ORDER', 70_000) } });
-    await m.user.click(orderPanel());
+  it('com prazo do servidor, o painel diz "Escolha quando quiser, dentro do prazo."', () => {
+    mount(ORDER, { fake: true, state: { deadline: deadline('ORDER', 70_000) } });
     expect(within(orderPanel()).getByText('Escolha quando quiser, dentro do prazo.')).toBeInTheDocument();
   });
 
-  it('sem prazo (treino e tutorial) o painel não fala em prazo: "Escolha quando quiser."', async () => {
+  it('sem prazo (treino e tutorial) o painel não fala em prazo: "Escolha quando quiser."', () => {
     const m = mount(ORDER, { fake: true });
     expect(m.session.snapshot().state?.deadline).toBeNull();
-    await m.user.click(orderPanel());
     expect(within(orderPanel()).getByText('Escolha quando quiser.')).toBeInTheDocument();
     expect(within(orderPanel()).queryByText(/prazo/)).not.toBeInTheDocument();
-  });
-
-  it('o mouse por cima do painel também cancela', async () => {
-    const m = mount(ORDER, { fake: true });
-    await m.user.hover(within(orderPanel()).getByRole('button', { name: 'Atacar em segundo' }));
-    expect(m.session.snapshot().orderAutoAt).toBeNull();
-  });
-
-  it('o foco do teclado dentro do painel também cancela', async () => {
-    const m = mount(ORDER, { fake: true });
-    expect(m.session.snapshot().orderAutoAt).not.toBeNull();
-    await m.user.tab();
-    expect(within(orderPanel()).getByRole('button', { name: 'Atacar primeiro' })).toHaveFocus();
-    expect(m.session.snapshot().orderAutoAt).toBeNull();
   });
 
   it('escolher à mão manda a ordem sem auto: primeiro ou em segundo', async () => {

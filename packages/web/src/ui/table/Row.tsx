@@ -22,7 +22,7 @@ import {
   type NumCard,
   type PublicPlayer,
 } from '@coringa/engine';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cardDropKey, ROW_DROP } from '../../model/drag.ts';
 import { rowKey } from '../../model/effects.ts';
 import { useAnim } from '../anim/context.ts';
@@ -56,6 +56,61 @@ interface Conta {
   multiplier: number;
 }
 
+/** Quanto o total cresce quando sobe no pouso de uma carta (decisoes.md 2026-11-02 (9), ponto 12). */
+const RISE = { scale: '1.3', ms: 320 } as const;
+
+/**
+ * As cartas que ainda vão pousar (sub-projeto 6 §8): enquanto a carta cai ou voa até a fileira (ou até os bônus que a multiplicam), o total
+ * não a conta, e ela entra na conta no pouso dela. A conta continua sendo a do motor, sobre o lado sem essas cartas. O pulo apaga os
+ * pousos (`landAt`), e o total volta ao da `view` na hora.
+ */
+function useLandingHold(ids: readonly string[]): { pending: ReadonlySet<string>; landed: number } {
+  const anim = useAnim();
+  const key = ids.flatMap((id) => {
+    const landing = anim.landAt(id);
+    return landing === null ? [] : [`${id}@${landing.at}`];
+  }).join(',');
+  const [done, setDone] = useState<{ key: string; ids: ReadonlySet<string> }>({ key: '', ids: new Set() });
+  useEffect(() => {
+    if (key === '') return;
+    const timers = key.split(',').map((entry) => {
+      const at = entry.lastIndexOf('@');
+      const id = entry.slice(0, at);
+      return window.setTimeout(
+        () => setDone((prev) => ({ key, ids: new Set([...(prev.key === key ? prev.ids : []), id]) })),
+        Number(entry.slice(at + 1)) * 1000,
+      );
+    });
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [key]);
+  const landed = done.key === key ? done.ids : new Set<string>();
+  const pending = new Set(key === '' ? [] : key.split(',').map((entry) => entry.slice(0, entry.lastIndexOf('@'))).filter((id) => !landed.has(id)));
+  return { pending, landed: landed.size };
+}
+
+/** O total cresce e assenta, em ouro, quando sobe porque uma carta pousou (com movimento reduzido, só a cor). */
+function useRise(total: number, landed: number, reduced: boolean) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const last = useRef(total);
+  useEffect(() => {
+    const before = last.current;
+    last.current = total;
+    const el = ref.current;
+    if (el === null || landed === 0 || total <= before) return;
+    const pop = reduced
+      ? undefined
+      : el.animate?.([{ scale: '1' }, { scale: RISE.scale, offset: 0.35 }, { scale: '1' }], { duration: RISE.ms, easing: 'ease-out' });
+    el.setAttribute('data-subiu', '');
+    const timer = window.setTimeout(() => el.removeAttribute('data-subiu'), RISE.ms);
+    return () => {
+      pop?.cancel();
+      window.clearTimeout(timer);
+      el.removeAttribute('data-subiu');
+    };
+  }, [total, landed, reduced]);
+  return ref;
+}
+
 /** A conta do mesmo quadro do total mostrado: a de antes enquanto o total espera ou conta, a de agora com a mesa parada. */
 function useShownConta(base: number, total: number): Conta {
   const { count } = useAnim();
@@ -65,12 +120,23 @@ function useShownConta(base: number, total: number): Conta {
   return count === 'idle' ? now : before;
 }
 
+/** O lado sem as cartas `ids` (as que ainda vão pousar). */
+function withoutCards(side: PublicPlayer, ids: ReadonlySet<string>): PublicPlayer {
+  const keep = <T extends { id: string }>(cards: readonly T[]): T[] => cards.filter((card) => !ids.has(card.id));
+  return { ...side, attackRow: keep(side.attackRow), defenseRow: keep(side.defenseRow), attackBuffs: keep(side.attackBuffs), defenseBuffs: keep(side.defenseBuffs) };
+}
+
 export function Row({ label, kind, side, limit, aim, droppable = false, targets = false }: RowProps) {
   const anim = useAnim();
   const cards: NumCard[] = kind === 'ATK' ? side.attackRow : side.defenseRow;
-  const total = kind === 'ATK' ? attackPower(side) : defensePower(side);
-  const base = kind === 'ATK' ? attackBase(side) : defenseBase(side);
-  const quads = quadValues(cards);
+  const buffs = kind === 'ATK' ? side.attackBuffs : side.defenseBuffs;
+  // O total não conta a carta que ainda vai pousar (na fileira ou nos bônus dela), e sobe no pouso.
+  const hold = useLandingHold([...cards, ...buffs].map((card) => card.id));
+  const counted = hold.pending.size === 0 ? side : withoutCards(side, hold.pending);
+  const total = kind === 'ATK' ? attackPower(counted) : defensePower(counted);
+  const base = kind === 'ATK' ? attackBase(counted) : defenseBase(counted);
+  const quads = quadValues(kind === 'ATK' ? counted.attackRow : counted.defenseRow);
+  const totalRef = useRise(total, hold.landed, anim.reduced);
   const vacancies = Math.max(0, limit - cards.length);
   // O total mostrado espera a batida do dano e conta até o valor do motor.
   const shownTotal = useCountedNumber(total);
@@ -123,7 +189,11 @@ export function Row({ label, kind, side, limit, aim, droppable = false, targets 
         <span className="flex items-center gap-0.5 pc:gap-1.5">
           <Figure className="size-3.5 pc:size-6" />
           <span className="sr-only">{CAPTION[kind]}</span>
-          <span data-total className="font-texto text-[22px] font-extrabold leading-[1.1] tabular-nums pc:text-3xl">
+          <span
+            ref={totalRef}
+            data-total
+            className="font-texto text-[22px] font-extrabold leading-[1.1] tabular-nums data-subiu:text-ouro pc:text-3xl"
+          >
             {shownTotal}
           </span>
         </span>

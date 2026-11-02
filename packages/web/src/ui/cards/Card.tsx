@@ -28,7 +28,7 @@ export interface CardProps {
   size: CardSize;
   /** Papel do Selvagem em campo ("Coringa Selvagem como J"). */
   as?: WildRole;
-  /** Papel escrito na carta da mão ("Guarda", "Buff de ataque"…). */
+  /** Papel escrito na carta da mão ("Guarda", "Bônus de ataque"…). */
   roleText?: string;
   /** A carta da frente da fileira: a primeira a sair (as fileiras são filas, spec 1 §1.2). */
   front?: boolean;
@@ -76,8 +76,8 @@ export function cardName(card: EngineCard, as?: WildRole): string {
 
 const HINT: Record<'K' | 'J' | 'Q' | 'A' | 'WILD' | 'NUM', string> = {
   K: 'K, Guarda: absorve o dano de um ataque e quebra. Quatro K na Guarda dão a Exódia.',
-  J: 'J, Buff de ataque: soma 1 ao multiplicador do ataque. Quatro J armam o Ataque Absoluto.',
-  Q: 'Q, Buff de defesa: soma 1 ao multiplicador da defesa. Quatro Q ativam a Defesa Absoluta.',
+  J: 'J, Bônus de ataque: soma 1 ao multiplicador do ataque. Quatro J armam o Ataque Absoluto.',
+  Q: 'Q, Bônus de defesa: soma 1 ao multiplicador da defesa. Quatro Q ativam a Defesa Absoluta.',
   A: 'A, Armadilha ou Roubo: destrói um J, um Q ou um K do oponente, ou rouba uma numérica dele (ele perde o valor e você cura).',
   WILD: 'Coringa Selvagem: vira J, Q ou A (nunca K) quando é jogado.',
   NUM: 'Numérica: o valor soma ao total da fileira. A carta da frente é a primeira a sair.',
@@ -135,8 +135,8 @@ function RoleLabel({ children }: { children: ReactNode }) {
 }
 
 /**
- * As partes do nome acessível. Com o papel escrito na face (a mão), o nome segue a ordem do texto visível, "Q, Buff de defesa, de
- * ouros": o axe (WCAG 2.5.3, rótulo no nome) exige que o texto visível ("Q Buff de defesa") seja um trecho contínuo do nome.
+ * As partes do nome acessível. Com o papel escrito na face (a mão), o nome segue a ordem do texto visível, "Q, Bônus de defesa, de
+ * ouros": o axe (WCAG 2.5.3, rótulo no nome) exige que o texto visível ("Q Bônus de defesa") seja um trecho contínuo do nome.
  */
 function cardLabel(card: EngineCard, as: WildRole | undefined, roleText: string | undefined): string[] {
   if (roleText && card.kind !== 'WILD') return [card.kind === 'NUM' ? String(card.value) : card.kind, roleText, `de ${card.suit}`];

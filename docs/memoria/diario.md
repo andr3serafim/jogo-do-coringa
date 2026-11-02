@@ -58,7 +58,13 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   - os controles do replay ("Início", "Passo anterior", "Próximo passo" e a rodada) cortam o som da cena, como o pulo. "Tocar" e "Pausar" não: a cena segue tocando. Era o pendente desde a fatia 2;
   - os dois golpes colados já tinham entrado na Task 1;
   - **não conferidos de ouvido:** os testes medem os instantes e o volume.
-- **A seguir:** a Task 8 (os pontos diretos do playtest: sem seleção de texto, sem a ameaça, sem a ordem automática, "Bônus" e o total que sobe).
+- **Task 8, os pontos diretos do playtest** (`decisoes.md` 2026-11-02 (9)):
+  - **3:** `select-none` no palco; o histórico e os diálogos (`Modal`) ficam com `select-text`;
+  - **4:** a linha "Ameaça de X" saiu da barra (e o grupo "Prévias", que só a tinha), e a prévia do alvo não fala mais da ameaça: diz "sem mudança no seu ataque" quando o alvo não muda a sua conta. **Escolha:** a conta da ameaça (`threatPreviewText`) fica no modelo, porque os testes de nocaute contra o motor a usam como uma das direções; a direção do ataque do Bot segue coberta pelo aviso da janela de reação, que fica;
+  - **7:** saíram a ordem automática da `Session` (`autoOrder`, `orderAutoAt`, `interact`), o `ORDER_AUTO_MS`, a barra (`AutoBar`), a frase e o `onInteract` da mesa e do painel, que só a cancelavam. O painel diz "Escolha quando quiser" (com "dentro do prazo" no online). O E2E do jogo online agora escolhe "Atacar primeiro" com um clique. O `CLAUDE.md` foi corrigido (o tutorial nascia com `autoOrder: false`);
+  - **8:** "Bônus de ataque" e "Bônus de defesa" em todo texto (na mão, nas zonas, nas jogadas, nos motivos, nos alvos, no `HINT`, nas regras, nas dicas, no histórico e no terminal do `pnpm play`). Os identificadores ficam. Um teste varre os arquivos de texto atrás de "Buff". **O digest da saída do `pnpm play`** (`sim/test/online.test.ts`) mudou só pelo texto: as jogadas seguem com o mesmo digest;
+  - **12:** o `Row` calcula o total (pelo motor) sem as cartas que ainda vão pousar, na fileira e nos bônus dela (`useLandingHold`), e no pouso o número cresce até 1,3 e volta em 320 ms, em ouro (`data-subiu`). Com movimento reduzido, só a troca do número e a cor. **Escolha:** vale também para o J ou o Q que sobe o total, pela coerência que o autor pediu no ponto 10; a marca "quadra +N" do total segue a mesma conta.
+- **A seguir:** a Task 9 (o E2E, a medição de depois, as fotos e a documentação).
 
 ---
 

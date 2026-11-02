@@ -28,8 +28,8 @@ export type TargetZone = BuffZone | RowZone;
 export const isRowZone = (zone: TargetZone): zone is RowZone => zone === 'attackRow' || zone === 'defenseRow';
 
 const ZONE_TEXT: Record<TargetZone, string> = {
-  attackBuffs: 'Buff de ataque',
-  defenseBuffs: 'Buff de defesa',
+  attackBuffs: 'Bônus de ataque',
+  defenseBuffs: 'Bônus de defesa',
   guard: 'Guarda',
   attackRow: 'Ataque',
   defenseRow: 'Defesa',
@@ -39,8 +39,8 @@ const ZONE_TEXT: Record<TargetZone, string> = {
 export const targetText = (card: Card, zone: TargetZone): string => `${cardText(card)} (${ZONE_TEXT[zone]})`;
 
 export const PLAY_TEXT = {
-  PLAY_J: 'Buff de ataque',
-  PLAY_Q: 'Buff de defesa',
+  PLAY_J: 'Bônus de ataque',
+  PLAY_Q: 'Bônus de defesa',
   TRAP: 'Armadilha',
   SACRIFICE: 'Sacrifício',
 } as const;
@@ -63,7 +63,7 @@ export function stealEffectText(outcome: StealOutcome, opponent: string): string
   return `${damage} · ${heal}`;
 }
 
-/** Papel que o Selvagem assume: "como J: Buff de ataque". */
+/** Papel que o Selvagem assume: "como J: Bônus de ataque". */
 export const asRoleText = (role: 'J' | 'Q' | 'A', play: string): string => `como ${role}: ${play}`;
 
 /** "Pôr na Guarda" com um K só na mão; com vários, "Pôr 1 K", "Pôr 2 K"… */
@@ -120,8 +120,8 @@ export function noPlayReasonText(card: SpecialCard, reason: NoPlayReason | null,
       return 'contra a Devastação, só o Reflect (K + J + Q da mão)';
     case 'BUFF_LIMIT':
       return card.kind === 'Q'
-        ? `seus Buffs de defesa já têm ${buffLimit} Q, o limite`
-        : `seus Buffs de ataque já têm ${buffLimit} J, o limite`;
+        ? `seus Bônus de defesa já têm ${buffLimit} Q, o limite`
+        : `seus Bônus de ataque já têm ${buffLimit} J, o limite`;
     case 'NO_TARGET':
       return `${opponent} não tem J, Q nem K para a Armadilha (as cartas do Reflect não contam)`;
     case 'NO_GUARD_TARGET':
@@ -129,13 +129,13 @@ export function noPlayReasonText(card: SpecialCard, reason: NoPlayReason | null,
     case 'TARGET_PROTECTED':
       return `${opponent} está sob Defesa Absoluta: nada de Armadilha nem Sacrifício`;
     case 'NO_ROLE':
-      return `os seus buffs estão no limite e ${opponent} não tem alvo para a Armadilha`;
+      return `os seus bônus estão no limite e ${opponent} não tem alvo para a Armadilha`;
     case null:
       return 'nenhuma jogada possível agora';
   }
 }
 
-/** "J♥: seus Buffs de ataque já têm 4 J, o limite". */
+/** "J♥: seus Bônus de ataque já têm 4 J, o limite". */
 export const noPlaysText = (card: SpecialCard, reason: NoPlayReason | null, opponent: string, buffLimit: number): string =>
   `${cardText(card)}: ${noPlayReasonText(card, reason, opponent, buffLimit)}`;
 export const chooseTargetText = (play: string, card: SpecialCard, opponent: string): string =>
@@ -149,8 +149,8 @@ export const leavesText = (cards: SpecialCard[], from: 'hand' | 'field'): string
 
 const TARGET_PLACE: Record<TargetZone, string> = {
   guard: 'da Guarda de',
-  attackBuffs: 'dos Buffs de Ataque de',
-  defenseBuffs: 'dos Buffs de Defesa de',
+  attackBuffs: 'dos Bônus de Ataque de',
+  defenseBuffs: 'dos Bônus de Defesa de',
   attackRow: 'do Ataque de',
   defenseRow: 'da Defesa de',
 };
@@ -160,7 +160,7 @@ const TARGET_ROLE: Record<BuffZone, 'K' | 'J' | 'Q'> = { guard: 'K', attackBuffs
 /** O papel da especial do oponente que é alvo: o Selvagem nos buffs conta como J ou Q. */
 export const targetRole = (zone: BuffZone): 'K' | 'J' | 'Q' => TARGET_ROLE[zone];
 
-/** O alvo como botão grande da barra: "K♣ da Guarda de Duda", "J♠ dos Buffs de Ataque de Duda", "9♦ do Ataque de Duda". */
+/** O alvo como botão grande da barra: "K♣ da Guarda de Duda", "J♠ dos Bônus de Ataque de Duda", "9♦ do Ataque de Duda". */
 export function targetButtonText(card: SpecialCard | NumCard, zone: TargetZone, owner: string): string {
   const who = card.kind === 'WILD' && !isRowZone(zone) ? `Selvagem como ${TARGET_ROLE[zone]}` : cardText(card);
   return `${who} ${TARGET_PLACE[zone]} ${owner}`;
@@ -224,7 +224,6 @@ export function threatPreviewText(p: AttackPreview, opponent: string, lives: Liv
   }
 }
 
-export const threatLabel = (opponent: string): string => `Ameaça de ${opponent}`;
 export const brokenLabel = (role: 'K' | 'J' | 'Q'): string => `Quebrando o ${role} antes`;
 
 /** O desfecho do seu ataque na frase curta do alvo ("110 de dano"). */
@@ -233,18 +232,12 @@ function attackEffectText(p: AttackPreview, opponent: string): string {
 }
 
 /**
- * O que muda na conta se a carta do alvo sair: o seu ataque, se mudou, e a ameaça do oponente, se mudou. Na forma
- * `short` é a frase do botão do alvo ("110 de dano"); na `long`, a linha inteira da prévia ("152 × 42 · dano 110").
+ * O que muda no seu ataque se a carta do alvo sair. Na forma `short` é a frase do botão do alvo ("110 de dano"); na `long`, a linha
+ * inteira da prévia ("152 × 42 · dano 110"). A ameaça do oponente não entra: quem joga a observa sozinho (decisoes.md 2026-11-02 (9)).
  */
 export function brokenEffectText(before: Previews, after: Previews, opponent: string, form: 'short' | 'long'): string {
-  const parts: string[] = [];
-  if (previewChanged(before.mine, after.mine)) {
-    parts.push(form === 'long' ? attackPreviewText(after.mine, opponent, after.lives) : attackEffectText(after.mine, opponent));
-  }
-  if (previewChanged(before.threat, after.threat)) {
-    parts.push(`ameaça de ${opponent} cai de ${before.threat.attack} para ${after.threat.attack}`);
-  }
-  return parts.length > 0 ? parts.join(' · ') : 'sem mudança na conta';
+  if (!previewChanged(before.mine, after.mine)) return 'sem mudança no seu ataque';
+  return form === 'long' ? attackPreviewText(after.mine, opponent, after.lives) : attackEffectText(after.mine, opponent);
 }
 
 /** A frase sob o botão do alvo: "quebrando o K: 110 de dano". */
@@ -295,7 +288,6 @@ export const placedText = (card: Card, destination: string): string => `${cardTe
 // Escolha da ordem (spec §3.6)
 
 export const ORDER_QUESTION = 'Você tem a iniciativa: atacar primeiro ou em segundo?';
-export const ORDER_AUTO_TEXT = '"Atacar primeiro" sai sozinho; toque para escolher com calma.';
 export const ORDER_MANUAL_TEXT = 'Escolha quando quiser, dentro do prazo.';
 /** Sem relógio (treino e tutorial) não há prazo a que se referir. */
 export const ORDER_MANUAL_NO_CLOCK_TEXT = 'Escolha quando quiser.';
@@ -605,14 +597,14 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
   {
     title: 'Cartas especiais',
     items: [
-      'J (Buff de Ataque) e Q (Buff de Defesa): cada um soma 1 ao multiplicador de ataque ou de defesa. Cabem 4 de cada.',
+      'J (Bônus de Ataque) e Q (Bônus de Defesa): cada um soma 1 ao multiplicador de ataque ou de defesa. Cabem 4 de cada.',
       'K (Guarda): absorve o dano, como acima. Você pode jogar vários K de uma vez; o oponente ganha uma janela de reação.',
       'Cura passiva (pela Defesa): Com 2 K ou mais na Guarda, cada numérica da sua fileira de Defesa que vai para o cemitério cura você o valor dela × (1 + número de Q), até a vida inicial. As cartas que a Devastação destrói não curam.',
       'A (Armadilha ou Roubo): como Armadilha, destrói 1 J, Q ou K do campo do oponente, no seu turno ou na janela de reação. Como Roubo, só no seu turno: leva uma numérica de qualquer fileira do oponente para o fim da fileira que você escolher; ele perde o valor dela de vida (um K na Guarda dele anula esse dano; o roubo nunca mata) e você cura o mesmo valor, até a vida inicial. Nada disso alcança quem está sob Defesa Absoluta.',
       'Sacrifício: no seu turno, descarte um J da mão para destruir um J do oponente, ou um Q para destruir um Q. Não funciona contra Defesa Absoluta.',
       'Coringa Selvagem: assume o papel de J, Q ou A, nunca o de K.',
       'Reflect (K + J + Q da mão): só na janela de reação, contra um ataque ou uma Devastação. Contra o ataque, quem atacou perde todos os K e Q que tiver e leva de volta o próprio ataque, com o multiplicador, menos metade (arredondada para baixo) da Defesa base dele, sem o multiplicador (o dano nunca fica abaixo de 0); você não leva nada. Se ele estiver sob Defesa Absoluta, o Reflect só segura o golpe. Contra a Devastação, ela volta para quem a lançou.',
-      'Devastação (K + A + J, ou K + A + Q, da mão, no seu turno): esvazia a fileira de Ataque do oponente (com o J) ou a de Defesa (com o Q). As numéricas dela vão para o cemitério, os buffs ficam. Só o Reflect responde. Não vale contra fileira vazia nem contra Defesa Absoluta. O Selvagem faz o A, o J ou o Q, nunca o K.',
+      'Devastação (K + A + J, ou K + A + Q, da mão, no seu turno): esvazia a fileira de Ataque do oponente (com o J) ou a de Defesa (com o Q). As numéricas dela vão para o cemitério, os bônus ficam. Só o Reflect responde. Não vale contra fileira vazia nem contra Defesa Absoluta. O Selvagem faz o A, o J ou o Q, nunca o K.',
     ],
   },
   {

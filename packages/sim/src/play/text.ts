@@ -71,9 +71,9 @@ export function actionText(action: Action, view: PlayerView): string {
     case 'CHOOSE_ORDER':
       return action.first ? 'Atacar primeiro' : 'Atacar em segundo';
     case 'PLAY_J':
-      return `Jogar ${t(action.cardId)} como J nos Buffs de Ataque`;
+      return `Jogar ${t(action.cardId)} como J nos Bônus de Ataque`;
     case 'PLAY_Q':
-      return `Jogar ${t(action.cardId)} como Q nos Buffs de Defesa`;
+      return `Jogar ${t(action.cardId)} como Q nos Bônus de Defesa`;
     case 'PLAY_K':
       return `Pôr ${action.cardIds.length} K na Guarda (${action.cardIds.map(t).join(' ')})`;
     case 'TRAP':
@@ -142,7 +142,7 @@ export function eventText(e: GameEvent, names: Names): string | null {
     case 'TurnStarted':
       return `→ Turno de ataque: ${who(e.player)}`;
     case 'BuffPlayed':
-      return `${who(e.player)} jogou ${cardText(e.card)}${e.card.kind === 'WILD' ? ` como ${e.as}` : ''} nos Buffs de ${e.as === 'J' ? 'Ataque' : 'Defesa'}`;
+      return `${who(e.player)} jogou ${cardText(e.card)}${e.card.kind === 'WILD' ? ` como ${e.as}` : ''} nos Bônus de ${e.as === 'J' ? 'Ataque' : 'Defesa'}`;
     case 'GuardPlayed':
       return `${who(e.player)} pôs ${e.cards.length} K na Guarda`;
     case 'TrapUsed': {
@@ -187,7 +187,7 @@ export function eventText(e: GameEvent, names: Names): string | null {
     case 'GuardBroken':
       return `${e.cards.length} ${plural(e.cards.length, 'K quebrou', 'K quebraram')} na Guarda ${de(e.player)}`;
     case 'BuffRemoved':
-      return `${who(e.player)} perdeu ${cardsText(e.cards)} dos buffs`;
+      return `${who(e.player)} perdeu ${cardsText(e.cards)} dos bônus`;
     case 'CardsRemovedFromRow':
       return e.cards.length === 0 ? null : `Saiu ${cardsText(e.cards)} ${FROM_ROW[e.row]} ${de(e.player)}`;
     case 'QuadFormed':

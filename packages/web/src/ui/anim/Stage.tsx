@@ -359,7 +359,8 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
             onPointerUpCapture={onPointerUp}
             onPointerCancelCapture={clearTouch}
             onClickCapture={onClick}
-            className="relative isolate"
+            // Arrastar o mouse pela mesa não seleciona texto (decisoes.md 2026-11-02 (9), ponto 3); o histórico e os diálogos seguem selecionáveis.
+            className="relative isolate select-none"
           >
             <FxLayer reduced={reducedMotion}>
               {children}

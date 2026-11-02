@@ -242,7 +242,7 @@ describe('/tutorial: o painel da dica', () => {
     expect(outlined()).toEqual(['order']);
   });
 
-  it('o primeiro turno de ataque: a dica da barra (contorno na barra) e, com "Entendi", a dos buffs no mesmo estado (contorno na mão)', async () => {
+  it('o primeiro turno de ataque: a dica da barra (contorno na barra) e, com "Entendi", a dos bônus no mesmo estado (contorno na mão)', async () => {
     const clock = await openTutorial();
     await toOrder(clock);
     await toAttack(clock);

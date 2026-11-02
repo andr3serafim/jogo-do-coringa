@@ -111,7 +111,7 @@ test('axe em cada estado da mesa: mão, janela de reação com o Reflect, cemit�
   const attack = actionBar(page).getByRole('button', { name: ATTACK_BUTTON });
   await expect(attack).toBeEnabled();
   await expect(actionBar(page).getByRole('button', { name: /^Lançar Reflect / })).toHaveCount(0);
-  await expect(hand.getByRole('button', { name: /^Q, Buff de defesa, de / })).toBeVisible();
+  await expect(hand.getByRole('button', { name: /^Q, Bônus de defesa, de / })).toBeVisible();
   await expect(hand.getByRole('button', { name: /^K, Guarda, de / })).toBeVisible();
   await axe(page);
   await attack.click();
@@ -146,8 +146,8 @@ test('axe em cada estado da mesa: mão, janela de reação com o Reflect, cemit�
   await axe(page);
   await first.click();
   await expect(attack).toBeEnabled();
-  await expect(hand.getByRole('button', { name: /^J, Buff de ataque, de / })).toBeVisible();
-  await expect(hand.getByRole('button', { name: /^Q, Buff de defesa, de / }).first()).toBeVisible();
+  await expect(hand.getByRole('button', { name: /^J, Bônus de ataque, de / })).toBeVisible();
+  await expect(hand.getByRole('button', { name: /^Q, Bônus de defesa, de / }).first()).toBeVisible();
   await expect(hand.getByRole('button', { name: /^K, Guarda, de / })).toBeVisible();
   await axe(page);
   guard.expectClean();

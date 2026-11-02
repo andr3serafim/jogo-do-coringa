@@ -1,10 +1,8 @@
-// Jogadas automáticas (spec §3.6, §3.7 e §5). Puro: só decide; quem agenda e envia é a sessão.
+// Jogadas automáticas (spec §3.7 e §5). Puro: só decide; quem agenda e envia é a sessão. A ordem automática da spec §3.6 saiu a pedido do
+// autor (decisoes.md 2026-11-02 (9), ponto 7): quem tem a iniciativa escolhe sem pressa; online vale o prazo do servidor.
 import type { PlayerView } from '@coringa/engine';
 import type { PlayerAction } from '@coringa/protocol';
 import type { Prefs } from './storage.ts';
-
-/** A ordem escolhida sozinha: 3 s depois de o painel aparecer (spec §3.6). */
-export const ORDER_AUTO_MS = 3_000;
 
 /**
  * Passe automático (spec §3.7): só numa janela de reação em que `PASS` é a única jogada legal, com a

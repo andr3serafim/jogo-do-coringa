@@ -448,7 +448,7 @@ describe('advanceHint e acknowledgeHint', () => {
   });
 
   it('uma dica de prioridade maior toma o painel de uma que ainda vale, e a que saiu não é dada por vista', () => {
-    // Sua vez de atacar com um J: firstAttack, que o jogador já viu; fica a dos buffs.
+    // Sua vez de atacar com um J: firstAttack, que o jogador já viu; fica a dos bônus.
     const attack = setup({ p1: { attack: [5], hand: ['J'] } });
     const buffs = acknowledge(advance(NO_HINT, attack), attack);
     expect(buffs.current).toBe('buffs');

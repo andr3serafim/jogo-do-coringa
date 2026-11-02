@@ -376,7 +376,6 @@ describe('replaySnapshot', () => {
       receivedAt: 0,
       equipDraft: [],
       equipConfirmed: 'none',
-      orderAutoAt: null,
       marks: NO_MARKS,
       marksBaseSeq: null,
       history: { ...TRACK.frames[frame]!.history, gameNo: 1 },

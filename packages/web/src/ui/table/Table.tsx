@@ -2,7 +2,7 @@
 // (sub-projeto 6 §3: os Coringas, as vidas e o relógio); o oponente na capa verde, em cima; a faixa central de tinta; você na
 // capa rosa, embaixo, com a mão; e a coluna do histórico no
 // PC. É só vista: as interações chegam por props (`onSelectCard`, `onSelectTarget`, `onSeen`, `onOpenGraveyard`,
-// `onOpenMenu`, `onInteract`) e a barra de ação entra pelo `actionBar`. Quem liga isso à sessão é a `PlayTable`. A textura de xilogravura vai só nos títulos e no grão do papel, por baixo
+// `onOpenMenu`) e a barra de ação entra pelo `actionBar`. Quem liga isso à sessão é a `PlayTable`. A textura de xilogravura vai só nos títulos e no grão do papel, por baixo
 // do conteúdo (spec §10.7). No tutorial, o `hint` traz o painel da dica (no alto da coluna do histórico no PC, no alto dos campos no
 // celular e no tablet) e a zona de que ela fala, que ganha o contorno parado (`data-dica`, desenhado em `styles.css`).
 import type { PlayerId } from '@coringa/engine';
@@ -67,8 +67,6 @@ export interface TableProps {
   onOpenGraveyard?: () => void;
   /** Abre o menu da partida. Sem ele, a mesa não tem botão de menu. */
   onOpenMenu?: () => void;
-  /** Um clique ou foco em qualquer parte da mesa (a sessão cancela a confirmação automática da ordem). */
-  onInteract?: () => void;
   /** A barra de ação, embaixo da mão. */
   actionBar?: ReactNode;
   /** Treino contra o bot, e o nível dele: a faixa central diz "Treino · Médio, sem relógio" e a vez do jogador é anunciada sem prazo. */
@@ -112,7 +110,6 @@ function TableView({
   onSeen,
   onOpenGraveyard,
   onOpenMenu,
-  onInteract,
   actionBar,
   training,
   replay,
@@ -202,9 +199,6 @@ function TableView({
     <TableUiContext value={ui}>
       <main
         aria-label="Mesa"
-        onPointerDownCapture={onInteract}
-        onClickCapture={onInteract}
-        onFocusCapture={onInteract}
         className="relative isolate flex h-dvh flex-col overflow-y-auto overflow-x-hidden overscroll-none bg-capa-voce pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] text-tinta pc:flex-row pc:justify-center pc:bg-tinta"
       >
         <svg width="0" height="0" aria-hidden="true" focusable="false" className="absolute">

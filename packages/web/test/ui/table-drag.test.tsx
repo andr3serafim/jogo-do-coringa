@@ -149,8 +149,8 @@ const inEquip = () => within(equipPanel());
 
 const HAND_NAME = {
   K: /^K, Guarda, de /,
-  J: /^J, Buff de ataque, de /,
-  Q: /^Q, Buff de defesa, de /,
+  J: /^J, Bônus de ataque, de /,
+  Q: /^Q, Bônus de defesa, de /,
   A: /^A, Armadilha, de /,
   WILD: /^Coringa Selvagem/,
 } as const;
@@ -182,13 +182,13 @@ describe('arrastar da mão: a fase principal', () => {
     expect(sentAction(m)).toEqual({ type: 'PLAY_K', cardIds: [handCards(m.view, 'K')[0]!.id] });
   });
 
-  it('um J até os Buffs de ataque manda PLAY_J', () => {
+  it('um J até os Bônus de ataque manda PLAY_J', () => {
     const m = mount(withHand(['J']));
     dragTo(handCard('J'), zone(DROP.attackBuffs));
     expect(sentAction(m)).toEqual({ type: 'PLAY_J', cardId: handCards(m.view, 'J')[0]!.id });
   });
 
-  it('um Q até os Buffs de defesa manda PLAY_Q', () => {
+  it('um Q até os Bônus de defesa manda PLAY_Q', () => {
     const m = mount();
     dragTo(handCard('Q'), zone(DROP.defenseBuffs));
     expect(sentAction(m)).toEqual({ type: 'PLAY_Q', cardId: handCards(m.view, 'Q')[0]!.id });
@@ -208,7 +208,7 @@ describe('arrastar da mão: a fase principal', () => {
     expect(sentAction(m)).toMatchObject({ type: 'TRAP', targetId: target.id });
   });
 
-  it('o Selvagem até os Buffs de ataque manda PLAY_J como J (uma jogada só nessa zona)', () => {
+  it('o Selvagem até os Bônus de ataque manda PLAY_J como J (uma jogada só nessa zona)', () => {
     const m = mount(withHand(['K', 'WILD']));
     dragTo(handCard('WILD'), zone(DROP.attackBuffs));
     expect(sentAction(m)).toEqual({ type: 'PLAY_J', cardId: handCards(m.view, 'WILD')[0]!.id });
@@ -273,7 +273,7 @@ describe('arrastar da mão: a fase principal', () => {
     expect(acts(m)).toEqual([]);
   });
 
-  it('soltar numa zona onde a carta não vale (o K nos Buffs de ataque, a mão do oponente) não manda nada', () => {
+  it('soltar numa zona onde a carta não vale (o K nos Bônus de ataque, a mão do oponente) não manda nada', () => {
     const m = mount();
     dragTo(handCard('K'), zone(DROP.attackBuffs));
     dragTo(handCard('K'), zone(DROP.graveyard));
@@ -294,7 +294,7 @@ describe('arrastar da mão: a fase principal', () => {
     expect(handCard('K').closest('li')).not.toHaveStyle({ opacity: '0.4' });
   });
 
-  it('o A marca como zonas os alvos da Armadilha e os do Roubo (as numéricas do oponente), e a Q, os Buffs de defesa e os Q do oponente', () => {
+  it('o A marca como zonas os alvos da Armadilha e os do Roubo (as numéricas do oponente), e a Q, os Bônus de defesa e os Q do oponente', () => {
     const m = mount();
     const a = handCard('A');
     press(a);
@@ -816,11 +816,11 @@ describe('as zonas da mesa (data-soltar) e as chaves do modelo', () => {
   it('a Guarda e os buffs do seu campo levam as chaves delas', () => {
     mount();
     expect(keyOf(mine().getByRole('list', { name: 'Guarda' }))).toBe(DROP.guard);
-    expect(keyOf(mine().getByRole('list', { name: 'Buffs de ataque' }))).toBe(DROP.attackBuffs);
-    expect(keyOf(mine().getByRole('list', { name: 'Buffs de defesa' }))).toBe(DROP.defenseBuffs);
+    expect(keyOf(mine().getByRole('list', { name: 'Bônus de ataque' }))).toBe(DROP.attackBuffs);
+    expect(keyOf(mine().getByRole('list', { name: 'Bônus de defesa' }))).toBe(DROP.defenseBuffs);
     // O título da zona está dentro dela: a zona que se vê é a que o jogador apontaria.
-    expect(zone(DROP.attackBuffs)).toHaveTextContent('Buffs de ataque');
-    expect(zone(DROP.defenseBuffs)).toHaveTextContent('Buffs de defesa');
+    expect(zone(DROP.attackBuffs)).toHaveTextContent('Bônus de ataque');
+    expect(zone(DROP.defenseBuffs)).toHaveTextContent('Bônus de defesa');
     expect(zone(DROP.guard)).toHaveTextContent('Guarda');
   });
 
@@ -852,8 +852,8 @@ describe('as zonas da mesa (data-soltar) e as chaves do modelo', () => {
     const { view } = mount();
     const lists = [
       ['Guarda', view.opponent.guard],
-      ['Buffs de ataque', view.opponent.attackBuffs],
-      ['Buffs de defesa', view.opponent.defenseBuffs],
+      ['Bônus de ataque', view.opponent.attackBuffs],
+      ['Bônus de defesa', view.opponent.defenseBuffs],
     ] as const;
     for (const [name, cards] of lists) {
       const list = theirs().getByRole('list', { name });

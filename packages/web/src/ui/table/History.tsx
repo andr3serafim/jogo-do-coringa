@@ -149,7 +149,7 @@ export function HistoryPanel({ id, open, onClose, lines, baseSeq, footer, top, t
           tabIndex={open || pc ? 0 : undefined}
           role="region"
           aria-label="Linhas do histórico"
-          className={`min-h-0 flex-1 pr-1 ${open ? 'overflow-y-auto' : 'max-pc:overflow-hidden pc:overflow-y-auto'}`}
+          className={`min-h-0 flex-1 select-text pr-1 ${open ? 'overflow-y-auto' : 'max-pc:overflow-hidden pc:overflow-y-auto'}`}
         >
           <ol role="list" aria-live="polite" className="flex list-none flex-col gap-[7px] text-sm leading-[1.35] pc:text-[14px]">
             {lines.map((line, index) => (

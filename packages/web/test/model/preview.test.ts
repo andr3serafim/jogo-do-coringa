@@ -37,7 +37,7 @@ describe('previewsOf', () => {
 });
 
 describe('viewWithout', () => {
-  it('tira o alvo da Guarda, dos buffs de ataque ou dos de defesa do oponente, sem mexer na view original', () => {
+  it('tira o alvo da Guarda, dos bônus de ataque ou dos de defesa do oponente, sem mexer na view original', () => {
     const view = viewAt(SPEC);
     const guardId = view.opponent.guard[0]!.id;
     const jId = view.opponent.attackBuffs[0]!.id;

@@ -1,4 +1,4 @@
-// A sua mão (spec §3.1): as cartas com o papel escrito em cada uma (Guarda, Buff de ataque, Buff de defesa,
+// A sua mão (spec §3.1): as cartas com o papel escrito em cada uma (Guarda, Bônus de ataque, Bônus de defesa,
 // Armadilha, Selvagem). Com `onSelectCard` na mesa as cartas viram botões; sem, é só a vista. Com mais cartas do
 // que cabem na largura, elas se sobrepõem aos poucos (a margem negativa sai da conta da largura da lista), e o
 // valor, no canto esquerdo, continua à vista. Fora da sua vez, com `onExplainCard`, o toque não escolhe: o balão sobre a mão diz

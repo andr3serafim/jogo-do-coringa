@@ -31,7 +31,7 @@ function playerBlock(label: string, p: PublicPlayer, hand: string): string[] {
     .join(' · ');
   return [
     `${label.padEnd(5)} Vida ${p.hp}   Guarda: ${p.guard.length === 0 ? '—' : `${p.guard.length} K`}   Mão: ${hand}${status ? `   [${status}]` : ''}`,
-    `      Buffs de Ataque: ${cardsText(p.attackBuffs)}   Buffs de Defesa: ${cardsText(p.defenseBuffs)}`,
+    `      Bônus de Ataque: ${cardsText(p.attackBuffs)}   Bônus de Defesa: ${cardsText(p.defenseBuffs)}`,
     `      Ataque: ${cardsText(p.attackRow).padEnd(28)} ATK ${attackPower(p)}`,
     `      Defesa: ${cardsText(p.defenseRow).padEnd(28)} DEF ${defensePower(p)}`,
   ];

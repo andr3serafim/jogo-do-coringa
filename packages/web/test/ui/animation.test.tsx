@@ -1843,17 +1843,15 @@ describe('CardsDealt e Reflect (spec §4.2)', () => {
     expect(document.activeElement).toBe(after);
   });
 
-  it('devolver o foco depois da remontagem não conta como interação do jogador nem apaga a marca "novo"', async () => {
+  it('devolver o foco depois da remontagem não apaga a marca "novo"', async () => {
     const m = mount(MINE);
     emit(m, dealt, DEALS);
     const card = () => m.container.querySelector<HTMLElement>('[data-card-id="n-novo"]')!;
     card().focus();
-    const interact = vi.spyOn(m.session, 'interact');
     const markSeen = vi.spyOn(m.session, 'markSeen');
     const focus = vi.spyOn(HTMLElement.prototype, 'focus');
     await m.user.keyboard('{Escape}');
     expect(document.activeElement).toBe(card());
-    expect(interact).not.toHaveBeenCalled();
     expect(markSeen).not.toHaveBeenCalled();
     // E sem rolar a mesa.
     expect(focus.mock.calls.some(([options]) => options?.preventScroll === true)).toBe(true);
@@ -1928,7 +1926,7 @@ describe('CardsDealt e Reflect (spec §4.2)', () => {
     const row = () => screen.getByRole('group', { name: 'Sua fileira de defesa' });
     expect(row().querySelector('[data-total]')).toHaveTextContent('46');
     expect(row().querySelector('[data-conta]')).toHaveTextContent('23 × 2');
-    // O Q dos buffs de defesa some: o total do motor cai para 23 (23 × 1), mas só na batida do dano.
+    // O Q dos bônus de defesa some: o total do motor cai para 23 (23 × 1), mas só na batida do dano.
     emit(m, { ...THEIRS, self: { ...THEIRS.self, defenseBuffs: [] } }, [TURN, ATTACK, HIT]);
     expect(row().querySelector('[data-total]')).toHaveTextContent('46');
     expect(row().querySelector('[data-conta]')).toHaveTextContent('23 × 2');

@@ -370,7 +370,7 @@
       flex-shrink: 0;
     }
 
-    /* A figura do título (decisoes.md 2026-11-01 (1)) ganha a sua largura: "Buffs de ataque" segue em duas linhas. */
+    /* A figura do título (decisoes.md 2026-11-01 (1)) ganha a sua largura: "Bônus de ataque" segue em duas linhas. */
     .campo-zona > .zona-titulo {
       width: 5.9rem;
       flex: none;

@@ -37,7 +37,7 @@ const HINT_TEXT: Record<HintId, string> = {
   trap: 'Janela de reação: quando o oponente ataca, você pode responder com um A, que destrói um J, Q ou K dele; quando ele joga K, o A só destrói um K da Guarda. Ou passar. No seu turno, o A vale como Armadilha ou como Roubo.',
   wild: 'O Coringa Selvagem vale como J, Q ou A, à sua escolha. Nunca como K.',
   devastation:
-    'Devastação: K + A + J da mão esvazia a fileira de Ataque do oponente; K + A + Q, a de Defesa. As numéricas dela vão para o cemitério, e os buffs ficam. Ele só pode responder com um Reflect, que devolve a Devastação para você.',
+    'Devastação: K + A + J da mão esvazia a fileira de Ataque do oponente; K + A + Q, a de Defesa. As numéricas dela vão para o cemitério, e os bônus ficam. Ele só pode responder com um Reflect, que devolve a Devastação para você.',
   reflect:
     'Reflect é K + J + Q da mão, jogado quando o oponente ataca ou lança uma Devastação. O ataque volta para ele, que perde os K e Q, e você não leva nada; a Devastação volta para quem a lançou. Se ele responder com outro Reflect, os dois se anulam.',
   limit:

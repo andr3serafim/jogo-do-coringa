@@ -5,8 +5,8 @@ import type { RoomMessage } from '@coringa/protocol';
 /** O papel escrito em cada carta da mão (spec §3.1). */
 export const HAND_ROLE: Record<SpecialCard['kind'], string> = {
   K: 'Guarda',
-  J: 'Buff de ataque',
-  Q: 'Buff de defesa',
+  J: 'Bônus de ataque',
+  Q: 'Bônus de defesa',
   A: 'Armadilha',
   WILD: 'Selvagem',
 };

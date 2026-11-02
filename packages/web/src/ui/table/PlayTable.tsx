@@ -159,7 +159,6 @@ function PlayTableView({
   const phase = view.phase.kind;
   const names = tableNames(room, view.me);
   const remainingMs = useCallback((deadline: Deadline) => session.remainingMs(deadline), [session]);
-  const now = useCallback(() => session.now(), [session]);
   const timedOut = useDeadlineExpired(state.deadline, remainingMs);
   const busy = useBoardBusy();
   const locked = pending || snapshot.status === 'reconnecting' || timedOut || busy;
@@ -259,11 +258,6 @@ function PlayTableView({
     setSelection(null);
     setPointedId(null);
   }, []);
-
-  /** O jogador mexeu na mesa (clique, foco, mouse no painel da ordem). O foco que a mesa move não conta. */
-  const interact = () => {
-    if (!programmatic.current) session.interact();
-  };
 
   /** Manda a jogada e leva o foco à barra (a carta em que ele estava vai sumir), salvo se `refocus` for falso. */
   const send = (action: PlayerAction, refocus = true) => {
@@ -501,13 +495,10 @@ function PlayTableView({
         view={view}
         names={names}
         choosing={ordering}
-        autoAt={snapshot.orderAutoAt}
-        now={now}
         hasDeadline={state.deadline !== null}
         disabled={locked}
         notice={snapshot.notice}
         onChoose={(first) => send({ type: 'CHOOSE_ORDER', first })}
-        onInteract={interact}
         panelRef={barRef}
       />
     );
@@ -532,7 +523,6 @@ function PlayTableView({
         }}
         onOpenGraveyard={() => setGraveyard('view')}
         onOpenMenu={() => setMenuOpen(true)}
-        onInteract={interact}
         actionBar={panel}
         training={training}
         tutorial={tutorial}

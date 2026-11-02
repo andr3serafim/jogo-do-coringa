@@ -162,17 +162,17 @@ test('duas pessoas jogam uma sala: do lobby ao fim, com queda e revanche', async
     for (const player of players) await expect(roundHeading(player.page)).toHaveText('Rodada 3');
   });
 
-  // Rodada 3, a primeira de Ataque: quem tem a iniciativa escolhe a ordem, e a escolha sai sozinha depois de 3 s.
-  await test.step('a escolha da ordem: quem tem a iniciativa espera a confirmação automática', async () => {
+  // Rodada 3, a primeira de Ataque: quem tem a iniciativa escolhe a ordem à mão; ela não sai mais sozinha (decisoes.md 2026-11-02 (9)).
+  await test.step('a escolha da ordem: quem tem a iniciativa escolhe "Atacar primeiro"', async () => {
     const first = (player: Player) => orderPanel(player.page).getByRole('button', { name: 'Atacar primeiro' });
     await expect.poll(async () => (await first(ana).count()) + (await first(duda).count())).toBe(1);
     const chooser = (await first(ana).count()) === 1 ? ana : duda;
     const waiting = opponentOf(chooser);
     // O outro só vê quem escolhe.
     await expect(orderPanel(waiting.page)).toContainText(`${chooser.name} está escolhendo a ordem`);
-    await expect(orderPanel(chooser.page).locator('[data-auto-barra]')).toBeVisible();
-    // Nenhum toque, foco nem axe em nenhuma das duas telas durante os 3 s: qualquer toque, foco ou mouse no painel cancelaria a
-    // confirmação, e o axe leva tempo do prazo. A barra esvazia e a ordem sai com a marca `auto`.
+    await expect(orderPanel(chooser.page).locator('[data-auto-barra]')).toHaveCount(0);
+    await expect(orderPanel(chooser.page)).toContainText('Escolha quando quiser, dentro do prazo.');
+    await first(chooser).click();
     await expect(first(chooser)).toBeHidden({ timeout: 15_000 });
     await expect(orderPanel(chooser.page)).toBeHidden();
     await expect(orderPanel(waiting.page)).toBeHidden();

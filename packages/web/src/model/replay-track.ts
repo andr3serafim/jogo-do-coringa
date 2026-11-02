@@ -162,7 +162,6 @@ export function replaySnapshot(track: ReplayTrack, message: StateMessage, frame:
     receivedAt: 0,
     equipDraft: [],
     equipConfirmed: 'none',
-    orderAutoAt: null,
     marks: NO_MARKS,
     marksBaseSeq: null,
     history: forGame(frameAt(track, frame).history, room.gameNo),

@@ -19,7 +19,7 @@ import {
   type RoomMessage,
   type StateMessage,
 } from '@coringa/protocol';
-import { ORDER_AUTO_MS, shouldAutoPass } from './automation.ts';
+import { shouldAutoPass } from './automation.ts';
 import { AUTO_PASS_NOTICE, RATE_NOTICE } from './copy.ts';
 import { completeDraft, equipAction, EQUIP_AUTO_SEND_MS, nextDestinations, remainingCards, shouldAutoSendEquip, type EquipPick } from './equip.ts';
 import { desolationAfter } from './desolation.ts';
@@ -27,7 +27,6 @@ import { appendHistory, appendNote, EMPTY_HISTORY, forGame, returnNote, roomName
 import { computeMarks, NO_MARKS, ownSpentIds, type Marks } from './marks.ts';
 import { legalFor } from './plays.ts';
 import { DEFAULT_PREFS, type Prefs } from './storage.ts';
-import { buildTimeline, timelineMs } from './timeline.ts';
 
 export type ConnStatus = 'connecting' | 'open' | 'reconnecting' | 'stopped';
 export type StopReason = 'ROOM_GONE' | 'PROTOCOL' | 'AUTH' | 'OTHER_TAB' | 'LEFT';
@@ -63,8 +62,6 @@ export interface SessionSnapshot {
   equipDraft: EquipPick[];
   /** `thisPage`: esta página confirmou; `earlier`: a `view` já diz que sim (página recarregada). */
   equipConfirmed: 'none' | 'thisPage' | 'earlier';
-  /** Relógio local (`deps.now`) em que a ordem sai sozinha; `null` sem confirmação agendada. */
-  orderAutoAt: number | null;
   /** O que mudou na mesa desde a sua última jogada voluntária e ainda não foi visto. */
   marks: Marks;
   /**
@@ -82,7 +79,7 @@ export interface SessionSnapshot {
 }
 
 /** Campos que a sessão deriva do que guarda por dentro: nunca entram num `patch`. */
-type Derived = 'equipDraft' | 'equipConfirmed' | 'orderAutoAt' | 'marks' | 'marksBaseSeq' | 'history' | 'desolated' | 'prefs';
+type Derived = 'equipDraft' | 'equipConfirmed' | 'marks' | 'marksBaseSeq' | 'history' | 'desolated' | 'prefs';
 
 export interface SessionDeps {
   now(): number;
@@ -98,11 +95,6 @@ export interface SessionOptions {
    * As preferências ficam como estão: o que não vale aqui é a automação, e não a chave guardada.
    */
   autoPass?: boolean;
-  /**
-   * `false`: esta sessão nunca manda a ordem automática ("Atacar primeiro" aos 3 s, spec §3.6), e o `orderAutoAt` fica `null`.
-   * O jogador escolhe à mão, sem pressa (o tutorial, que mostra a dica da ordem enquanto ele a lê). Vale para a partida toda.
-   */
-  autoOrder?: boolean;
 }
 
 /** Quanto tempo um aviso fica na tela. */
@@ -159,7 +151,6 @@ export class Session {
   readonly #listeners = new Set<() => void>();
   readonly #unsubscribe: () => void;
   readonly #autoPassAllowed: boolean;
-  readonly #autoOrderAllowed: boolean;
   #snapshot: SessionSnapshot;
   #prefs: Prefs;
   #noticeTimer: unknown = null;
@@ -176,9 +167,6 @@ export class Session {
   #equipTimer: unknown = null;
 
   // Ordem automática
-  #orderEpoch: number | null = null;
-  #orderAt: number | null = null;
-  #orderTimer: unknown = null;
 
   // Passe automático
   #autoPassEpoch: number | null = null;
@@ -205,7 +193,6 @@ export class Session {
     this.#deps = deps;
     this.#prefs = prefs;
     this.#autoPassAllowed = options.autoPass !== false;
-    this.#autoOrderAllowed = options.autoOrder !== false;
     const state = connection.state;
     this.#epoch = state?.epoch ?? null;
     if (connection.room) this.#history = forGame(this.#history, connection.room.gameNo);
@@ -230,7 +217,7 @@ export class Session {
     if (state) this.#reconcile();
   }
 
-  /** O relógio local da sessão (`deps.now`): é o dos instantes `orderAutoAt` e `receivedAt` do snapshot. */
+  /** O relógio local da sessão (`deps.now`): é o do instante `receivedAt` do snapshot. */
   now(): number {
     return this.#deps.now();
   }
@@ -288,12 +275,6 @@ export class Session {
     this.#connection.wake();
   }
 
-  /** O jogador mexeu no painel da ordem (toque, foco, mouse): a confirmação automática não sai mais. */
-  interact(): void {
-    this.#cancelOrder();
-    this.#update({});
-  }
-
   /**
    * Põe uma numérica pendente no destino, se ele leva a uma montagem legal (E2: em qualquer ordem). Sem `cardId`, a primeira que
    * falta, na ordem de compra; uma carta já escolhida ou que não está pendente não entra.
@@ -343,7 +324,6 @@ export class Session {
     this.#unsubscribe();
     this.#listeners.clear();
     this.#clearNoticeTimer();
-    this.#cancelOrder();
     this.#clearEquipTimer();
   }
 
@@ -356,7 +336,6 @@ export class Session {
     const transient = current?.kind === 'rate' || current?.kind === 'rule';
     if (transient) this.#clearNoticeTimer();
     if (voluntary) {
-      this.#cancelOrder();
       this.#base = this.#snapshot.state?.view ?? null;
       this.#baseSeq = this.#snapshot.state?.seq ?? null;
       this.#seen = new Set();
@@ -456,7 +435,6 @@ export class Session {
     this.#epoch = epoch;
     if (this.#draft.length > 0) this.#draft = [];
     this.#clearEquipTimer();
-    this.#cancelOrder();
   }
 
   // -------------------------------------------------------------------------------------------
@@ -465,7 +443,6 @@ export class Session {
   /** Reavalia as três automações contra o `state` atual. Idempotente. */
   #reconcile(): void {
     if (this.#disposed) return;
-    this.#reconcileOrder();
     this.#update({});
     this.#reconcileEquip();
     this.#reconcileAutoPass();
@@ -481,40 +458,6 @@ export class Session {
       voluntary: false,
       notice: { kind: 'autoPass', text: AUTO_PASS_NOTICE },
     }).catch(noop);
-  }
-
-  /** Ordem automática: `receivedAt` + batidas da revelação + 3 s, só para quem escolhe (spec §3.6). Sem ela (`autoOrder: false`), nada se agenda. */
-  #reconcileOrder(): void {
-    const { state, legal, receivedAt } = this.#snapshot;
-    if (!this.#autoOrderAllowed || !state || !legal.some((a) => a.type === 'CHOOSE_ORDER')) {
-      this.#cancelOrder();
-      return;
-    }
-    if (this.#orderEpoch === state.epoch) return;
-    this.#orderEpoch = state.epoch;
-    const mode = state.resync ? 'resync' : state.catchUp ? 'catchUp' : 'live';
-    const beats = buildTimeline(state.events, {
-      mode,
-      reducedMotion: this.#prefs.reduceMotion,
-      decisionPending: true,
-    });
-    const at = receivedAt + timelineMs(beats) + ORDER_AUTO_MS;
-    this.#orderAt = at;
-    this.#orderTimer = this.#deps.setTimer(() => {
-      this.#orderTimer = null;
-      this.#orderAt = null;
-      this.#update({});
-      void this.play({ type: 'CHOOSE_ORDER', first: true }, { auto: true }).catch(noop);
-    }, Math.max(0, at - this.#deps.now()));
-  }
-
-  /** Cancela a ordem automática desta época (e só dela: uma época nova agenda de novo). */
-  #cancelOrder(): void {
-    if (this.#orderTimer !== null) {
-      this.#deps.clearTimer(this.#orderTimer);
-      this.#orderTimer = null;
-    }
-    this.#orderAt = null;
   }
 
   /** Envio antecipado do Equipar: com ≥ 1 escolha, quando faltam 1500 ms, sem `auto` (spec §3.5). */
@@ -622,7 +565,6 @@ export class Session {
       ...snapshot,
       equipDraft: this.#draft,
       equipConfirmed: this.#confirmedFor(snapshot.state),
-      orderAutoAt: this.#orderAt,
       marks: this.#marksFor(snapshot.state),
       marksBaseSeq: this.#baseSeq,
       history: this.#history,
