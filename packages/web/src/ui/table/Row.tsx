@@ -57,8 +57,8 @@ interface Conta {
 }
 
 /**
- * O total que muda: cresce quando sobe no pouso de uma carta (decisoes.md 2026-11-02 (9), ponto 12) e encolhe quando desce; a cor (ouro
- * na subida, vermelho na descida, as duas com contorno de tinta: 2026-11-03 (1), ponto 18) fica `holdMs` depois da última mudança.
+ * O total que muda: cresce quando sobe no pouso de uma carta (decisoes.md 2026-11-02 (9), ponto 12) e encolhe quando desce. Na subida ele
+ * fica em ouro, com contorno de tinta, até `holdMs` depois da última mudança; a descida fica na cor de sempre (2026-11-03 (1) e (2), ponto 18).
  */
 export const TREND = { rise: '1.3', fall: '0.85', popMs: 320, holdMs: 900 } as const;
 
@@ -95,8 +95,9 @@ function useLandingHold(ids: readonly string[]): { pending: ReadonlySet<string>;
 
 /**
  * O total que muda com a mesa tocando: sobe quando uma carta pousa (`total` e `landed`), desce quando o número mostrado cai (o golpe que
- * conta, a carta que sai). Cresce ou encolhe uma vez e fica na cor até `holdMs` depois da última mudança: a contagem do golpe desce o
- * número a cada quadro, e o encolher não recomeça a cada um. Com movimento reduzido, só a cor.
+ * conta, a carta que sai). Cresce ou encolhe uma vez e fica marcado (`data-subiu`, que pinta de ouro, ou `data-desceu`, só a marca) até
+ * `holdMs` depois da última mudança: a contagem do golpe desce o número a cada quadro, e o encolher não recomeça a cada um. Com movimento
+ * reduzido, só a cor da subida.
  */
 function useTrend(total: number, shown: number, landed: number, busy: boolean, reduced: boolean) {
   const ref = useRef<HTMLSpanElement>(null);
