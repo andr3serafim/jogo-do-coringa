@@ -5,6 +5,23 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-03 (6): o bloco A do playtest, a execução
+
+- **Pedido:** o plano do bloco A aprovado como está (`decisoes.md` 2026-11-03 (5)). Branch `feat/playtest-bloco-a`, saída da
+  `feat/playtest-spec` em `0bd8d72` (a `main` está em `d35a241`; ela vai até o fim do bloco junto com ele, por fast-forward).
+- **Armadilha:** o pre-push do fast-forward da `main` para o `0bd8d72` falhou uma vez no `pnpm check`, com a sessão do bloco E rodando
+  ao mesmo tempo, e o `| tail` do comando escondeu qual teste foi. Rodado de novo, sozinho, passou. Não encadeie `git push | tail` com
+  `&&`: o `tail` engole o código de saída (o `git branch -f main` andou mesmo com o push recusado, e foi desfeito).
+- **Task 1 (o momento na linha do tempo e no protocolo):**
+  - protocolo: `SPECIAL_MOMENT_MS` (1,6 s e 1,1 s), `MOMENT_PLAYS`, `isMomentFor`, `momentsMs` e `stepAllowanceMs` em `scenes.ts`;
+  - web: a batida `moment` (com `Beat.moment`, o voo e o impacto), `MOMENT_MS` (as três fases), e nas opções `viewer`, `momentsBefore`,
+    `holdOwnMoments` e `ownMomentsBefore` (A9a). Sem `viewer` nada muda (os testes e o replay de antes);
+  - **Ruling:** o `classify` não devolve `moment` (o tipo dele exclui): o momento é decidido depois, com o `viewer`, e as contas seguem
+    `momentsMs` evento a evento, sem repetir a regra;
+  - **Ruling:** a A9a mantém a sua especial como `move` (com o voo e o pouso de hoje), só com a duração do momento do oponente.
+
+---
+
 ## 2026-11-03 (5): as respostas do autor; o desenho vira spec
 
 - **Respostas** (`decisoes.md` 2026-11-03 (4)): a fatia 5 aprovada (o sub-projeto 6 fecha); a ordem dos blocos, a variante A em todos os
