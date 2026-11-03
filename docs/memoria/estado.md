@@ -5,6 +5,12 @@
 
 ## Agora
 
+- **Em curso (2026-11-03, sessão lateral):** o conserto do online do ponto 17, na branch `feat/online-equipar-vazio` (worktree
+  `.claude/worktrees/dreamy-engelbart-4a4876`). **Ruling:** na web, não no servidor. Um `state` ao vivo só com eventos quietos
+  (`EquipSubmitted`, `ReactionWindowClosed`), na mesma época, não corta a linha do tempo em curso (`useBeatPlayer`): o servidor
+  teria de adivinhar quanto dura a animação do cliente (além da folga de cena há o teto de 1 s e a faixa da iniciativa de 1,2 s), e a
+  web cobre também o oponente humano que confirma o Equipar no meio do golpe. **Próximo passo:** teste de UI primeiro
+  (`test/ui`), o conserto, `pnpm check`, push da branch, CI verde, fast-forward na `main`, diário e este arquivo.
 - **Branch:** `main`, no checkout principal, sem trabalho em curso. A branch `feat/playtest-pontos-17-18` foi mesclada por fast-forward, com as duas CI verdes no último commit de código (`35ad7bd`, run `41576601116`).
 - **Feito por último** (`diario.md` 2026-11-03 (1); o pedido em `decisoes.md` 2026-11-03 (1)):
   - **ponto 18:** o total da fileira que sobe fica em ouro e o que desce fica vermelho, os dois com contorno de tinta e sombra de carimbo (`Row.tsx`, `useTrend`; `.total-fileira` no `styles.css`);
