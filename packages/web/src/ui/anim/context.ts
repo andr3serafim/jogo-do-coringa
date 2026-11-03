@@ -46,7 +46,7 @@ export interface Anim {
    * Quando a carta pousa (em segundos) e se ela cai no destino por não ter de onde voar (sub-projeto 6 §8), ou `null`. Vale além do fim
    * natural das batidas, porque a mola assenta depois delas; o pulo o apaga.
    */
-  landAt(id: string): { at: number; drop: boolean } | null;
+  landAt(id: string): { at: number; drop: boolean; dust: number } | null;
   /** Quantas cartas de verso (a mão do oponente) entram na batida, depois de quantos segundos e o intervalo do leque; `null` sem batida. */
   backs(player: PlayerId): { count: number; delay: number; stagger: number } | null;
   /**

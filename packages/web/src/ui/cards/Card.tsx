@@ -333,7 +333,7 @@ export function Card({
 function useTableMotion(
   self: { current: HTMLElement | null },
   recoilAt: number | null,
-  landing: { at: number; drop: boolean } | null,
+  landing: { at: number; drop: boolean; dust: number } | null,
   mark: number,
   reduced: boolean,
 ): void {
@@ -350,6 +350,7 @@ function useTableMotion(
   }, [self, recoilAt, mark, reduced]);
   const landAt = landing?.at ?? null;
   const drop = landing?.drop ?? false;
+  const dust = landing?.dust ?? TABLE_MOTION.dust;
   useEffect(() => {
     const el = self.current;
     if (el === null || landAt === null || reduced) return;
@@ -372,12 +373,12 @@ function useTableMotion(
         easing: 'ease-out',
       }),
     );
-    const timer = window.setTimeout(() => fxLayer.burst('dust', el, TABLE_MOTION.dust), ms);
+    const timer = window.setTimeout(() => fxLayer.burst('dust', el, dust), ms);
     return () => {
       moves.forEach((move) => move?.cancel());
       window.clearTimeout(timer);
     };
-  }, [self, landAt, drop, mark, reduced, fxLayer]);
+  }, [self, landAt, drop, dust, mark, reduced, fxLayer]);
 }
 
 /**

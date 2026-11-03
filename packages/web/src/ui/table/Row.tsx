@@ -73,14 +73,16 @@ function useLandingHold(ids: readonly string[]): { pending: ReadonlySet<string>;
   const [done, setDone] = useState<{ key: string; ids: ReadonlySet<string> }>({ key: '', ids: new Set() });
   useEffect(() => {
     if (key === '') return;
-    const timers = key.split(',').map((entry) => {
+    // As cartas que pousam no mesmo instante (as do Equipar) entram juntas: um desenho da fileira por instante, e não um por carta.
+    const byInstant = new Map<string, string[]>();
+    for (const entry of key.split(',')) {
       const at = entry.lastIndexOf('@');
-      const id = entry.slice(0, at);
-      return window.setTimeout(
-        () => setDone((prev) => ({ key, ids: new Set([...(prev.key === key ? prev.ids : []), id]) })),
-        Number(entry.slice(at + 1)) * 1000,
-      );
-    });
+      const instant = entry.slice(at + 1);
+      byInstant.set(instant, [...(byInstant.get(instant) ?? []), entry.slice(0, at)]);
+    }
+    const timers = [...byInstant].map(([instant, ids]) =>
+      window.setTimeout(() => setDone((prev) => ({ key, ids: new Set([...(prev.key === key ? prev.ids : []), ...ids]) })), Number(instant) * 1000),
+    );
     return () => timers.forEach((timer) => window.clearTimeout(timer));
   }, [key]);
   const landed = done.key === key ? done.ids : new Set<string>();

@@ -1,6 +1,6 @@
 import type { GameEvent, NumCard, SpecialCard } from '@coringa/engine';
 import { describe, expect, it } from 'vitest';
-import { landingsOf, leavingOf, recoilsOf, shardsPerCard, shiftDelaysOf, TABLE_MOTION } from '../../src/model/table-motion.ts';
+import { dustPerCard, landingsOf, leavingOf, recoilsOf, shardsPerCard, shiftDelaysOf, TABLE_MOTION } from '../../src/model/table-motion.ts';
 import { buildTimeline, DECISION_CAP_MS, timelineMs, type Beat } from '../../src/model/timeline.ts';
 import { scenarioAt } from '../fixtures.ts';
 
@@ -32,30 +32,40 @@ describe('o recuo das cartas que saem da sua mão (§8)', () => {
 describe('o pouso (§8)', () => {
   it('o seu J pousa depois do recuo e da mola, sem queda', () => {
     const beats = beatsOf(TURN, buff('p1'));
-    expect(landingsOf(beats, 'p1', false).get('j1')).toEqual({ atMs: beats[1]!.startMs + 510, drop: false });
+    expect(landingsOf(beats, 'p1', false).get('j1')).toMatchObject({ atMs: beats[1]!.startMs + 510, drop: false });
   });
 
   it('o J do Bot cai no destino na batida dele', () => {
     const beats = beatsOf(TURN, buff('p2'));
-    expect(landingsOf(beats, 'p1', false).get('j1')).toEqual({ atMs: beats[1]!.startMs + TABLE_MOTION.dropMs, drop: true });
+    expect(landingsOf(beats, 'p1', false).get('j1')).toMatchObject({ atMs: beats[1]!.startMs + TABLE_MOTION.dropMs, drop: true });
   });
 
   it('as suas do Equipar só achatam com o rascunho à vista, e caem sem ele', () => {
     const placed: GameEvent = { type: 'CardsPlaced', player: 'p1', placements: [{ card: num('n1'), destination: 'ATK' }] };
     const beats = beatsOf(TURN, placed);
     const at = beats[1]!.startMs + TABLE_MOTION.dropMs;
-    expect(landingsOf(beats, 'p1', true).get('n1')).toEqual({ atMs: at, drop: false });
-    expect(landingsOf(beats, 'p1', false).get('n1')).toEqual({ atMs: at, drop: true });
+    expect(landingsOf(beats, 'p1', true).get('n1')).toMatchObject({ atMs: at, drop: false });
+    expect(landingsOf(beats, 'p1', false).get('n1')).toMatchObject({ atMs: at, drop: true });
   });
 
   it('as do Bot no Equipar caem', () => {
     const placed: GameEvent = { type: 'CardsPlaced', player: 'p2', placements: [{ card: num('n2'), destination: 'DEF' }] };
-    expect(landingsOf(beatsOf(placed), 'p1', true).get('n2')).toEqual({ atMs: TABLE_MOTION.dropMs, drop: true });
+    expect(landingsOf(beatsOf(placed), 'p1', true).get('n2')).toMatchObject({ atMs: TABLE_MOTION.dropMs, drop: true });
   });
 
   it('a numérica roubada voa da fileira do outro e pousa depois da mola, sem recuo', () => {
     const stolen: GameEvent = { type: 'CardStolen', player: 'p1', from: 'p2', card: num('n3'), fromRow: 'ATK', toRow: 'ATK', ace: face('a1', 'A') };
-    expect(landingsOf(beatsOf(stolen), 'p1', false).get('n3')).toEqual({ atMs: TABLE_MOTION.landAfterMs, drop: false });
+    expect(landingsOf(beatsOf(stolen), 'p1', false).get('n3')).toMatchObject({ atMs: TABLE_MOTION.landAfterMs, drop: false });
+  });
+});
+
+describe('a poeira do pouso cabe num teto por batida (§11)', () => {
+  it('uma carta sozinha solta 5 puffs; as quatro do Equipar, que pousam juntas, 2 cada', () => {
+    expect(landingsOf(beatsOf(TURN, buff('p1')), 'p1', false).get('j1')).toMatchObject({ dust: 5 });
+    const placements = ['n1', 'n2', 'n3', 'n4'].map((id) => ({ card: num(id), destination: 'ATK' as const }));
+    const landings = landingsOf(beatsOf({ type: 'CardsPlaced', player: 'p2', placements }), 'p1', false);
+    expect(['n1', 'n2', 'n3', 'n4'].map((id) => landings.get(id)!.dust)).toEqual([2, 2, 2, 2]);
+    expect(dustPerCard(4) * 4).toBeLessThanOrEqual(TABLE_MOTION.dustBudget);
   });
 });
 

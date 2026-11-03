@@ -14,6 +14,7 @@ export const TABLE_MOTION = {
   dropPx: 14,
   dropMs: 220,
   dust: 5,
+  dustBudget: 10,
   dustMs: 520,
   crackShakeMs: 120,
   shards: 10,
@@ -61,7 +62,15 @@ export interface Landing {
   atMs: number;
   /** A carta não tinha de onde voar: espera a batida e cai de `dropPx` acima. */
   drop: boolean;
+  /** Quantos puffs de poeira ela solta: `dustPerCard` das cartas que pousam na mesma batida. */
+  dust: number;
 }
+
+/**
+ * No máximo `dust` puffs por carta e `dustBudget` por batida (§11): as cartas do Equipar pousam juntas, e a medição da fatia 5 achou a
+ * compra abaixo de 50 quadros por segundo com os 30 puffs dela.
+ */
+export const dustPerCard = (count: number): number => Math.min(TABLE_MOTION.dust, Math.floor(TABLE_MOTION.dustBudget / Math.max(1, count)));
 
 /**
  * Quando cada carta que chega pousa. A sua, da mão, depois do recuo e da mola; a do oponente cai no destino na batida dela; as do Equipar
@@ -73,27 +82,28 @@ export function landingsOf(beats: readonly Beat[], me: PlayerId, draftShown: boo
   const landings = new Map<string, Landing>();
   for (const beat of plainBeats(beats)) {
     const { event, startMs } = beat;
+    const here: [string, Omit<Landing, 'dust'>][] = [];
     switch (event.type) {
       case 'BuffPlayed':
       case 'GuardPlayed': {
         const cards = event.type === 'BuffPlayed' ? [event.card] : event.cards;
         const mine = event.player === me;
         for (const card of cards) {
-          landings.set(card.id, mine ? { atMs: startMs + recoilMs + landAfterMs, drop: false } : { atMs: startMs + dropMs, drop: true });
+          here.push([card.id, mine ? { atMs: startMs + recoilMs + landAfterMs, drop: false } : { atMs: startMs + dropMs, drop: true }]);
         }
         break;
       }
       case 'CardsPlaced':
-        for (const { card } of event.placements) {
-          landings.set(card.id, { atMs: startMs + dropMs, drop: event.player !== me || !draftShown });
-        }
+        for (const { card } of event.placements) here.push([card.id, { atMs: startMs + dropMs, drop: event.player !== me || !draftShown }]);
         break;
       case 'CardStolen':
-        landings.set(event.card.id, { atMs: startMs + landAfterMs, drop: false });
+        here.push([event.card.id, { atMs: startMs + landAfterMs, drop: false }]);
         break;
       default:
         break;
     }
+    const dust = dustPerCard(here.length);
+    for (const [id, landing] of here) landings.set(id, { ...landing, dust });
   }
   return landings;
 }

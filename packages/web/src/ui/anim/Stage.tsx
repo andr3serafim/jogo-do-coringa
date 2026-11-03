@@ -215,7 +215,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       },
       landAt: (id) => {
         const landing = cut ? undefined : run.landings.get(id);
-        return landing === undefined ? null : { at: landing.atMs / 1000, drop: landing.drop };
+        return landing === undefined ? null : { at: landing.atMs / 1000, drop: landing.drop, dust: landing.dust };
       },
       enterDelay: (id) => {
         const startMs = busy ? run.deals.cards.get(id) : undefined;

@@ -65,4 +65,40 @@ A jogada, depois: 56 quadros/s e chegada de 83 ms nas duas telas.
 
 ## Depois (Task 9)
 
-A preencher com os mesmos quatro passos, depois dos efeitos da fatia.
+Os mesmos quatro passos, com todos os efeitos da fatia e os pontos diretos do playtest, três execuções de cada (`MEDIR_PORTA=8797`).
+
+**A primeira medida reprovou dois passos** (meta de 50 quadros/s):
+- **a compra:** 43 a 51 quadros/s, contra 59 antes da fatia. As seis cartas do Equipar pousam juntas com 30 puffs de poeira, e cada pouso redesenhava a fileira, uma carta de cada vez;
+- **o ataque no PC:** 42 a 50, mas ele já ficava abaixo antes da fatia (38 a 41).
+
+**Os dois cortes, como o plano manda (§11: primeiro a poeira e os cacos):**
+- a poeira ganhou um teto por batida, como os cacos (`dustPerCard`: 5 por carta, 10 por batida);
+- o `Row` junta os pousos do mesmo instante num desenho só.
+
+| Passo | Tela | Quadros/s | Chegada (ms) | Partículas no pico |
+|---|---|---|---|---|
+| jogada | PC | 60, 56, 56 | 67, 100, 83 | 5 |
+| jogada | 360 | 60, 57, 57 | 50, 83, 83 | 5 |
+| armadilha | PC | 53, 53, 54 | 133, 117, 117 | 10 |
+| armadilha | 360 | 54, 54, 59 | 117, 100, 100 | 10 |
+| ataque (depois dos cortes) | PC | 56, 53, 53 | 117, 117, 134 | 0 |
+| ataque (depois dos cortes) | 360 | 57, 57, 55 | 100, 100, 100 | 0 |
+| compra (depois dos cortes) | PC | 59, 58, 52 | 183, 183, 183 | 18 |
+| compra (depois dos cortes) | 360 | 58, 57, 50 | 167, 167, 200 | 18 |
+
+- **A meta passa** em todos os passos, nas duas telas, e as partículas ficam abaixo de 60. A jogada e a armadilha foram medidas antes dos cortes, que não mexem nelas.
+- **A chegada:** o ataque caiu de 167–200 para 100–134 ms (o tremor da Task 1); a jogada e a armadilha ficam onde estavam; a compra também (167 a 200). O resto do peso é o desenho do React e as projeções do Motion: fica para o autor (E1).
+- **Uma execução só varia bastante:** a mesma compra deu de 43 a 59 quadros/s em rodadas diferentes da mesma tarde. As decisões acima usaram três rodadas.
+
+## O que foi visto nas fotos
+
+- **A jogada** (o K na Guarda): o voo, e o pouso no lugar, sem deslocamento do achatamento.
+- **A Armadilha:** a cópia do J♥ rachada no lugar, os cacos aos 160 ms, o J♥ no topo do cemitério depois, e a cópia do A♣ indo ao cemitério.
+- **O ataque:** o 8♠ gasto e o 9♣ do Bot seguram o lugar até a batida deles.
+- **A compra:** a carta do Bot que cai e assenta com poeira; o verso novo voa do monte, e o que já estava na mão fica parado (o defeito que as fotos acharam e que foi corrigido).
+
+## O que não foi visto
+
+- **O som:** os testes medem os instantes e o volume, não o ouvido.
+- **O movimento reduzido:** só nos testes de unidade.
+- **O painel do Equipar ao vivo:** o leque das numéricas dele só tem teste de unidade; o replay usa um painel próprio, sem leque.

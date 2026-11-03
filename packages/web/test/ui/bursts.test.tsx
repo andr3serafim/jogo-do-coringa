@@ -98,14 +98,14 @@ describe('o palco diz às cartas o recuo e o pouso', () => {
       <Probe />
     </Stage>
   );
-  const read = () => JSON.parse(screen.getByTestId('fx').textContent!) as { recoil: number | null; land: { at: number; drop: boolean } | null };
+  const read = () => JSON.parse(screen.getByTestId('fx').textContent!) as { recoil: number | null; land: { at: number; drop: boolean; dust: number } | null };
 
   it('ao vivo: o J recua no começo da batida dele e pousa depois do recuo e da mola, em segundos', () => {
     const { session, connection } = connect(MINE);
     const view = render(stageOf(session));
     emit({ connection }, MINE, [TURN, PLAY]);
     view.rerender(stageOf(session));
-    expect(read()).toEqual({ recoil: 0.4, land: { at: 0.91, drop: false } });
+    expect(read()).toEqual({ recoil: 0.4, land: { at: 0.91, drop: false, dust: 5 } });
   });
 
   it('o pouso continua valendo depois do fim natural das batidas, mas o pulo o apaga', () => {
