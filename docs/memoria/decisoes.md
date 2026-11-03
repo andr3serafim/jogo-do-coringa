@@ -6,6 +6,23 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-02 (10): o ponto 15 do playtest
+
+Depois do corte pelo limite de uso, no meio da Task 9 da fatia 5:
+
+> ok, prossiga.
+>
+> Ponto para incluir na lista de 14 itens que eu enviei.
+>
+> 15. se o ataque comum for o ataque final, deve haver uma animação cinematic curta do último ataque da partida para dar mais empolgação ao player vitorioso.
+
+**Leitura:**
+- "prossiga" é terminar a fatia 5 (a Task 9: a medição de depois, o portão, a CI, a revisão e o fast-forward).
+- **[I]** O ponto 15 é de desenho, como os nove de 2026-11-02 (9) que ficaram para depois da fatia 5: entra no mesmo brainstorming, com protótipo, e não nesta fatia. Ele não disse onde encaixar.
+- **[I]** "Ataque comum final" é o golpe que derruba a vida a zero (`GameOver` por vida), sem cena especial no mesmo passo. A Exódia e o Ataque Absoluto que encerram já têm cena.
+
+---
+
 ## 2026-11-02 (9): o plano da fatia 5 aprovado, e 14 pontos do playtest
 
 À entrega do plano (`docs/superpowers/plans/2026-11-02-direcao-visual-fatia-5.md`), com as escolhas E1 a E9 listadas para ele:
