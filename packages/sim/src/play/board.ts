@@ -14,6 +14,8 @@ export function phaseText(view: PlayerView): string {
   switch (phase.kind) {
     case 'EQUIP':
       return 'Sua vez: Equipar (as numéricas vão para o campo na ordem de compra)';
+    case 'RESURRECTION':
+      return 'Sua vez: Janela da Ressurreição (ressuscitar agora, antes do ataque, ou guardar)';
     case 'ORDER_CHOICE':
       return 'Sua vez: Escolha da iniciativa';
     case 'ATTACK_MAIN':

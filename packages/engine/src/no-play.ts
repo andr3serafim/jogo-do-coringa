@@ -4,7 +4,7 @@ import type { Action, PlayerView, SpecialCard, SpecialKind } from './types.ts';
 /**
  * Por que uma carta da mão não tem jogada agora (B2 do sub-projeto 5): a interface só traduz o código.
  * - `GAME_OVER`: a partida acabou.
- * - `EQUIP_ROUND`: rodada de Equipar; as especiais só se jogam nas rodadas de Ataque (spec §1.3).
+ * - `EQUIP_ROUND`: rodada de Equipar (também a janela da Ressurreição); as especiais só se jogam nas rodadas de Ataque (spec §1.3).
  * - `ORDER_CHOICE`: a ordem dos turnos ainda está sendo escolhida.
  * - `OPPONENT_TURN`: é a vez do oponente (o turno dele ou a janela de reação dele).
  * - `REACTION_TRAP_ONLY`: na sua janela de reação só o A (ou o Selvagem como A) responde (spec §1.7).
@@ -59,7 +59,9 @@ export function noPlayReason(view: PlayerView, card: SpecialCard): NoPlayReason 
   switch (phase.kind) {
     case 'GAME_OVER':
       return 'GAME_OVER';
+    // A janela da Ressurreição é da rodada de Equipar (ponto 16).
     case 'EQUIP':
+    case 'RESURRECTION':
       return 'EQUIP_ROUND';
     case 'ORDER_CHOICE':
       return 'ORDER_CHOICE';

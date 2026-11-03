@@ -6,6 +6,7 @@ export function actingPlayers(s: GameState): PlayerId[] {
   switch (phase.kind) {
     case 'EQUIP':
       return s.players.filter((p) => !p.equipSubmitted).map((p) => p.id);
+    case 'RESURRECTION':
     case 'ORDER_CHOICE':
     case 'ATTACK_MAIN':
       return [phase.player];

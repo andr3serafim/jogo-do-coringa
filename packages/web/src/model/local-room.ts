@@ -98,6 +98,7 @@ function phaseKey(state: GameState): string {
   switch (phase.kind) {
     case 'EQUIP':
       return JSON.stringify([state.round, 'EQUIP', null, null]);
+    case 'RESURRECTION':
     case 'ORDER_CHOICE':
     case 'ATTACK_MAIN':
       return JSON.stringify([state.round, phase.kind, phase.player, null]);

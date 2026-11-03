@@ -232,6 +232,9 @@ export function legalActions(view: PlayerView): Action[] {
       if (owed > 0) return discardOptions(view.self.hand, owed);
       return equipOptions(view).map((destinations): Action => ({ type: 'EQUIP', destinations }));
     }
+    case 'RESURRECTION':
+      // A janela da Ressurreição (ponto 16): passar (guardar) ou ressuscitar.
+      return phase.player === view.me ? [{ type: 'PASS' }, ...resurrectOptions(view)] : [];
     case 'ORDER_CHOICE':
       return phase.player === view.me
         ? [

@@ -9,6 +9,7 @@ import { actingPlayers, playout } from './playout.ts';
 const arbConfig = fc.record({
   initiativeChoice: fc.boolean(),
   wildJokers: fc.boolean(),
+  resurrectOnQuad: fc.boolean(),
 });
 const arbChoices = fc.array(fc.nat(), { minLength: 1, maxLength: 64 });
 

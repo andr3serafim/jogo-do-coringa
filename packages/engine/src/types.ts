@@ -141,6 +141,11 @@ export type GameResult = { kind: 'WIN'; winner: PlayerId; reason: 'HP' | 'EXODIA
 
 export type Phase =
   | { kind: 'EQUIP' }
+  /**
+   * A janela da Ressurreição depois da revelação do Equipar (ponto 16, só com `resurrectOnQuad`): decide `player`; `next` é o outro,
+   * se também formou quadra na revelação (a vez dele só vem se ele ainda tiver jogada).
+   */
+  | { kind: 'RESURRECTION'; player: PlayerId; next: PlayerId | null }
   | { kind: 'ORDER_CHOICE'; player: PlayerId }
   | { kind: 'ATTACK_MAIN'; player: PlayerId }
   /** `devastation`: a Devastação em curso, na janela dela e na resposta ao Reflect que a devolve. */

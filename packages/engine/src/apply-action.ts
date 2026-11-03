@@ -14,6 +14,7 @@ import {
 } from './actions/main.ts';
 import { chooseOrder, handleChooseOrder } from './actions/order.ts';
 import { cancelReflect, closeReaction, pass, reactReflect, reactTrap } from './actions/reaction.ts';
+import { advanceResurrection, passResurrection, resurrectInWindow } from './actions/resurrection.ts';
 import { fail, RuleViolation } from './errors.ts';
 import { endTurn } from './flow.ts';
 import { finishGame, getPlayer, opponentOf } from './state.ts';
@@ -57,6 +58,8 @@ function applySystem(s: GameState, action: Action, ev: GameEvent[]): void {
   switch (phase.kind) {
     case 'EQUIP':
       return timeoutEquip(s, ev);
+    case 'RESURRECTION':
+      return advanceResurrection(s, ev);
     case 'ORDER_CHOICE':
       return chooseOrder(s, true, ev);
     case 'ATTACK_MAIN': {
@@ -100,12 +103,14 @@ function applyPlayer(s: GameState, player: PlayerId, action: Action, ev: GameEve
     case 'CANCEL_REFLECT':
       return cancelReflect(s, player, action.kId, action.jId, action.qId, ev);
     case 'RESURRECT':
+      if (s.phase.kind === 'RESURRECTION') return resurrectInWindow(s, player, action.cardId, action.row, ev);
       return resurrect(s, requireMain(s, player), action.cardId, action.row, ev);
     case 'DEVASTATE':
       return devastate(s, requireMain(s, player), action.kId, action.aId, action.xId, action.row, ev);
     case 'STEAL':
       return steal(s, requireMain(s, player), action.cardId, action.targetId, action.row, ev);
     case 'PASS':
+      if (s.phase.kind === 'RESURRECTION') return passResurrection(s, player, ev);
       return pass(s, player, ev);
     case 'TIMEOUT':
     case 'FORFEIT':

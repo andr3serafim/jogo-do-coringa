@@ -11,6 +11,8 @@ export function phaseKey(state: GameState): string {
   switch (phase.kind) {
     case 'EQUIP':
       return JSON.stringify([state.round, 'EQUIP', null, null]);
+    // A janela da Ressurreição (ponto 16) tem a chave de quem decide: a vez do segundo da fila é época nova.
+    case 'RESURRECTION':
     case 'ORDER_CHOICE':
     case 'ATTACK_MAIN':
       return JSON.stringify([state.round, phase.kind, phase.player, null]);

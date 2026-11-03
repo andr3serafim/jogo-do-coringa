@@ -189,6 +189,8 @@ export const greedyBot: Bot = (view, legal, rng) => {
   switch (phase.kind) {
     case 'EQUIP':
       return chooseEquip(view, legal, rng);
+    case 'RESURRECTION':
+      return { type: 'PASS' };
     case 'ORDER_CHOICE':
       return { type: 'CHOOSE_ORDER', first: prefersFirst(view) };
     case 'ATTACK_MAIN':

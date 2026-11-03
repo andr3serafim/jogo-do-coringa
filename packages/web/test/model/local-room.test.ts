@@ -112,6 +112,7 @@ function myTurn(view: PlayerView): boolean {
   switch (phase.kind) {
     case 'EQUIP':
       return !view.self.equipSubmitted;
+    case 'RESURRECTION':
     case 'ORDER_CHOICE':
     case 'ATTACK_MAIN':
       return phase.player === LOCAL_ME;

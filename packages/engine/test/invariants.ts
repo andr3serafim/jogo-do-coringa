@@ -1,4 +1,6 @@
 import { totalCards } from '../src/deck.ts';
+import { hasResurrectPlay } from '../src/quads.ts';
+import { getPlayer } from '../src/state.ts';
 import { viewEvents, viewFor } from '../src/view.ts';
 import type { GameEvent, GameState } from '../src/types.ts';
 import { allCards } from './helpers.ts';
@@ -14,6 +16,15 @@ export function checkInvariants(before: GameState, after: GameState, events: Gam
     const healed = events.some((e) => e.type === 'Healed' && e.player === p.id && e.amount > 0);
     if (p.hp > before.players[i].hp && !healed) throw new Error('a vida subiu sem cura');
   });
+  // Ponto 16: nenhuma fileira passa do limite, a janela da Ressurreição só existe com jogada e a Ressurreição nunca desfaz quadra.
+  for (const p of after.players) {
+    if (p.attackRow.length > after.config.rowLimit || p.defenseRow.length > after.config.rowLimit) throw new Error('fileira acima do limite');
+  }
+  if (after.phase.kind === 'RESURRECTION' && !hasResurrectPlay(after, getPlayer(after, after.phase.player))) {
+    throw new Error('janela da Ressurreição sem jogada');
+  }
+  const resurrected = new Set(events.flatMap((e) => (e.type === 'Resurrected' ? [e.player] : [])));
+  if (events.some((e) => e.type === 'QuadBroken' && resurrected.has(e.player))) throw new Error('a Ressurreição desfez uma quadra');
   for (const viewer of after.players) {
     const opponent = after.players.find((p) => p.id !== viewer.id);
     if (!opponent) throw new Error('sem oponente');
