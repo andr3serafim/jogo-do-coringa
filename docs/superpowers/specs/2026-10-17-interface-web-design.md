@@ -216,6 +216,11 @@ A mesa está em §3 e §4. O menu da partida tem:
   - **Nota (2026-11-01, `decisoes.md` 2026-11-01 (3)):** antes de pensar, ele assiste ao fim das cenas raras no ar: espera a mesma
     folga de cena que estende o prazo no online (`sceneAllowanceMs`). Sem isso, a jogada dele trocava a linha do tempo e cortava a
     cena do Ataque Absoluto de quem o atacou. Quando o jogador joga, a espera zera: ele já pulou ou viu a cena.
+  - **Nota (2026-11-03, `decisoes.md` 2026-11-03 (1), ponto 17):** o Equipar vazio do jogador (zero numéricas, como o servidor,
+    spec 2 §5) sai com a mesma espera do bot: a folga de cena mais os ~600 ms, num timer próprio. Ele saía no mesmo instante do passo
+    que deu as cartas, os dois `state`s chegavam à mesa no mesmo desenho, e ela só tocava o último: o golpe que fecha a rodada sumia,
+    com a cena do Ataque Absoluto junto. **O online ainda tem o mesmo buraco:** o servidor aplica o Equipar vazio logo em seguida
+    (`autoSteps`), e o segundo `state` corta as batidas do primeiro.
 - Emite um `room` sintético: assentos "Você" e "Bot", status `PLAYING` e `FINISHED`, placar local. A revanche começa outra partida com outra semente.
 - Usa as mesmas telas da mesa e do fim. Não tem lobby.
 - Também é a base dos testes de componentes e de um E2E determinístico (§9).

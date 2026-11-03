@@ -8,12 +8,15 @@
 - **Branch:** `feat/playtest-pontos-17-18`, no checkout principal, a partir da `main` (`6759914`). Sobe para a CI e vai para a `main` por fast-forward com as duas CI verdes.
 - **Feito por último** (`diario.md` 2026-11-03 (1); o pedido em `decisoes.md` 2026-11-03 (1)):
   - **ponto 18:** o total da fileira que sobe fica em ouro e o que desce fica vermelho, os dois com contorno de tinta e sombra de carimbo (`Row.tsx`, `useTrend`; `.total-fileira` no `styles.css`);
-  - **ponto 17 (a cena do Ataque Absoluto que não aparece): não reproduzido.** A cena aparece ao vivo e no replay, nos dois lados, também quando encerra a partida. O único caminho achado em que ela some: quem defende quebra um J com uma Armadilha na janela de reação, o ataque deixa de ser Absoluto, e a mesa não diz isso.
+  - **ponto 17 (a cena do Ataque Absoluto que não aparece):** a cena aparece ao vivo e no replay, nos dois lados, também quando encerra a partida. Dois caminhos em que ela some:
+    - **consertado no treino:** com zero numéricas no Equipar seguinte, o Equipar vazio saía no mesmo instante do golpe que fecha a rodada, e a mesa só desenhava o último `state`: o golpe inteiro, com a cena, sumia. Agora ele espera a folga de cena e o tempo de pensar, como o bot (`local-room.ts`). **O online tem o mesmo buraco** (`autoSteps` do servidor), não consertado;
+    - **regra, sem conserto:** quem defende quebra um J com uma Armadilha na janela de reação, o ataque deixa de ser Absoluto, e a mesa não diz isso (11 de 59 ataques armados nas simulações).
+    O caso exato do autor não foi reproduzido.
 - **Antes, na `main`:** a fatia 5 do sub-projeto 6 e os pontos diretos 3, 4, 7, 8 e 12 (`diario.md` 2026-11-02 (8)). O autor jogou e mandou os pontos 16 a 18; ele não disse que aprova a fatia 5.
 - **Ajuste depois da aprovação da 4b:** as cartas da quadra perderam o losango de ouro do canto (`decisoes.md` 2026-11-02 (6)); o fundo dourado, a moldura, o brilho e o selo ficam. Não mude isso de volta seguindo a letra antiga do §6.
 - **Próximo passo exato:**
   1. Subir a branch, esperar as duas CI e fazer o fast-forward na `main`.
-  2. **Perguntar ao autor sobre o ponto 17:** de quem era o ataque, se veio uma Armadilha antes, se o movimento reduzido estava ligado. Com um caso que falhe, consertar com teste; se for a Armadilha, o aviso de que o Ataque Absoluto desarmou entra com o ponto 1.
+  2. **Perguntar ao autor sobre o ponto 17:** se uma Armadilha do Bot quebrou um J seu antes do golpe. Se foi, a decisão é dele: o Ataque Absoluto declarado continua valendo (regra; sobe `RULES_VERSION`), ou cai e a mesa avisa (desenho, com o ponto 1). Se não foi, provavelmente era o Equipar vazio colado, já consertado no treino. O conserto do online (o servidor) é trabalho à parte.
   3. **Os pontos de desenho do playtest:** 1, 2, 5, 6, 9, 10, 11, 13 e 14 (`decisoes.md` 2026-11-02 (9)), o 15 (2026-11-02 (10)) e o 16 (2026-11-03 (1), a Ressurreição no instante da quadra, que muda regra do motor). Brainstorming (`superpowers:brainstorming`) e protótipo para ele ver, antes de spec e plano. Nenhum foi desenhado nem aprovado. O 16 começa pelas perguntas de regra listadas na leitura dele.
   4. O deploy e o playtest online são dele (`notas/playtest.md`).
 - **Para medir uma cena com a 8787 ocupada:** `MEDIR_PORTA=8797` no `medir-cena.ts`. Para o E2E inteiro numa porta livre, a receita está no `diario.md` 2026-11-02 (8) (uma configuração que importa o `playwright.config.ts` e troca a porta).

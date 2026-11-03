@@ -406,6 +406,9 @@ Cada fatia é uma branch com `pnpm check`, `pnpm e2e` e as duas CI verdes, e vai
    - O que a execução decidiu está no §8. Entraram também os pontos diretos do playtest de 2026-11-02 (`decisoes.md` 2026-11-02 (9)):
      sem seleção de texto na mesa, sem a "Ameaça de X" na barra, sem a ordem automática, "Bônus" no lugar de "Buff" e o total da fileira que
      espera a carta pousar e então cresce.
+   - **Depois (2026-11-03, `decisoes.md` 2026-11-03 (1), ponto 18):** o total que sobe fica em ouro e o que desce (o golpe que conta, a
+     carta que sai) fica vermelho e encolhe uma vez; os dois com contorno de tinta e sombra de carimbo, até 900 ms depois da última
+     mudança. Fonte de texto, sem textura (§10.7 da spec da web).
    - Os sons: `carta` com o sopro do voo e a batida no pouso, `pouso` e `compra` novas, `quebra` no estouro; os controles do replay cortam
      o som da cena.
    - Medição: `docs/memoria/notas/medicao-fatia-5.md`.

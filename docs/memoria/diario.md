@@ -9,7 +9,8 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 - **Pedido do autor** (`decisoes.md` 2026-11-03 (1)): "ok, prossiga", com três pontos novos. O 16 muda regra (desenho); o 17 é defeito; o 18 é direto.
 - **Feito:** a branch `feat/playtest-pontos-17-18`, a partir da `main` (`6759914`).
-- **Ponto 17 (a cena do Ataque Absoluto que não aparece): não reproduzido.**
+- **Ponto 17 (a cena do Ataque Absoluto que não aparece): a cena em si funciona; um caminho em que o golpe inteiro some foi achado e
+  consertado no treino (o Equipar vazio colado); o caso exato do autor não foi reproduzido.**
   - **Diagnóstico** (testes temporários, apagados; o código ficou na pasta de rascunho da sessão): 300 partidas de treino na `LocalRoom` de verdade, com o
     jogador jogando como o greedy e esperando 5 s antes de cada jogada. 48 Ataques Absolutos (dos dois lados, 15 deles encerrando a partida);
     nenhum `state` da sala chega no meio da cena (a folga de cena de `decisoes.md` 2026-11-01 (3) segura o bot).
@@ -22,8 +23,23 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     Ataque Absoluto. Em todos, quem defendia quebrou um J (ou o Selvagem no papel de J) com uma Armadilha na janela de reação. Pela regra
     não há cena, mas a mesa não diz que o Ataque Absoluto desarmou: a barra prometia "Ataque Absoluto", e o golpe sai comum. É a mesma
     falta de leitura do ponto 1.
-  - **Próximo:** perguntar ao autor em que jogada a cena faltou (de quem era o ataque, se uma Armadilha veio antes, se o movimento
-    reduzido estava ligado). Sem um caso que falhe, não há conserto a fazer no desenho da cena.
+  - **Os dois Ataques Absolutos do jogador desarmados** na amostra: as sementes `diag-9` e `diag-73` (jogador greedy com o
+    sorteio `<semente>/me`, esperando 5 s antes de cada jogada, Médio). Para reproduzir sem o rascunho: o laço do teste
+    "o EQUIP vazio nunca sai no mesmo instante..." do `local-room.test.ts` é o mesmo.
+  - **A leitura do advisor que achou o defeito de verdade:** o `#autoEquip` da `LocalRoom` aplicava o Equipar vazio do jogador (zero
+    numéricas) dentro do `#commit` do passo que deu as cartas, no mesmo instante. Os dois `state`s chegavam ao `useSyncExternalStore`
+    da sessão na mesma tarefa, e o React desenhava só o último: o golpe que fecha a rodada nunca tocava, com cena e tudo. Em 300
+    partidas, 11 golpes de fim de rodada saíram colados assim (nenhum Absoluto, por acaso). **No navegador, antes:** semente `diag-236`,
+    rodada 9, o seu Atacar: a mesa não ficou ocupada nem um quadro, e a vida do Bot pulou de 380 para 353. **Depois:** a mesa fica
+    ocupada, a vida desce dentro das batidas, e o Equipar vazio sai em ~800 ms, junto com o do Bot.
+  - **Conserto** (`local-room.ts`): o Equipar vazio sai num timer próprio (`#scheduleAutoEquip`), com a espera do bot (folga de cena +
+    tempo de pensar); revanche, fechar e o fim da partida o soltam. A ordem dos passos no replay não muda (o timer dele nasce antes
+    do do bot, com o mesmo atraso). Testes: os quatro do Equipar vazio esperam o timer, e um novo joga as três sementes com o caso
+    e confere que nenhum Equipar vazio sai antes da folga mais 600 ms.
+  - **O online tem o mesmo buraco:** o `autoSteps` do servidor aplica o Equipar vazio logo depois do passo, e o segundo `state` corta
+    as batidas do primeiro (lá eles chegam em mensagens separadas, então o golpe começa e é cortado). Mexer no servidor (o prazo, o
+    alarme) é outro trabalho; ficou anotado na spec da web §2.6.
+  - **Ainda perguntar ao autor** em que jogada a cena faltou, para saber se foi este caso, o da Armadilha ou outro.
 - **Ponto 18 (as cores do total):** `useRise` virou `useTrend` (`Row.tsx`). O total que sobe no pouso fica em ouro e cresce (1,3×),
   como no ponto 12; o número mostrado que desce com a mesa tocando (o golpe que conta, a carta que sai) fica vermelho e encolhe (0,85×)
   uma vez só, mesmo com a contagem descendo a cada quadro. A cor fica até 900 ms depois da última mudança e sai esmaecendo (280 ms). Os dois
