@@ -5,12 +5,14 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
-## 2026-11-03 (2): o online do ponto 17 (o Equipar vazio que cortava o golpe), consertado na mesa
+## 2026-11-03 (3): o online do ponto 17 (o Equipar vazio que cortava o golpe), consertado na mesa
 
-- **Pedido:** sessão lateral aberta pela do ponto 17, para fechar o buraco do online que o (1) deixou anotado. O pedido do autor é o
-  "revisar, corrigir e conferir" de `decisoes.md` 2026-11-03 (1).
+- **Pedido:** a sessão que o autor abriu ("Online: Equipar vazio não pode cortar o golpe final"), para fechar o buraco do online que o
+  (1) deixou anotado. O ponto 17 em si foi fechado (era a Armadilha), mas o defeito do Equipar vazio fica: `decisoes.md` 2026-11-03 (2).
 - **Feito:** a branch `feat/online-equipar-vazio` (worktree `.claude/worktrees/dreamy-engelbart-4a4876`), a partir da `main` (`6165d57`),
-  commit de código `105b8ba`.
+  commit de código `105b8ba`. A `main` andou para `5b5b34f` (o ajuste do ponto 18, sem conflito no código) e entrou por merge: o
+  rebase pedia force-push da branch já publicada, que o modo automático barrou, e o `sync_with_base_branch` do app falhou no host
+  ("Committer identity unknown"). Fica um commit de merge na `main` depois do fast-forward.
 - **Ruling: na web, não no servidor.**
   - adiar o passo automático pelo alarme da sala obrigaria o servidor a adivinhar quanto dura a animação do cliente: além da folga
     de cena (`sceneAllowanceMs`) há o teto de decisão de 1 s e a faixa da iniciativa de 1,2 s (fora do teto), que só a web conhece;
@@ -29,6 +31,10 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   - **Ruling:** lista vazia não é quieta: um `state` sem evento é o começo de uma partida (a revanche), que troca a mesa inteira;
   - **Ruling:** o `layoutKey` das cartas (`Stage`) usa o `seq` da linha do tempo que toca, não o do último `state`: trocá-lo no meio do
     voo faria o Motion medir e partir de novo (o `layoutDependency` da carta).
+  - **O replay não absorve nada:** cada quadro tem `epoch` própria (`epoch` = índice, em `replay-track.ts`, travado no
+    `replay-track.test.ts`). O "Próximo passo" e o "Tocar" no meio de uma cena seguem cortando como antes, mesmo num passo só com
+    `EquipSubmitted`. Se um dia o replay passar a repetir a `epoch` do servidor, a absorção chega a ele e o "Próximo passo" deixa uma
+    cena tocando muda (os controles cortam o som): desligue a absorção ali.
 - **Testes** (`test/ui/quiet-state.test.tsx`, 8; e o `quietOnly` em `test/model/timeline.test.ts`): o Ataque Absoluto que fecha a
   rodada toca inteiro (a cena, a vida descendo no feixe e a mesa ocupada até o fim da compra) com o Equipar vazio colado; o golpe comum,
   também com a confirmação do oponente no meio; o `layoutKey` que não muda; e o contrário: um `state` com batidas, outra `epoch`, o
@@ -41,6 +47,21 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 - **Não conferido de verdade:** uma partida online com alguém sem numéricas depois do golpe final (é o playtest do autor, depois do
   deploy dele) e o Motion durante a absorção no navegador: o jsdom não tem layout, e o que garante as cartas é o `layoutKey` igual.
 - Specs: a da web §2.6 (a nota do online) e §4.1 (a regra do `state` quieto).
+
+---
+
+## 2026-11-03 (2): o ponto 18 sem o vermelho; o 17 fechado
+
+- **Pedido do autor** (`decisoes.md` 2026-11-03 (2)): o 17 foi a Armadilha (engano dele), ignorar; no 18, a descida na cor padrão,
+  mantendo a animação, e o contorno do ouro mais fino.
+- **Feito** (branch `feat/ponto-18-ajuste`, a partir da `main` `6165d57`):
+  - `styles.css`: só `.total-fileira[data-subiu]` pinta (ouro, contorno de 2,5 px com `paint-order`, ou seja ~1,25 px por fora, e sombra
+    de 1 px; antes 4 px e 2 px). A regra do `[data-desceu]` saiu; o atributo fica como marca do encolher (os testes o usam);
+  - `playtest-direct.test.tsx`: os testes da descida falam da marca, e um novo lê a folha e confere que só a subida tem cor;
+  - foto no navegador (replay da fixture `absolutos`, rodada 5, atributos postos à mão): o 16 em ouro com o contorno fino, o 74 na cor de sempre.
+- **Ruling:** a sombra de carimbo também afinou (2 → 1 px), porque ela soma com o contorno na espessura que ele viu.
+- **Fica:** o conserto do Equipar vazio colado ao golpe no treino (`09fc360`), que é defeito de verdade; o do online está na sessão
+  que o autor abriu ("Online: Equipar vazio não pode cortar o golpe final").
 
 ---
 

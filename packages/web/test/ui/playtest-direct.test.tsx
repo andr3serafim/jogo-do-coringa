@@ -1,6 +1,6 @@
 // Os pontos diretos do playtest de 2026-11-02 (decisoes.md 2026-11-02 (9)): sem seleção de texto na mesa, sem a "Ameaça de X", sem a
-// ordem automática, "Bônus" no lugar de "Buff" e o total da fileira que cresce quando sobe; e o ponto 18 (2026-11-03 (1)): o total que
-// sobe fica em ouro e o que desce em vermelho, os dois com contorno de tinta.
+// ordem automática, "Bônus" no lugar de "Buff" e o total da fileira que cresce quando sobe; e o ponto 18 (2026-11-03 (1) e (2)): o total
+// que sobe fica em ouro, com contorno de tinta, e o que desce encolhe na cor de sempre.
 import type { GameEvent, NumCard, SpecialCard } from '@coringa/engine';
 import { act, screen, within } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
@@ -152,7 +152,13 @@ describe('12. o total que sobe cresce no pouso', () => {
   });
 });
 
-describe('18. o total que desce fica vermelho, com contorno', () => {
+describe('18. o total que desce encolhe, na cor de sempre', () => {
+  it('a folha pinta só a subida: a descida não tem cor nem contorno (decisoes.md 2026-11-03 (2))', () => {
+    const css = readFileSync(resolve(import.meta.dirname, '../../src/styles.css'), 'utf8');
+    expect(css).toMatch(/\.total-fileira\[data-subiu\] \{[^}]*color: var\(--color-ouro\)/);
+    expect(css).not.toMatch(/data-desceu/);
+  });
+
   const total = (container: HTMLElement, key: string) => container.querySelector(`[data-fileira="${key}"] [data-total]`)!;
   const dips = (el: Element) => calls.filter((call) => call.el === el && call.frames.some((frame) => frame.scale === TREND.fall));
   /** O golpe de Duda tira a carta da frente da sua Defesa: o total conta para baixo na batida do dano. */
@@ -162,7 +168,7 @@ describe('18. o total que desce fica vermelho, com contorno', () => {
   ];
   const HIT_VIEW: ViewSpec = { ...THEIRS, self: { ...THEIRS.self, defenseRow: [6, 9, 5] } };
 
-  it('o golpe: vermelho enquanto conta, encolhe uma vez só, e a cor sai 900 ms depois da última mudança', () => {
+  it('o golpe: marcado enquanto conta, encolhe uma vez só, e a marca sai 900 ms depois da última mudança', () => {
     const m = mount(THEIRS);
     const before = Number(total(m.container, 'p1:DEF').textContent);
     emit(m, HIT_VIEW, HIT);
@@ -178,7 +184,7 @@ describe('18. o total que desce fica vermelho, com contorno', () => {
     expect(el).not.toHaveAttribute('data-desceu');
   });
 
-  it('a carta que sai sem golpe (a Armadilha num J seu) também desce o total em vermelho', () => {
+  it('a carta que sai sem golpe (a Armadilha num J seu) também desce o total', () => {
     const J: SpecialCard = { id: 'j-alvo', kind: 'J', suit: 'copas' };
     const trap: SpecialCard = { id: 'a-bot', kind: 'A', suit: 'paus' };
     const before: ViewSpec = { ...THEIRS, self: { ...THEIRS.self, attackBuffs: [J] } };
@@ -198,7 +204,7 @@ describe('18. o total que desce fica vermelho, com contorno', () => {
     expect(dips(el)).toHaveLength(0);
   });
 
-  it('com movimento reduzido: só a cor, sem encolher', () => {
+  it('com movimento reduzido: só a marca, sem encolher', () => {
     const J: SpecialCard = { id: 'j-alvo', kind: 'J', suit: 'copas' };
     const trap: SpecialCard = { id: 'a-bot', kind: 'A', suit: 'paus' };
     const before: ViewSpec = { ...THEIRS, self: { ...THEIRS.self, attackBuffs: [J] } };

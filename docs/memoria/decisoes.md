@@ -6,6 +6,23 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-03 (2): o ponto 17 era a Armadilha; o 18 sem o vermelho
+
+Perguntado se uma Armadilha do Bot tinha quebrado um J dele antes do golpe sem cena:
+
+> sim, houve armadilha, foi um engano meu. está ok. ignore o ponto 17. em relação ao ponto 18 a cor vermelha com bordas ficou estranha. no lugar da cor vermelha deixa a cor padrão mesmo, mantendo as animações. a cor dourada mantém para subida mas reduza um pouco a espessura da borda pois está muito grossa.
+
+**Leitura:**
+- **Ponto 17 fechado:** a regra fica como está (a Armadilha na janela de reação desarma o Ataque Absoluto, e não há cena). **[I]** O
+  aviso de que o Ataque Absoluto desarmou não foi pedido; se vier, é parte do ponto 1 (a jogada especial do Bot legível).
+- **[I]** O conserto do Equipar vazio colado ao golpe (`09fc360`) fica: é um defeito de verdade, achado no caminho, e ele mesmo abriu
+  a sessão do conserto online.
+- **Ponto 18:** o total que desce fica na cor padrão (tinta), sem contorno, e mantém a animação (encolhe uma vez). O que sobe segue em
+  ouro, com o contorno escuro mais fino. **[I]** A sombra de carimbo embaixo também afina, porque soma com o contorno na espessura que
+  ele viu.
+
+---
+
 ## 2026-11-03 (1): os pontos 16, 17 e 18 do playtest
 
 Depois da entrega da fatia 5 na `main` (`6759914`), que pedia que ele jogasse:
