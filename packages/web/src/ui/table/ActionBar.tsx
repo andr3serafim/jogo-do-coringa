@@ -386,7 +386,8 @@ function OwnPlays({ view, plays, disabled, onSend, onResurrect }: ActionBarProps
     const cards = pickCards(own, [devastate.kId, devastate.aId, devastate.xId]);
     if (cards) add(`devastate-${devastate.row}`, devastateLabel(devastate.row), leavesText(cards, 'hand'), () => onSend(devastate));
   }
-  if (plays.resurrect.length > 0) {
+  // Com as duas fileiras protegidas pela quadra (ponto 16) não há jogada, mas o botão fica: o cemitério diz por quê.
+  if (plays.resurrect.length > 0 || plays.resurrectBlocked.length === 2) {
     // A arte da Ressurreição (U2): a carta que sobe da lápide; a linha de baixo diz de onde ela vem e o que há para trazer.
     const numerics = view.graveyard.filter((card) => card.kind === 'NUM').length;
     add('resurrect', RESURRECT_LABEL, resurrectDetailText(view.self.resurrectionCount, numerics), onResurrect, <ResurrectIcon />);

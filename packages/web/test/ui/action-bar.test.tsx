@@ -1,7 +1,7 @@
 // A barra de ação e a escolha na mesa (spec §3.4, §7, §1.5): tocar a carta → jogadas → alvo, as prévias, os botões
 // próprios, o cemitério em `<dialog>`, o teclado e o foco. A mesa é a `PlayTable` sobre uma `Session` de verdade com
 // uma `FakeConnection`; toda jogada enviada também é conferida contra o motor (`applyAction`).
-import { applyAction, previewAttack, type PlayerView, type SpecialCard } from '@coringa/engine';
+import { applyAction, attackPower, previewAttack, type NumCard, type PlayerView, type SpecialCard } from '@coringa/engine';
 import type { PlayerAction, StateMessage } from '@coringa/protocol';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -9,6 +9,7 @@ import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { attackPreviewText, cardText, resurrectRowDetail } from '../../src/model/copy.ts';
 import { livesOf, viewWithout } from '../../src/model/preview.ts';
+import { resurrectTotalText } from '../../src/model/resurrection-copy.ts';
 import { Session } from '../../src/model/session.ts';
 import { PC_QUERY } from '../../src/ui/table/History.tsx';
 import { PlayTable } from '../../src/ui/table/PlayTable.tsx';
@@ -553,8 +554,11 @@ describe('Ressuscitar e o cemitério (spec §3.4, §7)', () => {
     await m.user.click(within(dialog).getByRole('button', { name: '7 de copas' }));
     expect(within(dialog).getByText(`Em qual fileira entra ${cardText(m.view.graveyard[0]!)}?`)).toBeInTheDocument();
     const row = within(dialog).getByRole('button', { name: startsWith('Ataque') });
-    // Rótulo no nome (axe, WCAG 2.5.3): o texto visível das duas linhas é, palavra por palavra, o nome ("Ataque no fim da fileira · 1 de 7").
-    const rowName = `Ataque ${resurrectRowDetail(m.view.self.attackRow.length, m.view.config.rowLimit)}`;
+    // Rótulo no nome (axe, WCAG 2.5.3): o texto visível das duas linhas é, palavra por palavra, o nome ("Ataque no fim da fileira · 1 de 7 ·
+    // total 152 → 180": o total da fileira na mesa antes e depois, ponto 16).
+    const { self } = m.view;
+    const after = attackPower({ ...self, attackRow: [...self.attackRow, m.view.graveyard[0] as NumCard] });
+    const rowName = `Ataque ${resurrectRowDetail(self.attackRow.length, m.view.config.rowLimit)} · ${resurrectTotalText(attackPower(self), after)}`;
     expect(row.textContent).toBe(rowName);
     expect(row).toHaveAccessibleName(rowName);
     await m.user.click(row);

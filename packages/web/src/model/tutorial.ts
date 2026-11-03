@@ -7,6 +7,7 @@ import { legalActions, type Action, type GameEvent, type PlayerView } from '@cor
 export type HintId =
   | 'equip'
   | 'quad'
+  | 'resurrectionWindow'
   | 'order'
   | 'firstAttack'
   | 'buffs'
@@ -62,6 +63,12 @@ const HINTS: ReadonlyArray<Hint & { holds: (situation: Situation) => boolean }> 
     id: 'quad',
     zone: 'rows',
     holds: ({ view, events }) => events.some((event) => event.type === 'QuadFormed') || view.self.quads.length > 0,
+  },
+  // A janela da Ressurreição (ponto 16): a sua, com a Ressurreição para usar antes do ataque.
+  {
+    id: 'resurrectionWindow',
+    zone: 'actionBar',
+    holds: ({ view, legal }) => view.phase.kind === 'RESURRECTION' && canDo(legal, 'RESURRECT'),
   },
   { id: 'order', zone: 'order', holds: ({ view, legal }) => view.phase.kind === 'ORDER_CHOICE' && canDo(legal, 'CHOOSE_ORDER') },
   { id: 'firstAttack', zone: 'actionBar', holds: (situation) => inMyTurn(situation) && canDo(situation.legal, 'DECLARE_ATTACK') },

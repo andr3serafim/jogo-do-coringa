@@ -26,6 +26,8 @@ const HINT_TEXT: Record<HintId, string> = {
   equip:
     'Suas numéricas vão para o campo na ordem que quiser: toque numa carta e depois no destino, Ataque ou Defesa (ou arraste a carta até a fileira). Cada fileira é uma fila: quando você ataca, a primeira carta do seu Ataque vai para o cemitério; quando defende, a primeira da sua Defesa.',
   quad: 'Quadra: quatro ou mais numéricas do mesmo valor na mesma fileira, seguidas ou não, somam esse valor à fileira e dão uma Ressurreição, que traz uma numérica do cemitério de volta.',
+  resurrectionWindow:
+    'Você formou uma quadra: a Ressurreição já vale agora, antes do ataque. Com as fileiras cheias, a carta entra no lugar da última, menos a que é da quadra.',
   order:
     'Quem tem a iniciativa escolhe atacar primeiro ou em segundo. Depois de cada rodada de Ataque, ela fica com quem causou mais dano; no empate, não muda. Durante o Ataque, a faixa do centro mostra o dano de cada um na rodada.',
   firstAttack:

@@ -29,6 +29,7 @@ import {
 const ALL: readonly HintId[] = [
   'equip',
   'quad',
+  'resurrectionWindow',
   'order',
   'firstAttack',
   'buffs',
@@ -98,6 +99,16 @@ describe('tutorialHint: cada dica na sua situação', () => {
     expect(hintFor(next, { events })).toEqual({ id: 'quad', zone: 'rows' });
     // O mesmo estado sem os eventos (a quadra do oponente não está no seu campo): só a escolha da ordem.
     expect(hintFor(next)?.id).toBe('order');
+  });
+
+  it('resurrectionWindow (ponto 16): a janela da Ressurreição é sua e você pode ressuscitar; a do oponente não tem dica', () => {
+    const window = (player: PlayerId): GameState => {
+      const s = setup({ phase: { kind: 'RESURRECTION', player, next: null }, roundKind: 'EQUIP', p1: { attack: [7, 7, 7, 7] }, graveyard: [5] });
+      s.players[0]!.resurrections = [{ row: 'ATK', value: 7, formedAtRound: s.round }];
+      return s;
+    };
+    expect(hintFor(window(P1), { seen: ['quad'] })).toEqual({ id: 'resurrectionWindow', zone: 'actionBar' });
+    expect(hintFor(window(P2), { seen: ['quad'] })).toBeNull();
   });
 
   it('order: a escolha da ordem é sua', () => {

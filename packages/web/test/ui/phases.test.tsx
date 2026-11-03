@@ -1091,7 +1091,7 @@ describe('correções da revisão da Tarefa 20', () => {
     await m.user.click(inBar().getByRole('button', { name: startsWith('Ressuscitar') }));
     const dialog = screen.getByRole('dialog', { name: 'Ressuscitar' });
     await m.user.click(within(dialog).getByRole('button', { name: '7 de copas' }));
-    expect(within(dialog).getByText('no fim da fileira · 5 de 7').className).toContain('tabular-nums');
+    expect(within(dialog).getByText('no fim da fileira · 5 de 7 · total 152 → 180').className).toContain('tabular-nums');
   });
 
   it('o foco que a mesa move ao primeiro alvo não aponta nem apaga a marca; o do jogador, sim', async () => {
