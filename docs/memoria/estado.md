@@ -62,9 +62,8 @@
   - o plano, **aprovado** com 15 s na janela (`decisoes.md` 2026-11-03 (5)): `docs/superpowers/plans/2026-11-03-ressurreicao-quadra.md` (9 tarefas).
 - **Achado que decidiu a chave na config:** as quatro fixtures do E2E têm quadra na revelação (`absolutos` no passo 24, `especiais` no
   49, `exodia-devastacao` no 25, `reflect` no 142). Sem `resurrectOnQuad` (ausente = a regra de antes), os replays delas divergiriam.
-- **Execução:** Tarefa 1 (a troca, `41a3cc2`) e Tarefa 2 (a janela, `2124c9a`) commitadas; a Tarefa 3 (os bots, `RULES_VERSION` 5, as
-  partidas de referência regravadas: 4 das 11 mudaram) está no `pnpm check` antes do commit.
-- **Próximo passo exato:** commitar a Tarefa 3; rodar o `pnpm e2e` uma vez (passo 6 da Tarefa 3); seguir para a Tarefa 4 (servidor).
+- **Execução:** Tarefas 1 a 4 commitadas (motor, bots com `RULES_VERSION` 5, servidor com `STATE_SCHEMA` 5 e 15 s na janela).
+- **Próximo passo exato:** o `pnpm e2e` roda uma vez (passo 6 da Tarefa 3, adiado para depois da 4); a Tarefa 5 (o modelo da web).
 - **Convivência:** dos arquivos do bloco A, o plano só toca em `packages/web/src/model/copy.ts` (o `CLOCK_START_TEXT` e a linha da
   Ressurreição no resumo das regras); os textos novos vão para `model/resurrection-copy.ts`. Antes de mesclar na `main`, mesclar a
   `main` aqui. O `STATE_SCHEMA` (5) e o `RULES_VERSION` (5) sobem nesta branch, uma vez cada.
