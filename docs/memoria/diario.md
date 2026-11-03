@@ -35,7 +35,11 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     véu de 35% é troca de luminância e passa pela `FlashLock` (A3); a consequência usa o total do motor, não o multiplicador (A5); o
     Selvagem como alvo não diz de que zona saiu, e a placa fica só com o título; o bot do treino não pode esperar o momento das jogadas
     do próprio jogador (o K dele abriria a janela do Bot 1,6 s depois);
-  - **escolhas para ele:** A1 a A8 no começo do plano, com a recomendação em cada uma.
+  - **escolhas para ele:** A1 a A9 no começo do plano, com a recomendação em cada uma;
+  - **achado da revisão do plano:** online, quem joga não vê o próprio momento, então um J, um Q e um K em um segundo chegariam ao
+    oponente como três `state`s, e cada um cortaria o momento anterior (o `useBeatPlayer` troca a linha do tempo). Virou a A9, com a
+    recomendação de quem joga esperar o momento do outro (como o Bot no treino). Também da revisão: a mão depois do passe fica apagada
+    (a lista legal ainda traz a Armadilha); o encaixe com o bloco E (a fase e os eventos novos) fica com quem mesclar por último.
 - **Próximo:** a CI e a `main`; o autor aprova o plano do bloco A.
 
 ---

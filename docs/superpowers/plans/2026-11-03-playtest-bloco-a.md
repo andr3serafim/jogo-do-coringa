@@ -37,9 +37,9 @@ Cada uma tem a recomendação de quem escreveu. Nada do código muda antes da ap
 - **A1. A folga do servidor é sempre a cheia.** Online, o prazo de quem decide depois de uma especial do oponente cresce 1,6 s, mesmo na
   segunda do turno (que toca em 1,1 s). Contar o turno no servidor pediria estado novo na sala (e subir o `STATE_SCHEMA`) só para
   economizar meio segundo do relógio parado. **Recomendo** a folga cheia. O treino conta certo (a sala local sabe o turno).
-- **A2. As suas especiais não alongam o seu prazo.** A folga vale só para quem vê o momento: o J que você joga no seu turno não para o seu
-  relógio; o K que você joga para o relógio da reação do oponente, que vê o momento. **Recomendo** assim: é a leitura literal da
-  pergunta 7 que ele aprovou.
+- **A2. As suas especiais não alongam o seu prazo** (vale com a A9 (b) ou (c); com a A9 (a), online a folga vale para os dois). A folga
+  vale só para quem vê o momento: o J que você joga no seu turno não para o seu relógio; o K que você joga para o relógio da reação do
+  oponente, que vê o momento. É a leitura literal da pergunta 7 que ele aprovou.
 - **A3. O véu passa pela trava de flash.** Um véu escuro de 35% sobre a mesa inteira é uma troca de luminância (spec da web §10.4). Ele
   sobe e desce pela mesma `FlashLock` da cortina das cenas; recusado, o momento toca sem véu. Com movimento reduzido, nunca há véu.
 - **A4. A placa não vai para o leitor de tela.** A §3.1 da spec dizia "a placa vai para a região viva da mesa, como as faixas", mas as
@@ -53,6 +53,18 @@ Cada uma tem a recomendação de quem escreveu. Nada do código muda antes da ap
   as outras três.
 - **A7. A primeira cura da partida é de qualquer lado.** A faixa que explica a regra toca na primeira cura passiva da partida, sua ou do
   oponente, uma vez. Recarregar a página esquece (como a desolação da fileira), e a faixa pode tocar de novo uma vez.
+- **A9. Online, a sua jogada seguinte não pode cortar o momento que o oponente vê.** Quem joga não vê o momento das próprias especiais,
+  então nada o segura: um J, um Q e um K em um segundo chegam ao outro como três `state`s, e cada um troca a linha do tempo dele
+  (`useBeatPlayer`), cortando o momento no meio. No treino isso não acontece (o Bot espera, Task 3). As saídas:
+  - **(a) quem joga espera o momento do outro** (recomendo): online, a batida da sua especial dura o mesmo que o momento que o oponente vê
+    (1,6 s, e 1,1 s a partir da segunda do turno), sem a carta grande: a sua carta voa e pousa como hoje, e os controles ficam travados até
+    o fim. O servidor dá a folga aos dois (a A2 muda: o seu relógio também para). É o que o treino já faz com o Bot, e os dois lados ficam
+    no mesmo ritmo; o custo é esperar ~1,1 a 1,6 s depois de cada especial sua, online;
+  - **(b) a mesa enfileira:** o `state` que chega no meio de um momento espera o fim dele. Ninguém espera, mas a mesa já desenha a carta
+    seguinte antes da vez dela, e o `useBeatPlayer` ganha uma fila;
+  - **(c) aceitar o corte:** o momento cortado some, e o histórico guarda a linha.
+
+  As linhas marcadas **(A9a)** nas Tasks 1, 2 e 3 são da saída (a); com outra escolha, o plano muda nelas antes da execução.
 - **A8. A execução:** aqui mesmo, tarefa por tarefa, na branch `feat/playtest-bloco-a` (saída da `main` com a spec), teste primeiro, e
   no fim um revisor novo, num subagente, lendo a branch inteira (as fatias 4 a 5 tiveram só a revisão de quem escreveu). **Recomendo**
   assim: as tarefas dependem umas das interfaces das outras (a batida nova passa por todas), e um erro no ritmo custa o playtest.
@@ -83,13 +95,16 @@ Cada uma tem a recomendação de quem escreveu. Nada do código muda antes da ap
 
 ## Review Focus
 
+0. **Online, três especiais seguidas de quem joga** (J, Q e K em um segundo): o oponente vê os três momentos inteiros, o segundo e o
+   terceiro em 1,1 s, e o relógio de quem jogou não corre durante a espera (A9a) → testes das Tasks 1 e 3.
 1. **Duas especiais do Bot no mesmo turno, com a sua reação no meio** (o K dele abre a sua janela, você passa, ele joga um J): a segunda
    toca em 1,1 s; o `TurnStarted` seguinte zera a conta; o servidor dá a folga cheia nas duas → testes das Tasks 1 e 3.
 2. **A Armadilha dele no seu J na janela do seu ataque:** o momento vem antes do golpe, o J estoura no impacto, e o golpe vem depois, já
    sem o J → testes da Task 1 (a linha do tempo com `TrapUsed` e depois `DamageDealt`) e da Task 2 (o J sai no impacto, com estouro).
 3. **O pulo e o `state` novo no meio do momento:** nenhuma cópia órfã, a carta de verdade aparece, o véu desce pela trava, o som do
    impacto não toca depois → testes das Tasks 2 e 4.
-4. **A mão no Equipar e na vez do Bot:** todas apagadas, sem piscar a cada batida, e o toque segue mostrando o motivo → teste da Task 5.
+4. **A mão no Equipar, na vez do Bot e depois do seu passe:** todas apagadas (depois do passe a lista legal ainda traz a Armadilha, mas o
+   servidor segura o passe e a mão não escolhe), sem piscar a cada batida, e o toque segue mostrando o motivo → teste da Task 5.
 5. **A primeira cura com a vida cheia** (`amount` 0: a batida é quieta, sem faixa, e a próxima cura de verdade é a primeira) **e a cura
    capada** (`amount` menor que o bruto: a faixa diz a conta e "até a vida cheia") → testes da Task 7.
 
@@ -117,6 +132,10 @@ Cada uma tem a recomendação de quem escreveu. Nada do código muda antes da ap
     `flyAtMs = startMs + flipMs + plateMs`, `impactAtMs = startMs + durationMs`. `null` fora do momento.
   - `TimelineOptions` ganha `viewer?: PlayerId | null` (sem ele, nenhum momento: os testes e o replay antigos seguem iguais) e
     `momentsBefore?: number` (padrão 0).
+  - **(A9a)** `TimelineOptions.holdOwnMoments?: boolean` e `ownMomentsBefore?: number`: com ele (só online), a sua especial segue `move`,
+    mas com a duração do momento que o oponente vê (a conta de `momentsMs` do lado dele, a partir de `ownMomentsBefore`) e fora do teto.
+  - **O encaixe com o bloco E:** o `never` do `classify` pega os eventos novos da regra do 16 (a janela da Ressurreição). Quem mesclar por
+    último classifica os dele; nenhum deles é especial do oponente.
 
 - [ ] **Step 1: Escrever os testes que falham**
   - `momentsMs`: um `BuffPlayed` de `p2` visto por `p1` → `{ ms: 1600, count: 1 }`; com `before: 1` → `{ ms: 1100, count: 2 }`; o de
@@ -131,6 +150,8 @@ Cada uma tem a recomendação de quem escreveu. Nada do código muda antes da ap
     (o momento não conta no teto); com `reducedMotion` o momento tem as mesmas durações (é informação).
   - `[TrapUsed p2 (alvo o J de p1), DamageDealt p1]` → `moment` e depois `damage`, nessa ordem, e o `impactAtMs` do momento é o
     `startMs` do dano.
+  - **(A9a)** com `holdOwnMoments` e `viewer: 'p1'`: o `BuffPlayed` de `p1` é `move` de 1600 ms, sem `moment`; o segundo do turno, 1100;
+    com `decisionPending`, não encolhe; sem `holdOwnMoments`, 300 ms como hoje.
 - [ ] **Step 2: Rodar e ver falhar**
 
 Run: `pnpm --filter @coringa/protocol exec vitest run test/scenes.test.ts` e `pnpm --filter @coringa/web exec vitest run test/model/timeline.test.ts`
@@ -188,7 +209,8 @@ Expected: FAIL.
 
 - [ ] **Step 3: Implementar.** No `Card.tsx`, a carta com `snap` entra como a que cai (`enter` no `at`), com 50 ms de esmaecimento e
   sem a queda de `dropPx`. No `useBeatPlayer`, a cortina guarda o tipo da batida que a subiu (`veil`). No `Stage`, passe `veil` ao
-  `BeatOverlay`.
+  `BeatOverlay`. **(A9a)** O `Stage` ganha a prop `online` (a `PlayTable` a passa: a partida não é treino nem tutorial; o replay não a
+  passa) e a leva ao `useBeatPlayer` como `holdOwnMoments`; a `Machine` guarda também a conta das suas (`ownMoments`).
 - [ ] **Step 4: Rodar** o comando do Step 2 e depois `pnpm --filter @coringa/web test`.
 Expected: PASS.
 - [ ] **Step 5: Commit**: `feat(web): o momento na mesa (o pouso, a saída e o véu pela trava)`, com o diário e o `estado.md`.
@@ -205,14 +227,17 @@ Expected: PASS.
 - Produces:
   - `schedulePhase` usa `stepAllowanceMs(events, decider)` no lugar de `sceneAllowanceMs(events)`. `decider` é quem decide na fase de
     depois do passo: `ATTACK_MAIN.player`, `REACTION.responder`, `ORDER_CHOICE.player`; no `EQUIP` e no `GAME_OVER`, `null` (todos
-    contam). Sem `before`: a folga é sempre a cheia (A1).
+    contam). Sem `before`: a folga é sempre a cheia (A1). **(A9a)** O `decider` passa a ser sempre `null`: online, quem jogou também
+    espera o momento, e o relógio dele para junto.
+  - **O encaixe com o bloco E:** a fase nova da janela da Ressurreição, de um jogador só, dá o `decider` dela. Quem mesclar por último
+    acrescenta o caso e confere de novo os testes do prazo.
   - `LocalRoom` guarda `#momentsInTurn` (zera na revanche e no `TurnStarted`, pela própria `momentsMs`) e soma ao `#sceneUntil`
     `momentsMs(events, HUMAN_SEAT, #momentsInTurn).ms` além das cenas.
 
 - [ ] **Step 1: Escrever os testes que falham**
   - Servidor: `p2` joga K no turno dele e abre a janela de `p1` → o prazo da reação é `TIMERS.reactionMs + 1600` e o relógio de `p1`
-    fica parado até `now + 1600`; `p1` joga um J no próprio turno → o prazo não muda (a época é a mesma e `p1` é quem decide); um
-    `Resurrected` no mesmo passo de uma especial do oponente soma as duas, até 8000.
+    fica parado até `now + 1600`; **(A9a)** `p1` joga um J no próprio turno → o prazo dele cresce 1600 e o relógio dele para (sem a
+    A9a: não muda); um `Resurrected` no mesmo passo de uma especial soma as duas, até 8000.
   - Treino: depois do `BuffPlayed` do Bot, o próximo timer dele é `1600 + 600`; depois do segundo, no mesmo turno, `1100 + 600`; o K que o
     jogador joga abre a janela do Bot, e o timer do Bot na reação é 0 (o jogador não vê momento das próprias jogadas); a revanche zera a
     conta.
@@ -304,7 +329,8 @@ Expected: PASS, e o JavaScript inicial ≤ 200 KB gzip.
   - `liveHandIds(view: PlayerView, legal: PlayerAction[], plays: TablePlays): ReadonlySet<string>`: as cartas da mão com jogada agora. São
     as chaves de `plays.byCard`, mais as cartas da mão cujo tipo aparece numa combinação legal (`REFLECT`, `CANCEL_REFLECT`, `DEVASTATE`,
     pela regra do `roleKey`: qualquer carta do mesmo tipo vale) e as cartas de um `DISCARD` legal.
-  - `TableUi.liveCards: ReadonlySet<string> | null`: `null` não apaga nada (o replay, o fim da partida, fora da `PlayTable`).
+  - `TableUi.liveCards: ReadonlySet<string> | null`: `null` não apaga nada (o replay, o fim da partida, fora da `PlayTable`). Depois do
+    seu passe na janela de reação (`passed`, na `PlayTable`), o conjunto é vazio: a lista legal ainda traz a Armadilha, mas a mão não escolhe.
   - `Card` ganha `idle?: boolean`: o nome acessível ganha ", sem jogada agora".
   - `LockIcon` em `icons.tsx` (um cadeado de traço de tinta, 24 × 24).
 
@@ -312,7 +338,8 @@ Expected: PASS, e o JavaScript inicial ≤ 200 KB gzip.
   - `liveHandIds`: na sua vez com `[K, J, Q, A, W]` e o limite de J cheio, o J fica de fora; com o Reflect legal (K + J + Q), o J volta
     (o Sacrifício ou o Reflect o usam); na janela de reação ao ataque dele com `[J, Q, A]`, só o A; no Equipar e na vez do Bot, nenhuma.
   - Na mesa: a carta sem jogada tem `data-sem-jogada`, não tem `data-respira`, mostra o cadeado e o nome acessível termina em ", sem
-    jogada agora"; a que joga tem `data-joga`; o toque na apagada mostra o motivo de hoje (`noPlayReason`); durante as batidas
+    jogada agora"; a que joga tem `data-joga`; depois do seu passe, com a Armadilha ainda na lista legal, o A fica apagado; o toque na
+    apagada mostra o motivo de hoje (`noPlayReason`); durante as batidas
     (`locked`), o conjunto não muda de uma batida para a outra (um `state` com batidas e a mesma lista legal: as mesmas marcas antes,
     durante e depois); com `liveCards` `null`, nenhuma marca.
 - [ ] **Step 2: Rodar e ver falhar**
