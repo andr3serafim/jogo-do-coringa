@@ -108,7 +108,7 @@ export function GraveyardDialog({ mode, graveyard, options, rowCounts, rowLimit,
             <div data-step className="flex flex-col gap-3">
               <p>{resurrectRowText(pickedCard)}</p>
               <ul role="list" aria-label="Fileiras" className="flex list-none flex-wrap gap-2 p-1.5">
-                {item.rows.map((row) => (
+                {item.rows.map(({ row }) => (
                   <li key={row}>
                     <RowButton
                       row={row}

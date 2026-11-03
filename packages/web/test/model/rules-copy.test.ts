@@ -20,6 +20,8 @@ describe('resumo das regras: os números do texto seguem a config padrão do mot
     ['o Ataque Absoluto pede buffLimit J', `Ataque Absoluto (${buffLimit} J)`],
     ['os K da Guarda da Exódia (exodiaGuard)', `Exódia (${exodiaGuard} K na Guarda)`],
     ['a garantia da Ressurreição (resurrectMinRounds)', `garantia de ${resurrectMinRounds} rodadas depois de formada`],
+    ['a Ressurreição no instante da quadra (resurrectOnQuad)', 'quando a quadra se forma no Equipar, logo depois da revelação, antes do ataque'],
+    ['a troca da última carta (resurrectOnQuad)', 'Com as duas fileiras cheias, ela entra no lugar da última, que vai ao cemitério; a última que é da quadra não sai.'],
     ['o limite de especiais na mão (specialLimit, BURN)', `A mão guarda no máximo ${specialLimit!.max} especiais: a que passaria disso vai direto para o cemitério.`],
     ['os K que ligam a cura pela Defesa (defenseHealGuard)', `Com ${defenseHealGuard} K ou mais na Guarda`],
   ])('%s', (_label, phrase) => {

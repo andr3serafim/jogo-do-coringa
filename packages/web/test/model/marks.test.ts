@@ -199,3 +199,20 @@ describe('ownSpentIds: o que saiu do seu campo por jogada ou efeito seu', () => 
   });
 });
 
+
+describe('ownSpentIds: a carta que a sua Ressurreição trocou (ponto 16)', () => {
+  const num = (id: string): NumCard => ({ id, kind: 'NUM', value: 5, suit: 'copas' });
+  const removed = (player: 'p1' | 'p2', row: 'ATK' | 'DEF', id: string): GameEvent => ({ type: 'CardsRemovedFromRow', player, row, cards: [num(id)] });
+  const resurrected = (player: 'p1' | 'p2', row: 'ATK' | 'DEF'): GameEvent => ({ type: 'Resurrected', player, card: num('volta'), row });
+  const healed = (player: 'p1' | 'p2', id: string): GameEvent => ({ type: 'Healed', player, amount: 10, source: 'DEFENSE', card: num(id) });
+
+  it('a última que sai da sua Defesa na sua Ressurreição é sua, mesmo com a cura entre os dois', () => {
+    expect(ownSpentIds([removed('p1', 'DEF', 'a'), resurrected('p1', 'DEF')], 'p1')).toEqual(['a']);
+    expect(ownSpentIds([removed('p1', 'DEF', 'a'), healed('p1', 'a'), resurrected('p1', 'DEF')], 'p1')).toEqual(['a']);
+  });
+
+  it('a da Defesa que o golpe do oponente tirou não é sua, nem a troca da Ressurreição dele', () => {
+    expect(ownSpentIds([removed('p1', 'DEF', 'a')], 'p1')).toEqual([]);
+    expect(ownSpentIds([removed('p2', 'DEF', 'b'), resurrected('p2', 'DEF')], 'p1')).toEqual([]);
+  });
+});
