@@ -125,6 +125,8 @@ export class LocalRoom implements RoomConnection {
   #steps: ReplayStep[] = [];
   /** O timer do bot: o do "pensar" antes da decisão, ou o da próxima fatia da busca do Difícil. Um por vez. */
   #botTimer: unknown = null;
+  /** O timer do Equipar vazio do jogador (`#scheduleAutoEquip`). */
+  #autoTimer: unknown = null;
   /** Até quando (no `now` injetado) vão as cenas raras publicadas: o bot assiste a elas antes de pensar (decisoes.md 2026-11-01 (3)). */
   #sceneUntil = 0;
   /** A busca do Difícil em curso (a decisão ainda não saiu). `null` fora dela; quando não é `null`, há uma fatia agendada em `#botTimer`. */
@@ -198,6 +200,7 @@ export class LocalRoom implements RoomConnection {
       return;
     }
     this.#cancelBot();
+    this.#cancelAutoEquip();
     const { game, botSeed } = this.#newGame();
     this.#game = game;
     this.#botSeed = botSeed;
@@ -210,6 +213,7 @@ export class LocalRoom implements RoomConnection {
     if (this.#closed) return;
     this.#closed = true;
     this.#cancelBot();
+    this.#cancelAutoEquip();
     if (this.#connected) this.#emit({ type: 'closed', code: 1000, final: true });
   }
 
@@ -281,7 +285,7 @@ export class LocalRoom implements RoomConnection {
     this.#epoch += 1;
     this.#publishRoom('PLAYING');
     this.#publishState([]);
-    this.#autoEquip();
+    this.#scheduleAutoEquip();
     this.#scheduleBot();
   }
 
@@ -305,6 +309,7 @@ export class LocalRoom implements RoomConnection {
     this.#publishState(events);
     if (next.phase.kind === 'GAME_OVER') {
       this.#cancelBot();
+      this.#cancelAutoEquip();
       const result = next.phase.result;
       this.#score[result.winner as 'p1' | 'p2'] += 1;
       this.#outcome = { gameNo: this.#gameNo, result, cause, durationMs: this.#options.now() - this.#startedAt };
@@ -312,7 +317,7 @@ export class LocalRoom implements RoomConnection {
       this.#publishReplay();
       this.#publishRoom('FINISHED');
     } else {
-      this.#autoEquip();
+      this.#scheduleAutoEquip();
       this.#scheduleBot();
     }
     return seq;
@@ -322,10 +327,34 @@ export class LocalRoom implements RoomConnection {
    * Equipar sem numéricas: quem recebeu zero tem `EQUIP { destinations: [] }` aplicado em seu nome, como passo próprio, igual
    * ao servidor (spec 2 §5). A interface não tem botão para um Equipar vazio, e sem relógio ninguém mais o enviaria: o jogo
    * esperaria para sempre. O bot não precisa: ele escolhe a jogada pela lista legal, que traz o `EQUIP` vazio.
+   *
+   * Ele sai num timer próprio, como a jogada do bot: depois da folga das cenas no ar e do tempo de pensar. Aplicado no mesmo instante do
+   * passo que deu as cartas (o golpe que fecha a rodada), os dois `state`s chegavam à mesa no mesmo desenho, e ela só tocava o último:
+   * o golpe, e a cena do Ataque Absoluto com ele, sumiam (decisoes.md 2026-11-03 (1), ponto 17).
    */
-  #autoEquip(): void {
+  #scheduleAutoEquip(): void {
+    if (this.#closed || this.#autoTimer !== null || !this.#owesEmptyEquip()) return;
+    const scene = Math.max(0, this.#sceneUntil - this.#options.now());
+    this.#autoTimer = this.#options.setTimer(() => {
+      this.#autoTimer = null;
+      this.#autoEquip();
+    }, scene + this.#think);
+  }
+
+  #cancelAutoEquip(): void {
+    if (this.#autoTimer === null) return;
+    this.#options.clearTimer(this.#autoTimer);
+    this.#autoTimer = null;
+  }
+
+  /** O jogador está no Equipar sem numéricas e ainda não confirmou. */
+  #owesEmptyEquip(): boolean {
     const player = this.#game.players.find((candidate) => candidate.id === LOCAL_ME);
-    if (this.#game.phase.kind !== 'EQUIP' || !player || player.equipSubmitted || player.pending.length > 0) return;
+    return this.#game.phase.kind === 'EQUIP' && player !== undefined && !player.equipSubmitted && player.pending.length === 0;
+  }
+
+  #autoEquip(): void {
+    if (!this.#owesEmptyEquip()) return;
     const action: Action = { type: 'EQUIP', destinations: [] };
     const result = applyAction(this.#game, LOCAL_ME, action);
     if (!result.ok) throw new Error(`o Equipar vazio foi recusado: ${result.error.code}`);

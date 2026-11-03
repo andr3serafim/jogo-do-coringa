@@ -330,20 +330,65 @@ describe('LocalRoom', () => {
     // Sementes em que o jogador recebe 4 especiais (zero numéricas) no primeiro Equipar (com o baralho do sub-projeto 5, 8 Ás).
     const NO_NUMBERS = ['s618', 's701', 's852', 's867'];
 
-    it.each(NO_NUMBERS)('%s: o EQUIP vazio sai em nome do jogador, como passo próprio, e a partida segue', (seed) => {
+    it.each(NO_NUMBERS)('%s: o EQUIP vazio sai em nome do jogador, como passo próprio, depois do tempo de pensar, e a partida segue', (seed) => {
       const { room, timers, events } = setup(seed);
       room.connect();
       expect(room.state!.view.self.pending).toHaveLength(0);
+      // Ainda não saiu: ele espera num timer próprio, como a jogada do bot (o do bot é o outro).
+      expect(states(events).map((s) => s.seq)).toEqual([1]);
+      expect(states(events)[0]!.events).toEqual([]);
+      expect(timers.pending.size).toBe(2);
+      expect(timers.delays).toEqual([600, 600]);
+      expect(timers.runNext()).toBe(true);
       const all = states(events);
       expect(all.map((s) => s.seq)).toEqual([1, 2]);
-      expect(all[0]!.events).toEqual([]);
       expect(all[1]!.view.self.equipSubmitted).toBe(true);
       expect(all[1]!.view.phase.kind).toBe('EQUIP');
-      // O bot ainda vai confirmar o dele: um timer só, e com a confirmação dele o Equipar se resolve (o passo traz os eventos).
-      expect(timers.pending.size).toBe(1);
+      // Com a confirmação do bot o Equipar se resolve (o passo traz os eventos).
       expect(timers.runNext()).toBe(true);
       expect(room.state!.seq).toBeGreaterThanOrEqual(3);
       expect(states(events).at(2)!.events.length).toBeGreaterThan(0);
+    });
+
+    it('o EQUIP vazio nunca sai no mesmo instante do passo que deu as cartas: a mesa só desenharia o último `state`, e o golpe que fecha a rodada (com a cena do Ataque Absoluto) sumia (decisoes.md 2026-11-03 (1), ponto 17)', async () => {
+      // Sementes em que, com o jogador jogando como o greedy, ele recebe zero numéricas logo depois do último golpe de uma rodada.
+      for (const seed of ['diag-30', 'diag-77', 'diag-236']) {
+        const { room, timers } = setup(seed);
+        room.connect();
+        const rng = createRng(`${seed}/me`);
+        let mine = false;
+        const published: Array<{ at: number; mine: boolean; state: StateMessage }> = [];
+        room.subscribe((e) => {
+          if (e.type === 'state') published.push({ at: timers.now, mine, state: e.state });
+        });
+        for (let i = 0; i < 6000 && room.room?.status !== 'FINISHED'; i++) {
+          const view = room.state!.view;
+          if (myTurn(view) && (view.phase.kind !== 'EQUIP' || view.self.pending.length > 0)) {
+            // O jogador espera a mesa (5 s) antes de jogar, se o bot não jogar antes.
+            const next = Math.min(...[...timers.pending.values()].map((entry) => entry.at));
+            if (next < timers.now + 5_000) {
+              timers.runNext();
+              continue;
+            }
+            timers.now += 5_000;
+            mine = true;
+            await room.act(BOTS.greedy(view, legalActions(view), rng) as PlayerAction);
+            mine = false;
+          } else if (!timers.runNext()) break;
+        }
+        expect(room.room?.status, seed).toBe('FINISHED');
+        // Os Equipar vazios do jogador: os passos dele que a sala aplicou sozinha.
+        const empties = published.flatMap((entry, i) =>
+          !entry.mine && entry.state.events.some((e) => e.type === 'EquipSubmitted' && e.player === LOCAL_ME) ? [i] : [],
+        );
+        expect(empties.length, seed).toBeGreaterThan(0);
+        for (const i of empties) {
+          const before = published[i - 1]!;
+          expect(published[i]!.at - before.at, `${seed}: o EQUIP vazio do state ${i} saiu colado ao anterior`).toBeGreaterThanOrEqual(
+            sceneAllowanceMs(before.state.events) + 600,
+          );
+        }
+      }
     });
 
     it('o jogador que só usa botões nunca fica preso, em nenhuma rodada: a partida termina', async () => {
