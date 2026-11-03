@@ -469,6 +469,40 @@ describe('mesa: a mão viva (sub-projeto 6 §6)', () => {
   });
 });
 
+describe('mesa: a mão que diz o que joga agora (bloco A do playtest, ponto 2)', () => {
+  const handItems = () => [...screen.getByRole('list', { name: 'Sua mão' }).querySelectorAll<HTMLElement>(':scope > li')];
+
+  it('a carta sem jogada apaga, para de respirar, ganha o cadeado e diz "sem jogada agora"; a que joga tem o fio de ouro', () => {
+    const { view } = scenarioAt(DRAFT);
+    const [first, ...rest] = view.self.hand;
+    mount(DRAFT, { props: { liveCards: new Set([first!.id]), onSelectCard: vi.fn() } });
+    const [live, ...idle] = handItems();
+    expect(live).toHaveAttribute('data-joga');
+    expect(live).toHaveAttribute('data-respira');
+    expect(live!.querySelector('[data-arte="cadeado"]')).toBeNull();
+    expect(idle).toHaveLength(rest.length);
+    for (const li of idle) {
+      expect(li).toHaveAttribute('data-sem-jogada');
+      expect(li).not.toHaveAttribute('data-respira');
+      expect(li.querySelector('[data-arte="cadeado"]')).not.toBeNull();
+      expect(li.querySelector('button')!.getAttribute('aria-label')).toMatch(/, sem jogada agora$/);
+    }
+  });
+
+  it('sem `liveCards` (o replay, o fim da partida), nenhuma marca', () => {
+    mount(DRAFT);
+    for (const li of handItems()) {
+      expect(li).not.toHaveAttribute('data-sem-jogada');
+      expect(li).not.toHaveAttribute('data-joga');
+    }
+  });
+
+  it('com movimento reduzido, a carta apagada desce sem transição', () => {
+    mount(DRAFT, { props: { liveCards: new Set() }, reduced: true });
+    for (const li of handItems()) expect(li).toHaveAttribute('data-parado');
+  });
+});
+
 describe('mesa: o tremor do golpe (sub-projeto 6 §5)', () => {
   it('o tremor desloca o placar e os campos, não o palco inteiro: a mão e a barra ficam paradas (e o golpe não pesa)', () => {
     const css = readFileSync(resolve(import.meta.dirname, '../../src/styles.css'), 'utf8');

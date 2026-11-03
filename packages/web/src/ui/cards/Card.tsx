@@ -43,6 +43,8 @@ export interface CardProps {
   grave?: boolean;
   /** Carta pendente do Equipar já posta na fileira como rascunho: translúcida, de borda tracejada (spec §3.5). */
   draft?: boolean;
+  /** Carta da mão sem jogada agora (bloco A dos pontos do playtest, ponto 2): o nome acessível termina em "sem jogada agora". */
+  idle?: boolean;
   /** Texto do `title` (padrão: o papel e o efeito da carta). */
   hint?: string;
   /**
@@ -205,6 +207,7 @@ export function Card({
   quad = false,
   grave = false,
   draft = false,
+  idle = false,
   hint,
   animated = true,
   disabled = false,
@@ -245,6 +248,7 @@ export function Card({
   if (target) name.push('alvo possível');
   if (marked) name.push('novo');
   if (draft) name.push('rascunho');
+  if (idle) name.push('sem jogada agora');
 
   const classes = [
     'relative box-border border-tinta p-0 text-tinta rounded-[3px_5px_4px_6px]',

@@ -9,7 +9,8 @@
 - **Branch:** `feat/playtest-bloco-a`, no checkout principal, saída da `feat/playtest-spec` em `0bd8d72` (CI verde). A `main` está em `d35a241`. **O plano do bloco A foi aprovado como está** (`decisoes.md` 2026-11-03 (5)), e a execução está em curso (`diario.md` 2026-11-03 (6)).
 - **Feito no bloco A:** Task 1 (o momento na linha do tempo e no protocolo), Task 2 (o momento na mesa: o pouso, a saída, o véu e o online que segura) e Task 3 (o prazo do servidor e o bot do treino esperam o momento).
 - **Feito também:** Task 4 (a carta grande que vira, a placa, o voo e o som do momento: `ui/anim/Moment.tsx`).
-- **Próximo passo exato do bloco A:** a Task 5 do plano (`docs/superpowers/plans/2026-11-03-playtest-bloco-a.md`): a mão que apaga as cartas sem jogada agora (`liveHandIds` em `plays.ts`, `liveCards` no contexto da mesa, o cadeado, `data-sem-jogada` e `data-joga`).
+- **Feito também:** Task 5 (a mão que apaga as cartas sem jogada agora).
+- **Próximo passo exato do bloco A:** a Task 6 do plano (`docs/superpowers/plans/2026-11-03-playtest-bloco-a.md`): as placas de estado (`StatePlate.tsx`, `plateLine` em `copy.ts`, os gestos `gesto-cura`, `gesto-alma` e `gesto-espelho`, e a lista das animações sem fim no `phases.test.tsx` passando a 5).
 - **O online muda com este bloco:** o prazo do servidor ganha a folga do momento. Só vale online depois do deploy do autor.
 - **Feito por último** (`diario.md` 2026-11-03 (5)): as respostas do autor às 8 perguntas, em `decisoes.md` 2026-11-03 (4):
   - **a fatia 5 está aprovada:** o sub-projeto 6 fechou;

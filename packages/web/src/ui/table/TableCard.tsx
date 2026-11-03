@@ -7,9 +7,11 @@ type TableCardProps = Omit<CardProps, 'marked' | 'target' | 'onSelect' | 'tabInd
   card: EngineCard;
   /** Carta da mão: o toque escolhe a carta (e não o alvo). */
   inHand?: boolean;
+  /** Carta da mão sem jogada agora (bloco A dos pontos do playtest, ponto 2): o nome acessível diz. */
+  idle?: boolean;
 };
 
-export function TableCard({ card, inHand = false, ...rest }: TableCardProps) {
+export function TableCard({ card, inHand = false, idle = false, ...rest }: TableCardProps) {
   const ui = useTableUi();
   const marked = ui.marked.has(card.id);
   const target = ui.targetIds.has(card.id);
@@ -29,6 +31,7 @@ export function TableCard({ card, inHand = false, ...rest }: TableCardProps) {
       marked={marked}
       target={target}
       draft={draft}
+      idle={idle}
       onSelect={onSelect}
       disabled={ui.locked}
       // O alvo na mesa é pequeno e fica antes da mão na ordem do DOM: o teclado usa a lista de alvos da barra

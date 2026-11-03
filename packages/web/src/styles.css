@@ -639,6 +639,33 @@
   animation-play-state: paused;
 }
 
+/*
+ * A mão que diz o que joga agora (bloco A dos pontos do playtest, ponto 2): a carta sem jogada desce 8 px e perde a cor (um filtro
+ * parado, nunca animado); a que joga ganha o fio de ouro embaixo. Com movimento reduzido, a descida é direta.
+ */
+li[data-sem-jogada] {
+  translate: 0 8px;
+  filter: saturate(0.35) brightness(0.82);
+  transition: translate 200ms ease-out;
+}
+
+li[data-sem-jogada][data-parado] {
+  transition: none;
+}
+
+li[data-joga]::after {
+  content: '';
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  bottom: -4px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--color-ouro);
+  box-shadow: 0 1px 0 var(--color-tinta);
+  pointer-events: none;
+}
+
 @keyframes brilho-quadra {
   0%,
   62% {

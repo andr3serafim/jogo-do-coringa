@@ -11,6 +11,11 @@
 // mesmo que o clique, que o gesto então engole, e a carta não é escolhida duas vezes. A carta de origem esmaece enquanto está no ar (na
 // `<li>`: o Motion põe `opacity` inline na carta, e uma regra de CSS perderia para ele).
 //
+// A mão que diz o que joga agora (bloco A dos pontos do playtest, ponto 2, variante A): a carta sem jogada agora (`liveCards`, da lista legal)
+// fica apagada (o filtro parado da `<li>`), desce 8 px, para de respirar e ganha o cadeado; a que joga fica em pé, respirando, com o fio de
+// ouro embaixo. Ela segue a decisão, não o `locked` das batidas: não apaga e acende a cada batida. A apagada continua botão: o toque mostra
+// o motivo, como antes.
+//
 // A mão viva (sub-projeto 6 §6): cada carta respira (`data-respira`, a animação mora no CSS), cada uma num tempo. Sob o mouse ela
 // inclina em 3D (até 13°), com a sombra acompanhando; no toque, a carta tocada sobe ~8 px e inclina para o lado do dedo enquanto ele
 // está nela. A inclinação mora num invólucro (`data-inclina`), fora da carta, cujo `transform` é do Motion (o deslize de layout), e
@@ -21,6 +26,7 @@ import type { DropKey } from '../../model/drag.ts';
 import { useAnim } from '../anim/context.ts';
 import { useTableUi } from './context.ts';
 import { DragGhost } from './DragGhost.tsx';
+import { LockIcon } from './icons.tsx';
 import { HAND_ROLE } from './labels.ts';
 import { TableCard } from './TableCard.tsx';
 import { useCardDrag } from './useCardDrag.ts';
@@ -92,9 +98,11 @@ interface HandCardProps {
 }
 
 function HandCard({ card, index, count, selected }: HandCardProps) {
-  const { onSelectCard, handDrag, locked } = useTableUi();
+  const { onSelectCard, handDrag, locked, liveCards = null } = useTableUi();
   const { reduced, busy } = useAnim();
   const tilt = useRef<HTMLSpanElement>(null);
+  const idle = liveCards !== null && !liveCards.has(card.id);
+  const live = liveCards !== null && !idle;
   const zones = () => handDrag?.zones(card.id) ?? NO_ZONES;
   // O mesmo `locked` que apaga a carta e o toque; sem zona (nenhuma jogada com ela agora) não há o que arrastar.
   const enabled = handDrag !== undefined && onSelectCard !== undefined && !locked && zones().size > 0;
@@ -109,7 +117,7 @@ function HandCard({ card, index, count, selected }: HandCardProps) {
     style.marginLeft = `clamp(calc(var(--hand-w) * -0.6), calc((100% - ${count} * var(--hand-w)) / ${count - 1}), 10px)`;
   }
   if (dragging) style.opacity = DRAGGED_OPACITY;
-  if (!reduced) (style as Record<string, string>)['--respira-i'] = String(index);
+  if (!reduced && !idle) (style as Record<string, string>)['--respira-i'] = String(index);
 
   const lean = (transform: string, shadow: string) => {
     if (!tilt.current) return;
@@ -149,8 +157,11 @@ function HandCard({ card, index, count, selected }: HandCardProps) {
     <li
       className="relative flex-none"
       style={style}
-      data-respira={reduced ? undefined : ''}
-      data-respira-pausa={!reduced && busy ? '' : undefined}
+      data-respira={reduced || idle ? undefined : ''}
+      data-respira-pausa={!reduced && !idle && busy ? '' : undefined}
+      data-sem-jogada={idle ? '' : undefined}
+      data-joga={live ? '' : undefined}
+      data-parado={reduced ? '' : undefined}
     >
       <span
         ref={tilt}
@@ -162,8 +173,9 @@ function HandCard({ card, index, count, selected }: HandCardProps) {
         onPointerUp={onPointerEnd}
         onPointerCancel={onPointerEnd}
       >
-        <TableCard card={card} size="hand" inHand selected={selected} roleText={HAND_ROLE[card.kind]} dragRef={bind} grabbable={enabled} />
+        <TableCard card={card} size="hand" inHand selected={selected} roleText={HAND_ROLE[card.kind]} dragRef={bind} grabbable={enabled} idle={idle} />
       </span>
+      {idle ? <LockIcon className="pointer-events-none absolute right-1 top-1 z-10 size-4 pc:size-5" /> : null}
       <DragGhost ghost={ghost} />
     </li>
   );

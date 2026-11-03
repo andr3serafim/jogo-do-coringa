@@ -50,6 +50,8 @@ export interface TableProps {
   remainingMs: (deadline: Deadline) => number;
   /** Os controles estão travados (batida, jogada em voo, conexão caída): as cartas que são botão ficam apagadas. */
   locked?: boolean;
+  /** As cartas da mão com jogada agora (`TableUi.liveCards`). */
+  liveCards?: ReadonlySet<string> | null;
   /** A carta da mão que está escolhida. */
   selectedCardId?: string | null;
   /** Ids das cartas que são alvo possível da jogada em andamento. */
@@ -100,6 +102,7 @@ function TableView({
   state,
   remainingMs,
   locked = false,
+  liveCards = null,
   selectedCardId = null,
   targetIds = NO_TARGETS,
   onSelectCard,
@@ -173,6 +176,7 @@ function TableView({
     zones: marks.zones,
     targetIds,
     locked,
+    liveCards,
     selectedCardId,
     draftIds,
     onSelectCard,

@@ -54,6 +54,14 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   - **Ruling:** o atributo da placa é `data-placa-momento`: `data-placa` já é a placa do placar (o seletor do teste pegou a errada);
   - JavaScript inicial: 170,6 KB de 200 KB (gzip);
   - **não conferido de verdade:** a posição, a virada em 3D e o voo (o jsdom não tem layout nem `animate`): só nas fotos da Task 8.
+- **Task 5 (a mão que diz o que joga agora):**
+  - `liveHandIds(view, legal, plays)` em `plays.ts`: as de `byCard` e as cartas da mão cujo tipo entra numa combinação legal (Reflect,
+    Devastação, a escolha do que queimar), pela regra do `roleKey`;
+  - a `PlayTable` passa `liveCards` (vazio depois do passe, `null` no fim da partida) pela `Table` ao contexto; a `<li>` da carta
+    apagada tem `data-sem-jogada` (desce 8 px, filtro parado, sem respirar, o `LockIcon`), a que joga `data-joga` (o fio de ouro);
+    com movimento reduzido, `data-parado` tira a transição. O nome acessível da apagada termina em "sem jogada agora";
+  - **achados nos testes, que eram meus e não do motor:** sem carta no campo do oponente o A não tem alvo; com K, A e J na mão a
+    Devastação acende o J mesmo com o limite de J cheio.
 
 ---
 

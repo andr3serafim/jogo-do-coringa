@@ -2,7 +2,7 @@ import { isDeepStrictEqual } from 'node:util';
 import { applyAction, legalActions, type PlayerView, type SpecialCard } from '@coringa/engine';
 import type { PlayerAction } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
-import { isLegal, legalFor, roleKey, tablePlays, type TablePlays } from '../../src/model/plays.ts';
+import { isLegal, legalFor, liveHandIds, roleKey, tablePlays, type TablePlays } from '../../src/model/plays.ts';
 import { scenarioAt, seededSteps, viewAt, type ViewSpec } from '../fixtures.ts';
 
 function setup(spec: ViewSpec) {
@@ -445,5 +445,44 @@ describe('propriedade: toda jogada montada pela mesa é aceita pelo motor', () =
     for (const type of ['PLAY_J', 'PLAY_Q', 'PLAY_K', 'TRAP', 'SACRIFICE', 'DECLARE_ATTACK', 'PASS', 'REFLECT', 'RESURRECT', 'DEVASTATE']) {
       expect(types.has(type), type).toBe(true);
     }
+  });
+});
+
+describe('liveHandIds: as cartas da mão que jogam agora (bloco A do playtest, ponto 2)', () => {
+  const live = (spec: ViewSpec) => {
+    const { view, legal, plays } = setup(spec);
+    const ids = liveHandIds(view, legal, plays);
+    return { view, kinds: view.self.hand.filter((card) => ids.has(card.id)).map((card) => card.kind) };
+  };
+
+  it('na sua vez, com o limite de J cheio e nenhum J no oponente, o J fica de fora', () => {
+    // O oponente tem uma numérica (o A rouba) e nenhum J (o Sacrifício do J não vale); sem K, nada de Devastação.
+    const { kinds } = live({ self: { hand: ['J', 'Q', 'A', 'WILD'], attackBuffs: ['J', 'J', 'J', 'J'] }, opponent: { attackRow: [5], attackBuffs: [] } });
+    expect(kinds).toEqual(['Q', 'A', 'WILD']);
+  });
+
+  it('com K e A na mão, a Devastação (K + A + J) acende o J mesmo com o limite cheio', () => {
+    const { kinds } = live({ self: { hand: ['K', 'J', 'A'], attackBuffs: ['J', 'J', 'J', 'J'] }, opponent: { attackRow: [5], attackBuffs: [] } });
+    expect(kinds).toEqual(['K', 'J', 'A']);
+  });
+
+  it('o J volta quando o Sacrifício contra um J do oponente é legal', () => {
+    const { kinds } = live({ self: { hand: ['J'], attackBuffs: ['J', 'J', 'J', 'J'] }, opponent: { attackBuffs: ['J'] } });
+    expect(kinds).toEqual(['J']);
+  });
+
+  it('na janela do ataque dele, com o Reflect legal, o K, o J e a Q da combinação jogam', () => {
+    const { kinds } = live({ phase: 'ATTACK', self: { hand: ['K', 'J', 'Q', 'K'] }, opponent: { attackRow: [9], attackBuffs: ['J'] } });
+    expect(kinds).toEqual(['K', 'J', 'Q', 'K']);
+  });
+
+  it('na janela do ataque dele, sem combinação, só o A', () => {
+    const { kinds } = live({ phase: 'ATTACK', self: { hand: ['J', 'Q', 'A'] }, opponent: { attackRow: [9], attackBuffs: ['J'] } });
+    expect(kinds).toEqual(['A']);
+  });
+
+  it('na vez dele e no Equipar, nenhuma', () => {
+    expect(live({ phase: 'WAITING', self: { hand: ['K', 'J', 'A'] } }).kinds).toEqual([]);
+    expect(live({ phase: { kind: 'EQUIP' }, self: { hand: ['K', 'J', 'A'], pending: [5] } }).kinds).toEqual([]);
   });
 });

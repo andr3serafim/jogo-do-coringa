@@ -150,3 +150,15 @@ export function ReflectIcon({ className }: ArtProps) {
     </Art>
   );
 }
+
+/** O cadeado da carta da mão que não joga agora (bloco A dos pontos do playtest, ponto 2): corpo de tinta, arco de papel, buraco de ouro. */
+export function LockIcon({ className }: ArtProps) {
+  return (
+    <Art name="cadeado" className={className}>
+      <path d="M7.4 10.6V7.8a4.6 4.6 0 0 1 9.2 0v2.8" stroke="var(--color-papel)" strokeWidth="4.2" />
+      <path d="M7.4 10.6V7.8a4.6 4.6 0 0 1 9.2 0v2.8" stroke="var(--color-tinta)" strokeWidth="2" />
+      <rect x="4.4" y="10.4" width="15.2" height="11.4" rx="1.6" fill="var(--color-tinta)" stroke="var(--color-papel)" strokeWidth="1.4" />
+      <path d="M12 14.2v3.6" stroke="var(--color-ouro)" strokeWidth="2.4" strokeLinecap="round" />
+    </Art>
+  );
+}
