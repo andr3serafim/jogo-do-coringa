@@ -9,6 +9,7 @@ import type { Beat } from './timeline.ts';
 export type Cue =
   | 'carta'
   | 'pouso'
+  | 'momento'
   | 'compra'
   | 'quebra'
   | 'golpe-leve'
@@ -50,6 +51,9 @@ export function cueOf(beat: Beat, me: PlayerId): Cue | null {
   const { event } = beat;
   // O golpe que a cena do Ataque Absoluto absorveu soa dentro dela, no impacto do feixe.
   if (beat.absorbed) return null;
+  // O momento da especial do oponente (bloco A dos pontos do playtest, ponto 1): a virada da carta no começo. O impacto (o pouso ou a
+  // quebra) soa na camada do momento, no instante em que a carta grande chega.
+  if (beat.kind === 'moment') return 'momento';
   switch (event.type) {
     // Sub-projeto 6 §8 (fatia 5): a sua carta voa da mão (o sopro e a batida no pouso); a do Bot e as do Equipar caem no destino e assentam.
     case 'BuffPlayed':

@@ -156,6 +156,7 @@ class FakeAudioContext {
 const ALL_CUES: Record<Cue, true> = {
   carta: true,
   pouso: true,
+  momento: true,
   compra: true,
   quebra: true,
   'golpe-leve': true,
