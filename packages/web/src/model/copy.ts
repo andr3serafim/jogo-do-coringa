@@ -3,6 +3,7 @@ import {
   absoluteAttackArmed,
   attackPower,
   defenseHealActive,
+  defenseHealOf,
   defensePower,
   type AttackPreview,
   type Card,
@@ -384,6 +385,22 @@ export const droppedAnnouncement = (opponent: string): string =>
 export interface Ribbon {
   title: string;
   reason: string | null;
+}
+
+/**
+ * A faixa da primeira cura passiva da partida (bloco A dos pontos do playtest, ponto 9): a regra e a conta, com o bruto do motor
+ * (`defenseHealOf`) e os Q que ele multiplica (a divisão do bruto pelo valor, como a conta da fileira). Se a vida chegou ao máximo antes, o
+ * que entrou foi menos: a faixa diz.
+ */
+export function healRibbon(event: Extract<GameEvent, { type: 'Healed' }>, view: PlayerView): Ribbon {
+  const side = event.player === view.me ? view.self : view.opponent;
+  const gross = defenseHealOf(event.card, side);
+  const queens = gross / event.card.value - 1;
+  const capped = event.amount < gross ? ' · até a vida cheia' : '';
+  return {
+    title: 'Cura passiva',
+    reason: `${side.guard.length} K na Guarda: a Defesa que cai vira vida · ${event.card.value} × (1 + ${queens} Q) = ${gross}${capped}`,
+  };
 }
 
 /** As placas de estado do Coringa (bloco A dos pontos do playtest, ponto 6) e a zona do Reflect. */

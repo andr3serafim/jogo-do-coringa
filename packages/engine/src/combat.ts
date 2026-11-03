@@ -66,7 +66,15 @@ export function defenseHealActive(side: { guard: SpecialCard[] }, config: Pick<R
  */
 export function healFromDefense(s: GameState, p: PlayerState, cards: NumCard[], ev: GameEvent[]): void {
   if (!defenseHealActive(p, s.config)) return;
-  for (const card of cards) heal(s, p, card.value * (1 + p.defenseBuffs.length), 'DEFENSE', card, ev);
+  for (const card of cards) heal(s, p, defenseHealOf(card, p), 'DEFENSE', card, ev);
+}
+
+/**
+ * O bruto da cura passiva de uma carta da Defesa: valor × (1 + nº de Q). A interface o usa para explicar a conta (bloco A dos pontos do
+ * playtest, ponto 9); o que entra na vida é o `amount` do `Healed`, até a vida inicial.
+ */
+export function defenseHealOf(card: NumCard, side: { defenseBuffs: readonly SpecialCard[] }): number {
+  return card.value * (1 + side.defenseBuffs.length);
 }
 
 function loseHp(s: GameState, victim: PlayerState, amount: number, dealer: PlayerState, ev: GameEvent[]): void {

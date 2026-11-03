@@ -169,6 +169,8 @@ export function replaySnapshot(track: ReplayTrack, message: StateMessage, frame:
     desolated: track.frames
       .slice(0, frame + 1)
       .reduce<ReadonlySet<string>>((rows, { state }) => desolationAfter(rows, state.events, state.view), new Set()),
+    // A faixa que ensina a cura passiva é da partida ao vivo (bloco A dos pontos do playtest, ponto 9): o replay não a toca.
+    firstHealSeq: null,
     prefs,
   };
 }

@@ -155,3 +155,41 @@ describe('quando não há cópia', () => {
     expect(shardCount(m.container)).toBe(0);
   });
 });
+
+describe('a essência da cura passiva (bloco A do playtest, ponto 9)', () => {
+  // A minha Defesa perde a carta da frente (o 3) com 2 K na Guarda: ela vai ao cemitério e me cura.
+  const HEALER: ViewSpec = { ...THEIRS, self: { ...THEIRS.self, guard: ['K', 'K'], defenseRow: [3, 6, 9, 5] } };
+  const front: NumCard = { id: 'x-p1-DEF-0', kind: 'NUM', value: 3, suit: 'copas' };
+  const AFTER_HEAL: ViewSpec = { ...HEALER, self: { ...HEALER.self, defenseRow: [6, 9, 5] }, graveyard: [5, 8, 3] };
+  const removed: GameEvent = { type: 'CardsRemovedFromRow', player: 'p1', row: 'DEF', cards: [front] };
+  const healed: GameEvent = { type: 'Healed', player: 'p1', amount: 6, source: 'DEFENSE', card: front };
+  const essence = (container: HTMLElement) => layer(container).querySelector('[data-essencia]');
+
+  it('sai da carta na batida dela, voa até o seu retrato e some na batida da cura', () => {
+    const m = mount(HEALER, { training: 'medio' });
+    emit(m, AFTER_HEAL, [removed, healed]);
+    expect(essence(m.container)).not.toBeNull();
+    const flight = calls.find((call) => call.el.hasAttribute('data-essencia'))!;
+    expect(flight.options).toMatchObject({ delay: 0, duration: 300 });
+    advance(299);
+    expect(essence(m.container)).not.toBeNull();
+    advance(1);
+    expect(essence(m.container)).toBeNull();
+  });
+
+  it('com movimento reduzido, nenhuma essência', () => {
+    const m = mount(HEALER, { training: 'medio', prefs: { reduceMotion: true } });
+    emit(m, AFTER_HEAL, [removed, healed]);
+    expect(essence(m.container)).toBeNull();
+  });
+
+  it('os K da Guarda de quem curou acendem na batida da cura', () => {
+    const m = mount(HEALER, { training: 'medio' });
+    emit(m, AFTER_HEAL, [removed, healed]);
+    const guard = () => [...m.container.querySelectorAll('[data-campo="p1"] [data-card-id^="x-p1-K"]')];
+    expect(guard().every((card) => card.getAttribute('data-fx') !== 'cause')).toBe(true);
+    advance(300);
+    expect(guard().length).toBe(2);
+    expect(guard().every((card) => card.getAttribute('data-fx') === 'cause')).toBe(true);
+  });
+});

@@ -131,6 +131,11 @@ export interface Beat {
    * `null` fora do momento.
    */
   moment: { flyAtMs: number; impactAtMs: number } | null;
+  /**
+   * A primeira cura passiva da partida (bloco A dos pontos do playtest, ponto 9): a batida segue `damage`, e a faixa dela explica a regra
+   * com a conta (`healRibbon`).
+   */
+  teach: boolean;
 }
 
 export interface TimelineOptions {
@@ -149,6 +154,8 @@ export interface TimelineOptions {
   holdOwnMoments?: boolean;
   /** Quantas especiais suas o turno já teve, na conta do momento que o oponente vê. */
   ownMomentsBefore?: number;
+  /** Este `state` trouxe a primeira cura passiva da partida (`SessionSnapshot.firstHealSeq`): a batida dela ensina. */
+  teachHeal?: boolean;
 }
 
 interface Classified {
@@ -277,8 +284,14 @@ export function buildTimeline(events: GameEvent[], options: TimelineOptions): Be
       hit: null as Beat['hit'],
       absorbed: false,
       phases: null as (typeof MOMENT_MS)[keyof typeof MOMENT_MS] | null,
+      teach: false,
     };
   });
+  // A faixa que ensina a cura passiva, só ao vivo: na primeira cura da Defesa que curou algo.
+  if (!catchUp && options.teachHeal) {
+    const first = items.find(({ event }) => event.type === 'Healed' && event.source === 'DEFENSE' && event.amount > 0);
+    if (first) first.teach = true;
+  }
   // Os momentos (bloco A dos pontos do playtest, ponto 1), só ao vivo: a especial de quem não é `viewer` vira `moment`; online (A9a), a
   // sua segura o tempo do momento que o oponente vê. As duas contas seguem `momentsMs`, evento a evento (o `TurnStarted` zera).
   const viewer = options.viewer ?? null;
@@ -366,6 +379,7 @@ export function buildTimeline(events: GameEvent[], options: TimelineOptions): Be
       absorbed: item.absorbed,
       intercepted: yields,
       moment,
+      teach: item.teach,
     });
     startMs += durationMs;
   }

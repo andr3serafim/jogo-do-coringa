@@ -168,6 +168,31 @@ export function leavingOf(beats: readonly Beat[]): ReadonlyMap<string, Leaving> 
   return leaving;
 }
 
+export interface Heal {
+  /** O início da batida em que a carta saiu da Defesa: a essência sai da cópia dela. */
+  fromMs: number;
+  /** O início da batida da cura: a essência chega ao retrato, e o "+N" nasce ali. */
+  atMs: number;
+  player: PlayerId;
+}
+
+/**
+ * A essência da cura passiva (bloco A dos pontos do playtest, ponto 9): cada carta da Defesa que curou, com a batida em que ela saiu e a da
+ * cura. Sem a saída na mesma linha do tempo, a essência sai na batida da cura.
+ */
+export function healsOf(beats: readonly Beat[]): ReadonlyMap<string, Heal> {
+  const left = new Map<string, number>();
+  const heals = new Map<string, Heal>();
+  for (const beat of plainBeats(beats)) {
+    const { event } = beat;
+    if (event.type === 'CardsRemovedFromRow' && event.row === 'DEF') for (const card of event.cards) left.set(card.id, touchMs(beat));
+    if (event.type === 'Healed' && event.source === 'DEFENSE' && event.amount > 0) {
+      heals.set(event.card.id, { fromMs: left.get(event.card.id) ?? beat.startMs, atMs: beat.startMs, player: event.player });
+    }
+  }
+  return heals;
+}
+
 /** No máximo `shards` cacos por carta e `shardBudget` por batida (§11: até ~60 partículas vivas). */
 export const shardsPerCard = (count: number): number => Math.min(TABLE_MOTION.shards, Math.floor(TABLE_MOTION.shardBudget / count));
 

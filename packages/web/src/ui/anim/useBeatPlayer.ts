@@ -43,7 +43,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { bannerBeatAt, damageBeatIndex, dealsOf, delaysOf, type Deals } from '../../model/effects.ts';
 import { FIELD_SCENES, RIBBON_SCENES } from '../../model/timeline.ts';
 import { FLASH_WINDOW_MS, FlashLock } from '../../model/flash.ts';
-import { landingsOf, leavingOf, recoilsOf, shiftDelaysOf, TABLE_MOTION, type Landing, type Leaving } from '../../model/table-motion.ts';
+import { healsOf, landingsOf, leavingOf, recoilsOf, shiftDelaysOf, TABLE_MOTION, type Heal, type Landing, type Leaving } from '../../model/table-motion.ts';
 import { buildTimeline, quietOnly, timelineMs, type Beat, type TimelineOptions } from '../../model/timeline.ts';
 
 /** A cortina fica no ar pelo menos 1 s: a subida e a descida não cabem numa janela de 1 s com a inversão no meio. */
@@ -75,6 +75,8 @@ export interface Run {
   recoils: ReadonlyMap<string, number>;
   landings: ReadonlyMap<string, Landing>;
   leaving: ReadonlyMap<string, Leaving>;
+  /** A essência da cura passiva (bloco A dos pontos do playtest, ponto 9), só ao vivo: a carta que curou, de onde e até quando. */
+  heals: ReadonlyMap<string, Heal>;
 }
 
 const NOTHING = new Map<string, never>();
@@ -152,6 +154,7 @@ function makeMachine(state: StateMessage | null, options: TimelineOptions | null
     recoils,
     landings: live ? landingsOf(beats, me, draftShown) : NOTHING,
     leaving: live ? leavingOf(beats) : NOTHING,
+    heals: live ? healsOf(beats) : NOTHING,
   };
   return { run, index: beats.findIndex((beat) => beat.durationMs > 0), done: run.totalMs === 0, absorbed: null, moments, ownMoments };
 }
@@ -212,13 +215,15 @@ export interface BeatPlayerOptions {
   draftShown?: boolean;
   /** Online (A9a): a sua especial segura o tempo do momento que o oponente vê (`TimelineOptions.holdOwnMoments`). */
   holdOwnMoments?: boolean;
+  /** Este `state` trouxe a primeira cura passiva da partida (`TimelineOptions.teachHeal`). */
+  teachHeal?: boolean;
 }
 
 const NO_READING = (): number => 0;
 
 export function useBeatPlayer(
   state: StateMessage | null,
-  { reducedMotion, decisionPending, bannerReadMs = NO_READING, draftShown = false, holdOwnMoments = false }: BeatPlayerOptions,
+  { reducedMotion, decisionPending, bannerReadMs = NO_READING, draftShown = false, holdOwnMoments = false, teachHeal = false }: BeatPlayerOptions,
   onSettled?: () => void,
 ): BeatPlayer {
   // O `state` com que a mesa abre (recarregar a página, entrar na partida) já está feito: não há de onde animar.
@@ -239,6 +244,7 @@ export function useBeatPlayer(
         momentsBefore: machine.moments,
         holdOwnMoments,
         ownMomentsBefore: machine.ownMoments,
+        teachHeal,
       };
       current = makeMachine(state, options, draftShown);
       // Um `state` novo no meio das batidas encerra as transições que a linha velha ainda tinha no ar.

@@ -74,12 +74,17 @@ export interface SessionSnapshot {
   history: HistoryState;
   /** As fileiras desoladas (`rowKey`), da Devastação até uma carta voltar (sub-projeto 6 §7.4). Some se a página recarregar. */
   desolated: ReadonlySet<string>;
+  /**
+   * O `seq` do `state` desta partida que trouxe a primeira cura passiva (`Healed` da Defesa que curou algo), de qualquer lado: a faixa
+   * que explica a regra toca nele (bloco A dos pontos do playtest, ponto 9; decisoes.md 2026-11-03 (5), A7). Some se a página recarregar.
+   */
+  firstHealSeq: number | null;
   /** As preferências do jogador (a mesa lê "reduzir animações" daqui; o menu as troca por `setPrefs`). */
   prefs: Prefs;
 }
 
 /** Campos que a sessão deriva do que guarda por dentro: nunca entram num `patch`. */
-type Derived = 'equipDraft' | 'equipConfirmed' | 'marks' | 'marksBaseSeq' | 'history' | 'desolated' | 'prefs';
+type Derived = 'equipDraft' | 'equipConfirmed' | 'marks' | 'marksBaseSeq' | 'history' | 'desolated' | 'firstHealSeq' | 'prefs';
 
 export interface SessionDeps {
   now(): number;
@@ -178,6 +183,7 @@ export class Session {
   // Histórico: as linhas de todo `state` que chegou (a sessão vê todos, ao contrário de um componente).
   #history: HistoryState = EMPTY_HISTORY;
   #desolated: ReadonlySet<string> = new Set();
+  #firstHealSeq: number | null = null;
   #marksCache: {
     view: PlayerView | null;
     base: PlayerView | null;
@@ -197,6 +203,7 @@ export class Session {
     if (state) {
       this.#history = appendHistory(this.#history, state, this.#names(state, connection.room));
       this.#desolated = desolationAfter(this.#desolated, state.events, state.view);
+      this.#noteHeal(state);
     }
     this.#snapshot = this.#derive({
       status: 'connecting',
@@ -383,6 +390,7 @@ export class Session {
         this.#deps.onSeq?.(state.seq);
         this.#history = appendHistory(this.#history, state, this.#names(state, this.#snapshot.room));
         this.#desolated = desolationAfter(this.#desolated, state.events, state.view);
+        this.#noteHeal(state);
         const spent = ownSpentIds(state.events, state.view.me);
         if (spent.length > 0) this.#spent = new Set([...this.#spent, ...spent]);
         const newEpoch = state.epoch !== this.#epoch;
@@ -422,6 +430,13 @@ export class Session {
     this.#seen = new Set();
     this.#spent = new Set();
     this.#desolated = new Set();
+    this.#firstHealSeq = null;
+  }
+
+  /** A primeira cura passiva da partida: guarda o `seq` do `state` que a trouxe. */
+  #noteHeal(state: StateMessage): void {
+    if (this.#firstHealSeq !== null) return;
+    if (state.events.some((event) => event.type === 'Healed' && event.source === 'DEFENSE' && event.amount > 0)) this.#firstHealSeq = state.seq;
   }
 
   #names(state: StateMessage, room: RoomMessage | null) {
@@ -567,6 +582,7 @@ export class Session {
       marksBaseSeq: this.#baseSeq,
       history: this.#history,
       desolated: this.#desolated,
+      firstHealSeq: this.#firstHealSeq,
       prefs: this.#prefs,
     };
   }

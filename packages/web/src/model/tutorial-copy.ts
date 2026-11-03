@@ -31,7 +31,7 @@ const HINT_TEXT: Record<HintId, string> = {
   firstAttack:
     'Sua vez de atacar: o dano é o seu ATK menos a DEF do oponente, no mínimo 0. Com cartas no Ataque, atacar é obrigatório. O botão mostra a conta antes de você confirmar.',
   buffs:
-    'Cada J soma 1 ao multiplicador do seu ataque, e cada Q ao da sua defesa (até 4 de cada). Um K na Guarda absorve um golpe inteiro e quebra; com 2 K ou mais, cada numérica que sai da sua Defesa cura você.',
+    'Cada J soma 1 ao multiplicador do seu ataque, e cada Q ao da sua defesa (até 4 de cada). Um K na Guarda absorve um golpe inteiro e quebra; com 2 K ou mais, cada numérica que sai da sua Defesa cura você. A cura é o valor da carta vezes (1 + o número de Q).',
   steal:
     'O A também rouba, no seu turno: leva uma numérica do oponente para a fileira que você escolher. Ele perde o valor dela de vida (um K na Guarda dele anula esse dano, e o roubo nunca mata), e você cura o mesmo valor. O botão do alvo mostra a conta.',
   trap: 'Janela de reação: quando o oponente ataca, você pode responder com um A, que destrói um J, Q ou K dele; quando ele joga K, o A só destrói um K da Guarda. Ou passar. No seu turno, o A vale como Armadilha ou como Roubo.',

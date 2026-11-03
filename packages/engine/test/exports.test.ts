@@ -39,6 +39,14 @@ describe('API para bots e interface', () => {
     expect(engine.defenseHealActive(view.self, {})).toBe(false);
   });
 
+  it('defenseHealOf: o bruto da cura de uma carta da Defesa é o valor × (1 + nº de Q) (a mesma conta da cura passiva)', () => {
+    const s = setup({ p1: { defenseBuffs: ['Q', 'Q'] } });
+    const view = viewFor(s, P1);
+    const six = { id: 'n6', kind: 'NUM', value: 6, suit: 'copas' } as const;
+    expect(engine.defenseHealOf(six, view.self)).toBe(18);
+    expect(engine.defenseHealOf(six, view.opponent)).toBe(6);
+  });
+
   it('o multiplicador de ataque é 1 + nJ (exemplo 6) e a quadra soma antes dele (exemplo 4)', () => {
     const s = setup({ p1: { attack: [4, 6], attackBuffs: ['J'] }, p2: { defense: [10, 3, 10, 10, 10], defenseBuffs: ['Q'] } });
     const view = viewFor(s, P2);

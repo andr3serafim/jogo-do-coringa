@@ -828,3 +828,33 @@ describe('a desolação na sessão (sub-projeto 6 §7.4)', () => {
     expect([...session.snapshot().desolated]).toEqual(['p2:DEF']);
   });
 });
+
+describe('a primeira cura passiva da partida (bloco A do playtest, ponto 9)', () => {
+  const six = { id: 'n6', kind: 'NUM', value: 6, suit: 'copas' } as const;
+  const healed = (player: 'p1' | 'p2', amount: number): GameEvent => ({ type: 'Healed', player, amount, source: 'DEFENSE', card: six });
+
+  it('o seq do state que trouxe a primeira cura passiva, de qualquer lado; as seguintes não mudam', () => {
+    const { connection, session } = setup({ playerId: 'p1', room: roomOf(1) });
+    expect(session.snapshot().firstHealSeq).toBeNull();
+    connection.emitState(stateMessage(viewAt(), { seq: 4, events: [healed('p2', 18)] }));
+    expect(session.snapshot().firstHealSeq).toBe(4);
+    connection.emitState(stateMessage(viewAt(), { seq: 5, events: [healed('p1', 12)] }));
+    expect(session.snapshot().firstHealSeq).toBe(4);
+  });
+
+  it('a cura que não curou nada (a vida cheia) e a do Roubo não contam', () => {
+    const { connection, session } = setup({ playerId: 'p1', room: roomOf(1) });
+    connection.emitState(stateMessage(viewAt(), { seq: 2, events: [healed('p1', 0)] }));
+    connection.emitState(stateMessage(viewAt(), { seq: 3, events: [{ type: 'Healed', player: 'p1', amount: 5, source: 'STEAL', card: six }] }));
+    expect(session.snapshot().firstHealSeq).toBeNull();
+    connection.emitState(stateMessage(viewAt(), { seq: 4, events: [healed('p1', 6)] }));
+    expect(session.snapshot().firstHealSeq).toBe(4);
+  });
+
+  it('a partida nova zera', () => {
+    const { connection, session } = setup({ playerId: 'p1', room: roomOf(1) });
+    connection.emitState(stateMessage(viewAt(), { seq: 2, events: [healed('p2', 6)] }));
+    connection.emitRoom(roomOf(2));
+    expect(session.snapshot().firstHealSeq).toBeNull();
+  });
+});

@@ -778,3 +778,18 @@ describe('o momento da especial do oponente (bloco A do playtest, ponto 1)', () 
     expect(buildTimeline([buffOf('p1')], SEEN)[0]!.durationMs).toBe(BEAT_MS.move);
   });
 });
+
+describe('a cura passiva que ensina (bloco A do playtest, ponto 9)', () => {
+  const six: NumCard = { id: 'n6', kind: 'NUM', value: 6, suit: 'copas' };
+  const healed = (amount: number, source: 'DEFENSE' | 'STEAL' = 'DEFENSE'): GameEvent => ({ type: 'Healed', player: 'p1', amount, source, card: six });
+
+  it('com teachHeal, só a primeira cura passiva que curou algo ensina', () => {
+    const beats = buildTimeline([healed(0), healed(5, 'STEAL'), healed(18), healed(6)], { ...LIVE, teachHeal: true });
+    expect(beats.map((beat) => beat.teach)).toEqual([false, false, true, false]);
+  });
+
+  it('sem teachHeal, ou no catchUp, nenhuma', () => {
+    expect(buildTimeline([healed(18)], LIVE)[0]!.teach).toBe(false);
+    expect(buildTimeline([healed(18)], { ...LIVE, mode: 'catchUp', teachHeal: true })[0]!.teach).toBe(false);
+  });
+});

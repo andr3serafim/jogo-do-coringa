@@ -3,7 +3,7 @@
 import type { GameEvent, NumCard, SpecialCard } from '@coringa/engine';
 import { namesFor } from '@coringa/sim/text';
 import { describe, expect, it } from 'vitest';
-import { momentPlate } from '../../src/model/copy.ts';
+import { healRibbon, momentPlate } from '../../src/model/copy.ts';
 import { scenarioAt } from '../fixtures.ts';
 
 const NAMES = namesFor('p1', 'Bot');
@@ -76,5 +76,21 @@ describe('a placa do momento', () => {
 
   it('fora das cinco especiais, nenhuma placa', () => {
     expect(momentPlate({ type: 'TurnStarted', player: 'p2' }, scenarioAt().view, NAMES)).toBeNull();
+  });
+});
+
+describe('a faixa da primeira cura passiva (bloco A do playtest, ponto 9)', () => {
+  const six = num('n6', 6);
+
+  it('a regra e a conta do motor, numa linha', () => {
+    const { view } = scenarioAt({ self: { guard: ['K', 'K'], defenseBuffs: ['Q', 'Q'] } });
+    const healed: GameEvent = { type: 'Healed', player: 'p1', amount: 18, source: 'DEFENSE', card: six };
+    expect(healRibbon(healed, view)).toEqual({ title: 'Cura passiva', reason: '2 K na Guarda: a Defesa que cai vira vida · 6 × (1 + 2 Q) = 18' });
+  });
+
+  it('a cura que bate na vida cheia diz que parou nela; a do oponente, a Guarda dele', () => {
+    const { view } = scenarioAt({ opponent: { guard: ['K', 'K', 'K'], defenseBuffs: [] } });
+    const healed: GameEvent = { type: 'Healed', player: 'p2', amount: 2, source: 'DEFENSE', card: six };
+    expect(healRibbon(healed, view).reason).toBe('3 K na Guarda: a Defesa que cai vira vida · 6 × (1 + 0 Q) = 6 · até a vida cheia');
   });
 });

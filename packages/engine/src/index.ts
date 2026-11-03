@@ -13,6 +13,7 @@ export {
   attackPower,
   defenseBase,
   defenseHealActive,
+  defenseHealOf,
   defensePower,
   type AttackSide,
   type DefenseSide,

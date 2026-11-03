@@ -762,6 +762,22 @@ li[data-joga]::after {
   animation: gesto-espelho 3.4s ease-in-out infinite;
 }
 
+/*
+ * A essência da cura passiva (bloco A dos pontos do playtest, ponto 9): uma gota verde, de tinta e papel como o resto da mesa, que voa da
+ * carta da Defesa que caiu até o retrato de quem curou (a `Leaving` a anima só com `translate`, `scale` e `opacity`).
+ */
+.essencia-cura {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border: 1.5px solid var(--color-tinta);
+  border-radius: 50% 50% 50% 0;
+  rotate: -45deg;
+  background: radial-gradient(circle at 35% 35%, #9be59a, var(--color-cura) 70%);
+  pointer-events: none;
+}
+
 /* No celular a placa fica só com o nome: a linha do que ela faz não cabe no campo. */
 @media (max-width: 599px) {
   .placa-faz {

@@ -71,6 +71,17 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   - abaixo de 600 px a linha do que faz some (`.placa-faz`); o nome fica;
   - **não conferido de verdade:** o tamanho das placas no campo (a zona do Reflect ganhou uma linha no PC) e os gestos: nas fotos da
     Task 8.
+- **Task 7 (a cura passiva que se explica):**
+  - motor: `defenseHealOf(card, side)` exportado, e o `healFromDefense` passa a usá-lo; os snapshots golden não mudaram (sem `-u`);
+  - sessão: `firstHealSeq` (o `seq` da primeira cura passiva que curou algo, de qualquer lado; zera na partida nova; o replay dá
+    `null`, sem faixa); linha do tempo: `teachHeal` e `Beat.teach`; a faixa dessa batida é a `healRibbon` ("Cura passiva" · "2 K na
+    Guarda: a Defesa que cai vira vida · 6 × (1 + 2 Q) = 18", e "· até a vida cheia" quando entrou menos), no `Stage`;
+  - os K da Guarda de quem curou acendem na batida da cura: o `CardFx` ganhou `cause` (o halo verde pela opacidade, como o `light` da
+    quadra). **Desvio do plano:** ele dizia `CardFx.cause?: true` e `data-causa`; ficou um valor a mais do `CardFx` que já existe
+    (`data-fx="cause"`), o padrão da casa;
+  - a essência: `healsOf(beats)` (da batida em que a carta saiu da Defesa à da cura) e a gota `.essencia-cura` na `Leaving`, até o
+    `[data-retrato="voce"|"oponente"]` (o plano dizia `self`/`opponent`; os valores de verdade do placar são esses);
+  - a dica `buffs` do tutorial ganhou a conta ("A cura é o valor da carta vezes (1 + o número de Q).").
 
 ---
 

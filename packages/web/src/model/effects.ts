@@ -14,7 +14,7 @@ export const rowKey = (player: PlayerId, row: RowName): string => `${player}:${r
  * O efeito numa carta: a carta do escudo do Reflect, a carta da quadra que acende. A carta que quebra (o K da Guarda, o alvo da Armadilha e
  * do Sacrifício) não tem efeito aqui: quem racha e estoura é a cópia dela, no lugar antigo (`ui/anim/Leaving.tsx`, sub-projeto 6 §8).
  */
-export type CardFx = 'shield' | 'light';
+export type CardFx = 'shield' | 'light' | 'cause';
 
 export interface BeatEffects {
   cards: ReadonlyMap<string, CardFx>;
@@ -70,8 +70,13 @@ function effectsOfEvent(event: GameEvent, view: PlayerView): Partial<BeatEffects
         damage: event.damage > 0 ? { target: event.victim, amount: event.damage } : null,
         impact: impactOn(event.victim, event.damage),
       };
-    case 'Healed':
-      return { damage: event.amount > 0 ? { target: event.player, amount: event.amount, heal: true } : null };
+    case 'Healed': {
+      const damage = event.amount > 0 ? { target: event.player, amount: event.amount, heal: true as const } : null;
+      if (event.source !== 'DEFENSE' || damage === null) return { damage };
+      // A causa da cura passiva acende junto (bloco A dos pontos do playtest, ponto 9): os K da Guarda de quem curou.
+      const side = view.me === event.player ? view.self : view.opponent;
+      return { damage, cards: fxMap(side.guard.map((card) => card.id), 'cause') };
+    }
     case 'ReflectCanceled':
       return { shieldBreak: event.owner };
     case 'InitiativeDecided':
@@ -337,7 +342,7 @@ export const ribbonText = (ribbon: Ribbon): string => (ribbon.reason === null ? 
  * na fita (`RIBBON_SCENES`); o `DeckReshuffled` é `move` com faixa.
  */
 function hasBanner(beat: Beat): boolean {
-  return beat.kind === 'banner' || beat.event.type === 'DeckReshuffled' || (beat.scene !== null && RIBBON_SCENES.has(beat.scene));
+  return beat.kind === 'banner' || beat.teach || beat.event.type === 'DeckReshuffled' || (beat.scene !== null && RIBBON_SCENES.has(beat.scene));
 }
 
 /**

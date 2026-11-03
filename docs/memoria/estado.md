@@ -11,7 +11,8 @@
 - **Feito também:** Task 4 (a carta grande que vira, a placa, o voo e o som do momento: `ui/anim/Moment.tsx`).
 - **Feito também:** Task 5 (a mão que apaga as cartas sem jogada agora).
 - **Feito também:** Task 6 (as placas de estado com medalhão e os gestos lentos).
-- **Próximo passo exato do bloco A:** a Task 7 do plano (`docs/superpowers/plans/2026-11-03-playtest-bloco-a.md`): a cura passiva que se explica (`defenseHealOf` no motor, `firstHealSeq` na sessão, `teachHeal` na linha do tempo, `healRibbon`, `healsOf` e a essência na `Leaving`, o halo dos K com `data-causa`, a frase nova da dica `buffs`).
+- **Feito também:** Task 7 (a cura passiva que se explica: o halo dos K, a essência, a faixa da primeira vez e a dica).
+- **Próximo passo exato do bloco A:** a Task 8 do plano (`docs/superpowers/plans/2026-11-03-playtest-bloco-a.md`): achar os passos nas fixtures, o E2E, a medição e as fotos com o `medir-cena.ts` (nota `notas/medicao-bloco-a.md`), a revisão final num subagente (A8), as specs e o fechamento (as duas CI, o fast-forward na `main`).
 - **O online muda com este bloco:** o prazo do servidor ganha a folga do momento. Só vale online depois do deploy do autor.
 - **Feito por último** (`diario.md` 2026-11-03 (5)): as respostas do autor às 8 perguntas, em `decisoes.md` 2026-11-03 (4):
   - **a fatia 5 está aprovada:** o sub-projeto 6 fechou;
