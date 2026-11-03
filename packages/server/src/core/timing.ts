@@ -1,5 +1,5 @@
 import type { GameEvent, Phase } from '@coringa/engine';
-import { sceneAllowanceMs } from '@coringa/protocol';
+import { stepAllowanceMs } from '@coringa/protocol';
 import { withItem, withoutKinds } from './agenda.ts';
 import { phaseKey } from './epoch.ts';
 import { TIMERS } from './timers.ts';
@@ -25,14 +25,16 @@ export interface PhaseSnapshot {
  *   (o turno acaba junto com ela).
  * - `GAME_OVER` não tem prazo.
  *
- * Folga de cena (sub-projeto 6 §9): o passo com cena rara (`sceneAllowanceMs` dos eventos) soma a cena ao prazo, e o relógio
- * fica parado até `clockRunsFrom`. Na mesma época (a Defesa Absoluta no próprio turno), o prazo que já existia cresce e o
+ * Folga de cena (sub-projeto 6 §9): o passo com cena rara soma a cena ao prazo, e o relógio fica parado até `clockRunsFrom`. Desde o
+ * bloco A dos pontos do playtest, a especial também dá a folga do momento que o oponente vê (`stepAllowanceMs`). Ela vale para os dois
+ * lados (`decisoes.md` 2026-11-03 (5), A9a): quem jogou espera o momento do outro, e o relógio dele para junto. A conta do turno não é
+ * guardada aqui: a folga é sempre a do momento inteiro (A1). Na mesma época (a Defesa Absoluta no próprio turno), o prazo que já existia cresce e o
  * alarme o acompanha; numa época nova, a folga entra na duração da fase.
  */
 export function schedulePhase(record: RoomRecord, prev: PhaseSnapshot, events: GameEvent[], now: number): void {
   const game = record.game;
   if (!game) throw new Error('schedulePhase sem partida');
-  const allowance = sceneAllowanceMs(events);
+  const allowance = stepAllowanceMs(events, null);
   if (phaseKey(game.state) === prev.key) {
     if (allowance > 0 && game.phaseDeadlineAt !== null) {
       game.phaseDeadlineAt += allowance;

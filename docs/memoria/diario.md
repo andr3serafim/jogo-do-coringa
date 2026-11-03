@@ -30,6 +30,17 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     a sua especial segura 1,6 s (A9a). O harness ganhou `training`;
   - **não conferido de verdade:** a recusa do véu pela trava cheia não tem teste próprio: ela usa a mesma `raiseCurtain` da cortina das
     cenas, que os testes da cortina cobrem.
+- **Task 3 (o servidor e o treino esperam o momento):**
+  - servidor: `schedulePhase` usa `stepAllowanceMs(events, null)`: a folga do momento vale para os dois lados (A9a) e é sempre a
+    inteira (A1). Três testes do prazo mudaram de propósito: o K abre a janela com +1,6 s, o Ás na reação soma +1,6 s, e o 4º Q soma a
+    cena e o momento. Um teste novo: duas especiais seguidas no próprio turno dão +1,6 s cada;
+  - treino: a sala local conta os momentos do Bot no turno (`#momentsInTurn`, zera na partida nova e no `TurnStarted`) e soma
+    `stepAllowanceMs(events, LOCAL_ME, conta)` ao `#sceneUntil`: o Bot espera 1,6 s + 600 ms depois da primeira especial do turno e
+    1,1 s + 600 ms depois das seguintes; o K do jogador abre a janela do Bot, que responde na hora;
+  - **armadilha (minha):** um script de edição pôs o zerar da conta no `act()` do jogador, e não na partida nova; o teste novo, que conta
+    os momentos à parte, achou na hora. Os scripts de troca de texto pegam a primeira ocorrência: confira o lugar.
+  - **testes mudados de propósito:** a reação do Bot pode esperar o momento da Armadilha dele (ele joga de novo na mesma janela), e o
+    Fácil tem esperas de momento além de 0 e 600 ms (o teste segue barrando as fatias curtas).
 
 ---
 

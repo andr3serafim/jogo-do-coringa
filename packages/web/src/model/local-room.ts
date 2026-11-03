@@ -16,7 +16,7 @@ import {
   type PlayerId,
   type ReplayStep,
 } from '@coringa/engine';
-import { HP_CHOICES, sceneAllowanceMs } from '@coringa/protocol';
+import { HP_CHOICES, momentsMs, stepAllowanceMs } from '@coringa/protocol';
 import type {
   AckMessage,
   ConnectionEvent,
@@ -129,6 +129,8 @@ export class LocalRoom implements RoomConnection {
   #autoTimer: unknown = null;
   /** Até quando (no `now` injetado) vão as cenas raras publicadas: o bot assiste a elas antes de pensar (decisoes.md 2026-11-01 (3)). */
   #sceneUntil = 0;
+  /** Quantos momentos de especial do Bot o turno já teve na tela do jogador (bloco A dos pontos do playtest, ponto 1): o segundo é mais curto. */
+  #momentsInTurn = 0;
   /** A busca do Difícil em curso (a decisão ainda não saiu). `null` fora dela; quando não é `null`, há uma fatia agendada em `#botTimer`. */
   #search: Generator<void, Action> | null = null;
   #connected = false;
@@ -269,6 +271,7 @@ export class LocalRoom implements RoomConnection {
   #newGame(): { game: GameState; botSeed: string } {
     this.#gameNo += 1;
     this.#botMoves = 0;
+    this.#momentsInTurn = 0;
     const seed = gameSeed(this.#options.seed, this.#gameNo);
     this.#gameSeed = seed;
     // Uma lista nova (e não `length = 0`): o replay já emitido da partida anterior guarda a lista dela.
@@ -303,8 +306,11 @@ export class LocalRoom implements RoomConnection {
     this.#seq += 1;
     if (phaseKey(next) !== keyBefore) this.#epoch += 1;
     const seq = this.#seq;
-    // A folga de cena, como o prazo do servidor (spec do servidor §6.2): duas cenas seguidas somam.
-    const allowance = sceneAllowanceMs(events);
+    // A folga de cena, como o prazo do servidor (spec do servidor §6.2): duas cenas seguidas somam. Desde o bloco A dos pontos do playtest,
+    // o momento da especial do Bot também: o jogador o vê inteiro antes de o Bot jogar de novo. O momento das jogadas do jogador não entra
+    // (ele não o vê), e a conta do turno é exata aqui, ao contrário do servidor (a sala sabe o turno).
+    const allowance = stepAllowanceMs(events, LOCAL_ME, this.#momentsInTurn);
+    this.#momentsInTurn = momentsMs(events, LOCAL_ME, this.#momentsInTurn).count;
     if (allowance > 0) this.#sceneUntil = Math.max(this.#sceneUntil, this.#options.now()) + allowance;
     this.#publishState(events);
     if (next.phase.kind === 'GAME_OVER') {

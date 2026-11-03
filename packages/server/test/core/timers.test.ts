@@ -1,6 +1,6 @@
 import { actingPlayers, applyAction, createGame, legalActions, viewFor } from '@coringa/engine';
 import type { GameState } from '@coringa/engine';
-import { SCENE_MS } from '@coringa/protocol';
+import { SCENE_MS, SPECIAL_MOMENT_MS } from '@coringa/protocol';
 import type { PlayerAction, StateMessage } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
 import { handId, setup, values } from '@coringa/engine/testing';
@@ -31,6 +31,8 @@ async function act(h: Harness, sock: FakeSocket, id: string, action: PlayerActio
 }
 
 const phaseOf = (h: Harness): GameState['phase'] => h.core.record!.game!.state.phase;
+/** A folga do momento da especial (bloco A dos pontos do playtest, ponto 1): vale para os dois lados (decisoes.md 2026-11-03 (5), A9a). */
+const MOMENT = SPECIAL_MOMENT_MS.first;
 
 describe('prazo de cada fase estoura com o efeito da spec (§6.2)', () => {
   it('Equipar: 40 s; as numéricas restantes vão para a fileira; conta estouro para quem não confirmou', async () => {
@@ -224,10 +226,11 @@ describe('turno pausa na janela do oponente (§6.2)', () => {
     await act(h, p1, 'k', { type: 'PLAY_K', cardIds: [kId] });
     const rec = h.core.record!;
     expect(rec.game!.pausedTurnMs).toBe(20_000);
+    // A janela começa com a folga do momento do K, que p2 vê (A9a).
     for (const sock of [p1, p2]) {
       const st = lastState(h, sock);
       expect(st.pausedTurnMs).toBe(20_000);
-      expect(st.deadline).toEqual({ kind: 'REACTION', at: h.now + 8_000, players: ['p2'] });
+      expect(st.deadline).toEqual({ kind: 'REACTION', at: h.now + 8_000 + MOMENT, players: ['p2'], runsFrom: h.now + MOMENT });
     }
     h.advance(3_000); // o piso de 2 s já passou: o PASS vale na hora
     await act(h, p2, 'p', { type: 'PASS' });
@@ -328,7 +331,7 @@ describe('turno pausa na janela do oponente (§6.2)', () => {
     expect(lastState(h, p1).deadline!.at).toBe(h.now + SCENE_MS.RowDevastated! + 18_000);
   });
 
-  it('a janela de um ataque não guarda tempo do turno, e o prazo do Ás na reação não muda', async () => {
+  it('a janela de um ataque não guarda tempo do turno, e o Ás na reação só soma a folga do momento dele (A9a)', async () => {
     const state = setup({ p1: { attack: [9], attackBuffs: ['J'] }, p2: { hand: ['A'] } });
     const { h, p1, p2 } = await armed(state);
     await act(h, p1, 'atk', { type: 'DECLARE_ATTACK' });
@@ -339,7 +342,7 @@ describe('turno pausa na janela do oponente (§6.2)', () => {
     h.advance(500);
     await act(h, p2, 'trap', { type: 'TRAP', cardId: handId(state, 'p2', 'A'), targetId: target });
     expect(p2.inbox.at(-1)).toMatchObject({ t: 'ack', ok: true });
-    expect(rec.game!.phaseDeadlineAt).toBe(at);
+    expect(rec.game!.phaseDeadlineAt).toBe(at! + MOMENT);
     expect(phaseOf(h)).toMatchObject({ kind: 'REACTION' });
   });
 });
@@ -681,13 +684,29 @@ describe('folga de cena (sub-projeto 6 §9)', () => {
     h.advance(10_000);
     await act(h, p1, 'q', { type: 'PLAY_Q', cardId: handId(state, 'p1', 'Q') });
     expect(rec.epoch).toBe(epoch);
-    expect(rec.game!.phaseDeadlineAt).toBe(before + defense);
-    expect(lastState(h, p1).deadline).toEqual({ kind: 'TURN', at: before + defense, players: ['p1'], runsFrom: h.now + defense });
-    expect(rec.agenda.filter((item) => item.kind === 'phase')).toEqual([{ kind: 'phase', at: before + defense + TIMERS.graceMs, epoch }]);
-    h.advance(before + defense + TIMERS.graceMs - h.now - 1);
+    // A cena da Defesa Absoluta e o momento do Q (que o oponente vê; A9a) somam.
+    const extra = defense + MOMENT;
+    expect(rec.game!.phaseDeadlineAt).toBe(before + extra);
+    expect(lastState(h, p1).deadline).toEqual({ kind: 'TURN', at: before + extra, players: ['p1'], runsFrom: h.now + extra });
+    expect(rec.agenda.filter((item) => item.kind === 'phase')).toEqual([{ kind: 'phase', at: before + extra + TIMERS.graceMs, epoch }]);
+    h.advance(before + extra + TIMERS.graceMs - h.now - 1);
     expect(phaseOf(h)).toEqual({ kind: 'ATTACK_MAIN', player: 'p1' });
     h.advance(1);
     expect(phaseOf(h)).not.toEqual({ kind: 'ATTACK_MAIN', player: 'p1' });
+  });
+
+  it('a especial dá a folga do momento a quem decide depois, e a quem a jogou também (bloco A, ponto 1; A9a)', async () => {
+    const state = setup({ p1: { hand: ['J', 'J'] } });
+    const { h, p1, p2 } = await armed(state);
+    const rec = h.core.record!;
+    const before = rec.game!.phaseDeadlineAt!;
+    const [first, second] = state.players[0]!.hand.map((card) => card.id);
+    await act(h, p1, 'j1', { type: 'PLAY_J', cardId: first! });
+    expect(rec.game!.phaseDeadlineAt).toBe(before + MOMENT);
+    expect(lastState(h, p2).deadline).toEqual({ kind: 'TURN', at: before + MOMENT, players: ['p1'], runsFrom: h.now + MOMENT });
+    // O servidor não guarda a conta do turno (A1): a segunda especial também dá a folga cheia.
+    await act(h, p1, 'j2', { type: 'PLAY_J', cardId: second! });
+    expect(rec.game!.phaseDeadlineAt).toBe(before + 2 * MOMENT);
   });
 
   it('passo sem cena não ganha folga', async () => {
