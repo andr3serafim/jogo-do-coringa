@@ -2,6 +2,8 @@
 export const TIMERS = {
   equipMs: 40_000,
   orderMs: 10_000,
+  /** A janela da Ressurreição (ponto 16), por jogador: 15 s (autor, 2026-11-03 (5)). */
+  resurrectionMs: 15_000,
   turnMs: 30_000,
   reactionMs: 8_000,
   reactionMinMs: 2_000,
@@ -19,8 +21,9 @@ export const TIMERS = {
  * Versão do formato gravado no storage (spec §9.3). 2: o estado perdeu a `pressure` (a Pressão da mesa saiu no sub-projeto 5).
  * 3: o estado perdeu `noDamageStreak` e `hpLostThisRound`, e o placar os empates (o anti-travamento saiu na E1).
  * 4: o Reflect deixou de ficar armado (F2): `reflect` só existe na resposta a ele, e a reação `REFLECT_PLAYED` mudou de dono.
+ * 5: a fase `RESURRECTION` e a troca da Ressurreição (ponto 16).
  */
-export const STATE_SCHEMA = 4;
+export const STATE_SCHEMA = 5;
 
 /** Limites por sala (spec §4, §8). */
 export const ROOM_LIMITS = {

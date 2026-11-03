@@ -3,7 +3,7 @@ import type { GameState } from '@coringa/engine';
 import { SCENE_MS } from '@coringa/protocol';
 import type { PlayerAction, StateMessage } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
-import { handId, setup, values } from '@coringa/engine/testing';
+import { handId, setup, values, type PlayerSetup, type Setup } from '@coringa/engine/testing';
 import { applyHeldPass, applyTimeout, autoSteps } from '../../src/core/game.ts';
 import { schedulePhase } from '../../src/core/timing.ts';
 import { TIMERS } from '../../src/core/timers.ts';
@@ -633,6 +633,51 @@ describe('nenhum TIMEOUT injetado é recusado pelo motor', () => {
       }
       expect(state).toEqual(rec.game!.state);
     }
+  });
+});
+
+describe('a janela da Ressurreição (ponto 16)', () => {
+  /** A revelação do Equipar da rodada 2: cada numérica pendente no Ataque, com P2 na iniciativa. */
+  async function revealed(p1: PlayerSetup, p2: PlayerSetup, graveyard: Setup['graveyard']) {
+    const room = await armed(setup({ round: 2, roundKind: 'EQUIP', phase: { kind: 'EQUIP' }, initiative: 'p2', p1, p2, graveyard }));
+    const pendingOf = (seat: 'p1' | 'p2') => room.h.core.record!.game!.state.players.find((p) => p.id === seat)!.pending;
+    await act(room.h, room.p1, 'e1', { type: 'EQUIP', destinations: pendingOf('p1').map(() => 'ATK' as const) });
+    await act(room.h, room.p2, 'e2', { type: 'EQUIP', destinations: pendingOf('p2').map(() => 'ATK' as const) });
+    return room;
+  }
+
+  it('15 s por jogador; o tempo esgotado passa só quem decide, sem estouro; a vez do segundo é época nova com prazo cheio', async () => {
+    const { h, p1, p2 } = await revealed({ attack: [7, 7, 7], pending: [7] }, { attack: [8, 8, 8], pending: [8] }, [5]);
+    const rec = h.core.record!;
+    expect(phaseOf(h)).toEqual({ kind: 'RESURRECTION', player: 'p2', next: 'p1' });
+    for (const sock of [p1, p2]) {
+      expect(lastState(h, sock).deadline).toEqual({ kind: 'RESURRECTION', at: h.now + TIMERS.resurrectionMs, players: ['p2'] });
+    }
+    const epoch = rec.epoch;
+    h.advance(TIMERS.resurrectionMs + TIMERS.graceMs);
+    expect(phaseOf(h)).toEqual({ kind: 'RESURRECTION', player: 'p1', next: null });
+    expect(rec.epoch).toBe(epoch + 1);
+    expect(lastState(h, p1).deadline).toEqual({ kind: 'RESURRECTION', at: h.now + TIMERS.resurrectionMs, players: ['p1'] });
+    h.advance(TIMERS.resurrectionMs + TIMERS.graceMs);
+    expect(phaseOf(h)).toEqual({ kind: 'ORDER_CHOICE', player: 'p2' });
+    expect(rec.game!.strikes).toEqual({ p1: 0, p2: 0 });
+  });
+
+  it('a Ressurreição que segue a cadeia mantém a época e estende o prazo pela cena; a que fecha dá à ordem 10 s mais a folga', async () => {
+    const { h, p1 } = await revealed({ attack: [7, 7, 7], pending: [7], defense: [9, 9, 9] }, { pending: [2] }, [9, 5]);
+    const rec = h.core.record!;
+    expect(phaseOf(h)).toEqual({ kind: 'RESURRECTION', player: 'p1', next: null });
+    const epoch = rec.epoch;
+    const before = rec.game!.phaseDeadlineAt!;
+    const graveyard = () => rec.game!.state.graveyard.filter((c) => c.kind === 'NUM');
+    await act(h, p1, 'r1', { type: 'RESURRECT', cardId: graveyard().find((c) => c.kind === 'NUM' && c.value === 9)!.id, row: 'DEF' });
+    expect(phaseOf(h)).toEqual({ kind: 'RESURRECTION', player: 'p1', next: null });
+    expect(rec.epoch).toBe(epoch);
+    expect(rec.game!.phaseDeadlineAt).toBe(before + SCENE_MS.Resurrected!);
+    await act(h, p1, 'r2', { type: 'RESURRECT', cardId: graveyard()[0]!.id, row: 'ATK' });
+    expect(phaseOf(h)).toEqual({ kind: 'ORDER_CHOICE', player: 'p2' });
+    const st = lastState(h, p1);
+    expect(st.deadline!.at - st.serverNow).toBe(TIMERS.orderMs + SCENE_MS.Resurrected!);
   });
 });
 

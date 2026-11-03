@@ -23,7 +23,7 @@ const CAUSE_TEXT: Record<OutcomeCause, string> = {
   ABANDONED: 'os dois saíram: partida sem resultado',
 };
 
-const KIND_TEXT = { EQUIP: 'Equipar', ORDER: 'Escolha da ordem', TURN: 'Turno', REACTION: 'Janela de reação' } as const;
+const KIND_TEXT = { EQUIP: 'Equipar', ORDER: 'Escolha da ordem', TURN: 'Turno', REACTION: 'Janela de reação', RESURRECTION: 'Janela da Ressurreição' } as const;
 
 /** Por que a conexão fechou de vez (spec §4.2). */
 const CLOSE_TEXT: Record<number, string> = {

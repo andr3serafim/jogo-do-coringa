@@ -348,6 +348,7 @@ const CLOCK_START_TEXT: Record<DeadlineKind, string> = {
   REACTION: 'Sua reação',
   EQUIP: 'Monte suas cartas',
   ORDER: 'Escolha a ordem',
+  RESURRECTION: 'Sua Ressurreição',
 };
 
 const secondsText = (seconds: number): string => `${seconds} ${seconds === 1 ? 'segundo' : 'segundos'}`;
