@@ -4,8 +4,8 @@
 //
 // As batidas são contíguas: `startMs` da batida i+1 = `startMs + durationMs` da batida i. Não há
 // sobreposição; o número de dano, a faixa e a tremida acontecem dentro da duração da própria batida.
-import type { GameEvent } from '@coringa/engine';
-import { SCENE_MS } from '@coringa/protocol';
+import type { GameEvent, PlayerId } from '@coringa/engine';
+import { SCENE_MS, SPECIAL_MOMENT_MS, momentsMs } from '@coringa/protocol';
 import { SCENE_MOMENTS } from './scene-moments.ts';
 
 /** Duração de uma cena na tabela do protocolo (a mesma que dá a folga do relógio no servidor, sub-projeto 6 §9). */
@@ -35,6 +35,16 @@ export const RARE_SCENE_MS = {
  * espremia em poucos ms. No `catchUp` (reconexão), anda como as outras.
  */
 export const INITIATIVE_BANNER_MS = 1_200;
+/**
+ * O momento da especial do oponente (bloco A dos pontos do playtest, ponto 1): a carta vira e cresce no centro (`flipMs`), a placa diz
+ * o que ela fez (`plateMs`) e ela voa ao destino ou ao alvo (`flyMs`). O segundo do turno em diante é mais curto. As somas são as do
+ * protocolo (`SPECIAL_MOMENT_MS`), que dá a folga do relógio. Fica fora do teto de decisão: é a informação que o jogador precisa para
+ * decidir a reação.
+ */
+export const MOMENT_MS = {
+  first: { flipMs: 300, plateMs: 1_000, flyMs: 300 },
+  next: { flipMs: 250, plateMs: 600, flyMs: 250 },
+} as const;
 /** Teto de uma linha do tempo que antecede uma decisão do jogador. */
 export const DECISION_CAP_MS = 1_000;
 /** Teto de uma linha do tempo de `catchUp` (eventos perdidos na reconexão). */
@@ -97,7 +107,7 @@ const SCENE_INVERT_HOLD_MS = 600;
 
 export interface Beat {
   event: GameEvent;
-  kind: 'move' | 'damage' | 'banner' | 'scene' | 'quiet';
+  kind: 'move' | 'damage' | 'banner' | 'scene' | 'quiet' | 'moment';
   /** Instante de início, em ms desde o começo da linha do tempo. */
   startMs: number;
   durationMs: number;
@@ -115,6 +125,12 @@ export interface Beat {
   absorbed: boolean;
   /** O Ataque Absoluto que um Reflect intercepta: o feixe não dispara no retrato, porque nada o acerta (§7.5). */
   intercepted: boolean;
+  /**
+   * No momento da especial do oponente: quando a carta grande começa a voar (`flyAtMs`) e quando chega ao destino ou ao alvo
+   * (`impactAtMs`, o fim da batida), absolutos como `startMs`. O pouso, a saída das cartas e os atrasos de layout contam do impacto.
+   * `null` fora do momento.
+   */
+  moment: { flyAtMs: number; impactAtMs: number } | null;
 }
 
 export interface TimelineOptions {
@@ -122,10 +138,22 @@ export interface TimelineOptions {
   reducedMotion: boolean;
   /** Há uma decisão do jogador esperando: tudo cabe em `DECISION_CAP_MS`. */
   decisionPending: boolean;
+  /** Quem vê esta mesa: a especial do outro vira momento. Sem ele (os testes e o replay de antes), nenhum momento. */
+  viewer?: PlayerId | null;
+  /** Quantos momentos o turno já teve nos `state`s anteriores (`momentsMs`). */
+  momentsBefore?: number;
+  /**
+   * Online (decisoes.md 2026-11-03 (5), A9a): a sua especial segura o tempo do momento que o oponente vê, sem a carta grande e fora do
+   * teto, para a sua jogada seguinte não cortar o momento dele.
+   */
+  holdOwnMoments?: boolean;
+  /** Quantas especiais suas o turno já teve, na conta do momento que o oponente vê. */
+  ownMomentsBefore?: number;
 }
 
 interface Classified {
-  kind: Beat['kind'];
+  /** O momento não sai da tabela: é a especial de quem não é `viewer`, decidida depois (`buildTimeline`). */
+  kind: Exclude<Beat['kind'], 'moment'>;
   cards: string[];
   scene: SceneKind | null;
 }
@@ -214,7 +242,7 @@ function classify(event: GameEvent): Classified {
   }
 }
 
-function baseDuration(kind: Beat['kind'], scene: SceneKind | null): number {
+function baseDuration(kind: Classified['kind'], scene: SceneKind | null): number {
   if (kind === 'quiet') return 0;
   return kind === 'scene' ? RARE_SCENE_MS[scene!] : BEAT_MS[kind];
 }
@@ -235,12 +263,47 @@ export function buildTimeline(events: GameEvent[], options: TimelineOptions): Be
   const items = events.map((event) => {
     const classified = classify(event);
     const flattened = catchUp && classified.kind === 'scene';
-    const kind: Beat['kind'] = flattened ? 'banner' : classified.kind;
+    const kind: Classified['kind'] = flattened ? 'banner' : classified.kind;
     const scene = flattened ? null : classified.scene;
     const held = !catchUp && event.type === 'InitiativeDecided';
     const baseMs = held ? INITIATIVE_BANNER_MS : baseDuration(kind, scene) / (catchUp ? 2 : 1);
-    return { event, kind, cards: classified.cards, scene, baseMs, uncapped: held || scene !== null, hit: null as Beat['hit'], absorbed: false };
+    return {
+      event,
+      kind: kind as Beat['kind'],
+      cards: classified.cards,
+      scene,
+      baseMs,
+      uncapped: held || scene !== null,
+      hit: null as Beat['hit'],
+      absorbed: false,
+      phases: null as (typeof MOMENT_MS)[keyof typeof MOMENT_MS] | null,
+    };
   });
+  // Os momentos (bloco A dos pontos do playtest, ponto 1), só ao vivo: a especial de quem não é `viewer` vira `moment`; online (A9a), a
+  // sua segura o tempo do momento que o oponente vê. As duas contas seguem `momentsMs`, evento a evento (o `TurnStarted` zera).
+  const viewer = options.viewer ?? null;
+  if (!catchUp && viewer !== null) {
+    const other: PlayerId = viewer === 'p1' ? 'p2' : 'p1';
+    let theirs = options.momentsBefore ?? 0;
+    let mine = options.ownMomentsBefore ?? 0;
+    for (const item of items) {
+      const seen = momentsMs([item.event], viewer, theirs);
+      theirs = seen.count;
+      if (seen.ms > 0) {
+        item.kind = 'moment';
+        item.baseMs = seen.ms;
+        item.uncapped = true;
+        item.phases = seen.ms === SPECIAL_MOMENT_MS.first ? MOMENT_MS.first : MOMENT_MS.next;
+      }
+      if (!options.holdOwnMoments) continue;
+      const shown = momentsMs([item.event], other, mine);
+      mine = shown.count;
+      if (shown.ms > 0) {
+        item.baseMs = shown.ms;
+        item.uncapped = true;
+      }
+    }
+  }
   // O golpe do Ataque Absoluto acontece dentro da cena dele (sub-projeto 6 §7.1): o `DamageDealt` do mesmo atacante que vem
   // depois da cena vira o golpe dela. Entre os dois só pode haver a Guarda que o Ataque Absoluto quebra inteira (`GuardBroken`,
   // que segue como batida própria) e batidas quietas.
@@ -290,7 +353,20 @@ export function buildTimeline(events: GameEvent[], options: TimelineOptions): Be
       }
     }
     const hit = item.hit && { event: item.hit.event, atMs: startMs + HIT_AT[item.scene!]! };
-    beats.push({ event: item.event, kind: item.kind, startMs, durationMs, cards: item.cards, scene: item.scene, invert, hit, absorbed: item.absorbed, intercepted: yields });
+    const moment = item.phases && { flyAtMs: startMs + item.phases.flipMs + item.phases.plateMs, impactAtMs: startMs + durationMs };
+    beats.push({
+      event: item.event,
+      kind: item.kind,
+      startMs,
+      durationMs,
+      cards: item.cards,
+      scene: item.scene,
+      invert,
+      hit,
+      absorbed: item.absorbed,
+      intercepted: yields,
+      moment,
+    });
     startMs += durationMs;
   }
   return beats;

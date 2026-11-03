@@ -1,5 +1,60 @@
+import type { GameEvent, SpecialCard } from '@coringa/engine';
 import { describe, expect, it } from 'vitest';
-import { SCENE_ALLOWANCE_CAP_MS, SCENE_MS, sceneAllowanceMs } from '../src/index.ts';
+import {
+  MOMENT_PLAYS,
+  SCENE_ALLOWANCE_CAP_MS,
+  SCENE_MS,
+  SPECIAL_MOMENT_MS,
+  isMomentFor,
+  momentsMs,
+  sceneAllowanceMs,
+  stepAllowanceMs,
+} from '../src/index.ts';
+
+const face = (id: string, kind: 'J' | 'Q' | 'K' = 'J'): SpecialCard => ({ id, kind, suit: 'ouros' });
+const buff = (player: 'p1' | 'p2', id = 'j1'): GameEvent => ({ type: 'BuffPlayed', player, card: face(id), as: 'J' });
+
+describe('o momento da especial do oponente (bloco A do playtest, ponto 1)', () => {
+  it('as cinco jogadas especiais, e os tempos do primeiro e dos seguintes', () => {
+    expect([...MOMENT_PLAYS].sort()).toEqual(['BuffPlayed', 'CardStolen', 'GuardPlayed', 'Sacrificed', 'TrapUsed']);
+    expect(SPECIAL_MOMENT_MS).toEqual({ first: 1_600, next: 1_100 });
+  });
+
+  it('o primeiro do turno dura o momento inteiro; o seguinte, no mesmo turno, o curto', () => {
+    expect(momentsMs([buff('p2')], 'p1')).toEqual({ ms: 1_600, count: 1 });
+    expect(momentsMs([buff('p2')], 'p1', 1)).toEqual({ ms: 1_100, count: 2 });
+    expect(momentsMs([buff('p2'), buff('p2', 'j2')], 'p1')).toEqual({ ms: 2_700, count: 2 });
+  });
+
+  it('quem jogou não vê o próprio momento', () => {
+    expect(momentsMs([buff('p1')], 'p1')).toEqual({ ms: 0, count: 0 });
+    expect(isMomentFor(buff('p1'), 'p1')).toBe(false);
+    expect(isMomentFor(buff('p2'), 'p1')).toBe(true);
+    expect(isMomentFor({ type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 9, defense: 4, damage: 5 }, 'p1')).toBe(false);
+  });
+
+  it('o TurnStarted zera a conta', () => {
+    const events: GameEvent[] = [{ type: 'GuardPlayed', player: 'p2', cards: [face('k1', 'K')] }, { type: 'TurnStarted', player: 'p2' }, buff('p2')];
+    expect(momentsMs(events, 'p1')).toEqual({ ms: 3_200, count: 1 });
+    expect(momentsMs([{ type: 'TurnStarted', player: 'p1' }], 'p1', 3)).toEqual({ ms: 0, count: 0 });
+  });
+
+  it('sem lado (`null`), as especiais dos dois contam', () => {
+    expect(momentsMs([buff('p1'), buff('p2', 'j2')], null)).toEqual({ ms: 2_700, count: 2 });
+  });
+
+  it('uma Guarda de 3 K jogada de uma vez é um momento só', () => {
+    const guard: GameEvent = { type: 'GuardPlayed', player: 'p2', cards: [face('k1', 'K'), face('k2', 'K'), face('k3', 'K')] };
+    expect(momentsMs([guard], 'p1')).toEqual({ ms: 1_600, count: 1 });
+  });
+
+  it('a folga do passo soma as cenas e os momentos, até o teto', () => {
+    const resurrected: GameEvent = { type: 'Resurrected', player: 'p2', card: { id: 'n1', kind: 'NUM', value: 5, suit: 'copas' }, row: 'ATK' };
+    expect(stepAllowanceMs([resurrected, buff('p2'), buff('p2', 'j2')], 'p1')).toBe(7_300);
+    expect(stepAllowanceMs([buff('p1')], 'p1')).toBe(0);
+    expect(stepAllowanceMs([{ type: 'Exodia', player: 'p2' }, { type: 'AbsoluteAttack', player: 'p2' }, buff('p2')], 'p1')).toBe(SCENE_ALLOWANCE_CAP_MS);
+  });
+});
 
 describe('folga de cena (sub-projeto 6 §9)', () => {
   it('a cena rara rende a sua duração; evento sem cena não rende nada', () => {
