@@ -20,10 +20,12 @@
   - **ponto 18, ajustado** e **ponto 17, fechado** (`diario.md` 2026-11-03 (1) e (2));
   - a fatia 5 do sub-projeto 6 e os pontos diretos 3, 4, 7, 8 e 12 (`diario.md` 2026-11-02 (8)), **aprovada** em 2026-11-03 (4).
 - **Ajuste depois da aprovação da 4b:** as cartas da quadra perderam o losango de ouro do canto (`decisoes.md` 2026-11-02 (6)); o fundo dourado, a moldura, o brilho e o selo ficam. Não mude isso de volta seguindo a letra antiga do §6.
+- **Também feito:** o **plano do bloco A** (pontos 1, 2, 6 e 9): `docs/superpowers/plans/2026-11-03-playtest-bloco-a.md`, com 8 tarefas e as escolhas A1 a A8 para o autor aprovar. **Não aprovado ainda.**
+- **Em paralelo:** a sessão do **bloco E** (a regra do 16), aberta em 2026-11-03 num worktree próprio (branch `ressurreicao-quadra`, saída da `feat/playtest-spec`). Ela escreve a regra na spec das regras e o plano, e leva o plano ao autor nela mesma. Ela escreve o estado dela numa seção própria, `## Bloco E (sessão paralela)`. Terminada e conferida, a sessão sai (`decisoes.md` 2026-11-03 (4)).
 - **Próximo passo exato:**
-  1. Subir `feat/playtest-spec` (o pre-push roda o `pnpm check`), esperar as duas CI e mesclar na `main` por fast-forward.
-  2. Abrir a sessão do **bloco E** (a regra do 16, §7 da spec), em worktree próprio, em paralelo: spec das regras, plano, aprovação do autor, execução. Quando ela terminar e o resultado for conferido, a sessão sai (`decisoes.md` 2026-11-03 (4)).
-  3. Escrever o plano do **bloco A** (pontos 1, 2, 6 e 9; `superpowers:writing-plans`), em `docs/superpowers/plans/`, e entregá-lo ao autor para aprovar antes da execução.
+  1. Esperar as duas CI da `feat/playtest-spec` e mesclar na `main` por fast-forward.
+  2. O autor aprova (ou ajusta) o plano do bloco A e as escolhas A1 a A8. O que ele disser entra no `decisoes.md`, com o texto dele.
+  3. Aprovado: branch `feat/playtest-bloco-a` saída da `main`, e a execução tarefa por tarefa (A8), teste primeiro.
   4. O deploy e o playtest online são dele (`notas/playtest.md`). O deploy leva o conserto do Equipar vazio do online.
 - **Para medir uma cena com a 8787 ocupada:** `MEDIR_PORTA=8797` no `medir-cena.ts`. Para o E2E inteiro numa porta livre, a receita está no `diario.md` 2026-11-02 (8) (uma configuração que importa o `playwright.config.ts` e troca a porta).
 - **Para ver a Ressurreição sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave `coringa:partidas` e abra `/partidas/exodia-devastacao`. "Próximo

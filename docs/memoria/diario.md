@@ -25,7 +25,18 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   (mesclada) saiu; a `feat/online-equipar-vazio` (rebase não publicado, 2 commits fora da `main`) ficou.
 - **Armadilha:** um `cd` para dentro do worktree de outra sessão faz o app tratar o worktree como a pasta desta sessão. Volte com `cd`
   para o checkout principal antes de apagar a outra sessão.
-- **Próximo:** a CI e a `main`; a sessão do bloco E; o plano do bloco A, para ele aprovar.
+- **A sessão do bloco E** foi aberta (worktree próprio, branch `ressurreicao-quadra`, saída da `feat/playtest-spec`), com a regra do 16
+  no brief: spec das regras, plano, aprovação do autor nela, execução. Combinado com ela: o estado dela numa seção própria do
+  `estado.md`, só acréscimos no diário e nas decisões, e aviso antes de tocar nos arquivos da web do bloco A.
+- **O plano do bloco A** (`docs/superpowers/plans/2026-11-03-playtest-bloco-a.md`), escrito a partir da leitura do código:
+  - **o momento** é uma batida nova (`moment`) da linha do tempo, fora do teto de decisão, com o voo e o impacto dentro dela; a conta
+    dos momentos do turno é uma função pura do protocolo (`momentsMs`), lida pela linha do tempo, pelo bot do treino e pelo servidor;
+  - **achados que a spec não dizia:** as faixas são `aria-hidden` (o registro acessível é o histórico), então a placa também (A4); o
+    véu de 35% é troca de luminância e passa pela `FlashLock` (A3); a consequência usa o total do motor, não o multiplicador (A5); o
+    Selvagem como alvo não diz de que zona saiu, e a placa fica só com o título; o bot do treino não pode esperar o momento das jogadas
+    do próprio jogador (o K dele abriria a janela do Bot 1,6 s depois);
+  - **escolhas para ele:** A1 a A8 no começo do plano, com a recomendação em cada uma.
+- **Próximo:** a CI e a `main`; o autor aprova o plano do bloco A.
 
 ---
 
