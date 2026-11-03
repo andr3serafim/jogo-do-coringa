@@ -19,7 +19,7 @@ export {
 } from './combat.ts';
 export { nextFloat, nextInt, seedRng, shuffle } from './rng.ts';
 export { autoDestinations } from './actions/equip.ts';
-export { quadValues } from './quads.ts';
+export { quadValues, resurrectionRows } from './quads.ts';
 export {
   absoluteAttackArmed,
   previewAttack,

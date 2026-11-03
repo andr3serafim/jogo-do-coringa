@@ -55,6 +55,12 @@ export interface RulesConfig {
    * no Equipar seguinte. Sem o campo (replays antigos), nada limita. A forma fica com o autor, depois da medição.
    */
   specialLimit?: { max: number; penalty: 'BURN' | 'CHOOSE' | 'FEWER' };
+  /**
+   * A Ressurreição no instante da quadra (ponto 16 do playtest, autor em 2026-11-03): a janela depois da revelação do Equipar e, com
+   * as duas fileiras cheias, a troca da última carta (a da quadra não sai). Sem o campo (replays de antes), a regra de antes: só na
+   * fase principal, só em fileira com vaga.
+   */
+  resurrectOnQuad?: boolean;
 }
 
 export type Destination = 'ATK' | 'DEF' | 'REPLACE_LAST_ATK' | 'REPLACE_LAST_DEF' | 'DISCARD';
@@ -81,6 +87,15 @@ export interface Resurrection {
   value: Rank;
   formedAtRound: number;
 }
+
+/**
+ * Onde a ressuscitada pode entrar numa fileira (spec §1.8, ponto 16): no fim (`APPEND`), no lugar da última (`REPLACE`, a `leaving` vai
+ * ao cemitério) ou não entra (`BLOCKED`): `FULL`, a fileira cheia com vaga na outra (ou sem a troca), `QUAD`, a última é da quadra.
+ */
+export type ResurrectionRow =
+  | { kind: 'APPEND' }
+  | { kind: 'REPLACE'; leaving: NumCard }
+  | { kind: 'BLOCKED'; reason: 'FULL' | 'QUAD'; last: NumCard };
 
 export interface PlayerState {
   id: PlayerId;
@@ -281,6 +296,7 @@ export type RuleErrorCode =
   | 'ALREADY_SUBMITTED'
   | 'NO_RESURRECTION'
   | 'ROW_FULL'
+  | 'QUAD_PROTECTED'
   | 'ATTACK_ROW_EMPTY'
   | 'ATTACK_ROW_NOT_EMPTY'
   | 'HAND_LIMIT';
