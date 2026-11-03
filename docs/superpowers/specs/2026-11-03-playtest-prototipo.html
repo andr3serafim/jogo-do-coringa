@@ -187,6 +187,38 @@ button.ctl.ativo { background: var(--ouro); }
 .nivel11 { position: absolute; font: 400 22px 'Alfa', serif; color: var(--ouro); }
 .nivel11 small { display: block; font: 700 12.5px 'Archivo'; color: #bdb8ad; margin-top: 4px; }
 input[type=range].ctl-range { width: 260px; accent-color: var(--ouro); }
+
+/* ---------- 13: a espada e o escudo ---------- */
+.totais { position: absolute; right: 30px; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
+.total { display: flex; align-items: center; gap: 8px; font: 800 30px 'Archivo'; font-variant-numeric: tabular-nums; color: var(--tinta); }
+.total .icone { position: relative; width: 40px; height: 40px; display: grid; place-items: center; overflow: hidden; }
+.total .icone svg { width: 24px; height: 24px; color: var(--tinta); position: relative; z-index: 1; }
+.total .icone.lider { background: radial-gradient(circle at 40% 35%, #fff3c4, var(--ouro) 60%, #d9a21c); border: 3px solid var(--tinta); box-shadow: 0 0 0 2px var(--ouro), 0 0 14px 4px rgba(245,194,56,.75); }
+.total .icone.lider::after { content: ''; position: absolute; top: -10px; bottom: -10px; width: 14px; left: -24px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent); transform: skewX(-20deg); animation: brilho13 3.2s ease-in-out infinite; }
+@keyframes brilho13 { 0%, 62% { left: -24px; } 100% { left: 130%; } }
+.reduzido .total .icone.lider::after { animation: none; display: none; }
+
+/* ---------- 14: o monte e o cemitério ---------- */
+.banda14 { position: absolute; left: 0; right: 0; background: var(--tinta); }
+.banda14 .fase { position: absolute; top: 50%; transform: translateY(-50%); font: 800 13px 'Archivo'; color: var(--ouro); }
+.pilha-monte .verso { width: 46px; height: 64px; }
+.lapide { position: absolute; width: 120px; height: 112px; background: linear-gradient(180deg, #5d544c, #3b342e); border: 3px solid #0b0908; border-radius: 60px 60px 6px 6px; box-shadow: inset 0 0 0 3px #6e655c, 4px 4px 0 #000; }
+.lapide .gravado { position: absolute; left: 0; right: 0; top: 16px; text-align: center; font: 400 11px 'Alfa', serif; letter-spacing: .14em; color: #2a2420; text-shadow: 0 1px 0 #7b7168; }
+.lapide .conta { position: absolute; left: 0; right: 0; top: 30px; text-align: center; font: 900 16px 'Archivo'; color: #e9e3d8; }
+.lapide .rachas { position: absolute; inset: 0; pointer-events: none; }
+.cova { position: absolute; width: 150px; height: 70px; background: radial-gradient(ellipse at 50% 40%, #0b0908 30%, #2a211b 70%); clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%); border-top: 6px solid #5b4636; }
+.cova-terra { position: absolute; height: 18px; border-radius: 50% 50% 0 0; background: #5b4636; }
+.placa-cova { position: absolute; font: 900 13px 'Archivo'; color: var(--tinta); background: #c9a77a; border: 2.5px solid var(--tinta); padding: 1px 8px; transform: rotate(-4deg); }
+
+/* ---------- 15: o golpe final ---------- */
+.tarja15 { position: absolute; left: 0; right: 0; background: #000; z-index: 40; transform: scaleY(0); }
+.corte15 { position: absolute; z-index: 35; height: 34px; transform-origin: 0 50%; pointer-events: none;
+  background: linear-gradient(180deg, transparent 0 8%, var(--tinta) 8% 18%, var(--vermelho) 18% 30%, var(--ouro) 30% 42%, #fffdf3 42% 58%, var(--ouro) 58% 70%, var(--vermelho) 70% 82%, var(--tinta) 82% 92%, transparent 92%);
+  clip-path: polygon(0 50%, 4% 0, 100% 35%, 100% 65%, 4% 100%); filter: drop-shadow(0 0 12px rgba(245,194,56,.8)); }
+.carimbo15 { position: absolute; left: 50%; top: 190px; z-index: 45; font: 400 64px 'Alfa', serif; color: var(--papel); background: var(--vermelho); border: 6px solid var(--tinta); box-shadow: 9px 9px 0 #000; padding: 6px 30px 2px; text-shadow: 4px 4px 0 var(--tinta); white-space: nowrap; letter-spacing: .03em; }
+.fim15 { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 46; background: var(--papel); color: var(--tinta); border: 5px solid var(--tinta); box-shadow: 8px 8px 0 #000; padding: 18px 40px; text-align: center; }
+.fim15 b { display: block; font: 400 40px 'Alfa', serif; }
+.fim15 span { font: 700 14px 'Archivo'; }
 </style>
 </head>
 <body>
@@ -326,6 +358,59 @@ input[type=range].ctl-range { width: 260px; accent-color: var(--ouro); }
   <p class="escolha"><b>Sem escolha de forma pendente.</b> Uma de regra: "seguidas" conta as rodadas de Ataque em que a iniciativa terminou
     com o mesmo jogador; quando ela troca de mão, a aura apaga de uma vez (com um sopro de fumaça). Os raios da super aura são pequenos e no
     máximo 3 por segundo, dentro da regra de fotossensibilidade.</p>
+</section>
+
+<section class="ponto" id="p13">
+  <h2>13 · A espada e o escudo de quem está na frente <small>VOCÊ PEDIU: AURA DOURADA</small></h2>
+  <p class="sub">Quem tem o <b>Ataque maior</b> da mesa (comparando os dois Ataques) ganha a espada dourada, com o fundo de ouro e o brilho
+    que passa, como a carta da quadra. O mesmo com a <b>Defesa maior</b> e o escudo. No empate, ninguém. Quando a liderança troca, o ouro
+    passa de um campo ao outro.</p>
+  <div class="frame"><div class="stage" id="p13-stage" data-w="1000" data-h="270"></div></div>
+  <div class="controles">
+    <span class="rotulo">ATAQUE</span>
+    <button class="ctl ativo" data-p13a="voce">o seu é maior</button><button class="ctl" data-p13a="bot">o dele é maior</button><button class="ctl" data-p13a="empate">empate</button>
+    <span class="rotulo" style="margin-left:14px">DEFESA</span>
+    <button class="ctl" data-p13d="voce">a sua é maior</button><button class="ctl ativo" data-p13d="bot">a dele é maior</button><button class="ctl" data-p13d="empate">empate</button>
+  </div>
+  <p class="escolha"><b>Uma leitura para você confirmar:</b> eu comparei Ataque com Ataque e Defesa com Defesa, como você escreveu. Outra
+    leitura seria "o meu Ataque passa a Defesa dele" (quem fura); ela é mais útil para decidir, mas é a prévia do golpe, que já está no botão
+    Atacar. Recomendo a sua leitura literal.</p>
+</section>
+
+<section class="ponto" id="p14">
+  <h2>14 · O monte e o cemitério no centro <small>VOCÊ PEDIU: MAIS CENTRAL E COM IDENTIDADE</small></h2>
+  <p class="sub">Hoje os dois ficam no canto direito da faixa do meio. Proposta: a faixa engorda um pouco e os dois vão para o <b>centro da
+    mesa</b>, lado a lado, entre os campos, com a situação da rodada dos lados. O cemitério ganha um desenho próprio. Toque em "uma carta cai"
+    para ver a chegada.</p>
+  <div class="frame"><div class="stage" id="p14-stage" data-w="1000" data-h="300"></div></div>
+  <div class="controles">
+    <span class="rotulo">VARIANTE</span>
+    <button class="ctl ativo" data-p14v="A">A · lápide</button>
+    <button class="ctl" data-p14v="B">B · cova aberta</button>
+    <span class="rotulo" style="margin-left:14px">TOCAR</span>
+    <button class="ctl" id="p14-cai">Uma carta cai no cemitério</button>
+  </div>
+  <p class="escolha"><b>Recomendo A.</b> A lápide se lê de longe como "onde as cartas morrem", e a carta do topo continua à vista, encostada
+    nela (o cemitério abre a lista quando tocado, como hoje). A cova é mais nova, mas esconde a carta do topo, que importa para a Ressurreição.
+    Nas duas, o centro custa uns 30 px de altura no celular: medi que cabe, mas confiro com fotos no plano.</p>
+</section>
+
+<section class="ponto" id="p15">
+  <h2>15 · O golpe final <small>VOCÊ PEDIU: UMA CENA CURTA QUANDO O ATAQUE COMUM ENCERRA</small></h2>
+  <p class="sub">Quando um ataque comum leva a vida do outro a zero, antes do painel do fim: as tarjas de cinema descem, a sua fileira de
+    Ataque acende carta a carta, o <b>corte</b> atravessa a mesa até o retrato dele, a tela inverte uma vez (o congelamento do golpe), a barra
+    dele zera e racha, e o carimbo <b>GOLPE FINAL</b> cai. Cerca de 2,2 s; um toque pula, como nas outras cenas.</p>
+  <div class="frame"><div class="stage" id="p15-stage" data-w="1000" data-h="430"></div></div>
+  <div class="controles">
+    <span class="rotulo">TOCAR</span>
+    <button class="ctl" id="p15-tocar">O seu ataque comum derruba o Bot</button>
+    <span class="rotulo" style="margin-left:14px">VARIANTE</span>
+    <button class="ctl ativo" data-p15v="A">A · corte com congelamento</button>
+    <button class="ctl" data-p15v="B">B · câmera lenta, sem inverter</button>
+  </div>
+  <p class="escolha"><b>Recomendo A.</b> A inversão no impacto é a mesma linguagem do Ataque Absoluto e da Exódia (uma por cena, ≥ 300 ms,
+    dentro da regra de fotossensibilidade), e o carimbo dá o fecho que você pediu para quem vence. Quando é o Bot que vence, a mesma cena vem
+    espelhada, e o carimbo diz <b>DERROTA</b>. A B é mais calma; serve se a A parecer exagerada para uma partida que já acabou.</p>
 </section>
 
 <!-- SECOES -->
@@ -934,6 +1019,189 @@ function raio(parent, x1, y1, x2, y2, cor = O, largura = 2.5) {
   }
   faixa.addEventListener('input', montar);
   document.addEventListener('reduzido', montar);
+  montar();
+})();
+// ------------------------------------------------------------------------------------------------
+// Ponto 13: a espada e o escudo de quem lidera
+(() => {
+  const st = document.getElementById('p13-stage');
+  let atk = 'voce', def = 'bot';
+  const VAL = { atk: { voce: [74, 52], bot: [52, 74], empate: [60, 60] }, def: { voce: [38, 26], bot: [26, 38], empate: [30, 30] } };
+  function montar() {
+    st.innerHTML = '';
+    st.append(el('div', 'campo bot', '', { top: '0', height: '125px' }), el('div', 'faixa-centro', '', { top: '125px', height: '20px' }), el('div', 'campo voce', '', { top: '145px', height: '125px' }), el('div', 'grao'));
+    st.append(el('div', 'rotulo-zona', 'BOT', { left: '24px', top: '12px' }), el('div', 'rotulo-zona', 'VOCÊ', { left: '24px', top: '157px' }));
+    [[0, 'bot'], [145, 'voce']].forEach(([y, lado]) => {
+      for (let i = 0; i < 6; i++) st.append(carta([6, 9, 3, 10, 7, 8][(i + (lado === 'bot' ? 2 : 0)) % 6], { x: 110 + i * 52, y: y + 30, vermelha: i % 2 === 0 }));
+      const i = lado === 'voce' ? 0 : 1;
+      const [a, d] = [VAL.atk[atk][i], VAL.def[def][i]];
+      const liderA = atk === lado, liderD = def === lado;
+      const tot = el('div', 'totais', `
+        <div class="total"><span class="icone${liderA ? ' lider' : ''}"><svg viewBox="0 0 24 24">${ESPADA}</svg></span><span>${a}</span></div>
+        <div class="total"><span class="icone${liderD ? ' lider' : ''}"><svg viewBox="0 0 24 24">${ESCUDO}</svg></span><span>${d}</span></div>`, { top: `${y + 12}px` });
+      st.append(tot);
+      // A liderança que muda: o ouro chega com um sopro.
+      if (!REDUZIDO) tot.querySelectorAll('.lider').forEach((ic) => ic.animate([{ scale: '0.6', opacity: 0 }, { scale: '1.15', opacity: 1, offset: 0.6 }, { scale: '1' }], { duration: 360, easing: 'ease-out' }));
+    });
+  }
+  const liga = (attr, set) => document.querySelectorAll(`[${attr}]`).forEach((b) => b.addEventListener('click', () => {
+    set(b.getAttribute(attr));
+    document.querySelectorAll(`[${attr}]`).forEach((x) => x.classList.toggle('ativo', x === b));
+    montar();
+  }));
+  liga('data-p13a', (v) => (atk = v));
+  liga('data-p13d', (v) => (def = v));
+  montar();
+})();
+
+// ------------------------------------------------------------------------------------------------
+// Ponto 14: o monte e o cemitério no centro
+(() => {
+  const st = document.getElementById('p14-stage');
+  let variante = 'A', conta = 7, tocando = false;
+  const TOPO = [{ v: 5, verm: true }, { v: 9, verm: false }];
+  function montar() {
+    st.innerHTML = '';
+    // hoje
+    st.append(el('div', 'campo bot', '', { top: '0', height: '40px' }), el('div', 'banda14', '', { top: '40px', height: '30px' }), el('div', 'campo voce', '', { top: '70px', height: '40px' }));
+    st.append(el('div', 'rotulo-zona', 'HOJE', { left: '14px', top: '14px' }));
+    const hb = st.lastChild.previousSibling;
+    st.append(el('div', '', 'Ataque · vez do Bot', { position: 'absolute', left: '24px', top: '48px', font: "800 12px 'Archivo'", color: O }));
+    st.append(el('div', '', 'MONTE <b class="num">76</b> · CEMITÉRIO <b class="num">7</b>', { position: 'absolute', right: '24px', top: '48px', font: "800 11px 'Archivo'", color: P, letterSpacing: '.08em' }));
+    // proposta
+    const y0 = 130;
+    st.append(el('div', 'campo bot', '', { top: `${y0}px`, height: '30px' }), el('div', 'banda14', '', { top: `${y0 + 30}px`, height: '110px' }), el('div', 'campo voce', '', { top: `${y0 + 140}px`, height: '30px' }), el('div', 'grao', '', { top: '0' }));
+    st.append(el('div', 'rotulo-zona', 'PROPOSTA', { left: '14px', top: `${y0 + 8}px` }));
+    st.append(el('div', 'fase', 'Ataque · vez do Bot', { position: 'absolute', left: '24px', top: `${y0 + 85}px`, font: "800 13px 'Archivo'", color: O, transform: 'translateY(-50%)' }));
+    st.append(el('div', 'fase', 'Treino · Médio, sem relógio', { position: 'absolute', right: '24px', top: `${y0 + 85}px`, font: "700 12px 'Archivo'", color: '#bdb8ad', transform: 'translateY(-50%)' }));
+    // o monte: a pilha com três versos e a conta
+    const mx = 400, my = y0 + 52;
+    for (let i = 2; i >= 0; i--) st.append(el('div', 'verso', '', { left: `${mx + i * 3}px`, top: `${my - i * 3}px`, width: '46px', height: '64px' }));
+    st.append(el('div', 'rotulo-zona', 'MONTE <span class="num" style="font-size:13px">76</span>', { left: `${mx - 6}px`, top: `${my - 26}px`, color: P }));
+    // o cemitério
+    if (variante === 'A') {
+      const lx = 520, ly = y0 + 34;
+      const lap = el('div', 'lapide', `<div class="gravado">CEMITÉRIO</div><div class="conta num" id="p14-conta">${conta}</div>
+        <svg class="rachas" viewBox="0 0 120 104"><path d="M78 20l-6 14 7 8-5 12" stroke="#2a2420" stroke-width="1.6" fill="none"/><path d="M30 60l8 6-3 9" stroke="#2a2420" stroke-width="1.4" fill="none"/></svg>`, { left: `${lx}px`, top: `${ly}px` });
+      st.append(lap);
+      // As cartas do topo encostadas na frente da lápide.
+      st.append(carta(TOPO[1].v, { x: lx + 26, y: ly + 52, w: 40, h: 56, vermelha: TOPO[1].verm }));
+      const topo = carta(TOPO[0].v, { x: lx + 50, y: ly + 56, w: 40, h: 56, vermelha: TOPO[0].verm });
+      topo.style.transform = 'rotate(8deg)'; topo.id = 'p14-topo';
+      st.append(topo);
+    } else {
+      const cx = 510, cy = y0 + 70;
+      st.append(el('div', 'cova-terra', '', { left: `${cx - 14}px`, top: `${cy - 14}px`, width: '50px' }), el('div', 'cova-terra', '', { left: `${cx + 120}px`, top: `${cy - 12}px`, width: '44px' }));
+      st.append(el('div', 'cova', '', { left: `${cx}px`, top: `${cy}px` }));
+      st.append(el('div', 'placa-cova num', `CEMITÉRIO · <span id="p14-conta">${conta}</span>`, { left: `${cx + 18}px`, top: `${cy - 40}px` }));
+      const c1 = carta(9, { x: cx + 40, y: cy + 14, w: 34, h: 48 }); c1.style.transform = 'rotate(-60deg)'; c1.style.filter = 'brightness(.55)';
+      const c2 = carta(5, { x: cx + 70, y: cy + 10, w: 34, h: 48, vermelha: true }); c2.style.transform = 'rotate(70deg)'; c2.style.filter = 'brightness(.7)'; c2.id = 'p14-topo';
+      st.append(c1, c2);
+    }
+  }
+  async function cai() {
+    if (tocando) return;
+    tocando = true;
+    const nova = carta(7, { x: 300, y: 285, w: 40, h: 56 });
+    nova.style.zIndex = 10;
+    st.appendChild(nova);
+    const alvo = variante === 'A' ? { x: 562, y: 218 } : { x: 555, y: 212 };
+    await anima(nova, [{ transform: 'translate(0,0) rotate(0)' }, { transform: `translate(${alvo.x - 300}px, ${alvo.y - 285 - 40}px) rotate(-10deg)`, offset: 0.7 }, { transform: `translate(${alvo.x - 300}px, ${alvo.y - 285}px) rotate(${variante === 'A' ? -4 : 50}deg)` }], { duration: 520, easing: 'cubic-bezier(.3,.6,.5,1)' }).finished;
+    faiscas(st, alvo.x + 20, alvo.y + 52, { n: 7, cor: variante === 'A' ? '#8a7d70' : '#5b4636', raio: 26, vida: 480, tam: 6 });
+    if (variante === 'B' && !REDUZIDO) nova.animate([{ filter: 'brightness(1)' }, { filter: 'brightness(.6)' }], { duration: 400, fill: 'forwards' });
+    conta += 1;
+    const c = document.getElementById('p14-conta'); if (c) c.textContent = conta;
+    await espera(300);
+    tocando = false;
+  }
+  document.querySelectorAll('[data-p14v]').forEach((b) => b.addEventListener('click', () => {
+    variante = b.dataset.p14v;
+    document.querySelectorAll('[data-p14v]').forEach((x) => x.classList.toggle('ativo', x === b));
+    montar();
+  }));
+  document.getElementById('p14-cai').addEventListener('click', cai);
+  montar();
+})();
+
+// ------------------------------------------------------------------------------------------------
+// Ponto 15: o golpe final
+(() => {
+  const st = document.getElementById('p15-stage');
+  let variante = 'A', tocando = false;
+  function montar() {
+    st.innerHTML = '';
+    st.style.filter = '';
+    st.append(el('div', 'hud', '', { height: '78px' }), el('div', 'campo bot', '', { top: '78px', height: '150px' }), el('div', 'faixa-centro', '', { top: '228px', height: '22px' }), el('div', 'campo voce', '', { top: '250px', height: '180px' }), el('div', 'grao', '', { top: '78px' }));
+    const rv = retrato('voce', 12, 7, 62), rb = retrato('bot', 926, 7, 62);
+    rb.id = 'p15-rb';
+    st.append(rv, rb);
+    const bv = el('div', 'barra', '<div class="vida" style="width:58%"></div>', { left: '86px', top: '16px', width: '300px' });
+    const bb = el('div', 'barra', '<div class="vida" id="p15-vb" style="width:9%;left:auto;right:0"></div>', { right: '86px', top: '16px', width: '300px' });
+    bb.id = 'p15-bb';
+    st.append(bv, bb, el('div', 'pv num', '290 <small>/500</small>', { left: '86px', top: '46px' }), el('div', 'pv num', '<span id="p15-pv">45</span> <small>/500</small>', { right: '86px', top: '46px' }));
+    [5, 8, 2].forEach((v, i) => st.append(carta(v, { x: 160 + i * 52, y: 120, vermelha: i === 1 })));
+    [9, 7, 10, 6, 8, 9].forEach((v, i) => { const c = carta(v, { x: 160 + i * 52, y: 300, vermelha: i % 2 === 0 }); c.dataset.atk = i; st.append(c); });
+    st.append(el('div', 'rotulo-zona', 'SEU ATAQUE · 98 × 2', { left: '160px', top: '378px' }));
+  }
+  async function tocar() {
+    if (tocando) return;
+    tocando = true;
+    montar();
+    const cima = el('div', 'tarja15', '', { top: '78px', height: '30px', transformOrigin: 'top' }), baixo = el('div', 'tarja15', '', { bottom: '0', height: '40px', transformOrigin: 'bottom' });
+    st.append(cima, baixo);
+    [cima, baixo].forEach((t) => anima(t, [{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }], { duration: 220 }));
+    // A fileira de Ataque acende carta a carta.
+    const atk = [...st.querySelectorAll('[data-atk]')];
+    for (const c of atk) {
+      c.animate([{ boxShadow: '2px 3px 0 rgba(23,18,15,.35)' }, { boxShadow: `0 0 0 3px ${O}, 0 0 18px 6px rgba(245,194,56,.85)` }], { duration: 120, fill: 'forwards' });
+      await espera(REDUZIDO ? 0 : (variante === 'A' ? 55 : 90));
+    }
+    await espera(REDUZIDO ? 0 : 160);
+    // O corte atravessa a mesa até o retrato dele.
+    const x0 = 300, y0 = 330, x1 = 957, y1 = 38;
+    const ang = Math.atan2(y1 - y0, x1 - x0), len = Math.hypot(x1 - x0, y1 - y0);
+    const corte = el('div', 'corte15', '', { left: `${x0}px`, top: `${y0 - 17}px`, width: `${len}px`, transform: `rotate(${ang}rad) scaleX(0)` });
+    st.appendChild(corte);
+    if (!REDUZIDO) await corte.animate([{ transform: `rotate(${ang}rad) scaleX(0)` }, { transform: `rotate(${ang}rad) scaleX(1)` }], { duration: variante === 'A' ? 150 : 420, fill: 'forwards', easing: variante === 'A' ? 'cubic-bezier(.7,0,.9,.5)' : 'ease-in-out' }).finished;
+    // O impacto: na A, a tela inverte uma vez (≥ 300 ms) e treme; a barra dele zera e racha.
+    if (variante === 'A' && !REDUZIDO) {
+      st.style.filter = 'invert(1)';
+      st.animate([{ translate: '0 0' }, { translate: '-6px 3px' }, { translate: '6px -3px' }, { translate: '-4px 2px' }, { translate: '0 0' }], { duration: 260 });
+      setTimeout(() => (st.style.filter = ''), 330);
+    }
+    faiscas(st, x1, y1, { n: 14, cor: O, raio: 70, vida: 620, tam: 6 });
+    const vb = document.getElementById('p15-vb');
+    vb.animate([{ width: '9%' }, { width: '0%' }], { duration: 300, fill: 'forwards' });
+    document.getElementById('p15-pv').textContent = '0';
+    const racha = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    racha.setAttribute('viewBox', '0 0 62 62');
+    Object.assign(racha.style, { position: 'absolute', left: '926px', top: '7px', width: '62px', height: '62px', zIndex: 5, overflow: 'visible' });
+    racha.innerHTML = `<path d="M8 4 L26 24 L20 34 L40 46 L36 60" stroke="${T}" stroke-width="4" fill="none" stroke-linejoin="round"/><path d="M26 24 L44 14" stroke="${T}" stroke-width="3" fill="none"/>`;
+    st.appendChild(racha);
+    corte.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 400, delay: 200, fill: 'forwards' });
+    await espera(REDUZIDO ? 0 : 380);
+    // O carimbo.
+    const carimbo = el('div', 'carimbo15', 'GOLPE FINAL!', { transform: 'translateX(-50%) rotate(-4deg)' });
+    st.appendChild(carimbo);
+    anima(carimbo, [{ transform: 'translateX(-50%) rotate(-4deg) scale(2.2)', opacity: 0 }, { transform: 'translateX(-50%) rotate(-4deg) scale(1)', opacity: 1 }], { duration: 200, easing: 'cubic-bezier(.5,0,.8,.4)' });
+    await espera(200);
+    if (!REDUZIDO) { st.animate([{ translate: '0 0' }, { translate: '0 5px' }, { translate: '0 0' }], { duration: 160 }); faiscas(st, 500, 230, { n: 12, cor: T, raio: 160, vida: 500, tam: 9 }); }
+    await espera(800);
+    // O painel do fim entra (no jogo, é o painel de hoje).
+    carimbo.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250, fill: 'forwards' });
+    [cima, baixo].forEach((t) => t.animate([{ transform: 'scaleY(1)' }, { transform: 'scaleY(0)' }], { duration: 250, fill: 'forwards' }));
+    const fim = el('div', 'fim15', '<b>VITÓRIA</b><span>Você derrubou o Bot na rodada 17</span>');
+    st.appendChild(fim);
+    fim.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 150, fill: 'both' });
+    await espera(600);
+    tocando = false;
+  }
+  document.getElementById('p15-tocar').addEventListener('click', tocar);
+  document.querySelectorAll('[data-p15v]').forEach((b) => b.addEventListener('click', () => {
+    variante = b.dataset.p15v;
+    document.querySelectorAll('[data-p15v]').forEach((x) => x.classList.toggle('ativo', x === b));
+    montar();
+  }));
   montar();
 })();
 /* JS-SECOES */
