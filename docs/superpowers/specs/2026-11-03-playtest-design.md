@@ -1,13 +1,16 @@
 # Os pontos do playtest: desenho
 
-> **RASCUNHO, NÃO APROVADO.** Escrito em 2026-11-03 com o autor fora (`decisoes.md` 2026-11-03 (3)), para ele reagir. As recomendações
-> são minhas; as perguntas da §9 são dele. Nada daqui vira código antes da aprovação dele.
+> **Spec, com as respostas do autor** (`decisoes.md` 2026-11-03 (4)). Escrita como rascunho em 2026-11-03, com o autor fora
+> (2026-11-03 (3)); ele respondeu às 8 perguntas no mesmo dia: aprovou a ordem, a variante A em todos os pontos e as recomendações das
+> perguntas 5 a 7, mudou o ponto 4 (só a aura, sem texto) e escreveu a regra do 16 (§7.2). As escolhas da §10 são minhas, à vista
+> dele. Cada bloco vira um plano, que ele aprova antes da execução.
 
 - **Origem:** os pontos 1, 2, 5, 6, 9, 10, 11, 13 e 14 (`decisoes.md` 2026-11-02 (9)), o 15 (2026-11-02 (10)) e o 16 (2026-11-03 (1)).
   Os diretos (3, 4, 7, 8, 12 e 18) já estão na `main`; o 17 foi fechado (era a Armadilha, 2026-11-03 (2)).
 - **Protótipo:** `docs/superpowers/specs/2026-11-03-playtest-prototipo.html`. Abre direto no navegador, com dois cliques no arquivo
   (conferido: as fontes vêm de `packages/web/node_modules` por caminho relativo, sem erro no console), ou num servidor estático com a raiz
-  no repositório. Cada ponto tem o seu quadro, os botões para tocar e as variantes.
+  no repositório. Cada ponto tem o seu quadro, os botões para tocar e as variantes; vale a **A** em todos. Os nomes embaixo das zonas do
+  ponto 10 são legenda do protótipo, não texto do jogo.
 - **Números do ponto 16:** `docs/memoria/notas/medicao-ponto-16.md` (2.000 partidas greedy × greedy).
 
 ## 1. A intenção
@@ -25,9 +28,9 @@ E uma regra (16): a Ressurreição deve valer no instante em que a quadra se for
 **O que seria fracasso mesmo funcionando:** a mesa virar um carnaval (tudo brilhando o tempo todo, nada se destaca); as jogadas ficarem
 lentas (cada especial uma cena longa); a tela piscar; o celular de 360 px não caber; o ritmo de 50 quadros/s com a CPU 4× cair.
 
-## 2. A ordem proposta
+## 2. A ordem
 
-São cinco blocos independentes. Proposta de ordem, a mais valiosa primeiro:
+São cinco blocos independentes. A ordem, a mais valiosa primeiro (aprovada pelo autor):
 
 | Bloco | Pontos | Por quê nesta posição |
 |---|---|---|
@@ -35,7 +38,7 @@ São cinco blocos independentes. Proposta de ordem, a mais valiosa primeiro:
 | B. O golpe final | 15 | Curto, isolado, e fecha a partida com o clímax que falta |
 | C. O poder que cresce | 10, 11, 13 | Depende de A nas marcas (o 6) e mexe no motor (o 11) |
 | D. Identidade | 5, 14 | Puro visual; o 14 mexe no arranjo da mesa, que pede fotos em todas as telas |
-| E. A Ressurreição no instante da quadra | 16 | Regra: motor, bots, calibração e portão do Difícil. Pode correr em paralelo, numa sessão própria, assim que as regras da §9 forem respondidas |
+| E. A Ressurreição no instante da quadra | 16 | Regra: motor, bots, calibração e portão do Difícil. Corre em paralelo, numa sessão própria |
 
 Cada bloco vira uma fatia com plano, teste primeiro, fotos e medição, como as fatias do sub-projeto 6.
 
@@ -54,7 +57,7 @@ Cada bloco vira uma fatia com plano, teste primeiro, fotos e medição, como as 
   uma, 25% têm duas, 5,8% têm três e 0,8% têm quatro. Na janela de reação ao seu turno, 6,8% dos seus turnos recebem uma. **Compressão:** a
   primeira especial do turno dele tem o momento inteiro; a segunda em diante, no mesmo turno, tem a placa por ~0,6 s (o momento fica em
   ~1,1 s). Com o pensar do bot (600 ms) entre elas, o turno de duas especiais leva ~3,9 s, e o de três ~5,6 s. Um toque pula, como nas cenas.
-- **Variantes no protótipo:** A, no centro (recomendada); B, na beira do campo dele.
+- **Variante:** A, no centro (escolhida; a B era na beira do campo dele).
 - **Onde mexe:** `model/timeline.ts` ganha uma batida nova para essas jogadas (hoje são `move`), que não encolhe no teto de 1 s: ela é a
   informação que o jogador precisa para decidir a reação. O texto da placa sai de uma função de cópia nova (`model/copy.ts`), com os
   totais do motor. A carta grande é uma cópia, como as cartas que saem (`Leaving.tsx`).
@@ -68,7 +71,7 @@ Cada bloco vira uma fatia com plano, teste primeiro, fotos e medição, como as 
 - **O que muda:** a carta sem jogada **agora** fica apagada (dessaturada e mais escura), desce 8 px, para de respirar e ganha um cadeado
   pequeno no canto. A que joga fica em pé, respirando, com um fio de ouro embaixo. O toque na apagada segue mostrando o motivo (o balão de
   hoje, do `noPlayReason` do motor).
-- **Variantes:** A, apagada com cadeado (recomendada); B, carimbo "AGORA NÃO".
+- **Variante:** A, apagada com cadeado (escolhida; a B era o carimbo "AGORA NÃO").
 - **Onde mexe:** `Hand.tsx` e `TableCard.tsx`. A informação já existe (as zonas da jogada e o `locked` da mesa); nenhuma regra na interface.
 - **"Joga agora"** inclui as jogadas em combinação (o Reflect, a Devastação, o Sacrifício): quem decide é a lista legal do motor
   (`legalActions`), e uma carta só apaga se nenhuma jogada legal a usa. O J com 4 J nos Bônus, por exemplo, segue aceso se o Sacrifício
@@ -104,7 +107,7 @@ Cada bloco vira uma fatia com plano, teste primeiro, fotos e medição, como as 
   Ataque acende carta a carta; o corte atravessa a mesa até o retrato do outro; no impacto, a tela inverte uma vez (≥ 300 ms, a regra de
   fotossensibilidade) e treme; a barra dele zera e o retrato racha; o carimbo **GOLPE FINAL!** cai. Depois, o painel do fim de hoje.
 - **Quem perde:** a mesma cena espelhada (o corte vem do campo dele), e o carimbo diz **DERROTA**.
-- **Variantes:** A, corte com congelamento (recomendada); B, câmera lenta, sem inverter.
+- **Variante:** A, corte com congelamento (escolhida; a B era câmera lenta, sem inverter).
 - **Onde mexe:** uma cena nova no módulo das cenas (`ui/scenes/`), a classificação em `timeline.ts`, os instantes em `scene-moments.ts`, a
   folga em `SCENE_MS` (o prazo do servidor e a espera do bot), os sons. O toque pula, como nas outras.
 
@@ -118,13 +121,13 @@ A mesma escada nas três zonas, cada uma com a sua cor:
 |---|---|---|---|
 | 1 | nada | nada | nada |
 | 2 | aceso (contorno de ouro) | aceso (brilho de papel) | cura passiva (pulso verde) |
-| 3 | faíscas (raios pequenos entre os J) | muralha (o escudo se ergue atrás) | **ameaça de Exódia** (brasa vermelha e a coroa tracejada) |
+| 3 | faíscas (raios pequenos entre os J) | muralha (o escudo se ergue atrás) | **ameaça de Exódia** (só a brasa vermelha nas cartas) |
 | 4 | Ataque Absoluto (a aura do Ataque Absoluto em volta) | Defesa Absoluta (o escudo de ouro) | Exódia (a partida acaba) |
 
 - **Cuidado:** os raios são pequenos e no máximo 3 por segundo; a aura usa as formas de `ui/scenes/aura.ts` (as mesmas da cena). Tudo
   some com o movimento reduzido, menos as cores.
-- **Uma mudança de leitura do jogo:** com 3 K, os dois lados veem o aviso "falta 1 K para a Exódia". A Guarda já é pública; hoje o
-  oponente precisa contar. Pergunta para o autor na §9.
+- **Os 3 K, sem texto** (o autor, 2026-11-03 (4)): nenhum aviso escrito; só a aura (a brasa) nas cartas, nos dois campos, porque a
+  Guarda é pública. A coroa tracejada do rascunho também saiu. Os nomes da tabela são para o plano, não aparecem na mesa.
 - **Onde mexe:** `PlayerField.tsx` (as zonas), `styles.css`, uma camada de efeitos para os raios (a `FxLayer` da fatia 5).
 
 ### 5.2 A aura da iniciativa (ponto 11)
@@ -157,7 +160,7 @@ A mesma escada nas três zonas, cada uma com a sua cor:
   toque, o carimbo afunda (a sombra some) e solta pingos de tinta. O **Atacar** é o maior e o único vermelho, com a espada e a prévia numa
   tira de papel; armado para o Ataque Absoluto, ganha a borda de ouro, a etiqueta e uma faísca que corre a borda. **Passar** é de papel,
   **Confirmar** é de ouro, **Desfazer** e **Recomeçar** viram selos redondos com o desenho girando no toque.
-- **Variantes:** A, carimbo (recomendada); B, cartaz rasgado.
+- **Variante:** A, carimbo (escolhida; a B era o cartaz rasgado).
 - **Cuidado:** alvo de toque ≥ 44 px, o contorno de foco do teclado (ouro com borda de tinta) visível em todos, e nada se mexe com o
   movimento reduzido (o afundar vira só a troca de cor).
 - **Onde mexe:** `ActionBar.tsx`, `controls.tsx`, `EquipPanel.tsx`, `OrderPanel.tsx`, `ReactionPanel.tsx`, `styles.css`.
@@ -167,7 +170,7 @@ A mesma escada nas três zonas, cada uma com a sua cor:
 - **O que muda:** a faixa do meio engorda (~30 px no celular, mais no PC) e o monte e o cemitério vão para o **centro**, lado a lado, com a
   situação da rodada à esquerda e o treino/relógio à direita. O cemitério vira uma **lápide** de pedra gravada, com a conta e as cartas do
   topo encostadas nela; a carta que chega cai com poeira.
-- **Variantes:** A, lápide (recomendada: a carta do topo continua à vista, e ela importa para a Ressurreição); B, cova aberta.
+- **Variante:** A, lápide (escolhida: a carta do topo continua à vista, e ela importa para a Ressurreição; a B era a cova aberta).
 - **Risco:** o PC de pouca altura (1366 × 657) precisa caber sem rolar (spec da web §3.3), e o celular de 360 × 640 já rola os campos.
   A faixa mais alta come altura dos campos: no PC baixo ela fica compacta. As fotos das quatro telas entram no plano, com o E2E de
   1366 × 657 que já existe.
@@ -186,29 +189,46 @@ Em 2.000 partidas (greedy × greedy, `notas/medicao-ponto-16.md`):
 - **54,9%** dos donos atacam **em segundo** na rodada seguinte: hoje eles só ressuscitam depois de levar o golpe do outro.
 - Os dois formando quadra na mesma revelação: 76 vezes em 2.000 partidas.
 
-### 7.2 A regra proposta (a confirmar na §9)
+### 7.2 A regra (do autor, 2026-11-03 (4))
 
-1. **Quando:** logo depois da revelação do Equipar que formou a quadra, antes da escolha da ordem do Ataque, abre uma **janela da
-   Ressurreição** para quem formou quadra.
-2. **Iniciativa:** se os dois formaram, quem tem a iniciativa decide primeiro; o outro decide vendo a jogada dele.
-3. **Opcional:** na janela, o jogador usa ou guarda. A Ressurreição guardada continua valendo como hoje (fase principal, enquanto a quadra
+O texto dele: "ao fazer a quadra o usuário deve ter opção de usar ressurreição antes do ataque, se as fileiras estiverem cheias, a última
+carta vai para o cemitério, desde que a última carta não seja uma carta da quadra formada, daí não é possível descarta-la". Perguntado
+depois, ele escolheu que a troca vale **também** na Ressurreição usada mais tarde. As leituras marcadas **[I]** são minhas, registradas
+no `decisoes.md`.
+
+1. **Quando:** ao formar a quadra, o dono pode usar a Ressurreição **antes do ataque**. Para a quadra da revelação do Equipar, abre uma
+   **janela da Ressurreição** logo depois da revelação, antes da escolha da ordem do Ataque **[I]**. A quadra que nasce na fase principal
+   (pelo Roubo ou pela própria Ressurreição) já está no turno do dono, antes do ataque dele: ali a Ressurreição já vale, como hoje.
+2. **Quem entra na janela:** quem formou quadra naquela revelação. Nela, a jogada é a Ressurreição de hoje, com qualquer uma das que ele
+   tem válidas **[I]**.
+3. **Iniciativa:** se os dois formaram, quem tem a iniciativa decide primeiro; o outro decide vendo a jogada dele **[I]**.
+4. **Opcional:** na janela, o jogador usa ou passa. A que ele guarda continua valendo como hoje (na fase principal, enquanto a quadra
    existir, com a garantia de 3 rodadas).
-4. **Fileira cheia:** se a fileira escolhida está cheia, a carta ressuscitada **substitui a última** dela; a substituída vai ao cemitério
-   (e cura, se era da Defesa com 2 K na Guarda, como a troca do Equipar). Vale em qualquer Ressurreição, também na fase principal. Com
-   vaga, ela entra no fim, como hoje.
-5. **Em cadeia:** se a carta ressuscitada forma outra quadra, a nova Ressurreição pode ser usada na mesma janela.
-6. **A carta substituída** não pode ser a ressuscitada no mesmo passo (escolhe-se do cemitério de antes da troca).
+5. **As duas fileiras cheias** **[I]** (como na troca do Equipar, spec das regras §1.4): a ressuscitada entra no lugar da **última** carta
+   da fileira escolhida, e essa vai ao cemitério. Com vaga numa fileira, a carta entra no fim da que tem vaga, como hoje.
+6. **A proteção da quadra:** a última carta que é da quadra não sai. "Da quadra" é toda numérica da fileira com o valor de uma quadra que
+   está nela (com 5 iguais, as 5), não só a que acabou de se formar: a troca nunca desfaz uma quadra **[I]**. Se a última de uma fileira
+   é da quadra, a ressuscitada só pode ir para a outra; se as duas são, a Ressurreição não pode ser usada agora e fica guardada.
+7. **Também depois:** a troca, com a mesma proteção, vale em toda Ressurreição com as duas fileiras cheias, também na fase principal.
+8. **A carta que sai cura** se era da Defesa com 2 K na Guarda: é a regra geral da cura passiva, que a troca do Equipar e o Roubo já
+   seguem **[I]**.
+9. **Em cadeia:** a ressuscitada que forma outra quadra dá outra Ressurreição, que pode ser usada na mesma janela **[I]** (na fase
+   principal já é assim).
+10. **A carta que sai** não pode ser a ressuscitada na mesma jogada: escolhe-se do cemitério de antes da troca **[I]**.
 
 ### 7.3 O que muda no código
 
 - **Motor:** uma fase nova (`RESURRECTION`, com a fila de quem decide), as jogadas `RESURRECT` (com a troca) e `PASS` nela, a troca também
-  na fase principal, a reavaliação das quadras, a cura da substituída. Testes de unidade e as invariantes.
+  na fase principal (hoje `resurrect` em `actions/main.ts` recusa a fileira cheia com `ROW_FULL`, e `legal-actions.ts` só lista a
+  fileira com vaga), a proteção da quadra (com `quadValues`), a reavaliação das quadras, a cura da que sai (`healFromDefense`). Testes de
+  unidade e as invariantes.
 - **Bots:** o greedy e o `eval` aprendem a janela (e a troca); a busca do Difícil a enxerga.
 - **Simulador:** calibração e o portão do Difícil remedidos (`--recomecar`, porque muda regra).
 - **Partidas de referência:** mudam; sobe `RULES_VERSION`, novo digest, replays regravados.
 - **Servidor:** o prazo da janela nova; sobe o `STATE_SCHEMA`.
-- **Web:** a janela (o cemitério para escolher, a fileira e a prévia da troca), a cena da Ressurreição de hoje no fim, o tutorial.
-- **Regras na spec:** §1.8 da spec das regras.
+- **Web:** a janela (o cemitério para escolher, a fileira e a prévia da troca, a carta protegida que não sai), a cena da Ressurreição de
+  hoje no fim, o tutorial.
+- **Regras na spec:** §1.4 (o passo 7 da revelação abre a janela) e §1.8 da spec das regras.
 
 ## 8. Restrições que valem para todos
 
@@ -220,21 +240,19 @@ Em 2.000 partidas (greedy × greedy, `notas/medicao-ponto-16.md`):
 - **Arte original** (§10.6), **números sem textura** (§10.7), **sem regra na interface** (os números vêm do motor).
 - **O histórico continua** com todas as linhas: os momentos novos não o substituem.
 
-## 9. Perguntas para o autor
+## 9. As perguntas e as respostas do autor
 
-A mais importante em cima. Onde há recomendação, ela está entre parênteses.
+Respondidas em 2026-11-03 (`decisoes.md` 2026-11-03 (4)):
 
-1. **A regra do 16** (§7.2): a janela logo depois da revelação do Equipar, quem tem a iniciativa decide primeiro, opcional (guarda para a
-   fase principal), a troca da última carta em qualquer Ressurreição com a fileira cheia, a substituída curando como no Equipar. (Recomendo
-   tudo como está na §7.2.)
-2. **A ordem dos blocos** (§2): A, B, C, D, com o E em paralelo. (Recomendo essa.)
-3. **As variantes do protótipo:** 1, 2, 5, 14 e 15. (Recomendo A em todas.)
-4. **O aviso da ameaça de Exódia** com 3 K, visto pelos dois lados (§5.1). (Recomendo sim.)
-5. **A espada e o escudo** comparam Ataque com Ataque e Defesa com Defesa (§5.3). (Recomendo a leitura literal.)
-6. **A aura da iniciativa** conta as rodadas de Ataque seguidas e apaga quando a iniciativa troca; o motor passa a contar, e as salas
-   online abertas fecham no deploy (§5.2). (Recomendo sim.)
-7. **O momento da especial** estende o prazo online da decisão, como as cenas (§3.1). (Recomendo sim.)
-8. **A fatia 5:** você jogou e mandou os pontos novos, mas não disse se ela está aprovada. Com ela aprovada, o sub-projeto 6 fecha.
+1. **A regra do 16:** a proposta do rascunho não foi aprovada; vale a regra dele (§7.2), com a troca também depois.
+2. **A ordem dos blocos** (§2): aprovada.
+3. **As variantes do protótipo** (1, 2, 5, 14 e 15): a A em todas.
+4. **O aviso da ameaça de Exódia:** não aprovado. Nenhum texto; só a aura nas cartas (§5.1).
+5. **A espada e o escudo** comparam Ataque com Ataque e Defesa com Defesa (§5.3): aprovado.
+6. **A aura da iniciativa** contada pelo motor, apagando quando a iniciativa troca; as salas online abertas fecham no deploy (§5.2):
+   aprovado.
+7. **O momento da especial** estende o prazo online da decisão (§3.1): aprovado.
+8. **A fatia 5:** aprovada. O sub-projeto 6 fecha.
 
 ## 10. Escolhas que fiz (para conferir ao ler)
 
@@ -244,4 +262,7 @@ A mais importante em cima. Onde há recomendação, ela está entre parênteses.
 - A faixa da cura passiva só na primeira cura de cada partida.
 - A sequência da iniciativa é contada pelo motor, não pela interface.
 - As tarjas do golpe final ficam abaixo do placar; a derrota usa a mesma cena, espelhada.
-- Na regra do 16: a troca vale também na fase principal; a substituída cura como no Equipar; a cadeia de quadras continua na mesma janela.
+- Os 3 K: a coroa tracejada saiu junto com o texto ("apenas uma aura nas cartas").
+- Na regra do 16 (as **[I]** da §7.2): a janela antes da escolha da ordem; o segundo a decidir vê a jogada de quem tem a iniciativa;
+  "as fileiras cheias" são as duas, como no Equipar; a proteção vale para toda carta de quadra da fileira; a que sai cura pela regra geral;
+  a cadeia continua na mesma janela; a que sai não volta na mesma jogada.

@@ -6,6 +6,61 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-03 (4): as respostas às 8 perguntas do desenho; a regra do 16
+
+Às 8 perguntas da §9 do rascunho (`docs/superpowers/specs/2026-11-03-playtest-design.md`), com as recomendações que ele viu na
+mensagem de entrega:
+
+> 1. não aprovado. ao fazer a quadra o usuário deve ter opção de usar ressurreição antes do ataque, se as fileiras estiverem cheias, a última carta vai para o cemitério, desde que a última carta não seja uma carta da quadra formada, daí não é possível descarta-la.
+> 2. ok.
+> 3. ok.
+> 4. não aprovado. não exibir texto, apenas uma aura nas cartas já é o suficiente.
+> 5. ok.
+> 6. ok.
+> 7. ok.
+> 8. ok aprovada. prossiga.
+>
+> Não deve ficar sub sessões pendentes, se a sessão do "Online: Equipar vazio não pode coretar o golpe final" estiver finalizada, apague a sessão.
+
+Perguntado em seguida se, com as duas fileiras cheias, a troca da última carta vale só no instante da quadra ou também na Ressurreição
+usada depois, na fase principal, ele escolheu a opção **"Também depois"**, cujo texto dizia: "Com as duas fileiras cheias, a Ressurreição
+usada mais tarde também manda a última carta ao cemitério, com a mesma proteção: carta da quadra não sai."
+
+**Leitura:**
+- **Fatia 5 aprovada:** o sub-projeto 6 fecha.
+- **Aprovados como recomendados:** a ordem dos blocos (A: 1, 2, 6 e 9; B: 15; C: 10, 11 e 13; D: 5 e 14; o E, o 16, em paralelo numa
+  sessão própria); a variante A nos pontos 1, 2, 5, 14 e 15; a espada e o escudo comparando Ataque com Ataque e Defesa com Defesa; a aura
+  da iniciativa contada pelo motor (as rodadas de Ataque seguidas, apagando quando a iniciativa troca; as salas online abertas fecham no
+  deploy); o momento da especial do oponente estendendo o prazo online da decisão.
+- **"prossiga":** o rascunho vira spec com as respostas, e o plano do bloco A é escrito para ele aprovar antes da execução, como nas
+  fatias. **[I]** As escolhas da §10 do rascunho que ele não comentou ficam na spec como escolhas minhas, à vista dele; nenhuma foi
+  recusada.
+- **Ponto 4 (os 3 K):** nenhum texto. **[I]** Os 3 K na Guarda ganham só a aura (a brasa vermelha), nos dois campos (a Guarda é
+  pública); a coroa tracejada do protótipo também sai, porque ele disse "apenas uma aura nas cartas". O resto da escada do ponto 10 fica.
+- **A regra do 16** (substitui a §7.2 do rascunho):
+  - **Quando:** ao formar a quadra, o dono pode usar a Ressurreição dela antes do ataque. **[I]** Para a quadra da revelação do Equipar,
+    é uma janela logo depois da revelação, antes da escolha da ordem do Ataque. A quadra que nasce na fase principal (pelo Roubo ou pela
+    própria Ressurreição) já está no turno do dono, antes do ataque dele: ali a Ressurreição já vale, como hoje.
+  - **Opcional** ("deve ter opção"): **[I]** quem não usa guarda a Ressurreição, que segue valendo como hoje (na fase principal, enquanto
+    a quadra existir, com a garantia de 3 rodadas).
+  - **Iniciativa:** com os dois formando quadra na mesma revelação, quem tem a iniciativa decide primeiro (o "respeitando obviamente a
+    iniciativa" do ponto 16 original); **[I]** o outro decide vendo a jogada dele.
+  - **Fileiras cheias:** a última carta vai ao cemitério e a ressuscitada entra no lugar dela. **[I]** "As fileiras cheias" são as duas,
+    como na troca do Equipar (spec das regras §1.4): com vaga numa delas, a carta entra no fim da que tem vaga, como hoje.
+  - **A proteção da quadra:** a última carta que é da quadra não sai. **[I]** "A última" é a do fim da fileira escolhida: se a de uma
+    fileira é da quadra, a ressuscitada só pode ir para a outra; se as duas são, a Ressurreição não pode ser usada naquele instante e
+    fica guardada. **[I]** "Da quadra" é toda numérica da fileira com o valor de uma quadra que está nela (com 5 iguais, as 5 são a
+    quadra, como na regra das 8 iguais), não só a quadra que acabou de se formar: a troca nunca desfaz uma quadra.
+  - **Também depois:** a troca, com a mesma proteção, vale em toda Ressurreição com as duas fileiras cheias, também na fase principal.
+  - **[I] A carta que sai cura** se era da Defesa com 2 K na Guarda: é a regra geral da cura passiva (toda numérica da própria Defesa que
+    vai ao cemitério cura; a troca do Equipar e o Roubo já curam assim), não uma regra nova.
+  - **[I] Em cadeia:** a ressuscitada que forma outra quadra dá outra Ressurreição, que pode ser usada no mesmo instante (na fase
+    principal já é assim). **[I]** A carta que sai não pode ser a ressuscitada na mesma jogada: escolhe-se do cemitério de antes da troca.
+- **Sessões:** a do online terminou com o trabalho na `main` (`4f7621e`) e o worktree limpo, e foi apagada. **[I]** Vale daqui em diante:
+  sessão que terminou o trabalho dela e teve o resultado conferido sai, sem esperar ele pedir (a do bloco E também).
+
+---
+
 ## 2026-11-03 (3): seguir no desenho sozinho por algumas horas
 
 Perguntado se o bloco de desenho podia começar, combinando a ordem dos pontos com ele:

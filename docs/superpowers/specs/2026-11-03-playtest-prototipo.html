@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="pt-BR">
 <!-- Protótipo descartável do bloco de desenho do playtest de 2026-11-02 e 2026-11-03 (decisoes.md 2026-11-02 (9) e (10), 2026-11-03 (1)).
-     RASCUNHO, NÃO APROVADO: serve para o autor reagir e escolher. Vale o que se vê e o ritmo; o código não é para reaproveitar.
-     Rascunho do desenho: docs/superpowers/specs/2026-11-03-playtest-design.md. Arte original do projeto (spec da web §10.6). -->
+     Respondido pelo autor em 2026-11-03 (decisoes.md 2026-11-03 (4)): a variante A em todos os pontos; com 3 K, só a aura nas cartas.
+     Vale o que se vê e o ritmo; o código não é para reaproveitar. A spec: docs/superpowers/specs/2026-11-03-playtest-design.md. Arte original do projeto (spec da web §10.6). -->
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -223,11 +223,11 @@ input[type=range].ctl-range { width: 260px; accent-color: var(--ouro); }
 </head>
 <body>
 <div class="page">
-  <span class="selo-rascunho">RASCUNHO · NÃO APROVADO</span>
+  <span class="selo-rascunho">RESPONDIDO · VARIANTE A EM TODOS</span>
   <h1>Os pontos do playtest, para você ver e escolher</h1>
   <p class="sub">Cada seção é um ponto da sua lista. Toque nos botões embaixo de cada quadro para ver a proposta acontecer. Onde há
     <b>variantes (A, B)</b>, elas são as escolhas que dependem de você; a caixa dourada diz o que eu recomendo e por quê. Nada aqui está no
-    jogo ainda: depois das suas escolhas viram a spec e o plano. Os pontos de regra (o 16) estão no rascunho do desenho, com os números do simulador.</p>
+    jogo ainda. Você escolheu a variante A em todos os pontos (2026-11-03); a spec e a regra do 16 estão no desenho, com os números do simulador.</p>
   <div class="global">
     <label><input type="checkbox" id="reduzido"> Movimento reduzido (como a opção do menu do jogo)</label>
   </div>
@@ -331,17 +331,16 @@ input[type=range].ctl-range { width: 260px; accent-color: var(--ouro); }
 <section class="ponto" id="p10">
   <h2>10 · Os bônus que crescem com a quantidade <small>VOCÊ PEDIU: MAIS EMPOLGANTE A CADA CARTA</small></h2>
   <p class="sub">A mesma escada para as três zonas, cada uma com a sua cor: <b>1 carta</b>, nada; <b>2</b>, as cartas acendem; <b>3</b>, o
-    poder transborda (raios no J, a muralha no Q, a brasa da ameaça no K); <b>4</b>, o Absoluto (ou a Exódia, no K). Com 3 K, os dois lados
-    veem a brasa vermelha: "falta 1 K para a Exódia". Use os botões para subir e descer.</p>
+    poder transborda (raios no J, a muralha no Q, a brasa da ameaça no K); <b>4</b>, o Absoluto (ou a Exódia, no K). Com 3 K, só a brasa vermelha
+    nas cartas, sem texto e sem coroa (a sua decisão). Use os botões para subir e descer.</p>
   <div class="frame"><div class="stage" id="p10-stage" data-w="1000" data-h="300"></div></div>
   <div class="controles">
     <span class="rotulo">J</span><button class="ctl" data-p10="J-">−</button><button class="ctl" data-p10="J+">+</button>
     <span class="rotulo" style="margin-left:14px">Q</span><button class="ctl" data-p10="Q-">−</button><button class="ctl" data-p10="Q+">+</button>
     <span class="rotulo" style="margin-left:14px">K</span><button class="ctl" data-p10="K-">−</button><button class="ctl" data-p10="K+">+</button>
   </div>
-  <p class="escolha"><b>Recomendo a escada como está,</b> e uma pergunta para você: o aviso da ameaça de Exódia (3 K) muda a leitura da
-    partida para o oponente (hoje ele precisa contar os K). Eu acho que é justo, porque a Guarda já é pública; mas é uma mudança de jogo, e a
-    decisão é sua.</p>
+  <p class="escolha"><b>Decidido:</b> a escada como está, e com 3 K nenhum aviso em texto, só a aura nas cartas. Os nomes embaixo de cada
+    zona são legenda do protótipo, não vão para o jogo.</p>
 </section>
 
 <section class="ponto" id="p11">
@@ -890,7 +889,7 @@ function raio(parent, x1, y1, x2, y2, cor = O, largura = 2.5) {
   const NIVEL = {
     J: [['—', '×2 no seu Ataque'], ['ACESO', '×3: as cartas acendem'], ['FAÍSCAS', '×4: raios entre os J'], ['ATAQUE ABSOLUTO', '×5 e quebra todos os K']],
     Q: [['—', '×2 na sua Defesa'], ['ACESO', '×3: as cartas acendem'], ['MURALHA', '×4: o escudo se ergue'], ['DEFESA ABSOLUTA', 'imune até o golpe dele']],
-    K: [['—', 'segura 1 golpe'], ['CURA PASSIVA', 'a Defesa que cai cura'], ['AMEAÇA DE EXÓDIA', 'falta 1 K: os dois veem'], ['EXÓDIA', 'a partida acaba']],
+    K: [['—', 'segura 1 golpe'], ['CURA PASSIVA', 'a Defesa que cai cura'], ['BRASA', 'só a aura nas cartas, sem texto'], ['EXÓDIA', 'a partida acaba']],
   };
   const ROT = { J: 'BÔNUS DE ATAQUE', Q: 'BÔNUS DE DEFESA', K: 'GUARDA' };
   let timers = [];
@@ -946,14 +945,13 @@ function raio(parent, x1, y1, x2, y2, cor = O, largura = 2.5) {
       }
       if (kind === 'K') {
         if (tier === 2) cartas.classList.add('t-aceso-k');
-        if (tier >= 3) {
-          cartas.classList.add('t-ameaca-k');
+        if (tier >= 3) cartas.classList.add('t-ameaca-k');
+        if (tier === 4) {
           const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
           svg.setAttribute('viewBox', '0 0 44 26');
           Object.assign(svg.style, { position: 'absolute', left: '50%', top: '-34px', width: '96px', height: '56px', transform: 'translateX(-50%)', zIndex: 3, overflow: 'visible' });
-          svg.innerHTML = `<path d="M2 24 L5 6 L14 15 L22 2 L30 15 L39 6 L42 24 Z" fill="${tier === 4 ? O : 'rgba(184,38,28,.22)'}" stroke="${tier === 4 ? T : R}" stroke-width="${tier === 4 ? 2 : 1.4}" stroke-dasharray="${tier === 4 ? '' : '2.4 1.4'}" stroke-linejoin="round"/>`;
+          svg.innerHTML = `<path d="M2 24 L5 6 L14 15 L22 2 L30 15 L39 6 L42 24 Z" fill="${O}" stroke="${T}" stroke-width="2" stroke-linejoin="round"/>`;
           zona.append(svg);
-          if (tier === 3 && !REDUZIDO) svg.animate([{ opacity: 0.45 }, { opacity: 1 }], { duration: 1800, iterations: Infinity, direction: 'alternate', easing: 'ease-in-out' });
         }
       }
     });
