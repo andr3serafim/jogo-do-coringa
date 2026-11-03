@@ -1,7 +1,9 @@
 // A jogada comum na carta (sub-projeto 6 §8, fatia 5): a que sai da sua mão recua antes de voar, assenta com um achatamento e solta poeira;
-// a do Bot, que não tem de onde voar, espera a batida dela e cai no destino. O jsdom não tem `animate`: o teste o põe em `HTMLElement` (no
-// `Element.prototype` ele faria o Motion trocar de modo) e grava as chamadas.
+// a do Bot, que não tem de onde voar, aparece no impacto do momento dela (bloco A do playtest, ponto 1), e as do Equipar dele caem no
+// destino. O jsdom não tem `animate`: o teste o põe em `HTMLElement` (no `Element.prototype` ele faria o Motion trocar de modo) e grava as
+// chamadas.
 import type { GameEvent, NumCard, SpecialCard } from '@coringa/engine';
+import { SPECIAL_MOMENT_MS } from '@coringa/protocol';
 import { act } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TABLE_MOTION } from '../../src/model/table-motion.ts';
@@ -78,17 +80,17 @@ describe('a sua carta: recua, voa e assenta', () => {
   });
 });
 
-describe('a carta do Bot: cai no destino na batida dela', () => {
-  it('fica apagada até a batida, cai de 14 px e então achata e solta poeira', () => {
+describe('a carta do Bot: o momento a leva ao destino (bloco A do playtest, ponto 1)', () => {
+  it('fica apagada até o impacto do momento, aparece de uma vez, sem queda, e então achata e solta poeira', () => {
     const m = mount(BEFORE);
     emit(m, AFTER_BOT, [TURN, BOT_PLAY]);
+    // A faixa do turno (400 ms) e o momento inteiro (1,6 s): a cópia grande chega na carta de verdade aos 2 s.
+    const impact = 400 + SPECIAL_MOMENT_MS.first;
     const card = m.container.querySelector('[data-card-id="jb"]')!;
-    expect(card).toHaveAttribute('data-entra', '0.4');
-    const [fall] = on('jb', 'translate');
-    expect(fall!.options).toMatchObject({ delay: 400, duration: TABLE_MOTION.dropMs });
-    expect(fall!.frames[0]).toMatchObject({ translate: `0 -${TABLE_MOTION.dropPx}px` });
-    expect(on('jb', 'scale')[0]!.options).toMatchObject({ delay: 400 + TABLE_MOTION.dropMs });
-    advance(400 + TABLE_MOTION.dropMs);
+    expect(card).toHaveAttribute('data-entra', String(impact / 1000));
+    expect(on('jb', 'translate')).toHaveLength(0);
+    expect(on('jb', 'scale')[0]!.options).toMatchObject({ delay: impact });
+    advance(impact);
     expect(dustCount(m.container)).toBe(TABLE_MOTION.dust);
   });
 
@@ -105,12 +107,12 @@ describe('a carta do Bot: cai no destino na batida dela', () => {
 });
 
 describe('sem o movimento novo', () => {
-  it('com movimento reduzido: nada recua, cai ou achata, nenhuma poeira; a carta do Bot só esmaece na batida', () => {
+  it('com movimento reduzido: nada recua, cai ou achata, nenhuma poeira; a carta do Bot só esmaece no fim do momento', () => {
     const m = mount(BEFORE, { prefs: { reduceMotion: true } });
     emit(m, AFTER_BOT, [TURN, BOT_PLAY]);
     expect(calls.filter((call) => call.frames.some((frame) => 'translate' in frame || 'scale' in frame))).toHaveLength(0);
-    expect(m.container.querySelector('[data-card-id="jb"]')).toHaveAttribute('data-entra', '0.4');
-    advance(1_000);
+    expect(m.container.querySelector('[data-card-id="jb"]')).toHaveAttribute('data-entra', String((400 + SPECIAL_MOMENT_MS.first) / 1000));
+    advance(2_500);
     expect(dustCount(m.container)).toBe(0);
   });
 

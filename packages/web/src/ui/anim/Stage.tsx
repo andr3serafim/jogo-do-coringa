@@ -71,10 +71,15 @@ export interface StageProps {
   reducedMotion: boolean;
   /** As batidas do último `state` terminaram (no fim ou no pulo). */
   onSettled?: () => void;
+  /**
+   * A partida é online: a sua especial segura o tempo do momento que o oponente vê, para a sua jogada seguinte não cortar o momento dele
+   * (decisoes.md 2026-11-03 (5), A9a). O treino não precisa (o Bot espera), e o replay não passa.
+   */
+  online?: boolean;
   children: ReactNode;
 }
 
-export function Stage({ snapshot, reducedMotion, onSettled, children }: StageProps) {
+export function Stage({ snapshot, reducedMotion, onSettled, online = false, children }: StageProps) {
   const { state, room } = snapshot;
   // A decisão do jogador espera se há jogada legal para ele neste `state` (spec §4.1: tudo cabe em ~1 s).
   const names = useMemo(() => roomNames(state?.view.me ?? 'p1', room?.seats ?? []), [state, room]);
@@ -88,8 +93,12 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
   const [confirmedBefore, setConfirmedBefore] = useState(snapshot.equipConfirmed);
   const draftShown = confirmedBefore === 'thisPage';
   if (confirmedBefore !== snapshot.equipConfirmed) setConfirmedBefore(snapshot.equipConfirmed);
-  const player = useBeatPlayer(state, { reducedMotion, decisionPending: snapshot.legal.length > 0, bannerReadMs: readBanner, draftShown }, onSettled);
-  const { run, beat, index, busy, inverted, curtain, bannerBeat, banner, released, skip, hitLanded, cut } = player;
+  const player = useBeatPlayer(
+    state,
+    { reducedMotion, decisionPending: snapshot.legal.length > 0, bannerReadMs: readBanner, draftShown, holdOwnMoments: online },
+    onSettled,
+  );
+  const { run, beat, index, busy, inverted, curtain, veil, bannerBeat, banner, released, skip, hitLanded, cut } = player;
 
   const count: CountPhase =
     !busy || reducedMotion || run.damageIndex < 0 || index > run.damageIndex
@@ -216,7 +225,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       },
       landAt: (id) => {
         const landing = cut ? undefined : run.landings.get(id);
-        return landing === undefined ? null : { at: landing.atMs / 1000, drop: landing.drop, dust: landing.dust };
+        return landing === undefined ? null : { at: landing.atMs / 1000, drop: landing.drop, dust: landing.dust, ...(landing.snap ? { snap: true } : {}) };
       },
       enterDelay: (id) => {
         const startMs = busy ? run.deals.cards.get(id) : undefined;
@@ -370,6 +379,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
             <BeatOverlay
               scene={scene}
               curtain={curtain}
+              veil={veil}
               names={names}
               reduced={reducedMotion}
               me={me}

@@ -65,6 +65,8 @@ export interface CardProps {
 }
 
 const DEAL_FLY = { fly: true, fade: false } as const;
+/** O esmaecimento da carta que a cópia do momento encontra no destino: curto, para não haver duas cartas no lugar. */
+const SNAP_FADE_S = 0.05;
 /** O verso: só o que acabou de entrar na mão voa (ver `useDealIn`). */
 const BACK_FLY = { fly: true, fade: false, onlyNew: true } as const;
 
@@ -215,8 +217,10 @@ export function Card({
   // batida dela (só opacidade: vale com movimento reduzido).
   const dealt = animated ? anim.enterDelay(card.id) : null;
   const dropAt = landing?.drop ? landing.at - TABLE_MOTION.dropMs / 1000 : null;
-  const enter = dealt ?? dropAt;
-  const enterSeconds = dealt === null && dropAt !== null ? TABLE_MOTION.dropMs / 1000 : 0.25;
+  // A da especial do oponente aparece de uma vez no impacto: a cópia do momento chega nela (bloco A dos pontos do playtest, ponto 1).
+  const snapAt = landing?.snap ? landing.at : null;
+  const enter = dealt ?? dropAt ?? snapAt;
+  const enterSeconds = dealt !== null ? 0.25 : dropAt !== null ? TABLE_MOTION.dropMs / 1000 : snapAt !== null ? SNAP_FADE_S : 0.25;
   const self = useRef<HTMLElement | null>(null);
   const bindRef = useCallback(
     (el: HTMLElement | null) => {

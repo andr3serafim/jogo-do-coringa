@@ -28,6 +28,12 @@ export const TABLE_MOTION = {
 /** As batidas de cena desenham as próprias cópias: nada daqui vale nelas. */
 const plainBeats = (beats: readonly Beat[]): Beat[] => beats.filter((beat) => beat.scene === null);
 
+/**
+ * Quando a batida mexe na mesa: o início dela, ou, no momento da especial do oponente (bloco A dos pontos do playtest, ponto 1), o impacto,
+ * quando a carta grande chega ao destino ou ao alvo.
+ */
+export const touchMs = (beat: Beat): number => beat.moment?.impactAtMs ?? beat.startMs;
+
 /** As cartas que saem da mão de quem jogou, neste evento. */
 function handCards(event: GameEvent): { player: PlayerId; cards: SpecialCard[] } | null {
   switch (event.type) {
@@ -64,6 +70,11 @@ export interface Landing {
   drop: boolean;
   /** Quantos puffs de poeira ela solta: `dustPerCard` das cartas que pousam na mesma batida. */
   dust: number;
+  /**
+   * A carta não tinha de onde voar, e a cópia do momento chega nela (a especial do oponente): fica escondida até `atMs` e aparece de uma
+   * vez, com o achatamento e a poeira, sem a queda.
+   */
+  snap?: true;
 }
 
 /**
@@ -89,7 +100,8 @@ export function landingsOf(beats: readonly Beat[], me: PlayerId, draftShown: boo
         const cards = event.type === 'BuffPlayed' ? [event.card] : event.cards;
         const mine = event.player === me;
         for (const card of cards) {
-          here.push([card.id, mine ? { atMs: startMs + recoilMs + landAfterMs, drop: false } : { atMs: startMs + dropMs, drop: true }]);
+          if (beat.moment) here.push([card.id, { atMs: beat.moment.impactAtMs, drop: false, snap: true }]);
+          else here.push([card.id, mine ? { atMs: startMs + recoilMs + landAfterMs, drop: false } : { atMs: startMs + dropMs, drop: true }]);
         }
         break;
       }
@@ -97,7 +109,7 @@ export function landingsOf(beats: readonly Beat[], me: PlayerId, draftShown: boo
         for (const { card } of event.placements) here.push([card.id, { atMs: startMs + dropMs, drop: event.player !== me || !draftShown }]);
         break;
       case 'CardStolen':
-        here.push([event.card.id, { atMs: startMs + landAfterMs, drop: false }]);
+        here.push([event.card.id, { atMs: touchMs(beat) + landAfterMs, drop: false }]);
         break;
       default:
         break;
@@ -119,7 +131,10 @@ export interface Leaving {
 export function leavingOf(beats: readonly Beat[]): ReadonlyMap<string, Leaving> {
   const leaving = new Map<string, Leaving>();
   for (const beat of plainBeats(beats)) {
-    const { event, startMs } = beat;
+    const { event } = beat;
+    const startMs = touchMs(beat);
+    // No momento, a carta que o oponente usou vem da mão dele (versos sem id): quem a leva ao cemitério é a camada do momento.
+    const opponentHand = beat.kind === 'moment';
     const add = (cards: readonly { id: string }[], shatter: boolean) => {
       for (const card of cards) leaving.set(card.id, { startMs, shatter });
     };
@@ -136,11 +151,11 @@ export function leavingOf(beats: readonly Beat[]): ReadonlyMap<string, Leaving> 
         add([event.k, event.a, event.x], false);
         break;
       case 'CardStolen':
-        add([event.ace], false);
+        if (!opponentHand) add([event.ace], false);
         break;
       case 'TrapUsed':
       case 'Sacrificed':
-        add([event.card], false);
+        if (!opponentHand) add([event.card], false);
         add([event.target], true);
         break;
       case 'GuardBroken':
@@ -218,7 +233,7 @@ export function shiftDelaysOf(beats: readonly Beat[], view: PlayerView): Readonl
   const shifts = new Map<string, number>();
   for (const beat of plainBeats(beats)) {
     for (const { player, zones } of vacated(beat.event)) {
-      for (const zone of zones) for (const card of zoneCards(view, player, zone)) shifts.set(card.id, beat.startMs);
+      for (const zone of zones) for (const card of zoneCards(view, player, zone)) shifts.set(card.id, touchMs(beat));
     }
   }
   return shifts;

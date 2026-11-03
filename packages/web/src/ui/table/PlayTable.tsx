@@ -92,7 +92,8 @@ export function PlayTable(props: PlayTableProps) {
   }, [sound, soundOn]);
   if (snapshot.state === null) return null;
   return (
-    <Stage snapshot={snapshot} reducedMotion={reducedMotion}>
+    // Online (sem `training`, que o tutorial também passa), a sua especial espera o momento que o oponente vê (decisoes.md 2026-11-03 (5), A9a).
+    <Stage snapshot={snapshot} reducedMotion={reducedMotion} online={props.training === undefined}>
       <PlayTableView {...props} snapshot={snapshot} state={snapshot.state} />
     </Stage>
   );

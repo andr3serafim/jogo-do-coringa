@@ -174,12 +174,13 @@ export function fieldTarget(event: GameEvent, cast: Pick<DevastationState, 'row'
 
 /**
  * Quando cada elemento com `layoutId` (as cartas) começa a se mexer: o início, em ms, da
- * batida que o move. Se mais de uma batida mexe na carta, vale a última: a carta fica onde estava até lá.
+ * batida que o move (no momento da especial do oponente, o impacto). Se mais de uma batida mexe na carta, vale a última: a carta fica
+ * onde estava até lá.
  */
 export function delaysOf(beats: readonly Beat[]): ReadonlyMap<string, number> {
   const delays = new Map<string, number>();
   for (const beat of beats) {
-    for (const id of beat.cards) delays.set(id, beat.startMs);
+    for (const id of beat.cards) delays.set(id, beat.moment?.impactAtMs ?? beat.startMs);
   }
   return delays;
 }

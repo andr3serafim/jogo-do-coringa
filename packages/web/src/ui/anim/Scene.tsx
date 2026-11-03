@@ -39,6 +39,8 @@ export interface BeatOverlayProps {
   scene: Beat | null;
   /** A cortina escura está no ar (decidido pelo `useBeatPlayer`). */
   curtain: boolean;
+  /** Quem a subiu: uma cena (60% de tinta) ou o momento da especial do oponente (o véu leve, 35%). */
+  veil?: 'scene' | 'moment';
   names: Names;
   reduced: boolean;
   /** O jogador deste lado da tela (as cenas com desenho próprio se espelham pelo lado de quem joga). */
@@ -70,7 +72,7 @@ function Shield() {
   );
 }
 
-function SceneLayer({ scene, curtain, names, reduced, me, hitLanded, field = null, rising = null }: BeatOverlayProps) {
+function SceneLayer({ scene, curtain, veil = 'scene', names, reduced, me, hitLanded, field = null, rising = null }: BeatOverlayProps) {
   const layer = useRef<HTMLDivElement>(null);
   const box = useSceneBox(layer, scene !== null || curtain);
   const scenes = useScenes();
@@ -106,8 +108,9 @@ function SceneLayer({ scene, curtain, names, reduced, me, hitLanded, field = nul
       <div
         data-cortina
         data-ativa={curtain ? 'true' : undefined}
+        data-veu={curtain && veil === 'moment' ? 'momento' : undefined}
         style={{ top: `${box?.hudBottom ?? 0}px` }}
-        className={`absolute inset-x-0 bottom-0 bg-tinta/60 transition-opacity duration-[220ms] ease-out ${curtain ? 'opacity-100' : 'opacity-0'}`}
+        className={`absolute inset-x-0 bottom-0 ${veil === 'moment' ? 'bg-tinta/35' : 'bg-tinta/60'} transition-opacity duration-[220ms] ease-out ${curtain ? 'opacity-100' : 'opacity-0'}`}
       />
       {Drawn && scene && box ? (
         <Drawn key={serial} beat={scene} names={names} reduced={reduced} me={me} hitLanded={hitLanded} box={box} field={field} rising={rising} />

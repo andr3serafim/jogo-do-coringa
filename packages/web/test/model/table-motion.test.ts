@@ -1,7 +1,8 @@
 import type { GameEvent, NumCard, SpecialCard } from '@coringa/engine';
 import { describe, expect, it } from 'vitest';
 import { dustPerCard, landingsOf, leavingOf, recoilsOf, shardsPerCard, shiftDelaysOf, TABLE_MOTION } from '../../src/model/table-motion.ts';
-import { buildTimeline, DECISION_CAP_MS, timelineMs, type Beat } from '../../src/model/timeline.ts';
+import { delaysOf } from '../../src/model/effects.ts';
+import { BEAT_MS, buildTimeline, DECISION_CAP_MS, timelineMs, type Beat } from '../../src/model/timeline.ts';
 import { scenarioAt } from '../fixtures.ts';
 
 const num = (id: string, value: NumCard['value'] = 5): NumCard => ({ id, kind: 'NUM', value, suit: 'copas' });
@@ -138,5 +139,45 @@ describe('o teto de decisão não muda (§8)', () => {
     const beats = buildTimeline(events, { ...LIVE, decisionPending: true });
     expect(beats.map((beat) => beat.durationMs)).toEqual([157, 157, 315, 157, 210]);
     expect(timelineMs(beats)).toBeLessThanOrEqual(DECISION_CAP_MS);
+  });
+});
+
+describe('o momento da especial do oponente na mesa (bloco A do playtest, ponto 1)', () => {
+  const seen = (...events: GameEvent[]): Beat[] => buildTimeline(events, { ...LIVE, viewer: 'p1' });
+
+  it('a Guarda do Bot aparece no impacto, de uma vez: a cópia do momento chega nela', () => {
+    const beats = seen({ type: 'GuardPlayed', player: 'p2', cards: [face('k1'), face('k2')] });
+    const landings = landingsOf(beats, 'p1', false);
+    expect(landings.get('k1')).toMatchObject({ atMs: 1_600, drop: false, snap: true });
+    expect(landings.get('k2')).toMatchObject({ atMs: 1_600, drop: false, snap: true });
+    expect(delaysOf(beats).get('k1')).toBe(1_600);
+  });
+
+  it('a Armadilha do Bot no seu J: o J sai no impacto, com estouro; o A dele não está na mesa', () => {
+    const trap: GameEvent = { type: 'TrapUsed', player: 'p2', card: face('a1', 'A'), target: face('j9', 'J'), targetOwner: 'p1' };
+    const leaving = leavingOf(seen(TURN, trap));
+    expect(leaving.get('j9')).toEqual({ startMs: BEAT_MS.banner + 1_600, shatter: true });
+    expect(leaving.has('a1')).toBe(false);
+  });
+
+  it('o Roubo do Bot: a numérica espera o impacto para voar, e pousa depois da mola', () => {
+    const stolen: GameEvent = { type: 'CardStolen', player: 'p2', from: 'p1', card: num('n3'), fromRow: 'DEF', toRow: 'ATK', ace: face('a1', 'A') };
+    const beats = seen(stolen);
+    expect(delaysOf(beats).get('n3')).toBe(1_600);
+    expect(landingsOf(beats, 'p1', false).get('n3')).toMatchObject({ atMs: 1_600 + TABLE_MOTION.landAfterMs, drop: false });
+    expect(leavingOf(beats).has('a1')).toBe(false);
+  });
+
+  it('as vizinhas do alvo esperam o impacto', () => {
+    const { view } = scenarioAt({ self: { attackBuffs: ['J'] } });
+    const trap: GameEvent = { type: 'TrapUsed', player: 'p2', card: face('a1', 'A'), target: face('j9', 'J'), targetOwner: 'p1' };
+    const shifts = shiftDelaysOf(seen(trap), view);
+    expect(view.self.attackBuffs.map((card) => shifts.get(card.id))).toEqual([1_600]);
+  });
+
+  it('a sua jogada segue igual: o J voa da mão e pousa depois do recuo e da mola', () => {
+    const beats = seen(TURN, buff('p1'));
+    expect(landingsOf(beats, 'p1', false).get('j1')).toMatchObject({ atMs: beats[1]!.startMs + 510, drop: false });
+    expect(landingsOf(beats, 'p1', false).get('j1')?.snap).toBeUndefined();
   });
 });

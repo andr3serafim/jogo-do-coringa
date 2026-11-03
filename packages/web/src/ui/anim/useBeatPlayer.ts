@@ -33,8 +33,12 @@
 //
 // O pulo cancela os timers da linha do tempo (nenhuma inversão, cortina ou batida chega depois dele), e a inversão confere
 // o movimento reduzido na hora de ligar: ligá-lo com a linha do tempo no ar também vale.
+//
+// O momento da especial do oponente (bloco A dos pontos do playtest, ponto 1) sobe a cortina leve (o véu, `veil`), pela mesma trava; com
+// movimento reduzido, não. A máquina guarda a conta dos momentos do turno (`momentsMs`) para a seguinte, que encolhe o segundo; o
+// `resync` zera.
 import type { PlayerId } from '@coringa/engine';
-import type { StateMessage } from '@coringa/protocol';
+import { momentsMs, type StateMessage } from '@coringa/protocol';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { bannerBeatAt, damageBeatIndex, dealsOf, delaysOf, type Deals } from '../../model/effects.ts';
 import { FIELD_SCENES, RIBBON_SCENES } from '../../model/timeline.ts';
@@ -84,6 +88,12 @@ function layoutDelays(beats: Beat[], recoils: ReadonlyMap<string, number>, shift
 
 interface Machine {
   run: Run;
+  /**
+   * A conta dos momentos do turno depois desta linha do tempo (`momentsMs`): os do oponente que você viu e, online, as suas especiais
+   * que ele viu (A9a). A máquina seguinte começa dela; o `resync` zera.
+   */
+  moments: number;
+  ownMoments: number;
   /** Batida de agora (índice em `run.beats`), ou -1 sem batida com duração. */
   index: number;
   done: boolean;
@@ -121,6 +131,11 @@ function release(prev: Released, ended: Run | null, next: Run | null): Released 
 
 function makeMachine(state: StateMessage | null, options: TimelineOptions | null, draftShown = false): Machine {
   const beats = state !== null && options !== null ? buildTimeline(state.events, options) : [];
+  const viewer = options?.viewer ?? null;
+  const counted = state !== null && options !== null && options.mode !== 'resync' && viewer !== null;
+  const other: PlayerId = viewer === 'p1' ? 'p2' : 'p1';
+  const moments = counted ? momentsMs(state.events, viewer, options.momentsBefore).count : 0;
+  const ownMoments = counted ? momentsMs(state.events, other, options.ownMomentsBefore).count : 0;
   // O recuo, o pouso e as cópias das cartas que saem são do passo ao vivo: o `catchUp` e o `resync` trocam a mesa como sempre.
   const live = state !== null && options?.mode === 'live';
   const me: PlayerId = state?.view.me ?? 'p1';
@@ -138,7 +153,7 @@ function makeMachine(state: StateMessage | null, options: TimelineOptions | null
     landings: live ? landingsOf(beats, me, draftShown) : NOTHING,
     leaving: live ? leavingOf(beats) : NOTHING,
   };
-  return { run, index: beats.findIndex((beat) => beat.durationMs > 0), done: run.totalMs === 0, absorbed: null };
+  return { run, index: beats.findIndex((beat) => beat.durationMs > 0), done: run.totalMs === 0, absorbed: null, moments, ownMoments };
 }
 
 /** O `state` ao vivo que chega com as batidas no ar, na mesma época e só com eventos quietos, não troca a linha do tempo. */
@@ -163,6 +178,8 @@ export interface BeatPlayer {
   inverted: boolean;
   /** A cortina escura da cena está no ar (ela segura um pouco além da batida, e a regra de flash pode segurá-la mais). */
   curtain: boolean;
+  /** Quem subiu a cortina que está no ar: uma cena, ou o momento da especial do oponente (o véu leve, de 35%). */
+  veil: 'scene' | 'moment';
   /** A batida cuja faixa vale agora (`bannerBeatAt`), ou `null`: o texto da faixa sai dela. */
   bannerBeat: Beat | null;
   /** A camada da faixa está no ar (a regra de flash pode segurá-la, no ar ou fora dele, além da batida). */
@@ -178,8 +195,12 @@ export interface BeatPlayer {
   skip(): void;
 }
 
-/** A batida sobe a cortina: toda cena, menos as de campo (a Devastação acontece na mesa, à vista). */
-const curtained = (beat: Beat): boolean => beat.kind === 'scene' && beat.scene !== null && !FIELD_SCENES.has(beat.scene);
+/**
+ * A batida sobe a cortina: toda cena, menos as de campo (a Devastação acontece na mesa, à vista), e o momento da especial do oponente,
+ * com o véu leve. O véu também é troca de luminância (spec da web §10.4): passa pela mesma trava, e com movimento reduzido não sobe.
+ */
+const curtained = (beat: Beat, reduced: boolean): boolean =>
+  (beat.kind === 'scene' && beat.scene !== null && !FIELD_SCENES.has(beat.scene)) || (beat.kind === 'moment' && !reduced);
 
 export interface BeatPlayerOptions {
   reducedMotion: boolean;
@@ -189,13 +210,15 @@ export interface BeatPlayerOptions {
   bannerReadMs?: (beat: Beat) => number;
   /** O rascunho do Equipar estava à vista antes deste `state` (você confirmou nesta página): as suas cartas só assentam, sem cair. */
   draftShown?: boolean;
+  /** Online (A9a): a sua especial segura o tempo do momento que o oponente vê (`TimelineOptions.holdOwnMoments`). */
+  holdOwnMoments?: boolean;
 }
 
 const NO_READING = (): number => 0;
 
 export function useBeatPlayer(
   state: StateMessage | null,
-  { reducedMotion, decisionPending, bannerReadMs = NO_READING, draftShown = false }: BeatPlayerOptions,
+  { reducedMotion, decisionPending, bannerReadMs = NO_READING, draftShown = false, holdOwnMoments = false }: BeatPlayerOptions,
   onSettled?: () => void,
 ): BeatPlayer {
   // O `state` com que a mesa abre (recarregar a página, entrar na partida) já está feito: não há de onde animar.
@@ -208,7 +231,16 @@ export function useBeatPlayer(
       current = { ...machine, absorbed: state };
     } else {
       const mode = state?.resync ? 'resync' : state?.catchUp ? 'catchUp' : 'live';
-      current = makeMachine(state, { mode, reducedMotion, decisionPending }, draftShown);
+      const options: TimelineOptions = {
+        mode,
+        reducedMotion,
+        decisionPending,
+        viewer: state?.view.me ?? null,
+        momentsBefore: machine.moments,
+        holdOwnMoments,
+        ownMomentsBefore: machine.ownMoments,
+      };
+      current = makeMachine(state, options, draftShown);
       // Um `state` novo no meio das batidas encerra as transições que a linha velha ainda tinha no ar.
       const ended = machine.done ? null : machine.run;
       setReleased((prev) => release(prev, ended, current.run));
@@ -275,6 +307,7 @@ export function useBeatPlayer(
 
   // --- Cortina da cena ---
   const [curtain, setCurtain] = useState(false);
+  const [veil, setVeil] = useState<'scene' | 'moment'>('scene');
   const curtainUp = useRef(false);
   const curtainSince = useRef(0);
   const fallTimer = useRef<number | null>(null);
@@ -283,17 +316,24 @@ export function useBeatPlayer(
    * Uma cena começa: a cortina sobe (se a regra deixa) ou, se já está no ar, fica (cancela a descida marcada). Recusada, devolve quanto
    * falta para a regra deixar; senão, `null`.
    */
-  const raiseCurtain = useCallback((): number | null => {
-    if (fallTimer.current !== null) window.clearTimeout(fallTimer.current);
-    fallTimer.current = null;
-    if (curtainUp.current) return null;
-    const now = clock();
-    if (!lock.toggle(now)) return lock.nextAllowed(now) - now;
-    curtainUp.current = true;
-    curtainSince.current = now;
-    setCurtain(true);
-    return null;
-  }, [lock]);
+  const raiseCurtain = useCallback(
+    (kind: 'scene' | 'moment'): number | null => {
+      if (fallTimer.current !== null) window.clearTimeout(fallTimer.current);
+      fallTimer.current = null;
+      if (curtainUp.current) {
+        setVeil(kind);
+        return null;
+      }
+      const now = clock();
+      if (!lock.toggle(now)) return lock.nextAllowed(now) - now;
+      curtainUp.current = true;
+      curtainSince.current = now;
+      setVeil(kind);
+      setCurtain(true);
+      return null;
+    },
+    [lock],
+  );
 
   /** Nenhuma cena segura a cortina: ela desce depois de `minHoldMs` no ar, e só quando a regra de flash deixa. */
   const lowerCurtain = useCallback(
@@ -408,13 +448,13 @@ export function useBeatPlayer(
       }
       // O golpe que a cena do Ataque Absoluto absorveu acende no impacto do feixe (sub-projeto 6 §7.1), no mesmo relógio da inversão.
       if (beat.hit) at(beat.hit.atMs, () => setLanded({ run, index: i }));
-      if (curtained(beat)) {
+      if (curtained(beat, reduced.current)) {
         // A cortina recusada tenta de novo quando a regra deixa, se ainda faltar bastante cena: numa cena longa, ela não fica de fora só
         // porque a anterior acabou há pouco. A espera confere o relógio de novo: um timer atrasado não a sobe no fim.
         const sceneEnd = startedAt + beat.startMs + beat.durationMs;
         const tryRaise = (delayMs: number) =>
           at(delayMs, () => {
-            const waitMs = raiseCurtain();
+            const waitMs = raiseCurtain(beat.kind === 'moment' ? 'moment' : 'scene');
             if (waitMs !== null && clock() + waitMs + CURTAIN_RETRY_LEFT_MS <= sceneEnd) tryRaise(waitMs);
           });
         tryRaise(beat.startMs);
@@ -431,7 +471,7 @@ export function useBeatPlayer(
 
   // Um `state` novo trocou a linha do tempo no meio de uma cena: a cortina que ficou no ar desce, a não ser que a nova
   // linha também tenha cena (a cena dela a segura, e o fim dela a baixa). A descida respeita a espera mínima e a trava.
-  const hasScene = run.beats.some(curtained);
+  const hasScene = run.beats.some((b) => curtained(b, reducedMotion));
   useEffect(() => {
     if (!hasScene) lowerCurtain(CURTAIN_MIN_HOLD_MS);
   }, [run, hasScene, lowerCurtain]);
@@ -480,6 +520,7 @@ export function useBeatPlayer(
     busy: !current.done,
     inverted,
     curtain,
+    veil,
     bannerBeat,
     banner,
     released,

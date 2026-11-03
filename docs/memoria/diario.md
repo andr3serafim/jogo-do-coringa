@@ -19,6 +19,17 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   - **Ruling:** o `classify` não devolve `moment` (o tipo dele exclui): o momento é decidido depois, com o `viewer`, e as contas seguem
     `momentsMs` evento a evento, sem repetir a regra;
   - **Ruling:** a A9a mantém a sua especial como `move` (com o voo e o pouso de hoje), só com a duração do momento do oponente.
+- **Task 2 (o momento na mesa):**
+  - `touchMs(beat)` (o impacto no momento, o início nas outras) nos atrasos, na saída e nas vizinhas; a carta do Bot ganha o pouso
+    `snap` (escondida até o impacto, 50 ms de esmaecimento, sem a queda); o A do oponente não vira cópia (vem de versos sem id);
+  - a máquina das batidas guarda `moments` e `ownMoments` (a conta do turno) para a seguinte, e o `resync` zera; o véu é a cortina
+    com `veil: 'moment'` (35% de tinta, `data-veu="momento"`), pela mesma trava; com movimento reduzido, não sobe;
+  - `Stage` ganha `online` (a `PlayTable` passa `training === undefined`) e o leva como `holdOwnMoments`;
+  - **testes mudados de propósito:** a carta do Bot não cai mais de 14 px na batida dela (`table-motion.test.tsx`): ela aparece no
+    impacto do momento. Os três testes de layout (`animation-layout.test.tsx`) montam a mesa do treino, porque o harness é online e lá
+    a sua especial segura 1,6 s (A9a). O harness ganhou `training`;
+  - **não conferido de verdade:** a recusa do véu pela trava cheia não tem teste próprio: ela usa a mesma `raiseCurtain` da cortina das
+    cenas, que os testes da cortina cobrem.
 
 ---
 
