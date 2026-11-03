@@ -28,6 +28,14 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     repositório (as fontes vêm de `packages/web/node_modules`); a configuração `prototipo` do `.claude/launch.json` (fora do git) aponta
     para ele;
   - **a `main` andou durante o bloco** (a sessão do online, `4f7621e`): mesclada na branch; o conflito foi só no `estado.md`.
+- **Revisão antes de entregar (advisor):**
+  - a caixa do ponto 14 dizia "medi que cabe" sem medir: agora diz que as fotos de 360 × 640 e 1366 × 657 vêm no plano;
+  - o cenário de reação do ponto 2 contradizia a regra (com K, J e Q na mão o Reflect joga): cada momento tem agora a sua mão, e o
+    rascunho diz que "joga agora" é a lista legal do motor, com as jogadas em combinação;
+  - **o ritmo do ponto 1, medido** (1.000 partidas, 14.508 turnos do Bot): 1,12 especial por turno; 25% dos turnos com duas, 6,6% com três
+    ou mais. O rascunho ganhou a compressão (a 2ª especial em diante no mesmo turno em ~1,1 s);
+  - o protótipo abre direto pelo arquivo (conferido no Chromium: fontes carregadas, nenhum erro); as fontes ficaram só com o caminho relativo;
+  - o `initiativeStreak` não muda o digest das partidas de referência (ele conta eventos por tipo); anotado na §5.2.
 - **Não conferido:** o protótipo no celular de verdade (os quadros escalam, mas os botões de controle não foram medidos) e o som (não há).
 
 ---

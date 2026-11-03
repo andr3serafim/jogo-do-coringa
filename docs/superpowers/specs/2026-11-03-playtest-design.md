@@ -5,9 +5,9 @@
 
 - **Origem:** os pontos 1, 2, 5, 6, 9, 10, 11, 13 e 14 (`decisoes.md` 2026-11-02 (9)), o 15 (2026-11-02 (10)) e o 16 (2026-11-03 (1)).
   Os diretos (3, 4, 7, 8, 12 e 18) já estão na `main`; o 17 foi fechado (era a Armadilha, 2026-11-03 (2)).
-- **Protótipo:** `docs/superpowers/specs/2026-11-03-playtest-prototipo.html`. Abre num servidor estático com a raiz no repositório (as
-  fontes vêm de `packages/web/node_modules`), ou direto no navegador pelo arquivo (o caminho relativo das fontes também funciona). Cada
-  ponto tem o seu quadro, os botões para tocar e as variantes.
+- **Protótipo:** `docs/superpowers/specs/2026-11-03-playtest-prototipo.html`. Abre direto no navegador, com dois cliques no arquivo
+  (conferido: as fontes vêm de `packages/web/node_modules` por caminho relativo, sem erro no console), ou num servidor estático com a raiz
+  no repositório. Cada ponto tem o seu quadro, os botões para tocar e as variantes.
 - **Números do ponto 16:** `docs/memoria/notas/medicao-ponto-16.md` (2.000 partidas greedy × greedy).
 
 ## 1. A intenção
@@ -50,6 +50,10 @@ Cada bloco vira uma fatia com plano, teste primeiro, fotos e medição, como as 
   racha e estoura, como na fatia 5). O Reflect, a Devastação e a Ressurreição já têm cena e ficam como estão.
 - **Duração:** ~1,6 s por especial (0,3 s a virada, ~1 s a placa, 0,3 s o voo). As suas jogadas não ganham o momento: você sabe o que jogou.
   Online, o seu oponente vê as suas assim (os dois lados, como o autor pediu).
+- **O ritmo, medido** (1.000 partidas greedy × greedy, 14.508 turnos do Bot): o Bot joga em média 1,12 especial por turno; 42% dos turnos têm
+  uma, 25% têm duas, 5,8% têm três e 0,8% têm quatro. Na janela de reação ao seu turno, 6,8% dos seus turnos recebem uma. **Compressão:** a
+  primeira especial do turno dele tem o momento inteiro; a segunda em diante, no mesmo turno, tem a placa por ~0,6 s (o momento fica em
+  ~1,1 s). Com o pensar do bot (600 ms) entre elas, o turno de duas especiais leva ~3,9 s, e o de três ~5,6 s. Um toque pula, como nas cenas.
 - **Variantes no protótipo:** A, no centro (recomendada); B, na beira do campo dele.
 - **Onde mexe:** `model/timeline.ts` ganha uma batida nova para essas jogadas (hoje são `move`), que não encolhe no teto de 1 s: ela é a
   informação que o jogador precisa para decidir a reação. O texto da placa sai de uma função de cópia nova (`model/copy.ts`), com os
@@ -66,6 +70,9 @@ Cada bloco vira uma fatia com plano, teste primeiro, fotos e medição, como as 
   hoje, do `noPlayReason` do motor).
 - **Variantes:** A, apagada com cadeado (recomendada); B, carimbo "AGORA NÃO".
 - **Onde mexe:** `Hand.tsx` e `TableCard.tsx`. A informação já existe (as zonas da jogada e o `locked` da mesa); nenhuma regra na interface.
+- **"Joga agora"** inclui as jogadas em combinação (o Reflect, a Devastação, o Sacrifício): quem decide é a lista legal do motor
+  (`legalActions`), e uma carta só apaga se nenhuma jogada legal a usa. O J com 4 J nos Bônus, por exemplo, segue aceso se o Sacrifício
+  contra um J do oponente for legal.
 - **Cuidado:** durante as batidas a mão inteira está travada; as cartas não devem apagar e acender a cada batida. Elas seguem o estado da
   decisão (com a mesa parada), não o `locked` momentâneo.
 
@@ -128,7 +135,10 @@ A mesma escada nas três zonas, cada uma com a sua cor:
 - **"Seguidas":** as rodadas de Ataque que terminaram (`InitiativeDecided`) com a iniciativa no mesmo jogador, contando a de agora.
 - **Onde mexe:** o motor passa a contar a sequência (`initiativeStreak` no estado e na `view`, e no evento `InitiativeDecided`). Derivar
   na interface a partir dos eventos perderia a conta numa recarga. Não muda nenhuma partida (as regras são as mesmas), mas muda a forma do
-  estado: sobe o `STATE_SCHEMA` do servidor (as salas abertas fecham no deploy) e o esquema do protocolo.
+  estado: sobe o `STATE_SCHEMA` do servidor (as salas abertas fecham no deploy) e o esquema do protocolo. O digest das partidas de
+  referência (`RULES_DIGESTS`) conta os eventos por tipo, não a forma deles, então o campo novo no `InitiativeDecided` não o muda e não
+  pede `RULES_VERSION`; o plano confere isso rodando os testes do motor, e confere o digest do texto do `pnpm play` (`sim/test/online.test.ts`)
+  se o histórico passar a falar da sequência.
 - **Desenho:** a aura usa as formas de `ui/scenes/aura.ts`, com camadas menores. O retrato do placar fica no topo, e a aura passa por cima
   da barra de vida sem cobri-la (ela é mais estreita que o retrato no celular; confiro nas fotos do plano).
 

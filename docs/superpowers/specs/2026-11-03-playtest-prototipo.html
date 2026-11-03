@@ -8,8 +8,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Protótipo do playtest</title>
 <style>
-@font-face { font-family: 'Alfa'; src: url('/packages/web/node_modules/@fontsource/alfa-slab-one/files/alfa-slab-one-latin-400-normal.woff2') format('woff2'), url('../../../packages/web/node_modules/@fontsource/alfa-slab-one/files/alfa-slab-one-latin-400-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Archivo'; src: url('/packages/web/node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2') format('woff2'), url('../../../packages/web/node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2') format('woff2'); font-weight: 100 900; }
+@font-face { font-family: 'Alfa'; src: url('../../../packages/web/node_modules/@fontsource/alfa-slab-one/files/alfa-slab-one-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Archivo'; src: url('../../../packages/web/node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2') format('woff2'); font-weight: 100 900; }
 :root { --tinta: #17120f; --papel: #f1f0ea; --verde: #6fa86c; --rosa: #ee9db5; --vermelho: #b8261c; --ouro: #f5c238; --cura: #2a7339; }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: #0b0908; color: var(--papel); font-family: 'Archivo', system-ui, sans-serif; }
@@ -269,7 +269,7 @@ input[type=range].ctl-range { width: 260px; accent-color: var(--ouro); }
   <div class="controles">
     <span class="rotulo">MOMENTO</span>
     <button class="ctl ativo" data-p2m="vez">Sua vez (já com 4 J)</button>
-    <button class="ctl" data-p2m="reacao">Reação ao ataque do Bot</button>
+    <button class="ctl" data-p2m="reacao">Reação ao ataque do Bot (mão sem K)</button>
     <button class="ctl" data-p2m="bot">Vez do Bot</button>
     <button class="ctl" data-p2m="equipar">Equipar</button>
   </div>
@@ -392,7 +392,8 @@ input[type=range].ctl-range { width: 260px; accent-color: var(--ouro); }
   </div>
   <p class="escolha"><b>Recomendo A.</b> A lápide se lê de longe como "onde as cartas morrem", e a carta do topo continua à vista, encostada
     nela (o cemitério abre a lista quando tocado, como hoje). A cova é mais nova, mas esconde a carta do topo, que importa para a Ressurreição.
-    Nas duas, o centro custa uns 30 px de altura no celular: medi que cabe, mas confiro com fotos no plano.</p>
+    Nas duas, o centro custa uns 30 px de altura no celular. <b>Ainda não medi se cabe</b>: as fotos de 360 × 640 e de 1366 × 657 (o PC de
+    pouca altura, que hoje cabe sem rolar) entram no plano, antes de qualquer código.</p>
 </section>
 
 <section class="ponto" id="p15">
@@ -608,12 +609,13 @@ function faiscas(parent, x, y, { n = 8, cor = O, raio = 40, vida = 600, tam = 4 
     { id: 'Q', v: 'Q', papel: 'BÔNUS DE DEFESA', naipe: '♥', verm: true }, { id: 'A', v: 'A', papel: 'ARMADILHA', naipe: '♠' },
     { id: 'W', v: '★', papel: 'SELVAGEM', naipe: '' },
   ];
-  // O que joga em cada momento, e o motivo das que não jogam (as frases do motor, encurtadas).
+  // O que joga em cada momento, e o motivo das que não jogam (as frases do motor, encurtadas). No jogo, quem decide é a lista legal do
+  // motor, com as jogadas em combinação (Reflect, Devastação, Sacrifício): aqui cada momento tem a mão que deixa o exemplo certo.
   const MOMENTOS = {
-    vez: { joga: ['K', 'Q', 'A', 'W'], motivo: { J: 'Os Bônus de ataque já têm 4 J: não cabe outro.' } },
-    reacao: { joga: ['A', 'W'], motivo: { K: 'Na reação ao ataque só entram Armadilha e Reflect.', J: 'Na reação ao ataque só entram Armadilha e Reflect.', Q: 'Na reação ao ataque só entram Armadilha e Reflect.' } },
-    bot: { joga: [], motivo: { '*': 'É a vez do Bot: as suas especiais esperam o seu turno.' } },
-    equipar: { joga: [], motivo: { '*': 'No Equipar só as numéricas entram; as especiais esperam o Ataque.' } },
+    vez: { mao: ['K', 'J', 'Q', 'A', 'W'], joga: ['K', 'Q', 'A', 'W'], motivo: { J: 'Os Bônus de ataque já têm 4 J, e o Bot não tem J para o Sacrifício.' } },
+    reacao: { mao: ['J', 'Q', 'A'], joga: ['A'], motivo: { J: 'Na reação ao ataque só entram a Armadilha e o Reflect, que pede K, J e Q juntos (falta o K).', Q: 'Na reação ao ataque só entram a Armadilha e o Reflect, que pede K, J e Q juntos (falta o K).' } },
+    bot: { mao: ['K', 'J', 'Q', 'A', 'W'], joga: [], motivo: { '*': 'É a vez do Bot: as suas especiais esperam o seu turno.' } },
+    equipar: { mao: ['K', 'J', 'Q', 'A', 'W'], joga: [], motivo: { '*': 'No Equipar só as numéricas entram; as especiais esperam o Ataque.' } },
   };
   let momento = 'vez', variante = 'A';
   const CADEADO = `<svg viewBox="0 0 16 16"><rect x="3" y="7" width="10" height="8" rx="1" fill="${P}"/><path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="${P}" stroke-width="2" fill="none"/></svg>`;
@@ -624,7 +626,7 @@ function faiscas(parent, x, y, { n = 8, cor = O, raio = 40, vida = 600, tam = 4 
     const balao = el('div', 'balao', '');
     const mao = el('div', `mao2 ${variante}`);
     const m = MOMENTOS[momento];
-    CARTAS.forEach((c) => {
+    CARTAS.filter((c) => m.mao.includes(c.id)).forEach((c) => {
       const joga = m.joga.includes(c.id);
       const cm = el('div', `cm ${joga ? 'joga' : 'trava'}`, '');
       const face = carta(c.v, { vermelha: c.verm, papel: c.papel, naipe: c.naipe, w: 82, h: 116 });
