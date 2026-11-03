@@ -5,6 +5,30 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-03 (5): as respostas do autor; o desenho vira spec
+
+- **Respostas** (`decisoes.md` 2026-11-03 (4)): a fatia 5 aprovada (o sub-projeto 6 fecha); a ordem dos blocos, a variante A em todos os
+  pontos e as perguntas 5 a 7 aprovadas; o ponto 4 sem texto (só a aura nos 3 K); a regra do 16 escrita por ele, com uma pergunta de
+  seguimento (a troca vale também depois, na fase principal).
+- **Feito** (branch `feat/playtest-spec`, só documentos):
+  - `decisoes.md` 2026-11-03 (4), com o texto dele e as leituras **[I]** da regra do 16;
+  - a spec `2026-11-03-playtest-design.md`: o cabeçalho deixa de ser rascunho, as variantes escolhidas, os 3 K sem texto e sem a coroa,
+    a §7.2 com a regra dele (10 itens, as [I] marcadas), a §9 com as respostas, a §10 com as minhas leituras;
+  - o protótipo: o selo e as caixas dizem as respostas; os 3 K só com a brasa nas cartas (a coroa ficou só na Exódia, com 4 K).
+- **Conferido no motor, para a regra do 16:** `resurrect` (`actions/main.ts`) recusa a fileira cheia (`ROW_FULL`), e `legal-actions.ts`
+  só lista a fileira com vaga; a troca do Equipar (`actions/equip.ts`) e o Roubo (`actions/main.ts`) já mandam a última carta ao
+  cemitério e chamam `healFromDefense`: a cura da carta que sai na Ressurreição é a regra geral, não regra nova. A quadra é por fileira
+  (`quadValues`, 4+ iguais), e cada Ressurreição guarda a quadra que a deu (`row`, `value`, `formedAtRound`).
+- **Sessões:** a do online ("Equipar vazio não pode cortar o golpe final") foi apagada, como ele pediu. O app apagou a sessão, mas a
+  pasta do worktree ficou pela metade (`Filename too long` no `node_modules`): o `Remove-Item` com o prefixo `\\?\` terminou, e o
+  `git worktree prune` limpou o registro (e o do `jogo-coringa-v5`, que já não tinha pasta). A branch `sync/online-equipar-vazio`
+  (mesclada) saiu; a `feat/online-equipar-vazio` (rebase não publicado, 2 commits fora da `main`) ficou.
+- **Armadilha:** um `cd` para dentro do worktree de outra sessão faz o app tratar o worktree como a pasta desta sessão. Volte com `cd`
+  para o checkout principal antes de apagar a outra sessão.
+- **Próximo:** a CI e a `main`; a sessão do bloco E; o plano do bloco A, para ele aprovar.
+
+---
+
 ## 2026-11-03 (4): o rascunho do desenho dos pontos do playtest, com o autor fora
 
 - **Pedido do autor** (`decisoes.md` 2026-11-03 (3)): adiantar tudo o que não precisa dele e deixar as perguntas para o fim.
