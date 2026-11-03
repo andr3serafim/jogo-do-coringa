@@ -88,6 +88,9 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   batida vencem no mesmo instante; se o do momento chegasse antes (o filho roda o efeito antes do pai), a batida ainda era o momento, a
   camada o mostrava de novo e reaproveitava o componente parado na fase `exit`, para sempre (invisível, mas montado). Agora o momento
   terminado fica anotado (`done`) e não volta. O teste de unidade reproduz a corrida (falha sem o conserto). Depois: 3 execuções de 7/7.
+- **A CI do `e194d58` reprovou 3 E2E de layout** (`layout.spec.ts`, "especiais no PC", nas três telas): o bloco das marcas tinha 67,5 px,
+  e o teste aceitava 56 (duas linhas de etiqueta). As placas são mais altas por desenho (o medalhão e a linha do que faz): o limite passou a
+  88 (duas linhas de placa), e o resto do teste (as zonas sem se sobrepor, a coluna cabendo no campo) passou nas três telas, localmente.
 - **Armadilha:** `-g "360 × 640 › ..."` não acha o teste no Playwright do Windows (o `×` e o `›` do título); filtre por um pedaço sem eles.
 
 ---
