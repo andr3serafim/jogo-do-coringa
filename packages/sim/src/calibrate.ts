@@ -50,6 +50,8 @@ const TOGGLES: Array<[string, ConfigOverrides]> = [
   ['padrão', {}],
   ['sem Escolha da iniciativa', { initiativeChoice: false }],
   ['sem Coringas Selvagens', { wildJokers: false }],
+  // O ponto 16 (a janela da Ressurreição e a troca da última carta), para medir o que a regra muda.
+  ['sem a Ressurreição da quadra', { resurrectOnQuad: false }],
 ];
 
 /** Varredura da spec §3: vida, tamanho da fileira e composição do baralho. */
