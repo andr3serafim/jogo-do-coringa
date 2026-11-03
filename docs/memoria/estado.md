@@ -1,12 +1,12 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-03**, com o bloco de desenho do playtest entregue como rascunho na branch
-> `feat/desenho-playtest`, esperando as respostas do autor. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1
+> Sobrescrito a cada atualização. **Última: 2026-11-03**, com o bloco de desenho do playtest entregue como rascunho na `main`,
+> esperando as respostas do autor. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1
 > da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `feat/desenho-playtest`, no checkout principal, com a `main` (`4f7621e`) mesclada. Só documentos e o protótipo: nenhum código do jogo mudou neste bloco. Vai para a `main` por fast-forward com as duas CI verdes.
+- **Branch:** `main`, no checkout principal, sem trabalho em curso. A branch `feat/desenho-playtest` (só documentos e o protótipo) foi mesclada por fast-forward, com as duas CI verdes no último commit (`de89a00`, run `41590275089`).
 - **Feito por último** (`diario.md` 2026-11-03 (4); o pedido em `decisoes.md` 2026-11-03 (3)): o **rascunho do desenho** dos pontos 1, 2, 5, 6, 9, 10, 11, 13, 14, 15 e 16, com o autor fora:
   - o rascunho: `docs/superpowers/specs/2026-11-03-playtest-design.md` (a intenção, a ordem em cinco blocos, cada ponto, as restrições, as minhas escolhas e as **8 perguntas** dele na §9);
   - o protótipo clicável: `docs/superpowers/specs/2026-11-03-playtest-prototipo.html` (um quadro por ponto, com as variantes A e B; abre num servidor estático com a raiz no repositório, ou pelo arquivo);
