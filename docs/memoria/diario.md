@@ -5,6 +5,45 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-03 (2): o online do ponto 17 (o Equipar vazio que cortava o golpe), consertado na mesa
+
+- **Pedido:** sessão lateral aberta pela do ponto 17, para fechar o buraco do online que o (1) deixou anotado. O pedido do autor é o
+  "revisar, corrigir e conferir" de `decisoes.md` 2026-11-03 (1).
+- **Feito:** a branch `feat/online-equipar-vazio` (worktree `.claude/worktrees/dreamy-engelbart-4a4876`), a partir da `main` (`6165d57`),
+  commit de código `105b8ba`.
+- **Ruling: na web, não no servidor.**
+  - adiar o passo automático pelo alarme da sala obrigaria o servidor a adivinhar quanto dura a animação do cliente: além da folga
+    de cena (`sceneAllowanceMs`) há o teto de decisão de 1 s e a faixa da iniciativa de 1,2 s (fora do teto), que só a web conhece;
+  - o mesmo corte acontecia com o oponente humano que pula a cena e confirma o Equipar no meio do golpe: o `state` dele só traz
+    `EquipSubmitted`. O conserto no servidor não pegava esse caso;
+  - no servidor seriam ainda um tipo novo na agenda, um `setAlarm` a mais por rodada e a pergunta de o que fazer quando o oponente
+    confirma antes do alarme (mudança visível no online, para o autor aprovar). Na web não muda regra, prazo nem estouro: não pede
+    aprovação.
+- **Conferido antes:** a conexão (`packages/protocol/src/client.ts`) entrega cada mensagem no seu `onmessage`, sem fila; o golpe chega a
+  ser desenhado e o `state` seguinte o corta (no treino os dois vinham na mesma tarefa, e o golpe nem desenhava).
+- **A regra** (`useBeatPlayer`, `absorbs`): um `state` ao vivo, na mesma `epoch` da linha do tempo que toca e só com eventos de batida
+  quieta (`quietOnly`, em `timeline.ts`) não troca a máquina; ela anota o `state` (`absorbed`) e segue até o fim. A `view` nova é
+  desenhada na hora (a mesa desenha sempre a última).
+  - **Ruling:** a mesma `epoch` limita a regra a "a mesa de decisões não mudou". Um `ReactionWindowClosed` sozinho que devolve o turno
+    muda a `epoch` e segue cortando, para a decisão não esperar a animação velha;
+  - **Ruling:** lista vazia não é quieta: um `state` sem evento é o começo de uma partida (a revanche), que troca a mesa inteira;
+  - **Ruling:** o `layoutKey` das cartas (`Stage`) usa o `seq` da linha do tempo que toca, não o do último `state`: trocá-lo no meio do
+    voo faria o Motion medir e partir de novo (o `layoutDependency` da carta).
+- **Testes** (`test/ui/quiet-state.test.tsx`, 8; e o `quietOnly` em `test/model/timeline.test.ts`): o Ataque Absoluto que fecha a
+  rodada toca inteiro (a cena, a vida descendo no feixe e a mesa ocupada até o fim da compra) com o Equipar vazio colado; o golpe comum,
+  também com a confirmação do oponente no meio; o `layoutKey` que não muda; e o contrário: um `state` com batidas, outra `epoch`, o
+  `resync` e o `catchUp` trocam como antes. Sem o código, os 3 do caso falham; a suíte da web inteira passa (2.438).
+- **Medido** (rascunho com o motor, fora do repositório): em 1.500 partidas greedy × greedy, 21.177 golpes de fim de rodada; um jogador
+  sem numéricas no Equipar seguinte em 308 (1,45%, perto de uma partida em cinco), os dois juntos em 0. **Fica de fora** esse caso dos
+  dois: o segundo Equipar vazio resolve o Equipar e tem batidas, então ainda cortaria.
+- **De quebra, no treino:** o Equipar do bot (também só `EquipSubmitted`) não corta mais a faixa da iniciativa e a compra do fim de
+  rodada. O timer do Equipar vazio do treino (`#scheduleAutoEquip`, do (1)) fica como está.
+- **Não conferido de verdade:** uma partida online com alguém sem numéricas depois do golpe final (é o playtest do autor, depois do
+  deploy dele) e o Motion durante a absorção no navegador: o jsdom não tem layout, e o que garante as cartas é o `layoutKey` igual.
+- Specs: a da web §2.6 (a nota do online) e §4.1 (a regra do `state` quieto).
+
+---
+
 ## 2026-11-03 (1): os pontos 16, 17 e 18 do playtest
 
 - **Pedido do autor** (`decisoes.md` 2026-11-03 (1)): "ok, prossiga", com três pontos novos. O 16 muda regra (desenho); o 17 é defeito; o 18 é direto.
