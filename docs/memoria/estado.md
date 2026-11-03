@@ -1,26 +1,20 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-03**, com o ajuste do ponto 18 na `main`. Antes de seguir,
+> Sobrescrito a cada atualização. **Última: 2026-11-03**, com o conserto do online do Equipar vazio na `main`. Antes de seguir,
 > confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `main`, no checkout principal, sem trabalho em curso. A branch `feat/ponto-18-ajuste` foi mesclada por fast-forward, com as duas CI verdes no último commit (`f01885a`, run `41580088700`).
-- **Em curso (2026-11-03, a sessão "Online: Equipar vazio não pode cortar o golpe final"):** o conserto do online, na branch
-  `feat/online-equipar-vazio` (worktree `.claude/worktrees/dreamy-engelbart-4a4876`, local `sync/online-equipar-vazio`), com o
-  código (`105b8ba`), a `main` `5b5b34f` mesclada por cima e a memória (`diario.md` 2026-11-03 (3)). **Ruling:** na web, não no
-  servidor: um `state` ao vivo só com eventos quietos, na mesma `epoch`, não corta a linha do tempo em curso (`useBeatPlayer`). O
-  `pnpm check` passou no pre-push antes do merge. **Próximo passo:** as duas CI verdes (`check` e `e2e`; sem `gh`, pela API pública:
-  `curl -s https://api.github.com/repos/andr3serafim/jogo-do-coringa/actions/runs?branch=feat/online-equipar-vazio`), o
-  fast-forward na `main` e este arquivo de volta para a `main`. O online só muda para o autor depois do deploy dele.
-- **Feito por último** (`diario.md` 2026-11-03 (1) e (2); os pedidos em `decisoes.md` 2026-11-03 (1) e (2)):
+- **Branch:** `main`, no checkout principal, sem trabalho em curso. A branch `feat/online-equipar-vazio` foi mesclada por fast-forward, com as duas CI verdes no último commit de código (`037048c`, o merge da `main` por cima do conserto; run `41582483148`).
+- **Feito por último** (`diario.md` 2026-11-03 (1) a (3); os pedidos em `decisoes.md` 2026-11-03 (1) e (2)):
+  - **o online do Equipar vazio** (`diario.md` 2026-11-03 (3), a sessão que o autor abriu): o golpe que fecha a rodada não é mais cortado pelo Equipar vazio que o servidor aplica logo depois dele. **Ruling:** na mesa, não no servidor: um `state` ao vivo, na mesma `epoch` e só com eventos quietos (`quietOnly`) não troca a linha do tempo em curso (`useBeatPlayer`); vale também para o oponente que confirma o Equipar no meio do golpe. Fica de fora o caso dos dois sem numéricas no mesmo Equipar (0 em 21.177 golpes de fim de rodada). **Para o autor:** só muda no online depois do `pnpm deploy:server` dele; não foi visto numa partida online de verdade;
   - **ponto 18, ajustado:** o total que sobe fica em ouro, com o contorno de tinta mais fino; o que desce encolhe na cor de sempre (o vermelho foi recusado);
   - **ponto 17, fechado:** era a Armadilha do Bot desarmando o Ataque Absoluto (engano do autor). De quebra, ficou consertado no treino o golpe que fecha a rodada sumindo quando o Equipar vazio saía colado a ele (`09fc360`).
 - **Antes, na `main`:** a fatia 5 do sub-projeto 6 e os pontos diretos 3, 4, 7, 8 e 12 (`diario.md` 2026-11-02 (8)). O autor jogou e mandou os pontos 16 a 18; ele não disse que aprova a fatia 5.
 - **Ajuste depois da aprovação da 4b:** as cartas da quadra perderam o losango de ouro do canto (`decisoes.md` 2026-11-02 (6)); o fundo dourado, a moldura, o brilho e o selo ficam. Não mude isso de volta seguindo a letra antiga do §6.
 - **Próximo passo exato:**
   1. **Os pontos de desenho do playtest:** 1, 2, 5, 6, 9, 10, 11, 13 e 14 (`decisoes.md` 2026-11-02 (9)), o 15 (2026-11-02 (10)) e o 16 (2026-11-03 (1), a Ressurreição no instante da quadra, que muda regra do motor). Brainstorming (`superpowers:brainstorming`) e protótipo para ele ver, antes de spec e plano. Nenhum foi desenhado nem aprovado. Primeiro combinar com ele a ordem (são projetos independentes); o 16 começa pelas perguntas de regra listadas na leitura dele.
-  2. O deploy e o playtest online são dele (`notas/playtest.md`).
+  2. O deploy e o playtest online são dele (`notas/playtest.md`). O deploy leva o conserto do Equipar vazio do online.
 - **Para medir uma cena com a 8787 ocupada:** `MEDIR_PORTA=8797` no `medir-cena.ts`. Para o E2E inteiro numa porta livre, a receita está no `diario.md` 2026-11-02 (8) (uma configuração que importa o `playwright.config.ts` e troca a porta).
 - **Para ver a Ressurreição sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave `coringa:partidas` e abra `/partidas/exodia-devastacao`. "Próximo
   passo" na rodada 7, passo 27, mostra a sua, com a quadra; na rodada 23, passo 107, a do Bot, com a quadra na outra fileira; na rodada 37, passo 182, a do Bot sem quadra.
@@ -219,4 +213,5 @@ Playtest online, `wrangler login` + `pnpm deploy:server`, proteção da `main`, 
   - `.claude/worktrees/youthful-elgamal-3d5e8a` (`claude/inspiring-sammet-387417`, num commit de 2026-10-27, limpo): criado em 2026-11-02 às 17:00, sem `pnpm install`, provavelmente por outra sessão do app. **Não apague:** pode ser de uma sessão aberta. Ele reprovava o ESLint, que agora ignora `.claude/**` (`6103b52`).
 - **Branches que sobraram:** todas as locais já estão mescladas na `main` (conferido em 2026-11-01), inclusive
   `claude/inspiring-sammet-387417` e `feat/ajustes-fase-a`. Só o trabalho novo precisa de branch nova.
+  No worktree `.claude/worktrees/dreamy-engelbart-4a4876`, duas locais da sessão do online: `sync/online-equipar-vazio` (a que foi para a `main`) e `feat/online-equipar-vazio`, que ficou num rebase não publicado (o force-push foi barrado) e pode ser apagada. A remota `feat/online-equipar-vazio` está mesclada.
 - **Arquivo solto:** o `jogar-treino.bat` na raiz é o lançador do autor. Não mexer nem commitar.
