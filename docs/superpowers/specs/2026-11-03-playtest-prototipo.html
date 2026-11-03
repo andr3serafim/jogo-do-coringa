@@ -64,6 +64,92 @@ button.ctl.ativo { background: var(--ouro); }
 .estampa { position: absolute; font-family: 'Alfa', serif; padding: 4px 16px 2px; border: 4px solid var(--tinta); box-shadow: 6px 6px 0 #000; white-space: nowrap; }
 .particula { position: absolute; pointer-events: none; }
 .reduzido .so-movimento { display: none !important; }
+
+/* ---------- 2: a mão ---------- */
+.mao2 { position: absolute; left: 0; right: 0; bottom: 18px; display: flex; justify-content: center; gap: 16px; }
+.mao2 .cm { position: relative; width: 82px; height: 116px; cursor: pointer; transition: transform .25s ease-out, filter .25s ease-out; }
+.mao2 .cm .carta { left: 0; top: 0; width: 82px; height: 116px; }
+.mao2 .cm .carta b { font-size: 34px; left: 7px; top: 3px; }
+.mao2 .cm .carta em { font-size: 8.5px; bottom: 8px; }
+.mao2 .cm .carta .naipe { font-size: 20px; right: 8px; bottom: 20px; }
+.mao2 .cm.joga { animation: respira 3.6s ease-in-out infinite; }
+.mao2 .cm.joga::after { content: ''; position: absolute; left: 6px; right: 6px; bottom: -9px; height: 4px; background: var(--ouro); border: 1.5px solid var(--tinta); }
+.mao2 .cm:nth-child(2) { animation-delay: -.9s; } .mao2 .cm:nth-child(3) { animation-delay: -1.8s; } .mao2 .cm:nth-child(4) { animation-delay: -2.7s; }
+@keyframes respira { 0%,100% { translate: 0 0; } 50% { translate: 0 -3px; } }
+.reduzido .mao2 .cm.joga { animation: none; }
+.mao2 .cm.trava { transform: translateY(8px); }
+.mao2.A .cm.trava .carta { filter: saturate(.25) brightness(.78); }
+.mao2.A .cm.trava .cadeado { display: grid; }
+.mao2 .cadeado { display: none; position: absolute; right: -8px; top: -8px; width: 26px; height: 26px; place-items: center; background: var(--tinta); border: 2px solid var(--papel); border-radius: 50%; z-index: 2; }
+.mao2 .cadeado svg { width: 14px; height: 14px; }
+.mao2.B .cm.trava .carta { filter: saturate(.2) brightness(.85); }
+.mao2.B .cm.trava .carimbo { display: block; }
+.mao2 .carimbo { display: none; position: absolute; left: -6px; right: -6px; top: 42px; transform: rotate(-14deg); text-align: center; font: 400 13px 'Alfa', serif; color: var(--vermelho); border: 3px solid var(--vermelho); background: rgba(241,240,234,.85); padding: 2px 0 0; z-index: 2; }
+.balao { position: absolute; left: 50%; top: 18px; transform: translateX(-50%); max-width: 520px; background: var(--papel); color: var(--tinta); border: 2.5px solid var(--tinta); box-shadow: 3px 3px 0 var(--tinta); padding: 6px 12px; font-weight: 700; font-size: 14px; text-align: center; opacity: 0; transition: opacity .2s; z-index: 5; }
+
+/* ---------- 5: os botões ---------- */
+.linha-botoes { position: absolute; left: 30px; right: 30px; display: flex; gap: 18px; align-items: center; }
+.linha-botoes .legenda { width: 70px; font-size: 11px; font-weight: 800; letter-spacing: .12em; color: var(--tinta); }
+/* hoje */
+.hoje-atacar { background: var(--ouro); border: 2px solid var(--tinta); padding: 8px 18px; font: 400 22px 'Alfa', serif; color: var(--tinta); text-align: left; }
+.hoje-atacar small { display: block; font: 700 11px 'Archivo', sans-serif; }
+.hoje-sec { background: var(--papel); border: 2px solid var(--tinta); padding: 8px 14px; font: 700 14px 'Archivo', sans-serif; color: var(--tinta); }
+/* proposta A: carimbo */
+.carimbo-btn { position: relative; border: 4px solid var(--tinta); box-shadow: 6px 6px 0 var(--tinta); cursor: pointer; transition: transform .12s ease-out, box-shadow .12s ease-out; font-family: 'Alfa', serif; color: var(--tinta); background: var(--papel); }
+.carimbo-btn:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--tinta); }
+.carimbo-btn.apertado { transform: translate(6px, 6px) !important; box-shadow: 0 0 0 var(--tinta) !important; transition-duration: .05s; }
+.carimbo-btn .papelada { position: absolute; inset: 0; pointer-events: none; opacity: .35; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.09  0 0 0 0 0.07  0 0 0 0 0.06  0 0 0 0.6 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>"); }
+.btn-atacar { background: var(--vermelho); color: var(--papel); padding: 8px 22px 8px 16px; transform: rotate(-1.5deg); display: flex; gap: 12px; align-items: center; text-align: left; }
+.btn-atacar:hover { transform: rotate(-1.5deg) translate(-2px, -2px); }
+.btn-atacar .rot { font-size: 30px; line-height: 1; text-shadow: 3px 3px 0 var(--tinta); letter-spacing: .03em; }
+.btn-atacar small { display: block; white-space: nowrap; margin-top: 5px; font: 800 12px 'Archivo', sans-serif; color: var(--tinta); background: var(--papel); padding: 2px 6px; border: 2px solid var(--tinta); }
+.btn-atacar svg.ic { width: 34px; height: 34px; color: var(--papel); filter: drop-shadow(2px 2px 0 var(--tinta)); }
+.btn-atacar.absoluto { background: linear-gradient(180deg, var(--vermelho), #8e1b13); outline: 4px solid var(--ouro); outline-offset: -11px; }
+.btn-atacar.absoluto .tag { position: absolute; right: -14px; top: -14px; background: var(--ouro); color: var(--tinta); font: 800 10px 'Archivo'; letter-spacing: .1em; padding: 3px 6px; border: 2.5px solid var(--tinta); transform: rotate(6deg); }
+.btn-passar { padding: 10px 22px; font-size: 22px; transform: rotate(1deg); }
+.btn-confirmar { padding: 10px 22px; font-size: 22px; background: var(--ouro); transform: rotate(-1deg); }
+.selo-btn { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; padding: 0; }
+.selo-btn svg { width: 30px; height: 30px; transition: transform .25s cubic-bezier(.3,1.6,.5,1); }
+.selo-btn.apertado svg { transform: rotate(-60deg); }
+.selo-legenda { font: 800 10px 'Archivo'; letter-spacing: .1em; color: var(--tinta); text-align: center; margin-top: 6px; }
+/* proposta B: cartaz rasgado */
+.B .carimbo-btn { border: none; box-shadow: none; filter: drop-shadow(4px 5px 0 var(--tinta)); clip-path: polygon(0 4%, 6% 0, 18% 5%, 31% 1%, 47% 6%, 62% 0, 78% 4%, 91% 1%, 100% 6%, 98% 50%, 100% 94%, 88% 100%, 72% 95%, 55% 100%, 40% 94%, 24% 100%, 9% 95%, 0 100%, 2% 50%); }
+.B .carimbo-btn:hover { filter: drop-shadow(6px 7px 0 var(--tinta)); }
+.B .selo-btn { clip-path: none; border-radius: 6px; }
+.tinta-pingo { position: absolute; border-radius: 50%; background: var(--tinta); pointer-events: none; }
+.faisca-borda { position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; background: var(--ouro); border: 1.5px solid #fff6c8; border-radius: 50%; box-shadow: 0 0 8px 2px rgba(245,194,56,.8); pointer-events: none; }
+
+/* ---------- 6: as marcas ---------- */
+.marcas { position: absolute; display: flex; gap: 10px; align-items: center; }
+.marca { display: flex; align-items: center; gap: 5px; border: 2px solid var(--tinta); padding: 3px 8px 3px 5px; font: 800 12px 'Archivo'; letter-spacing: .04em; text-transform: uppercase; color: var(--tinta); background: var(--papel); position: relative; overflow: hidden; }
+.marca svg { width: 18px; height: 18px; flex: none; }
+.marca.forte { background: var(--ouro); }
+/* a proposta: a placa com medalhão, o nome e o que a marca faz */
+.placa-estado { position: relative; display: flex; align-items: center; gap: 9px; padding: 6px 12px 6px 6px; border: 3px solid var(--tinta); box-shadow: 4px 4px 0 var(--tinta); overflow: hidden; min-width: 196px; }
+.placa-estado .medalhao { position: relative; width: 46px; height: 46px; border-radius: 50%; border: 3px solid var(--tinta); display: grid; place-items: center; flex: none; background: var(--papel); overflow: hidden; }
+.placa-estado .medalhao svg { width: 34px; height: 34px; overflow: visible; }
+.placa-estado .nome { font: 400 15px 'Alfa', serif; letter-spacing: .03em; line-height: 1.05; }
+.placa-estado .faz { font: 800 11px 'Archivo'; margin-top: 3px; opacity: .92; }
+.placa-estado.cura { background: var(--cura); color: var(--papel); }
+.placa-estado.cura .medalhao { background: #dff3e2; }
+.placa-estado.cura .cruz { animation: bate 3s ease-in-out infinite; transform-origin: 50% 50%; transform-box: fill-box; }
+@keyframes bate { 0%, 70%, 100% { transform: scale(1); } 76% { transform: scale(1.22); } 82% { transform: scale(1); } 88% { transform: scale(1.12); } }
+.placa-estado .mais { position: absolute; font: 900 14px 'Archivo'; color: var(--cura); opacity: 0; animation: sobe 3s ease-out infinite; }
+.placa-estado .mais.m2 { animation-delay: .25s; }
+@keyframes sobe { 0%, 74% { opacity: 0; transform: translateY(8px); } 82% { opacity: 1; } 100% { opacity: 0; transform: translateY(-16px); } }
+.placa-estado.reflect { background: linear-gradient(135deg, #d9d5c9, #fffdf6 48%, #c4bfb1); color: var(--tinta); }
+.placa-estado.reflect .medalhao { background: radial-gradient(circle at 35% 30%, #fff, #d6d2c6 60%, #a9a497); }
+.placa-estado.reflect::after { content: ''; position: absolute; top: -12px; bottom: -12px; width: 34px; left: -60px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent); transform: skewX(-20deg); animation: espelho 3.2s ease-in-out infinite; }
+@keyframes espelho { 0%, 62% { left: -60px; } 100% { left: 115%; } }
+.placa-estado.res { background: var(--papel); color: var(--tinta); }
+.placa-estado.res .medalhao { background: #2a2420; }
+.placa-estado.res .alma { animation: alma 3s ease-out infinite; transform-box: fill-box; }
+@keyframes alma { 0%, 50% { transform: translateY(6px); opacity: 0; } 62% { opacity: 1; } 88% { transform: translateY(-5px); opacity: 1; } 100% { transform: translateY(-9px); opacity: 0; } }
+.placa-estado .contagem { position: absolute; right: -4px; bottom: -4px; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--ouro); color: var(--tinta); border: 2.5px solid var(--tinta); font: 900 12px 'Archivo'; z-index: 2; }
+.placa-estado.forte { background: var(--ouro); color: var(--tinta); }
+.placa-estado.forte .medalhao { background: var(--tinta); }
+.reduzido .placa-estado *, .reduzido .placa-estado::after { animation: none !important; }
 </style>
 </head>
 <body>
@@ -81,6 +167,82 @@ button.ctl.ativo { background: var(--ouro); }
     <a href="#p9">9 · Cura passiva</a><a href="#p10">10 · Bônus em escala</a><a href="#p11">11 · Aura da iniciativa</a>
     <a href="#p13">13 · Espada e escudo</a><a href="#p14">14 · Monte e cemitério</a><a href="#p15">15 · Golpe final</a>
   </nav>
+
+<section class="ponto" id="p1">
+  <h2>1 · A jogada especial do oponente <small>VOCÊ PEDIU: ENTENDER SEM O HISTÓRICO</small></h2>
+  <p class="sub">Hoje a carta do Bot só cai no lugar, e o que ela fez fica no histórico. Proposta: toda especial do oponente (K, J, Q, A,
+    Sacrifício, Selvagem) <b>vira</b> diante de você, com uma placa que diz <b>o que ela faz</b> em uma linha, e só então voa ao destino ou
+    acerta o alvo. Vale para os dois lados: online, o seu oponente vê as suas assim. As suas jogadas seguem como estão (você já sabe o que jogou).</p>
+  <div class="frame"><div class="stage" id="p1-stage" data-w="1000" data-h="430"></div></div>
+  <div class="controles">
+    <span class="rotulo">TOCAR</span>
+    <button class="ctl" data-p1="K">Bot põe K na Guarda</button>
+    <button class="ctl" data-p1="J">Bot põe J nos Bônus</button>
+    <button class="ctl" data-p1="A">Bot usa Armadilha no seu J</button>
+    <button class="ctl" data-p1="S">Bot faz Sacrifício no seu Q</button>
+  </div>
+  <div class="controles">
+    <span class="rotulo">VARIANTE</span>
+    <button class="ctl ativo" data-p1v="A">A · no centro da mesa</button>
+    <button class="ctl" data-p1v="B">B · na beira do campo dele</button>
+  </div>
+  <p class="escolha"><b>Recomendo A.</b> A especial é rara (uma ou duas por turno) e muda a partida: merece o centro por ~1,6 s. A B é mais
+    discreta, mas a placa pequena perto da mão dele volta a pedir que você procure. Nas duas, a placa fala da <b>consequência</b> ("2 K: a Defesa
+    que cai cura o Bot"), não só do nome. Com o movimento reduzido, a carta aparece e some no centro, sem voo.</p>
+</section>
+
+<section class="ponto" id="p2">
+  <h2>2 · As cartas da mão que agora não jogam <small>VOCÊ PEDIU: SABER SEM CLICAR</small></h2>
+  <p class="sub">Hoje toda carta da mão parece igual, e só o toque explica por que ela não joga. Proposta: a carta sem jogada <b>agora</b>
+    fica apagada e para de respirar; a que tem jogada fica em pé, com um fio de ouro embaixo. O toque na apagada continua dizendo o motivo.
+    Troque o momento da partida e toque numa carta apagada.</p>
+  <div class="frame"><div class="stage" id="p2-stage" data-w="1000" data-h="250"></div></div>
+  <div class="controles">
+    <span class="rotulo">MOMENTO</span>
+    <button class="ctl ativo" data-p2m="vez">Sua vez (já com 4 J)</button>
+    <button class="ctl" data-p2m="reacao">Reação ao ataque do Bot</button>
+    <button class="ctl" data-p2m="bot">Vez do Bot</button>
+    <button class="ctl" data-p2m="equipar">Equipar</button>
+  </div>
+  <div class="controles">
+    <span class="rotulo">VARIANTE</span>
+    <button class="ctl ativo" data-p2v="A">A · apagada, com cadeado</button>
+    <button class="ctl" data-p2v="B">B · carimbo "AGORA NÃO"</button>
+  </div>
+  <p class="escolha"><b>Recomendo A.</b> O cadeado pequeno diz "trancada" sem tampar o valor da carta, e o apagado já basta para o olho
+    separar as duas. O carimbo da B é mais forte, mas com 4 ou 5 cartas apagadas (a vez do Bot) a mão vira um muro de carimbos.</p>
+</section>
+
+<section class="ponto" id="p5">
+  <h2>5 · Os botões da jogada <small>VOCÊ PEDIU: IDENTIDADE E PERSONALIDADE</small></h2>
+  <p class="sub">Em cima, como estão hoje. Embaixo, a proposta: botões de <b>carimbo de madeira</b>, com borda grossa, sombra dura e a
+    tipografia dos títulos. Passe o mouse e aperte: o carimbo afunda e solta tinta. O Atacar é o maior e o único vermelho; quando o Ataque
+    Absoluto está armado, ele ganha a borda de ouro com faíscas. Desfazer e Recomeçar viram selos redondos, com o desenho girando no toque.</p>
+  <div class="frame"><div class="stage" id="p5-stage" data-w="1000" data-h="330"></div></div>
+  <div class="controles">
+    <span class="rotulo">ATACAR</span>
+    <button class="ctl ativo" data-p5a="comum">Ataque comum</button>
+    <button class="ctl" data-p5a="absoluto">Ataque Absoluto armado</button>
+  </div>
+  <div class="controles">
+    <span class="rotulo">VARIANTE</span>
+    <button class="ctl ativo" data-p5v="A">A · carimbo</button>
+    <button class="ctl" data-p5v="B">B · cartaz rasgado</button>
+  </div>
+  <p class="escolha"><b>Recomendo A.</b> O carimbo conversa com o resto da Peleja (as cenas carimbam o nome, as cartas são de papel), aperta
+    bem no toque do celular e cabe nos 44 px de alvo. O cartaz rasgado tem mais textura, mas a borda recortada atrapalha ler o contorno de foco
+    do teclado.</p>
+</section>
+
+<section class="ponto" id="p6">
+  <h2>6 · As marcas de estado na mesa <small>VOCÊ PEDIU: CURA PASSIVA, REFLECT E RESSURREIÇÃO MAIS RICOS</small></h2>
+  <p class="sub">Em cima, as marcas de hoje. Embaixo, a proposta: cada marca ganha a cor e o gesto dela. A <b>cura passiva</b> pulsa em verde
+    com um "+" que sobe; o <b>Reflect</b> tem um brilho de espelho que passa; a <b>Ressurreição</b> mostra uma carta-alma que sobe e o número
+    num selo. Os gestos se repetem devagar (a cada 3 s), pequenos e sem piscar.</p>
+  <div class="frame"><div class="stage" id="p6-stage" data-w="1000" data-h="300"></div></div>
+  <p class="escolha"><b>Uma regra muda com isto:</b> hoje só duas animações da mesa se repetem sem fim (a respiração da mão e o brilho da
+    quadra), e um teste confere. As três marcas entram nessa lista, com o mesmo cuidado: área pequena, nada que acenda a tela.</p>
+</section>
 
 <!-- SECOES -->
 
@@ -135,7 +297,7 @@ function anima(node, frames, opts) {
 function carta(valor, { vermelha = false, papel = '', naipe = '', x = 0, y = 0, w = 46, h = 64 } = {}) {
   const c = el('div', `carta${vermelha ? ' v' : ''}`, `<b>${valor}</b>${naipe ? `<span class="naipe">${naipe}</span>` : ''}${papel ? `<em>${papel}</em>` : ''}`, { left: `${x}px`, top: `${y}px`, width: `${w}px`, height: `${h}px` });
   if (w > 50) c.querySelector('b').style.fontSize = `${Math.round(w * 0.42)}px`;
-  if (papel && w > 50) c.querySelector('em').style.fontSize = `${Math.round(w * 0.14)}px`;
+  if (papel && w > 50) c.querySelector('em').style.fontSize = `${Math.max(7, Math.round(w * 0.095))}px`;
   return c;
 }
 function retrato(lado, x, y, size = 64) {
@@ -154,6 +316,271 @@ function faiscas(parent, x, y, { n = 8, cor = O, raio = 40, vida = 600, tam = 4 
     p.animate([{ transform: 'translate(0,0)', opacity: 1 }, { transform: `translate(${Math.cos(a) * d}px, ${Math.sin(a) * d}px)`, opacity: 0 }], { duration: vida, easing: 'ease-out' }).onfinish = () => p.remove();
   }
 }
+// ------------------------------------------------------------------------------------------------
+// Ponto 1: a jogada especial do oponente
+(() => {
+  const st = document.getElementById('p1-stage');
+  let variante = 'A';
+  let tocando = false;
+  const FACE = { K: { v: 'K', papel: 'GUARDA', verm: false, naipe: '♣' }, J: { v: 'J', papel: 'BÔNUS DE ATAQUE', verm: true, naipe: '♦' }, A: { v: 'A', papel: 'ARMADILHA', verm: false, naipe: '♠' }, Q: { v: 'Q', papel: 'BÔNUS DE DEFESA', verm: true, naipe: '♥' } };
+  const PLACA = {
+    K: ['GUARDA', 'Bot pôs 1 K na Guarda · com 2 K, a Defesa dele que cai o cura'],
+    J: ['BÔNUS DE ATAQUE', 'Bot pôs 1 J · o Ataque dele passa a ×3'],
+    A: ['ARMADILHA', 'Bot quebra 1 J seu · o seu Ataque cai para ×2'],
+    S: ['SACRIFÍCIO', 'Bot troca 1 Q dele pelo seu Q · a sua Defesa cai para ×1'],
+  };
+  const pos = {};
+  function montar() {
+    st.innerHTML = '';
+    st.append(el('div', 'campo bot', '', { top: '0', height: '190px' }), el('div', 'faixa-centro', '', { top: '190px', height: '52px' }), el('div', 'campo voce', '', { top: '242px', height: '188px' }), el('div', 'grao'));
+    // o campo do Bot
+    st.append(el('div', 'rotulo-zona', 'GUARDA', { left: '24px', top: '14px' }), el('div', 'rotulo-zona', 'BÔNUS DE ATAQUE', { left: '150px', top: '14px' }), el('div', 'rotulo-zona', 'BÔNUS DE DEFESA', { left: '330px', top: '14px' }), el('div', 'rotulo-zona', 'MÃO', { left: '760px', top: '14px' }));
+    st.append(carta('K', { x: 24, y: 30, w: 38, h: 54, papel: '' }), carta('J', { x: 150, y: 30, w: 38, h: 54, vermelha: true }), carta('Q', { x: 330, y: 30, w: 38, h: 54, vermelha: true }));
+    pos.botGuarda = { x: 68, y: 30 }; pos.botBonus = { x: 194, y: 30 };
+    for (let i = 0; i < 5; i++) st.append(el('div', 'verso', '', { left: `${760 + i * 40}px`, top: '30px' }));
+    pos.botMao = { x: 840, y: 30 };
+    [6, 9, 3, 10, 7].forEach((v, i) => st.append(carta(v, { x: 160 + i * 52, y: 106, vermelha: i % 2 === 1, naipe: i % 2 ? '♥' : '♣' })));
+    // o centro: monte e cemitério
+    st.append(el('div', 'rotulo-zona', 'MONTE', { left: '780px', top: '198px', color: P }), el('div', 'rotulo-zona', 'CEMITÉRIO', { left: '880px', top: '198px', color: P }));
+    st.append(el('div', 'verso', '', { left: '830px', top: '194px', width: '30px', height: '42px' }));
+    pos.cemiterio = { x: 960, y: 196 };
+    st.append(carta(5, { x: 950, y: 194, w: 30, h: 42 }));
+    // o seu campo
+    st.append(el('div', 'rotulo-zona', 'GUARDA', { left: '24px', top: '252px' }), el('div', 'rotulo-zona', 'BÔNUS DE ATAQUE', { left: '150px', top: '252px' }), el('div', 'rotulo-zona', 'BÔNUS DE DEFESA', { left: '330px', top: '252px' }));
+    st.append(carta('K', { x: 24, y: 268, w: 38, h: 54 }));
+    const j1 = carta('J', { x: 150, y: 268, w: 38, h: 54, vermelha: true }), j2 = carta('J', { x: 194, y: 268, w: 38, h: 54 });
+    const q1 = carta('Q', { x: 330, y: 268, w: 38, h: 54, vermelha: true });
+    j2.id = 'p1-alvoJ'; q1.id = 'p1-alvoQ';
+    st.append(j1, j2, q1);
+    [8, 4, 10, 7, 9, 6].forEach((v, i) => st.append(carta(v, { x: 160 + i * 52, y: 340, vermelha: i % 2 === 0, naipe: i % 2 ? '♠' : '♦' })));
+    st.append(el('div', 'rotulo-zona', 'Ataque · vez do Bot', { left: '24px', top: '210px', color: O, fontSize: '12px', letterSpacing: '.04em' }));
+  }
+  /** Os cacos de papel da carta que quebra. */
+  function cacos(x, y) {
+    if (REDUZIDO) return;
+    for (let i = 0; i < 10; i++) {
+      const s = el('div', 'particula', '', { left: `${x}px`, top: `${y}px`, width: '10px', height: '10px', background: P, border: `2px solid ${T}`, clipPath: 'polygon(0 0, 100% 30%, 40% 100%)' });
+      st.appendChild(s);
+      const a = Math.random() * Math.PI * 2, d = 40 + Math.random() * 50;
+      s.animate([{ transform: 'translate(0,0) rotate(0)', opacity: 1 }, { transform: `translate(${Math.cos(a) * d}px, ${Math.sin(a) * d + 30}px) rotate(${Math.random() * 540}deg)`, opacity: 0 }], { duration: 650, easing: 'cubic-bezier(.2,.7,.4,1)' }).onfinish = () => s.remove();
+    }
+  }
+  async function tocar(tipo) {
+    if (tocando) return;
+    tocando = true;
+    montar();
+    const face = FACE[tipo === 'S' ? 'Q' : tipo];
+    const [titulo, linha] = PLACA[tipo];
+    // A carta sai da mão dele de costas.
+    const c = el('div', 'verso', '', { left: `${pos.botMao.x}px`, top: `${pos.botMao.y}px`, zIndex: 20 });
+    st.appendChild(c);
+    const centro = variante === 'A' ? { x: 500 - 17, y: 120, s: 2.3 } : { x: 700, y: 70, s: 1.5 };
+    const dx = centro.x - pos.botMao.x, dy = centro.y - pos.botMao.y;
+    let veu = null;
+    if (variante === 'A') {
+      veu = el('div', '', '', { position: 'absolute', inset: '0', background: T, opacity: 0, zIndex: 15 });
+      st.appendChild(veu);
+      veu.animate([{ opacity: 0 }, { opacity: 0.35 }], { duration: 220, fill: 'forwards' });
+    }
+    await anima(c, [{ transform: 'translate(0,0) scale(1) rotateY(0deg)' }, { transform: `translate(${dx}px, ${dy}px) scale(${centro.s}) rotateY(90deg)` }], { duration: 300, easing: 'cubic-bezier(.3,.6,.4,1)' }).finished;
+    // Vira: a face aparece.
+    c.className = `carta${face.verm ? ' v' : ''}`;
+    c.innerHTML = `<b>${face.v}</b><span class="naipe">${face.naipe}</span><em>${face.papel}</em>`;
+    Object.assign(c.style, { width: '34px', height: '48px', borderWidth: '2px' });
+    c.querySelector('b').style.fontSize = '15px'; c.querySelector('em').style.fontSize = '4px'; c.querySelector('.naipe').style.fontSize = '9px';
+    c.querySelector('b').style.left = '3px'; c.querySelector('b').style.top = '1px';
+    await anima(c, [{ transform: `translate(${dx}px, ${dy}px) scale(${centro.s}) rotateY(90deg)` }, { transform: `translate(${dx}px, ${dy}px) scale(${centro.s}) rotateY(0deg)` }], { duration: 160 }).finished;
+    // A placa: o nome e a consequência.
+    const placa = el('div', 'estampa', `<div style="font-size:${variante === 'A' ? 30 : 18}px;line-height:1">${titulo}</div><div style="font-family:Archivo;font-weight:800;font-size:${variante === 'A' ? 14 : 11}px;margin-top:4px;letter-spacing:0">${linha}</div>`,
+      { background: tipo === 'A' || tipo === 'S' ? R : P, color: tipo === 'A' || tipo === 'S' ? P : T, zIndex: 21, textAlign: 'center' });
+    if (variante === 'A') Object.assign(placa.style, { left: '500px', top: '262px', transform: 'translateX(-50%) rotate(-2deg)' });
+    else Object.assign(placa.style, { right: '320px', top: '60px', transform: 'rotate(-2deg)', padding: '3px 10px 2px', borderWidth: '3px', boxShadow: '4px 4px 0 #000' });
+    st.appendChild(placa);
+    anima(placa, [{ opacity: 0, scale: 1.25 }, { opacity: 1, scale: 1 }], { duration: 180, easing: 'cubic-bezier(.2,1.4,.5,1)' });
+    await espera(950);
+    // O destino: a zona dele, ou o alvo no seu campo.
+    const alvo = tipo === 'A' ? document.getElementById('p1-alvoJ') : tipo === 'S' ? document.getElementById('p1-alvoQ') : null;
+    let dest = tipo === 'K' ? pos.botGuarda : tipo === 'J' ? pos.botBonus : { x: parseFloat(alvo.style.left), y: parseFloat(alvo.style.top) };
+    placa.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, fill: 'forwards' });
+    veu?.animate([{ opacity: 0.35 }, { opacity: 0 }], { duration: 300, fill: 'forwards' });
+    const ex = dest.x - pos.botMao.x, ey = dest.y - pos.botMao.y;
+    const escalaDest = 38 / 34;
+    await anima(c, [{ transform: `translate(${dx}px, ${dy}px) scale(${centro.s})` }, { transform: `translate(${ex}px, ${ey}px) scale(${escalaDest})` }], { duration: alvo ? 220 : 340, easing: alvo ? 'cubic-bezier(.6,0,.9,.4)' : 'cubic-bezier(.3,.6,.4,1)' }).finished;
+    if (alvo) {
+      // Acerta: o alvo racha, treme e estoura; as duas vão ao cemitério.
+      const cx = dest.x + 19, cy = dest.y + 27;
+      if (!REDUZIDO) alvo.animate([{ translate: '0 0' }, { translate: '-3px 1px' }, { translate: '3px -1px' }, { translate: '-2px 0' }, { translate: '0 0' }], { duration: 160 });
+      await espera(REDUZIDO ? 0 : 160);
+      cacos(cx, cy);
+      alvo.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, fill: 'forwards' });
+      await anima(c, [{ transform: `translate(${ex}px, ${ey}px) scale(${escalaDest})`, opacity: 1 }, { transform: `translate(${pos.cemiterio.x - pos.botMao.x}px, ${pos.cemiterio.y - pos.botMao.y}px) scale(.8)`, opacity: 0.2 }], { duration: 380, delay: 80 }).finished;
+      c.remove();
+      st.append(carta(face.v, { x: 950, y: 194, w: 30, h: 42, vermelha: face.verm }));
+    } else if (!REDUZIDO) {
+      c.animate([{ scale: '1 1' }, { scale: '1.06 .94' }, { scale: '1 1' }], { duration: 160, composite: 'add' });
+      faiscas(st, dest.x + 19, dest.y + 50, { n: 5, cor: '#8a7d70', raio: 22, vida: 450, tam: 5 });
+    }
+    await espera(400);
+    tocando = false;
+  }
+  document.querySelectorAll('[data-p1]').forEach((b) => b.addEventListener('click', () => tocar(b.dataset.p1)));
+  document.querySelectorAll('[data-p1v]').forEach((b) => b.addEventListener('click', () => {
+    variante = b.dataset.p1v;
+    document.querySelectorAll('[data-p1v]').forEach((x) => x.classList.toggle('ativo', x === b));
+  }));
+  montar();
+})();
+// ------------------------------------------------------------------------------------------------
+// Ponto 2: as cartas travadas da mão
+(() => {
+  const st = document.getElementById('p2-stage');
+  const CARTAS = [
+    { id: 'K', v: 'K', papel: 'GUARDA', naipe: '♣' }, { id: 'J', v: 'J', papel: 'BÔNUS DE ATAQUE', naipe: '♦', verm: true },
+    { id: 'Q', v: 'Q', papel: 'BÔNUS DE DEFESA', naipe: '♥', verm: true }, { id: 'A', v: 'A', papel: 'ARMADILHA', naipe: '♠' },
+    { id: 'W', v: '★', papel: 'SELVAGEM', naipe: '' },
+  ];
+  // O que joga em cada momento, e o motivo das que não jogam (as frases do motor, encurtadas).
+  const MOMENTOS = {
+    vez: { joga: ['K', 'Q', 'A', 'W'], motivo: { J: 'Os Bônus de ataque já têm 4 J: não cabe outro.' } },
+    reacao: { joga: ['A', 'W'], motivo: { K: 'Na reação ao ataque só entram Armadilha e Reflect.', J: 'Na reação ao ataque só entram Armadilha e Reflect.', Q: 'Na reação ao ataque só entram Armadilha e Reflect.' } },
+    bot: { joga: [], motivo: { '*': 'É a vez do Bot: as suas especiais esperam o seu turno.' } },
+    equipar: { joga: [], motivo: { '*': 'No Equipar só as numéricas entram; as especiais esperam o Ataque.' } },
+  };
+  let momento = 'vez', variante = 'A';
+  const CADEADO = `<svg viewBox="0 0 16 16"><rect x="3" y="7" width="10" height="8" rx="1" fill="${P}"/><path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="${P}" stroke-width="2" fill="none"/></svg>`;
+  function montar() {
+    st.innerHTML = '';
+    st.append(el('div', 'campo voce', '', { top: '0', height: '250px' }), el('div', 'grao'));
+    st.append(el('div', 'rotulo-zona', 'SUA MÃO', { left: '24px', top: '16px' }));
+    const balao = el('div', 'balao', '');
+    const mao = el('div', `mao2 ${variante}`);
+    const m = MOMENTOS[momento];
+    CARTAS.forEach((c) => {
+      const joga = m.joga.includes(c.id);
+      const cm = el('div', `cm ${joga ? 'joga' : 'trava'}`, '');
+      const face = carta(c.v, { vermelha: c.verm, papel: c.papel, naipe: c.naipe, w: 82, h: 116 });
+      cm.append(face, el('div', 'cadeado', CADEADO), el('div', 'carimbo', 'AGORA NÃO'));
+      cm.addEventListener('click', () => {
+        const texto = joga ? `${c.papel[0] + c.papel.slice(1).toLowerCase()}: escolha o destino (a jogada abre).` : m.motivo[c.id] ?? m.motivo['*'];
+        balao.textContent = texto;
+        balao.style.opacity = 1;
+        clearTimeout(balao.t);
+        balao.t = setTimeout(() => (balao.style.opacity = 0), 2400);
+      });
+      mao.append(cm);
+    });
+    st.append(mao, balao);
+  }
+  document.querySelectorAll('[data-p2m]').forEach((b) => b.addEventListener('click', () => {
+    momento = b.dataset.p2m;
+    document.querySelectorAll('[data-p2m]').forEach((x) => x.classList.toggle('ativo', x === b));
+    montar();
+  }));
+  document.querySelectorAll('[data-p2v]').forEach((b) => b.addEventListener('click', () => {
+    variante = b.dataset.p2v;
+    document.querySelectorAll('[data-p2v]').forEach((x) => x.classList.toggle('ativo', x === b));
+    montar();
+  }));
+  montar();
+})();
+
+// ------------------------------------------------------------------------------------------------
+// Ponto 5: os botões
+(() => {
+  const st = document.getElementById('p5-stage');
+  let absoluto = false, variante = 'A';
+  const DESFAZER = `<svg viewBox="0 0 24 24"><path d="M9 5L3 10l6 5v-3.5c5 0 8 1.5 10 6-1-6-4-9.5-10-10V5z" fill="${T}"/></svg>`;
+  const RECOMECAR = `<svg viewBox="0 0 24 24"><path d="M12 4a8 8 0 1 0 8 8h-3a5 5 0 1 1-5-5v3l5-4.5L12 1z" fill="${T}"/></svg>`;
+  let faiscasTimer = null;
+  function pingos(btn) {
+    if (REDUZIDO) return;
+    const r = btn.getBoundingClientRect(), s = st.getBoundingClientRect(), k = s.width / 1000;
+    const x = (r.left - s.left + r.width / 2) / k, y = (r.top - s.top + r.height) / k;
+    for (let i = 0; i < 9; i++) {
+      const tam = 4 + Math.random() * 7;
+      const p = el('div', 'tinta-pingo', '', { left: `${x + (Math.random() - 0.5) * r.width / k}px`, top: `${y - 4}px`, width: `${tam}px`, height: `${tam}px` });
+      st.appendChild(p);
+      p.animate([{ transform: 'translate(0,0) scale(1)', opacity: 1 }, { transform: `translate(${(Math.random() - 0.5) * 40}px, ${8 + Math.random() * 18}px) scale(.6)`, opacity: 0 }], { duration: 420, easing: 'ease-out' }).onfinish = () => p.remove();
+    }
+  }
+  function apertavel(btn) {
+    btn.addEventListener('pointerdown', () => btn.classList.add('apertado'));
+    const solta = () => { if (btn.classList.contains('apertado')) { btn.classList.remove('apertado'); pingos(btn); } };
+    btn.addEventListener('pointerup', solta); btn.addEventListener('pointerleave', () => btn.classList.remove('apertado'));
+  }
+  function montar() {
+    clearInterval(faiscasTimer);
+    st.innerHTML = '';
+    st.append(el('div', 'campo voce', '', { top: '0', height: '330px' }), el('div', 'grao'));
+    // hoje
+    const hoje = el('div', 'linha-botoes', '', { top: '26px' });
+    hoje.append(el('div', 'legenda', 'HOJE'));
+    hoje.append(el('div', 'hoje-atacar', `ATACAR<small>${absoluto ? '245 × 44 · Ataque Absoluto, dano 201' : '74 × 20 · dano 54'}</small>`));
+    hoje.append(el('div', 'hoje-sec', 'Passar'), el('div', 'hoje-sec', 'Desfazer'), el('div', 'hoje-sec', 'Recomeçar'), el('div', 'hoje-sec', 'Confirmar'));
+    st.append(hoje);
+    st.append(el('div', '', '', { position: 'absolute', left: '30px', right: '30px', top: '108px', borderTop: `2px dashed ${T}`, opacity: .35 }));
+    // proposta
+    const prop = el('div', `linha-botoes ${variante}`, '', { top: '150px' });
+    prop.append(el('div', 'legenda', 'PROPOSTA'));
+    const atacar = el('button', `carimbo-btn btn-atacar${absoluto ? ' absoluto' : ''}`, `<span class="papelada"></span><svg class="ic" viewBox="0 0 24 24">${ESPADA}</svg><span><span class="rot alfa">ATACAR</span><small class="num">${absoluto ? '245 × 44 · ABSOLUTO · dano 201' : '74 × 20 · dano 54'}</small></span>${absoluto ? '<span class="tag">ATAQUE ABSOLUTO</span>' : ''}`);
+    const passar = el('button', 'carimbo-btn btn-passar', '<span class="papelada"></span>PASSAR');
+    const confirmar = el('button', 'carimbo-btn btn-confirmar', '<span class="papelada"></span>CONFIRMAR');
+    const selo = (svg, txt) => { const w = el('div', '', ''); const b = el('button', 'carimbo-btn selo-btn', `<span class="papelada"></span>${svg}`); b.setAttribute('aria-label', txt); w.append(b, el('div', 'selo-legenda', txt.toUpperCase())); apertavel(b); return w; };
+    [atacar, passar, confirmar].forEach(apertavel);
+    prop.append(atacar, passar, selo(DESFAZER, 'Desfazer'), selo(RECOMECAR, 'Recomeçar'), confirmar);
+    st.append(prop);
+    // As faíscas correm pela borda do Atacar armado (uma de cada vez, devagar).
+    if (absoluto) {
+      const corre = () => {
+        if (REDUZIDO || !atacar.isConnected) return;
+        const r = atacar.getBoundingClientRect(), s = st.getBoundingClientRect(), k = s.width / 1000;
+        const x0 = (r.left - s.left) / k, y0 = (r.top - s.top) / k, w = r.width / k, h = r.height / k;
+        const f = el('div', 'faisca-borda', '', { left: `${x0}px`, top: `${y0}px` });
+        st.appendChild(f);
+        f.animate([{ transform: 'translate(0,0)' }, { transform: `translate(${w}px,0)` }, { transform: `translate(${w}px,${h}px)` }, { transform: `translate(0,${h}px)` }, { transform: 'translate(0,0)' }], { duration: 1800, easing: 'linear' }).onfinish = () => f.remove();
+      };
+      corre();
+      faiscasTimer = setInterval(corre, 2600);
+    }
+  }
+  document.querySelectorAll('[data-p5a]').forEach((b) => b.addEventListener('click', () => {
+    absoluto = b.dataset.p5a === 'absoluto';
+    document.querySelectorAll('[data-p5a]').forEach((x) => x.classList.toggle('ativo', x === b));
+    montar();
+  }));
+  document.querySelectorAll('[data-p5v]').forEach((b) => b.addEventListener('click', () => {
+    variante = b.dataset.p5v;
+    document.querySelectorAll('[data-p5v]').forEach((x) => x.classList.toggle('ativo', x === b));
+    montar();
+  }));
+  document.addEventListener('reduzido', montar);
+  montar();
+})();
+
+// ------------------------------------------------------------------------------------------------
+// Ponto 6: as marcas de estado
+(() => {
+  const st = document.getElementById('p6-stage');
+  const CRUZ = (cor) => `<svg class="cruz" viewBox="0 0 24 24"><path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7z" fill="${cor}" stroke="${T}" stroke-width="1.5"/></svg>`;
+  const ESPELHO = `<svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="8" ry="10" fill="#dcd8cc" stroke="${T}" stroke-width="2"/><path d="M8 8l4-3M8 13l7-6" stroke="#fff" stroke-width="1.6"/></svg>`;
+  const ALMA = `<svg viewBox="0 0 24 24"><rect class="alma" x="7" y="3" width="10" height="14" rx="1.5" fill="${P}" stroke="${T}" stroke-width="2"/><path d="M4 21h16" stroke="${T}" stroke-width="2.5"/></svg>`;
+  const ESC = `<svg viewBox="0 0 24 24">${ESCUDO.replace('currentColor', T)}</svg>`;
+  st.append(el('div', 'campo voce', '', { top: '0', height: '300px' }), el('div', 'grao'));
+  st.append(el('div', 'rotulo-zona', 'HOJE', { left: '24px', top: '30px' }), el('div', 'rotulo-zona', 'PROPOSTA', { left: '24px', top: '120px' }));
+  const hoje = el('div', 'marcas', '', { left: '120px', top: '22px' });
+  hoje.innerHTML = `<div class="marca">${CRUZ(P)}Cura passiva</div><div class="marca">${ESPELHO}Reflect ativo</div><div class="marca">${ALMA}2 Ressurreições</div><div class="marca forte">${ESC}Defesa Absoluta</div>`;
+  const prop = el('div', 'marcas', '', { left: '120px', top: '96px', display: 'grid', gridTemplateColumns: '340px 340px', gap: '18px 26px' });
+  const CRUZ2 = `<svg viewBox="0 0 24 24"><path class="cruz" d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7z" fill="${CURA}" stroke="${T}" stroke-width="1.6"/></svg>`;
+  const ESPELHO2 = `<svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="7.5" ry="10" fill="none" stroke="${T}" stroke-width="2.2"/><path d="M8.5 8.5l4-3M8.5 14l6.5-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M12 22v1.5M8 23.5h8" stroke="${T}" stroke-width="2"/></svg>`;
+  const ALMA2 = `<svg viewBox="0 0 24 24"><path d="M3 22h18" stroke="${P}" stroke-width="2"/><path d="M6 22v-4h12v4" fill="#5a4e45" stroke="${P}" stroke-width="1.4"/><g class="alma"><rect x="8" y="5" width="8" height="11" rx="1.2" fill="${P}" stroke="${T}" stroke-width="1.4"/><path d="M10 8h4" stroke="${R}" stroke-width="1.6"/></g></svg>`;
+  const ESC2 = `<svg viewBox="0 0 24 24"><path d="M12 1.5l9.5 3.4V12c0 5.8-4.3 10-9.5 11.5C6.8 22 2.5 17.8 2.5 12V4.9z" fill="${O}" stroke="${P}" stroke-width="1.4"/><path d="M12 6v12M6.5 11h11" stroke="${T}" stroke-width="2"/></svg>`;
+  prop.innerHTML = `
+    <div class="placa-estado cura"><div class="medalhao">${CRUZ2}<span class="mais" style="left:8px;top:6px">+</span><span class="mais m2" style="right:7px;top:10px">+</span></div><div><div class="nome">CURA PASSIVA</div><div class="faz">a sua Defesa que cai vira vida</div></div></div>
+    <div class="placa-estado reflect"><div class="medalhao">${ESPELHO2}</div><div><div class="nome">REFLECT ATIVO</div><div class="faz">o próximo golpe volta para ele</div></div></div>
+    <div class="placa-estado res"><div class="medalhao">${ALMA2}</div><span class="contagem num" style="left:40px;top:36px;right:auto;bottom:auto">2</span><div><div class="nome">RESSURREIÇÃO</div><div class="faz">traz 1 numérica do cemitério</div></div></div>
+    <div class="placa-estado forte"><div class="medalhao">${ESC2}</div><div><div class="nome">DEFESA ABSOLUTA</div><div class="faz">imune até o golpe dele</div></div></div>`;
+  st.append(hoje, prop);
+})();
 /* JS-SECOES */
 encaixar();
 </script>
