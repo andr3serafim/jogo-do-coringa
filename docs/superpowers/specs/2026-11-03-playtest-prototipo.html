@@ -150,6 +150,43 @@ button.ctl.ativo { background: var(--ouro); }
 .placa-estado.forte { background: var(--ouro); color: var(--tinta); }
 .placa-estado.forte .medalhao { background: var(--tinta); }
 .reduzido .placa-estado *, .reduzido .placa-estado::after { animation: none !important; }
+
+/* ---------- 9: a cura passiva ---------- */
+.hud { position: absolute; left: 0; right: 0; top: 0; background: var(--tinta); }
+.pv { position: absolute; font-size: 14px; color: var(--papel); }
+.pv small { color: #9e978c; font-weight: 600; }
+.mais-cura { position: absolute; font: 900 30px 'Archivo'; color: var(--papel); background: var(--cura); border: 3px solid var(--tinta); padding: 0 8px; box-shadow: 4px 4px 0 #000; z-index: 30; }
+.carta.aceso-k { box-shadow: 0 0 0 3px var(--ouro), 0 0 16px 4px rgba(245,194,56,.75); }
+.essencia { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; background: #7fe08f; border: 1.5px solid var(--cura); transform: rotate(45deg); z-index: 25; pointer-events: none; }
+.fita-cura { position: absolute; left: 50%; top: 104px; transform: translateX(-50%); background: var(--tinta); padding: 3px; z-index: 31;
+  clip-path: polygon(0 0, 100% 0, 96% 50%, 100% 100%, 0 100%, 4% 50%); }
+.fita-cura > div { clip-path: polygon(0 0, 100% 0, 96% 50%, 100% 100%, 0 100%, 4% 50%); background: var(--papel); padding: 6px 40px 5px; text-align: center; color: var(--tinta); }
+.fita-cura b { display: block; font: 400 19px 'Alfa', serif; }
+.fita-cura span { display: block; font: 700 12.5px 'Archivo'; color: #4b433c; }
+
+/* ---------- 10: os bônus em escala ---------- */
+.zona10 { position: absolute; top: 34px; width: 300px; height: 250px; }
+.zona10 .cartas { position: absolute; left: 0; right: 0; top: 40px; height: 110px; display: flex; justify-content: center; gap: 10px; }
+.zona10 .cartas .carta { position: relative; left: auto; top: auto; flex: none; width: 52px; height: 74px; transition: box-shadow .3s; }
+.zona10 .cartas .carta b { font-size: 24px; }
+.zona10 .nivel { position: absolute; left: 0; right: 0; top: 182px; text-align: center; font: 400 18px 'Alfa', serif; color: var(--tinta); }
+.zona10 .nivel small { display: block; font: 800 11.5px 'Archivo'; letter-spacing: 0; margin-top: 2px; color: #3a312b; }
+.zona10 .fundo { position: absolute; left: 50%; top: 95px; transform: translate(-50%, -50%); pointer-events: none; }
+.t-aceso-j .carta { box-shadow: 0 0 0 2.5px var(--ouro), 0 0 12px 3px rgba(245,194,56,.6); }
+.t-aceso-q .carta { box-shadow: 0 0 0 2.5px #fffdf6, 0 0 14px 4px rgba(255,253,246,.85); }
+.t-aceso-k .carta { box-shadow: 0 0 0 2.5px #7fe08f, 0 0 12px 3px rgba(42,115,57,.7); animation: batek 2.6s ease-in-out infinite; }
+@keyframes batek { 0%, 70%, 100% { box-shadow: 0 0 0 2.5px #7fe08f, 0 0 10px 2px rgba(42,115,57,.6); } 78% { box-shadow: 0 0 0 3px #b9f5c4, 0 0 18px 6px rgba(42,115,57,.85); } }
+.t-ameaca-k .carta { box-shadow: 0 0 0 2.5px #ff7a5c, 0 0 14px 5px rgba(184,38,28,.75); animation: brasa 1.8s ease-in-out infinite alternate; }
+@keyframes brasa { from { box-shadow: 0 0 0 2.5px #ff7a5c, 0 0 10px 3px rgba(184,38,28,.6); } to { box-shadow: 0 0 0 3px #ffb08f, 0 0 20px 7px rgba(184,38,28,.85); } }
+.raio10 { position: absolute; pointer-events: none; z-index: 5; }
+.reduzido .zona10 .carta { animation: none !important; }
+
+/* ---------- 11: a aura da iniciativa ---------- */
+.aura11 { position: absolute; pointer-events: none; overflow: visible; }
+.contador11 { position: absolute; font: 900 15px 'Archivo'; color: var(--tinta); background: var(--ouro); border: 2.5px solid var(--papel); padding: 1px 6px; z-index: 6; }
+.nivel11 { position: absolute; font: 400 22px 'Alfa', serif; color: var(--ouro); }
+.nivel11 small { display: block; font: 700 12.5px 'Archivo'; color: #bdb8ad; margin-top: 4px; }
+input[type=range].ctl-range { width: 260px; accent-color: var(--ouro); }
 </style>
 </head>
 <body>
@@ -242,6 +279,53 @@ button.ctl.ativo { background: var(--ouro); }
   <div class="frame"><div class="stage" id="p6-stage" data-w="1000" data-h="300"></div></div>
   <p class="escolha"><b>Uma regra muda com isto:</b> hoje só duas animações da mesa se repetem sem fim (a respiração da mão e o brilho da
     quadra), e um teste confere. As três marcas entram nessa lista, com o mesmo cuidado: área pequena, nada que acenda a tela.</p>
+</section>
+
+<section class="ponto" id="p9">
+  <h2>9 · A cura passiva que se explica <small>VOCÊ PEDIU: SABER POR QUE FOI CURADO</small></h2>
+  <p class="sub">Com 2 K na Guarda, cada numérica da sua Defesa que cai vira vida (valor × (1 + Q)). Hoje só aparece o "+18" no placar.
+    Proposta: no instante em que a carta cai, os <b>K da Guarda acendem</b> (a causa), a carta solta uma <b>essência verde</b> que corre até o
+    seu Coringa, e o "+18" nasce ali, enchendo a barra. Na primeira cura da partida, uma faixa explica a regra em uma linha.</p>
+  <div class="frame"><div class="stage" id="p9-stage" data-w="1000" data-h="300"></div></div>
+  <div class="controles">
+    <span class="rotulo">TOCAR</span>
+    <button class="ctl" id="p9-tocar">O golpe do Bot tira a 1ª carta da sua Defesa</button>
+    <label style="font-size:13.5px;font-weight:700;display:flex;gap:6px;align-items:center"><input type="checkbox" id="p9-primeira" checked> primeira cura da partida (com a faixa)</label>
+  </div>
+  <p class="escolha"><b>Sem escolha pendente aqui:</b> é a forma direta do que você pediu. A faixa só na primeira cura de cada partida, para
+    não repetir a aula; o tutorial ganha uma dica sobre ela.</p>
+</section>
+
+<section class="ponto" id="p10">
+  <h2>10 · Os bônus que crescem com a quantidade <small>VOCÊ PEDIU: MAIS EMPOLGANTE A CADA CARTA</small></h2>
+  <p class="sub">A mesma escada para as três zonas, cada uma com a sua cor: <b>1 carta</b>, nada; <b>2</b>, as cartas acendem; <b>3</b>, o
+    poder transborda (raios no J, a muralha no Q, a brasa da ameaça no K); <b>4</b>, o Absoluto (ou a Exódia, no K). Com 3 K, os dois lados
+    veem a brasa vermelha: "falta 1 K para a Exódia". Use os botões para subir e descer.</p>
+  <div class="frame"><div class="stage" id="p10-stage" data-w="1000" data-h="300"></div></div>
+  <div class="controles">
+    <span class="rotulo">J</span><button class="ctl" data-p10="J-">−</button><button class="ctl" data-p10="J+">+</button>
+    <span class="rotulo" style="margin-left:14px">Q</span><button class="ctl" data-p10="Q-">−</button><button class="ctl" data-p10="Q+">+</button>
+    <span class="rotulo" style="margin-left:14px">K</span><button class="ctl" data-p10="K-">−</button><button class="ctl" data-p10="K+">+</button>
+  </div>
+  <p class="escolha"><b>Recomendo a escada como está,</b> e uma pergunta para você: o aviso da ameaça de Exódia (3 K) muda a leitura da
+    partida para o oponente (hoje ele precisa contar os K). Eu acho que é justo, porque a Guarda já é pública; mas é uma mudança de jogo, e a
+    decisão é sua.</p>
+</section>
+
+<section class="ponto" id="p11">
+  <h2>11 · A aura da iniciativa <small>VOCÊ PEDIU: 3, 5 E 10 RODADAS SEGUIDAS</small></h2>
+  <p class="sub">O Coringa de quem segura a iniciativa por várias rodadas de Ataque seguidas ganha uma aura de poder que cresce: <b>3</b>, a
+    brasa (um contorno de ouro que tremula); <b>5</b>, a chama (labaredas acima do retrato e brasas subindo); <b>10</b>, a super aura (o núcleo
+    branco, a chama alta e raios pequenos estalando). O número de rodadas fica num selo ao lado. Arraste a barra.</p>
+  <div class="frame"><div class="stage" id="p11-stage" data-w="1000" data-h="230"></div></div>
+  <div class="controles">
+    <span class="rotulo">RODADAS SEGUIDAS</span>
+    <input type="range" class="ctl-range" id="p11-n" min="0" max="12" value="5">
+    <span class="num" id="p11-rot" style="font-size:15px">5</span>
+  </div>
+  <p class="escolha"><b>Sem escolha de forma pendente.</b> Uma de regra: "seguidas" conta as rodadas de Ataque em que a iniciativa terminou
+    com o mesmo jogador; quando ela troca de mão, a aura apaga de uma vez (com um sopro de fumaça). Os raios da super aura são pequenos e no
+    máximo 3 por segundo, dentro da regra de fotossensibilidade.</p>
 </section>
 
 <!-- SECOES -->
@@ -580,6 +664,277 @@ function faiscas(parent, x, y, { n = 8, cor = O, raio = 40, vida = 600, tam = 4 
     <div class="placa-estado res"><div class="medalhao">${ALMA2}</div><span class="contagem num" style="left:40px;top:36px;right:auto;bottom:auto">2</span><div><div class="nome">RESSURREIÇÃO</div><div class="faz">traz 1 numérica do cemitério</div></div></div>
     <div class="placa-estado forte"><div class="medalhao">${ESC2}</div><div><div class="nome">DEFESA ABSOLUTA</div><div class="faz">imune até o golpe dele</div></div></div>`;
   st.append(hoje, prop);
+})();
+// ------------------------------------------------------------------------------------------------
+// A aura que ferve (pontos 10 e 11): a mesma conta da aura do Ataque Absoluto do jogo (`ui/scenes/aura.ts`), com pontas viradas para
+// cima, e o mesmo "ferver": cada camada troca entre 4 formas a cada 70 ms.
+function semente(seed) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
+function auraPontas(rx, ry, n, maxL, seed) {
+  const r = semente(seed), vertices = [], tips = [];
+  for (let i = 0; i < n; i++) {
+    const av = Math.PI / 2 + (i / n) * 2 * Math.PI, at = Math.PI / 2 + ((i + 0.5) / n) * 2 * Math.PI;
+    vertices.push([Math.cos(av) * rx * (0.94 + 0.1 * r()), Math.sin(av) * ry * (0.94 + 0.1 * r())]);
+    const up = Math.max(0, -Math.sin(at)), down = Math.max(0, Math.sin(at));
+    const L = maxL * (0.22 + 0.78 * Math.pow(up, 1.3)) * (0.72 + 0.5 * r()) * (1 - 0.85 * down);
+    const bx = Math.cos(at) * rx, by = Math.sin(at) * ry;
+    tips.push([bx + Math.cos(at) * L * 0.45 + (r() - 0.5) * L * 0.25, by + Math.sin(at) * L * 0.45 - L * (0.35 + 0.55 * up), L]);
+  }
+  const f = (v) => v.toFixed(1);
+  let d = `M${f(vertices[0][0])} ${f(vertices[0][1])}`;
+  for (let i = 0; i < n; i++) {
+    const [vx, vy] = vertices[i], [tx, ty, L] = tips[i], [nx, ny] = vertices[(i + 1) % n];
+    d += ` C${f(vx + (tx - vx) * 0.2)} ${f(vy + (ty - vy) * 0.1)} ${f(tx - (tx - vx) * 0.12)} ${f(ty + L * 0.5)} ${f(tx)} ${f(ty)}`;
+    d += ` C${f(tx + (nx - tx) * 0.12)} ${f(ty + L * 0.5)} ${f(nx - (nx - tx) * 0.2)} ${f(ny + (ty - ny) * 0.1)} ${f(nx)} ${f(ny)}`;
+  }
+  return `${d} Z`;
+}
+/** Um SVG de aura com `camadas` (de fora para dentro: { rx, ry, n, maxL, cor, contorno? }) e o ferver; devolve { svg, ferver }. */
+function aura(camadas, base = 211) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.style.overflow = 'visible';
+  const formas = camadas.map((c, i) => [0, 1, 2, 3].map((k) => auraPontas(c.rx, c.ry, c.n, c.maxL, base + i * 47 + k * 13)));
+  const paths = camadas.map((c) => {
+    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    p.setAttribute('fill', c.cor);
+    if (c.contorno) { p.setAttribute('stroke', T); p.setAttribute('stroke-width', c.contorno); p.setAttribute('stroke-linejoin', 'round'); }
+    if (c.opacidade) p.setAttribute('opacity', c.opacidade);
+    svg.appendChild(p);
+    return p;
+  });
+  let quadro = 0;
+  const ferver = () => { paths.forEach((p, i) => p.setAttribute('d', formas[i][quadro % 4])); quadro += 1; };
+  ferver();
+  return { svg, ferver };
+}
+/** Um raio pequeno (zigue-zague) entre dois pontos do palco, que acende e some em ~160 ms. */
+function raio(parent, x1, y1, x2, y2, cor = O, largura = 2.5) {
+  const minx = Math.min(x1, x2) - 20, miny = Math.min(y1, y2) - 20, w = Math.abs(x2 - x1) + 40, h = Math.abs(y2 - y1) + 40;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'raio10');
+  Object.assign(svg.style, { left: `${minx}px`, top: `${miny}px`, width: `${w}px`, height: `${h}px` });
+  let d = `M${x1 - minx} ${y1 - miny}`;
+  const passos = 6;
+  for (let i = 1; i < passos; i++) {
+    const t = i / passos;
+    d += ` L${(x1 + (x2 - x1) * t - minx + (Math.random() - 0.5) * 16).toFixed(1)} ${(y1 + (y2 - y1) * t - miny + (Math.random() - 0.5) * 16).toFixed(1)}`;
+  }
+  d += ` L${x2 - minx} ${y2 - miny}`;
+  svg.innerHTML = `<path d="${d}" stroke="${T}" stroke-width="${largura + 3}" fill="none" stroke-linejoin="round"/><path d="${d}" stroke="${cor}" stroke-width="${largura}" fill="none" stroke-linejoin="round"/><path d="${d}" stroke="#fffdf3" stroke-width="${largura / 2.5}" fill="none"/>`;
+  parent.appendChild(svg);
+  svg.animate([{ opacity: 0 }, { opacity: 1, offset: 0.2 }, { opacity: 1, offset: 0.6 }, { opacity: 0 }], { duration: 170 }).onfinish = () => svg.remove();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Ponto 9: a cura passiva
+(() => {
+  const st = document.getElementById('p9-stage');
+  let tocando = false;
+  const BASE = 62;
+  function montar() {
+    st.innerHTML = '';
+    st.append(el('div', 'hud', '', { height: '80px' }), el('div', 'campo voce', '', { top: '80px', height: '220px' }), el('div', 'grao', '', { top: '80px' }));
+    st.append(retrato('voce', 14, 8, 64));
+    const barra = el('div', 'barra', '<div class="vida"></div><div class="cura"></div>', { left: '92px', top: '18px', width: '320px' });
+    barra.querySelector('.vida').style.width = `${BASE}%`;
+    Object.assign(barra.querySelector('.cura').style, { left: `${BASE}%`, width: '0%' });
+    barra.id = 'p9-barra';
+    st.append(barra, el('div', 'pv num', '<span id="p9-pv">310</span> <small>/500</small>', { left: '92px', top: '48px' }));
+    st.append(el('div', 'rotulo-zona', 'GUARDA', { left: '24px', top: '92px' }), el('div', 'rotulo-zona', 'BÔNUS DE DEFESA', { left: '150px', top: '92px' }), el('div', 'rotulo-zona', 'SUA DEFESA', { left: '24px', top: '222px' }), el('div', 'rotulo-zona', 'CEMITÉRIO', { left: '890px', top: '186px' }));
+    const k1 = carta('K', { x: 24, y: 108, w: 38, h: 54 }), k2 = carta('K', { x: 68, y: 108, w: 38, h: 54 });
+    k1.dataset.k = k2.dataset.k = '1';
+    st.append(k1, k2, carta('Q', { x: 150, y: 108, w: 38, h: 54, vermelha: true }), carta('Q', { x: 194, y: 108, w: 38, h: 54 }));
+    [6, 9, 5, 8].forEach((v, i) => { const c = carta(v, { x: 160 + i * 54, y: 206, vermelha: i % 2 === 0, naipe: i % 2 ? '♠' : '♥' }); if (i === 0) c.id = 'p9-frente'; st.append(c); });
+    st.append(carta(3, { x: 900, y: 202, w: 40, h: 56 }));
+  }
+  async function tocar() {
+    if (tocando) return;
+    tocando = true;
+    montar();
+    const frente = document.getElementById('p9-frente');
+    const ks = [...st.querySelectorAll('[data-k]')];
+    // A carta da frente sobe e cai no cemitério; os K acendem (a causa).
+    await anima(frente, [{ transform: 'translate(0,0)' }, { transform: 'translate(0,-12px)' }], { duration: 140 }).finished;
+    ks.forEach((k) => { k.classList.add('aceso-k'); if (!REDUZIDO) k.animate([{ scale: '1' }, { scale: '1.12' }, { scale: '1' }], { duration: 300 }); });
+    if (document.getElementById('p9-primeira').checked) {
+      const fita = el('div', 'fita-cura', '<div><b>CURA PASSIVA</b><span>2 K na Guarda: cada carta da sua Defesa que cai vira vida · 6 × (1 + 2 Q) = 18</span></div>');
+      st.appendChild(fita);
+      fita.animate([{ opacity: 0, transform: 'translateX(-50%) scale(1.15)' }, { opacity: 1, transform: 'translateX(-50%) scale(1)' }], { duration: 200, fill: 'both' });
+      setTimeout(() => fita.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: 'forwards' }), 2300);
+    }
+    anima(frente, [{ transform: 'translate(0,-12px) rotate(0)' }, { transform: `translate(${900 - 160}px, ${-4}px) rotate(14deg) scale(.86)` }], { duration: 460, easing: 'cubic-bezier(.4,.1,.3,1)' });
+    // A essência verde corre da carta ao retrato, numa curva.
+    const x0 = 183, y0 = 220, x1 = 46, y1 = 40;
+    if (!REDUZIDO) {
+      for (let i = 0; i < 16; i++) {
+        const p = el('div', 'essencia', '', { left: `${x0 + (Math.random() - 0.5) * 30}px`, top: `${y0 + (Math.random() - 0.5) * 30}px` });
+        st.appendChild(p);
+        const mx = (x0 + x1) / 2 + 60 + Math.random() * 40, my = Math.min(y0, y1) - 10 + Math.random() * 30;
+        p.animate([
+          { transform: 'translate(0,0) rotate(45deg) scale(.6)', opacity: 0 },
+          { transform: `translate(${mx - x0}px, ${my - y0}px) rotate(225deg) scale(1.1)`, opacity: 1, offset: 0.5 },
+          { transform: `translate(${x1 - x0}px, ${y1 - y0}px) rotate(405deg) scale(.4)`, opacity: 0.9 },
+        ], { duration: 640, delay: i * 30, easing: 'cubic-bezier(.4,0,.6,1)' }).onfinish = () => p.remove();
+      }
+    }
+    await espera(REDUZIDO ? 300 : 820);
+    // O "+18" nasce no retrato e a barra enche de verde.
+    const mais = el('div', 'mais-cura num', '+18', { left: '84px', top: '6px' });
+    st.appendChild(mais);
+    anima(mais, [{ opacity: 0, transform: 'scale(1.6) rotate(-6deg)' }, { opacity: 1, transform: 'scale(1) rotate(-3deg)' }], { duration: 220, easing: 'cubic-bezier(.2,1.5,.5,1)' });
+    const cura = st.querySelector('#p9-barra .cura');
+    cura.animate([{ width: '0%' }, { width: `${(18 / 500) * 100}%` }], { duration: 420, fill: 'forwards', easing: 'ease-out' });
+    if (!REDUZIDO) st.querySelector('.retrato').animate([{ boxShadow: '0 0 0 0 rgba(127,224,143,0)' }, { boxShadow: '0 0 0 6px rgba(127,224,143,.85)' }, { boxShadow: '0 0 0 0 rgba(127,224,143,0)' }], { duration: 600 });
+    const pv = document.getElementById('p9-pv');
+    for (let v = 310; v <= 328; v += 2) { pv.textContent = v; await espera(REDUZIDO ? 0 : 40); }
+    await espera(900);
+    ks.forEach((k) => k.classList.remove('aceso-k'));
+    mais.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: 'forwards' });
+    tocando = false;
+  }
+  document.getElementById('p9-tocar').addEventListener('click', tocar);
+  montar();
+})();
+
+// ------------------------------------------------------------------------------------------------
+// Ponto 10: os bônus em escala
+(() => {
+  const st = document.getElementById('p10-stage');
+  const n = { J: 2, Q: 2, K: 2 };
+  const NIVEL = {
+    J: [['—', '×2 no seu Ataque'], ['ACESO', '×3: as cartas acendem'], ['FAÍSCAS', '×4: raios entre os J'], ['ATAQUE ABSOLUTO', '×5 e quebra todos os K']],
+    Q: [['—', '×2 na sua Defesa'], ['ACESO', '×3: as cartas acendem'], ['MURALHA', '×4: o escudo se ergue'], ['DEFESA ABSOLUTA', 'imune até o golpe dele']],
+    K: [['—', 'segura 1 golpe'], ['CURA PASSIVA', 'a Defesa que cai cura'], ['AMEAÇA DE EXÓDIA', 'falta 1 K: os dois veem'], ['EXÓDIA', 'a partida acaba']],
+  };
+  const ROT = { J: 'BÔNUS DE ATAQUE', Q: 'BÔNUS DE DEFESA', K: 'GUARDA' };
+  let timers = [];
+  function limpar() { timers.forEach((t) => clearInterval(t)); timers = []; }
+  function montar() {
+    limpar();
+    st.innerHTML = '';
+    st.append(el('div', 'campo voce', '', { top: '0', height: '300px' }), el('div', 'grao'));
+    ['J', 'Q', 'K'].forEach((kind, z) => {
+      const x = 20 + z * 330;
+      const zona = el('div', 'zona10', '', { left: `${x}px` });
+      zona.append(el('div', 'rotulo-zona', ROT[kind], { left: '0', top: '6px', right: '0', textAlign: 'center', zIndex: 4 }));
+      const fundo = el('div', 'fundo', '');
+      zona.append(fundo);
+      const cartas = el('div', 'cartas', '');
+      for (let i = 0; i < n[kind]; i++) cartas.append(carta(kind, { vermelha: i % 2 === 0, w: 52, h: 74, naipe: ['♦', '♣', '♥', '♠'][i] }));
+      zona.append(cartas);
+      const [nome, faz] = NIVEL[kind][n[kind] - 1];
+      zona.append(el('div', 'nivel', `${nome}<small>${n[kind]} ${kind} · ${faz}</small>`));
+      st.append(zona);
+      const tier = n[kind];
+      if (kind === 'J') {
+        if (tier >= 2) cartas.classList.add('t-aceso-j');
+        if (tier >= 3) {
+          const zap = () => {
+            if (REDUZIDO) return;
+            const cs = [...cartas.children]; if (cs.length < 2) return;
+            const i = Math.floor(Math.random() * (cs.length - 1));
+            const s = st.getBoundingClientRect(), k = s.width / 1000;
+            const a = cs[i].getBoundingClientRect(), b = cs[i + 1].getBoundingClientRect();
+            raio(st, (a.right - s.left) / k - 4, (a.top - s.top + a.height * (0.3 + Math.random() * 0.4)) / k, (b.left - s.left) / k + 4, (b.top - s.top + b.height * (0.3 + Math.random() * 0.4)) / k);
+          };
+          timers.push(setInterval(zap, tier === 4 ? 700 : 1300));
+        }
+        if (tier === 4) {
+          const { svg, ferver } = aura([{ rx: 150, ry: 52, n: 22, maxL: 54, cor: O, contorno: 3 }, { rx: 132, ry: 42, n: 18, maxL: 30, cor: '#ffe79a' }]);
+          svg.setAttribute('viewBox', '-180 -130 360 200'); svg.style.width = '360px'; svg.style.height = '200px'; svg.style.marginTop = '-14px';
+          fundo.append(svg);
+          if (!REDUZIDO) timers.push(setInterval(ferver, 70));
+        }
+      }
+      if (kind === 'Q') {
+        if (tier >= 2) cartas.classList.add('t-aceso-q');
+        if (tier >= 3) {
+          const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          svg.setAttribute('viewBox', '0 0 24 26'); svg.style.width = '150px'; svg.style.height = '164px'; svg.style.marginTop = '-6px';
+          svg.innerHTML = tier === 4
+            ? `<path d="M12 1l10 3.5V12c0 6-4.5 10.5-10 12C6.5 22.5 2 18 2 12V4.5z" fill="${O}" stroke="${T}" stroke-width=".7"/><circle cx="4.5" cy="6.5" r=".7" fill="${T}"/><circle cx="19.5" cy="6.5" r=".7" fill="${T}"/><circle cx="12" cy="22" r=".7" fill="${T}"/>`
+            : `<path d="M12 1l10 3.5V12c0 6-4.5 10.5-10 12C6.5 22.5 2 18 2 12V4.5z" fill="rgba(255,253,246,.28)" stroke="#fffdf6" stroke-width=".5" stroke-dasharray="1.2 .6"/>`;
+          fundo.append(svg);
+          if (tier === 3 && !REDUZIDO) svg.animate([{ opacity: 0.55, scale: '0.98' }, { opacity: 1, scale: '1.02' }], { duration: 1600, iterations: Infinity, direction: 'alternate', easing: 'ease-in-out' });
+        }
+      }
+      if (kind === 'K') {
+        if (tier === 2) cartas.classList.add('t-aceso-k');
+        if (tier >= 3) {
+          cartas.classList.add('t-ameaca-k');
+          const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          svg.setAttribute('viewBox', '0 0 44 26');
+          Object.assign(svg.style, { position: 'absolute', left: '50%', top: '-34px', width: '96px', height: '56px', transform: 'translateX(-50%)', zIndex: 3, overflow: 'visible' });
+          svg.innerHTML = `<path d="M2 24 L5 6 L14 15 L22 2 L30 15 L39 6 L42 24 Z" fill="${tier === 4 ? O : 'rgba(184,38,28,.22)'}" stroke="${tier === 4 ? T : R}" stroke-width="${tier === 4 ? 2 : 1.4}" stroke-dasharray="${tier === 4 ? '' : '2.4 1.4'}" stroke-linejoin="round"/>`;
+          zona.append(svg);
+          if (tier === 3 && !REDUZIDO) svg.animate([{ opacity: 0.45 }, { opacity: 1 }], { duration: 1800, iterations: Infinity, direction: 'alternate', easing: 'ease-in-out' });
+        }
+      }
+    });
+  }
+  document.querySelectorAll('[data-p10]').forEach((b) => b.addEventListener('click', () => {
+    const kind = b.dataset.p10[0], d = b.dataset.p10[1] === '+' ? 1 : -1;
+    n[kind] = Math.min(4, Math.max(1, n[kind] + d));
+    montar();
+  }));
+  document.addEventListener('reduzido', montar);
+  montar();
+})();
+
+// ------------------------------------------------------------------------------------------------
+// Ponto 11: a aura da iniciativa
+(() => {
+  const st = document.getElementById('p11-stage');
+  const faixa = document.getElementById('p11-n'), rot = document.getElementById('p11-rot');
+  let timers = [];
+  const CX = 128, CY = 130;
+  function montar() {
+    timers.forEach((t) => clearInterval(t)); timers = [];
+    st.innerHTML = '';
+    const n = Number(faixa.value); rot.textContent = n;
+    st.append(el('div', 'hud', '', { height: '230px' }));
+    const tier = n >= 10 ? 3 : n >= 5 ? 2 : n >= 3 ? 1 : 0;
+    // As camadas de cada nível: a brasa é um contorno baixo; a chama sobe; a super aura tem o núcleo branco-quente, como a do Ataque Absoluto.
+    const CAMADAS = [null,
+      [{ rx: 52, ry: 52, n: 18, maxL: 16, cor: O, contorno: 2.5, opacidade: 0.9 }],
+      [{ rx: 56, ry: 58, n: 18, maxL: 52, cor: O, contorno: 3 }, { rx: 48, ry: 50, n: 15, maxL: 30, cor: '#ffe79a' }],
+      [{ rx: 64, ry: 68, n: 20, maxL: 92, cor: O, contorno: 3 }, { rx: 56, ry: 60, n: 17, maxL: 62, cor: '#ffe79a' }, { rx: 48, ry: 52, n: 14, maxL: 40, cor: '#fffdf3' }],
+    ][tier];
+    let ferverAura = null;
+    if (CAMADAS) {
+      const { svg, ferver } = aura(CAMADAS, 211 + tier * 7);
+      svg.setAttribute('class', 'aura11'); svg.setAttribute('viewBox', '-150 -170 300 300');
+      Object.assign(svg.style, { left: `${CX - 150}px`, top: `${CY - 150}px`, width: '300px', height: '300px' });
+      st.append(svg);
+      ferverAura = ferver;
+    }
+    const r = retrato('voce', CX - 38, CY - 38, 76);
+    if (tier === 3) r.style.borderColor = '#fff3c4';
+    else if (tier >= 1) r.style.borderColor = O;
+    st.append(r);
+    if (n >= 2) st.append(el('div', 'contador11', `×${n}`, { left: `${CX + 26}px`, top: `${CY - 58}px`, background: tier === 3 ? R : O, color: tier === 3 ? P : T }));
+    st.append(el('div', 'alfa', 'VOCÊ', { position: 'absolute', left: '230px', top: '96px', fontSize: '17px' }));
+    const barra = el('div', 'barra', '<div class="vida" style="width:70%"></div>', { left: '230px', top: '122px', width: '300px' });
+    st.append(barra);
+    const NOMES = [['SEM AURA', 'a iniciativa ainda não firmou'], ['BRASA', '3 rodadas seguidas: o contorno de ouro tremula'], ['CHAMA', '5 seguidas: labaredas e brasas subindo'], ['SUPER AURA', '10 seguidas: núcleo branco, chama alta e raios']];
+    st.append(el('div', 'nivel11', `${NOMES[tier][0]}<small>${NOMES[tier][1]}</small>`, { left: '600px', top: '96px' }));
+    if (ferverAura) {
+      if (!REDUZIDO) {
+        timers.push(setInterval(ferverAura, 70));
+        if (tier >= 2) timers.push(setInterval(() => {
+          const b = el('div', 'particula', '', { left: `${CX + (Math.random() - 0.5) * 70}px`, top: `${CY + 20}px`, width: '4px', height: '4px', background: tier === 3 ? '#fffdf3' : O, borderRadius: '50%', boxShadow: `0 0 6px ${O}` });
+          st.appendChild(b);
+          b.animate([{ transform: 'translate(0,0)', opacity: 1 }, { transform: `translate(${(Math.random() - 0.5) * 30}px, ${-90 - Math.random() * 60}px)`, opacity: 0 }], { duration: 1100, easing: 'ease-out' }).onfinish = () => b.remove();
+        }, tier === 3 ? 90 : 180));
+        if (tier === 3) timers.push(setInterval(() => {
+          const a = Math.random() * Math.PI * 2, r0 = 52, r1 = 92;
+          raio(st, CX + Math.cos(a) * r0, CY + Math.sin(a) * r0, CX + Math.cos(a + 0.3) * r1, CY + Math.sin(a + 0.3) * r1, '#fffdf3', 2);
+        }, 360));
+      }
+    }
+  }
+  faixa.addEventListener('input', montar);
+  document.addEventListener('reduzido', montar);
+  montar();
 })();
 /* JS-SECOES */
 encaixar();
