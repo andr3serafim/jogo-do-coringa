@@ -8,7 +8,9 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 ## 2026-11-03 (1): os pontos 16, 17 e 18 do playtest
 
 - **Pedido do autor** (`decisoes.md` 2026-11-03 (1)): "ok, prossiga", com três pontos novos. O 16 muda regra (desenho); o 17 é defeito; o 18 é direto.
-- **Feito:** a branch `feat/playtest-pontos-17-18`, a partir da `main` (`6759914`).
+- **Feito:** a branch `feat/playtest-pontos-17-18`, a partir da `main` (`6759914`), com as duas CI verdes no último commit de código
+  (`35ad7bd`, run `41576601116`) e fast-forward na `main`. Para ver a CI sem o `gh` (não está instalado nesta máquina): a API pública,
+  `curl -s https://api.github.com/repos/andr3serafim/jogo-do-coringa/actions/runs?branch=<branch>`.
 - **Ponto 17 (a cena do Ataque Absoluto que não aparece): a cena em si funciona; um caminho em que o golpe inteiro some foi achado e
   consertado no treino (o Equipar vazio colado); o caso exato do autor não foi reproduzido.**
   - **Diagnóstico** (testes temporários, apagados; o código ficou na pasta de rascunho da sessão): 300 partidas de treino na `LocalRoom` de verdade, com o

@@ -1,11 +1,11 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-03**, com os pontos 17 e 18 do playtest na branch `feat/playtest-pontos-17-18`. Antes
+> Sobrescrito a cada atualização. **Última: 2026-11-03**, com os pontos 17 e 18 do playtest na `main`, esperando a resposta do autor sobre o 17. Antes
 > de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `feat/playtest-pontos-17-18`, no checkout principal, a partir da `main` (`6759914`). Sobe para a CI e vai para a `main` por fast-forward com as duas CI verdes.
+- **Branch:** `main`, no checkout principal, sem trabalho em curso. A branch `feat/playtest-pontos-17-18` foi mesclada por fast-forward, com as duas CI verdes no último commit de código (`35ad7bd`, run `41576601116`).
 - **Feito por último** (`diario.md` 2026-11-03 (1); o pedido em `decisoes.md` 2026-11-03 (1)):
   - **ponto 18:** o total da fileira que sobe fica em ouro e o que desce fica vermelho, os dois com contorno de tinta e sombra de carimbo (`Row.tsx`, `useTrend`; `.total-fileira` no `styles.css`);
   - **ponto 17 (a cena do Ataque Absoluto que não aparece):** a cena aparece ao vivo e no replay, nos dois lados, também quando encerra a partida. Dois caminhos em que ela some:
@@ -15,10 +15,9 @@
 - **Antes, na `main`:** a fatia 5 do sub-projeto 6 e os pontos diretos 3, 4, 7, 8 e 12 (`diario.md` 2026-11-02 (8)). O autor jogou e mandou os pontos 16 a 18; ele não disse que aprova a fatia 5.
 - **Ajuste depois da aprovação da 4b:** as cartas da quadra perderam o losango de ouro do canto (`decisoes.md` 2026-11-02 (6)); o fundo dourado, a moldura, o brilho e o selo ficam. Não mude isso de volta seguindo a letra antiga do §6.
 - **Próximo passo exato:**
-  1. Subir a branch, esperar as duas CI e fazer o fast-forward na `main`.
-  2. **Perguntar ao autor sobre o ponto 17:** se uma Armadilha do Bot quebrou um J seu antes do golpe. Se foi, a decisão é dele: o Ataque Absoluto declarado continua valendo (regra; sobe `RULES_VERSION`), ou cai e a mesa avisa (desenho, com o ponto 1). Se não foi, provavelmente era o Equipar vazio colado, já consertado no treino. O conserto do online (o servidor) é trabalho à parte.
-  3. **Os pontos de desenho do playtest:** 1, 2, 5, 6, 9, 10, 11, 13 e 14 (`decisoes.md` 2026-11-02 (9)), o 15 (2026-11-02 (10)) e o 16 (2026-11-03 (1), a Ressurreição no instante da quadra, que muda regra do motor). Brainstorming (`superpowers:brainstorming`) e protótipo para ele ver, antes de spec e plano. Nenhum foi desenhado nem aprovado. O 16 começa pelas perguntas de regra listadas na leitura dele.
-  4. O deploy e o playtest online são dele (`notas/playtest.md`).
+  1. **Perguntar ao autor sobre o ponto 17:** se uma Armadilha do Bot quebrou um J seu antes do golpe. Se foi, a decisão é dele: o Ataque Absoluto declarado continua valendo (regra; sobe `RULES_VERSION`), ou cai e a mesa avisa (desenho, com o ponto 1). Se não foi, provavelmente era o Equipar vazio colado, já consertado no treino. O conserto do online (o servidor) é trabalho à parte.
+  2. **Os pontos de desenho do playtest:** 1, 2, 5, 6, 9, 10, 11, 13 e 14 (`decisoes.md` 2026-11-02 (9)), o 15 (2026-11-02 (10)) e o 16 (2026-11-03 (1), a Ressurreição no instante da quadra, que muda regra do motor). Brainstorming (`superpowers:brainstorming`) e protótipo para ele ver, antes de spec e plano. Nenhum foi desenhado nem aprovado. O 16 começa pelas perguntas de regra listadas na leitura dele.
+  3. O deploy e o playtest online são dele (`notas/playtest.md`).
 - **Para medir uma cena com a 8787 ocupada:** `MEDIR_PORTA=8797` no `medir-cena.ts`. Para o E2E inteiro numa porta livre, a receita está no `diario.md` 2026-11-02 (8) (uma configuração que importa o `playwright.config.ts` e troca a porta).
 - **Para ver a Ressurreição sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave `coringa:partidas` e abra `/partidas/exodia-devastacao`. "Próximo
   passo" na rodada 7, passo 27, mostra a sua, com a quadra; na rodada 23, passo 107, a do Bot, com a quadra na outra fileira; na rodada 37, passo 182, a do Bot sem quadra.
