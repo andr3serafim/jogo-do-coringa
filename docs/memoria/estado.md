@@ -20,7 +20,7 @@
   - **ponto 18, ajustado** e **ponto 17, fechado** (`diario.md` 2026-11-03 (1) e (2));
   - a fatia 5 do sub-projeto 6 e os pontos diretos 3, 4, 7, 8 e 12 (`diario.md` 2026-11-02 (8)), **aprovada** em 2026-11-03 (4).
 - **Ajuste depois da aprovação da 4b:** as cartas da quadra perderam o losango de ouro do canto (`decisoes.md` 2026-11-02 (6)); o fundo dourado, a moldura, o brilho e o selo ficam. Não mude isso de volta seguindo a letra antiga do §6.
-- **Próximo passo exato:**
+- **Próximo passo exato:** o `pnpm sim:dificil --recomecar` (rodando, sozinho na máquina; a sessão do bloco A foi avisada); depois a nota `notas/medicao-ressurreicao-quadra.md` (a calibração e a contagem já estão prontas: 98% das quadras viram Ressurreição usada, eram 82%) e o fechamento (Tarefa 9).
   1. Subir `feat/playtest-spec` (o pre-push roda o `pnpm check`), esperar as duas CI e mesclar na `main` por fast-forward.
   2. Abrir a sessão do **bloco E** (a regra do 16, §7 da spec), em worktree próprio, em paralelo: spec das regras, plano, aprovação do autor, execução. Quando ela terminar e o resultado for conferido, a sessão sai (`decisoes.md` 2026-11-03 (4)).
   3. Escrever o plano do **bloco A** (pontos 1, 2, 6 e 9; `superpowers:writing-plans`), em `docs/superpowers/plans/`, e entregá-lo ao autor para aprovar antes da execução.
