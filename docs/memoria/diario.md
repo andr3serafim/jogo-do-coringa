@@ -82,6 +82,13 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   - a essência: `healsOf(beats)` (da batida em que a carta saiu da Defesa à da cura) e a gota `.essencia-cura` na `Leaving`, até o
     `[data-retrato="voce"|"oponente"]` (o plano dizia `self`/`opponent`; os valores de verdade do placar são esses);
   - a dica `buffs` do tutorial ganhou a conta ("A cura é o valor da carta vezes (1 + o número de Q).").
+- **Task 8, o E2E (`e2e/moment.spec.ts`, no projeto `desktop`, a 1366 × 657 e a 360 × 640):** a Guarda do Bot (a placa à vista, nada
+  rola de lado, o K aparece no fim), o segundo J do turno mais curto (a página mede cada vez que a camada fica montada), o pulo pelo toque
+  e a mão toda apagada no Equipar do treino. **Defeito achado por ele, consertado com teste:** o timer do fim do momento e o do fim da
+  batida vencem no mesmo instante; se o do momento chegasse antes (o filho roda o efeito antes do pai), a batida ainda era o momento, a
+  camada o mostrava de novo e reaproveitava o componente parado na fase `exit`, para sempre (invisível, mas montado). Agora o momento
+  terminado fica anotado (`done`) e não volta. O teste de unidade reproduz a corrida (falha sem o conserto). Depois: 3 execuções de 7/7.
+- **Armadilha:** `-g "360 × 640 › ..."` não acha o teste no Playwright do Windows (o `×` e o `›` do título); filtre por um pedaço sem eles.
 
 ---
 

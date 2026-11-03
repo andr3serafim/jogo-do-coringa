@@ -4,13 +4,17 @@
 import type { GameEvent, SpecialCard } from '@coringa/engine';
 import { SPECIAL_MOMENT_MS } from '@coringa/protocol';
 import { act, render } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { namesFor } from '@coringa/sim/text';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { buildTimeline } from '../../src/model/timeline.ts';
+import { MomentLayer } from '../../src/ui/anim/Moment.tsx';
+import type { Run } from '../../src/ui/anim/useBeatPlayer.ts';
 import type { Cue } from '../../src/model/sound.ts';
 import { TABLE_MOTION } from '../../src/model/table-motion.ts';
 import { SoundContext, type SoundApi } from '../../src/ui/sound-context.ts';
 import { PlayTable } from '../../src/ui/table/PlayTable.tsx';
 import { advance, busy, cleanup, connect, emit, MINE, mount, stage, THEIRS, TURN } from './anim-harness.tsx';
-import type { ViewSpec } from '../fixtures.ts';
+import { scenarioAt, type ViewSpec } from '../fixtures.ts';
 
 afterEach(cleanup);
 
@@ -200,5 +204,25 @@ describe('o som do momento (Task 4)', () => {
     act(() => stage(m.container).click());
     advance(3_000);
     expect(m.played).not.toContain('pouso');
+  });
+});
+
+describe('o momento que terminou não volta (a corrida dos dois timers, achada no E2E)', () => {
+  it('a batida ainda é o momento quando o timer dele vence: a camada sai e não remonta', () => {
+    vi.useFakeTimers();
+    const view = scenarioAt(BOT_ONE).view;
+    const [beat] = buildTimeline([botBuff(JB)], { mode: 'live', reducedMotion: false, decisionPending: false, viewer: 'p1' });
+    const run = { beats: [beat!] } as unknown as Run;
+    const names = namesFor('p1', 'Bot');
+    const shown = render(<MomentLayer run={run} beat={beat!} cut={false} view={view} names={names} reduced={false} />);
+    expect(shown.container.querySelector('[data-momento]')).not.toBeNull();
+    act(() => {
+      vi.advanceTimersByTime(SPECIAL_MOMENT_MS.first);
+    });
+    // O palco ainda não encerrou a batida (o mesmo `beat` chega de novo): a camada fica fora.
+    shown.rerender(<MomentLayer run={run} beat={beat!} cut={false} view={view} names={names} reduced={false} />);
+    expect(shown.container.querySelector('[data-momento]')).toBeNull();
+    shown.unmount();
+    vi.useRealTimers();
   });
 });

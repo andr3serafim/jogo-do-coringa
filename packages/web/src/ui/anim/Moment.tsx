@@ -102,13 +102,15 @@ export interface MomentLayerProps {
  * batida); o pulo e a linha do tempo que não tem mais a batida o tiram.
  */
 export function MomentLayer({ run, beat, cut, view, names, reduced }: MomentLayerProps) {
-  const [shown, setShown] = useState<{ beat: Beat; serial: number } | null>(null);
+  // O momento que terminou fica anotado (`done`), em vez de sair: o timer do fim dele e o do fim da batida vencem no mesmo instante, e
+  // se o dele chegasse antes, a batida ainda seria o momento e ele voltaria (o achado do E2E do bloco A).
+  const [shown, setShown] = useState<{ beat: Beat; serial: number; done: boolean } | null>(null);
   let next = shown;
-  if (beat?.kind === 'moment' && beat.moment !== null && shown?.beat !== beat) next = { beat, serial: (shown?.serial ?? 0) + 1 };
+  if (beat?.kind === 'moment' && beat.moment !== null && shown?.beat !== beat) next = { beat, serial: (shown?.serial ?? 0) + 1, done: false };
   else if (shown !== null && (cut || !run.beats.includes(shown.beat))) next = null;
   if (next !== shown) setShown(next);
-  if (next === null) return null;
-  const done = next.beat;
+  if (next === null || next.done) return null;
+  const finished = next.beat;
   return (
     <MomentShow
       key={next.serial}
@@ -116,7 +118,7 @@ export function MomentLayer({ run, beat, cut, view, names, reduced }: MomentLaye
       view={view}
       names={names}
       reduced={reduced}
-      onDone={() => setShown((now) => (now?.beat === done ? null : now))}
+      onDone={() => setShown((now) => (now?.beat === finished ? { ...now, done: true } : now))}
     />
   );
 }
