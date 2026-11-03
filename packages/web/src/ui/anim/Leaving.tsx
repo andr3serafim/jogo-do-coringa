@@ -56,6 +56,8 @@ function asCopy(clone: HTMLElement, id: string, rect: DOMRect, layer: DOMRect): 
   clone.setAttribute('data-saindo', '');
   clone.setAttribute('data-saindo-id', id);
   clone.setAttribute('aria-hidden', 'true');
+  // A cópia de uma carta da mão é um botão: `inert` a tira do Tab (escondida do leitor de tela, ela não pode receber foco).
+  clone.setAttribute('inert', '');
   const style = clone.style;
   style.position = 'absolute';
   style.margin = '0';

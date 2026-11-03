@@ -72,7 +72,8 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   - **para rodar o E2E com a 8787 ocupada:** uma configuração no scratchpad importava o `playwright.config.ts` por caminho absoluto e trocava a porta para 8797 (`testDir` e `cwd` absolutos, `reuseExistingServer: false`);
   - **o E2E inteiro passou de novo:** 75 de 75, numa porta livre;
   - **a medição de depois reprovou dois passos** (a compra com 43–51 quadros/s, contra 59 antes; o ataque no PC com 42–50, que já ficava abaixo antes). Os cortes, como o plano manda: um teto de poeira por batida (`dustPerCard`, 5 por carta e 10 por batida: o `Landing` ganhou `dust`) e o `Row` juntando os pousos do mesmo instante num desenho só. Depois deles, a compra ficou em 50–59 e o ataque em 53–57; a tabela está em `notas/medicao-fatia-5.md`;
-  - **falta:** a revisão da branch inteira, o `pnpm check`, o push, as duas CI e o fast-forward.
+  - **a revisão final** (de quem escreveu, como o autor aprovou na E9): a cópia de uma carta da mão era um botão focável com `aria-hidden`; agora nasce `inert`, com teste que falhou antes. Quatro comentários ainda falavam da ordem automática (`session.ts`, `timeline.ts`). **Adiado, menor:** a lista de timers da `FxLayer` cresce durante a partida (são números, sem efeito visível);
+  - **falta:** o `pnpm check` no pre-push, as duas CI e o fast-forward na `main`.
 
 ---
 

@@ -3,7 +3,7 @@
 //
 // A interface lê `snapshot()` (via `useSyncExternalStore`): um objeto novo a cada mudança e o mesmo
 // enquanto nada muda. Toda mudança passa por `#update`, que também recalcula o que a sessão deriva do
-// que guarda por dentro (rascunho do Equipar, confirmação, prazo da ordem automática e marcas).
+// que guarda por dentro (rascunho do Equipar, confirmação e marcas).
 //
 // Automações (spec §3.5, §3.6, §3.7): o passe automático, a ordem automática e o envio antecipado do
 // Equipar saem daqui, sempre por `deps.setTimer`/`deps.clearTimer`. Só o passe e a ordem levam `auto`.
@@ -166,8 +166,6 @@ export class Session {
   #equipAutoEpoch: number | null = null;
   #equipTimer: unknown = null;
 
-  // Ordem automática
-
   // Passe automático
   #autoPassEpoch: number | null = null;
 
@@ -247,7 +245,7 @@ export class Session {
   /**
    * Manda uma jogada. Com outra em voo (`pending`), não manda nada: a mesa já desliga os controles,
    * mas dois toques rápidos chegam antes de ela redesenhar. Sem `auto`, a jogada é voluntária: troca a
-   * base das marcas e cancela a ordem automática.
+   * base das marcas.
    */
   async play(action: PlayerAction, options?: { auto?: boolean }): Promise<void> {
     await this.#send(() => this.#connection.act(action, options), { voluntary: options?.auto !== true });

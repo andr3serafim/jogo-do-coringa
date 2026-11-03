@@ -1,7 +1,6 @@
 // Linha do tempo das animações (spec §4 e §10.4). Puro: sem React, DOM nem timers. Recebe os eventos
 // de um `state` e devolve as batidas em ordem, com início e duração absolutos (ms desde o começo da
-// linha do tempo); quem toca as batidas é a interface (Tarefa 22) e quem mede a espera é a sessão
-// (`timelineMs`, para a confirmação automática da ordem).
+// linha do tempo); quem toca as batidas é a interface (Tarefa 22), e `timelineMs` dá a duração total.
 //
 // As batidas são contíguas: `startMs` da batida i+1 = `startMs + durationMs` da batida i. Não há
 // sobreposição; o número de dano, a faixa e a tremida acontecem dentro da duração da própria batida.

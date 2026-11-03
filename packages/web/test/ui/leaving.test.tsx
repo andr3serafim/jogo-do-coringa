@@ -80,6 +80,20 @@ describe('a carta que quebra estoura em cacos (E5)', () => {
     emit(m, after([...KS, 5]), [TURN, broken(KS)]);
     expect(layer(m.container).querySelectorAll('[data-card-id]')).toHaveLength(0);
   });
+
+  it('a cópia de uma carta que é botão (a da sua mão) não recebe foco: o Tab nunca cai numa carta escondida do leitor de tela', () => {
+    const trap: SpecialCard = { id: 'a-usada', kind: 'A', suit: 'paus' };
+    const j: SpecialCard = { id: 'j-alvo', kind: 'J', suit: 'copas' };
+    const mine: ViewSpec = { ...THEIRS, phase: 'MAIN', self: { ...THEIRS.self, hand: ['K', trap] }, opponent: { ...THEIRS.opponent, attackBuffs: [j] } };
+    const m = mount(mine);
+    emit(m, { ...mine, self: { ...mine.self, hand: ['K'] }, opponent: { ...mine.opponent, attackBuffs: [] }, graveyard: [3, trap, j, 5] }, [
+      TURN,
+      { type: 'TrapUsed', player: 'p1', card: trap, target: j, targetOwner: 'p2' },
+    ]);
+    const copy = copyOf(m.container, 'a-usada')!;
+    expect(copy.tagName).toBe('BUTTON');
+    expect(copy).toHaveAttribute('inert');
+  });
 });
 
 describe('a carta que sai sem quebrar voa ao cemitério na batida dela (E2)', () => {
