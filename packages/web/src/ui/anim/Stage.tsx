@@ -35,6 +35,7 @@ import { AnimContext, IDLE_LIFE, type Anim, type CountPhase, type LifeCount } fr
 import { useScenes } from './scenes-loader.ts';
 import { FxLayer } from './FxLayer.tsx';
 import { Leaving } from './Leaving.tsx';
+import { MomentLayer } from './Moment.tsx';
 import { BeatOverlay } from './Scene.tsx';
 import { useBeatPlayer } from './useBeatPlayer.ts';
 
@@ -387,6 +388,8 @@ export function Stage({ snapshot, reducedMotion, onSettled, online = false, chil
               field={scene && state ? fieldTarget(scene.event, lastCast, state.view.me, state.view.opponent.id) : null}
               rising={scene && state ? resurrectionInfo(scene.event, state.view) : null}
             />
+            {/* O momento da especial do oponente (bloco A dos pontos do playtest, ponto 1): a carta grande e a placa, por cima do véu. */}
+            {state ? <MomentLayer run={run} beat={beat} cut={cut} view={state.view} names={names} reduced={reducedMotion} /> : null}
           </div>
         </AnimContext>
       </MotionConfig>

@@ -3,9 +3,13 @@
 // 2026-11-03 (5), A9a).
 import type { GameEvent, SpecialCard } from '@coringa/engine';
 import { SPECIAL_MOMENT_MS } from '@coringa/protocol';
-import { act } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { advance, busy, cleanup, emit, MINE, mount, stage, THEIRS, TURN } from './anim-harness.tsx';
+import type { Cue } from '../../src/model/sound.ts';
+import { TABLE_MOTION } from '../../src/model/table-motion.ts';
+import { SoundContext, type SoundApi } from '../../src/ui/sound-context.ts';
+import { PlayTable } from '../../src/ui/table/PlayTable.tsx';
+import { advance, busy, cleanup, connect, emit, MINE, mount, stage, THEIRS, TURN } from './anim-harness.tsx';
 import type { ViewSpec } from '../fixtures.ts';
 
 afterEach(cleanup);
@@ -100,5 +104,101 @@ describe('online, a sua especial espera o momento que o oponente vê (A9a)', () 
     const m = mount(HAND, { training: 'medio' });
     emit(m, ONE, [MY_TURN, myBuff(J1)]);
     expect(busyFor(m.container)).toBe(400 + 300);
+  });
+});
+
+describe('a carta grande e a placa (Task 4)', () => {
+  const layer = (container: HTMLElement) => container.querySelector<HTMLElement>('[data-momento]');
+  const plate = (container: HTMLElement) => container.querySelector<HTMLElement>('[data-placa-momento]');
+
+  it('a cópia da carta e a placa, escondidas do leitor de tela, sem data-card-id', () => {
+    const m = mount(THEIRS, { training: 'medio' });
+    emit(m, BOT_ONE, [botBuff(JB)]);
+    const shown = layer(m.container)!;
+    expect(shown).toHaveAttribute('data-momento', 'BuffPlayed');
+    expect(shown).toHaveAttribute('aria-hidden', 'true');
+    expect(shown.querySelector('[data-card-id]')).toBeNull();
+    expect(plate(m.container)).toHaveTextContent('Duda pôs 1 J nos Bônus de ataque');
+    expect(plate(m.container)).toHaveTextContent('o Ataque dele vai a');
+  });
+
+  it('as fases: a virada, a placa, o voo, e a camada some no impacto', () => {
+    const m = mount(THEIRS, { training: 'medio' });
+    emit(m, BOT_ONE, [botBuff(JB)]);
+    expect(layer(m.container)).toHaveAttribute('data-fase', 'flip');
+    expect(plate(m.container)).not.toHaveAttribute('data-visivel');
+    advance(300);
+    expect(layer(m.container)).toHaveAttribute('data-fase', 'plate');
+    expect(plate(m.container)).toHaveAttribute('data-visivel', 'true');
+    advance(1_000);
+    expect(layer(m.container)).toHaveAttribute('data-fase', 'fly');
+    expect(plate(m.container)).not.toHaveAttribute('data-visivel');
+    advance(300);
+    expect(layer(m.container)).toBeNull();
+  });
+
+  it('a Armadilha dele no seu J: depois do impacto, a carta dele segue ao cemitério e some', () => {
+    const J9: SpecialCard = { id: 'j9', kind: 'J', suit: 'ouros' };
+    const before: ViewSpec = { ...THEIRS, self: { ...THEIRS.self, attackBuffs: [J9] } };
+    const after: ViewSpec = { ...THEIRS, self: { ...THEIRS.self, attackBuffs: [] } };
+    const m = mount(before, { training: 'medio' });
+    emit(m, after, [{ type: 'TrapUsed', player: 'p2', card: { id: 'a1', kind: 'A', suit: 'paus' }, target: J9, targetOwner: 'p1' }]);
+    expect(plate(m.container)).toHaveTextContent('Duda quebra 1 J seu');
+    advance(SPECIAL_MOMENT_MS.first);
+    expect(layer(m.container)).toHaveAttribute('data-fase', 'exit');
+    advance(359);
+    expect(layer(m.container)).not.toBeNull();
+    advance(1);
+    expect(layer(m.container)).toBeNull();
+  });
+
+  it('o pulo no meio tira a camada na hora', () => {
+    const m = mount(THEIRS, { training: 'medio' });
+    emit(m, BOT_ONE, [botBuff(JB)]);
+    advance(400);
+    act(() => stage(m.container).click());
+    expect(layer(m.container)).toBeNull();
+  });
+
+  it('com movimento reduzido: a carta e a placa já estão no centro, sem o verso', () => {
+    const m = mount(THEIRS, { training: 'medio', prefs: { reduceMotion: true } });
+    emit(m, BOT_ONE, [botBuff(JB)]);
+    expect(layer(m.container)).toHaveAttribute('data-reduzido', 'true');
+    expect(plate(m.container)).toHaveAttribute('data-visivel', 'true');
+    expect(m.container.querySelector('[data-momento-verso]')).toBeNull();
+  });
+});
+
+describe('o som do momento (Task 4)', () => {
+  function mountWithSound(spec: ViewSpec) {
+    const base = connect(spec);
+    const played: Cue[] = [];
+    const api: SoundApi = { play: (cue) => void played.push(cue), setEnabled: () => {}, cut: () => {} };
+    const rendered = render(
+      <SoundContext value={api}>
+        <PlayTable session={base.session} training="medio" />
+      </SoundContext>,
+    );
+    return { ...base, ...rendered, played };
+  }
+
+  it('a virada no começo, o pouso quando a carta chega', () => {
+    const m = mountWithSound(THEIRS);
+    emit(m, BOT_ONE, [botBuff(JB)]);
+    advance(10);
+    expect(m.played).toEqual(['momento']);
+    advance(SPECIAL_MOMENT_MS.first - TABLE_MOTION.dropMs - 20);
+    expect(m.played).toEqual(['momento']);
+    advance(20);
+    expect(m.played).toEqual(['momento', 'pouso']);
+  });
+
+  it('pulado antes, o pouso não soa depois', () => {
+    const m = mountWithSound(THEIRS);
+    emit(m, BOT_ONE, [botBuff(JB)]);
+    advance(400);
+    act(() => stage(m.container).click());
+    advance(3_000);
+    expect(m.played).not.toContain('pouso');
   });
 });

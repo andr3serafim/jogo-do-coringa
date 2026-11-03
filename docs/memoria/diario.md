@@ -41,6 +41,19 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     os momentos à parte, achou na hora. Os scripts de troca de texto pegam a primeira ocorrência: confira o lugar.
   - **testes mudados de propósito:** a reação do Bot pode esperar o momento da Armadilha dele (ele joga de novo na mesma janela), e o
     Fácil tem esperas de momento além de 0 e 600 ms (o teste segue barrando as fatias curtas).
+- **Corte pelo limite de uso** no meio da Task 4 (as duas sessões, a do bloco E também). Nada se perdeu: o que estava sem commit (o texto
+  da placa e a pista) estava inteiro, e foi o primeiro commit da volta (`2ae674f`).
+- **Task 4 (a carta grande, a placa e o som):**
+  - `momentPlate` em `copy.ts` (a tabela do plano; o Selvagem como alvo dá só o título; nenhuma placa fala da Exódia); a pista
+    `momento` (a virada de papel) no começo da batida; o impacto soa na camada (`pouso` `dropMs` antes do impacto, `quebra` no impacto);
+  - `ui/anim/Moment.tsx` (`MomentLayer`, no `Stage`, z-55, por cima do véu): a carta (`Card` com `ghost`, sem `data-card-id` e
+    `aria-hidden`) sai da mão dele de costas e vira em 3D (o verso é `.momento-verso`, no `styles.css`), a placa embaixo, o voo medido no
+    começo dele, e depois do impacto a Armadilha, o Sacrifício e o Roubo seguem ao cemitério (`exitMs`). As fases moram em `data-fase`;
+  - **Ruling:** a camada guarda o último momento até a carta terminar (a ida ao cemitério passa do fim da batida); o pulo e a linha do
+    tempo que não tem mais a batida a tiram;
+  - **Ruling:** o atributo da placa é `data-placa-momento`: `data-placa` já é a placa do placar (o seletor do teste pegou a errada);
+  - JavaScript inicial: 170,6 KB de 200 KB (gzip);
+  - **não conferido de verdade:** a posição, a virada em 3D e o voo (o jsdom não tem layout nem `animate`): só nas fotos da Task 8.
 
 ---
 

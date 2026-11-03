@@ -61,6 +61,11 @@ export interface CardProps {
   dragRef?: (el: HTMLElement | null) => void;
   /** O gesto de arrastar vale agora para esta carta: o cursor vira a mãozinha (`cursor-grab`), no lugar do `cursor-pointer` do botão. */
   grabbable?: boolean;
+  /**
+   * Uma cópia (a carta grande do momento da especial do oponente): sem `data-card-id`, para nenhum seletor da carta de verdade a pegar,
+   * e escondida do leitor de tela.
+   */
+  ghost?: boolean;
   className?: string;
 }
 
@@ -208,6 +213,7 @@ export function Card({
   onSeen,
   dragRef,
   grabbable = false,
+  ghost = false,
   className = '',
 }: CardProps) {
   const anim = useAnim();
@@ -260,7 +266,8 @@ export function Card({
     className: classes.filter(Boolean).join(' '),
     'aria-label': name.join(', '),
     title: hint ?? cardHint(card, as),
-    'data-card-id': card.id,
+    'data-card-id': ghost ? undefined : card.id,
+    'aria-hidden': ghost ? true : undefined,
     'data-novo': marked ? 'true' : undefined,
     'data-alvo': target ? 'true' : undefined,
     'data-quad': quad ? 'true' : undefined,

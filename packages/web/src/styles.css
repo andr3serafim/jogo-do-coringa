@@ -654,6 +654,29 @@
 }
 
 /*
+ * O momento da especial do oponente (bloco A dos pontos do playtest, ponto 1): a carta grande vira de costas para a frente, então as faces
+ * vivem em 3D e escondem o verso de cada uma. O verso é o mesmo xadrez de tinta dos versos da mão dele.
+ */
+.momento-carta,
+.momento-face {
+  transform-style: preserve-3d;
+}
+
+.momento-face > :first-child {
+  backface-visibility: hidden;
+}
+
+.momento-verso {
+  position: absolute;
+  inset: 0;
+  border: 3px solid var(--color-tinta);
+  border-radius: 3px 5px 4px 6px;
+  background: repeating-linear-gradient(45deg, var(--color-tinta) 0 3px, var(--color-papel) 3px 6px);
+  transform: rotateY(180deg);
+  backface-visibility: hidden;
+}
+
+/*
  * As cenas do sub-projeto 6 (fatia 2): a onda de choque da transformação e a bola de energia do Ataque Absoluto. Tocam uma vez
  * (nenhuma sem fim), só com `transform` e `opacity`.
  */
