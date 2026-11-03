@@ -219,8 +219,9 @@ A mesa está em §3 e §4. O menu da partida tem:
   - **Nota (2026-11-03, `decisoes.md` 2026-11-03 (1), ponto 17):** o Equipar vazio do jogador (zero numéricas, como o servidor,
     spec 2 §5) sai com a mesma espera do bot: a folga de cena mais os ~600 ms, num timer próprio. Ele saía no mesmo instante do passo
     que deu as cartas, os dois `state`s chegavam à mesa no mesmo desenho, e ela só tocava o último: o golpe que fecha a rodada sumia,
-    com a cena do Ataque Absoluto junto. **O online ainda tem o mesmo buraco:** o servidor aplica o Equipar vazio logo em seguida
-    (`autoSteps`), e o segundo `state` corta as batidas do primeiro.
+    com a cena do Ataque Absoluto junto. **O online** (o servidor aplica o Equipar vazio logo em seguida, em `autoSteps`, e o segundo
+    `state` chega em outra mensagem) ficou consertado na mesa, não no servidor: um `state` só com eventos quietos não corta a linha do
+    tempo em curso (§4.1, nota de 2026-11-03).
 - Emite um `room` sintético: assentos "Você" e "Bot", status `PLAYING` e `FINISHED`, placar local. A revanche começa outra partida com outra semente.
 - Usa as mesmas telas da mesa e do fim. Não tem lobby.
 - Também é a base dos testes de componentes e de um E2E determinístico (§9).
@@ -468,6 +469,14 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
 ### 4.1 Princípios
 
 - **A `view` mais recente é a verdade.** A mesa desenha sempre a última `view` e os controles valem sobre ela. As animações são transição e sobreposição, nunca um estado diferente.
+  - **Nota (2026-11-03, `decisoes.md` 2026-11-03 (1), ponto 17):** um `state` novo no meio das batidas troca a linha do tempo, salvo o
+    quieto: ao vivo, na mesma `epoch` e só com eventos de batida quieta (`quietOnly`: `EquipSubmitted`, `ReactionWindowClosed`, a cura
+    de 0). A `view` dele é desenhada na hora, mas a linha em curso segue até o fim. Era o Equipar vazio automático do servidor que
+    cortava o golpe que fecha a rodada (e a cena do Ataque Absoluto com ele); o oponente que confirma o Equipar no meio do golpe também
+    o cortava. Outra `epoch`, o `catchUp` e o `resync` trocam como sempre; um `state` sem evento nenhum (o começo de uma partida) não é
+    quieto. As cartas seguem a transição de layout do `state` que toca (o `layoutKey` usa o `seq` dele). Fica de fora o caso dos dois
+    sem numéricas no mesmo Equipar: o segundo Equipar vazio resolve o Equipar e tem batidas. Em 1.500 partidas greedy × greedy (21.177
+    golpes de fim de rodada) ele não aconteceu nenhuma vez; um só sem numéricas, em 1,45%.
 - Cada carta tem id estável. Mudar de zona (mão → buffs, fileira → cemitério, monte → mão) é uma transição de layout, por exemplo com o `layoutId` do Motion.
 - **A linha do tempo** (`src/model/timeline.ts`, puro) recebe os eventos de um `state` e devolve **batidas** em ordem. Cada batida tem duração, os elementos que anima e a sobreposição: número de dano, faixa de "ATAQUE ABSOLUTO", tremida do K quebrando.
 - As transições de cada carta e as contagens de números, como a vida descendo, esperam a batida do evento que as causou.

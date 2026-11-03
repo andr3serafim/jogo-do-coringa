@@ -19,6 +19,12 @@
 //   desce quando a regra deixa e, recusada, fica como está até deixar (um `catchUp` logo depois de uma cena ao vivo subia a
 //   faixa no instante em que a cortina descia). Só o visual espera: as batidas e os controles seguem a linha do tempo.
 //
+// Um `state` novo no meio das batidas troca a linha do tempo, salvo o quieto: ao vivo, na mesma época e só com eventos de batida
+// quieta (`quietOnly`: a confirmação do Equipar de alguém). Esse não anima nada, e a linha em curso segue tocando até o fim, com a
+// `view` nova já desenhada (decisoes.md 2026-11-03 (1), ponto 17): o servidor aplica o Equipar vazio de quem recebeu zero numéricas
+// logo depois do passo que deu as cartas, e ele cortava o golpe que fecha a rodada, com a cena do Ataque Absoluto junto. Vale também
+// para o oponente que confirma no meio do golpe. Outra época (a mesa de decisões mudou), o `catchUp` e o `resync` trocam como sempre.
+//
 // Terminar na hora (pulo, ou um `state` novo no meio das batidas) também precisa terminar as transições de layout que o
 // Motion deixou no ar, com o atraso que ainda faltava: a carta ficaria no lugar velho enquanto a mesa já mostra a `view`
 // nova. O Motion não encerra uma transição em andamento quando a medida muda (o alvo é o mesmo), então as cartas que a
@@ -34,7 +40,7 @@ import { bannerBeatAt, damageBeatIndex, dealsOf, delaysOf, type Deals } from '..
 import { FIELD_SCENES, RIBBON_SCENES } from '../../model/timeline.ts';
 import { FLASH_WINDOW_MS, FlashLock } from '../../model/flash.ts';
 import { landingsOf, leavingOf, recoilsOf, shiftDelaysOf, TABLE_MOTION, type Landing, type Leaving } from '../../model/table-motion.ts';
-import { buildTimeline, timelineMs, type Beat, type TimelineOptions } from '../../model/timeline.ts';
+import { buildTimeline, quietOnly, timelineMs, type Beat, type TimelineOptions } from '../../model/timeline.ts';
 
 /** A cortina fica no ar pelo menos 1 s: a subida e a descida não cabem numa janela de 1 s com a inversão no meio. */
 export const CURTAIN_MIN_HOLD_MS = FLASH_WINDOW_MS;
@@ -81,6 +87,8 @@ interface Machine {
   /** Batida de agora (índice em `run.beats`), ou -1 sem batida com duração. */
   index: number;
   done: boolean;
+  /** O último `state` quieto que chegou com as batidas no ar (`absorbs`): a linha do tempo de `run` seguiu tocando. */
+  absorbed: StateMessage | null;
 }
 
 /**
@@ -130,7 +138,14 @@ function makeMachine(state: StateMessage | null, options: TimelineOptions | null
     landings: live ? landingsOf(beats, me, draftShown) : NOTHING,
     leaving: live ? leavingOf(beats) : NOTHING,
   };
-  return { run, index: beats.findIndex((beat) => beat.durationMs > 0), done: run.totalMs === 0 };
+  return { run, index: beats.findIndex((beat) => beat.durationMs > 0), done: run.totalMs === 0, absorbed: null };
+}
+
+/** O `state` ao vivo que chega com as batidas no ar, na mesma época e só com eventos quietos, não troca a linha do tempo. */
+function absorbs(machine: Machine, state: StateMessage | null): boolean {
+  const playing = machine.run.state;
+  if (machine.done || playing === null || state === null || state.resync || state.catchUp) return false;
+  return state.epoch === playing.epoch && quietOnly(state.events);
 }
 
 /** O relógio da trava de flash: monotônico, em ms. */
@@ -187,13 +202,18 @@ export function useBeatPlayer(
   const [machine, setMachine] = useState(() => makeMachine(state, null));
   const [released, setReleased] = useState(NO_RELEASE);
   let current = machine;
-  if (machine.run.state !== state) {
-    const mode = state?.resync ? 'resync' : state?.catchUp ? 'catchUp' : 'live';
-    current = makeMachine(state, { mode, reducedMotion, decisionPending }, draftShown);
+  if (machine.run.state !== state && machine.absorbed !== state) {
+    if (absorbs(machine, state)) {
+      // A linha do tempo segue (os timers são da `run`, que não muda); só fica anotado que este `state` já chegou.
+      current = { ...machine, absorbed: state };
+    } else {
+      const mode = state?.resync ? 'resync' : state?.catchUp ? 'catchUp' : 'live';
+      current = makeMachine(state, { mode, reducedMotion, decisionPending }, draftShown);
+      // Um `state` novo no meio das batidas encerra as transições que a linha velha ainda tinha no ar.
+      const ended = machine.done ? null : machine.run;
+      setReleased((prev) => release(prev, ended, current.run));
+    }
     setMachine(current);
-    // Um `state` novo no meio das batidas encerra as transições que a linha velha ainda tinha no ar.
-    const ended = machine.done ? null : machine.run;
-    setReleased((prev) => release(prev, ended, current.run));
   }
   const { run } = current;
 

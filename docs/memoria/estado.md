@@ -1,20 +1,25 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-03**, com o bloco de desenho do playtest em curso na branch `feat/desenho-playtest`, o
-> autor fora por algumas horas. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
+> Sobrescrito a cada atualização. **Última: 2026-11-03**, com o bloco de desenho do playtest entregue como rascunho na branch
+> `feat/desenho-playtest`, esperando as respostas do autor. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1
+> da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `feat/desenho-playtest`, no checkout principal, a partir da `main` (`5b5b34f`). Só documentos e o protótipo: nenhum código do jogo muda neste bloco.
-- **Em curso:** o bloco de desenho dos pontos 1, 2, 5, 6, 9, 10, 11, 13, 14, 15 e 16 do playtest, adiantado sem o autor (`decisoes.md` 2026-11-03 (3)): levantar o código de cada ponto, medir no simulador o que a regra do 16 mudaria, montar o protótipo clicável e escrever um **rascunho** do desenho, com as perguntas dele juntas no fim. Nada aprovado.
-- **Em outra sessão, aberta pelo autor:** "Online: Equipar vazio não pode cortar o golpe final", na branch `claude/dreamy-engelbart-4a4876`: o conserto no online do defeito que `09fc360` consertou no treino. Confira a branch dela antes de mexer em `packages/server` ou no `useBeatPlayer`.
-- **Feito por último** (`diario.md` 2026-11-03 (1) e (2)): o ponto 18 ajustado (ouro com contorno fino na subida; a descida só encolhe, na cor de sempre) e o 17 fechado (era a Armadilha desarmando o Ataque Absoluto).
-- **Antes, na `main`:** a fatia 5 do sub-projeto 6 e os pontos diretos 3, 4, 7, 8 e 12 (`diario.md` 2026-11-02 (8)). O autor jogou e mandou os pontos 16 a 18; ele não disse que aprova a fatia 5.
+- **Branch:** `feat/desenho-playtest`, no checkout principal, com a `main` (`4f7621e`) mesclada. Só documentos e o protótipo: nenhum código do jogo mudou neste bloco. Vai para a `main` por fast-forward com as duas CI verdes.
+- **Feito por último** (`diario.md` 2026-11-03 (4); o pedido em `decisoes.md` 2026-11-03 (3)): o **rascunho do desenho** dos pontos 1, 2, 5, 6, 9, 10, 11, 13, 14, 15 e 16, com o autor fora:
+  - o rascunho: `docs/superpowers/specs/2026-11-03-playtest-design.md` (a intenção, a ordem em cinco blocos, cada ponto, as restrições, as minhas escolhas e as **8 perguntas** dele na §9);
+  - o protótipo clicável: `docs/superpowers/specs/2026-11-03-playtest-prototipo.html` (um quadro por ponto, com as variantes A e B; abre num servidor estático com a raiz no repositório, ou pelo arquivo);
+  - os números do 16: `notas/medicao-ponto-16.md` (em 47,8% das quadras da revelação as duas fileiras já estão cheias; 54,9% dos donos atacam em segundo).
+- **Antes, na `main`:**
+  - **o online do Equipar vazio** (`diario.md` 2026-11-03 (3), a sessão que o autor abriu): o golpe que fecha a rodada não é mais cortado pelo Equipar vazio que o servidor aplica logo depois dele. **Ruling:** na mesa, não no servidor: um `state` ao vivo, na mesma `epoch` e só com eventos quietos (`quietOnly`) não troca a linha do tempo em curso (`useBeatPlayer`); vale também para o oponente que confirma o Equipar no meio do golpe. **Para o autor:** só muda no online depois do `pnpm deploy:server` dele;
+  - **ponto 18, ajustado** e **ponto 17, fechado** (`diario.md` 2026-11-03 (1) e (2));
+  - a fatia 5 do sub-projeto 6 e os pontos diretos 3, 4, 7, 8 e 12 (`diario.md` 2026-11-02 (8)). O autor jogou e mandou os pontos 16 a 18; ele não disse que aprova a fatia 5 (é a pergunta 8 do rascunho).
 - **Ajuste depois da aprovação da 4b:** as cartas da quadra perderam o losango de ouro do canto (`decisoes.md` 2026-11-02 (6)); o fundo dourado, a moldura, o brilho e o selo ficam. Não mude isso de volta seguindo a letra antiga do §6.
 - **Próximo passo exato:**
-  1. Terminar o bloco de desenho na ordem: o levantamento, a medição do 16, o protótipo (`docs/superpowers/specs/2026-11-03-playtest-prototipo.html`), as fotos dele e o rascunho (`docs/superpowers/specs/2026-11-03-playtest-design.md`). Commitar cada um e subir a branch.
-  2. Entregar ao autor as perguntas juntas, a mais importante em cima. Só depois das respostas: a spec final e o plano (`superpowers:writing-plans`).
-  3. O deploy e o playtest online são dele (`notas/playtest.md`).
+  1. Esperar as respostas do autor às 8 perguntas da §9 do rascunho. O que ele disser entra em `decisoes.md`, com o texto dele.
+  2. Com as respostas: atualizar o rascunho para spec (tirar o "rascunho"), e escrever o plano do primeiro bloco (`superpowers:writing-plans`). O bloco E (a regra do 16) pode ir para uma sessão própria, em paralelo.
+  3. O deploy e o playtest online são dele (`notas/playtest.md`). O deploy leva o conserto do Equipar vazio do online.
 - **Para medir uma cena com a 8787 ocupada:** `MEDIR_PORTA=8797` no `medir-cena.ts`. Para o E2E inteiro numa porta livre, a receita está no `diario.md` 2026-11-02 (8) (uma configuração que importa o `playwright.config.ts` e troca a porta).
 - **Para ver a Ressurreição sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave `coringa:partidas` e abra `/partidas/exodia-devastacao`. "Próximo
   passo" na rodada 7, passo 27, mostra a sua, com a quadra; na rodada 23, passo 107, a do Bot, com a quadra na outra fileira; na rodada 37, passo 182, a do Bot sem quadra.
@@ -213,4 +218,5 @@ Playtest online, `wrangler login` + `pnpm deploy:server`, proteção da `main`, 
   - `.claude/worktrees/youthful-elgamal-3d5e8a` (`claude/inspiring-sammet-387417`, num commit de 2026-10-27, limpo): criado em 2026-11-02 às 17:00, sem `pnpm install`, provavelmente por outra sessão do app. **Não apague:** pode ser de uma sessão aberta. Ele reprovava o ESLint, que agora ignora `.claude/**` (`6103b52`).
 - **Branches que sobraram:** todas as locais já estão mescladas na `main` (conferido em 2026-11-01), inclusive
   `claude/inspiring-sammet-387417` e `feat/ajustes-fase-a`. Só o trabalho novo precisa de branch nova.
+  No worktree `.claude/worktrees/dreamy-engelbart-4a4876`, duas locais da sessão do online: `sync/online-equipar-vazio` (a que foi para a `main`) e `feat/online-equipar-vazio`, que ficou num rebase não publicado (o force-push foi barrado) e pode ser apagada. A remota `feat/online-equipar-vazio` está mesclada.
 - **Arquivo solto:** o `jogar-treino.bat` na raiz é o lançador do autor. Não mexer nem commitar.

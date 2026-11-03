@@ -219,6 +219,14 @@ function baseDuration(kind: Beat['kind'], scene: SceneKind | null): number {
   return kind === 'scene' ? RARE_SCENE_MS[scene!] : BEAT_MS[kind];
 }
 
+/**
+ * Os eventos só têm batida quieta (a confirmação do Equipar, a janela que fecha): o `state` não anima nada e não corta a linha do tempo
+ * em curso (`useBeatPlayer`; decisoes.md 2026-11-03 (1), ponto 17). Sem evento nenhum não conta: é o começo de uma partida.
+ */
+export function quietOnly(events: readonly GameEvent[]): boolean {
+  return events.length > 0 && events.every((event) => classify(event).kind === 'quiet');
+}
+
 export function buildTimeline(events: GameEvent[], options: TimelineOptions): Beat[] {
   if (options.mode === 'resync') return [];
   const catchUp = options.mode === 'catchUp';
