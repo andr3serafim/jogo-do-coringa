@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="pt-BR">
+<!-- Protótipo descartável do bloco de desenho do playtest de 2026-11-02 e 2026-11-03 (decisoes.md 2026-11-02 (9) e (10), 2026-11-03 (1)).
+     RASCUNHO, NÃO APROVADO: serve para o autor reagir e escolher. Vale o que se vê e o ritmo; o código não é para reaproveitar.
+     Rascunho do desenho: docs/superpowers/specs/2026-11-03-playtest-design.md. Arte original do projeto (spec da web §10.6). -->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protótipo do playtest</title>
+<style>
+@font-face { font-family: 'Alfa'; src: url('/packages/web/node_modules/@fontsource/alfa-slab-one/files/alfa-slab-one-latin-400-normal.woff2') format('woff2'), url('../../../packages/web/node_modules/@fontsource/alfa-slab-one/files/alfa-slab-one-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Archivo'; src: url('/packages/web/node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2') format('woff2'), url('../../../packages/web/node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2') format('woff2'); font-weight: 100 900; }
+:root { --tinta: #17120f; --papel: #f1f0ea; --verde: #6fa86c; --rosa: #ee9db5; --vermelho: #b8261c; --ouro: #f5c238; --cura: #2a7339; }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #0b0908; color: var(--papel); font-family: 'Archivo', system-ui, sans-serif; }
+.page { max-width: 1040px; margin: 0 auto; padding: 16px 16px 80px; }
+h1 { font-family: 'Alfa', serif; font-weight: 400; font-size: 28px; margin: 6px 0 4px; }
+h2 { font-family: 'Alfa', serif; font-weight: 400; font-size: 22px; margin: 0 0 6px; letter-spacing: .02em; }
+h2 small { font-family: 'Archivo', sans-serif; font-size: 13px; font-weight: 700; color: #bdb8ad; letter-spacing: .08em; margin-left: 8px; }
+.sub { color: #bdb8ad; font-size: 14.5px; margin: 0 0 12px; line-height: 1.5; }
+.sub b { color: var(--papel); }
+.selo-rascunho { display: inline-block; background: var(--vermelho); color: var(--papel); font-weight: 800; font-size: 12px; letter-spacing: .12em; padding: 3px 8px; border: 2px solid var(--papel); transform: rotate(-2deg); }
+nav.indice { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 18px; }
+nav.indice a { color: var(--tinta); background: var(--papel); text-decoration: none; font-weight: 800; font-size: 13px; padding: 4px 9px; border: 2px solid var(--tinta); box-shadow: 2px 2px 0 #000; }
+nav.indice a:hover { background: var(--ouro); }
+.global { position: sticky; top: 0; z-index: 100; background: #0b0908ee; padding: 8px 0; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; border-bottom: 1px solid #2a2420; }
+.global label { font-size: 13.5px; font-weight: 700; display: flex; gap: 6px; align-items: center; cursor: pointer; }
+section.ponto { margin: 34px 0 0; padding-top: 18px; border-top: 2px solid #2a2420; }
+.frame { width: 100%; position: relative; overflow: hidden; border: 3px solid var(--tinta); background: var(--tinta); }
+.stage { position: absolute; left: 0; top: 0; transform-origin: 0 0; overflow: hidden; }
+.controles { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; align-items: center; }
+.controles .rotulo { font-size: 12px; font-weight: 800; letter-spacing: .1em; color: #9e978c; margin-right: 2px; }
+button.ctl { font: 800 13.5px 'Archivo', sans-serif; color: var(--tinta); background: var(--papel); border: 2.5px solid var(--tinta); padding: 6px 11px; cursor: pointer; box-shadow: 3px 3px 0 #000; }
+button.ctl:hover { background: #fff6d9; }
+button.ctl:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #000; }
+button.ctl.ativo { background: var(--ouro); }
+.escolha { margin: 10px 0 0; padding: 10px 12px; border-left: 4px solid var(--ouro); background: #1a1512; font-size: 14px; line-height: 1.5; color: #d9d4ca; }
+.escolha b { color: var(--ouro); }
+.num { font-family: 'Archivo', sans-serif; font-variant-numeric: tabular-nums; font-weight: 800; }
+.alfa { font-family: 'Alfa', serif; font-weight: 400; letter-spacing: .03em; }
+
+/* ---------- peças comuns da mesa ---------- */
+.campo { position: absolute; left: 0; right: 0; }
+.campo.bot { background: var(--verde); }
+.campo.voce { background: var(--rosa); }
+.faixa-centro { position: absolute; left: 0; right: 0; background: var(--tinta); }
+.grao { position: absolute; inset: 0; pointer-events: none; opacity: .45; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.09  0 0 0 0 0.07  0 0 0 0 0.06  0 0 0 0.55 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"); }
+.carta { position: absolute; width: 46px; height: 64px; background: var(--papel); border: 3px solid var(--tinta); border-radius: 3px; box-shadow: 2px 3px 0 rgba(23,18,15,.35); }
+.carta b { position: absolute; left: 5px; top: 2px; font-family: 'Alfa', serif; font-weight: 400; font-size: 19px; color: var(--tinta); }
+.carta.v b { color: var(--vermelho); }
+.carta em { position: absolute; left: 0; right: 0; bottom: 4px; text-align: center; font-style: normal; font-size: 7px; font-weight: 800; letter-spacing: .08em; color: var(--tinta); }
+.carta .naipe { position: absolute; right: 5px; bottom: 4px; font-size: 13px; color: var(--tinta); }
+.carta.v .naipe { color: var(--vermelho); }
+.verso { position: absolute; width: 34px; height: 48px; border: 2.5px solid var(--papel); border-radius: 3px; background:
+  repeating-linear-gradient(45deg, var(--tinta) 0 4px, #3a2f28 4px 8px); box-shadow: 2px 2px 0 rgba(0,0,0,.4); }
+.rotulo-zona { position: absolute; font-size: 10px; font-weight: 800; letter-spacing: .12em; color: var(--tinta); }
+.retrato { position: absolute; width: 64px; height: 64px; border: 3px solid var(--papel); display: grid; place-items: center; }
+.retrato svg { width: 54px; height: 54px; }
+.retrato.voce { background: var(--rosa); } .retrato.bot { background: var(--verde); }
+.barra { position: absolute; height: 20px; border: 3px solid var(--papel); overflow: hidden; background: repeating-linear-gradient(135deg, #3a332d 0 2px, transparent 2px 7px), #221c18; }
+.barra .vida { position: absolute; top: 0; bottom: 0; left: 0; background: linear-gradient(180deg, #ffd96a 0 45%, var(--ouro) 45%); }
+.barra .cura { position: absolute; top: 0; bottom: 0; background: var(--cura); }
+.estampa { position: absolute; font-family: 'Alfa', serif; padding: 4px 16px 2px; border: 4px solid var(--tinta); box-shadow: 6px 6px 0 #000; white-space: nowrap; }
+.particula { position: absolute; pointer-events: none; }
+.reduzido .so-movimento { display: none !important; }
+</style>
+</head>
+<body>
+<div class="page">
+  <span class="selo-rascunho">RASCUNHO · NÃO APROVADO</span>
+  <h1>Os pontos do playtest, para você ver e escolher</h1>
+  <p class="sub">Cada seção é um ponto da sua lista. Toque nos botões embaixo de cada quadro para ver a proposta acontecer. Onde há
+    <b>variantes (A, B)</b>, elas são as escolhas que dependem de você; a caixa dourada diz o que eu recomendo e por quê. Nada aqui está no
+    jogo ainda: depois das suas escolhas viram a spec e o plano. Os pontos de regra (o 16) estão no rascunho do desenho, com os números do simulador.</p>
+  <div class="global">
+    <label><input type="checkbox" id="reduzido"> Movimento reduzido (como a opção do menu do jogo)</label>
+  </div>
+  <nav class="indice" aria-label="Pontos">
+    <a href="#p1">1 · Jogadas especiais</a><a href="#p2">2 · Cartas travadas</a><a href="#p5">5 · Botões</a><a href="#p6">6 · Marcas</a>
+    <a href="#p9">9 · Cura passiva</a><a href="#p10">10 · Bônus em escala</a><a href="#p11">11 · Aura da iniciativa</a>
+    <a href="#p13">13 · Espada e escudo</a><a href="#p14">14 · Monte e cemitério</a><a href="#p15">15 · Golpe final</a>
+  </nav>
+
+<!-- SECOES -->
+
+</div>
+<script>
+const T = '#17120f', P = '#f1f0ea', R = '#b8261c', O = '#f5c238', VERDE = '#6fa86c', ROSA = '#ee9db5', CURA = '#2a7339';
+const CORINGA = `
+  <path fill="${T}" d="M14 31C10 23 6 17 4 10c8 2 14 6 18 12 2-8 6-14 10-18 4 4 8 10 10 18 4-6 10-10 18-12-2 7-6 13-10 21z"/>
+  <path stroke="${P}" d="M10 16c4 2 7 5 9 9M32 10v14M54 16c-4 2-7 5-9 9" stroke-width="1.6" fill="none"/>
+  <circle fill="${P}" stroke="${T}" cx="4" cy="10" r="3.4" stroke-width="2"/><circle fill="${P}" stroke="${T}" cx="32" cy="4" r="3.4" stroke-width="2"/>
+  <circle fill="${P}" stroke="${T}" cx="60" cy="10" r="3.4" stroke-width="2"/><circle fill="${P}" stroke="${T}" cx="32" cy="40" r="12" stroke-width="2.6"/>
+  <path stroke="${T}" d="M26 37.5l3-2M35 35.5l3 2M25.5 43c3.5 5.5 9.5 5.5 13 0" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+  <circle fill="${R}" cx="24.5" cy="41" r="1.8"/><circle fill="${R}" cx="39.5" cy="41" r="1.8"/>
+  <path fill="${T}" d="M16 54l6-6 5 6 5-6 5 6 5-6 6 6-2 9H18z"/>`;
+const ESPADA = `<path d="M12 1l3 3v13h4v2h-4v2.5a2.5 2.5 0 1 1-6 0V19H5v-2h4V4z" fill="currentColor"/>`;
+const ESCUDO = `<path d="M12 1l10 3.5V12c0 6-4.5 10.5-10 12C6.5 22.5 2 18 2 12V4.5z" fill="currentColor"/>`;
+
+/** O movimento reduzido: o do sistema no começo, e a caixa do topo troca. */
+let REDUZIDO = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const caixaReduzido = document.getElementById('reduzido');
+caixaReduzido.checked = REDUZIDO;
+caixaReduzido.addEventListener('change', () => {
+  REDUZIDO = caixaReduzido.checked;
+  document.body.classList.toggle('reduzido', REDUZIDO);
+  document.dispatchEvent(new Event('reduzido'));
+});
+document.body.classList.toggle('reduzido', REDUZIDO);
+
+/** Cada quadro tem um palco de tamanho fixo, escalado para caber na largura. */
+function encaixar() {
+  document.querySelectorAll('.frame').forEach((frame) => {
+    const stage = frame.querySelector('.stage');
+    const w = Number(stage.dataset.w), h = Number(stage.dataset.h);
+    stage.style.width = `${w}px`; stage.style.height = `${h}px`;
+    const s = frame.clientWidth / w;
+    stage.style.transform = `scale(${s})`;
+    frame.style.height = `${h * s}px`;
+  });
+}
+addEventListener('resize', encaixar);
+
+const el = (tag, cls, html = '', style = {}) => { const e = document.createElement(tag); if (cls) e.className = cls; e.innerHTML = html; Object.assign(e.style, style); return e; };
+const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+/** Uma animação do navegador; com movimento reduzido, pula para o fim (ou esmaece, quando `fade`). */
+function anima(node, frames, opts) {
+  if (REDUZIDO && !opts.semReduzir) {
+    const last = frames[frames.length - 1];
+    return node.animate([last, last], { duration: opts.duration ?? 1, delay: opts.delay ?? 0, fill: 'both' });
+  }
+  return node.animate(frames, { fill: 'both', easing: 'ease-out', ...opts });
+}
+function carta(valor, { vermelha = false, papel = '', naipe = '', x = 0, y = 0, w = 46, h = 64 } = {}) {
+  const c = el('div', `carta${vermelha ? ' v' : ''}`, `<b>${valor}</b>${naipe ? `<span class="naipe">${naipe}</span>` : ''}${papel ? `<em>${papel}</em>` : ''}`, { left: `${x}px`, top: `${y}px`, width: `${w}px`, height: `${h}px` });
+  if (w > 50) c.querySelector('b').style.fontSize = `${Math.round(w * 0.42)}px`;
+  if (papel && w > 50) c.querySelector('em').style.fontSize = `${Math.round(w * 0.14)}px`;
+  return c;
+}
+function retrato(lado, x, y, size = 64) {
+  const r = el('div', `retrato ${lado}`, `<svg viewBox="0 0 64 64">${CORINGA}</svg>`, { left: `${x}px`, top: `${y}px`, width: `${size}px`, height: `${size}px` });
+  r.querySelector('svg').style.width = r.querySelector('svg').style.height = `${size - 10}px`;
+  return r;
+}
+/** Partículas soltas que sobem e somem. */
+function faiscas(parent, x, y, { n = 8, cor = O, raio = 40, vida = 600, tam = 4 } = {}) {
+  if (REDUZIDO) return;
+  for (let i = 0; i < n; i++) {
+    const a = (Math.PI * 2 * i) / n + Math.random() * 0.6;
+    const d = raio * (0.6 + Math.random() * 0.6);
+    const p = el('div', 'particula', '', { left: `${x}px`, top: `${y}px`, width: `${tam}px`, height: `${tam}px`, background: cor, borderRadius: '50%' });
+    parent.appendChild(p);
+    p.animate([{ transform: 'translate(0,0)', opacity: 1 }, { transform: `translate(${Math.cos(a) * d}px, ${Math.sin(a) * d}px)`, opacity: 0 }], { duration: vida, easing: 'ease-out' }).onfinish = () => p.remove();
+  }
+}
+/* JS-SECOES */
+encaixar();
+</script>
+</body>
+</html>
