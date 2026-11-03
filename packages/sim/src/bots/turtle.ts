@@ -25,6 +25,8 @@ export const turtleBot: Bot = (view, legal, rng) => {
       (ties) => rng.pick(ties),
     );
   }
+  // Na janela da Ressurreição (ponto 16), como na fase principal: nada no Ataque.
+  if (phase.kind === 'RESURRECTION') return greedyBot(view, legal.filter((a) => !(a.type === 'RESURRECT' && a.row === 'ATK')), rng);
   if (phase.kind === 'ATTACK_MAIN') {
     const kings = legal.filter((a) => a.type === 'PLAY_K');
     if (kings.length > 0) return kings[kings.length - 1];

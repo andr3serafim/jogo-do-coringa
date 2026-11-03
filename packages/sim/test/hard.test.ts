@@ -105,6 +105,29 @@ describe('bot Difícil', () => {
     expect(on.value.candidates[0]).toEqual(greedy);
   });
 
+  it('a janela da Ressurreição (ponto 16): fora do horizonte, vale o greedy; com ela no horizonte, os rollouts a atravessam', () => {
+    let found: { state: GameState; actor: PlayerId } | null = null;
+    for (let i = 0; i < 40 && !found; i += 1) {
+      runGame({
+        config,
+        seed: `janela-${i}`,
+        bots: [greedyBot, greedyBot],
+        onStep: (before) => {
+          const actor = actingPlayers(before)[0];
+          if (!found && before.phase.kind === 'RESURRECTION' && legalOf(before, actor).length >= 2) found = { state: before, actor };
+        },
+      });
+    }
+    if (!found) throw new Error('nenhuma das partidas passou pela janela da Ressurreição');
+    const { state, actor } = found as { state: GameState; actor: PlayerId };
+    const legal = legalOf(state, actor);
+    expect(HARD_DEFAULTS.horizon.RESURRECTION).toBeUndefined();
+    expect(drain(hardSearchTotals(state, actor, legal, createRng('j'), HARD_DEFAULTS)).yields).toBe(0);
+    const on = drain(hardSearchTotals(state, actor, legal, createRng('j'), { ...HARD_DEFAULTS, rolloutsPerCandidate: 2, horizon: { RESURRECTION: 2 } }));
+    expect(on.yields).toBe(2 * Math.min(legal.length, HARD_DEFAULTS.maxCandidates));
+    expect(legal).toContainEqual(on.value.candidates[0]);
+  });
+
   it('o horizonte conta rodadas de Ataque: um maior muda os totais, e um enorme termina sem lançar', () => {
     const s = equip();
     const legal = legalOf(s);

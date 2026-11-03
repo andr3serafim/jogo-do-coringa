@@ -3,6 +3,8 @@ import { legalActions, makeConfig, viewFor, type Action, type GameState, type Pl
 // Builder de cenários do motor: monta estados reais sem inventar cartas.
 import { P1, P2, setup, type PlayerSetup } from '@coringa/engine/testing';
 import { GREEDY, greedyBot, prefersFirst } from '../src/bots/greedy.ts';
+import { resurrectionGain } from '../src/bots/eval.ts';
+import { turtleBot } from '../src/bots/turtle.ts';
 import type { Bot } from '../src/bots/types.ts';
 import { runGame } from '../src/match.ts';
 import { createRng } from '../src/rng.ts';
@@ -168,5 +170,52 @@ describe('greedy: descarte do limite de especiais (CHOOSE, E3)', () => {
     const kinds = action.type === 'DISCARD' ? action.cardIds.map((id) => s.players[0].hand.find((c) => c.id === id)!.kind) : [];
     // Os J não têm lugar (4 J nos buffs): saem os dois.
     expect(kinds).toEqual(['J', 'J']);
+  });
+});
+
+describe('greedy na Ressurreição da quadra (ponto 16)', () => {
+  const token = { row: 'ATK' as const, value: 7 as const, formedAtRound: 3 };
+  const window = { kind: 'RESURRECTION' as const, player: P1, next: null };
+  const withToken = (s: GameState): GameState => {
+    s.players[0].resurrections = [token];
+    return s;
+  };
+
+  it('na janela, ressuscita a opção que mais melhora a mesa', () => {
+    const s = withToken(setup({ phase: window, roundKind: 'EQUIP', p1: { attack: [7, 7, 7, 7], defense: [2] }, p2: { attack: [9, 9] }, graveyard: [3, 10] }));
+    const action = decide(greedyBot, s);
+    expect(action).toMatchObject({ type: 'RESURRECT', cardId: s.graveyard[1].id });
+  });
+
+  it('na janela, com só trocas que pioram a mesa, guarda (PASS)', () => {
+    const s = withToken(
+      setup({ phase: window, roundKind: 'EQUIP', p1: { attack: [7, 7, 7, 7, 8, 9, 10], defense: [9, 10, 8, 9, 10, 8, 10] }, graveyard: [2] }),
+    );
+    expect(decide(greedyBot, s)).toEqual({ type: 'PASS' });
+  });
+
+  it('na fase principal, a troca que piora não é feita: o greedy segue (ataca)', () => {
+    const s = withToken(setup({ p1: { attack: [7, 7, 7, 7, 8, 9, 10], defense: [9, 10, 8, 9, 10, 8, 10] }, graveyard: [2] }));
+    expect(decide(greedyBot, s)).toEqual({ type: 'DECLARE_ATTACK' });
+  });
+
+  it('na fase principal, com vaga, continua ressuscitando sempre', () => {
+    const s = withToken(setup({ p1: { attack: [7, 7, 7, 7] }, graveyard: [2] }));
+    expect(decide(greedyBot, s).type).toBe('RESURRECT');
+  });
+
+  it('avalia a troca como troca: a fileira fica com o mesmo tamanho (a última sai)', () => {
+    // A última da Defesa é um 2 e o cemitério tem um 10: a troca melhora a Defesa em 8, não em 10.
+    const s = withToken(setup({ p1: { attack: [7, 7, 7, 7, 3, 4, 5], defense: [3, 4, 5, 6, 8, 9, 2] }, graveyard: [10] }));
+    const view = viewFor(s, P1);
+    const action = legalActions(view).find((a) => a.type === 'RESURRECT' && a.row === 'DEF');
+    if (action?.type !== 'RESURRECT') throw new Error('sem a troca na Defesa');
+    expect(resurrectionGain(view, action)[1]).toBe(8);
+  });
+
+  it('o turtle na frente não ressuscita no Ataque na janela', () => {
+    const s = withToken(setup({ phase: window, roundKind: 'EQUIP', p1: { hp: 90, attack: [7, 7, 7, 7] }, p2: { hp: 50 }, graveyard: [10] }));
+    const action = decide(turtleBot, s);
+    expect(action.type === 'RESURRECT' ? action.row : 'PASS').not.toBe('ATK');
   });
 });
