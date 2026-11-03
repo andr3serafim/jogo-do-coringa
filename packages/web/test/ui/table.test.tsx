@@ -406,13 +406,14 @@ describe('mesa: as figuras no lugar do texto (decisoes.md 2026-11-01 (1))', () =
       },
     });
     const list = region('Seu campo').getByRole('list', { name: /Estado do Coringa/ });
+    // Desde o bloco A do playtest (ponto 6), cada marca é uma placa com medalhão: a figura, o nome e a linha do que ela faz.
     const marks = within(list)
       .getAllByRole('listitem')
-      .map((item) => [item.querySelector('svg[data-arte]')?.getAttribute('data-arte'), item.textContent]);
+      .map((item) => [item.querySelector('svg[data-arte]')?.getAttribute('data-arte'), item.querySelector('[data-placa-nome]')?.textContent]);
     expect(marks).toEqual([
       ['defesa-absoluta', 'Defesa Absoluta'],
       ['cura', 'Cura passiva'],
-      ['ressurreicao', '1 Ressurreição disponível'],
+      ['ressurreicao', 'Ressurreição'],
       ['ataque-absoluto', 'Ataque Absoluto armado'],
     ]);
   });
@@ -500,6 +501,57 @@ describe('mesa: a mão que diz o que joga agora (bloco A do playtest, ponto 2)',
   it('com movimento reduzido, a carta apagada desce sem transição', () => {
     mount(DRAFT, { props: { liveCards: new Set() }, reduced: true });
     for (const li of handItems()) expect(li).toHaveAttribute('data-parado');
+  });
+});
+
+describe('mesa: as placas de estado (bloco A do playtest, ponto 6)', () => {
+  const region = (name: string) => within(screen.getByRole('region', { name }));
+  const plate = (field: string, name: string) =>
+    region(field)
+      .getAllByRole('listitem')
+      .find((item) => item.querySelector('[data-placa-nome]')?.textContent === name)!;
+  const line = (item: Element) => item.querySelector('[data-placa-faz]')?.textContent;
+
+  it('cada placa diz o que a marca faz, do lado de quem a vê', () => {
+    mount({
+      ...DRAFT,
+      self: { ...DRAFT.self, absoluteDefense: true, guard: ['K', 'K'], attackBuffs: ['J', 'J', 'J', 'J'] },
+      opponent: { ...DRAFT.opponent, guard: ['K', 'K'], absoluteDefense: true, attackBuffs: ['J', 'J', 'J', 'J'] },
+    });
+    expect(line(plate('Seu campo', 'Cura passiva'))).toBe('a sua Defesa que cai vira vida');
+    expect(line(plate('Campo de Duda', 'Cura passiva'))).toBe('a Defesa dele que cai vira vida');
+    expect(line(plate('Seu campo', 'Defesa Absoluta'))).toBe('imune até o golpe dele');
+    expect(line(plate('Campo de Duda', 'Defesa Absoluta'))).toBe('imune até o seu golpe');
+    expect(line(plate('Seu campo', 'Ataque Absoluto armado'))).toBe('o seu próximo ataque quebra todos os K');
+    expect(line(plate('Campo de Duda', 'Ataque Absoluto armado'))).toBe('o próximo ataque dele quebra todos os K');
+  });
+
+  it('a Ressurreição mostra o número num selo, e o leitor de tela ouve a frase inteira', () => {
+    mount({ ...DRAFT, self: { ...DRAFT.self, resurrections: [{ row: 'ATK', value: 7 }, { row: 'DEF', value: 5 }] } });
+    const item = plate('Seu campo', 'Ressurreições');
+    expect(item.querySelector('[data-selo]')).toHaveTextContent('2');
+    expect(item.querySelector('[data-selo]')).toHaveAttribute('aria-hidden', 'true');
+    expect(line(item)).toBe('traz 1 numérica do cemitério');
+    expect(within(item).getByText('2 Ressurreições disponíveis')).toHaveClass('sr-only');
+  });
+
+  it('a zona do Reflect ganha a linha do que faz, e o espelho o brilho lento', () => {
+    mount({ ...DRAFT, opponent: { ...DRAFT.opponent, reflect: true } });
+    expect(region('Campo de Duda').getByText('o seu próximo golpe volta para você')).toBeInTheDocument();
+    expect(document.querySelector('[data-espelho-zona="p2"]')).toHaveAttribute('data-gesto', 'espelho');
+  });
+
+  it('os gestos lentos: a cruz da cura e a alma da Ressurreição; com movimento reduzido, nenhum', () => {
+    const spec: ViewSpec = {
+      ...DRAFT,
+      self: { ...DRAFT.self, guard: ['K', 'K'], resurrections: [{ row: 'ATK', value: 7 }] },
+      opponent: { ...DRAFT.opponent, reflect: true },
+    };
+    const first = mount(spec);
+    expect(region('Seu campo').getAllByRole('listitem').flatMap((item) => [...item.querySelectorAll('[data-gesto]')].map((el) => el.getAttribute('data-gesto')))).toEqual(['cura', 'alma']);
+    first.unmount();
+    mount(spec, { reduced: true });
+    expect(document.querySelectorAll('[data-gesto]')).toHaveLength(0);
   });
 });
 

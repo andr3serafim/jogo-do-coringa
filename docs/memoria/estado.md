@@ -10,7 +10,8 @@
 - **Feito no bloco A:** Task 1 (o momento na linha do tempo e no protocolo), Task 2 (o momento na mesa: o pouso, a saída, o véu e o online que segura) e Task 3 (o prazo do servidor e o bot do treino esperam o momento).
 - **Feito também:** Task 4 (a carta grande que vira, a placa, o voo e o som do momento: `ui/anim/Moment.tsx`).
 - **Feito também:** Task 5 (a mão que apaga as cartas sem jogada agora).
-- **Próximo passo exato do bloco A:** a Task 6 do plano (`docs/superpowers/plans/2026-11-03-playtest-bloco-a.md`): as placas de estado (`StatePlate.tsx`, `plateLine` em `copy.ts`, os gestos `gesto-cura`, `gesto-alma` e `gesto-espelho`, e a lista das animações sem fim no `phases.test.tsx` passando a 5).
+- **Feito também:** Task 6 (as placas de estado com medalhão e os gestos lentos).
+- **Próximo passo exato do bloco A:** a Task 7 do plano (`docs/superpowers/plans/2026-11-03-playtest-bloco-a.md`): a cura passiva que se explica (`defenseHealOf` no motor, `firstHealSeq` na sessão, `teachHeal` na linha do tempo, `healRibbon`, `healsOf` e a essência na `Leaving`, o halo dos K com `data-causa`, a frase nova da dica `buffs`).
 - **O online muda com este bloco:** o prazo do servidor ganha a folga do momento. Só vale online depois do deploy do autor.
 - **Feito por último** (`diario.md` 2026-11-03 (5)): as respostas do autor às 8 perguntas, em `decisoes.md` 2026-11-03 (4):
   - **a fatia 5 está aprovada:** o sub-projeto 6 fechou;

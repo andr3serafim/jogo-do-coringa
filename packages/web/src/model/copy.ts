@@ -386,6 +386,20 @@ export interface Ribbon {
   reason: string | null;
 }
 
+/** As placas de estado do Coringa (bloco A dos pontos do playtest, ponto 6) e a zona do Reflect. */
+export type PlateKind = 'cura' | 'res' | 'defesa' | 'ataque' | 'reflect';
+
+/** O que cada marca faz, numa linha: no seu campo e no do oponente. */
+const PLATE_LINE: Record<PlateKind, readonly [self: string, opponent: string]> = {
+  cura: ['a sua Defesa que cai vira vida', 'a Defesa dele que cai vira vida'],
+  res: ['traz 1 numérica do cemitério', 'traz 1 numérica do cemitério'],
+  defesa: ['imune até o golpe dele', 'imune até o seu golpe'],
+  ataque: ['o seu próximo ataque quebra todos os K', 'o próximo ataque dele quebra todos os K'],
+  reflect: ['o próximo golpe volta para ele', 'o seu próximo golpe volta para você'],
+};
+
+export const plateLine = (kind: PlateKind, self: boolean): string => PLATE_LINE[kind][self ? 0 : 1];
+
 /** A placa do momento da especial do oponente: o que ela fez e, quando o evento diz, a consequência com os números do motor. */
 export interface MomentPlate {
   title: string;

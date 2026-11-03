@@ -62,6 +62,15 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     com movimento reduzido, `data-parado` tira a transição. O nome acessível da apagada termina em "sem jogada agora";
   - **achados nos testes, que eram meus e não do motor:** sem carta no campo do oponente o A não tem alvo; com K, A e J na mão a
     Devastação acende o J mesmo com o limite de J cheio.
+- **Task 6 (as placas de estado):**
+  - `StatePlate.tsx` (o medalhão com a figura de hoje num disco, o nome e a linha de `plateLine`, do lado de quem vê); a Ressurreição
+    mostra "Ressurreição(ões)" e o número num selo, e o leitor de tela segue ouvindo "N Ressurreições disponíveis" (`sr-only`);
+  - a zona do Reflect ganha a linha (A6) e o `MirrorMark` o brilho (`data-gesto="espelho"`, um retângulo recortado pelo espelho);
+  - **desvio do plano (pequeno):** as animações sem fim ficaram **6**, não 5: a cura tem dois gestos (a cruz que bate e o "+" que sobe),
+    e cada elemento precisa da sua animação. O teste das animações sem fim trava as seis;
+  - abaixo de 600 px a linha do que faz some (`.placa-faz`); o nome fica;
+  - **não conferido de verdade:** o tamanho das placas no campo (a zona do Reflect ganhou uma linha no PC) e os gestos: nas fotos da
+    Task 8.
 
 ---
 

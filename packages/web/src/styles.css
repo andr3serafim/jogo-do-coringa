@@ -615,9 +615,10 @@
 
 /*
  * A mesa viva (sub-projeto 6 §6). As cartas da mão respiram: sobem e descem 3 px num ciclo de 3,6 s, cada uma num tempo
- * (`--respira-i`, o índice dela, adianta o ciclo em 0,9 s). Na carta de quadra, um brilho passa a cada 3,2 s. As duas são as
- * únicas animações sem fim da folha (o teste do relógio confere): pouco movimento, em área pequena, sem trocar a luminância da
- * tela. Com movimento reduzido a mesa não põe as marcas (`data-respira`, `.brilho-quadra`).
+ * (`--respira-i`, o índice dela, adianta o ciclo em 0,9 s). Na carta de quadra, um brilho passa a cada 3,2 s. Com os gestos das
+ * placas de estado (bloco A dos pontos do playtest, ponto 6), são as únicas animações sem fim da folha (o teste do relógio confere):
+ * pouco movimento, em área pequena, sem trocar a luminância da tela. Com movimento reduzido a mesa não põe as marcas (`data-respira`,
+ * `.brilho-quadra`, `data-gesto`).
  */
 @keyframes respira {
   0%,
@@ -678,6 +679,94 @@ li[data-joga]::after {
 
 .brilho-quadra {
   animation: brilho-quadra 3.2s ease-in-out infinite;
+}
+
+/*
+ * As placas de estado (bloco A dos pontos do playtest, ponto 6): um gesto lento a cada ~3 s, na área do medalhão, só com `transform` e
+ * `opacity` (nada acende a tela). A cruz da cura bate e solta um "+", a alma sobe do túmulo da Ressurreição, e um brilho passa pelo
+ * espelho do Reflect. Com movimento reduzido a mesa não põe os gestos (`data-gesto`, `data-gesto-mais`).
+ */
+@keyframes gesto-cura {
+  0%,
+  78%,
+  100% {
+    scale: 1;
+  }
+  84% {
+    scale: 1.18;
+  }
+  90% {
+    scale: 0.96;
+  }
+}
+
+[data-gesto='cura'] {
+  animation: gesto-cura 3s ease-in-out infinite;
+}
+
+@keyframes gesto-cura-mais {
+  0%,
+  82% {
+    opacity: 0;
+    translate: 0 2px;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 -12px;
+  }
+}
+
+[data-gesto-mais] {
+  animation: gesto-cura-mais 3s ease-out infinite;
+}
+
+@keyframes gesto-alma {
+  0%,
+  70% {
+    opacity: 0;
+    translate: -50% 4px;
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: -50% -10px;
+  }
+}
+
+[data-gesto='alma'] {
+  animation: gesto-alma 3.2s ease-out infinite;
+}
+
+@keyframes gesto-espelho {
+  0%,
+  74% {
+    translate: -80px 0;
+    opacity: 0;
+  }
+  80%,
+  94% {
+    opacity: 0.85;
+  }
+  100% {
+    translate: 80px 0;
+    opacity: 0;
+  }
+}
+
+[data-gesto='espelho'] [data-brilho] {
+  animation: gesto-espelho 3.4s ease-in-out infinite;
+}
+
+/* No celular a placa fica só com o nome: a linha do que ela faz não cabe no campo. */
+@media (max-width: 599px) {
+  .placa-faz {
+    display: none;
+  }
 }
 
 /*
