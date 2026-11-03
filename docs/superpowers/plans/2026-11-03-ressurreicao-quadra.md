@@ -3,7 +3,7 @@
 > **Para agentes:** SUB-SKILL OBRIGATÓRIA: superpowers:subagent-driven-development (recomendada) ou superpowers:executing-plans,
 > tarefa por tarefa. Os passos usam caixas (`- [ ]`) para o acompanhamento.
 >
-> **Estado:** rascunho, esperando a aprovação do autor. Nenhum código do jogo muda antes dela.
+> **Estado:** **aprovado** pelo autor em 2026-11-03, com 15 s na janela (`decisoes.md` 2026-11-03 (5)).
 
 **Objetivo:** pôr no jogo a regra do ponto 16, escrita pelo autor: a Ressurreição usada já na revelação do Equipar, antes do ataque,
 e a troca da última carta quando as duas fileiras estão cheias, com a carta da quadra protegida, também na fase principal.
@@ -56,7 +56,7 @@ Origem: `docs/memoria/decisoes.md` 2026-11-03 (4).
 9. **Os bots:** o greedy ressuscita (na janela e na fase principal) quando a melhor opção não piora a mesa (a avaliação de mesa e,
    no empate, a soma das fileiras); senão, guarda. O Difícil mede no portão se a busca na janela vale o tempo.
 
-## Pergunta ao autor (a única que é dele e não está decidida)
+## Pergunta ao autor (respondida: 15 s)
 
 1. **O prazo online da janela**, por jogador: **15 s** (recomendo: abrir o cemitério, escolher a carta e a fileira, com a prévia da
    troca para ler; no celular, 10 s é apertado) ou 10 s, como a escolha da ordem. O tempo esgotado guarda a Ressurreição. No treino
@@ -209,7 +209,7 @@ sem estouro na janela). Testes: `packages/server/test/core/timers.test.ts`, `pri
 
 **Interfaces (produz):**
 - `DeadlineKind = 'EQUIP' | 'ORDER' | 'TURN' | 'REACTION' | 'RESURRECTION'`.
-- `TIMERS.resurrectionMs`: o valor que o autor escolher (proposta 15 000).
+- `TIMERS.resurrectionMs = 15_000` (autor, 2026-11-03 (5)).
 - `phaseKey` da janela: `[round, 'RESURRECTION', player, null]` (a vez do segundo da fila é época nova).
 - `STATE_SCHEMA = 5`, com a linha do comentário: "5: a fase `RESURRECTION` e a troca da Ressurreição (ponto 16)".
 
