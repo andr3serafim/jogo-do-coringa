@@ -1,22 +1,27 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-02**, na outra conta, com a fatia 5 em execução. Antes de seguir, confira se não há
+> Sobrescrito a cada atualização. **Última: 2026-11-02**, com a fatia 5 na `main`, esperando o autor jogar. Antes de seguir, confira se não há
 > versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `feat/direcao-visual-fatia-5`, no checkout principal, criada da `main` (`35b4660`). Plano: `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-5.md`.
-- **Feito por último:** o autor **aprovou o plano da fatia 5** com as escolhas E1 a E9 como recomendadas, e mandou 14 pontos do playtest (`decisoes.md` 2026-11-02 (9), com o texto dele). Os pontos diretos (3, 4, 7, 8 e 12) viraram a **Task 8** do plano; o E2E e a medição passaram a ser a Task 9. Antes, o ESLint passou a ignorar `.claude/**` (`6103b52`).
-- **O que ele escolheu nos pontos:** "Bônus" no lugar de "Buff"; sem a barra e sem a escolha automática da ordem; os nove pontos de desenho depois da fatia 5.
-- **Esperando o autor:** nada agora. Ele joga quando a fatia 5 chegar à `main`.
+- **Branch:** `main`, no checkout principal, sem trabalho em curso. A branch `feat/direcao-visual-fatia-5` foi mesclada por fast-forward, com as duas CI verdes no último commit de código (`15ddfeb`, run `41559998891`).
+- **Feito por último:** a **fatia 5 do sub-projeto 6** (a fluidez das jogadas comuns, com os sons) e os **pontos diretos do playtest** (3, 4, 7, 8 e 12). Plano em `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-5.md`; cada escolha no `diario.md` 2026-11-02 (8); medição em `notas/medicao-fatia-5.md`.
+- **Esperando o autor:** jogar a fatia 5 no treino. Com a aprovação dele, o sub-projeto 6 acaba (§8 e §15 da spec 6).
+- **O que ele precisa saber ao jogar:**
+  - **a carta jogada** recua, voa e assenta com um achatamento e poeira; a do Bot cai no destino na batida dela;
+  - **as cartas que saem** seguram o lugar até a batida delas (antes sumiam quando o passo chegava), e a que quebra (o K da Guarda, o alvo da Armadilha e do Sacrifício) racha e estoura em cacos de papel;
+  - **a compra** chega do monte em leque; **o total da fileira** espera a carta pousar e cresce;
+  - **os pontos dele:** a mesa não seleciona texto; sem a "Ameaça de Bot"; a ordem não sai sozinha; "Bônus" no lugar de "Buff";
+  - **E1:** o quadro da chegada caiu no ataque (de 167–200 para 100–134 ms com a CPU 4×). O resto do peso é o desenho do React com a mesa inteira e as projeções do Motion: não é local, e fica para ele decidir se vale mexer;
+  - **não conferido de verdade:** o som (só os instantes nos testes), o movimento reduzido no navegador e o painel do Equipar ao vivo com o leque (só testes de unidade; o replay usa outro painel). A revisão final foi de quem escreveu o código, como ele aprovou (E9);
+  - **adiado, menor:** a lista de timers da camada de efeitos (`FxLayer`) cresce durante a partida (são números, sem efeito visível).
 - **Ajuste depois da aprovação da 4b:** as cartas da quadra perderam o losango de ouro do canto (`decisoes.md` 2026-11-02 (6)); o fundo dourado, a moldura, o brilho e o selo ficam. Não mude isso de volta seguindo a letra antiga do §6.
-- **Em curso:** as Tasks 1 a 8 estão commitadas; a Task 9 está pela metade (commit "wip" desta branch): o E2E novo `e2e/fluidez.spec.ts` (6 de 6 verdes), os E2E da ordem ajustados (`training`, `mobile`, `online`, e o `playUntil` com `order: 'leave'`), a medida dos alvos de toque em repouso (`mobile.spec.ts`) e as specs (6 §8 e §14; a da interface §3.6 e outras notas). **O limite de uso cortou a sessão aqui.**
-- **Para o autor saber (E1):** o quadro da chegada caiu no ataque (de 183–200 para 117 ms no PC), mas o resto do peso é o desenho do React com a mesa inteira e as projeções do Motion. Não é local: fica para ele decidir.
 - **Próximo passo exato:**
-  1. **Terminar a Task 9:** (a) o E2E inteiro já passou (75 de 75); (b) a medição de depois está feita, com os cortes da poeira e dos desenhos do `Row`: todos os passos acima de 50 quadros/s (`notas/medicao-fatia-5.md`); (c) a revisão da branch inteira está feita; falta o push com o `pnpm check`, as duas CI verdes e o fast-forward na `main`. Depois, o autor joga.
-  2. No fim, o `pnpm check`, o push, as duas CI verdes, a revisão da branch inteira e o fast-forward na `main`. Depois, ele joga.
-  3. **Depois da fatia 5: os dez pontos de desenho do playtest** (1, 2, 5, 6, 9, 10, 11, 13 e 14, em `decisoes.md` 2026-11-02 (9), e o 15, a cena curta do golpe comum que encerra a partida, em 2026-11-02 (10)): brainstorming (`superpowers:brainstorming`) e protótipo para ele ver, antes de spec e plano. Nenhum foi desenhado nem aprovado. O ponto 1 (a jogada especial do Bot legível sem o histórico) pode trocar a queda simples da E3.
-  4. Com a fatia 5 aprovada, o sub-projeto 6 acaba. O deploy e o playtest online são dele (`notas/playtest.md`).
+  1. Esperar o autor jogar a fatia 5. O que ele disser entra em `decisoes.md`, com o texto dele.
+  2. **Depois: os dez pontos de desenho do playtest** (1, 2, 5, 6, 9, 10, 11, 13 e 14, em `decisoes.md` 2026-11-02 (9), e o 15, a cena curta do golpe comum que encerra a partida, em 2026-11-02 (10)): brainstorming (`superpowers:brainstorming`) e protótipo para ele ver, antes de spec e plano. Nenhum foi desenhado nem aprovado. O ponto 1 (a jogada especial do Bot legível sem o histórico) pode trocar a queda simples da E3.
+  3. O deploy e o playtest online são dele (`notas/playtest.md`).
+- **Para medir uma cena com a 8787 ocupada:** `MEDIR_PORTA=8797` no `medir-cena.ts`. Para o E2E inteiro numa porta livre, a receita está no `diario.md` 2026-11-02 (8) (uma configuração que importa o `playwright.config.ts` e troca a porta).
 - **Para ver a Ressurreição sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave `coringa:partidas` e abra `/partidas/exodia-devastacao`. "Próximo
   passo" na rodada 7, passo 27, mostra a sua, com a quadra; na rodada 23, passo 107, a do Bot, com a quadra na outra fileira; na rodada 37, passo 182, a do Bot sem quadra.
 - **Para ver as cenas do Reflect sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/reflect.json` para a chave `coringa:partidas` e abra
