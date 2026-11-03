@@ -50,6 +50,25 @@
   - **`animation.test.tsx`** usa a sonda `installFlashProbe` (`test/ui/anim-harness.tsx`): as cenas do Reflect e da Ressurreição seguem com o painel de reserva nesse arquivo;
   - uma marca que dura menos de meio segundo escapa do `toHaveCount` do Playwright: quem procura é a própria página, a cada quadro (`e2e/scenes.spec.ts`).
 
+## Bloco E (sessão paralela)
+
+> Seção da sessão do bloco E (a regra do ponto 16), no worktree `.claude/worktrees/ressurreicao-quadra-f59247`, branch
+> `claude/ressurreicao-quadra-f59247`, saída de `d35a241` (`feat/playtest-spec`). O "Agora" acima é da outra sessão (o bloco A).
+
+- **Feito (2026-11-03):**
+  - a regra escrita na spec das regras (`2026-10-15-jogo-coringa-regras-motor-design.md`): §1.4 passo 7, §1.8 "Ressurreição no
+    instante da quadra", §1.12 (o prazo da janela, a definir), §1.14, §2.3 a §2.7 (a fase `RESURRECTION`, `RESURRECT` e `PASS` nela, a
+    troca saindo como no Roubo, o campo `resurrectOnQuad`);
+  - o plano, **esperando o autor:** `docs/superpowers/plans/2026-11-03-ressurreicao-quadra.md` (9 tarefas, as escolhas minhas e uma
+    pergunta: o prazo online da janela, 15 s recomendado).
+- **Achado que decidiu a chave na config:** as quatro fixtures do E2E têm quadra na revelação (`absolutos` no passo 24, `especiais` no
+  49, `exodia-devastacao` no 25, `reflect` no 142). Sem `resurrectOnQuad` (ausente = a regra de antes), os replays delas divergiriam.
+- **Próximo passo exato:** o autor aprova o plano (e responde ao prazo) → registrar no `decisoes.md` → executar a Tarefa 1 com teste
+  primeiro. Nenhum código do jogo mudou ainda.
+- **Convivência:** dos arquivos do bloco A, o plano só toca em `packages/web/src/model/copy.ts` (o `CLOCK_START_TEXT` e a linha da
+  Ressurreição no resumo das regras); os textos novos vão para `model/resurrection-copy.ts`. Antes de mesclar na `main`, mesclar a
+  `main` aqui. O `STATE_SCHEMA` (5) e o `RULES_VERSION` (5) sobem nesta branch, uma vez cada.
+
 ## O plano da fatia 5, em resumo
 
 O mapa que estava aqui virou o plano (`docs/superpowers/plans/2026-11-02-direcao-visual-fatia-5.md`), **aprovado** em 2026-11-02 (`decisoes.md` 2026-11-02 (9)). Em nove tarefas:

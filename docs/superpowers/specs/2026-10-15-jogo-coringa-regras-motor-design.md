@@ -95,7 +95,9 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
 5. Especiais **não** podem ser jogados na rodada de Equipar **[O]**.
 6. **Monte vazio [O]:** quando o monte acaba (inclusive no meio de uma distribuição), o **cemitério inteiro é embaralhado e vira o novo monte**, e a distribuição continua.
    - **A compra nunca para [I]:** numéricas nunca ficam na mão e o campo comporta no máximo 4 × 8 = 32 delas; logo, pelo menos 72 − 32 = **40 cartas** estão sempre no monte ou no cemitério — mais que as 8 de uma distribuição. A config é validada para manter essa garantia (§2.7).
-7. Após a revelação, verificam-se as quadras (Fallen is Back, §1.8).
+7. Após a revelação, verificam-se as quadras (Fallen is Back, §1.8). **Janela da Ressurreição [autor, 2026-11-03 (4), ponto 16 do
+   playtest]:** quem formou quadra nesta revelação pode usar a Ressurreição logo ali, antes da rodada seguinte (antes da escolha da
+   ordem do Ataque), conforme a §1.8.
 
 ### 1.5 Rodada de Ataque
 
@@ -217,9 +219,43 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
 **Fallen is Back [O, simplificado]**
 - **Quadra:** 4 ou mais numéricas **do mesmo valor na mesma fileira ao mesmo tempo** — não precisam estar seguidas **[I]** (sem organização, "seguidas" seria quase impossível).
 - **Bônus [O]:** enquanto a quadra existir, a fileira soma **+ valor da carta** antes do multiplicador **[I]** (quadra de 10 → +10). Cada quadra dá bônus uma única vez, mesmo com 5+ cartas iguais. Com o limite de 8 cartas (sub-projeto 5) cabem duas quadras de valores diferentes na mesma fileira, e cada uma conta separadamente: o bônus soma as duas e cada uma dá a sua Ressurreição. Oito cartas iguais continuam sendo uma quadra só.
-- **Ressurreição [M]:** ao formar uma quadra, o jogador ganha **1 Ressurreição**: na fase principal de um turno seu, pega **1 carta numérica** do cemitério **[O do autor: só numéricas]** e a coloca no **fim de uma fileira à escolha** (que tenha espaço).
+- **Ressurreição [M]:** ao formar uma quadra, o jogador ganha **1 Ressurreição**: pega **1 carta numérica** do cemitério **[O do autor: só numéricas]** e a coloca no **fim de uma fileira à escolha**. Vale na fase principal de um turno seu e, para a quadra da revelação do Equipar, na janela logo depois dela (abaixo).
   - Validade: enquanto a quadra existir, com **garantia mínima de 3 rodadas** após a formação **[O]**.
   - Uso único por quadra. Se a quadra se desfizer e se formar de novo depois, gera nova Ressurreição **[I]**.
+  - Com várias Ressurreições válidas, a usada é a mais antiga (a primeira ganha; o motor sempre fez assim).
+
+**Ressurreição no instante da quadra [autor, 2026-11-03 (4), ponto 16 do playtest; substitui "na fase principal, numa fileira que tenha espaço"]**
+
+O texto dele: "ao fazer a quadra o usuário deve ter opção de usar ressurreição antes do ataque, se as fileiras estiverem cheias, a
+última carta vai para o cemitério, desde que a última carta não seja uma carta da quadra formada, daí não é possível descarta-la". Na
+pergunta de seguimento, ele escolheu que a troca vale **também** na Ressurreição usada depois, na fase principal. As leituras **[I]**
+estão no `docs/memoria/decisoes.md` 2026-11-03 (4) e na spec do playtest (`2026-11-03-playtest-design.md` §7.2).
+
+- **A janela:** depois da revelação do Equipar (§1.4 passo 7), quem formou quadra **nesta** revelação ganha uma janela para usar a
+  Ressurreição antes da rodada seguinte **[I]** (com o ciclo da §1.3, é antes da escolha da ordem do Ataque; depois do 1º Equipar, que é
+  seguido de outro Equipar, a janela abre do mesmo jeito). Na janela, a jogada é a Ressurreição, com qualquer uma das que ele tem válidas
+  **[I]**, ou passar.
+  - **Opcional:** quem passa guarda a Ressurreição, que segue valendo como acima (fase principal, enquanto a quadra existir, com a
+    garantia de 3 rodadas).
+  - **Iniciativa:** com os dois formando quadra na mesma revelação, quem tem a iniciativa decide primeiro, e o outro decide vendo a
+    jogada dele **[I]**.
+  - **Em cadeia [I]:** a ressuscitada que forma outra quadra dá outra Ressurreição, que pode ser usada na mesma janela. O jogador fica na
+    janela até passar ou até não ter mais Ressurreição que possa usar.
+  - **Só abre com jogada [I]:** quem formou quadra mas não pode ressuscitar (sem numérica no cemitério, ou com as duas fileiras
+    bloqueadas pela proteção, abaixo) não ganha janela. Ao contrário da janela de reação (§1.7), aqui tudo o que decide é público
+    (cemitério, fileiras, quadras, Ressurreições válidas): pular não revela nada.
+  - **A janela é da rodada de Equipar:** as especiais da mão não se jogam nela (§1.4 passo 5).
+- **As duas fileiras cheias [I]** (como na troca do Equipar, §1.4): a ressuscitada entra no lugar da **última** carta da fileira
+  escolhida, e essa vai ao cemitério. Com vaga numa fileira, a carta entra no fim da que tem vaga, como antes (a fileira cheia não
+  aceita). Vale em toda Ressurreição, na janela e na fase principal.
+  - **A proteção da quadra:** a última carta que é da quadra não sai. "Da quadra" é toda numérica da fileira com o valor de uma quadra
+    que está nela (com 5 iguais, as 5), não só a que acabou de se formar: a troca nunca desfaz uma quadra **[I]**. Se a última de uma
+    fileira é da quadra, a ressuscitada só pode ir para a outra; se as duas são, a Ressurreição não pode ser usada agora e fica guardada.
+  - **A carta que sai** não pode ser a ressuscitada na mesma jogada: a ressuscitada sai do cemitério antes da troca **[I]**.
+  - **A carta que sai cura** se era da Defesa e a cura passiva está ligada (2 K na Guarda): é a regra geral da cura passiva, que a troca
+    do Equipar e o Roubo já seguem **[I]**.
+  - **Sob Defesa Absoluta [I]:** a troca na própria Defesa vale, como a troca do Equipar e o Roubo (a proteção da Defesa Absoluta é
+    contra o oponente: o golpe, a Armadilha e o Sacrifício).
 
 **Defesa Absoluta — 4 Q nos Buffs de Defesa**
 - Ativa ao colocar o 4º Q. Dura **até o oponente atacar de fato**: acaba no fim do turno em que ele ataca, e um turno dele sem
@@ -283,6 +319,7 @@ DEF = (soma(Defesa do defensor) + bônus) × (1 + nQ)
 | Momento | Tempo | Se estourar |
 |---|---|---|
 | Equipar (simultâneo) | 40 s | cada numérica restante vai para a fileira com menos cartas (empate → Defesa **[I]**); ambas cheias → cemitério |
+| Janela da Ressurreição (ponto 16) | a definir pelo autor (proposta: 15 s, por jogador) | passa e guarda a Ressurreição |
 | Escolha da ordem (iniciativa) | 10 s | ataca primeiro |
 | Turno de ataque | 30 s | declara o ataque sem jogar mais especiais (ou passa, se Ataque vazio) |
 | Janela de reação | 8 s (mínimo 2 s) | passa |
@@ -311,7 +348,7 @@ DEF = (soma(Defesa do defensor) + bônus) × (1 + nQ)
 | A | elimina um especial | armadilha: também como reação a ataque ou jogada de K |
 | Sacrifício | — | J/Q da mão abate J/Q do oponente (só no seu turno) |
 | Reflect | "em aprovação" | só como reação a um golpe; quebra Q e K de quem é refletido; Reflect contra Reflect anula os dois |
-| Fallen is Back | qualquer carta do cemitério | só numéricas; "juntas" = mesma fileira |
+| Fallen is Back | qualquer carta do cemitério | só numéricas; "juntas" = mesma fileira; usada já na revelação do Equipar, e com as fileiras cheias troca a última carta, salvo a da quadra (ponto 16) |
 | Absolutos | sem custo definido | consomem 1 Q / 1 J ao terminar |
 | Exódia | instantânea | instantânea após janela de reação (A) |
 | Fim do monte | — | cemitério embaralhado vira novo monte; a compra nunca para |
@@ -348,6 +385,8 @@ legalActions(view: PlayerView): Action[]
 - **Cartas** têm id único (ex.: `b1-copas-7`, `selvagem-1`), tipo e valor/naipe. Um Coringa Selvagem em campo guarda o papel assumido (J ou Q).
 - **Fases** (máquina de estados explícita):
   - `EQUIP` — aguardando as submissões dos dois jogadores;
+  - `RESURRECTION(jogador, próximo?)` — a janela da Ressurreição depois da revelação (§1.8, ponto 16; só com `resurrectOnQuad`): decide
+    `jogador`; `próximo` é o outro, se também formou quadra na revelação e ainda pode ressuscitar quando a vez dele chegar;
   - `ORDER_CHOICE(jogador)` — quem tem a iniciativa escolhe a ordem (só com `initiativeChoice`);
   - `ATTACK_MAIN(jogador)` — fase principal do turno;
   - `REACTION(respondente, gatilho, devastação?)` — gatilho: `ATTACK` | `K_PLAYED` | `DEVASTATION` | `REFLECT_PLAYED` (a resposta de quem foi refletido); a Devastação em curso vai junto na janela dela e na resposta ao Reflect que a devolve;
@@ -367,11 +406,11 @@ legalActions(view: PlayerView): Action[]
 | `SACRIFICE { cardId, targetId }` | `ATTACK_MAIN` |
 | `REFLECT { kId, jId, qId }` | `REACTION` (gatilho ATTACK ou DEVASTATION) |
 | `CANCEL_REFLECT { kId, jId, qId }` (da mão; Reflect contra Reflect) | `REACTION` (gatilho REFLECT_PLAYED) |
-| `RESURRECT { cardId, row }` | `ATTACK_MAIN` |
+| `RESURRECT { cardId, row }` — com as duas fileiras cheias (e `resurrectOnQuad`), troca a última de `row`, que vai ao cemitério; a fileira cheia com vaga na outra recusa (`ROW_FULL`), e a última que é da quadra também (`QUAD_PROTECTED`) | `ATTACK_MAIN`, `RESURRECTION` |
 | `STEAL { cardId, targetId, row }` — o Ás (ou Selvagem) da mão, a numérica do oponente e a fileira do ladrão | `ATTACK_MAIN` |
 | `DEVASTATE { kId, aId, xId, row }` — `row` é a fileira **do oponente**; `xId` é o J (`ATK`) ou o Q (`DEF`) | `ATTACK_MAIN` |
 | `DECLARE_ATTACK` / `END_TURN` (Ataque vazio) | `ATTACK_MAIN` |
-| `PASS` | `REACTION` |
+| `PASS` | `REACTION`, `RESURRECTION` (guarda a Ressurreição) |
 | `TIMEOUT` (`system`) | qualquer fase com prazo |
 | `FORFEIT` (`system`) | qualquer fase |
 
@@ -382,7 +421,7 @@ legalActions(view: PlayerView): Action[]
 A união `GameEvent` de `types.ts`, base para animações e histórico. Cada ação devolve os seus, em ordem. Um teste do motor (`test/spec-events.test.ts`) confere que esta lista e a união têm os mesmos nomes.
 
 - **Rodada e Equipar:** `RoundStarted`, `DeckReshuffled`, `CardsDealt`, `HandLimitPenalty` (o limite de especiais, E3), `EquipSubmitted`, `CardsPlaced` (a carta que troca a última da fileira leva o `replaced`), `OrderChosen`, `TurnStarted`.
-- **Fase principal:** `BuffPlayed` (com o papel, `as`), `GuardPlayed`, `TrapUsed` e `Sacrificed` (com `as` quando a carta é um Selvagem), `Resurrected`.
+- **Fase principal:** `BuffPlayed` (com o papel, `as`), `GuardPlayed`, `TrapUsed` e `Sacrificed` (com `as` quando a carta é um Selvagem), `Resurrected`. A Ressurreição com troca (§1.8, ponto 16) sai como no Roubo: `CardsRemovedFromRow` (a última, que vai ao cemitério), o `Healed` dela se curar, e então `Resurrected`. A janela da Ressurreição não tem evento próprio: é a fase.
 - **Janela de reação:** `ReactionWindowOpened`, `ReactionWindowClosed`, `ReflectPlayed` (com o golpe que responde, `against`), `ReflectCanceled` (Reflect contra Reflect).
 - **Roubo e cura (E3):** `CardStolen` (a carta, as duas fileiras e o Ás gasto), `StealDamage` (o valor seco, o dano que saiu e se um K anulou), `Healed` (quanto entrou, de onde e a carta que curou).
 - **Devastação (F3):** `DevastationCast` (as 3 cartas, a fileira e o alvo), `RowDevastated` (quem perdeu a fileira, as cartas e se foi refletida), `DevastationCanceled` (Reflect contra Reflect, ou o Reflect contra quem está sob Defesa Absoluta).
@@ -407,9 +446,15 @@ RulesConfig {
   initiativeChoice: true,
   wildJokers: true,
   defenseHealGuard: 2, // cura passiva (E3): K na Guarda que a ligam; sem o campo (replays antigos), nada cura
-  specialLimit: { max: 4, penalty: 'BURN' } // limite de especiais (E3); CHOOSE e FEWER também valem; sem o campo, nada limita
+  specialLimit: { max: 4, penalty: 'BURN' }, // limite de especiais (E3); CHOOSE e FEWER também valem; sem o campo, nada limita
+  resurrectOnQuad: true // a Ressurreição no instante da quadra (ponto 16): a janela e a troca; sem o campo, a regra de antes
 }
 ```
+
+- **`resurrectOnQuad` (ponto 16, 2026-11-03):** liga a janela da Ressurreição depois da revelação e a troca da última carta com as duas
+  fileiras cheias (§1.8). Sem o campo, a Ressurreição de antes (só na fase principal, só em fileira com vaga). Ele existe pelos replays
+  guardados: as fixtures das cenas do E2E e as partidas no navegador do autor têm quadras na revelação, e sem ele divergiriam no passo
+  seguinte a cada uma delas (a fase nova pediria uma jogada que o replay não tem). A calibração também compara a regra ligada e desligada.
 
 - **Validação em `createGame`:** rejeita configs que quebram a garantia de compra (§1.4): `4 × rowLimit ≤ totalNuméricas − 2 × cardsPerEquip` (com o baralho padrão: `rowLimit ≤ 16`).
 - O total de cartas do monte é **derivado da config** (98, ou 100 com `wildJokers`).
