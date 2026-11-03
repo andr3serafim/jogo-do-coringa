@@ -14,6 +14,7 @@ import {
   SCENE_INVERT_LEAD_MS,
   buildTimeline,
   luminanceSwitches,
+  quietOnly,
   timelineMs,
   type Beat,
   type SceneKind,
@@ -196,6 +197,19 @@ describe('mapeamento evento → batida (spec §4.2)', () => {
       expect(beat!.invert !== null).toBe(kind === 'scene' && !NO_INVERT.has(scene!));
     });
   }
+
+  it('quietOnly: só eventos de batida quieta, e ao menos um (decisoes.md 2026-11-03 (1), ponto 17)', () => {
+    const quiet = SAMPLES.filter((s) => s.kind === 'quiet').map((s) => s.event);
+    expect(quiet.length).toBeGreaterThan(0);
+    for (const event of quiet) expect(quietOnly([event])).toBe(true);
+    for (const { event } of SAMPLES.filter((s) => s.kind !== 'quiet')) expect(quietOnly([event])).toBe(false);
+    expect(quietOnly(quiet)).toBe(true);
+    // A cura que não curou nada passa quieta; a que curou tem número.
+    expect(quietOnly([{ type: 'Healed', player: 'p1', amount: 0, source: 'DEFENSE', card: num('n9') }])).toBe(true);
+    expect(quietOnly([{ type: 'EquipSubmitted', player: 'p1' }, { type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 9, defense: 3, damage: 6 }])).toBe(false);
+    // Sem evento nenhum não é quieto: é o começo de uma partida (a revanche), que troca a mesa inteira.
+    expect(quietOnly([])).toBe(false);
+  });
 });
 
 describe('as cenas raras (U3 do sub-projeto 5)', () => {

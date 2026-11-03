@@ -172,7 +172,8 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
   const castNow = phaseNow?.kind === 'REACTION' ? (phaseNow.devastation ?? null) : null;
   const [lastCast, setLastCast] = useState<DevastationState | null>(castNow);
   if (castNow !== null && castNow !== lastCast) setLastCast(castNow);
-  const seq = state?.seq ?? 0;
+  // O `seq` da linha do tempo que toca, não o do último `state`: o quieto que ela absorveu não muda a transição de layout das cartas.
+  const seq = run.state?.seq ?? 0;
   const jump = state?.resync === true;
   const remounted = useMemo(() => ({ serial: released.serial, ids: released.batch }), [released]);
 
