@@ -1,20 +1,20 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-03**, com o ajuste do ponto 18 na `main`. Antes de seguir,
-> confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
+> Sobrescrito a cada atualização. **Última: 2026-11-03**, com o bloco de desenho do playtest em curso na branch `feat/desenho-playtest`, o
+> autor fora por algumas horas. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `main`, no checkout principal, sem trabalho em curso. A branch `feat/ponto-18-ajuste` foi mesclada por fast-forward, com as duas CI verdes no último commit (`f01885a`, run `41580088700`).
-- **Em outra sessão, aberta pelo autor:** "Online: Equipar vazio não pode cortar o golpe final", no worktree dela: o conserto no online do mesmo defeito que `09fc360` consertou no treino (o servidor aplica o Equipar vazio logo depois do golpe, e o segundo `state` corta as batidas). Confira a branch dela antes de mexer em `packages/server` ou no `useBeatPlayer`.
-- **Feito por último** (`diario.md` 2026-11-03 (1) e (2); os pedidos em `decisoes.md` 2026-11-03 (1) e (2)):
-  - **ponto 18, ajustado:** o total que sobe fica em ouro, com o contorno de tinta mais fino; o que desce encolhe na cor de sempre (o vermelho foi recusado);
-  - **ponto 17, fechado:** era a Armadilha do Bot desarmando o Ataque Absoluto (engano do autor). De quebra, ficou consertado no treino o golpe que fecha a rodada sumindo quando o Equipar vazio saía colado a ele (`09fc360`).
+- **Branch:** `feat/desenho-playtest`, no checkout principal, a partir da `main` (`5b5b34f`). Só documentos e o protótipo: nenhum código do jogo muda neste bloco.
+- **Em curso:** o bloco de desenho dos pontos 1, 2, 5, 6, 9, 10, 11, 13, 14, 15 e 16 do playtest, adiantado sem o autor (`decisoes.md` 2026-11-03 (3)): levantar o código de cada ponto, medir no simulador o que a regra do 16 mudaria, montar o protótipo clicável e escrever um **rascunho** do desenho, com as perguntas dele juntas no fim. Nada aprovado.
+- **Em outra sessão, aberta pelo autor:** "Online: Equipar vazio não pode cortar o golpe final", na branch `claude/dreamy-engelbart-4a4876`: o conserto no online do defeito que `09fc360` consertou no treino. Confira a branch dela antes de mexer em `packages/server` ou no `useBeatPlayer`.
+- **Feito por último** (`diario.md` 2026-11-03 (1) e (2)): o ponto 18 ajustado (ouro com contorno fino na subida; a descida só encolhe, na cor de sempre) e o 17 fechado (era a Armadilha desarmando o Ataque Absoluto).
 - **Antes, na `main`:** a fatia 5 do sub-projeto 6 e os pontos diretos 3, 4, 7, 8 e 12 (`diario.md` 2026-11-02 (8)). O autor jogou e mandou os pontos 16 a 18; ele não disse que aprova a fatia 5.
 - **Ajuste depois da aprovação da 4b:** as cartas da quadra perderam o losango de ouro do canto (`decisoes.md` 2026-11-02 (6)); o fundo dourado, a moldura, o brilho e o selo ficam. Não mude isso de volta seguindo a letra antiga do §6.
 - **Próximo passo exato:**
-  1. **Os pontos de desenho do playtest:** 1, 2, 5, 6, 9, 10, 11, 13 e 14 (`decisoes.md` 2026-11-02 (9)), o 15 (2026-11-02 (10)) e o 16 (2026-11-03 (1), a Ressurreição no instante da quadra, que muda regra do motor). Brainstorming (`superpowers:brainstorming`) e protótipo para ele ver, antes de spec e plano. Nenhum foi desenhado nem aprovado. Primeiro combinar com ele a ordem (são projetos independentes); o 16 começa pelas perguntas de regra listadas na leitura dele.
-  2. O deploy e o playtest online são dele (`notas/playtest.md`).
+  1. Terminar o bloco de desenho na ordem: o levantamento, a medição do 16, o protótipo (`docs/superpowers/specs/2026-11-03-playtest-prototipo.html`), as fotos dele e o rascunho (`docs/superpowers/specs/2026-11-03-playtest-design.md`). Commitar cada um e subir a branch.
+  2. Entregar ao autor as perguntas juntas, a mais importante em cima. Só depois das respostas: a spec final e o plano (`superpowers:writing-plans`).
+  3. O deploy e o playtest online são dele (`notas/playtest.md`).
 - **Para medir uma cena com a 8787 ocupada:** `MEDIR_PORTA=8797` no `medir-cena.ts`. Para o E2E inteiro numa porta livre, a receita está no `diario.md` 2026-11-02 (8) (uma configuração que importa o `playwright.config.ts` e troca a porta).
 - **Para ver a Ressurreição sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave `coringa:partidas` e abra `/partidas/exodia-devastacao`. "Próximo
   passo" na rodada 7, passo 27, mostra a sua, com a quadra; na rodada 23, passo 107, a do Bot, com a quadra na outra fileira; na rodada 37, passo 182, a do Bot sem quadra.

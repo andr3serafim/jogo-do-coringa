@@ -6,6 +6,22 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-03 (3): seguir no desenho sozinho por algumas horas
+
+Perguntado se o bloco de desenho podia começar, combinando a ordem dos pontos com ele:
+
+> sim, vamos. Irei me abster por algumas horas portanto peço-lhe que faça e adiante o máximo que puder tudo que não necessita de minha aprovação. reserve para o final as questões que dependem de mim para que assim que eu retornar, responda e dê prosseguimento. autorizo a você prosseguir mantendo o altíssimo nível para este jogo que será vencedor de jogo indie haha.
+
+**Leitura:**
+- **[I]** O que não precisa dele: levantar o código de cada ponto, medir no simulador o que a regra nova (ponto 16) mudaria, montar o
+  protótipo clicável dos pontos visuais e escrever um **rascunho** do desenho com as recomendações. Tudo marcado como rascunho: nada
+  disso está aprovado, e nenhum código do jogo (`packages/*/src`) muda antes da aprovação dele (regra 3 da memória; o portão do
+  brainstorming).
+- **[I]** A ordem dos pontos, as escolhas de regra do 16 e as escolhas de gosto entre as variantes do protótipo são dele: ficam numa
+  lista única no fim, a mais importante em cima.
+
+---
+
 ## 2026-11-03 (2): o ponto 17 era a Armadilha; o 18 sem o vermelho
 
 Perguntado se uma Armadilha do Bot tinha quebrado um J dele antes do golpe sem cena:
