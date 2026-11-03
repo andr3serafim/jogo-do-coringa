@@ -5,6 +5,21 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-03 (2): o ponto 18 sem o vermelho; o 17 fechado
+
+- **Pedido do autor** (`decisoes.md` 2026-11-03 (2)): o 17 foi a Armadilha (engano dele), ignorar; no 18, a descida na cor padrão,
+  mantendo a animação, e o contorno do ouro mais fino.
+- **Feito** (branch `feat/ponto-18-ajuste`, a partir da `main` `6165d57`):
+  - `styles.css`: só `.total-fileira[data-subiu]` pinta (ouro, contorno de 2,5 px com `paint-order`, ou seja ~1,25 px por fora, e sombra
+    de 1 px; antes 4 px e 2 px). A regra do `[data-desceu]` saiu; o atributo fica como marca do encolher (os testes o usam);
+  - `playtest-direct.test.tsx`: os testes da descida falam da marca, e um novo lê a folha e confere que só a subida tem cor;
+  - foto no navegador (replay da fixture `absolutos`, rodada 5, atributos postos à mão): o 16 em ouro com o contorno fino, o 74 na cor de sempre.
+- **Ruling:** a sombra de carimbo também afinou (2 → 1 px), porque ela soma com o contorno na espessura que ele viu.
+- **Fica:** o conserto do Equipar vazio colado ao golpe no treino (`09fc360`), que é defeito de verdade; o do online está na sessão
+  que o autor abriu ("Online: Equipar vazio não pode cortar o golpe final").
+
+---
+
 ## 2026-11-03 (1): os pontos 16, 17 e 18 do playtest
 
 - **Pedido do autor** (`decisoes.md` 2026-11-03 (1)): "ok, prossiga", com três pontos novos. O 16 muda regra (desenho); o 17 é defeito; o 18 é direto.
