@@ -186,6 +186,38 @@
 /* fim da soltura do arrasto */
 
 /*
+ * O total da fileira que muda (decisoes.md 2026-11-03 (1), ponto 18): ouro quando sobe, vermelho quando desce, os dois com contorno de
+ * tinta e uma sombra de carimbo embaixo. O contorno fica por fora do número (`paint-order`), para não comer o desenho dele, e em repouso
+ * é transparente. A cor entra de uma vez e sai esmaecendo; com movimento reduzido também (é cor, não movimento). A fonte continua a de
+ * texto, sem textura (spec §10.7).
+ */
+@layer components {
+  .total-fileira {
+    -webkit-text-stroke: 4px transparent;
+    paint-order: stroke fill;
+    transition:
+      color 280ms ease-out,
+      -webkit-text-stroke-color 280ms ease-out,
+      text-shadow 280ms ease-out;
+  }
+
+  .total-fileira[data-subiu],
+  .total-fileira[data-desceu] {
+    -webkit-text-stroke-color: var(--color-tinta);
+    text-shadow: 0 2px 0 var(--color-tinta);
+    transition: none;
+  }
+
+  .total-fileira[data-subiu] {
+    color: var(--color-ouro);
+  }
+
+  .total-fileira[data-desceu] {
+    color: var(--color-vermelho);
+  }
+}
+
+/*
  * O destaque da dica do tutorial (spec do polimento, §5): a zona de que a dica fala (`data-dica`) ganha um contorno PARADO, ouro com
  * borda de tinta (tinta por fora e por dentro, para o ouro ler sobre a capa rosa, a verde e a tinta). Sem animação nem transição, e
  * igual com movimento reduzido (spec §10.4: nada de piscar). É uma camada de `::after` que não pega o mouse, e não o `outline` ou o

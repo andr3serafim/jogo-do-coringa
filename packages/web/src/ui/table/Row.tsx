@@ -56,8 +56,11 @@ interface Conta {
   multiplier: number;
 }
 
-/** Quanto o total cresce quando sobe no pouso de uma carta (decisoes.md 2026-11-02 (9), ponto 12). */
-const RISE = { scale: '1.3', ms: 320 } as const;
+/**
+ * O total que muda: cresce quando sobe no pouso de uma carta (decisoes.md 2026-11-02 (9), ponto 12) e encolhe quando desce; a cor (ouro
+ * na subida, vermelho na descida, as duas com contorno de tinta: 2026-11-03 (1), ponto 18) fica `holdMs` depois da última mudança.
+ */
+export const TREND = { rise: '1.3', fall: '0.85', popMs: 320, holdMs: 900 } as const;
 
 /**
  * As cartas que ainda vão pousar (sub-projeto 6 §8): enquanto a carta cai ou voa até a fileira (ou até os bônus que a multiplicam), o total
@@ -90,26 +93,48 @@ function useLandingHold(ids: readonly string[]): { pending: ReadonlySet<string>;
   return { pending, landed: landed.size };
 }
 
-/** O total cresce e assenta, em ouro, quando sobe porque uma carta pousou (com movimento reduzido, só a cor). */
-function useRise(total: number, landed: number, reduced: boolean) {
+/**
+ * O total que muda com a mesa tocando: sobe quando uma carta pousa (`total` e `landed`), desce quando o número mostrado cai (o golpe que
+ * conta, a carta que sai). Cresce ou encolhe uma vez e fica na cor até `holdMs` depois da última mudança: a contagem do golpe desce o
+ * número a cada quadro, e o encolher não recomeça a cada um. Com movimento reduzido, só a cor.
+ */
+function useTrend(total: number, shown: number, landed: number, busy: boolean, reduced: boolean) {
   const ref = useRef<HTMLSpanElement>(null);
-  const last = useRef(total);
+  const last = useRef({ total, shown });
+  const trend = useRef<{ dir: 'subiu' | 'desceu'; timer: number; pop: Animation | undefined } | null>(null);
   useEffect(() => {
     const before = last.current;
-    last.current = total;
+    last.current = { total, shown };
     const el = ref.current;
-    if (el === null || landed === 0 || total <= before) return;
-    const pop = reduced
-      ? undefined
-      : el.animate?.([{ scale: '1' }, { scale: RISE.scale, offset: 0.35 }, { scale: '1' }], { duration: RISE.ms, easing: 'ease-out' });
-    el.setAttribute('data-subiu', '');
-    const timer = window.setTimeout(() => el.removeAttribute('data-subiu'), RISE.ms);
-    return () => {
-      pop?.cancel();
-      window.clearTimeout(timer);
-      el.removeAttribute('data-subiu');
-    };
-  }, [total, landed, reduced]);
+    if (el === null) return;
+    const dir = landed > 0 && total > before.total ? 'subiu' : busy && shown < before.shown ? 'desceu' : null;
+    if (dir === null) return;
+    const now = trend.current;
+    if (now !== null) window.clearTimeout(now.timer);
+    let pop = now?.dir === dir ? now.pop : undefined;
+    if (now?.dir !== dir) {
+      now?.pop?.cancel();
+      if (now !== null) el.removeAttribute(`data-${now.dir}`);
+      el.setAttribute(`data-${dir}`, '');
+      const scale = dir === 'subiu' ? TREND.rise : TREND.fall;
+      pop = reduced ? undefined : el.animate?.([{ scale: '1' }, { scale, offset: 0.35 }, { scale: '1' }], { duration: TREND.popMs, easing: 'ease-out' });
+    }
+    const timer = window.setTimeout(() => {
+      el.removeAttribute(`data-${dir}`);
+      trend.current = null;
+    }, TREND.holdMs);
+    trend.current = { dir, timer, pop };
+  }, [total, shown, landed, busy, reduced]);
+  // Ao desmontar, nada fica no ar.
+  useEffect(
+    () => () => {
+      const now = trend.current;
+      if (now === null) return;
+      window.clearTimeout(now.timer);
+      now.pop?.cancel();
+    },
+    [],
+  );
   return ref;
 }
 
@@ -138,10 +163,10 @@ export function Row({ label, kind, side, limit, aim, droppable = false, targets 
   const total = kind === 'ATK' ? attackPower(counted) : defensePower(counted);
   const base = kind === 'ATK' ? attackBase(counted) : defenseBase(counted);
   const quads = quadValues(kind === 'ATK' ? counted.attackRow : counted.defenseRow);
-  const totalRef = useRise(total, hold.landed, anim.reduced);
   const vacancies = Math.max(0, limit - cards.length);
   // O total mostrado espera a batida do dano e conta até o valor do motor.
   const shownTotal = useCountedNumber(total);
+  const totalRef = useTrend(total, shownTotal, hold.landed, anim.busy, anim.reduced);
   const conta = useShownConta(base, total);
   const key = rowKey(side.id, kind);
   const lit = anim.fx.rows.has(key);
@@ -194,7 +219,7 @@ export function Row({ label, kind, side, limit, aim, droppable = false, targets 
           <span
             ref={totalRef}
             data-total
-            className="font-texto text-[22px] font-extrabold leading-[1.1] tabular-nums data-subiu:text-ouro pc:text-3xl"
+            className="total-fileira font-texto text-[22px] font-extrabold leading-[1.1] tabular-nums pc:text-3xl"
           >
             {shownTotal}
           </span>

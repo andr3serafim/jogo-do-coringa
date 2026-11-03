@@ -1,11 +1,13 @@
 // Os pontos diretos do playtest de 2026-11-02 (decisoes.md 2026-11-02 (9)): sem seleção de texto na mesa, sem a "Ameaça de X", sem a
-// ordem automática, "Bônus" no lugar de "Buff" e o total da fileira que cresce quando sobe.
+// ordem automática, "Bônus" no lugar de "Buff" e o total da fileira que cresce quando sobe; e o ponto 18 (2026-11-03 (1)): o total que
+// sobe fica em ouro e o que desce em vermelho, os dois com contorno de tinta.
 import type { GameEvent, NumCard, SpecialCard } from '@coringa/engine';
-import { screen, within } from '@testing-library/react';
+import { act, screen, within } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TABLE_MOTION } from '../../src/model/table-motion.ts';
+import { TREND } from '../../src/ui/table/Row.tsx';
 import { advance, cleanup, emit, MINE, mount, stage, THEIRS, TURN } from './anim-harness.tsx';
 import type { ViewSpec } from '../fixtures.ts';
 
@@ -125,6 +127,20 @@ describe('12. o total que sobe cresce no pouso', () => {
     expect(pops(total(m.container, 'p1:DEF'))).toHaveLength(0);
   });
 
+  it('18. o total que sobe fica em ouro (com contorno) até 900 ms depois do pouso', () => {
+    const m = mount(THEIRS);
+    emit(m, WITH_SIXTH, [PLACED]);
+    advance(TABLE_MOTION.dropMs);
+    const el = total(m.container, 'p1:ATK');
+    expect(el).toHaveClass('total-fileira');
+    expect(el).toHaveAttribute('data-subiu');
+    expect(el).not.toHaveAttribute('data-desceu');
+    advance(TREND.holdMs - 1);
+    expect(el).toHaveAttribute('data-subiu');
+    advance(1);
+    expect(el).not.toHaveAttribute('data-subiu');
+  });
+
   it('com movimento reduzido: o total troca no pouso, sem crescer', () => {
     const m = mount(THEIRS, { prefs: { reduceMotion: true } });
     const before = total(m.container, 'p1:ATK').textContent;
@@ -133,5 +149,65 @@ describe('12. o total que sobe cresce no pouso', () => {
     advance(TABLE_MOTION.dropMs);
     expect(total(m.container, 'p1:ATK').textContent).not.toBe(before);
     expect(pops(total(m.container, 'p1:ATK'))).toHaveLength(0);
+  });
+});
+
+describe('18. o total que desce fica vermelho, com contorno', () => {
+  const total = (container: HTMLElement, key: string) => container.querySelector(`[data-fileira="${key}"] [data-total]`)!;
+  const dips = (el: Element) => calls.filter((call) => call.el === el && call.frames.some((frame) => frame.scale === TREND.fall));
+  /** O golpe de Duda tira a carta da frente da sua Defesa: o total conta para baixo na batida do dano. */
+  const HIT: GameEvent[] = [
+    { type: 'AttackDeclared', player: 'p2' },
+    { type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 100, defense: 50, damage: 50 },
+  ];
+  const HIT_VIEW: ViewSpec = { ...THEIRS, self: { ...THEIRS.self, defenseRow: [6, 9, 5] } };
+
+  it('o golpe: vermelho enquanto conta, encolhe uma vez só, e a cor sai 900 ms depois da última mudança', () => {
+    const m = mount(THEIRS);
+    const before = Number(total(m.container, 'p1:DEF').textContent);
+    emit(m, HIT_VIEW, HIT);
+    const el = total(m.container, 'p1:DEF');
+    expect(el).not.toHaveAttribute('data-desceu');
+    // A batida do dano conta o número para baixo, quadro a quadro.
+    for (let i = 0; i < 40 && Number(el.textContent) === before; i++) advance(50);
+    expect(Number(el.textContent)).toBeLessThan(before);
+    expect(el).toHaveAttribute('data-desceu');
+    expect(el).not.toHaveAttribute('data-subiu');
+    advance(2_000);
+    expect(dips(el)).toHaveLength(1);
+    expect(el).not.toHaveAttribute('data-desceu');
+  });
+
+  it('a carta que sai sem golpe (a Armadilha num J seu) também desce o total em vermelho', () => {
+    const J: SpecialCard = { id: 'j-alvo', kind: 'J', suit: 'copas' };
+    const trap: SpecialCard = { id: 'a-bot', kind: 'A', suit: 'paus' };
+    const before: ViewSpec = { ...THEIRS, self: { ...THEIRS.self, attackBuffs: [J] } };
+    const m = mount(before);
+    emit(m, { ...before, self: { ...before.self, attackBuffs: [] }, graveyard: [3, 5, 8, J, trap] }, [
+      { type: 'TrapUsed', player: 'p2', card: trap, target: J, targetOwner: 'p1' },
+    ]);
+    expect(total(m.container, 'p1:ATK')).toHaveAttribute('data-desceu');
+  });
+
+  it('o pulo leva o total ao valor final sem pintar', () => {
+    const m = mount(THEIRS);
+    emit(m, HIT_VIEW, HIT);
+    act(() => stage(m.container).click());
+    const el = total(m.container, 'p1:DEF');
+    expect(el).not.toHaveAttribute('data-desceu');
+    expect(dips(el)).toHaveLength(0);
+  });
+
+  it('com movimento reduzido: só a cor, sem encolher', () => {
+    const J: SpecialCard = { id: 'j-alvo', kind: 'J', suit: 'copas' };
+    const trap: SpecialCard = { id: 'a-bot', kind: 'A', suit: 'paus' };
+    const before: ViewSpec = { ...THEIRS, self: { ...THEIRS.self, attackBuffs: [J] } };
+    const m = mount(before, { prefs: { reduceMotion: true } });
+    emit(m, { ...before, self: { ...before.self, attackBuffs: [] }, graveyard: [3, 5, 8, J, trap] }, [
+      { type: 'TrapUsed', player: 'p2', card: trap, target: J, targetOwner: 'p1' },
+    ]);
+    const el = total(m.container, 'p1:ATK');
+    expect(el).toHaveAttribute('data-desceu');
+    expect(dips(el)).toHaveLength(0);
   });
 });
