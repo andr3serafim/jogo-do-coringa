@@ -6,6 +6,32 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-03 (1): os pontos 16, 17 e 18 do playtest
+
+Depois da entrega da fatia 5 na `main` (`6759914`), que pedia que ele jogasse:
+
+> ok, prossiga.
+>
+> pontos novos para registrar:
+>
+> 16. no instante em que forma a quadra deve ser possível usar ressurreição, respeitando obviamente a iniciativa. se as fileiras estiverem cheias, a carta ressuscitada substitui a última da fileira (de ataque ou defesa).
+> 17. ataque absoluto não está exibindo a cinemática. revisar, corrigir e conferir.
+>
+> 18. melhoria: a cor do valor de ataque e defesa quando aumentados estão muito simples e devem ser visualmente melhor trabalhados, a cor quando sobe pode continuar sendo dourada com bordas escuras e quando desce deve ser vermelhas com bordas escuras.
+
+**Leitura:**
+- **[I]** "prossiga" é o próximo passo do `estado.md`: o desenho dos pontos que ficaram para depois da fatia 5, com protótipo. Ele não
+  disse que a fatia 5 está aprovada; ele jogou e mandou os pontos novos.
+- **Ponto 17** é defeito: entra direto, com teste e foto, antes do desenho.
+- **[I] Ponto 18** é direto, como o 12 de que ele nasce: o total que sobe fica dourado com contorno escuro, e o que desce fica vermelho
+  com contorno escuro. Ele só falou da cor; o tamanho que cresce na subida (ponto 12) fica.
+- **[I] Ponto 16 muda regra do motor** (hoje a Ressurreição só vale na fase principal de um turno seu, e só numa fileira com espaço:
+  spec das regras §1.8). Vai para o desenho, com perguntas antes da spec: em que momento do Equipar ela vale, o que "respeitando a
+  iniciativa" decide quando os dois formam quadra, o que acontece com a carta substituída, e se ela continua valendo depois, na fase
+  principal. Mudar a regra muda partidas de referência: sobe `RULES_VERSION` e remede o portão do Difícil.
+
+---
+
 ## 2026-11-02 (10): o ponto 15 do playtest
 
 Depois do corte pelo limite de uso, no meio da Task 9 da fatia 5:

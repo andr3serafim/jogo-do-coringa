@@ -1,26 +1,21 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-02**, com a fatia 5 na `main`, esperando o autor jogar. Antes de seguir, confira se não há
-> versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
+> Sobrescrito a cada atualização. **Última: 2026-11-03**, com os pontos 17 e 18 do playtest na branch `feat/playtest-pontos-17-18`. Antes
+> de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `main`, no checkout principal, sem trabalho em curso. A branch `feat/direcao-visual-fatia-5` foi mesclada por fast-forward, com as duas CI verdes no último commit de código (`15ddfeb`, run `41559998891`).
-- **Feito por último:** a **fatia 5 do sub-projeto 6** (a fluidez das jogadas comuns, com os sons) e os **pontos diretos do playtest** (3, 4, 7, 8 e 12). Plano em `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-5.md`; cada escolha no `diario.md` 2026-11-02 (8); medição em `notas/medicao-fatia-5.md`.
-- **Esperando o autor:** jogar a fatia 5 no treino. Com a aprovação dele, o sub-projeto 6 acaba (§8 e §15 da spec 6).
-- **O que ele precisa saber ao jogar:**
-  - **a carta jogada** recua, voa e assenta com um achatamento e poeira; a do Bot cai no destino na batida dela;
-  - **as cartas que saem** seguram o lugar até a batida delas (antes sumiam quando o passo chegava), e a que quebra (o K da Guarda, o alvo da Armadilha e do Sacrifício) racha e estoura em cacos de papel;
-  - **a compra** chega do monte em leque; **o total da fileira** espera a carta pousar e cresce;
-  - **os pontos dele:** a mesa não seleciona texto; sem a "Ameaça de Bot"; a ordem não sai sozinha; "Bônus" no lugar de "Buff";
-  - **E1:** o quadro da chegada caiu no ataque (de 167–200 para 100–134 ms com a CPU 4×). O resto do peso é o desenho do React com a mesa inteira e as projeções do Motion: não é local, e fica para ele decidir se vale mexer;
-  - **não conferido de verdade:** o som (só os instantes nos testes), o movimento reduzido no navegador e o painel do Equipar ao vivo com o leque (só testes de unidade; o replay usa outro painel). A revisão final foi de quem escreveu o código, como ele aprovou (E9);
-  - **adiado, menor:** a lista de timers da camada de efeitos (`FxLayer`) cresce durante a partida (são números, sem efeito visível).
+- **Branch:** `feat/playtest-pontos-17-18`, no checkout principal, a partir da `main` (`6759914`). Sobe para a CI e vai para a `main` por fast-forward com as duas CI verdes.
+- **Feito por último** (`diario.md` 2026-11-03 (1); o pedido em `decisoes.md` 2026-11-03 (1)):
+  - **ponto 18:** o total da fileira que sobe fica em ouro e o que desce fica vermelho, os dois com contorno de tinta e sombra de carimbo (`Row.tsx`, `useTrend`; `.total-fileira` no `styles.css`);
+  - **ponto 17 (a cena do Ataque Absoluto que não aparece): não reproduzido.** A cena aparece ao vivo e no replay, nos dois lados, também quando encerra a partida. O único caminho achado em que ela some: quem defende quebra um J com uma Armadilha na janela de reação, o ataque deixa de ser Absoluto, e a mesa não diz isso.
+- **Antes, na `main`:** a fatia 5 do sub-projeto 6 e os pontos diretos 3, 4, 7, 8 e 12 (`diario.md` 2026-11-02 (8)). O autor jogou e mandou os pontos 16 a 18; ele não disse que aprova a fatia 5.
 - **Ajuste depois da aprovação da 4b:** as cartas da quadra perderam o losango de ouro do canto (`decisoes.md` 2026-11-02 (6)); o fundo dourado, a moldura, o brilho e o selo ficam. Não mude isso de volta seguindo a letra antiga do §6.
 - **Próximo passo exato:**
-  1. Esperar o autor jogar a fatia 5. O que ele disser entra em `decisoes.md`, com o texto dele.
-  2. **Depois: os dez pontos de desenho do playtest** (1, 2, 5, 6, 9, 10, 11, 13 e 14, em `decisoes.md` 2026-11-02 (9), e o 15, a cena curta do golpe comum que encerra a partida, em 2026-11-02 (10)): brainstorming (`superpowers:brainstorming`) e protótipo para ele ver, antes de spec e plano. Nenhum foi desenhado nem aprovado. O ponto 1 (a jogada especial do Bot legível sem o histórico) pode trocar a queda simples da E3.
-  3. O deploy e o playtest online são dele (`notas/playtest.md`).
+  1. Subir a branch, esperar as duas CI e fazer o fast-forward na `main`.
+  2. **Perguntar ao autor sobre o ponto 17:** de quem era o ataque, se veio uma Armadilha antes, se o movimento reduzido estava ligado. Com um caso que falhe, consertar com teste; se for a Armadilha, o aviso de que o Ataque Absoluto desarmou entra com o ponto 1.
+  3. **Os pontos de desenho do playtest:** 1, 2, 5, 6, 9, 10, 11, 13 e 14 (`decisoes.md` 2026-11-02 (9)), o 15 (2026-11-02 (10)) e o 16 (2026-11-03 (1), a Ressurreição no instante da quadra, que muda regra do motor). Brainstorming (`superpowers:brainstorming`) e protótipo para ele ver, antes de spec e plano. Nenhum foi desenhado nem aprovado. O 16 começa pelas perguntas de regra listadas na leitura dele.
+  4. O deploy e o playtest online são dele (`notas/playtest.md`).
 - **Para medir uma cena com a 8787 ocupada:** `MEDIR_PORTA=8797` no `medir-cena.ts`. Para o E2E inteiro numa porta livre, a receita está no `diario.md` 2026-11-02 (8) (uma configuração que importa o `playwright.config.ts` e troca a porta).
 - **Para ver a Ressurreição sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave `coringa:partidas` e abra `/partidas/exodia-devastacao`. "Próximo
   passo" na rodada 7, passo 27, mostra a sua, com a quadra; na rodada 23, passo 107, a do Bot, com a quadra na outra fileira; na rodada 37, passo 182, a do Bot sem quadra.

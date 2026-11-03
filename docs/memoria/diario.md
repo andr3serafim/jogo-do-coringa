@@ -5,6 +5,40 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-03 (1): os pontos 16, 17 e 18 do playtest
+
+- **Pedido do autor** (`decisoes.md` 2026-11-03 (1)): "ok, prossiga", com três pontos novos. O 16 muda regra (desenho); o 17 é defeito; o 18 é direto.
+- **Feito:** a branch `feat/playtest-pontos-17-18`, a partir da `main` (`6759914`).
+- **Ponto 17 (a cena do Ataque Absoluto que não aparece): não reproduzido.**
+  - **Diagnóstico** (testes temporários, apagados; o código ficou na pasta de rascunho da sessão): 300 partidas de treino na `LocalRoom` de verdade, com o
+    jogador jogando como o greedy e esperando 5 s antes de cada jogada. 48 Ataques Absolutos (dos dois lados, 15 deles encerrando a partida);
+    nenhum `state` da sala chega no meio da cena (a folga de cena de `decisoes.md` 2026-11-01 (3) segura o bot).
+  - **No navegador** (o Vite do autor na 5173, sem mexer nele): a cena aparece inteira no replay (o seu Ataque Absoluto que encerra a
+    partida, semente `diag-35`) e **ao vivo**, nos dois lados: o seu, clicando no Atacar de verdade (semente `diag-35`, rodada 17), e o
+    do Bot, clicando no Passar (semente `diag-136`, rodada 5). Para jogar ao vivo até lá, um script na página trocou o `connect` da
+    `LocalRoom` (pelo `import('/src/model/local-room.ts')` do Vite, o mesmo módulo da tela) para guardar a sala, e jogou o seu lado com
+    o greedy até o ataque; o clique final foi na tela.
+  - **O caminho em que a cena some de verdade:** em 59 ataques declarados com 4 J (o "Ataque Absoluto armado"), 11 não viraram
+    Ataque Absoluto. Em todos, quem defendia quebrou um J (ou o Selvagem no papel de J) com uma Armadilha na janela de reação. Pela regra
+    não há cena, mas a mesa não diz que o Ataque Absoluto desarmou: a barra prometia "Ataque Absoluto", e o golpe sai comum. É a mesma
+    falta de leitura do ponto 1.
+  - **Próximo:** perguntar ao autor em que jogada a cena faltou (de quem era o ataque, se uma Armadilha veio antes, se o movimento
+    reduzido estava ligado). Sem um caso que falhe, não há conserto a fazer no desenho da cena.
+- **Ponto 18 (as cores do total):** `useRise` virou `useTrend` (`Row.tsx`). O total que sobe no pouso fica em ouro e cresce (1,3×),
+  como no ponto 12; o número mostrado que desce com a mesa tocando (o golpe que conta, a carta que sai) fica vermelho e encolhe (0,85×)
+  uma vez só, mesmo com a contagem descendo a cada quadro. A cor fica até 900 ms depois da última mudança e sai esmaecendo (280 ms). Os dois
+  com contorno de tinta por fora do número (`-webkit-text-stroke` com `paint-order: stroke fill`) e uma sombra de carimbo de 2 px
+  (`.total-fileira`, `styles.css`). No pulo e fora das batidas (`busy` falso), nada pinta. Com movimento reduzido, só a cor.
+  - **Ruling:** a descida também tem o micro movimento (encolhe), pela coerência com a subida; ele só falou da cor.
+  - **Ruling:** a cor da descida segue o número mostrado, então cai quando o número cai: no golpe, na batida do dano; numa carta que
+    sai sem golpe (Armadilha, Roubo, Sacrifício), quando o passo chega, como o total sempre fez. Segurar o total até a batida da saída,
+    como a fatia 5 faz com o pouso, fica para depois, se ele notar.
+  - **Testes** (`playtest-direct.test.tsx`): a subida em ouro até 900 ms; o golpe em vermelho, encolhendo uma vez; a Armadilha num J seu;
+    o pulo sem cor; o movimento reduzido sem encolher. Conferido que os da descida falham sem o código. Foto no navegador: o 31 e o 8
+    em vermelho e o 22 em ouro, com contorno, no replay `diag-35`, rodada 3 (atributos postos à mão para a foto, porque a cor dura 900 ms).
+
+---
+
 ## 2026-11-02 (8): sub-projeto 6, fatia 5 (a fluidez), da aprovação à `main`
 
 - **Pedido do autor** (`decisoes.md` 2026-11-02 (9)): "Aprovado, execute", com 14 pontos do playtest. Ele escolheu encaixar os diretos (3, 4, 7, 8 e 12) nesta fatia e deixar os nove de desenho para depois, com protótipo; "Bônus" no lugar de "Buff"; e tirar a escolha automática da ordem junto com a barra.
