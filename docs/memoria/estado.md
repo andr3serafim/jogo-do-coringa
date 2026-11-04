@@ -1,40 +1,36 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-03**, com as respostas do autor ao desenho do playtest registradas e o desenho
-> virado spec, na branch `feat/playtest-spec`. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1
+> Sobrescrito a cada atualização. **Última: 2026-11-03**, com o bloco A do playtest executado e revisado, na branch
+> `feat/playtest-bloco-a`, a caminho da `main`. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1
 > da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `feat/playtest-bloco-a`, no checkout principal, saída da `feat/playtest-spec` em `0bd8d72` (CI verde). A `main` está em `d35a241`. **O plano do bloco A foi aprovado como está** (`decisoes.md` 2026-11-03 (5)), e a execução está em curso (`diario.md` 2026-11-03 (6)).
-- **Feito no bloco A:** Task 1 (o momento na linha do tempo e no protocolo), Task 2 (o momento na mesa: o pouso, a saída, o véu e o online que segura) e Task 3 (o prazo do servidor e o bot do treino esperam o momento).
-- **Feito também:** Task 4 (a carta grande que vira, a placa, o voo e o som do momento: `ui/anim/Moment.tsx`).
-- **Feito também:** Task 5 (a mão que apaga as cartas sem jogada agora).
-- **Feito também:** Task 6 (as placas de estado com medalhão e os gestos lentos).
-- **Feito também:** Task 7 (a cura passiva que se explica: o halo dos K, a essência, a faixa da primeira vez e a dica).
-- **Feito na Task 8:** o E2E novo (`packages/web/e2e/moment.spec.ts`), que achou e fez consertar a corrida do momento terminado; o limite de altura das marcas no `layout.spec.ts` passou a 88 px (as placas); o `pnpm e2e` inteiro local (82 passaram, 4 pulados de sempre); a medição e as fotos (`notas/medicao-bloco-a.md`: ≥ 50 quadros/s nas duas telas); as specs (a tabela de eventos da spec da web e a §3.5 da spec do playtest). **Agora:** a revisão final num subagente (A8), e depois o `pnpm check`, as duas CI e o fast-forward na `main`. Os passos achados na `especiais.json`: o J do Bot nos passos 10→11 e 11→12 (rodada 3, os dois no mesmo turno), o Roubo em 35 (rodada 9), a Guarda em 51 (rodada 13), a Armadilha em 109 (rodada 23) e uma cura sua em 137 (rodada 29). O script que acha os passos ficou no scratchpad; a receita: o motor reexecuta `replay.steps` e anota o quadro de antes de cada evento.
-- **Próximo passo exato do bloco A:** a Task 8 do plano (`docs/superpowers/plans/2026-11-03-playtest-bloco-a.md`): achar os passos nas fixtures, o E2E, a medição e as fotos com o `medir-cena.ts` (nota `notas/medicao-bloco-a.md`), a revisão final num subagente (A8), as specs e o fechamento (as duas CI, o fast-forward na `main`).
-- **O online muda com este bloco:** o prazo do servidor ganha a folga do momento. Só vale online depois do deploy do autor.
-- **Feito por último** (`diario.md` 2026-11-03 (5)): as respostas do autor às 8 perguntas, em `decisoes.md` 2026-11-03 (4):
-  - **a fatia 5 está aprovada:** o sub-projeto 6 fechou;
-  - aprovados: a ordem dos blocos (A: 1, 2, 6, 9; B: 15; C: 10, 11, 13; D: 5, 14; o E, a regra do 16, em paralelo numa sessão própria), a variante A em todos os pontos e as perguntas 5 a 7;
-  - **o ponto 4 mudou:** os 3 K na Guarda sem texto, só a aura nas cartas;
-  - **a regra do 16 é a dele** (a §7.2 da spec, com as leituras [I]): a Ressurreição antes do ataque, ao formar a quadra; com as duas fileiras cheias, a última carta vai ao cemitério, a não ser que seja carta de quadra; a troca vale também na Ressurreição usada depois;
-  - o desenho virou **spec**: `docs/superpowers/specs/2026-11-03-playtest-design.md`; o protótipo diz as respostas (os 3 K só com a brasa);
-  - **a sessão do online foi apagada,** como ele pediu, com o worktree; a branch mesclada `sync/online-equipar-vazio` também. Sobrou a local `feat/online-equipar-vazio` (um rebase não publicado, com 2 commits fora da `main`): não foi apagada.
-- **Antes, na `main`:**
-  - **o rascunho do desenho e o protótipo** (`diario.md` 2026-11-03 (4)), feitos com o autor fora; os números do 16 em `notas/medicao-ponto-16.md`;
-  - **o online do Equipar vazio** (`diario.md` 2026-11-03 (3), a sessão que o autor abriu): o golpe que fecha a rodada não é mais cortado pelo Equipar vazio que o servidor aplica logo depois dele. **Ruling:** na mesa, não no servidor: um `state` ao vivo, na mesma `epoch` e só com eventos quietos (`quietOnly`) não troca a linha do tempo em curso (`useBeatPlayer`); vale também para o oponente que confirma o Equipar no meio do golpe. **Para o autor:** só muda no online depois do `pnpm deploy:server` dele;
-  - **ponto 18, ajustado** e **ponto 17, fechado** (`diario.md` 2026-11-03 (1) e (2));
-  - a fatia 5 do sub-projeto 6 e os pontos diretos 3, 4, 7, 8 e 12 (`diario.md` 2026-11-02 (8)), **aprovada** em 2026-11-03 (4).
-- **Ajuste depois da aprovação da 4b:** as cartas da quadra perderam o losango de ouro do canto (`decisoes.md` 2026-11-02 (6)); o fundo dourado, a moldura, o brilho e o selo ficam. Não mude isso de volta seguindo a letra antiga do §6.
-- **Também feito:** o **plano do bloco A** (pontos 1, 2, 6 e 9): `docs/superpowers/plans/2026-11-03-playtest-bloco-a.md`, com 8 tarefas e as escolhas A1 a A9 para o autor aprovar (a A9 é a mais importante: online, a especial seguinte de quem joga cortaria o momento que o oponente vê). **Não aprovado ainda.**
-- **Em paralelo:** a sessão do **bloco E** (a regra do 16), aberta em 2026-11-03 num worktree próprio (`.claude/worktrees/ressurreicao-quadra-f59247`, branch `claude/ressurreicao-quadra-f59247`, saída da `feat/playtest-spec` em `d35a241`). Ela escreve a regra na spec das regras e o plano, e leva o plano ao autor nela mesma. Ela escreve o estado dela numa seção própria, `## Bloco E (sessão paralela)`. Terminada e conferida, a sessão sai (`decisoes.md` 2026-11-03 (4)).
+- **Branch:** `feat/playtest-bloco-a`, no checkout principal, saída da `feat/playtest-spec` em `0bd8d72`. A `main` está em `d35a241`.
+  O plano do bloco A (pontos 1, 2, 6 e 9) foi aprovado como está (`decisoes.md` 2026-11-03 (5)); a execução e a revisão estão no
+  `diario.md` 2026-11-03 (6).
+- **Feito:** as 8 tarefas do plano (o momento da especial do oponente, a mão que apaga as cartas sem jogada, as placas de estado com os
+  gestos, a cura passiva que se explica), o E2E novo (`e2e/moment.spec.ts`), a medição e as fotos (`notas/medicao-bloco-a.md`, ≥ 50
+  quadros/s nas duas telas) e as specs. As duas CI do `266644d` passaram.
+- **A revisão final (A8, num subagente) achou e foi consertado com teste** (`256d69d`): online, o passe automático logo depois do Ás do
+  respondente cortava o momento que o atacante vê (o servidor agora guarda o PASS até o fim do momento e do impacto, `passHeldUntil`); no
+  treino, o Bot na janela cortava o alvo quebrando (espera `MOMENT_TAIL_MS`); o Ás do Roubo do oponente aparecia duas vezes; o "4 J"/"4 Q"
+  fixos; o véu que pulava de 35% para 60%.
 - **Próximo passo exato:**
-  1. Esperar as duas CI da `feat/playtest-spec` e mesclar na `main` por fast-forward.
-  2. O autor aprova (ou ajusta) o plano do bloco A e as escolhas A1 a A9. O que ele disser entra no `decisoes.md`, com o texto dele.
-  3. Aprovado: branch `feat/playtest-bloco-a` saída da `main`, e a execução tarefa por tarefa (A8), teste primeiro.
-  4. O deploy e o playtest online são dele (`notas/playtest.md`). O deploy leva o conserto do Equipar vazio do online.
+  1. O push (o pre-push roda o `pnpm check`) e as duas CI verdes no último commit.
+  2. A `main` por fast-forward até a `feat/playtest-bloco-a` (`git push origin <sha>:refs/heads/main`, sem `| tail`), e este estado com a
+     `main` nova.
+  3. Avisar a sessão do bloco E (`claude/ressurreicao-quadra-f59247`, também publicada como `feat/ressurreicao-quadra`): ela mescla a
+     `main` e renumera as entradas dela (`decisoes.md` 2026-11-03 (5) vira (6); `diario.md` (6) vira (7)), roda o check e as CI e leva a
+     branch à `main`.
+- **Esperando o autor:**
+  - jogar o bloco A (o treino mostra tudo; o online só depois do `pnpm deploy:server` dele, que leva também a folga do momento no
+    prazo, o PASS guardado depois do Ás e o conserto do Equipar vazio);
+  - **quatro textos das placas que ele viu na spec §3 e o motor contradiz em casos de borda** (`diario.md` 2026-11-03 (6), "para o autor
+    decidir"): "imune até o golpe dele" (o Ataque Absoluto fura), "quebra todos os K" (o Reflect segura), "o K absorve o próximo golpe
+    inteiro" (o Ataque Absoluto quebra) e "o próximo golpe volta para ele" (contra a Defesa Absoluta, só segura). Ficaram como ele aprovou.
+- **Em paralelo:** a sessão do **bloco E** (a regra do 16) terminou o plano dela (`21e4c43`, Difícil aprovado, E2E 79/79) e espera o
+  bloco A entrar na `main`. Terminada e conferida, a sessão sai (`decisoes.md` 2026-11-03 (4)), com aviso antes.
 - **Para medir uma cena com a 8787 ocupada:** `MEDIR_PORTA=8797` no `medir-cena.ts`. Para o E2E inteiro numa porta livre, a receita está no `diario.md` 2026-11-02 (8) (uma configuração que importa o `playwright.config.ts` e troca a porta).
 - **Para ver a Ressurreição sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave `coringa:partidas` e abra `/partidas/exodia-devastacao`. "Próximo
   passo" na rodada 7, passo 27, mostra a sua, com a quadra; na rodada 23, passo 107, a do Bot, com a quadra na outra fileira; na rodada 37, passo 182, a do Bot sem quadra.

@@ -92,6 +92,28 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   e o teste aceitava 56 (duas linhas de etiqueta). As placas são mais altas por desenho (o medalhão e a linha do que faz): o limite passou a
   88 (duas linhas de placa), e o resto do teste (as zonas sem se sobrepor, a coluna cabendo no campo) passou nas três telas, localmente.
 - **Armadilha:** `-g "360 × 640 › ..."` não acha o teste no Playwright do Windows (o `×` e o `›` do título); filtre por um pedaço sem eles.
+- **Task 8, a revisão final (A8, um revisor novo, a branch inteira contra a spec e o plano).** Consertado com teste (`256d69d`):
+  - **online, o passe automático cortava o momento do Ás na janela:** ele sai no ack do Ás do respondente, e o servidor o aplicava na
+    hora quando os 2 s já tinham passado; o atacante via a placa por 100 a 300 ms. A trava da A9a segura a mão, não a sessão.
+    **Ruling:** o servidor guarda o PASS até o fim do momento do Ás mais o impacto (`passHeldUntil`, opcional no registro, sem subir o
+    `STATE_SCHEMA`; a época nova o esquece). Só o Ás do respondente na janela o arma: o K que abre a janela segue com o piso de 2 s.
+    O teste do piso que usava um Ás aos 300 ms mudou de propósito (o PASS dele vale aos 2.380 ms, não aos 2 s);
+  - **no treino, o Bot na janela jogava no fim exato do momento do Ás dele:** o `state` novo cortava o racha, o tremor e a ida do Ás ao
+    cemitério (e o som da quebra). **Ruling:** `MOMENT_TAIL_MS` (480 ms, no protocolo; um teste da web confere que cobre
+    `crackShakeMs + exitMs`) entra só onde a jogada seguinte não pensa: o PASS guardado e o Bot na janela. Fora da janela o Bot já
+    pensa 600 ms depois do momento, e a folga do prazo (`stepAllowanceMs`) ficou como estava;
+  - **o Ás do Roubo do oponente aparecia duas vezes** (no topo do cemitério, sem numérica deslocada, e grande no centro): ganhou o pouso
+    `snap` quando a cópia chega ao cemitério (impacto + `exitMs`). Com movimento reduzido ele aparece 360 ms depois do fim do momento;
+  - o "4 J" e o "4 Q" da placa vêm de `config.buffLimit`; o véu do momento passa para a cortina da cena (o 4º Q, com a Defesa
+    Absoluta) esmaecendo o fundo, sem o pulo de 35% para 60% fora da trava; um comentário da linha do tempo sobre o replay corrigido
+    (o replay mostra os momentos, do lado de quem gravou: é o que o E2E e a medição usam).
+- **Da revisão, para o autor decidir (textos que ele viu na spec §3 e no protótipo):** "imune até o golpe dele" (o Ataque Absoluto fura
+  a Defesa Absoluta, e a ajuda do jogo diz isso), "quebra todos os K" (contra um Reflect ativo, os K ficam), "o K absorve o próximo golpe
+  inteiro" (não contra o Ataque Absoluto armado de quem vê) e "o próximo golpe volta para ele" (com o atacante sob Defesa Absoluta, o
+  Reflect só segura). Ficaram como ele aprovou.
+- **Da revisão, menores, não feitos:** a primeira cura passiva que chega num `catchUp` ou é pulada gasta o `firstHealSeq` sem a faixa;
+  as placas "Cura passiva" e "Ataque Absoluto armado" aparecem na chegada do `state`, 1,6 s antes de o K ou o J pousar; o `copy.ts`
+  segue fora da cobertura (`vitest.config.ts`), agora com lógica (`momentPlate`, `healRibbon`) que o portão de 90% não vê.
 
 ---
 

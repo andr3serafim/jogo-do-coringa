@@ -115,6 +115,9 @@ O plano (`docs/superpowers/plans/2026-11-03-playtest-bloco-a.md`) foi aprovado c
   vivo (A7; o replay não a toca).
 - **Achado no caminho:** o fim do momento e o fim da batida venciam no mesmo instante, e a camada podia voltar e ficar montada; consertado
   com teste (o E2E achou).
+- **Da revisão final:** depois de um Ás do respondente na janela, o PASS dele (o automático, online) fica guardado até o fim do momento do
+  Ás e do impacto (480 ms: o racha, o tremor e a ida ao cemitério), e o Bot na janela espera o mesmo no treino; sem isso, a jogada
+  seguinte cortava o alvo quebrando. O piso de 2 s da janela segue para todo o resto.
 - **Medição e fotos:** `docs/memoria/notas/medicao-bloco-a.md` (≥ 50 quadros/s com a CPU 4× nas duas telas).
 
 ## 4. Bloco B: o golpe final (ponto 15)
