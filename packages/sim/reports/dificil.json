@@ -92,6 +92,71 @@
       },
       "approved": true,
       "seconds": 727.2356775
+    },
+    {
+      "label": "a busca na janela da Ressurreição (horizonte 3)",
+      "notes": [],
+      "hard": {
+        "rolloutsPerCandidate": 8,
+        "maxCandidates": 4,
+        "horizon": {
+          "EQUIP": 2,
+          "RESURRECTION": 3,
+          "ATTACK_MAIN": 3
+        }
+      },
+      "easyBlunder": 0.7,
+      "hardVsGreedy": {
+        "games": 200,
+        "rate": 0.675,
+        "se": 0.03311910324872942,
+        "wins": 135,
+        "losses": 65,
+        "unfinished": 0,
+        "withInitiative": {
+          "games": 100,
+          "rate": 0.71
+        },
+        "withoutInitiative": {
+          "games": 100,
+          "rate": 0.64
+        }
+      },
+      "greedyVsEasy": {
+        "games": 200,
+        "rate": 0.815,
+        "se": 0.027456784225396828,
+        "wins": 163,
+        "losses": 37,
+        "unfinished": 0,
+        "withInitiative": {
+          "games": 100,
+          "rate": 0.84
+        },
+        "withoutInitiative": {
+          "games": 100,
+          "rate": 0.79
+        }
+      },
+      "timing": {
+        "decisions": 8958,
+        "p50Ms": 79.97019999998156,
+        "p95Ms": 149.39199999999255,
+        "maxMs": 430.1999000000069,
+        "searching": {
+          "decisions": 7007,
+          "p50Ms": 90.28840000007767,
+          "p95Ms": 154.84769999999844,
+          "maxMs": 430.1999000000069
+        }
+      },
+      "passes": {
+        "hardVsGreedy": true,
+        "greedyVsEasy": true,
+        "p95": true
+      },
+      "approved": true,
+      "seconds": 658.0972447
     }
   ]
 }
