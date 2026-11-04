@@ -1,12 +1,12 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-03**, com o bloco A do playtest executado e revisado, na branch
-> `feat/playtest-bloco-a`, a caminho da `main`. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1
+> Sobrescrito a cada atualização. **Última: 2026-11-03**, com o bloco A do playtest na `main` (fast-forward até este commit). Antes de seguir, confira se não há versão mais nova em outra branch (regra 1
 > da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `feat/playtest-bloco-a`, no checkout principal, saída da `feat/playtest-spec` em `0bd8d72`. A `main` está em `d35a241`.
+- **Branch:** `feat/playtest-bloco-a`, no checkout principal; a `main` foi por fast-forward até este commit (antes: `d35a241`). As duas CI
+  passaram no último commit de código (`540e3d4`, run `41760616250`); depois dele, só este da memória.
   O plano do bloco A (pontos 1, 2, 6 e 9) foi aprovado como está (`decisoes.md` 2026-11-03 (5)); a execução e a revisão estão no
   `diario.md` 2026-11-03 (6).
 - **Feito:** as 8 tarefas do plano (o momento da especial do oponente, a mão que apaga as cartas sem jogada, as placas de estado com os
@@ -15,12 +15,10 @@
 - **A revisão final (A8, num subagente) achou e foi consertado com teste** (`256d69d`): online, o passe automático logo depois do Ás do
   respondente cortava o momento que o atacante vê (o servidor agora guarda o PASS até o fim do momento e do impacto, `passHeldUntil`); no
   treino, o Bot na janela cortava o alvo quebrando (espera `MOMENT_TAIL_MS`); o Ás do Roubo do oponente aparecia duas vezes; o "4 J"/"4 Q"
-  fixos; o véu que pulava de 35% para 60%.
+  fixos; o véu que pulava de 35% para 60%. E, por um conselho depois dela (`540e3d4`): online, a sua especial que quebra (o Ás, o
+  Sacrifício, o Roubo) trava a sua jogada seguinte até o fim do impacto (2,08 s), e o Bot só espera a cauda depois de um momento dele.
 - **Próximo passo exato:**
-  1. O push (o pre-push roda o `pnpm check`) e as duas CI verdes no último commit.
-  2. A `main` por fast-forward até a `feat/playtest-bloco-a` (`git push origin <sha>:refs/heads/main`, sem `| tail`), e este estado com a
-     `main` nova.
-  3. Avisar a sessão do bloco E (`claude/ressurreicao-quadra-f59247`, também publicada como `feat/ressurreicao-quadra`): ela mescla a
+  1. Avisar a sessão do bloco E (`claude/ressurreicao-quadra-f59247`, também publicada como `feat/ressurreicao-quadra`): ela mescla a
      `main` e renumera as entradas dela (`decisoes.md` 2026-11-03 (5) vira (6); `diario.md` (6) vira (7)), roda o check e as CI e leva a
      branch à `main`.
 - **Esperando o autor:**

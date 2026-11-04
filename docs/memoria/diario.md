@@ -119,6 +119,9 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 - **Da revisão, menores, não feitos:** a primeira cura passiva que chega num `catchUp` ou é pulada gasta o `firstHealSeq` sem a faixa;
   as placas "Cura passiva" e "Ataque Absoluto armado" aparecem na chegada do `state`, 1,6 s antes de o K ou o J pousar; o `copy.ts`
   segue fora da cobertura (`vitest.config.ts`), agora com lógica (`momentPlate`, `healRibbon`) que o portão de 90% não vê.
+- **Fechamento:** as duas CI verdes no último commit de código (`540e3d4`, run `41760616250`); a `main` por fast-forward até o commit da
+  memória que vem logo depois. A sessão do bloco E mescla a `main` em seguida (conflitos só na memória e no `testMatch` do
+  `playwright.config.ts`, pela simulação dela) e renumera as entradas dela.
 
 ---
 
