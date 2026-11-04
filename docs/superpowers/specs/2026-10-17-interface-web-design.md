@@ -521,9 +521,9 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
 | `CardsPlaced` | as cartas vão para as fileiras (as dos dois juntas, na revelação); a trocada e a descartada vão para o cemitério |
 | `OrderChosen` | a faixa central mostra a ordem; linha no histórico |
 | `TurnStarted` | "Vez de X"; o relógio do turno recomeça |
-| `BuffPlayed` | mão → buffs; o Selvagem ganha a etiqueta do papel |
-| `GuardPlayed` | mão → Guarda |
-| `TrapUsed` / `Sacrificed` | a carta usada vai até o alvo, o alvo quebra, os dois vão para o cemitério |
+| `BuffPlayed` | mão → buffs; o Selvagem ganha a etiqueta do papel. Do oponente, é um **momento** (bloco A dos pontos do playtest, 2026-11-03): a carta vira e cresce no centro, com o véu leve e uma placa do que ela fez (os totais do motor), e voa ao destino; 1,6 s, e 1,1 s a partir da segunda do turno, fora do teto de decisão |
+| `GuardPlayed` | mão → Guarda (do oponente, o momento) |
+| `TrapUsed` / `Sacrificed` | a carta usada vai até o alvo, o alvo quebra, os dois vão para o cemitério (do oponente, o momento: o alvo estoura no impacto, e a carta dele segue ao cemitério) |
 | `ReflectPlayed` | **cena** (sub-projeto 6 §7.5): as três cartas formam o espelho, que encolhe até a zona "Reflect ativo" |
 | `ReflectCanceled` | **cena** (sub-projeto 6 §7.5): dois espelhos trincam e somem, com a fita "Os Reflects se anularam" |
 | `ReflectTriggered` | **cena** (sub-projeto 6 §7.5): o cometa bate no espelho e volta ao retrato de quem atacou, com o dano; sem dano, ele se desfaz no vidro |
@@ -539,9 +539,9 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
 | `AbsoluteDefenseStarted` | **cena:** escudo na Defesa |
 | `AbsoluteDefenseEnded` | o escudo some; 1 Q vai para o cemitério |
 | `InitiativeDecided` | **faixa** no fim de toda rodada de Ataque ("Duda causou mais dano (9 × 3) e ficou com a iniciativa", "… e segue com a iniciativa", "Empate em dano (5 × 5): a iniciativa segue com você"), que segura 1,2 s **fora do teto de decisão**, como as cenas raras (o Equipar que vem depois a espremia); a marca da iniciativa troca de lado só quando `changed` |
-| `CardStolen` | **faixa** ("Duda roubou o 9♥ do seu Ataque"); a carta vai da fileira do oponente para a do ladrão, o A para o cemitério |
+| `CardStolen` | **faixa** ("Duda roubou o 9♥ do seu Ataque"); a carta vai da fileira do oponente para a do ladrão, o A para o cemitério. Do oponente, o momento no lugar da faixa: a numérica sai no impacto |
 | `StealDamage` | o número do dano sobe no Coringa de quem foi roubado (nada, se o K anulou); a vida desce |
-| `Healed` | "+N" no ouro sobe no Coringa de quem curou (o Roubo e a cura pela Defesa); 0 passa quieto |
+| `Healed` | "+N" no ouro sobe no Coringa de quem curou (o Roubo e a cura pela Defesa); 0 passa quieto. Na cura pela Defesa (bloco A, ponto 9), os K da Guarda de quem curou acendem, uma essência verde voa da carta que caiu até o retrato, e a primeira da partida tem a faixa com a regra e a conta ("6 × (1 + 2 Q) = 18") |
 | `HandLimitPenalty` | **faixa** ("Sua mão já tem 4 especiais: K♦ foi para o cemitério"); a carta queimada vai para o cemitério |
 | `DevastationCast` | **faixa** ("DEVASTAÇÃO de Duda!") com as três cartas indo ao cemitério: só abre a janela de reação do alvo (sub-projeto 6 §7.4) |
 | `RowDevastated` | **cena de campo** (3,1 s, sub-projeto 6 §7.4): o terremoto sobre a fileira, sem tarjas nem cortina; a inversão no chão que se abre, e o carimbo "DEVASTAÇÃO!". As numéricas vão ao cemitério na hora, e a cena desenha as cópias caindo. O campo fica desolado até uma carta voltar. No `catchUp`, faixa ("O Ataque de Duda foi devastado", "A Devastação voltou: …") |
