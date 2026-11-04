@@ -1,26 +1,49 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-04**, com os blocos A e E e os quatro textos de placa na `main` (fast-forward até
-> este commit). Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da
-> seção "Memória compartilhada" do `CLAUDE.md`).
+> Sobrescrito a cada atualização. **Última: 2026-11-04**, consolidado para a próxima sessão: os blocos A e E e os quatro textos de placa
+> na `main`, nada em curso. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada"
+> do `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `feat/playtest-placas`, no checkout principal, saída da `main` em `f8755bc`, com a `main` do bloco E (`d04dc0b`) mesclada em
-  `9c25133`. As duas CI passaram no merge (run `41837134228`), e a `main` foi por fast-forward até este commit, que só mexe na memória.
-- **Feito:** o autor pediu "Corrija os quatro" (`decisoes.md` 2026-11-04 (1)). As placas trocam de linha só no caso de borda, na ordem do
-  `previewBetween`, com teste contra a prévia do motor; a linha da zona do Reflect, no PC, foi para baixo do título (`diario.md` 2026-11-04 (1)).
-- **Próximo passo exato:** nada em curso. O próximo é do autor (abaixo); depois do playtest dele, os blocos B (o golpe final, ponto 15),
-  C (10, 11 e 13) e D (5 e 14) da spec do playtest, nessa ordem (`decisoes.md` 2026-11-03 (4)), cada um com o plano aprovado antes.
+- **Onde está:** a `main` tem tudo (fast-forward até este commit; as duas CI verdes no último commit de código, o merge `9c25133`, run
+  `41837134228`, e na `main` em `1a19e08`, run `41840463012`). O checkout principal está na `feat/playtest-placas`, igual à `main`.
+  **Trabalho novo sai de uma branch nova da `main`** (prefixo `feat/`, para a CI rodar). Nada sem commit além do de sempre (abaixo).
+  Nenhuma sessão paralela aberta.
+- **Feito nesta leva (2026-11-03 e 04), na ordem:**
+  - **o desenho dos pontos do playtest virou spec** (`docs/superpowers/specs/2026-11-03-playtest-design.md`), com as respostas do autor às
+    8 perguntas (`decisoes.md` 2026-11-03 (4)): a fatia 5 aprovada, a ordem dos blocos, a regra do 16 dele e os 3 K só com a aura;
+  - **bloco A** (pontos 1, 2, 6 e 9: o momento da especial do oponente, a mão que apaga as cartas sem jogada, as placas de estado, a cura
+    passiva que se explica): plano aprovado como estava (`decisoes.md` 2026-11-03 (5)), execução, revisão final e consertos no `diario.md`
+    2026-11-03 (6); medição em `notas/medicao-bloco-a.md`; o que a execução decidiu na §3.5 da spec do playtest;
+  - **bloco E** (ponto 16, a Ressurreição no instante da quadra), numa sessão paralela: plano aprovado com 15 s na janela (`decisoes.md`
+    2026-11-03 (6)), execução e medição no `diario.md` 2026-11-03 (7) e na seção "Bloco E" abaixo; `RULES_VERSION` 5 e `STATE_SCHEMA` 5;
+  - **os quatro textos de placa no caso de borda** ("Corrija os quatro", `decisoes.md` 2026-11-04 (1); `diario.md` 2026-11-04 (1)).
+- **Próximo passo exato:** é a vez do autor (abaixo). Quando ele voltar:
+  1. o que ele disser do playtest entra no `decisoes.md`, com o texto dele, antes de virar código;
+  2. se ele quiser o quinto caso de placa, as duas propostas estão abaixo;
+  3. depois, os blocos que faltam da spec do playtest, nesta ordem (`decisoes.md` 2026-11-03 (4)): **B** (ponto 15, o golpe final, §4), **C**
+     (pontos 10, 11 e 13) e **D** (pontos 5 e 14). Cada um com plano escrito e aprovado por ele antes da execução, como os blocos A e E.
 - **Esperando o autor:**
-  - jogar os blocos A e E e as placas novas (o treino mostra tudo; o online só depois do `pnpm deploy:server` dele, que leva a folga do
-    momento no prazo, o PASS guardado depois do Ás, o conserto do Equipar vazio e a janela da Ressurreição; o deploy fecha as salas abertas,
-    `STATE_SCHEMA` 5, e as partidas guardadas abrem com o aviso de versão, `RULES_VERSION` 5);
-  - **um quinto caso de placa, achado no motor** (`diario.md` 2026-11-04 (1)): "Cura passiva" falha contra o Ataque Absoluto armado do outro
-    (os K quebram antes da cura) e, com exatamente 2 K, no golpe que um K absorve. Não mexido: ele pediu os quatro.
-- **Bloco E:** terminado e na `main` (`d04dc0b`, seção "Bloco E" abaixo). A sessão foi apagada em 2026-11-04, com o worktree, depois de
-  conferido que a branch estava na `main` e o worktree limpo (anunciado ao autor antes, `decisoes.md` 2026-11-03 (4)).
+  - **jogar** os blocos A e E e as placas novas. O treino já mostra tudo; o online só depois do `pnpm deploy:server` dele, que leva a folga
+    do momento no prazo, o PASS guardado depois do Ás, o conserto do Equipar vazio e a janela da Ressurreição. O deploy fecha as salas
+    abertas (`STATE_SCHEMA` 5), e as partidas guardadas abrem com o aviso de versão (`RULES_VERSION` 5);
+  - **as frases novas das placas são de quem escreveu** (ele aprovou corrigir, não as palavras): conferir no playtest;
+  - **o quinto caso de placa** (`diario.md` 2026-11-04 (1)). Ele pediu a explicação e respondeu "Ok, entendi" (2026-11-04), sem decidir. A
+    placa "Cura passiva" diz "a Defesa dele que cai vira vida", e o motor (`resolveAttack`: a Guarda quebra antes, a Defesa cai depois, e a
+    cura conta os K que sobram, ≥ 2) a contradiz em dois casos: contra o Ataque Absoluto armado do outro, todos os K quebram antes da cura;
+    com exatamente 2 K, o golpe que um K absorve deixa 1 K, e aquele golpe não cura. As duas propostas que ele viu: no caso do Absoluto,
+    trocar a linha como nas outras quatro ("o seu Ataque Absoluto quebra os K antes da cura" / "o Ataque Absoluto dele quebra os K antes
+    da cura"); no de 2 K, deixar a linha de sempre mais clara ("com 2 K depois do golpe, a Defesa que cai vira vida");
+  - **os pequenos do bloco A, não feitos** (`diario.md` 2026-11-03 (6), "menores"): a explicação da cura passiva se perde na partida se a
+    primeira cura for pulada ou chegar num `catchUp`; as placas "Cura passiva" e "Ataque Absoluto armado" aparecem 1,6 s antes de o K ou o J
+    pousar; o `copy.ts` segue fora da cobertura;
+  - **o não conferido do bloco E** (seção "Bloco E" abaixo): a troca no navegador, o relógio de 15 s online e o som.
 - **Para medir uma cena com a 8787 ocupada:** `MEDIR_PORTA=8797` no `medir-cena.ts`. Para o E2E inteiro numa porta livre, a receita está no `diario.md` 2026-11-02 (8) (uma configuração que importa o `playwright.config.ts` e troca a porta).
+- **Para ver o momento do bloco A sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/especiais.json` para a chave
+  `coringa:partidas` e abra `/partidas/especiais`. "Próximo passo" a partir do passo 10 (rodada 3) toca o J do Bot e, no 11, o segundo J do
+  turno (mais curto); no 35 (rodada 9), o Roubo; no 51 (rodada 13), a Guarda; no 109 (rodada 23), a Armadilha; no 137 (rodada 29), a sua
+  cura passiva. A linha da zona do Reflect aparece no `/partidas/reflect`, rodada 37, passo 176.
 - **Para ver a Ressurreição sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave `coringa:partidas` e abra `/partidas/exodia-devastacao`. "Próximo
   passo" na rodada 7, passo 27, mostra a sua, com a quadra; na rodada 23, passo 107, a do Bot, com a quadra na outra fileira; na rodada 37, passo 182, a do Bot sem quadra.
 - **Para ver as cenas do Reflect sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/reflect.json` para a chave `coringa:partidas` e abra
@@ -37,6 +60,8 @@
   - um `wrangler dev` do autor pode estar na porta 8787. O Playwright o reaproveita, e o E2E falha (o online pela semente; o das
     cenas porque ele não serve `/partidas/...`). Com ele aberto, rode o E2E pela CI ou troque a porta só naquela execução;
   - não edite nada enquanto o pre-push roda;
+  - **ao levar ao autor um caso de borda** (a ordem do motor, um texto que o motor contradiz): passos numerados e um exemplo de mesa, curto,
+    com a proposta numa linha à parte. A frase compacta ele não entendeu (2026-11-04, o quinto caso de placa);
   - não há Python nesta máquina, e heredoc grande no shell às vezes quebra (crase, aspas): para editar vários arquivos, escreva um
     script `.mjs` com a ferramenta de escrita e rode com `node`;
   - o ledger `.superpowers/sdd/…` fica fora do git: vale o `diario.md` e o `git log` (regra 6 do `CLAUDE.md`);
@@ -47,9 +72,9 @@
 
 ## Bloco E (sessão paralela)
 
-> Seção da sessão do bloco E (a regra do ponto 16), no worktree `.claude/worktrees/ressurreicao-quadra-f59247`, branch
-> `claude/ressurreicao-quadra-f59247` (publicada também como `feat/ressurreicao-quadra`, para a CI), saída de `d35a241`. O "Agora"
-> acima é da outra sessão (o bloco A).
+> Registro do bloco E (a regra do ponto 16), feito numa sessão paralela que terminou em 2026-11-04. A sessão, o worktree
+> (`.claude/worktrees/ressurreicao-quadra-f59247`) e a branch local foram apagados depois de conferido que tudo estava na `main`; as
+> remotas `claude/ressurreicao-quadra-f59247` e `feat/ressurreicao-quadra` (mescladas) ficam para o autor, com as outras velhas.
 
 - **Feito (2026-11-03), o plano inteiro** (`docs/superpowers/plans/2026-11-03-ressurreicao-quadra.md`, aprovado com 15 s na janela,
   `decisoes.md` 2026-11-03 (6)); detalhes, commits e rulings no `diario.md` 2026-11-03 (7):
@@ -72,35 +97,27 @@
   regras). No merge, o `timing.ts` ficou com o `stepAllowanceMs` do bloco A e o caso `RESURRECTION` (15 s); o `passHeldUntil` só vale na
   `REACTION`, e a Ressurreição não entra nos momentos do bloco A.
 
-## O plano da fatia 5, em resumo
+## A fatia 5
 
-O mapa que estava aqui virou o plano (`docs/superpowers/plans/2026-11-02-direcao-visual-fatia-5.md`), **aprovado** em 2026-11-02 (`decisoes.md` 2026-11-02 (9)). Em nove tarefas:
-
-1. a linha de base: medir os passos comuns e o quadro da chegada (100 a 225 ms com a CPU 4×), com o perfil; consertar só se a causa for nossa e local (E1);
-2. o modelo (`model/table-motion.ts`): recuo, pouso, saída, estouro, as vizinhas que esperam a batida da saída (`shiftDelaysOf`) e os tempos, com teste que trava as durações da linha do tempo;
-3. as partículas saem de `ui/scenes/` para `ui/anim/particles.ts`, e a mesa ganha a camada dos efeitos (`FxLayer`);
-4. a jogada: recuo de 90 ms, voo na mola e pouso com achatamento (1,06 → 1) e poeira; a carta do Bot cai na batida dela (E3);
-5. a saída e os estilhaços: cópias lidas no `getSnapshotBeforeUpdate` seguram as cartas que saem até a batida delas (E2), e as que quebram estouram em cacos (E5);
-6. o leque da compra e do Equipar, do monte, 40 ms uma da outra (E6);
-7. os sons (`carta` no pouso, `pouso`, `quebra` no estouro, `compra`) e os dois pequenos (o replay corta o som da cena; dois golpes colados tremem duas vezes) (E7, E8);
-8. os pontos diretos do playtest: sem seleção de texto, sem a "Ameaça de X", sem a ordem automática, "Bônus" no lugar de "Buff" e o total da fileira que cresce quando sobe;
-9. E2E, medição, fotos e documentação.
-
-**Achados do código que o §8 não dizia** (detalhes no `diario.md` 2026-11-02 (7)): a carta que vai ao cemitério sem ser a de cima some na chegada do `state`, antes da batida; a carta do Bot aparece também antes da batida; as numéricas do Equipar nem esmaecem; o `transform` da carta é do Motion, e o recuo e o achatamento vão para as propriedades CSS `translate` e `scale`.
+Feita e aprovada (`decisoes.md` 2026-11-03 (4)): o plano é `docs/superpowers/plans/2026-11-02-direcao-visual-fatia-5.md`, e a execução,
+com os achados do código, está no `diario.md` 2026-11-02 (7) e (8).
 
 ## A `main`
 
-E1, E2, F1 (2026-10-30), o bloco E3 + F2 + F3 (2026-10-31), a marca "Cura passiva", as fatias 1, 2 e 3 do sub-projeto 6, os ajustes da fatia 1 (2026-11-01) e as fatias 4 e 4b (2026-11-02) mesclados. Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D
-(`8d7f078`, `a5a76c5`, `bba8377`, `8cdf0a1`), a memória compartilhada, a E1, a E2, a F1 e o bloco E3 + F2 + F3 (o Reflect
-reativo, a Devastação, o Roubo sem naipe, a cura pela Defesa, o limite de 4 especiais com a BURN e a iniciativa com o placar na
-tela). Regras em vigor: spec 1 (`docs/superpowers/specs/2026-10-15-jogo-coringa-regras-motor-design.md`), com os ajustes da
-spec do sub-projeto 5 (`2026-10-27-ajustes-design.md`).
+- **Até 2026-11-02:** E1, E2, F1 (2026-10-30), o bloco E3 + F2 + F3 (2026-10-31), a marca "Cura passiva", as fatias 1 a 5 e a 4b do
+  sub-projeto 6 (a direção visual). Sub-projetos 1 a 4 concluídos; sub-projeto 5 com as Fases A a D (`8d7f078`, `a5a76c5`, `bba8377`,
+  `8cdf0a1`), a memória compartilhada e o bloco E3 + F2 + F3 (o Reflect reativo, a Devastação, o Roubo sem naipe, a cura pela Defesa, o
+  limite de 4 especiais com a BURN e a iniciativa com o placar na tela).
+- **2026-11-03 e 04:** os pontos 16 a 18 do playtest (o 17 também online), a spec do playtest, o bloco A, o bloco E e os textos de placa.
+- **Regras em vigor:** a spec 1 (`docs/superpowers/specs/2026-10-15-jogo-coringa-regras-motor-design.md`), com os ajustes do sub-projeto 5
+  (`2026-10-27-ajustes-design.md`) e a regra do 16 (a Ressurreição no instante da quadra, §1.12 e vizinhas). `RULES_VERSION` 5,
+  `STATE_SCHEMA` 5.
 
-## Fila (sub-projeto 5)
+## Fila
 
-Vazia: o bloco E3 + F2 + F3 era o último item.
+Os blocos B, C e D da spec do playtest (`2026-11-03-playtest-design.md`), nessa ordem, cada um com plano aprovado antes ("Agora").
 
-## Esperando o autor
+## Esperando o autor (histórico das fatias e dos blocos anteriores)
 
 - **Sub-projeto 6, fatia 4b (a Ressurreição): jogada e aprovada em 2026-11-02, sem ajustes** (`decisoes.md` 2026-11-02 (5)). O que ele aprovou no plano está em `decisoes.md` 2026-11-02 (4). O que a execução decidiu:
   - **com duas quadras na mesma fileira, acende a de maior valor:** é a que mais soma na conta que o jogador vê;
@@ -243,7 +260,11 @@ Playtest online, `wrangler login` + `pnpm deploy:server`, proteção da `main`, 
   - `.claude/worktrees/inspiring-sammet-387417` (`feat/ajustes`, limpo): o da conta anterior.
   - `D:\andr3\jogo-coringa-v5`: era o checkout limpo dos pushes da conta anterior; a pasta não existia mais, e o `git worktree prune` de 2026-11-03 tirou o registro.
   - `.claude/worktrees/youthful-elgamal-3d5e8a` (`claude/inspiring-sammet-387417`, num commit de 2026-10-27, limpo): criado em 2026-11-02 às 17:00, sem `pnpm install`, provavelmente por outra sessão do app. **Não apague:** pode ser de uma sessão aberta. Ele reprovava o ESLint, que agora ignora `.claude/**` (`6103b52`).
-- **Branches que sobraram:** todas as locais já estão mescladas na `main` (conferido em 2026-11-01), inclusive
-  `claude/inspiring-sammet-387417` e `feat/ajustes-fase-a`. Só o trabalho novo precisa de branch nova.
+  - `.claude/worktrees/ressurreicao-quadra-f59247` (o bloco E): apagado em 2026-11-04. O app tirou a sessão, mas o worktree ficou; o
+    `git worktree remove` tirou o registro e falhou na pasta ("Filename too long", o `node_modules`), que saiu no PowerShell com o prefixo
+    de caminho longo: `Remove-Item -LiteralPath ('\\?\' + $p) -Recurse -Force`.
+- **Branches que sobraram:** todas as locais estão mescladas na `main` (conferido em 2026-11-04), menos a `feat/online-equipar-vazio`
+  (abaixo). As remotas velhas, mescladas, são do autor (`notas/playtest.md`), agora com `feat/playtest-spec`, `feat/playtest-bloco-a`,
+  `feat/playtest-placas`, `feat/ressurreicao-quadra` e `claude/ressurreicao-quadra-f59247`. Só o trabalho novo precisa de branch nova.
   O worktree `.claude/worktrees/dreamy-engelbart-4a4876` (a sessão do online) foi apagado com a sessão, em 2026-11-03, e a branch `sync/online-equipar-vazio` (mesclada) também. Sobrou a local `feat/online-equipar-vazio`, que ficou num rebase não publicado (o force-push foi barrado) e pode ser apagada pelo autor (`git branch -D`). A remota `feat/online-equipar-vazio` está mesclada.
 - **Arquivo solto:** o `jogar-treino.bat` na raiz é o lançador do autor. Não mexer nem commitar.

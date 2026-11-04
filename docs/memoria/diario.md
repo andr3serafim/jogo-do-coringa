@@ -28,6 +28,15 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 - **Fechamento:** a sessão do bloco E levou a `main` a `d04dc0b`; mesclada aqui em `9c25133` (conflitos só na memória: as entradas das
   duas branches juntas, a mais nova em cima). As duas CI verdes no merge (run `41837134228`) e no `2d9774e`; a `main` por fast-forward até
   o commit da memória logo depois. A sessão do bloco E foi apagada (a branch estava na `main`, o worktree limpo).
+- **O quinto caso, explicado:** o autor pediu "me explique de forma rápida e entendível o quinto caso" e, depois do exemplo (a ordem do
+  motor: a Guarda quebra, a Defesa cai, a cura conta os K que sobram), respondeu "Ok, entendi", sem decidir. As duas propostas que ele viu
+  estão no `estado.md` ("Esperando o autor"). Nada mudou no código.
+- **Armadilha (Windows):** o app apagou a sessão do bloco E, mas o worktree dela seguiu registrado. O `git worktree remove` tirou o
+  registro e falhou na pasta ("Filename too long", dentro do `node_modules`); ela saiu no PowerShell com o prefixo de caminho longo
+  (`Remove-Item -LiteralPath ('\\?\' + $p) -Recurse -Force`). A branch local saiu com `git branch -d` (mesclada); as remotas ficam para o autor.
+- **Consolidação para a próxima sessão (2026-11-04):** o autor encerra esta sessão e continua em outra. O `estado.md` foi reescrito
+  para isso: onde está tudo, o que esta leva fez, o próximo passo (a vez dele; depois os blocos B, C e D), o que espera por ele e as
+  receitas para ver o momento e a zona do Reflect sem jogar. Nada em curso, nenhuma sessão paralela aberta.
 
 ---
 
