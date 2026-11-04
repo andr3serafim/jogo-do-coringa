@@ -143,7 +143,7 @@ export interface TimelineOptions {
   reducedMotion: boolean;
   /** Há uma decisão do jogador esperando: tudo cabe em `DECISION_CAP_MS`. */
   decisionPending: boolean;
-  /** Quem vê esta mesa: a especial do outro vira momento. Sem ele (os testes e o replay de antes), nenhum momento. */
+  /** Quem vê esta mesa: a especial do outro vira momento (ao vivo e no replay, do lado de quem gravou). Sem ele, nenhum momento. */
   viewer?: PlayerId | null;
   /** Quantos momentos o turno já teve nos `state`s anteriores (`momentsMs`). */
   momentsBefore?: number;

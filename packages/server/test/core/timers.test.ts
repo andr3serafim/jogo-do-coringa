@@ -1,6 +1,6 @@
 import { actingPlayers, applyAction, createGame, legalActions, viewFor } from '@coringa/engine';
 import type { GameState } from '@coringa/engine';
-import { SCENE_MS, SPECIAL_MOMENT_MS } from '@coringa/protocol';
+import { MOMENT_TAIL_MS, SCENE_MS, SPECIAL_MOMENT_MS } from '@coringa/protocol';
 import type { PlayerAction, StateMessage } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
 import { handId, setup, values } from '@coringa/engine/testing';
@@ -355,7 +355,7 @@ describe('piso da janela de reação (§6.3)', () => {
     return { ...room, state };
   }
 
-  it('PASS antes de 2 s fica guardado (held) e vale aos 2 s; TRAP antes de 2 s vale na hora', async () => {
+  it('TRAP antes de 2 s vale na hora; o PASS depois dele fica guardado (held) e vale no fim do momento do Ás (bloco A, A9a)', async () => {
     const { h, p1, p2, state } = await kWindow({ p2: { hand: ['A'] } });
     const rec = h.core.record!;
     const opened = rec.game!.phaseStartedAt;
@@ -372,7 +372,8 @@ describe('piso da janela de reação (§6.3)', () => {
     expect(rec.epoch).toBe(epoch);
     expect(phaseOf(h)).toMatchObject({ kind: 'REACTION' });
 
-    // O PASS em 600 ms fica guardado.
+    // O PASS em 600 ms fica guardado: o atacante vê o momento do Ás desde os 300 ms, até o fim do impacto.
+    const floor = opened + 300 + MOMENT + MOMENT_TAIL_MS;
     h.advance(300);
     expect(h.now).toBe(opened + 600);
     const seqBefore = rec.seq;
@@ -381,8 +382,8 @@ describe('piso da janela de reação (§6.3)', () => {
     expect(rec.seq).toBe(seqBefore);
     expect(phaseOf(h)).toMatchObject({ kind: 'REACTION' });
     expect(rec.game!.heldPass).toEqual({ epoch: rec.epoch, id: 'pass' });
-    expect(rec.agenda).toContainEqual({ kind: 'reactionMin', at: opened + 2_000, epoch: rec.epoch });
-    expect(h.alarm).toBe(opened + 2_000);
+    expect(rec.agenda).toContainEqual({ kind: 'reactionMin', at: floor, epoch: rec.epoch });
+    expect(h.alarm).toBe(floor);
     // O oponente não recebeu nada do PASS.
     expect(p1.inbox.length).toBe(p1Inbox + 1); // só o `state` da jogada do Ás
     expect(h.messages(p1, 'state').at(-1)!.view.phase).toMatchObject({ kind: 'REACTION' });
@@ -398,12 +399,12 @@ describe('piso da janela de reação (§6.3)', () => {
     await act(h, p1, 'p1-pass', { type: 'PASS' });
     expect(p1.inbox.at(-1)).toMatchObject({ ok: false, code: 'NOT_YOUR_TURN' });
 
-    // Aos 2 s o PASS é aplicado.
-    h.advance(1_399);
+    // No piso o PASS é aplicado.
+    h.advance(floor - 1 - h.now);
     expect(phaseOf(h)).toMatchObject({ kind: 'REACTION' });
     const inbox1 = p1.inbox.length;
     h.advance(1);
-    expect(h.now).toBe(opened + 2_000);
+    expect(h.now).toBe(floor);
     expect(phaseOf(h)).toEqual({ kind: 'ATTACK_MAIN', player: 'p1' });
     expect(rec.game!.steps.at(-1)).toEqual({ player: 'p2', action: { type: 'PASS' } });
     expect(rec.game!.heldPass).toBeNull();
@@ -430,6 +431,26 @@ describe('piso da janela de reação (§6.3)', () => {
     await act(second.h, second.p2, 'b', { type: 'PASS' });
     expect(second.p2.inbox.at(-1)).toMatchObject({ ok: true, seq: second.h.core.record!.seq });
     expect(phaseOf(second.h)).toEqual({ kind: 'ATTACK_MAIN', player: 'p1' });
+  });
+
+  it('o passe automático logo depois de um Ás tardio fica guardado até o fim do momento dele, e a época nova esquece o piso (bloco A, A9a)', async () => {
+    const state = setup({ p1: { attack: [9], attackBuffs: ['J'] }, p2: { hand: ['A'] } });
+    const { h, p1, p2 } = await armed(state);
+    await act(h, p1, 'atk', { type: 'DECLARE_ATTACK' });
+    const rec = h.core.record!;
+    // Depois dos 2 s: sem o momento, o PASS valeria na hora e cortaria o Ás que o atacante ainda vê.
+    h.advance(2_500);
+    const used = h.now;
+    await act(h, p2, 'trap', { type: 'TRAP', cardId: handId(state, 'p2', 'A'), targetId: state.players[0]!.attackBuffs[0]!.id });
+    await h.send(p2, { t: 'act', id: 'auto', epoch: rec.epoch, action: { type: 'PASS' }, auto: true });
+    expect(p2.inbox.at(-1)).toEqual({ t: 'ack', id: 'auto', ok: true, held: true });
+    expect(rec.agenda).toContainEqual({ kind: 'reactionMin', at: used + MOMENT + MOMENT_TAIL_MS, epoch: rec.epoch });
+    h.advance(MOMENT + MOMENT_TAIL_MS - 1);
+    expect(phaseOf(h)).toMatchObject({ kind: 'REACTION' });
+    h.advance(1);
+    // O golpe resolve e encerra o turno de p1.
+    expect(phaseOf(h)).toEqual({ kind: 'ATTACK_MAIN', player: 'p2' });
+    expect(rec.game!.passHeldUntil).toBeNull();
   });
 
   it('o PASS guardado conta como jogada voluntária do respondente quando é aplicado', async () => {

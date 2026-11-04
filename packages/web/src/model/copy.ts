@@ -458,12 +458,14 @@ export function momentPlate(event: GameEvent, view: PlayerView, names: Names): M
       if (event.as === 'J') {
         return {
           title: `${who} pôs ${playedText(event.card, 'J')} nos Bônus de ataque`,
-          consequence: absoluteAttackArmed(owner, view.config) ? '4 J: o próximo ataque dele é Absoluto' : `o Ataque dele vai a ${attackPower(owner)}`,
+          consequence: absoluteAttackArmed(owner, view.config)
+            ? `${view.config.buffLimit} J: o próximo ataque dele é Absoluto`
+            : `o Ataque dele vai a ${attackPower(owner)}`,
         };
       }
       return {
         title: `${who} pôs ${playedText(event.card, 'Q')} nos Bônus de defesa`,
-        consequence: owner.absoluteDefense ? '4 Q: a Defesa Absoluta começa' : `a Defesa dele vai a ${defensePower(owner)}`,
+        consequence: owner.absoluteDefense ? `${view.config.buffLimit} Q: a Defesa Absoluta começa` : `a Defesa dele vai a ${defensePower(owner)}`,
       };
     }
     case 'GuardPlayed': {

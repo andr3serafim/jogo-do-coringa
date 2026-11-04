@@ -1,4 +1,5 @@
 import type { GameEvent, NumCard, SpecialCard } from '@coringa/engine';
+import { MOMENT_TAIL_MS } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
 import { dustPerCard, healsOf, landingsOf, leavingOf, recoilsOf, shardsPerCard, shiftDelaysOf, TABLE_MOTION } from '../../src/model/table-motion.ts';
 import { delaysOf } from '../../src/model/effects.ts';
@@ -166,6 +167,12 @@ describe('o momento da especial do oponente na mesa (bloco A do playtest, ponto 
     expect(delaysOf(beats).get('n3')).toBe(1_600);
     expect(landingsOf(beats, 'p1', false).get('n3')).toMatchObject({ atMs: 1_600 + TABLE_MOTION.landAfterMs, drop: false });
     expect(leavingOf(beats).has('a1')).toBe(false);
+    // O Ás dele, no topo do cemitério, só aparece quando a cópia do momento chega lá (a revisão final achou dois Ás à vista).
+    expect(landingsOf(beats, 'p1', false).get('a1')).toMatchObject({ atMs: 1_600 + TABLE_MOTION.exitMs, drop: false, snap: true });
+  });
+
+  it('a cauda do impacto que o protocolo dá a quem age logo depois cobre o racha, o tremor e a ida da carta ao cemitério', () => {
+    expect(MOMENT_TAIL_MS).toBeGreaterThanOrEqual(TABLE_MOTION.crackShakeMs + TABLE_MOTION.exitMs);
   });
 
   it('as vizinhas do alvo esperam o impacto', () => {

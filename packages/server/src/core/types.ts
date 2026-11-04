@@ -41,6 +41,11 @@ export interface GameRecord {
   pausedTurnMs: number | null;
   /** PASS guardado durante a janela de reação mínima; `auto` marca o passe automático, que não zera os estouros. */
   heldPass: { epoch: number; id: string; auto?: true } | null;
+  /**
+   * Depois de um Ás do respondente na janela, o PASS dele fica guardado até aqui: o momento do Ás que o atacante vê, até o fim do impacto
+   * (bloco A dos pontos do playtest, `decisoes.md` 2026-11-03 (5), A9a). Opcional: o registro de antes do campo vale `null`.
+   */
+  passHeldUntil?: number | null;
   strikes: Record<SeatId, number>;
   acks: Record<SeatId, AckMessage[]>;
   cause: OutcomeCause | null;

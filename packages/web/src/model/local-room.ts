@@ -16,7 +16,7 @@ import {
   type PlayerId,
   type ReplayStep,
 } from '@coringa/engine';
-import { HP_CHOICES, momentsMs, stepAllowanceMs } from '@coringa/protocol';
+import { HP_CHOICES, MOMENT_TAIL_MS, momentsMs, stepAllowanceMs } from '@coringa/protocol';
 import type {
   AckMessage,
   ConnectionEvent,
@@ -422,7 +422,8 @@ export class LocalRoom implements RoomConnection {
   /**
    * O bot joga quando é a vez dele: depois de `thinkMs`, ou já (0 ms) numa janela de reação. Antes, ele assiste ao fim das cenas
    * raras que estão no ar (a folga de cena): um `state` novo troca a linha do tempo da mesa, e a jogada dele em 600 ms cortava a
-   * cena do Ataque Absoluto de quem o atacou (decisoes.md 2026-11-01 (3)). Um timer por vez. O Difícil começa
+   * cena do Ataque Absoluto de quem o atacou (decisoes.md 2026-11-01 (3)). Na janela, depois do momento de um Ás dele, ele espera também o
+   * impacto (`MOMENT_TAIL_MS`): o passe ou o segundo Ás no fim da batida cortava o alvo quebrando e a ida do Ás ao cemitério. Um timer por vez. O Difícil começa
    * a busca quando esse timer dispara e a continua em fatias (`#searchSlice`); na reação e na ordem do ataque não há busca, e a
    * decisão sai na primeira fatia.
    */
@@ -430,7 +431,7 @@ export class LocalRoom implements RoomConnection {
     if (this.#closed || this.#botTimer !== null) return;
     if (!actingPlayers(this.#game).includes(BOT_SEAT)) return;
     const scene = Math.max(0, this.#sceneUntil - this.#options.now());
-    const delay = scene + (this.#game.phase.kind === 'REACTION' ? 0 : this.#think);
+    const delay = scene + (this.#game.phase.kind !== 'REACTION' ? this.#think : scene > 0 ? MOMENT_TAIL_MS : 0);
     this.#botTimer = this.#options.setTimer(() => {
       this.#botTimer = null;
       this.#botPlay();

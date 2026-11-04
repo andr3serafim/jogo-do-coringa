@@ -89,7 +89,7 @@ export const dustPerCard = (count: number): number => Math.min(TABLE_MOTION.dust
  * roubada voa de uma fileira para a outra, sem recuo.
  */
 export function landingsOf(beats: readonly Beat[], me: PlayerId, draftShown: boolean): ReadonlyMap<string, Landing> {
-  const { recoilMs, landAfterMs, dropMs } = TABLE_MOTION;
+  const { recoilMs, landAfterMs, dropMs, exitMs } = TABLE_MOTION;
   const landings = new Map<string, Landing>();
   for (const beat of plainBeats(beats)) {
     const { event, startMs } = beat;
@@ -110,6 +110,8 @@ export function landingsOf(beats: readonly Beat[], me: PlayerId, draftShown: boo
         break;
       case 'CardStolen':
         here.push([event.card.id, { atMs: touchMs(beat) + landAfterMs, drop: false }]);
+        // No momento, o Ás vem da mão do oponente e fica no topo do cemitério (sem numérica deslocada): aparece quando a cópia chega lá.
+        if (beat.moment) here.push([event.ace.id, { atMs: beat.moment.impactAtMs + exitMs, drop: false, snap: true }]);
         break;
       default:
         break;

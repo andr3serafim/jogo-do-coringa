@@ -110,7 +110,7 @@ function SceneLayer({ scene, curtain, veil = 'scene', names, reduced, me, hitLan
         data-ativa={curtain ? 'true' : undefined}
         data-veu={curtain && veil === 'moment' ? 'momento' : undefined}
         style={{ top: `${box?.hudBottom ?? 0}px` }}
-        className={`absolute inset-x-0 bottom-0 ${veil === 'moment' ? 'bg-tinta/35' : 'bg-tinta/60'} transition-opacity duration-[220ms] ease-out ${curtain ? 'opacity-100' : 'opacity-0'}`}
+        className={`absolute inset-x-0 bottom-0 ${veil === 'moment' ? 'bg-tinta/35' : 'bg-tinta/60'} transition-[opacity,background-color] duration-[220ms] ease-out ${curtain ? 'opacity-100' : 'opacity-0'}`}
       />
       {Drawn && scene && box ? (
         <Drawn key={serial} beat={scene} names={names} reduced={reduced} me={me} hitLanded={hitLanded} box={box} field={field} rising={rising} />

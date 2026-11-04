@@ -18,6 +18,9 @@ describe('a placa do momento', () => {
     expect(momentPlate(played, view, NAMES)).toEqual({ title: 'Bot pôs 1 J nos Bônus de ataque', consequence: 'o Ataque dele vai a 38' });
     const armed = scenarioAt({ opponent: { attackRow: [10], attackBuffs: ['J', 'J', 'J', 'J'] } }).view;
     expect(momentPlate(played, armed, NAMES)?.consequence).toBe('4 J: o próximo ataque dele é Absoluto');
+    // O limite dos Bônus é do motor (`config.buffLimit`), não da interface.
+    const three = scenarioAt({ opponent: { attackRow: [10], attackBuffs: ['J', 'J', 'J'] } }).view;
+    expect(momentPlate(played, { ...three, config: { ...three.config, buffLimit: 3 } }, NAMES)?.consequence).toBe('3 J: o próximo ataque dele é Absoluto');
   });
 
   it('o Selvagem como Q: a Defesa dele, ou a Defesa Absoluta', () => {

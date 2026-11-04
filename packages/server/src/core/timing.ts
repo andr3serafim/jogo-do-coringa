@@ -1,5 +1,5 @@
 import type { GameEvent, Phase } from '@coringa/engine';
-import { stepAllowanceMs } from '@coringa/protocol';
+import { MOMENT_TAIL_MS, stepAllowanceMs } from '@coringa/protocol';
 import { withItem, withoutKinds } from './agenda.ts';
 import { phaseKey } from './epoch.ts';
 import { TIMERS } from './timers.ts';
@@ -39,6 +39,8 @@ export function schedulePhase(record: RoomRecord, prev: PhaseSnapshot, events: G
     if (allowance > 0 && game.phaseDeadlineAt !== null) {
       game.phaseDeadlineAt += allowance;
       game.clockRunsFrom = Math.max(now, game.clockRunsFrom ?? now) + allowance;
+      // O Ás do respondente na janela: o atacante vê o momento dele a partir de agora, e o PASS que vier logo depois espera o impacto.
+      if (game.state.phase.kind === 'REACTION') game.passHeldUntil = now + allowance + MOMENT_TAIL_MS;
       armPhaseAlarm(record, game.phaseDeadlineAt);
     }
     return;
@@ -47,6 +49,7 @@ export function schedulePhase(record: RoomRecord, prev: PhaseSnapshot, events: G
   const phase = game.state.phase;
   game.phaseStartedAt = now;
   game.heldPass = null;
+  game.passHeldUntil = null;
   record.agenda = withoutKinds(record.agenda, ['phase', 'reactionMin']);
 
   let durationMs: number | null = null;

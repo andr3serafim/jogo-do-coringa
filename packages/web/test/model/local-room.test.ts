@@ -11,7 +11,7 @@ import {
   type PlayerView,
   type Replay,
 } from '@coringa/engine';
-import { SPECIAL_MOMENT_MS, momentsMs, sceneAllowanceMs, type ConnectionEvent, type PlayerAction, type ReplayMessage, type RoomMessage, type StateMessage } from '@coringa/protocol';
+import { MOMENT_TAIL_MS, SPECIAL_MOMENT_MS, momentsMs, sceneAllowanceMs, type ConnectionEvent, type PlayerAction, type ReplayMessage, type RoomMessage, type StateMessage } from '@coringa/protocol';
 import { BOTS, runHard } from '@coringa/sim/bots';
 import { createRng } from '@coringa/sim/rng';
 import { describe, expect, it, vi } from 'vitest';
@@ -274,9 +274,10 @@ describe('LocalRoom', () => {
       if (view.phase.kind === 'REACTION' && view.phase.responder === 'p2') {
         sawReaction = true;
         // Sem cena no ar, na hora; com uma cena no ar, só a folga dela (decisoes.md 2026-11-01 (3)). A Armadilha do Bot na janela também
-        // tem o momento dela, que o jogador vê antes de o Bot jogar de novo (bloco A do playtest, ponto 1): no máximo o inteiro.
+        // tem o momento dela, que o jogador vê antes de o Bot jogar de novo (bloco A do playtest, ponto 1): no máximo o inteiro, e o impacto.
         const last = states(events).at(-1)!.events;
-        expect(timers.delays.at(-1)).toBeLessThanOrEqual(sceneAllowanceMs(last) + momentsMs(last, 'p1').ms);
+        const moment = momentsMs(last, 'p1').ms;
+        expect(timers.delays.at(-1)).toBeLessThanOrEqual(sceneAllowanceMs(last) + moment + (moment > 0 ? MOMENT_TAIL_MS : 0));
       }
       if (myTurn(view)) await room.act(legalActions(view)[0] as PlayerAction);
       else timers.runNext();
@@ -332,7 +333,7 @@ describe('LocalRoom', () => {
       const last = list.at(-1);
       if (!last || moments.length === 0 || sceneAllowanceMs(last.events) > 0) return null;
       const reaction = last.view.phase.kind === 'REACTION';
-      return moments.reduce((sum, ms) => sum + ms, 0) + (reaction ? 0 : 600);
+      return moments.reduce((sum, ms) => sum + ms, 0) + (reaction ? MOMENT_TAIL_MS : 600);
     };
     const checked: Array<{ delay: number; expected: number }> = [];
     let published: ConnectionEvent[] = [];
@@ -356,6 +357,8 @@ describe('LocalRoom', () => {
     }
     expect(checked.some((entry) => entry.expected === SPECIAL_MOMENT_MS.first + 600)).toBe(true);
     expect(checked.some((entry) => entry.expected === SPECIAL_MOMENT_MS.next + 600)).toBe(true);
+    // O Ás do Bot na janela: o passe dele espera também o impacto.
+    expect(checked.some((entry) => entry.expected === SPECIAL_MOMENT_MS.first + MOMENT_TAIL_MS)).toBe(true);
     for (const { delay, expected } of checked) expect(delay).toBe(expected);
   });
 

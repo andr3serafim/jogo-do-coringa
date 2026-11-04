@@ -68,6 +68,23 @@ describe('o véu do momento', () => {
     expect(m.container.querySelector('[data-cortina][data-ativa]')).toBeNull();
   });
 
+  it('o Q do Bot que abre a Defesa Absoluta: o véu vira a cortina da cena sem descer, e o fundo esmaece de um para o outro', () => {
+    const m = mount(THEIRS, { training: 'medio' });
+    const QB: SpecialCard = { id: 'qb', kind: 'Q', suit: 'paus' };
+    emit(m, { ...THEIRS, opponent: { ...THEIRS.opponent, defenseBuffs: [QB], absoluteDefense: true } }, [
+      { type: 'BuffPlayed', player: 'p2', card: QB, as: 'Q' },
+      { type: 'AbsoluteDefenseStarted', player: 'p2' },
+    ]);
+    advance(10);
+    expect(veil(m.container)).not.toBeNull();
+    advance(SPECIAL_MOMENT_MS.first + 10);
+    const curtain = m.container.querySelector('[data-cortina][data-ativa]');
+    expect(curtain).not.toBeNull();
+    expect(curtain).not.toHaveAttribute('data-veu');
+    // A troca de 35% para 60% é uma subida de luminância sem a trava: esmaece junto com a opacidade, nunca de uma vez.
+    expect(curtain!.className).toContain('transition-[opacity,background-color]');
+  });
+
   it('com movimento reduzido, nenhum véu', () => {
     const m = mount(THEIRS, { training: 'medio', prefs: { reduceMotion: true } });
     emit(m, BOT_ONE, [botBuff(JB)]);
