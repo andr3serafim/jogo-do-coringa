@@ -1,6 +1,7 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-03**, com o bloco A do playtest na `main` (fast-forward até este commit). Antes de seguir, confira se não há versão mais nova em outra branch (regra 1
+> Sobrescrito a cada atualização. **Última: 2026-11-04**, com o bloco E (a regra do 16) na `main` por fast-forward até este commit,
+> depois do bloco A (`f8755bc`). Antes de seguir, confira se não há versão mais nova em outra branch (regra 1
 > da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
@@ -18,16 +19,16 @@
   fixos; o véu que pulava de 35% para 60%. E, por um conselho depois dela (`540e3d4`): online, a sua especial que quebra (o Ás, o
   Sacrifício, o Roubo) trava a sua jogada seguinte até o fim do impacto (2,08 s), e o Bot só espera a cauda depois de um momento dele.
 - **Próximo passo exato:**
-  1. A sessão do bloco E mesclou a `main` (com o bloco A) na branch dela e renumerou as entradas (`decisoes.md` 2026-11-03 (6),
-     `diario.md` (7)); com o check e as duas CI verdes no merge, ela leva a branch à `main` por fast-forward e sai (seção "Bloco E" abaixo).
+  1. Feito: a sessão do bloco E mesclou a `main` (com o bloco A) na branch dela (`9125328`, as duas CI verdes, run `41764020751`) e
+     levou a branch à `main` por fast-forward (seção "Bloco E" abaixo). Os dois blocos estão na `main`; o próximo passo é do autor.
 - **Esperando o autor:**
   - jogar o bloco A (o treino mostra tudo; o online só depois do `pnpm deploy:server` dele, que leva também a folga do momento no
     prazo, o PASS guardado depois do Ás e o conserto do Equipar vazio);
   - **quatro textos das placas que ele viu na spec §3 e o motor contradiz em casos de borda** (`diario.md` 2026-11-03 (6), "para o autor
     decidir"): "imune até o golpe dele" (o Ataque Absoluto fura), "quebra todos os K" (o Reflect segura), "o K absorve o próximo golpe
     inteiro" (o Ataque Absoluto quebra) e "o próximo golpe volta para ele" (contra a Defesa Absoluta, só segura). Ficaram como ele aprovou.
-- **Em paralelo:** a sessão do **bloco E** (a regra do 16) terminou o plano dela (`21e4c43`, Difícil aprovado, E2E 79/79) e mesclou a
-  `main` com o bloco A. Terminada e conferida, a sessão sai (`decisoes.md` 2026-11-03 (4)), com aviso antes.
+- **Bloco E:** a sessão do bloco E (a regra do 16) terminou o plano (Difícil aprovado, E2E 79/79), mesclou a `main` com o bloco A e
+  foi para a `main`. Terminada e conferida, a sessão sai (`decisoes.md` 2026-11-03 (4)).
 - **Para medir uma cena com a 8787 ocupada:** `MEDIR_PORTA=8797` no `medir-cena.ts`. Para o E2E inteiro numa porta livre, a receita está no `diario.md` 2026-11-02 (8) (uma configuração que importa o `playwright.config.ts` e troca a porta).
 - **Para ver a Ressurreição sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave `coringa:partidas` e abra `/partidas/exodia-devastacao`. "Próximo
   passo" na rodada 7, passo 27, mostra a sua, com a quadra; na rodada 23, passo 107, a do Bot, com a quadra na outra fileira; na rodada 37, passo 182, a do Bot sem quadra.
@@ -66,9 +67,9 @@
     `STATE_SCHEMA` 5), web (o painel, o cemitério com a troca e o total, a fileira protegida, a dica do tutorial), E2E (79 de 79);
   - a medição em `notas/medicao-ressurreicao-quadra.md`: 98% das quadras viram Ressurreição usada (eram 82%), a iniciativa quase não
     muda, a mediana de rodadas de Ataque vai a 14 (meta 8–14); o portão do Difícil aprovado do zero (69,0% / 81,5% / p95 até 189 ms).
-- **Próximo passo exato:** as duas CI passaram em `21e4c43`; a `main` com o bloco A (`f8755bc`) foi mesclada aqui (conflitos só na
-  memória e no `testMatch` do `playwright.config.ts`; as entradas do bloco E renumeradas: `decisoes.md` 2026-11-03 (6), `diario.md` (7)).
-  Falta: o check e as duas CI no commit do merge, a `main` por fast-forward e o aviso à sessão que abriu esta, que então a apaga.
+- **Na `main`:** a `main` com o bloco A (`f8755bc`) foi mesclada aqui em `9125328` (conflitos só na memória e no `testMatch` do
+  `playwright.config.ts`; as entradas do bloco E renumeradas: `decisoes.md` 2026-11-03 (6), `diario.md` (7)); as duas CI passaram nele
+  (run `41764020751`), e a `main` foi por fast-forward até este commit, que só mexe na memória. Nada mais da sessão do bloco E em curso.
 - **Para o autor** (o deploy é dele, `pnpm deploy:server`):
   - **jogue a janela:** ela aparece depois da revelação do Equipar quando você forma quadra e há numérica no cemitério; com as duas
     fileiras cheias, o cemitério mostra a troca (a carta que sai e o total);
@@ -77,8 +78,8 @@
   - **não conferido de verdade:** a troca no navegador (o E2E não chega a ela; só os testes da mesa, sem layout), o relógio de 15 s online
     e o som.
 - **Convivência:** dos arquivos do bloco A, só o `copy.ts` mudou aqui (o `CLOCK_START_TEXT` e a linha da Ressurreição no resumo das
-  regras). O `timing.ts` do servidor vai receber do bloco A o `stepAllowanceMs(events, decider)`: quem mesclar por último põe a fase
-  `RESURRECTION` no mapa e roda de novo os testes do prazo.
+  regras). No merge, o `timing.ts` ficou com o `stepAllowanceMs` do bloco A e o caso `RESURRECTION` (15 s); o `passHeldUntil` só vale na
+  `REACTION`, e a Ressurreição não entra nos momentos do bloco A.
 
 ## O plano da fatia 5, em resumo
 

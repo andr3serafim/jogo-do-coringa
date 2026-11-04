@@ -23,6 +23,9 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   7. o E2E (`1b1c023`): `resurrection.spec.ts` na semente `e2e-quadra-36` (a janela do jogador na rodada 4), fotos em 360 × 640 e 1366 × 657;
      o `pnpm e2e` inteiro, 79 de 79 (na porta 8797);
   8. a medição: calibração e portão do Difícil (`e8660f1`, `071626f`), números em `notas/medicao-ressurreicao-quadra.md`.
+- **Para a `main` (2026-11-04):** as duas CI passaram em `21e4c43`; a `main` com o bloco A (`f8755bc`) foi mesclada em `9125328`
+  (conflitos só na memória e no `testMatch` do `playwright.config.ts`; as entradas renumeradas), e as duas CI passaram de novo nele
+  (run `41764020751`); a `main` foi por fast-forward até o commit da memória. A revisão final foi de quem escreveu o código, sem subagente.
 - **Rulings** (as escolhas da execução, além das 9 do plano que ele aprovou):
   - a troca sai como no Roubo (`CardsRemovedFromRow`, `Healed`, `Resurrected`): a linha do tempo, a saída na mesa, o som e o histórico já a
     tratam, e o `timeline.ts` (do bloco A) ficou intocado;
