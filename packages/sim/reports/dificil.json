@@ -157,6 +157,70 @@
       },
       "approved": true,
       "seconds": 658.0972447
+    },
+    {
+      "label": "de volta sem a busca na janela (a rodada 2 pontuou menos), numa máquina sem outra medição",
+      "notes": [],
+      "hard": {
+        "rolloutsPerCandidate": 8,
+        "maxCandidates": 4,
+        "horizon": {
+          "EQUIP": 2,
+          "ATTACK_MAIN": 3
+        }
+      },
+      "easyBlunder": 0.7,
+      "hardVsGreedy": {
+        "games": 200,
+        "rate": 0.69,
+        "se": 0.032703210851535665,
+        "wins": 138,
+        "losses": 62,
+        "unfinished": 0,
+        "withInitiative": {
+          "games": 100,
+          "rate": 0.72
+        },
+        "withoutInitiative": {
+          "games": 100,
+          "rate": 0.66
+        }
+      },
+      "greedyVsEasy": {
+        "games": 200,
+        "rate": 0.815,
+        "se": 0.027456784225396828,
+        "wins": 163,
+        "losses": 37,
+        "unfinished": 0,
+        "withInitiative": {
+          "games": 100,
+          "rate": 0.84
+        },
+        "withoutInitiative": {
+          "games": 100,
+          "rate": 0.79
+        }
+      },
+      "timing": {
+        "decisions": 8886,
+        "p50Ms": 84.70329999993555,
+        "p95Ms": 188.9147000000812,
+        "maxMs": 605.6113999999943,
+        "searching": {
+          "decisions": 6776,
+          "p50Ms": 98.24409999999625,
+          "p95Ms": 218.67379999998957,
+          "maxMs": 605.6113999999943
+        }
+      },
+      "passes": {
+        "hardVsGreedy": true,
+        "greedyVsEasy": true,
+        "p95": true
+      },
+      "approved": true,
+      "seconds": 750.5503386
     }
   ]
 }

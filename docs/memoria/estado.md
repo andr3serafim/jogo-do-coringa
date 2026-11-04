@@ -53,20 +53,28 @@
 ## Bloco E (sessão paralela)
 
 > Seção da sessão do bloco E (a regra do ponto 16), no worktree `.claude/worktrees/ressurreicao-quadra-f59247`, branch
-> `claude/ressurreicao-quadra-f59247`, saída de `d35a241` (`feat/playtest-spec`). O "Agora" acima é da outra sessão (o bloco A).
+> `claude/ressurreicao-quadra-f59247` (publicada também como `feat/ressurreicao-quadra`, para a CI), saída de `d35a241`. O "Agora"
+> acima é da outra sessão (o bloco A).
 
-- **Feito (2026-11-03):**
-  - a regra escrita na spec das regras (`2026-10-15-jogo-coringa-regras-motor-design.md`): §1.4 passo 7, §1.8 "Ressurreição no
-    instante da quadra", §1.12 (o prazo da janela, a definir), §1.14, §2.3 a §2.7 (a fase `RESURRECTION`, `RESURRECT` e `PASS` nela, a
-    troca saindo como no Roubo, o campo `resurrectOnQuad`);
-  - o plano, **aprovado** com 15 s na janela (`decisoes.md` 2026-11-03 (5)): `docs/superpowers/plans/2026-11-03-ressurreicao-quadra.md` (9 tarefas).
-- **Achado que decidiu a chave na config:** as quatro fixtures do E2E têm quadra na revelação (`absolutos` no passo 24, `especiais` no
-  49, `exodia-devastacao` no 25, `reflect` no 142). Sem `resurrectOnQuad` (ausente = a regra de antes), os replays delas divergiriam.
-- **Execução:** Tarefas 1 a 7 commitadas (motor, bots com `RULES_VERSION` 5, servidor com `STATE_SCHEMA` 5 e 15 s, a web, o E2E da janela).
-- **Próximo passo exato:** o `pnpm e2e` inteiro (na 8797 se a 8787 estiver ocupada: a receita está no `diario.md` 2026-11-02 (8)); depois a Tarefa 8 (a medição: `sim:calibrate` e `sim:dificil --recomecar`, avisando antes a sessão do bloco A).
-- **Convivência:** dos arquivos do bloco A, o plano só toca em `packages/web/src/model/copy.ts` (o `CLOCK_START_TEXT` e a linha da
-  Ressurreição no resumo das regras); os textos novos vão para `model/resurrection-copy.ts`. Antes de mesclar na `main`, mesclar a
-  `main` aqui. O `STATE_SCHEMA` (5) e o `RULES_VERSION` (5) sobem nesta branch, uma vez cada.
+- **Feito (2026-11-03), o plano inteiro** (`docs/superpowers/plans/2026-11-03-ressurreicao-quadra.md`, aprovado com 15 s na janela,
+  `decisoes.md` 2026-11-03 (5)); detalhes, commits e rulings no `diario.md` 2026-11-03 (6):
+  - a regra na spec das regras (§1.4, §1.8, §1.12, §1.14, §2.3 a §2.7) e na spec da web (§3.4 e §3.5b);
+  - motor (a janela `RESURRECTION`, a troca com a proteção da quadra, a chave `resurrectOnQuad`), bots, `RULES_VERSION` 5, servidor (15 s,
+    `STATE_SCHEMA` 5), web (o painel, o cemitério com a troca e o total, a fileira protegida, a dica do tutorial), E2E (79 de 79);
+  - a medição em `notas/medicao-ressurreicao-quadra.md`: 98% das quadras viram Ressurreição usada (eram 82%), a iniciativa quase não
+    muda, a mediana de rodadas de Ataque vai a 14 (meta 8–14); o portão do Difícil aprovado do zero (69,0% / 81,5% / p95 até 189 ms).
+- **Próximo passo exato:** as duas CI (`check` e `e2e`) verdes em `feat/ressurreicao-quadra`; mesclar a `main` aqui se ela andou (a do
+  bloco A pode ter chegado antes) e levar a branch à `main` por fast-forward; avisar a sessão que abriu esta, que então a apaga.
+- **Para o autor** (o deploy é dele, `pnpm deploy:server`):
+  - **jogue a janela:** ela aparece depois da revelação do Equipar quando você forma quadra e há numérica no cemitério; com as duas
+    fileiras cheias, o cemitério mostra a troca (a carta que sai e o total);
+  - o deploy fecha as salas online abertas (`STATE_SCHEMA` 5) e as partidas guardadas de antes abrem com o aviso de versão (`RULES_VERSION`
+    5), mas reproduzem igual (a chave `resurrectOnQuad` fica ausente nelas);
+  - **não conferido de verdade:** a troca no navegador (o E2E não chega a ela; só os testes da mesa, sem layout), o relógio de 15 s online
+    e o som.
+- **Convivência:** dos arquivos do bloco A, só o `copy.ts` mudou aqui (o `CLOCK_START_TEXT` e a linha da Ressurreição no resumo das
+  regras). O `timing.ts` do servidor vai receber do bloco A o `stepAllowanceMs(events, decider)`: quem mesclar por último põe a fase
+  `RESURRECTION` no mapa e roda de novo os testes do prazo.
 
 ## O plano da fatia 5, em resumo
 

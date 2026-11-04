@@ -218,6 +218,9 @@ no `decisoes.md`.
 
 ### 7.3 O que muda no código
 
+> **Feito em 2026-11-03** (plano `docs/superpowers/plans/2026-11-03-ressurreicao-quadra.md`, `diario.md` 2026-11-03 (6)); a medição está em
+> `docs/memoria/notas/medicao-ressurreicao-quadra.md`.
+
 - **Motor:** uma fase nova (`RESURRECTION`, com a fila de quem decide), as jogadas `RESURRECT` (com a troca) e `PASS` nela, a troca também
   na fase principal (hoje `resurrect` em `actions/main.ts` recusa a fileira cheia com `ROW_FULL`, e `legal-actions.ts` só lista a
   fileira com vaga), a proteção da quadra (com `quadValues`), a reavaliação das quadras, a cura da que sai (`healFromDefense`). Testes de
