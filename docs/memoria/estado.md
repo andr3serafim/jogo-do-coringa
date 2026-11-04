@@ -1,17 +1,17 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-04**, com o bloco E na `main` (`d04dc0b`) e os quatro textos de placa na
-> branch `feat/playtest-placas`, a caminho da `main`. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da
+> Sobrescrito a cada atualização. **Última: 2026-11-04**, com os blocos A e E e os quatro textos de placa na `main` (fast-forward até
+> este commit). Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da
 > seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `feat/playtest-placas`, no checkout principal, saída da `main` em `f8755bc`, com a `main` do bloco E (`d04dc0b`) mesclada.
+- **Branch:** `feat/playtest-placas`, no checkout principal, saída da `main` em `f8755bc`, com a `main` do bloco E (`d04dc0b`) mesclada em
+  `9c25133`. As duas CI passaram no merge (run `41837134228`), e a `main` foi por fast-forward até este commit, que só mexe na memória.
 - **Feito:** o autor pediu "Corrija os quatro" (`decisoes.md` 2026-11-04 (1)). As placas trocam de linha só no caso de borda, na ordem do
   `previewBetween`, com teste contra a prévia do motor; a linha da zona do Reflect, no PC, foi para baixo do título (`diario.md` 2026-11-04 (1)).
-- **Próximo passo exato:**
-  1. O push do merge da `main` (`d04dc0b`, o bloco E) nesta branch (o pre-push roda o `pnpm check`), as duas CI verdes e a `main` por
-     fast-forward (`git push origin <sha>:refs/heads/main`, sem `| tail`).
+- **Próximo passo exato:** nada em curso. O próximo é do autor (abaixo); depois do playtest dele, os blocos B (o golpe final, ponto 15),
+  C (10, 11 e 13) e D (5 e 14) da spec do playtest, nessa ordem (`decisoes.md` 2026-11-03 (4)), cada um com o plano aprovado antes.
 - **Esperando o autor:**
   - jogar os blocos A e E e as placas novas (o treino mostra tudo; o online só depois do `pnpm deploy:server` dele, que leva a folga do
     momento no prazo, o PASS guardado depois do Ás, o conserto do Equipar vazio e a janela da Ressurreição; o deploy fecha as salas abertas,

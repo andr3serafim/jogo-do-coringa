@@ -25,6 +25,9 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 - **Para o autor (um quinto caso, achado no motor):** a placa "Cura passiva" ("a Defesa dele que cai vira vida") também falha: contra o
   Ataque Absoluto armado do outro, todos os K quebram antes da cura, e com exatamente 2 K o golpe que um K absorve deixa 1 K, sem cura
   naquele golpe. Não mexido: ele pediu os quatro.
+- **Fechamento:** a sessão do bloco E levou a `main` a `d04dc0b`; mesclada aqui em `9c25133` (conflitos só na memória: as entradas das
+  duas branches juntas, a mais nova em cima). As duas CI verdes no merge (run `41837134228`) e no `2d9774e`; a `main` por fast-forward até
+  o commit da memória logo depois. A sessão do bloco E foi apagada (a branch estava na `main`, o worktree limpo).
 
 ---
 
