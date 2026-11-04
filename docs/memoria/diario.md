@@ -100,8 +100,13 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     O teste do piso que usava um Ás aos 300 ms mudou de propósito (o PASS dele vale aos 2.380 ms, não aos 2 s);
   - **no treino, o Bot na janela jogava no fim exato do momento do Ás dele:** o `state` novo cortava o racha, o tremor e a ida do Ás ao
     cemitério (e o som da quebra). **Ruling:** `MOMENT_TAIL_MS` (480 ms, no protocolo; um teste da web confere que cobre
-    `crackShakeMs + exitMs`) entra só onde a jogada seguinte não pensa: o PASS guardado e o Bot na janela. Fora da janela o Bot já
-    pensa 600 ms depois do momento, e a folga do prazo (`stepAllowanceMs`) ficou como estava;
+    `crackShakeMs + exitMs`) entra só depois das especiais que quebram ou levam uma carta (`MOMENT_TAIL_PLAYS`: o Ás, o Sacrifício e o
+    Roubo) e só onde a jogada seguinte não pensa: o PASS guardado, o Bot na janela (`#tailUntil`, só depois de um momento dele com
+    cauda: uma cena sua no ar não o atrasa) e, online, a sua jogada depois da sua especial com cauda (a trava da A9a passa de 1,6 s a
+    2,08 s; um clique rápido logo depois cortava o alvo quebrando na tela do oponente). Fora da janela o Bot já pensa 600 ms depois do
+    momento, e a folga do prazo (`stepAllowanceMs`) ficou como estava: o relógio do servidor para 1,6 s, e os 480 ms da trava correm no
+    relógio de quem jogou. Os cacos vão para a camada das partículas, que o `state` novo não limpa: a cópia que racha vive 120 ms e a ida
+    do Ás ao cemitério 360 ms, os dois dentro dos 480;
   - **o Ás do Roubo do oponente aparecia duas vezes** (no topo do cemitério, sem numérica deslocada, e grande no centro): ganhou o pouso
     `snap` quando a cópia chega ao cemitério (impacto + `exitMs`). Com movimento reduzido ele aparece 360 ms depois do fim do momento;
   - o "4 J" e o "4 Q" da placa vêm de `config.buffLimit`; o véu do momento passa para a cortina da cena (o 4º Q, com a Defesa

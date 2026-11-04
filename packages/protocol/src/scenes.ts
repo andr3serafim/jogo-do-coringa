@@ -42,9 +42,13 @@ export const SPECIAL_MOMENT_MS = { first: 1_600, next: 1_100 } as const;
 /**
  * O que o impacto do momento ainda mostra depois do fim da batida: o racha e o tremor do alvo e a ida da carta ao cemitério (a web confere a
  * conta contra os tempos da mesa). Quem age sem pensar logo depois do momento de um Ás espera também isto, ou a jogada seguinte corta o alvo
- * quebrando: o PASS do respondente depois do Ás dele na janela de reação (o passe automático, online) e o Bot na janela, no treino.
+ * quebrando: o PASS do respondente depois do Ás dele na janela de reação (o passe automático, online), o Bot na janela, no treino, e,
+ * online, a sua jogada seguinte depois da sua especial que tem impacto (`MOMENT_TAIL_PLAYS`).
  */
 export const MOMENT_TAIL_MS = 480;
+
+/** As especiais cujo impacto quebra ou leva uma carta (o alvo estoura, o Ás vai ao cemitério, a numérica roubada voa): as que têm cauda. */
+export const MOMENT_TAIL_PLAYS: ReadonlySet<GameEvent['type']> = new Set<GameEvent['type']>(['TrapUsed', 'Sacrificed', 'CardStolen']);
 
 /** As jogadas especiais que viram momento para quem não jogou. O Reflect, a Devastação e a Ressurreição têm cena própria. */
 export const MOMENT_PLAYS: ReadonlySet<GameEvent['type']> = new Set<GameEvent['type']>([

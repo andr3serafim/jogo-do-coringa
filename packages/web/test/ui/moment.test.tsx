@@ -2,7 +2,7 @@
 // leve pela mesma trava de flash da cortina e, online, a sua especial que segura o tempo do momento que o oponente vê (decisoes.md
 // 2026-11-03 (5), A9a).
 import type { GameEvent, SpecialCard } from '@coringa/engine';
-import { SPECIAL_MOMENT_MS } from '@coringa/protocol';
+import { MOMENT_TAIL_MS, SPECIAL_MOMENT_MS } from '@coringa/protocol';
 import { act, render } from '@testing-library/react';
 import { namesFor } from '@coringa/sim/text';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -119,6 +119,19 @@ describe('online, a sua especial espera o momento que o oponente vê (A9a)', () 
     expect(busyFor(m.container)).toBe(400 + SPECIAL_MOMENT_MS.first);
     emit(m, TWO, [myBuff(J2)]);
     expect(busyFor(m.container)).toBe(SPECIAL_MOMENT_MS.next);
+  });
+
+  it('o seu Ás espera também o impacto que o oponente vê (o alvo quebrando): 1,6 s e mais a cauda', () => {
+    const A1: SpecialCard = { id: 'a1', kind: 'A', suit: 'espadas' };
+    const JX: SpecialCard = { id: 'jx', kind: 'J', suit: 'copas' };
+    const before: ViewSpec = { ...MINE, self: { ...MINE.self, hand: [A1] }, opponent: { ...MINE.opponent, attackBuffs: [JX] } };
+    const after: ViewSpec = { ...MINE, self: { ...MINE.self, hand: [] }, opponent: { ...MINE.opponent, attackBuffs: [] } };
+    const m = mount(before);
+    emit(m, after, [MY_TURN, { type: 'TrapUsed', player: 'p1', card: A1, target: JX, targetOwner: 'p2' }]);
+    advance(400 + SPECIAL_MOMENT_MS.first + MOMENT_TAIL_MS - 1);
+    expect(busy(m.container)).toBe(true);
+    advance(1);
+    expect(busy(m.container)).toBe(false);
   });
 
   it('no treino, a sua especial é a jogada de sempre', () => {

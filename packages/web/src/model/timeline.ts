@@ -5,7 +5,7 @@
 // As batidas são contíguas: `startMs` da batida i+1 = `startMs + durationMs` da batida i. Não há
 // sobreposição; o número de dano, a faixa e a tremida acontecem dentro da duração da própria batida.
 import type { GameEvent, PlayerId } from '@coringa/engine';
-import { SCENE_MS, SPECIAL_MOMENT_MS, momentsMs } from '@coringa/protocol';
+import { MOMENT_TAIL_MS, MOMENT_TAIL_PLAYS, SCENE_MS, SPECIAL_MOMENT_MS, momentsMs } from '@coringa/protocol';
 import { SCENE_MOMENTS } from './scene-moments.ts';
 
 /** Duração de uma cena na tabela do protocolo (a mesma que dá a folga do relógio no servidor, sub-projeto 6 §9). */
@@ -312,7 +312,8 @@ export function buildTimeline(events: GameEvent[], options: TimelineOptions): Be
       const shown = momentsMs([item.event], other, mine);
       mine = shown.count;
       if (shown.ms > 0) {
-        item.baseMs = shown.ms;
+        // O Ás, o Sacrifício e o Roubo quebram ou levam uma carta no impacto: a sua jogada seguinte espera também o fim dele.
+        item.baseMs = shown.ms + (MOMENT_TAIL_PLAYS.has(item.event.type) ? MOMENT_TAIL_MS : 0);
         item.uncapped = true;
       }
     }

@@ -16,7 +16,7 @@ import {
   type PlayerId,
   type ReplayStep,
 } from '@coringa/engine';
-import { HP_CHOICES, MOMENT_TAIL_MS, momentsMs, stepAllowanceMs } from '@coringa/protocol';
+import { HP_CHOICES, MOMENT_TAIL_MS, MOMENT_TAIL_PLAYS, isMomentFor, momentsMs, stepAllowanceMs } from '@coringa/protocol';
 import type {
   AckMessage,
   ConnectionEvent,
@@ -129,6 +129,8 @@ export class LocalRoom implements RoomConnection {
   #autoTimer: unknown = null;
   /** Até quando (no `now` injetado) vão as cenas raras publicadas: o bot assiste a elas antes de pensar (decisoes.md 2026-11-01 (3)). */
   #sceneUntil = 0;
+  /** Até quando vai o impacto do último momento com cauda do Bot (o Ás dele, o Sacrifício, o Roubo): na janela, ele espera também isto. */
+  #tailUntil = 0;
   /** Quantos momentos de especial do Bot o turno já teve na tela do jogador (bloco A dos pontos do playtest, ponto 1): o segundo é mais curto. */
   #momentsInTurn = 0;
   /** A busca do Difícil em curso (a decisão ainda não saiu). `null` fora dela; quando não é `null`, há uma fatia agendada em `#botTimer`. */
@@ -230,6 +232,7 @@ export class LocalRoom implements RoomConnection {
     }
     // Quem joga já não está vendo a cena de antes (ela acabou ou foi pulada): o bot não a espera mais, só a desta jogada.
     this.#sceneUntil = 0;
+    this.#tailUntil = 0;
     const seq = this.#commit({ player: LOCAL_ME, action }, result.state, result.events);
     return Promise.resolve({ t: 'ack', id, ok: true, seq });
   }
@@ -312,6 +315,7 @@ export class LocalRoom implements RoomConnection {
     const allowance = stepAllowanceMs(events, LOCAL_ME, this.#momentsInTurn);
     this.#momentsInTurn = momentsMs(events, LOCAL_ME, this.#momentsInTurn).count;
     if (allowance > 0) this.#sceneUntil = Math.max(this.#sceneUntil, this.#options.now()) + allowance;
+    if (events.some((event) => MOMENT_TAIL_PLAYS.has(event.type) && isMomentFor(event, LOCAL_ME))) this.#tailUntil = this.#sceneUntil + MOMENT_TAIL_MS;
     this.#publishState(events);
     if (next.phase.kind === 'GAME_OVER') {
       this.#cancelBot();
@@ -430,8 +434,9 @@ export class LocalRoom implements RoomConnection {
   #scheduleBot(): void {
     if (this.#closed || this.#botTimer !== null) return;
     if (!actingPlayers(this.#game).includes(BOT_SEAT)) return;
-    const scene = Math.max(0, this.#sceneUntil - this.#options.now());
-    const delay = scene + (this.#game.phase.kind !== 'REACTION' ? this.#think : scene > 0 ? MOMENT_TAIL_MS : 0);
+    const now = this.#options.now();
+    const scene = Math.max(0, this.#sceneUntil - now);
+    const delay = this.#game.phase.kind === 'REACTION' ? Math.max(scene, this.#tailUntil - now) : scene + this.#think;
     this.#botTimer = this.#options.setTimer(() => {
       this.#botTimer = null;
       this.#botPlay();
