@@ -32,7 +32,7 @@ import { noPlaysText } from '../../model/copy.ts';
 import { playDropZones, resolvePlayDrop, type DropKey } from '../../model/drag.ts';
 import { rowKey } from '../../model/effects.ts';
 import type { TrainingLevel } from '../../model/local-room.ts';
-import { isLegal, tablePlays, type CardPlay } from '../../model/plays.ts';
+import { isLegal, liveHandIds, tablePlays, type CardPlay } from '../../model/plays.ts';
 import { readingMs } from '../../model/reading.ts';
 import type { Session, SessionSnapshot } from '../../model/session.ts';
 import { savePrefs, type KeyValueStore, type Prefs } from '../../model/storage.ts';
@@ -93,7 +93,8 @@ export function PlayTable(props: PlayTableProps) {
   }, [sound, soundOn]);
   if (snapshot.state === null) return null;
   return (
-    <Stage snapshot={snapshot} reducedMotion={reducedMotion}>
+    // Online (sem `training`, que o tutorial também passa), a sua especial espera o momento que o oponente vê (decisoes.md 2026-11-03 (5), A9a).
+    <Stage snapshot={snapshot} reducedMotion={reducedMotion} online={props.training === undefined}>
       <PlayTableView {...props} snapshot={snapshot} state={snapshot.state} />
     </Stage>
   );
@@ -107,6 +108,8 @@ interface Selection {
 }
 
 const noop = (): void => undefined;
+/** Nenhuma carta da mão joga (depois do passe). */
+const NO_LIVE: ReadonlySet<string> = new Set();
 
 /** Campo onde se digita: o foco que a mesa nunca rouba. */
 function isTextEntry(el: Element | null): boolean {
@@ -210,6 +213,12 @@ function PlayTableView({
   const hasTargets = play?.targets != null;
   // Depois do passe (manual, ou o automático) o servidor recusa o resto da janela: a mão não escolhe mais.
   const passed = phase === 'REACTION' && (passedEpoch === state.epoch || snapshot.notice?.kind === 'autoPass');
+  // A mão que diz o que joga agora (bloco A dos pontos do playtest, ponto 2): da lista legal, não do `locked` das batidas. Depois do passe
+  // a lista ainda traz a Armadilha, mas o servidor segura o passe e a mão não escolhe: todas apagam. No fim da partida, nenhuma.
+  const liveCards = useMemo(
+    () => (phase === 'GAME_OVER' ? null : passed ? NO_LIVE : liveHandIds(view, legal, plays)),
+    [phase, passed, view, legal, plays],
+  );
 
   const moveFocus = useCallback((el: HTMLElement | null, options?: FocusOptions) => {
     if (!el) return;
@@ -525,6 +534,7 @@ function PlayTableView({
         snapshot={snapshot}
         remainingMs={remainingMs}
         locked={locked}
+        liveCards={liveCards}
         selectedCardId={cardId}
         targetIds={targetIds}
         onSelectCard={acting && !passed ? selectCard : undefined}

@@ -11,6 +11,7 @@ import { DEFAULT_PREFS, type Prefs } from '../../src/model/storage.ts';
 import { NO_INVERT, SCENE_INVERT_LEAD_MS, type SceneKind } from '../../src/model/timeline.ts';
 import { SCENES } from '../../src/ui/scenes/index.ts';
 import { PlayTable } from '../../src/ui/table/PlayTable.tsx';
+import type { TrainingLevel } from '../../src/model/local-room.ts';
 import { FakeConnection, scenarioAt, stateMessage, type ViewSpec } from '../fixtures.ts';
 import { roomMessage } from './support.tsx';
 
@@ -106,6 +107,8 @@ export interface MountOptions {
   /** Eventos do `state` com que a mesa abre. */
   events?: GameEvent[];
   room?: Parameters<typeof roomMessage>[0];
+  /** Monta a mesa do treino (sem isso, a mesa é online: a sua especial segura o tempo do momento do oponente, A9a). */
+  training?: TrainingLevel;
 }
 
 export function connect(spec: ViewSpec, options: MountOptions = {}) {
@@ -150,7 +153,7 @@ export function connect(spec: ViewSpec, options: MountOptions = {}) {
 
 export function mount(spec: ViewSpec = THEIRS, options: MountOptions = {}) {
   const base = connect(spec, options);
-  const rendered = render(<PlayTable session={base.session} />);
+  const rendered = render(<PlayTable session={base.session} training={options.training} />);
   return { ...base, ...rendered };
 }
 

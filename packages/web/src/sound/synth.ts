@@ -166,6 +166,13 @@ const RECIPES: Record<Cue, (voices: Voices) => void> = {
     noise({ filter: 'bandpass', from: 2200, to: 900, q: 0.8, at: land, length: 0.06, peak: 0.4 });
     tone({ wave: 'triangle', from: 200, to: 120, at: land, length: 0.08, peak: 0.32 });
   },
+  // A carta do oponente vira e cresce no centro da mesa, no momento da especial dele (bloco A dos pontos do playtest): um sopro de papel
+  // que sobe e um estalo curto quando ela fica de frente.
+  momento: ({ tone, noise }) => {
+    noise({ filter: 'bandpass', from: 700, to: 2600, q: 0.7, length: 0.2, peak: 0.2, attack: 0.06 });
+    noise({ filter: 'bandpass', from: 3000, to: 1500, q: 1, at: 0.2, length: 0.05, peak: 0.3 });
+    tone({ wave: 'triangle', from: 330, to: 260, at: 0.2, length: 0.06, peak: 0.16 });
+  },
   // A compra chega em leque: quatro estalos de papel, um a cada carta (o leque do Equipar compra quatro).
   compra: ({ noise }) => {
     for (let i = 0; i < 4; i++) {

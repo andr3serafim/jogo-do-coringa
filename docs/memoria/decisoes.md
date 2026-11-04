@@ -6,7 +6,7 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
-## 2026-11-03 (5): o plano do bloco E aprovado, com 15 s na janela
+## 2026-11-03 (6): o plano do bloco E aprovado, com 15 s na janela
 
 Ao plano `docs/superpowers/plans/2026-11-03-ressurreicao-quadra.md` (as escolhas da seção "Escolhas minhas" e a pergunta do prazo
 online da janela, 15 s recomendado ou 10 s):
@@ -20,6 +20,23 @@ online da janela, 15 s recomendado ou 10 s):
 - **O prazo online da janela é de 15 s por jogador** (`TIMERS.resurrectionMs`), e a spec das regras §1.12 passa a dizer isso.
 - **[I]** "Aprovo" responde também à forma de execução, que a mensagem não perguntou: a execução é desta sessão, tarefa por tarefa, com
   teste primeiro, como nas fatias.
+
+---
+
+## 2026-11-03 (5): o plano do bloco A aprovado
+
+Perguntado "Aprova o plano do bloco A, com as escolhas A1 a A9?", sobre `docs/superpowers/plans/2026-11-03-playtest-bloco-a.md`, ele
+escolheu:
+
+> Aprovo como está
+
+**Leitura:**
+- As nove escolhas valem como recomendadas: A1 (a folga do servidor sempre cheia), A2 e A9 (a) (online, quem joga também espera o
+  momento do outro, e a folga vale para os dois), A3 (o véu pela trava de flash), A4 (a placa fora do leitor de tela, como as faixas), A5
+  (o total do motor na consequência), A6 (o Reflect fica na zona dele), A7 (a primeira cura da partida, de qualquer lado) e A8 (a
+  execução aqui, tarefa por tarefa, na branch `feat/playtest-bloco-a`, com um revisor novo no fim).
+- **[I]** Ele não respondeu à leitura de apagar sessões terminadas sem perguntar (2026-11-03 (4), "Sessões"): ela segue como está,
+  e a próxima exclusão é anunciada a ele antes.
 
 ---
 

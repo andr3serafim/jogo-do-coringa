@@ -321,6 +321,7 @@ Leitura aprovada de "8 s (mínimo 2 s)":
 - A janela fica aberta por até 8 s.
 - Respostas que revelam a carta (A, anular, proteger) valem **na hora**. O A não fecha a janela (o motor permite várias respostas); anular e proteger fecham.
 - Um **PASS** que chega antes de 2 s desde a abertura **fica guardado**: o servidor responde `ack { ok: true, held: true }` e aplica o PASS quando os 2 s vencem. Depois de um PASS guardado, outra jogada do respondente nesta janela recebe `ALREADY_PASSED`.
+- Depois de um Ás do respondente na janela (bloco A dos pontos do playtest, 2026-11-03), o piso passa a ser também o fim do momento do Ás mais o impacto (`MOMENT_TAIL_MS`, 480 ms), contado do passo do Ás (`passHeldUntil`): o passe automático sai logo depois do Ás e cortaria o momento que o atacante vê.
 - O servidor **nunca passa sozinho** com base na mão do respondente. A janela fecha por PASS (respeitado o piso) ou por estouro.
 - Efeito: de fora, uma janela fechada "na hora" e uma sem resposta possível ficam iguais (mínimo 2 s). Se a interface vai oferecer passe automático é decisão do sub-projeto 3, e ela deve respeitar o mesmo piso.
 

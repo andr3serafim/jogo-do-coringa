@@ -139,6 +139,7 @@ export function finishGame(record: RoomRecord, cause: OutcomeCause, now: number)
   game.clockRunsFrom = null;
   game.pausedTurnMs = null;
   game.heldPass = null;
+  game.passHeldUntil = null;
   record.agenda = withoutKinds(record.agenda, ['phase', 'reactionMin', 'reconnect', 'presenceSweep']);
 
   return [
@@ -305,12 +306,14 @@ export function playerAct(
   const phase = game.state.phase;
   if (phase.kind === 'REACTION' && phase.responder === seat) {
     if (game.heldPass) return { ack: ackFail(msg.id, 'ALREADY_PASSED', 'você já passou nesta janela'), steps: [] };
-    if (msg.action.type === 'PASS' && now < game.phaseStartedAt + TIMERS.reactionMinMs) {
-      // Piso da janela (spec §6.3): o PASS espera os 2 s e só então vale; o oponente não vê nada até lá.
+    // Piso da janela (spec §6.3): os 2 s e, depois de um Ás do respondente nela, o momento dele até o fim do impacto (`passHeldUntil`).
+    const floor = Math.max(game.phaseStartedAt + TIMERS.reactionMinMs, game.passHeldUntil ?? 0);
+    if (msg.action.type === 'PASS' && now < floor) {
+      // O PASS espera o piso e só então vale; o oponente não vê nada até lá.
       game.heldPass = { epoch: record.epoch, id: msg.id, ...(msg.auto === true ? { auto: true as const } : {}) };
       record.agenda = withItem(record.agenda, {
         kind: 'reactionMin',
-        at: game.phaseStartedAt + TIMERS.reactionMinMs,
+        at: floor,
         epoch: record.epoch,
       });
       const held: AckMessage = { t: 'ack', id: msg.id, ok: true, held: true };

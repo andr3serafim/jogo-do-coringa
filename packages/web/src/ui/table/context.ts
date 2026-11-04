@@ -21,6 +21,11 @@ export interface TableUi {
   targetIds: ReadonlySet<string>;
   /** Controles travados: as cartas que são botão ficam apagadas (`aria-disabled`), sem tirar o foco. */
   locked: boolean;
+  /**
+   * As cartas da mão com jogada agora (bloco A dos pontos do playtest, ponto 2): as outras ficam apagadas, com o cadeado. Segue a decisão
+   * (a lista legal), não o `locked` das batidas. `null` não apaga nada (o replay, o fim da partida).
+   */
+  liveCards?: ReadonlySet<string> | null;
   selectedCardId: string | null;
   /** Ids das cartas pendentes do Equipar que já estão na fileira como rascunho (spec §3.5). */
   draftIds: ReadonlySet<string>;

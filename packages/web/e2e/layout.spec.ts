@@ -88,8 +88,9 @@ for (const viewport of [
       }
       if (state) {
         expect(state.top, 'as marcas ficam abaixo das zonas').toBeGreaterThanOrEqual(floor - 0.5);
-        // Uma ou duas linhas de etiqueta, nunca um bloco esticado até o fim da coluna.
-        expect(state.bottom - state.top, 'as marcas têm a altura das etiquetas').toBeLessThanOrEqual(56);
+        // Uma ou duas linhas de placa (bloco A do playtest, ponto 6: o medalhão e a linha do que a marca faz), nunca um bloco esticado até
+        // o fim da coluna.
+        expect(state.bottom - state.top, 'as marcas têm a altura das placas').toBeLessThanOrEqual(88);
         floor = state.bottom;
       }
       expect(floor, 'a coluna cabe no campo').toBeLessThanOrEqual(field.bottom + 0.5);

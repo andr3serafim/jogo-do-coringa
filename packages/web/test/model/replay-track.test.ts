@@ -380,6 +380,7 @@ describe('replaySnapshot', () => {
       marksBaseSeq: null,
       history: { ...TRACK.frames[frame]!.history, gameNo: 1 },
       desolated: expect.any(Set),
+      firstHealSeq: null,
       prefs: DEFAULT_PREFS,
     });
     expect(snapshot.state).toBe(message);

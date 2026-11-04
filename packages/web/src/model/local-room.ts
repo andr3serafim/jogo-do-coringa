@@ -16,7 +16,7 @@ import {
   type PlayerId,
   type ReplayStep,
 } from '@coringa/engine';
-import { HP_CHOICES, sceneAllowanceMs } from '@coringa/protocol';
+import { HP_CHOICES, MOMENT_TAIL_MS, MOMENT_TAIL_PLAYS, isMomentFor, momentsMs, stepAllowanceMs } from '@coringa/protocol';
 import type {
   AckMessage,
   ConnectionEvent,
@@ -130,6 +130,10 @@ export class LocalRoom implements RoomConnection {
   #autoTimer: unknown = null;
   /** Até quando (no `now` injetado) vão as cenas raras publicadas: o bot assiste a elas antes de pensar (decisoes.md 2026-11-01 (3)). */
   #sceneUntil = 0;
+  /** Até quando vai o impacto do último momento com cauda do Bot (o Ás dele, o Sacrifício, o Roubo): na janela, ele espera também isto. */
+  #tailUntil = 0;
+  /** Quantos momentos de especial do Bot o turno já teve na tela do jogador (bloco A dos pontos do playtest, ponto 1): o segundo é mais curto. */
+  #momentsInTurn = 0;
   /** A busca do Difícil em curso (a decisão ainda não saiu). `null` fora dela; quando não é `null`, há uma fatia agendada em `#botTimer`. */
   #search: Generator<void, Action> | null = null;
   #connected = false;
@@ -229,6 +233,7 @@ export class LocalRoom implements RoomConnection {
     }
     // Quem joga já não está vendo a cena de antes (ela acabou ou foi pulada): o bot não a espera mais, só a desta jogada.
     this.#sceneUntil = 0;
+    this.#tailUntil = 0;
     const seq = this.#commit({ player: LOCAL_ME, action }, result.state, result.events);
     return Promise.resolve({ t: 'ack', id, ok: true, seq });
   }
@@ -270,6 +275,7 @@ export class LocalRoom implements RoomConnection {
   #newGame(): { game: GameState; botSeed: string } {
     this.#gameNo += 1;
     this.#botMoves = 0;
+    this.#momentsInTurn = 0;
     const seed = gameSeed(this.#options.seed, this.#gameNo);
     this.#gameSeed = seed;
     // Uma lista nova (e não `length = 0`): o replay já emitido da partida anterior guarda a lista dela.
@@ -304,9 +310,13 @@ export class LocalRoom implements RoomConnection {
     this.#seq += 1;
     if (phaseKey(next) !== keyBefore) this.#epoch += 1;
     const seq = this.#seq;
-    // A folga de cena, como o prazo do servidor (spec do servidor §6.2): duas cenas seguidas somam.
-    const allowance = sceneAllowanceMs(events);
+    // A folga de cena, como o prazo do servidor (spec do servidor §6.2): duas cenas seguidas somam. Desde o bloco A dos pontos do playtest,
+    // o momento da especial do Bot também: o jogador o vê inteiro antes de o Bot jogar de novo. O momento das jogadas do jogador não entra
+    // (ele não o vê), e a conta do turno é exata aqui, ao contrário do servidor (a sala sabe o turno).
+    const allowance = stepAllowanceMs(events, LOCAL_ME, this.#momentsInTurn);
+    this.#momentsInTurn = momentsMs(events, LOCAL_ME, this.#momentsInTurn).count;
     if (allowance > 0) this.#sceneUntil = Math.max(this.#sceneUntil, this.#options.now()) + allowance;
+    if (events.some((event) => MOMENT_TAIL_PLAYS.has(event.type) && isMomentFor(event, LOCAL_ME))) this.#tailUntil = this.#sceneUntil + MOMENT_TAIL_MS;
     this.#publishState(events);
     if (next.phase.kind === 'GAME_OVER') {
       this.#cancelBot();
@@ -417,15 +427,17 @@ export class LocalRoom implements RoomConnection {
   /**
    * O bot joga quando é a vez dele: depois de `thinkMs`, ou já (0 ms) numa janela de reação. Antes, ele assiste ao fim das cenas
    * raras que estão no ar (a folga de cena): um `state` novo troca a linha do tempo da mesa, e a jogada dele em 600 ms cortava a
-   * cena do Ataque Absoluto de quem o atacou (decisoes.md 2026-11-01 (3)). Um timer por vez. O Difícil começa
+   * cena do Ataque Absoluto de quem o atacou (decisoes.md 2026-11-01 (3)). Na janela, depois do momento de um Ás dele, ele espera também o
+   * impacto (`MOMENT_TAIL_MS`): o passe ou o segundo Ás no fim da batida cortava o alvo quebrando e a ida do Ás ao cemitério. Um timer por vez. O Difícil começa
    * a busca quando esse timer dispara e a continua em fatias (`#searchSlice`); na reação e na ordem do ataque não há busca, e a
    * decisão sai na primeira fatia.
    */
   #scheduleBot(): void {
     if (this.#closed || this.#botTimer !== null) return;
     if (!actingPlayers(this.#game).includes(BOT_SEAT)) return;
-    const scene = Math.max(0, this.#sceneUntil - this.#options.now());
-    const delay = scene + (this.#game.phase.kind === 'REACTION' ? 0 : this.#think);
+    const now = this.#options.now();
+    const scene = Math.max(0, this.#sceneUntil - now);
+    const delay = this.#game.phase.kind === 'REACTION' ? Math.max(scene, this.#tailUntil - now) : scene + this.#think;
     this.#botTimer = this.#options.setTimer(() => {
       this.#botTimer = null;
       this.#botPlay();

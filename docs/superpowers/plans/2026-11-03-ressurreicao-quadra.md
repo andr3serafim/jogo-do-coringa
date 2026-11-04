@@ -3,7 +3,7 @@
 > **Para agentes:** SUB-SKILL OBRIGATÓRIA: superpowers:subagent-driven-development (recomendada) ou superpowers:executing-plans,
 > tarefa por tarefa. Os passos usam caixas (`- [ ]`) para o acompanhamento.
 >
-> **Estado:** **aprovado** pelo autor em 2026-11-03, com 15 s na janela (`decisoes.md` 2026-11-03 (5)).
+> **Estado:** **aprovado** pelo autor em 2026-11-03, com 15 s na janela (`decisoes.md` 2026-11-03 (6)).
 
 **Objetivo:** pôr no jogo a regra do ponto 16, escrita pelo autor: a Ressurreição usada já na revelação do Equipar, antes do ataque,
 e a troca da última carta quando as duas fileiras estão cheias, com a carta da quadra protegida, também na fase principal.
@@ -209,7 +209,7 @@ sem estouro na janela). Testes: `packages/server/test/core/timers.test.ts`, `pri
 
 **Interfaces (produz):**
 - `DeadlineKind = 'EQUIP' | 'ORDER' | 'TURN' | 'REACTION' | 'RESURRECTION'`.
-- `TIMERS.resurrectionMs = 15_000` (autor, 2026-11-03 (5)).
+- `TIMERS.resurrectionMs = 15_000` (autor, 2026-11-03 (6)).
 - `phaseKey` da janela: `[round, 'RESURRECTION', player, null]` (a vez do segundo da fila é época nova).
 - `STATE_SCHEMA = 5`, com a linha do comentário: "5: a fase `RESURRECTION` e a troca da Ressurreição (ponto 16)".
 

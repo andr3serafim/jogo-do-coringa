@@ -1,6 +1,6 @@
 # Medição da Ressurreição no instante da quadra (ponto 16, bloco E)
 
-2026-11-03, com a regra do autor no motor (`decisoes.md` 2026-11-03 (4) e (5); plano `docs/superpowers/plans/2026-11-03-ressurreicao-quadra.md`,
+2026-11-03, com a regra do autor no motor (`decisoes.md` 2026-11-03 (4) e (6); plano `docs/superpowers/plans/2026-11-03-ressurreicao-quadra.md`,
 Tarefa 8). A medição de antes da regra, que levou ao desenho, é a `medicao-ponto-16.md`.
 
 ## 1. A contagem do uso (2.000 partidas greedy × greedy)

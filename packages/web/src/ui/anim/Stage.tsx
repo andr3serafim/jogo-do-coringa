@@ -22,6 +22,7 @@ import type { DevastationState, PlayerId } from '@coringa/engine';
 import { LazyMotion, MotionConfig } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
 import type { Ribbon } from '../../model/copy.ts';
+import { healRibbon } from '../../model/copy.ts';
 import { bannerRibbon, desolationShown, effectsOf, fieldTarget, insigniaShown, lifeChange, NO_EFFECTS, resurrectionInfo, ribbonText } from '../../model/effects.ts';
 import { roomNames } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
@@ -35,6 +36,7 @@ import { AnimContext, IDLE_LIFE, type Anim, type CountPhase, type LifeCount } fr
 import { useScenes } from './scenes-loader.ts';
 import { FxLayer } from './FxLayer.tsx';
 import { Leaving } from './Leaving.tsx';
+import { MomentLayer } from './Moment.tsx';
 import { BeatOverlay } from './Scene.tsx';
 import { useBeatPlayer } from './useBeatPlayer.ts';
 
@@ -71,25 +73,48 @@ export interface StageProps {
   reducedMotion: boolean;
   /** As batidas do último `state` terminaram (no fim ou no pulo). */
   onSettled?: () => void;
+  /**
+   * A partida é online: a sua especial segura o tempo do momento que o oponente vê, para a sua jogada seguinte não cortar o momento dele
+   * (decisoes.md 2026-11-03 (5), A9a). O treino não precisa (o Bot espera), e o replay não passa.
+   */
+  online?: boolean;
   children: ReactNode;
 }
 
-export function Stage({ snapshot, reducedMotion, onSettled, children }: StageProps) {
+export function Stage({ snapshot, reducedMotion, onSettled, online = false, children }: StageProps) {
   const { state, room } = snapshot;
   // A decisão do jogador espera se há jogada legal para ele neste `state` (spec §4.1: tudo cabe em ~1 s).
   const names = useMemo(() => roomNames(state?.view.me ?? 'p1', room?.seats ?? []), [state, room]);
+  // A faixa da batida: a que ensina a cura passiva na primeira vez (bloco A dos pontos do playtest, ponto 9), ou a de sempre.
+  const view = state?.view ?? null;
+  const ribbonOf = useCallback(
+    (beat: Beat): Ribbon | null =>
+      beat.teach && view !== null && beat.event.type === 'Healed' ? healRibbon(beat.event, view) : bannerRibbon(beat.event, names),
+    [names, view],
+  );
   // A faixa fica no ar ao menos o tempo de leitura do texto dela (U1).
   const readBanner = useCallback((beat: Beat) => {
-    const ribbon = bannerRibbon(beat.event, names);
+    const ribbon = ribbonOf(beat);
     return bannerReadMs(ribbon === null ? '' : ribbonText(ribbon));
-  }, [names]);
+  }, [ribbonOf]);
   // O rascunho do Equipar estava à vista no desenho de antes deste `state` (você confirmou nesta página): as suas cartas só assentam.
   // O valor guardado ainda é o do desenho anterior quando o `state` novo chega; a troca dele só vale do desenho seguinte em diante.
   const [confirmedBefore, setConfirmedBefore] = useState(snapshot.equipConfirmed);
   const draftShown = confirmedBefore === 'thisPage';
   if (confirmedBefore !== snapshot.equipConfirmed) setConfirmedBefore(snapshot.equipConfirmed);
-  const player = useBeatPlayer(state, { reducedMotion, decisionPending: snapshot.legal.length > 0, bannerReadMs: readBanner, draftShown }, onSettled);
-  const { run, beat, index, busy, inverted, curtain, bannerBeat, banner, released, skip, hitLanded, cut } = player;
+  const player = useBeatPlayer(
+    state,
+    {
+      reducedMotion,
+      decisionPending: snapshot.legal.length > 0,
+      bannerReadMs: readBanner,
+      draftShown,
+      holdOwnMoments: online,
+      teachHeal: state !== null && snapshot.firstHealSeq === state.seq,
+    },
+    onSettled,
+  );
+  const { run, beat, index, busy, inverted, curtain, veil, bannerBeat, banner, released, skip, hitLanded, cut } = player;
 
   const count: CountPhase =
     !busy || reducedMotion || run.damageIndex < 0 || index > run.damageIndex
@@ -198,7 +223,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
 
   // A fita (sub-projeto 6 §4): a trava pode segurá-la no ar depois da batida dela, então fica a última que passou. O objeto só
   // troca quando o texto troca (o `anim` não muda a cada desenho por causa dela).
-  const ribbonNow = bannerBeat === null ? null : bannerRibbon(bannerBeat.event, names);
+  const ribbonNow = bannerBeat === null ? null : ribbonOf(bannerBeat);
   const [lastRibbon, setLastRibbon] = useState<Ribbon | null>(ribbonNow);
   if (ribbonNow !== null && (lastRibbon === null || ribbonText(ribbonNow) !== ribbonText(lastRibbon))) setLastRibbon(ribbonNow);
   const ribbon = banner ? lastRibbon : null;
@@ -216,7 +241,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
       },
       landAt: (id) => {
         const landing = cut ? undefined : run.landings.get(id);
-        return landing === undefined ? null : { at: landing.atMs / 1000, drop: landing.drop, dust: landing.dust };
+        return landing === undefined ? null : { at: landing.atMs / 1000, drop: landing.drop, dust: landing.dust, ...(landing.snap ? { snap: true } : {}) };
       },
       enterDelay: (id) => {
         const startMs = busy ? run.deals.cards.get(id) : undefined;
@@ -370,6 +395,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
             <BeatOverlay
               scene={scene}
               curtain={curtain}
+              veil={veil}
               names={names}
               reduced={reducedMotion}
               me={me}
@@ -377,6 +403,8 @@ export function Stage({ snapshot, reducedMotion, onSettled, children }: StagePro
               field={scene && state ? fieldTarget(scene.event, lastCast, state.view.me, state.view.opponent.id) : null}
               rising={scene && state ? resurrectionInfo(scene.event, state.view) : null}
             />
+            {/* O momento da especial do oponente (bloco A dos pontos do playtest, ponto 1): a carta grande e a placa, por cima do véu. */}
+            {state ? <MomentLayer run={run} beat={beat} cut={cut} view={state.view} names={names} reduced={reducedMotion} /> : null}
           </div>
         </AnimContext>
       </MotionConfig>

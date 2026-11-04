@@ -2,7 +2,7 @@
 export const TIMERS = {
   equipMs: 40_000,
   orderMs: 10_000,
-  /** A janela da Ressurreição (ponto 16), por jogador: 15 s (autor, 2026-11-03 (5)). */
+  /** A janela da Ressurreição (ponto 16), por jogador: 15 s (autor, 2026-11-03 (6)). */
   resurrectionMs: 15_000,
   turnMs: 30_000,
   reactionMs: 8_000,

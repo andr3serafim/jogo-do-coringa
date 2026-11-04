@@ -319,7 +319,7 @@ DEF = (soma(Defesa do defensor) + bônus) × (1 + nQ)
 | Momento | Tempo | Se estourar |
 |---|---|---|
 | Equipar (simultâneo) | 40 s | cada numérica restante vai para a fileira com menos cartas (empate → Defesa **[I]**); ambas cheias → cemitério |
-| Janela da Ressurreição (ponto 16) | 15 s por jogador (autor, 2026-11-03 (5)) | passa e guarda a Ressurreição |
+| Janela da Ressurreição (ponto 16) | 15 s por jogador (autor, 2026-11-03 (6)) | passa e guarda a Ressurreição |
 | Escolha da ordem (iniciativa) | 10 s | ataca primeiro |
 | Turno de ataque | 30 s | declara o ataque sem jogar mais especiais (ou passa, se Ataque vazio) |
 | Janela de reação | 8 s (mínimo 2 s) | passa |

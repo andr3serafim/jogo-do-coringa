@@ -18,11 +18,13 @@ import {
   HealIcon,
   ReflectIcon,
 } from './icons.tsx';
-import { handCountText, resurrectionsText } from './labels.ts';
+import { plateLine } from '../../model/copy.ts';
+import { handCountText } from './labels.ts';
 import { ResurrectIcon } from './ResurrectIcon.tsx';
 import { Row } from './Row.tsx';
 import { TableCard } from './TableCard.tsx';
 import { MirrorMark } from './MirrorMark.tsx';
+import { StatePlate } from './StatePlate.tsx';
 
 export interface PlayerFieldProps {
   side: 'self' | 'opponent';
@@ -149,26 +151,24 @@ function Info({ player, name, away, equip, tool }: InfoProps) {
 // Guarda, buffs, Reflect e as marcas de estado
 
 function Zones({ player, name, view, self }: { player: PublicPlayer; name: string; view: PlayerView; self: boolean }) {
-  // Cada marca com a sua figura e o nome curto ao lado (decisoes.md 2026-11-01 (1)): a figura sozinha não ensina o que é.
-  const chips: Array<{ key: string; text: string; strong: boolean; icon: ReactNode }> = [];
+  // Cada marca é uma placa com medalhão (bloco A dos pontos do playtest, ponto 6): a figura (decisoes.md 2026-11-01 (1)), o nome e a
+  // linha do que ela faz, do lado de quem a vê.
+  const plates: ReactNode[] = [];
   const icon = 'size-4 pc:size-[18px]';
   if (player.absoluteDefense) {
-    chips.push({ key: 'def', text: 'Defesa Absoluta', strong: true, icon: <AbsoluteDefenseIcon className={icon} /> });
+    plates.push(<StatePlate key="def" kind="defesa" self={self} icon={<AbsoluteDefenseIcon className={icon} />} />);
   }
   // Enquanto houver 2 K ou mais na Guarda (a regra é do motor): as numéricas da Defesa que caem curam o dono.
   if (defenseHealActive(player, view.config)) {
-    chips.push({ key: 'cura', text: 'Cura passiva', strong: false, icon: <HealIcon className={icon} /> });
+    plates.push(<StatePlate key="cura" kind="cura" self={self} icon={<HealIcon className={icon} />} />);
   }
   if (player.resurrectionCount > 0) {
-    chips.push({
-      key: 'res',
-      text: resurrectionsText(player.resurrectionCount),
-      strong: false,
-      icon: <ResurrectIcon className={icon} />,
-    });
+    plates.push(
+      <StatePlate key="res" kind="res" self={self} count={player.resurrectionCount} icon={<ResurrectIcon className={icon} />} />,
+    );
   }
   if (absoluteAttackArmed(player, view.config)) {
-    chips.push({ key: 'atk', text: 'Ataque Absoluto armado', strong: true, icon: <AbsoluteAttackIcon className={icon} /> });
+    plates.push(<StatePlate key="atk" kind="ataque" self={self} icon={<AbsoluteAttackIcon className={icon} />} />);
   }
 
   return (
@@ -192,6 +192,7 @@ function Zones({ player, name, view, self }: { player: PublicPlayer; name: strin
       {player.reflect ? (
         <Zone
           label="Reflect ativo"
+          does={plateLine('reflect', self)}
           icon={<ReflectIcon className={ZONE_ICON} />}
           listLabel="Cartas do Reflect"
           mark={<MirrorMark owner={player.id} />}
@@ -199,17 +200,9 @@ function Zones({ player, name, view, self }: { player: PublicPlayer; name: strin
           wildAs={{ 1: 'J', 2: 'Q' }}
         />
       ) : null}
-      {chips.length > 0 ? (
+      {plates.length > 0 ? (
         <ul role="list" aria-label={`Estado do Coringa de ${name}`} className="campo-estado">
-          {chips.map((chip) => (
-            <li
-              key={chip.key}
-              className={`flex items-center gap-1 border-2 border-tinta py-0.5 pl-1 pr-1.5 text-[11px] font-bold uppercase leading-tight pc:text-xs ${chip.strong ? 'bg-ouro' : 'bg-papel'}`}
-            >
-              {chip.icon}
-              <span>{chip.text}</span>
-            </li>
-          ))}
+          {plates}
         </ul>
       ) : null}
     </div>
@@ -232,11 +225,13 @@ interface ZoneProps {
   count?: boolean;
   /** O que fica no canto da zona, sem mudar a altura dela (o espelho do Reflect). */
   mark?: ReactNode;
+  /** O que a zona faz, numa linha embaixo do título (o Reflect; bloco A dos pontos do playtest, ponto 6). Some abaixo de 600 px. */
+  does?: string;
   /** O arrasto: a chave da zona inteira (a sua), `'targets'` (cada carta é uma zona `carta:<id>`, a do oponente) ou nada (o Reflect). */
   drop?: DropKey | 'targets';
 }
 
-function Zone({ label, icon, listLabel, cards, wildAs, count = false, mark, drop }: ZoneProps) {
+function Zone({ label, icon, listLabel, cards, wildAs, count = false, mark, drop, does }: ZoneProps) {
   const labelId = useId();
   // Só uma Guarda grande (muitos K) precisa de cartas sobrepostas para caber na linha.
   const overlap = cards.length > 4;
@@ -258,6 +253,11 @@ function Zone({ label, icon, listLabel, cards, wildAs, count = false, mark, drop
           </span>
         ) : null}
       </div>
+      {does ? (
+        <p data-placa-faz className="placa-faz font-texto text-[10px] leading-tight pc:text-[11px]">
+          {does}
+        </p>
+      ) : null}
       <ul
         role="list"
         aria-label={listLabel}

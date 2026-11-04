@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { GameEvent, NumCard, SpecialCard } from '@coringa/engine';
-import { SCENE_MS } from '@coringa/protocol';
+import { SCENE_MS, SPECIAL_MOMENT_MS } from '@coringa/protocol';
 import {
   BEAT_MS,
   CATCH_UP_CAP_MS,
@@ -9,6 +9,7 @@ import {
   INVERT_COOLDOWN_MS,
   INITIATIVE_BANNER_MS,
   INVERT_MIN_HOLD_MS,
+  MOMENT_MS,
   NO_INVERT,
   RARE_SCENE_MS,
   SCENE_INVERT_LEAD_MS,
@@ -701,5 +702,94 @@ describe('fotossensibilidade (spec §10.4)', () => {
     }
     expect(tally.sequences).toBe(200 * 12);
     expect(tally.inversions).toBeGreaterThan(100);
+  });
+});
+
+describe('o momento da especial do oponente (bloco A do playtest, ponto 1)', () => {
+  const SEEN: TimelineOptions = { ...LIVE, viewer: 'p1' };
+  const buffOf = (player: 'p1' | 'p2', id = 'j1'): GameEvent => ({ type: 'BuffPlayed', player, card: face(id, 'J'), as: 'J' });
+  const GUARD_P2: GameEvent = { type: 'GuardPlayed', player: 'p2', cards: [face('k1'), face('k2')] };
+
+  it('os tempos de dentro somam os do protocolo', () => {
+    for (const key of ['first', 'next'] as const) {
+      const { flipMs, plateMs, flyMs } = MOMENT_MS[key];
+      expect(flipMs + plateMs + flyMs).toBe(SPECIAL_MOMENT_MS[key]);
+    }
+  });
+
+  it('a Guarda que o oponente joga vira o momento, com o voo e o impacto dentro dele', () => {
+    const [beat] = buildTimeline([GUARD_P2], SEEN);
+    expect(beat).toMatchObject({ kind: 'moment', startMs: 0, durationMs: 1_600, cards: ['k1', 'k2'], scene: null, invert: null });
+    expect(beat!.moment).toEqual({ flyAtMs: 1_300, impactAtMs: 1_600 });
+  });
+
+  it('a segunda do mesmo turno encolhe; a conta vem do state anterior; o TurnStarted zera', () => {
+    expect(buildTimeline([buffOf('p2'), buffOf('p2', 'j2')], SEEN).map((b) => b.durationMs)).toEqual([1_600, 1_100]);
+    const second = buildTimeline([buffOf('p2')], { ...SEEN, momentsBefore: 1 });
+    expect(second[0]!.durationMs).toBe(1_100);
+    expect(second[0]!.moment).toEqual({ flyAtMs: 850, impactAtMs: 1_100 });
+    const turned = buildTimeline([buffOf('p2'), { type: 'TurnStarted', player: 'p2' }, buffOf('p2', 'j2')], SEEN);
+    expect(turned.map((b) => [b.kind, b.durationMs])).toEqual([
+      ['moment', 1_600],
+      ['banner', BEAT_MS.banner],
+      ['moment', 1_600],
+    ]);
+  });
+
+  it('a sua especial segue movimento; sem lado ou no catchUp, nada vira momento', () => {
+    const [mine] = buildTimeline([buffOf('p1')], SEEN);
+    expect(mine).toMatchObject({ kind: 'move', durationMs: BEAT_MS.move, moment: null });
+    expect(buildTimeline([GUARD_P2], LIVE)[0]).toMatchObject({ kind: 'move', moment: null });
+    expect(buildTimeline([GUARD_P2], { ...SEEN, mode: 'catchUp' })[0]).toMatchObject({ kind: 'move', moment: null });
+  });
+
+  it('o momento fica fora do teto de decisão; o resto encolhe sozinho', () => {
+    const beats = buildTimeline([GUARD_P2, ...ATTACK], { ...SEEN, decisionPending: true });
+    expect(beats[0]).toMatchObject({ kind: 'moment', durationMs: 1_600 });
+    const rest = beats.slice(1).reduce((sum, b) => sum + b.durationMs, 0);
+    expect(rest).toBeLessThanOrEqual(DECISION_CAP_MS);
+    expect(timelineMs(beats)).toBeLessThanOrEqual(1_600 + DECISION_CAP_MS);
+  });
+
+  it('com movimento reduzido o momento dura o mesmo: é informação', () => {
+    expect(buildTimeline([GUARD_P2], { ...SEEN, reducedMotion: true })[0]).toMatchObject({ kind: 'moment', durationMs: 1_600 });
+  });
+
+  it('a Armadilha dele no seu J antes do golpe: o momento, e o golpe começa no impacto', () => {
+    const trap: GameEvent = { type: 'TrapUsed', player: 'p2', card: face('a1', 'A'), target: face('j9', 'J'), targetOwner: 'p1' };
+    const beats = buildTimeline([trap, DAMAGE], SEEN);
+    expect(beats.map((b) => b.kind)).toEqual(['moment', 'damage']);
+    expect(beats[1]!.startMs).toBe(beats[0]!.moment!.impactAtMs);
+  });
+
+  it('fora do momento, `moment` é nulo', () => {
+    for (const beat of buildTimeline(ATTACK, SEEN)) expect(beat.moment).toBeNull();
+  });
+
+  it('online (A9a): a sua especial segura o tempo do momento que o oponente vê, sem a carta grande e fora do teto', () => {
+    const held = { ...SEEN, holdOwnMoments: true };
+    expect(buildTimeline([buffOf('p1'), buffOf('p1', 'j2')], held).map((b) => [b.kind, b.durationMs, b.moment])).toEqual([
+      ['move', 1_600, null],
+      ['move', 1_100, null],
+    ]);
+    expect(buildTimeline([buffOf('p1')], { ...held, ownMomentsBefore: 1 })[0]!.durationMs).toBe(1_100);
+    const capped = buildTimeline([buffOf('p1'), ...ATTACK], { ...held, decisionPending: true });
+    expect(capped[0]!.durationMs).toBe(1_600);
+    expect(buildTimeline([buffOf('p1')], SEEN)[0]!.durationMs).toBe(BEAT_MS.move);
+  });
+});
+
+describe('a cura passiva que ensina (bloco A do playtest, ponto 9)', () => {
+  const six: NumCard = { id: 'n6', kind: 'NUM', value: 6, suit: 'copas' };
+  const healed = (amount: number, source: 'DEFENSE' | 'STEAL' = 'DEFENSE'): GameEvent => ({ type: 'Healed', player: 'p1', amount, source, card: six });
+
+  it('com teachHeal, só a primeira cura passiva que curou algo ensina', () => {
+    const beats = buildTimeline([healed(0), healed(5, 'STEAL'), healed(18), healed(6)], { ...LIVE, teachHeal: true });
+    expect(beats.map((beat) => beat.teach)).toEqual([false, false, true, false]);
+  });
+
+  it('sem teachHeal, ou no catchUp, nenhuma', () => {
+    expect(buildTimeline([healed(18)], LIVE)[0]!.teach).toBe(false);
+    expect(buildTimeline([healed(18)], { ...LIVE, mode: 'catchUp', teachHeal: true })[0]!.teach).toBe(false);
   });
 });

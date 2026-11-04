@@ -64,7 +64,8 @@ Cada bloco vira uma fatia com plano, teste primeiro, fotos e medição, como as 
 - **Online:** a folga de cena do servidor (`sceneAllowanceMs`, `packages/protocol/src/scenes.ts`) passa a somar o momento, para o prazo
   da sua decisão não correr durante ele. O bot do treino espera do mesmo jeito. Isso muda o servidor (o deploy é do autor).
 - **Movimento reduzido:** a carta aparece e some no centro, com a placa, sem voo nem véu.
-- **Leitor de tela:** a placa vai para a região viva da mesa, como as faixas.
+- **Leitor de tela:** a placa fica escondida dele, como as faixas, que já são `aria-hidden`; o histórico, que tem a linha de cada especial,
+  é o registro acessível (a frase de antes, "vai para a região viva", estava errada; `decisoes.md` 2026-11-03 (5), A4).
 
 ### 3.2 As cartas da mão que agora não jogam (ponto 2)
 
@@ -98,6 +99,27 @@ Cada bloco vira uma fatia com plano, teste primeiro, fotos e medição, como as 
 - **Onde mexe:** a batida do `Healed` com `reason: 'DEFENSE'` (o evento já diz a carta). A essência sai da cópia da carta que vai ao
   cemitério (`Leaving.tsx`), e o "+N" já existe no placar. A "primeira da partida" fica na sessão.
 - **Tutorial:** a dica da cura passiva ganha uma linha.
+
+### 3.5 O que a execução decidiu (bloco A, 2026-11-03)
+
+O plano (`docs/superpowers/plans/2026-11-03-playtest-bloco-a.md`) foi aprovado como estava, com as escolhas A1 a A9 (`decisoes.md`
+2026-11-03 (5)). O que a execução acrescentou ou mudou:
+
+- **Online, quem joga espera o momento do outro** (A9a): a sua especial segura 1,6 s (1,1 s a partir da segunda do turno), sem a carta
+  grande, e o servidor dá a folga aos dois; o servidor dá sempre a folga inteira (A1). No treino, o Bot espera os momentos dele.
+- **A consequência da placa usa o total do motor** (A5), e com o Selvagem como alvo a placa só tem o título.
+- **As placas de estado:** a Ressurreição mostra o número num selo, e o leitor de tela segue ouvindo "N Ressurreições disponíveis"; o
+  Reflect ficou na zona dele, com a linha do que faz e o brilho no espelho (A6). As animações sem fim da folha ficaram seis (a cura tem dois
+  gestos: a cruz e o "+").
+- **A cura passiva:** os K acendem pelo efeito de carta de sempre (`CardFx` `cause`); a faixa da primeira cura é de qualquer lado e só ao
+  vivo (A7; o replay não a toca).
+- **Achado no caminho:** o fim do momento e o fim da batida venciam no mesmo instante, e a camada podia voltar e ficar montada; consertado
+  com teste (o E2E achou).
+- **Da revisão final:** depois de um Ás do respondente na janela, o PASS dele (o automático, online) fica guardado até o fim do momento do
+  Ás e do impacto (480 ms: o racha, o tremor e a ida ao cemitério), e o Bot na janela espera o mesmo no treino; online, a sua jogada
+  depois do seu Ás, Sacrifício ou Roubo também espera o impacto (2,08 s em vez de 1,6 s). Sem isso, a jogada seguinte cortava o alvo
+  quebrando. O piso de 2 s da janela segue para todo o resto.
+- **Medição e fotos:** `docs/memoria/notas/medicao-bloco-a.md` (≥ 50 quadros/s com a CPU 4× nas duas telas).
 
 ## 4. Bloco B: o golpe final (ponto 15)
 
@@ -218,7 +240,7 @@ no `decisoes.md`.
 
 ### 7.3 O que muda no código
 
-> **Feito em 2026-11-03** (plano `docs/superpowers/plans/2026-11-03-ressurreicao-quadra.md`, `diario.md` 2026-11-03 (6)); a medição está em
+> **Feito em 2026-11-03** (plano `docs/superpowers/plans/2026-11-03-ressurreicao-quadra.md`, `diario.md` 2026-11-03 (7)); a medição está em
 > `docs/memoria/notas/medicao-ressurreicao-quadra.md`.
 
 - **Motor:** uma fase nova (`RESURRECTION`, com a fila de quem decide), as jogadas `RESURRECT` (com a troca) e `PASS` nela, a troca também

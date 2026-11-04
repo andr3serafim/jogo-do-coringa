@@ -11,7 +11,7 @@
 // - O pulo (`cut`) e o `state` seguinte tiram todas as cópias e devolvem as cartas escondidas. Com movimento reduzido, a cópia fica até a
 //   batida e esmaece, sem voo, tremor nem cacos.
 import { Component, type ContextType } from 'react';
-import { shardsPerCard, TABLE_MOTION, type Leaving as LeavingCard } from '../../model/table-motion.ts';
+import { shardsPerCard, TABLE_MOTION, type Heal, type Leaving as LeavingCard } from '../../model/table-motion.ts';
 import { FxLayerContext } from './FxLayer.tsx';
 import type { Run } from './useBeatPlayer.ts';
 
@@ -27,6 +27,9 @@ interface Snapshot {
   clone: HTMLElement;
   leaving: LeavingCard;
 }
+
+/** O voo mais curto da essência da cura: com a linha do tempo espremida no teto de decisão, ela ainda se vê. */
+const ESSENCE_MIN_MS = 120;
 
 /** O traço da rachadura, o mesmo que a carta mostrava (viewBox 40 × 56). */
 const CRACK_PATH = 'M22 0 L15 15 L26 24 L12 38 L21 56';
@@ -112,6 +115,9 @@ export class Leaving extends Component<LeavingProps> {
     const shattering = new Map<number, number>();
     for (const { leaving } of snapshot) if (leaving.shatter) shattering.set(leaving.startMs, (shattering.get(leaving.startMs) ?? 0) + 1);
     for (const { id, rect, clone, leaving } of snapshot) {
+      // A carta da Defesa que cura solta a essência verde até o retrato de quem curou (bloco A dos pontos do playtest, ponto 9).
+      const heal = this.props.run.heals.get(id);
+      if (heal !== undefined && !this.props.reduced) this.essence(rect, layerBox, stage, heal);
       const real = stage.querySelector<HTMLElement>(`[data-card-id="${CSS.escape(id)}"]`);
       // A que segue na mesa sem quebrar (o topo do cemitério) voa pelo `layoutId`: não precisa de cópia.
       if (real !== null && !leaving.shatter) continue;
@@ -165,6 +171,40 @@ export class Leaving extends Component<LeavingProps> {
       ),
     );
     this.at(delay + exitMs, () => this.gone(copy));
+  }
+
+  /**
+   * A essência da cura passiva: uma gota verde que sai do lugar da carta na batida da saída e chega ao retrato de quem curou na batida da
+   * cura (no mínimo `ESSENCE_MIN_MS` de voo), quando o "+N" nasce ali. Some na chegada.
+   */
+  private essence(from: DOMRect, layer: DOMRect, stage: HTMLElement, heal: Heal): void {
+    const me = this.props.run.state?.view.me;
+    const portrait = stage.querySelector(`[data-retrato="${heal.player === me ? 'voce' : 'oponente'}"]`)?.getBoundingClientRect();
+    if (!portrait) return;
+    const drop = document.createElement('span');
+    drop.setAttribute('data-essencia', '');
+    drop.setAttribute('aria-hidden', 'true');
+    drop.className = 'essencia-cura';
+    const x = from.left + from.width / 2 - layer.left;
+    const y = from.top + from.height / 2 - layer.top;
+    drop.style.left = `${x}px`;
+    drop.style.top = `${y}px`;
+    this.context.layer()?.appendChild(drop);
+    this.copies.push(drop);
+    const dx = portrait.left + portrait.width / 2 - layer.left - x;
+    const dy = portrait.top + portrait.height / 2 - layer.top - y;
+    const duration = Math.max(ESSENCE_MIN_MS, heal.atMs - heal.fromMs);
+    this.moves.push(
+      drop.animate?.(
+        [
+          { translate: '0px 0px', scale: '0.6', opacity: 0 },
+          { translate: `${(dx * 0.15).toFixed(1)}px ${(dy * 0.15 - 18).toFixed(1)}px`, scale: '1', opacity: 1, offset: 0.25 },
+          { translate: `${dx.toFixed(1)}px ${dy.toFixed(1)}px`, scale: '0.8', opacity: 0.9 },
+        ],
+        { duration, delay: heal.fromMs, easing: 'cubic-bezier(0.4, 0, 0.7, 1)', fill: 'both' },
+      ),
+    );
+    this.at(heal.fromMs + duration, () => this.gone(drop));
   }
 
   /** A cópia racha, treme e estoura em cacos; a carta de verdade (o topo do cemitério) aparece no estouro. */

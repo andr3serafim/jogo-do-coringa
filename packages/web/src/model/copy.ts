@@ -1,14 +1,21 @@
 // Textos das jogadas da mesa, em pt-BR (spec §3.4). Fora da meta de cobertura: é só texto.
-import type {
-  AttackPreview,
-  Card,
-  GameEvent,
-  NoPlayReason,
-  NumCard,
-  PlayerId,
-  RowName,
-  SpecialCard,
-  StealOutcome,
+import {
+  absoluteAttackArmed,
+  attackPower,
+  defenseHealActive,
+  defenseHealOf,
+  defensePower,
+  type AttackPreview,
+  type Card,
+  type GameEvent,
+  type NoPlayReason,
+  type NumCard,
+  type PlayerId,
+  type PlayerView,
+  type PublicPlayer,
+  type RowName,
+  type SpecialCard,
+  type StealOutcome,
 } from '@coringa/engine';
 import type { DeadlineKind, Outcome, Score } from '@coringa/protocol';
 import { cardText, ROW_NAME, type Names } from '@coringa/sim/text';
@@ -379,6 +386,118 @@ export const droppedAnnouncement = (opponent: string): string =>
 export interface Ribbon {
   title: string;
   reason: string | null;
+}
+
+/**
+ * A faixa da primeira cura passiva da partida (bloco A dos pontos do playtest, ponto 9): a regra e a conta, com o bruto do motor
+ * (`defenseHealOf`) e os Q que ele multiplica (a divisão do bruto pelo valor, como a conta da fileira). Se a vida chegou ao máximo antes, o
+ * que entrou foi menos: a faixa diz.
+ */
+export function healRibbon(event: Extract<GameEvent, { type: 'Healed' }>, view: PlayerView): Ribbon {
+  const side = event.player === view.me ? view.self : view.opponent;
+  const gross = defenseHealOf(event.card, side);
+  const queens = gross / event.card.value - 1;
+  const capped = event.amount < gross ? ' · até a vida cheia' : '';
+  return {
+    title: 'Cura passiva',
+    reason: `${side.guard.length} K na Guarda: a Defesa que cai vira vida · ${event.card.value} × (1 + ${queens} Q) = ${gross}${capped}`,
+  };
+}
+
+/** As placas de estado do Coringa (bloco A dos pontos do playtest, ponto 6) e a zona do Reflect. */
+export type PlateKind = 'cura' | 'res' | 'defesa' | 'ataque' | 'reflect';
+
+/** O que cada marca faz, numa linha: no seu campo e no do oponente. */
+const PLATE_LINE: Record<PlateKind, readonly [self: string, opponent: string]> = {
+  cura: ['a sua Defesa que cai vira vida', 'a Defesa dele que cai vira vida'],
+  res: ['traz 1 numérica do cemitério', 'traz 1 numérica do cemitério'],
+  defesa: ['imune até o golpe dele', 'imune até o seu golpe'],
+  ataque: ['o seu próximo ataque quebra todos os K', 'o próximo ataque dele quebra todos os K'],
+  reflect: ['o próximo golpe volta para ele', 'o seu próximo golpe volta para você'],
+};
+
+export const plateLine = (kind: PlateKind, self: boolean): string => PLATE_LINE[kind][self ? 0 : 1];
+
+/** A placa do momento da especial do oponente: o que ela fez e, quando o evento diz, a consequência com os números do motor. */
+export interface MomentPlate {
+  title: string;
+  consequence: string | null;
+}
+
+/** "1 J", "o Selvagem como J": a carta que o oponente jogou, no papel dela. */
+const playedText = (card: SpecialCard, as: 'J' | 'Q' | 'A'): string => (card.kind === 'WILD' ? `o Selvagem como ${as}` : `1 ${card.kind}`);
+
+/** O que a carta quebrada tirava de você: o total da fileira que ela multiplicava, ou a Guarda que sobrou. */
+function brokenConsequence(target: SpecialCard, self: PublicPlayer): string | null {
+  switch (target.kind) {
+    case 'J':
+      return `o seu Ataque cai para ${attackPower(self)}`;
+    case 'Q':
+      return `a sua Defesa cai para ${defensePower(self)}`;
+    case 'K':
+      return self.guard.length > 0 ? `a sua Guarda fica com ${self.guard.length} K` : 'a sua Guarda ficou vazia';
+    default:
+      // O Selvagem: o evento não diz de que zona ele saiu (decisoes.md 2026-11-03 (5), A5).
+      return null;
+  }
+}
+
+const brokenText = (target: SpecialCard): string => (target.kind === 'WILD' ? 'o seu Selvagem' : `1 ${target.kind} seu`);
+
+/**
+ * A placa do momento (bloco A dos pontos do playtest, ponto 1): o que a especial do oponente fez, numa linha, e a consequência, com os
+ * totais do motor na `view` de depois do passo (A5: o total, não o multiplicador). Nenhuma fala da Exódia, nem com 3 K (decisoes.md
+ * 2026-11-03 (4), ponto 4). `null` para os eventos que não são momento.
+ */
+export function momentPlate(event: GameEvent, view: PlayerView, names: Names): MomentPlate | null {
+  const self = view.self;
+  const side = (id: PlayerId): PublicPlayer => (id === view.me ? view.self : view.opponent);
+  switch (event.type) {
+    case 'BuffPlayed': {
+      const who = names.of(event.player);
+      const owner = side(event.player);
+      if (event.as === 'J') {
+        return {
+          title: `${who} pôs ${playedText(event.card, 'J')} nos Bônus de ataque`,
+          consequence: absoluteAttackArmed(owner, view.config)
+            ? `${view.config.buffLimit} J: o próximo ataque dele é Absoluto`
+            : `o Ataque dele vai a ${attackPower(owner)}`,
+        };
+      }
+      return {
+        title: `${who} pôs ${playedText(event.card, 'Q')} nos Bônus de defesa`,
+        consequence: owner.absoluteDefense ? `${view.config.buffLimit} Q: a Defesa Absoluta começa` : `a Defesa dele vai a ${defensePower(owner)}`,
+      };
+    }
+    case 'GuardPlayed': {
+      const owner = side(event.player);
+      const count = event.cards.length;
+      const consequence = defenseHealActive(owner, view.config)
+        ? `com ${owner.guard.length} K, a Defesa dele que cai o cura`
+        : count === 1
+          ? 'o K absorve o próximo golpe inteiro'
+          : 'cada K absorve um golpe inteiro';
+      return { title: `${names.of(event.player)} pôs ${count} K na Guarda`, consequence };
+    }
+    case 'TrapUsed':
+      return { title: `${names.of(event.player)} quebra ${brokenText(event.target)}`, consequence: brokenConsequence(event.target, self) };
+    case 'Sacrificed': {
+      const role = event.as ?? (event.card.kind === 'Q' ? 'Q' : 'J');
+      return {
+        title: `${names.of(event.player)} sacrifica ${playedText(event.card, role)} e quebra ${brokenText(event.target)}`,
+        consequence: brokenConsequence(event.target, self),
+      };
+    }
+    case 'CardStolen': {
+      const from = event.fromRow === 'ATK' ? 'do Ataque' : 'da Defesa';
+      return {
+        title: `${names.of(event.player)} rouba o seu ${event.card.value} ${from}`,
+        consequence: event.fromRow === 'ATK' ? `o seu Ataque cai para ${attackPower(self)}` : `a sua Defesa cai para ${defensePower(self)}`,
+      };
+    }
+    default:
+      return null;
+  }
 }
 
 /**

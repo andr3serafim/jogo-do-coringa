@@ -87,8 +87,9 @@ describe('layoutId das cartas (spec §4.1)', () => {
 });
 
 describe('transição atrasada até a batida que moveu a carta (spec §4.1)', () => {
+  // No treino: online, a sua especial segura o tempo do momento que o oponente vê (A9a, `moment.test.tsx`).
   it('a carta espera o início da sua batida (e, saindo da sua mão, o recuo de 90 ms) e, no fim das batidas, volta a não esperar', () => {
-    const m = mount(BEFORE);
+    const m = mount(BEFORE, { training: 'medio' });
     expect(delayOf(m.container, 'j1')).toBe('0');
     emit(m, AFTER, [TURN, BUFF]);
     expect(delayOf(m.container, 'j1')).toBe('0.49');
@@ -100,7 +101,7 @@ describe('transição atrasada até a batida que moveu a carta (spec §4.1)', ()
   });
 
   it('a espera encolhe junto com a linha do tempo quando uma decisão minha espera (teto de 1 s)', () => {
-    const m = mount(BEFORE);
+    const m = mount(BEFORE, { training: 'medio' });
     emit(m, AFTER, [TURN, TURN, TURN, TURN, BUFF]); // 4 × 400 + 300 = 1900 ms, escalados para 1000
     const delay = Number(delayOf(m.container, 'j1'));
     expect(delay).toBeGreaterThan(0.5);
@@ -115,7 +116,7 @@ describe('transição atrasada até a batida que moveu a carta (spec §4.1)', ()
   });
 
   it('o Motion mede a mesa uma vez por `state` e uma vez quando as batidas acabam', () => {
-    const m = mount(BEFORE);
+    const m = mount(BEFORE, { training: 'medio' });
     const dep = () => layoutOf(m.container, 'k1').getAttribute('data-layout-dep');
     const first = dep();
     emit(m, AFTER, [TURN, BUFF]);

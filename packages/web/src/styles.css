@@ -615,9 +615,10 @@
 
 /*
  * A mesa viva (sub-projeto 6 §6). As cartas da mão respiram: sobem e descem 3 px num ciclo de 3,6 s, cada uma num tempo
- * (`--respira-i`, o índice dela, adianta o ciclo em 0,9 s). Na carta de quadra, um brilho passa a cada 3,2 s. As duas são as
- * únicas animações sem fim da folha (o teste do relógio confere): pouco movimento, em área pequena, sem trocar a luminância da
- * tela. Com movimento reduzido a mesa não põe as marcas (`data-respira`, `.brilho-quadra`).
+ * (`--respira-i`, o índice dela, adianta o ciclo em 0,9 s). Na carta de quadra, um brilho passa a cada 3,2 s. Com os gestos das
+ * placas de estado (bloco A dos pontos do playtest, ponto 6), são as únicas animações sem fim da folha (o teste do relógio confere):
+ * pouco movimento, em área pequena, sem trocar a luminância da tela. Com movimento reduzido a mesa não põe as marcas (`data-respira`,
+ * `.brilho-quadra`, `data-gesto`).
  */
 @keyframes respira {
   0%,
@@ -639,6 +640,33 @@
   animation-play-state: paused;
 }
 
+/*
+ * A mão que diz o que joga agora (bloco A dos pontos do playtest, ponto 2): a carta sem jogada desce 8 px e perde a cor (um filtro
+ * parado, nunca animado); a que joga ganha o fio de ouro embaixo. Com movimento reduzido, a descida é direta.
+ */
+li[data-sem-jogada] {
+  translate: 0 8px;
+  filter: saturate(0.35) brightness(0.82);
+  transition: translate 200ms ease-out;
+}
+
+li[data-sem-jogada][data-parado] {
+  transition: none;
+}
+
+li[data-joga]::after {
+  content: '';
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  bottom: -4px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--color-ouro);
+  box-shadow: 0 1px 0 var(--color-tinta);
+  pointer-events: none;
+}
+
 @keyframes brilho-quadra {
   0%,
   62% {
@@ -651,6 +679,133 @@
 
 .brilho-quadra {
   animation: brilho-quadra 3.2s ease-in-out infinite;
+}
+
+/*
+ * As placas de estado (bloco A dos pontos do playtest, ponto 6): um gesto lento a cada ~3 s, na área do medalhão, só com `transform` e
+ * `opacity` (nada acende a tela). A cruz da cura bate e solta um "+", a alma sobe do túmulo da Ressurreição, e um brilho passa pelo
+ * espelho do Reflect. Com movimento reduzido a mesa não põe os gestos (`data-gesto`, `data-gesto-mais`).
+ */
+@keyframes gesto-cura {
+  0%,
+  78%,
+  100% {
+    scale: 1;
+  }
+  84% {
+    scale: 1.18;
+  }
+  90% {
+    scale: 0.96;
+  }
+}
+
+[data-gesto='cura'] {
+  animation: gesto-cura 3s ease-in-out infinite;
+}
+
+@keyframes gesto-cura-mais {
+  0%,
+  82% {
+    opacity: 0;
+    translate: 0 2px;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 -12px;
+  }
+}
+
+[data-gesto-mais] {
+  animation: gesto-cura-mais 3s ease-out infinite;
+}
+
+@keyframes gesto-alma {
+  0%,
+  70% {
+    opacity: 0;
+    translate: -50% 4px;
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: -50% -10px;
+  }
+}
+
+[data-gesto='alma'] {
+  animation: gesto-alma 3.2s ease-out infinite;
+}
+
+@keyframes gesto-espelho {
+  0%,
+  74% {
+    translate: -80px 0;
+    opacity: 0;
+  }
+  80%,
+  94% {
+    opacity: 0.85;
+  }
+  100% {
+    translate: 80px 0;
+    opacity: 0;
+  }
+}
+
+[data-gesto='espelho'] [data-brilho] {
+  animation: gesto-espelho 3.4s ease-in-out infinite;
+}
+
+/*
+ * A essência da cura passiva (bloco A dos pontos do playtest, ponto 9): uma gota verde, de tinta e papel como o resto da mesa, que voa da
+ * carta da Defesa que caiu até o retrato de quem curou (a `Leaving` a anima só com `translate`, `scale` e `opacity`).
+ */
+.essencia-cura {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border: 1.5px solid var(--color-tinta);
+  border-radius: 50% 50% 50% 0;
+  rotate: -45deg;
+  background: radial-gradient(circle at 35% 35%, #9be59a, var(--color-cura) 70%);
+  pointer-events: none;
+}
+
+/* No celular a placa fica só com o nome: a linha do que ela faz não cabe no campo. */
+@media (max-width: 599px) {
+  .placa-faz {
+    display: none;
+  }
+}
+
+/*
+ * O momento da especial do oponente (bloco A dos pontos do playtest, ponto 1): a carta grande vira de costas para a frente, então as faces
+ * vivem em 3D e escondem o verso de cada uma. O verso é o mesmo xadrez de tinta dos versos da mão dele.
+ */
+.momento-carta,
+.momento-face {
+  transform-style: preserve-3d;
+}
+
+.momento-face > :first-child {
+  backface-visibility: hidden;
+}
+
+.momento-verso {
+  position: absolute;
+  inset: 0;
+  border: 3px solid var(--color-tinta);
+  border-radius: 3px 5px 4px 6px;
+  background: repeating-linear-gradient(45deg, var(--color-tinta) 0 3px, var(--color-papel) 3px 6px);
+  transform: rotateY(180deg);
+  backface-visibility: hidden;
 }
 
 /*

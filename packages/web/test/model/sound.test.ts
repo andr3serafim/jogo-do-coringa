@@ -115,6 +115,14 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
       expect(cueFor({ ...SAMPLES[type], player: 'p2' } as GameEvent)).toBe('pouso');
     });
 
+    it.each(['BuffPlayed', 'GuardPlayed', 'TrapUsed', 'Sacrificed', 'CardStolen'] as const)(
+      'o %s do Bot, visto como momento (bloco A do playtest, ponto 1): a virada da carta; o impacto soa na camada do momento',
+      (type) => {
+        const event = { ...SAMPLES[type], player: 'p2' } as GameEvent;
+        expect(cueOf(buildTimeline([event], { ...LIVE, viewer: 'p1' })[0]!, 'p1')).toBe('momento');
+      },
+    );
+
     it('as cartas do Equipar, as suas e as do Bot, assentam: pouso', () => {
       expect(cueFor(SAMPLES.CardsPlaced)).toBe('pouso');
       expect(cueFor({ ...SAMPLES.CardsPlaced, player: 'p2' } as GameEvent)).toBe('pouso');

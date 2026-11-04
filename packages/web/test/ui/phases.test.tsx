@@ -787,12 +787,13 @@ describe('relógio (spec §3.8, §10.3)', () => {
     check();
     tick(m, 4_000);
     check();
-    // E a folha de estilos só tem as animações sem fim da mesa viva (sub-projeto 6 §6: a mão que respira e o brilho da quadra),
-    // nenhuma no relógio nem em outro lugar.
+    // E a folha de estilos só tem as animações sem fim da mesa viva (sub-projeto 6 §6: a mão que respira e o brilho da quadra; bloco A
+    // do playtest, ponto 6: os gestos lentos das placas de estado, a cruz e o "+" da cura, a alma e o espelho), nenhuma no relógio nem
+    // em outro lugar.
     const css = readFileSync(resolve(import.meta.dirname, '../../src/styles.css'), 'utf8');
     const endless = [...css.matchAll(/animation:\s*([\w-]+)[^;]*\binfinite\b/g)].map((match) => match[1]);
-    expect(endless.sort()).toEqual(['brilho-quadra', 'respira']);
-    expect(css.match(/\binfinite\b/g)).toHaveLength(2);
+    expect(endless.sort()).toEqual(['brilho-quadra', 'gesto-alma', 'gesto-cura', 'gesto-cura-mais', 'gesto-espelho', 'respira']);
+    expect(css.match(/\binfinite\b/g)).toHaveLength(6);
     expect(css).not.toMatch(/animation-iteration-count/);
   });
 

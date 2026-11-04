@@ -280,6 +280,29 @@ function fewestWilds(list: PlayerAction[], view: PlayerView): PlayerAction | nul
   return best;
 }
 
+/** As jogadas que usam cartas da mão em combinação (a carta não aparece em `byCard`, mas joga). */
+const COMBOS: ReadonlySet<PlayerAction['type']> = new Set<PlayerAction['type']>(['REFLECT', 'CANCEL_REFLECT', 'DEVASTATE', 'DISCARD']);
+
+/**
+ * As cartas da mão com jogada agora (bloco A dos pontos do playtest, ponto 2): as de `byCard` e as que entram numa combinação legal
+ * (o Reflect, a Devastação, a escolha do que queimar). A combinação lista a carta canônica de cada tipo, e o motor aceita qualquer uma do
+ * mesmo tipo (`roleKey`): todas as cartas da mão desse tipo jogam. Nenhuma regra aqui, só a lista legal.
+ */
+export function liveHandIds(view: PlayerView, legal: PlayerAction[], plays: TablePlays): ReadonlySet<string> {
+  const live = new Set(plays.byCard.keys());
+  const handKind = new Map(view.self.hand.map((card) => [card.id, card.kind]));
+  const kinds = new Set<SpecialCard['kind']>();
+  for (const action of legal) {
+    if (!COMBOS.has(action.type)) continue;
+    for (const id of cardIdsOf(action)) {
+      const kind = handKind.get(id);
+      if (kind !== undefined) kinds.add(kind);
+    }
+  }
+  for (const card of view.self.hand) if (kinds.has(card.kind)) live.add(card.id);
+  return live;
+}
+
 /** Tudo o que a mesa pode oferecer, a partir da lista legal. */
 export function tablePlays(view: PlayerView, legal: PlayerAction[]): TablePlays {
   const targets = opponentTargets(view);

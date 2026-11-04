@@ -5,10 +5,10 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
-## 2026-11-03 (6): bloco E, a Ressurreição no instante da quadra (ponto 16), da spec à medição
+## 2026-11-03 (7): bloco E, a Ressurreição no instante da quadra (ponto 16), da spec à medição
 
 - **Sessão paralela** do bloco E (worktree `.claude/worktrees/ressurreicao-quadra-f59247`, branch `claude/ressurreicao-quadra-f59247`, saída
-  de `d35a241`). O autor aprovou o plano com 15 s na janela (`decisoes.md` 2026-11-03 (5)).
+  de `d35a241`). O autor aprovou o plano com 15 s na janela (`decisoes.md` 2026-11-03 (6)).
 - **Feito, por tarefa do plano** (`docs/superpowers/plans/2026-11-03-ressurreicao-quadra.md`):
   1. a troca e a proteção no motor (`41a3cc2`): `resurrectionRows` é a fonte única (motor, lista legal, bots, web), `QUAD_PROTECTED`, a chave
      `resurrectOnQuad` (ausente = a regra de antes);
@@ -56,6 +56,126 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-03 (6): o bloco A do playtest, a execução
+
+- **Pedido:** o plano do bloco A aprovado como está (`decisoes.md` 2026-11-03 (5)). Branch `feat/playtest-bloco-a`, saída da
+  `feat/playtest-spec` em `0bd8d72` (a `main` está em `d35a241`; ela vai até o fim do bloco junto com ele, por fast-forward).
+- **Armadilha:** o pre-push do fast-forward da `main` para o `0bd8d72` falhou uma vez no `pnpm check`, com a sessão do bloco E rodando
+  ao mesmo tempo, e o `| tail` do comando escondeu qual teste foi. Rodado de novo, sozinho, passou. Não encadeie `git push | tail` com
+  `&&`: o `tail` engole o código de saída (o `git branch -f main` andou mesmo com o push recusado, e foi desfeito).
+- **Task 1 (o momento na linha do tempo e no protocolo):**
+  - protocolo: `SPECIAL_MOMENT_MS` (1,6 s e 1,1 s), `MOMENT_PLAYS`, `isMomentFor`, `momentsMs` e `stepAllowanceMs` em `scenes.ts`;
+  - web: a batida `moment` (com `Beat.moment`, o voo e o impacto), `MOMENT_MS` (as três fases), e nas opções `viewer`, `momentsBefore`,
+    `holdOwnMoments` e `ownMomentsBefore` (A9a). Sem `viewer` nada muda (os testes e o replay de antes);
+  - **Ruling:** o `classify` não devolve `moment` (o tipo dele exclui): o momento é decidido depois, com o `viewer`, e as contas seguem
+    `momentsMs` evento a evento, sem repetir a regra;
+  - **Ruling:** a A9a mantém a sua especial como `move` (com o voo e o pouso de hoje), só com a duração do momento do oponente.
+- **Task 2 (o momento na mesa):**
+  - `touchMs(beat)` (o impacto no momento, o início nas outras) nos atrasos, na saída e nas vizinhas; a carta do Bot ganha o pouso
+    `snap` (escondida até o impacto, 50 ms de esmaecimento, sem a queda); o A do oponente não vira cópia (vem de versos sem id);
+  - a máquina das batidas guarda `moments` e `ownMoments` (a conta do turno) para a seguinte, e o `resync` zera; o véu é a cortina
+    com `veil: 'moment'` (35% de tinta, `data-veu="momento"`), pela mesma trava; com movimento reduzido, não sobe;
+  - `Stage` ganha `online` (a `PlayTable` passa `training === undefined`) e o leva como `holdOwnMoments`;
+  - **testes mudados de propósito:** a carta do Bot não cai mais de 14 px na batida dela (`table-motion.test.tsx`): ela aparece no
+    impacto do momento. Os três testes de layout (`animation-layout.test.tsx`) montam a mesa do treino, porque o harness é online e lá
+    a sua especial segura 1,6 s (A9a). O harness ganhou `training`;
+  - **não conferido de verdade:** a recusa do véu pela trava cheia não tem teste próprio: ela usa a mesma `raiseCurtain` da cortina das
+    cenas, que os testes da cortina cobrem.
+- **Task 3 (o servidor e o treino esperam o momento):**
+  - servidor: `schedulePhase` usa `stepAllowanceMs(events, null)`: a folga do momento vale para os dois lados (A9a) e é sempre a
+    inteira (A1). Três testes do prazo mudaram de propósito: o K abre a janela com +1,6 s, o Ás na reação soma +1,6 s, e o 4º Q soma a
+    cena e o momento. Um teste novo: duas especiais seguidas no próprio turno dão +1,6 s cada;
+  - treino: a sala local conta os momentos do Bot no turno (`#momentsInTurn`, zera na partida nova e no `TurnStarted`) e soma
+    `stepAllowanceMs(events, LOCAL_ME, conta)` ao `#sceneUntil`: o Bot espera 1,6 s + 600 ms depois da primeira especial do turno e
+    1,1 s + 600 ms depois das seguintes; o K do jogador abre a janela do Bot, que responde na hora;
+  - **armadilha (minha):** um script de edição pôs o zerar da conta no `act()` do jogador, e não na partida nova; o teste novo, que conta
+    os momentos à parte, achou na hora. Os scripts de troca de texto pegam a primeira ocorrência: confira o lugar.
+  - **testes mudados de propósito:** a reação do Bot pode esperar o momento da Armadilha dele (ele joga de novo na mesma janela), e o
+    Fácil tem esperas de momento além de 0 e 600 ms (o teste segue barrando as fatias curtas).
+- **Corte pelo limite de uso** no meio da Task 4 (as duas sessões, a do bloco E também). Nada se perdeu: o que estava sem commit (o texto
+  da placa e a pista) estava inteiro, e foi o primeiro commit da volta (`2ae674f`).
+- **Task 4 (a carta grande, a placa e o som):**
+  - `momentPlate` em `copy.ts` (a tabela do plano; o Selvagem como alvo dá só o título; nenhuma placa fala da Exódia); a pista
+    `momento` (a virada de papel) no começo da batida; o impacto soa na camada (`pouso` `dropMs` antes do impacto, `quebra` no impacto);
+  - `ui/anim/Moment.tsx` (`MomentLayer`, no `Stage`, z-55, por cima do véu): a carta (`Card` com `ghost`, sem `data-card-id` e
+    `aria-hidden`) sai da mão dele de costas e vira em 3D (o verso é `.momento-verso`, no `styles.css`), a placa embaixo, o voo medido no
+    começo dele, e depois do impacto a Armadilha, o Sacrifício e o Roubo seguem ao cemitério (`exitMs`). As fases moram em `data-fase`;
+  - **Ruling:** a camada guarda o último momento até a carta terminar (a ida ao cemitério passa do fim da batida); o pulo e a linha do
+    tempo que não tem mais a batida a tiram;
+  - **Ruling:** o atributo da placa é `data-placa-momento`: `data-placa` já é a placa do placar (o seletor do teste pegou a errada);
+  - JavaScript inicial: 170,6 KB de 200 KB (gzip);
+  - **não conferido de verdade:** a posição, a virada em 3D e o voo (o jsdom não tem layout nem `animate`): só nas fotos da Task 8.
+- **Task 5 (a mão que diz o que joga agora):**
+  - `liveHandIds(view, legal, plays)` em `plays.ts`: as de `byCard` e as cartas da mão cujo tipo entra numa combinação legal (Reflect,
+    Devastação, a escolha do que queimar), pela regra do `roleKey`;
+  - a `PlayTable` passa `liveCards` (vazio depois do passe, `null` no fim da partida) pela `Table` ao contexto; a `<li>` da carta
+    apagada tem `data-sem-jogada` (desce 8 px, filtro parado, sem respirar, o `LockIcon`), a que joga `data-joga` (o fio de ouro);
+    com movimento reduzido, `data-parado` tira a transição. O nome acessível da apagada termina em "sem jogada agora";
+  - **achados nos testes, que eram meus e não do motor:** sem carta no campo do oponente o A não tem alvo; com K, A e J na mão a
+    Devastação acende o J mesmo com o limite de J cheio.
+- **Task 6 (as placas de estado):**
+  - `StatePlate.tsx` (o medalhão com a figura de hoje num disco, o nome e a linha de `plateLine`, do lado de quem vê); a Ressurreição
+    mostra "Ressurreição(ões)" e o número num selo, e o leitor de tela segue ouvindo "N Ressurreições disponíveis" (`sr-only`);
+  - a zona do Reflect ganha a linha (A6) e o `MirrorMark` o brilho (`data-gesto="espelho"`, um retângulo recortado pelo espelho);
+  - **desvio do plano (pequeno):** as animações sem fim ficaram **6**, não 5: a cura tem dois gestos (a cruz que bate e o "+" que sobe),
+    e cada elemento precisa da sua animação. O teste das animações sem fim trava as seis;
+  - abaixo de 600 px a linha do que faz some (`.placa-faz`); o nome fica;
+  - **não conferido de verdade:** o tamanho das placas no campo (a zona do Reflect ganhou uma linha no PC) e os gestos: nas fotos da
+    Task 8.
+- **Task 7 (a cura passiva que se explica):**
+  - motor: `defenseHealOf(card, side)` exportado, e o `healFromDefense` passa a usá-lo; os snapshots golden não mudaram (sem `-u`);
+  - sessão: `firstHealSeq` (o `seq` da primeira cura passiva que curou algo, de qualquer lado; zera na partida nova; o replay dá
+    `null`, sem faixa); linha do tempo: `teachHeal` e `Beat.teach`; a faixa dessa batida é a `healRibbon` ("Cura passiva" · "2 K na
+    Guarda: a Defesa que cai vira vida · 6 × (1 + 2 Q) = 18", e "· até a vida cheia" quando entrou menos), no `Stage`;
+  - os K da Guarda de quem curou acendem na batida da cura: o `CardFx` ganhou `cause` (o halo verde pela opacidade, como o `light` da
+    quadra). **Desvio do plano:** ele dizia `CardFx.cause?: true` e `data-causa`; ficou um valor a mais do `CardFx` que já existe
+    (`data-fx="cause"`), o padrão da casa;
+  - a essência: `healsOf(beats)` (da batida em que a carta saiu da Defesa à da cura) e a gota `.essencia-cura` na `Leaving`, até o
+    `[data-retrato="voce"|"oponente"]` (o plano dizia `self`/`opponent`; os valores de verdade do placar são esses);
+  - a dica `buffs` do tutorial ganhou a conta ("A cura é o valor da carta vezes (1 + o número de Q).").
+- **Task 8, o E2E (`e2e/moment.spec.ts`, no projeto `desktop`, a 1366 × 657 e a 360 × 640):** a Guarda do Bot (a placa à vista, nada
+  rola de lado, o K aparece no fim), o segundo J do turno mais curto (a página mede cada vez que a camada fica montada), o pulo pelo toque
+  e a mão toda apagada no Equipar do treino. **Defeito achado por ele, consertado com teste:** o timer do fim do momento e o do fim da
+  batida vencem no mesmo instante; se o do momento chegasse antes (o filho roda o efeito antes do pai), a batida ainda era o momento, a
+  camada o mostrava de novo e reaproveitava o componente parado na fase `exit`, para sempre (invisível, mas montado). Agora o momento
+  terminado fica anotado (`done`) e não volta. O teste de unidade reproduz a corrida (falha sem o conserto). Depois: 3 execuções de 7/7.
+- **A CI do `e194d58` reprovou 3 E2E de layout** (`layout.spec.ts`, "especiais no PC", nas três telas): o bloco das marcas tinha 67,5 px,
+  e o teste aceitava 56 (duas linhas de etiqueta). As placas são mais altas por desenho (o medalhão e a linha do que faz): o limite passou a
+  88 (duas linhas de placa), e o resto do teste (as zonas sem se sobrepor, a coluna cabendo no campo) passou nas três telas, localmente.
+- **Armadilha:** `-g "360 × 640 › ..."` não acha o teste no Playwright do Windows (o `×` e o `›` do título); filtre por um pedaço sem eles.
+- **Task 8, a revisão final (A8, um revisor novo, a branch inteira contra a spec e o plano).** Consertado com teste (`256d69d`):
+  - **online, o passe automático cortava o momento do Ás na janela:** ele sai no ack do Ás do respondente, e o servidor o aplicava na
+    hora quando os 2 s já tinham passado; o atacante via a placa por 100 a 300 ms. A trava da A9a segura a mão, não a sessão.
+    **Ruling:** o servidor guarda o PASS até o fim do momento do Ás mais o impacto (`passHeldUntil`, opcional no registro, sem subir o
+    `STATE_SCHEMA`; a época nova o esquece). Só o Ás do respondente na janela o arma: o K que abre a janela segue com o piso de 2 s.
+    O teste do piso que usava um Ás aos 300 ms mudou de propósito (o PASS dele vale aos 2.380 ms, não aos 2 s);
+  - **no treino, o Bot na janela jogava no fim exato do momento do Ás dele:** o `state` novo cortava o racha, o tremor e a ida do Ás ao
+    cemitério (e o som da quebra). **Ruling:** `MOMENT_TAIL_MS` (480 ms, no protocolo; um teste da web confere que cobre
+    `crackShakeMs + exitMs`) entra só depois das especiais que quebram ou levam uma carta (`MOMENT_TAIL_PLAYS`: o Ás, o Sacrifício e o
+    Roubo) e só onde a jogada seguinte não pensa: o PASS guardado, o Bot na janela (`#tailUntil`, só depois de um momento dele com
+    cauda: uma cena sua no ar não o atrasa) e, online, a sua jogada depois da sua especial com cauda (a trava da A9a passa de 1,6 s a
+    2,08 s; um clique rápido logo depois cortava o alvo quebrando na tela do oponente). Fora da janela o Bot já pensa 600 ms depois do
+    momento, e a folga do prazo (`stepAllowanceMs`) ficou como estava: o relógio do servidor para 1,6 s, e os 480 ms da trava correm no
+    relógio de quem jogou. Os cacos vão para a camada das partículas, que o `state` novo não limpa: a cópia que racha vive 120 ms e a ida
+    do Ás ao cemitério 360 ms, os dois dentro dos 480;
+  - **o Ás do Roubo do oponente aparecia duas vezes** (no topo do cemitério, sem numérica deslocada, e grande no centro): ganhou o pouso
+    `snap` quando a cópia chega ao cemitério (impacto + `exitMs`). Com movimento reduzido ele aparece 360 ms depois do fim do momento;
+  - o "4 J" e o "4 Q" da placa vêm de `config.buffLimit`; o véu do momento passa para a cortina da cena (o 4º Q, com a Defesa
+    Absoluta) esmaecendo o fundo, sem o pulo de 35% para 60% fora da trava; um comentário da linha do tempo sobre o replay corrigido
+    (o replay mostra os momentos, do lado de quem gravou: é o que o E2E e a medição usam).
+- **Da revisão, para o autor decidir (textos que ele viu na spec §3 e no protótipo):** "imune até o golpe dele" (o Ataque Absoluto fura
+  a Defesa Absoluta, e a ajuda do jogo diz isso), "quebra todos os K" (contra um Reflect ativo, os K ficam), "o K absorve o próximo golpe
+  inteiro" (não contra o Ataque Absoluto armado de quem vê) e "o próximo golpe volta para ele" (com o atacante sob Defesa Absoluta, o
+  Reflect só segura). Ficaram como ele aprovou.
+- **Da revisão, menores, não feitos:** a primeira cura passiva que chega num `catchUp` ou é pulada gasta o `firstHealSeq` sem a faixa;
+  as placas "Cura passiva" e "Ataque Absoluto armado" aparecem na chegada do `state`, 1,6 s antes de o K ou o J pousar; o `copy.ts`
+  segue fora da cobertura (`vitest.config.ts`), agora com lógica (`momentPlate`, `healRibbon`) que o portão de 90% não vê.
+- **Fechamento:** as duas CI verdes no último commit de código (`540e3d4`, run `41760616250`); a `main` por fast-forward até o commit da
+  memória que vem logo depois. A sessão do bloco E mescla a `main` em seguida (conflitos só na memória e no `testMatch` do
+  `playwright.config.ts`, pela simulação dela) e renumera as entradas dela.
+
+---
+
 ## 2026-11-03 (5): as respostas do autor; o desenho vira spec
 
 - **Respostas** (`decisoes.md` 2026-11-03 (4)): a fatia 5 aprovada (o sub-projeto 6 fecha); a ordem dos blocos, a variante A em todos os
@@ -76,7 +196,22 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   (mesclada) saiu; a `feat/online-equipar-vazio` (rebase não publicado, 2 commits fora da `main`) ficou.
 - **Armadilha:** um `cd` para dentro do worktree de outra sessão faz o app tratar o worktree como a pasta desta sessão. Volte com `cd`
   para o checkout principal antes de apagar a outra sessão.
-- **Próximo:** a CI e a `main`; a sessão do bloco E; o plano do bloco A, para ele aprovar.
+- **A sessão do bloco E** foi aberta (worktree próprio, branch `ressurreicao-quadra`, saída da `feat/playtest-spec`), com a regra do 16
+  no brief: spec das regras, plano, aprovação do autor nela, execução. Combinado com ela: o estado dela numa seção própria do
+  `estado.md`, só acréscimos no diário e nas decisões, e aviso antes de tocar nos arquivos da web do bloco A.
+- **O plano do bloco A** (`docs/superpowers/plans/2026-11-03-playtest-bloco-a.md`), escrito a partir da leitura do código:
+  - **o momento** é uma batida nova (`moment`) da linha do tempo, fora do teto de decisão, com o voo e o impacto dentro dela; a conta
+    dos momentos do turno é uma função pura do protocolo (`momentsMs`), lida pela linha do tempo, pelo bot do treino e pelo servidor;
+  - **achados que a spec não dizia:** as faixas são `aria-hidden` (o registro acessível é o histórico), então a placa também (A4); o
+    véu de 35% é troca de luminância e passa pela `FlashLock` (A3); a consequência usa o total do motor, não o multiplicador (A5); o
+    Selvagem como alvo não diz de que zona saiu, e a placa fica só com o título; o bot do treino não pode esperar o momento das jogadas
+    do próprio jogador (o K dele abriria a janela do Bot 1,6 s depois);
+  - **escolhas para ele:** A1 a A9 no começo do plano, com a recomendação em cada uma;
+  - **achado da revisão do plano:** online, quem joga não vê o próprio momento, então um J, um Q e um K em um segundo chegariam ao
+    oponente como três `state`s, e cada um cortaria o momento anterior (o `useBeatPlayer` troca a linha do tempo). Virou a A9, com a
+    recomendação de quem joga esperar o momento do outro (como o Bot no treino). Também da revisão: a mão depois do passe fica apagada
+    (a lista legal ainda traz a Armadilha); o encaixe com o bloco E (a fase e os eventos novos) fica com quem mesclar por último.
+- **Próximo:** a CI e a `main`; o autor aprova o plano do bloco A.
 
 ---
 

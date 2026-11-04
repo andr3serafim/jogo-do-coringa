@@ -43,6 +43,8 @@ export interface CardProps {
   grave?: boolean;
   /** Carta pendente do Equipar já posta na fileira como rascunho: translúcida, de borda tracejada (spec §3.5). */
   draft?: boolean;
+  /** Carta da mão sem jogada agora (bloco A dos pontos do playtest, ponto 2): o nome acessível termina em "sem jogada agora". */
+  idle?: boolean;
   /** Texto do `title` (padrão: o papel e o efeito da carta). */
   hint?: string;
   /**
@@ -61,10 +63,17 @@ export interface CardProps {
   dragRef?: (el: HTMLElement | null) => void;
   /** O gesto de arrastar vale agora para esta carta: o cursor vira a mãozinha (`cursor-grab`), no lugar do `cursor-pointer` do botão. */
   grabbable?: boolean;
+  /**
+   * Uma cópia (a carta grande do momento da especial do oponente): sem `data-card-id`, para nenhum seletor da carta de verdade a pegar,
+   * e escondida do leitor de tela.
+   */
+  ghost?: boolean;
   className?: string;
 }
 
 const DEAL_FLY = { fly: true, fade: false } as const;
+/** O esmaecimento da carta que a cópia do momento encontra no destino: curto, para não haver duas cartas no lugar. */
+const SNAP_FADE_S = 0.05;
 /** O verso: só o que acabou de entrar na mão voa (ver `useDealIn`). */
 const BACK_FLY = { fly: true, fade: false, onlyNew: true } as const;
 
@@ -198,6 +207,7 @@ export function Card({
   quad = false,
   grave = false,
   draft = false,
+  idle = false,
   hint,
   animated = true,
   disabled = false,
@@ -206,6 +216,7 @@ export function Card({
   onSeen,
   dragRef,
   grabbable = false,
+  ghost = false,
   className = '',
 }: CardProps) {
   const anim = useAnim();
@@ -215,8 +226,10 @@ export function Card({
   // batida dela (só opacidade: vale com movimento reduzido).
   const dealt = animated ? anim.enterDelay(card.id) : null;
   const dropAt = landing?.drop ? landing.at - TABLE_MOTION.dropMs / 1000 : null;
-  const enter = dealt ?? dropAt;
-  const enterSeconds = dealt === null && dropAt !== null ? TABLE_MOTION.dropMs / 1000 : 0.25;
+  // A da especial do oponente aparece de uma vez no impacto: a cópia do momento chega nela (bloco A dos pontos do playtest, ponto 1).
+  const snapAt = landing?.snap ? landing.at : null;
+  const enter = dealt ?? dropAt ?? snapAt;
+  const enterSeconds = dealt !== null ? 0.25 : dropAt !== null ? TABLE_MOTION.dropMs / 1000 : snapAt !== null ? SNAP_FADE_S : 0.25;
   const self = useRef<HTMLElement | null>(null);
   const bindRef = useCallback(
     (el: HTMLElement | null) => {
@@ -235,6 +248,7 @@ export function Card({
   if (target) name.push('alvo possível');
   if (marked) name.push('novo');
   if (draft) name.push('rascunho');
+  if (idle) name.push('sem jogada agora');
 
   const classes = [
     'relative box-border border-tinta p-0 text-tinta rounded-[3px_5px_4px_6px]',
@@ -256,7 +270,8 @@ export function Card({
     className: classes.filter(Boolean).join(' '),
     'aria-label': name.join(', '),
     title: hint ?? cardHint(card, as),
-    'data-card-id': card.id,
+    'data-card-id': ghost ? undefined : card.id,
+    'aria-hidden': ghost ? true : undefined,
     'data-novo': marked ? 'true' : undefined,
     'data-alvo': target ? 'true' : undefined,
     'data-quad': quad ? 'true' : undefined,
@@ -419,6 +434,8 @@ function FxOverlay({ fx, ms }: { fx: CardFx; ms: number }) {
     transition: { duration: ms / 1000, times: [0, 0.2, 0.8, 1], ease: 'linear' as const },
   };
   if (fx === 'light') return <m.span {...motion} className="pointer-events-none absolute inset-0 bg-ouro/70" />;
+  // Os K da Guarda que causam a cura passiva (bloco A dos pontos do playtest, ponto 9): o halo verde da cura.
+  if (fx === 'cause') return <m.span {...motion} className="pointer-events-none absolute -inset-1 rounded-[8px] border-4 border-cura bg-cura/20" />;
   return <m.span {...motion} className="pointer-events-none absolute -inset-1 rounded-[8px] border-4 border-ouro" />;
 }
 

@@ -11,7 +11,7 @@ import {
   type PlayerView,
   type Replay,
 } from '@coringa/engine';
-import { sceneAllowanceMs, type ConnectionEvent, type PlayerAction, type ReplayMessage, type RoomMessage, type StateMessage } from '@coringa/protocol';
+import { MOMENT_TAIL_MS, SPECIAL_MOMENT_MS, momentsMs, sceneAllowanceMs, type ConnectionEvent, type PlayerAction, type ReplayMessage, type RoomMessage, type StateMessage } from '@coringa/protocol';
 import { BOTS, runHard } from '@coringa/sim/bots';
 import { createRng } from '@coringa/sim/rng';
 import { describe, expect, it, vi } from 'vitest';
@@ -274,8 +274,11 @@ describe('LocalRoom', () => {
       const view = room.state!.view;
       if (view.phase.kind === 'REACTION' && view.phase.responder === 'p2') {
         sawReaction = true;
-        // Sem cena no ar, na hora; com uma cena no ar, só a folga dela (decisoes.md 2026-11-01 (3)).
-        expect(timers.delays.at(-1)).toBeLessThanOrEqual(sceneAllowanceMs(states(events).at(-1)!.events));
+        // Sem cena no ar, na hora; com uma cena no ar, só a folga dela (decisoes.md 2026-11-01 (3)). A Armadilha do Bot na janela também
+        // tem o momento dela, que o jogador vê antes de o Bot jogar de novo (bloco A do playtest, ponto 1): no máximo o inteiro, e o impacto.
+        const last = states(events).at(-1)!.events;
+        const moment = momentsMs(last, 'p1').ms;
+        expect(timers.delays.at(-1)).toBeLessThanOrEqual(sceneAllowanceMs(last) + moment + (moment > 0 ? MOMENT_TAIL_MS : 0));
       }
       if (myTurn(view)) await room.act(legalActions(view)[0] as PlayerAction);
       else timers.runNext();
@@ -310,6 +313,74 @@ describe('LocalRoom', () => {
     const afterScenes = scheduled.filter((entry) => entry.allowance > 0);
     expect(afterScenes.length).toBeGreaterThanOrEqual(2);
     for (const { delay, allowance } of afterScenes) expect(delay).toBeGreaterThanOrEqual(allowance + 600);
+  });
+
+  it('o bot espera o momento das especiais dele (bloco A do playtest, ponto 1): o inteiro na primeira do turno, o curto depois', async () => {
+    const SPECIALS = new Set(['BuffPlayed', 'GuardPlayed', 'TrapUsed', 'Sacrificed', 'CardStolen']);
+    /** A espera que o último `state` pede ao Bot, contada à parte: só os momentos dele, sem cena no passo; `null` fora disso. */
+    const expectedWait = (list: StateMessage[]): number | null => {
+      let inTurn = 0;
+      let moments: number[] = [];
+      for (const state of list) {
+        moments = [];
+        for (const event of state.events) {
+          if (event.type === 'TurnStarted') inTurn = 0;
+          if (SPECIALS.has(event.type) && 'player' in event && event.player === 'p2') {
+            moments.push(inTurn === 0 ? SPECIAL_MOMENT_MS.first : SPECIAL_MOMENT_MS.next);
+            inTurn += 1;
+          }
+        }
+      }
+      const last = list.at(-1);
+      if (!last || moments.length === 0 || sceneAllowanceMs(last.events) > 0) return null;
+      const reaction = last.view.phase.kind === 'REACTION';
+      return moments.reduce((sum, ms) => sum + ms, 0) + (reaction ? MOMENT_TAIL_MS : 600);
+    };
+    const checked: Array<{ delay: number; expected: number }> = [];
+    let published: ConnectionEvent[] = [];
+    let base: FakeTimers['setTimer'] = () => undefined;
+    const { room, timers, events } = setup('cena-74', {
+      setTimer: (fn, ms) => {
+        const expected = expectedWait(states(published));
+        if (expected !== null) checked.push({ delay: ms, expected });
+        return base(fn, ms);
+      },
+    });
+    published = events;
+    base = timers.setTimer;
+    room.connect();
+    const rng = createRng('cena-74/me');
+    for (let i = 0; i < 6000 && room.room?.status !== 'FINISHED'; i++) {
+      const view = room.state!.view;
+      if (myTurn(view) && (view.phase.kind !== 'EQUIP' || view.self.pending.length > 0)) {
+        await room.act(BOTS.greedy(view, legalActions(view), rng) as PlayerAction);
+      } else if (!timers.runNext()) break;
+    }
+    expect(checked.some((entry) => entry.expected === SPECIAL_MOMENT_MS.first + 600)).toBe(true);
+    expect(checked.some((entry) => entry.expected === SPECIAL_MOMENT_MS.next + 600)).toBe(true);
+    // O Ás do Bot na janela: o passe dele espera também o impacto.
+    expect(checked.some((entry) => entry.expected === SPECIAL_MOMENT_MS.first + MOMENT_TAIL_MS)).toBe(true);
+    for (const { delay, expected } of checked) expect(delay).toBe(expected);
+  });
+
+  it('o K do jogador abre a janela do Bot, que responde sem esperar momento: o jogador não vê o momento das próprias jogadas', async () => {
+    const { room, timers, events } = setup('treino-1');
+    room.connect();
+    let checked = 0;
+    for (let i = 0; i < 4000 && room.room?.status !== 'FINISHED'; i++) {
+      const view = room.state!.view;
+      const last = states(events).at(-1)!;
+      const mineOpened = last.events.some((event) => event.type === 'GuardPlayed' && event.player === 'p1');
+      if (mineOpened && view.phase.kind === 'REACTION' && view.phase.responder === 'p2' && sceneAllowanceMs(last.events) === 0) {
+        expect(timers.delays.at(-1)).toBe(0);
+        checked += 1;
+      }
+      if (myTurn(view)) {
+        const legal = legalActions(view);
+        await room.act((legal.find((action) => action.type === 'PLAY_K') ?? legal[0]) as PlayerAction);
+      } else timers.runNext();
+    }
+    expect(checked).toBeGreaterThan(0);
   });
 
   it('thinkMs configurável, em qualquer nível', () => {
@@ -715,7 +786,8 @@ describe('níveis do bot', () => {
     const { room, timers } = setup('treino-1', { level: 'facil' });
     room.connect();
     await playToEnd(room, timers);
-    expect(timers.delays.filter((d) => d !== 0 && d !== 600)).toEqual([]);
+    // Fora o pensar e a reação, só a espera dos momentos das especiais dele (bloco A do playtest, ponto 1) e das cenas: nenhuma fatia curta.
+    expect(timers.delays.filter((d) => d !== 0 && d !== 600).every((d) => d >= SPECIAL_MOMENT_MS.next)).toBe(true);
     expect(timers.pending.size).toBe(0);
   });
 
