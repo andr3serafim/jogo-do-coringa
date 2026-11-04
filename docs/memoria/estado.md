@@ -1,34 +1,25 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-03**, com o bloco A do playtest na `main` (fast-forward até este commit). Antes de seguir, confira se não há versão mais nova em outra branch (regra 1
-> da seção "Memória compartilhada" do `CLAUDE.md`).
+> Sobrescrito a cada atualização. **Última: 2026-11-04**, com os quatro textos de placa corrigidos na branch `feat/playtest-placas`.
+> Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`): a
+> sessão do bloco E também escreve o estado, na branch dela.
 
 ## Agora
 
-- **Branch:** `feat/playtest-bloco-a`, no checkout principal; a `main` foi por fast-forward até este commit (antes: `d35a241`). As duas CI
-  passaram no último commit de código (`540e3d4`, run `41760616250`); depois dele, só este da memória.
-  O plano do bloco A (pontos 1, 2, 6 e 9) foi aprovado como está (`decisoes.md` 2026-11-03 (5)); a execução e a revisão estão no
-  `diario.md` 2026-11-03 (6).
-- **Feito:** as 8 tarefas do plano (o momento da especial do oponente, a mão que apaga as cartas sem jogada, as placas de estado com os
-  gestos, a cura passiva que se explica), o E2E novo (`e2e/moment.spec.ts`), a medição e as fotos (`notas/medicao-bloco-a.md`, ≥ 50
-  quadros/s nas duas telas) e as specs. As duas CI do `266644d` passaram.
-- **A revisão final (A8, num subagente) achou e foi consertado com teste** (`256d69d`): online, o passe automático logo depois do Ás do
-  respondente cortava o momento que o atacante vê (o servidor agora guarda o PASS até o fim do momento e do impacto, `passHeldUntil`); no
-  treino, o Bot na janela cortava o alvo quebrando (espera `MOMENT_TAIL_MS`); o Ás do Roubo do oponente aparecia duas vezes; o "4 J"/"4 Q"
-  fixos; o véu que pulava de 35% para 60%. E, por um conselho depois dela (`540e3d4`): online, a sua especial que quebra (o Ás, o
-  Sacrifício, o Roubo) trava a sua jogada seguinte até o fim do impacto (2,08 s), e o Bot só espera a cauda depois de um momento dele.
+- **Branch:** `feat/playtest-placas`, no checkout principal, saída da `main` em `f8755bc` (o bloco A inteiro, com as duas CI verdes no
+  `540e3d4`).
+- **Feito:** o autor pediu "Corrija os quatro" (`decisoes.md` 2026-11-04 (1)). As placas trocam de linha só no caso de borda, na ordem do
+  `previewBetween`, com teste contra a prévia do motor; a linha da zona do Reflect, no PC, foi para baixo do título (`diario.md` 2026-11-04 (1)).
 - **Próximo passo exato:**
-  1. Avisar a sessão do bloco E (`claude/ressurreicao-quadra-f59247`, também publicada como `feat/ressurreicao-quadra`): ela mescla a
-     `main` e renumera as entradas dela (`decisoes.md` 2026-11-03 (5) vira (6); `diario.md` (6) vira (7)), roda o check e as CI e leva a
-     branch à `main`.
+  1. Esperar a sessão do bloco E levar a `main` (`feat/ressurreicao-quadra`, o merge `9125328` e o commit final da memória dela).
+  2. Mesclar a `main` nova nesta branch (conflitos esperados só na memória), o push (o pre-push roda o `pnpm check`), as duas CI verdes e
+     a `main` por fast-forward (`git push origin <sha>:refs/heads/main`, sem `| tail`).
+  3. Conferida a `main` com o bloco E, avisar o autor e apagar a sessão do bloco E (com aviso antes, `decisoes.md` 2026-11-03 (4)).
 - **Esperando o autor:**
-  - jogar o bloco A (o treino mostra tudo; o online só depois do `pnpm deploy:server` dele, que leva também a folga do momento no
-    prazo, o PASS guardado depois do Ás e o conserto do Equipar vazio);
-  - **quatro textos das placas que ele viu na spec §3 e o motor contradiz em casos de borda** (`diario.md` 2026-11-03 (6), "para o autor
-    decidir"): "imune até o golpe dele" (o Ataque Absoluto fura), "quebra todos os K" (o Reflect segura), "o K absorve o próximo golpe
-    inteiro" (o Ataque Absoluto quebra) e "o próximo golpe volta para ele" (contra a Defesa Absoluta, só segura). Ficaram como ele aprovou.
-- **Em paralelo:** a sessão do **bloco E** (a regra do 16) terminou o plano dela (`21e4c43`, Difícil aprovado, E2E 79/79) e espera o
-  bloco A entrar na `main`. Terminada e conferida, a sessão sai (`decisoes.md` 2026-11-03 (4)), com aviso antes.
+  - jogar o bloco A e as placas novas (o treino mostra tudo; o online só depois do `pnpm deploy:server` dele, que leva também a folga do
+    momento no prazo, o PASS guardado depois do Ás e o conserto do Equipar vazio);
+  - **um quinto caso de placa, achado no motor** (`diario.md` 2026-11-04 (1)): "Cura passiva" falha contra o Ataque Absoluto armado do outro
+    (os K quebram antes da cura) e, com exatamente 2 K, no golpe que um K absorve. Não mexido: ele pediu os quatro.
 - **Para medir uma cena com a 8787 ocupada:** `MEDIR_PORTA=8797` no `medir-cena.ts`. Para o E2E inteiro numa porta livre, a receita está no `diario.md` 2026-11-02 (8) (uma configuração que importa o `playwright.config.ts` e troca a porta).
 - **Para ver a Ressurreição sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave `coringa:partidas` e abra `/partidas/exodia-devastacao`. "Próximo
   passo" na rodada 7, passo 27, mostra a sua, com a quadra; na rodada 23, passo 107, a do Bot, com a quadra na outra fileira; na rodada 37, passo 182, a do Bot sem quadra.

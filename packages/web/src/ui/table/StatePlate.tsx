@@ -4,7 +4,6 @@
 // brilha (`MirrorMark`). Área pequena, só `transform` e `opacity`, nada que acenda a tela; com movimento reduzido, nenhum gesto. Abaixo de
 // 600 px a linha do que faz some (`placa-faz`, no `styles.css`), e o nome fica.
 import type { ReactNode } from 'react';
-import { plateLine } from '../../model/copy.ts';
 import { useAnim } from '../anim/context.ts';
 import { resurrectionsText } from './labels.ts';
 
@@ -29,15 +28,15 @@ const NAME: Record<Exclude<StateKind, 'res'>, string> = {
 
 export interface StatePlateProps {
   kind: StateKind;
-  /** A placa é do seu campo: a linha do que faz é escrita do seu lado. */
-  self: boolean;
+  /** A linha do que a marca faz, do lado de quem a vê (`plateLine`). */
+  does: string;
   /** A figura da marca (`icons.tsx`). */
   icon: ReactNode;
   /** Quantas Ressurreições (só na Ressurreição). */
   count?: number;
 }
 
-export function StatePlate({ kind, self, icon, count = 1 }: StatePlateProps) {
+export function StatePlate({ kind, does, icon, count = 1 }: StatePlateProps) {
   const { reduced } = useAnim();
   const name = kind === 'res' ? (count > 1 ? 'Ressurreições' : 'Ressurreição') : NAME[kind];
   return (
@@ -76,7 +75,7 @@ export function StatePlate({ kind, self, icon, count = 1 }: StatePlateProps) {
           {name}
         </span>
         <span data-placa-faz className="placa-faz font-texto text-[10px] pc:text-[11px]">
-          {plateLine(kind, self)}
+          {does}
         </span>
       </span>
       {kind === 'res' ? <span className="sr-only">{resurrectionsText(count)}</span> : null}

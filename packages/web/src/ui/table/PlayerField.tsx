@@ -156,19 +156,19 @@ function Zones({ player, name, view, self }: { player: PublicPlayer; name: strin
   const plates: ReactNode[] = [];
   const icon = 'size-4 pc:size-[18px]';
   if (player.absoluteDefense) {
-    plates.push(<StatePlate key="def" kind="defesa" self={self} icon={<AbsoluteDefenseIcon className={icon} />} />);
+    plates.push(<StatePlate key="def" kind="defesa" does={plateLine('defesa', self, view)} icon={<AbsoluteDefenseIcon className={icon} />} />);
   }
   // Enquanto houver 2 K ou mais na Guarda (a regra é do motor): as numéricas da Defesa que caem curam o dono.
   if (defenseHealActive(player, view.config)) {
-    plates.push(<StatePlate key="cura" kind="cura" self={self} icon={<HealIcon className={icon} />} />);
+    plates.push(<StatePlate key="cura" kind="cura" does={plateLine('cura', self, view)} icon={<HealIcon className={icon} />} />);
   }
   if (player.resurrectionCount > 0) {
     plates.push(
-      <StatePlate key="res" kind="res" self={self} count={player.resurrectionCount} icon={<ResurrectIcon className={icon} />} />,
+      <StatePlate key="res" kind="res" does={plateLine('res', self, view)} count={player.resurrectionCount} icon={<ResurrectIcon className={icon} />} />,
     );
   }
   if (absoluteAttackArmed(player, view.config)) {
-    plates.push(<StatePlate key="atk" kind="ataque" self={self} icon={<AbsoluteAttackIcon className={icon} />} />);
+    plates.push(<StatePlate key="atk" kind="ataque" does={plateLine('ataque', self, view)} icon={<AbsoluteAttackIcon className={icon} />} />);
   }
 
   return (
@@ -192,7 +192,7 @@ function Zones({ player, name, view, self }: { player: PublicPlayer; name: strin
       {player.reflect ? (
         <Zone
           label="Reflect ativo"
-          does={plateLine('reflect', self)}
+          does={plateLine('reflect', self, view)}
           icon={<ReflectIcon className={ZONE_ICON} />}
           listLabel="Cartas do Reflect"
           mark={<MirrorMark owner={player.id} />}
@@ -242,22 +242,26 @@ function Zone({ label, icon, listLabel, cards, wildAs, count = false, mark, drop
       data-soltar={drop !== undefined && drop !== 'targets' ? drop : undefined}
     >
       {mark}
-      <div className="zona-titulo flex items-center gap-1">
-        {icon}
-        <span id={labelId} className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">
-          {label}
-        </span>
-        {count && cards.length > 0 ? (
-          <span data-numero className="font-texto text-[11px] font-bold tabular-nums">
-            {cards.length}
+      {/* A linha do que a zona faz (o Reflect) fica embaixo do título, na largura dele: ao lado, no PC, ela se espremia entre o título e
+          as cartas, uma ou duas palavras por linha. */}
+      <div className="zona-titulo flex flex-col gap-0.5">
+        <div className="flex items-center gap-1">
+          {icon}
+          <span id={labelId} className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">
+            {label}
           </span>
+          {count && cards.length > 0 ? (
+            <span data-numero className="font-texto text-[11px] font-bold tabular-nums">
+              {cards.length}
+            </span>
+          ) : null}
+        </div>
+        {does ? (
+          <p data-placa-faz className="placa-faz font-texto text-[10px] leading-tight pc:text-[11px]">
+            {does}
+          </p>
         ) : null}
       </div>
-      {does ? (
-        <p data-placa-faz className="placa-faz font-texto text-[10px] leading-tight pc:text-[11px]">
-          {does}
-        </p>
-      ) : null}
       <ul
         role="list"
         aria-label={listLabel}

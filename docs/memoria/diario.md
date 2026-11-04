@@ -5,6 +5,29 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-04 (1): os quatro textos de placa no caso de borda
+
+- **Pedido:** "Corrija os quatro" (`decisoes.md` 2026-11-04 (1)). Branch `feat/playtest-placas`, saída da `main` em `f8755bc`.
+- **Feito:** `plateLine(kind, self, view)` (`model/copy.ts`) troca a linha só no caso de borda, lido da mesa na ordem do `previewBetween`
+  (o Reflect antes de tudo, depois a Defesa Absoluta, que só o Ataque Absoluto fura); o texto de sempre ficou como o autor aprovou. A
+  `StatePlate` recebe a linha pronta (`does`), e a `PlayerField` a calcula com a `view`.
+  - **Ruling:** na placa do momento do K, o seu Ataque Absoluto armado (sem o Reflect dele) vem antes da cura: o motor quebra a Guarda
+    antes de a Defesa cair (`resolveAttack`), e a cura conta os K que sobram; a frase da cura também era falsa nesse caso;
+  - **Ruling:** "o K absorve o próximo golpe inteiro" virou "o K absorve um golpe inteiro" (a de 2 K ou mais já dizia "um golpe"): com a
+    Defesa Absoluta dele, o próximo golpe é segurado por ela;
+  - cada caso de borda tem teste contra a prévia do motor no mesmo cenário (`moment-copy.test.ts`), e a mesa tem as duas Defesas
+    Absolutas com os dois Ataques Absolutos armados (o caso que a revisão achou contraditório) e o Reflect dele contra a sua Defesa
+    Absoluta (`table.test.tsx`).
+- **Achado na tela, consertado:** no PC, a linha da zona do Reflect ficava entre o título e as cartas, numa coluna de 40 px (6 linhas de
+  uma ou duas palavras; já era assim no bloco A). Agora fica embaixo do título, na largura dele (5,9 rem): 3 linhas com o texto de
+  sempre e com o mais longo novo, a zona caiu de 83 para 76 px, sem sobrepor nem rolar de lado (1366 × 768 e 1366 × 657, no replay
+  `reflect.json`, passo 176).
+- **Para o autor (um quinto caso, achado no motor):** a placa "Cura passiva" ("a Defesa dele que cai vira vida") também falha: contra o
+  Ataque Absoluto armado do outro, todos os K quebram antes da cura, e com exatamente 2 K o golpe que um K absorve deixa 1 K, sem cura
+  naquele golpe. Não mexido: ele pediu os quatro.
+
+---
+
 ## 2026-11-03 (6): o bloco A do playtest, a execução
 
 - **Pedido:** o plano do bloco A aprovado como está (`decisoes.md` 2026-11-03 (5)). Branch `feat/playtest-bloco-a`, saída da

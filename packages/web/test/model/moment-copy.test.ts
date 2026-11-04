@@ -1,9 +1,9 @@
 // O texto da placa do momento (bloco A dos pontos do playtest, ponto 1): o que a especial do oponente fez, com os números do motor (os
 // totais de `attackPower` e `defensePower` da `view` de depois do passo; decisoes.md 2026-11-03 (5), A5).
-import type { GameEvent, NumCard, SpecialCard } from '@coringa/engine';
+import { previewAttack, type GameEvent, type NumCard, type SpecialCard } from '@coringa/engine';
 import { namesFor } from '@coringa/sim/text';
 import { describe, expect, it } from 'vitest';
-import { healRibbon, momentPlate } from '../../src/model/copy.ts';
+import { healRibbon, momentPlate, plateLine } from '../../src/model/copy.ts';
 import { scenarioAt } from '../fixtures.ts';
 
 const NAMES = namesFor('p1', 'Bot');
@@ -38,7 +38,7 @@ describe('a placa do momento', () => {
     const one: GameEvent = { type: 'GuardPlayed', player: 'p2', cards: [face('k1', 'K')] };
     expect(momentPlate(one, scenarioAt({ opponent: { guard: ['K'] } }).view, NAMES)).toEqual({
       title: 'Bot pôs 1 K na Guarda',
-      consequence: 'o K absorve o próximo golpe inteiro',
+      consequence: 'o K absorve um golpe inteiro',
     });
     const two: GameEvent = { type: 'GuardPlayed', player: 'p2', cards: [face('k1', 'K'), face('k2', 'K')] };
     expect(momentPlate(two, scenarioAt({ opponent: { guard: ['K', 'K'] } }).view, NAMES)).toEqual({
@@ -48,6 +48,16 @@ describe('a placa do momento', () => {
     const three = momentPlate(one, scenarioAt({ opponent: { guard: ['K', 'K', 'K'] } }).view, NAMES)!;
     expect(three.consequence).toBe('com 3 K, a Defesa dele que cai o cura');
     expect(`${three.title} ${three.consequence}`).not.toMatch(/Exódia/);
+  });
+
+  it('a Guarda contra o seu Ataque Absoluto armado: os K quebram todos, antes da cura, como no motor; o Reflect dele o seguraria', () => {
+    const two: GameEvent = { type: 'GuardPlayed', player: 'p2', cards: [face('k1', 'K'), face('k2', 'K')] };
+    const armed = scenarioAt({ self: { attackRow: [10], attackBuffs: ['J', 'J', 'J', 'J'] }, opponent: { guard: ['K', 'K'], defenseRow: [7] } }).view;
+    expect(previewAttack(armed, 'self').breaks.defenderGuard).toBe(2);
+    expect(momentPlate(two, armed, NAMES)?.consequence).toBe('o seu Ataque Absoluto quebra todos os K');
+    const mirror = scenarioAt({ self: { attackRow: [10], attackBuffs: ['J', 'J', 'J', 'J'] }, opponent: { guard: ['K', 'K'], reflect: true } }).view;
+    expect(previewAttack(mirror, 'self').breaks.defenderGuard).toBe(0);
+    expect(momentPlate(two, mirror, NAMES)?.consequence).toBe('com 2 K, a Defesa dele que cai o cura');
   });
 
   it('a Armadilha num J, num Q e num K seus', () => {
@@ -95,5 +105,47 @@ describe('a faixa da primeira cura passiva (bloco A do playtest, ponto 9)', () =
     const { view } = scenarioAt({ opponent: { guard: ['K', 'K', 'K'], defenseBuffs: [] } });
     const healed: GameEvent = { type: 'Healed', player: 'p2', amount: 2, source: 'DEFENSE', card: six };
     expect(healRibbon(healed, view).reason).toBe('3 K na Guarda: a Defesa que cai vira vida · 6 × (1 + 0 Q) = 6 · até a vida cheia');
+  });
+});
+
+describe('as placas de estado no caso de borda (decisoes.md 2026-11-04 (1)): a linha segue o golpe que o motor dá', () => {
+  it('a Defesa Absoluta: só o Ataque Absoluto do outro fura, e o Reflect de quem a tem vem antes', () => {
+    const pierced = scenarioAt({ self: { absoluteDefense: true, defenseRow: [8] }, opponent: { attackRow: [10], attackBuffs: ['J', 'J', 'J', 'J'] } }).view;
+    expect(previewAttack(pierced, 'opponent').outcome).toBe('DAMAGE');
+    expect(plateLine('defesa', true, pierced)).toBe('o Ataque Absoluto dele fura a imunidade');
+    const mine = scenarioAt({ self: { attackRow: [10], attackBuffs: ['J', 'J', 'J', 'J'] }, opponent: { absoluteDefense: true } }).view;
+    expect(previewAttack(mine, 'self').outcome).toBe('DAMAGE');
+    expect(plateLine('defesa', false, mine)).toBe('o seu Ataque Absoluto fura a imunidade');
+    const reflected = scenarioAt({ self: { absoluteDefense: true, reflect: true }, opponent: { attackRow: [10], attackBuffs: ['J', 'J', 'J', 'J'] } }).view;
+    expect(previewAttack(reflected, 'opponent').outcome).toBe('REFLECTED');
+    expect(plateLine('defesa', true, reflected)).toBe('imune até o golpe dele');
+    const calm = scenarioAt({ self: { absoluteDefense: true }, opponent: { attackRow: [10], attackBuffs: ['J'] } }).view;
+    expect(previewAttack(calm, 'opponent').outcome).toBe('ABSOLUTE_DEFENSE');
+    expect(plateLine('defesa', true, calm)).toBe('imune até o golpe dele');
+  });
+
+  it('o Ataque Absoluto armado: contra o Reflect do alvo, os K ficam', () => {
+    const mirror = scenarioAt({ self: { attackRow: [10], attackBuffs: ['J', 'J', 'J', 'J'] }, opponent: { guard: ['K'], reflect: true } }).view;
+    expect(previewAttack(mirror, 'self')).toMatchObject({ outcome: 'REFLECTED', breaks: { defenderGuard: 0 } });
+    expect(plateLine('ataque', true, mirror)).toBe('o Reflect dele segura o seu golpe');
+    const theirs = scenarioAt({ self: { guard: ['K'], reflect: true }, opponent: { attackRow: [10], attackBuffs: ['J', 'J', 'J', 'J'] } }).view;
+    expect(previewAttack(theirs, 'opponent').outcome).toBe('REFLECTED');
+    expect(plateLine('ataque', false, theirs)).toBe('o seu Reflect segura o golpe dele');
+    const open = scenarioAt({ self: { attackRow: [10], attackBuffs: ['J', 'J', 'J', 'J'] }, opponent: { guard: ['K', 'K'] } }).view;
+    expect(previewAttack(open, 'self').breaks.defenderGuard).toBe(2);
+    expect(plateLine('ataque', true, open)).toBe('o seu próximo ataque quebra todos os K');
+  });
+
+  it('o Reflect: contra quem ataca sob Defesa Absoluta, segura o golpe e não devolve nada', () => {
+    const held = scenarioAt({ self: { reflect: true }, opponent: { attackRow: [10, 9], absoluteDefense: true } }).view;
+    const preview = previewAttack(held, 'opponent');
+    expect(preview).toMatchObject({ outcome: 'REFLECTED', damage: 0, reflected: 0 });
+    expect(preview.net).toBeGreaterThan(0);
+    expect(plateLine('reflect', true, held)).toBe('segura o próximo golpe dele, sem devolver');
+    const mine = scenarioAt({ self: { attackRow: [10, 9], absoluteDefense: true }, opponent: { reflect: true } }).view;
+    expect(plateLine('reflect', false, mine)).toBe('segura o seu próximo golpe, sem devolver');
+    const back = scenarioAt({ self: { reflect: true }, opponent: { attackRow: [10, 9] } }).view;
+    expect(previewAttack(back, 'opponent').reflected).toBeGreaterThan(0);
+    expect(plateLine('reflect', true, back)).toBe('o próximo golpe volta para ele');
   });
 });

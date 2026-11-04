@@ -513,17 +513,29 @@ describe('mesa: as placas de estado (bloco A do playtest, ponto 6)', () => {
   const line = (item: Element) => item.querySelector('[data-placa-faz]')?.textContent;
 
   it('cada placa diz o que a marca faz, do lado de quem a vê', () => {
-    mount({
+    const first = mount({
       ...DRAFT,
-      self: { ...DRAFT.self, absoluteDefense: true, guard: ['K', 'K'], attackBuffs: ['J', 'J', 'J', 'J'] },
-      opponent: { ...DRAFT.opponent, guard: ['K', 'K'], absoluteDefense: true, attackBuffs: ['J', 'J', 'J', 'J'] },
+      self: { ...DRAFT.self, absoluteDefense: true, guard: ['K', 'K'] },
+      opponent: { ...DRAFT.opponent, guard: ['K', 'K'], absoluteDefense: true },
     });
     expect(line(plate('Seu campo', 'Cura passiva'))).toBe('a sua Defesa que cai vira vida');
     expect(line(plate('Campo de Duda', 'Cura passiva'))).toBe('a Defesa dele que cai vira vida');
     expect(line(plate('Seu campo', 'Defesa Absoluta'))).toBe('imune até o golpe dele');
     expect(line(plate('Campo de Duda', 'Defesa Absoluta'))).toBe('imune até o seu golpe');
+    first.unmount();
+    mount({ ...DRAFT, self: { ...DRAFT.self, attackBuffs: ['J', 'J', 'J', 'J'] }, opponent: { ...DRAFT.opponent, attackBuffs: ['J', 'J', 'J', 'J'] } });
     expect(line(plate('Seu campo', 'Ataque Absoluto armado'))).toBe('o seu próximo ataque quebra todos os K');
     expect(line(plate('Campo de Duda', 'Ataque Absoluto armado'))).toBe('o próximo ataque dele quebra todos os K');
+  });
+
+  it('as duas Defesas Absolutas com os dois Ataques Absolutos armados: as placas não se contradizem (decisoes.md 2026-11-04 (1))', () => {
+    mount({
+      ...DRAFT,
+      self: { ...DRAFT.self, absoluteDefense: true, attackBuffs: ['J', 'J', 'J', 'J'] },
+      opponent: { ...DRAFT.opponent, absoluteDefense: true, attackBuffs: ['J', 'J', 'J', 'J'] },
+    });
+    expect(line(plate('Seu campo', 'Defesa Absoluta'))).toBe('o Ataque Absoluto dele fura a imunidade');
+    expect(line(plate('Campo de Duda', 'Defesa Absoluta'))).toBe('o seu Ataque Absoluto fura a imunidade');
   });
 
   it('a Ressurreição mostra o número num selo, e o leitor de tela ouve a frase inteira', () => {
@@ -539,6 +551,11 @@ describe('mesa: as placas de estado (bloco A do playtest, ponto 6)', () => {
     mount({ ...DRAFT, opponent: { ...DRAFT.opponent, reflect: true } });
     expect(region('Campo de Duda').getByText('o seu próximo golpe volta para você')).toBeInTheDocument();
     expect(document.querySelector('[data-espelho-zona="p2"]')).toHaveAttribute('data-gesto', 'espelho');
+  });
+
+  it('o Reflect dele contra a sua Defesa Absoluta: segura o golpe e não devolve (decisoes.md 2026-11-04 (1))', () => {
+    mount({ ...DRAFT, self: { ...DRAFT.self, absoluteDefense: true }, opponent: { ...DRAFT.opponent, reflect: true } });
+    expect(region('Campo de Duda').getByText('segura o seu próximo golpe, sem devolver')).toBeInTheDocument();
   });
 
   it('os gestos lentos: a cruz da cura e a alma da Ressurreição; com movimento reduzido, nenhum', () => {

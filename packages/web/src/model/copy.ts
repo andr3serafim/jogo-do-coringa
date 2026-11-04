@@ -415,7 +415,36 @@ const PLATE_LINE: Record<PlateKind, readonly [self: string, opponent: string]> =
   reflect: ['o próximo golpe volta para ele', 'o seu próximo golpe volta para você'],
 };
 
-export const plateLine = (kind: PlateKind, self: boolean): string => PLATE_LINE[kind][self ? 0 : 1];
+/** A linha do caso de borda, em que o golpe que a marca promete não é o que o motor dá (decisoes.md 2026-11-04 (1)). */
+const PLATE_EDGE: Partial<Record<PlateKind, readonly [self: string, opponent: string]>> = {
+  defesa: ['o Ataque Absoluto dele fura a imunidade', 'o seu Ataque Absoluto fura a imunidade'],
+  ataque: ['o Reflect dele segura o seu golpe', 'o seu Reflect segura o golpe dele'],
+  reflect: ['segura o próximo golpe dele, sem devolver', 'segura o seu próximo golpe, sem devolver'],
+};
+
+type PlateSide = Pick<PublicPlayer, 'attackBuffs' | 'absoluteDefense' | 'reflect'>;
+
+/** A marca de `owner` está no caso de borda contra `other`, na ordem em que o motor decide o golpe (`previewBetween`). */
+function plateEdge(kind: PlateKind, owner: PlateSide, other: PlateSide, view: PlayerView): boolean {
+  switch (kind) {
+    // O Reflect vem antes da Defesa Absoluta, e só o Ataque Absoluto fura a imunidade.
+    case 'defesa':
+      return !owner.reflect && absoluteAttackArmed(other, view.config);
+    case 'ataque':
+      return Boolean(other.reflect);
+    // Contra quem ataca sob Defesa Absoluta, o Reflect segura o golpe e não devolve nada.
+    case 'reflect':
+      return other.absoluteDefense;
+    default:
+      return false;
+  }
+}
+
+/** A linha do que a marca faz, do lado de quem a vê, e a do caso de borda quando a mesa está nele. */
+export function plateLine(kind: PlateKind, self: boolean, view: PlayerView): string {
+  const [owner, other] = self ? [view.self, view.opponent] : [view.opponent, view.self];
+  return (plateEdge(kind, owner, other, view) ? PLATE_EDGE[kind]! : PLATE_LINE[kind])[self ? 0 : 1];
+}
 
 /** A placa do momento da especial do oponente: o que ela fez e, quando o evento diz, a consequência com os números do motor. */
 export interface MomentPlate {
@@ -471,11 +500,16 @@ export function momentPlate(event: GameEvent, view: PlayerView, names: Names): M
     case 'GuardPlayed': {
       const owner = side(event.player);
       const count = event.cards.length;
-      const consequence = defenseHealActive(owner, view.config)
-        ? `com ${owner.guard.length} K, a Defesa dele que cai o cura`
-        : count === 1
-          ? 'o K absorve o próximo golpe inteiro'
-          : 'cada K absorve um golpe inteiro';
+      // O seu Ataque Absoluto quebra a Guarda inteira antes de tudo (e a cura dele conta os K que sobram): ele vem antes; o Reflect dele
+      // o seguraria (decisoes.md 2026-11-04 (1)).
+      const consequence =
+        !owner.reflect && absoluteAttackArmed(self, view.config)
+          ? 'o seu Ataque Absoluto quebra todos os K'
+          : defenseHealActive(owner, view.config)
+            ? `com ${owner.guard.length} K, a Defesa dele que cai o cura`
+            : count === 1
+              ? 'o K absorve um golpe inteiro'
+              : 'cada K absorve um golpe inteiro';
       return { title: `${names.of(event.player)} pôs ${count} K na Guarda`, consequence };
     }
     case 'TrapUsed':

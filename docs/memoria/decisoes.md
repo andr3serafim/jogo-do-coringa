@@ -6,6 +6,28 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-04 (1): os quatro textos de placa que o motor contradiz
+
+Perguntado "Corrijo os quatro textos de placa que o motor contradiz em casos de borda?", depois de ver a lista na mensagem de entrega do
+bloco A ("imune até o golpe dele", "quebra todos os K", "o K absorve o próximo golpe inteiro" e "o próximo golpe volta para ele", cada um
+com o caso em que o motor faz outra coisa; `diario.md` 2026-11-03 (6)), ele escolheu:
+
+> Corrija os quatro
+
+**Leitura:**
+- **[I]** O texto de sempre fica como ele aprovou na spec §3; só no caso de borda a placa troca de linha, lida da mesa como o motor
+  decide o golpe (`previewBetween`: o Reflect antes de tudo, depois a Defesa Absoluta, que só o Ataque Absoluto fura):
+  - Defesa Absoluta, com o Ataque Absoluto do outro armado (e sem o seu Reflect): "o Ataque Absoluto dele fura a imunidade" / "o seu
+    Ataque Absoluto fura a imunidade";
+  - Ataque Absoluto armado, com o Reflect do alvo ativo: "o Reflect dele segura o seu golpe" / "o seu Reflect segura o golpe dele";
+  - Reflect, com quem ataca sob Defesa Absoluta: "segura o próximo golpe dele, sem devolver" / "segura o seu próximo golpe, sem
+    devolver";
+  - a placa do momento do K, com o seu Ataque Absoluto armado (e sem o Reflect dele): "o seu Ataque Absoluto quebra todos os K"; fora
+    disso, "o K absorve um golpe inteiro" (sem o "próximo", que também falhava com a Defesa Absoluta dele no caminho).
+- **[I]** As frases novas são de quem escreveu, e ele ainda não as viu: conferir no playtest.
+
+---
+
 ## 2026-11-03 (5): o plano do bloco A aprovado
 
 Perguntado "Aprova o plano do bloco A, com as escolhas A1 a A9?", sobre `docs/superpowers/plans/2026-11-03-playtest-bloco-a.md`, ele

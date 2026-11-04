@@ -119,6 +119,10 @@ O plano (`docs/superpowers/plans/2026-11-03-playtest-bloco-a.md`) foi aprovado c
   Ás e do impacto (480 ms: o racha, o tremor e a ida ao cemitério), e o Bot na janela espera o mesmo no treino; online, a sua jogada
   depois do seu Ás, Sacrifício ou Roubo também espera o impacto (2,08 s em vez de 1,6 s). Sem isso, a jogada seguinte cortava o alvo
   quebrando. O piso de 2 s da janela segue para todo o resto.
+- **As placas no caso de borda** (`decisoes.md` 2026-11-04 (1)): a linha de sempre fica; quando a mesa está num caso em que o motor dá
+  outro golpe, ela troca. A Defesa Absoluta diz que o Ataque Absoluto do outro fura a imunidade; o Ataque Absoluto armado, que o Reflect
+  do alvo segura o golpe; o Reflect, que segura sem devolver contra quem ataca sob Defesa Absoluta; e a placa do momento do K, que o seu
+  Ataque Absoluto quebra todos os K (fora disso, "o K absorve um golpe inteiro"). No PC, a linha da zona do Reflect fica embaixo do título.
 - **Medição e fotos:** `docs/memoria/notas/medicao-bloco-a.md` (≥ 50 quadros/s com a CPU 4× nas duas telas).
 
 ## 4. Bloco B: o golpe final (ponto 15)
