@@ -28,6 +28,60 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-03 (7): bloco E, a Ressurreição no instante da quadra (ponto 16), da spec à medição
+
+- **Sessão paralela** do bloco E (worktree `.claude/worktrees/ressurreicao-quadra-f59247`, branch `claude/ressurreicao-quadra-f59247`, saída
+  de `d35a241`). O autor aprovou o plano com 15 s na janela (`decisoes.md` 2026-11-03 (6)).
+- **Feito, por tarefa do plano** (`docs/superpowers/plans/2026-11-03-ressurreicao-quadra.md`):
+  1. a troca e a proteção no motor (`41a3cc2`): `resurrectionRows` é a fonte única (motor, lista legal, bots, web), `QUAD_PROTECTED`, a chave
+     `resurrectOnQuad` (ausente = a regra de antes);
+  2. a janela (`2124c9a`): a fase `RESURRECTION { player, next }` aberta no `resolveEquip`, invariantes novas (a janela só com jogada, a
+     Ressurreição nunca desfaz quadra, nenhuma fileira acima do limite); uma mutação conferiu que a invariante pega a janela sem jogada;
+  3. os bots (`1158b2f`): `resurrectionGain` (mesa, depois soma), o greedy só ressuscita sem piorar a mesa, o turtle não põe no Ataque;
+     `RULES_VERSION` 5, 4 das 11 partidas de referência mudaram (15 Ressurreições na janela, 1 guardada, 9 trocas nelas);
+  4. o servidor (`b696b2e`): 15 s por jogador, sem estouro, a vez do segundo é época nova; `STATE_SCHEMA` 5; `DeadlineKind` `RESURRECTION`;
+  5. o modelo da web (`802f8ff`): a troca e o total no `plays.ts`, a carta trocada é sua (`marks.ts`), o anúncio; textos em
+     `model/resurrection-copy.ts`; no `copy.ts`, só a linha do resumo e o `CLOCK_START_TEXT`;
+  6. a mesa (`e9799cc`): o `ResurrectionPanel`, o passo da fileira com a troca, o total e a fileira protegida; a dica do tutorial;
+  7. o E2E (`1b1c023`): `resurrection.spec.ts` na semente `e2e-quadra-36` (a janela do jogador na rodada 4), fotos em 360 × 640 e 1366 × 657;
+     o `pnpm e2e` inteiro, 79 de 79 (na porta 8797);
+  8. a medição: calibração e portão do Difícil (`e8660f1`, `071626f`), números em `notas/medicao-ressurreicao-quadra.md`.
+- **Para a `main` (2026-11-04):** as duas CI passaram em `21e4c43`; a `main` com o bloco A (`f8755bc`) foi mesclada em `9125328`
+  (conflitos só na memória e no `testMatch` do `playwright.config.ts`; as entradas renumeradas), e as duas CI passaram de novo nele
+  (run `41764020751`); a `main` foi por fast-forward até o commit da memória. A revisão final foi de quem escreveu o código, sem subagente.
+- **Rulings** (as escolhas da execução, além das 9 do plano que ele aprovou):
+  - a troca sai como no Roubo (`CardsRemovedFromRow`, `Healed`, `Resurrected`): a linha do tempo, a saída na mesa, o som e o histórico já a
+    tratam, e o `timeline.ts` (do bloco A) ficou intocado;
+  - o greedy desempata as Ressurreições no fim pela soma (antes, sorteio): ele muda um pouco também com a chave desligada;
+  - o total da fileira entra na mesma linha do detalhe ("no fim da fileira · 5 de 7 · total 152 → 180"), para o nome acessível seguir o texto;
+  - **o E2E não mostra a troca:** o `playOnce` põe toda numérica no Ataque e ataca todo turno, e as duas fileiras nunca ficam cheias juntas
+    (0 janelas com troca em 200 sementes). A troca e a fileira protegida ficam nos testes da mesa (`resurrection-window.test.tsx`), sem layout;
+  - o "segundo da fila ganha a jogada pela troca do primeiro", do Foco da revisão, é impossível (a mesma numérica daria jogada aos dois):
+    o teste cobre o segundo trazendo a carta que a troca do primeiro tirou;
+  - as sementes do teste do Equipar vazio da `LocalRoom` (ponto 17) e a partida do terminal (roteiro, 90 → 131 passos) foram refeitas para o
+    greedy novo.
+- **Números** (detalhes na nota): 98% das quadras viram Ressurreição usada (eram 82%); a Ressurreição parada na fase principal cai de 44% para
+  11%; 55% de quem usa a janela ataca em segundo; a iniciativa quase não muda (52,0% → 52,8%); a mediana de rodadas de Ataque passa de 13 para
+  14 (meta 8–14). Portão do Difícil aprovado do zero nas três rodadas: (a) 69,0%, (b) 81,5%, p95 168 / 149 / 189 ms; a busca na janela
+  (rodada 2: 67,5%) não ficou.
+- **Não conferido de verdade:** a troca no navegador (só no jsdom); o relógio de 15 s online e a cena com o prazo (só nos testes do servidor);
+  a janela do Bot no treino vista a olho (só no E2E inteiro, que passa por ela sem quebrar); o som.
+- **Armadilhas desta sessão:**
+  - **dois `pnpm check` ao mesmo tempo:** achei que o primeiro tinha sido cortado pelo limite de uso (o log ainda estava no typecheck) e abri
+    outro; os dois derrubaram o `workerd` e disputaram a pasta de cobertura da web. Antes de rodar de novo, confira se o job acabou;
+  - **o ESLint lê a pasta `.superpowers/`:** um script `.ts` deixado ali reprova o pre-commit. Scripts de rascunho vão para o scratchpad;
+  - **o Playwright carrega a configuração como CommonJS:** a do E2E na porta livre importa a de verdade pelo caminho absoluto
+    (`D:/…/playwright.config.ts`), não por `file:///`;
+  - **redimensionar a página no meio da partida** deixou o `<main>` com 681 px de rolagem lateral (artefato): o teste de cada tamanho abre a
+    partida já nele, como o `layout.spec.ts`;
+  - a 8787 estava ocupada por um `workerd` de fora: o E2E rodou na 8797 (receita do (8) de 2026-11-02);
+  - **o p95 do portão do Difícil varia entre rodadas** (149 a 189 ms com os mesmos bots e sementes): não leia uma diferença de 40 ms como
+    efeito de uma mudança. As pontuações, essas, se repetem;
+  - **a CI só roda nos pushes de `main` e `feat/**` e nos PRs:** a branch `claude/…` não dispara nada. Ela subiu também como
+    `feat/ressurreicao-quadra` para as duas CI.
+
+---
+
 ## 2026-11-03 (6): o bloco A do playtest, a execução
 
 - **Pedido:** o plano do bloco A aprovado como está (`decisoes.md` 2026-11-03 (5)). Branch `feat/playtest-bloco-a`, saída da

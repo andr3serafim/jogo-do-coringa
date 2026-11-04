@@ -348,6 +348,14 @@ A mesa está em §3 e §4. O menu da partida tem:
 segunda linha diz de onde vem e o que há ("1 Ressurreição da quadra · 3 numéricas no cemitério"). O diálogo do cemitério, no modo de
 ressuscitar, tem o mesmo desenho no título.
 
+- **A troca da última carta (ponto 16, plano `2026-11-03-ressurreicao-quadra.md`):** no passo da fileira, cada fileira que aceita é
+  um botão de duas linhas: o nome e, embaixo, "no fim da fileira · 3 de 8" ou, com as duas fileiras cheias, "no lugar de 9♣, que vai
+  ao cemitério", sempre com o total da fileira na mesa antes e depois ("total 37 → 38", do `attackPower`/`defensePower` do motor). A
+  fileira cuja última carta é da quadra aparece sem botão, com a mini carta e "Ataque: a última, 7♥, é da quadra e não sai". As
+  opções vêm de `resurrectionRows` (motor), nunca de regra na interface.
+- **As duas fileiras protegidas:** sem jogada, o botão Ressuscitar fica na barra e o cemitério diz "As duas fileiras estão cheias e a
+  última de cada uma é da quadra: a Ressurreição fica guardada."
+
 **Atacar ou encerrar o turno:**
 
 - o botão principal está sempre visível na fase principal: **Atacar**, com a prévia, ou **Encerrar turno**, quando o Ataque está vazio;
@@ -406,6 +414,18 @@ arrastar nunca é o único caminho (WCAG 2.5.7). As regras do gesto estão na sp
   - o resto (as cartas que faltam, depois das escolhidas, na ordem de compra) é completado pela regra de estouro do motor, a fileira com menos cartas (empate → Defesa; as duas cheias → descarte). A conta vem de `autoDestinations` exportada (§8.2), nunca de uma cópia;
   - é uma jogada voluntária (o jogador escolheu) e vai **sem** a marca `auto`;
   - com nenhuma escolha feita, nada é enviado: o servidor aplica o estouro, que conta para o W.O. por ausência.
+
+### 3.5b Janela da Ressurreição [A, ponto 16 do playtest]
+
+Depois da revelação do Equipar, quem formou quadra pode ressuscitar antes do ataque (`decisoes.md` 2026-11-03 (4) e (6); a regra está
+na spec das regras §1.8). A fase é `RESURRECTION`, e o painel (`ResurrectionPanel`) fica no lugar da barra, como o da ordem:
+
+- para quem decide: "Ressurreição agora", "Você formou quadra na revelação: pode ressuscitar agora, antes do ataque, ou guardar a
+  Ressurreição para depois.", o botão principal **Ressuscitar** (abre o cemitério, §3.4) e **Guardar** (`PASS`). O foco vai para o
+  painel quando a vez chega; a faixa central diz "Equipar · sua Ressurreição", e a placa do placar, "Quadra";
+- quem espera vê "Duda formou quadra e decide se ressuscita agora", sem botões;
+- as especiais da mão ficam paradas, com o motivo do Equipar (a janela é da rodada de Equipar);
+- online, 15 s por jogador; o tempo esgotado guarda a Ressurreição. No treino não há relógio, e o tutorial tem a dica da janela.
 
 ### 3.6 Escolha da iniciativa [D + A]
 

@@ -3,11 +3,14 @@ import {
   attackPower,
   defenseBase,
   defensePower,
+  resurrectionRows,
   type Action,
   type Destination,
   type NumCard,
   type PlayerView,
   type PublicPlayer,
+  type RowName,
+  type RulesConfig,
   type SpecialCard,
 } from '@coringa/engine';
 
@@ -69,6 +72,26 @@ export function stealValue(view: PlayerView, action: Extract<Action, { type: 'ST
   const damage = opponent.guard.length > 0 ? 0 : Math.max(0, Math.min(card.value, opponent.hp - 1));
   const heal = Math.min(card.value, config.hp - self.hp);
   return boardScore(thief, victim) - boardScore(self, opponent) + damage + heal;
+}
+
+/** O campo depois da Ressurreição de `card` em `row` (ponto 16): no fim da fileira ou, com as duas cheias, no lugar da última. */
+export function resurrectPlace<T extends PublicPlayer>(p: T, card: NumCard, row: RowName, config: RulesConfig): T {
+  const cards = row === 'ATK' ? p.attackRow : p.defenseRow;
+  const next = resurrectionRows(config, p)[row].kind === 'REPLACE' ? [...cards.slice(0, -1), card] : [...cards, card];
+  return row === 'ATK' ? { ...p, attackRow: next } : { ...p, defenseRow: next };
+}
+
+const rowsSum = (p: PublicPlayer): number => [...p.attackRow, ...p.defenseRow].reduce((sum, c) => sum + c.value, 0);
+
+/**
+ * O que uma Ressurreição muda para quem a usa: a avaliação de mesa e, para desempatar, a soma das duas fileiras (a troca que tira um 10
+ * para pôr um 2 pode não mexer na avaliação, mas perde valor).
+ */
+export function resurrectionGain(view: PlayerView, action: Extract<Action, { type: 'RESURRECT' }>): [board: number, sum: number] {
+  const card = view.graveyard.find((c) => c.id === action.cardId);
+  if (card?.kind !== 'NUM') return [-Infinity, -Infinity];
+  const after = resurrectPlace(view.self, card, action.row, view.config);
+  return [boardScore(after, view.opponent) - boardScore(view.self, view.opponent), rowsSum(after) - rowsSum(view.self)];
 }
 
 /** Com a fileira `row` vazia (efeito de uma Devastação). */

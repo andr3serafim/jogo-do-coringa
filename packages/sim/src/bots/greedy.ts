@@ -10,6 +10,7 @@ import {
   hpDamage,
   placeAll,
   reflectedDamage,
+  resurrectionGain,
   stealValue,
   wildsUsed,
   without,
@@ -93,24 +94,29 @@ export function targetValue(view: PlayerView, targetId: string): number {
   return defenseBase(opponent);
 }
 
+/**
+ * A melhor Ressurreição (ponto 16): a de maior ganho na avaliação de mesa e, no empate, na soma das fileiras. Só vale se não piora: com
+ * vaga, nunca piora (a de hoje, "sempre"); a troca da última, com as duas cheias, pode piorar, e aí o greedy guarda. Sem opção, `null`.
+ */
+function bestResurrection(view: PlayerView, legal: Action[], rng: Rng): Of<'RESURRECT'> | null {
+  const options = ofType(legal, 'RESURRECT');
+  if (options.length === 0) return null;
+  const gains = new Map(options.map((a) => [a, resurrectionGain(view, a)]));
+  // A soma muda no máximo ±20: multiplicar a mesa por 1000 dá a ordem lexicográfica (mesa, depois soma).
+  const pick = best(options, (a) => gains.get(a)![0] * 1000 + gains.get(a)![1], (ties) => rng.pick(ties));
+  const [board, sum] = gains.get(pick)!;
+  return board > 0 || (board === 0 && sum >= 0) ? pick : null;
+}
+
 function mainPhase(view: PlayerView, legal: Action[], rng: Rng): Action {
   const { self, opponent, config } = view;
   const kings = ofType(legal, 'PLAY_K');
   const allKings = kings.at(-1);
   // 1. Exódia: se os K da mão completam a Guarda, joga todos.
   if (allKings && self.guard.length + allKings.cardIds.length >= config.exodiaGuard) return allKings;
-  // 2. Ressurreição: sempre, no lugar que mais melhora a mesa.
-  const resurrections = ofType(legal, 'RESURRECT');
-  if (resurrections.length > 0) {
-    return best(
-      resurrections,
-      (a) => {
-        const card = view.graveyard.find((c) => c.id === a.cardId);
-        return card?.kind === 'NUM' ? boardScore(placeAll(self, [card], [a.row]), opponent) : -Infinity;
-      },
-      (ties) => rng.pick(ties),
-    );
-  }
+  // 2. Ressurreição, no lugar que mais melhora a mesa, se não a piora (no fim de uma fileira, sempre).
+  const resurrection = bestResurrection(view, legal, rng);
+  if (resurrection) return resurrection;
   // 3. Devastação na fileira cuja perda mais muda a mesa a meu favor (o Reflect do oponente fica por conta dele).
   const devastations = ofType(legal, 'DEVASTATE');
   if (devastations.length > 0) {
@@ -189,6 +195,9 @@ export const greedyBot: Bot = (view, legal, rng) => {
   switch (phase.kind) {
     case 'EQUIP':
       return chooseEquip(view, legal, rng);
+    case 'RESURRECTION':
+      // A janela da Ressurreição (ponto 16): a mesma escolha da fase principal; sem uma que não piore, guarda.
+      return bestResurrection(view, legal, rng) ?? { type: 'PASS' };
     case 'ORDER_CHOICE':
       return { type: 'CHOOSE_ORDER', first: prefersFirst(view) };
     case 'ATTACK_MAIN':

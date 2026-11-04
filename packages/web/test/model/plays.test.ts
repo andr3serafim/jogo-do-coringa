@@ -215,11 +215,12 @@ describe('tablePlays: combinações', () => {
       self: { attackRow: [2, 3, 4, 5, 6, 7, 8], resurrections: [{ row: 'ATK', value: 5 }] },
       graveyard: [5, 5, 7, 9],
     });
-    expect(plays.resurrect.map((r) => [r.value, r.rows])).toEqual([
+    expect(plays.resurrect.map((r) => [r.value, r.rows.map((x) => x.row)])).toEqual([
       [5, ['DEF']],
       [7, ['DEF']],
       [9, ['DEF']],
     ]);
+    expect(plays.resurrect[0]!.rows[0]).toEqual({ row: 'DEF', leaving: null, total: { before: 0, after: 5 } });
     for (const item of plays.resurrect) {
       expect(view.graveyard.find((c) => c.id === item.cardId)).toMatchObject({ kind: 'NUM', value: item.value });
     }
@@ -228,7 +229,48 @@ describe('tablePlays: combinações', () => {
 
   it('Ressurreição com as duas fileiras com vaga oferece as duas', () => {
     const { plays } = setup({ self: { resurrections: [{ row: 'DEF', value: 4 }] }, graveyard: [3] });
-    expect(plays.resurrect).toEqual([{ cardId: expect.any(String), value: 3, rows: ['ATK', 'DEF'] }]);
+    expect(plays.resurrect).toEqual([
+      {
+        cardId: expect.any(String),
+        value: 3,
+        rows: [
+          { row: 'ATK', leaving: null, total: { before: 0, after: 3 } },
+          { row: 'DEF', leaving: null, total: { before: 0, after: 3 } },
+        ],
+      },
+    ]);
+    expect(plays.resurrectBlocked).toEqual([]);
+  });
+
+  it('Ressurreição com as duas fileiras cheias: a troca diz a carta que sai e o total da fileira antes e depois (ponto 16)', () => {
+    const { state, view, plays } = setup({
+      self: { attackRow: [2, 3, 4, 5, 6, 8, 9], defenseRow: [2, 3, 4, 5, 6, 8, 9], defenseBuffs: ['Q'], resurrections: [{ row: 'ATK', value: 5 }] },
+      graveyard: [10],
+    });
+    const [item] = plays.resurrect;
+    expect(item!.rows).toEqual([
+      { row: 'ATK', leaving: view.self.attackRow[6], total: { before: 37, after: 38 } },
+      { row: 'DEF', leaving: view.self.defenseRow[6], total: { before: 74, after: 76 } },
+    ]);
+    expect(applyAction(state, view.me, { type: 'RESURRECT', cardId: item!.cardId, row: 'DEF' }).ok).toBe(true);
+  });
+
+  it('a fileira cuja última é da quadra não entra na lista e aparece como protegida, com a carta (ponto 16)', () => {
+    const { view, plays } = setup({
+      self: { attackRow: [2, 3, 4, 7, 7, 7, 7], defenseRow: [2, 3, 4, 5, 6, 8, 9], resurrections: [{ row: 'ATK', value: 7 }] },
+      graveyard: [10],
+    });
+    expect(plays.resurrect.map((r) => r.rows.map((x) => x.row))).toEqual([['DEF']]);
+    expect(plays.resurrectBlocked).toEqual([{ row: 'ATK', last: view.self.attackRow[6] }]);
+  });
+
+  it('as duas últimas da quadra: nenhuma opção, as duas protegidas (o diálogo diz por quê)', () => {
+    const { plays } = setup({
+      self: { attackRow: [2, 3, 4, 7, 7, 7, 7], defenseRow: [2, 3, 9, 9, 9, 6, 9], resurrections: [{ row: 'ATK', value: 7 }] },
+      graveyard: [10],
+    });
+    expect(plays.resurrect).toEqual([]);
+    expect(plays.resurrectBlocked.map((b) => b.row)).toEqual(['ATK', 'DEF']);
   });
 
   it('sem direito a Ressurreição, a lista fica vazia', () => {
@@ -378,7 +420,7 @@ describe('propriedade: toda jogada montada pela mesa é aceita pelo motor', () =
       }
     }
     for (const combo of [plays.reflect, plays.cancelReflect, ...plays.devastate, plays.finish]) if (combo) actions.push(combo);
-    for (const r of plays.resurrect) for (const row of r.rows) actions.push({ type: 'RESURRECT', cardId: r.cardId, row });
+    for (const r of plays.resurrect) for (const { row } of r.rows) actions.push({ type: 'RESURRECT', cardId: r.cardId, row });
     if (plays.pass) actions.push({ type: 'PASS' });
     return actions;
   }

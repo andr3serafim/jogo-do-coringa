@@ -261,6 +261,8 @@ async function playOnce(page: Page, options: PlayOptions): Promise<string | null
   const destination = equip.getByRole('list', { name: 'Destinos' }).getByRole('button').first();
   const confirm = equip.getByRole('button', { name: 'Confirmar', exact: true });
   const order = orderPanel(page).getByRole('button').first();
+  // A janela da Ressurreição (ponto 16): o `playOnce` guarda (passa), como passa a reação.
+  const keep = page.getByRole('region', { name: 'Janela da Ressurreição' }).getByRole('button', { name: 'Guardar', exact: true });
   const bar = actionBar(page);
   const pass = bar.getByRole('button', { name: 'Passar', exact: true });
   const attack = bar.getByRole('button', { name: ATTACK_BUTTON });
@@ -270,6 +272,7 @@ async function playOnce(page: Page, options: PlayOptions): Promise<string | null
     (await attempt('destino do Equipar', destination)) ??
     (await attempt('Confirmar o Equipar', confirm)) ??
     (options.order === 'leave' ? null : await attempt('ordem', order)) ??
+    (await attempt('Guardar a Ressurreição', keep)) ??
     (await attempt('Passar', pass)) ??
     (await attempt('Atacar', attack)) ??
     (await attempt('Encerrar turno', endTurn))

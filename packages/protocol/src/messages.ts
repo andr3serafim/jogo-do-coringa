@@ -32,7 +32,8 @@ export interface Score {
   p2: number;
 }
 
-export type DeadlineKind = 'EQUIP' | 'ORDER' | 'TURN' | 'REACTION';
+/** `RESURRECTION`: a janela da Ressurreição depois da revelação do Equipar (ponto 16). */
+export type DeadlineKind = 'EQUIP' | 'ORDER' | 'TURN' | 'REACTION' | 'RESURRECTION';
 
 export interface Deadline {
   kind: DeadlineKind;

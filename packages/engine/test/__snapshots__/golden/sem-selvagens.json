@@ -8,7 +8,7 @@
   "rounds": 39,
   "finalHp": {
     "p1": -73,
-    "p2": 37
+    "p2": 57
   },
   "events": {
     "AbsoluteAttack": 1,
@@ -17,7 +17,7 @@
     "BuffRemoved": 1,
     "CardsDealt": 38,
     "CardsPlaced": 40,
-    "CardsRemovedFromRow": 74,
+    "CardsRemovedFromRow": 75,
     "CardStolen": 7,
     "DamageDealt": 35,
     "DeckReshuffled": 1,
@@ -35,7 +35,7 @@
     "ReactionWindowOpened": 47,
     "ReflectPlayed": 2,
     "ReflectTriggered": 2,
-    "Resurrected": 2,
+    "Resurrected": 3,
     "RoundStarted": 38,
     "RowDevastated": 1,
     "Sacrificed": 2,

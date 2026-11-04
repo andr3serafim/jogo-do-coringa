@@ -28,6 +28,23 @@ describe('textos em pt-BR', () => {
     expect(texts).toContain('Declarar o ataque (ATK 38 contra DEF 26)');
   });
 
+  it('a Ressurreição com troca diz a carta que sai, e o passe da janela diz que guarda (ponto 16)', () => {
+    const s = setup({
+      phase: { kind: 'RESURRECTION', player: P1, next: null },
+      roundKind: 'EQUIP',
+      p1: { attack: [7, 7, 7, 7, 2, 3, 4], defense: [2, 3, 4, 5, 6, 8, 9] },
+      graveyard: [10],
+    });
+    s.players[0].resurrections = [{ row: 'ATK', value: 7, formedAtRound: 3 }];
+    const view = viewFor(s, P1);
+    const [ten] = view.graveyard;
+    const nine = view.self.defenseRow[6]!;
+    expect(actionText({ type: 'PASS' }, view)).toBe('Guardar a Ressurreição');
+    expect(actionText({ type: 'RESURRECT', cardId: ten!.id, row: 'DEF' }, view)).toBe(
+      `Ressuscitar ${cardText(ten!)} no lugar de ${cardText(nine)}, a última da fileira de Defesa (que vai ao cemitério)`,
+    );
+  });
+
   it('o Equipar com order (E2) diz cada carta com o seu destino, na ordem escolhida', () => {
     const s = setup({ round: 1, roundKind: 'EQUIP', phase: { kind: 'EQUIP' }, p1: { pending: [3, 9] } });
     const view = viewFor(s, P1);

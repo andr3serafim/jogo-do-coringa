@@ -28,6 +28,23 @@ com o caso em que o motor faz outra coisa; `diario.md` 2026-11-03 (6)), ele esco
 
 ---
 
+## 2026-11-03 (6): o plano do bloco E aprovado, com 15 s na janela
+
+Ao plano `docs/superpowers/plans/2026-11-03-ressurreicao-quadra.md` (as escolhas da seção "Escolhas minhas" e a pergunta do prazo
+online da janela, 15 s recomendado ou 10 s):
+
+> Aprovo, 15 s
+
+**Leitura:**
+- O plano vale como está, com as 9 escolhas à vista dele: a chave `resurrectOnQuad` na config, a janela só com jogada, o jogador na
+  janela até passar ou não ter mais jogada, o tempo esgotado que guarda (sem estouro), a janela também depois do 1º Equipar, a troca
+  saindo como no Roubo, a troca sob Defesa Absoluta, as especiais paradas na janela e os bots que só ressuscitam sem piorar a mesa.
+- **O prazo online da janela é de 15 s por jogador** (`TIMERS.resurrectionMs`), e a spec das regras §1.12 passa a dizer isso.
+- **[I]** "Aprovo" responde também à forma de execução, que a mensagem não perguntou: a execução é desta sessão, tarefa por tarefa, com
+  teste primeiro, como nas fatias.
+
+---
+
 ## 2026-11-03 (5): o plano do bloco A aprovado
 
 Perguntado "Aprova o plano do bloco A, com as escolhas A1 a A9?", sobre `docs/superpowers/plans/2026-11-03-playtest-bloco-a.md`, ele

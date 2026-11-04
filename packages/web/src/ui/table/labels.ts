@@ -43,6 +43,8 @@ export function turnText(view: PlayerView, names: TableNames): string {
   switch (phase.kind) {
     case 'EQUIP':
       return `${kind} · os dois montam`;
+    case 'RESURRECTION':
+      return `${kind} · ${phase.player === view.me ? 'sua Ressurreição' : `${names.opponent} decide a Ressurreição`}`;
     case 'ORDER_CHOICE':
       return `${kind} · ${phase.player === view.me ? 'você escolhe' : `${names.opponent} escolhe`} a ordem`;
     case 'ATTACK_MAIN':
@@ -83,6 +85,7 @@ export function initiativeScore(view: PlayerView): [number, number] | null {
 
 const PHASE_SHORT: Record<PlayerView['phase']['kind'], string> = {
   EQUIP: 'Equipar',
+  RESURRECTION: 'Quadra',
   ORDER_CHOICE: 'Ordem',
   ATTACK_MAIN: 'Ataque',
   REACTION: 'Reação',

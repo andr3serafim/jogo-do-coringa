@@ -17,6 +17,7 @@ describe('config', () => {
       wildJokers: true,
       defenseHealGuard: 2,
       specialLimit: { max: 4, penalty: 'BURN' },
+      resurrectOnQuad: true,
     });
   });
 
@@ -64,5 +65,13 @@ describe('cura passiva na config (E3)', () => {
     expect(validateConfig(makeConfig({ defenseHealGuard: 1 }))).toBeNull();
     expect(validateConfig(makeConfig({ defenseHealGuard: 0 }))?.code).toBe('INVALID_CONFIG');
     expect(validateConfig(makeConfig({ defenseHealGuard: 1.5 }))?.code).toBe('INVALID_CONFIG');
+  });
+});
+
+describe('a Ressurreição da quadra na config (ponto 16)', () => {
+  it('resurrectOnQuad: sem o campo vale (a regra de antes); com ele, verdadeiro ou falso', () => {
+    expect(validateConfig(makeConfig({ resurrectOnQuad: undefined }))).toBeNull();
+    expect(validateConfig(makeConfig({ resurrectOnQuad: false }))).toBeNull();
+    expect(validateConfig({ ...makeConfig(), resurrectOnQuad: 1 } as unknown as RulesConfig)?.code).toBe('INVALID_CONFIG');
   });
 });

@@ -1,7 +1,7 @@
 import { fail } from '../errors.ts';
 import { endTurn, openReaction } from '../flow.ts';
 import { assertDistinct, getPlayer, opponentOf, removeById, takeFromHand, toGraveyard } from '../state.ts';
-import { reevaluateQuads, rowCards, validResurrections } from '../quads.ts';
+import { reevaluateQuads, resurrectionRows, rowCards, validResurrections } from '../quads.ts';
 import { heal, healFromDefense } from '../combat.ts';
 import { stealOutcome } from '../preview.ts';
 import type { GameEvent, GameState, NumCard, PlayerId, PlayerState, ReflectState, RowName, SpecialCard } from '../types.ts';
@@ -178,18 +178,32 @@ export function steal(s: GameState, p: PlayerState, cardId: string, targetId: st
   heal(s, p, card.value, 'STEAL', card, ev);
 }
 
-/** Ressurreição (spec §1.8): 1 numérica do cemitério para o fim de uma fileira com espaço. */
+/**
+ * Ressurreição (spec §1.8): 1 numérica do cemitério para o fim de uma fileira. Com as duas cheias (ponto 16, `resurrectOnQuad`), ela
+ * entra no lugar da última, que vai ao cemitério (e cura, se saiu da Defesa, pela cura passiva), salvo a última da quadra. A
+ * ressuscitada sai do cemitério antes da troca: a que sai não volta na mesma jogada.
+ */
 export function resurrect(s: GameState, p: PlayerState, cardId: string, row: RowName, ev: GameEvent[]): void {
   const tokens = validResurrections(s, p);
   if (tokens.length === 0) fail('NO_RESURRECTION', 'você não tem Ressurreição disponível');
   if (row !== 'ATK' && row !== 'DEF') fail('INVALID_TARGET', 'fileira inválida');
-  const target = rowCards(p, row);
-  if (target.length >= s.config.rowLimit) fail('ROW_FULL', 'a fileira escolhida está cheia');
+  const entry = resurrectionRows(s.config, p)[row];
+  if (entry.kind === 'BLOCKED') {
+    if (entry.reason === 'QUAD') fail('QUAD_PROTECTED', 'a última carta da fileira é da quadra e não sai');
+    fail('ROW_FULL', 'a fileira escolhida está cheia');
+  }
   const index = s.graveyard.findIndex((c) => c.id === cardId);
   if (index < 0) fail('CARD_NOT_IN_GRAVEYARD', `a carta ${cardId} não está no cemitério`);
   const card = s.graveyard[index];
   if (card.kind !== 'NUM') fail('INVALID_CARD', 'só cartas numéricas podem ser revividas');
   s.graveyard.splice(index, 1);
+  const target = rowCards(p, row);
+  if (entry.kind === 'REPLACE') {
+    const displaced = target.splice(target.length - 1, 1);
+    toGraveyard(s, displaced);
+    ev.push({ type: 'CardsRemovedFromRow', player: p.id, row, cards: displaced });
+    if (row === 'DEF') healFromDefense(s, p, displaced, ev);
+  }
   const used = tokens[0];
   p.resurrections = p.resurrections.filter((r) => r !== used);
   target.push(card);

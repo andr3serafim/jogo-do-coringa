@@ -1,11 +1,22 @@
-import type { GameEvent, GameState, NumCard, PlayerState, Quad, Rank, Resurrection, RowName } from './types.ts';
+import type {
+  GameEvent,
+  GameState,
+  NumCard,
+  PlayerState,
+  Quad,
+  Rank,
+  Resurrection,
+  ResurrectionRow,
+  RowName,
+  RulesConfig,
+} from './types.ts';
 
 export function rowCards(p: PlayerState, row: RowName): NumCard[] {
   return row === 'ATK' ? p.attackRow : p.defenseRow;
 }
 
 /** Valores com 4+ cópias na fileira (spec §1.8: não precisam estar seguidas). */
-export function quadValues(cards: NumCard[]): Rank[] {
+export function quadValues(cards: readonly NumCard[]): Rank[] {
   const counts = new Map<Rank, number>();
   for (const c of cards) counts.set(c.value, (counts.get(c.value) ?? 0) + 1);
   return [...counts.entries()]
@@ -54,4 +65,31 @@ export function validResurrections(s: GameState, p: PlayerState): Resurrection[]
 
 export function pruneResurrections(s: GameState, p: PlayerState): void {
   p.resurrections = validResurrections(s, p);
+}
+
+/**
+ * Onde a ressuscitada pode entrar em cada fileira (spec §1.8, ponto 16). Com vaga, no fim. Com as duas cheias (e `resurrectOnQuad`),
+ * no lugar da última, a não ser que a última seja da quadra: toda numérica com o valor de uma quadra daquela fileira, para a troca
+ * nunca desfazer uma quadra. A fileira cheia com vaga na outra não aceita, como antes. É a fonte única do motor, dos bots e da mesa.
+ */
+export function resurrectionRows(
+  config: Pick<RulesConfig, 'rowLimit' | 'resurrectOnQuad'>,
+  rows: { attackRow: readonly NumCard[]; defenseRow: readonly NumCard[] },
+): Record<RowName, ResurrectionRow> {
+  const bothFull = rows.attackRow.length >= config.rowLimit && rows.defenseRow.length >= config.rowLimit;
+  const of = (cards: readonly NumCard[]): ResurrectionRow => {
+    if (cards.length < config.rowLimit) return { kind: 'APPEND' };
+    const last = cards[cards.length - 1];
+    if (!bothFull || config.resurrectOnQuad !== true) return { kind: 'BLOCKED', reason: 'FULL', last };
+    if (quadValues(cards).includes(last.value)) return { kind: 'BLOCKED', reason: 'QUAD', last };
+    return { kind: 'REPLACE', leaving: last };
+  };
+  return { ATK: of(rows.attackRow), DEF: of(rows.defenseRow) };
+}
+
+/** O jogador pode ressuscitar agora? Uma Ressurreição válida, uma numérica no cemitério e uma fileira que aceite. */
+export function hasResurrectPlay(s: GameState, p: PlayerState): boolean {
+  if (validResurrections(s, p).length === 0 || !s.graveyard.some((c) => c.kind === 'NUM')) return false;
+  const rows = resurrectionRows(s.config, p);
+  return rows.ATK.kind !== 'BLOCKED' || rows.DEF.kind !== 'BLOCKED';
 }

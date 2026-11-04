@@ -1,4 +1,5 @@
 import { discardsOwed } from './config.ts';
+import { resurrectionRows } from './quads.ts';
 import type { Action, Destination, PlayerView, ReactionTrigger, SpecialCard, SpecialKind } from './types.ts';
 
 const firstOf = (cards: SpecialCard[], kind: SpecialKind): SpecialCard | undefined => cards.find((c) => c.kind === kind);
@@ -102,8 +103,27 @@ function equipOptions(view: PlayerView): Destination[][] {
   return results;
 }
 
+/**
+ * As Ressurreições, uma por valor do cemitério e por fileira que aceita (`resurrectionRows`: no fim, ou no lugar da última com as duas
+ * cheias). Cartas do mesmo valor dão o mesmo efeito: a lista traz a primeira, e o motor aceita qualquer uma.
+ */
+function resurrectOptions(view: PlayerView): Action[] {
+  const { self, config, graveyard } = view;
+  if (self.resurrections.length === 0) return [];
+  const rows = resurrectionRows(config, self);
+  const open = (['ATK', 'DEF'] as const).filter((row) => rows[row].kind !== 'BLOCKED');
+  const actions: Action[] = [];
+  const seen = new Set<number>();
+  for (const card of graveyard) {
+    if (card.kind !== 'NUM' || seen.has(card.value)) continue;
+    seen.add(card.value);
+    for (const row of open) actions.push({ type: 'RESURRECT', cardId: card.id, row });
+  }
+  return actions;
+}
+
 function mainOptions(view: PlayerView): Action[] {
-  const { self, opponent, config, graveyard } = view;
+  const { self, opponent, config } = view;
   const actions: Action[] = [];
   if (self.attackBuffs.length < config.buffLimit) {
     for (const c of sources(self.hand, 'J')) actions.push({ type: 'PLAY_J', cardId: c.id });
@@ -127,15 +147,7 @@ function mainOptions(view: PlayerView): Action[] {
       for (const t of opponent.defenseBuffs) actions.push({ type: 'SACRIFICE', cardId: c.id, targetId: t.id });
     }
   }
-  if (self.resurrections.length > 0) {
-    const seen = new Set<number>();
-    for (const card of graveyard) {
-      if (card.kind !== 'NUM' || seen.has(card.value)) continue;
-      seen.add(card.value);
-      if (self.attackRow.length < config.rowLimit) actions.push({ type: 'RESURRECT', cardId: card.id, row: 'ATK' });
-      if (self.defenseRow.length < config.rowLimit) actions.push({ type: 'RESURRECT', cardId: card.id, row: 'DEF' });
-    }
-  }
+  actions.push(...resurrectOptions(view));
   // Devastação (F3), depois da Ressurreição: contra Defesa Absoluta não vale, e só contra fileira com carta.
   if (!opponent.absoluteDefense) {
     for (const [row, x] of [['ATK', 'J'], ['DEF', 'Q']] as const) {
@@ -220,6 +232,9 @@ export function legalActions(view: PlayerView): Action[] {
       if (owed > 0) return discardOptions(view.self.hand, owed);
       return equipOptions(view).map((destinations): Action => ({ type: 'EQUIP', destinations }));
     }
+    case 'RESURRECTION':
+      // A janela da Ressurreição (ponto 16): passar (guardar) ou ressuscitar.
+      return phase.player === view.me ? [{ type: 'PASS' }, ...resurrectOptions(view)] : [];
     case 'ORDER_CHOICE':
       return phase.player === view.me
         ? [

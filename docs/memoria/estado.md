@@ -1,25 +1,25 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-04**, com os quatro textos de placa corrigidos na branch `feat/playtest-placas`.
-> Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`): a
-> sessão do bloco E também escreve o estado, na branch dela.
+> Sobrescrito a cada atualização. **Última: 2026-11-04**, com o bloco E na `main` (`d04dc0b`) e os quatro textos de placa na
+> branch `feat/playtest-placas`, a caminho da `main`. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da
+> seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Branch:** `feat/playtest-placas`, no checkout principal, saída da `main` em `f8755bc` (o bloco A inteiro, com as duas CI verdes no
-  `540e3d4`).
+- **Branch:** `feat/playtest-placas`, no checkout principal, saída da `main` em `f8755bc`, com a `main` do bloco E (`d04dc0b`) mesclada.
 - **Feito:** o autor pediu "Corrija os quatro" (`decisoes.md` 2026-11-04 (1)). As placas trocam de linha só no caso de borda, na ordem do
   `previewBetween`, com teste contra a prévia do motor; a linha da zona do Reflect, no PC, foi para baixo do título (`diario.md` 2026-11-04 (1)).
 - **Próximo passo exato:**
-  1. Esperar a sessão do bloco E levar a `main` (`feat/ressurreicao-quadra`, o merge `9125328` e o commit final da memória dela).
-  2. Mesclar a `main` nova nesta branch (conflitos esperados só na memória), o push (o pre-push roda o `pnpm check`), as duas CI verdes e
-     a `main` por fast-forward (`git push origin <sha>:refs/heads/main`, sem `| tail`).
-  3. Conferida a `main` com o bloco E, avisar o autor e apagar a sessão do bloco E (com aviso antes, `decisoes.md` 2026-11-03 (4)).
+  1. O push do merge da `main` (`d04dc0b`, o bloco E) nesta branch (o pre-push roda o `pnpm check`), as duas CI verdes e a `main` por
+     fast-forward (`git push origin <sha>:refs/heads/main`, sem `| tail`).
 - **Esperando o autor:**
-  - jogar o bloco A e as placas novas (o treino mostra tudo; o online só depois do `pnpm deploy:server` dele, que leva também a folga do
-    momento no prazo, o PASS guardado depois do Ás e o conserto do Equipar vazio);
+  - jogar os blocos A e E e as placas novas (o treino mostra tudo; o online só depois do `pnpm deploy:server` dele, que leva a folga do
+    momento no prazo, o PASS guardado depois do Ás, o conserto do Equipar vazio e a janela da Ressurreição; o deploy fecha as salas abertas,
+    `STATE_SCHEMA` 5, e as partidas guardadas abrem com o aviso de versão, `RULES_VERSION` 5);
   - **um quinto caso de placa, achado no motor** (`diario.md` 2026-11-04 (1)): "Cura passiva" falha contra o Ataque Absoluto armado do outro
     (os K quebram antes da cura) e, com exatamente 2 K, no golpe que um K absorve. Não mexido: ele pediu os quatro.
+- **Bloco E:** terminado e na `main` (`d04dc0b`, seção "Bloco E" abaixo). A sessão foi apagada em 2026-11-04, com o worktree, depois de
+  conferido que a branch estava na `main` e o worktree limpo (anunciado ao autor antes, `decisoes.md` 2026-11-03 (4)).
 - **Para medir uma cena com a 8787 ocupada:** `MEDIR_PORTA=8797` no `medir-cena.ts`. Para o E2E inteiro numa porta livre, a receita está no `diario.md` 2026-11-02 (8) (uma configuração que importa o `playwright.config.ts` e troca a porta).
 - **Para ver a Ressurreição sem esperar no treino:** importe a fixture `packages/web/e2e/fixtures/exodia-devastacao.json` para a chave `coringa:partidas` e abra `/partidas/exodia-devastacao`. "Próximo
   passo" na rodada 7, passo 27, mostra a sua, com a quadra; na rodada 23, passo 107, a do Bot, com a quadra na outra fileira; na rodada 37, passo 182, a do Bot sem quadra.
@@ -44,6 +44,33 @@
   - **em `test/ui`, todo teste é `.test.tsx`:** o Vitest da web não roda `.test.ts` ali, nem na CI, e nada avisa;
   - **`animation.test.tsx`** usa a sonda `installFlashProbe` (`test/ui/anim-harness.tsx`): as cenas do Reflect e da Ressurreição seguem com o painel de reserva nesse arquivo;
   - uma marca que dura menos de meio segundo escapa do `toHaveCount` do Playwright: quem procura é a própria página, a cada quadro (`e2e/scenes.spec.ts`).
+
+## Bloco E (sessão paralela)
+
+> Seção da sessão do bloco E (a regra do ponto 16), no worktree `.claude/worktrees/ressurreicao-quadra-f59247`, branch
+> `claude/ressurreicao-quadra-f59247` (publicada também como `feat/ressurreicao-quadra`, para a CI), saída de `d35a241`. O "Agora"
+> acima é da outra sessão (o bloco A).
+
+- **Feito (2026-11-03), o plano inteiro** (`docs/superpowers/plans/2026-11-03-ressurreicao-quadra.md`, aprovado com 15 s na janela,
+  `decisoes.md` 2026-11-03 (6)); detalhes, commits e rulings no `diario.md` 2026-11-03 (7):
+  - a regra na spec das regras (§1.4, §1.8, §1.12, §1.14, §2.3 a §2.7) e na spec da web (§3.4 e §3.5b);
+  - motor (a janela `RESURRECTION`, a troca com a proteção da quadra, a chave `resurrectOnQuad`), bots, `RULES_VERSION` 5, servidor (15 s,
+    `STATE_SCHEMA` 5), web (o painel, o cemitério com a troca e o total, a fileira protegida, a dica do tutorial), E2E (79 de 79);
+  - a medição em `notas/medicao-ressurreicao-quadra.md`: 98% das quadras viram Ressurreição usada (eram 82%), a iniciativa quase não
+    muda, a mediana de rodadas de Ataque vai a 14 (meta 8–14); o portão do Difícil aprovado do zero (69,0% / 81,5% / p95 até 189 ms).
+- **Na `main`:** a `main` com o bloco A (`f8755bc`) foi mesclada aqui em `9125328` (conflitos só na memória e no `testMatch` do
+  `playwright.config.ts`; as entradas do bloco E renumeradas: `decisoes.md` 2026-11-03 (6), `diario.md` (7)); as duas CI passaram nele
+  (run `41764020751`), e a `main` foi por fast-forward até este commit, que só mexe na memória. Nada mais da sessão do bloco E em curso; ela foi apagada em 2026-11-04.
+- **Para o autor** (o deploy é dele, `pnpm deploy:server`):
+  - **jogue a janela:** ela aparece depois da revelação do Equipar quando você forma quadra e há numérica no cemitério; com as duas
+    fileiras cheias, o cemitério mostra a troca (a carta que sai e o total);
+  - o deploy fecha as salas online abertas (`STATE_SCHEMA` 5) e as partidas guardadas de antes abrem com o aviso de versão (`RULES_VERSION`
+    5), mas reproduzem igual (a chave `resurrectOnQuad` fica ausente nelas);
+  - **não conferido de verdade:** a troca no navegador (o E2E não chega a ela; só os testes da mesa, sem layout), o relógio de 15 s online
+    e o som.
+- **Convivência:** dos arquivos do bloco A, só o `copy.ts` mudou aqui (o `CLOCK_START_TEXT` e a linha da Ressurreição no resumo das
+  regras). No merge, o `timing.ts` ficou com o `stepAllowanceMs` do bloco A e o caso `RESURRECTION` (15 s); o `passHeldUntil` só vale na
+  `REACTION`, e a Ressurreição não entra nos momentos do bloco A.
 
 ## O plano da fatia 5, em resumo
 

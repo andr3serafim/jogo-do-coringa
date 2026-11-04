@@ -221,6 +221,7 @@ function Playback({ game, track, prefs }: ReplayViewerProps) {
           mode={graveyardOpen ? 'view' : null}
           graveyard={view.graveyard}
           options={NO_RESURRECT}
+          blocked={NO_RESURRECT}
           rowCounts={{ ATK: view.self.attackRow.length, DEF: view.self.defenseRow.length }}
           rowLimit={view.config.rowLimit}
           onPick={noop}

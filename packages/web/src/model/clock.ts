@@ -64,6 +64,7 @@ const CUE_KIND: Partial<Record<StateMessage['view']['phase']['kind'], DeadlineKi
   ORDER_CHOICE: 'ORDER',
   ATTACK_MAIN: 'TURN',
   REACTION: 'REACTION',
+  RESURRECTION: 'RESURRECTION',
 };
 
 /**

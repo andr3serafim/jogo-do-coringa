@@ -13,6 +13,8 @@ export const DEFAULT_CONFIG: RulesConfig = {
   defenseHealGuard: 2,
   // A forma escolhida pelo autor (2026-10-31): a especial que passaria de 4 na mão vai direto ao cemitério.
   specialLimit: { max: 4, penalty: 'BURN' },
+  // A Ressurreição no instante da quadra (ponto 16, autor em 2026-11-03).
+  resurrectOnQuad: true,
 };
 
 export type ConfigOverrides = Partial<Omit<RulesConfig, 'deck'>> & {
@@ -65,6 +67,7 @@ export function validateConfig(c: RulesConfig): ConfigError | null {
           ['BURN', 'CHOOSE', 'FEWER'].includes(c.specialLimit.penalty)),
       'specialLimit deve ser { max: inteiro ≥ 3, penalty: BURN | CHOOSE | FEWER }',
     ],
+    [c.resurrectOnQuad === undefined || typeof c.resurrectOnQuad === 'boolean', 'resurrectOnQuad deve ser verdadeiro ou falso'],
   ];
   for (const [ok, message] of checks) {
     if (!ok) return { code: 'INVALID_CONFIG', message };

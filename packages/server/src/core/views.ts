@@ -61,6 +61,7 @@ const DEADLINE_KINDS: Record<string, DeadlineKind> = {
   ORDER_CHOICE: 'ORDER',
   ATTACK_MAIN: 'TURN',
   REACTION: 'REACTION',
+  RESURRECTION: 'RESURRECTION',
 };
 
 /**

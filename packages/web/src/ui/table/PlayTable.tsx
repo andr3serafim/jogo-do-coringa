@@ -49,6 +49,7 @@ import { GraveyardDialog, type GraveyardMode } from './GraveyardDialog.tsx';
 import { PC_QUERY } from './History.tsx';
 import { tableNames } from './labels.ts';
 import { OrderPanel } from './OrderPanel.tsx';
+import { ResurrectionPanel } from './ResurrectionPanel.tsx';
 import { Table, type TableHint } from './Table.tsx';
 import { useDeadlineExpired } from './useClock.ts';
 import { useRecordPastGame } from './useRecordPastGame.ts';
@@ -177,6 +178,8 @@ function PlayTableView({
   const acting = barPhase && legal.length > 0;
   const equipping = phase === 'EQUIP' && snapshot.equipConfirmed === 'none' && legal.some((a) => a.type === 'EQUIP');
   const ordering = phase === 'ORDER_CHOICE' && legal.some((a) => a.type === 'CHOOSE_ORDER');
+  // A janela da Ressurreição (ponto 16): é a sua quando a lista legal tem o passe (guardar) e a Ressurreição.
+  const resurrecting = phase === 'RESURRECTION' && legal.some((a) => a.type === 'PASS');
   const plays = useMemo(() => tablePlays(view, legal), [view, legal]);
 
   const [selection, setSelection] = useState<Selection | null>(null);
@@ -370,7 +373,7 @@ function PlayTableView({
 
   // Chegou a sua vez de jogar (época nova): o foco vai para o painel, sem roubar de quem digita ou de um diálogo. Na revanche
   // o `state` novo pode chegar antes de o painel de fim sair: quando ele sai (`showEnd`), a vez conta de novo.
-  const turnEpoch = acting || equipping || ordering ? state.epoch : null;
+  const turnEpoch = acting || equipping || ordering || resurrecting ? state.epoch : null;
   useEffect(() => {
     if (turnEpoch === null) return;
     if (document.querySelector('dialog[open]') || isTextEntry(document.activeElement)) return;
@@ -498,6 +501,18 @@ function PlayTableView({
         panelRef={barRef}
       />
     );
+  } else if (phase === 'RESURRECTION') {
+    panel = (
+      <ResurrectionPanel
+        names={names}
+        deciding={resurrecting}
+        disabled={locked}
+        notice={snapshot.notice}
+        onResurrect={() => setGraveyard('resurrect')}
+        onKeep={() => send({ type: 'PASS' })}
+        panelRef={barRef}
+      />
+    );
   } else if (phase === 'ORDER_CHOICE') {
     panel = (
       <OrderPanel
@@ -542,6 +557,7 @@ function PlayTableView({
         mode={graveyard}
         graveyard={view.graveyard}
         options={plays.resurrect}
+        blocked={plays.resurrectBlocked}
         rowCounts={{ ATK: view.self.attackRow.length, DEF: view.self.defenseRow.length }}
         rowLimit={view.config.rowLimit}
         onPick={(id, row) => {

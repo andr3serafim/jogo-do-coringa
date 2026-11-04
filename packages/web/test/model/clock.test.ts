@@ -157,6 +157,12 @@ describe('turnCue: a vez do jogador quando não há prazo (treino)', () => {
     expect(cue({ phase: 'ATTACK' })?.kind).toBe('REACTION');
     expect(cue(EQUIP)?.kind).toBe('EQUIP');
     expect(cue({ phase: { kind: 'ORDER_CHOICE', player: 'p1' } })?.kind).toBe('ORDER');
+    const window: ViewSpec = {
+      phase: { kind: 'RESURRECTION', player: 'p1', next: null },
+      self: { attackRow: [7, 7, 7, 7], resurrections: [{ row: 'ATK', value: 7 }] },
+      graveyard: [5],
+    };
+    expect(cue(window)?.kind).toBe('RESURRECTION');
   });
 
   it('a vez do outro, a ordem que ele escolhe e o fim da partida não são a minha vez', () => {

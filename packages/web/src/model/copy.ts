@@ -355,6 +355,7 @@ const CLOCK_START_TEXT: Record<DeadlineKind, string> = {
   REACTION: 'Sua reação',
   EQUIP: 'Monte suas cartas',
   ORDER: 'Escolha a ordem',
+  RESURRECTION: 'Sua Ressurreição',
 };
 
 const secondsText = (seconds: number): string => `${seconds} ${seconds === 1 ? 'segundo' : 'segundos'}`;
@@ -771,7 +772,7 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
     title: 'Combos',
     items: [
       'Quadra: 4 ou mais numéricas do mesmo valor na mesma fileira, seguidas ou não, somam esse valor à fileira e dão 1 Ressurreição. Uma fileira pode ter duas quadras de valores diferentes, e cada uma conta.',
-      'Ressurreição: no seu turno, traz 1 numérica do cemitério para o fim de uma fileira com vaga. Vale uma vez por quadra e fica disponível enquanto a quadra existir, com garantia de 3 rodadas depois de formada.',
+      'Ressurreição: traz 1 numérica do cemitério para o fim de uma fileira. Vale no seu turno e, quando a quadra se forma no Equipar, logo depois da revelação, antes do ataque. Com as duas fileiras cheias, ela entra no lugar da última, que vai ao cemitério; a última que é da quadra não sai. Vale uma vez por quadra e fica disponível enquanto a quadra existir, com garantia de 3 rodadas depois de formada.',
       'Defesa Absoluta (4 Q): até o oponente atacar, você é imune a dano, a Armadilha e a Sacrifício, e a fileira de Defesa não perde cartas. Só o Ataque Absoluto fura a imunidade a dano: quebra os seus K e causa o dano normal. Depois do primeiro ataque do oponente, ela acaba e 1 Q vai para o cemitério.',
       'Ataque Absoluto (4 J): multiplicador 5× e quebra todos os K do alvo. Depois do ataque, 1 J vai para o cemitério.',
       'Exódia (4 K na Guarda): vence na hora, depois da janela de reação.',

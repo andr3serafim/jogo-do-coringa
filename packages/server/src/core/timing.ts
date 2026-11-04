@@ -18,7 +18,7 @@ export interface PhaseSnapshot {
  * mantém o prazo. Época nova: `phaseStartedAt = now`, o PASS guardado e os itens `phase`/`reactionMin` velhos
  * saem da agenda e o prazo da fase nova entra, junto com a `epoch` em que nasceu.
  *
- * - `EQUIP` 40 s; `ORDER_CHOICE` 10 s; `REACTION` 8 s.
+ * - `EQUIP` 40 s; `RESURRECTION` 15 s (a vez de cada um da fila é época nova); `ORDER_CHOICE` 10 s; `REACTION` 8 s.
  * - `ATTACK_MAIN` com `TurnStarted` começa com 30 s cheios; sem ele, é a volta de uma janela de K ou de Reflect e
  *   o turno retoma o que sobrou (`pausedTurnMs`), sem piso. Sem nenhum dos dois (cenário montado de fora), 30 s.
  * - A janela aberta por K ou Reflect no turno do oponente guarda o que sobrou do turno; a de um ataque, não
@@ -56,6 +56,9 @@ export function schedulePhase(record: RoomRecord, prev: PhaseSnapshot, events: G
   switch (phase.kind) {
     case 'EQUIP':
       durationMs = TIMERS.equipMs;
+      break;
+    case 'RESURRECTION':
+      durationMs = TIMERS.resurrectionMs;
       break;
     case 'ORDER_CHOICE':
       durationMs = TIMERS.orderMs;

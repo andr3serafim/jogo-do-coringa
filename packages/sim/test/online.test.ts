@@ -140,13 +140,14 @@ describe('askChoice e o jogo offline com AbortSignal', () => {
     // Defesa" e "quadra … na Defesa" no lugar de "do Defesa" e "no Defesa". Na E1 (sem anti-travamento) também só a saída: a mesa
     // não mostra mais "N de 3 sem dano"; a partida já acabava pela vida. No Reflect reativo (F2) também só a saída: o texto da
     // janela do Reflect; na Devastação (F3), o texto que a lista. No Roubo (E3) as jogadas mudaram: o Bot rouba. Os digests novos
-    // saem de `node packages/sim/scripts/roteiro-digest.ts`. Na fatia 5 do sub-projeto 6 (2026-11-02) só a saída: "Bônus" no lugar de "Buff".
+    // saem de `node packages/sim/scripts/roteiro-digest.ts`. Na fatia 5 do sub-projeto 6 (2026-11-02) só a saída: "Bônus" no lugar de "Buff". Na janela da
+    // Ressurreição (ponto 16) mudaram as jogadas e a saída: o Bot ressuscita nela, e a partida fica mais longa.
     const game = scriptedIo(() => '1');
     const outcome = await playGame({ io: game, seed: 'roteiro', bot: 'greedy', config: makeConfig(), saveDir: null });
     const sha = (text: string) => createHash('sha256').update(text).digest('hex');
-    expect(sha(game.output.join('\n'))).toBe('d65f18a1a7175b0333712deed3751bae4a54bd656e73eb3fbfa10efd2dc9e001');
-    expect(sha(JSON.stringify(outcome.replay.steps))).toBe('3dc3cc0a89c288e209ed92ab9b59439734f00354b442c2113242b6cf10a6ee36');
-    expect(outcome.replay.steps).toHaveLength(90);
+    expect(sha(game.output.join('\n'))).toBe('15fc523c2efdd37e53b01f122c32b5fce8aac25a15f0b2f7f5c89a5b374da7c4');
+    expect(sha(JSON.stringify(outcome.replay.steps))).toBe('02bbe34549d9dde58c41025cbcfc2a87dbfc57221d69ee05b121e2c6d9a29940');
+    expect(outcome.replay.steps).toHaveLength(131);
   });
 
   it('askAction cancela a pergunta do Equipar e do menu pelo sinal', async () => {

@@ -19,6 +19,9 @@ const RULES_DIGESTS: Record<number, string> = {
   // 4 (bloco E3 + F2 + F3 do sub-projeto 5): o Reflect reativo (F2), a Devastação (F3), o Roubo e a cura (E3). Os commits
   // seguintes da mesma branch trocam só este digest.
   4: '56ed17cbf482f3cb9e8ba2d51710bb1e5441023b357bca52950f1986d76553ca',
+  // 5 (ponto 16 do playtest): a Ressurreição no instante da quadra (a janela depois da revelação do Equipar, a troca da última carta
+  // com as duas fileiras cheias e a quadra protegida) e os bots que a usam. Os commits seguintes da mesma branch trocam só este digest.
+  5: '5e37bfa45e7e7db16a210cd08afdcf8b3216d55b7199ca12dbf387812de1dcd3',
 };
 
 const GOLDEN_DIR = new URL('./__snapshots__/golden/', import.meta.url);

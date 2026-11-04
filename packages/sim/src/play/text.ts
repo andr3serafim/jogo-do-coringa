@@ -1,5 +1,5 @@
 import type { Action, Card, Destination, GameEvent, GameResult, PlayerId, PlayerView, RowName } from '@coringa/engine';
-import { attackPower, defensePower } from '@coringa/engine';
+import { attackPower, defensePower, resurrectionRows } from '@coringa/engine';
 
 const SUIT: Record<string, string> = { copas: '♥', ouros: '♦', espadas: '♠', paus: '♣' };
 
@@ -84,8 +84,14 @@ export function actionText(action: Action, view: PlayerView): string {
       return `Responder com Reflect (${t(action.kId)} + ${t(action.jId)} + ${t(action.qId)})`;
     case 'CANCEL_REFLECT':
       return `Reflect contra Reflect: anular com ${t(action.kId)} + ${t(action.jId)} + ${t(action.qId)} da mão`;
-    case 'RESURRECT':
+    case 'RESURRECT': {
+      // Com as duas fileiras cheias (ponto 16), ela entra no lugar da última.
+      const entry = resurrectionRows(view.config, view.self)[action.row];
+      if (entry.kind === 'REPLACE') {
+        return `Ressuscitar ${t(action.cardId)} no lugar de ${cardText(entry.leaving)}, a última da fileira de ${ROW_NAME[action.row]} (que vai ao cemitério)`;
+      }
       return `Ressuscitar ${t(action.cardId)} no fim da fileira de ${ROW_NAME[action.row]}`;
+    }
     case 'STEAL':
       return `Roubar ${t(action.targetId)} do oponente com ${t(action.cardId)}, para o fim da fileira de ${ROW_NAME[action.row]}`;
     case 'DEVASTATE':
@@ -95,7 +101,7 @@ export function actionText(action: Action, view: PlayerView): string {
     case 'END_TURN':
       return 'Encerrar o turno (Ataque vazio, sem ataque)';
     case 'PASS':
-      return 'Passar';
+      return view.phase.kind === 'RESURRECTION' ? 'Guardar a Ressurreição' : 'Passar';
     case 'TIMEOUT':
       return 'Tempo esgotado';
     case 'FORFEIT':

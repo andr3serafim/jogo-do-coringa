@@ -36,6 +36,7 @@ function fieldCards(player: PublicPlayer): Card[] {
  *   seu. O motor anuncia o Absoluto antes de tudo, e contra um Reflect as Q que o dano devolvido quebra saem antes da carta da
  *   frente, e seguem marcadas;
  * - a carta da sua fileira que o seu próprio Equipar trocou (o `replaced` do seu `CardsPlaced`);
+ * - a última da sua Defesa que a sua Ressurreição trocou (ponto 16: o seu `CardsRemovedFromRow` logo antes do seu `Resurrected`);
  * - o Q que a sua Defesa Absoluta gasta ao acabar (o `BuffRemoved` seu logo depois do seu `AbsoluteDefenseEnded`).
  *
  * A §10.5 só marca no cemitério o que o oponente destruiu; essas vão para lá por jogada ou efeito seu, e o passe do oponente
@@ -47,7 +48,15 @@ export function ownSpentIds(events: readonly GameEvent[], me: PlayerId): string[
   let absolute = false;
   let frontGone = false;
   let defenseEnded = false;
+  /** A última da sua Defesa que saiu agora, à espera de saber se foi a troca da sua Ressurreição (ponto 16). */
+  let defenseOut: string[] | null = null;
   for (const event of events) {
+    // A troca da Ressurreição: o seu `CardsRemovedFromRow` da Defesa seguido do seu `Resurrected`, com no máximo a cura dela no meio.
+    const swapped: string[] | null = defenseOut;
+    defenseOut = null;
+    if (swapped && event.type === 'Healed' && event.player === me) defenseOut = swapped;
+    else if (swapped && event.type === 'Resurrected' && event.player === me) ids.push(...swapped);
+    if (event.type === 'CardsRemovedFromRow' && event.player === me && event.row === 'DEF') defenseOut = event.cards.map((card) => card.id);
     // O Q da Defesa Absoluta é o `BuffRemoved` que vem logo depois do fim dela: qualquer outro evento no meio desfaz a ligação.
     const afterDefenseEnded = defenseEnded;
     defenseEnded = false;

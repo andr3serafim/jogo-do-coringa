@@ -1,6 +1,7 @@
 import { healFromDefense } from '../combat.ts';
 import { fail } from '../errors.ts';
 import { startRound } from '../flow.ts';
+import { openResurrectionWindow } from './resurrection.ts';
 import { reevaluateQuads } from '../quads.ts';
 import { discardsOwed } from '../config.ts';
 import { assertDistinct, getPlayer, removeById, toGraveyard } from '../state.ts';
@@ -150,6 +151,11 @@ function resolveEquip(s: GameState, ev: GameEvent[]): void {
     ev.push({ type: 'CardsPlaced', player: p.id, placements });
     healFromDefense(s, p, leftDefense, ev);
   }
+  const before = ev.length;
   for (const p of s.players) reevaluateQuads(s, p, ev);
-  startRound(s, ev);
+  if (s.config.resurrectOnQuad !== true) return startRound(s, ev);
+  // A janela da Ressurreição (ponto 16): quem formou quadra nesta revelação, quem tem a iniciativa primeiro.
+  const formed = new Set(ev.slice(before).flatMap((e) => (e.type === 'QuadFormed' ? [e.player] : [])));
+  const order = [s.initiative, ...s.players.map((p) => p.id).filter((id) => id !== s.initiative)];
+  openResurrectionWindow(s, order.filter((id) => formed.has(id)), ev);
 }

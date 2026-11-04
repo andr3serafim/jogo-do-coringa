@@ -4,7 +4,18 @@
 // qualquer carta da mão do mesmo tipo. Por isso a mesa compara pelo papel (`roleKey`): tipo de jogada,
 // tipo de carta e alvo, nunca o id de uma carta da mão. Nenhuma regra do jogo mora aqui: só se
 // reaproveita o que a lista legal já diz, trocando a carta canônica pela que o jogador tocou.
-import { legalActions, type Card, type NumCard, type PlayerView, type Rank, type RowName, type SpecialCard } from '@coringa/engine';
+import {
+  attackPower,
+  defensePower,
+  legalActions,
+  resurrectionRows,
+  type Card,
+  type NumCard,
+  type PlayerView,
+  type Rank,
+  type RowName,
+  type SpecialCard,
+} from '@coringa/engine';
 import type { PlayerAction } from '@coringa/protocol';
 import { asRoleText, guardText, PLAY_TEXT, STEAL_TEXT, targetText, type BuffZone, type RowZone, type TargetZone } from './copy.ts';
 
@@ -23,6 +34,13 @@ export interface CardPlay {
   make(targetId?: string): PlayerAction;
 }
 
+/** Uma fileira em que a ressuscitada pode entrar: no fim (`leaving: null`) ou no lugar da última. */
+export interface ResurrectRowOption {
+  row: RowName;
+  leaving: NumCard | null;
+  total: { before: number; after: number };
+}
+
 export interface TablePlays {
   /** Id da carta da mão → jogadas com ela. Cartas sem jogada não aparecem. */
   byCard: Map<string, CardPlay[]>;
@@ -30,8 +48,13 @@ export interface TablePlays {
   cancelReflect: PlayerAction | null;
   /** A Devastação (F3), uma por fileira do oponente: a de menos Selvagens. */
   devastate: PlayerAction[];
-  /** Um item por valor no cemitério; `rows` só com as fileiras que têm vaga. */
-  resurrect: { cardId: string; value: Rank; rows: RowName[] }[];
+  /**
+   * Um item por valor no cemitério; `rows` só com as fileiras que aceitam (ponto 16: com as duas cheias, a ressuscitada entra no lugar
+   * da última, `leaving`), e o total da fileira na mesa antes e depois (`attackPower`/`defensePower` do motor).
+   */
+  resurrect: { cardId: string; value: Rank; rows: ResurrectRowOption[] }[];
+  /** As fileiras que não aceitam porque a última é da quadra (`resurrectionRows`): a carta que não sai. */
+  resurrectBlocked: { row: RowName; last: NumCard }[];
   finish: { type: 'DECLARE_ATTACK' } | { type: 'END_TURN' } | null;
   pass: boolean;
 }
@@ -290,15 +313,30 @@ export function tablePlays(view: PlayerView, legal: PlayerAction[]): TablePlays 
   }
 
   const graveyard = new Map<string, Card>(view.graveyard.map((c) => [c.id, c]));
-  const resurrect = new Map<string, { cardId: string; value: Rank; rows: RowName[] }>();
+  const rowsNow = resurrectionRows(view.config, view.self);
+  const power = (row: RowName, cards: NumCard[]): number =>
+    row === 'ATK' ? attackPower({ ...view.self, attackRow: cards }) : defensePower({ ...view.self, defenseRow: cards });
+  const resurrect = new Map<string, { cardId: string; value: Rank; rows: ResurrectRowOption[] }>();
   for (const entry of legal) {
     if (entry.type !== 'RESURRECT') continue;
     const card = graveyard.get(entry.cardId);
     if (card?.kind !== 'NUM') continue;
     const item = resurrect.get(entry.cardId) ?? { cardId: entry.cardId, value: card.value, rows: [] };
-    item.rows.push(entry.row);
+    const now = entry.row === 'ATK' ? view.self.attackRow : view.self.defenseRow;
+    const there = rowsNow[entry.row];
+    const leaving = there.kind === 'REPLACE' ? there.leaving : null;
+    const after = [...(leaving ? now.slice(0, -1) : now), card];
+    item.rows.push({ row: entry.row, leaving, total: { before: power(entry.row, now), after: power(entry.row, after) } });
     resurrect.set(entry.cardId, item);
   }
+  // Só com a Ressurreição na mão: sem ela, nada a dizer sobre as fileiras.
+  const resurrectBlocked =
+    view.self.resurrections.length === 0
+      ? []
+      : (['ATK', 'DEF'] as const).flatMap((row) => {
+          const there = rowsNow[row];
+          return there.kind === 'BLOCKED' && there.reason === 'QUAD' ? [{ row, last: there.last }] : [];
+        });
 
   const has = (type: PlayerAction['type']): boolean => legal.some((a) => a.type === type);
   return {
@@ -309,6 +347,7 @@ export function tablePlays(view: PlayerView, legal: PlayerAction[]): TablePlays 
       .map((row) => fewestWilds(legal.filter((a) => a.type === 'DEVASTATE' && a.row === row), view))
       .filter((a): a is PlayerAction => a !== null),
     resurrect: [...resurrect.values()],
+    resurrectBlocked,
     finish: has('DECLARE_ATTACK') ? { type: 'DECLARE_ATTACK' } : has('END_TURN') ? { type: 'END_TURN' } : null,
     pass: has('PASS'),
   };
