@@ -5,6 +5,33 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-06 (1): o quinto caso de placa (a cura passiva)
+
+- **Pedido:** o autor perguntou "O que está pendente para produção?"; na resposta, o quinto caso de placa era o único texto conhecido que
+  o motor contradiz, e ele respondeu "Sim, aplique" (`decisoes.md` 2026-11-06 (1)). Branch `feat/placa-cura-passiva`, saída da `main` em
+  `9a902de`, no checkout principal.
+- **Feito (`2b26577`):** `plateLine('cura', …)` (`model/copy.ts`) troca a linha em dois casos, lidos da mesa na ordem do `resolveAttack` (a
+  Guarda quebra, a Defesa cai, a cura conta os K que sobram):
+  - **Ruling:** o caso do Absoluto usa a mesma condição da placa da Defesa Absoluta (o Ataque Absoluto do outro armado, sem o Reflect de
+    quem tem a marca: o Reflect segura o golpe com os K inteiros, e a Defesa dele cai e cura); entrou no `PLATE_EDGE` ao lado dela;
+  - **Ruling:** a linha de 2 K só com exatamente `config.defenseHealGuard` K (o mínimo da cura vem do motor, e a frase usa a conta da
+    Guarda); com 3 K o golpe que um K absorve deixa 2 e cura, e fica a linha de sempre;
+  - **Ruling:** o Absoluto vem antes do caso de 2 K (ele quebra a Guarda inteira);
+  - **Ruling:** o "sua"/"dele" da linha de sempre entrou na frase que o autor viu ("com 2 K depois do golpe, a Defesa que cai vira vida").
+- **Testes:** `moment-copy.test.ts` confere cada caso contra a prévia do motor (os K que sobram do golpe e o `defenseHealActive` deles),
+  com o Reflect que segura o Absoluto e o mínimo da cura trocado na config; `table.test.tsx` mostra as duas linhas novas nos dois campos
+  (o teste da linha de sempre passou a usar 3 K).
+- **Foto (o jsdom não tem layout):** no replay `especiais.json`, passo 133 (rodada 29: você com 2 K), a linha de 2 K ocupa duas linhas na
+  coluna de 228 px do PC de 1366 × 657 (a placa tem 52 px; com a linha de sempre, de uma linha só, a placa era mais baixa); no tablet de
+  768, uma linha, sem rolagem lateral. O passo 99 do E2E de layout não tem a placa da cura (as duas Guardas com 1 K): as colunas seguem com
+  40 e 68 px, abaixo dos 88.
+- **Para o autor (não mexido, ele aprovou só a placa de estado):** a placa do momento da Guarda (`momentPlate`, `GuardPlayed`) diz "com 2
+  K, a Defesa dele que cai o cura", e tem a mesma imprecisão: no golpe comum seguinte, um K absorve, sobra 1 e aquele golpe não cura. As
+  duas placas agora falam do mesmo caso com palavras diferentes.
+- **Verificado:** `pnpm check` verde antes do commit.
+
+---
+
 ## 2026-11-04 (1): os quatro textos de placa no caso de borda
 
 - **Pedido:** "Corrija os quatro" (`decisoes.md` 2026-11-04 (1)). Branch `feat/playtest-placas`, saída da `main` em `f8755bc`.

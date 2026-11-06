@@ -6,10 +6,9 @@
 ## Agora
 
 - **Em curso (2026-11-06): o quinto caso de placa** ("Sim, aplique", `decisoes.md` 2026-11-06 (1)). Branch `feat/placa-cura-passiva`,
-  saída da `main` em `9a902de`, no checkout principal. O código e os testes estão prontos (`plateLine` em `model/copy.ts`; testes em
-  `moment-copy.test.ts` e `table.test.tsx`, verdes) e a foto foi tirada (PC 1366 × 657: a linha de 2 K ocupa duas linhas na coluna de
-  228 px, placa com 52 px; tablet 768: uma linha). **Próximo passo exato:** `pnpm check`, commit do código, push, as duas CI verdes,
-  fast-forward da `main`, entrada no `diario.md` e este estado de volta ao "nada em curso".
+  saída da `main` em `9a902de`, no checkout principal. Código em `2b26577` (`pnpm check` verde), foto e entrada no `diario.md`
+  2026-11-06 (1). **Próximo passo exato:** push da branch, as duas CI verdes (`check` e `e2e`), fast-forward da `main` até a branch,
+  push da `main` e este estado de volta ao "nada em curso".
 - **Onde estava antes:** a `main` em `9a902de`, com as duas CI verdes. **Trabalho novo sai de uma branch nova da `main`** (prefixo
   `feat/`, para a CI rodar). Nada sem commit além do de sempre (abaixo). Nenhuma sessão paralela aberta.
 - **Feito nesta leva (2026-11-03 e 04), na ordem:**
@@ -31,7 +30,11 @@
     do momento no prazo, o PASS guardado depois do Ás, o conserto do Equipar vazio e a janela da Ressurreição. O deploy fecha as salas
     abertas (`STATE_SCHEMA` 5), e as partidas guardadas abrem com o aviso de versão (`RULES_VERSION` 5);
   - **as frases novas das placas são de quem escreveu** (ele aprovou corrigir, não as palavras): conferir no playtest;
-  - **o quinto caso de placa:** ele decidiu em 2026-11-06 ("Sim, aplique", `decisoes.md` 2026-11-06 (1)); em curso (acima);
+  - **o quinto caso de placa:** ele decidiu em 2026-11-06 ("Sim, aplique", `decisoes.md` 2026-11-06 (1)); em curso (acima). As duas
+    frases novas ("o Ataque Absoluto dele quebra os K antes da cura", "com 2 K depois do golpe, a sua Defesa que cai vira vida") entram
+    na conferência do playtest com as outras;
+  - **a placa do momento da Guarda** (`diario.md` 2026-11-06 (1)): "com 2 K, a Defesa dele que cai o cura" tem a mesma imprecisão do
+    quinto caso, e ele não a aprovou. Proposta: a mesma linha da placa de estado ("com 2 K depois do golpe, …");
   - **os pequenos do bloco A, não feitos** (`diario.md` 2026-11-03 (6), "menores"): a explicação da cura passiva se perde na partida se a
     primeira cura for pulada ou chegar num `catchUp`; as placas "Cura passiva" e "Ataque Absoluto armado" aparecem 1,6 s antes de o K ou o J
     pousar; o `copy.ts` segue fora da cobertura;
