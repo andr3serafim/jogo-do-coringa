@@ -6,6 +6,26 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-06 (1): o quinto caso de placa, as duas propostas aplicadas
+
+Perguntado "Aplico as duas propostas do quinto caso de placa antes do deploy?", depois de ver na lista do que falta para a produção que
+a placa "Cura passiva" ("a Defesa dele que cai vira vida") é o único texto que o motor contradiz (`estado.md` 2026-11-04, "Esperando o
+autor"; `diario.md` 2026-11-04 (1)), ele escolheu:
+
+> Sim, aplique
+
+**Leitura:**
+- **Contra o Ataque Absoluto armado do outro** (e sem o Reflect de quem tem a Guarda, que seguraria o golpe com os K inteiros), a placa
+  troca de linha como nas outras quatro: "o Ataque Absoluto dele quebra os K antes da cura" (no seu campo) / "o seu Ataque Absoluto
+  quebra os K antes da cura" (no dele). São as frases que ele viu.
+- **Com 2 K na Guarda,** a linha de sempre fica mais clara: "com 2 K depois do golpe, a sua Defesa que cai vira vida" / "com 2 K depois
+  do golpe, a Defesa dele que cai vira vida". **[I]** Ele viu "com 2 K depois do golpe, a Defesa que cai vira vida"; o "sua" e o "dele"
+  seguem o lado de quem vê, como na linha de sempre. **[I]** Só com exatamente 2 K (o mínimo da cura, `config.defenseHealGuard`): com 3 K,
+  o golpe que um K absorve deixa 2 e cura, e a linha de sempre é verdadeira; "com 2 K" ali confundiria quem tem 3.
+- **[I]** O Absoluto vem antes do caso de 2 K: ele quebra a Guarda inteira, tenha ela 2 ou 3 K.
+
+---
+
 ## 2026-11-04 (1): os quatro textos de placa que o motor contradiz
 
 Perguntado "Corrijo os quatro textos de placa que o motor contradiz em casos de borda?", depois de ver a lista na mensagem de entrega do
