@@ -416,8 +416,9 @@ const PLATE_LINE: Record<PlateKind, readonly [self: string, opponent: string]> =
   reflect: ['o próximo golpe volta para ele', 'o seu próximo golpe volta para você'],
 };
 
-/** A linha do caso de borda, em que o golpe que a marca promete não é o que o motor dá (decisoes.md 2026-11-04 (1)). */
+/** A linha do caso de borda, em que o golpe que a marca promete não é o que o motor dá (decisoes.md 2026-11-04 (1) e 2026-11-06 (1)). */
 const PLATE_EDGE: Partial<Record<PlateKind, readonly [self: string, opponent: string]>> = {
+  cura: ['o Ataque Absoluto dele quebra os K antes da cura', 'o seu Ataque Absoluto quebra os K antes da cura'],
   defesa: ['o Ataque Absoluto dele fura a imunidade', 'o seu Ataque Absoluto fura a imunidade'],
   ataque: ['o Reflect dele segura o seu golpe', 'o seu Reflect segura o golpe dele'],
   reflect: ['segura o próximo golpe dele, sem devolver', 'segura o seu próximo golpe, sem devolver'],
@@ -428,7 +429,9 @@ type PlateSide = Pick<PublicPlayer, 'attackBuffs' | 'absoluteDefense' | 'reflect
 /** A marca de `owner` está no caso de borda contra `other`, na ordem em que o motor decide o golpe (`previewBetween`). */
 function plateEdge(kind: PlateKind, owner: PlateSide, other: PlateSide, view: PlayerView): boolean {
   switch (kind) {
-    // O Reflect vem antes da Defesa Absoluta, e só o Ataque Absoluto fura a imunidade.
+    // O Reflect vem antes da Defesa Absoluta, e só o Ataque Absoluto fura a imunidade. Ele também quebra a Guarda inteira antes de a
+    // Defesa cair, e a cura conta os K que sobram (`resolveAttack`).
+    case 'cura':
     case 'defesa':
       return !owner.reflect && absoluteAttackArmed(other, view.config);
     case 'ataque':
@@ -444,7 +447,11 @@ function plateEdge(kind: PlateKind, owner: PlateSide, other: PlateSide, view: Pl
 /** A linha do que a marca faz, do lado de quem a vê, e a do caso de borda quando a mesa está nele. */
 export function plateLine(kind: PlateKind, self: boolean, view: PlayerView): string {
   const [owner, other] = self ? [view.self, view.opponent] : [view.opponent, view.self];
-  return (plateEdge(kind, owner, other, view) ? PLATE_EDGE[kind]! : PLATE_LINE[kind])[self ? 0 : 1];
+  const side = self ? 0 : 1;
+  if (plateEdge(kind, owner, other, view)) return PLATE_EDGE[kind]![side];
+  const line = PLATE_LINE[kind][side];
+  // No mínimo da cura, o golpe que um K absorve deixa a Guarda abaixo dele, e aquele golpe não cura (decisoes.md 2026-11-06 (1)).
+  return kind === 'cura' && owner.guard.length === view.config.defenseHealGuard ? `com ${owner.guard.length} K depois do golpe, ${line}` : line;
 }
 
 /** A placa do momento da especial do oponente: o que ela fez e, quando o evento diz, a consequência com os números do motor. */

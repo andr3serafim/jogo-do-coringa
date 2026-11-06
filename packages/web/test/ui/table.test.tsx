@@ -515,8 +515,8 @@ describe('mesa: as placas de estado (bloco A do playtest, ponto 6)', () => {
   it('cada placa diz o que a marca faz, do lado de quem a vê', () => {
     const first = mount({
       ...DRAFT,
-      self: { ...DRAFT.self, absoluteDefense: true, guard: ['K', 'K'] },
-      opponent: { ...DRAFT.opponent, guard: ['K', 'K'], absoluteDefense: true },
+      self: { ...DRAFT.self, absoluteDefense: true, guard: ['K', 'K', 'K'] },
+      opponent: { ...DRAFT.opponent, guard: ['K', 'K', 'K'], absoluteDefense: true },
     });
     expect(line(plate('Seu campo', 'Cura passiva'))).toBe('a sua Defesa que cai vira vida');
     expect(line(plate('Campo de Duda', 'Cura passiva'))).toBe('a Defesa dele que cai vira vida');
@@ -536,6 +536,20 @@ describe('mesa: as placas de estado (bloco A do playtest, ponto 6)', () => {
     });
     expect(line(plate('Seu campo', 'Defesa Absoluta'))).toBe('o Ataque Absoluto dele fura a imunidade');
     expect(line(plate('Campo de Duda', 'Defesa Absoluta'))).toBe('o seu Ataque Absoluto fura a imunidade');
+  });
+
+  it('a Cura passiva com 2 K e contra o Ataque Absoluto armado do outro (decisoes.md 2026-11-06 (1))', () => {
+    const first = mount({ ...DRAFT, self: { ...DRAFT.self, guard: ['K', 'K'] }, opponent: { ...DRAFT.opponent, guard: ['K', 'K'] } });
+    expect(line(plate('Seu campo', 'Cura passiva'))).toBe('com 2 K depois do golpe, a sua Defesa que cai vira vida');
+    expect(line(plate('Campo de Duda', 'Cura passiva'))).toBe('com 2 K depois do golpe, a Defesa dele que cai vira vida');
+    first.unmount();
+    mount({
+      ...DRAFT,
+      self: { ...DRAFT.self, guard: ['K', 'K', 'K'], attackBuffs: ['J', 'J', 'J', 'J'] },
+      opponent: { ...DRAFT.opponent, guard: ['K', 'K'], attackBuffs: ['J', 'J', 'J', 'J'] },
+    });
+    expect(line(plate('Seu campo', 'Cura passiva'))).toBe('o Ataque Absoluto dele quebra os K antes da cura');
+    expect(line(plate('Campo de Duda', 'Cura passiva'))).toBe('o seu Ataque Absoluto quebra os K antes da cura');
   });
 
   it('a Ressurreição mostra o número num selo, e o leitor de tela ouve a frase inteira', () => {

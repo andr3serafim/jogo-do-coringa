@@ -1,6 +1,6 @@
 // O texto da placa do momento (bloco A dos pontos do playtest, ponto 1): o que a especial do oponente fez, com os números do motor (os
 // totais de `attackPower` e `defensePower` da `view` de depois do passo; decisoes.md 2026-11-03 (5), A5).
-import { previewAttack, type GameEvent, type NumCard, type SpecialCard } from '@coringa/engine';
+import { defenseHealActive, previewAttack, type GameEvent, type NumCard, type PlayerView, type SpecialCard } from '@coringa/engine';
 import { namesFor } from '@coringa/sim/text';
 import { describe, expect, it } from 'vitest';
 import { healRibbon, momentPlate, plateLine } from '../../src/model/copy.ts';
@@ -147,5 +147,46 @@ describe('as placas de estado no caso de borda (decisoes.md 2026-11-04 (1)): a l
     const back = scenarioAt({ self: { reflect: true }, opponent: { attackRow: [10, 9] } }).view;
     expect(previewAttack(back, 'opponent').reflected).toBeGreaterThan(0);
     expect(plateLine('reflect', true, back)).toBe('o próximo golpe volta para ele');
+  });
+});
+
+describe('a placa da cura passiva no caso de borda (decisoes.md 2026-11-06 (1)): a cura conta os K que sobram do golpe', () => {
+  /** Quantos K sobram na Guarda de quem leva o golpe de `attacker`, na conta do motor. */
+  const guardLeft = (view: PlayerView, attacker: 'self' | 'opponent'): number =>
+    (attacker === 'self' ? view.opponent : view.self).guard.length - previewAttack(view, attacker).breaks.defenderGuard;
+
+  it('contra o Ataque Absoluto armado do outro, os K quebram todos antes da cura', () => {
+    const mine = scenarioAt({ self: { guard: ['K', 'K', 'K'], defenseRow: [7] }, opponent: { attackRow: [10], attackBuffs: ['J', 'J', 'J', 'J'] } }).view;
+    expect(guardLeft(mine, 'opponent')).toBe(0);
+    expect(plateLine('cura', true, mine)).toBe('o Ataque Absoluto dele quebra os K antes da cura');
+    const theirs = scenarioAt({ self: { attackRow: [10], attackBuffs: ['J', 'J', 'J', 'J'] }, opponent: { guard: ['K', 'K'], defenseRow: [7] } }).view;
+    expect(guardLeft(theirs, 'self')).toBe(0);
+    expect(plateLine('cura', false, theirs)).toBe('o seu Ataque Absoluto quebra os K antes da cura');
+  });
+
+  it('o Reflect de quem tem a Guarda segura o Absoluto com os K inteiros: a linha de sempre', () => {
+    const mirror = scenarioAt({ self: { guard: ['K', 'K', 'K'], reflect: true }, opponent: { attackRow: [10], attackBuffs: ['J', 'J', 'J', 'J'] } }).view;
+    expect(previewAttack(mirror, 'opponent').outcome).toBe('REFLECTED');
+    expect(guardLeft(mirror, 'opponent')).toBe(3);
+    expect(plateLine('cura', true, mirror)).toBe('a sua Defesa que cai vira vida');
+  });
+
+  it('com 2 K, o golpe que um K absorve deixa 1 e não cura; com 3 K, deixa 2 e cura', () => {
+    const two = scenarioAt({ self: { guard: ['K', 'K'], defenseRow: [3] }, opponent: { attackRow: [10, 9] } }).view;
+    expect(previewAttack(two, 'opponent').outcome).toBe('GUARD_ABSORBS');
+    expect(defenseHealActive({ guard: two.self.guard.slice(0, guardLeft(two, 'opponent')) }, two.config)).toBe(false);
+    expect(plateLine('cura', true, two)).toBe('com 2 K depois do golpe, a sua Defesa que cai vira vida');
+    const theirs = scenarioAt({ self: { attackRow: [10, 9] }, opponent: { guard: ['K', 'K'], defenseRow: [3] } }).view;
+    expect(plateLine('cura', false, theirs)).toBe('com 2 K depois do golpe, a Defesa dele que cai vira vida');
+    const three = scenarioAt({ self: { guard: ['K', 'K', 'K'], defenseRow: [3] }, opponent: { attackRow: [10, 9] } }).view;
+    expect(defenseHealActive({ guard: three.self.guard.slice(0, guardLeft(three, 'opponent')) }, three.config)).toBe(true);
+    expect(plateLine('cura', true, three)).toBe('a sua Defesa que cai vira vida');
+  });
+
+  it('o mínimo da cura é do motor (`config.defenseHealGuard`), não da interface', () => {
+    const { view } = scenarioAt({ self: { guard: ['K', 'K', 'K'] } });
+    expect(plateLine('cura', true, { ...view, config: { ...view.config, defenseHealGuard: 3 } })).toBe(
+      'com 3 K depois do golpe, a sua Defesa que cai vira vida',
+    );
   });
 });
