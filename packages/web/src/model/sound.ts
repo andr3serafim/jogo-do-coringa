@@ -31,7 +31,8 @@ export type Cue =
   | 'reflect-cometa'
   | 'reflect-segurado'
   | 'reflect-cancelado'
-  | 'ressurreicao';
+  | 'ressurreicao'
+  | 'golpe-final';
 
 /** A pista do golpe de `damage` pontos, pelo peso dele (`impactForce`, o mesmo do tremor); dano zero (a defesa segurou tudo) é mudo. */
 function strikeCue(damage: number): Cue | null {
@@ -51,6 +52,8 @@ export function cueOf(beat: Beat, me: PlayerId): Cue | null {
   const { event } = beat;
   // O golpe que a cena do Ataque Absoluto absorveu soa dentro dela, no impacto do feixe.
   if (beat.absorbed) return null;
+  // O golpe final (bloco B dos pontos do playtest, ponto 15): a pista da cena, que segue o corte, o impacto e o carimbo, no lugar do golpe comum.
+  if (beat.scene === 'FINAL_BLOW') return 'golpe-final';
   // O momento da especial do oponente (bloco A dos pontos do playtest, ponto 1): a virada da carta no começo. O impacto (o pouso ou a
   // quebra) soa na camada do momento, no instante em que a carta grande chega.
   if (beat.kind === 'moment') return 'momento';

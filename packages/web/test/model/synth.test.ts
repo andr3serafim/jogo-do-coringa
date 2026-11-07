@@ -179,6 +179,7 @@ const ALL_CUES: Record<Cue, true> = {
   'reflect-segurado': true,
   'reflect-cancelado': true,
   ressurreicao: true,
+  'golpe-final': true,
 };
 const CUES = Object.keys(ALL_CUES) as Cue[];
 
@@ -334,6 +335,16 @@ describe('os sons das cenas absolutas seguem o pico de cada uma (sub-projeto 6 �
     expect(times.filter((t) => t > m.riseAt / 1000 && t < m.colorAt / 1000).length).toBeGreaterThanOrEqual(3);
   });
 
+  it('o golpe final: o sopro do corte que sobe, o baque grave no impacto e a batida do carimbo', () => {
+    const { play } = setup();
+    const times = startsAt(play('golpe-final'));
+    const m = SCENE_MOMENTS.FINAL_BLOW;
+    for (const ms of [m.cutAt, m.hitAt, m.thudAt]) expect(times).toContain(ms / 1000);
+    // O impacto é de várias vozes juntas (o grave, o corpo e o ruído).
+    expect(times.filter((t) => t === m.hitAt / 1000).length).toBeGreaterThanOrEqual(3);
+    expect(times.every((t) => t < 2.4)).toBe(true);
+  });
+
   it('cut() leva a saída das pistas tocando a zero em 80 ms (o pulo da cena corta o som dela)', () => {
     const { synth, play, ctx } = setup();
     const nodes = play('ataque-absoluto');
@@ -393,6 +404,7 @@ describe('createSynth', () => {
     'reflect-segurado': 3.8,
     'reflect-cancelado': 1.4,
     ressurreicao: 4.6,
+    'golpe-final': 2.4,
   };
 
   it.each(CUES)('%s: dura no máximo 600 ms (a espada, 1,2 s; as das cenas, a cena) e começa agora', (cue) => {

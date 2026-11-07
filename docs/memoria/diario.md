@@ -26,6 +26,9 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     do tremor do palco no impacto (640 ms), e os dois não se cruzam. **Ruling:** o carimbo da derrota é de tinta, com letra de papel e sombra
     vermelha (o ouro fica com a vitória e os Absolutos). O teste do palco ("sem cortina, uma inversão") foi escrito depois da cena; ele falha
     com o golpe final fora das cenas sem cortina (conferido) e passa com ele.
+  - **Task 4 (o som): feita.** A pista `golpe-final` (o sopro do corte em `cutAt`, o baque do impacto em `hitAt`, mais fundo que o golpe
+    forte, e a batida do carimbo em `thudAt`), no lugar do `golpe-*` na batida da cena; a faixa do fim segue com `vitoria` ou `derrota` (B5).
+    Não conferido de verdade: o ouvido (os testes conferem os instantes e os picos).
 
 ---
 

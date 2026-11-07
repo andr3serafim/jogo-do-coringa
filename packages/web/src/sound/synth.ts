@@ -113,6 +113,7 @@ const RP = SCENE_MOMENTS.REFLECT_PLAYED;
 const RT = SCENE_MOMENTS.REFLECT_TRIGGERED;
 const RC = SCENE_MOMENTS.REFLECT_CANCELED;
 const RES = SCENE_MOMENTS.RESURRECTED;
+const FIN = SCENE_MOMENTS.FINAL_BLOW;
 /** Quanto cada carta leva para chegar à ponta do espelho (o voo da cena). */
 const MIRROR_CARD_MS = 220;
 /** Um instante da cena (ms desde o começo dela), em segundos de pista. */
@@ -351,6 +352,16 @@ const RECIPES: Record<Cue, (voices: Voices) => void> = {
     tone({ wave: 'sine', from: 2093, at: s(RES.colorAt), length: 0.7, peak: 0.07 });
     tone({ wave: 'sine', from: 180, to: 90, at: s(RES.landAt), length: 0.16, peak: 0.3 });
     noise({ filter: 'bandpass', from: 1800, q: 1.2, at: s(RES.landAt), length: 0.05, peak: 0.18 });
+  },
+  // O golpe final (bloco B dos pontos do playtest, ponto 15): o sopro que sobe com o corte, o baque do impacto (o grave que afunda, o corpo e o
+  // ruído, mais fundo que o golpe forte) e a batida seca do carimbo que assenta.
+  'golpe-final': ({ tone, noise }) => {
+    noise({ filter: 'bandpass', from: 600, to: 3200, q: 1.5, at: s(FIN.cutAt), attack: 0.12, length: s(FIN.hitAt - FIN.cutAt) + 0.05, peak: 0.25 });
+    tone({ wave: 'sine', from: 120, to: 34, at: s(FIN.hitAt), length: 0.6, peak: 0.5 });
+    tone({ wave: 'sawtooth', from: 95, to: 40, at: s(FIN.hitAt), length: 0.35, peak: 0.15 });
+    noise({ filter: 'lowpass', from: 2600, to: 220, at: s(FIN.hitAt), length: 0.35, peak: 0.4 });
+    tone({ wave: 'sine', from: 160, to: 70, at: s(FIN.thudAt), length: 0.18, peak: 0.35 });
+    noise({ filter: 'lowpass', from: 900, at: s(FIN.thudAt), length: 0.08, peak: 0.25 });
   },
 };
 

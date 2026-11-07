@@ -134,6 +134,21 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
     });
   });
 
+  it('o golpe final tem a pista da cena dele, dos dois lados; o golpe comum segue com o peso dele (bloco B do playtest, ponto 15)', () => {
+    const kill = (attacker: PlayerId): Beat =>
+      buildTimeline(
+        [
+          { type: 'DamageDealt', attacker, defender: attacker === 'p1' ? 'p2' : 'p1', attack: 290, defense: 95, damage: 195 },
+          { type: 'GameOver', result: { kind: 'WIN', winner: attacker, reason: 'HP' } },
+        ],
+        LIVE,
+      )[0]!;
+    expect(kill('p1').scene).toBe('FINAL_BLOW');
+    expect(cueOf(kill('p1'), 'p1')).toBe('golpe-final');
+    expect(cueOf(kill('p2'), 'p1')).toBe('golpe-final');
+    expect(cueFor(damage(195))).toMatch(/^golpe-(leve|medio|forte)$/);
+  });
+
   it('a Ressurreição tem a pista da cena dela (sub-projeto 6 §10)', () => {
     expect(cueFor(SAMPLES.Resurrected)).toBe('ressurreicao');
   });
