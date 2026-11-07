@@ -17,6 +17,10 @@
 //
 // A Ressurreição vem da mesma `exodia-devastacao.json`: do passo 27 para o 28 (rodada 7) a sua, com a quadra de 9 na fileira de destino; do 182 para o 183
 // (rodada 37) a do Bot, sem quadra na mesa.
+//
+// O golpe final (bloco B dos pontos do playtest, ponto 15) vem das duas que acabam pela vida: na `especiais.json`, do passo 178 para o 179
+// (rodada 37), o seu golpe comum derruba o Bot (195 de dano; ele fica com -118, e o placar mostra 0); na `absolutos.json`, do 99 para o 100
+// (rodada 21), o golpe comum do Bot derruba você (184).
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { failOnConsoleErrors, placar, replayControl, replayCounter } from './helpers.ts';
@@ -24,6 +28,7 @@ import { failOnConsoleErrors, placar, replayControl, replayCounter } from './hel
 const ABSOLUTES = readFileSync(new URL('./fixtures/absolutos.json', import.meta.url), 'utf8');
 const SLICE_3 = readFileSync(new URL('./fixtures/exodia-devastacao.json', import.meta.url), 'utf8');
 const REFLECT = readFileSync(new URL('./fixtures/reflect.json', import.meta.url), 'utf8');
+const SPECIALS = readFileSync(new URL('./fixtures/especiais.json', import.meta.url), 'utf8');
 
 /** Abre o replay parado no passo `step` (a rodada `round` é o atalho até perto dele). */
 async function openAt(page: Page, round: number, step: number, game: { id: string; fixture: string } = { id: 'absolutos', fixture: ABSOLUTES }): Promise<void> {
@@ -42,6 +47,7 @@ async function openAt(page: Page, round: number, step: number, game: { id: strin
 
 const SLICE_3_GAME = { id: 'exodia-devastacao', fixture: SLICE_3 };
 const REFLECT_GAME = { id: 'reflect', fixture: REFLECT };
+const SPECIALS_GAME = { id: 'especiais', fixture: SPECIALS };
 
 /** O id da carta que a jogada do passo `step` da `exodia-devastacao.json` ressuscita. */
 const revivedAt = (step: number): string => (JSON.parse(SLICE_3) as Array<{ replay: { steps: Array<{ action: { cardId: string } }> } }>)[0]!.replay.steps[step]!.action.cardId;
@@ -271,6 +277,43 @@ for (const viewport of [
       await expect(page.locator(`[data-card-id="${revivedAt(182)}"]`)).toBeVisible();
       await expectNoSideScroll(page);
       expect(await inverted(), 'a Ressurreição não inverte a tela').toBe(false);
+      guard.expectClean();
+    });
+
+    test('o seu golpe final: as tarjas sem cortina, a fileira acende, o corte vai ao retrato do Bot, a tela inverte, GOLPE FINAL! e o retrato dele racha', async ({ page }) => {
+      const guard = failOnConsoleErrors(page);
+      await openAt(page, 37, 178, SPECIALS_GAME);
+      const inverted = await watchInversion(page);
+      await replayControl(page, 'Próximo passo').click();
+      await expect(page.locator('[data-cena="FINAL_BLOW"]')).toHaveCount(1);
+      await expect(page.locator('[data-golpe-final] [data-tarja]')).toHaveCount(2);
+      await expect(page.locator('[data-cortina][data-ativa]')).toHaveCount(0);
+      await expect(page.locator('[data-acesa]').first()).toBeAttached();
+      await expect(page.locator('[data-corte]')).toHaveAttribute('data-alvo', 'oponente');
+      await expect(page.locator('[data-carimbo="FINAL_BLOW"]')).toHaveText('GOLPE FINAL!');
+      await expectInView(page, '[data-carimbo="FINAL_BLOW"] span');
+      await expectNoSideScroll(page);
+      await expect(placar(page).locator('[data-retrato="oponente"][data-derrotado]')).toHaveCount(1);
+      await expect(placar(page).locator('[data-retrato="voce"][data-derrotado]')).toHaveCount(0);
+      await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1, { timeout: 5_000 });
+      await expect(placar(page).locator('[data-lado="oponente"] [data-hp]')).toHaveText('0');
+      expect(await inverted(), 'a tela inverte no impacto').toBe(true);
+      guard.expectClean();
+    });
+
+    test('o golpe final do Bot: DERROTA, o corte vem até o seu retrato, e o toque pula para o seu retrato rachado e a vida 0', async ({ page }) => {
+      const guard = failOnConsoleErrors(page);
+      await openAt(page, 21, 99);
+      await replayControl(page, 'Próximo passo').click();
+      await expect(page.locator('[data-cena="FINAL_BLOW"]')).toHaveCount(1);
+      await expect(page.locator('[data-corte]')).toHaveAttribute('data-alvo', 'voce');
+      await expect(page.locator('[data-carimbo="FINAL_BLOW"]')).toHaveText('DERROTA');
+      await expectNoSideScroll(page);
+      await tapTable(page);
+      await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1, { timeout: 500 });
+      await expect(placar(page).locator('[data-retrato="voce"][data-derrotado]')).toHaveCount(1, { timeout: 500 });
+      await expect(placar(page).locator('[data-lado="voce"] [data-hp]')).toHaveText('0', { timeout: 500 });
+      await expect(page.locator('[data-golpe-final]')).toHaveCount(0);
       guard.expectClean();
     });
 

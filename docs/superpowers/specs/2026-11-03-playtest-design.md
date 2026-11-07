@@ -134,8 +134,27 @@ O plano (`docs/superpowers/plans/2026-11-03-playtest-bloco-a.md`) foi aprovado c
   fotossensibilidade) e treme; a barra dele zera e o retrato racha; o carimbo **GOLPE FINAL!** cai. Depois, o painel do fim de hoje.
 - **Quem perde:** a mesma cena espelhada (o corte vem do campo dele), e o carimbo diz **DERROTA**.
 - **Variante:** A, corte com congelamento (escolhida; a B era câmera lenta, sem inverter).
-- **Onde mexe:** uma cena nova no módulo das cenas (`ui/scenes/`), a classificação em `timeline.ts`, os instantes em `scene-moments.ts`, a
-  folga em `SCENE_MS` (o prazo do servidor e a espera do bot), os sons. O toque pula, como nas outras.
+- **Onde mexe:** uma cena nova no módulo das cenas (`ui/scenes/`), a classificação em `timeline.ts`, os instantes em `scene-moments.ts` e
+  os sons. Sem folga no relógio (`decisoes.md` 2026-11-07 (3), B1): depois do `GameOver` ninguém decide, e a revanche espera o painel do fim;
+  o `SCENE_MS` e o servidor não mudam. O toque pula, como nas outras.
+
+### 4.1 O que a execução decidiu (bloco B, 2026-11-07)
+
+O plano é `docs/superpowers/plans/2026-11-07-playtest-bloco-b.md`, aprovado como estava (`decisoes.md` 2026-11-07 (3)); a execução e as
+escolhas estão no `diario.md` 2026-11-07 (2), e a medição em `docs/memoria/notas/medicao-bloco-b.md`.
+
+- **A batida:** o `DamageDealt` do vencedor, a batida não quieta mais perto antes do `GameOver` pela vida, vira a cena `FINAL_BLOW`, só ao
+  vivo (na reconexão é o golpe e a faixa de sempre). O golpe absorvido pelo Ataque Absoluto e o dano devolvido pelo Reflect ficam com as
+  cenas deles.
+- **2,4 s, e não ~2,2 s (B3):** o carimbo comum fica 1,5 s na tela e entra 260 ms depois do impacto. A inversão dura 600 ms, como em todas
+  as cenas (B4).
+- **Na mesa, sem cortina:** só as tarjas, abaixo do placar (as mesmas das outras cenas, agora em `CinemaBars`).
+- **O retrato racha em toda derrota pela vida (B2):** no golpe final, no impacto; no Ataque Absoluto e no Reflect que matam, na faixa do fim,
+  logo depois da cena deles. A W.O. e o abandono não racham.
+- **A vida do derrotado para em 0 no placar:** o golpe que passa da vida que restava deixa o motor com vida negativa (o Bot terminou com -118
+  numa das partidas de teste); o protótipo aprovado mostra 0, e o placar também.
+- **O carimbo da derrota** é de tinta, com letra de papel e sombra vermelha; o da vitória, vermelho com letra de papel.
+- **Não conferido de verdade:** o som (só os instantes), o movimento reduzido no navegador e o online (o deploy é do autor).
 
 ## 5. Bloco C: o poder que cresce
 

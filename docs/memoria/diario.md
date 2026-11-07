@@ -29,6 +29,16 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   - **Task 4 (o som): feita.** A pista `golpe-final` (o sopro do corte em `cutAt`, o baque do impacto em `hitAt`, mais fundo que o golpe
     forte, e a batida do carimbo em `thudAt`), no lugar do `golpe-*` na batida da cena; a faixa do fim segue com `vitoria` ou `derrota` (B5).
     Não conferido de verdade: o ouvido (os testes conferem os instantes e os picos).
+  - **Achado no caminho, consertado (`aa34530`):** o golpe que passa da vida que restava deixa o motor com vida negativa, e o placar mostrava
+    "-118/500" no fim. **Ruling:** a vida mostrada (o número e o medidor) para em 0, na contagem e em repouso; o protótipo aprovado mostra 0.
+    O teste antigo "o golpe que mata conta até a vida do motor, mesmo abaixo de 0" (de `f16057a`, uma escolha de execução, não do autor)
+    mudou de propósito: o motivo dele era o salto do 0 à vida da `view` no fim, que não volta com o corte também em repouso.
+  - **Task 5 (E2E, fotos e medição): feita.** Dois E2E novos em `e2e/scenes.spec.ts`, nos dois tamanhos: o seu golpe final na
+    `especiais.json` (178→179: as tarjas sem cortina, a fileira acesa, o corte até o retrato do Bot, a inversão, "GOLPE FINAL!", o retrato
+    dele rachado e a vida 0) e o do Bot na `absolutos.json` (99→100: "DERROTA", o corte até o seu retrato, e o toque pula para o retrato
+    rachado e a vida 0); 22 de 22 no `scenes.spec.ts`. Medição e fotos em `notas/medicao-bloco-b.md`: 58 a 60 quadros/s com a CPU 4×, pico de
+    21 partículas. **Ruling:** os E2E e as fotos usam 1366 × 768 e 360 × 640, os tamanhos do `scenes.spec.ts` e do `medir-cena.ts` (o plano
+    dizia 1366 × 657, que é o tamanho do E2E de layout, e esta cena não passa por ele). A spec ganhou a §4.1 e a correção da folga (B1).
 
 ---
 
