@@ -5,12 +5,12 @@
 
 ## Agora
 
-- **Em curso (2026-11-07): o plano do bloco B** (ponto 15, o golpe final; "aprovado, prossiga.", `decisoes.md` 2026-11-07 (2)). Branch
-  `feat/playtest-bloco-b`, saída da `main` em `8b6ee88`, no checkout principal. **Próximo passo exato:** escrever
-  `docs/superpowers/plans/2026-11-07-playtest-bloco-b.md` (modelo: o plano da fatia 4b; a spec do playtest §4, §8 e §10), commitar, subir e
-  levar ao autor as escolhas (sem folga no `SCENE_MS`; o retrato que racha em toda derrota por vida; a cena de 2,4 s por causa do carimbo
-  de 1,5 s; o jeito de executar). Nada de código antes da aprovação dele. Achados do mapeamento: a `especiais.json` termina no seu golpe
-  comum (passo 178→179) e a `absolutos.json` no do Bot (99→100); o retrato hoje só racha na Exódia (`FightHud`, `exodiaStage` no `Stage`).
+- **Esperando o autor (2026-11-07): o plano do bloco B** (ponto 15, o golpe final; "aprovado, prossiga.", `decisoes.md` 2026-11-07 (2)),
+  escrito em `docs/superpowers/plans/2026-11-07-playtest-bloco-b.md`, na branch `feat/playtest-bloco-b` (saída da `main` em `8b6ee88`), no
+  checkout principal. Cinco tarefas: a batida, o retrato que racha, a cena, o som e o E2E com as fotos. **Próximo passo exato:** a resposta
+  dele às escolhas B1 a B6 entra no `decisoes.md`, com o texto dele; depois, a execução como ele escolher (B6). Nada de código antes.
+  Achados do mapeamento: a `especiais.json` termina no seu golpe comum (passo 178→179) e a `absolutos.json` no do Bot (99→100); o retrato
+  hoje só racha na Exódia (`FightHud`, `exodiaStage` no `Stage`), e o teste "o fim pela vida não racha retrato nenhum" muda com a B2.
 
 - **Onde está:** a `main` tem tudo (fast-forward até este commit; as duas CI verdes no commit antes deste, `4c1cd25`, run
   `42338855114`). O checkout principal está na `feat/placa-momento-guarda`, igual à `main`. **Trabalho novo sai de uma branch nova da
