@@ -238,6 +238,29 @@ describe('o retrato de quem perde pela vida (bloco B do playtest, ponto 15; deci
     expect(cracked(m.container)).toBe(true);
   });
 
+  it('com movimento reduzido, a vida e o retrato mudam juntos, no impacto (e não a vida no começo da cena)', () => {
+    const m = mount(THEIRS, { prefs: { reduceMotion: true } });
+    emit(m, HP_OVER, [KILL, END]);
+    advance(T.hitAt - 1);
+    expect(hp(m.container)).toBe('187');
+    expect(cracked(m.container)).toBe(false);
+    advance(1);
+    expect(cracked(m.container)).toBe(true);
+    advance(50);
+    expect(hp(m.container)).toBe('0');
+  });
+
+  it('com movimento reduzido, o Ataque Absoluto também segura a vida até o feixe acertar (a mesma regra em toda cena com golpe)', () => {
+    const m = mount(THEIRS, { prefs: { reduceMotion: true } });
+    emit(m, { ...THEIRS, self: { ...THEIRS.self, hp: 137 } }, [ABSOLUTE, HIT]);
+    advance(SCENE_MOMENTS.ABSOLUTE_ATTACK.hitAt - 1);
+    expect(hp(m.container)).toBe('187');
+    // O golpe acende num avanço, e o salto da vida corre no desenho seguinte.
+    advance(1);
+    advance(50);
+    expect(hp(m.container)).toBe('137');
+  });
+
   it('o pulo no meio: rachado e 0 na hora, e a mesa libera', async () => {
     const m = mount(THEIRS);
     emit(m, HP_OVER, [KILL, END]);

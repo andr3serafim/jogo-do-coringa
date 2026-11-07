@@ -131,9 +131,12 @@ export function Stage({ snapshot, reducedMotion, onSettled, online = false, chil
     () => run.beats.map((b) => (b.absorbed ? null : lifeChange(b.hit ? b.hit.event : b.event))),
     [run],
   );
+  // Com movimento reduzido a vida não conta: salta. Numa linha do tempo com golpe de cena (o Ataque Absoluto, o dano devolvido pelo Reflect, o
+  // golpe final), ela salta no instante em que o golpe acende, junto do número e do retrato, e não no começo da cena (bloco B do playtest).
+  const sceneHit = useMemo(() => run.beats.some((b) => b.hit !== null), [run]);
   const life = useCallback(
     (who: PlayerId): LifeCount => {
-      if (!busy || reducedMotion) return IDLE_LIFE;
+      if (!busy || (reducedMotion && !sceneHit)) return IDLE_LIFE;
       let done = 0;
       let total = 0;
       lifeSteps.forEach((change, i) => {
@@ -145,10 +148,10 @@ export function Stage({ snapshot, reducedMotion, onSettled, online = false, chil
       const hit = run.beats[index]?.hit ?? null;
       // Na cena com golpe, a vida espera o feixe acertar e desce em `HIT_COUNT_MS`.
       const step = now?.player === who && (hit === null || hitLanded) ? now.delta : 0;
-      const ms = hit === null ? (run.beats[index]?.durationMs ?? 0) : HIT_COUNT_MS;
+      const ms = reducedMotion ? 0 : hit === null ? (run.beats[index]?.durationMs ?? 0) : HIT_COUNT_MS;
       return { playing: true, done, step, ms, total };
     },
-    [busy, reducedMotion, lifeSteps, index, run, hitLanded],
+    [busy, reducedMotion, sceneHit, lifeSteps, index, run, hitLanded],
   );
   const insignia = useCallback(
     (who: PlayerId, active: boolean): boolean => (busy && index >= 0 ? insigniaShown(run.beats, index, who, active) : active),
