@@ -128,6 +128,22 @@ export interface ResurrectedMoments {
   fadeAt: number;
 }
 
+/**
+ * O golpe final (bloco B dos pontos do playtest, ponto 15): o ataque comum que leva a vida do outro a zero. 2,4 s (`FINAL_BLOW_MS`), na
+ * mesa, sem cortina; as tarjas descem abaixo do placar. Do protótipo `2026-11-03-playtest-prototipo.html`, quadro `p15`, variante A.
+ */
+export interface FinalBlowMoments {
+  /** Até aqui, a fileira de Ataque de quem bate acende carta a carta (a i-ésima em `i × litUntil / n`). */
+  litUntil: number;
+  /** O corte sai da fileira e atravessa a mesa até o retrato do outro. */
+  cutAt: number;
+  /** O corte acerta: a inversão, o tremor, as faíscas, o número, a vida que zera e o retrato que racha. */
+  hitAt: number;
+  titleAt: number;
+  /** O carimbo assenta: os campos afundam e respinga tinta. */
+  thudAt: number;
+}
+
 export const SCENE_MOMENTS: {
   ABSOLUTE_ATTACK: AttackMoments;
   ABSOLUTE_DEFENSE: DefenseMoments;
@@ -138,6 +154,7 @@ export const SCENE_MOMENTS: {
   REFLECT_TRIGGERED: ReflectTriggeredMoments;
   REFLECT_CANCELED: ReflectCanceledMoments;
   RESURRECTED: ResurrectedMoments;
+  FINAL_BLOW: FinalBlowMoments;
 } = {
   ABSOLUTE_ATTACK: { barsIn: 280, transformAt: 1_430, titleAt: 1_700, ballAt: 2_740, hitAt: 3_200, bandOut: 4_050 },
   ABSOLUTE_DEFENSE: {
@@ -154,8 +171,15 @@ export const SCENE_MOMENTS: {
   REFLECT_PLAYED: { cardsAt: [0, 120, 240], mirrorAt: 440, settledAt: 740, shrinkAt: 1_100, doneAt: 1_400 },
   REFLECT_TRIGGERED: { launchAt: 540, slowAt: 840, slowUntil: 1_890, mirrorHitAt: 1_980, returnHitAt: 2_300, titleAt: 2_300 },
   REFLECT_CANCELED: { crackAt: 500, fadeAt: 900 },
+  FINAL_BLOW: { litUntil: 330, cutAt: 490, hitAt: 640, titleAt: 900, thudAt: 1_040 },
   RESURRECTED: { threadsAt: 200, portalAt: 620, columnAt: 1_000, riseAt: 1_380, colorAt: 2_360, titleAt: 2_360, flightAt: 3_010, landAt: 3_530, fadeAt: 4_030 },
 };
 
 /** Quanto o nome carimbado fica na tela: entra (escala 3 → 1 com quique), segura ~1,2 s e sai crescendo (spec 6 §7). */
 export const TITLE_MS = 1_500;
+
+/**
+ * A duração da cena do golpe final: o carimbo comum (`TITLE_MS`) depois do título (`decisoes.md` 2026-11-07 (3), B3). Ela não entra no
+ * `SCENE_MS` do protocolo, que dá a folga do relógio: depois do `GameOver` ninguém decide (B1).
+ */
+export const FINAL_BLOW_MS = SCENE_MOMENTS.FINAL_BLOW.titleAt + TITLE_MS;

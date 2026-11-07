@@ -21,7 +21,7 @@ import {
   type SceneKind,
   type TimelineOptions,
 } from '../../src/model/timeline.ts';
-import { SCENE_MOMENTS } from '../../src/model/scene-moments.ts';
+import { FINAL_BLOW_MS, SCENE_MOMENTS, TITLE_MS } from '../../src/model/scene-moments.ts';
 import { damageBeatIndex } from '../../src/model/effects.ts';
 import { BOTS, type BotName } from '@coringa/sim/bots';
 import { createRng } from '@coringa/sim/rng';
@@ -225,11 +225,16 @@ describe('as cenas raras (U3 do sub-projeto 5)', () => {
       REFLECT_TRIGGERED: 3_800,
       REFLECT_CANCELED: 1_400,
       RESURRECTED: 4_600,
+      FINAL_BLOW: 2_400,
     });
   });
 
-  it('os tempos das cenas são os da tabela do protocolo, a mesma que o servidor usa na folga (sub-projeto 6 §9)', () => {
-    expect(RARE_SCENE_MS).toEqual({
+  it('os tempos das cenas são os da tabela do protocolo, a mesma que o servidor usa na folga (sub-projeto 6 §9); o golpe final não dá folga', () => {
+    // Depois do GameOver ninguém decide: a cena do golpe final mora só na web (decisoes.md 2026-11-07 (3), B1).
+    const { FINAL_BLOW, ...withAllowance } = RARE_SCENE_MS;
+    expect(FINAL_BLOW).toBe(FINAL_BLOW_MS);
+    expect(Object.values(SCENE_MS)).not.toContain(FINAL_BLOW_MS);
+    expect(withAllowance).toEqual({
       EXODIA: SCENE_MS.Exodia,
       ABSOLUTE_ATTACK: SCENE_MS.AbsoluteAttack,
       ABSOLUTE_DEFENSE: SCENE_MS.AbsoluteDefenseStarted,
@@ -296,8 +301,8 @@ describe('a Exódia e a Devastação (sub-projeto 6 §7.3, §7.4)', () => {
     expect(NO_INVERT.has('DEVASTATION_CANCELED')).toBe(true);
   });
 
-  it('as duas e a anulação dos Reflects são cenas de campo (sem cortina nem faixa); as outras, não', () => {
-    expect([...FIELD_SCENES].sort()).toEqual(['DEVASTATION', 'DEVASTATION_CANCELED', 'REFLECT_CANCELED']);
+  it('as duas, a anulação dos Reflects e o golpe final são cenas de campo (sem cortina); as outras, não', () => {
+    expect([...FIELD_SCENES].sort()).toEqual(['DEVASTATION', 'DEVASTATION_CANCELED', 'FINAL_BLOW', 'REFLECT_CANCELED']);
   });
 
   it('a refletida: a cena do Reflect e depois a fileira de quem lançou, as duas inversões dentro da regra', () => {
@@ -373,6 +378,97 @@ describe('o golpe dentro do Ataque Absoluto (sub-projeto 6 §7.1)', () => {
   it('a batida que conta os totais não é a do golpe absorvido', () => {
     const beats = buildTimeline([ABS_ATTACK, HIT, REMOVED], LIVE);
     expect(damageBeatIndex(beats)).toBe(-1);
+  });
+});
+
+describe('o golpe final (bloco B do playtest, ponto 15)', () => {
+  const T = SCENE_MOMENTS.FINAL_BLOW;
+  const mine: GameEvent = { type: 'DamageDealt', attacker: 'p1', defender: 'p2', attack: 290, defense: 95, damage: 195 };
+  const theirs: GameEvent = { type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 230, defense: 46, damage: 184 };
+  const over = (winner: 'p1' | 'p2', reason: 'HP' | 'EXODIA' | 'FORFEIT' = 'HP'): GameEvent => ({ type: 'GameOver', result: { kind: 'WIN', winner, reason } });
+  const closed: GameEvent = { type: 'ReactionWindowClosed', responder: 'p2', trigger: 'ATTACK' };
+
+  it('a duração é a do carimbo comum depois do título (B3): 2,4 s', () => {
+    expect(FINAL_BLOW_MS).toBe(T.titleAt + TITLE_MS);
+    expect(FINAL_BLOW_MS).toBe(2_400);
+    expect(T.hitAt).toBeLessThan(T.titleAt);
+  });
+
+  it('o seu golpe comum que leva a vida dele a zero vira a cena, com o golpe nela mesma no impacto e a inversão ali', () => {
+    const beats = buildTimeline([mine, over('p1')], LIVE);
+    const [scene, end] = beats;
+    expect(scene).toMatchObject({ kind: 'scene', scene: 'FINAL_BLOW', durationMs: 2_400, absorbed: false });
+    expect(scene!.hit).toEqual({ event: mine, atMs: scene!.startMs + T.hitAt });
+    expect(scene!.invert).toEqual({ atMs: scene!.startMs + T.hitAt, holdMs: 600 });
+    expect(end).toMatchObject({ kind: 'banner', event: over('p1') });
+    expect(SCENE_INVERT_LEAD_MS.FINAL_BLOW).toBe(T.hitAt);
+    expectPhotosafe(beats, false);
+  });
+
+  it('o do Bot em você também (a mesma cena, espelhada na mesa)', () => {
+    const [scene] = buildTimeline([theirs, over('p2')], LIVE);
+    expect(scene).toMatchObject({ kind: 'scene', scene: 'FINAL_BLOW' });
+  });
+
+  it('as batidas quietas no meio não atrapalham: vale a batida não quieta mais perto antes do GameOver', () => {
+    const beats = buildTimeline([closed, mine, closed, over('p1')], LIVE);
+    expect(beats.map((b) => b.scene ?? b.kind)).toEqual(['quiet', 'FINAL_BLOW', 'quiet', 'banner']);
+  });
+
+  it('acontece na mesa, sem cortina', () => {
+    expect(FIELD_SCENES.has('FINAL_BLOW')).toBe(true);
+    expect(NO_INVERT.has('FINAL_BLOW')).toBe(false);
+  });
+
+  it('o golpe que mata dentro do Ataque Absoluto fica com a cena dele', () => {
+    const hit: GameEvent = { type: 'DamageDealt', attacker: 'p1', defender: 'p2', attack: 900, defense: 40, damage: 860 };
+    const beats = buildTimeline([ABS_ATTACK, { type: 'GuardBroken', player: 'p2', cards: [] }, hit, over('p1')], LIVE);
+    expect(beats.map((b) => b.scene)).not.toContain('FINAL_BLOW');
+    expect(beats[0]!.hit?.event).toEqual(hit);
+    expect(beats[2]).toMatchObject({ kind: 'quiet', absorbed: true });
+  });
+
+  it('o dano devolvido pelo Reflect que mata fica com a cena do Reflect', () => {
+    const back: GameEvent = { type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 136 };
+    expect(buildTimeline([back, over('p2')], LIVE).map((b) => b.scene)).toEqual(['REFLECT_TRIGGERED', null]);
+  });
+
+  it('sem o fim pela vida, ou com o golpe de quem perdeu, nada vira golpe final', () => {
+    const scenes = (events: GameEvent[]) => buildTimeline(events, LIVE).map((b) => b.scene);
+    expect(scenes([mine])).toEqual([null]);
+    expect(scenes([mine, over('p1', 'EXODIA')])).not.toContain('FINAL_BLOW');
+    expect(scenes([mine, over('p1', 'FORFEIT')])).not.toContain('FINAL_BLOW');
+    expect(scenes([mine, over('p2')])).not.toContain('FINAL_BLOW');
+    expect(scenes([mine, { type: 'TurnStarted', player: 'p2' }, over('p1')])).not.toContain('FINAL_BLOW');
+  });
+
+  it('na reconexão (catchUp) não há cena: o golpe e a faixa em velocidade dobrada', () => {
+    const beats = buildTimeline([mine, over('p1')], { ...LIVE, mode: 'catchUp' });
+    expect(beats.map((b) => [b.kind, b.scene, b.hit])).toEqual([
+      ['damage', null, null],
+      ['banner', null, null],
+    ]);
+  });
+
+  it('com decisão pendente a cena não encolhe; com movimento reduzido tem a mesma duração e nenhuma inversão', () => {
+    const [pending] = buildTimeline([mine, over('p1')], { ...LIVE, decisionPending: true });
+    expect(pending!.durationMs).toBe(FINAL_BLOW_MS);
+    const reduced = buildTimeline([mine, over('p1')], { ...LIVE, reducedMotion: true });
+    expect(reduced[0]).toMatchObject({ scene: 'FINAL_BLOW', durationMs: FINAL_BLOW_MS, invert: null });
+    expectPhotosafe(reduced, true);
+  });
+
+  it('duas trocas de luz no total, e uma inversão a menos de 2 s antes na mesma linha tira a dele', () => {
+    expect(luminanceSwitches(buildTimeline([mine, over('p1')], LIVE))).toHaveLength(2);
+    const reflect: GameEvent = { type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 0 };
+    const beats = buildTimeline([reflect, mine, over('p1')], LIVE);
+    const gap = beats[1]!.startMs + T.hitAt - (beats[0]!.invert!.atMs + beats[0]!.invert!.holdMs);
+    expect(gap).toBeLessThan(INVERT_COOLDOWN_MS);
+    expect(beats[1]).toMatchObject({ scene: 'FINAL_BLOW', invert: null });
+  });
+
+  it('a batida que conta os totais é a do golpe final (o ataque que mata não mexe nas fileiras)', () => {
+    expect(damageBeatIndex(buildTimeline([closed, mine, over('p1')], LIVE))).toBe(1);
   });
 });
 

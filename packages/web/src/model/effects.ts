@@ -2,7 +2,7 @@
 // cenas, e o atraso das transições de layout. Puro: sem React nem DOM. Quem desenha é a interface (`ui/anim`).
 import { quadValues, type DevastationState, type GameEvent, type NumCard, type PlayerId, type PlayerView, type RowName } from '@coringa/engine';
 import { cardText, eventText, type Names } from '@coringa/sim/text';
-import { initiativeRibbon, SCENE_TITLE, type Ribbon } from './copy.ts';
+import { finalBlowTitle, initiativeRibbon, SCENE_TITLE, type Ribbon } from './copy.ts';
 import { impactForce, type ImpactForce } from './impact.ts';
 import { TABLE_MOTION } from './table-motion.ts';
 import { RIBBON_SCENES, type Beat } from './timeline.ts';
@@ -157,6 +157,24 @@ export function resurrectionInfo(event: GameEvent, view: PlayerView): RisingInfo
     return { landIndex, quad: { row, indices, cards: indices.map((i) => cards[i]!) } };
   }
   return { landIndex, quad: null };
+}
+
+/** O que a cena do golpe final lê da mesa: quem bate, de que lado está o retrato atingido e quantas cartas acendem na fileira de Ataque. */
+export interface FinalBlowInfo {
+  attacker: PlayerId;
+  target: 'voce' | 'oponente';
+  cards: number;
+}
+
+/**
+ * Lê da `view` o golpe final (bloco B dos pontos do playtest, ponto 15). O motor acaba a partida antes de tirar as cartas da fileira de
+ * Ataque de quem bateu (`resolveAttack`), então a `view` de depois do passo ainda as tem. `null` fora da cena do golpe final.
+ */
+export function finalBlowInfo(beat: Beat, view: PlayerView): FinalBlowInfo | null {
+  if (beat.scene !== 'FINAL_BLOW' || beat.event.type !== 'DamageDealt') return null;
+  const { attacker } = beat.event;
+  const side = attacker === view.me ? view.self : view.opponent;
+  return { attacker, target: attacker === view.me ? 'oponente' : 'voce', cards: side.attackRow.length };
 }
 
 /** A fileira onde a cena de campo acontece. */
@@ -387,6 +405,12 @@ export function sceneText(beat: Beat, names: Names): { title: string; detail: st
       return { title, detail: devastatedText(event, names) };
     case 'Resurrected':
       return { title, detail: eventText(event, names) ?? '' };
+    case 'DamageDealt': {
+      // O golpe final (bloco B dos pontos do playtest, ponto 15): o carimbo é de quem vê.
+      if (scene !== 'FINAL_BLOW') return { title, detail: '' };
+      const detail = event.attacker === names.me ? `Você derrubou ${names.of(event.defender)}` : `${names.of(event.attacker)} derrubou você`;
+      return { title: finalBlowTitle(event.attacker, names.me), detail };
+    }
     default:
       return { title, detail: '' };
   }

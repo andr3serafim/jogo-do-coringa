@@ -10,13 +10,14 @@ import {
   desolationShown,
   effectsOf,
   fieldTarget,
+  finalBlowInfo,
   insigniaShown,
   NO_EFFECTS,
   resurrectionInfo,
   rowKey,
   sceneText,
 } from '../../src/model/effects.ts';
-import { initiativeRibbon } from '../../src/model/copy.ts';
+import { FINAL_BLOW_LOSS_TITLE, SCENE_TITLE, finalBlowTitle, initiativeRibbon } from '../../src/model/copy.ts';
 import { DAMAGE_BANDS, impactForce } from '../../src/model/impact.ts';
 import { withinFlashLimit } from '../../src/model/flash.ts';
 import { roomNames } from '../../src/model/history.ts';
@@ -805,5 +806,36 @@ describe('o peso do golpe (sub-projeto 6 §5)', () => {
     const reflected = beatsOf({ type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 60 })[0]!;
     expect(effectsOf(reflected, view, true).impact).toEqual({ target: 'p1', force: 'forte' });
     expect(fx({ type: 'Healed', player: 'p1', amount: 9, source: 'STEAL', card: num('n9', 9) })).toBeNull();
+  });
+});
+
+describe('o golpe final na mesa (bloco B do playtest, ponto 15)', () => {
+  const blow = (attacker: 'p1' | 'p2'): GameEvent => ({
+    type: 'DamageDealt',
+    attacker,
+    defender: attacker === 'p1' ? 'p2' : 'p1',
+    attack: 290,
+    defense: 95,
+    damage: 195,
+  });
+  const over = (winner: 'p1' | 'p2'): GameEvent => ({ type: 'GameOver', result: { kind: 'WIN', winner, reason: 'HP' } });
+  const sceneOf = (attacker: 'p1' | 'p2'): Beat => beatsOf(blow(attacker), over(attacker))[0]!;
+
+  it('quem bate, quem leva e quantas cartas a fileira de Ataque de quem bate tem na mesa', () => {
+    expect(finalBlowInfo(sceneOf('p1'), view)).toEqual({ attacker: 'p1', target: 'oponente', cards: 5 });
+    expect(finalBlowInfo(sceneOf('p2'), view)).toEqual({ attacker: 'p2', target: 'voce', cards: 2 });
+  });
+
+  it('fora da cena do golpe final, nada', () => {
+    expect(finalBlowInfo(beatsOf(blow('p1'))[0]!, view)).toBeNull();
+    expect(finalBlowInfo(beatsOf({ type: 'TurnStarted', player: 'p1' })[0]!, view)).toBeNull();
+  });
+
+  it('o título é de quem vê: GOLPE FINAL! para quem bate, DERROTA para quem leva', () => {
+    expect(sceneText(sceneOf('p1'), names)).toEqual({ title: 'GOLPE FINAL!', detail: 'Você derrubou Duda' });
+    expect(sceneText(sceneOf('p2'), names)).toEqual({ title: 'DERROTA', detail: 'Duda derrubou você' });
+    expect(finalBlowTitle('p1', 'p1')).toBe('GOLPE FINAL!');
+    expect(finalBlowTitle('p2', 'p1')).toBe(FINAL_BLOW_LOSS_TITLE);
+    expect(SCENE_TITLE.FINAL_BLOW).toBe('GOLPE FINAL!');
   });
 });

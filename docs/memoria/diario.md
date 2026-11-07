@@ -12,6 +12,10 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 - **O plano, em uma linha por escolha:** sem folga no relógio (B1); o retrato racha em toda derrota pela vida (B2); 2,4 s de cena (B3);
   a inversão de 600 ms (B4); a faixa e o som do fim depois da cena (B5).
 - **Andamento** (uma linha por tarefa, com os commits e as escolhas da execução):
+  - **Task 1 (a batida): feita.** `FINAL_BLOW` na linha do tempo (o `DamageDealt` do vencedor, a batida não quieta mais perto antes do
+    `GameOver` pela vida, só ao vivo), `SCENE_MOMENTS.FINAL_BLOW`, `FINAL_BLOW_MS` (2,4 s), `finalBlowTitle`, `finalBlowInfo` e o
+    `sceneText`. **Ruling:** os testes que listam todas as cenas (`RARE_SCENE_MS`, a tabela do protocolo e `FIELD_SCENES`) mudaram de
+    propósito; o da tabela do protocolo passou a comparar só as cenas com folga, e confere que o golpe final não está no `SCENE_MS` (B1).
 
 ---
 

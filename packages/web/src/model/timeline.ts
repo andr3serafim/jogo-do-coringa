@@ -6,7 +6,7 @@
 // sobreposição; o número de dano, a faixa e a tremida acontecem dentro da duração da própria batida.
 import type { GameEvent, PlayerId } from '@coringa/engine';
 import { MOMENT_TAIL_MS, MOMENT_TAIL_PLAYS, SCENE_MS, SPECIAL_MOMENT_MS, momentsMs } from '@coringa/protocol';
-import { SCENE_MOMENTS } from './scene-moments.ts';
+import { FINAL_BLOW_MS, SCENE_MOMENTS } from './scene-moments.ts';
 
 /** Duração de uma cena na tabela do protocolo (a mesma que dá a folga do relógio no servidor, sub-projeto 6 §9). */
 const sceneMs = (type: GameEvent['type']): number => SCENE_MS[type] ?? 0;
@@ -28,6 +28,8 @@ export const RARE_SCENE_MS = {
   REFLECT_TRIGGERED: sceneMs('ReflectTriggered'),
   REFLECT_CANCELED: sceneMs('ReflectCanceled'),
   RESURRECTED: sceneMs('Resurrected'),
+  // O golpe final não é um evento: é o `DamageDealt` que acaba a partida, e a duração mora na web (sem folga no relógio).
+  FINAL_BLOW: FINAL_BLOW_MS,
 } as const;
 /**
  * A faixa da decisão da iniciativa segura a leitura (autor, 2026-10-31: "a iniciativa muda pro adversário, eu também não vejo o
@@ -68,7 +70,8 @@ export type SceneKind =
   | 'REFLECT_PLAYED'
   | 'REFLECT_TRIGGERED'
   | 'REFLECT_CANCELED'
-  | 'RESURRECTED';
+  | 'RESURRECTED'
+  | 'FINAL_BLOW';
 
 /**
  * Onde, dentro da cena, a inversão acontece: no pico dela (`SCENE_MOMENTS`): o feixe que acerta o retrato, a trava do escudo, a
@@ -85,6 +88,7 @@ export const SCENE_INVERT_LEAD_MS: Record<SceneKind, number> = {
   DEVASTATION: SCENE_MOMENTS.DEVASTATION.openAt,
   DEVASTATION_CANCELED: 0,
   EXODIA: SCENE_MOMENTS.EXODIA.crownAt,
+  FINAL_BLOW: SCENE_MOMENTS.FINAL_BLOW.hitAt,
 };
 /**
  * As cenas sem inversão: a Devastação cancelada (a terra ronca e para, sem abismo; sub-projeto 6 §7.4), o espelho que se forma e os
@@ -93,15 +97,17 @@ export const SCENE_INVERT_LEAD_MS: Record<SceneKind, number> = {
 export const NO_INVERT: ReadonlySet<SceneKind> = new Set(['DEVASTATION_CANCELED', 'REFLECT_PLAYED', 'REFLECT_CANCELED', 'RESURRECTED']);
 /**
  * As cenas de campo: acontecem sobre a fileira atingida, sem cortina nem faixa (sub-projeto 6 §7.4; escurecer a mesa esconderia o que
- * cai, como no protótipo). Os dois espelhos que trincam também acontecem na mesa, à vista.
+ * cai, como no protótipo). Os dois espelhos que trincam também acontecem na mesa, à vista, e o golpe final também (a fileira que acende
+ * precisa aparecer; só as tarjas descem, abaixo do placar).
  */
-export const FIELD_SCENES: ReadonlySet<SceneKind> = new Set(['DEVASTATION', 'DEVASTATION_CANCELED', 'REFLECT_CANCELED']);
+export const FIELD_SCENES: ReadonlySet<SceneKind> = new Set(['DEVASTATION', 'DEVASTATION_CANCELED', 'REFLECT_CANCELED', 'FINAL_BLOW']);
 /** As cenas sem nome carimbado: o motivo vai na fita, no ar durante a cena (§7.4, §7.5). */
 export const RIBBON_SCENES: ReadonlySet<SceneKind> = new Set(['DEVASTATION_CANCELED', 'REFLECT_CANCELED']);
 /** O instante, dentro da cena, em que o golpe dela acende: o feixe no retrato ou a volta dourada do cometa. */
 const HIT_AT: Partial<Record<SceneKind, number>> = {
   ABSOLUTE_ATTACK: SCENE_MOMENTS.ABSOLUTE_ATTACK.hitAt,
   REFLECT_TRIGGERED: SCENE_MOMENTS.REFLECT_TRIGGERED.returnHitAt,
+  FINAL_BLOW: SCENE_MOMENTS.FINAL_BLOW.hitAt,
 };
 const SCENE_INVERT_HOLD_MS = 600;
 
@@ -337,6 +343,22 @@ export function buildTimeline(events: GameEvent[], options: TimelineOptions): Be
       return;
     }
   });
+  // O golpe final (bloco B dos pontos do playtest, ponto 15), só ao vivo: o `DamageDealt` do vencedor que leva a vida do outro a zero
+  // (a batida não quieta mais perto antes do `GameOver` pela vida) vira a cena, com o golpe nela mesma, como o Reflect que devolve dano.
+  // O golpe absorvido pelo Ataque Absoluto já é quieto aqui, e o dano devolvido pelo Reflect não é `DamageDealt`: ficam com as cenas deles.
+  if (!catchUp) {
+    items.forEach((item, i) => {
+      const over = item.event;
+      if (over.type !== 'GameOver' || over.result.kind !== 'WIN' || over.result.reason !== 'HP') return;
+      const blow = items.slice(0, i).findLast((before) => before.kind !== 'quiet');
+      if (blow?.event.type !== 'DamageDealt' || blow.event.attacker !== over.result.winner) return;
+      blow.kind = 'scene';
+      blow.scene = 'FINAL_BLOW';
+      blow.baseMs = RARE_SCENE_MS.FINAL_BLOW;
+      blow.uncapped = true;
+      blow.hit = { event: blow.event, atMs: 0 };
+    });
+  }
 
   // 2. Escala proporcional para caber no teto (o menor dos que valem). As cenas raras e a faixa da iniciativa ficam de fora: não
   // encolhem nem contam no teto. Arredonda para baixo, para nunca passar do teto por causa do arredondamento.

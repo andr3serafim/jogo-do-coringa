@@ -574,7 +574,15 @@ export const SCENE_TITLE: Record<SceneKind, string> = {
   // Os dois espelhos trincam sem nome: o motivo vai na fita (sub-projeto 6 §7.5).
   REFLECT_CANCELED: '',
   RESURRECTED: 'RESSURREIÇÃO',
+  // O golpe final carimba isto para quem bate; quem leva vê `FINAL_BLOW_LOSS_TITLE` (`finalBlowTitle`).
+  FINAL_BLOW: 'GOLPE FINAL!',
 };
+
+/** O carimbo do golpe final para quem leva (bloco B dos pontos do playtest, ponto 15: a mesma cena, espelhada). */
+export const FINAL_BLOW_LOSS_TITLE = 'DERROTA';
+
+/** O carimbo do golpe final do lado de quem vê: `me` bateu, ou levou. */
+export const finalBlowTitle = (attacker: PlayerId, me: PlayerId): string => (attacker === me ? SCENE_TITLE.FINAL_BLOW : FINAL_BLOW_LOSS_TITLE);
 
 // ---------------------------------------------------------------------------------------------
 // Fim da partida e revanche (spec §2.5)
