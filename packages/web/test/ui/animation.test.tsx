@@ -249,6 +249,18 @@ describe('o retrato de quem perde pela vida (bloco B do playtest, ponto 15; deci
     expect(busy(m.container)).toBe(false);
   });
 
+  it('a cena desenhada acontece na mesa: nenhuma cortina, e a tela inverte uma vez, no impacto', () => {
+    const m = mount(THEIRS);
+    const trace = watchMany([() => curtainUp(m.container), () => inverted(m.container)]);
+    emit(m, HP_OVER, [KILL, END]);
+    expect(m.container.querySelector('[data-golpe-final]')).not.toBeNull();
+    trace.sample();
+    trace.run(RARE_SCENE_MS.FINAL_BLOW + 1_000);
+    expect(trace.flips[0]).toEqual([]);
+    expect(trace.flips[1]).toHaveLength(2);
+    expectFlashSafe(trace.all);
+  });
+
   it('o Ataque Absoluto que mata fica com a cena dele: o retrato só racha na faixa do fim, depois dela', () => {
     const m = mount(THEIRS);
     emit(m, HP_OVER, [ABSOLUTE, KILL, END]);

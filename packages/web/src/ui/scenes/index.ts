@@ -5,6 +5,7 @@ import { AbsoluteAttack } from './AbsoluteAttack.tsx';
 import { AbsoluteDefense } from './AbsoluteDefense.tsx';
 import { Devastation } from './Devastation.tsx';
 import { Exodia } from './Exodia.tsx';
+import { FinalBlow } from './FinalBlow.tsx';
 import { ReflectCanceled } from './ReflectCanceled.tsx';
 import { ReflectPlayed } from './ReflectPlayed.tsx';
 import { ReflectTriggered } from './ReflectTriggered.tsx';
@@ -20,4 +21,5 @@ export const SCENES: SceneModule = {
   REFLECT_TRIGGERED: ReflectTriggered,
   REFLECT_CANCELED: ReflectCanceled,
   RESURRECTED: Resurrection,
+  FINAL_BLOW: FinalBlow,
 };

@@ -28,7 +28,7 @@ import type { PlayerId, SpecialCard, Suit } from '@coringa/engine';
 import type { Names } from '@coringa/sim/text';
 import * as m from 'motion/react-m';
 import { useRef, useState, type ReactNode } from 'react';
-import { sceneText, type FieldTarget, type RisingInfo } from '../../model/effects.ts';
+import { sceneText, type FieldTarget, type FinalBlowInfo, type RisingInfo } from '../../model/effects.ts';
 import { RIBBON_SCENES, SCENE_INVERT_LEAD_MS, type Beat, type SceneKind } from '../../model/timeline.ts';
 import { Card } from '../cards/Card.tsx';
 import { useSceneBox } from './scene-box.ts';
@@ -51,6 +51,8 @@ export interface BeatOverlayProps {
   field?: FieldTarget | null;
   /** O que a mesa diz da Ressurreição. */
   rising?: RisingInfo | null;
+  /** O que a mesa diz do golpe final. */
+  blow?: FinalBlowInfo | null;
 }
 
 /** A sobreposição da cena de agora, ou nada (a camada fica, só esmaece). */
@@ -72,7 +74,7 @@ function Shield() {
   );
 }
 
-function SceneLayer({ scene, curtain, veil = 'scene', names, reduced, me, hitLanded, field = null, rising = null }: BeatOverlayProps) {
+function SceneLayer({ scene, curtain, veil = 'scene', names, reduced, me, hitLanded, field = null, rising = null, blow = null }: BeatOverlayProps) {
   const layer = useRef<HTMLDivElement>(null);
   const box = useSceneBox(layer, scene !== null || curtain);
   const scenes = useScenes();
@@ -113,7 +115,7 @@ function SceneLayer({ scene, curtain, veil = 'scene', names, reduced, me, hitLan
         className={`absolute inset-x-0 bottom-0 ${veil === 'moment' ? 'bg-tinta/35' : 'bg-tinta/60'} transition-[opacity,background-color] duration-[220ms] ease-out ${curtain ? 'opacity-100' : 'opacity-0'}`}
       />
       {Drawn && scene && box ? (
-        <Drawn key={serial} beat={scene} names={names} reduced={reduced} me={me} hitLanded={hitLanded} box={box} field={field} rising={rising} />
+        <Drawn key={serial} beat={scene} names={names} reduced={reduced} me={me} hitLanded={hitLanded} box={box} field={field} rising={rising} blow={blow} />
       ) : null}
       {/* Sempre montado: até o primeiro aparecer é um esmaecimento, não um pulo de opacidade. */}
       <div

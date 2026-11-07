@@ -20,6 +20,12 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     na derrota pela vida e na Exódia (a W.O. não), e a vida a 0 e o `drained` seguem só da Exódia. O teste "o fim pela vida não racha
     retrato nenhum" virou "racha o de quem perdeu" (B2). **Ruling:** a batida fatal (a Exódia ou o golpe final) vale sozinha, sem exigir o
     `GameOver` na mesma linha do tempo: os testes antigos da Exódia emitem só o `Exodia` (o motor sempre emite os dois juntos).
+  - **Task 3 (a cena): feita.** `ui/scenes/FinalBlow.tsx` (os halos na fileira de quem bate, o corte até o retrato, as faíscas, o `HitNumber`,
+    o carimbo e os respingos), `CinemaBars` extraído do `SceneFrame` (as duas usam), `Stamp` com `text`, e o `blow` (`finalBlowInfo`) do
+    `Stage` até a cena. **Ruling:** o afundar dos campos no `thudAt` usa `transform` no `[data-campos]`, como a Ressurreição; o `translate` é
+    do tremor do palco no impacto (640 ms), e os dois não se cruzam. **Ruling:** o carimbo da derrota é de tinta, com letra de papel e sombra
+    vermelha (o ouro fica com a vitória e os Absolutos). O teste do palco ("sem cortina, uma inversão") foi escrito depois da cena; ele falha
+    com o golpe final fora das cenas sem cortina (conferido) e passa com ele.
 
 ---
 

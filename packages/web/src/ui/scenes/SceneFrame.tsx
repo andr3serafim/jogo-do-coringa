@@ -88,7 +88,6 @@ export function SceneFrame({
 }) {
   const look = LOOK[kind];
   const band = useRef<HTMLDivElement>(null);
-  const bars = useRef<HTMLDivElement>(null);
   const [stamp, setStamp] = useState(false);
 
   useEffect(() => {
@@ -97,25 +96,16 @@ export function SceneFrame({
     return () => ids.forEach((id) => window.clearTimeout(id));
   }, [kind]);
 
-  // A faixa entra e sai; as tarjas também (com movimento reduzido, só a faixa esmaece).
+  // A faixa entra e sai (com movimento reduzido, só esmaece); as tarjas são as de `CinemaBars`.
   const drawn = box !== null;
   useEffect(() => {
     if (!drawn) return;
-    const end = RARE_SCENE_MS[kind];
     const enter = reduced ? [{ opacity: 0 }, { opacity: 1 }] : [{ transform: look.from }, { transform: 'none' }];
     const leave = reduced ? [{ opacity: 1 }, { opacity: 0 }] : [{ transform: 'none', opacity: 1 }, { transform: look.from, opacity: 0 }];
     const motions = [
       band.current?.animate?.(enter, { duration: 300, easing: 'cubic-bezier(.15,.9,.25,1.1)', fill: 'backwards' }),
       band.current?.animate?.(leave, { duration: 220, delay: look.outAt, easing: 'ease-in', fill: 'forwards' }),
     ];
-    if (!reduced) {
-      for (const bar of bars.current?.querySelectorAll<HTMLElement>('[data-tarja]') ?? []) {
-        motions.push(
-          bar.animate?.([{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }], { duration: BARS_IN_MS, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' }),
-          bar.animate?.([{ transform: 'scaleY(1)' }, { transform: 'scaleY(0)' }], { duration: BARS_IN_MS, delay: end - BARS_OUT_LEAD_MS, fill: 'forwards' }),
-        );
-      }
-    }
     return () => motions.forEach((motion) => motion?.cancel());
   }, [drawn, kind, look, reduced]);
 
@@ -143,17 +133,40 @@ export function SceneFrame({
           {children}
         </div>
       </div>
-      <div ref={bars}>
-        <div data-tarja="cima" className="absolute inset-x-0 top-0 h-[9%] min-h-4 origin-top bg-tinta" />
-        <div data-tarja="baixo" className="absolute inset-x-0 bottom-0 h-[13%] min-h-5 origin-bottom bg-tinta" />
-      </div>
+      <CinemaBars endMs={RARE_SCENE_MS[kind]} reduced={reduced} />
       {stamp ? <Stamp kind={kind} reduced={reduced} className={look.stamp} /> : null}
     </div>
   );
 }
 
-/** O nome carimbado (Alfa Slab One, a fonte dos carimbos; sem legenda embaixo, §7). Sem `top`, fica na parte de baixo da faixa. */
-export function Stamp({ kind, reduced, className, top }: { kind: SceneKind; reduced: boolean; className: string; top?: number }) {
+/**
+ * As tarjas pretas de cinema (§7), em cima e embaixo do elemento que as contém (a faixa da cena, abaixo do placar): entram em 260 ms e saem
+ * nos últimos 280 ms antes de `endMs`. Com movimento reduzido, já estão no lugar. O golpe final (bloco B dos pontos do playtest) as usa sem
+ * a faixa escura.
+ */
+export function CinemaBars({ endMs, reduced }: { endMs: number; reduced: boolean }) {
+  const bars = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (reduced) return;
+    const motions = [...(bars.current?.querySelectorAll<HTMLElement>('[data-tarja]') ?? [])].flatMap((bar) => [
+      bar.animate?.([{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }], { duration: BARS_IN_MS, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' }),
+      bar.animate?.([{ transform: 'scaleY(1)' }, { transform: 'scaleY(0)' }], { duration: BARS_IN_MS, delay: endMs - BARS_OUT_LEAD_MS, fill: 'forwards' }),
+    ]);
+    return () => motions.forEach((motion) => motion?.cancel());
+  }, [endMs, reduced]);
+  return (
+    <div ref={bars} className="pointer-events-none absolute inset-0">
+      <div data-tarja="cima" className="absolute inset-x-0 top-0 h-[9%] min-h-4 origin-top bg-tinta" />
+      <div data-tarja="baixo" className="absolute inset-x-0 bottom-0 h-[13%] min-h-5 origin-bottom bg-tinta" />
+    </div>
+  );
+}
+
+/**
+ * O nome carimbado (Alfa Slab One, a fonte dos carimbos; sem legenda embaixo, §7). Sem `top`, fica na parte de baixo da faixa. `text` troca o
+ * nome da cena (o golpe final carimba DERROTA para quem leva).
+ */
+export function Stamp({ kind, reduced, className, top, text }: { kind: SceneKind; reduced: boolean; className: string; top?: number; text?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const motion = ref.current?.animate?.(stampKeyframes(reduced), { duration: TITLE_MS, easing: 'ease-out', fill: 'both' });
@@ -169,7 +182,7 @@ export function Stamp({ kind, reduced, className, top }: { kind: SceneKind; redu
       <span
         className={`inline-block border-[5px] pb-0.5 pt-1.5 font-madeira uppercase leading-none tracking-[0.03em] shadow-[8px_8px_0_var(--color-tinta)] ${className}`}
       >
-        {SCENE_TITLE[kind]}
+        {text ?? SCENE_TITLE[kind]}
       </span>
     </div>
   );

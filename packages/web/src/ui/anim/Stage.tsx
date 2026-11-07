@@ -23,7 +23,7 @@ import { LazyMotion, MotionConfig } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
 import type { Ribbon } from '../../model/copy.ts';
 import { healRibbon } from '../../model/copy.ts';
-import { bannerRibbon, defeatShown, desolationShown, effectsOf, fieldTarget, insigniaShown, lifeChange, NO_EFFECTS, resurrectionInfo, ribbonText } from '../../model/effects.ts';
+import { bannerRibbon, defeatShown, desolationShown, effectsOf, fieldTarget, finalBlowInfo, insigniaShown, lifeChange, NO_EFFECTS, resurrectionInfo, ribbonText } from '../../model/effects.ts';
 import { roomNames } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import type { ImpactForce } from '../../model/impact.ts';
@@ -412,6 +412,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, online = false, chil
               hitLanded={hitLanded}
               field={scene && state ? fieldTarget(scene.event, lastCast, state.view.me, state.view.opponent.id) : null}
               rising={scene && state ? resurrectionInfo(scene.event, state.view) : null}
+              blow={scene && state ? finalBlowInfo(scene, state.view) : null}
             />
             {/* O momento da especial do oponente (bloco A dos pontos do playtest, ponto 1): a carta grande e a placa, por cima do véu. */}
             {state ? <MomentLayer run={run} beat={beat} cut={cut} view={state.view} names={names} reduced={reducedMotion} /> : null}

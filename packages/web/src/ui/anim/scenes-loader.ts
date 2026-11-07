@@ -4,7 +4,7 @@
 import type { PlayerId } from '@coringa/engine';
 import type { Names } from '@coringa/sim/text';
 import { useSyncExternalStore, type ComponentType } from 'react';
-import type { FieldTarget, RisingInfo } from '../../model/effects.ts';
+import type { FieldTarget, FinalBlowInfo, RisingInfo } from '../../model/effects.ts';
 import type { Beat, SceneKind } from '../../model/timeline.ts';
 import type { SceneBox } from './scene-box.ts';
 
@@ -22,6 +22,8 @@ export interface SceneProps {
   field: FieldTarget | null;
   /** O que a mesa diz da Ressurreição; `null` ou nada nas outras. */
   rising?: RisingInfo | null;
+  /** O que a mesa diz do golpe final (bloco B dos pontos do playtest, ponto 15); `null` ou nada nas outras. */
+  blow?: FinalBlowInfo | null;
 }
 
 export type SceneModule = Partial<Record<SceneKind, ComponentType<SceneProps>>>;
