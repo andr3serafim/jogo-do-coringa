@@ -6,6 +6,23 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-07 (1): a placa do momento da Guarda com a linha do quinto caso
+
+Perguntado "Aplico a mesma linha na placa do momento da Guarda?", depois de saber que a placa do momento em que o oponente põe K na Guarda
+("com 2 K, a Defesa dele que cai o cura") tem a mesma imprecisão do quinto caso (no golpe comum seguinte, um K absorve, sobra 1 e aquele
+golpe não cura; `diario.md` 2026-11-06 (1)), ele escolheu:
+
+> Sim, aplique
+
+**Leitura:**
+- Com exatamente 2 K (o mínimo da cura, `config.defenseHealGuard`), a consequência da placa do momento passa a ser a mesma linha da placa
+  de estado: "com 2 K depois do golpe, a Defesa dele que cai vira vida".
+- **[I]** Com 3 K fica "com 3 K, a Defesa dele que cai o cura": o golpe que um K absorve deixa 2 e cura, a frase é verdadeira, e ele
+  aprovou corrigir a imprecisão, não reescrever o caso que funciona.
+- **[I]** O caso do seu Ataque Absoluto armado ("o seu Ataque Absoluto quebra todos os K") já estava certo e não muda.
+
+---
+
 ## 2026-11-06 (1): o quinto caso de placa, as duas propostas aplicadas
 
 Perguntado "Aplico as duas propostas do quinto caso de placa antes do deploy?", depois de ver na lista do que falta para a produção que
