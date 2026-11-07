@@ -5,6 +5,30 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-07 (1): a placa do momento da Guarda com a linha do quinto caso
+
+- **Pedido:** "Sim, aplique" à pergunta "Aplico a mesma linha na placa do momento da Guarda?" (`decisoes.md` 2026-11-07 (1)). Branch
+  `feat/placa-momento-guarda`, saída da `main` em `b2f1087`, no checkout principal.
+- **Feito (`51b7945`):** no `momentPlate` (`GuardPlayed`, `model/copy.ts`), com exatamente `config.defenseHealGuard` K a consequência é
+  a própria `plateLine('cura', …)`: "com 2 K depois do golpe, a Defesa dele que cai vira vida". As duas placas não se separam mais.
+  - **Ruling:** o teste do mínimo virou o `healAtMinimum`, que a placa de estado e a do momento usam;
+  - **Ruling:** com 3 K fica "com 3 K, a Defesa dele que cai o cura" (verdadeira: o K que absorve deixa 2, e a cura vale); o caso do seu
+    Ataque Absoluto armado ("o seu Ataque Absoluto quebra todos os K") já estava certo e vem antes.
+- **Testes:** `moment-copy.test.ts` confere contra a prévia do motor que o golpe comum seguinte deixa 1 K sem cura com 2 K, e 2 K com cura
+  com 3 K; a placa do momento com 2 K é igual à `plateLine` do mesmo campo.
+- **Medida (o painel do navegador estava escondido, e as fotos saíam velhas: valeu o DOM):** no replay `especiais.json`, do passo 73 para o
+  74 (rodada 17, o Bot põe 2 K), a placa no celular de 360 × 640 vai de 16 a 344 px, com 71 px de altura (a frase quebra linha), sem rolagem
+  lateral; no PC de 1366 × 657, de 340 a 760 px, numa linha. O E2E do momento (`moment.spec.ts`) usa a Guarda do passo 51→52, de 1 K, e não
+  muda.
+- **Armadilha:** com o painel escondido, a página roda em segundo plano; as transições não andam (a placa fica com `opacity` 0) e o
+  `screenshot` devolve um quadro velho. Para ver uma camada passageira, peça ao autor para mostrar o painel, ou meça pelo DOM.
+- **Achado no caminho:** a fixture `especiais.json` tem o Bot com exatamente 2 K nos passos 74 (rodada 17) e 115 (rodada 25); a
+  `exodia-devastacao.json`, nos 60, 191, 202 e 343; a `reflect.json`, no 188; a `absolutos.json`, no 97 (um script com o motor sobre os
+  `steps` de cada replay).
+- **Verificado:** `pnpm check` verde antes do commit.
+
+---
+
 ## 2026-11-06 (1): o quinto caso de placa (a cura passiva)
 
 - **Pedido:** o autor perguntou "O que está pendente para produção?"; na resposta, o quinto caso de placa era o único texto conhecido que

@@ -6,10 +6,9 @@
 ## Agora
 
 - **Em curso (2026-11-07): a placa do momento da Guarda** ("Sim, aplique", `decisoes.md` 2026-11-07 (1)). Branch
-  `feat/placa-momento-guarda`, saída da `main` em `b2f1087` (as duas CI verdes nela), no checkout principal. **Próximo passo exato:** o
-  teste em `moment-copy.test.ts` ("a Guarda: a cura passiva com 2 K…" passa a esperar "com 2 K depois do golpe, a Defesa dele que cai
-  vira vida"), a troca no `momentPlate` (`GuardPlayed`, `model/copy.ts`), a foto da placa (replay `especiais.json`, a Guarda do Bot na
-  rodada 13), `pnpm check`, commit, push, as duas CI, fast-forward da `main`, `diario.md` e este estado de volta ao "nada em curso".
+  `feat/placa-momento-guarda`, saída da `main` em `b2f1087` (as duas CI verdes nela), no checkout principal. Código em `51b7945`
+  (`pnpm check` verde), medida e entrada no `diario.md` 2026-11-07 (1). **Próximo passo exato:** push da branch, as duas CI verdes,
+  fast-forward da `main` até a branch, push da `main` e este estado de volta ao "nada em curso".
 
 - **Onde está:** a `main` tem tudo (fast-forward até este commit; as duas CI verdes no último commit de código e de memória antes deste,
   `5254763`, run `42301083851`). O checkout principal está na `feat/placa-cura-passiva`, igual à `main`. **Trabalho novo sai de uma
