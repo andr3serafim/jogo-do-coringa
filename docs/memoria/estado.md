@@ -7,9 +7,11 @@
 
 - **Em curso (2026-11-07): a execução do bloco B** (ponto 15, o golpe final), com o plano aprovado como estava ("Aprovo como está",
   `decisoes.md` 2026-11-07 (3)): `docs/superpowers/plans/2026-11-07-playtest-bloco-b.md`, na branch `feat/playtest-bloco-b` (saída da `main`
-  em `8b6ee88`), no checkout principal, aqui mesmo, tarefa por tarefa, com um revisor novo no fim. **Próximo passo exato:** a primeira
-  tarefa sem linha "Task N: feita" no `diario.md` (entrada 2026-11-07 (2)), na ordem do plano: 1 a batida, 2 o retrato que racha, 3 a
-  cena, 4 o som, 5 o E2E, as fotos e a medição; depois a revisão da branch inteira, o `pnpm check`, as duas CI e o fast-forward.
+  em `8b6ee88`), no checkout principal, aqui mesmo, tarefa por tarefa, com um revisor novo no fim. As Tasks 1 a 4 estão feitas (`cb8809f`,
+  `f073fee`, `6af1b6e`, `f433752`), mais a vida do derrotado que para em 0 (`aa34530`). **Próximo passo exato:** a Task 5: o E2E do golpe
+  final (escrito em `e2e/scenes.spec.ts`, ainda sem commit se este estado estiver no `HEAD`: `pnpm --filter @coringa/web build` e
+  `playwright test e2e/scenes.spec.ts`), as fotos e a medição com o `e2e/medir-cena.ts` (`notas/medicao-bloco-b.md`), a spec §4; depois a
+  revisão da branch inteira num subagente, o `pnpm check`, as duas CI e o fast-forward.
   Achados do mapeamento: a `especiais.json` termina no seu golpe comum (passo 178→179) e a `absolutos.json` no do Bot (99→100); o retrato
   hoje só racha na Exódia (`FightHud`, `exodiaStage` no `Stage`), e o teste "o fim pela vida não racha retrato nenhum" muda com a B2.
 
