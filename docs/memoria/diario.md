@@ -5,6 +5,16 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-07 (2): o bloco B, o golpe final (ponto 15)
+
+- **Pedido:** "aprovado, prossiga." levou ao plano (`docs/superpowers/plans/2026-11-07-playtest-bloco-b.md`), e "Aprovo como está"
+  (`decisoes.md` 2026-11-07 (3)) à execução: aqui mesmo, tarefa por tarefa, na branch `feat/playtest-bloco-b`, com um revisor novo no fim.
+- **O plano, em uma linha por escolha:** sem folga no relógio (B1); o retrato racha em toda derrota pela vida (B2); 2,4 s de cena (B3);
+  a inversão de 600 ms (B4); a faixa e o som do fim depois da cena (B5).
+- **Andamento** (uma linha por tarefa, com os commits e as escolhas da execução):
+
+---
+
 ## 2026-11-07 (1): a placa do momento da Guarda com a linha do quinto caso
 
 - **Pedido:** "Sim, aplique" à pergunta "Aplico a mesma linha na placa do momento da Guarda?" (`decisoes.md` 2026-11-07 (1)). Branch

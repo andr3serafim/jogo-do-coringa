@@ -5,10 +5,11 @@
 
 ## Agora
 
-- **Esperando o autor (2026-11-07): o plano do bloco B** (ponto 15, o golpe final; "aprovado, prossiga.", `decisoes.md` 2026-11-07 (2)),
-  escrito em `docs/superpowers/plans/2026-11-07-playtest-bloco-b.md`, na branch `feat/playtest-bloco-b` (saída da `main` em `8b6ee88`), no
-  checkout principal. Cinco tarefas: a batida, o retrato que racha, a cena, o som e o E2E com as fotos. **Próximo passo exato:** a resposta
-  dele às escolhas B1 a B6 entra no `decisoes.md`, com o texto dele; depois, a execução como ele escolher (B6). Nada de código antes.
+- **Em curso (2026-11-07): a execução do bloco B** (ponto 15, o golpe final), com o plano aprovado como estava ("Aprovo como está",
+  `decisoes.md` 2026-11-07 (3)): `docs/superpowers/plans/2026-11-07-playtest-bloco-b.md`, na branch `feat/playtest-bloco-b` (saída da `main`
+  em `8b6ee88`), no checkout principal, aqui mesmo, tarefa por tarefa, com um revisor novo no fim. **Próximo passo exato:** a primeira
+  tarefa sem linha "Task N: feita" no `diario.md` (entrada 2026-11-07 (2)), na ordem do plano: 1 a batida, 2 o retrato que racha, 3 a
+  cena, 4 o som, 5 o E2E, as fotos e a medição; depois a revisão da branch inteira, o `pnpm check`, as duas CI e o fast-forward.
   Achados do mapeamento: a `especiais.json` termina no seu golpe comum (passo 178→179) e a `absolutos.json` no do Bot (99→100); o retrato
   hoje só racha na Exódia (`FightHud`, `exodiaStage` no `Stage`), e o teste "o fim pela vida não racha retrato nenhum" muda com a B2.
 

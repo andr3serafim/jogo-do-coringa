@@ -6,6 +6,20 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-07 (3): o plano do bloco B aprovado
+
+Perguntado "Aprova o plano do bloco B com as escolhas B1 a B6?", sobre `docs/superpowers/plans/2026-11-07-playtest-bloco-b.md`, ele escolheu:
+
+> Aprovo como está
+
+**Leitura:**
+- As seis escolhas valem como recomendadas: B1 (sem folga no relógio: o `SCENE_MS` e o servidor não mudam, e a frase da spec §4 é
+  corrigida), B2 (o retrato racha em toda derrota pela vida; a W.O. e o abandono não), B3 (a cena de 2,4 s, com o carimbo comum de 1,5 s),
+  B4 (a inversão de 600 ms, a regra comum), B5 (a faixa e o som do fim depois da cena, como na Exódia) e B6 (a execução aqui, tarefa por
+  tarefa, na branch `feat/playtest-bloco-b`, teste primeiro, com um revisor novo num subagente lendo a branch inteira no fim).
+
+---
+
 ## 2026-11-07 (2): as placas aprovadas, e o plano do bloco B
 
 Depois da entrega da placa do momento da Guarda (2026-11-07 (1)), sem pergunta pendente, ele escreveu:
