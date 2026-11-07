@@ -39,6 +39,28 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     rachado e a vida 0); 22 de 22 no `scenes.spec.ts`. Medição e fotos em `notas/medicao-bloco-b.md`: 58 a 60 quadros/s com a CPU 4×, pico de
     21 partículas. **Ruling:** os E2E e as fotos usam 1366 × 768 e 360 × 640, os tamanhos do `scenes.spec.ts` e do `medir-cena.ts` (o plano
     dizia 1366 × 657, que é o tamanho do E2E de layout, e esta cena não passa por ele). A spec ganhou a §4.1 e a correção da folga (B1).
+- **Revisão da branch inteira** (um subagente novo, só leitura, `8b6ee88..0927176`): pronta com correções; nenhum crítico, dois importantes,
+  sete menores. O revisor concordou com as escolhas das Tasks 1 a 4 e com a vida em 0, e discordou da Ruling do 1366 × 768.
+  - **Consertado (`9f97d6e`):** com movimento reduzido, a vida zerava no começo da cena, antes do corte (o retrato e o número só no
+    impacto). Numa linha do tempo com golpe de cena (o golpe final, o Ataque Absoluto, o dano devolvido pelo Reflect), a vida agora salta
+    quando o golpe acende. **Ruling:** vale para as três cenas com golpe, e não só a nova: a mesma informação no mesmo instante.
+  - **Consertado (neste commit):** o E2E do golpe final roda também no PC baixo (1366 × 657), com o carimbo à vista e sem rolar de lado: 24
+    de 24. A Ruling da Task 5 caiu: outras cenas também rodam nesse tamanho (`resurrection.spec.ts`, `moment.spec.ts`).
+  - **Menores, para depois** (nenhum quebra a partida):
+    - o corte em 0 encurta a descida da vida (77 de vida e 195 de dano: a barra chega a 0 em ~276 ms, não em 700); o conserto é cortar as
+      pontas do tween no `useCountedLife`;
+    - o retrato derrotado tem `transition: filter` (cinza), que já existia na Exódia e agora vale em toda derrota pela vida, junto da inversão;
+    - no E2E, o toque do golpe do Bot vem depois do carimbo (o pulo na hora fica só no teste de unidade), e nada confere que a fileira de quem
+      bate fica à vista no celular (só as fotos);
+    - o afundar dos campos não é cancelado se a cena desmonta entre 1.040 e 1.200 ms;
+    - com movimento reduzido, o corte aparece de uma vez, sem esmaecer;
+    - o `attacker` repetido em `FinalBlow.tsx`, a §4 da spec ainda com "~2,2 s" (a §4.1 diz 2,4 s), e dois comentários antigos (o do
+      `PortraitCrack` e o do `drained`);
+    - sem teste o painel de reserva do golpe final (o chunk das cenas ainda não carregado) e a posição das tarjas.
+  - **O que o revisor deixou de julgar** (fica como está): o corte inteiro por um quadro antes de crescer, os halos que não acompanham o
+    tremor, o chunk das cenas que chega no meio da cena e o pulo que corta o som da faixa do fim (o mesmo padrão das outras cenas); as tarjas
+    sobre a mesa clara (troca de luz parcial, dentro do limite de 3 por segundo); o online com dois clientes (conferido só lendo o código: sem
+    prazo depois do `GameOver`, a revanche vem pelo `room` e o painel espera a mesa parar); as cores dos carimbos (do autor, no playtest).
 
 ---
 

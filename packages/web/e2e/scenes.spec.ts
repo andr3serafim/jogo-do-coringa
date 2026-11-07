@@ -101,6 +101,47 @@ async function tapTable(page: Page): Promise<void> {
   await page.mouse.click(box.x + box.width / 2, box.y + 10);
 }
 
+/** O golpe final (bloco B dos pontos do playtest, ponto 15), nos dois lados: roda em cada tamanho, inclusive no PC baixo. */
+function finalBlowTests(): void {
+  test('o seu golpe final: as tarjas sem cortina, a fileira acende, o corte vai ao retrato do Bot, a tela inverte, GOLPE FINAL! e o retrato dele racha', async ({ page }) => {
+    const guard = failOnConsoleErrors(page);
+    await openAt(page, 37, 178, SPECIALS_GAME);
+    const inverted = await watchInversion(page);
+    await replayControl(page, 'Próximo passo').click();
+    await expect(page.locator('[data-cena="FINAL_BLOW"]')).toHaveCount(1);
+    await expect(page.locator('[data-golpe-final] [data-tarja]')).toHaveCount(2);
+    await expect(page.locator('[data-cortina][data-ativa]')).toHaveCount(0);
+    await expect(page.locator('[data-acesa]').first()).toBeAttached();
+    await expect(page.locator('[data-corte]')).toHaveAttribute('data-alvo', 'oponente');
+    await expect(page.locator('[data-carimbo="FINAL_BLOW"]')).toHaveText('GOLPE FINAL!');
+    await expectInView(page, '[data-carimbo="FINAL_BLOW"] span');
+    await expectNoSideScroll(page);
+    await expect(placar(page).locator('[data-retrato="oponente"][data-derrotado]')).toHaveCount(1);
+    await expect(placar(page).locator('[data-retrato="voce"][data-derrotado]')).toHaveCount(0);
+    await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1, { timeout: 5_000 });
+    await expect(placar(page).locator('[data-lado="oponente"] [data-hp]')).toHaveText('0');
+    expect(await inverted(), 'a tela inverte no impacto').toBe(true);
+    guard.expectClean();
+  });
+
+  test('o golpe final do Bot: DERROTA, o corte vem até o seu retrato, e o toque pula para o seu retrato rachado e a vida 0', async ({ page }) => {
+    const guard = failOnConsoleErrors(page);
+    await openAt(page, 21, 99);
+    await replayControl(page, 'Próximo passo').click();
+    await expect(page.locator('[data-cena="FINAL_BLOW"]')).toHaveCount(1);
+    await expect(page.locator('[data-corte]')).toHaveAttribute('data-alvo', 'voce');
+    await expect(page.locator('[data-carimbo="FINAL_BLOW"]')).toHaveText('DERROTA');
+    await expectInView(page, '[data-carimbo="FINAL_BLOW"] span');
+    await expectNoSideScroll(page);
+    await tapTable(page);
+    await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1, { timeout: 500 });
+    await expect(placar(page).locator('[data-retrato="voce"][data-derrotado]')).toHaveCount(1, { timeout: 500 });
+    await expect(placar(page).locator('[data-lado="voce"] [data-hp]')).toHaveText('0', { timeout: 500 });
+    await expect(page.locator('[data-golpe-final]')).toHaveCount(0);
+    guard.expectClean();
+  });
+}
+
 for (const viewport of [
   { width: 1366, height: 768 },
   { width: 360, height: 640 },
@@ -280,42 +321,7 @@ for (const viewport of [
       guard.expectClean();
     });
 
-    test('o seu golpe final: as tarjas sem cortina, a fileira acende, o corte vai ao retrato do Bot, a tela inverte, GOLPE FINAL! e o retrato dele racha', async ({ page }) => {
-      const guard = failOnConsoleErrors(page);
-      await openAt(page, 37, 178, SPECIALS_GAME);
-      const inverted = await watchInversion(page);
-      await replayControl(page, 'Próximo passo').click();
-      await expect(page.locator('[data-cena="FINAL_BLOW"]')).toHaveCount(1);
-      await expect(page.locator('[data-golpe-final] [data-tarja]')).toHaveCount(2);
-      await expect(page.locator('[data-cortina][data-ativa]')).toHaveCount(0);
-      await expect(page.locator('[data-acesa]').first()).toBeAttached();
-      await expect(page.locator('[data-corte]')).toHaveAttribute('data-alvo', 'oponente');
-      await expect(page.locator('[data-carimbo="FINAL_BLOW"]')).toHaveText('GOLPE FINAL!');
-      await expectInView(page, '[data-carimbo="FINAL_BLOW"] span');
-      await expectNoSideScroll(page);
-      await expect(placar(page).locator('[data-retrato="oponente"][data-derrotado]')).toHaveCount(1);
-      await expect(placar(page).locator('[data-retrato="voce"][data-derrotado]')).toHaveCount(0);
-      await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1, { timeout: 5_000 });
-      await expect(placar(page).locator('[data-lado="oponente"] [data-hp]')).toHaveText('0');
-      expect(await inverted(), 'a tela inverte no impacto').toBe(true);
-      guard.expectClean();
-    });
-
-    test('o golpe final do Bot: DERROTA, o corte vem até o seu retrato, e o toque pula para o seu retrato rachado e a vida 0', async ({ page }) => {
-      const guard = failOnConsoleErrors(page);
-      await openAt(page, 21, 99);
-      await replayControl(page, 'Próximo passo').click();
-      await expect(page.locator('[data-cena="FINAL_BLOW"]')).toHaveCount(1);
-      await expect(page.locator('[data-corte]')).toHaveAttribute('data-alvo', 'voce');
-      await expect(page.locator('[data-carimbo="FINAL_BLOW"]')).toHaveText('DERROTA');
-      await expectNoSideScroll(page);
-      await tapTable(page);
-      await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1, { timeout: 500 });
-      await expect(placar(page).locator('[data-retrato="voce"][data-derrotado]')).toHaveCount(1, { timeout: 500 });
-      await expect(placar(page).locator('[data-lado="voce"] [data-hp]')).toHaveText('0', { timeout: 500 });
-      await expect(page.locator('[data-golpe-final]')).toHaveCount(0);
-      guard.expectClean();
-    });
+    finalBlowTests();
 
     test('a Exódia do Bot: a cena com as tarjas, sem rolar de lado, e o toque pula para o seu retrato rachado', async ({ page }) => {
       const guard = failOnConsoleErrors(page);
@@ -333,3 +339,9 @@ for (const viewport of [
     });
   });
 }
+
+// O PC baixo (spec do playtest §8): a faixa é ~110 px mais baixa, e o carimbo tem de caber nela sem rolar de lado.
+test.describe('1366 × 657 (PC baixo)', () => {
+  test.use({ viewport: { width: 1366, height: 657 } });
+  finalBlowTests();
+});
