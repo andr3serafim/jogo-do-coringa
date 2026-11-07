@@ -1,24 +1,18 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-07**, o plano do bloco B em curso na `feat/playtest-bloco-b`. Antes de seguir,
-> confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
+> Sobrescrito a cada atualização. **Última: 2026-11-07**, o bloco B (o golpe final) na `main`, nada em curso. Antes de seguir, confira se
+> não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Em curso (2026-11-07): a execução do bloco B** (ponto 15, o golpe final), com o plano aprovado como estava ("Aprovo como está",
-  `decisoes.md` 2026-11-07 (3)): `docs/superpowers/plans/2026-11-07-playtest-bloco-b.md`, na branch `feat/playtest-bloco-b` (saída da `main`
-  em `8b6ee88`), no checkout principal, aqui mesmo, tarefa por tarefa, com um revisor novo no fim. As cinco tarefas estão feitas (`cb8809f`,
-  `f073fee`, `6af1b6e`, `f433752`, `0927176`), mais a vida do derrotado que para em 0 (`aa34530`); o E2E das cenas passou (22 de 22) e a
-  medição está em `notas/medicao-bloco-b.md`. A revisão da branch inteira foi feita (subagente; pronta com correções), e os dois achados
-  importantes foram consertados (`9f97d6e`, `734e450`); os menores estão no `diario.md` 2026-11-07 (2). **Próximo passo exato:** o push da
-  branch (o pre-push roda o `pnpm check`), as duas CI verdes (`check` e `e2e`), o fast-forward da `main` até a branch, o push da `main` e
-  este estado de volta ao "nada em curso".
-  Achados do mapeamento: a `especiais.json` termina no seu golpe comum (passo 178→179) e a `absolutos.json` no do Bot (99→100); o retrato
-  hoje só racha na Exódia (`FightHud`, `exodiaStage` no `Stage`), e o teste "o fim pela vida não racha retrato nenhum" muda com a B2.
-
-- **Onde está:** a `main` tem tudo (fast-forward até este commit; as duas CI verdes no commit antes deste, `4c1cd25`, run
-  `42338855114`). O checkout principal está na `feat/placa-momento-guarda`, igual à `main`. **Trabalho novo sai de uma branch nova da
+- **Onde está:** a `main` tem tudo (fast-forward até este commit; as duas CI verdes no commit antes deste, `a8aa55b`, run
+  `42348114555`). O checkout principal está na `feat/playtest-bloco-b`, igual à `main`. **Trabalho novo sai de uma branch nova da
   `main`** (prefixo `feat/`, para a CI rodar). Nada sem commit além do de sempre (abaixo). Nenhuma sessão paralela aberta.
+- **Feito em 2026-11-07: o bloco B, o golpe final (ponto 15).** Plano aprovado como estava (`decisoes.md` 2026-11-07 (3)); execução, revisão
+  da branch inteira e consertos no `diario.md` 2026-11-07 (2); medição em `notas/medicao-bloco-b.md`; o que a execução decidiu na §4.1 da
+  spec do playtest. O ataque comum que leva a vida do outro a zero vira uma cena de 2,4 s na mesa (as tarjas, a fileira que acende, o corte
+  até o retrato, a inversão, "GOLPE FINAL!" ou "DERROTA"); o retrato racha em toda derrota pela vida; a vida do derrotado para em 0 no
+  placar; com movimento reduzido, a vida salta quando o golpe da cena acende. Nada mudou no motor nem no servidor.
 - **Feito em 2026-11-06 e 07:**
   - o quinto caso de placa ("Sim, aplique", `decisoes.md` 2026-11-06 (1); `diario.md` 2026-11-06 (1)): a placa "Cura passiva" diz "o
     Ataque Absoluto dele quebra os K antes da cura" contra o Ataque Absoluto armado do outro, e "com 2 K depois do golpe, a sua Defesa
@@ -36,9 +30,15 @@
   - **os quatro textos de placa no caso de borda** ("Corrija os quatro", `decisoes.md` 2026-11-04 (1); `diario.md` 2026-11-04 (1)).
 - **Próximo passo exato:** é a vez do autor (abaixo). Quando ele voltar:
   1. o que ele disser do playtest entra no `decisoes.md`, com o texto dele, antes de virar código;
-  2. depois, os blocos que faltam da spec do playtest, nesta ordem (`decisoes.md` 2026-11-03 (4)): **B** (ponto 15, o golpe final, §4), **C**
-     (pontos 10, 11 e 13) e **D** (pontos 5 e 14). Cada um com plano escrito e aprovado por ele antes da execução, como os blocos A e E.
+  2. depois, os blocos que faltam da spec do playtest, nesta ordem (`decisoes.md` 2026-11-03 (4)): **C** (pontos 10, 11 e 13) e **D**
+     (pontos 5 e 14). Cada um com plano escrito e aprovado por ele antes da execução, como os blocos A, B e E.
 - **Esperando o autor:**
+  - **jogar o golpe final** (bloco B): no treino, derrubar o Bot com um ataque comum, e perder para ele; ou, sem esperar, o replay
+    `especiais.json` do passo 178 para o 179 e o `absolutos.json` do 99 para o 100 (a receita das fixtures está abaixo). Conferir as cores
+    dos dois carimbos (a derrota de tinta, com sombra vermelha, é escolha de quem escreveu) e o som. O online só depois do deploy dele;
+  - **os menores do bloco B** (`diario.md` 2026-11-07 (2), "Menores, para depois"): a descida da vida mais curta quando o golpe passa
+    de zero, o cinza do retrato por `filter`, dois buracos do E2E, o afundar não cancelado no pulo, o corte sem esmaecer com movimento
+    reduzido, textos antigos e dois testes que faltam;
   - **jogar** os blocos A e E e as placas novas. O treino já mostra tudo; o online só depois do `pnpm deploy:server` dele, que leva a folga
     do momento no prazo, o PASS guardado depois do Ás, o conserto do Equipar vazio e a janela da Ressurreição. O deploy fecha as salas
     abertas (`STATE_SCHEMA` 5), e as partidas guardadas abrem com o aviso de versão (`RULES_VERSION` 5);
@@ -120,13 +120,14 @@ com os achados do código, está no `diario.md` 2026-11-02 (7) e (8).
   `8cdf0a1`), a memória compartilhada e o bloco E3 + F2 + F3 (o Reflect reativo, a Devastação, o Roubo sem naipe, a cura pela Defesa, o
   limite de 4 especiais com a BURN e a iniciativa com o placar na tela).
 - **2026-11-03 e 04:** os pontos 16 a 18 do playtest (o 17 também online), a spec do playtest, o bloco A, o bloco E e os textos de placa.
+- **2026-11-06 e 07:** o quinto caso de placa, a placa do momento da Guarda e o bloco B (o golpe final).
 - **Regras em vigor:** a spec 1 (`docs/superpowers/specs/2026-10-15-jogo-coringa-regras-motor-design.md`), com os ajustes do sub-projeto 5
   (`2026-10-27-ajustes-design.md`) e a regra do 16 (a Ressurreição no instante da quadra, §1.12 e vizinhas). `RULES_VERSION` 5,
   `STATE_SCHEMA` 5.
 
 ## Fila
 
-Os blocos B, C e D da spec do playtest (`2026-11-03-playtest-design.md`), nessa ordem, cada um com plano aprovado antes ("Agora").
+Os blocos C e D da spec do playtest (`2026-11-03-playtest-design.md`), nessa ordem, cada um com plano aprovado antes ("Agora").
 
 ## Esperando o autor (histórico das fatias e dos blocos anteriores)
 
