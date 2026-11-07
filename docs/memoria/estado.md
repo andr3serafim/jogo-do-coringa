@@ -1,9 +1,16 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-07**, a placa do momento da Guarda na `main`, nada em curso. Antes de seguir,
+> Sobrescrito a cada atualização. **Última: 2026-11-07**, o plano do bloco B em curso na `feat/playtest-bloco-b`. Antes de seguir,
 > confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
+
+- **Em curso (2026-11-07): o plano do bloco B** (ponto 15, o golpe final; "aprovado, prossiga.", `decisoes.md` 2026-11-07 (2)). Branch
+  `feat/playtest-bloco-b`, saída da `main` em `8b6ee88`, no checkout principal. **Próximo passo exato:** escrever
+  `docs/superpowers/plans/2026-11-07-playtest-bloco-b.md` (modelo: o plano da fatia 4b; a spec do playtest §4, §8 e §10), commitar, subir e
+  levar ao autor as escolhas (sem folga no `SCENE_MS`; o retrato que racha em toda derrota por vida; a cena de 2,4 s por causa do carimbo
+  de 1,5 s; o jeito de executar). Nada de código antes da aprovação dele. Achados do mapeamento: a `especiais.json` termina no seu golpe
+  comum (passo 178→179) e a `absolutos.json` no do Bot (99→100); o retrato hoje só racha na Exódia (`FightHud`, `exodiaStage` no `Stage`).
 
 - **Onde está:** a `main` tem tudo (fast-forward até este commit; as duas CI verdes no commit antes deste, `4c1cd25`, run
   `42338855114`). O checkout principal está na `feat/placa-momento-guarda`, igual à `main`. **Trabalho novo sai de uma branch nova da

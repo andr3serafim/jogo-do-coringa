@@ -6,6 +6,20 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-07 (2): as placas aprovadas, e o plano do bloco B
+
+Depois da entrega da placa do momento da Guarda (2026-11-07 (1)), sem pergunta pendente, ele escreveu:
+
+> aprovado, prossiga.
+
+**Leitura:**
+- **[I]** "aprovado" vale para o que foi entregue nas placas em 2026-11-06 e 07, como a mensagem descreveu (as frases e os casos em que
+  elas aparecem). Ele não as viu jogando: a conferência no playtest continua na lista dele.
+- **[I]** "prossiga" é o próximo da fila (`decisoes.md` 2026-11-03 (4)): o plano do **bloco B** (ponto 15, o golpe final, spec do playtest
+  §4), escrito para ele aprovar antes da execução, como nos blocos A e E. O deploy e o playtest continuam com ele.
+
+---
+
 ## 2026-11-07 (1): a placa do momento da Guarda com a linha do quinto caso
 
 Perguntado "Aplico a mesma linha na placa do momento da Guarda?", depois de saber que a placa do momento em que o oponente põe K na Guarda
