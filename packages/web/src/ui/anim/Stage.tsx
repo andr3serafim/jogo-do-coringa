@@ -23,7 +23,7 @@ import { LazyMotion, MotionConfig } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
 import type { Ribbon } from '../../model/copy.ts';
 import { healRibbon } from '../../model/copy.ts';
-import { bannerRibbon, desolationShown, effectsOf, fieldTarget, insigniaShown, lifeChange, NO_EFFECTS, resurrectionInfo, ribbonText } from '../../model/effects.ts';
+import { bannerRibbon, defeatShown, desolationShown, effectsOf, fieldTarget, insigniaShown, lifeChange, NO_EFFECTS, resurrectionInfo, ribbonText } from '../../model/effects.ts';
 import { roomNames } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import type { ImpactForce } from '../../model/impact.ts';
@@ -174,7 +174,17 @@ export function Stage({ snapshot, reducedMotion, onSettled, online = false, chil
     if (run.beats[at]!.scene === null) return 2;
     return exodia?.beat === run.beats[at] ? exodia.stage : 0;
   }, [busy, index, run, exodia]);
-  const defeated = useCallback((_who: PlayerId, lost: boolean) => lost && exodiaStage() >= 2, [exodiaStage]);
+  // O retrato racha em toda derrota pela vida (decisoes.md 2026-11-07 (3), B2): na Exódia, em `crackAt`; no golpe final, no impacto.
+  const defeated = useCallback(
+    (_who: PlayerId, lost: boolean) => {
+      if (!lost) return false;
+      if (!busy || index < 0) return true;
+      const now = run.beats[index];
+      const cracked = now?.scene === 'EXODIA' ? exodia?.beat === now && exodia.stage >= 2 : hitLanded;
+      return defeatShown(run.beats, index, cracked);
+    },
+    [busy, index, run, exodia, hitLanded],
+  );
   const drained = useCallback((_who: PlayerId, lost: boolean) => lost && exodiaStage() >= 1, [exodiaStage]);
   // A desolação da fileira que caiu aparece quando a poeira assenta (sub-projeto 6 §7.4).
   const [settled, setSettled] = useState<Beat | null>(null);

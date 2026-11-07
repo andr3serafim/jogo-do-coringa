@@ -153,13 +153,17 @@ function Side({ side, view, player, name, holder }: SideProps) {
   const seen = onSeen && marked ? () => onSeen(zoneKey(zone)) : undefined;
   const max = view.config.hp;
   const anim = useAnim();
-  // A Exódia do outro acabou a partida (sub-projeto 6 §7.3): a vida vai a zero, também para o leitor de tela, e o retrato racha.
+  // A Exódia do outro acabou a partida (sub-projeto 6 §7.3): a vida vai a zero, também para o leitor de tela. O retrato racha nela e em
+  // toda derrota pela vida (decisoes.md 2026-11-07 (3), B2); a W.O. e o abandono não racham.
   const { phase } = view;
-  const lost = phase.kind === 'GAME_OVER' && phase.result.reason === 'EXODIA' && phase.result.winner !== player.id;
-  const hp = lost ? 0 : player.hp;
+  const beaten = phase.kind === 'GAME_OVER' && phase.result.winner !== player.id;
+  const byExodia = beaten && phase.result.reason === 'EXODIA';
+  const lost = byExodia || (beaten && phase.result.reason === 'HP');
+  const hp = byExodia ? 0 : player.hp;
   const defeated = anim.defeated(player.id, lost);
-  // A vida mostrada conta na batida que mexe nela (o golpe, a cura) até o valor da `view`, que é a verdade (aria-valuenow).
-  const { shown: shownHp, target: hpTarget } = useCountedLife(player.id, player.hp, anim.drained(player.id, lost));
+  // A vida mostrada conta na batida que mexe nela (o golpe, a cura) até o valor da `view`, que é a verdade (aria-valuenow). Na derrota pela
+  // vida a `view` já a traz e o golpe a desce; só a Exódia a escorre.
+  const { shown: shownHp, target: hpTarget } = useCountedLife(player.id, player.hp, anim.drained(player.id, byExodia));
   const damage = anim.fx.damage?.target === player.id ? anim.fx.damage : null;
   const impact = anim.fx.impact?.target === player.id ? anim.fx.impact : null;
   const hpName = `Vida de ${name}`;

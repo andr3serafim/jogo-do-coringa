@@ -133,6 +133,19 @@ export function desolationShown(beats: readonly Beat[], index: number, key: stri
   return beats[fall]!.scene === null || settled === beats[fall];
 }
 
+/**
+ * O retrato do perdedor rachado na batida `index` (`decisoes.md` 2026-11-07 (3), B2: toda derrota pela vida racha, como a Exódia). A
+ * batida fatal é a da Exódia ou a do golpe final: antes dela, inteiro; nela, a partir do instante dela (`cracked`: o `crackAt` da Exódia,
+ * o impacto do golpe final; no `catchUp`, sem cena, na hora); depois dela, rachado. Sem batida fatal (o Ataque Absoluto e o Reflect que
+ * matam ficam com as cenas deles), racha na batida do `GameOver`. Sem nenhuma das duas na linha do tempo, a partida acabou antes: rachado.
+ */
+export function defeatShown(beats: readonly Beat[], index: number, cracked: boolean): boolean {
+  const fatal = beats.findLastIndex((beat) => beat.event.type === 'Exodia' || beat.scene === 'FINAL_BLOW');
+  if (fatal >= 0) return index === fatal ? beats[fatal]!.scene === null || cracked : index > fatal;
+  const over = beats.findIndex((beat) => beat.event.type === 'GameOver');
+  return over < 0 || index >= over;
+}
+
 /** O que a cena da Ressurreição lê da mesa: a vaga onde a carta pousa (`-1` sem ela) e a quadra que acende. */
 export interface RisingInfo {
   landIndex: number;

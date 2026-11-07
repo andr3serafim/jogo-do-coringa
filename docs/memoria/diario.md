@@ -16,6 +16,10 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     `GameOver` pela vida, só ao vivo), `SCENE_MOMENTS.FINAL_BLOW`, `FINAL_BLOW_MS` (2,4 s), `finalBlowTitle`, `finalBlowInfo` e o
     `sceneText`. **Ruling:** os testes que listam todas as cenas (`RARE_SCENE_MS`, a tabela do protocolo e `FIELD_SCENES`) mudaram de
     propósito; o da tabela do protocolo passou a comparar só as cenas com folga, e confere que o golpe final não está no `SCENE_MS` (B1).
+  - **Task 2 (o retrato que racha): feita.** `defeatShown` (`effects.ts`) troca o `exodiaStage` no `defeated` do `Stage`; o `FightHud` racha
+    na derrota pela vida e na Exódia (a W.O. não), e a vida a 0 e o `drained` seguem só da Exódia. O teste "o fim pela vida não racha
+    retrato nenhum" virou "racha o de quem perdeu" (B2). **Ruling:** a batida fatal (a Exódia ou o golpe final) vale sozinha, sem exigir o
+    `GameOver` na mesma linha do tempo: os testes antigos da Exódia emitem só o `Exodia` (o motor sempre emite os dois juntos).
 
 ---
 

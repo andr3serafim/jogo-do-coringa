@@ -6,6 +6,7 @@ import {
   bannerText,
   damageBeatIndex,
   dealsOf,
+  defeatShown,
   delaysOf,
   desolationShown,
   effectsOf,
@@ -837,5 +838,42 @@ describe('o golpe final na mesa (bloco B do playtest, ponto 15)', () => {
     expect(finalBlowTitle('p1', 'p1')).toBe('GOLPE FINAL!');
     expect(finalBlowTitle('p2', 'p1')).toBe(FINAL_BLOW_LOSS_TITLE);
     expect(SCENE_TITLE.FINAL_BLOW).toBe('GOLPE FINAL!');
+  });
+});
+
+describe('quando o retrato do perdedor racha (decisoes.md 2026-11-07 (3), B2)', () => {
+  const kill = (attacker: 'p1' | 'p2'): GameEvent => ({ type: 'DamageDealt', attacker, defender: attacker === 'p1' ? 'p2' : 'p1', attack: 300, defense: 50, damage: 250 });
+  const over = (winner: 'p1' | 'p2', reason: 'HP' | 'EXODIA' = 'HP'): GameEvent => ({ type: 'GameOver', result: { kind: 'WIN', winner, reason } });
+
+  it('no golpe final: antes do impacto, inteiro; no impacto, rachado; depois, rachado', () => {
+    const beats = beatsOf(kill('p2'), over('p2'));
+    expect(beats[0]!.scene).toBe('FINAL_BLOW');
+    expect(defeatShown(beats, 0, false)).toBe(false);
+    expect(defeatShown(beats, 0, true)).toBe(true);
+    expect(defeatShown(beats, 1, false)).toBe(true);
+  });
+
+  it('antes da batida fatal, inteiro', () => {
+    expect(defeatShown(beatsOf({ type: 'TurnStarted', player: 'p2' }, kill('p2'), over('p2')), 0, true)).toBe(false);
+  });
+
+  it('na Exódia: no instante dela (crackAt), e no catchUp, sem cena, na batida dela', () => {
+    const beats = beatsOf({ type: 'Exodia', player: 'p2' }, over('p2', 'EXODIA'));
+    expect(defeatShown(beats, 0, false)).toBe(false);
+    expect(defeatShown(beats, 0, true)).toBe(true);
+    const flat = buildTimeline([{ type: 'Exodia', player: 'p2' }, over('p2', 'EXODIA')], { ...LIVE, mode: 'catchUp' });
+    expect(defeatShown(flat, 0, false)).toBe(true);
+  });
+
+  it('o Ataque Absoluto que mata (fica como está): racha na faixa do fim, logo depois da cena dele', () => {
+    const beats = beatsOf({ type: 'AbsoluteAttack', player: 'p2' }, kill('p2'), over('p2'));
+    expect(beats.map((b) => b.scene)).not.toContain('FINAL_BLOW');
+    expect(defeatShown(beats, 0, true)).toBe(false);
+    expect(defeatShown(beats, 1, true)).toBe(false);
+    expect(defeatShown(beats, 2, false)).toBe(true);
+  });
+
+  it('sem o fim nesta linha do tempo (a partida acabou antes), rachado', () => {
+    expect(defeatShown(beatsOf(kill('p2')), 0, false)).toBe(true);
   });
 });

@@ -214,6 +214,52 @@ describe('o retrato do perdedor na Exódia (sub-projeto 6 §7.3)', () => {
   });
 });
 
+describe('o retrato de quem perde pela vida (bloco B do playtest, ponto 15; decisoes.md 2026-11-07 (3), B2)', () => {
+  const cracked = (container: HTMLElement) => container.querySelector('[data-retrato="voce"][data-derrotado]') !== null;
+  const hp = (container: HTMLElement) => container.querySelector('[data-lado="voce"] [data-hp]')!.textContent;
+  const result = { kind: 'WIN', winner: 'p2', reason: 'HP' } as const;
+  const HP_OVER: ViewSpec = { ...THEIRS, self: { ...THEIRS.self, hp: 0 }, phase: { kind: 'GAME_OVER', result } };
+  const KILL: GameEvent = { type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 237, defense: 50, damage: 187 };
+  const END: GameEvent = { type: 'GameOver', result };
+  const T = SCENE_MOMENTS.FINAL_BLOW;
+
+  it('no golpe final, antes do impacto a vida é a de antes e o retrato está inteiro; no impacto racha, e a vida desce a 0', () => {
+    const m = mount(THEIRS);
+    emit(m, HP_OVER, [KILL, END]);
+    expect(scene(m.container)).toHaveAttribute('data-cena', 'FINAL_BLOW');
+    advance(T.hitAt - 1);
+    expect(cracked(m.container)).toBe(false);
+    expect(hp(m.container)).toBe('187');
+    advance(1);
+    expect(cracked(m.container)).toBe(true);
+    advance(HIT_COUNT_MS + 100);
+    expect(hp(m.container)).toBe('0');
+    advance(RARE_SCENE_MS.FINAL_BLOW);
+    expect(cracked(m.container)).toBe(true);
+  });
+
+  it('o pulo no meio: rachado e 0 na hora, e a mesa libera', async () => {
+    const m = mount(THEIRS);
+    emit(m, HP_OVER, [KILL, END]);
+    advance(300);
+    expect(cracked(m.container)).toBe(false);
+    await m.user.click(stage(m.container));
+    expect(cracked(m.container)).toBe(true);
+    expect(hp(m.container)).toBe('0');
+    expect(busy(m.container)).toBe(false);
+  });
+
+  it('o Ataque Absoluto que mata fica com a cena dele: o retrato só racha na faixa do fim, depois dela', () => {
+    const m = mount(THEIRS);
+    emit(m, HP_OVER, [ABSOLUTE, KILL, END]);
+    expect(scene(m.container)).toHaveAttribute('data-cena', 'ABSOLUTE_ATTACK');
+    advance(SCENE_MOMENTS.ABSOLUTE_ATTACK.hitAt + 100);
+    expect(cracked(m.container)).toBe(false);
+    advance(RARE_SCENE_MS.ABSOLUTE_ATTACK - SCENE_MOMENTS.ABSOLUTE_ATTACK.hitAt);
+    expect(cracked(m.container)).toBe(true);
+  });
+});
+
 describe('cenas raras (U3): a figura, o título que carimba e os raios', () => {
   const figure = (container: HTMLElement) => container.querySelector('[data-figura]');
 

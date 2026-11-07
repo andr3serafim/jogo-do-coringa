@@ -682,9 +682,13 @@ describe('mesa: o placar de luta (sub-projeto 6 §3)', () => {
     expect(hp).toEqual(['0', '214']);
   });
 
-  it('o fim pela vida não racha retrato nenhum', () => {
+  it('o fim pela vida racha o retrato de quem perdeu, e só o dele (decisoes.md 2026-11-07 (3), B2); a W.O. não racha', () => {
+    const first = mount({ ...DRAFT, phase: { kind: 'GAME_OVER', result: { kind: 'WIN', winner: 'p2', reason: 'FORFEIT' } } });
+    expect(first.container.querySelector('[data-derrotado]')).toBeNull();
+    first.unmount();
     const { container } = mount({ ...DRAFT, phase: { kind: 'GAME_OVER', result: { kind: 'WIN', winner: 'p2', reason: 'HP' } } });
-    expect(container.querySelector('[data-derrotado]')).toBeNull();
+    expect(container.querySelector('[data-retrato="voce"]')).toHaveAttribute('data-derrotado');
+    expect(container.querySelector('[data-retrato="oponente"]')).not.toHaveAttribute('data-derrotado');
     expect(placar().getByRole('meter', { name: 'Vida de André' })).toHaveAttribute('aria-valuenow', '187');
   });
 

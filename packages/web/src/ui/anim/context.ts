@@ -91,8 +91,9 @@ export interface Anim {
    */
   insignia(player: PlayerId, active: boolean): boolean;
   /**
-   * O retrato de `player` racha (sub-projeto 6 §7.3). `lost` diz se a `view` acabou com a Exódia do outro: parado, vale ele; com a
-   * batida da Exódia tocando, só a partir de `crackAt` (e no pulo, na hora).
+   * O retrato de `player` racha (sub-projeto 6 §7.3; decisoes.md 2026-11-07 (3), B2). `lost` diz se a `view` acabou com a Exódia do outro
+   * ou pela vida: parado, vale ele; com as batidas tocando, a partir do instante da batida fatal (`crackAt` na Exódia, o impacto no golpe
+   * final, a faixa do fim no Ataque Absoluto e no Reflect que matam; `defeatShown`), e no pulo, na hora.
    */
   defeated(player: PlayerId, lost: boolean): boolean;
   /** A vida de `player` escorre até zero: como `defeated`, mas a partir de `drainAt`, um pouco antes da rachadura. */
