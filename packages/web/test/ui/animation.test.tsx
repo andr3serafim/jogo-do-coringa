@@ -1278,17 +1278,17 @@ describe('efeitos da batida (spec §4.2)', () => {
       expect(hp()).toBe(87);
     });
 
-    it('o golpe que mata conta até a vida do motor, mesmo abaixo de 0', () => {
+    it('o golpe que mata conta até 0 e para ali, sem saltar depois (o motor fica com a vida negativa; o protótipo do golpe final mostra 0)', () => {
       const m = mount(THEIRS);
       const kill: GameEvent = { type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 300, defense: 100, damage: 200 };
       emit(m, { ...THEIRS, self: { ...THEIRS.self, hp: -13 } }, [ATTACK, kill]);
       advance(300);
       advance(1);
-      // Perto do fim da batida a contagem já passou de 0, como a vida do motor (o placar sempre mostrou a vida da `view`).
+      // Perto do fim da batida a contagem já chegou a 0; a vida em repouso também é 0, então nada salta no fim (o que tirou o primeiro corte, f16057a).
       advance(580);
-      expect(hp()).toBeLessThan(0);
+      expect(hp()).toBe(0);
       advance(100);
-      expect(hp()).toBe(-13);
+      expect(hp()).toBe(0);
     });
 
     it('com movimento reduzido, a vida vai direto à nova, sem o trecho verde', () => {

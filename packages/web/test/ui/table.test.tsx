@@ -682,6 +682,12 @@ describe('mesa: o placar de luta (sub-projeto 6 §3)', () => {
     expect(hp).toEqual(['0', '214']);
   });
 
+  it('o golpe que passa da vida que restava mostra 0, e não a vida negativa do motor (bloco B do playtest: a vida zera)', () => {
+    mount({ ...DRAFT, self: { ...DRAFT.self, hp: -118 }, phase: { kind: 'GAME_OVER', result: { kind: 'WIN', winner: 'p2', reason: 'HP' } } });
+    expect(placar().getByRole('meter', { name: 'Vida de André' })).toHaveAttribute('aria-valuenow', '0');
+    expect(document.querySelector('[data-lado="voce"] [data-hp]')).toHaveTextContent(/^0$/);
+  });
+
   it('o fim pela vida racha o retrato de quem perdeu, e só o dele (decisoes.md 2026-11-07 (3), B2); a W.O. não racha', () => {
     const first = mount({ ...DRAFT, phase: { kind: 'GAME_OVER', result: { kind: 'WIN', winner: 'p2', reason: 'FORFEIT' } } });
     expect(first.container.querySelector('[data-derrotado]')).toBeNull();

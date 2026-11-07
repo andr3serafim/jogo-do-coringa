@@ -159,11 +159,14 @@ function Side({ side, view, player, name, holder }: SideProps) {
   const beaten = phase.kind === 'GAME_OVER' && phase.result.winner !== player.id;
   const byExodia = beaten && phase.result.reason === 'EXODIA';
   const lost = byExodia || (beaten && phase.result.reason === 'HP');
-  const hp = byExodia ? 0 : player.hp;
+  // O golpe que passa da vida que restava deixa o motor com vida negativa; a mesa mostra 0 (bloco B dos pontos do playtest: a vida zera).
+  const hp = byExodia ? 0 : Math.max(0, player.hp);
   const defeated = anim.defeated(player.id, lost);
   // A vida mostrada conta na batida que mexe nela (o golpe, a cura) até o valor da `view`, que é a verdade (aria-valuenow). Na derrota pela
   // vida a `view` já a traz e o golpe a desce; só a Exódia a escorre.
-  const { shown: shownHp, target: hpTarget } = useCountedLife(player.id, player.hp, anim.drained(player.id, byExodia));
+  const counted = useCountedLife(player.id, player.hp, anim.drained(player.id, byExodia));
+  const shownHp = Math.max(0, counted.shown);
+  const hpTarget = Math.max(0, counted.target);
   const damage = anim.fx.damage?.target === player.id ? anim.fx.damage : null;
   const impact = anim.fx.impact?.target === player.id ? anim.fx.impact : null;
   const hpName = `Vida de ${name}`;
