@@ -9,9 +9,10 @@
   `decisoes.md` 2026-11-07 (3)): `docs/superpowers/plans/2026-11-07-playtest-bloco-b.md`, na branch `feat/playtest-bloco-b` (saída da `main`
   em `8b6ee88`), no checkout principal, aqui mesmo, tarefa por tarefa, com um revisor novo no fim. As cinco tarefas estão feitas (`cb8809f`,
   `f073fee`, `6af1b6e`, `f433752`, `0927176`), mais a vida do derrotado que para em 0 (`aa34530`); o E2E das cenas passou (22 de 22) e a
-  medição está em `notas/medicao-bloco-b.md`. **Próximo passo exato:** a revisão da branch inteira (`8b6ee88..0927176`), num subagente
-  (B6); os achados Critical e Important consertados com teste primeiro, os Minor no diário; depois o `pnpm check`, o push, as duas CI e o
-  fast-forward da `main`. Se a sessão cair no meio, refaça a revisão a partir do pacote (`review-package` da skill) ou leia o diff à mão.
+  medição está em `notas/medicao-bloco-b.md`. A revisão da branch inteira foi feita (subagente; pronta com correções), e os dois achados
+  importantes foram consertados (`9f97d6e`, `734e450`); os menores estão no `diario.md` 2026-11-07 (2). **Próximo passo exato:** o push da
+  branch (o pre-push roda o `pnpm check`), as duas CI verdes (`check` e `e2e`), o fast-forward da `main` até a branch, o push da `main` e
+  este estado de volta ao "nada em curso".
   Achados do mapeamento: a `especiais.json` termina no seu golpe comum (passo 178→179) e a `absolutos.json` no do Bot (99→100); o retrato
   hoje só racha na Exódia (`FightHud`, `exodiaStage` no `Stage`), e o teste "o fim pela vida não racha retrato nenhum" muda com a B2.
 
