@@ -40,12 +40,22 @@ describe('a placa do momento', () => {
       title: 'Bot pôs 1 K na Guarda',
       consequence: 'o K absorve um golpe inteiro',
     });
+    // Com o mínimo da cura, o golpe comum que um K absorve deixa 1 K, e aquele golpe não cura: a linha da placa de estado
+    // (decisoes.md 2026-11-07 (1)).
     const two: GameEvent = { type: 'GuardPlayed', player: 'p2', cards: [face('k1', 'K'), face('k2', 'K')] };
-    expect(momentPlate(two, scenarioAt({ opponent: { guard: ['K', 'K'] } }).view, NAMES)).toEqual({
+    const twoK = scenarioAt({ self: { attackRow: [10, 9] }, opponent: { guard: ['K', 'K'], defenseRow: [3] } }).view;
+    const absorbed = previewAttack(twoK, 'self');
+    expect(absorbed.outcome).toBe('GUARD_ABSORBS');
+    expect(defenseHealActive({ guard: twoK.opponent.guard.slice(absorbed.breaks.defenderGuard) }, twoK.config)).toBe(false);
+    expect(momentPlate(two, twoK, NAMES)).toEqual({
       title: 'Bot pôs 2 K na Guarda',
-      consequence: 'com 2 K, a Defesa dele que cai o cura',
+      consequence: 'com 2 K depois do golpe, a Defesa dele que cai vira vida',
     });
-    const three = momentPlate(one, scenarioAt({ opponent: { guard: ['K', 'K', 'K'] } }).view, NAMES)!;
+    expect(momentPlate(two, twoK, NAMES)?.consequence).toBe(plateLine('cura', false, twoK));
+    // Com 3 K, o golpe que um K absorve deixa 2, e a cura vale: a frase de antes é verdadeira.
+    const threeK = scenarioAt({ self: { attackRow: [10, 9] }, opponent: { guard: ['K', 'K', 'K'], defenseRow: [3] } }).view;
+    expect(defenseHealActive({ guard: threeK.opponent.guard.slice(previewAttack(threeK, 'self').breaks.defenderGuard) }, threeK.config)).toBe(true);
+    const three = momentPlate(one, threeK, NAMES)!;
     expect(three.consequence).toBe('com 3 K, a Defesa dele que cai o cura');
     expect(`${three.title} ${three.consequence}`).not.toMatch(/Exódia/);
   });
@@ -57,7 +67,7 @@ describe('a placa do momento', () => {
     expect(momentPlate(two, armed, NAMES)?.consequence).toBe('o seu Ataque Absoluto quebra todos os K');
     const mirror = scenarioAt({ self: { attackRow: [10], attackBuffs: ['J', 'J', 'J', 'J'] }, opponent: { guard: ['K', 'K'], reflect: true } }).view;
     expect(previewAttack(mirror, 'self').breaks.defenderGuard).toBe(0);
-    expect(momentPlate(two, mirror, NAMES)?.consequence).toBe('com 2 K, a Defesa dele que cai o cura');
+    expect(momentPlate(two, mirror, NAMES)?.consequence).toBe('com 2 K depois do golpe, a Defesa dele que cai vira vida');
   });
 
   it('a Armadilha num J, num Q e num K seus', () => {

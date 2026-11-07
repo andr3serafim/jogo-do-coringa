@@ -444,14 +444,16 @@ function plateEdge(kind: PlateKind, owner: PlateSide, other: PlateSide, view: Pl
   }
 }
 
+/** No mínimo da cura, o golpe que um K absorve deixa a Guarda abaixo dele, e aquele golpe não cura (decisoes.md 2026-11-06 (1)). */
+const healAtMinimum = (owner: { guard: readonly unknown[] }, view: PlayerView): boolean => owner.guard.length === view.config.defenseHealGuard;
+
 /** A linha do que a marca faz, do lado de quem a vê, e a do caso de borda quando a mesa está nele. */
 export function plateLine(kind: PlateKind, self: boolean, view: PlayerView): string {
   const [owner, other] = self ? [view.self, view.opponent] : [view.opponent, view.self];
   const side = self ? 0 : 1;
   if (plateEdge(kind, owner, other, view)) return PLATE_EDGE[kind]![side];
   const line = PLATE_LINE[kind][side];
-  // No mínimo da cura, o golpe que um K absorve deixa a Guarda abaixo dele, e aquele golpe não cura (decisoes.md 2026-11-06 (1)).
-  return kind === 'cura' && owner.guard.length === view.config.defenseHealGuard ? `com ${owner.guard.length} K depois do golpe, ${line}` : line;
+  return kind === 'cura' && healAtMinimum(owner, view) ? `com ${owner.guard.length} K depois do golpe, ${line}` : line;
 }
 
 /** A placa do momento da especial do oponente: o que ela fez e, quando o evento diz, a consequência com os números do motor. */
@@ -509,12 +511,15 @@ export function momentPlate(event: GameEvent, view: PlayerView, names: Names): M
       const owner = side(event.player);
       const count = event.cards.length;
       // O seu Ataque Absoluto quebra a Guarda inteira antes de tudo (e a cura dele conta os K que sobram): ele vem antes; o Reflect dele
-      // o seguraria (decisoes.md 2026-11-04 (1)).
+      // o seguraria (decisoes.md 2026-11-04 (1)). No mínimo da cura, a linha da placa de estado: o golpe que um K absorve deixa a Guarda
+      // abaixo dele e não cura (decisoes.md 2026-11-07 (1)).
       const consequence =
         !owner.reflect && absoluteAttackArmed(self, view.config)
           ? 'o seu Ataque Absoluto quebra todos os K'
           : defenseHealActive(owner, view.config)
-            ? `com ${owner.guard.length} K, a Defesa dele que cai o cura`
+            ? healAtMinimum(owner, view)
+              ? plateLine('cura', event.player === view.me, view)
+              : `com ${owner.guard.length} K, a Defesa dele que cai o cura`
             : count === 1
               ? 'o K absorve um golpe inteiro'
               : 'cada K absorve um golpe inteiro';
