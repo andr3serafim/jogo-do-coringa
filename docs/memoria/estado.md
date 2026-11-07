@@ -1,21 +1,19 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-07**, a placa do momento da Guarda em curso na `feat/placa-momento-guarda`. Antes de
-> seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
+> Sobrescrito a cada atualização. **Última: 2026-11-07**, a placa do momento da Guarda na `main`, nada em curso. Antes de seguir,
+> confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Em curso (2026-11-07): a placa do momento da Guarda** ("Sim, aplique", `decisoes.md` 2026-11-07 (1)). Branch
-  `feat/placa-momento-guarda`, saída da `main` em `b2f1087` (as duas CI verdes nela), no checkout principal. Código em `51b7945`
-  (`pnpm check` verde), medida e entrada no `diario.md` 2026-11-07 (1). **Próximo passo exato:** push da branch, as duas CI verdes,
-  fast-forward da `main` até a branch, push da `main` e este estado de volta ao "nada em curso".
-
-- **Onde está:** a `main` tem tudo (fast-forward até este commit; as duas CI verdes no último commit de código e de memória antes deste,
-  `5254763`, run `42301083851`). O checkout principal está na `feat/placa-cura-passiva`, igual à `main`. **Trabalho novo sai de uma
-  branch nova da `main`** (prefixo `feat/`, para a CI rodar). Nada sem commit além do de sempre (abaixo). Nenhuma sessão paralela aberta.
-- **Feito em 2026-11-06:** o quinto caso de placa ("Sim, aplique", `decisoes.md` 2026-11-06 (1); `diario.md` 2026-11-06 (1)): a placa
-  "Cura passiva" diz "o Ataque Absoluto dele quebra os K antes da cura" contra o Ataque Absoluto armado do outro, e "com 2 K depois do
-  golpe, a sua Defesa que cai vira vida" com exatamente 2 K. Código em `2b26577`.
+- **Onde está:** a `main` tem tudo (fast-forward até este commit; as duas CI verdes no commit antes deste, `4c1cd25`, run
+  `42338855114`). O checkout principal está na `feat/placa-momento-guarda`, igual à `main`. **Trabalho novo sai de uma branch nova da
+  `main`** (prefixo `feat/`, para a CI rodar). Nada sem commit além do de sempre (abaixo). Nenhuma sessão paralela aberta.
+- **Feito em 2026-11-06 e 07:**
+  - o quinto caso de placa ("Sim, aplique", `decisoes.md` 2026-11-06 (1); `diario.md` 2026-11-06 (1)): a placa "Cura passiva" diz "o
+    Ataque Absoluto dele quebra os K antes da cura" contra o Ataque Absoluto armado do outro, e "com 2 K depois do golpe, a sua Defesa
+    que cai vira vida" com exatamente 2 K. Código em `2b26577`;
+  - a placa do momento da Guarda com a mesma linha, com 2 K ("Sim, aplique", `decisoes.md` 2026-11-07 (1); `diario.md` 2026-11-07 (1)).
+    Código em `51b7945`.
 - **Feito nesta leva (2026-11-03 e 04), na ordem:**
   - **o desenho dos pontos do playtest virou spec** (`docs/superpowers/specs/2026-11-03-playtest-design.md`), com as respostas do autor às
     8 perguntas (`decisoes.md` 2026-11-03 (4)): a fatia 5 aprovada, a ordem dos blocos, a regra do 16 dele e os 3 K só com a aura;
@@ -27,18 +25,16 @@
   - **os quatro textos de placa no caso de borda** ("Corrija os quatro", `decisoes.md` 2026-11-04 (1); `diario.md` 2026-11-04 (1)).
 - **Próximo passo exato:** é a vez do autor (abaixo). Quando ele voltar:
   1. o que ele disser do playtest entra no `decisoes.md`, com o texto dele, antes de virar código;
-  2. se ele quiser, a placa do momento da Guarda com a mesma linha do quinto caso (abaixo);
-  3. depois, os blocos que faltam da spec do playtest, nesta ordem (`decisoes.md` 2026-11-03 (4)): **B** (ponto 15, o golpe final, §4), **C**
+  2. depois, os blocos que faltam da spec do playtest, nesta ordem (`decisoes.md` 2026-11-03 (4)): **B** (ponto 15, o golpe final, §4), **C**
      (pontos 10, 11 e 13) e **D** (pontos 5 e 14). Cada um com plano escrito e aprovado por ele antes da execução, como os blocos A e E.
 - **Esperando o autor:**
   - **jogar** os blocos A e E e as placas novas. O treino já mostra tudo; o online só depois do `pnpm deploy:server` dele, que leva a folga
     do momento no prazo, o PASS guardado depois do Ás, o conserto do Equipar vazio e a janela da Ressurreição. O deploy fecha as salas
     abertas (`STATE_SCHEMA` 5), e as partidas guardadas abrem com o aviso de versão (`RULES_VERSION` 5);
   - **as frases novas das placas são de quem escreveu** (ele aprovou corrigir, não as palavras): conferir no playtest;
-  - **o quinto caso de placa:** feito em 2026-11-06 (acima). As duas frases novas ("o Ataque Absoluto dele quebra os K antes da cura", "com 2 K depois do golpe, a sua Defesa que cai vira vida") entram
-    na conferência do playtest com as outras;
-  - **a placa do momento da Guarda** (`diario.md` 2026-11-06 (1)): "com 2 K, a Defesa dele que cai o cura" tem a mesma imprecisão do
-    quinto caso, e ele não a aprovou. Proposta: a mesma linha da placa de estado ("com 2 K depois do golpe, …");
+  - **o quinto caso de placa e a placa do momento da Guarda:** feitos em 2026-11-06 e 07 (acima). As frases novas ("o Ataque Absoluto
+    dele quebra os K antes da cura", "com 2 K depois do golpe, a sua Defesa que cai vira vida", também no momento em que o Bot põe K na
+    Guarda) entram na conferência do playtest com as outras;
   - **os pequenos do bloco A, não feitos** (`diario.md` 2026-11-03 (6), "menores"): a explicação da cura passiva se perde na partida se a
     primeira cura for pulada ou chegar num `catchUp`; as placas "Cura passiva" e "Ataque Absoluto armado" aparecem 1,6 s antes de o K ou o J
     pousar; o `copy.ts` segue fora da cobertura;
