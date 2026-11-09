@@ -682,6 +682,21 @@ describe('mesa: o placar de luta (sub-projeto 6 §3)', () => {
     expect(hp).toEqual(['0', '214']);
   });
 
+  it('a espada e o escudo de quem lidera (bloco C, ponto 13): o ouro no Ataque maior e na Defesa maior, pelos totais do motor', () => {
+    const spec: ViewSpec = { ...DRAFT, self: { ...DRAFT.self, attackRow: [10, 10, 10], defenseRow: [2] }, opponent: { ...DRAFT.opponent, attackRow: [3], defenseRow: [9, 9, 9] } };
+    const { view } = scenarioAt(spec);
+    expect(attackPower(view.self)).toBeGreaterThan(attackPower(view.opponent));
+    expect(defensePower(view.opponent)).toBeGreaterThan(defensePower(view.self));
+    const { container } = mount(spec);
+    const leaders = [...container.querySelectorAll('[data-fileira] [data-lider]')].map((el) => el.closest('[data-fileira]')!.getAttribute('data-fileira'));
+    expect(leaders.sort()).toEqual(['p1:ATK', 'p2:DEF']);
+  });
+
+  it('no empate, e com os dois Ataques vazios, ninguém lidera', () => {
+    const tie = mount({ ...DRAFT, self: { ...DRAFT.self, attackRow: [], attackBuffs: [], defenseRow: [5], defenseBuffs: [] }, opponent: { ...DRAFT.opponent, attackRow: [], attackBuffs: [], defenseRow: [5], defenseBuffs: [] } });
+    expect(tie.container.querySelector('[data-lider]')).toBeNull();
+  });
+
   it('os bônus em escala (bloco C, ponto 10): cada zona com o seu nível, e nenhum texto novo na mesa', () => {
     const { container } = mount({
       ...DRAFT,

@@ -2047,6 +2047,22 @@ describe('CardsDealt e Reflect (spec §4.2)', () => {
     expect(m.container.querySelector('[data-retrato="voce"] [data-escudo-quebra]')).not.toBeNull();
   });
 
+  it('o ouro de quem lidera troca no pouso da carta que vira a liderança, e não quando o passo chega (bloco C, ponto 13)', () => {
+    // A sua Defesa: 23 × 2 = 46; a dele: 14 × 3 = 42. O terceiro Q dele (o momento da especial do oponente) leva a dele a 14 × 4 = 56.
+    const m = mount(THEIRS);
+    const leads = (key: string) => m.container.querySelector(`[data-fileira="${key}"] [data-lider]`) !== null;
+    expect(leads('p1:DEF')).toBe(true);
+    const after: ViewSpec = { ...THEIRS, opponent: { ...THEIRS.opponent, defenseBuffs: ['Q', 'Q', 'Q'] } };
+    const queen = scenarioAt(after).view.opponent.defenseBuffs.at(-1)!;
+    emit(m, after, [{ type: 'BuffPlayed', player: 'p2', card: queen, as: 'Q' }]);
+    advance(800);
+    expect(leads('p1:DEF')).toBe(true);
+    expect(leads('p2:DEF')).toBe(false);
+    advance(2_000);
+    expect(leads('p1:DEF')).toBe(false);
+    expect(leads('p2:DEF')).toBe(true);
+  });
+
   it('a conta da fileira acompanha o total mostrado: não mostra o multiplicador novo com o total velho', () => {
     const m = mount(THEIRS);
     const row = () => screen.getByRole('group', { name: 'Sua fileira de defesa' });

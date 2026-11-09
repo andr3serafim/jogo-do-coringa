@@ -25,6 +25,7 @@ import { MenuButton } from './GameMenu.tsx';
 import { Hand } from './Hand.tsx';
 import { HistoryButton, HistoryPanel, PC_QUERY } from './History.tsx';
 import { tableNames, type TableNames } from './labels.ts';
+import { LeadProvider } from './lead-store.ts';
 import { PlayerField } from './PlayerField.tsx';
 import { useClock } from './useClock.ts';
 
@@ -230,6 +231,8 @@ function TableView({
               no painel de baixo) não rola nada. No PC eles não crescem além do que pedem (a sobra fica com a mão, centrada), e a
               coluna do histórico, com o menu, nunca rola junto. */}
           <div data-campos className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-none pc:flex-initial [&>*]:flex-none">
+            {/* A liderança (bloco C, ponto 13): as fileiras dos dois campos informam os totais num armazém só (não põe nó no DOM). */}
+            <LeadProvider>
             {pc ? null : hint?.panel}
             <PlayerField
               side="opponent"
@@ -262,6 +265,7 @@ function TableView({
               onOpenGraveyard={onOpenGraveyard}
             />
             <PlayerField side="self" view={view} player={self} name={names.self} />
+            </LeadProvider>
           </div>
           <div className="flex flex-none flex-col pb-[env(safe-area-inset-bottom)] pc:flex-1 pc:flex-row pc:items-center pc:gap-7 pc:px-6 pc:pb-0 pc:text-papel">
             <Hand cards={view.self.hand} />

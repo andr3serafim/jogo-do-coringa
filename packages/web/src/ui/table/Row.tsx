@@ -32,6 +32,7 @@ import { AttackIcon, DefenseIcon } from './icons.tsx';
 import { useTableUi } from './context.ts';
 import { RowDesolation, useDesolationClosing } from './RowDesolation.tsx';
 import { TableCard } from './TableCard.tsx';
+import { useLead, useReportTotal } from './lead-store.ts';
 
 export interface RowProps {
   /** Nome acessível do grupo: "Sua fileira de ataque". */
@@ -50,6 +51,40 @@ export interface RowProps {
 const CAPTION = { ATK: 'Ataque', DEF: 'Defesa' } as const;
 /** A figura antes do total (decisoes.md 2026-11-01 (1)): a palavra fica só para o leitor de tela. */
 const FIGURE = { ATK: AttackIcon, DEF: DefenseIcon } as const;
+
+/**
+ * A figura do total com o ouro de quem lidera (bloco C dos pontos do playtest, ponto 13): o medalhão de ouro fica atrás da figura, sem mudar o
+ * espaço da coluna do total (58 px no celular), com o brilho que passa (`data-brilho-lider`, fora do movimento reduzido). Quando passa a liderar
+ * depois de a mesa montar, o ouro chega com um sopro (só `scale` e `opacity`).
+ */
+function LeadFigure({ kind, leading, reduced }: { kind: keyof typeof FIGURE; leading: boolean; reduced: boolean }) {
+  const Figure = FIGURE[kind];
+  const medal = useRef<HTMLSpanElement>(null);
+  const mounted = useRef(false);
+  useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true;
+      return;
+    }
+    if (!leading || reduced) return;
+    const motion = medal.current?.animate?.([{ scale: '0.6', opacity: 0 }, { scale: '1.15', opacity: 1, offset: 0.6 }, { scale: '1' }], { duration: 360, easing: 'ease-out' });
+    return () => motion?.cancel();
+  }, [leading, reduced]);
+  return (
+    <span className="relative inline-grid place-items-center">
+      {leading ? (
+        <span
+          ref={medal}
+          aria-hidden="true"
+          data-lider=""
+          data-brilho-lider={reduced ? undefined : ''}
+          className="lider-total absolute -inset-1 rounded-full pc:-inset-1.5"
+        />
+      ) : null}
+      <Figure className="relative size-3.5 pc:size-6" />
+    </span>
+  );
+}
 
 interface Conta {
   base: number;
@@ -167,11 +202,13 @@ export function Row({ label, kind, side, limit, aim, droppable = false, targets 
   const vacancies = Math.max(0, limit - cards.length);
   // O total mostrado espera a batida do dano e conta até o valor do motor.
   const shownTotal = useCountedNumber(total);
+  // A liderança compara o total que a fileira mostra (o que espera o pouso e conta na batida do golpe; decisoes.md 2026-11-08 (2), C7).
+  useReportTotal(side.id, kind, shownTotal);
+  const leading = useLead(side.id, kind);
   const totalRef = useTrend(total, shownTotal, hold.landed, anim.busy, anim.reduced);
   const conta = useShownConta(base, total);
   const key = rowKey(side.id, kind);
   const lit = anim.fx.rows.has(key);
-  const Figure = FIGURE[kind];
   const { desolated: desolatedRows } = useTableUi();
   const desolated = anim.desolated(key, desolatedRows.has(key));
   const closing = useDesolationClosing(desolated, anim.reduced);
@@ -215,7 +252,7 @@ export function Row({ label, kind, side, limit, aim, droppable = false, targets 
       </ul>
       <div className="flex w-[58px] shrink-0 flex-col items-end text-right pc:w-24">
         <span className="flex items-center gap-0.5 pc:gap-1.5">
-          <Figure className="size-3.5 pc:size-6" />
+          <LeadFigure kind={kind} leading={leading} reduced={anim.reduced} />
           <span className="sr-only">{CAPTION[kind]}</span>
           <span
             ref={totalRef}

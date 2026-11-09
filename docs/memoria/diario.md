@@ -31,6 +31,11 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     `max(2, limite − 1)`). **Ruling:** a camada de poder fica num invólucro posicionado em volta da lista (um filho não-`li` dentro do `ul`
     quebraria a lista para o leitor de tela). **Ruling (foto):** as cartas de todas as zonas ficam por cima das camadas de poder (`z-[1]`):
     a aura dos 4 J sobe até a Guarda de cima. Foto dos 4 J armados (`especiais.json`, 98→99): 57 quadros/s.
+  - **Task 4 (a espada e o escudo de quem lidera): feita.** `lead-store.ts` (`leaderOf`, o `LeadProvider` em volta dos dois campos, sem nó no
+    DOM; `useReportTotal` e `useLead`, com uma assinatura por tipo de fileira) e o `LeadFigure` da `Row` (o medalhão de ouro atrás da figura,
+    sem mudar o espaço da coluna do total, com o brilho que passa e o sopro quando passa a liderar). A lista das animações sem fim foi a 10.
+    **Ruling:** a fileira informa o total que mostra (`shownTotal`, o contado), e não o alvo (`total`): o alvo muda quando o passo chega, e a C7
+    pede a troca no pouso e na batida do golpe. **Ruling:** o sopro não toca no primeiro desenho da mesa, só quando a liderança troca.
 
 ---
 
