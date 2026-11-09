@@ -68,7 +68,7 @@ export function ZonePower({ kind, level, reduced, busy }: ZonePowerProps) {
       {kind === 'Q' && level >= 2 ? (
         <svg
           viewBox="0 0 24 26"
-          data-muralha={level === 2 && !reduced ? '' : undefined}
+          data-muralha-zona={level === 2 && !reduced ? '' : undefined}
           className="absolute left-1/2 top-1/2 h-[150%] -translate-x-1/2 -translate-y-1/2 overflow-visible"
         >
           {level === 3 ? (

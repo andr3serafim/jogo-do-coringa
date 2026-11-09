@@ -715,6 +715,15 @@ describe('mesa: o placar de luta (sub-projeto 6 §3)', () => {
     expect(zone('p1', 'J')).toHaveAttribute('data-soltar');
   });
 
+  it('a muralha que respira atrás dos 3 Q tem o atributo dela, e a folha não toca na muralha da cena da Defesa Absoluta', () => {
+    const { container } = mount({ ...DRAFT, self: { ...DRAFT.self, defenseBuffs: ['Q', 'Q', 'Q'] } });
+    expect(container.querySelector('[data-campo="p1"] [data-poder="Q"] [data-muralha-zona]')).not.toBeNull();
+    // A cena (`AbsoluteDefense.tsx`) marca a muralha de tijolos com `data-muralha`: uma regra com esse seletor a faria pulsar durante a
+    // cena, inclusive com movimento reduzido.
+    const css = readFileSync(resolve(import.meta.dirname, '../../src/styles.css'), 'utf8');
+    expect(css).not.toMatch(/\[data-muralha\]/);
+  });
+
   it('a aura da iniciativa no retrato de quem a segura há 5 rodadas seguidas, com o selo e o texto do leitor de tela (bloco C, ponto 11)', () => {
     const { container } = mount({ ...DRAFT, initiative: 'self', lastInitiative: { holder: 'self', changed: false, self: 9, opponent: 3, streak: 5 } });
     const mine = container.querySelector('[data-lado="voce"]')!;

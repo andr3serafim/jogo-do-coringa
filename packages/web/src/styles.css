@@ -841,7 +841,7 @@ li[data-joga]::after {
   }
 }
 
-[data-muralha] {
+[data-muralha-zona] {
   animation: muralha 3.2s ease-in-out infinite;
 }
 
