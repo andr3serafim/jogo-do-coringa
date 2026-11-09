@@ -6,12 +6,13 @@
 import type { GameEvent } from '@coringa/engine';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FLASH_WINDOW_MS } from '../../src/model/flash.ts';
 import { bannerReadMs, readingMs } from '../../src/model/reading.ts';
 import { Session } from '../../src/model/session.ts';
 import { DEFAULT_PREFS } from '../../src/model/storage.ts';
 import { BEAT_MS, INVERT_COOLDOWN_MS, INVERT_MIN_HOLD_MS, NO_INVERT, RARE_SCENE_MS, type SceneKind } from '../../src/model/timeline.ts';
+import { AURA_BOIL_MS } from '../../src/ui/anim/aura.ts';
 import { SCENE_MOMENTS } from '../../src/model/scene-moments.ts';
 import { useAnim, useBoardBusy } from '../../src/ui/anim/context.ts';
 import { HIT_COUNT_MS, Stage } from '../../src/ui/anim/Stage.tsx';
@@ -2061,6 +2062,70 @@ describe('CardsDealt e Reflect (spec §4.2)', () => {
     advance(2_000);
     expect(leads('p1:DEF')).toBe(false);
     expect(leads('p2:DEF')).toBe(true);
+  });
+
+  it('a aura da iniciativa e a dos 4 J fervem com a mesa parada e param durante as batidas (bloco C, relógio único)', () => {
+    const spec: ViewSpec = {
+      ...THEIRS,
+      initiative: 'self',
+      lastInitiative: { holder: 'self', changed: false, self: 9, opponent: 3, streak: 5 },
+      self: { ...THEIRS.self, attackBuffs: ['J', 'J', 'J', 'J'] },
+    };
+    const m = mount(spec);
+    const shapes = () =>
+      [
+        m.container.querySelector('[data-aura-iniciativa] path')!.getAttribute('d'),
+        m.container.querySelector('[data-campo="p1"] [data-poder-camada="J3"] path')!.getAttribute('d'),
+      ].join('|');
+    const rest = shapes();
+    advance(AURA_BOIL_MS);
+    expect(shapes()).not.toBe(rest);
+    // As batidas de um golpe: a mesa fica ocupada, e as formas ficam onde estavam.
+    emit(m, spec, [TURN, ATTACK, HIT]);
+    expect(busy(m.container)).toBe(true);
+    // O relógio tem 4 quadros: confere a cada um (4 de uma vez voltaria ao mesmo desenho).
+    const during = shapes();
+    for (let i = 0; i < 3; i++) {
+      advance(AURA_BOIL_MS);
+      expect(busy(m.container)).toBe(true);
+      expect(shapes()).toBe(during);
+    }
+  });
+
+  describe('o sopro do ouro de quem lidera (bloco C, ponto 13)', () => {
+    /** As fileiras cujo ouro tocou o sopro (`animate` no `[data-lider]`). */
+    let puffs: string[] = [];
+    beforeEach(() => {
+      puffs = [];
+      HTMLElement.prototype.animate = function (this: HTMLElement) {
+        if (this.hasAttribute('data-lider')) puffs.push(this.closest('[data-fileira]')?.getAttribute('data-fileira') ?? '?');
+        return { cancel() {}, finished: Promise.resolve() } as unknown as Animation;
+      } as HTMLElement['animate'];
+    });
+    afterEach(() => {
+      delete (HTMLElement.prototype as Partial<HTMLElement>).animate;
+    });
+    const queenLands = (m: ReturnType<typeof mount>) => {
+      const after: ViewSpec = { ...THEIRS, opponent: { ...THEIRS.opponent, defenseBuffs: ['Q', 'Q', 'Q'] } };
+      const queen = scenarioAt(after).view.opponent.defenseBuffs.at(-1)!;
+      emit(m, after, [{ type: 'BuffPlayed', player: 'p2', card: queen, as: 'Q' }]);
+      advance(2_800);
+    };
+
+    it('não toca no primeiro desenho da mesa, só quando a liderança troca', () => {
+      const m = mount(THEIRS);
+      expect(m.container.querySelectorAll('[data-lider]').length).toBeGreaterThan(0);
+      expect(puffs).toEqual([]);
+      queenLands(m);
+      expect(puffs).toEqual(['p2:DEF']);
+    });
+
+    it('com movimento reduzido, o ouro troca sem sopro', () => {
+      const m = mount(THEIRS, { prefs: { reduceMotion: true } });
+      queenLands(m);
+      expect(m.container.querySelector('[data-fileira="p2:DEF"] [data-lider]')).not.toBeNull();
+      expect(puffs).toEqual([]);
+    });
   });
 
   it('o nível da zona sobe no pouso da carta, como o total e o ouro, e não quando o passo chega (bloco C, ponto 10)', () => {

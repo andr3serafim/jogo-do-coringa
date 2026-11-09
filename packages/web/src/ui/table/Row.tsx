@@ -58,16 +58,16 @@ const FIGURE = { ATK: AttackIcon, DEF: DefenseIcon } as const;
  * espaço da coluna do total (58 px no celular), com o brilho que passa (`data-brilho-lider`, fora do movimento reduzido). Quando passa a liderar
  * depois de a mesa montar, o ouro chega com um sopro (só `scale` e `opacity`).
  */
-function LeadFigure({ kind, leading, reduced }: { kind: keyof typeof FIGURE; leading: boolean; reduced: boolean }) {
+function LeadFigure({ kind, leading, reduced }: { kind: keyof typeof FIGURE; leading: boolean | null; reduced: boolean }) {
   const Figure = FIGURE[kind];
   const medal = useRef<HTMLSpanElement>(null);
-  const mounted = useRef(false);
+  // O sopro só vale na troca de "não lidera" para "lidera": no primeiro desenho a mesa ainda não sabe (`null`), e o ouro que já estava lá
+  // quando ela soube não sopra. Ligar ou desligar o movimento reduzido não toca o sopro de novo.
+  const before = useRef<boolean | null>(null);
   useEffect(() => {
-    if (!mounted.current) {
-      mounted.current = true;
-      return;
-    }
-    if (!leading || reduced) return;
+    const was = before.current;
+    before.current = leading;
+    if (was !== false || leading !== true || reduced) return;
     const motion = medal.current?.animate?.([{ scale: '0.6', opacity: 0 }, { scale: '1.15', opacity: 1, offset: 0.6 }, { scale: '1' }], { duration: 360, easing: 'ease-out' });
     return () => motion?.cancel();
   }, [leading, reduced]);

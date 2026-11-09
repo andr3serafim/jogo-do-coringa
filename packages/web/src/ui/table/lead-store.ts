@@ -25,12 +25,13 @@ class LeadStore {
     for (const listener of [...this.#listeners[kind]]) listener();
   }
 
-  leading(player: PlayerId, kind: RowName): boolean {
+  /** `null` enquanto a mesa não tem os dois totais (o primeiro desenho: as fileiras informam nos efeitos). */
+  leading(player: PlayerId, kind: RowName): boolean | null {
     const totals = this.#totals[kind];
     const mine = totals.get(player);
-    if (mine === undefined) return false;
     const others = [...totals].filter(([id]) => id !== player).map(([, total]) => total);
-    return others.length > 0 && others.every((other) => leaderOf(mine, other) === 'a');
+    if (mine === undefined || others.length === 0) return null;
+    return others.every((other) => leaderOf(mine, other) === 'a');
   }
 
   subscribe(kind: RowName, listener: () => void): () => void {
@@ -57,12 +58,16 @@ export function useReportTotal(player: PlayerId, kind: RowName, total: number): 
 }
 
 const never = () => () => {};
-const nobody = () => false;
+const unknown = () => null;
 
-/** A fileira `kind` de `player` lidera agora. Sem o armazém (uma fileira fora da mesa), ninguém. */
-export function useLead(player: PlayerId, kind: RowName): boolean {
+/**
+ * A fileira `kind` de `player` lidera agora: `true` ou `false`, e `null` enquanto a mesa não sabe (no primeiro desenho, antes de as
+ * duas fileiras informarem; sem o armazém, uma fileira fora da mesa, sempre). Quem desenha trata `null` como "não lidera", e o sopro da
+ * troca só vale de `false` para `true`: o ouro que já está lá quando a mesa aparece não sopra.
+ */
+export function useLead(player: PlayerId, kind: RowName): boolean | null {
   const store = useContext(LeadContext);
   const subscribe = useCallback((listener: () => void) => (store ? store.subscribe(kind, listener) : never()), [store, kind]);
-  const snapshot = useCallback(() => (store ? store.leading(player, kind) : nobody()), [store, player, kind]);
+  const snapshot = useCallback(() => (store ? store.leading(player, kind) : unknown()), [store, player, kind]);
   return useSyncExternalStore(subscribe, snapshot);
 }

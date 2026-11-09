@@ -54,6 +54,19 @@ describe('o armazém da liderança', () => {
     expect(view.getByTestId('atk-p2')).toHaveTextContent('-');
   });
 
+  it('com um total só, a mesa ainda não sabe (null): o ouro que já está lá quando ela sabe não sopra', () => {
+    function Row() {
+      useReportTotal('p1', 'ATK', 10);
+      return <span data-testid="so">{String(useLead('p1', 'ATK'))}</span>;
+    }
+    const view = render(
+      <LeadProvider>
+        <Row />
+      </LeadProvider>,
+    );
+    expect(view.getByTestId('so')).toHaveTextContent('null');
+  });
+
   it('sem o provedor, ninguém lidera', () => {
     function Row() {
       useReportTotal('p1', 'ATK', 10);
