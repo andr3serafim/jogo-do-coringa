@@ -22,6 +22,15 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     do plano): a forma troca por atributo, fora do React, como nas cenas, e nada redesenha a cada 70 ms. **Ruling:** um invólucro em volta do
     retrato põe a aura atrás dele (vem antes) e o selo no canto de cima, por fora; a capa do retrato não fica coberta. **Ruling:** as brasas
     sobem a cada 2 quadros do relógio (140 ms, ~8 no ar), sem intervalo próprio. O teste do efeito da decisão ganhou o `streak`.
+    **Achado na foto, consertado (`3fe5db3`):** posicionada, a aura cobria o nome e o começo da barra (no celular, o V de VOCÊ); o bloco do
+    nome e da barra ficou posicionado e por cima. Foto da super aura em 1366 e 360: 58 a 59 quadros/s com a CPU 4×.
+  - **Task 3 (os bônus em escala): feita.** `zoneLevel` (`model/zone-level.ts`, pela config e pelas marcas do motor), `ZonePower.tsx` (os
+    raios entre J vizinhos no nível 2 e 3, a aura do Ataque Absoluto no 3, a muralha que respira atrás dos Q no 2, o escudo de ouro no 3) e o
+    CSS das camadas das cartas (o aceso de ouro e de papel, o pulso verde dos K da cura e a brasa dos K da ameaça, só com opacidade). A lista
+    das animações sem fim passou de 6 para 9, de propósito. **Ruling:** uma carta só nunca acende, nem com o limite em 2 (o nível 2 pede
+    `max(2, limite − 1)`). **Ruling:** a camada de poder fica num invólucro posicionado em volta da lista (um filho não-`li` dentro do `ul`
+    quebraria a lista para o leitor de tela). **Ruling (foto):** as cartas de todas as zonas ficam por cima das camadas de poder (`z-[1]`):
+    a aura dos 4 J sobe até a Guarda de cima. Foto dos 4 J armados (`especiais.json`, 98→99): 57 quadros/s.
 
 ---
 

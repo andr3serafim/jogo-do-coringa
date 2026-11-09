@@ -792,8 +792,9 @@ describe('relógio (spec §3.8, §10.3)', () => {
     // em outro lugar.
     const css = readFileSync(resolve(import.meta.dirname, '../../src/styles.css'), 'utf8');
     const endless = [...css.matchAll(/animation:\s*([\w-]+)[^;]*\binfinite\b/g)].map((match) => match[1]);
-    expect(endless.sort()).toEqual(['brilho-quadra', 'gesto-alma', 'gesto-cura', 'gesto-cura-mais', 'gesto-espelho', 'respira']);
-    expect(css.match(/\binfinite\b/g)).toHaveLength(6);
+    // Bloco C do playtest, ponto 10: o pulso verde dos K da cura passiva, a brasa dos K da ameaça e a muralha que respira atrás dos Q.
+    expect(endless.sort()).toEqual(['brasa-k', 'brilho-quadra', 'gesto-alma', 'gesto-cura', 'gesto-cura-mais', 'gesto-espelho', 'muralha', 'pulso-k', 'respira']);
+    expect(css.match(/\binfinite\b/g)).toHaveLength(9);
     expect(css).not.toMatch(/animation-iteration-count/);
   });
 

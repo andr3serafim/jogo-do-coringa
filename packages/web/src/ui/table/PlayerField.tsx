@@ -6,6 +6,7 @@ import { absoluteAttackArmed, defenseHealActive, type PlayerView, type PublicPla
 import { useId, type ReactNode } from 'react';
 import { cardDropKey, DROP, type DropKey } from '../../model/drag.ts';
 import { rowKey } from '../../model/effects.ts';
+import { zoneLevel, type ZoneKind } from '../../model/zone-level.ts';
 import { useAnim } from '../anim/context.ts';
 import { CardBack } from '../cards/Card.tsx';
 import { useTableUi } from './context.ts';
@@ -25,6 +26,7 @@ import { Row } from './Row.tsx';
 import { TableCard } from './TableCard.tsx';
 import { MirrorMark } from './MirrorMark.tsx';
 import { StatePlate } from './StatePlate.tsx';
+import { ZonePower } from './ZonePower.tsx';
 
 export interface PlayerFieldProps {
   side: 'self' | 'opponent';
@@ -174,13 +176,21 @@ function Zones({ player, name, view, self }: { player: PublicPlayer; name: strin
   return (
     <div className="campo-zonas">
       {/* No seu campo, a zona inteira recebe a carta da mão (J, Q, K); no do oponente, cada carta é um alvo possível (A, Selvagem, Sacrifício). */}
-      <Zone label="Guarda" icon={<GuardIcon className={ZONE_ICON} />} cards={player.guard} count drop={self ? DROP.guard : 'targets'} />
+      <Zone
+        label="Guarda"
+        icon={<GuardIcon className={ZONE_ICON} />}
+        cards={player.guard}
+        count
+        drop={self ? DROP.guard : 'targets'}
+        power={{ kind: 'K', level: zoneLevel('K', player, view.config) }}
+      />
       <Zone
         label="Bônus de ataque"
         icon={<AttackBuffIcon className={ZONE_ICON} />}
         cards={player.attackBuffs}
         wildAs="J"
         drop={self ? DROP.attackBuffs : 'targets'}
+        power={{ kind: 'J', level: zoneLevel('J', player, view.config) }}
       />
       <Zone
         label="Bônus de defesa"
@@ -188,6 +198,7 @@ function Zones({ player, name, view, self }: { player: PublicPlayer; name: strin
         cards={player.defenseBuffs}
         wildAs="Q"
         drop={self ? DROP.defenseBuffs : 'targets'}
+        power={{ kind: 'Q', level: zoneLevel('Q', player, view.config) }}
       />
       {player.reflect ? (
         <Zone
@@ -229,10 +240,14 @@ interface ZoneProps {
   does?: string;
   /** O arrasto: a chave da zona inteira (a sua), `'targets'` (cada carta é uma zona `carta:<id>`, a do oponente) ou nada (o Reflect). */
   drop?: DropKey | 'targets';
+  /** Os bônus em escala (bloco C dos pontos do playtest, ponto 10): o tipo da zona e o nível dela (`zoneLevel`). O Reflect não tem. */
+  power?: { kind: ZoneKind; level: 0 | 1 | 2 | 3 };
 }
 
-function Zone({ label, icon, listLabel, cards, wildAs, count = false, mark, drop, does }: ZoneProps) {
+function Zone({ label, icon, listLabel, cards, wildAs, count = false, mark, drop, does, power }: ZoneProps) {
   const labelId = useId();
+  const anim = useAnim();
+  const level = power?.level ?? 0;
   // Só uma Guarda grande (muitos K) precisa de cartas sobrepostas para caber na linha.
   const overlap = cards.length > 4;
   const roleAt = (index: number) => (typeof wildAs === 'object' ? wildAs[index] : wildAs);
@@ -240,6 +255,9 @@ function Zone({ label, icon, listLabel, cards, wildAs, count = false, mark, drop
     <div
       className={`campo-zona [--soltar-folga:-4px] ${mark ? 'relative' : ''}`}
       data-soltar={drop !== undefined && drop !== 'targets' ? drop : undefined}
+      data-poder={power?.kind}
+      data-nivel={level > 0 ? level : undefined}
+      data-anima={power && level > 0 && !anim.reduced ? `${power.kind}${level}` : undefined}
     >
       {mark}
       {/* A linha do que a zona faz (o Reflect) fica embaixo do título, na largura dele: ao lado, no PC, ela se espremia entre o título e
@@ -262,17 +280,21 @@ function Zone({ label, icon, listLabel, cards, wildAs, count = false, mark, drop
           </p>
         ) : null}
       </div>
+      {/* A camada de poder fica atrás das cartas (vem antes da lista), no tamanho da lista. */}
+      <div className="relative">
+      {power && level > 0 ? <ZonePower kind={power.kind} level={level} reduced={anim.reduced} busy={anim.busy} /> : null}
       <ul
         role="list"
         aria-label={listLabel}
         aria-labelledby={listLabel ? undefined : labelId}
         className="flex min-h-(--mini-h) list-none items-center p-0"
       >
+        {/* As cartas ficam por cima de toda camada de poder (`z-[1]`): a aura dos 4 J sobe até a Guarda, e não pode cobrir os K de lá. */}
         {cards.map((card, index) => (
           <li
             key={card.id}
             data-soltar={drop === 'targets' ? cardDropKey(card.id) : undefined}
-            className="relative flex-none [--soltar-folga:-4px]"
+            className="relative z-[1] flex-none [--soltar-folga:-4px]"
             style={index > 0 ? { marginLeft: overlap ? 'calc(var(--mini-w) * -0.34)' : '3px' } : undefined}
           >
             <TableCard card={card} size="mini" as={card.kind === 'WILD' ? roleAt(index) : undefined} />
@@ -286,6 +308,7 @@ function Zone({ label, icon, listLabel, cards, wildAs, count = false, mark, drop
           />
         ) : null}
       </ul>
+      </div>
     </div>
   );
 }

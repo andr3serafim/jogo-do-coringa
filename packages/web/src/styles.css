@@ -763,6 +763,89 @@ li[data-joga]::after {
 }
 
 /*
+ * Os bônus em escala (bloco C dos pontos do playtest, ponto 10): as cartas de uma zona com nível ganham uma camada desenhada por fora (o
+ * contorno e o halo ficam parados; só a opacidade anima, decisoes.md 2026-11-08 (2), C5). O aceso dos J é de ouro, o dos Q de papel; os K da
+ * cura passiva pulsam em verde, e os K da ameaça de Exódia ganham a brasa vermelha (sem texto: a decisão do autor). A mesa só põe a marca do
+ * movimento (`data-anima`) fora do movimento reduzido: com ele, a camada fica parada, acesa.
+ */
+[data-poder][data-nivel] > div > ul > li::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 5px;
+  pointer-events: none;
+}
+
+[data-poder='J'][data-nivel] > div > ul > li::after {
+  box-shadow:
+    0 0 0 2px var(--color-ouro),
+    0 0 8px 2px rgb(245 194 56 / 0.55);
+}
+
+[data-poder='Q'][data-nivel] > div > ul > li::after {
+  box-shadow:
+    0 0 0 2px var(--color-papel),
+    0 0 9px 3px rgb(255 253 246 / 0.7);
+}
+
+[data-poder='K'][data-nivel='1'] > div > ul > li::after {
+  box-shadow:
+    0 0 0 2px #7fe08f,
+    0 0 8px 2px rgb(42 115 57 / 0.7);
+}
+
+[data-poder='K'][data-nivel='2'] > div > ul > li::after {
+  box-shadow:
+    0 0 0 2px #ff7a5c,
+    0 0 10px 3px rgb(184 38 28 / 0.75);
+}
+
+@keyframes pulso-k {
+  0%,
+  70%,
+  100% {
+    opacity: 0.55;
+  }
+  78% {
+    opacity: 1;
+  }
+}
+
+[data-anima='K1'] > div > ul > li::after {
+  animation: pulso-k 2.6s ease-in-out infinite;
+}
+
+@keyframes brasa-k {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+[data-anima='K2'] > div > ul > li::after {
+  animation: brasa-k 1.8s ease-in-out infinite alternate;
+}
+
+/* A muralha (os Q a um do limite): o escudo tracejado respira atrás das cartas. */
+@keyframes muralha {
+  0%,
+  100% {
+    opacity: 0.55;
+    scale: 0.98;
+  }
+  50% {
+    opacity: 1;
+    scale: 1.02;
+  }
+}
+
+[data-muralha] {
+  animation: muralha 3.2s ease-in-out infinite;
+}
+
+/*
  * A essência da cura passiva (bloco A dos pontos do playtest, ponto 9): uma gota verde, de tinta e papel como o resto da mesa, que voa da
  * carta da Defesa que caiu até o retrato de quem curou (a `Leaving` a anima só com `translate`, `scale` e `opacity`).
  */

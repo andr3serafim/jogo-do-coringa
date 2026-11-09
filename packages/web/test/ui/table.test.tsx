@@ -682,6 +682,24 @@ describe('mesa: o placar de luta (sub-projeto 6 §3)', () => {
     expect(hp).toEqual(['0', '214']);
   });
 
+  it('os bônus em escala (bloco C, ponto 10): cada zona com o seu nível, e nenhum texto novo na mesa', () => {
+    const { container } = mount({
+      ...DRAFT,
+      self: { ...DRAFT.self, attackBuffs: ['J', 'J', 'WILD'], defenseBuffs: ['Q', 'Q', 'Q', 'Q'], absoluteDefense: true, guard: ['K', 'K', 'K'] },
+      opponent: { ...DRAFT.opponent, attackBuffs: ['J'], defenseBuffs: [], guard: ['K', 'K'] },
+    });
+    const zone = (field: string, power: string) => container.querySelector(`[data-campo="${field}"] [data-poder="${power}"]`);
+    expect(zone('p1', 'J')).toHaveAttribute('data-nivel', '2');
+    expect(zone('p1', 'Q')).toHaveAttribute('data-nivel', '3');
+    expect(zone('p1', 'K')).toHaveAttribute('data-nivel', '2');
+    expect(zone('p2', 'J')).not.toHaveAttribute('data-nivel');
+    expect(zone('p2', 'K')).toHaveAttribute('data-nivel', '1');
+    // Os 3 K só ganham a brasa: nenhum aviso escrito (decisoes.md 2026-11-03 (4)).
+    expect(zone('p1', 'K')!.textContent).not.toMatch(/Exódia|ameaça/i);
+    // O arrasto segue igual: a zona inteira recebe a carta da mão.
+    expect(zone('p1', 'J')).toHaveAttribute('data-soltar');
+  });
+
   it('a aura da iniciativa no retrato de quem a segura há 5 rodadas seguidas, com o selo e o texto do leitor de tela (bloco C, ponto 11)', () => {
     const { container } = mount({ ...DRAFT, initiative: 'self', lastInitiative: { holder: 'self', changed: false, self: 9, opponent: 3, streak: 5 } });
     const mine = container.querySelector('[data-lado="voce"]')!;
