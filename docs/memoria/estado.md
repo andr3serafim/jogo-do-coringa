@@ -1,9 +1,18 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-07**, o bloco B (o golpe final) na `main`, nada em curso. Antes de seguir, confira se
-> não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
+> Sobrescrito a cada atualização. **Última: 2026-11-08**, o plano do bloco C esperando o autor, na `feat/playtest-bloco-c`. Antes de seguir,
+> confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
+
+- **Esperando o autor (2026-11-08): o plano do bloco C** (pontos 10, 11 e 13: os bônus em escala, a aura da iniciativa, a espada e o escudo
+  de quem lidera; "Sim, escreva", `decisoes.md` 2026-11-08 (1)), em `docs/superpowers/plans/2026-11-08-playtest-bloco-c.md`, na branch
+  `feat/playtest-bloco-c` (saída da `main` em `792bd62`), no checkout principal. Cinco tarefas: o motor conta a sequência (`streak` no
+  `InitiativeDecision`, `STATE_SCHEMA` 6, `RULES_VERSION` igual), o relógio da mesa e a aura da iniciativa, os bônus em escala, a liderança, e
+  o E2E com as fotos, a medição e o portão do Difícil. **Próximo passo exato:** a resposta dele às escolhas C1 a C9 entra no `decisoes.md`,
+  com o texto dele; depois, a execução como ele escolher (C9). Nada de código antes. Achados do mapeamento: a `especiais.json` tem todos os
+  níveis (3 Q no passo 68, 3 J no 90, 4 J no 99, a sequência 3/5/10 nos 92/111/161, 3 K no 174, a liderança do Ataque no 78); o
+  `PROTOCOL_VERSION` (1) nunca subiu com mudança de estado; as formas da aura (`ui/scenes/aura.ts`) precisam sair do chunk das cenas.
 
 - **Onde está:** a `main` tem tudo (fast-forward até este commit; as duas CI verdes no commit antes deste, `a8aa55b`, run
   `42348114555`). O checkout principal está na `feat/playtest-bloco-b`, igual à `main`. **Trabalho novo sai de uma branch nova da

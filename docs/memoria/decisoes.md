@@ -6,6 +6,19 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-08 (1): o plano do bloco C
+
+Perguntado "Escrevo o plano do bloco C agora?", depois da entrega do bloco B (o golpe final na `main`, `792bd62`), ele escolheu:
+
+> Sim, escreva
+
+**Leitura:**
+- O plano do **bloco C** (pontos 10, 11 e 13 da spec do playtest, §5: os bônus em escala, a aura da iniciativa, a espada e o escudo de quem
+  lidera) é escrito para ele aprovar antes da execução, como nos blocos A, B e E. Nada de código antes.
+- **[I]** Ele não jogou o bloco B antes de pedir o plano: a conferência do golpe final continua na lista dele.
+
+---
+
 ## 2026-11-07 (3): o plano do bloco B aprovado
 
 Perguntado "Aprova o plano do bloco B com as escolhas B1 a B6?", sobre `docs/superpowers/plans/2026-11-07-playtest-bloco-b.md`, ele escolheu:
