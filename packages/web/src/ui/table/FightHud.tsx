@@ -241,7 +241,8 @@ function Side({ side, view, player, name, holder, aura }: SideProps) {
       </span>
       <StreakSeal streak={aura.streak} side={side} />
       </span>
-      <div className="placar-info">
+      {/* Posicionado, o nome e a barra ficam por cima da aura da iniciativa (que é posicionada e vem antes): a aura não cobre a vida. */}
+      <div className="placar-info relative">
         <h2 className="w-full truncate font-madeira text-xs leading-tight uppercase tracking-[0.02em] pc:text-[17px]">
           {name}
           {self && name !== 'Você' ? <span className="font-texto text-[10px] font-normal normal-case pc:text-sm"> (você)</span> : null}
