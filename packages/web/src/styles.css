@@ -768,7 +768,7 @@ li[data-joga]::after {
  * cura passiva pulsam em verde, e os K da ameaça de Exódia ganham a brasa vermelha (sem texto: a decisão do autor). A mesa só põe a marca do
  * movimento (`data-anima`) fora do movimento reduzido: com ele, a camada fica parada, acesa.
  */
-[data-poder][data-nivel] > div > ul > li::after {
+[data-poder][data-nivel] > div > ul > li:not([data-pousando])::after {
   content: '';
   position: absolute;
   inset: -3px;

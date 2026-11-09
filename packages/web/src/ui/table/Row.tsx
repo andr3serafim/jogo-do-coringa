@@ -32,6 +32,7 @@ import { AttackIcon, DefenseIcon } from './icons.tsx';
 import { useTableUi } from './context.ts';
 import { RowDesolation, useDesolationClosing } from './RowDesolation.tsx';
 import { TableCard } from './TableCard.tsx';
+import { useLandingHold, withoutCards } from './landing-hold.ts';
 import { useLead, useReportTotal } from './lead-store.ts';
 
 export interface RowProps {
@@ -98,37 +99,6 @@ interface Conta {
 export const TREND = { rise: '1.3', fall: '0.85', popMs: 320, holdMs: 900 } as const;
 
 /**
- * As cartas que ainda vão pousar (sub-projeto 6 §8): enquanto a carta cai ou voa até a fileira (ou até os bônus que a multiplicam), o total
- * não a conta, e ela entra na conta no pouso dela. A conta continua sendo a do motor, sobre o lado sem essas cartas. O pulo apaga os
- * pousos (`landAt`), e o total volta ao da `view` na hora.
- */
-function useLandingHold(ids: readonly string[]): { pending: ReadonlySet<string>; landed: number } {
-  const anim = useAnim();
-  const key = ids.flatMap((id) => {
-    const landing = anim.landAt(id);
-    return landing === null ? [] : [`${id}@${landing.at}`];
-  }).join(',');
-  const [done, setDone] = useState<{ key: string; ids: ReadonlySet<string> }>({ key: '', ids: new Set() });
-  useEffect(() => {
-    if (key === '') return;
-    // As cartas que pousam no mesmo instante (as do Equipar) entram juntas: um desenho da fileira por instante, e não um por carta.
-    const byInstant = new Map<string, string[]>();
-    for (const entry of key.split(',')) {
-      const at = entry.lastIndexOf('@');
-      const instant = entry.slice(at + 1);
-      byInstant.set(instant, [...(byInstant.get(instant) ?? []), entry.slice(0, at)]);
-    }
-    const timers = [...byInstant].map(([instant, ids]) =>
-      window.setTimeout(() => setDone((prev) => ({ key, ids: new Set([...(prev.key === key ? prev.ids : []), ...ids]) })), Number(instant) * 1000),
-    );
-    return () => timers.forEach((timer) => window.clearTimeout(timer));
-  }, [key]);
-  const landed = done.key === key ? done.ids : new Set<string>();
-  const pending = new Set(key === '' ? [] : key.split(',').map((entry) => entry.slice(0, entry.lastIndexOf('@'))).filter((id) => !landed.has(id)));
-  return { pending, landed: landed.size };
-}
-
-/**
  * O total que muda com a mesa tocando: sobe quando uma carta pousa (`total` e `landed`), desce quando o número mostrado cai (o golpe que
  * conta, a carta que sai). Cresce ou encolhe uma vez e fica marcado (`data-subiu`, que pinta de ouro, ou `data-desceu`, só a marca) até
  * `holdMs` depois da última mudança: a contagem do golpe desce o número a cada quadro, e o encolher não recomeça a cada um. Com movimento
@@ -181,12 +151,6 @@ function useShownConta(base: number, total: number): Conta {
   const [before, setBefore] = useState(now);
   if (count === 'idle' && (before.base !== now.base || before.multiplier !== now.multiplier)) setBefore(now);
   return count === 'idle' ? now : before;
-}
-
-/** O lado sem as cartas `ids` (as que ainda vão pousar). */
-function withoutCards(side: PublicPlayer, ids: ReadonlySet<string>): PublicPlayer {
-  const keep = <T extends { id: string }>(cards: readonly T[]): T[] => cards.filter((card) => !ids.has(card.id));
-  return { ...side, attackRow: keep(side.attackRow), defenseRow: keep(side.defenseRow), attackBuffs: keep(side.attackBuffs), defenseBuffs: keep(side.defenseBuffs) };
 }
 
 export function Row({ label, kind, side, limit, aim, droppable = false, targets = false }: RowProps) {

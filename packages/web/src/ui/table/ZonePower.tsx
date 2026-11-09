@@ -33,7 +33,7 @@ export function ZonePower({ kind, level, reduced, busy }: ZonePowerProps) {
   });
   useBoltSlot(live && kind === 'J' && level >= 2, () => {
     const zone = root.current?.parentElement;
-    const cards = zone ? [...zone.querySelectorAll<HTMLElement>('ul > li')] : [];
+    const cards = zone ? [...zone.querySelectorAll<HTMLElement>('ul > li:not([data-pousando])')] : [];
     if (!root.current || !zone || cards.length < 2) return;
     const i = Math.floor(random.current() * (cards.length - 1));
     const origin = zone.getBoundingClientRect();

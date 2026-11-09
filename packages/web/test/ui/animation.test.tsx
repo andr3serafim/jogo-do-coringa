@@ -2063,6 +2063,35 @@ describe('CardsDealt e Reflect (spec §4.2)', () => {
     expect(leads('p2:DEF')).toBe(true);
   });
 
+  it('o nível da zona sobe no pouso da carta, como o total e o ouro, e não quando o passo chega (bloco C, ponto 10)', () => {
+    // Os 2 Q dele acendem (nível 1); o terceiro (o momento da especial do oponente) é a muralha (nível 2), mas só quando pousa.
+    const m = mount(THEIRS);
+    const zone = () => m.container.querySelector('[data-campo="p2"] [data-poder="Q"]')!;
+    expect(zone()).toHaveAttribute('data-nivel', '1');
+    const after: ViewSpec = { ...THEIRS, opponent: { ...THEIRS.opponent, defenseBuffs: ['Q', 'Q', 'Q'] } };
+    const queen = scenarioAt(after).view.opponent.defenseBuffs.at(-1)!;
+    emit(m, after, [{ type: 'BuffPlayed', player: 'p2', card: queen, as: 'Q' }]);
+    advance(800);
+    expect(zone()).toHaveAttribute('data-nivel', '1');
+    expect(zone().querySelector('[data-poder-camada]')).toHaveAttribute('data-poder-camada', 'Q1');
+    // A vaga da carta que ainda voa não acende (o anel é da `li`, que já está no lugar).
+    expect(zone().querySelectorAll('ul > li[data-pousando]')).toHaveLength(1);
+    advance(2_000);
+    expect(zone()).toHaveAttribute('data-nivel', '2');
+    expect(zone().querySelector('[data-poder-camada]')).toHaveAttribute('data-poder-camada', 'Q2');
+    expect(zone().querySelectorAll('ul > li[data-pousando]')).toHaveLength(0);
+  });
+
+  it('o escudo de ouro da zona dos Q chega com a insígnia do retrato, depois da cena da Defesa Absoluta', () => {
+    const m = mount(THEIRS);
+    const zone = () => m.container.querySelector('[data-campo="p1"] [data-poder="Q"]')!;
+    emit(m, { ...THEIRS, self: { ...THEIRS.self, defenseBuffs: ['Q', 'Q', 'Q', 'Q'], absoluteDefense: true } }, [{ type: 'AbsoluteDefenseStarted', player: 'p1' }]);
+    advance(RARE_SCENE_MS.ABSOLUTE_DEFENSE - 100);
+    expect(zone()).toHaveAttribute('data-nivel', '2');
+    advance(200);
+    expect(zone()).toHaveAttribute('data-nivel', '3');
+  });
+
   it('a conta da fileira acompanha o total mostrado: não mostra o multiplicador novo com o total velho', () => {
     const m = mount(THEIRS);
     const row = () => screen.getByRole('group', { name: 'Sua fileira de defesa' });

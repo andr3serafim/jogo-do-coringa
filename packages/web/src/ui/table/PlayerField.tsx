@@ -23,6 +23,7 @@ import { plateLine } from '../../model/copy.ts';
 import { handCountText } from './labels.ts';
 import { ResurrectIcon } from './ResurrectIcon.tsx';
 import { Row } from './Row.tsx';
+import { useLandingHold, withoutCards } from './landing-hold.ts';
 import { TableCard } from './TableCard.tsx';
 import { MirrorMark } from './MirrorMark.tsx';
 import { StatePlate } from './StatePlate.tsx';
@@ -173,6 +174,13 @@ function Zones({ player, name, view, self }: { player: PublicPlayer; name: strin
     plates.push(<StatePlate key="atk" kind="ataque" does={plateLine('ataque', self, view)} icon={<AbsoluteAttackIcon className={icon} />} />);
   }
 
+  // Os bônus em escala acompanham a mesa que toca, como o total e o ouro de quem lidera: a carta que ainda voa até a zona só conta no pouso
+  // dela, e o escudo de ouro dos Q (a Defesa Absoluta) chega e sai com a insígnia do retrato.
+  const anim = useAnim();
+  const hold = useLandingHold([...player.guard, ...player.attackBuffs, ...player.defenseBuffs].map((card) => card.id));
+  const landed = hold.pending.size === 0 ? player : withoutCards(player, hold.pending);
+  const settled = { ...landed, absoluteDefense: anim.insignia(player.id, player.absoluteDefense) };
+
   return (
     <div className="campo-zonas">
       {/* No seu campo, a zona inteira recebe a carta da mão (J, Q, K); no do oponente, cada carta é um alvo possível (A, Selvagem, Sacrifício). */}
@@ -182,7 +190,8 @@ function Zones({ player, name, view, self }: { player: PublicPlayer; name: strin
         cards={player.guard}
         count
         drop={self ? DROP.guard : 'targets'}
-        power={{ kind: 'K', level: zoneLevel('K', player, view.config) }}
+        power={{ kind: 'K', level: zoneLevel('K', settled, view.config) }}
+        pending={hold.pending}
       />
       <Zone
         label="Bônus de ataque"
@@ -190,7 +199,8 @@ function Zones({ player, name, view, self }: { player: PublicPlayer; name: strin
         cards={player.attackBuffs}
         wildAs="J"
         drop={self ? DROP.attackBuffs : 'targets'}
-        power={{ kind: 'J', level: zoneLevel('J', player, view.config) }}
+        power={{ kind: 'J', level: zoneLevel('J', settled, view.config) }}
+        pending={hold.pending}
       />
       <Zone
         label="Bônus de defesa"
@@ -198,7 +208,8 @@ function Zones({ player, name, view, self }: { player: PublicPlayer; name: strin
         cards={player.defenseBuffs}
         wildAs="Q"
         drop={self ? DROP.defenseBuffs : 'targets'}
-        power={{ kind: 'Q', level: zoneLevel('Q', player, view.config) }}
+        power={{ kind: 'Q', level: zoneLevel('Q', settled, view.config) }}
+        pending={hold.pending}
       />
       {player.reflect ? (
         <Zone
@@ -242,9 +253,11 @@ interface ZoneProps {
   drop?: DropKey | 'targets';
   /** Os bônus em escala (bloco C dos pontos do playtest, ponto 10): o tipo da zona e o nível dela (`zoneLevel`). O Reflect não tem. */
   power?: { kind: ZoneKind; level: 0 | 1 | 2 | 3 };
+  /** As cartas que ainda voam até a zona: a vaga delas fica marcada (`data-pousando`) e não acende antes do pouso. */
+  pending?: ReadonlySet<string>;
 }
 
-function Zone({ label, icon, listLabel, cards, wildAs, count = false, mark, drop, does, power }: ZoneProps) {
+function Zone({ label, icon, listLabel, cards, wildAs, count = false, mark, drop, does, power, pending }: ZoneProps) {
   const labelId = useId();
   const anim = useAnim();
   const level = power?.level ?? 0;
@@ -294,6 +307,7 @@ function Zone({ label, icon, listLabel, cards, wildAs, count = false, mark, drop
           <li
             key={card.id}
             data-soltar={drop === 'targets' ? cardDropKey(card.id) : undefined}
+            data-pousando={pending?.has(card.id) ? '' : undefined}
             className="relative z-[1] flex-none [--soltar-folga:-4px]"
             style={index > 0 ? { marginLeft: overlap ? 'calc(var(--mini-w) * -0.34)' : '3px' } : undefined}
           >
