@@ -5,6 +5,14 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-08 (1): o bloco C, o poder que cresce (pontos 10, 11 e 13)
+
+- **Pedido:** "Sim, escreva" levou ao plano (`docs/superpowers/plans/2026-11-08-playtest-bloco-c.md`), e "Aprovo como está" (`decisoes.md`
+  2026-11-08 (2)) à execução: aqui mesmo, tarefa por tarefa, na branch `feat/playtest-bloco-c`, com um revisor novo no fim.
+- **Andamento** (uma linha por tarefa, com os commits e as escolhas da execução):
+
+---
+
 ## 2026-11-07 (2): o bloco B, o golpe final (ponto 15)
 
 - **Pedido:** "aprovado, prossiga." levou ao plano (`docs/superpowers/plans/2026-11-07-playtest-bloco-b.md`), e "Aprovo como está"

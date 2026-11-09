@@ -6,6 +6,26 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-08 (2): o plano do bloco C aprovado
+
+Perguntado "Aprova o plano do bloco C com as escolhas C1 a C9?", sobre `docs/superpowers/plans/2026-11-08-playtest-bloco-c.md`, ele escolheu:
+
+> Aprovo como está
+
+**Leitura:**
+- As nove escolhas valem como recomendadas:
+  - C1: a sequência no `InitiativeDecision` (`streak`), `STATE_SCHEMA` 6, o `PROTOCOL_VERSION` igual, e a frase da spec §5.2 corrigida;
+  - C2: o selo a partir de 2, a aura a partir de 3;
+  - C3: a aura muda na batida da decisão, com o sopro na troca de mão, dos dois lados;
+  - C4: um relógio e um agendador de raios só, com a saída das formas paradas se a medição não passar;
+  - C5: os brilhos desenhados, só com opacidade;
+  - C6: os níveis pela config do motor;
+  - C7: a liderança pelos totais mostrados, ninguém no empate, a troca no pouso;
+  - C8: o histórico igual e a sequência para o leitor de tela;
+  - C9: a execução aqui, tarefa por tarefa, na branch `feat/playtest-bloco-c`, teste primeiro, com um revisor novo num subagente no fim.
+
+---
+
 ## 2026-11-08 (1): o plano do bloco C
 
 Perguntado "Escrevo o plano do bloco C agora?", depois da entrega do bloco B (o golpe final na `main`, `792bd62`), ele escolheu:
