@@ -28,7 +28,7 @@ export interface BeatEffects {
    * A decisão da iniciativa (sub-projeto 6 §4): quem ficou com ela e se mudou de mão. A espada voa para o retrato novo (ou salta no
    * mesmo) na batida, e não quando o `state` chega.
    */
-  initiative: { holder: PlayerId; changed: boolean } | null;
+  initiative: { holder: PlayerId; changed: boolean; streak: number } | null;
   /** O golpe (sub-projeto 6 §5): quem apanhou e com que peso. A mesa treme e respinga tinta no retrato dele. */
   impact: { target: PlayerId; force: ImpactForce } | null;
 }
@@ -80,7 +80,7 @@ function effectsOfEvent(event: GameEvent, view: PlayerView): Partial<BeatEffects
     case 'ReflectCanceled':
       return { shieldBreak: event.owner };
     case 'InitiativeDecided':
-      return { initiative: { holder: event.player, changed: event.changed } };
+      return { initiative: { holder: event.player, changed: event.changed, streak: event.streak } };
     case 'ReflectPlayed':
       return { cards: fxMap([event.reflect.k.id, event.reflect.j.id, event.reflect.q.id], 'shield') };
     case 'QuadFormed':

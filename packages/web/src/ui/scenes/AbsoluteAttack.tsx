@@ -18,7 +18,7 @@ import { SCENE_MOMENTS } from '../../model/scene-moments.ts';
 import type { ScenePoint, SceneBox } from '../anim/scene-box.ts';
 import type { SceneProps } from '../anim/scenes-loader.ts';
 import { Coringa } from '../cards/Coringa.tsx';
-import { AURA_BOIL_MS, auraVariants, BOLT_FADE_MS, BOLT_HOLD_MS, boltTimes } from './aura.ts';
+import { AURA_BOIL_MS, auraVariants, BOLT_FADE_MS, BOLT_HOLD_MS, boltTimes } from '../anim/aura.ts';
 import { SceneFrame, stageFit } from './SceneFrame.tsx';
 
 const M = SCENE_MOMENTS.ABSOLUTE_ATTACK;

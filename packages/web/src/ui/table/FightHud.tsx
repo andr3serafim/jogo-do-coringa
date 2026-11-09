@@ -20,7 +20,9 @@ import { Coringa } from '../cards/Coringa.tsx';
 import { useSound } from '../sound-context.ts';
 import { useTableUi } from './context.ts';
 import { Insignia } from './Insignia.tsx';
+import { InitiativeAura, StreakSeal } from './InitiativeAura.tsx';
 import { InitiativeSword, SWORD_FLIGHT_MS, type SwordMove, type SwordSide } from './InitiativeSword.tsx';
+import { initiativeTier } from '../../model/initiative-aura.ts';
 import { initiativeScore, initiativeScoreText, initiativeText, phaseShortText, type TableNames } from './labels.ts';
 import { NovoChip } from './NovoChip.tsx';
 import { deadlineKey } from './useClock.ts';
@@ -48,10 +50,12 @@ export function FightHud({ view, names, face, deadline }: FightHudProps) {
   const anim = useAnim();
   const hud = useRef<HTMLElement>(null);
   const sword = useSword(view, anim);
+  const aura = useInitiativeAura(view, anim);
+  const auraOf = (side: SwordSide) => ({ streak: aura.holder === side ? aura.streak : 0, puff: aura.puff?.side === side ? aura.puff.serial : 0 });
   const score = initiativeScore(view);
   return (
     <section ref={hud} aria-label="Placar" data-placar className="placar relative flex-none bg-tinta text-papel">
-      <Side side="voce" view={view} player={view.self} name={names.self} holder={sword.shown === 'voce'} />
+      <Side side="voce" view={view} player={view.self} name={names.self} holder={sword.shown === 'voce'} aura={auraOf('voce')} />
       <div data-placa className="placar-placa flex flex-col items-center text-center">
         {/* Letra lisa, como no protótipo: a textura de madeira borra o rótulo nesse tamanho. O número grande é tipo de madeira. */}
         <h2 className="text-[9px] font-bold uppercase leading-[1.15] tracking-[0.16em] text-papel/70 pc:text-xs">
@@ -82,11 +86,44 @@ export function FightHud({ view, names, face, deadline }: FightHudProps) {
         <p className="sr-only">Iniciativa: {initiativeText(view, names)}</p>
         <p className="sr-only">{initiativeScoreText(view, names)}</p>
       </div>
-      <Side side="oponente" view={view} player={view.opponent} name={names.opponent} holder={sword.shown === 'oponente'} />
+      <Side side="oponente" view={view} player={view.opponent} name={names.opponent} holder={sword.shown === 'oponente'} aura={auraOf('oponente')} />
       <InitiativeSword holder={sword.shown} move={sword.move} reduced={anim.reduced} busy={anim.busy} hud={hud} />
       <RibbonLayer ribbon={anim.ribbon} reduced={anim.reduced} />
     </section>
   );
+}
+
+interface AuraState {
+  holder: SwordSide;
+  streak: number;
+  /** O último sopro: do lado de quem perdeu a iniciativa com a aura acesa (a contagem faz o sopro tocar de novo). */
+  puff: { side: SwordSide; serial: number } | null;
+}
+
+/**
+ * A aura da iniciativa (bloco C dos pontos do playtest, ponto 11; decisoes.md 2026-11-08 (2), C3): como a espada, ela muda na batida da decisão
+ * (`fx.initiative`, com a sequência do motor), e não quando o `state` chega; fora das batidas (a mesa parada, o pulo, o `resync`) vale a `view`, sem
+ * sopro. Quando a iniciativa troca de mão com a aura acesa, ela apaga com o sopro de fumaça.
+ */
+function useInitiativeAura(view: PlayerView, anim: Anim): AuraState {
+  const viewHolder: SwordSide = view.initiative === view.me ? 'voce' : 'oponente';
+  const viewStreak = view.lastInitiative?.streak ?? 0;
+  const [aura, setAura] = useState<AuraState>({ holder: viewHolder, streak: viewStreak, puff: null });
+  const decided = anim.fx.initiative;
+  let current = aura;
+  if (decided !== null) {
+    const holder: SwordSide = decided.holder === view.me ? 'voce' : 'oponente';
+    if (holder !== aura.holder || decided.streak !== aura.streak) {
+      const lit = initiativeTier(aura.streak) > 0;
+      const puff = decided.changed && lit ? { side: aura.holder, serial: (aura.puff?.serial ?? 0) + 1 } : aura.puff;
+      current = { holder, streak: decided.streak, puff };
+      setAura(current);
+    }
+  } else if (!anim.busy && (viewHolder !== aura.holder || viewStreak !== aura.streak)) {
+    current = { ...aura, holder: viewHolder, streak: viewStreak };
+    setAura(current);
+  }
+  return current;
 }
 
 interface SwordState {
@@ -143,9 +180,11 @@ interface SideProps {
   name: string;
   /** Quem tem a iniciativa: o retrato ganha a moldura de ouro (`data-dono`). */
   holder: boolean;
+  /** A aura da iniciativa deste lado: a sequência (0 sem aura) e o sopro (0, nenhum). */
+  aura: { streak: number; puff: number };
 }
 
-function Side({ side, view, player, name, holder }: SideProps) {
+function Side({ side, view, player, name, holder, aura }: SideProps) {
   const self = side === 'voce';
   const zone: MarkZone = self ? 'selfHp' : 'opponentHp';
   const { zones, onSeen } = useTableUi();
@@ -173,6 +212,9 @@ function Side({ side, view, player, name, holder }: SideProps) {
 
   return (
     <div data-lado={side} className={`placar-lado placar-lado--${side}`}>
+      {/* A aura da iniciativa fica atrás do retrato (vem antes dele), e o selo ao lado; o invólucro não muda o tamanho do placar. */}
+      <span className="relative flex-none">
+      <InitiativeAura streak={aura.streak} reduced={anim.reduced} busy={anim.busy} puff={aura.puff} />
       <span
         data-retrato={side}
         data-dono={holder ? '' : undefined}
@@ -196,6 +238,8 @@ function Side({ side, view, player, name, holder }: SideProps) {
             edge={self ? 'left' : 'right'}
           />
         ) : null}
+      </span>
+      <StreakSeal streak={aura.streak} side={side} />
       </span>
       <div className="placar-info">
         <h2 className="w-full truncate font-madeira text-xs leading-tight uppercase tracking-[0.02em] pc:text-[17px]">

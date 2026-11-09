@@ -682,6 +682,29 @@ describe('mesa: o placar de luta (sub-projeto 6 §3)', () => {
     expect(hp).toEqual(['0', '214']);
   });
 
+  it('a aura da iniciativa no retrato de quem a segura há 5 rodadas seguidas, com o selo e o texto do leitor de tela (bloco C, ponto 11)', () => {
+    const { container } = mount({ ...DRAFT, initiative: 'self', lastInitiative: { holder: 'self', changed: false, self: 9, opponent: 3, streak: 5 } });
+    const mine = container.querySelector('[data-lado="voce"]')!;
+    expect(mine.querySelector('[data-aura-iniciativa]')).toHaveAttribute('data-aura-iniciativa', '2');
+    const seal = mine.querySelector('[data-selo-sequencia]')!;
+    expect(seal).toHaveTextContent('×5');
+    expect(seal).toHaveAttribute('aria-hidden', 'true');
+    expect(within(mine as HTMLElement).getByText('5 rodadas seguidas com a iniciativa')).toHaveClass('sr-only');
+    const theirs = container.querySelector('[data-lado="oponente"]')!;
+    expect(theirs.querySelector('[data-aura-iniciativa]')).toBeNull();
+    expect(theirs.querySelector('[data-selo-sequencia]')).toBeNull();
+  });
+
+  it('com 1 rodada, nem aura nem selo; com 2, só o selo', () => {
+    const one = mount({ ...DRAFT, initiative: 'opponent', lastInitiative: { holder: 'opponent', changed: true, self: 0, opponent: 9, streak: 1 } });
+    expect(one.container.querySelector('[data-aura-iniciativa]')).toBeNull();
+    expect(one.container.querySelector('[data-selo-sequencia]')).toBeNull();
+    one.unmount();
+    const two = mount({ ...DRAFT, initiative: 'opponent', lastInitiative: { holder: 'opponent', changed: false, self: 0, opponent: 9, streak: 2 } });
+    expect(two.container.querySelector('[data-aura-iniciativa]')).toBeNull();
+    expect(two.container.querySelector('[data-lado="oponente"] [data-selo-sequencia]')).toHaveTextContent('×2');
+  });
+
   it('o golpe que passa da vida que restava mostra 0, e não a vida negativa do motor (bloco B do playtest: a vida zera)', () => {
     mount({ ...DRAFT, self: { ...DRAFT.self, hp: -118 }, phase: { kind: 'GAME_OVER', result: { kind: 'WIN', winner: 'p2', reason: 'HP' } } });
     expect(placar().getByRole('meter', { name: 'Vida de André' })).toHaveAttribute('aria-valuenow', '0');

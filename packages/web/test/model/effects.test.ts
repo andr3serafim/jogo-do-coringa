@@ -773,10 +773,10 @@ describe('a fita da iniciativa (sub-projeto 6 §4)', () => {
     expect(bannerRibbon({ type: 'CardsDealt', player: 'p1', count: 2 }, names)).toBeNull();
   });
 
-  it('a batida da iniciativa diz à espada quem ficou com ela e se mudou', () => {
+  it('a batida da iniciativa diz à espada (e à aura) quem ficou com ela, se mudou e a sequência', () => {
     const [, beat] = beatsOf({ type: 'TurnStarted', player: 'p1' }, decided('p2', true, 3, 9));
-    expect(effectsOf(beat!, view).initiative).toEqual({ holder: 'p2', changed: true });
-    expect(effectsOf(beatsOf(decided('p1', false, 9, 3))[0]!, view).initiative).toEqual({ holder: 'p1', changed: false });
+    expect(effectsOf(beat!, view).initiative).toEqual({ holder: 'p2', changed: true, streak: 1 });
+    expect(effectsOf(beatsOf(decided('p1', false, 9, 3))[0]!, view).initiative).toEqual({ holder: 'p1', changed: false, streak: 1 });
     expect(effectsOf(beatsOf({ type: 'TurnStarted', player: 'p1' })[0]!, view).initiative).toBeNull();
   });
 });

@@ -1,7 +1,9 @@
 // As auras de energia do Ataque Absoluto e da Exódia (sub-projeto 6 §7.1, §7.3) e os raios pequenos em volta delas. A aura
 // "ferve" trocando o `d` de 3 caminhos entre 4 formas calculadas uma vez (§11: nada de calcular forma a cada quadro). As formas
 // saem da mesma conta do protótipo aprovado, com as mesmas sementes: pontas viradas para cima, maiores no alto, quase nada embaixo.
-import { rng } from '../anim/particles.ts';
+// Mora fora de `ui/scenes/` desde o bloco C dos pontos do playtest: a mesa (no JavaScript inicial) também ferve auras (a da iniciativa, a dos
+// 4 J armados) e não pode puxar o chunk das cenas.
+import { rng } from './particles.ts';
 
 
 /** Um contorno fechado de `n` pontas em volta de uma elipse `rx` × `ry`, com pontas de até `maxL` viradas para cima. */

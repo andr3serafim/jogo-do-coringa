@@ -1355,6 +1355,51 @@ describe('efeitos da batida (spec §4.2)', () => {
     expect(m.container.querySelectorAll('[data-iniciativa]')).toHaveLength(1);
   });
 
+  it('a aura da iniciativa (bloco C, ponto 11): depois de 10 rodadas, segue acesa até a batida da decisão e apaga nela, com o sopro', () => {
+    const before = { ...THEIRS, initiative: 'self', lastInitiative: { holder: 'self', changed: false, self: 9, opponent: 3, streak: 10 } } as const;
+    const m = mount(before);
+    const aura = () => m.container.querySelector('[data-lado="voce"] [data-aura-iniciativa]')?.getAttribute('data-aura-iniciativa') ?? null;
+    expect(aura()).toBe('3');
+    const after = { ...THEIRS, initiative: 'opponent', lastInitiative: { holder: 'opponent', changed: true, self: 3, opponent: 9, streak: 1 } } as const;
+    emit(m, after, [TURN, { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 }, streak: 1 }]);
+    advance(BEAT_MS.banner - 50);
+    expect(aura()).toBe('3');
+    expect(m.container.querySelector('[data-sopro]')).toBeNull();
+    advance(100);
+    expect(aura()).toBeNull();
+    expect(m.container.querySelector('[data-lado="voce"] [data-sopro]')).not.toBeNull();
+  });
+
+  it('a aura sobe na batida da decisão que mantém a iniciativa', () => {
+    const before = { ...THEIRS, initiative: 'self', lastInitiative: { holder: 'self', changed: false, self: 9, opponent: 3, streak: 4 } } as const;
+    const m = mount(before);
+    const aura = () => m.container.querySelector('[data-lado="voce"] [data-aura-iniciativa]')?.getAttribute('data-aura-iniciativa') ?? null;
+    expect(aura()).toBe('1');
+    emit(m, { ...before, lastInitiative: { ...before.lastInitiative, streak: 5 } }, [TURN, { type: 'InitiativeDecided', player: 'p1', changed: false, damage: { p1: 9, p2: 3 }, streak: 5 }]);
+    advance(BEAT_MS.banner - 50);
+    expect(aura()).toBe('1');
+    advance(100);
+    expect(aura()).toBe('2');
+    expect(m.container.querySelector('[data-sopro]')).toBeNull();
+  });
+
+  it('num salto (resync) a aura e o selo vêm direto da view, sem sopro', () => {
+    const m = mount({ ...THEIRS, initiative: 'self', lastInitiative: { holder: 'self', changed: false, self: 9, opponent: 3, streak: 10 } });
+    emit(m, { ...THEIRS, initiative: 'opponent', lastInitiative: { holder: 'opponent', changed: false, self: 0, opponent: 9, streak: 6 } }, [], { resync: true });
+    expect(m.container.querySelector('[data-lado="voce"] [data-aura-iniciativa]')).toBeNull();
+    expect(m.container.querySelector('[data-lado="oponente"] [data-aura-iniciativa]')).toHaveAttribute('data-aura-iniciativa', '2');
+    expect(m.container.querySelector('[data-sopro]')).toBeNull();
+  });
+
+  it('com movimento reduzido a aura fica parada: nenhuma partícula, e a forma não troca', () => {
+    const m = mount({ ...THEIRS, initiative: 'self', lastInitiative: { holder: 'self', changed: false, self: 9, opponent: 3, streak: 10 } }, { prefs: { reduceMotion: true } });
+    const shape = () => m.container.querySelector('[data-aura-iniciativa] path')?.getAttribute('d');
+    const first = shape();
+    advance(1_000);
+    expect(shape()).toBe(first);
+    expect(m.container.querySelectorAll('[data-particula]')).toHaveLength(0);
+  });
+
   it('o voo segue o relógio dele: o state seguinte (o bot responde logo) não corta a espada no ar', () => {
     const m = mount(THEIRS);
     const after = { ...THEIRS, initiative: 'opponent' } as const;

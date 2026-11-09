@@ -16,7 +16,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { SCENE_MOMENTS } from '../../model/scene-moments.ts';
 import type { SceneProps } from '../anim/scenes-loader.ts';
 import { Coringa } from '../cards/Coringa.tsx';
-import { AURA_BOIL_MS, auraVariants, BOLT_FADE_MS, BOLT_HOLD_MS, boltTimes, EXODIA_AURA } from './aura.ts';
+import { AURA_BOIL_MS, auraVariants, BOLT_FADE_MS, BOLT_HOLD_MS, boltTimes, EXODIA_AURA } from '../anim/aura.ts';
 import { spawn } from '../anim/particles.ts';
 import { SceneFrame } from './SceneFrame.tsx';
 

@@ -14,6 +14,14 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     o empate soma. `STATE_SCHEMA` 6. O motor inteiro passou sem `-u` (os golden e os `RULES_DIGESTS` iguais), e o digest do texto do
     `pnpm play` também: nenhuma partida mudou, `RULES_VERSION` fica. Os `InitiativeDecided` literais dos testes da web ganharam
     `streak: 1`, e a `scenarioAt` aceita `lastInitiative.streak` (padrão 1).
+  - **Task 2 (o relógio e a aura da iniciativa): feita.** O `aura.ts` foi para `ui/anim/` (a mesa não puxa o chunk das cenas);
+    `table-clock.ts` (um intervalo só para as auras que fervem, um agendador só para os raios, ≤ 3 por segundo na mesa inteira);
+    `initiative-aura.ts` (os níveis 3, 5 e 10 e o selo a partir de 2); `InitiativeAura.tsx` (as camadas de cada nível, as brasas, os raios
+    da super aura, o sopro) e o `StreakSeal` (o "×N" `aria-hidden` e a frase do leitor de tela); `useInitiativeAura` no `FightHud`, pelo
+    caminho da espada. **Ruling:** o relógio entrega o quadro por chamada (`useAuraBoil(active, onFrame)`), não por estado (`useAuraFrame`
+    do plano): a forma troca por atributo, fora do React, como nas cenas, e nada redesenha a cada 70 ms. **Ruling:** um invólucro em volta do
+    retrato põe a aura atrás dele (vem antes) e o selo no canto de cima, por fora; a capa do retrato não fica coberta. **Ruling:** as brasas
+    sobem a cada 2 quadros do relógio (140 ms, ~8 no ar), sem intervalo próprio. O teste do efeito da decisão ganhou o `streak`.
 
 ---
 

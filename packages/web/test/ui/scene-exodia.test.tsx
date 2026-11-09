@@ -7,7 +7,7 @@ import { roomNames } from '../../src/model/history.ts';
 import { SCENE_MOMENTS } from '../../src/model/scene-moments.ts';
 import { buildTimeline, RARE_SCENE_MS } from '../../src/model/timeline.ts';
 import type { SceneBox } from '../../src/ui/anim/scene-box.ts';
-import { AURA_BOIL_MS } from '../../src/ui/scenes/aura.ts';
+import { AURA_BOIL_MS } from '../../src/ui/anim/aura.ts';
 import { Exodia } from '../../src/ui/scenes/Exodia.tsx';
 
 const BOX: SceneBox = {

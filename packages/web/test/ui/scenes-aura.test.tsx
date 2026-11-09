@@ -1,6 +1,6 @@
 // A aura de energia do Ataque Absoluto (sub-projeto 6 §7.1, §11) e os raios em volta dela (§1: no máximo 3 por segundo).
 import { describe, expect, it } from 'vitest';
-import { auraVariants, BOLT_FADE_MS, boltTimes, EXODIA_AURA } from '../../src/ui/scenes/aura.ts';
+import { auraVariants, BOLT_FADE_MS, boltTimes, EXODIA_AURA } from '../../src/ui/anim/aura.ts';
 
 describe('a aura: 3 camadas × 4 formas pré-calculadas, sempre as mesmas', () => {
   it('cada camada tem 4 caminhos fechados, e duas chamadas dão o mesmo desenho', () => {
