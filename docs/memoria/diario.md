@@ -42,7 +42,10 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     e 55; a troca de mão a 42 e 48, como já estava na `main` (41 e 47, medida em seguida pondo a web da `main` no lugar e restaurando). A spec
     ganhou a §5.4 e a correção do protocolo (C1). Portão do Difícil, rodada 4: 69,0% e 81,5% (iguais às rodadas 1 e 3), p95 146 ms, aprovado.
     **Ruling:** o passo da troca de mão do plano (239→240) era outro: a troca é no 236→237 (contado com o motor). **Ruling:** a troca de mão
-    abaixo de 50 quadros/s fica como achado para o autor, fora do bloco (a `main` já mede o mesmo).
+    abaixo de 50 quadros/s fica como achado para o autor, fora do bloco (a `main` já mede o mesmo). **Ruling:** o E2E do ouro passava por
+    sorte (media no meio do sopro de entrada, com o `scale` abaixo de 1); medindo em repouso (o teste espera as animações do elemento), o
+    medalhão do PC (anel de 6 px, 36 px) passava 1,5 px da fileira por cima e por baixo. O anel ficou 4 px no PC também (32 px, dentro dos 33
+    px da linha do total), como no celular.
 
 ---
 

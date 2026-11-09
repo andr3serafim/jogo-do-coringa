@@ -78,7 +78,7 @@ function LeadFigure({ kind, leading, reduced }: { kind: keyof typeof FIGURE; lea
           aria-hidden="true"
           data-lider=""
           data-brilho-lider={reduced ? undefined : ''}
-          className="lider-total absolute -inset-1 rounded-full pc:-inset-1.5"
+          className="lider-total absolute -inset-1 rounded-full"
         />
       ) : null}
       <Figure className="relative size-3.5 pc:size-6" />

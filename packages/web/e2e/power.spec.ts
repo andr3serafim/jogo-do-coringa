@@ -37,8 +37,15 @@ async function expectNoSideScroll(page: Page): Promise<void> {
   expect(scroll, 'a página não rola de lado').toBeLessThanOrEqual(client);
 }
 
-/** O elemento cabe inteiro dentro do outro (com 1 px de folga). */
+/**
+ * O elemento cabe inteiro dentro do outro (com 1 px de folga), em repouso: espera antes as animações do próprio elemento (o ouro que entra
+ * na troca da liderança cresce a 1,15 por um instante e passaria da fileira no meio da entrada).
+ */
 async function expectInside(page: Page, inner: string, outer: string): Promise<void> {
+  await page
+    .locator(inner)
+    .first()
+    .evaluate((el) => Promise.all(el.getAnimations().map((motion) => motion.finished.catch(() => undefined))));
   const a = (await page.locator(inner).first().boundingBox())!;
   const b = (await page.locator(outer).first().boundingBox())!;
   expect(a.x, `${inner} dentro de ${outer}`).toBeGreaterThanOrEqual(b.x - 1);
