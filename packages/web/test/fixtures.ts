@@ -155,7 +155,7 @@ export interface ViewSpec {
    * A última decisão da iniciativa: com quem ficou (`self`/`opponent`), se mudou de mão e o dano de cada lado. Sem o campo, a
    * iniciativa é a sorteada (`null`).
    */
-  lastInitiative?: { holder: 'self' | 'opponent'; changed: boolean; self: number; opponent: number };
+  lastInitiative?: { holder: 'self' | 'opponent'; changed: boolean; self: number; opponent: number; streak?: number };
 }
 
 const SUITS: readonly Suit[] = ['copas', 'ouros', 'espadas', 'paus'];
@@ -220,7 +220,7 @@ export function scenarioAt(spec: ViewSpec = {}): { state: GameState; view: Playe
   state.initiative = spec.initiative === 'opponent' ? other : me;
   const last = spec.lastInitiative;
   state.lastInitiative = last
-    ? { player: last.holder === 'opponent' ? other : me, changed: last.changed, damage: { [me]: last.self, [other]: last.opponent } }
+    ? { player: last.holder === 'opponent' ? other : me, changed: last.changed, damage: { [me]: last.self, [other]: last.opponent }, streak: last.streak ?? 1 }
     : null;
   state.turnOrder = spec.firstToAttack === 'opponent' ? [other, me] : [me, other];
   state.turnIndex = 0;

@@ -167,7 +167,7 @@ describe('delaysOf: quando cada elemento com layoutId se mexe', () => {
   });
 
   it('a decisão da iniciativa não atrasa nenhum layout (a espada troca de retrato pelo efeito da batida)', () => {
-    const changed = { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } } as const;
+    const changed = { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 }, streak: 1 } as const;
     expect(delaysOf(beatsOf({ type: 'TurnStarted', player: 'p1' }, changed)).size).toBe(0);
   });
 
@@ -504,11 +504,11 @@ describe('bannerText: a faixa de cada evento', () => {
     expect(bannerText({ type: 'ReactionWindowOpened', responder: 'p2', trigger: 'K_PLAYED' }, names)).toBe(
       'Duda pode reagir',
     );
-    expect(bannerText({ type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } }, names)).toBe('Duda causou mais dano (9 × 3) e ficou com a iniciativa');
-    expect(bannerText({ type: 'InitiativeDecided', player: 'p1', changed: false, damage: { p1: 14, p2: 9 } }, names)).toBe(
+    expect(bannerText({ type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 }, streak: 1 }, names)).toBe('Duda causou mais dano (9 × 3) e ficou com a iniciativa');
+    expect(bannerText({ type: 'InitiativeDecided', player: 'p1', changed: false, damage: { p1: 14, p2: 9 }, streak: 1 }, names)).toBe(
       'Você causou mais dano (14 × 9) e segue com a iniciativa',
     );
-    expect(bannerText({ type: 'InitiativeDecided', player: 'p1', changed: false, damage: { p1: 5, p2: 5 } }, names)).toBe(
+    expect(bannerText({ type: 'InitiativeDecided', player: 'p1', changed: false, damage: { p1: 5, p2: 5 }, streak: 1 }, names)).toBe(
       'Empate em dano (5 × 5): a iniciativa segue com você',
     );
     expect(bannerText({ type: 'QuadFormed', player: 'p1', quad: { row: 'ATK', value: 7 } }, names)).toContain(
@@ -735,7 +735,7 @@ describe('bannerBeatAt: a faixa que está no ar (spec §4.1, §10.4)', () => {
 
 describe('a fita da iniciativa (sub-projeto 6 §4)', () => {
   const decided = (player: 'p1' | 'p2', changed: boolean, p1: number, p2: number) =>
-    ({ type: 'InitiativeDecided', player, changed, damage: { p1, p2 } }) as const;
+    ({ type: 'InitiativeDecided', player, changed, damage: { p1, p2 }, streak: 1 }) as const;
 
   it('mudou para você: "Você ataca primeiro", e o seu dano primeiro', () => {
     expect(initiativeRibbon(decided('p1', true, 50, 37), names)).toEqual({

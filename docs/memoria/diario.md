@@ -10,6 +10,10 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 - **Pedido:** "Sim, escreva" levou ao plano (`docs/superpowers/plans/2026-11-08-playtest-bloco-c.md`), e "Aprovo como está" (`decisoes.md`
   2026-11-08 (2)) à execução: aqui mesmo, tarefa por tarefa, na branch `feat/playtest-bloco-c`, com um revisor novo no fim.
 - **Andamento** (uma linha por tarefa, com os commits e as escolhas da execução):
+  - **Task 1 (o motor conta a sequência): feita.** `InitiativeDecision.streak` (obrigatório), `changed ? 1 : (anterior?.streak ?? 0) + 1`;
+    o empate soma. `STATE_SCHEMA` 6. O motor inteiro passou sem `-u` (os golden e os `RULES_DIGESTS` iguais), e o digest do texto do
+    `pnpm play` também: nenhuma partida mudou, `RULES_VERSION` fica. Os `InitiativeDecided` literais dos testes da web ganharam
+    `streak: 1`, e a `scenarioAt` aceita `lastInitiative.streak` (padrão 1).
 
 ---
 

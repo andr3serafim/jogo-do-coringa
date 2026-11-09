@@ -515,7 +515,7 @@ describe('palco: catchUp e resync (spec §4.1)', () => {
 
   it('catchUp toca as faixas na metade do tempo', () => {
     const m = mount(THEIRS);
-    emit(m, THEIRS, [TURN, { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } }], { catchUp: true });
+    emit(m, THEIRS, [TURN, { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 }, streak: 1 }], { catchUp: true });
     expect(banner(m.container)).toHaveTextContent('Vez de Duda');
     advance(199);
     expect(busy(m.container)).toBe(true);
@@ -1343,7 +1343,7 @@ describe('efeitos da batida (spec §4.2)', () => {
     const sword = () => m.container.querySelector('[data-espada]')!;
     const owner = (side: string) => m.container.querySelector(`[data-retrato="${side}"]`)!;
     expect(sword()).toHaveAttribute('data-iniciativa', 'voce');
-    emit(m, { ...THEIRS, initiative: 'opponent' }, [TURN, { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } }]);
+    emit(m, { ...THEIRS, initiative: 'opponent' }, [TURN, { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 }, streak: 1 }]);
     // A view já é a nova, mas a espada espera a batida dela.
     expect(sword()).toHaveAttribute('data-iniciativa', 'voce');
     expect(owner('voce')).toHaveAttribute('data-dono');
@@ -1358,7 +1358,7 @@ describe('efeitos da batida (spec §4.2)', () => {
   it('o voo segue o relógio dele: o state seguinte (o bot responde logo) não corta a espada no ar', () => {
     const m = mount(THEIRS);
     const after = { ...THEIRS, initiative: 'opponent' } as const;
-    emit(m, after, [TURN, { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } }]);
+    emit(m, after, [TURN, { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 }, streak: 1 }]);
     advance(400);
     expect(m.container.querySelector('[data-voando]')).not.toBeNull();
     emit(m, after, []);
@@ -1371,7 +1371,7 @@ describe('efeitos da batida (spec §4.2)', () => {
 
   it('com movimento reduzido a espada pula sem voo', () => {
     const m = mount(THEIRS, { prefs: { reduceMotion: true } });
-    emit(m, { ...THEIRS, initiative: 'opponent' }, [TURN, { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } }]);
+    emit(m, { ...THEIRS, initiative: 'opponent' }, [TURN, { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 }, streak: 1 }]);
     advance(400);
     expect(m.container.querySelector('[data-espada]')).toHaveAttribute('data-iniciativa', 'oponente');
     expect(m.container.querySelector('[data-voando]')).toBeNull();
@@ -1386,14 +1386,14 @@ describe('efeitos da batida (spec §4.2)', () => {
 
   it('a fita diz quem ataca primeiro e por quê', () => {
     const m = mount(THEIRS);
-    emit(m, { ...THEIRS, initiative: 'opponent' }, [{ type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } }]);
+    emit(m, { ...THEIRS, initiative: 'opponent' }, [{ type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 }, streak: 1 }]);
     expect(banner(m.container)).toHaveAttribute('data-faixa', 'Duda ataca primeiro · causou mais dano na rodada · 9 × 3');
     expect(banner(m.container)).toHaveAttribute('data-fita');
   });
 
   it('a decisão que não muda: a espada salta no mesmo retrato, e a fita diz que segue', () => {
     const m = mount(THEIRS);
-    emit(m, THEIRS, [{ type: 'InitiativeDecided', player: 'p1', changed: false, damage: { p1: 14, p2: 9 } }]);
+    emit(m, THEIRS, [{ type: 'InitiativeDecided', player: 'p1', changed: false, damage: { p1: 14, p2: 9 }, streak: 1 }]);
     const sword = m.container.querySelector('[data-espada]')!;
     expect(sword).toHaveAttribute('data-iniciativa', 'voce');
     expect(sword).toHaveAttribute('data-salto');

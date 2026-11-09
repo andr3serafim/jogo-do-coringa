@@ -62,7 +62,7 @@ const SAMPLES: { [T in GameEvent['type']]: Extract<GameEvent, { type: T }> } = {
   Resurrected: { type: 'Resurrected', player: 'p1', card: num('n4'), row: 'ATK' },
   AbsoluteDefenseStarted: { type: 'AbsoluteDefenseStarted', player: 'p2' },
   AbsoluteDefenseEnded: { type: 'AbsoluteDefenseEnded', player: 'p2' },
-  InitiativeDecided: { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } },
+  InitiativeDecided: { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 }, streak: 1 },
   Exodia: { type: 'Exodia', player: 'p1' },
   GameOver: { type: 'GameOver', result: { kind: 'WIN', winner: 'p1', reason: 'EXODIA' } },
 };
@@ -215,9 +215,9 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
 
   describe('a espada, a fita e a quadra (sub-projeto 6 §10)', () => {
     it('a iniciativa que muda de mão é a espada (voa e crava); a que fica é a fita', () => {
-      expect(cueFor({ type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 } })).toBe('espada');
-      expect(cueFor({ type: 'InitiativeDecided', player: 'p1', changed: false, damage: { p1: 14, p2: 9 } })).toBe('fita');
-      expect(cueFor({ type: 'InitiativeDecided', player: 'p1', changed: false, damage: { p1: 5, p2: 5 } }, 'p2')).toBe('fita');
+      expect(cueFor({ type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 3, p2: 9 }, streak: 1 })).toBe('espada');
+      expect(cueFor({ type: 'InitiativeDecided', player: 'p1', changed: false, damage: { p1: 14, p2: 9 }, streak: 1 })).toBe('fita');
+      expect(cueFor({ type: 'InitiativeDecided', player: 'p1', changed: false, damage: { p1: 5, p2: 5 }, streak: 1 }, 'p2')).toBe('fita');
     });
 
     it('a quadra formada soa o acorde; a quebrada, não', () => {

@@ -113,7 +113,9 @@ function endAttackRound(s: GameState, ev: GameEvent[]): void {
   const [a, b] = s.players;
   const leader = a.damageThisRound > b.damageThisRound ? a : b.damageThisRound > a.damageThisRound ? b : null;
   const player = leader ? leader.id : s.initiative;
-  const decision = { player, changed: player !== s.initiative, damage: { [a.id]: a.damageThisRound, [b.id]: b.damageThisRound } };
+  const changed = player !== s.initiative;
+  const streak = changed ? 1 : (s.lastInitiative?.streak ?? 0) + 1;
+  const decision = { player, changed, damage: { [a.id]: a.damageThisRound, [b.id]: b.damageThisRound }, streak };
   s.initiative = player;
   s.lastInitiative = decision;
   ev.push({ type: 'InitiativeDecided', ...decision });

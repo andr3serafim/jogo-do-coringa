@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { legalActions } from '../src/legal-actions.ts';
 import { viewFor } from '../src/view.ts';
+import type { Action, PlayerId } from '../src/types.ts';
 import { P1, P2, act, actErr, handId, player, setup, steps, values, type PlayerSetup } from './helpers.ts';
 
 describe('buffs na fase principal', () => {
@@ -92,7 +93,7 @@ describe('fim da rodada de Ataque', () => {
     ]);
     expect(player(r.state, P2).hp).toBe(90);
     expect(player(r.state, P1).hp).toBe(98);
-    const decision = { player: P1, changed: true, damage: { [P1]: 10, [P2]: 2 } };
+    const decision = { player: P1, changed: true, damage: { [P1]: 10, [P2]: 2 }, streak: 1 };
     expect(r.events).toContainEqual({ type: 'InitiativeDecided', ...decision });
     expect(r.state.lastInitiative).toEqual(decision);
     expect(r.state.initiative).toBe(P1);
@@ -108,7 +109,7 @@ describe('fim da rodada de Ataque', () => {
       [P2, { type: 'DECLARE_ATTACK' }],
       [P1, { type: 'PASS' }],
     ]);
-    expect(r.events).toContainEqual({ type: 'InitiativeDecided', player: P1, changed: false, damage: { [P1]: 10, [P2]: 2 } });
+    expect(r.events).toContainEqual({ type: 'InitiativeDecided', player: P1, changed: false, damage: { [P1]: 10, [P2]: 2 }, streak: 1 });
     expect(r.state.initiative).toBe(P1);
   });
 
@@ -120,8 +121,42 @@ describe('fim da rodada de Ataque', () => {
       [P2, { type: 'END_TURN' }],
     ]);
     expect(r.state.initiative).toBe(P2);
-    expect(r.events).toContainEqual({ type: 'InitiativeDecided', player: P2, changed: false, damage: { [P1]: 0, [P2]: 0 } });
-    expect(r.state.lastInitiative).toEqual({ player: P2, changed: false, damage: { [P1]: 0, [P2]: 0 } });
+    expect(r.events).toContainEqual({ type: 'InitiativeDecided', player: P2, changed: false, damage: { [P1]: 0, [P2]: 0 }, streak: 1 });
+    expect(r.state.lastInitiative).toEqual({ player: P2, changed: false, damage: { [P1]: 0, [P2]: 0 }, streak: 1 });
+  });
+
+  // A sequência da iniciativa (bloco C dos pontos do playtest, ponto 11): as rodadas de Ataque seguidas que terminam com ela no mesmo jogador,
+  // contando a de agora. Não muda nenhuma regra: só a decisão passa a dizer quantas.
+  const round: Array<[PlayerId, Action]> = [
+    [P1, { type: 'DECLARE_ATTACK' }],
+    [P2, { type: 'PASS' }],
+    [P2, { type: 'DECLARE_ATTACK' }],
+    [P1, { type: 'PASS' }],
+  ];
+
+  it('a sequência sobe com a iniciativa no mesmo jogador', () => {
+    const s = setup({ initiative: P1, p1: { attack: [10] }, p2: { attack: [2] } });
+    s.lastInitiative = { player: P1, changed: false, damage: { [P1]: 5, [P2]: 0 }, streak: 2 };
+    const r = steps(s, round);
+    expect(r.events).toContainEqual({ type: 'InitiativeDecided', player: P1, changed: false, damage: { [P1]: 10, [P2]: 2 }, streak: 3 });
+    expect(r.state.lastInitiative?.streak).toBe(3);
+  });
+
+  it('a sequência volta a 1 quando a iniciativa troca de mão, por maior que fosse', () => {
+    const s = setup({ initiative: P2, p1: { attack: [10] }, p2: { attack: [2] } });
+    s.lastInitiative = { player: P2, changed: false, damage: { [P1]: 0, [P2]: 7 }, streak: 9 };
+    const r = steps(s, round);
+    expect(r.events).toContainEqual({ type: 'InitiativeDecided', player: P1, changed: true, damage: { [P1]: 10, [P2]: 2 }, streak: 1 });
+  });
+
+  it('o empate mantém a iniciativa e não zera a sequência: ela sobe', () => {
+    const s = setup({ initiative: P2 });
+    s.lastInitiative = { player: P2, changed: false, damage: { [P1]: 0, [P2]: 3 }, streak: 4 };
+    const r = steps(s, [
+      [P1, { type: 'END_TURN' }],
+      [P2, { type: 'END_TURN' }],
+    ]);
+    expect(r.state.lastInitiative).toEqual({ player: P2, changed: false, damage: { [P1]: 0, [P2]: 0 }, streak: 5 });
   });
 
   // O anti-travamento saiu (autor, 2026-10-30): a partida acaba por vida, Exódia ou W.O., nunca por rodadas sem dano.

@@ -22,8 +22,9 @@ export const TIMERS = {
  * 3: o estado perdeu `noDamageStreak` e `hpLostThisRound`, e o placar os empates (o anti-travamento saiu na E1).
  * 4: o Reflect deixou de ficar armado (F2): `reflect` só existe na resposta a ele, e a reação `REFLECT_PLAYED` mudou de dono.
  * 5: a fase `RESURRECTION` e a troca da Ressurreição (ponto 16).
+ * 6: a decisão da iniciativa (`lastInitiative`) ganhou a sequência (`streak`; bloco C dos pontos do playtest, ponto 11).
  */
-export const STATE_SCHEMA = 5;
+export const STATE_SCHEMA = 6;
 
 /** Limites por sala (spec §4, §8). */
 export const ROOM_LIMITS = {

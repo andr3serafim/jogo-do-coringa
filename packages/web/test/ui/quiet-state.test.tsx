@@ -37,7 +37,7 @@ const AUTO_EQUIPPED: ViewSpec = { ...AFTER_BLOW, self: { ...AFTER_BLOW.self, equ
 const HIT_50: GameEvent = { type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 100, defense: 50, damage: 50 };
 /** O fim da rodada de Ataque e a compra do Equipar seguinte, no mesmo passo do golpe. */
 const ROUND_END: GameEvent[] = [
-  { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 0, p2: 50 } },
+  { type: 'InitiativeDecided', player: 'p2', changed: true, damage: { p1: 0, p2: 50 }, streak: 1 },
   { type: 'RoundStarted', round: 11, kind: 'EQUIP' },
   { type: 'CardsDealt', player: 'p2', count: 2 },
   { type: 'CardsDealt', player: 'p1', count: 2, cards: DEALT },

@@ -38,6 +38,13 @@ describe('viewFor (review focus 3)', () => {
     expect(v.opponent.damageThisRound).toBe(10);
   });
 
+  it('a decisão da iniciativa na view traz a sequência (bloco C dos pontos do playtest, ponto 11)', () => {
+    const s = setup({ p1: { attack: [10] }, p2: { attack: [2] } });
+    s.lastInitiative = { player: s.initiative, changed: false, damage: { [P1]: 0, [P2]: 0 }, streak: 4 };
+    expect(viewFor(s, P1).lastInitiative?.streak).toBe(4);
+    expect(viewFor(s, P2).lastInitiative?.streak).toBe(4);
+  });
+
   it('é uma cópia: mexer na visão não muda o estado', () => {
     const s = setup({ p1: { hand: ['J'] } });
     viewFor(s, P1).self.hand.pop();

@@ -179,6 +179,11 @@ export interface InitiativeDecision {
   player: PlayerId;
   changed: boolean;
   damage: Record<PlayerId, number>;
+  /**
+   * Quantas rodadas de Ataque seguidas terminaram com a iniciativa em `player`, contando esta (bloco C dos pontos do playtest, ponto 11: a
+   * aura de quem a segura). Volta a 1 quando ela troca de mão; o empate a mantém e soma. Não muda nenhuma regra.
+   */
+  streak: number;
 }
 
 export type Action =
