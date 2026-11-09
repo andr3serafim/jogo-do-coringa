@@ -181,13 +181,14 @@ A mesma escada nas três zonas, cada uma com a sua cor:
   **3** rodadas, a brasa (um contorno baixo que tremula); **5**, a chama (labaredas e brasas subindo); **10**, a super aura (núcleo
   branco-quente, chama alta e raios pequenos). Um selo "×N" ao lado do retrato. Quando a iniciativa troca de mão, a aura apaga de uma vez.
 - **"Seguidas":** as rodadas de Ataque que terminaram (`InitiativeDecided`) com a iniciativa no mesmo jogador, contando a de agora.
-- **Onde mexe:** o motor passa a contar a sequência (`initiativeStreak` no estado e na `view`, e no evento `InitiativeDecided`). Derivar
-  na interface a partir dos eventos perderia a conta numa recarga. Não muda nenhuma partida (as regras são as mesmas), mas muda a forma do
-  estado: sobe o `STATE_SCHEMA` do servidor (as salas abertas fecham no deploy) e o esquema do protocolo. O digest das partidas de
+- **Onde mexe:** o motor passa a contar a sequência (o `streak` da decisão da iniciativa: no estado, na `view` e no evento
+  `InitiativeDecided`; `decisoes.md` 2026-11-08 (2), C1). Derivar na interface a partir dos eventos perderia a conta numa recarga. Não muda
+  nenhuma partida (as regras são as mesmas), mas muda a forma do estado: sobe o `STATE_SCHEMA` do servidor (as salas abertas fecham no
+  deploy). O `PROTOCOL_VERSION` não sobe: a `view` só ganha um campo, que um cliente antigo ignora (C1). O digest das partidas de
   referência (`RULES_DIGESTS`) conta os eventos por tipo, não a forma deles, então o campo novo no `InitiativeDecided` não o muda e não
   pede `RULES_VERSION`; o plano confere isso rodando os testes do motor, e confere o digest do texto do `pnpm play` (`sim/test/online.test.ts`)
   se o histórico passar a falar da sequência.
-- **Desenho:** a aura usa as formas de `ui/scenes/aura.ts`, com camadas menores. O retrato do placar fica no topo, e a aura passa por cima
+- **Desenho:** a aura usa as formas de `ui/anim/aura.ts` (saíram do chunk das cenas para a mesa usar), com camadas menores. O retrato do placar fica no topo, e a aura passa por cima
   da barra de vida sem cobri-la (ela é mais estreita que o retrato no celular; confiro nas fotos do plano).
 
 ### 5.3 A espada e o escudo de quem lidera (ponto 13)
@@ -196,6 +197,24 @@ A mesma escada nas três zonas, cada uma com a sua cor:
   o brilho que passa, como a carta da quadra; o mesmo com a **Defesa maior** e o escudo. No empate, ninguém. Quando a liderança troca, o
   ouro passa de um campo ao outro com um sopro.
 - **Onde mexe:** `Row.tsx` (a figura antes do total), com os totais que a fileira já mostra (os que esperam o pouso, da fatia 5).
+
+### 5.4 O que a execução decidiu (bloco C, 2026-11-08)
+
+O plano é `docs/superpowers/plans/2026-11-08-playtest-bloco-c.md`, aprovado como estava (`decisoes.md` 2026-11-08 (2)); a execução e as
+escolhas estão no `diario.md` 2026-11-08 (1), e a medição em `docs/memoria/notas/medicao-bloco-c.md`.
+
+- **A sequência:** `changed ? 1 : anterior + 1`; o empate mantém a iniciativa e soma. O motor inteiro passou sem atualizar as partidas de
+  referência, e o texto do `pnpm play` não mudou: `RULES_VERSION` fica. `STATE_SCHEMA` 6.
+- **Um relógio e um agendador só para a mesa** (`ui/anim/table-clock.ts`): as auras que fervem trocam de forma por atributo, fora do React,
+  a cada 70 ms, num intervalo só; os raios saem um por vez, a cada 340 ms, somando a mesa inteira. Os dois param nas batidas e nas cenas.
+- **A aura da iniciativa** fica atrás do retrato, e o nome e a barra por cima dela; o selo "×N" no canto de cima, por fora, a partir de 2.
+- **Os níveis das zonas** saem da config e das marcas do motor; uma carta só nunca acende. As cartas ficam por cima de toda camada de poder
+  (a aura dos 4 J sobe até a Guarda de cima).
+- **A liderança** segue o total que a fileira mostra (o contado), e o ouro chega com um sopro quando ela troca, não no primeiro desenho.
+- **Medição:** a mesa mais cheia a 50 e 55 quadros/s com a CPU 4× (a `main`, 53 e 55); as formas não precisaram parar (a saída da C4). A
+  virada de rodada depois de uma sequência longa fica abaixo de 50 com ou sem o bloco C (41 e 47 na `main`): achado para o autor, fora do
+  bloco.
+- **Não conferido de verdade:** o movimento reduzido no navegador e o online (o deploy é do autor).
 
 ## 6. Bloco D: identidade
 

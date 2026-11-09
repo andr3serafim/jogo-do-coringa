@@ -36,6 +36,13 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     sem mudar o espaço da coluna do total, com o brilho que passa e o sopro quando passa a liderar). A lista das animações sem fim foi a 10.
     **Ruling:** a fileira informa o total que mostra (`shownTotal`, o contado), e não o alvo (`total`): o alvo muda quando o passo chega, e a C7
     pede a troca no pouso e na batida do golpe. **Ruling:** o sopro não toca no primeiro desenho da mesa, só quando a liderança troca.
+  - **Task 5 (E2E, fotos, medição, portão): feita.** `e2e/power.spec.ts` (na lista do Playwright), nas três telas, com os passos contados pelo
+    motor (`especiais.json` 78, 99, 111, 161 e 174; `exodia-devastacao.json` 236→237, a troca de mão do Bot depois de 10 rodadas): 15 + o de
+    layout, 18 de 18. Medição em `notas/medicao-bloco-c.md`: a mesa mais cheia a 50 e 55 quadros/s com a CPU 4× (a `main`: 53 e 55), os 4 J a 53
+    e 55; a troca de mão a 42 e 48, como já estava na `main` (41 e 47, medida em seguida pondo a web da `main` no lugar e restaurando). A spec
+    ganhou a §5.4 e a correção do protocolo (C1). Portão do Difícil, rodada 4: 69,0% e 81,5% (iguais às rodadas 1 e 3), p95 146 ms, aprovado.
+    **Ruling:** o passo da troca de mão do plano (239→240) era outro: a troca é no 236→237 (contado com o motor). **Ruling:** a troca de mão
+    abaixo de 50 quadros/s fica como achado para o autor, fora do bloco (a `main` já mede o mesmo).
 
 ---
 

@@ -221,6 +221,70 @@
       },
       "approved": true,
       "seconds": 750.5503386
+    },
+    {
+      "label": "a sequência da iniciativa no estado (bloco C), sem mudança de regra",
+      "notes": [],
+      "hard": {
+        "rolloutsPerCandidate": 8,
+        "maxCandidates": 4,
+        "horizon": {
+          "EQUIP": 2,
+          "ATTACK_MAIN": 3
+        }
+      },
+      "easyBlunder": 0.7,
+      "hardVsGreedy": {
+        "games": 200,
+        "rate": 0.69,
+        "se": 0.032703210851535665,
+        "wins": 138,
+        "losses": 62,
+        "unfinished": 0,
+        "withInitiative": {
+          "games": 100,
+          "rate": 0.72
+        },
+        "withoutInitiative": {
+          "games": 100,
+          "rate": 0.66
+        }
+      },
+      "greedyVsEasy": {
+        "games": 200,
+        "rate": 0.815,
+        "se": 0.027456784225396828,
+        "wins": 163,
+        "losses": 37,
+        "unfinished": 0,
+        "withInitiative": {
+          "games": 100,
+          "rate": 0.84
+        },
+        "withoutInitiative": {
+          "games": 100,
+          "rate": 0.79
+        }
+      },
+      "timing": {
+        "decisions": 8886,
+        "p50Ms": 80.92990000001737,
+        "p95Ms": 146.26149999999325,
+        "maxMs": 303.8610000000044,
+        "searching": {
+          "decisions": 6776,
+          "p50Ms": 94.1978999999701,
+          "p95Ms": 151.875800000038,
+          "maxMs": 303.8610000000044
+        }
+      },
+      "passes": {
+        "hardVsGreedy": true,
+        "greedyVsEasy": true,
+        "p95": true
+      },
+      "approved": true,
+      "seconds": 645.3266754
     }
   ]
 }
