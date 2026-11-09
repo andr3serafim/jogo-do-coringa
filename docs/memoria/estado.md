@@ -1,6 +1,6 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-08**, o plano do bloco C esperando o autor, na `feat/playtest-bloco-c`. Antes de seguir,
+> Sobrescrito a cada atualização. **Última: 2026-11-08**, o bloco C feito, na revisão da branch inteira, na `feat/playtest-bloco-c`. Antes de seguir,
 > confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
@@ -9,11 +9,12 @@
   2026-11-08 (2)): `docs/superpowers/plans/2026-11-08-playtest-bloco-c.md`, na branch `feat/playtest-bloco-c` (saída da `main` em
   `792bd62`), no checkout principal, aqui mesmo, tarefa por tarefa, com um revisor novo no fim. Cinco tarefas: o motor conta a sequência
   (`streak` no `InitiativeDecision`, `STATE_SCHEMA` 6, `RULES_VERSION` igual), o relógio da mesa e a aura da iniciativa, os bônus em escala, a
-  liderança, e o E2E com as fotos, a medição e o portão do Difícil. As Tasks 1 a 4 estão feitas (`e241da8`, `9bd8e19` + `3fe5db3`,
-  `0bf2f85`, `f2c0129`); o E2E (`e2e/power.spec.ts`, 15 + layout: 18 de 18) e a medição (`notas/medicao-bloco-c.md`) também. **Próximo passo
-  exato:** o portão do Difícil em segundo plano (`pnpm sim:dificil --ajuste "a sequência da iniciativa no estado, sem mudança de regra"`,
-  sozinho na máquina: ele mede tempo), o relatório commitado, a spec §5 (a frase do protocolo e "O que a execução decidiu"), o diário; depois
-  a revisão da branch inteira num subagente, o `pnpm check`, as duas CI e o fast-forward. Achados do mapeamento: a `especiais.json` tem todos os
+  liderança, e o E2E com as fotos, a medição e o portão do Difícil. **As cinco tarefas estão feitas** (`e241da8`, `9bd8e19` + `3fe5db3`,
+  `0bf2f85`, `f2c0129`, `de654f7` + `3e5fb23` + `5510071`): o E2E (`e2e/power.spec.ts` + layout, 18 de 18, medindo em repouso), a medição
+  (`notas/medicao-bloco-c.md`), o portão do Difícil (rodada 4: 69,0% e 81,5%, p95 146 ms, aprovado), a spec §5.2 corrigida e a §5.4 nova, e
+  o ouro de quem lidera 4 px menor no PC (o E2E pegou 1,5 px fora da fileira). **Próximo passo exato:** a revisão da branch inteira num
+  subagente (`792bd62..HEAD`, em curso), corrigir o que for Critical ou Important, depois o push (o pre-push roda o `pnpm check`), as duas
+  CI (`check` e `e2e`) e o fast-forward da `main`. Achados do mapeamento: a `especiais.json` tem todos os
   níveis (3 Q no passo 68, 3 J no 90, 4 J no 99, a sequência 3/5/10 nos 92/111/161, 3 K no 174, a liderança do Ataque no 78); o
   `PROTOCOL_VERSION` (1) nunca subiu com mudança de estado; as formas da aura (`ui/scenes/aura.ts`) precisam sair do chunk das cenas.
 
