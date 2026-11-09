@@ -1,6 +1,6 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-08**, o bloco C feito, na revisão da branch inteira, na `feat/playtest-bloco-c`. Antes de seguir,
+> Sobrescrito a cada atualização. **Última: 2026-11-08**, o bloco C feito e revisado, antes do push, na `feat/playtest-bloco-c`. Antes de seguir,
 > confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
@@ -12,9 +12,14 @@
   liderança, e o E2E com as fotos, a medição e o portão do Difícil. **As cinco tarefas estão feitas** (`e241da8`, `9bd8e19` + `3fe5db3`,
   `0bf2f85`, `f2c0129`, `de654f7` + `3e5fb23` + `5510071`): o E2E (`e2e/power.spec.ts` + layout, 18 de 18, medindo em repouso), a medição
   (`notas/medicao-bloco-c.md`), o portão do Difícil (rodada 4: 69,0% e 81,5%, p95 146 ms, aprovado), a spec §5.2 corrigida e a §5.4 nova, e
-  o ouro de quem lidera 4 px menor no PC (o E2E pegou 1,5 px fora da fileira). **Próximo passo exato:** a revisão da branch inteira num
-  subagente (`792bd62..HEAD`, em curso), corrigir o que for Critical ou Important, depois o push (o pre-push roda o `pnpm check`), as duas
-  CI (`check` e `e2e`) e o fast-forward da `main`. Achados do mapeamento: a `especiais.json` tem todos os
+  o ouro de quem lidera 4 px menor no PC (o E2E pegou 1,5 px fora da fileira). **A revisão da branch inteira (subagente) foi "com
+  correções", e tudo está corrigido** (`f6cf1f9` Critical da muralha, `2331e02` Important do nível da zona no pouso, `972e890` e `6df073d`
+  Minors; docs em `d44ad96`; o diário tem os rulings e os adiados). **Próximo passo exato:** (1) o `pnpm e2e` inteiro deu 101 passed mas
+  saiu com código 1, sem teste falho listado: rodar de novo (`pnpm --filter @coringa/web build` e `pnpm e2e`) e ver a causa (flaky? erro fora
+  dos testes?); (2) a segunda revisão, só das correções (`81697a6..6df073d`, um subagente novo), foi interrompida pelo limite de uso:
+  refazer; (3) o push (o pre-push roda o `pnpm check`), as duas CI (`check` e `e2e`) e o fast-forward da `main`; (4) o `estado.md` final,
+  apagar `.superpowers/sdd/2026-11-08-playtest-bloco-c`. Para o autor: a "mesa mais cheia" medida não tem os 4 J (nenhuma fixture junta os
+  4 J armados com sequência ≥ 5; `notas/medicao-bloco-c.md`). Achados do mapeamento: a `especiais.json` tem todos os
   níveis (3 Q no passo 68, 3 J no 90, 4 J no 99, a sequência 3/5/10 nos 92/111/161, 3 K no 174, a liderança do Ataque no 78); o
   `PROTOCOL_VERSION` (1) nunca subiu com mudança de estado; as formas da aura (`ui/scenes/aura.ts`) precisam sair do chunk das cenas.
 
