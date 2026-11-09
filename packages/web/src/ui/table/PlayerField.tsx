@@ -274,8 +274,9 @@ function Zone({ label, icon, listLabel, cards, wildAs, count = false, mark, drop
     >
       {mark}
       {/* A linha do que a zona faz (o Reflect) fica embaixo do título, na largura dele: ao lado, no PC, ela se espremia entre o título e
-          as cartas, uma ou duas palavras por linha. */}
-      <div className="zona-titulo flex flex-col gap-0.5">
+          as cartas, uma ou duas palavras por linha. O título fica por cima das camadas de poder (`z-[1]`, como as cartas): no celular, a
+          aura dos 4 J sobe até o título da zona e o da zona de baixo. */}
+      <div className="zona-titulo relative z-[1] flex flex-col gap-0.5">
         <div className="flex items-center gap-1">
           {icon}
           <span id={labelId} className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">

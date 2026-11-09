@@ -616,9 +616,10 @@
 /*
  * A mesa viva (sub-projeto 6 §6). As cartas da mão respiram: sobem e descem 3 px num ciclo de 3,6 s, cada uma num tempo
  * (`--respira-i`, o índice dela, adianta o ciclo em 0,9 s). Na carta de quadra, um brilho passa a cada 3,2 s. Com os gestos das
- * placas de estado (bloco A dos pontos do playtest, ponto 6), são as únicas animações sem fim da folha (o teste do relógio confere):
- * pouco movimento, em área pequena, sem trocar a luminância da tela. Com movimento reduzido a mesa não põe as marcas (`data-respira`,
- * `.brilho-quadra`, `data-gesto`).
+ * placas de estado (bloco A dos pontos do playtest, ponto 6) e as marcas do poder que cresce (bloco C: o pulso e a brasa dos K, a
+ * muralha dos Q e o brilho do ouro de quem lidera), são as únicas animações sem fim da folha (o teste do relógio confere): pouco
+ * movimento, em área pequena, sem trocar a luminância da tela. Com movimento reduzido a mesa não põe as marcas (`data-respira`,
+ * `.brilho-quadra`, `data-gesto`, `data-anima`, `data-muralha-zona`, `data-brilho-lider`).
  */
 @keyframes respira {
   0%,

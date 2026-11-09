@@ -713,6 +713,8 @@ describe('mesa: o placar de luta (sub-projeto 6 §3)', () => {
     expect(zone('p1', 'K')!.textContent).not.toMatch(/Exódia|ameaça/i);
     // O arrasto segue igual: a zona inteira recebe a carta da mão.
     expect(zone('p1', 'J')).toHaveAttribute('data-soltar');
+    // O título de cada zona fica por cima das camadas de poder, como as cartas: no celular, a aura dos 4 J sobe por cima dos títulos.
+    for (const power of ['J', 'Q', 'K']) expect(zone('p1', power)!.querySelector('.zona-titulo')).toHaveClass('relative', 'z-[1]');
   });
 
   it('a muralha que respira atrás dos 3 Q tem o atributo dela, e a folha não toca na muralha da cena da Defesa Absoluta', () => {

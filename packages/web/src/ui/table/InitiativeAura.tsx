@@ -68,9 +68,14 @@ export function InitiativeAura({ streak, reduced, busy, puff }: InitiativeAuraPr
   });
 
   // O sopro de fumaça quando a iniciativa troca de mão (fora do movimento reduzido).
+  // Toca uma vez por troca (`played`): ligar e desligar o movimento reduzido não sopra de novo, e a fumaça que estava no ar sai na limpeza.
   const puffs = useRef<HTMLDivElement>(null);
+  const played = useRef(0);
   useEffect(() => {
-    if (puff === 0 || reduced || !puffs.current) return;
+    if (puff === 0 || puff === played.current) return;
+    played.current = puff;
+    const parent = puffs.current;
+    if (reduced || !parent) return;
     const timers: number[] = [];
     for (let i = 0; i < PUFFS; i++) {
       const node = document.createElement('div');
@@ -78,7 +83,7 @@ export function InitiativeAura({ streak, reduced, busy, puff }: InitiativeAuraPr
       node.className = 'absolute left-1/2 top-1/2 size-3 rounded-full bg-papel/60';
       spawn(
         timers,
-        puffs.current,
+        parent,
         node,
         [
           { transform: 'translate(-50%, -50%) scale(0.6)', opacity: 0.8 },
@@ -87,7 +92,10 @@ export function InitiativeAura({ streak, reduced, busy, puff }: InitiativeAuraPr
         PUFF_MS,
       );
     }
-    return () => timers.forEach((id) => window.clearTimeout(id));
+    return () => {
+      timers.forEach((id) => window.clearTimeout(id));
+      parent.querySelectorAll('[data-particula]').forEach((node) => node.remove());
+    };
   }, [puff, reduced]);
 
   return (
