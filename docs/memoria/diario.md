@@ -46,6 +46,23 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     sorte (media no meio do sopro de entrada, com o `scale` abaixo de 1); medindo em repouso (o teste espera as animações do elemento), o
     medalhão do PC (anel de 6 px, 36 px) passava 1,5 px da fileira por cima e por baixo. O anel ficou 4 px no PC também (32 px, dentro dos 33
     px da linha do total), como no celular.
+  - **Revisão da branch inteira (subagente novo, `792bd62..81697a6`): "com correções".** Corrigido, com teste antes:
+    - (Critical, `f6cf1f9`) o `[data-muralha]` da respiração dos 3 Q pegava a muralha da cena da Defesa Absoluta (que já tinha esse
+      atributo): ela pulsava durante a cena, até com movimento reduzido. A zona usa `data-muralha-zona`, e um teste barra o seletor antigo.
+    - (Important, `2331e02`) o nível da zona saía da `view` crua: acendia quando o passo chegava, com a vaga da carta ainda voando contornada,
+      e o escudo de ouro dos Q mudava antes da insígnia. O `useLandingHold` e o `withoutCards` foram para `ui/table/landing-hold.ts` (que
+      tira também a Guarda); a zona conta só o que pousou, a Defesa Absoluta dela segue o `anim.insignia`, e a vaga em pouso
+      (`data-pousando`) fica sem anel e sem raio.
+    - (Minor, `972e890`) o ouro soprava no primeiro desenho (o armazém vazio até os efeitos): `useLead` devolve `null` até ter os dois
+      totais, e o sopro só vale de `false` para `true`. Os testes que o plano pedia e faltavam: as auras param nas batidas (conferido
+      quadro a quadro, que o relógio tem 4, e por mutação) e o ouro sem sopro com movimento reduzido.
+    - (Minor, `6df073d`) no celular a aura dos 4 J cobria os títulos das zonas (foto do passo 99 em 360): o título fica por cima das
+      camadas. O sopro da iniciativa tocava de novo ao desligar o movimento reduzido e deixava fumaça órfã. O comentário da folha.
+    **Ruling:** o anel do arrasto com o `z-[1]` por carta ficou (fotos 4× da junta dos 2 K do Bot: os dois anéis já se fundem numa faixa
+    só, com ou sem a mudança). **Ruling:** "a mesa mais cheia" medida foi a do plano (Task 5), sem os 4 J; nenhuma fixture tem os 4 J armados
+    com sequência ≥ 5, então as duas auras de 3 camadas juntas não foram medidas: vai ao autor (`notas/medicao-bloco-c.md`). **Adiados
+    (Minor):** as placas de estado ("Ataque Absoluto armado", "Cura passiva") ainda aparecem quando o passo chega, antes do pouso que acende
+    a zona (tempo do bloco A); o texto do leitor de tela do selo fica antes do nome no seu lado ("3 rodadas seguidas…", depois "Você").
 
 ---
 

@@ -208,12 +208,19 @@ escolhas estão no `diario.md` 2026-11-08 (1), e a medição em `docs/memoria/no
 - **Um relógio e um agendador só para a mesa** (`ui/anim/table-clock.ts`): as auras que fervem trocam de forma por atributo, fora do React,
   a cada 70 ms, num intervalo só; os raios saem um por vez, a cada 340 ms, somando a mesa inteira. Os dois param nas batidas e nas cenas.
 - **A aura da iniciativa** fica atrás do retrato, e o nome e a barra por cima dela; o selo "×N" no canto de cima, por fora, a partir de 2.
-- **Os níveis das zonas** saem da config e das marcas do motor; uma carta só nunca acende. As cartas ficam por cima de toda camada de poder
-  (a aura dos 4 J sobe até a Guarda de cima).
-- **A liderança** segue o total que a fileira mostra (o contado), e o ouro chega com um sopro quando ela troca, não no primeiro desenho.
-- **Medição:** a mesa mais cheia a 50 e 55 quadros/s com a CPU 4× (a `main`, 53 e 55); as formas não precisaram parar (a saída da C4). A
-  virada de rodada depois de uma sequência longa fica abaixo de 50 com ou sem o bloco C (41 e 47 na `main`): achado para o autor, fora do
-  bloco.
+- **Os níveis das zonas** saem da config e das marcas do motor; uma carta só nunca acende. Como o total e o ouro, o nível acompanha a mesa
+  que toca: a carta que ainda voa até a zona só conta no pouso (a vaga dela não acende), e o escudo de ouro dos Q chega e sai com a insígnia
+  do retrato. As cartas e o título de cada zona ficam por cima de toda camada de poder (a aura dos 4 J sobe até a Guarda de cima e, no
+  celular, até os títulos).
+- **A liderança** segue o total que a fileira mostra (o contado), e o ouro chega com um sopro quando ela troca, não no primeiro desenho. O
+  medalhão tem o mesmo anel no PC e no celular (4 px), para caber na linha do total.
+- **A muralha dos 3 Q** tem o atributo dela (`data-muralha-zona`): a cena da Defesa Absoluta já usava `data-muralha`, e a respiração da zona
+  não pode tocar nela.
+- **Medição:** a mesa mais cheia a 50 e 55 quadros/s com a CPU 4× (a `main`, 53 e 55); as formas não precisaram parar (a saída da C4). "A
+  mais cheia" foi a do plano, Task 5 (`especiais.json` 173→174: a sequência ≥ 10, 3 K, os Q acesos e os dois ouros), sem os 4 J armados:
+  nenhuma partida das fixtures tem os 4 J armados junto com uma sequência ≥ 5 (os 4 J duram no máximo 4 passos), então as duas auras de 3
+  camadas fervendo juntas não foram medidas; os 4 J sozinhos, com a sequência 3, mediram 53 e 55. A virada de rodada depois de uma sequência
+  longa fica abaixo de 50 com ou sem o bloco C (41 e 47 na `main`): achado para o autor, fora do bloco.
 - **Não conferido de verdade:** o movimento reduzido no navegador e o online (o deploy é do autor).
 
 ## 6. Bloco D: identidade
