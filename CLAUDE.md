@@ -12,6 +12,7 @@ memória pessoal de uma conta divergir dela, vale a do repositório (e a pessoal
   **[I]** onde for interpretação). Só acrescenta; uma decisão nova que substitui outra diz qual.
 - `diario.md`: uma entrada por bloco de trabalho, a mais nova em cima (o que foi feito, commits, o que ficou, armadilhas).
 - `notas/`: material de apoio (tabelas de medição, lista do playtest).
+- `arquivo/`: o que saiu do diário para ele ficar curto (as entradas até 2026-11-02, em `diario-ate-2026-11-02.md`).
 
 Regras:
 

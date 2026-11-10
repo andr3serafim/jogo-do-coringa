@@ -6,6 +6,18 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-10 (1): a mesa com as duas auras grandes fica sem medir
+
+Perguntado "A mesa com as duas auras grandes fervendo juntas (a do retrato e a dos 4 J) nunca foi medida, e a mesa mais cheia que medi
+ficou em 50 quadros/s cravado no PC. Você aceita assim, ou quer que eu grave uma partida com essa mesa para medir?", ele respondeu:
+
+> Aceito.
+
+**Leitura:** o bloco C segue para o merge com a medição como está (`notas/medicao-bloco-c.md`): a mesa mais cheia do plano a 50 e 55
+quadros/s, os 4 J sozinhos a 53 e 55, sem gravar uma partida nova com os 4 J armados e a sequência ≥ 5 juntos.
+
+---
+
 ## 2026-11-08 (2): o plano do bloco C aprovado
 
 Perguntado "Aprova o plano do bloco C com as escolhas C1 a C9?", sobre `docs/superpowers/plans/2026-11-08-playtest-bloco-c.md`, ele escolheu:
