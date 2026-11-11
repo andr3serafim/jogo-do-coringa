@@ -43,6 +43,16 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     custo: um chunk minúsculo a mais. **Ruling:** a promessa rejeitada do `loadPack` também fica guardada (a F3 diz "para sempre" no
     cordel) — custo: sem nova tentativa até recarregar. **Armadilha:** a chave `'10'` é índice inteiro, e o `Object.values` a põe antes de
     `'02'`: leia o catálogo pela lista das chaves, nunca pela ordem do objeto.
+  - **Task 4 (a face com arte): feita.** `ui/cards/looks-context.ts` (`LooksContext`, `useCardArt`), `LooksProvider.tsx` (pede os pacotes de
+    `packsOf`, rende os filhos sempre, engole a rejeição: F3; com `packs` de fora não pede nada) e `ArtFace.tsx`; o `Card.tsx` só escolhe a
+    face e o fundo (`bg-tinta` com arte). 16 testes novos em `test/ui/card-art.test.tsx`; nenhum teste existente mudou (2671 na web).
+    **Ruling:** o `Suit` ganhou um `style` opcional, para a cor de metal ir no próprio SVG pelo CSSOM (a forma não muda) — custo: uma prop
+    a mais num componente comum. **Ruling:** o anel é uma borda de 1,5 px com a cor no `style` (sem `box-shadow`); a aura é o único
+    `box-shadow`, num filho, com a cor `rgba` tirada do metal. **Ruling:** o véu de ouro da quadra fica dentro do invólucro da imagem, por
+    baixo do valor e do naipe, que seguem no metal. **Ruling:** o traço do naipe é de 2,5 unidades do `viewBox` 24, por fora
+    (`paint-order: stroke`); o contorno do número, 1 px de tinta a 90% nas quatro direções mais um halo de 4 px — os dois se conferem nas
+    fotos da Task 6. **Ruling:** o teste também barra, na carta com arte, a segunda classe `bg-*` e o `shadow-*` na raiz (as duas regras
+    da carta de hoje).
 
 ---
 

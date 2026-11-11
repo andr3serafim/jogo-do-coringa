@@ -15,7 +15,9 @@ import { useAnim } from '../anim/context.ts';
 import { useFxLayer } from '../anim/FxLayer.tsx';
 import { layoutTransition } from '../anim/motion.ts';
 import { useDealIn } from '../anim/useDealIn.ts';
+import { ArtFace } from './ArtFace.tsx';
 import { Coringa } from './Coringa.tsx';
+import { useCardArt } from './looks-context.ts';
 import { isRedSuit, Suit } from './Suit.tsx';
 
 export type CardSize = 'field' | 'mini' | 'hand';
@@ -241,6 +243,8 @@ export function Card({
   useTableMotion(self, animated ? anim.recoilAt(card.id) : null, landing, animated ? anim.markOf(card.id) : 0, anim.reduced);
   // A carta que a compra traz voa do monte, em leque; a opacidade é a do Motion (`enter`).
   useDealIn(self, animated ? anim.dealAt(card.id) : null, DEAL_FLY);
+  // A aparência do lugar (decks e raças): com arte, a `ArtFace` no fundo escuro; sem provedor ou sem pacote, a face de cordel de hoje.
+  const art = useCardArt(card);
   const name = cardLabel(card, as, roleText);
   const waiting = disabled && onSelect !== undefined;
   if (front) name.push('sai primeiro');
@@ -254,7 +258,7 @@ export function Card({
     'relative box-border border-tinta p-0 text-tinta rounded-[3px_5px_4px_6px]',
     SIZE[size].box,
     // Um fundo só: duas classes `bg-*` disputam a mesma propriedade e quem ganha é a ordem do CSS gerado, não a da lista.
-    card.kind === 'WILD' ? 'bg-ouro' : quad ? QUAD_FACE : 'bg-papel',
+    art ? 'bg-tinta' : card.kind === 'WILD' ? 'bg-ouro' : quad ? QUAD_FACE : 'bg-papel',
     selected ? '-translate-y-3.5 anel-ouro' : target ? 'anel-ouro' : '',
     grave ? 'grayscale opacity-90' : '',
     draft ? 'border-dashed opacity-70' : '',
@@ -305,7 +309,11 @@ export function Card({
           className="absolute -left-[9px] top-1/2 h-0 w-0 -translate-y-1/2 border-y-[5px] border-r-[6px] border-y-transparent border-r-tinta pc:-left-[11px] pc:border-y-[6px] pc:border-r-[7px]"
         />
       ) : null}
-      <Face card={card} size={size} as={as} roleText={roleText} />
+      {art ? (
+        <ArtFace card={card} size={size} as={as} roleText={roleText} quad={quad} art={art} />
+      ) : (
+        <Face card={card} size={size} as={as} roleText={roleText} />
+      )}
       {quad ? <QuadMarks reduced={anim.reduced} /> : null}
       {marked ? (
         <span aria-hidden="true" data-marca-novo className="absolute bottom-[3px] left-[3px] h-[4px] w-[46%] bg-vermelho" />

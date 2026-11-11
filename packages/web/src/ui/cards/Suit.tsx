@@ -2,6 +2,7 @@
 // naipe com forma própria, para o vermelho e o preto nunca serem a única pista. `currentColor` deixa quem usa
 // escolher a cor.
 import type { Suit as SuitName } from '@coringa/engine';
+import type { CSSProperties } from 'react';
 
 const PATHS: Record<SuitName, string> = {
   copas:
@@ -15,9 +16,10 @@ const PATHS: Record<SuitName, string> = {
 /** Copas e ouros são vermelhos; espadas e paus, pretos. */
 export const isRedSuit = (suit: SuitName): boolean => suit === 'copas' || suit === 'ouros';
 
-export function Suit({ suit, className }: { suit: SuitName; className?: string }) {
+/** `style` leva a cor de metal da carta com arte (decks e raças), pelo CSSOM. */
+export function Suit({ suit, className, style }: { suit: SuitName; className?: string; style?: CSSProperties }) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" className={className}>
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" className={className} style={style}>
       <path d={PATHS[suit]} />
     </svg>
   );
