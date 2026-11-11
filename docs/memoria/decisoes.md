@@ -6,6 +6,133 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-11 (3): o plano da fatia 1 aprovado; a execução é no Claude Code; a arte não pode amarrar
+
+Perguntado "aprova o plano com as escolhas F1 a F7 como recomendadas?", ele respondeu:
+
+> aprovado. não implemente nada ainda. apenas gere planos, specs e atualize a memória e arquivos persistentes se tiver finalizado a
+> solicitação desta sessão. a implementação será feita no claude code, não aqui no chat. um dúvida sincera minha: Estes esboços de desenho
+> que vc está fazendo serão melhorados por você? esses assets (decks com imagens) ficarão salvos localmente e poderão ser enviadas
+> futuramente pra ferramentas de IA exclusiva de desenho e arte para melhoria visual? isso seria importante porque não ficaria amarrado a você
+
+**Leitura:**
+- O plano `docs/superpowers/plans/2026-11-11-decks-fatia-1.md` está aprovado com as F1 a F7 como recomendadas. **Ninguém implementa pela
+  conversa do app:** a execução é no Claude Code local (com o Opus 5.5, como ele pediu no começo), a partir da Task 0.
+- **Requisito novo, dele:** a arte tem de poder sair daqui para uma ferramenta de IA de desenho (ou um ilustrador) sem depender de quem a
+  fez. Resposta dada: os SVG e os WebP já são arquivos comuns no repositório; o que faltava era o que acompanha a arte, e virou
+  `docs/superpowers/specs/2026-11-11-biblia-de-arte.md` (o contrato de cada arquivo, a descrição de cada carta, os pedidos prontos) e a
+  seção nova do `packages/web/art/LEIAME.md`.
+- Dito a ele, sem enfeite: o Claude pode seguir retocando o vetor (as mais fracas: Urso, Cervo Branco, Beija-flor), mas não chega ao
+  realismo pintado que ele pediu; esse salto é da ferramenta de desenho ou do ilustrador, como combinado em 2026-11-10 (2), resposta 4.
+- Achado ao conferir os arquivos: os gravados pela conversa do app levam uma credencial de conteúdo (C2PA) embutida, que diz que o Claude
+  forneceu o arquivo. É metadado, sem dado pessoal, e pesa cerca de 6 KB por WebP; os pesos da §5 da spec foram corrigidos para os do
+  disco (182, 234 e 108 KB).
+- **[I]** Os planos das fatias 2 (o dono por lado) e 3 (o online) **não** foram escritos: dependem do código que a fatia 1 deixar, e o
+  costume do projeto é um plano por fatia, aprovado antes da execução. Ficam para depois da fatia 1.
+
+---
+
+## 2026-11-11 (2): a spec dos decks e raças aceita, e o plano da fatia 1
+
+Perguntado "a spec está aprovada como está, ou há algo a mudar antes de eu escrever o plano da fatia 1 para o Opus?", com o aviso de que
+as oito escolhas de quem escreveu estão na §13 da spec, ele respondeu:
+
+> ok, pode escrever o plano
+
+**Leitura:**
+- A spec `docs/superpowers/specs/2026-11-10-decks-e-racas-design.md` vale como está, com as oito escolhas da §13.
+- **[I]** Ele não disse com essas palavras que leu o arquivo: respondeu à pergunta sem pedir mudança. As escolhas da §13 continuam
+  marcadas **[I]** na spec, para conferir no playtest.
+- O plano da fatia 1 (a carta com arte e o seletor, no treino) é `docs/superpowers/plans/2026-11-11-decks-fatia-1.md`, com sete escolhas
+  (F1 a F7) para ele aprovar antes da execução. Nada de código antes. A execução é pelo Opus 5.5, no Claude Code local (o pedido original
+  dele: "implementação com modelos mais baratos [opus 5.5]").
+
+---
+
+## 2026-11-11 (1): o deck Celestial aprovado como arte provisória
+
+Depois da entrega da spec dos decks e raças (2026-11-10 (2)), avisado de que o passo seguinte era ele ler o arquivo enquanto o deck
+Celestial era desenhado, ele respondeu "ok". Mostradas as nove cartas (Borboleta, Beija-flor, Cervo Branco, Unicórnio, Pégaso, Leão
+Alado, Águia Gigante, Baleia Celeste e Arcanjo) e perguntado "o Celestial serve como arte provisória?", ele respondeu:
+
+> sim, aprovado. prossiga
+
+**Leitura:**
+- Os três decks (Cordel, Bestiário, Celestial) e a raça Egípcia têm a arte provisória aprovada. Ele foi avisado de que o Pégaso e o
+  Arcanjo têm o fundo claro (o número depende mais da sombra) e de que o Beija-flor e o Cervo Branco são as mais fracas, e aprovou assim.
+- **[I]** "prossiga" vale para pôr a arte no repositório (as origens em `packages/web/art/`, os WebP em `packages/web/src/looks/`, spec
+  §5), o que foi feito, sem commit. **Não vale** como leitura da spec: ele ainda não disse que leu o arquivo, e o plano da fatia 1 espera
+  por isso.
+
+---
+
+## 2026-11-10 (2): decks e raças do Coringa (o brainstorming inteiro)
+
+Pedido do autor, numa conversa do app (outra conta; a pasta do repositório estava ligada, sem shell: nada foi commitado por lá):
+
+> As cartas numéricas passarão a ser representadas por ilustrações de monstros ou seres fantásticos, seguindo uma progressão de raridade
+> visual, sem qualquer indicação textual de raridade na própria carta. […] Manter característica /identidade de carta de baralho com
+> naipe a amostra, pois futuramente este jogo será publicado no Steam e esse será um dos diferenciais. […] A referência que tenho como
+> preferencia das artes é Dark Fantasy, Celestial Fantasy, Mythic Fantasy; […] Como possibilidade futura de monetização, pretendo
+> disponibilizar decks temáticos para venda na loja do jogo (Store). […] Uma possibilidade seria vincular a aparência das cartas
+> especiais à raça do Coringa. […] Caso seja necessário utilizar alguma biblioteca, ferramenta ou serviço externo […] solicite minha
+> autorização para realizar a configuração e a instalação.
+
+As respostas dele, na ordem (a pergunta resumida, depois o texto dele):
+
+1. Como a fantasia convive com o cordel: escolheu **"Decks são skins"** (o baralho atual vira o deck Cordel; mesa, placar e cenas ficam).
+2. Sobre o rascunho 1 (três cartas em SVG, com uma plaquinha de papel para o valor e o naipe):
+   > Quero outras sugestões de artes com mais detalhes e realismo. O número e naipes deve ser incorporados ao background da carta mas se
+   > prejudicar a leitura. exemplo o fundo é azul escuro e o número é dourado. o exemplo que dei da vespa e dragão são meramente
+   > ilustrativa. fica livre a sua criatividade.
+
+   E a tabela das faixas: 2–3 "Criaturas menores, anatomia simples"; 4–5 "Criaturas maiores, formas mais elaboradas"; 6–7 "Seres
+   ancestrais, poderes sobrenaturais"; 8–9 "Criaturas colossais e extraordinárias"; 10 "Entidade única, visual quase divino".
+3. Sobre o rascunho 2 (cinco cartas, o número e o naipe sobre a arte):
+   > Arte não aprovada. Ficou ok: Número e naipe: direto sobre a arte, no metal de cada carta com visual perceptível de progressão de
+   > raridade ficou boa. a aura em volta da carta de acordo com a raridade também ficou boa. a cor do naipe deve ser a mesma do número. em
+   > jogo o número pode ser 10% menor; Vc criou um ser na carta 10 muito fantasioso e esquisito até de imaginar. seja mais intuitivo na arte.
+4. Como seguir com a arte, já que o vetor não chega ao realismo pedido: escolheu **"SVG provisório, pintura depois"**.
+5. "Este nível serve como arte provisória?" (rascunho 3: Morcego, Fênix, Dragão Ancestral): > sim
+6. Quantos decks no menu de testes: > pode fazer mais 1 apenas. não precisa ser 3 decks. E depois, corrigindo:
+   > talvez me expressei errado, peço desculpas. quero 2 decks customizados + 1 padrão que é o atual.
+
+   O tema do segundo customizado: escolheu **"Celestial"** (Borboleta, Beija-flor, Cervo Branco, Unicórnio, Pégaso, Leão Alado, Águia
+   Gigante, Baleia Celeste e Arcanjo).
+7. As especiais pertencem à raça ou ao deck: escolheu **"Raça separada do deck"** (nos testes: Bufão de cordel e mais uma, com o Cordel
+   travado no Bufão).
+8. Sobre as especiais desenhadas como personagens (raça Morto-vivo):
+   > cartas especiais poderiam ser representadas por artefatos lendários de acordo com a raça do coringa. se o coringa for um anubis os
+   > artefatos serão da raça egípcia e assim por diante.
+
+   E sobre os artefatos egípcios, com a regra "J é a arma, Q é a proteção, K é a insígnia de realeza, A é o objeto da trapaça, e o
+   Selvagem é o Coringa": > sim, aprovado. prossiga
+9. O que o oponente vê no online:
+   > deve ser possível o oponente ver as minhas cartas do meu lado da mesa e eu posso ver o deck dele equipados no lado da mesa dele. o
+   > mesmo para raça do coringa. no cemitério eu vejo meu deck e ele ver o deck dele. se não for assim a monetização e venda de deck e
+   > raças não farão sentido no futuro quando eu publicar no steam.
+10. "Aprova o design e a Cinzel?" (o desenho em seis partes e a dependência `@fontsource/cinzel`): > Sim ok. prossiga
+
+**Leitura:**
+- Três decks no menu: **Cordel** (o padrão, como está), **Bestiário** (2 Morcego, 3 Aranha, 4 Lobo, 5 Urso, 6 Grifo, 7 Fênix, 8 Hidra,
+  9 Kraken, 10 Dragão Ancestral) e **Celestial** (a lista da resposta 6). Duas raças: **Bufão** (as especiais de cordel de hoje) e
+  **Egípcia** (K Máscara do Faraó, J Khopesh de Rá, Q Escudo de Hórus, A Adaga de Set, Selvagem Coringa Anúbis).
+- A arte em SVG é **provisória**, para os testes; a final, pintada (modelo de imagem ou ilustrador), entra depois no mesmo formato.
+  Aprovados por ele como provisórios: as três cartas do rascunho 3 e os cinco artefatos egípcios. **Ele não viu** as outras seis do
+  Bestiário uma a uma (foram mostradas juntas, sem resposta sobre elas), nem o verso, nem o retrato do Anúbis; o deck Celestial tem a
+  lista aprovada e a arte por desenhar.
+- O número e o naipe ficam sobre a arte, **os dois na mesma cor de metal** da carta, o número 10% menor em jogo que no rascunho 2; a
+  moldura e a aura crescem com a faixa (2–3, 4–5, 6–7, 8–9, 10), sem texto de raridade.
+- Cada lado da mesa mostra o deck e a raça do **dono daquele lado**; o cemitério (e o monte) mostra os de **quem olha**. Isso pede a
+  aparência no protocolo e no servidor.
+- Autorizada a dependência `@fontsource/cinzel` (SIL OFL).
+- **[I]** As seis cenas especiais seguem em cordel nesta fase (ele leu isso duas vezes e não objetou); a loja, a conferência de posse e a
+  carta ampliada ficam fora.
+- **[I]** As raças continuam duas: a correção da resposta 6 falou de decks.
+- A spec: `docs/superpowers/specs/2026-11-10-decks-e-racas-design.md`. Ele aprovou o desenho pela conversa e **ainda não leu o arquivo**.
+
+---
+
 ## 2026-11-10 (1): a mesa com as duas auras grandes fica sem medir
 
 Perguntado "A mesa com as duas auras grandes fervendo juntas (a do retrato e a dos 4 J) nunca foi medida, e a mesa mais cheia que medi

@@ -1,32 +1,28 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-11**, o bloco C na `main`; nada em curso. Antes de seguir, confira se não há versão
+> Sobrescrito a cada atualização. **Última: 2026-11-11**, a fatia 1 dos decks em curso (Task 0). Antes de seguir, confira se não há versão
 > mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Nada em curso.** O checkout principal está na `main`.
+- **Em curso: a fatia 1 dos decks e raças**, na branch `feat/decks-fatia-1` (saída da `main` em `fe9a507`), no checkout principal. Plano
+  `docs/superpowers/plans/2026-11-11-decks-fatia-1.md`, aprovado (`decisoes.md` 2026-11-11 (3)); "prossiga por aqui" (o autor, 2026-11-11)
+  começou a execução: aqui mesmo, tarefa por tarefa, teste primeiro, com um revisor novo no fim (F7). O andamento, com as `Ruling:` de cada
+  tarefa, vai no `diario.md` 2026-11-11 (1).
+- **Próximo passo exato:** Task 0 (os commits de entrada, a fonte Cinzel, o `pnpm check`), depois a Task 1.
 - **O bloco C está na `main`** (pontos 10, 11 e 13: a aura da iniciativa, os bônus em escala, o ouro de quem lidera), por fast-forward de
   `feat/playtest-bloco-c` até `21d1387`, com as duas CI verdes (`check` e `e2e`) no topo do código (`75d35c8`) e no push da `main`
   (`21d1387`). Plano `docs/superpowers/plans/2026-11-08-playtest-bloco-c.md`; a revisão da branch inteira e a segunda, só das correções
   (nenhum Critical nem Important), os rulings e os menores adiados no `diario.md` 2026-11-08 (1); a medição em `notas/medicao-bloco-c.md`;
   o que a execução decidiu na §5.4 da spec do playtest. `STATE_SCHEMA` 6, `RULES_VERSION` 5 (igual). O ledger do bloco foi apagado.
-- **Próximo passo exato:** quando o autor pedir, a **Task 0 do plano `docs/superpowers/plans/2026-11-11-decks-fatia-1.md`** (a fatia 1 dos
-  decks e raças), no Claude Code local, neste checkout (os arquivos dela estão sem commit aqui; uma worktree nova não os teria).
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app) e o `jogar-treino.bat` do autor.
-- **Sem commit, de outra conta (2026-11-10 e 11, conversa do app, sem shell):** as entradas 2026-11-10 (2) e 2026-11-11 (1), (2) e (3) do
-  `decisoes.md`, a spec `docs/superpowers/specs/2026-11-10-decks-e-racas-design.md` com a folha `…-arte.webp`, a bíblia de arte
-  `docs/superpowers/specs/2026-11-11-biblia-de-arte.md`, o plano `docs/superpowers/plans/2026-11-11-decks-fatia-1.md`, e a arte provisória
-  (`packages/web/art/` com 23 SVG e o `LEIAME.md`; `packages/web/src/looks/` com 24 WebP). Só existem neste checkout: a Task 0 do plano
-  os leva para a branch `feat/decks-fatia-1`.
 
 ## Fila
 
-- **Decks e raças do Coringa** (sub-projeto novo, `decisoes.md` 2026-11-10 (2) e 2026-11-11 (1) a (3), ainda sem commit): três decks
-  (Cordel, Bestiário, Celestial) e duas raças (Bufão, Egípcia), a aparência de cada lado da mesa pelo dono, também no online. A spec está
-  aceita, a arte provisória aprovada e nos arquivos, e **o plano da fatia 1 está aprovado** (as F1 a F7 como recomendadas). A execução é no
-  Claude Code local (Opus 5.5), a partir da Task 0; a conversa do app não implementa. Os planos das fatias 2 e 3 vêm depois da fatia 1. A
-  arte pintada, quando o autor quiser, segue a bíblia de arte.
+- **Decks e raças do Coringa, depois da fatia 1** (`decisoes.md` 2026-11-10 (2) e 2026-11-11 (1) a (3)): três decks (Cordel, Bestiário,
+  Celestial) e duas raças (Bufão, Egípcia), a aparência de cada lado da mesa pelo dono, também no online. Os planos das fatias 2 (o dono por
+  lado) e 3 (o online) vêm depois da fatia 1, cada um aprovado antes da execução. A arte pintada, quando o autor quiser, segue a bíblia de
+  arte (`docs/superpowers/specs/2026-11-11-biblia-de-arte.md`).
 - **Bloco D** (pontos 5 e 14, spec do playtest §6: os botões de carimbo e o 14), com plano escrito e aprovado pelo autor antes da execução,
   como os blocos A, B, C e E.
 

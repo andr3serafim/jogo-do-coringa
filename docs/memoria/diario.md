@@ -5,6 +5,17 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-11 (1): a fatia 1 dos decks e raças (a carta com arte e o seletor, no treino)
+
+- **Pedido:** o plano `docs/superpowers/plans/2026-11-11-decks-fatia-1.md` aprovado com as F1 a F7 (`decisoes.md` 2026-11-11 (3)); depois do
+  bloco C na `main`, "prossiga por aqui" (o autor, 2026-11-11) levou à execução: no checkout principal, branch `feat/decks-fatia-1` (saída
+  de `fe9a507`), tarefa por tarefa, teste primeiro, com um revisor novo no fim (F7).
+- **Pre-flight:** as interfaces entre as tarefas batem (T1 → T2 → T3/T4 → T5). **Ruling:** a spec §6 queria o seletor apagado no online e
+  a §5 um `art.css`; vale o plano (a F1 tira o seletor do online, e a fonte vai num `font.css`), aprovado depois da spec.
+- **Andamento** (uma linha por tarefa, com os commits e as escolhas da execução):
+
+---
+
 ## 2026-11-08 (1): o bloco C, o poder que cresce (pontos 10, 11 e 13)
 
 - **Pedido:** "Sim, escreva" levou ao plano (`docs/superpowers/plans/2026-11-08-playtest-bloco-c.md`), e "Aprovo como está" (`decisoes.md`
