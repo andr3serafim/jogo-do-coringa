@@ -20,7 +20,15 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     'D:\andr3\jogo-coringa\D:.pnpm-store\v11'`); o `node_modules` foi instalado com `D:\.pnpm-store\v11`. Até o autor corrigir a config,
     passe `--store-dir 'D:\.pnpm-store'`. As DLLs do paliativo do `workerd` sobreviveram ao `pnpm add`. **Ruling:** o commit da fonte
     foi antes do `pnpm check` (o plano tem o contrário), para o estado ficar commitado antes do job longo (regra 2); o pre-commit já roda
-    o lint e o typecheck.
+    o lint e o typecheck. **Armadilha:** o `node_modules` desta máquina estava fora do lockfile (o `tough-cookie` ligado ao `tldts@7.4.19`
+    e o `jsdom` ao `undici@7.30.1`, quando o lockfile pede 7.4.18 e 7.29.1); o `pnpm add` apagou as pastas órfãs e os 52 arquivos de teste
+    `ui` da web pararam com `Cannot find module 'tldts'`. O `pnpm install --frozen-lockfile` (até com `--force`) diz "Already up to date" e
+    não refaz o link: os dois links foram refeitos à mão (junção do PowerShell) para as versões do lockfile, e o `pnpm check` passou. Se
+    voltar: `find node_modules/.pnpm -mindepth 3 -maxdepth 4 -type l ! -exec test -e {} \; -print` acha os links quebrados.
+  - **Task 1 (a aparência no protocolo): feita.** `packages/protocol/src/looks.ts` (`DECK_IDS`, `RACE_IDS`, `Look`, `DEFAULT_LOOK`
+    congelado, `normalizeLook`) e o `export` no `index.ts`; 18 testes, cobertura de 100% no arquivo. **Ruling:** `DEFAULT_LOOK` tem o tipo
+    `Readonly<Look>` (o plano diz `Look`, congelado): o tipo diz o que o `Object.freeze` faz, e um `Readonly<Look>` entra onde se pede um
+    `Look`. **Ruling:** um id que só existe no protótipo (`toString`) não vale (o teste a mais), porque a busca é na lista, não por chave.
 
 ---
 
