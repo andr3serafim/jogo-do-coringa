@@ -1,6 +1,6 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-10**, o bloco C feito, revisado e na branch, antes do merge. Antes de seguir, confira
+> Sobrescrito a cada atualização. **Última: 2026-11-11**, o bloco C com as duas CI verdes e a segunda revisão feita, no merge. Antes de seguir, confira
 > se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
@@ -11,21 +11,22 @@
   correções", e tudo foi corrigido com teste (`f6cf1f9`, `2331e02`, `972e890`, `6df073d`). O autor aceitou a medição como está
   (`decisoes.md` 2026-11-10 (1)). Tudo, com os rulings e os menores adiados, no `diario.md` 2026-11-08 (1); a medição em
   `notas/medicao-bloco-c.md`; o que a execução decidiu na §5.4 da spec do playtest. `STATE_SCHEMA` 6, `RULES_VERSION` 5 (igual).
+- **Feito em 2026-11-11:** a CI de `75d35c8` passou nos dois jobs (`check` e `e2e`); a segunda revisão, só das correções
+  (`81697a6..6df073d`), não achou Critical nem Important (`diario.md` 2026-11-08 (1), "o fechamento").
 - **Próximo passo exato:**
-  1. **Ler a CI** do topo da branch (subiu na passagem de 2026-11-10), os dois jobs, pela API pública:
-     `curl -s "https://api.github.com/repos/andr3serafim/jogo-do-coringa/actions/runs?branch=feat/playtest-bloco-c&per_page=3"` (o
-     `head_sha` tem de ser o topo; depois `.../runs/<id>/jobs`). Em 2026-11-09 o `pnpm e2e` local deu **101 passed, mas saiu com código 1**,
-     sem teste falho listado. Se o job `e2e` da CI passar, segue; se falhar, rode aqui (`pnpm --filter @coringa/web build` e `pnpm e2e`,
-     em segundo plano, ~10 min) e ache a causa no relatório inteiro (teste instável? erro fora dos testes?).
-  2. **A segunda revisão, só das correções** (`81697a6..6df073d`), num subagente novo: foi interrompida pelo limite de uso. Foco: a
-     extração do `useLandingHold`/`withoutCards` para `ui/table/landing-hold.ts` (agora tira também a Guarda); as `Zones` com o
-     `anim.insignia` na Defesa Absoluta da zona; o `useLead` que devolve `null`; o sopro da iniciativa com o ref `played`. Critical ou
-     Important: corrigir com teste antes.
-  3. **O merge:** com as duas CI verdes no topo, `git merge-base --is-ancestor main HEAD`, `git branch -f main HEAD` e o push das duas
-     (o pre-push roda o `pnpm check`).
-  4. **Fechar:** o `estado.md` com "nada em curso" e a fila só com o bloco D; apagar `.superpowers/sdd/2026-11-08-playtest-bloco-c` (o
+  1. **O merge (em curso):** `git branch -f main HEAD` (a `main` é ancestral) e `git push origin main feat/playtest-bloco-c` (o pre-push
+     roda o `pnpm check`). Depois, ler a CI do push da `main` pela API pública
+     (`curl -s "https://api.github.com/repos/andr3serafim/jogo-do-coringa/actions/runs?branch=main&per_page=3"`, o `head_sha` tem de ser o
+     topo; depois `.../runs/<id>/jobs`).
+  2. **Fechar:** o `estado.md` com "nada em curso" e a fila com o bloco D; apagar `.superpowers/sdd/2026-11-08-playtest-bloco-c` (o
      ledger, fora do git: os rulings já estão no diário).
+  3. **Devolver a memória dos decks:** se houver um `git stash` "decks: memória da outra conta", ele tem o `decisoes.md` e o `estado.md`
+     da outra conta: `git stash pop`, resolver o `estado.md` à mão (o bloco C fechado mais o parágrafo e o item da fila dos decks),
+     `git restore --staged docs/memoria/estado.md` e `git stash drop`. Os dois ficam sem commit, para a Task 0 do plano dos decks.
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app) e o `jogar-treino.bat` do autor.
+- **Sem commit, de outra conta (decks e raças, não são do bloco C):** a spec, a bíblia de arte, o plano
+  `docs/superpowers/plans/2026-11-11-decks-fatia-1.md` e a arte provisória (`packages/web/art/`, `packages/web/src/looks/`), e as entradas
+  do `decisoes.md` (no stash do passo 3). Entram na branch `feat/decks-fatia-1` pela Task 0 do plano, depois do merge do bloco C.
 
 ## Fila
 

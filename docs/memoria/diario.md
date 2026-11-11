@@ -67,6 +67,14 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     101 passed mas saiu com código 1, sem teste falho listado (causa não vista). A segunda revisão, só das correções, foi interrompida pelo
     limite de uso. A branch subiu para a CI rodar; o que falta está no `estado.md`. A memória foi enxugada: o histórico do estado foi para
     `notas/playtest.md`, e o diário até 2026-11-02 (8) para `arquivo/diario-ate-2026-11-02.md`.
+  - **2026-11-11, o fechamento ("continue o bloco C"):** a CI do topo (`75d35c8`) passou nos dois jobs, `check` e `e2e`: o "101 passed,
+    código 1" do E2E local não se repetiu na CI e fica sem causa achada (a CI é o portão). A segunda revisão, só das correções
+    (`81697a6..6df073d`), foi feita na sessão, lendo o diff, sem subagente: **nenhum Critical nem Important**. Conferido: o `null` do
+    `useLead` só chega ao `LeadFigure`, que o trata como "não lidera"; os hooks novos das `Zones` vêm antes de qualquer retorno; a `Row`
+    nunca põe a Guarda no `pending` (o `withoutCards` tirar a Guarda não muda o total dela); o `played` do sopro e a limpeza da fumaça; cada
+    correção tem o teste dela. O único Minor (as placas de estado lendo a `view` crua) já estava nos adiados acima. **Armadilha:** a memória
+    dos decks, sem commit, de outra conta (`decisoes.md` e `estado.md`), foi para um `git stash` durante o merge, para não entrar nos commits
+    do bloco C, e voltou ao fim, como manda a Task 0 do plano `2026-11-11-decks-fatia-1.md`.
 
 ---
 
