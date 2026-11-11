@@ -613,6 +613,14 @@ export const DURATION_LABEL = 'Duração';
 export const HP_CHOICE_LABEL = 'Vida inicial';
 export const hpChoiceText = (hp: number, isDefault: boolean): string => (isDefault ? `${hp} · padrão` : String(hp));
 
+/** A aparência das cartas (decks e raças, fatia 1): o painel do Início e o do menu do treino. */
+export const LOOK_PANEL_LABEL = 'Aparência';
+export const LOOK_DECK_LABEL = 'Deck';
+export const LOOK_RACE_LABEL = 'Coringa';
+export const LOOK_LOCK_NOTE = 'O deck Cordel joga com o Coringa Bufão.';
+/** F1: por enquanto a aparência vale no treino (e no replay); o online fica em Cordel até a fatia 3. */
+export const LOOK_TRAINING_ONLY = 'Por enquanto vale no treino.';
+
 /** O tempo de partida no painel de fim (U5): "12:34", ou "1:02:03" passando de uma hora. */
 export function durationText(ms: number): string {
   const total = Math.max(0, Math.round(ms / 1000));

@@ -53,6 +53,18 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     (`paint-order: stroke`); o contorno do número, 1 px de tinta a 90% nas quatro direções mais um halo de 4 px — os dois se conferem nas
     fotos da Task 6. **Ruling:** o teste também barra, na carta com arte, a segunda classe `bg-*` e o `shadow-*` na raiz (as duas regras
     da carta de hoje).
+  - **Task 5 (o seletor, o treino e o replay): feita.** `ui/LookChoice.tsx` (os grupos Deck e Coringa no molde do `HpChoice`, a trava do
+    Cordel com a linha `LOOK_LOCK_NOTE`, a amostra 3, 10 e K num `LooksProvider` próprio), os textos no `copy.ts`, o painel "Aparência"
+    no `Home` (antes de "Preferências", com a nota da F1), o seletor no `GameMenu` (prop `look`, só no treino fora do tutorial), o
+    `LooksProvider` no `PlayTable` e no `ReplayViewer` (F4). Testes novos em `look-choice.test.tsx`, `home`, `end-and-menu`, `training`,
+    `tutorial`, `replay-screen` e `training-looks-fail.test.tsx`; nenhum caso existente mudou (só imports acrescentados). **Ruling:** o
+    provedor envolve o `Stage` inteiro, e não só o `PlayTableView` (o plano): o `MomentLayer` e o `Leaving` (as cópias das cartas que
+    saem) moram no `Stage`, fora do `PlayTableView`, e ficariam de cordel com a mesa em arte — custo: nenhum visto (as cenas que desenham o
+    Coringa não usam a `Card`). **Ruling:** o `LookChoice` ganhou `packs?` (repassado ao provedor da amostra), para o teste da amostra não
+    depender do `import()`. **Ruling:** a amostra é `aria-hidden` (decorativa; a escolha está nos rádios). **Ruling:** o caso do pacote
+    que falha (F3) mora num arquivo à parte, `training-looks-fail.test.tsx`, porque o `vi.mock` vale para o arquivo inteiro (como os
+    `app-chunk-*-fails`). **Ruling:** "sem tocar batida" se confere pelo mesmo nó da mesa e da carta e pelo `seq` igual da sala; a sala
+    online com a preferência fantasy é a do `mount` do `end-and-menu` (a `PlayTable` sem `training`).
 
 ---
 

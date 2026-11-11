@@ -4,6 +4,7 @@
 //
 // Não conhece a sessão, o armazenamento nem o HTTP: recebe as preferências e os ouvintes por props, e o que depende da
 // sala (o link, a versão) é opcional e some quando falta. Assim o treino contra o bot usa o mesmo menu.
+import type { Look } from '@coringa/protocol';
 import { useEffect, useId, useState } from 'react';
 import {
   AUTO_PASS_LABEL,
@@ -27,6 +28,7 @@ import type { TrainingLevel } from '../../model/local-room.ts';
 import type { Prefs } from '../../model/storage.ts';
 import { useSystemReducedMotion } from '../anim/useReducedMotion.ts';
 import { copyText } from '../clipboard.ts';
+import { LookChoice } from '../LookChoice.tsx';
 import { Switch } from '../parts.tsx';
 import { COPY_FAILED, LINK_COPIED } from '../text.ts';
 import { ConfirmDialog } from './ConfirmDialog.tsx';
@@ -85,6 +87,11 @@ export interface GameMenuProps {
   trainingLevel?: TrainingLevel;
   /** O tutorial (um treino guiado): o menu diz "Tutorial" no lugar do nível do bot. */
   tutorial?: true;
+  /**
+   * A aparência das cartas (decks e raças, fatia 1): com ela, o seletor aparece abaixo das chaves. Só o treino a passa (F1: o online fica
+   * em Cordel até a fatia 3, e o tutorial é sempre de cordel).
+   */
+  look?: { value: Look; onChange: (look: Look) => void };
   /** Há partida em curso para desistir. */
   canConcede: boolean;
   /** Sem conexão não dá para desistir (o pedido se perderia). */
@@ -106,6 +113,7 @@ export function GameMenu({
   showAutoPass = true,
   trainingLevel,
   tutorial,
+  look,
   canConcede,
   concedeDisabled,
   onConcede,
@@ -188,6 +196,7 @@ export function GameMenu({
             onChange={(reduceMotion) => onPrefs({ ...prefs, reduceMotion })}
           />
           <Switch label={SOUND_LABEL} checked={prefs.sound} onChange={(sound) => onPrefs({ ...prefs, sound })} />
+          {look === undefined ? null : <LookChoice value={look.value} onChange={look.onChange} />}
 
           <button type="button" className={ITEM} onClick={() => setRulesOpen(true)}>
             {RULES_LABEL}

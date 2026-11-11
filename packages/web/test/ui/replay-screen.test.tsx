@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { EMPTY_HISTORY, roomNames } from '../../src/model/history.ts';
 import { recordPastGame, type PastGame } from '../../src/model/past-games.ts';
 import { buildTrack, type ReplayTrack } from '../../src/model/replay-track.ts';
-import { DEFAULT_PREFS } from '../../src/model/storage.ts';
+import { DEFAULT_PREFS, savePrefs } from '../../src/model/storage.ts';
 import { buildTimeline, timelineMs } from '../../src/model/timeline.ts';
 import ReplayScreen from '../../src/ui/screens/ReplayScreen.tsx';
 import { ReplayViewer } from '../../src/ui/screens/ReplayViewer.tsx';
@@ -968,5 +968,20 @@ describe('<ReplayViewer />: cenas de Ataque Absoluto em passos seguidos', () => 
     render(<ReplayViewer game={GAME} track={absoluteTrack(0)} prefs={DEFAULT_PREFS} />);
     expect(counter()).toBe('Passo 0 de 0');
     for (const name of ['Início', 'Passo anterior', 'Próximo passo', 'Tocar']) expect(isOff(control(name))).toBe(true);
+  });
+});
+
+describe('o replay e a aparência (decks e raças, fatia 1)', () => {
+  it('com a preferência fantasy, o replay mostra as cartas com arte (F4: a aparência de agora, dos dois lados)', async () => {
+    fakeUi();
+    const store = memoryStore();
+    savePrefs(store, { ...DEFAULT_PREFS, look: { deck: 'bestiario', race: 'egipcio' } });
+    const game = recordPastGame(store, entry(), 1_000)!;
+    render(<ReplayScreen store={store} id={game.id} />);
+    await act(async () => vi.dynamicImportSettled());
+    await act(async () => vi.dynamicImportSettled());
+    const images = [...document.querySelectorAll('[data-card-id] img')].map((img) => img.getAttribute('src') ?? '');
+    expect(images.length).toBeGreaterThan(0);
+    for (const src of images) expect(src).toMatch(/\/looks\/(bestiario|egipcio)\//);
   });
 });

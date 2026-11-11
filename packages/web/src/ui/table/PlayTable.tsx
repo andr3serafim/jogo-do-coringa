@@ -25,7 +25,7 @@
 // que ela não tem jogada agora (B2, o motivo é do motor: `noPlayReason`) e some sozinho depois do tempo de leitura, ou com outro toque
 // na mesma carta. Depois do passe, e no fim da partida, a mão fica só de vista.
 import { noPlayReason, type SpecialCard } from '@coringa/engine';
-import type { Deadline, PlayerAction, StateMessage } from '@coringa/protocol';
+import { DEFAULT_LOOK, type Deadline, type Look, type PlayerAction, type StateMessage } from '@coringa/protocol';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { navigate } from '../../app/router.ts';
 import { noPlaysText } from '../../model/copy.ts';
@@ -38,6 +38,7 @@ import type { Session, SessionSnapshot } from '../../model/session.ts';
 import { savePrefs, type KeyValueStore, type Prefs } from '../../model/storage.ts';
 import { useAnim, useBoardBusy } from '../anim/context.ts';
 import { Stage } from '../anim/Stage.tsx';
+import { LooksProvider } from '../cards/LooksProvider.tsx';
 import { useReducedMotion } from '../anim/useReducedMotion.ts';
 import { useSound } from '../sound-context.ts';
 import { useSession } from '../useSession.ts';
@@ -81,6 +82,14 @@ export interface PlayTableProps {
 }
 
 /** Sem `state` ainda não há o que desenhar. */
+/** A aparência se escolhe só no treino fora do tutorial (F1); no resto, a mesa fica no padrão e o menu não mostra o seletor. */
+const chosenLook = ({ training, tutorial }: Pick<PlayTableProps, 'training' | 'tutorial'>): boolean => training !== undefined && !tutorial;
+
+/** A aparência da mesa: a das preferências no treino; o padrão (o Cordel) no tutorial e no online. */
+function tableLook(props: Pick<PlayTableProps, 'training' | 'tutorial'>, look: Look | undefined): Look {
+  return chosenLook(props) ? (look ?? DEFAULT_LOOK) : DEFAULT_LOOK;
+}
+
 export function PlayTable(props: PlayTableProps) {
   const { session } = props;
   const snapshot = useSession(session);
@@ -93,10 +102,14 @@ export function PlayTable(props: PlayTableProps) {
   }, [sound, soundOn]);
   if (snapshot.state === null) return null;
   return (
-    // Online (sem `training`, que o tutorial também passa), a sua especial espera o momento que o oponente vê (decisoes.md 2026-11-03 (5), A9a).
-    <Stage snapshot={snapshot} reducedMotion={reducedMotion} online={props.training === undefined}>
-      <PlayTableView {...props} snapshot={snapshot} state={snapshot.state} />
-    </Stage>
+    // A aparência das cartas (decks e raças, fatia 1): a sua, dos dois lados, só no treino (F1); o tutorial e o online ficam em cordel. O
+    // provedor envolve o palco inteiro: o momento da especial e as cópias das cartas que saem também vestem a mesma aparência.
+    <LooksProvider look={tableLook(props, snapshot.prefs.look)}>
+      {/* Online (sem `training`, que o tutorial também passa), a sua especial espera o momento que o oponente vê (decisoes.md 2026-11-03 (5), A9a). */}
+      <Stage snapshot={snapshot} reducedMotion={reducedMotion} online={props.training === undefined}>
+        <PlayTableView {...props} snapshot={snapshot} state={snapshot.state} />
+      </Stage>
+    </LooksProvider>
   );
 }
 
@@ -580,6 +593,11 @@ function PlayTableView({
         showAutoPass={training === undefined}
         trainingLevel={training}
         tutorial={tutorial}
+        look={
+          chosenLook({ training, tutorial })
+            ? { value: snapshot.prefs.look ?? DEFAULT_LOOK, onChange: (look) => changePrefs({ ...snapshot.prefs, look }) }
+            : undefined
+        }
         concedeWarning={concedeWarning}
         canConcede={room?.status === 'PLAYING' && phase !== 'GAME_OVER'}
         concedeDisabled={snapshot.status === 'reconnecting'}

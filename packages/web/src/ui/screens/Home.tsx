@@ -1,11 +1,11 @@
 // Início (spec §2.1): criar sala, entrar com código ou link e treinar contra o bot. O apelido fica lembrado, e a chave "Som"
 // já mora aqui (guardada em `coringa:prefs`, com as outras preferências como estavam).
 import { DEFAULT_CONFIG } from '@coringa/engine';
-import { HttpError, normalizeNickname, parseTarget } from '@coringa/protocol';
+import { DEFAULT_LOOK, HttpError, normalizeNickname, parseTarget, type Look } from '@coringa/protocol';
 import { useState, type FormEvent } from 'react';
 import type { RoomApi } from '../../app/room-api.ts';
 import { navigate } from '../../app/router.ts';
-import { LEARN_LABEL, PAST_GAMES_LABEL, SOUND_LABEL } from '../../model/copy.ts';
+import { LEARN_LABEL, LOOK_PANEL_LABEL, LOOK_TRAINING_ONLY, PAST_GAMES_LABEL, SOUND_LABEL } from '../../model/copy.ts';
 import {
   loadNickname,
   loadPrefs,
@@ -16,6 +16,7 @@ import {
   type KeyValueStore,
 } from '../../model/storage.ts';
 import { HpChoice } from '../HpChoice.tsx';
+import { LookChoice } from '../LookChoice.tsx';
 import { Button, Panel, Screen, Switch, TextField, Title } from '../parts.tsx';
 import { useSound } from '../sound-context.ts';
 import { NICKNAME_ERROR, OFFLINE, TOO_MANY } from '../text.ts';
@@ -37,6 +38,7 @@ export function Home({ api, store }: HomeProps) {
   const [targetError, setTargetError] = useState<string | null>(null);
   const sound = useSound();
   const [soundOn, setSoundOn] = useState(() => loadPrefs(store).sound);
+  const [look, setLook] = useState<Look>(() => loadPrefs(store).look ?? DEFAULT_LOOK);
   // "Aprender jogando" vem em destaque (no alto, em ouro) enquanto o tutorial não foi feito nem pulado; depois, é um botão comum, entre os do treino.
   const [tutorialPending] = useState(() => loadTutorialState(store) === null);
   const learn = (
@@ -54,6 +56,12 @@ export function Home({ api, store }: HomeProps) {
     setSoundOn(on);
     savePrefs(store, { ...loadPrefs(store), sound: on });
     sound.setEnabled(on);
+  }
+
+  /** A aparência das cartas (decks e raças): guardada com as outras preferências; por enquanto vale no treino e no replay (F1). */
+  function changeLook(next: Look) {
+    setLook(next);
+    savePrefs(store, { ...loadPrefs(store), look: next });
   }
 
   async function create(event: FormEvent) {
@@ -148,6 +156,9 @@ export function Home({ api, store }: HomeProps) {
       <Button variant="secondary" onClick={() => navigate('/partidas')}>
         {PAST_GAMES_LABEL}
       </Button>
+      <Panel label={LOOK_PANEL_LABEL}>
+        <LookChoice value={look} onChange={changeLook} note={LOOK_TRAINING_ONLY} />
+      </Panel>
       <Panel label="Preferências">
         <Switch label={SOUND_LABEL} checked={soundOn} onChange={changeSound} />
       </Panel>

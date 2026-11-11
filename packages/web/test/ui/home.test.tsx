@@ -2,7 +2,8 @@ import { HttpError } from '@coringa/protocol';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { loadNickname, loadSeat } from '../../src/model/storage.ts';
+import { LOOK_PANEL_LABEL, LOOK_TRAINING_ONLY } from '../../src/model/copy.ts';
+import { DEFAULT_PREFS, loadNickname, loadPrefs, loadSeat } from '../../src/model/storage.ts';
 import { Home } from '../../src/ui/screens/Home.tsx';
 import { CODE, created, fakeApi, memoryStore, seriousViolations, TOKEN } from './support.tsx';
 
@@ -228,5 +229,34 @@ describe('início: treino e acessibilidade', () => {
     await user.click(screen.getByRole('button', { name: 'Entrar' }));
     expect(screen.getAllByRole('alert')).toHaveLength(2);
     expect(await seriousViolations(container)).toEqual([]);
+  });
+});
+
+describe('início: o painel "Aparência" (decks e raças, fatia 1)', () => {
+  it('o painel existe, antes das preferências, com a nota de que por enquanto vale no treino', () => {
+    setup();
+    const panel = screen.getByRole('region', { name: LOOK_PANEL_LABEL });
+    expect(within(panel).getByRole('group', { name: 'Deck' })).toBeInTheDocument();
+    expect(within(panel).getByText(LOOK_TRAINING_ONLY)).toBeInTheDocument();
+    const regions = screen.getAllByRole('region').map((region) => region.getAttribute('aria-label'));
+    expect(regions.indexOf(LOOK_PANEL_LABEL)).toBe(regions.indexOf('Preferências') - 1);
+  });
+
+  it('a troca fica no armazenamento, com as outras preferências, e volta ao reabrir a tela', async () => {
+    const { store, user, unmount } = setup();
+    await user.click(screen.getByRole('radio', { name: 'Bestiário' }));
+    await user.click(screen.getByRole('radio', { name: 'Egípcio' }));
+    expect(loadPrefs(store)).toEqual({ ...DEFAULT_PREFS, look: { deck: 'bestiario', race: 'egipcio' } });
+    unmount();
+    render(<Home api={fakeApi()} store={store} />);
+    expect(screen.getByRole('radio', { name: 'Bestiário' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'Egípcio' })).toBeChecked();
+  });
+
+  it('sem nada guardado, o Cordel e o Bufão, e nada é gravado só por abrir a tela', () => {
+    const { store } = setup();
+    expect(screen.getByRole('radio', { name: 'Cordel' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'Bufão' })).toBeChecked();
+    expect(store.get('coringa:prefs')).toBeNull();
   });
 });

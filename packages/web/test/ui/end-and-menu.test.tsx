@@ -1126,3 +1126,33 @@ describe('acessibilidade', () => {
     expect(await seriousViolations(m.container)).toEqual([]);
   });
 });
+
+describe('o menu: a aparência só no treino (decks e raças, fatia 1)', () => {
+  const FANTASY = { deck: 'bestiario', race: 'egipcio' } as const;
+  /** Deixa os `import()` dos pacotes de arte acontecerem: sem isto, uma mesa em cordel passaria por ainda não ter recebido a arte. */
+  const settle = () => act(async () => vi.dynamicImportSettled());
+
+  it('no treino, o menu mostra o seletor, e a troca vai para as preferências guardadas e para a sessão', async () => {
+    const m = mount({ status: 'PLAYING', props: { training: 'medio' } });
+    await m.user.click(menuButton());
+    const menu = within(menuDialog());
+    expect(menu.getByRole('group', { name: 'Deck' })).toBeInTheDocument();
+    await m.user.click(menu.getByRole('radio', { name: 'Celestial' }));
+    expect(loadPrefs(m.store).look).toEqual({ deck: 'celestial', race: 'bufao' });
+    expect(menu.getByRole('radio', { name: 'Celestial' })).toBeChecked();
+  });
+
+  it('na sala online, o menu não mostra o seletor, e a mesa fica em cordel mesmo com a preferência fantasy', async () => {
+    const m = mount({ status: 'PLAYING', prefs: { look: FANTASY } });
+    await settle();
+    expect(m.container.querySelector('[data-card-id] img')).toBeNull();
+    await m.user.click(menuButton());
+    expect(within(menuDialog()).queryByRole('group', { name: 'Deck' })).not.toBeInTheDocument();
+  });
+
+  it('no tutorial, o menu não mostra o seletor', async () => {
+    const m = mount({ status: 'PLAYING', prefs: { look: FANTASY }, props: { training: 'facil', tutorial: true } });
+    await m.user.click(menuButton());
+    expect(within(menuDialog()).queryByRole('group', { name: 'Deck' })).not.toBeInTheDocument();
+  });
+});

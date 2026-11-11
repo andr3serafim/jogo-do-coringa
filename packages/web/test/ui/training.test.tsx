@@ -17,6 +17,7 @@ import { getDiagnosticContext } from '../../src/app/diagnostic-context.ts';
 import { navigate } from '../../src/app/router.ts';
 import * as localRoomModule from '../../src/model/local-room.ts';
 import { loadPastGames } from '../../src/model/past-games.ts';
+import { DEFAULT_PREFS, loadPrefs, savePrefs } from '../../src/model/storage.ts';
 import { Training, type LocalRoomModule } from '../../src/ui/screens/Training.tsx';
 import { fakeApi, memoryStore, seriousViolations } from './support.tsx';
 
@@ -801,5 +802,50 @@ describe('/treino: acessibilidade', () => {
     const { container } = render(<Training store={memoryStore()} load={load} />);
     await screen.findByRole('heading', { name: 'Não deu para carregar o treino' });
     expect(await seriousViolations(container)).toEqual([]);
+  });
+});
+
+describe('/treino: a aparência (decks e raças, fatia 1)', () => {
+  const FANTASY = { deck: 'bestiario', race: 'egipcio' } as const;
+  const cardImages = () => [...document.querySelectorAll('[data-card-id] img')].map((img) => img.getAttribute('src') ?? '');
+
+  /** O treino com a aparência guardada; o pacote de arte chega por `import()` depois que a mesa monta. */
+  async function openWithLook() {
+    const clock = fakeClock();
+    const store = memoryStore();
+    savePrefs(store, { ...DEFAULT_PREFS, look: FANTASY });
+    const captured = capture();
+    render(<Training store={store} load={captured.load} />);
+    await settle();
+    await settle();
+    return { ...clock, ...captured, store };
+  }
+
+  it('com o Bestiário e o Egípcio nas preferências, as cartas da mesa têm a arte deles', async () => {
+    await openWithLook();
+    expect(cardImages().length).toBeGreaterThan(0);
+    for (const src of cardImages()) expect(src).toMatch(/\/looks\/(bestiario|egipcio)\//);
+  });
+
+  it('trocar o deck no menu troca as cartas na hora, sem remontar a mesa nem mexer na partida', async () => {
+    const { user, rooms, store } = await openWithLook();
+    const table = screen.getByRole('main', { name: 'Mesa' });
+    const card = document.querySelector('[data-card-id]');
+    const seq = rooms[0]!.state!.seq;
+
+    await user.click(menuButton());
+    await user.click(within(screen.getByRole('dialog', { name: 'Menu da partida' })).getByRole('radio', { name: 'Celestial' }));
+    await settle();
+    await settle();
+    expect(loadPrefs(store).look).toEqual({ deck: 'celestial', race: 'egipcio' });
+    expect(screen.getByRole('main', { name: 'Mesa' })).toBe(table);
+    expect(document.querySelector('[data-card-id]')).toBe(card);
+    expect(rooms[0]!.state!.seq).toBe(seq);
+    expect(cardImages().some((src) => src.includes('/looks/celestial/'))).toBe(true);
+    expect(cardImages().some((src) => src.includes('/looks/bestiario/'))).toBe(false);
+
+    await user.click(within(screen.getByRole('dialog', { name: 'Menu da partida' })).getByRole('radio', { name: 'Cordel' }));
+    expect(cardImages()).toEqual([]);
+    expect(screen.getByRole('main', { name: 'Mesa' })).toBe(table);
   });
 });

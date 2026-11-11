@@ -16,7 +16,7 @@
 // - "Tocar" avança um passo quando passaram 700 ms E o palco assentou. Um passo sem batida (o Equipar do oponente, um Equipar
 //   vazio) nunca avisa que assentou, então a pergunta "está ocupado?" é feita ao palco quando os 700 ms acabam: se não está,
 //   avança; se está, espera o `onSettled`. Pausar, navegar na mão ou sair da tela cancelam o timer e a espera.
-import type { RoomMessage, SeatInfo, StateMessage } from '@coringa/protocol';
+import { DEFAULT_LOOK, type RoomMessage, type SeatInfo, type StateMessage } from '@coringa/protocol';
 import { RULES_VERSION, type PlayerId } from '@coringa/engine';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DIVERGED_TEXT, myName, opponentName, OTHER_RULES_VERSION_TEXT, replayStoppedText } from '../../model/past-games-copy.ts';
@@ -24,6 +24,7 @@ import type { PastGame } from '../../model/past-games.ts';
 import { diverges, frameMessage, replaySnapshot, type ReplayTrack } from '../../model/replay-track.ts';
 import type { Prefs } from '../../model/storage.ts';
 import { Stage } from '../anim/Stage.tsx';
+import { LooksProvider } from '../cards/LooksProvider.tsx';
 import { useSound } from '../sound-context.ts';
 import { useReducedMotion } from '../anim/useReducedMotion.ts';
 import { GraveyardDialog } from '../table/GraveyardDialog.tsx';
@@ -208,26 +209,29 @@ function Playback({ game, track, prefs }: ReplayViewerProps) {
 
   return (
     <div ref={root} className="contents">
-      <Stage snapshot={snapshot} reducedMotion={reducedMotion} onSettled={onSettled}>
-        <Table
-          snapshot={snapshot}
-          remainingMs={remainingMs}
-          replay
-          actionBar={bar}
-          onOpenGraveyard={openGraveyard}
-          titleRef={title}
-        />
-        <GraveyardDialog
-          mode={graveyardOpen ? 'view' : null}
-          graveyard={view.graveyard}
-          options={NO_RESURRECT}
-          blocked={NO_RESURRECT}
-          rowCounts={{ ATK: view.self.attackRow.length, DEF: view.self.defenseRow.length }}
-          rowLimit={view.config.rowLimit}
-          onPick={noop}
-          onClose={() => setGraveyardOpen(false)}
-        />
-      </Stage>
+      {/* A aparência de agora, dos dois lados (decks e raças, fatia 1, F4); a fatia 2 a troca pela gravada com a partida. */}
+      <LooksProvider look={prefs.look ?? DEFAULT_LOOK}>
+        <Stage snapshot={snapshot} reducedMotion={reducedMotion} onSettled={onSettled}>
+          <Table
+            snapshot={snapshot}
+            remainingMs={remainingMs}
+            replay
+            actionBar={bar}
+            onOpenGraveyard={openGraveyard}
+            titleRef={title}
+          />
+          <GraveyardDialog
+            mode={graveyardOpen ? 'view' : null}
+            graveyard={view.graveyard}
+            options={NO_RESURRECT}
+            blocked={NO_RESURRECT}
+            rowCounts={{ ATK: view.self.attackRow.length, DEF: view.self.defenseRow.length }}
+            rowLimit={view.config.rowLimit}
+            onPick={noop}
+            onClose={() => setGraveyardOpen(false)}
+          />
+        </Stage>
+      </LooksProvider>
     </div>
   );
 }

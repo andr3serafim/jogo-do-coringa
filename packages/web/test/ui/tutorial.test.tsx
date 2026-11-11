@@ -14,7 +14,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../../src/app/App.tsx';
 import { getDiagnosticContext } from '../../src/app/diagnostic-context.ts';
 import * as localRoomModule from '../../src/model/local-room.ts';
-import { loadTutorialState } from '../../src/model/storage.ts';
+import { DEFAULT_PREFS, loadTutorialState, savePrefs } from '../../src/model/storage.ts';
 import { PC_QUERY } from '../../src/ui/table/History.tsx';
 import Tutorial from '../../src/ui/screens/Tutorial.tsx';
 import type { LocalRoomModule } from '../../src/ui/screens/local-game.tsx';
@@ -639,5 +639,16 @@ describe('/tutorial: acessibilidade', () => {
     );
     await screen.findByRole('heading', { name: 'Não deu para carregar o tutorial' });
     expect(await seriousViolations(container)).toEqual([]);
+  });
+});
+
+describe('o tutorial e a aparência (decks e raças, fatia 1)', () => {
+  it('com a preferência fantasy, o tutorial fica em cordel (as dicas falam das cartas de cordel)', async () => {
+    const store = memoryStore();
+    savePrefs(store, { ...DEFAULT_PREFS, look: { deck: 'bestiario', race: 'egipcio' } });
+    await openTutorial(store);
+    await settle();
+    expect(document.querySelectorAll('[data-card-id]').length).toBeGreaterThan(0);
+    expect(document.querySelector('[data-card-id] img')).toBeNull();
   });
 });
