@@ -1,6 +1,7 @@
 // Persistência no navegador (spec §6.1 e §6.5). Núcleo puro: o `Storage` entra por parâmetro e toda
 // operação fica num try/catch. O token é segredo e nunca sai daqui para o diagnóstico.
 import type { PlayerId } from '@coringa/engine';
+import { normalizeLook, type Look } from '@coringa/protocol';
 import type { TrainingLevel } from './local-room.ts';
 
 export interface KeyValueStore {
@@ -143,6 +144,11 @@ export interface Prefs {
   reduceMotion: boolean;
   /** Os sons da mesa (Fase C): ligados por padrão; a pessoa desliga no menu da partida ou na tela inicial. */
   sound: boolean;
+  /**
+   * A aparência das cartas (decks e raças, fatia 1): opcional, e ausente quando nunca foi escolhida. Quem lê usa
+   * `prefs.look ?? DEFAULT_LOOK` (de `@coringa/protocol`).
+   */
+  look?: Look;
 }
 
 export const DEFAULT_PREFS: Prefs = { autoPass: true, reduceMotion: false, sound: true };
@@ -157,6 +163,7 @@ export function loadPrefs(store: KeyValueStore): Prefs {
   if (typeof value.autoPass === 'boolean') prefs.autoPass = value.autoPass;
   if (typeof value.reduceMotion === 'boolean') prefs.reduceMotion = value.reduceMotion;
   if (typeof value.sound === 'boolean') prefs.sound = value.sound;
+  if ('look' in value) prefs.look = normalizeLook(value.look);
   return prefs;
 }
 

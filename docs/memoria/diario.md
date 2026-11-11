@@ -29,6 +29,12 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     congelado, `normalizeLook`) e o `export` no `index.ts`; 18 testes, cobertura de 100% no arquivo. **Ruling:** `DEFAULT_LOOK` tem o tipo
     `Readonly<Look>` (o plano diz `Look`, congelado): o tipo diz o que o `Object.freeze` faz, e um `Readonly<Look>` entra onde se pede um
     `Look`. **Ruling:** um id que só existe no protótipo (`toString`) não vale (o teste a mais), porque a busca é na lista, não por chave.
+  - **Task 2 (o modelo da web e as preferências): feita.** `packages/web/src/model/looks.ts` (`tierOf`, `PackId`, `ArtKey`, `artOf`,
+    `packsOf`, `AURA`, `RACE_TIER`) e `Prefs.look?` no `storage.ts` (`'look' in value` → `normalizeLook`; sem o campo, ausente; o
+    `DEFAULT_PREFS` igual). Nenhum teste existente mudou: casos novos num `describe` à parte do `storage.test.ts`. Web: 2646 testes,
+    cobertura do modelo 98,98% de linhas. **Ruling:** `tierOf` recebe `Rank` (o plano diz `number`): quem chama passa `card.value`, e o
+    tipo barra um 11 — custo: um `as Rank` se alguém tiver um `number` solto. **Ruling:** um `look` guardado como `null` ou texto conta
+    como "tem o campo" e sai normalizado no padrão (o plano fala de "inválido"; `null` é inválido).
 
 ---
 

@@ -304,6 +304,41 @@ describe('preferências', () => {
   });
 });
 
+describe('preferências: a aparência (decks e raças, fatia 1)', () => {
+  it('sem look guardado, o campo fica ausente e o resto é o de hoje', () => {
+    const store = fresh();
+    store.set('coringa:prefs', JSON.stringify({ autoPass: false, reduceMotion: true, sound: false }));
+    const prefs = loadPrefs(store);
+    expect(prefs).toStrictEqual({ autoPass: false, reduceMotion: true, sound: false });
+    expect('look' in prefs).toBe(false);
+    expect('look' in loadPrefs(fresh())).toBe(false);
+  });
+
+  it('com um look válido, carrega com ele', () => {
+    const store = fresh();
+    store.set('coringa:prefs', JSON.stringify({ ...DEFAULT_PREFS, look: { deck: 'celestial', race: 'egipcio' } }));
+    expect(loadPrefs(store).look).toEqual({ deck: 'celestial', race: 'egipcio' });
+  });
+
+  it.each([
+    [{ deck: 'cordel', race: 'egipcio' }, { deck: 'cordel', race: 'bufao' }],
+    [{ deck: 'x', race: 'y' }, { deck: 'cordel', race: 'bufao' }],
+    [{ deck: 'bestiario', race: 'y' }, { deck: 'bestiario', race: 'bufao' }],
+    ['bestiario', { deck: 'cordel', race: 'bufao' }],
+    [null, { deck: 'cordel', race: 'bufao' }],
+  ])('o look %j guardado sai normalizado', (look, expected) => {
+    const store = fresh();
+    store.set('coringa:prefs', JSON.stringify({ ...DEFAULT_PREFS, look }));
+    expect(loadPrefs(store).look).toEqual(expected);
+  });
+
+  it('ida e volta com a aparência', () => {
+    const store = fresh();
+    savePrefs(store, { ...DEFAULT_PREFS, look: { deck: 'bestiario', race: 'egipcio' } });
+    expect(loadPrefs(store)).toEqual({ ...DEFAULT_PREFS, look: { deck: 'bestiario', race: 'egipcio' } });
+  });
+});
+
 describe('apelido', () => {
   it('ida e volta na chave coringa:apelido', () => {
     const raw = memoryStorage();
