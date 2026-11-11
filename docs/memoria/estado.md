@@ -9,8 +9,9 @@
   `docs/superpowers/plans/2026-11-11-decks-fatia-1.md`, aprovado (`decisoes.md` 2026-11-11 (3)); "prossiga por aqui" (o autor, 2026-11-11)
   começou a execução: aqui mesmo, tarefa por tarefa, teste primeiro, com um revisor novo no fim (F7). O andamento, com as `Ruling:` de cada
   tarefa, vai no `diario.md` 2026-11-11 (1).
-- **Próximo passo exato:** conferir o `pnpm check` da Task 5 (o commit dela já está na branch) e seguir para a Task 6 (o smoke, o E2E, as
-  fotos, a medição e a documentação). As Tasks 0 a 5 estão commitadas; nada subiu ainda.
+- **Próximo passo exato:** a Task 6, em curso: o smoke e o `e2e/looks.spec.ts` estão commitados; falta rodar o spec
+  (`pnpm --filter @coringa/web exec playwright test looks.spec.ts`), as fotos, a medição (F5), o `pnpm e2e` inteiro e a documentação. As
+  Tasks 0 a 5 estão feitas (o JavaScript inicial foi de 179,9 para 182,7 KB). Nada subiu ainda.
 - **O bloco C está na `main`** (pontos 10, 11 e 13: a aura da iniciativa, os bônus em escala, o ouro de quem lidera), por fast-forward de
   `feat/playtest-bloco-c` até `21d1387`, com as duas CI verdes (`check` e `e2e`) no topo do código (`75d35c8`) e no push da `main`
   (`21d1387`). Plano `docs/superpowers/plans/2026-11-08-playtest-bloco-c.md`; a revisão da branch inteira e a segunda, só das correções

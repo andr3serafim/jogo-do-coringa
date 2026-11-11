@@ -11,6 +11,9 @@
  * - as duas telas das partidas anteriores (a lista e o visualizador do replay) também: entram por `React.lazy`. Mesma dupla.
  * - a tela do tutorial (o painel, os textos das dicas e a semente) também: entra por `React.lazy`. Mesma dupla.
  * - as cenas refeitas no sub-projeto 6 (`src/ui/scenes/`) também: entram por `import()` dinâmico (`loadScenes`). Mesma dupla.
+ * - os pacotes de arte dos decks e das raças (`src/looks/<pacote>/index.ts`) também: entram por `import()` (`loadPack`). Mesma dupla.
+ *   E mais duas: o `index.html` não pré-carrega nenhuma imagem `.webp`, e o CSS que ele pede não traz a fonte Cinzel, que só existe
+ *   num CSS de chunk (`src/looks/font.css`, pedido junto com o pacote).
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -36,6 +39,17 @@ const SCENES_MARK = 'data-palco-cena';
  * string de uma receita; as duas só existem no `synth.ts`. Qualquer uma num `.js` inicial reprova, e o chunk do sintetizador tem as duas.
  */
 const SYNTH_MARKS = ['createDynamicsCompressor', 'sawtooth'];
+/**
+ * Marcas dos pacotes de arte (decks e raças, fatia 1): o nome de um arquivo de cada pacote, que só o módulo de URLs dele cita (a URL
+ * da imagem fica no chunk do pacote como texto). Uma num `.js` inicial reprova, e cada uma tem que estar num chunk à parte.
+ */
+const LOOK_PACK_MARKS = [
+  { pack: 'o deck Bestiário', mark: '02-morcego' },
+  { pack: 'o deck Celestial', mark: '02-borboleta' },
+  { pack: 'a raça Egípcia', mark: 'k-mascara' },
+];
+/** O `@font-face` da Cinzel (o arquivo do pacote se chama `cinzel-latin-900-normal`): só num CSS de chunk, nunca no inicial. */
+const CINZEL_MARK = 'cinzel-latin-900';
 /**
  * Marcas das duas telas das partidas anteriores (literais de string sobrevivem à minificação). Cada marca tem que estar num chunk à
  * parte e em nenhum `.js` inicial.
@@ -83,13 +97,25 @@ function initialScripts(page: string): string[] {
   return [...urls];
 }
 
-function jsFiles(dir: string): string[] {
+/** Os `.css` que o HTML pede na abertura (`<link rel="stylesheet" href>`). */
+function initialStyles(page: string): string[] {
+  const urls: string[] = [];
+  for (const [tag] of page.matchAll(/<link\b[^>]*>/gi)) {
+    const url = attribute(tag, 'href');
+    if (url && (attribute(tag, 'rel') ?? '').split(/\s+/).includes('stylesheet')) urls.push(url);
+  }
+  return urls;
+}
+
+function filesEndingWith(dir: string, extension: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name);
-    if (entry.isDirectory()) return jsFiles(path);
-    return entry.name.endsWith('.js') ? [path] : [];
+    if (entry.isDirectory()) return filesEndingWith(path, extension);
+    return entry.name.endsWith(extension) ? [path] : [];
   });
 }
+
+const jsFiles = (dir: string): string[] => filesEndingWith(dir, '.js');
 
 const kb = (bytes: number): string => `${(bytes / 1024).toFixed(1)} KB`;
 const fromDist = (path: string): string => relative(dist, path).replaceAll('\\', '/');
@@ -131,8 +157,30 @@ for (const url of initial) {
   if (source.includes(SCENES_MARK)) {
     problems.push(`${url} contém as cenas do sub-projeto 6 ("${SCENES_MARK}"): elas têm que entrar por import() dinâmico, fora do inicial`);
   }
+  for (const { pack, mark } of LOOK_PACK_MARKS) {
+    if (source.includes(mark)) problems.push(`${url} contém ${pack} ("${mark}"): o pacote de arte tem que entrar por import(), fora do inicial`);
+  }
 }
 console.log(`  total: ${kb(total)} de ${kb(BUDGET_BYTES)}`);
+
+// As imagens das aparências nunca entram na abertura: nada de `.webp` pré-carregado pelo `index.html`.
+if (/\.webp\b/i.test(html)) problems.push('o index.html cita uma imagem .webp: as imagens dos decks só chegam com o pacote, por import()');
+
+// A Cinzel só existe num CSS de chunk (o `font.css`, pedido junto com o pacote); o CSS que o `index.html` pede não a traz.
+const initialCss = initialStyles(html);
+if (initialCss.length === 0) problems.push('o dist/index.html não pede nenhum CSS: a conferência da Cinzel não teria o que ler');
+for (const url of initialCss) {
+  const path = join(dist, url.slice(1));
+  if (existsSync(path) && readFileSync(path, 'utf8').includes(CINZEL_MARK)) {
+    problems.push(`${url} traz a fonte Cinzel ("${CINZEL_MARK}"): ela tem que chegar num CSS de chunk, com o pacote de arte`);
+  }
+}
+const cinzelCss = filesEndingWith(dist, '.css').filter((path) => readFileSync(path, 'utf8').includes(CINZEL_MARK));
+if (cinzelCss.length === 0) {
+  problems.push(`nenhum CSS do dist traz a fonte Cinzel ("${CINZEL_MARK}"): o import('./font.css') do loadPack sumiu, ou o nome mudou`);
+} else {
+  console.log(`Fonte Cinzel (fora do CSS inicial): ${cinzelCss.map(fromDist).join(', ')}`);
+}
 if (total > BUDGET_BYTES) problems.push(`JavaScript inicial com ${kb(total)} gzip passa do orçamento de ${kb(BUDGET_BYTES)}`);
 
 const all = jsFiles(dist);
@@ -197,6 +245,16 @@ if (sceneChunks.length === 0) {
   problems.push(`as cenas do sub-projeto 6 ("${SCENES_MARK}") não estão em nenhum chunk carregado sob demanda: o import() dinâmico sumiu, ou a marca mudou`);
 } else {
   console.log(`Cenas do sub-projeto 6 (fora do inicial): ${sceneChunks.map(fromDist).join(', ')}`);
+}
+
+// Os pacotes de arte têm que existir em algum chunk que não é o inicial, pelo mesmo motivo.
+for (const { pack, mark } of LOOK_PACK_MARKS) {
+  const chunks = all.filter((path) => !initialPaths.has(path) && readFileSync(path).includes(mark));
+  if (chunks.length === 0) {
+    problems.push(`${pack} ("${mark}") não está em nenhum chunk carregado sob demanda: o import() do loadPack sumiu, ou o arquivo mudou de nome`);
+  } else {
+    console.log(`Pacote de arte, ${pack} (fora do inicial): ${chunks.map(fromDist).join(', ')}`);
+  }
 }
 
 if (problems.length > 0) throw new Error(`smoke da web falhou:\n- ${problems.join('\n- ')}`);
