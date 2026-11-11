@@ -13,6 +13,14 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 - **Pre-flight:** as interfaces entre as tarefas batem (T1 → T2 → T3/T4 → T5). **Ruling:** a spec §6 queria o seletor apagado no online e
   a §5 um `art.css`; vale o plano (a F1 tira o seletor do online, e a fonte vai num `font.css`), aprovado depois da spec.
 - **Andamento** (uma linha por tarefa, com os commits e as escolhas da execução):
+  - **Task 0 (a branch, o que estava sem commit, a fonte): feita.** Commits de entrada `a159c3b` (as decisões), `dcaa266` (a spec, a folha,
+    a bíblia e o plano) e `2f5e0da` (23 SVG, o `LEIAME.md` e 24 WebP; nenhum dado pessoal neles); a Cinzel 5.3.0 (SIL OFL 1.1) no
+    `packages/web/package.json` e no `LICENSES.md`. **Armadilha:** o `config.yaml` global do pnpm desta máquina
+    (`%LOCALAPPDATA%\pnpm\config\config.yaml`) tem `storeDir: D:.pnpm-store`, sem a barra, e o `pnpm add` falha com `ENOENT` (`mkdir
+    'D:\andr3\jogo-coringa\D:.pnpm-store\v11'`); o `node_modules` foi instalado com `D:\.pnpm-store\v11`. Até o autor corrigir a config,
+    passe `--store-dir 'D:\.pnpm-store'`. As DLLs do paliativo do `workerd` sobreviveram ao `pnpm add`. **Ruling:** o commit da fonte
+    foi antes do `pnpm check` (o plano tem o contrário), para o estado ficar commitado antes do job longo (regra 2); o pre-commit já roda
+    o lint e o typecheck.
 
 ---
 

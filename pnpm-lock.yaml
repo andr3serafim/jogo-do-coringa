@@ -146,6 +146,9 @@ importers:
       '@fontsource/alfa-slab-one':
         specifier: ^5.0.0
         version: 5.3.0
+      '@fontsource/cinzel':
+        specifier: ^5.3.0
+        version: 5.3.0
       motion:
         specifier: ^12.0.0
         version: 12.43.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -622,6 +625,9 @@ packages:
 
   '@fontsource/alfa-slab-one@5.3.0':
     resolution: {integrity: sha512-J/ANFZ7S9CbZClr/QhMjmBtpFmmKipVkEXHj20aurR5uqJPCBChVPJn1/kx6vtrwnfnDY0kQaYSTYasSt4GruA==}
+
+  '@fontsource/cinzel@5.3.0':
+    resolution: {integrity: sha512-KEOYTsrRppW0uRIPWBDPrQgunCS6f8u4nzZxYRBfo9SCknKojLYjK7B0ZoVmJhyVLefz271ZQRF9EOpHZlfhRw==}
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -2562,6 +2568,8 @@ snapshots:
   '@fontsource-variable/archivo@5.3.0': {}
 
   '@fontsource/alfa-slab-one@5.3.0': {}
+
+  '@fontsource/cinzel@5.3.0': {}
 
   '@humanfs/core@0.19.2':
     dependencies:
