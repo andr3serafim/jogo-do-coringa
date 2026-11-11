@@ -12,6 +12,8 @@
 // - `MEDIR_MS`: a duração da cena; `MEDIR_FOTOS`: os instantes das fotos, em ms depois do clique (opcional).
 // - `MEDIR_SAIDA`: a pasta das fotos (`<largura>-<ms>.png`) e da medida (`<largura>.json`). Fora do repositório.
 // - `MEDIR_PORTA` (opcional): a porta do servidor da medição, quando a 8787 está ocupada (ver `medir.config.ts`).
+// - `MEDIR_APARENCIA` (opcional): `<deck>:<raça>` (ex.: `bestiario:egipcio`), gravado em `coringa:prefs` antes de abrir o replay, que veste
+//   a aparência de agora (decks e raças, fatia 1, F4). A medida espera as imagens das cartas carregarem. Sem a variável, nada muda.
 // - `MEDIR_PERFIL=1` (opcional): grava também o perfil do Chromium do clique medido em `<largura>-perfil.json` (abre no painel Performance do DevTools). O
 //   rastreamento pesa: com ele, os números da medida não valem. Meça sem ele e use o perfil só para ver do que é feito cada quadro.
 //
@@ -35,6 +37,7 @@ const sceneMs = Number(required('MEDIR_MS'));
 const out = required('MEDIR_SAIDA');
 const shots = (process.env.MEDIR_FOTOS ?? '').split(',').filter(Boolean).map(Number);
 const profile = process.env.MEDIR_PERFIL === '1';
+const [lookDeck, lookRace] = (process.env.MEDIR_APARENCIA ?? '').split(':');
 /** O que o perfil grava: a linha do tempo do DevTools e as amostras de JS (para saber de qual função é cada trecho). */
 const TRACE_CATEGORIES = ['devtools.timeline', 'disabled-by-default-devtools.timeline', 'disabled-by-default-devtools.timeline.frame', 'v8.execute', 'disabled-by-default-v8.cpu_profiler', 'disabled-by-default-devtools.timeline.invalidationTracking'];
 /** Depois do toque, a janela em que o passo chega à mesa. */
@@ -51,6 +54,10 @@ for (const viewport of [
     test.setTimeout(90_000);
     await page.setViewportSize(viewport);
     await page.addInitScript((games) => window.localStorage.setItem('coringa:partidas', games), fixture);
+    if (lookDeck && lookRace) {
+      const prefs = JSON.stringify({ autoPass: true, reduceMotion: false, sound: true, look: { deck: lookDeck, race: lookRace } });
+      await page.addInitScript((value) => window.localStorage.setItem('coringa:prefs', value), prefs);
+    }
     await page.goto(`/partidas/${gameId}`);
     await page.getByRole('combobox', { name: 'Rodada' }).selectOption(round);
     const next = replayControl(page, 'Próximo passo');
@@ -61,6 +68,17 @@ for (const viewport of [
     }
     const idle = page.locator('[data-palco]:not([data-ocupado])');
     await expect(idle).toHaveCount(1);
+    // Com uma aparência de arte, a medida começa com as imagens das cartas já carregadas (o pacote chega por `import()`).
+    if (lookDeck && lookRace) {
+      await expect
+        .poll(() =>
+          page.evaluate(() => {
+            const images = [...document.querySelectorAll<HTMLImageElement>('[data-card-id] img')];
+            return images.length > 0 && images.every((image) => image.complete && image.naturalWidth > 0);
+          }),
+        )
+        .toBe(true);
+    }
 
     // As fotos: toca a cena, fotografa, e volta um passo para medir a mesma cena.
     if (shots.length > 0) {
