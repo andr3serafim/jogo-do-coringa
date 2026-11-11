@@ -9,7 +9,7 @@
   `docs/superpowers/plans/2026-11-11-decks-fatia-1.md`, aprovado (`decisoes.md` 2026-11-11 (3)); "prossiga por aqui" (o autor, 2026-11-11)
   começou a execução: aqui mesmo, tarefa por tarefa, teste primeiro, com um revisor novo no fim (F7). O andamento, com as `Ruling:` de cada
   tarefa, vai no `diario.md` 2026-11-11 (1).
-- **Próximo passo exato:** a Task 3 (o catálogo e os pacotes da arte). As Tasks 0 a 2 estão feitas e commitadas; nada subiu ainda.
+- **Próximo passo exato:** a Task 4 (a face com arte). As Tasks 0 a 3 estão feitas e commitadas; nada subiu ainda.
 - **O bloco C está na `main`** (pontos 10, 11 e 13: a aura da iniciativa, os bônus em escala, o ouro de quem lidera), por fast-forward de
   `feat/playtest-bloco-c` até `21d1387`, com as duas CI verdes (`check` e `e2e`) no topo do código (`75d35c8`) e no push da `main`
   (`21d1387`). Plano `docs/superpowers/plans/2026-11-08-playtest-bloco-c.md`; a revisão da branch inteira e a segunda, só das correções

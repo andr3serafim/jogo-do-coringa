@@ -35,6 +35,14 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     cobertura do modelo 98,98% de linhas. **Ruling:** `tierOf` recebe `Rank` (o plano diz `number`): quem chama passa `card.value`, e o
     tipo barra um 11 — custo: um `as Rank` se alguém tiver um `number` solto. **Ruling:** um `look` guardado como `null` ou texto conta
     como "tem o campo" e sai normalizado no padrão (o plano fala de "inválido"; `null` é inválido).
+  - **Task 3 (o catálogo e os pacotes da arte): feita.** `src/looks/catalog.ts` (`DECK_LABEL`, `RACE_LABEL`, `ART_META` com os 23 nomes e
+    cores da spec), um `index.ts` por pacote (`import.meta.glob` com `?url` e a tabela arquivo → chave; o `egipcio` exporta o `portrait`),
+    `load.ts` (`loadPack`: o pacote e o `font.css` por `import()`, a promessa guardada, o aquecimento com `new Image()` só onde existe) e o
+    `--font-cinzel` no `@theme`. O teste ficou no projeto `model` (o Node): o `import.meta.glob` com `?url` e o `import()` do CSS funcionam
+    lá. **Ruling:** um `src/looks/pack-urls.ts` (`urlsByKey`) a mais, que os três pacotes dividem, em vez de repetir o laço em cada um —
+    custo: um chunk minúsculo a mais. **Ruling:** a promessa rejeitada do `loadPack` também fica guardada (a F3 diz "para sempre" no
+    cordel) — custo: sem nova tentativa até recarregar. **Armadilha:** a chave `'10'` é índice inteiro, e o `Object.values` a põe antes de
+    `'02'`: leia o catálogo pela lista das chaves, nunca pela ordem do objeto.
 
 ---
 

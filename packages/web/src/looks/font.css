@@ -1,0 +1,3 @@
+/* A Cinzel 900 latina (SIL OFL 1.1, @fontsource/cinzel), o valor das cartas com arte. Chega com o primeiro pacote de arte (`load.ts`), num
+   CSS de chunk: fora do CSS inicial. */
+@import '@fontsource/cinzel/latin-900.css';

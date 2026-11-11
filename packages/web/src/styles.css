@@ -21,6 +21,8 @@
   --font-madeira: 'Alfa Slab One', serif;
   --font-texto: 'Archivo Variable', sans-serif;
   --default-font-family: var(--font-texto);
+  /* O valor das cartas com arte (decks e raças): a Cinzel 900 chega com o pacote de arte (`looks/font.css`), fora do CSS inicial. */
+  --font-cinzel: 'Cinzel', serif;
 
   /* Celular de 360 a 599 px (sem prefixo), tablet de 600 a 1023, PC a partir de 1024. */
   --breakpoint-*: initial;
