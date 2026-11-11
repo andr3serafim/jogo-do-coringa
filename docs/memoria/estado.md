@@ -1,42 +1,39 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-11**, o bloco C com as duas CI verdes e a segunda revisão feita, no merge. Antes de seguir, confira
-> se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
+> Sobrescrito a cada atualização. **Última: 2026-11-11**, o bloco C na `main`; nada em curso. Antes de seguir, confira se não há versão
+> mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Em curso: o bloco C** (pontos 10, 11 e 13: a aura da iniciativa, os bônus em escala, o ouro de quem lidera), na branch
-  `feat/playtest-bloco-c` (saída da `main` em `792bd62`), no checkout principal. Plano `docs/superpowers/plans/2026-11-08-playtest-bloco-c.md`,
-  aprovado como estava (`decisoes.md` 2026-11-08 (2)). As cinco tarefas estão feitas; a revisão da branch inteira (subagente) foi "com
-  correções", e tudo foi corrigido com teste (`f6cf1f9`, `2331e02`, `972e890`, `6df073d`). O autor aceitou a medição como está
-  (`decisoes.md` 2026-11-10 (1)). Tudo, com os rulings e os menores adiados, no `diario.md` 2026-11-08 (1); a medição em
-  `notas/medicao-bloco-c.md`; o que a execução decidiu na §5.4 da spec do playtest. `STATE_SCHEMA` 6, `RULES_VERSION` 5 (igual).
-- **Feito em 2026-11-11:** a CI de `75d35c8` passou nos dois jobs (`check` e `e2e`); a segunda revisão, só das correções
-  (`81697a6..6df073d`), não achou Critical nem Important (`diario.md` 2026-11-08 (1), "o fechamento").
-- **Próximo passo exato:**
-  1. **O merge (em curso):** `git branch -f main HEAD` (a `main` é ancestral) e `git push origin main feat/playtest-bloco-c` (o pre-push
-     roda o `pnpm check`). Depois, ler a CI do push da `main` pela API pública
-     (`curl -s "https://api.github.com/repos/andr3serafim/jogo-do-coringa/actions/runs?branch=main&per_page=3"`, o `head_sha` tem de ser o
-     topo; depois `.../runs/<id>/jobs`).
-  2. **Fechar:** o `estado.md` com "nada em curso" e a fila com o bloco D; apagar `.superpowers/sdd/2026-11-08-playtest-bloco-c` (o
-     ledger, fora do git: os rulings já estão no diário).
-  3. **Devolver a memória dos decks:** se houver um `git stash` "decks: memória da outra conta", ele tem o `decisoes.md` e o `estado.md`
-     da outra conta: `git stash pop`, resolver o `estado.md` à mão (o bloco C fechado mais o parágrafo e o item da fila dos decks),
-     `git restore --staged docs/memoria/estado.md` e `git stash drop`. Os dois ficam sem commit, para a Task 0 do plano dos decks.
+- **Nada em curso.** O checkout principal está na `main`.
+- **O bloco C está na `main`** (pontos 10, 11 e 13: a aura da iniciativa, os bônus em escala, o ouro de quem lidera), por fast-forward de
+  `feat/playtest-bloco-c` até `21d1387`, com as duas CI verdes (`check` e `e2e`) no topo do código (`75d35c8`) e no push da `main`
+  (`21d1387`). Plano `docs/superpowers/plans/2026-11-08-playtest-bloco-c.md`; a revisão da branch inteira e a segunda, só das correções
+  (nenhum Critical nem Important), os rulings e os menores adiados no `diario.md` 2026-11-08 (1); a medição em `notas/medicao-bloco-c.md`;
+  o que a execução decidiu na §5.4 da spec do playtest. `STATE_SCHEMA` 6, `RULES_VERSION` 5 (igual). O ledger do bloco foi apagado.
+- **Próximo passo exato:** quando o autor pedir, a **Task 0 do plano `docs/superpowers/plans/2026-11-11-decks-fatia-1.md`** (a fatia 1 dos
+  decks e raças), no Claude Code local, neste checkout (os arquivos dela estão sem commit aqui; uma worktree nova não os teria).
 - **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app) e o `jogar-treino.bat` do autor.
-- **Sem commit, de outra conta (decks e raças, não são do bloco C):** a spec, a bíblia de arte, o plano
-  `docs/superpowers/plans/2026-11-11-decks-fatia-1.md` e a arte provisória (`packages/web/art/`, `packages/web/src/looks/`), e as entradas
-  do `decisoes.md` (no stash do passo 3). Entram na branch `feat/decks-fatia-1` pela Task 0 do plano, depois do merge do bloco C.
+- **Sem commit, de outra conta (2026-11-10 e 11, conversa do app, sem shell):** as entradas 2026-11-10 (2) e 2026-11-11 (1), (2) e (3) do
+  `decisoes.md`, a spec `docs/superpowers/specs/2026-11-10-decks-e-racas-design.md` com a folha `…-arte.webp`, a bíblia de arte
+  `docs/superpowers/specs/2026-11-11-biblia-de-arte.md`, o plano `docs/superpowers/plans/2026-11-11-decks-fatia-1.md`, e a arte provisória
+  (`packages/web/art/` com 23 SVG e o `LEIAME.md`; `packages/web/src/looks/` com 24 WebP). Só existem neste checkout: a Task 0 do plano
+  os leva para a branch `feat/decks-fatia-1`.
 
 ## Fila
 
+- **Decks e raças do Coringa** (sub-projeto novo, `decisoes.md` 2026-11-10 (2) e 2026-11-11 (1) a (3), ainda sem commit): três decks
+  (Cordel, Bestiário, Celestial) e duas raças (Bufão, Egípcia), a aparência de cada lado da mesa pelo dono, também no online. A spec está
+  aceita, a arte provisória aprovada e nos arquivos, e **o plano da fatia 1 está aprovado** (as F1 a F7 como recomendadas). A execução é no
+  Claude Code local (Opus 5.5), a partir da Task 0; a conversa do app não implementa. Os planos das fatias 2 e 3 vêm depois da fatia 1. A
+  arte pintada, quando o autor quiser, segue a bíblia de arte.
 - **Bloco D** (pontos 5 e 14, spec do playtest §6: os botões de carimbo e o 14), com plano escrito e aprovado pelo autor antes da execução,
   como os blocos A, B, C e E.
 
 ## Esperando o autor
 
-- **O deploy** (`pnpm deploy:server`, só ele), de preferência depois do merge do bloco C: fecha as salas online abertas (`STATE_SCHEMA` 6),
-  e as partidas guardadas de antes abrem com o aviso de versão (`RULES_VERSION` 5).
+- **O deploy** (`pnpm deploy:server`, só ele), agora que o bloco C está na `main`: fecha as salas online abertas (`STATE_SCHEMA` 6), e as
+  partidas guardadas de antes abrem com o aviso de versão (`RULES_VERSION` 5).
 - **Jogar** os blocos A, B, C e E e as placas novas. O treino mostra tudo; o online só depois do deploy. As frases novas das placas são de
   quem escreveu (ele aprovou corrigir, não as palavras): conferir no playtest.
 - **Achado da medição do bloco C:** a virada de rodada depois de uma sequência longa (`exodia-devastacao.json` 236→237) fica a 42 e 48
@@ -86,6 +83,6 @@ toque "Próximo passo" a partir do passo:
   `.claude/worktrees/youthful-elgamal-3d5e8a` (de 2026-11-02, talvez de uma sessão do app: não apague). Uma pasta de worktree com
   `node_modules` que o `git worktree remove` não apaga ("Filename too long") sai no PowerShell com
   `Remove-Item -LiteralPath ('\\?\' + $p) -Recurse -Force`.
-- **Branches:** as locais estão mescladas na `main`, menos a `feat/online-equipar-vazio` (um rebase não publicado; o autor pode apagá-la)
-  e a `feat/playtest-bloco-c` (em curso). As remotas velhas, mescladas, são do autor (`notas/playtest.md`).
+- **Branches:** as locais estão mescladas na `main` (a `feat/playtest-bloco-c` também, em 2026-11-11), menos a `feat/online-equipar-vazio`
+  (um rebase não publicado; o autor pode apagá-la). As remotas velhas, mescladas, são do autor (`notas/playtest.md`).
 - O `jogar-treino.bat` na raiz é o lançador do autor: não mexer nem commitar.
