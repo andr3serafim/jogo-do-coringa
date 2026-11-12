@@ -9,20 +9,16 @@
   `docs/superpowers/plans/2026-11-11-decks-fatia-1.md`, aprovado (`decisoes.md` 2026-11-11 (3)); "prossiga por aqui" (o autor, 2026-11-11)
   começou a execução: aqui mesmo, tarefa por tarefa, teste primeiro, com um revisor novo no fim (F7). O andamento, com as `Ruling:` de cada
   tarefa, vai no `diario.md` 2026-11-11 (1).
-- **Pausado pelo autor ("pause", 2026-11-11), no meio da Task 6.** As Tasks 0 a 5 estão feitas e commitadas (o JavaScript inicial foi de
-  179,9 para 182,7 KB). Da Task 6: o smoke (passa e reprova um `.webp` no `index.html`), o `e2e/looks.spec.ts` e o `MEDIR_APARENCIA` do
-  `e2e/medir-cena.ts` estão commitados. Nada subiu ainda.
+- **Task 6 em curso** (retomada depois da pausa: "Tente novamente"). As Tasks 0 a 5 estão feitas e commitadas (o JavaScript inicial foi de
+  179,9 para 182,7 KB). Da Task 6: o smoke (passa e reprova um `.webp` no `index.html`), o `e2e/looks.spec.ts` (3 de 3, com o clique no
+  rótulo do rádio) e o `MEDIR_APARENCIA` do `e2e/medir-cena.ts` estão commitados. Nada subiu ainda.
 - **Próximo passo exato:**
-  1. **Consertar o `looks.spec.ts`:** rodado só ele (`pnpm --filter @coringa/web exec playwright test looks.spec.ts`), 2 de 3 passaram; o
-     da troca no menu falha porque o `.check()` clica no `<input class="sr-only">` e o `<label>` por cima intercepta o clique. Trocar os
-     `menu.getByRole('radio', { name }).check()` por um clique no rótulo (`menu.locator('label', { hasText: /^Celestial$/ }).click()`, idem
-     "Cordel") e rodar de novo.
-  2. **A medição (F5)**, com a web construída: `exodia-devastacao` em dois passos, o do plano (`MEDIR_RODADA=7 MEDIR_PASSO=27 MEDIR_MS=4600`) e
+  1. **A medição (F5)**, com a web construída: `exodia-devastacao` em dois passos, o do plano (`MEDIR_RODADA=7 MEDIR_PASSO=27 MEDIR_MS=4600`) e
      a mesa mais cheia dela (`MEDIR_RODADA=47 MEDIR_PASSO=236 MEDIR_MS=3000`, o 236→237 do bloco C), cada um sem `MEDIR_APARENCIA`, com
      `bestiario:egipcio` e com `celestial:egipcio`; a tabela e o veredito em `docs/memoria/notas/medicao-decks-fatia-1.md`.
-  3. **As fotos** para o autor (fora do repositório): a mesa do treino a 360 × 640 e a 1366 × 657 com as duas aparências, a mão, o
+  2. **As fotos** para o autor (fora do repositório): a mesa do treino a 360 × 640 e a 1366 × 657 com as duas aparências, a mão, o
      cemitério, as minis e o painel "Aparência"; conferir o Pégaso e o Arcanjo e as minis de 30 px.
-  4. `pnpm check` e `pnpm e2e` inteiros; a documentação (o `CLAUDE.md`, a seção "O que a execução decidiu (fatia 1)" na spec, o diário);
+  3. `pnpm check` e `pnpm e2e` inteiros; a documentação (o `CLAUDE.md`, a seção "O que a execução decidiu (fatia 1)" na spec, o diário);
      subir a branch; o PR; o revisor novo (F7) e as correções.
 - **O bloco C está na `main`** (pontos 10, 11 e 13: a aura da iniciativa, os bônus em escala, o ouro de quem lidera), por fast-forward de
   `feat/playtest-bloco-c` até `21d1387`, com as duas CI verdes (`check` e `e2e`) no topo do código (`75d35c8`) e no push da `main`

@@ -81,12 +81,15 @@ test('aparência: a troca no menu do treino troca as imagens, e o Cordel trava o
   await loadedCardImages(page);
 
   const menu = await openMenu(page);
-  await menu.getByRole('radio', { name: 'Celestial' }).check();
+  // O rádio é `sr-only` dentro do rótulo com cara de botão: quem recebe o toque é o rótulo (o `check()` no input esbarra nele).
+  const option = (name: string) => menu.locator('label').filter({ hasText: new RegExp(`^${name}$`) });
+  await option('Celestial').click();
+  await expect(menu.getByRole('radio', { name: 'Celestial' })).toBeChecked();
   await expect.poll(async () => (await cardImages(page)).some((image) => CELESTIAL.test(image.src))).toBe(true);
   const celestial = await loadedCardImages(page);
   expect(celestial.filter((src) => BESTIARIO.test(src))).toEqual([]);
 
-  await menu.getByRole('radio', { name: 'Cordel' }).check();
+  await option('Cordel').click();
   await expect.poll(async () => (await cardImages(page)).length).toBe(0);
   // Com o Cordel, o Egípcio não se marca: o Coringa volta ao Bufão e fica travado nele.
   await expect(menu.getByRole('radio', { name: 'Bufão' })).toBeChecked();
