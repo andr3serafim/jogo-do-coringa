@@ -17,6 +17,8 @@ import { DamageNumber, InkSplat, ShieldBreak } from '../anim/Effects.tsx';
 import { RibbonLayer } from '../anim/Ribbon.tsx';
 import { useCountedLife } from '../anim/useCountedNumber.ts';
 import { Coringa } from '../cards/Coringa.tsx';
+import { LookZone } from '../cards/LooksProvider.tsx';
+import { usePortrait } from '../cards/looks-context.ts';
 import { useSound } from '../sound-context.ts';
 import { useTableUi } from './context.ts';
 import { Insignia } from './Insignia.tsx';
@@ -55,7 +57,10 @@ export function FightHud({ view, names, face, deadline }: FightHudProps) {
   const score = initiativeScore(view);
   return (
     <section ref={hud} aria-label="Placar" data-placar className="placar relative flex-none bg-tinta text-papel">
-      <Side side="voce" view={view} player={view.self} name={names.self} holder={sword.shown === 'voce'} aura={auraOf('voce')} />
+      {/* Cada lado no lugar do dono (decks e raças, fatia 2): o retrato veste a raça dele. O LookZone não põe nó no DOM. */}
+      <LookZone owner={view.self.id}>
+        <Side side="voce" view={view} player={view.self} name={names.self} holder={sword.shown === 'voce'} aura={auraOf('voce')} />
+      </LookZone>
       <div data-placa className="placar-placa flex flex-col items-center text-center">
         {/* Letra lisa, como no protótipo: a textura de madeira borra o rótulo nesse tamanho. O número grande é tipo de madeira. */}
         <h2 className="text-[9px] font-bold uppercase leading-[1.15] tracking-[0.16em] text-papel/70 pc:text-xs">
@@ -86,7 +91,9 @@ export function FightHud({ view, names, face, deadline }: FightHudProps) {
         <p className="sr-only">Iniciativa: {initiativeText(view, names)}</p>
         <p className="sr-only">{initiativeScoreText(view, names)}</p>
       </div>
-      <Side side="oponente" view={view} player={view.opponent} name={names.opponent} holder={sword.shown === 'oponente'} aura={auraOf('oponente')} />
+      <LookZone owner={view.opponent.id}>
+        <Side side="oponente" view={view} player={view.opponent} name={names.opponent} holder={sword.shown === 'oponente'} aura={auraOf('oponente')} />
+      </LookZone>
       <InitiativeSword holder={sword.shown} move={sword.move} reduced={anim.reduced} busy={anim.busy} hud={hud} />
       <RibbonLayer ribbon={anim.ribbon} reduced={anim.reduced} />
     </section>
@@ -184,6 +191,16 @@ interface SideProps {
   aura: { streak: number; puff: number };
 }
 
+/**
+ * O rosto do retrato: o da raça do lugar (o Anúbis, uma imagem decorativa, quando o pacote dela chegou) ou o Coringa de cordel (o Bufão, ou
+ * o pacote por chegar ou falho). A rachadura, a insígnia, a quebra do escudo e o número de dano ficam por cima, como antes.
+ */
+function PortraitFace() {
+  const url = usePortrait();
+  if (url === null) return <Coringa className="size-[82%]" />;
+  return <img src={url} alt="" draggable={false} decoding="async" className="size-[82%] object-cover" />;
+}
+
 function Side({ side, view, player, name, holder, aura }: SideProps) {
   const self = side === 'voce';
   const zone: MarkZone = self ? 'selfHp' : 'opponentHp';
@@ -221,7 +238,7 @@ function Side({ side, view, player, name, holder, aura }: SideProps) {
         data-derrotado={defeated ? '' : undefined}
         className={`placar-retrato ${self ? 'bg-capa-voce' : 'bg-capa-oponente'}`}
       >
-        <Coringa className="size-[82%]" />
+        <PortraitFace />
         {defeated ? <PortraitCrack reduced={anim.reduced} /> : null}
         {/* A insígnia da Defesa Absoluta (sub-projeto 6 §7.2), no canto de baixo, por fora: a espada da iniciativa fica no de cima. */}
         {anim.insignia(player.id, player.absoluteDefense) ? (

@@ -24,7 +24,7 @@
 // Fora da sua vez (Equipar, escolha da ordem, vez do oponente), tocar uma carta da mão não escolhe nada: o balão sobre a mão diz por
 // que ela não tem jogada agora (B2, o motivo é do motor: `noPlayReason`) e some sozinho depois do tempo de leitura, ou com outro toque
 // na mesma carta. Depois do passe, e no fim da partida, a mão fica só de vista.
-import { noPlayReason, type SpecialCard } from '@coringa/engine';
+import { noPlayReason, type PlayerId, type SpecialCard } from '@coringa/engine';
 import { DEFAULT_LOOK, type Deadline, type Look, type PlayerAction, type StateMessage } from '@coringa/protocol';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { navigate } from '../../app/router.ts';
@@ -32,6 +32,8 @@ import { noPlaysText } from '../../model/copy.ts';
 import { playDropZones, resolvePlayDrop, type DropKey } from '../../model/drag.ts';
 import { rowKey } from '../../model/effects.ts';
 import type { TrainingLevel } from '../../model/local-room.ts';
+import { botLook } from '../../model/looks.ts';
+import type { PastLooks } from '../../model/past-games.ts';
 import { isLegal, liveHandIds, tablePlays, type CardPlay } from '../../model/plays.ts';
 import { readingMs } from '../../model/reading.ts';
 import type { Session, SessionSnapshot } from '../../model/session.ts';
@@ -84,9 +86,32 @@ export interface PlayTableProps {
 /** A aparência se escolhe só no treino fora do tutorial (F1); no resto, a mesa fica no padrão e o menu não mostra o seletor. */
 const chosenLook = ({ training, tutorial }: Pick<PlayTableProps, 'training' | 'tutorial'>): boolean => training !== undefined && !tutorial;
 
-/** A aparência da mesa: a das preferências no treino; o padrão (o Cordel) no tutorial e no online. */
-function tableLook(props: Pick<PlayTableProps, 'training' | 'tutorial'>, look: Look | undefined): Look {
-  return chosenLook(props) ? (look ?? DEFAULT_LOOK) : DEFAULT_LOOK;
+interface TableLooks {
+  /** A sua (a de quem olha). */
+  mine: Look;
+  /** A de cada dono, para o provedor. */
+  owners: Partial<Record<PlayerId, Look>>;
+  /**
+   * A sua e a do bot, para a gravação da partida (G3); nenhuma com o Cordel, para a linha do treino padrão ficar como a de hoje (sem elas o
+   * replay já é Cordel dos dois lados, e o bot em Cordel é a G1).
+   */
+  recorded: PastLooks | undefined;
+}
+
+/**
+ * As aparências da mesa (decks e raças, fatia 2): no treino fora do tutorial, a sua (das preferências) e a do bot (`botLook`, G1),
+ * calculada da sua a cada desenho (G2: trocar a sua no menu troca a dele); no tutorial e no online, nenhuma (o padrão dos dois lados, G4).
+ * Memoizada pelo conteúdo: o `botLook` devolve um objeto novo, e um `owners` novo a cada desenho mudaria o contexto de toda carta.
+ */
+function useTableLooks(chosen: Look | null, me: PlayerId | undefined, opponent: PlayerId | undefined): TableLooks | null {
+  const deck = chosen?.deck;
+  const race = chosen?.race;
+  return useMemo(() => {
+    if (deck === undefined || race === undefined || me === undefined || opponent === undefined) return null;
+    const mine: Look = { deck, race };
+    const bot = botLook(mine);
+    return { mine, owners: { [me]: mine, [opponent]: bot }, recorded: deck === 'cordel' ? undefined : { me: mine, opponent: bot } };
+  }, [deck, race, me, opponent]);
 }
 
 export function PlayTable(props: PlayTableProps) {
@@ -99,15 +124,18 @@ export function PlayTable(props: PlayTableProps) {
   useEffect(() => {
     sound.setEnabled(soundOn);
   }, [sound, soundOn]);
+  const view = snapshot.state?.view;
+  const table = useTableLooks(chosenLook(props) ? (snapshot.prefs.look ?? DEFAULT_LOOK) : null, view?.me, view?.opponent.id);
   // Sem `state` ainda não há o que desenhar.
   if (snapshot.state === null) return null;
   return (
-    // A aparência das cartas (decks e raças, fatia 1): a sua, dos dois lados, só no treino (F1); o tutorial e o online ficam em cordel. O
-    // provedor envolve o palco inteiro: o momento da especial e as cópias das cartas que saem também vestem a mesma aparência.
-    <LooksProvider look={tableLook(props, snapshot.prefs.look)}>
+    // A aparência das cartas: no treino, a sua no seu lado e no que é seu (a mão, o Equipar, o cemitério), e a do bot no lado dele (fatia
+    // 2); o tutorial e o online ficam em cordel. Um provedor só, em volta do palco inteiro: o momento da especial e as cópias das cenas
+    // ficam no `LookZone` de quem a cena fala.
+    <LooksProvider look={table?.mine ?? DEFAULT_LOOK} owners={table?.owners}>
       {/* Online (sem `training`, que o tutorial também passa), a sua especial espera o momento que o oponente vê (decisoes.md 2026-11-03 (5), A9a). */}
       <Stage snapshot={snapshot} reducedMotion={reducedMotion} online={props.training === undefined}>
-        <PlayTableView {...props} snapshot={snapshot} state={snapshot.state} />
+        <PlayTableView {...props} snapshot={snapshot} state={snapshot.state} looks={table?.recorded} />
       </Stage>
     </LooksProvider>
   );
@@ -152,6 +180,8 @@ function handButton(id: string | null): HTMLElement | null {
 interface ViewProps extends PlayTableProps {
   snapshot: SessionSnapshot;
   state: StateMessage;
+  /** As aparências que a partida guardada leva (só o treino fora do tutorial). */
+  looks: PastLooks | undefined;
 }
 
 function PlayTableView({
@@ -169,6 +199,7 @@ function PlayTableView({
   tutorial,
   hint,
   endNote,
+  looks,
 }: ViewProps) {
   const { view } = state;
   const sound = useSound();
@@ -184,7 +215,7 @@ function PlayTableView({
   const showEnd = room !== null && outcome !== undefined && !busy;
   // A partida terminada fica na lista local assim que a sala vira FINISHED; com o replay (o treino já o traz, e online ele é
   // acrescentado à linha quando chega), o painel oferece "Rever a partida".
-  const pastGame = useRecordPastGame(snapshot, view, names, store, training);
+  const pastGame = useRecordPastGame(snapshot, view, names, store, training, looks);
 
   // A barra existe nas fases de jogada; o Equipar e a escolha da ordem têm painéis próprios.
   const barPhase = phase === 'ATTACK_MAIN' || phase === 'REACTION';

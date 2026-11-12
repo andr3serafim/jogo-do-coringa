@@ -78,6 +78,21 @@ describe('o LookZone: o lugar de um dono', () => {
     expect(srcOf(container.querySelector('[data-dentro]'))).toBe('/arte/07-fenix.webp');
   });
 
+  it('sem dono (null), o lugar fica como está: dentro de outra zona, a dela', () => {
+    const { container } = render(
+      <LooksProvider look={MINE} owners={OWNERS} packs={PACKS}>
+        <LookZone owner="p2">
+          <LookZone owner={null}>
+            <div data-sem-dono>
+              <Card card={seven} size="field" />
+            </div>
+          </LookZone>
+        </LookZone>
+      </LooksProvider>,
+    );
+    expect(srcOf(container.querySelector('[data-sem-dono]'))).toBe('/arte/07-leao-alado.webp');
+  });
+
   it('não põe nó no DOM: o filho dele é filho direto do pai', () => {
     const { container } = render(
       <LooksProvider look={MINE} owners={OWNERS} packs={PACKS}>

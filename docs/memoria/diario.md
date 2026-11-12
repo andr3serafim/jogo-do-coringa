@@ -44,6 +44,21 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     de fora). Testes em `look-zone.test.tsx` (novo) e no `looks-catalog`. **Ruling:** sem `loadPortrait`: o retrato chega no próprio `import()`
     do pacote de raça (`m.portrait`, o caminho que o plano deixa escolher), fica no `ready.ts` (`readyPortrait`) e é aquecido com as imagens —
     uma função só para o teste chamar seria código morto; custo: se um dia o retrato precisar chegar sem o pacote da raça, ela volta.
+  - **Task 4 (a mesa: cada lado com o seu dono): feita.** Um `LookZone` em volta de cada `PlayerField` (`Table.tsx`) e de cada lado do
+    placar (`FightHud.tsx`, com o `PortraitFace`: o Anúbis, `img` decorativo `size-[82%] object-cover`, ou o `<Coringa>`); o `CardBack` lê
+    `BACK_CLASS[deck]` (`catalog.ts`) e ganha `data-verso-deck` fora do Cordel; o momento (`Moment.tsx`) fica no `LookZone` de quem jogou, e o
+    verso que vira (`MomentBack`) leva o deck dele (G6; as cores no `styles.css`, `.momento-verso[data-verso-deck]`); as cópias da Devastação
+    (o dono da fileira) e da Ressurreição (quem ressuscita) também. A `PlayTable` calcula as aparências (`useTableLooks`, memoizado pelo
+    conteúdo: o `botLook` devolve objeto novo) e passa `owners` ao provedor e as aparências ao `useRecordPastGame` (novo parâmetro `looks`). O
+    `Training` também pede os pacotes do bot. Testes: `table-looks.test.tsx` (novo: os dois lados, os versos, os retratos, o padrão sem nenhum
+    pacote pedido, a troca no menu sem remontar, o Roubo, o momento, as cenas, o tutorial e o online em cordel, o axe), a gravação no
+    `past-games-record.test.tsx`, o pedido do bot no `training.test.tsx`, a zona sem dono no `look-zone.test.tsx`. Web: 2753 testes; **nenhum
+    teste existente mudou** (os da troca no menu da fatia 1 seguem verdes). **Ruling:** o treino em Cordel não grava `looks` (só com um deck de
+    arte): um teste de hoje compara a linha inteira do treino, e sem `looks` o replay já é Cordel dos dois lados (o mesmo que o bot em Cordel
+    da G1) — custo: uma partida de treino em Cordel não se distingue de uma de antes da fatia 2, o que não muda nada na tela. **Ruling:** o
+    `data-verso-deck` só existe fora do Cordel (o DOM do padrão fica o de hoje). **Ruling:** o `LookZone` aceita `owner={null}` (o evento sem
+    dono, a Devastação sem campo): o lugar fica como está, sem duplicar o bloco das cópias — custo: nenhum. **Ruling:** as cores do verso
+    (Bestiário `#2b1640`/`#4a2a6b`, Celestial `#14305c`/`#2c5a96`, o fio `#d9b25a`) e o retrato a 82% se conferem nas fotos da Task 6.
 
 ---
 

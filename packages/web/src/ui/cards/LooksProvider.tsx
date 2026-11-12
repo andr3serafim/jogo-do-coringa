@@ -78,12 +78,13 @@ export function LooksProvider({ look, owners = NO_OWNERS, children, packs: given
 }
 
 /**
- * O lugar de um dono: os filhos vestem a aparência dele (`owners[owner]`, ou a de quem olha se ele não está lá). Não pede nada (o provedor
- * já pediu a união) e não põe nó no DOM: os seletores da mesa ficam como estão.
+ * O lugar de um dono: os filhos vestem a aparência dele (`owners[owner]`, ou a de quem olha se ele não está lá). Sem dono (`null`, um evento
+ * que não é de ninguém), o lugar fica como está. Não pede nada (o provedor já pediu a união) e não põe nó no DOM: os seletores da mesa
+ * ficam como estão.
  */
-export function LookZone({ owner, children }: { owner: PlayerId; children: ReactNode }) {
+export function LookZone({ owner, children }: { owner: PlayerId | null; children: ReactNode }) {
   const parent = useContext(LooksContext);
-  const look = parent.owners[owner] ?? parent.viewer;
+  const look = owner === null ? parent.look : (parent.owners[owner] ?? parent.viewer);
   const value = useMemo(() => (look === parent.look ? parent : { ...parent, look }), [parent, look]);
   return <LooksContext.Provider value={value}>{children}</LooksContext.Provider>;
 }

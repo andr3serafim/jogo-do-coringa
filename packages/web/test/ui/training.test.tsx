@@ -869,6 +869,16 @@ describe('/treino: os pacotes pedidos junto com a sala (decks e raças, fatia 2,
     expect(screen.queryByRole('main', { name: 'Mesa' })).not.toBeInTheDocument();
   });
 
+  it('os do bot também (fatia 2, G1): com o Bestiário, a Celestial dele', async () => {
+    const store = memoryStore();
+    savePrefs(store, { ...DEFAULT_PREFS, look: { deck: 'bestiario', race: 'bufao' } });
+    render(<Training store={store} load={never} />);
+    await vi.waitFor(() => {
+      expect(readyPack('celestial')).toBeDefined();
+      expect(readyPack('egipcio')).toBeDefined();
+    });
+  });
+
   it('com o padrão, nenhum pacote é pedido', async () => {
     render(<Training store={memoryStore()} load={never} />);
     await act(async () => vi.dynamicImportSettled());

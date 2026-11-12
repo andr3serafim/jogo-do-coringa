@@ -17,7 +17,8 @@ import { layoutTransition } from '../anim/motion.ts';
 import { useDealIn } from '../anim/useDealIn.ts';
 import { ArtFace } from './ArtFace.tsx';
 import { Coringa } from './Coringa.tsx';
-import { useCardArt } from './looks-context.ts';
+import { BACK_CLASS } from '../../looks/catalog.ts';
+import { useCardArt, useLook } from './looks-context.ts';
 import { isRedSuit, Suit } from './Suit.tsx';
 
 export type CardSize = 'field' | 'mini' | 'hand';
@@ -457,16 +458,20 @@ function FxOverlay({ fx, ms }: { fx: CardFx; ms: number }) {
 export function CardBack({ className = '', enter = null, fly = null }: { className?: string; enter?: number | null; fly?: number | null }) {
   const self = useRef<HTMLSpanElement>(null);
   useDealIn(self, fly, BACK_FLY);
+  // O verso veste o deck do lugar (decks e raças, fatia 2): a mão do oponente fica no campo dele, no `LookZone` dele. O Cordel é o de hoje,
+  // sem o atributo.
+  const { deck } = useLook();
   return (
     <m.span
       ref={self}
       aria-hidden="true"
       data-verso
+      data-verso-deck={deck === 'cordel' ? undefined : deck}
       data-entra={enter === null ? undefined : String(enter)}
       initial={enter === null ? undefined : { opacity: 0 }}
       animate={enter === null ? undefined : { opacity: 1 }}
       transition={{ opacity: { delay: enter ?? 0, duration: 0.25 } }}
-      className={`box-border inline-block h-[26px] w-[18px] flex-none rounded-[2px] border-[1.5px] border-tinta bg-[repeating-linear-gradient(45deg,var(--color-tinta)_0_2px,var(--color-papel)_2px_4px)] pc:h-[34px] pc:w-6 ${className}`}
+      className={`box-border inline-block h-[26px] w-[18px] flex-none rounded-[2px] border-[1.5px] ${BACK_CLASS[deck]} pc:h-[34px] pc:w-6 ${className}`}
     />
   );
 }

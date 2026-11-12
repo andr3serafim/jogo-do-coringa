@@ -3,7 +3,7 @@
 // o `room` e só então o `replay`), acrescentado à mesma linha. A mesa é a `PlayTable` sobre uma `Session` de verdade com uma
 // `FakeConnection`; o armazenamento recusar nunca pode quebrar o painel de fim.
 import { RULES_VERSION, makeConfig, type GameResult, type PlayerId, type Replay } from '@coringa/engine';
-import type { RoomMessage, Score } from '@coringa/protocol';
+import type { Look, RoomMessage, Score } from '@coringa/protocol';
 import { act, render, renderHook, screen } from '@testing-library/react';
 import { Profiler, StrictMode, type ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -11,7 +11,7 @@ import type { TrainingLevel } from '../../src/model/local-room.ts';
 import { loadPastGames, PAST_GAMES_KEY } from '../../src/model/past-games.ts';
 import { saveSeat, type KeyValueStore } from '../../src/model/storage.ts';
 import { RoomGate } from '../../src/ui/screens/RoomGate.tsx';
-import { PlayTable } from '../../src/ui/table/PlayTable.tsx';
+import { PlayTable, type PlayTableProps } from '../../src/ui/table/PlayTable.tsx';
 import { useRecordPastGame } from '../../src/ui/table/useRecordPastGame.ts';
 import { stateMessage, viewAt } from '../fixtures.ts';
 import { advance, cleanup, connect, emit, EXODIA, EXODIA_OVER, seatOf, THEIRS } from './anim-harness.tsx';
@@ -634,5 +634,41 @@ describe('a sala que termina e fecha em seguida (4000)', () => {
       outcome: { gameNo: 1, result: null, cause: 'ABANDONED' },
       replay,
     });
+  });
+});
+
+describe('as aparências gravadas com a partida (decks e raças, fatia 2, G3 e G4)', () => {
+  const FANTASY: Look = { deck: 'bestiario', race: 'egipcio' };
+  const CORDEL: Look = { deck: 'cordel', race: 'bufao' };
+
+  /** A mesa com as preferências dadas e as props do modo (o treino, o tutorial ou o online). */
+  function mountWith(props: Partial<PlayTableProps>, look?: Look) {
+    const m = connect(THEIRS, look === undefined ? {} : { prefs: { look } });
+    const store = memoryStore();
+    render(<PlayTable session={m.session} store={store} onNewRoom={() => undefined} {...props} />);
+    return { ...m, store };
+  }
+
+  it('o treino grava a sua aparência e a do bot (G1)', () => {
+    const m = mountWith({ training: 'medio' }, FANTASY);
+    finish(m);
+    expect(rows(m)[0]!.looks).toEqual({ me: FANTASY, opponent: { deck: 'celestial', race: 'egipcio' } });
+  });
+
+  it('o treino padrão não grava aparências: a linha fica como a de hoje, e sem elas o replay já é Cordel', () => {
+    const m = mountWith({ training: 'medio' }, CORDEL);
+    finish(m);
+    expect(rows(m)).toHaveLength(1);
+    expect(rows(m)[0]).not.toHaveProperty('looks');
+  });
+
+  it.each([
+    ['o tutorial', { training: 'facil', tutorial: true } as const],
+    ['a partida online', {} as const],
+  ])('%s não grava aparências, nem com a preferência fantasy (G4)', (_, props) => {
+    const m = mountWith(props, FANTASY);
+    finish(m);
+    expect(rows(m)).toHaveLength(1);
+    expect(rows(m)[0]).not.toHaveProperty('looks');
   });
 });

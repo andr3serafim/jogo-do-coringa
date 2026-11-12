@@ -20,6 +20,8 @@ import type { Cue } from '../../model/sound.ts';
 import { TABLE_MOTION } from '../../model/table-motion.ts';
 import { MOMENT_MS, type Beat } from '../../model/timeline.ts';
 import { Card } from '../cards/Card.tsx';
+import { LookZone } from '../cards/LooksProvider.tsx';
+import { useLook } from '../cards/looks-context.ts';
 import { useSound } from '../sound-context.ts';
 import type { Run } from './useBeatPlayer.ts';
 
@@ -111,16 +113,26 @@ export function MomentLayer({ run, beat, cut, view, names, reduced }: MomentLaye
   if (next !== shown) setShown(next);
   if (next === null || next.done) return null;
   const finished = next.beat;
+  const { event } = next.beat;
+  // O momento veste a aparência de quem jogou (decks e raças, fatia 2, G6): a carta grande e o verso que vira.
   return (
-    <MomentShow
-      key={next.serial}
-      beat={next.beat}
-      view={view}
-      names={names}
-      reduced={reduced}
-      onDone={() => setShown((now) => (now?.beat === finished ? { ...now, done: true } : now))}
-    />
+    <LookZone owner={'player' in event ? event.player : null}>
+      <MomentShow
+        key={next.serial}
+        beat={next.beat}
+        view={view}
+        names={names}
+        reduced={reduced}
+        onDone={() => setShown((now) => (now?.beat === finished ? { ...now, done: true } : now))}
+      />
+    </LookZone>
   );
+}
+
+/** O verso da carta grande, no deck do lugar (o de quem jogou): o mesmo do verso da mão dele. O Cordel é o de hoje, sem o atributo. */
+function MomentBack() {
+  const { deck } = useLook();
+  return <span aria-hidden="true" data-momento-verso data-verso-deck={deck === 'cordel' ? undefined : deck} className="momento-verso" />;
 }
 
 interface MomentShowProps {
@@ -289,7 +301,7 @@ function MomentShow({ beat, view, names, reduced, onDone }: MomentShowProps) {
               style={{ translate: `calc(-50% + ${step * FAN_PX}px) -50%`, rotate: `${step * FAN_DEG}deg` }}
             >
               <Card card={special} size="hand" animated={false} ghost />
-              {reduced ? null : <span aria-hidden="true" data-momento-verso className="momento-verso" />}
+              {reduced ? null : <MomentBack />}
             </div>
           );
         })}

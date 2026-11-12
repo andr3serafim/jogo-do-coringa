@@ -21,6 +21,7 @@ import { RARE_SCENE_MS } from '../../model/timeline.ts';
 import { revealRow, type SceneRect, type SceneRow } from '../anim/scene-box.ts';
 import type { SceneProps } from '../anim/scenes-loader.ts';
 import { Card } from '../cards/Card.tsx';
+import { LookZone } from '../cards/LooksProvider.tsx';
 import { chasmBranches, chasmEdges, chasmPaths } from './chasm.ts';
 import { Stamp } from './SceneFrame.tsx';
 import { rng, shakeFrames, spawn } from '../anim/particles.ts';
@@ -405,24 +406,27 @@ export function Devastation({ beat, me, reduced, box, field }: SceneProps) {
               </g>
             </svg>
           ) : null}
+          {/* As cópias vestem a aparência do dono da fileira que cai (decks e raças, fatia 2). */}
           {fallen ? null : (
-            <div ref={copies}>
-              {cards.map((card, i) => {
-                const slot = layout.slots[i];
-                if (slot === undefined) return null;
-                return (
-                  <div
-                    key={card.id}
-                    data-carta-caindo
-                    className="absolute"
-                    style={{ left: `${slot.x}px`, top: `${slot.y}px`, width: `${slot.w}px` }}
-                  >
-                    <Card card={{ ...card, id: `cena-${card.id}` }} size="field" animated={false} />
-                    <div data-sombra-queda className="absolute inset-0 rounded-[3px] bg-tinta opacity-0" />
-                  </div>
-                );
-              })}
-            </div>
+            <LookZone owner={owner}>
+              <div ref={copies}>
+                {cards.map((card, i) => {
+                  const slot = layout.slots[i];
+                  if (slot === undefined) return null;
+                  return (
+                    <div
+                      key={card.id}
+                      data-carta-caindo
+                      className="absolute"
+                      style={{ left: `${slot.x}px`, top: `${slot.y}px`, width: `${slot.w}px` }}
+                    >
+                      <Card card={{ ...card, id: `cena-${card.id}` }} size="field" animated={false} />
+                      <div data-sombra-queda className="absolute inset-0 rounded-[3px] bg-tinta opacity-0" />
+                    </div>
+                  );
+                })}
+              </div>
+            </LookZone>
           )}
           {/* A fenda corre por cima das cartas, e o abismo toma o lugar dela. */}
           {crack && !open ? (

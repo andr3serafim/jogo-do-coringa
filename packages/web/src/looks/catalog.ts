@@ -11,6 +11,16 @@ export interface CardMeta {
 }
 
 export const DECK_LABEL: Record<DeckId, string> = { cordel: 'Cordel', bestiario: 'Bestiário', celestial: 'Celestial' };
+
+/**
+ * O verso de cada deck (spec §4.3), nas cartas da mão do oponente: duas cores e uma borda, em classes, sem imagem. O do Cordel é o de hoje
+ * (as listras de tinta e papel); o Bestiário, violeta escuro com fio de ouro; o Celestial, azul com fio de ouro.
+ */
+export const BACK_CLASS: Record<DeckId, string> = {
+  cordel: 'border-tinta bg-[repeating-linear-gradient(45deg,var(--color-tinta)_0_2px,var(--color-papel)_2px_4px)]',
+  bestiario: 'border-[#d9b25a] bg-[repeating-linear-gradient(45deg,#2b1640_0_2px,#4a2a6b_2px_4px)]',
+  celestial: 'border-[#d9b25a] bg-[repeating-linear-gradient(45deg,#14305c_0_2px,#2c5a96_2px_4px)]',
+};
 export const RACE_LABEL: Record<RaceId, string> = { bufao: 'Bufão', egipcio: 'Egípcio' };
 
 const EGYPT_GOLD = '#ffd98a';

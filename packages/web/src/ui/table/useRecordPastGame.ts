@@ -18,7 +18,7 @@
 import { RULES_VERSION, type PlayerView } from '@coringa/engine';
 import { useEffect, useRef, useState } from 'react';
 import type { TrainingLevel } from '../../model/local-room.ts';
-import { attachReplay, recordPastGame, type PastGame, type PastGameMode } from '../../model/past-games.ts';
+import { attachReplay, recordPastGame, type PastGame, type PastGameMode, type PastLooks } from '../../model/past-games.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import type { KeyValueStore } from '../../model/storage.ts';
 import type { TableNames } from './labels.ts';
@@ -40,6 +40,8 @@ export function useRecordPastGame(
   names: TableNames,
   store: KeyValueStore | undefined,
   training: TrainingLevel | undefined,
+  /** As aparências da mesa (decks e raças, fatia 2, G3): a linha só as leva quando vêm (o treino fora do tutorial). Estável entre desenhos. */
+  looks?: PastLooks,
 ): PastGame | null {
   const { room, replay } = snapshot;
   const outcome = room?.status === 'FINISHED' ? room.outcome : undefined;
@@ -68,12 +70,13 @@ export function useRecordPastGame(
     // Online a mesma partida pode chegar duas vezes (voltar à sala depois de terminada): a `key` as junta. O treino não tem.
     if (mode.kind === 'online') entry.key = `sala:${room.code}:${outcome.gameNo}`;
     if (replay !== null && replay.gameNo === outcome.gameNo) entry.replay = replay.replay;
+    if (looks !== undefined) entry.looks = looks;
     // O resultado de gravar no armazenamento, que só este efeito faz: o `ref` é para o efeito do anexo, logo abaixo, no mesmo
     // desenho; o estado, para a mesa oferecer "Rever a partida".
     const next: Recorded = { gameNo: outcome.gameNo, game: recordPastGame(store, entry, now) };
     recordedRef.current = next;
     setRecorded(next);
-  }, [store, room, outcome, replay, training, me, round, self, opponent]);
+  }, [store, room, outcome, replay, training, me, round, self, opponent, looks]);
 
   useEffect(() => {
     const current = recordedRef.current;

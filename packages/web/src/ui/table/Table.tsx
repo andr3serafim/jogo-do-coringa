@@ -16,6 +16,7 @@ import type { TrainingLevel } from '../../model/local-room.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import type { HintZone } from '../../model/tutorial.ts';
 import { loadScenes } from '../anim/scenes-loader.ts';
+import { LookZone } from '../cards/LooksProvider.tsx';
 import { useMediaQuery } from '../useMediaQuery.ts';
 import { Banners } from './Banners.tsx';
 import { CenterBand } from './CenterBand.tsx';
@@ -234,6 +235,8 @@ function TableView({
             {/* A liderança (bloco C, ponto 13): as fileiras dos dois campos informam os totais num armazém só (não põe nó no DOM). */}
             <LeadProvider>
             {pc ? null : hint?.panel}
+            {/* Cada campo veste a aparência do dono (decks e raças, fatia 2): o `LookZone` não põe nó no DOM. */}
+            <LookZone owner={view.opponent.id}>
             <PlayerField
               side="opponent"
               view={view}
@@ -254,6 +257,7 @@ function TableView({
                 </div>
               }
             />
+            </LookZone>
             <CenterBand
               view={view}
               names={names}
@@ -264,7 +268,9 @@ function TableView({
               tutorial={tutorial}
               onOpenGraveyard={onOpenGraveyard}
             />
-            <PlayerField side="self" view={view} player={self} name={names.self} />
+            <LookZone owner={self.id}>
+              <PlayerField side="self" view={view} player={self} name={names.self} />
+            </LookZone>
             </LeadProvider>
           </div>
           <div className="flex flex-none flex-col pb-[env(safe-area-inset-bottom)] pc:flex-1 pc:flex-row pc:items-center pc:gap-7 pc:px-6 pc:pb-0 pc:text-papel">

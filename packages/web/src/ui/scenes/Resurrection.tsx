@@ -15,6 +15,7 @@ import { SCENE_MOMENTS, TITLE_MS } from '../../model/scene-moments.ts';
 import { revealRow, type ScenePoint, type SceneRect, type SceneRow } from '../anim/scene-box.ts';
 import type { SceneProps } from '../anim/scenes-loader.ts';
 import { Card } from '../cards/Card.tsx';
+import { LookZone } from '../cards/LooksProvider.tsx';
 import { useMeasuredBox } from './measured-box.ts';
 import { rng, shakeFrames, spawn } from '../anim/particles.ts';
 import { STAMP_SIZE, Stamp } from './SceneFrame.tsx';
@@ -66,9 +67,15 @@ export function Resurrection(props: SceneProps) {
     if (props.rising?.quad) revealRow(palco, event.player, props.rising.quad.row);
     revealRow(palco, event.player, event.row);
   });
+  // As cópias (a quadra e a carta que volta) vestem a aparência de quem ressuscita (decks e raças, fatia 2).
+  const owner = event.type === 'Resurrected' ? event.player : props.me;
   return (
     <div ref={anchor} className="absolute inset-0">
-      {measured ? <Rising {...props} box={measured} /> : null}
+      {measured ? (
+        <LookZone owner={owner}>
+          <Rising {...props} box={measured} />
+        </LookZone>
+      ) : null}
     </div>
   );
 }
