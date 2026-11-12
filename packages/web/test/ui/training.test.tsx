@@ -15,6 +15,7 @@ import { App } from '../../src/app/App.tsx';
 import { openStore } from '../../src/app/browser-store.ts';
 import { getDiagnosticContext } from '../../src/app/diagnostic-context.ts';
 import { navigate } from '../../src/app/router.ts';
+import { readyPack, resetPacks } from '../../src/looks/load.ts';
 import * as localRoomModule from '../../src/model/local-room.ts';
 import { loadPastGames } from '../../src/model/past-games.ts';
 import { DEFAULT_PREFS, loadPrefs, savePrefs } from '../../src/model/storage.ts';
@@ -847,5 +848,32 @@ describe('/treino: a aparência (decks e raças, fatia 1)', () => {
     await user.click(within(screen.getByRole('dialog', { name: 'Menu da partida' })).getByRole('radio', { name: 'Cordel' }));
     expect(cardImages()).toEqual([]);
     expect(screen.getByRole('main', { name: 'Mesa' })).toBe(table);
+  });
+});
+
+describe('/treino: os pacotes pedidos junto com a sala (decks e raças, fatia 2, Minor 1)', () => {
+  // O cache dos pacotes é do módulo e vaza entre os testes do arquivo.
+  beforeEach(() => resetPacks());
+  afterEach(() => resetPacks());
+  /** O módulo da sala que nunca chega: a mesa não monta, e o pedido só pode ter vindo da tela. */
+  const never = () => new Promise<LocalRoomModule>(() => undefined);
+
+  it('com uma aparência de arte guardada, os pacotes dela são pedidos antes de a mesa montar', async () => {
+    const store = memoryStore();
+    savePrefs(store, { ...DEFAULT_PREFS, look: { deck: 'bestiario', race: 'egipcio' } });
+    render(<Training store={store} load={never} />);
+    await vi.waitFor(() => {
+      expect(readyPack('bestiario')).toBeDefined();
+      expect(readyPack('egipcio')).toBeDefined();
+    });
+    expect(screen.queryByRole('main', { name: 'Mesa' })).not.toBeInTheDocument();
+  });
+
+  it('com o padrão, nenhum pacote é pedido', async () => {
+    render(<Training store={memoryStore()} load={never} />);
+    await act(async () => vi.dynamicImportSettled());
+    expect(readyPack('bestiario')).toBeUndefined();
+    expect(readyPack('celestial')).toBeUndefined();
+    expect(readyPack('egipcio')).toBeUndefined();
   });
 });

@@ -18,6 +18,7 @@ import {
 } from '../../model/past-games-copy.ts';
 import { buildTrack, type ReplayTrack } from '../../model/replay-track.ts';
 import { loadPrefs, type KeyValueStore, type Prefs } from '../../model/storage.ts';
+import { requestLook } from '../cards/LooksProvider.tsx';
 import { AppLink, Panel, Screen, Title } from '../parts.tsx';
 import { ReplayViewer } from './ReplayViewer.tsx';
 
@@ -44,7 +45,11 @@ function load(store: KeyValueStore, id: string): Loaded {
   if (track.frames.length === 0 && track.stoppedAt !== null) {
     return { kind: 'text', text: replayStoppedText(track.stoppedAt.step, track.stoppedAt.message) };
   }
-  return { kind: 'viewer', game, track, prefs: loadPrefs(store) };
+  const prefs = loadPrefs(store);
+  // Os pacotes da aparência, pedidos assim que a partida é achada e antes de a mesa montar, sem esperar nem falhar (decks e raças,
+  // fatia 2): a mesa que nasce depois deles já tem a arte. Pedir duas vezes (o modo estrito) é pedir uma: a promessa fica guardada.
+  requestLook(prefs.look);
+  return { kind: 'viewer', game, track, prefs };
 }
 
 export default function ReplayScreen({ store, id }: ReplayScreenProps) {

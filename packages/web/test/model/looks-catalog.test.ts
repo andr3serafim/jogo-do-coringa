@@ -1,10 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import type { ArtKey, PackId } from '../../src/model/looks.ts';
 import { ART_META, DECK_LABEL, RACE_LABEL } from '../../src/looks/catalog.ts';
 import { urls as bestiario } from '../../src/looks/bestiario/index.ts';
 import { urls as celestial } from '../../src/looks/celestial/index.ts';
 import { portrait, urls as egipcio } from '../../src/looks/egipcio/index.ts';
-import { loadPack } from '../../src/looks/load.ts';
+import { loadPack, readyPack, resetPacks } from '../../src/looks/load.ts';
 
 const NUMBERS: ArtKey[] = ['02', '03', '04', '05', '06', '07', '08', '09', '10'];
 const SPECIALS: ArtKey[] = ['K', 'J', 'Q', 'A', 'WILD'];
@@ -91,5 +91,40 @@ describe('o catálogo das aparências (spec dos decks §2.3 e §4.4)', () => {
     const first = loadPack('bestiario');
     expect(loadPack('bestiario')).toBe(first);
     await expect(first).resolves.toEqual(bestiario);
+  });
+});
+
+describe('o pacote pronto e a nova tentativa (fatia 2, Minor 1 e 3)', () => {
+  // O cache é do módulo: cada teste começa sem nada pedido.
+  beforeEach(() => resetPacks());
+  afterAll(() => resetPacks());
+
+  it('o readyPack não tem nada antes de o pacote chegar, e tem as URLs dele depois, sem esperar', async () => {
+    expect(readyPack('celestial')).toBeUndefined();
+    const urls = await loadPack('celestial');
+    expect(urls).toEqual(celestial);
+    expect(readyPack('celestial')).toBe(urls);
+    expect(readyPack('bestiario')).toBeUndefined();
+  });
+
+  it('o pacote que falha sai do mapa: o pedido seguinte tenta de novo e chega', async () => {
+    let calls = 0;
+    resetPacks({
+      celestial: () => {
+        calls++;
+        return calls === 1 ? Promise.reject(new Error('sem rede')) : Promise.resolve({ urls: celestial });
+      },
+    });
+    await expect(loadPack('celestial')).rejects.toThrow('sem rede');
+    expect(readyPack('celestial')).toBeUndefined();
+    await expect(loadPack('celestial')).resolves.toEqual(celestial);
+    expect(calls).toBe(2);
+    expect(readyPack('celestial')).toEqual(celestial);
+  });
+
+  it('o pacote que chegou continua sendo a mesma promessa', async () => {
+    const first = loadPack('egipcio');
+    await first;
+    expect(loadPack('egipcio')).toBe(first);
   });
 });

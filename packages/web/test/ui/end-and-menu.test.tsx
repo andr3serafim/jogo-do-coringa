@@ -1150,6 +1150,17 @@ describe('o menu: a aparência só no treino (decks e raças, fatia 1)', () => {
     expect(within(menuDialog()).queryByRole('group', { name: 'Deck' })).not.toBeInTheDocument();
   });
 
+  // Fatia 2, Minor 8: a mesa online em cordel, com a preferência fantasy, não deixa erro nem aviso no console.
+  it('na sala online com a preferência fantasy, nada vai ao console', async () => {
+    const errors = vi.spyOn(console, 'error');
+    const warnings = vi.spyOn(console, 'warn');
+    const m = mount({ status: 'PLAYING', prefs: { look: FANTASY } });
+    await settle();
+    expect(m.container.querySelector('[data-card-id] img')).toBeNull();
+    expect(errors).not.toHaveBeenCalled();
+    expect(warnings).not.toHaveBeenCalled();
+  });
+
   it('no tutorial, o menu não mostra o seletor', async () => {
     const m = mount({ status: 'PLAYING', prefs: { look: FANTASY }, props: { training: 'facil', tutorial: true } });
     await m.user.click(menuButton());

@@ -100,12 +100,19 @@ test('aparência: a troca no menu do treino troca as imagens, e o Cordel trava o
 
 test('aparência: o tutorial fica em cordel, mesmo com a preferência fantasy', async ({ page }) => {
   const guard = failOnConsoleErrors(page);
+  // Todo pedido de imagem dos pacotes e da fonte que vem junto com qualquer pacote (o `font.css`, a Cinzel): o tutorial não pede nenhum.
+  const looksRequests: string[] = [];
+  page.on('request', (request) => {
+    const url = request.url();
+    if (/\.webp(\?|$)/.test(url) || /\/font-[^/]*\.css(\?|$)/.test(url) || /cinzel/i.test(url)) looksRequests.push(url);
+  });
   await page.addInitScript((prefs) => window.localStorage.setItem('coringa:prefs', prefs), FANTASY_PREFS);
   await page.goto('/tutorial');
   await expect(table(page)).toBeVisible();
   await expect.poll(() => page.locator('[data-card-id]').count()).toBeGreaterThan(0);
-  // Dá tempo de um pacote pedido chegar, se alguém o pedisse.
-  await page.waitForTimeout(500);
+  // Os pedidos saem quando a mesa monta: com a rede quieta, todo pedido que alguém fizesse já teria saído.
+  await page.waitForLoadState('networkidle');
+  expect(looksRequests).toEqual([]);
   expect(await cardImages(page)).toEqual([]);
   guard.expectClean();
 });

@@ -97,6 +97,36 @@ describe('o seletor da aparência', () => {
     expect(race().getByRole('radio', { name: 'Bufão' })).toBeChecked();
   });
 
+  // Fatia 2, Minor 6: passar pelo Cordel não desfaz a raça escolhida enquanto o seletor está aberto.
+  it('Bestiário + Egípcio → Cordel → Celestial devolve o Egípcio', async () => {
+    const onChange = vi.fn();
+    const user = userEvent.setup();
+    render(<Harness initial={{ deck: 'bestiario', race: 'egipcio' }} onChange={onChange} />);
+    await user.click(deck().getByRole('radio', { name: 'Cordel' }));
+    expect(onChange).toHaveBeenLastCalledWith({ deck: 'cordel', race: 'bufao' });
+    await user.click(deck().getByRole('radio', { name: 'Celestial' }));
+    expect(onChange).toHaveBeenLastCalledWith({ deck: 'celestial', race: 'egipcio' });
+    expect(race().getByRole('radio', { name: 'Egípcio' })).toBeChecked();
+  });
+
+  it('o Bufão escolhido fora do Cordel também é o que volta depois dele', async () => {
+    const onChange = vi.fn();
+    const user = userEvent.setup();
+    render(<Harness initial={{ deck: 'bestiario', race: 'egipcio' }} onChange={onChange} />);
+    await user.click(race().getByRole('radio', { name: 'Bufão' }));
+    await user.click(deck().getByRole('radio', { name: 'Cordel' }));
+    await user.click(deck().getByRole('radio', { name: 'Celestial' }));
+    expect(onChange).toHaveBeenLastCalledWith({ deck: 'celestial', race: 'bufao' });
+  });
+
+  // Fatia 2, Minor 7: a linha da trava descreve o grupo Coringa (o leitor de tela a ouve ao entrar no grupo).
+  it('com o Cordel, o grupo Coringa tem a linha da trava como descrição; fora dele, nenhuma', () => {
+    const { rerender } = render(<LookChoice value={DEFAULT_LOOK} onChange={() => undefined} packs={PACKS} />);
+    expect(screen.getByRole('group', { name: LOOK_RACE_LABEL })).toHaveAccessibleDescription(LOOK_LOCK_NOTE);
+    rerender(<LookChoice value={{ deck: 'celestial', race: 'bufao' }} onChange={() => undefined} packs={PACKS} />);
+    expect(screen.getByRole('group', { name: LOOK_RACE_LABEL })).toHaveAccessibleDescription('');
+  });
+
   it('a amostra: três cartas (uma baixa, uma alta e o K), com arte quando os pacotes vêm prontos', () => {
     const { container, rerender } = render(<LookChoice value={DEFAULT_LOOK} onChange={() => undefined} packs={PACKS} />);
     const sample = () => container.querySelectorAll('[data-amostra] > *');

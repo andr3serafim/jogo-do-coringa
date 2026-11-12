@@ -12,8 +12,23 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   (`superpowers:executing-plans`), tarefa por tarefa, teste primeiro, na branch `feat/decks-fatia-2`; o revisor novo, num subagente, no fim
   (G8). A Devastação no celular segue sem ordem de conserto: a fatia vai pela G7.
 - **Andamento** (uma linha por tarefa, com os commits e as `Ruling:`):
-  - **Task 0 (o começo): em curso.** A `main` não andou (`2f2aa51`); a aprovação está no `decisoes.md`; nada sem commit além do
-    `.claude/` e do `jogar-treino.bat` do autor.
+  - **Task 0 (o começo): feita.** A `main` não andou (`2f2aa51`); a aprovação está no `decisoes.md`; nada sem commit além do
+    `.claude/` e do `jogar-treino.bat` do autor. `pnpm check` verde (web: 2697 testes; JS inicial 182,7 KB). **Armadilha:** a primeira
+    rodada caiu no vitest da web com um "Failed" seco, sem nenhum teste vermelho; sozinha, a web passou inteira, e a segunda rodada do
+    `pnpm check` também. Se voltar, rode a web sozinha antes de caçar um teste.
+  - **Task 1 (os 8 Minor da fatia 1, G5): código feito, check completo em curso.** O cache síncrono num módulo à parte,
+    `src/looks/ready.ts` (`readyPack`), que o `loadPack` preenche e o `load.ts` reexporta; a promessa rejeitada sai do mapa e o pedido
+    seguinte tenta de novo (muda a `Ruling:` da Task 3 da fatia 1, como a G5 manda); `resetPacks(fake?)` só para os testes. O provedor lê o
+    pronto a cada desenho (o que nasce depois do pacote e a troca para um deck já carregado não passam pelo cordel). `requestLook` (no
+    `LooksProvider.tsx`) pede os pacotes no `Training`, junto com o módulo da sala, e no `ReplayScreen`, ao achar a partida. O seletor lembra
+    a raça ao passar pelo Cordel e liga a linha da trava ao grupo Coringa (`aria-describedby`). O smoke lê os nomes de `src/looks/*/*.webp`;
+    o E2E do tutorial confere as requisições (`networkidle`) em vez de esperar 500 ms; a sala online confere o console. Testes novos em
+    `looks-catalog`, `card-art`, `look-choice`, `end-and-menu`, `training` e `replay-prefetch.test.tsx` (novo: o visualizador trocado por
+    um vazio, para o pedido só poder vir da tela). **Ruling:** o `readyPack` mora no `ready.ts`, e o provedor só importa `loadPack` do
+    `load.ts`, porque o `training-looks-fail.test.tsx` troca o `load.ts` inteiro por um mock com só o `loadPack` (o vitest lança na exportação
+    ausente) e o plano manda não mexer nesse teste — custo: um módulo minúsculo a mais. **Ruling:** o commit vai antes do `pnpm check`
+    completo (como na fatia 1), para o estado ficar commitado antes do job longo; o pre-commit já roda lint, typecheck e os testes
+    relacionados. **Ruling:** o Minor 8 é só teste (passou de primeira: não havia erro, faltava a conferência).
 
 ---
 

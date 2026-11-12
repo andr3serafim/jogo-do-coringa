@@ -1,9 +1,10 @@
 // O seletor da aparência (spec dos decks e raças, §6): dois grupos de rádio no molde do `HpChoice` (rádios escondidos com cara de botão,
 // alvo de toque ≥ 44 px, o anel ouro no foco), o Deck e o Coringa, e uma amostra do que está escolhido. Toda troca passa pelo
-// `normalizeLook`: com o deck Cordel, o Coringa fica travado no Bufão (§2.1), e uma linha diz por quê.
+// `normalizeLook`: com o deck Cordel, o Coringa fica travado no Bufão (§2.1), e uma linha diz por quê (a descrição do grupo Coringa).
+// Passar pelo Cordel não desfaz a raça: enquanto o seletor está aberto, ele lembra a última escolhida fora do Cordel e a devolve na saída.
 import type { Card as EngineCard } from '@coringa/engine';
-import { DECK_IDS, normalizeLook, RACE_IDS, type Look } from '@coringa/protocol';
-import { useId } from 'react';
+import { DECK_IDS, normalizeLook, RACE_IDS, type Look, type RaceId } from '@coringa/protocol';
+import { useId, useRef } from 'react';
 import { DECK_LABEL, RACE_LABEL } from '../looks/catalog.ts';
 import { LOOK_DECK_LABEL, LOOK_LOCK_NOTE, LOOK_RACE_LABEL } from '../model/copy.ts';
 import { Card } from './cards/Card.tsx';
@@ -25,14 +26,16 @@ interface GroupProps<T extends string> {
   ids: readonly T[];
   labels: Record<T, string>;
   value: T;
+  /** O id do texto que descreve o grupo (`aria-describedby`). */
+  describedBy?: string;
   disabled?: (id: T) => boolean;
   onChange: (id: T) => void;
 }
 
-function Group<T extends string>({ legend, ids, labels, value, disabled, onChange }: GroupProps<T>) {
+function Group<T extends string>({ legend, ids, labels, value, describedBy, disabled, onChange }: GroupProps<T>) {
   const name = useId();
   return (
-    <fieldset className="flex flex-col gap-2 border-0 p-0">
+    <fieldset aria-describedby={describedBy} className="flex flex-col gap-2 border-0 p-0">
       <legend className="mb-2 font-bold">{legend}</legend>
       <div className="flex flex-wrap gap-2">
         {ids.map((id) => (
@@ -65,7 +68,15 @@ export interface LookChoiceProps {
 
 export function LookChoice({ value, onChange, note, packs }: LookChoiceProps) {
   const locked = value.deck === 'cordel';
-  const change = (next: Partial<Look>) => onChange(normalizeLook({ ...value, ...next }));
+  const lockNote = useId();
+  // A última raça escolhida fora do Cordel: a que volta quando o deck sai dele.
+  const race = useRef<RaceId>(value.race);
+  const change = (next: Partial<Look>) => {
+    const leaving = locked && next.deck !== undefined && next.deck !== 'cordel';
+    const look = normalizeLook({ ...value, ...next, ...(leaving ? { race: race.current } : {}) });
+    if (look.deck !== 'cordel') race.current = look.race;
+    onChange(look);
+  };
   return (
     <div className="flex flex-col gap-4">
       <Group legend={LOOK_DECK_LABEL} ids={DECK_IDS} labels={DECK_LABEL} value={value.deck} onChange={(deck) => change({ deck })} />
@@ -74,10 +85,15 @@ export function LookChoice({ value, onChange, note, packs }: LookChoiceProps) {
         ids={RACE_IDS}
         labels={RACE_LABEL}
         value={value.race}
-        disabled={(race) => locked && race !== 'bufao'}
-        onChange={(race) => change({ race })}
+        describedBy={locked ? lockNote : undefined}
+        disabled={(id) => locked && id !== 'bufao'}
+        onChange={(id) => change({ race: id })}
       />
-      {locked ? <p className="text-sm">{LOOK_LOCK_NOTE}</p> : null}
+      {locked ? (
+        <p id={lockNote} className="text-sm">
+          {LOOK_LOCK_NOTE}
+        </p>
+      ) : null}
       <LooksProvider look={value} packs={packs}>
         <div data-amostra aria-hidden="true" className="flex justify-center gap-3">
           {SAMPLE.map((card) => (

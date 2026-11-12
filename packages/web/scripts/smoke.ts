@@ -11,7 +11,8 @@
  * - as duas telas das partidas anteriores (a lista e o visualizador do replay) também: entram por `React.lazy`. Mesma dupla.
  * - a tela do tutorial (o painel, os textos das dicas e a semente) também: entra por `React.lazy`. Mesma dupla.
  * - as cenas refeitas no sub-projeto 6 (`src/ui/scenes/`) também: entram por `import()` dinâmico (`loadScenes`). Mesma dupla.
- * - os pacotes de arte dos decks e das raças (`src/looks/<pacote>/index.ts`) também: entram por `import()` (`loadPack`). Mesma dupla.
+ * - os pacotes de arte dos decks e das raças (`src/looks/<pacote>/index.ts`) também: entram por `import()` (`loadPack`). Mesma dupla, e
+ *   nenhum nome de imagem de `src/looks/` (lidos da pasta, o retrato incluído) no JavaScript inicial.
  *   E mais duas: o `index.html` não pré-carrega nenhuma imagem `.webp`, e o CSS que ele pede não traz a fonte Cinzel, que só existe
  *   num CSS de chunk (`src/looks/font.css`, pedido junto com o pacote).
  */
@@ -48,6 +49,18 @@ const LOOK_PACK_MARKS = [
   { pack: 'o deck Celestial', mark: '02-borboleta' },
   { pack: 'a raça Egípcia', mark: 'k-mascara' },
 ];
+/**
+ * Todo nome de imagem dos pacotes (`src/looks/<pacote>/<nome>.webp`, o retrato do placar incluído), lido da pasta: no `dist` a imagem
+ * vira `<nome>-<hash>.webp`, e o nome só aparece no chunk do pacote. Qualquer um num `.js` inicial reprova (decks e raças, fatia 2).
+ */
+const LOOKS_DIR = join(import.meta.dirname, '..', 'src', 'looks');
+const LOOK_FILE_MARKS = readdirSync(LOOKS_DIR, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .flatMap((pack) =>
+    readdirSync(join(LOOKS_DIR, pack.name))
+      .filter((name) => name.endsWith('.webp'))
+      .map((name) => ({ pack: pack.name, mark: name.slice(0, -'.webp'.length) })),
+  );
 /** O `@font-face` da Cinzel (o arquivo do pacote se chama `cinzel-latin-900-normal`): só num CSS de chunk, nunca no inicial. */
 const CINZEL_MARK = 'cinzel-latin-900';
 /**
@@ -159,6 +172,9 @@ for (const url of initial) {
   }
   for (const { pack, mark } of LOOK_PACK_MARKS) {
     if (source.includes(mark)) problems.push(`${url} contém ${pack} ("${mark}"): o pacote de arte tem que entrar por import(), fora do inicial`);
+  }
+  for (const { pack, mark } of LOOK_FILE_MARKS) {
+    if (source.includes(mark)) problems.push(`${url} cita a imagem "${mark}" do pacote ${pack}: as imagens só chegam com o pacote, por import()`);
   }
 }
 console.log(`  total: ${kb(total)} de ${kb(BUDGET_BYTES)}`);

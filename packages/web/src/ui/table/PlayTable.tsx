@@ -81,7 +81,6 @@ export interface PlayTableProps {
   endNote?: ReactNode;
 }
 
-/** Sem `state` ainda não há o que desenhar. */
 /** A aparência se escolhe só no treino fora do tutorial (F1); no resto, a mesa fica no padrão e o menu não mostra o seletor. */
 const chosenLook = ({ training, tutorial }: Pick<PlayTableProps, 'training' | 'tutorial'>): boolean => training !== undefined && !tutorial;
 
@@ -100,6 +99,7 @@ export function PlayTable(props: PlayTableProps) {
   useEffect(() => {
     sound.setEnabled(soundOn);
   }, [sound, soundOn]);
+  // Sem `state` ainda não há o que desenhar.
   if (snapshot.state === null) return null;
   return (
     // A aparência das cartas (decks e raças, fatia 1): a sua, dos dois lados, só no treino (F1); o tutorial e o online ficam em cordel. O

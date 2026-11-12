@@ -24,7 +24,8 @@ import {
 } from '../../model/copy.ts';
 import type { TrainingLevel } from '../../model/local-room.ts';
 import type { Session } from '../../model/session.ts';
-import { loadLevel, saveLevel, type KeyValueStore } from '../../model/storage.ts';
+import { loadLevel, loadPrefs, saveLevel, type KeyValueStore } from '../../model/storage.ts';
+import { requestLook } from '../cards/LooksProvider.tsx';
 import { HpChoice } from '../HpChoice.tsx';
 import { Button, Screen, Title } from '../parts.tsx';
 import { PlayTable } from '../table/PlayTable.tsx';
@@ -90,6 +91,9 @@ export function Training({ store, load = loadLocalRoom, reload = defaultReload }
       dispose = game.dispose;
       setStep({ kind: 'playing', session: game.session, level, seedOf: game.seedOf });
     };
+    // Os pacotes da aparência guardada vêm junto com o módulo da sala, sem esperar por eles e sem falhar (decks e raças, fatia 2): a
+    // mesa que nasce depois deles já tem a arte, sem um quadro de cordel.
+    requestLook(loadPrefs(store).look);
     // O `catch` fica depois do `then`: uma exceção ao criar a sala (e não só o módulo que não carrega) cai na tela de falha, e
     // não numa rejeição solta com a tela presa em "Preparando…".
     load()

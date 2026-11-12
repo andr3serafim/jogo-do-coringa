@@ -4,7 +4,8 @@ import type { Card as EngineCard } from '@coringa/engine';
 import { DEFAULT_LOOK, type Look } from '@coringa/protocol';
 import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { loadPack, resetPacks } from '../../src/looks/load.ts';
 import { Card, type CardSize } from '../../src/ui/cards/Card.tsx';
 import { LooksProvider } from '../../src/ui/cards/LooksProvider.tsx';
 import type { LooksValue } from '../../src/ui/cards/looks-context.ts';
@@ -211,5 +212,33 @@ describe('a carta com arte', () => {
       ),
     );
     expect(await seriousViolations(container)).toEqual([]);
+  });
+});
+
+describe('o pacote que já chegou não passa pelo cordel (fatia 2, Minor 1)', () => {
+  // O cache dos pacotes é do módulo e vaza entre os testes do arquivo.
+  beforeEach(() => resetPacks());
+  afterAll(() => resetPacks());
+  const BESTIARIO: Look = { deck: 'bestiario', race: 'bufao' };
+  const CELESTIAL: Look = { deck: 'celestial', race: 'bufao' };
+
+  it('o provedor montado depois de o pacote chegar desenha a arte já no primeiro desenho', async () => {
+    await loadPack('bestiario');
+    const { container } = render(
+      <LooksProvider look={BESTIARIO}>
+        <Card card={seven} size="field" />
+      </LooksProvider>,
+    );
+    // Sem esperar nada: a promessa do pedido só resolveria depois desta linha.
+    expect(container.querySelector('img')?.getAttribute('src')).toMatch(/07-fenix\.webp$/);
+  });
+
+  it('trocar para um pacote que já chegou troca a face no mesmo desenho', async () => {
+    await loadPack('bestiario');
+    await loadPack('celestial');
+    const card = <Card card={seven} size="field" />;
+    const { container, rerender } = render(<LooksProvider look={BESTIARIO}>{card}</LooksProvider>);
+    rerender(<LooksProvider look={CELESTIAL}>{card}</LooksProvider>);
+    expect(container.querySelector('img')?.getAttribute('src')).toMatch(/07-leao-alado\.webp$/);
   });
 });
