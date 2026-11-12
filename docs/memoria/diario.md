@@ -65,6 +65,20 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     que falha (F3) mora num arquivo à parte, `training-looks-fail.test.tsx`, porque o `vi.mock` vale para o arquivo inteiro (como os
     `app-chunk-*-fails`). **Ruling:** "sem tocar batida" se confere pelo mesmo nó da mesa e da carta e pelo `seq` igual da sala; a sala
     online com a preferência fantasy é a do `mount` do `end-and-menu` (a `PlayTable` sem `training`).
+  - **Task 6 (smoke, E2E, fotos, medição, documentação): feita, menos o E2E inteiro, o push e o revisor.** O smoke confere os três pacotes
+    fora do inicial (cada um num chunk), nenhum `.webp` no `index.html` e a Cinzel só num CSS de chunk (conferido também que ele reprova um
+    `.webp` posto no `index.html`). O `e2e/looks.spec.ts` (na lista do Playwright): o painel por teclado e guardado, a mesa do treino com as
+    imagens carregadas sob a CSP, sem rolar de lado a 360 e a 1366 × 657, o axe, a troca no menu, a trava do Cordel e o tutorial em cordel —
+    3 de 3. O `medir-cena.ts` ganhou `MEDIR_APARENCIA` e `MEDIR_APARENCIAS` + `MEDIR_REPETICOES` (as aparências alternadas numa build só). A
+    medição e o veredito da F5 (passa: 50 e 55 quadros/s com arte contra 56 e 58 do Cordel na troca de mão) em `notas/medicao-decks-fatia-1.md`;
+    a spec ganhou a §15; o `CLAUDE.md`, o item "Aparências". As fotos (20 + 8 dos campos) estão em `.superpowers/fotos-decks-fatia-1/`, nesta
+    máquina, fora do git: o valor e o naipe se leem em todas, inclusive no Pégaso, no Arcanjo e nas minis de 30 px. **Ruling:** a medição
+    foi também na mesa mais cheia da fixture (236→237), e não só no exemplo do cabeçalho (a Ressurreição, rodada 7), que fica em 60 nas três.
+    **Ruling:** as saídas 1 e 2 entraram (`2eeba72`) e saíram (`2c47f24`): na medição limpa não mudaram nada, e uma saída só fica se ajudar.
+    **Ruling:** o `.check()` do Playwright no rádio `sr-only` esbarra no rótulo; o E2E clica no rótulo. **Armadilha:** na bateria esta máquina
+    não mede (o mesmo Cordel deu 13 e 26 quadros/s); meça na tomada, alternando as aparências na mesma build. **Armadilha:** a sonda do GIF de
+    1 px no lugar da imagem não serve de controle (troca um desenho de imagem por outro mais caro). **Armadilha:** o Playwright e o pre-commit
+    leem tudo em `packages/web/e2e/` e `*.config.ts` (lint e typecheck): spec temporário fica fora do repositório entre as execuções.
 
 ---
 

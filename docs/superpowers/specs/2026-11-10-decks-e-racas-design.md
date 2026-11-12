@@ -339,3 +339,34 @@ provisório (2026-11-11 (1)).
 - O valor e o naipe se leem nas fotos de 360 px e do computador, nos três tamanhos de carta.
 - A medição da §9 está na nota, com a meta cumprida ou a saída aplicada.
 - O autor jogou e disse que serve para os testes.
+
+## 15. O que a execução decidiu (fatia 1)
+
+Executada em 2026-11-11 na branch `feat/decks-fatia-1`, pelo plano `docs/superpowers/plans/2026-11-11-decks-fatia-1.md`. As `Ruling:` de cada
+tarefa estão no `docs/memoria/diario.md` 2026-11-11 (1).
+
+- **As escolhas F1 a F7, como ficaram:**
+  - **F1:** a aparência vale no treino (fora do tutorial) e no replay. Na sala online o menu não mostra o seletor, e a mesa fica em Cordel; no
+    Início, o painel "Aparência" diz "Por enquanto vale no treino.". (A §6 pedia o seletor apagado no online; vale a F1, aprovada depois.)
+  - **F2:** o número leva um contorno de tinta de 1 px nas quatro direções mais um halo de 4 px (`text-shadow`, sem filtro); o naipe, um traço
+    de tinta de 2,5 unidades do `viewBox` por fora (`paint-order: stroke`).
+  - **F3:** o pacote que não chega deixa a carta de cordel, sem erro e sem aviso (a promessa rejeitada fica guardada até recarregar).
+  - **F4:** o replay usa a aparência de agora, dos dois lados.
+  - **F5:** passa (abaixo).
+  - **F6:** `Prefs.look` é opcional; o `DEFAULT_PREFS` não mudou.
+  - **F7:** no Claude Code local, tarefa por tarefa, teste primeiro, com um revisor novo no fim.
+- **O provedor envolve o palco inteiro** (`LooksProvider` em volta do `Stage`, no `PlayTable` e no `ReplayViewer`), e não só a mesa: o
+  momento da especial e as cópias das cartas que saem moram no `Stage` e vestem a mesma aparência.
+- **A aura e o anel:** o anel é uma borda de 1,5 px na cor de metal; a aura é o único `box-shadow` da face, num filho, com os números da §4.1.
+  O véu de ouro da quadra fica por baixo do valor e do naipe.
+- **A fonte** chega num CSS de chunk (`src/looks/font.css`), e não num `art.css` (§5): os estilos da `ArtFace` são classes do Tailwind, do CSS
+  de sempre.
+- **A medição** (`docs/memoria/notas/medicao-decks-fatia-1.md`), na tomada, com a CPU 4×: na troca de mão da `exodia-devastacao` (236→237, a
+  mesa mais cheia dela) a arte dá 50 quadros/s no PC e 55 no celular, contra 56 e 58 do Cordel; a Ressurreição fica em 60. **A F5 passa, no
+  limite no PC.** O custo é de pintura (o perfil: a rasterização dobra), não de decodificação. As saídas 1 (o número sem halo) e 2 (a aura
+  sem desfoque) foram medidas e **não mudaram nada**: foram desfeitas, e a carta é a aprovada. A terceira (a imagem de 208 px) não foi
+  preciso tentar. Na bateria, a CPU desta máquina varia demais para a medição decidir.
+- **As fotos** (fora do repositório; o diário diz onde): o valor e o naipe se leem nos três tamanhos, nas duas larguras e nas duas aparências,
+  inclusive no Pégaso e no Arcanjo e nas minis de 30 px da Guarda e dos bônus. Nada mudou por causa delas.
+- **O JavaScript inicial** foi de 179,9 para 182,7 KB (gzip): a `ArtFace`, o contexto e o catálogo. Os módulos de URLs, as imagens e a fonte
+  ficam fora, e o smoke confere.

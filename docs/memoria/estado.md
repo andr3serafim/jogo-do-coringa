@@ -1,6 +1,6 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-11**, a fatia 1 dos decks em curso (Task 6, a medição). Antes de seguir, confira se não há versão
+> Sobrescrito a cada atualização. **Última: 2026-11-11**, a fatia 1 dos decks com as Tasks 0 a 6 feitas, antes do E2E inteiro. Antes de seguir, confira se não há versão
 > mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
@@ -9,18 +9,17 @@
   `docs/superpowers/plans/2026-11-11-decks-fatia-1.md`, aprovado (`decisoes.md` 2026-11-11 (3)); "prossiga por aqui" (o autor, 2026-11-11)
   começou a execução: aqui mesmo, tarefa por tarefa, teste primeiro, com um revisor novo no fim (F7). O andamento, com as `Ruling:` de cada
   tarefa, vai no `diario.md` 2026-11-11 (1).
-- **Task 6 em curso** (retomada depois da pausa: "Tente novamente"). As Tasks 0 a 5 estão feitas e commitadas (o JavaScript inicial foi de
-  179,9 para 182,7 KB). Da Task 6: o smoke (passa e reprova um `.webp` no `index.html`), o `e2e/looks.spec.ts` (3 de 3, com o clique no
-  rótulo do rádio) e o `e2e/medir-cena.ts` com `MEDIR_APARENCIA`, `MEDIR_APARENCIAS` e `MEDIR_REPETICOES` estão commitados. Nada subiu
+- **As Tasks 0 a 6 estão feitas e commitadas** (o andamento e as `Ruling:` no `diario.md` 2026-11-11 (1)): o smoke, o `e2e/looks.spec.ts` (3 de
+  3), a medição (a F5 passa, no limite no PC: 50 e 55 quadros/s com arte contra 56 e 58 do Cordel, na tomada; as saídas 1 e 2 entraram e
+  saíram), as fotos (em `.superpowers/fotos-decks-fatia-1/`, nesta máquina), a §15 da spec e o item "Aparências" do `CLAUDE.md`. Nada subiu
   ainda.
-- **A medição (F5) está feita** (`docs/memoria/notas/medicao-decks-fatia-1.md`), na tomada: a troca de mão com arte dá 50 quadros/s no PC e
-  55 no celular (o Cordel, 56 e 58); a F5 passa, no limite no PC. As saídas 1 e 2 não mudaram a medida e foram desfeitas (`2c47f24`): a carta
-  é a aprovada. A Ressurreição fica em 60.
 - **Próximo passo exato:**
-  1. **As fotos** para o autor (fora do repositório): a mesa do treino a 360 × 640 e a 1366 × 657 com as duas aparências, a mão, o
-     cemitério, as minis e o painel "Aparência"; conferir o Pégaso e o Arcanjo e as minis de 30 px.
-  2. `pnpm check` e `pnpm e2e` inteiros; a documentação (o `CLAUDE.md`, a seção "O que a execução decidiu (fatia 1)" na spec, o diário);
-     subir a branch; o PR; o revisor novo (F7) e as correções.
+  1. `pnpm e2e` inteiro (em segundo plano, ~10 min); se passar, subir a branch (`git push -u origin feat/decks-fatia-1`; o pre-push roda o
+     `pnpm check`) e ler a CI dos dois jobs.
+  2. **O revisor novo (F7):** um subagente lê a branch inteira (`fe9a507..HEAD`) contra o plano e a spec, com o "Review Focus" do plano e as
+     `Ruling:` do diário. Critical e Important: corrigir com teste antes. Depois, o PR para a `main` (sem `gh` nesta máquina: pelo app ou pelo
+     autor) e o merge com as duas CI verdes.
+  3. **Para o autor:** jogar o treino com os três decks; depois, o plano da fatia 2.
 - **O bloco C está na `main`** (pontos 10, 11 e 13: a aura da iniciativa, os bônus em escala, o ouro de quem lidera), por fast-forward de
   `feat/playtest-bloco-c` até `21d1387`, com as duas CI verdes (`check` e `e2e`) no topo do código (`75d35c8`) e no push da `main`
   (`21d1387`). Plano `docs/superpowers/plans/2026-11-08-playtest-bloco-c.md`; a revisão da branch inteira e a segunda, só das correções
