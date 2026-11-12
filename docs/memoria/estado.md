@@ -1,7 +1,7 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-12**, o plano da fatia 3 dos decks (o online) aprovado; a execução começa pela
-> Task 0 quando o autor pedir.
+> Sobrescrito a cada atualização. **Última: 2026-11-12**, o plano da fatia 3 dos decks (o online) aprovado; a execução é numa sessão
+> nova, pela Task 0.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
@@ -10,8 +10,8 @@
   dos decks" (o autor, 2026-11-12). O plano: `docs/superpowers/plans/2026-11-12-decks-fatia-3.md`, com as escolhas H1 a H7 (o que vai pelo fio com o padrão, a
   sua aparência vinda do assento, a linha do menu online, a nota do Início, a partida online guardada, sem medição nova, a execução).
   - **Branch:** `feat/decks-fatia-3`, no checkout principal, saída da `main` em `b6c2caf`, só com o plano e esta memória; no GitHub.
-  - **Próximo passo exato:** a execução, pela Task 0 do plano, quando o autor pedir (nesta sessão ou noutra; ele não disse quando). Nada de
-    código antes disso.
+  - **Próximo passo exato:** numa sessão nova do Claude Code ("Em outra sessão", `decisoes.md` 2026-11-12 (2)), executar o plano pela
+    Task 0, na branch `feat/decks-fatia-3`, com o pedido do autor (por exemplo "execute o plano da fatia 3 dos decks").
 - **A fatia 2 dos decks e raças (o dono por lado) está na `main`** ("sim", o autor, 2026-11-12), por fast-forward de `feat/decks-fatia-2`
   até `bb186ef`, com as duas CI verdes (`check` e `e2e`) no topo da branch e no push da `main` (`56efcbc`). No treino com um deck de
   arte, o bot veste o outro deck com o Egípcio (G1); cada lado da mesa, do placar (o retrato do Anúbis), do momento e das cópias das cenas veste o deck do dono, com o verso na
@@ -55,7 +55,7 @@
 
 ## Esperando o autor
 
-- **Dizer quando executar a fatia 3** (o plano aprovado, `docs/superpowers/plans/2026-11-12-decks-fatia-3.md`).
+- **Abrir a sessão que executa a fatia 3** (o plano aprovado, `docs/superpowers/plans/2026-11-12-decks-fatia-3.md`).
 - **A Devastação com arte no celular** (46 e 47 quadros/s, a meta é 50): consertar (a recomendação: um bloco curto para cortar o recálculo
   de estilo da mesa inteira, que ajuda o Cordel também) ou não. A fatia 2 passou pela G7 e já está na `main`. Não segura o deploy: só sente
   quem escolheu um deck de arte, no celular, nessa cena.

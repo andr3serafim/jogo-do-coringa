@@ -6,7 +6,7 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
-## 2026-11-12 (2): o plano da fatia 3 aprovado
+## 2026-11-12 (2): o plano da fatia 3 aprovado; a execução em outra sessão
 
 Depois do resumo do plano da fatia 3 (o online), perguntado "Aprova o plano da fatia 3 com as H1 a H7 como recomendadas?", ele respondeu:
 
@@ -25,7 +25,8 @@ Depois do resumo do plano da fatia 3 (o online), perguntado "Aprova o plano da f
   - **H6:** sem medição nova.
   - **H7:** a execução no Claude Code local, tarefa por tarefa, teste primeiro, na branch `feat/decks-fatia-3`, com um revisor novo no fim.
 - **[I]** As duas frases (H3 e H4) foram aprovadas com o plano, palavra por palavra.
-- **[I]** Ele não disse quando executar: a execução começa pela Task 0 do plano quando ele pedir, nesta sessão ou noutra.
+- **A execução:** perguntado em seguida "Começo a execução da fatia 3 nesta sessão?", ele respondeu "Em outra sessão". A execução é numa
+  sessão nova do Claude Code, a partir da Task 0, como a da fatia 2. Nada de código nesta.
 
 ---
 
