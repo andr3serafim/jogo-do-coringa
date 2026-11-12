@@ -74,11 +74,15 @@ O que a fatia 1 deixou: `diario.md` 2026-11-11 (1) (os rulings e os 8 Minor).
 - **G7. O portão da medição desta fatia.**
   - **O que se mede:** a troca de mão (236→237) e a Devastação (210→211) da `exodia-devastacao`, com o Cordel e com dois decks diferentes na
     mesa (você Bestiário + Egípcio, o oponente Celestial + Egípcio), alternados numa build só, 3 repetições, na tomada.
-  - **Passa se:** nenhuma das duas cenas fica mais de 2 quadros/s abaixo da `main` de hoje com arte (medianas da mesma medição: 50 e 55 na
-    troca de mão; 50 e 47 na Devastação), e a troca de mão segue ≥ 50. A Devastação a 360 já está abaixo de 50 na `main`: esta fatia não a
-    conserta, e não pode piorá-la.
-  - **Se o autor mandar consertar a Devastação antes** (o achado acima), esta fatia começa depois desse conserto e o portão volta a ser ≥ 50
-    nas duas cenas.
+  - **O portão é relativo, dentro da mesma medição** (como a F5 da fatia 1): o que conta é quanto a arte perde para o Cordel na mesma rodada
+    alternada, comparado com o que ela já perde na `main`. Números absolutos de outro dia não decidem: o próprio Cordel variou de 43 a 55 numa
+    mesma sessão, e a tolerância é de 2.
+  - **A perda da `main`** (medianas, Cordel menos arte): na troca de mão, ~6 quadros/s no PC (56 → 50) e ~3 no celular (58 → 55); na
+    Devastação, ~0 no PC (50 → 50) e ~8 no celular (55 → 47).
+  - **Passa se** a perda de cada cena, em cada largura, não crescer mais de 2 quadros/s. Se a dúvida ficar no limite, medir a `main` e a branch
+    na mesma sessão, uma depois da outra.
+  - **Se o autor mandar consertar a Devastação antes** (o achado acima), esta fatia começa depois desse conserto, e a perda de referência é a
+    da `main` consertada.
   - **Recomendo** assim.
 - **G8. A execução.** No Claude Code local, com o Opus 5.5, tarefa por tarefa, teste primeiro, na branch `feat/decks-fatia-2` (já aberta, com
   a medição e este plano); no fim, um revisor novo, num subagente, lendo a branch inteira, como na fatia 1. **Recomendo** assim.
@@ -88,6 +92,10 @@ O que a fatia 1 deixou: `diario.md` 2026-11-11 (1) (os rulings e os 8 Minor).
 - **O Cordel não muda:** com a aparência padrão, nenhum teste existente muda. Os testes da fatia 1 que conferem "a sua aparência dos dois
   lados" no treino continuam valendo enquanto só olham o seu lado e o seu lugar; se um deles passar a ver as cartas do bot e falhar, a mudança
   é a desta fatia (a §3) e vai no diário com o porquê. Qualquer outro teste que precise mudar: para e pergunta.
+  - **Por que os testes da troca no menu seguem verdes** (o `training.test.tsx` "trocar o deck no menu…" e o E2E "a troca no menu do
+    treino…"): eles afirmam "nenhuma imagem do Bestiário" depois de trocar para Celestial, e com a G2 o bot vai para o Bestiário. Passam só
+    porque, no começo da partida (o Equipar), o bot não tem carta virada na mesa. Se um deles quebrar porque a partida do teste mudou, o
+    conserto é no teste (olhar só o seu lado), nunca na regra do bot.
 - **O `LookZone` não põe nó no DOM:** é só um provedor de contexto. Os seletores de hoje (`[data-campos] > *`, `[data-campo]`, as fileiras)
   ficam como estão.
 - **Orçamento:** JavaScript inicial ≤ 200 KB gzip. O retrato do Anúbis, como as outras imagens, só chega pelo pacote da raça (por `import()`); o
@@ -152,6 +160,9 @@ O que a fatia 1 deixou: `diario.md` 2026-11-11 (1) (os rulings e os 8 Minor).
   O `loadPack` guarda o que resolveu num mapa síncrono. **Rejeição:** a promessa sai do mapa de pedidos, e o próximo `loadPack` do mesmo
   pacote tenta de novo (muda a `Ruling:` da Task 3 da fatia 1; a F3 continua: quem chama cai no Cordel, sem erro).
 - `LooksProvider`: o estado inicial vem do `readyPack` de cada pacote pedido. Com o pacote já pronto, a primeira renderização já tem a arte.
+- **O cache é do módulo e vaza entre os testes do mesmo arquivo:** um teste que espera o Cordel enquanto o pacote chega pode ver a arte de
+  cara, conforme a ordem. O `load.ts` ganha um reset só para os testes (ou eles usam `vi.resetModules`), chamado no `beforeEach` dos arquivos
+  que dependem disso.
 
 Os oito, cada um com o teste que falha antes:
 1. **O cordel pisca antes da arte** (cada provedor começa vazio). O provedor começa com os pacotes já prontos (`readyPack`). O `Training`
@@ -417,8 +428,9 @@ Expected: FAIL nos casos novos.
 
 Run: `MEDIR_FIXTURE=exodia-devastacao MEDIR_RODADA=47 MEDIR_PASSO=236 MEDIR_MS=3000 MEDIR_APARENCIAS=cordel,bestiario:egipcio/celestial:egipcio MEDIR_REPETICOES=3 MEDIR_SAIDA=<pasta> pnpm --filter @coringa/web exec playwright test --config medir.config.ts`
   e o mesmo com `MEDIR_RODADA=43 MEDIR_PASSO=210 MEDIR_MS=3200` (a Devastação).
-Expected: a tabela nas duas larguras, com o veredito da G7 contra as medianas da `main` (a seção "Antes da fatia 2" da nota). Se piorar mais
-  de 2 quadros/s, achar a causa (o retrato? o verso?) antes de seguir, e registrar.
+Expected: a tabela nas duas larguras, com o veredito da G7: a perda da arte para o Cordel nesta medição contra a perda da `main` (a seção
+  "Antes da fatia 2" da nota e a medida final da fatia 1). Se a perda crescer mais de 2 quadros/s, achar a causa (o retrato? o verso?) antes
+  de seguir, e registrar.
 - [ ] **Step 5: `pnpm check` e `pnpm e2e`.** Expected: PASS nos dois. Repetir a execução inteira do E2E se o limite de salas barrar (nunca
   `--repeat-each`).
 - [ ] **Step 6: A documentação.**
