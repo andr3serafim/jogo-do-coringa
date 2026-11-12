@@ -104,9 +104,10 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
       plano e do `CLAUDE.md` ("`pnpm check` antes de cada commit"); o pre-commit rodou a versão rápida, o check completo passou logo depois, e
       o squash apaga esses commits. Vai na mensagem final como desvio.
   - **2026-11-12, o merge ("sim"):** com as duas CI verdes em `bb186ef` (o topo da branch, com as correções da revisão), fast-forward
-    da `main` e push (o pre-push com o `pnpm check`). O ledger `.superpowers/sdd/2026-11-12-decks-fatia-2/` é apagado depois da CI da
-    `main` (as `Ruling:` estão aqui); as fotos ficam em `.superpowers/fotos-decks-fatia-2/`. Ao fechar, a descrição da Task 5 (o replay),
-    que tinha ido parar no fim desta entrada, voltou ao item dela.
+    da `main` e push (o pre-push com o `pnpm check`). A CI da `main` passou em `56efcbc` (`check` e `e2e`), e o ledger
+    `.superpowers/sdd/2026-11-12-decks-fatia-2/` foi apagado (as `Ruling:` estão aqui); as fotos ficam em
+    `.superpowers/fotos-decks-fatia-2/`. Ao fechar, a descrição da Task 5 (o replay), que tinha ido parar no fim desta entrada, voltou ao
+    item dela.
 
 ---
 

@@ -1,20 +1,21 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-12**, a fatia 2 dos decks na `main`; falta conferir a CI dela e apagar o ledger.
+> Sobrescrito a cada atualização. **Última: 2026-11-12**, a fatia 2 dos decks na `main`, com as duas CI verdes; nada em curso.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
+- **Nada em curso.** O checkout principal está na `main` (`56efcbc`).
 - **A fatia 2 dos decks e raças (o dono por lado) está na `main`** ("sim", o autor, 2026-11-12), por fast-forward de `feat/decks-fatia-2`
-  até `bb186ef`, com as duas CI verdes (`check` e `e2e`) no topo da branch. No treino com um deck de arte, o bot veste o outro deck com o
-  Egípcio (G1); cada lado da mesa, do placar (o retrato do Anúbis), do momento e das cópias das cenas veste o deck do dono, com o verso na
+  até `bb186ef`, com as duas CI verdes (`check` e `e2e`) no topo da branch e no push da `main` (`56efcbc`). No treino com um deck de
+  arte, o bot veste o outro deck com o Egípcio (G1); cada lado da mesa, do placar (o retrato do Anúbis), do momento e das cópias das cenas veste o deck do dono, com o verso na
   cor do deck; a partida guardada leva `looks`, e o replay veste as gravadas. Com a aparência padrão nada muda; o tutorial e o online ficam
   em Cordel até a fatia 3. Plano `docs/superpowers/plans/2026-11-12-decks-fatia-2.md` (G1 a G8, `decisoes.md` 2026-11-12 (1)); a
   execução, as `Ruling:`, a revisão (nenhum Critical nem Important; os 6 Minor corrigidos com teste) e as armadilhas no `diario.md`
   2026-11-12 (2); a medição G7 em `notas/medicao-decks-fatia-2.md` (passa nas quatro); o que a execução decidiu na §16 da spec.
   `RULES_VERSION`, `STATE_SCHEMA` e `PROTOCOL_VERSION` não mudaram (só a web mudou).
-  - **Próximo passo exato:** conferir as duas CI do push da `main` (pela API pública, com `curl`) e, verdes, apagar o ledger
-    `.superpowers/sdd/2026-11-12-decks-fatia-2/` (as `Ruling:` estão no diário). Depois, nada em curso: a Fila.
+  - O ledger da fatia foi apagado (as `Ruling:` estão no diário). **Próximo passo:** o que o autor escolher na Fila ou em "Esperando o
+    autor"; a fatia 3 e o bloco D só com plano aprovado antes.
   - **O que não pode regredir:** com a preferência padrão, o bot em Cordel (G1), nenhum `img` de carta, o verso de listras sem
     `data-verso-deck` e o `<Coringa>` no placar; o treino em Cordel não grava `looks`. O `LookZone` não põe nó no DOM, e há um provedor
     só. O que chegou mora na loja do `ready.ts`, que o provedor assina (`useSyncExternalStore`); o provedor e o placar só importam
