@@ -1,40 +1,32 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-12**, a execução da fatia 2 dos decks começou (Task 0). Antes de
+> Sobrescrito a cada atualização. **Última: 2026-11-12**, a fatia 2 dos decks executada (Tasks 0 a 6), com o revisor (G8) em curso. Antes de
 > seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **A fatia 2 dos decks (o dono por lado): em execução** desde 2026-11-12, numa sessão nova do Claude Code ("execute o plano da fatia 2 dos
-  decks", o autor), inline (`superpowers:executing-plans`), tarefa por tarefa, teste primeiro. **Feitas: as Tasks 0 a 6** (a medição G7 passa: `notas/medicao-decks-fatia-2.md`), **menos o `pnpm e2e` inteiro (em curso) e o revisor (G8)**
-  (o replay com as aparências gravadas, G3, e o `medir-cena.ts` gravando `looks` na partida da fixture). O andamento de cada tarefa, com as `Ruling:`, vai no `diario.md` 2026-11-12 (2). O ledger
-  está em `.superpowers/sdd/2026-11-12-decks-fatia-2/` (fora do git). Quem assumir: retome na primeira tarefa sem "feita" no diário.
-- **O plano aprovado:** "Aprovo como está mas irei implementar em outra sessão"
-  (o autor, 2026-11-12; `decisoes.md` 2026-11-12 (1)): as escolhas G1 a G8 como recomendadas.
-  - **Branch:** `feat/decks-fatia-2`, no checkout principal (`D:\andr3\jogo-coringa`), saída da `main` em `2f2aa51`, já no GitHub. Ela
-    só tem documentos: a medição da Devastação, o plano, a memória e as notas na spec que o plano substitui.
-  - **Plano:** `docs/superpowers/plans/2026-11-12-decks-fatia-2.md` (Task 0 a Task 6, com o revisor no fim).
-  - **Próximo passo exato (a sessão nova):** ler este arquivo, o `decisoes.md` 2026-11-12 (1), o plano inteiro e o `diario.md` 2026-11-12
-    (1) e 2026-11-11 (1); depois executar a partir da **Task 0** (a regra 1 do `CLAUDE.md`, a branch, o `pnpm check`), tarefa por tarefa,
-    teste primeiro, com a skill `superpowers:executing-plans` (ou a `subagent-driven-development`). A cada tarefa: commit, a `Ruling:` no
-    diário, o `estado.md` (regras 2 e 6).
-  - **O que não pode regredir** (está no plano; repetido aqui porque quebra calado):
-    - **O padrão fica igual:** com a preferência padrão, o bot em Cordel (G1, e não o "deck seguinte" da §7.1 da spec, substituída), nenhum
-      `img` de carta, o verso de listras e o `<Coringa>` no placar. Nenhum teste existente muda, fora os dois que o plano cita (o caso da F4
-      no `replay-screen.test.tsx`, por desenho, e algum da fatia 1 que passe a ver as cartas do bot).
-    - **Os testes da troca no menu** (o `training.test.tsx` e o E2E `looks.spec.ts`) só passam porque, no Equipar, o bot não tem carta
-      virada. Se quebrarem, o conserto é no teste, nunca na regra do bot.
-    - **O `LookZone` não põe nó no DOM**, e há **um provedor só** (a união dos pacotes dos dois lados).
-    - **O cache síncrono do `loadPack`** (Task 1) vaza entre testes do mesmo arquivo: reset no `beforeEach`.
-    - **A medição** é só na tomada (na bateria esta máquina não decide), alternando as aparências numa build só, e o portão é **relativo**
-      (G7): a perda da arte para o Cordel não cresce mais de 2 quadros/s sobre a da `main`.
-    - **O `medir-cena.ts`** passa a gravar `looks` na partida da fixture (G3): o replay deixa de ler a preferência, e sem isso a medição com
-      aparência não acha imagem e falha na espera por elas.
+- **A fatia 2 dos decks (o dono por lado): Tasks 0 a 6 feitas; o revisor (G8) em curso.** "execute o plano da fatia 2 dos decks" (o autor,
+  2026-11-12), pelo plano `docs/superpowers/plans/2026-11-12-decks-fatia-2.md`, aprovado com as G1 a G8 (`decisoes.md` 2026-11-12 (1)).
+  - **Branch:** `feat/decks-fatia-2`, no checkout principal (`D:\andr3\jogo-coringa`), saída da `main` em `2f2aa51`, no GitHub até `5c16dff`
+    (o pre-push com o `pnpm check` verde).
+  - **Verificado:** `pnpm check` (web 2758 testes; JS inicial 183,8 KB), `pnpm e2e` inteiro (113 passaram, 4 pulados), a medição G7 na
+    tomada, com a `main` e a branch na mesma sessão (passa nas quatro: `notas/medicao-decks-fatia-2.md`), e as fotos em
+    `.superpowers/fotos-decks-fatia-2/` (nesta máquina, fora do git). A CI do GitHub ainda não foi lida.
+  - **Próximo passo exato:** ler o parecer do revisor (um subagente novo, lendo `2f2aa51..5c16dff`); corrigir os Critical e Important nesta
+    branch, cada um com o teste que falha antes; os Minor vão ao diário como adiados. Depois, conferir as duas CI do GitHub no topo da branch e
+    levar ao autor o merge (fast-forward ou squash). O andamento de cada tarefa, com as `Ruling:`, está no `diario.md` 2026-11-12 (2); o
+    ledger em `.superpowers/sdd/2026-11-12-decks-fatia-2/` (fora do git).
+  - **O que não pode regredir:** com a preferência padrão, o bot em Cordel (G1), nenhum `img` de carta, o verso de listras sem
+    `data-verso-deck` e o `<Coringa>` no placar; o treino em Cordel não grava `looks` (a linha fica a de hoje). O `LookZone` não põe nó
+    no DOM, e há um provedor só. O provedor e o placar só importam `loadPack` do `load.ts` (o que está pronto mora no `ready.ts`), e o efeito
+    do provedor passa sempre pelo `loadPack(...).then` (a corrida do pacote que fica pronto entre o desenho e o efeito). Nos testes,
+    `resetPacks()` no `beforeEach`.
 - **A Devastação com arte não passa no celular** (medida em 2026-11-12, na tomada): 46 e 47 quadros/s com arte, contra 55 do Cordel; no PC,
   50 e 51 contra 50. O perfil: o recálculo de estilo das cartas da mesa inteira, umas 70 vezes na cena, já acontece no Cordel e dobra com a face
   com arte; a imagem numa camada própria foi medida e não muda nada. Tudo em `notas/medicao-decks-fatia-1.md`, seção "Antes da fatia 2", e
   na §15 da spec. **O autor não decidiu o conserto** (a recomendação: um bloco curto que corte esse recálculo, antes da fatia 2, sem segurar o
-  deploy); a fatia 2 segue pelo portão relativo da G7 (`Esperando o autor`).
+  deploy); a fatia 2 passou pelo portão relativo da G7 (`Esperando o autor`). Na medição A/B da fatia 2 (mais tarde no mesmo dia, a máquina
+  mais rápida), a Devastação com arte deu 52 a 360 nas duas builds, contra 57 e 59 do Cordel: a perda segue (`notas/medicao-decks-fatia-2.md`).
 - **A fatia 1 dos decks e raças está na `main`** ("Sim, merge", o autor, 2026-11-12), por fast-forward de `feat/decks-fatia-1` até `bf6c335`,
   com as duas CI verdes no topo da branch e no push da `main`. No treino (fora do tutorial) e no replay, a carta veste a aparência escolhida
   (Cordel, Bestiário ou Celestial; Bufão ou Egípcio), a sua dos dois lados; o online fica em Cordel até a fatia 3. Plano
