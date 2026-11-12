@@ -93,3 +93,48 @@ próprio Cordel variou de 13 a 26 na mesma ABBA.
   (`<img hidden>`: se ficar perto do Cordel, o custo é desenhar a imagem) e a imagem numa camada própria (`will-change: transform` no
   invólucro: se recuperar a diferença, a carta com arte era repintada a cada quadro do voo). Conferir os dois a 360 (camadas a mais pesam no
   celular).
+
+## A medição limpa, na tomada (a troca de mão, alternada, 3 repetições, uma build só)
+
+Com o autor ligando o notebook na tomada (status 2, CPU a 19% em repouso). `MEDIR_APARENCIAS=cordel,bestiario:egipcio MEDIR_REPETICOES=3`,
+com as saídas 1 e 2 no código. O ruído caiu para 1 a 2 quadros/s entre execuções iguais.
+
+| Aparência | Tela | Quadros/s (as três) | Mediana | p95 (ms) | Maior intervalo (ms) | Chegada (ms) |
+|---|---|---|---|---|---|---|
+| Cordel | 1366 | 56, 56, 58 | 56 | 17 | 83 | 83 |
+| | 360 | 58, 58, 59 | 58 | 17 | 50 | 83 a 100 |
+| Bestiário + Egípcio | 1366 | 50, 50, 49 | 50 | 33 | 133 | 133 |
+| | 360 | 54, 55, 55 | 55 | 33 | 117 | 117 a 133 |
+
+**Leitura:** com o Cordel acima de 50, vale a primeira regra da F5 (≥ 50 quadros/s): **passa, no limite no PC** (mediana 50, uma das três
+em 49) e com folga no celular (55). A chegada do passo à mesa fica 50 ms mais lenta com arte (133 contra 83).
+
+**As saídas 1 e 2 contra a carta de antes delas** (a mesma medição, com o `ArtFace.tsx` de `dd1d9bd`, o halo e a aura desfocada): Cordel 53,
+56, 56 e 57, 58, 58 (medianas 56 e 58); arte 50, 50, 49 e 55, 50, 55 (medianas 50 e 55). **Iguais às com as saídas:** o desfoque não
+custava nada que se meça. As duas saíram (`git revert` de `2eeba72`), e a carta volta ao desenho aprovado. **Ruling:** uma saída só fica se a
+medição limpa mostrar que ajuda; não ajudou, e ela pioraria a arte de graça.
+
+## A medida final (a carta aprovada, as três aparências alternadas, 3 repetições, na tomada)
+
+| Aparência | Tela | Quadros/s (as três) | Mediana | p95 (ms) | Maior intervalo (ms) | Chegada (ms) |
+|---|---|---|---|---|---|---|
+| Cordel | 1366 | 56, 56, 58 | 56 | 17 | 83 | 83 a 100 |
+| | 360 | 58, 58, 58 | 58 | 17 | 83 | 83 |
+| Bestiário + Egípcio | 1366 | 49, 50, 50 | 50 | 33 | 133 | 133 |
+| | 360 | 55, 55, 55 | 55 | 33 | 117 | 117 a 133 |
+| Celestial + Egípcio | 1366 | 50, 50, 50 | 50 | 33 | 133 | 117 a 133 |
+| | 360 | 55, 55, 55 | 55 | 33 | 117 | 117 |
+
+**A Ressurreição** (rodada 7, passo 27, 4,6 s; 2 repetições, alternadas): 60 quadros/s nas três aparências e nas duas telas (o Celestial a 360,
+59 e 60), p95 de 17 ms, maior intervalo de 17 a 33 ms, chegada de 83 (Cordel) a 100 ms (arte), pico de 44 a 45 partículas.
+
+## Veredito da F5
+
+- **Passa pela primeira regra (≥ 50 quadros/s com a CPU 4×), no limite no PC** (mediana 50 nas duas aparências, uma execução em 49) e com
+  folga no celular (55). O Bestiário e o Celestial custam o mesmo, apesar das imagens do Celestial pesarem mais no disco.
+- **O custo da arte na mesa cheia:** 6 quadros/s no PC (56 → 50) e 3 no celular (58 → 55); o p95 sobe de 17 para 33 ms (mais quadros de 2
+  intervalos), e o passo chega à mesa 30 a 50 ms depois. O perfil diz onde: a pintura dobra, e não a decodificação das imagens.
+- **Nenhuma saída ficou no código:** as saídas 1 e 2 não mudaram a medida e saíram; a terceira (a imagem de 208 px) não foi preciso tentar.
+  Se a arte pintada ou mais efeitos baixarem a mesa de 50, os próximos a medir são a imagem numa camada própria (`will-change: transform` no
+  invólucro da imagem, que evitaria repintá-la a cada quadro do voo; conferir as camadas a mais no celular) e a imagem de 208 px.
+- **Para o autor:** a medição só decide na tomada. Na bateria, a CPU desta máquina varia demais (o mesmo Cordel deu 13 e 26 quadros/s).
