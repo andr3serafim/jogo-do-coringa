@@ -1,6 +1,6 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-11**, a fatia 1 dos decks com as Tasks 0 a 6 feitas, antes do E2E inteiro. Antes de seguir, confira se não há versão
+> Sobrescrito a cada atualização. **Última: 2026-11-11**, a fatia 1 dos decks feita, revisada e corrigida, na branch, antes do merge. Antes de seguir, confira se não há versão
 > mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
@@ -11,15 +11,19 @@
   tarefa, vai no `diario.md` 2026-11-11 (1).
 - **As Tasks 0 a 6 estão feitas e commitadas** (o andamento e as `Ruling:` no `diario.md` 2026-11-11 (1)): o smoke, o `e2e/looks.spec.ts` (3 de
   3), a medição (a F5 passa, no limite no PC: 50 e 55 quadros/s com arte contra 56 e 58 do Cordel, na tomada; as saídas 1 e 2 entraram e
-  saíram), as fotos (em `.superpowers/fotos-decks-fatia-1/`, nesta máquina), a §15 da spec e o item "Aparências" do `CLAUDE.md`. Nada subiu
-  ainda.
+  saíram), as fotos (em `.superpowers/fotos-decks-fatia-1/`, nesta máquina), a §15 da spec e o item "Aparências" do `CLAUDE.md`. O
+  `pnpm e2e` inteiro passou (110, 4 pulados).
+- **A revisão da branch inteira (F7)** foi "com correções" (0 Critical, 3 Important, 8 Minor); os 3 Important estão corrigidos com teste em
+  `0ac348d` (a aura sobre o anel ouro, o foco e a seta; o tracejado do rascunho; a amostra com `data-card-id`), e os Minor adiados e as
+  decisões sobre o que o revisor deixou de lado estão no `diario.md` 2026-11-11 (1).
 - **Próximo passo exato:**
-  1. `pnpm e2e` inteiro (em segundo plano, ~10 min); se passar, subir a branch (`git push -u origin feat/decks-fatia-1`; o pre-push roda o
-     `pnpm check`) e ler a CI dos dois jobs.
-  2. **O revisor novo (F7):** um subagente lê a branch inteira (`fe9a507..HEAD`) contra o plano e a spec, com o "Review Focus" do plano e as
-     `Ruling:` do diário. Critical e Important: corrigir com teste antes. Depois, o PR para a `main` (sem `gh` nesta máquina: pelo app ou pelo
-     autor) e o merge com as duas CI verdes.
-  3. **Para o autor:** jogar o treino com os três decks; depois, o plano da fatia 2.
+  1. Subir a branch com as correções (o pre-push roda o `pnpm check`) e ler a CI dos dois jobs no topo, pela API pública
+     (`curl -s "https://api.github.com/repos/andr3serafim/jogo-do-coringa/actions/runs?branch=feat/decks-fatia-1&per_page=3"`).
+  2. **O merge (pergunta ao autor):** com as duas CI verdes, PR para a `main` (sem `gh` nesta máquina: pelo app) ou fast-forward
+     (`git merge-base --is-ancestor main HEAD`, `git branch -f main HEAD` e o push das duas). Depois, apagar o ledger
+     `.superpowers/sdd/2026-11-11-decks-fatia-1` (os rulings já estão no diário) e fechar o `estado.md`.
+  3. **Para o autor:** jogar o treino com os três decks (a §14 da spec pede que ele diga que serve); ver as fotos; decidir os Minor
+     adiados; depois, o plano da fatia 2 (com folga para a F5: a mesa cheia está em 50 quadros/s no PC).
 - **O bloco C está na `main`** (pontos 10, 11 e 13: a aura da iniciativa, os bônus em escala, o ouro de quem lidera), por fast-forward de
   `feat/playtest-bloco-c` até `21d1387`, com as duas CI verdes (`check` e `e2e`) no topo do código (`75d35c8`) e no push da `main`
   (`21d1387`). Plano `docs/superpowers/plans/2026-11-08-playtest-bloco-c.md`; a revisão da branch inteira e a segunda, só das correções

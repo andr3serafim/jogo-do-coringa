@@ -79,6 +79,29 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     não mede (o mesmo Cordel deu 13 e 26 quadros/s); meça na tomada, alternando as aparências na mesma build. **Armadilha:** a sonda do GIF de
     1 px no lugar da imagem não serve de controle (troca um desenho de imagem por outro mais caro). **Armadilha:** o Playwright e o pre-commit
     leem tudo em `packages/web/e2e/` e `*.config.ts` (lint e typecheck): spec temporário fica fora do repositório entre as execuções.
+    `pnpm e2e` inteiro: 110 passed, 4 skipped. A branch subiu em `699e647` (o pre-push com o `pnpm check` verde).
+  - **Revisão da branch inteira (subagente novo, Opus, `fe9a507..699e647`): "com correções"** — nenhum Critical, 3 Important, 8 Minor.
+    Corrigido em `0ac348d`, cada um com o teste que falhou antes (web: 2697 testes):
+    - (Important) a aura, um filho posicionado, pintava por cima do `box-shadow` da raiz (o anel ouro de alvo e de seleção, o halo do
+      foco) e da seta da frente: num 10 dourado, a carta-alvo parecia comum. Agora não há aura com o anel ouro (`ringed`), ela some no
+      `:focus-visible` (a carta é o `group/carta`), e a seta vem depois da face com arte. Fotos conferidas: a selecionada e a focada.
+    - (Important) com o fundo de tinta até a borda, o rascunho com arte perdia o tracejado: `bg-clip-padding` no ramo com arte. Foto
+      conferida.
+    - (Important) as cartas da amostra do seletor tinham `data-card-id`, e o teste da troca no treino podia passar só por elas: a amostra
+      agora é de cópias (`ghost`).
+    - **Adiados (Minor):** o cordel pisca um quadro antes da arte (cada provedor começa vazio; na troca de deck, arte → cordel → arte); um
+      JSDoc órfão acima do `chosenLook` no `PlayTable.tsx`; a promessa rejeitada do `loadPack` sem teste (e uma falha passageira desliga a arte
+      até recarregar); o negativo do tutorial no E2E espera 500 ms em vez de conferir as requisições; o smoke procura três nomes de `.webp`, não
+      qualquer `.webp` (o retrato do Anúbis da fatia 2 escaparia); passar pelo Cordel desfaz a escolha de raça; a linha da trava não está ligada
+      ao grupo Coringa (`aria-describedby`); o teste da sala online não espia o console.
+    - **O que o revisor deixou de lado, e a decisão:** **Ruling:** a leitura a 360 fica com as fotos, que conferi. **Ruling:** a beleza da aura é
+      do autor. **Ruling:** as fatias 2 e 3, a §6 apagada e o `art.css` ficam como o plano mandou. **Ruling:** a nota "Por enquanto vale no
+      treino." não cita o replay (o replay de partida online também veste a arte, F4): o texto é do plano; fica, e vai ao autor. **Ruling:** a
+      Cinzel chega depois do primeiro desenho (`font-display: swap`): um quadro com a serifa de reserva, aceitável. **Ruling:** o Início de quem
+      já escolheu um deck fantasy pede o pacote e aquece as imagens, como a §5 manda. **Ruling:** a F5 passou com margem zero no PC: fica
+      registrado e vai ao autor como recomendação para a fatia 2 (medir a Devastação com arte, ter pronta a imagem de 208 px ou a camada
+      própria). **Ruling:** o clone do fantasma do arrasto leva o `style` com o metal; os E2E do arrasto já clonam cartas com `style` sob a CSP
+      sem erro, então fica.
 
 ---
 
