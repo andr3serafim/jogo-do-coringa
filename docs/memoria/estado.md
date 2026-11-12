@@ -1,11 +1,15 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-12**, o plano da fatia 2 dos decks aprovado; a execução é em outra sessão. Antes de
+> Sobrescrito a cada atualização. **Última: 2026-11-12**, a execução da fatia 2 dos decks começou (Task 0). Antes de
 > seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **A fatia 2 dos decks (o dono por lado): plano aprovado, nada de código ainda.** "Aprovo como está mas irei implementar em outra sessão"
+- **A fatia 2 dos decks (o dono por lado): em execução** desde 2026-11-12, numa sessão nova do Claude Code ("execute o plano da fatia 2 dos
+  decks", o autor), inline (`superpowers:executing-plans`), tarefa por tarefa, teste primeiro. **Em curso: a Task 0** (a `main` não andou:
+  segue em `2f2aa51`; rodando o `pnpm check`). O andamento de cada tarefa, com as `Ruling:`, vai no `diario.md` 2026-11-12 (2). O ledger
+  está em `.superpowers/sdd/2026-11-12-decks-fatia-2/` (fora do git). Quem assumir: retome na primeira tarefa sem "feita" no diário.
+- **O plano aprovado:** "Aprovo como está mas irei implementar em outra sessão"
   (o autor, 2026-11-12; `decisoes.md` 2026-11-12 (1)): as escolhas G1 a G8 como recomendadas.
   - **Branch:** `feat/decks-fatia-2`, no checkout principal (`D:\andr3\jogo-coringa`), saída da `main` em `2f2aa51`, já no GitHub. Ela
     só tem documentos: a medição da Devastação, o plano, a memória e as notas na spec que o plano substitui.

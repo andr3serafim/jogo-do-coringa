@@ -5,6 +5,18 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-12 (2): a fatia 2 dos decks (o dono por lado), a execução
+
+- **Pedido:** "execute o plano da fatia 2 dos decks" (o autor, 2026-11-12), numa sessão nova do Claude Code. O plano
+  `docs/superpowers/plans/2026-11-12-decks-fatia-2.md`, aprovado com as G1 a G8 (`decisoes.md` 2026-11-12 (1)). Inline
+  (`superpowers:executing-plans`), tarefa por tarefa, teste primeiro, na branch `feat/decks-fatia-2`; o revisor novo, num subagente, no fim
+  (G8). A Devastação no celular segue sem ordem de conserto: a fatia vai pela G7.
+- **Andamento** (uma linha por tarefa, com os commits e as `Ruling:`):
+  - **Task 0 (o começo): em curso.** A `main` não andou (`2f2aa51`); a aprovação está no `decisoes.md`; nada sem commit além do
+    `.claude/` e do `jogar-treino.bat` do autor.
+
+---
+
 ## 2026-11-12 (1): a Devastação com arte medida, e o plano da fatia 2 dos decks
 
 - **Pedido:** depois do merge da fatia 1, "ok, prossiga" (o autor). Lido como o próximo passo da Fila que não depende dele: medir a
