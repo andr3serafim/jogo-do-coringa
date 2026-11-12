@@ -412,7 +412,12 @@ G8 (`decisoes.md` 2026-11-12 (1)). As `Ruling:` de cada tarefa estão no `docs/m
   7, contra 0 e 5. **Passa:** nenhuma perda cresce mais de 2. O retrato do Anúbis custa ~1 quadro/s no PC e nada no celular. Uma primeira
   rodada, só da branch, dera +3 na troca de mão: era ruído.
 - **Um defeito da Task 1, achado na medição:** o pedido adiantado podia resolver entre o desenho do provedor e o efeito dele, e a carta ficava
-  de cordel para sempre. O efeito agora passa sempre pelo `loadPack(...).then`; um teste o reproduz.
+  de cordel para sempre; um teste o reproduz. O conserto final (depois da revisão): o provedor assina a loja do `ready.ts`
+  (`useSyncExternalStore`), e todo pacote que chega, por qualquer pedido, acorda a mesa (também depois de uma falha passageira, quando outro
+  pedido, como o da amostra do menu, o traz).
+- **A revisão (G8, um subagente novo):** nenhum Critical nem Important; os 6 Minor entraram nesta fatia: a loja assinada (acima), a figura
+  da cena rara em cordel (`CORDEL_LOOKS`, como manda a §3), as cores do verso nas variáveis `--verso-*` do `styles.css` (que o `BACK_CLASS` e
+  o `.momento-verso` usam), e três testes que passaram a provar o que dizem (o Roubo com o mesmo id, o Equipar e o cemitério do replay).
 - **As fotos** (fora do repositório; o diário diz onde): o J do bot no Egípcio dele, os versos dos dois decks a 360, o Anúbis no retrato com a
   espada por cima, as cópias da Devastação e da Ressurreição do bot na Celestial dele. Nada mudou por causa delas.
 - **O JavaScript inicial** foi de 182,7 para 183,8 KB (gzip).

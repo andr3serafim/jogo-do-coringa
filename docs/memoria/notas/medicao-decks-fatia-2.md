@@ -63,6 +63,14 @@ e 2 abaixo na Devastação do PC. A rodada 1 era ruído (o próprio Cordel vario
   a máquina estava mais rápida hoje, e o achado continua de pé (a perda para o Cordel segue de 5 a 7 quadros/s). A decisão de consertar
   continua do autor.
 
+## Depois da revisão
+
+A A/B mediu o código em `9687966`. As correções da revisão vieram depois: o provedor passou a assinar a loja do `ready.ts`
+(`useSyncExternalStore`), a figura da cena rara ficou em cordel e as cores do verso foram para variáveis CSS. Os números seguem valendo: nas
+cenas medidas nenhum pacote chega (eles chegam antes, e a medida espera as imagens), então a loja não muda e o provedor não desenha de novo por
+ela; a figura só aparece no painel de reserva, que essas cenas não mostram; e as variáveis só trocam onde mora a cor do verso, que é parado.
+Não foi medido de novo.
+
 ## O JavaScript inicial
 
 182,7 KB (gzip) na `main` → 183,8 KB na branch (o contexto por dono, o `LookZone`, o `ready.ts`, as cores do verso no catálogo e o retrato
