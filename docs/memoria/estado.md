@@ -13,9 +13,11 @@
   179,9 para 182,7 KB). Da Task 6: o smoke (passa e reprova um `.webp` no `index.html`), o `e2e/looks.spec.ts` (3 de 3, com o clique no
   rótulo do rádio) e o `MEDIR_APARENCIA` do `e2e/medir-cena.ts` estão commitados. Nada subiu ainda.
 - **Próximo passo exato:**
-  1. **A medição (F5)**, com a web construída: `exodia-devastacao` em dois passos, o do plano (`MEDIR_RODADA=7 MEDIR_PASSO=27 MEDIR_MS=4600`) e
-     a mesa mais cheia dela (`MEDIR_RODADA=47 MEDIR_PASSO=236 MEDIR_MS=3000`, o 236→237 do bloco C), cada um sem `MEDIR_APARENCIA`, com
-     `bestiario:egipcio` e com `celestial:egipcio`; a tabela e o veredito em `docs/memoria/notas/medicao-decks-fatia-1.md`.
+  1. **A medição (F5), em curso:** a primeira rodada está em `docs/memoria/notas/medicao-decks-fatia-1.md` (o notebook na bateria; na troca de
+     mão, 236→237, a arte perde de 5 a 11 quadros/s para o Cordel: a F5 não passa ali). Agora: o perfil da troca de mão (`MEDIR_PERFIL=1`,
+     `MEDIR_RODADA=47 MEDIR_PASSO=236 MEDIR_MS=3000`, Cordel e `bestiario:egipcio`), somar o tempo por evento do trace para achar a causa, e
+     medir de novo em ordem ABBA. Se não passar, as saídas da F5 na ordem que a causa indicar (o halo do número; a aura desenhada; a imagem de
+     208 px com `srcset`), medindo depois de cada uma. Depois das três sem passar: parar e perguntar ao autor.
   2. **As fotos** para o autor (fora do repositório): a mesa do treino a 360 × 640 e a 1366 × 657 com as duas aparências, a mão, o
      cemitério, as minis e o painel "Aparência"; conferir o Pégaso e o Arcanjo e as minis de 30 px.
   3. `pnpm check` e `pnpm e2e` inteiros; a documentação (o `CLAUDE.md`, a seção "O que a execução decidiu (fatia 1)" na spec, o diário);
