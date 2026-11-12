@@ -138,3 +138,43 @@ medição limpa mostrar que ajuda; não ajudou, e ela pioraria a arte de graça.
   Se a arte pintada ou mais efeitos baixarem a mesa de 50, os próximos a medir são a imagem numa camada própria (`will-change: transform` no
   invólucro da imagem, que evitaria repintá-la a cada quadro do voo; conferir as camadas a mais no celular) e a imagem de 208 px.
 - **Para o autor:** a medição só decide na tomada. Na bateria, a CPU desta máquina varia demais (o mesmo Cordel deu 13 e 26 quadros/s).
+
+## Antes da fatia 2: a Devastação com arte (2026-11-12, na tomada)
+
+O `estado.md` pedia, para o plano da fatia 2, medir a Devastação com arte. Medida na branch `feat/decks-fatia-2`, com o código da `main` em
+`2f2aa51` (a fatia 1 inteira), o notebook na tomada (status 2, 97%). `exodia-devastacao`, rodada 43, passo 210→211 (a sua Devastação derruba
+a Defesa do Bot, 8 cartas), 3,2 s, `MEDIR_APARENCIAS=cordel,bestiario:egipcio,celestial:egipcio MEDIR_REPETICOES=3`, numa build só. O replay
+veste a aparência de agora dos dois lados (F4), então a mesa inteira tem arte. Pico de 30 partículas em todas.
+
+| Aparência | Tela | Quadros/s (as três) | Mediana | p95 (ms) | Maior intervalo (ms) | Chegada (ms) |
+|---|---|---|---|---|---|---|
+| Cordel | 1366 | 43, 50, 55 | 50 | 33 a 50 | 50 a 133 | 133 |
+| | 360 | 55, 55, 57 | 55 | 17 a 33 | 50 a 150 | 133 a 150 |
+| Bestiário + Egípcio | 1366 | 48, 52, 50 | 50 | 33 | 167 | 167 |
+| | 360 | 47, 46, 49 | 47 | 33 | 67 a 200 | 183 a 200 |
+| Celestial + Egípcio | 1366 | 48, 51, 51 | 51 | 33 | 167 a 183 | 167 a 183 |
+| | 360 | 45, 47, 46 | 46 | 33 a 50 | 183 a 217 | 183 a 217 |
+
+**Leitura:** no PC a arte empata com o Cordel (50 e 51 contra 50; o próprio Cordel variou de 43 a 55, a primeira execução fria). **No celular a
+arte fica em 46 e 47, contra 55 do Cordel: a F5 não passa na Devastação a 360.** A chegada do passo fica 50 a 70 ms mais lenta. A troca de mão
+(a mesa mais cheia, medida na fatia 1) segue passando: 55 contra 58.
+
+**A camada própria** (`will-change: transform` no invólucro da imagem, a saída que a fatia 1 deixou para medir), só a 360, 3 repetições
+alternadas: Cordel 57, 57 e 58 (57); arte 45, 46 e 49 (46). **Não muda nada:** desfeita, sem commit.
+
+**O perfil** (360, uma execução de cada, `MEDIR_PERFIL=1`; os números da medida não valem com ele):
+- **O compositor desenha o mesmo:** 228 e 229 quadros (`DrawFrame`). Quem perde é a thread principal: 140 quadros dela no Cordel, 114 na arte
+  (`BeginMainThreadFrame`). As animações que correm no compositor (a queda das cópias, o tremor dos campos) seguem lisas; a medida conta
+  `requestAnimationFrame`, que é da thread principal.
+- **A imagem não é o custo:** a rasterização quase não muda (137 → 167 ms) e a decodificação é quase zero. A imagem de 208 px mexeria só nisso.
+- **O custo é o recálculo de estilo:** 503 → 711 ms. Os recálculos pequenos custam o mesmo nos dois (233 e 206 ms). Os grandes, que passam pelas
+  cartas da mesa inteira, acontecem nos dois (77 vezes no Cordel, 64 na arte, ~70 numa cena de 3,2 s), mas tocam até 59 elementos no Cordel e
+  até ~230 na arte (a face com arte tem uns 4 elementos por carta a mais: o invólucro, a imagem, o anel, a aura), e custam 270 → 505 ms.
+- **Quem invalida:** o mais frequente nos dois é "Inline CSS style declaration was mutated" na raiz das cartas (1037 vezes no Cordel, 533 na
+  arte), e as ~30 animações fora do compositor são as mesmas nos dois (as partículas).
+
+**Conclusão:** já no Cordel, algo recalcula o estilo de todas as cartas da mesa umas 70 vezes na cena; com arte cada recálculo custa o dobro.
+As saídas da F5 não atacam isso: o halo e a aura saíram na fatia 1 sem efeito, a camada própria agora, e a imagem de 208 px só mexeria na
+rasterização. Pela regra do plano da fatia 1 (depois das saídas, para e pergunta), vai ao autor. Os dois caminhos que o perfil aponta:
+**estancar essa invalidação** (achar quem muda o `style` de toda carta a cada quadro; ajuda o Cordel também) ou **enxugar a face com arte**
+(menos elementos por carta).

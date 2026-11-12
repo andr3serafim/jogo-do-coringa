@@ -6,17 +6,19 @@
 ## Agora
 
 - **Em curso, na branch `feat/decks-fatia-2`** (saída da `main` em `2f2aa51`; o autor disse "ok, prossiga" depois do merge da fatia 1):
-  1. **A medição da Devastação com arte** (o "Para o plano da 2" da Fila), na tomada: `exodia-devastacao`, rodada 43, passo 210, 3,2 s,
-     `MEDIR_APARENCIAS=cordel,bestiario:egipcio,celestial:egipcio MEDIR_REPETICOES=3`. O resultado vai para
-     `notas/medicao-decks-fatia-1.md` (seção nova "Antes da fatia 2"). Se a máquina cair, rode de novo, na tomada (na bateria não decide).
+  1. **A medição da Devastação com arte: feita, e ela não passa no celular.** 46 e 47 quadros/s com arte, contra 55 do Cordel (no PC, 50 e
+     51 contra 50). O perfil: o recálculo de estilo das cartas da mesa inteira, umas 70 vezes na cena, já acontece no Cordel e dobra com a face
+     com arte; a imagem numa camada própria foi medida e não muda nada (desfeita, sem commit). Tudo em `notas/medicao-decks-fatia-1.md`,
+     seção "Antes da fatia 2", e na §15 da spec. **Vai ao autor antes do deploy:** a fatia 1 já está na `main` com isso.
   2. **O plano da fatia 2** (`docs/superpowers/plans/2026-11-12-decks-fatia-2.md`), escrito a partir do código da `main`, para o autor
      aprovar antes de qualquer código. Nada de implementação antes da aprovação.
 - **A fatia 1 dos decks e raças está na `main`** ("Sim, merge", o autor, 2026-11-12), por fast-forward de `feat/decks-fatia-1` até `bf6c335`,
   com as duas CI verdes no topo da branch e no push da `main`. No treino (fora do tutorial) e no replay, a carta veste a aparência escolhida
   (Cordel, Bestiário ou Celestial; Bufão ou Egípcio), a sua dos dois lados; o online fica em Cordel até a fatia 3. Plano
   `docs/superpowers/plans/2026-11-11-decks-fatia-1.md`; a execução, as `Ruling:`, a revisão (0 Critical, 3 Important corrigidos com teste,
-  8 Minor adiados) e as armadilhas no `diario.md` 2026-11-11 (1); a medição em `notas/medicao-decks-fatia-1.md` (a F5 passa no limite no PC:
-  50 quadros/s com arte na mesa mais cheia, contra 56 do Cordel); o que a execução decidiu na §15 da spec. O ledger da fatia foi apagado.
+  8 Minor adiados) e as armadilhas no `diario.md` 2026-11-11 (1); a medição em `notas/medicao-decks-fatia-1.md` (a F5 passou na troca de mão,
+  no limite no PC: 50 quadros/s com arte contra 56 do Cordel; **mas a Devastação, medida depois, não passa no celular**: item 1 acima); o que
+  a execução decidiu na §15 da spec. O ledger da fatia foi apagado.
   `RULES_VERSION`, `STATE_SCHEMA` e `PROTOCOL_VERSION` não mudaram.
 - **O bloco C está na `main`** (pontos 10, 11 e 13: a aura da iniciativa, os bônus em escala, o ouro de quem lidera), por fast-forward de
   `feat/playtest-bloco-c` até `21d1387`, com as duas CI verdes (`check` e `e2e`) no topo do código (`75d35c8`) e no push da `main`

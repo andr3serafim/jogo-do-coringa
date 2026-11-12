@@ -366,6 +366,10 @@ tarefa estão no `docs/memoria/diario.md` 2026-11-11 (1).
   limite no PC.** O custo é de pintura (o perfil: a rasterização dobra), não de decodificação. As saídas 1 (o número sem halo) e 2 (a aura
   sem desfoque) foram medidas e **não mudaram nada**: foram desfeitas, e a carta é a aprovada. A terceira (a imagem de 208 px) não foi
   preciso tentar. Na bateria, a CPU desta máquina varia demais para a medição decidir.
+- **Depois do merge (2026-11-12), a Devastação:** medida para o plano da fatia 2, ela **não passa no celular**: 46 e 47 quadros/s com arte,
+  contra 55 do Cordel (no PC, 50 e 51 contra 50). O custo é o recálculo de estilo das cartas da mesa inteira, que já acontece no Cordel e
+  dobra com a face com arte; a imagem numa camada própria não mudou nada. A nota da medição (seção "Antes da fatia 2") tem os números e o
+  perfil; a decisão é do autor.
 - **As fotos** (fora do repositório; o diário diz onde): o valor e o naipe se leem nos três tamanhos, nas duas larguras e nas duas aparências,
   inclusive no Pégaso e no Arcanjo e nas minis de 30 px da Guarda e dos bônus. Nada mudou por causa delas.
 - **O JavaScript inicial** foi de 179,9 para 182,7 KB (gzip): a `ArtFace`, o contexto e o catálogo. Os módulos de URLs, as imagens e a fonte
