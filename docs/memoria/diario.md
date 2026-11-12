@@ -5,6 +5,23 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-12 (3): o plano da fatia 3 dos decks (o online)
+
+- **Pedido:** "escreva o plano da fatia 3 dos decks" (o autor, 2026-11-12), na mesma sessão que executou a fatia 2 e fez o merge dela.
+- **Feito:** o plano `docs/superpowers/plans/2026-11-12-decks-fatia-3.md`, na branch `feat/decks-fatia-3` (saída da `main` em `b6c2caf`),
+  com os nomes lidos do código (o protocolo, o núcleo e o roteador do servidor, a `RoomApi`, o Início, a entrada por link, a `PlayTable`, o
+  menu). Seis tarefas: o começo, o protocolo, o servidor, a entrada da web, a mesa online e o E2E com a documentação e o revisor. Sete
+  escolhas para o autor (H1 a H7).
+- **O que guiou o desenho:** os testes de hoje conferem o corpo exato do POST (`client.test.ts`), o assento gravado e o da mensagem com
+  `toEqual` (`room.test.ts`) e as chamadas exatas da `RoomApi` (`home.test.tsx`, `room-gate.test.tsx`). Gravar ou mandar sempre a
+  aparência os quebraria; por isso a H1: o padrão não vai pelo fio, o servidor só grava o que veio, e a mensagem só devolve o que o assento
+  tem. Só dois testes mudam por desenho: a nota do Início (H4) e o do `NicknameBodySchema`, que vira `JoinRoomBodySchema`.
+- **Armadilha para quem executa:** cada mensagem `room` traz um `seats` novo (presença, pronto, `woAt`); o memo das aparências da mesa tem
+  de ser pelos textos do deck e da raça, ou o contexto de toda carta muda a cada mensagem de presença.
+- **Ficou:** a aprovação do autor. Nada de código.
+
+---
+
 ## 2026-11-12 (2): a fatia 2 dos decks (o dono por lado), a execução
 
 - **Pedido:** "execute o plano da fatia 2 dos decks" (o autor, 2026-11-12), numa sessão nova do Claude Code. O plano
