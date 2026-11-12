@@ -1,26 +1,42 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-12**, a Devastação medida e o plano da fatia 2 escritos; esperando o autor. Antes de
+> Sobrescrito a cada atualização. **Última: 2026-11-12**, o plano da fatia 2 dos decks aprovado; a execução é em outra sessão. Antes de
 > seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Em curso, na branch `feat/decks-fatia-2`** (saída da `main` em `2f2aa51`; o autor disse "ok, prossiga" depois do merge da fatia 1):
-  1. **A medição da Devastação com arte: feita, e ela não passa no celular.** 46 e 47 quadros/s com arte, contra 55 do Cordel (no PC, 50 e
-     51 contra 50). O perfil: o recálculo de estilo das cartas da mesa inteira, umas 70 vezes na cena, já acontece no Cordel e dobra com a face
-     com arte; a imagem numa camada própria foi medida e não muda nada (desfeita, sem commit). Tudo em `notas/medicao-decks-fatia-1.md`,
-     seção "Antes da fatia 2", e na §15 da spec. **Vai ao autor antes do deploy:** a fatia 1 já está na `main` com isso.
-  2. **O plano da fatia 2: escrito** (`docs/superpowers/plans/2026-11-12-decks-fatia-2.md`), a partir do código da `main`, com as escolhas
-     G1 a G8 para o autor aprovar. **Nada de código antes da aprovação.** A G1 resolve um conflito da spec (o bot no deck seguinte punha arte
-     no treino padrão): recomenda o bot em Cordel quando você está em Cordel. A G5 traz os 8 Minor da fatia 1; a G7, o portão contra a `main`.
-  - **Próximo passo:** o autor decide (a) o que fazer com a Devastação no celular (o conserto antes da fatia 2, ou não) e (b) se aprova o
-    plano com as G1 a G8 como recomendadas. A resposta entra no `decisoes.md` antes de qualquer código; a execução começa pela Task 0.
+- **A fatia 2 dos decks (o dono por lado): plano aprovado, nada de código ainda.** "Aprovo como está mas irei implementar em outra sessão"
+  (o autor, 2026-11-12; `decisoes.md` 2026-11-12 (1)): as escolhas G1 a G8 como recomendadas.
+  - **Branch:** `feat/decks-fatia-2`, no checkout principal (`D:\andr3\jogo-coringa`), saída da `main` em `2f2aa51`, já no GitHub. Ela
+    só tem documentos: a medição da Devastação, o plano, a memória e as notas na spec que o plano substitui.
+  - **Plano:** `docs/superpowers/plans/2026-11-12-decks-fatia-2.md` (Task 0 a Task 6, com o revisor no fim).
+  - **Próximo passo exato (a sessão nova):** ler este arquivo, o `decisoes.md` 2026-11-12 (1), o plano inteiro e o `diario.md` 2026-11-12
+    (1) e 2026-11-11 (1); depois executar a partir da **Task 0** (a regra 1 do `CLAUDE.md`, a branch, o `pnpm check`), tarefa por tarefa,
+    teste primeiro, com a skill `superpowers:executing-plans` (ou a `subagent-driven-development`). A cada tarefa: commit, a `Ruling:` no
+    diário, o `estado.md` (regras 2 e 6).
+  - **O que não pode regredir** (está no plano; repetido aqui porque quebra calado):
+    - **O padrão fica igual:** com a preferência padrão, o bot em Cordel (G1, e não o "deck seguinte" da §7.1 da spec, substituída), nenhum
+      `img` de carta, o verso de listras e o `<Coringa>` no placar. Nenhum teste existente muda, fora os dois que o plano cita (o caso da F4
+      no `replay-screen.test.tsx`, por desenho, e algum da fatia 1 que passe a ver as cartas do bot).
+    - **Os testes da troca no menu** (o `training.test.tsx` e o E2E `looks.spec.ts`) só passam porque, no Equipar, o bot não tem carta
+      virada. Se quebrarem, o conserto é no teste, nunca na regra do bot.
+    - **O `LookZone` não põe nó no DOM**, e há **um provedor só** (a união dos pacotes dos dois lados).
+    - **O cache síncrono do `loadPack`** (Task 1) vaza entre testes do mesmo arquivo: reset no `beforeEach`.
+    - **A medição** é só na tomada (na bateria esta máquina não decide), alternando as aparências numa build só, e o portão é **relativo**
+      (G7): a perda da arte para o Cordel não cresce mais de 2 quadros/s sobre a da `main`.
+    - **O `medir-cena.ts`** passa a gravar `looks` na partida da fixture (G3): o replay deixa de ler a preferência, e sem isso a medição com
+      aparência não acha imagem e falha na espera por elas.
+- **A Devastação com arte não passa no celular** (medida em 2026-11-12, na tomada): 46 e 47 quadros/s com arte, contra 55 do Cordel; no PC,
+  50 e 51 contra 50. O perfil: o recálculo de estilo das cartas da mesa inteira, umas 70 vezes na cena, já acontece no Cordel e dobra com a face
+  com arte; a imagem numa camada própria foi medida e não muda nada. Tudo em `notas/medicao-decks-fatia-1.md`, seção "Antes da fatia 2", e
+  na §15 da spec. **O autor não decidiu o conserto** (a recomendação: um bloco curto que corte esse recálculo, antes da fatia 2, sem segurar o
+  deploy); a fatia 2 segue pelo portão relativo da G7 (`Esperando o autor`).
 - **A fatia 1 dos decks e raças está na `main`** ("Sim, merge", o autor, 2026-11-12), por fast-forward de `feat/decks-fatia-1` até `bf6c335`,
   com as duas CI verdes no topo da branch e no push da `main`. No treino (fora do tutorial) e no replay, a carta veste a aparência escolhida
   (Cordel, Bestiário ou Celestial; Bufão ou Egípcio), a sua dos dois lados; o online fica em Cordel até a fatia 3. Plano
   `docs/superpowers/plans/2026-11-11-decks-fatia-1.md`; a execução, as `Ruling:`, a revisão (0 Critical, 3 Important corrigidos com teste,
   8 Minor adiados) e as armadilhas no `diario.md` 2026-11-11 (1); a medição em `notas/medicao-decks-fatia-1.md` (a F5 passou na troca de mão,
-  no limite no PC: 50 quadros/s com arte contra 56 do Cordel; **mas a Devastação, medida depois, não passa no celular**: item 1 acima); o que
+  no limite no PC: 50 quadros/s com arte contra 56 do Cordel; **mas a Devastação, medida depois, não passa no celular**: o item dela acima); o que
   a execução decidiu na §15 da spec. O ledger da fatia foi apagado.
   `RULES_VERSION`, `STATE_SCHEMA` e `PROTOCOL_VERSION` não mudaram.
 - **O bloco C está na `main`** (pontos 10, 11 e 13: a aura da iniciativa, os bônus em escala, o ouro de quem lidera), por fast-forward de
@@ -32,31 +48,30 @@
 
 ## Fila
 
-- **Decks e raças do Coringa, as fatias 2 e 3** (`decisoes.md` 2026-11-10 (2) e 2026-11-11 (1) a (3); spec §11): a 2, o dono por lado (o
-  `LookZone`, o deck do bot, o verso por deck, o retrato por raça, o momento e as cópias das cenas, a partida guardada com as aparências); a
-  3, o online. Cada uma com plano escrito e aprovado pelo autor antes da execução, de preferência depois de ele jogar a fatia 1. **Para o
-  plano da 2:** a mesa cheia com arte está em 50 quadros/s no PC (a F5 no limite) e a fatia 2 põe mais arte nela: medir antes a Devastação com
-  arte (`MEDIR_APARENCIAS`, na tomada) e ter pronta uma saída (a imagem numa camada própria, `will-change: transform` no invólucro, ou a
-  imagem de 208 px com `srcset`). A arte pintada, quando o autor quiser, segue a bíblia de arte
-  (`docs/superpowers/specs/2026-11-11-biblia-de-arte.md`).
+- **Decks e raças do Coringa, a fatia 3** (o online; spec §8 e §11): plano escrito e aprovado pelo autor antes da execução, depois da
+  fatia 2. A arte pintada, quando o autor quiser, segue a bíblia de arte (`docs/superpowers/specs/2026-11-11-biblia-de-arte.md`).
 - **Bloco D** (pontos 5 e 14, spec do playtest §6: os botões de carimbo e o 14), com plano escrito e aprovado pelo autor antes da execução,
   como os blocos A, B, C e E.
 
 ## Esperando o autor
 
-- **A Devastação com arte no celular (46 e 47 quadros/s, a meta é 50) e o plano da fatia 2:** as duas decisões do "Próximo passo" acima.
+- **A Devastação com arte no celular** (46 e 47 quadros/s, a meta é 50): consertar antes da fatia 2 (a recomendação: um bloco curto para
+  cortar o recálculo de estilo da mesa inteira, que ajuda o Cordel também) ou não. Sem resposta, a fatia 2 segue pela G7. Não segura o deploy:
+  só sente quem escolheu um deck de arte, no celular, nessa cena.
+- **Jogar a fatia 2** quando ela chegar à `main` (o bot com a aparência dele no treino).
 - **O deploy** (`pnpm deploy:server`, só ele), agora que o bloco C está na `main`: fecha as salas online abertas (`STATE_SCHEMA` 6), e as
   partidas guardadas de antes abrem com o aviso de versão (`RULES_VERSION` 5).
 - **Jogar** os blocos A, B, C e E e as placas novas. O treino mostra tudo; o online só depois do deploy. As frases novas das placas são de
   quem escreveu (ele aprovou corrigir, não as palavras): conferir no playtest.
 - **Jogar a fatia 1 dos decks** no treino (o painel "Aparência" no Início e no menu da partida) e dizer se serve para os testes (a §14 da
-  spec). As fotos de conferência estão em `.superpowers/fotos-decks-fatia-1/` (nesta máquina, fora do git). Decidir os 8 Minor adiados da
-  revisão (`diario.md` 2026-11-11 (1)); os mais visíveis: o cordel pisca um quadro antes da arte, passar pelo Cordel desfaz a escolha do
-  Egípcio, e um pacote que falha uma vez só volta ao recarregar.
+  spec). As fotos de conferência estão em `.superpowers/fotos-decks-fatia-1/` (nesta máquina, fora do git). Os 8 Minor adiados da revisão
+  já estão decididos: entram na fatia 2 (G5, a Task 1 do plano).
 - **A config do pnpm desta máquina:** o `%LOCALAPPDATA%\pnpm\config\config.yaml` tem `storeDir: D:.pnpm-store` (sem a barra), e o `pnpm add`
   falha; o `node_modules` usa `D:\.pnpm-store\v11`. Até corrigir, passe `--store-dir 'D:\.pnpm-store'`.
 - **Achado da medição do bloco C:** a virada de rodada depois de uma sequência longa (`exodia-devastacao.json` 236→237) fica a 42 e 48
   quadros/s com a CPU 4×, abaixo da meta de 50; a `main` sem o bloco C já media 41 e 47. Fora dos blocos; a decisão de atacar é dele.
+  **[I]** Na tomada, na medição da fatia 1 (2026-11-11), a mesma troca de mão deu 56 e 58 no Cordel: o achado do bloco C deve ter sido
+  medido com a CPU mais lenta (a bateria). Conferir na tomada antes de atacar.
 - **Menores adiados** (nenhum quebra o jogo): bloco C no `diario.md` 2026-11-08 (1) ("Adiados"); bloco B no 2026-11-07 (2) ("Menores, para
   depois"); bloco A no 2026-11-03 (6) ("menores").
 - **O resto** (o que olhar no playtest por fatia e bloco, as leituras [I] por confirmar, o Roubo fraco, o que só ele pode fazer: proteção da
@@ -103,5 +118,6 @@ toque "Próximo passo" a partir do passo:
   `node_modules` que o `git worktree remove` não apaga ("Filename too long") sai no PowerShell com
   `Remove-Item -LiteralPath ('\\?\' + $p) -Recurse -Force`.
 - **Branches:** as locais estão mescladas na `main` (a `feat/playtest-bloco-c` em 2026-11-11 e a `feat/decks-fatia-1` em 2026-11-12), menos a `feat/online-equipar-vazio`
-  (um rebase não publicado; o autor pode apagá-la). As remotas velhas, mescladas, são do autor (`notas/playtest.md`).
+  (um rebase não publicado; o autor pode apagá-la) e a `feat/decks-fatia-2` (a fatia em curso, já no GitHub: o plano aprovado, sem código).
+  As remotas velhas, mescladas, são do autor (`notas/playtest.md`).
 - O `jogar-treino.bat` na raiz é o lançador do autor: não mexer nem commitar.

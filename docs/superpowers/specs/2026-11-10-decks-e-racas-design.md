@@ -220,6 +220,10 @@ A minha aparência vem das preferências e pode mudar no meio da partida (é só
 (`cordel → bestiario → celestial → cordel`), com a raça natural dele (`cordel` com `bufao`, os outros com `egipcio`): toda partida de
 treino mostra dois estilos na mesa, que é o que os testes querem ver. **[I]** A regra do bot é minha.
 
+> **Substituída pelo plano da fatia 2, aprovado** (`decisoes.md` 2026-11-12 (1), escolha G1): com o Cordel, o bot também fica no Cordel
+> (com o Bufão), para a aparência padrão não mudar o treino (§0, §14); com um deck de arte, o bot joga com o **outro** deck de arte, com a
+> raça Egípcia. A aparência do bot acompanha a sua troca no meio da partida (G2).
+
 ### 7.2 Tutorial
 
 Sempre em `DEFAULT_LOOK`, dos dois lados: as dicas falam das cartas como elas são no cordel, e a semente fixa e os E2E não mudam.
@@ -317,7 +321,8 @@ memória (`estado.md`, `diario.md`) como manda o `CLAUDE.md`.
 
 O autor aprovou o desenho em seis partes pela conversa. Estes pontos estavam lá em uma linha, ou nasceram ao escrever:
 
-1. **[I]** O bot usa o deck seguinte ao seu (§7.1). Na conversa, com dois decks, era "o que você não escolheu".
+1. **[I]** O bot usa o deck seguinte ao seu (§7.1). Na conversa, com dois decks, era "o que você não escolheu". **Substituída** pela G1 do
+   plano da fatia 2 (a nota na §7.1).
 2. **[I]** O tutorial fica sempre em cordel (§7.2). Não foi perguntado.
 3. **[I]** Id de aparência desconhecido vira o padrão, sem erro (§8.2). Na conversa: "valida contra a lista de ids".
 4. **[I]** No online, a minha aparência também vem do assento, e a preferência mudada depois não vale para a sala aberta (§8.3). Na

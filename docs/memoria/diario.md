@@ -21,6 +21,15 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   da fatia 1. Oito escolhas (G1 a G8) para o autor. **Ruling:** a Devastação no celular não entra no plano: é defeito da fatia 1, já na
   `main`, e vai ao autor como achado à parte (a fatia 2 não põe mais carta com arte na mesa). **Ruling:** a regra do bot da spec (§7.1, o
   deck seguinte) punha o Bestiário no treino padrão e quebrava a §0; o plano recomenda o bot em Cordel quando você está em Cordel (G1).
+- **A revisão do plano** (um conselheiro, antes de subir): o portão da G7 comparava números absolutos de outro dia, com ruído maior que a
+  tolerância, e virou relativo (a perda da arte para o Cordel na mesma medição contra a da `main`); duas linhas para quem executa (por que os
+  testes da troca no menu seguem verdes; o cache síncrono do `loadPack` vaza entre testes). Commit `c33550a`.
+- **A aprovação:** "Aprovo como está mas irei implementar em outra sessão" (o autor; `decisoes.md` 2026-11-12 (1)). O plano e a spec dizem
+  que estão aprovados e o que substituem (a §7.1 da spec, pela G1); o `estado.md` traz o próximo passo exato e o que não pode regredir. A
+  Devastação ficou sem ordem de conserto: segue em "Esperando o autor", e a fatia 2 vai pela G7.
+- **Fora do git, nesta máquina:** os dois rastros da Devastação a 360 (Cordel e Bestiário + Egípcio) e os scripts que os leram
+  (`trace-sum.mjs`, a soma por evento; `frames.mjs`, os quadros; `invalida.mjs`, os elementos por recálculo e quem invalida), em
+  `.superpowers/perfil-devastacao-2026-11-12/`, para o bloco do conserto, se o autor o pedir.
 - **Armadilhas:** o rastro do `medir-cena.ts` (`MEDIR_PERFIL=1`) já traz o `invalidationTracking` e a contagem de elementos de cada
   `UpdateLayoutTree` (`args.elementCount`): dá para achar o recálculo grande sem outra medição. Os quadros do compositor (`DrawFrame`) e os da
   thread principal (`BeginMainThreadFrame`) se contam à parte; a medida do projeto conta os da thread principal (`requestAnimationFrame`).

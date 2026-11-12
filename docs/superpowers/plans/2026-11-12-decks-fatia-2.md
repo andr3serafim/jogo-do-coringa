@@ -4,8 +4,8 @@
 
 > **De onde vem este plano:** escrito no Claude Code, no checkout principal, com o código da `main` em `2f2aa51` (a fatia 1 inteira), na
 > branch `feat/decks-fatia-2`. Os nomes de arquivo, de função e de teste foram lidos do código. A medição da Devastação com arte, pedida pelo
-> `estado.md` para este plano, foi feita antes dele (`docs/memoria/notas/medicao-decks-fatia-1.md`, seção "Antes da fatia 2"). **Nada de
-> código antes de o autor aprovar as escolhas G1 a G8.**
+> `estado.md` para este plano, foi feita antes dele (`docs/memoria/notas/medicao-decks-fatia-1.md`, seção "Antes da fatia 2"). **O autor
+> aprovou as escolhas G1 a G8 como recomendadas** (`decisoes.md` 2026-11-12 (1)); a execução é em outra sessão, a partir da Task 0.
 
 **Goal:** no treino, cada lado da mesa veste a aparência do dono:
 - **O bot tem a aparência dele:** as cartas dos campos, a Guarda e os bônus dele, o verso das cartas da mão dele e o retrato dele no placar.
@@ -28,7 +28,8 @@ O online segue em Cordel até a fatia 3, como manda a F1.
 **Tech Stack:** React 19, Tailwind 4, Vite, Vitest (`model` no Node, `ui` no jsdom), Playwright. Nenhuma dependência nova.
 
 **Spec:** `docs/superpowers/specs/2026-11-10-decks-e-racas-design.md` §3 (quem veste cada carta), §4.3 (o verso e o retrato), §7.1 (o bot),
-§7.3 (o replay), §9, §10 e §11 (a fatia 2); a §15 (o que a fatia 1 decidiu). As decisões: `decisoes.md` 2026-11-10 (2) e 2026-11-11 (1) a (3).
+§7.3 (o replay), §9, §10 e §11 (a fatia 2); a §15 (o que a fatia 1 decidiu). As decisões: `decisoes.md` 2026-11-10 (2), 2026-11-11 (1) a (3)
+e 2026-11-12 (1) (a aprovação deste plano).
 O que a fatia 1 deixou: `diario.md` 2026-11-11 (1) (os rulings e os 8 Minor).
 
 ## O que este plano não traz
@@ -40,7 +41,12 @@ O que a fatia 1 deixou: `diario.md` 2026-11-11 (1) (os rulings e os 8 Minor).
   dele e acrescenta o retrato (uma imagem de 256 px por lado) e as cores do verso (CSS). O número de cartas com arte na mesa não muda.
 - **O online** (a fatia 3), as cenas por raça e a carta ampliada (spec §12).
 
-## Escolhas do plano (para o autor aprovar)
+## Escolhas do plano (aprovadas)
+
+**O autor aprovou as oito como recomendadas** (`decisoes.md` 2026-11-12 (1)). Onde a spec diz outra coisa, vale o plano: a G1 substitui a
+regra do bot da §7.1 (o deck seguinte), e a G3 tira a F4 da fatia 1 (o replay com a aparência de agora). A seção "O que a execução decidiu
+(fatia 2)" da spec registra isso na Task 6. **A Devastação no celular** ficou sem ordem de consertar antes: vale o caminho da G7 (o portão
+relativo), e o conserto segue esperando o autor (`estado.md`).
 
 - **G1. O deck do bot.**
   - **O conflito:** a §7.1 da spec põe o bot no deck seguinte ao seu (Cordel → Bestiário → Celestial → Cordel). Com a aparência padrão (o

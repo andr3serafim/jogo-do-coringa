@@ -6,6 +6,29 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-12 (1): o plano da fatia 2 aprovado; a execução em outra sessão
+
+Depois de ler o achado da Devastação no celular (46 e 47 quadros/s com arte, contra 55 do Cordel; a minha posição: um bloco curto para
+cortar o recálculo de estilo da mesa inteira antes da fatia 2, sem segurar o deploy) e o resumo do plano, perguntado "Aprova o plano da
+fatia 2 com as G1 a G8 como recomendadas?", ele respondeu:
+
+> Aprovo como está mas irei implementar em outra sessão pois esta está muito cheia. Deixe tudo preparado para que não haja regressão e a
+> outra sessão consiga continuar
+
+**Leitura:**
+- O plano `docs/superpowers/plans/2026-11-12-decks-fatia-2.md` está aprovado com as G1 a G8 como recomendadas: o bot em Cordel quando você
+  está em Cordel, e no outro deck de arte (com a raça Egípcia) quando você está num (G1); o bot acompanha a sua troca no meio da partida
+  (G2); o replay com as aparências gravadas, e a partida sem `looks` em Cordel (G3, que tira a F4 da fatia 1); o tutorial e o online em
+  Cordel até a fatia 3 (G4); os 8 Minor da fatia 1 nesta fatia (G5, que muda a `Ruling:` do pacote que falha: uma nova montagem tenta de
+  novo); o verso do momento pelo deck de quem jogou (G6); o portão relativo da medição (G7); a execução tarefa por tarefa, com um revisor no
+  fim (G8).
+- **A execução é em outra sessão do Claude Code**, a partir da Task 0, na branch `feat/decks-fatia-2`. Nada de código nesta.
+- **[I] A Devastação no celular:** ele não respondeu à recomendação do bloco curto. "Como está" vale para o plano, cuja G7 cobre o caso: sem
+  a ordem de consertar antes, a fatia 2 segue com o portão relativo (a arte não perde para o Cordel mais do que já perde na `main`). O
+  conserto continua esperando a decisão dele, no `estado.md`; não foi rotulado como aprovado nem como recusado.
+
+---
+
 ## 2026-11-11 (3): o plano da fatia 1 aprovado; a execução é no Claude Code; a arte não pode amarrar
 
 Perguntado "aprova o plano com as escolhas F1 a F7 como recomendadas?", ele respondeu:
