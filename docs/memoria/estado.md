@@ -13,11 +13,12 @@
   179,9 para 182,7 KB). Da Task 6: o smoke (passa e reprova um `.webp` no `index.html`), o `e2e/looks.spec.ts` (3 de 3, com o clique no
   rótulo do rádio) e o `MEDIR_APARENCIA` do `e2e/medir-cena.ts` estão commitados. Nada subiu ainda.
 - **Próximo passo exato:**
-  1. **A medição (F5), em curso:** a primeira rodada está em `docs/memoria/notas/medicao-decks-fatia-1.md` (o notebook na bateria; na troca de
-     mão, 236→237, a arte perde de 5 a 11 quadros/s para o Cordel: a F5 não passa ali). Agora: o perfil da troca de mão (`MEDIR_PERFIL=1`,
-     `MEDIR_RODADA=47 MEDIR_PASSO=236 MEDIR_MS=3000`, Cordel e `bestiario:egipcio`), somar o tempo por evento do trace para achar a causa, e
-     medir de novo em ordem ABBA. Se não passar, as saídas da F5 na ordem que a causa indicar (o halo do número; a aura desenhada; a imagem de
-     208 px com `srcset`), medindo depois de cada uma. Depois das três sem passar: parar e perguntar ao autor.
+  1. **A medição (F5), em curso** (tudo em `docs/memoria/notas/medicao-decks-fatia-1.md`; o notebook na bateria). Na troca de mão (236→237) a
+     arte perde de 4,5 a 10 quadros/s para o Cordel, em ABBA. As saídas 1 (o número sem halo) e 2 (a aura em anéis sem desfoque) estão no
+     `ArtFace.tsx`, **sem commit**, e não resolveram. **Atenção:** o `ArtFace.tsx` está agora com um EXPERIMENTO (o `<img>` trocado por um GIF
+     de 1 px, marcado `EXPERIMENTO`); a versão boa, com as saídas 1 e 2, está na cópia do scratchpad desta sessão (`ArtFace.saida2.tsx`). Se
+     a sessão cair: desfazer o experimento (voltar o `<img src={art.url} … />`). Depois do experimento: se a imagem é o custo, a terceira
+     saída (a imagem de 208 px com `srcset`); depois das três sem passar, parar e perguntar ao autor.
   2. **As fotos** para o autor (fora do repositório): a mesa do treino a 360 × 640 e a 1366 × 657 com as duas aparências, a mão, o
      cemitério, as minis e o painel "Aparência"; conferir o Pégaso e o Arcanjo e as minis de 30 px.
   3. `pnpm check` e `pnpm e2e` inteiros; a documentação (o `CLAUDE.md`, a seção "O que a execução decidiu (fatia 1)" na spec, o diário);
