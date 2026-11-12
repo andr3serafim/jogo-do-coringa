@@ -79,7 +79,7 @@ describe('a carta com arte', () => {
     }
   });
 
-  it('a aura cresce com a faixa (anéis sem desfoque): nenhuma no 2, a da faixa 5 no 10, a da faixa 3 no K da raça', () => {
+  it('a aura cresce com a faixa: nenhuma no 2, a da faixa 5 no 10, a da faixa 3 no K da raça', () => {
     const aura = (card: EngineCard) => {
       const { container, unmount } = render(withLook(<Card card={card} size="field" />));
       const style = container.querySelector<HTMLElement>('[data-aura]')?.style.boxShadow ?? null;
@@ -87,14 +87,8 @@ describe('a carta com arte', () => {
       return style;
     };
     expect(aura(two)).toBeNull();
-    // Faixa 5: alcance 3 px e desfoque 14 px viram anéis em 3, 10 e 17 px; faixa 3: alcance 1 e desfoque 8, anéis em 1, 5 e 9 px.
-    expect(aura(ten)).toContain('0 0 0 3px');
-    expect(aura(ten)).toContain('0 0 0 17px');
-    expect(aura(k)).toContain('0 0 0 9px');
-    // Nenhum desfoque: todo anel é "0 0 0 <alcance>".
-    for (const style of [aura(ten), aura(k)]) {
-      for (const shadow of style!.split(/,\s*(?=0 )/)) expect(shadow).toMatch(/^0 0 0 \d+(\.\d+)?px /);
-    }
+    expect(aura(ten)).toContain('14px 3px');
+    expect(aura(k)).toContain('8px 1px');
   });
 
   it.each([

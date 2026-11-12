@@ -22,32 +22,17 @@ const ART_SIZE: Record<CardSize, { value: string; suit: string }> = {
 };
 
 /**
- * A sombra do número (F2): um contorno de tinta de 1 px nas quatro direções, em `text-shadow` sem desfoque (não é filtro: a carta voa). O
- * halo curto de 4 px saiu na medição (F5, a primeira saída: o desfoque custa na rasterização da mesa cheia). O naipe leva um traço de tinta
- * no próprio SVG, por fora do preenchimento (`paint-order: stroke`).
+ * A sombra do número (F2): um contorno de tinta de 1 px nas quatro direções e um halo curto, em `text-shadow` (não é filtro: a carta voa).
+ * O naipe leva um traço de tinta no próprio SVG, por fora do preenchimento (`paint-order: stroke`).
  */
 const NUMBER_SHADOW =
-  '[text-shadow:-1px_0_0_rgb(23_18_15/0.9),1px_0_0_rgb(23_18_15/0.9),0_-1px_0_rgb(23_18_15/0.9),0_1px_0_rgb(23_18_15/0.9)]';
+  '[text-shadow:-1px_0_0_rgb(23_18_15/0.9),1px_0_0_rgb(23_18_15/0.9),0_-1px_0_rgb(23_18_15/0.9),0_1px_0_rgb(23_18_15/0.9),0_0_4px_rgb(23_18_15/0.75)]';
 const SUIT_STROKE = '[&_path]:stroke-tinta [&_path]:[stroke-width:2.5px] [&_path]:[stroke-linejoin:round] [&_path]:[paint-order:stroke]';
 
 /** `#rrggbb` com opacidade, para a aura (o `style` do React vai pelo CSSOM, sem esbarrar na CSP). */
 function withAlpha(hex: string, alpha: number): string {
   const n = Number.parseInt(hex.slice(1), 16);
-  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${Number(alpha.toFixed(3))})`;
-}
-
-/**
- * A aura desenhada (F5, a segunda saída): três anéis de `box-shadow` sem desfoque, do alcance da faixa até alcance + desfoque, com a opacidade
- * caindo para fora (a da faixa, metade, um quinto). O desfoque gaussiano custava na rasterização das cartas que voam; os anéis duros se
- * desenham quase de graça e, a 5 a 14 px, passam pelo mesmo brilho.
- */
-function auraShadow(metal: string, aura: { blur: number; spread: number; alpha: number }): string {
-  const rings = [
-    { reach: aura.spread, alpha: aura.alpha },
-    { reach: aura.spread + aura.blur / 2, alpha: aura.alpha / 2 },
-    { reach: aura.spread + aura.blur, alpha: aura.alpha / 5 },
-  ];
-  return rings.map((ring) => `0 0 0 ${ring.reach}px ${withAlpha(metal, ring.alpha)}`).join(', ');
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
 }
 
 export interface ArtFaceProps {
@@ -91,7 +76,7 @@ export function ArtFace({ card, size, as, roleText, quad = false, art }: ArtFace
           aria-hidden="true"
           data-aura
           className="pointer-events-none absolute -inset-px rounded-[inherit]"
-          style={{ boxShadow: auraShadow(art.metal, aura) }}
+          style={{ boxShadow: `0 0 ${aura.blur}px ${aura.spread}px ${withAlpha(art.metal, aura.alpha)}` }}
         />
       ) : null}
       {/* Quem recorta a imagem é este invólucro, não a carta: a seta da frente, o anel da quadra e a aura ficam por fora. */}
