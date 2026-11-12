@@ -67,7 +67,18 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     lista de antes, sem arte, para sempre. No jsdom o `act` roda o efeito colado ao desenho, e nenhum teste pegava. Conserto: o efeito sempre
     passa pelo `loadPack(...).then` (o pacote pronto resolve logo e acorda o desenho); o teste novo (`look-zone.test.tsx`, "a corrida…") deixa
     o pacote pronto durante o desenho de um filho e falhava antes. **Armadilha:** um estado de módulo lido no desenho precisa de um gatilho
-    de estado do React para cada mudança; "já está pronto, então pulo" esquece o intervalo entre o desenho e o efeito. O `ReplayViewer` veste
+    de estado do React para cada mudança; "já está pronto, então pulo" esquece o intervalo entre o desenho e o efeito.
+  - **Task 6 (smoke, E2E, fotos, medição, documentação): feita, menos o `pnpm e2e` inteiro e o revisor.** O smoke: JS inicial 182,7 KB na
+    `main` → 183,8 KB. O `e2e/looks.spec.ts` ganhou o bot no treino (os versos da Celestial, os dois retratos do Anúbis carregados, as
+    fileiras de cada lado depois da revelação, o axe) e o replay da `especiais` com `looks` gravado, no PC e a 360, sem rolar de lado: 6 de 6.
+    As fotos em `.superpowers/fotos-decks-fatia-2/` (nesta máquina, fora do git): nada ilegível, nenhum ajuste. **A medição G7**
+    (`notas/medicao-decks-fatia-2.md`): a primeira rodada deu +3 na troca de mão; a segunda isolou o retrato (~1 quadro/s no PC, nada no
+    celular); a `main` e a branch medidas na mesma sessão **passam nas quatro** (a perda cresce −1, 0, +2 e +2). O `CLAUDE.md` (o item
+    "Aparências") e a §16 da spec. **Ruling:** a A/B foi feita trocando o checkout para a `main` (`git checkout --detach 2f2aa51`) com os
+    documentos sem commit guardados no `stash`, e não num worktree novo: o `node_modules` é o mesmo (a fatia não muda dependência) e um
+    worktree pediria um `pnpm install` com a config quebrada do pnpm desta máquina — custo: nenhum (o script volta à branch e devolve o stash).
+    **Armadilha:** na medição a CPU desta máquina variou o Cordel de 53 a 59 entre rodadas; com a tolerância de 2, só a A/B na mesma sessão
+    decide. O `ReplayViewer` veste
     `game.looks` (`replayLooks`: o seu lado e o lugar de quem olha com o `me`, o do oponente com o `opponent`; sem `looks`, Cordel dos dois
     lados) e não lê mais a preferência; o `ReplayScreen` pede os pacotes das gravadas. O `medir-cena.ts` grava `looks` na primeira partida da
     fixture (`MEDIR_APARENCIA=bestiario:egipcio/celestial:egipcio`; sem barra, a mesma dos dois lados; o prefixo troca `:` e `/` por `-`), e

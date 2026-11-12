@@ -379,3 +379,40 @@ tarefa estão no `docs/memoria/diario.md` 2026-11-11 (1).
   inclusive no Pégaso e no Arcanjo e nas minis de 30 px da Guarda e dos bônus. Nada mudou por causa delas.
 - **O JavaScript inicial** foi de 179,9 para 182,7 KB (gzip): a `ArtFace`, o contexto e o catálogo. Os módulos de URLs, as imagens e a fonte
   ficam fora, e o smoke confere.
+
+## 16. O que a execução decidiu (fatia 2)
+
+Executada em 2026-11-12 na branch `feat/decks-fatia-2`, pelo plano `docs/superpowers/plans/2026-11-12-decks-fatia-2.md`, aprovado com as G1 a
+G8 (`decisoes.md` 2026-11-12 (1)). As `Ruling:` de cada tarefa estão no `docs/memoria/diario.md` 2026-11-12 (2).
+
+- **As escolhas G1 a G8, como ficaram:**
+  - **G1 (substitui a §7.1):** o bot veste `botLook(a sua)`: com o Cordel, o Cordel com o Bufão; com um deck de arte, o outro, com o Egípcio.
+  - **G2:** recalculada a cada desenho; trocar a sua no menu troca a dele, sem remontar a mesa.
+  - **G3 (tira a F4 da fatia 1):** a partida guardada leva `looks: { me, opponent }`, e o replay veste as gravadas; sem elas, Cordel dos dois
+    lados, e a preferência de agora não entra. **O treino em Cordel não grava `looks`:** a linha fica a de hoje, e o replay dela já é Cordel.
+  - **G4:** o tutorial e o online seguem em Cordel e não gravam `looks`.
+  - **G5:** os 8 Minor da fatia 1 entraram (Task 1). A promessa rejeitada do `loadPack` sai do mapa: uma nova montagem tenta de novo (a F3
+    continua: a carta fica de cordel enquanto isso, sem erro).
+  - **G6:** o verso da carta que vira no momento leva o deck de quem jogou (`.momento-verso[data-verso-deck]`).
+  - **G7:** abaixo.
+  - **G8:** inline, tarefa por tarefa, teste primeiro; um revisor novo no fim.
+- **Um provedor só e o `LookZone` sem DOM** (§3): em volta de cada campo, de cada lado do placar, do momento e das cópias da Devastação (o
+  dono da fileira) e da Ressurreição (quem ressuscita). Fora de zona, a de quem olha. As cópias das cartas que saem (`Leaving`) clonam a face
+  que a carta tinha; as quatro cartas da figura da cena rara seguem em cordel.
+- **O verso (§4.3):** duas cores e uma borda em classes (`BACK_CLASS`, no `catalog.ts`): o Bestiário violeta escuro com fio de ouro, o
+  Celestial azul com fio de ouro; o do Cordel é o de hoje, sem o atributo `data-verso-deck`. Nas fotos, os dois se distinguem a 360 (18 × 26 px).
+- **O retrato (§4.3):** o Anúbis (`retrato-anubis.webp`) chega no próprio `import()` do pacote da raça e é aquecido com as imagens; no placar,
+  `img` decorativo a 82%, com a rachadura, a insígnia e a espada por cima, como antes. Sem ele (o Bufão, o pacote por chegar ou falho), o
+  Coringa de cordel.
+- **O que já chegou** fica num módulo à parte (`src/looks/ready.ts`) e entra no próprio desenho: o provedor que nasce depois do pacote, ou a
+  troca para um deck já carregado, não passa pelo cordel. As telas (o treino, com o módulo da sala; o replay, ao achar a partida) pedem os
+  pacotes antes de a mesa montar.
+- **A medição (G7)** (`docs/memoria/notas/medicao-decks-fatia-2.md`), na tomada, com a CPU 4×, a `main` e a branch na mesma sessão: na troca de
+  mão (236→237) a perda da arte para o Cordel ficou em 7 e 4 quadros/s (PC e celular), contra 8 e 4 na `main`; na Devastação (210→211), 2 e
+  7, contra 0 e 5. **Passa:** nenhuma perda cresce mais de 2. O retrato do Anúbis custa ~1 quadro/s no PC e nada no celular. Uma primeira
+  rodada, só da branch, dera +3 na troca de mão: era ruído.
+- **Um defeito da Task 1, achado na medição:** o pedido adiantado podia resolver entre o desenho do provedor e o efeito dele, e a carta ficava
+  de cordel para sempre. O efeito agora passa sempre pelo `loadPack(...).then`; um teste o reproduz.
+- **As fotos** (fora do repositório; o diário diz onde): o J do bot no Egípcio dele, os versos dos dois decks a 360, o Anúbis no retrato com a
+  espada por cima, as cópias da Devastação e da Ressurreição do bot na Celestial dele. Nada mudou por causa delas.
+- **O JavaScript inicial** foi de 182,7 para 183,8 KB (gzip).
