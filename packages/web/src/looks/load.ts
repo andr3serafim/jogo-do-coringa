@@ -3,11 +3,17 @@
 import type { ArtKey, PackId } from '../model/looks.ts';
 import { forgetReady, markReady } from './ready.ts';
 
-export { readyPack } from './ready.ts';
+export { readyPack, readyPortrait } from './ready.ts';
 
 export type PackUrls = Partial<Record<ArtKey, string>>;
 
-type Loaders = Record<PackId, () => Promise<{ urls: PackUrls }>>;
+/** Um módulo de pacote: as URLs por chave e, no de raça, o retrato do placar (do mesmo chunk). */
+interface PackModule {
+  urls: PackUrls;
+  portrait?: string;
+}
+
+type Loaders = Record<PackId, () => Promise<PackModule>>;
 
 const LOADERS: Loaders = {
   bestiario: () => import('./bestiario/index.ts'),
@@ -19,9 +25,9 @@ let loaders: Loaders = LOADERS;
 const requested = new Map<PackId, Promise<PackUrls>>();
 
 /** Aquece as imagens no cache do navegador, sem esperar por elas (no Node, onde não há `Image`, não faz nada). */
-function warm(urls: PackUrls): void {
+function warm(urls: readonly string[]): void {
   if (typeof Image === 'undefined') return;
-  for (const url of Object.values(urls)) new Image().src = url;
+  for (const url of urls) new Image().src = url;
 }
 
 /**
@@ -33,8 +39,8 @@ export function loadPack(id: PackId): Promise<PackUrls> {
   let promise = requested.get(id);
   if (promise === undefined) {
     const made = Promise.all([loaders[id](), import('./font.css')]).then(([pack]) => {
-      markReady(id, pack.urls);
-      warm(pack.urls);
+      markReady(id, pack.urls, pack.portrait);
+      warm(pack.portrait ? [...Object.values(pack.urls), pack.portrait] : Object.values(pack.urls));
       return pack.urls;
     });
     made.catch(() => {

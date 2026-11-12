@@ -1,22 +1,30 @@
-// O provedor da aparência (spec dos decks e raças, §3 e §5): pede os pacotes que a aparência cita e guarda o que chega. Rende os filhos
-// sempre: a carta fica de cordel enquanto o pacote não chega, e se ele falhar (F3), sem erro e sem aviso; uma nova montagem pede de novo.
+// O provedor da aparência (spec dos decks e raças, §3 e §5): conhece a aparência de quem olha (`look`) e a de cada dono (`owners`, fatia 2),
+// pede a união dos pacotes de todas uma vez cada, e guarda o que chega. Rende os filhos sempre: a carta fica de cordel enquanto o pacote não
+// chega, e se ele falhar (F3), sem erro e sem aviso; uma nova montagem pede de novo. Um provedor só na mesa: provedores por lado
+// multiplicariam os pedidos e o cordel que pisca.
 //
 // O pacote que já chegou (por outro provedor, ou pelo pedido adiantado da tela) entra no próprio desenho, pelo `readyPack`: o provedor que
 // nasce depois dele, ou a troca para um deck já carregado, não passa por um quadro de cordel. Do `load.ts` só se usa o `loadPack` (o teste
 // do pacote que falha troca aquele módulo inteiro; o que está pronto mora no `ready.ts`).
+import type { PlayerId } from '@coringa/engine';
 import type { Look } from '@coringa/protocol';
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { loadPack } from '../../looks/load.ts';
-import { readyPack } from '../../looks/ready.ts';
+import { readyPack, readyPortrait } from '../../looks/ready.ts';
 import { packsOf, type PackId } from '../../model/looks.ts';
 import { LooksContext, type LooksValue } from './looks-context.ts';
 
 export interface LooksProviderProps {
+  /** A aparência de quem olha: a mão, o Equipar, o cemitério, e todo lugar fora de um `LookZone`. */
   look: Look;
+  /** A aparência de cada dono (o lado da mesa, o retrato). Sem ela, toda zona veste `look`. Estável entre desenhos (quem chama memoiza). */
+  owners?: Partial<Record<PlayerId, Look>>;
   children: ReactNode;
   /** Os pacotes prontos, de fora (os testes e a amostra do seletor): com eles, nada é pedido. */
   packs?: LooksValue['packs'];
 }
+
+const NO_OWNERS: Partial<Record<PlayerId, Look>> = {};
 
 /** Pede os pacotes de uma aparência sem esperar por eles e sem falhar (as telas, antes de a mesa montar). */
 export function requestLook(look: Look | undefined): void {
@@ -24,11 +32,15 @@ export function requestLook(look: Look | undefined): void {
   for (const id of packsOf(look)) loadPack(id).catch(() => undefined);
 }
 
-export function LooksProvider({ look, children, packs: given }: LooksProviderProps) {
+/** Os pacotes que as aparências pedem, sem repetir, numa ordem fixa (em texto, para o efeito não rodar de novo a cada objeto novo). */
+function wantedPacks(looks: readonly Look[]): string {
+  return [...new Set(looks.flatMap(packsOf))].sort().join(',');
+}
+
+export function LooksProvider({ look, owners = NO_OWNERS, children, packs: given }: LooksProviderProps) {
   const [loaded, setLoaded] = useState<LooksValue['packs']>({});
   const external = given !== undefined;
-  // A lista dos pacotes em texto, para o efeito não rodar de novo a cada objeto `look` novo com o mesmo conteúdo.
-  const wanted = packsOf(look).join(',');
+  const wanted = wantedPacks([look, ...Object.values(owners).filter((one): one is Look => one !== undefined)]);
   useEffect(() => {
     if (external || wanted === '') return;
     let live = true;
@@ -46,15 +58,32 @@ export function LooksProvider({ look, children, packs: given }: LooksProviderPro
       live = false;
     };
   }, [external, wanted]);
-  const packs = useMemo(() => {
-    if (given !== undefined) return given;
-    const out: LooksValue['packs'] = {};
+  const ready = useMemo(() => {
+    const packs: LooksValue['packs'] = {};
+    const portraits: LooksValue['portraits'] = {};
     for (const id of (wanted === '' ? [] : wanted.split(',')) as PackId[]) {
       const urls = readyPack(id) ?? loaded[id];
-      if (urls !== undefined) out[id] = urls;
+      if (urls !== undefined) packs[id] = urls;
+      const portrait = readyPortrait(id);
+      if (portrait !== undefined) portraits[id] = portrait;
     }
-    return out;
-  }, [given, wanted, loaded]);
-  const value = useMemo(() => ({ look, packs }), [look, packs]);
+    return { packs, portraits };
+  }, [wanted, loaded]);
+  const packs = given ?? ready.packs;
+  const value = useMemo(
+    () => ({ look, viewer: look, owners, packs, portraits: ready.portraits }),
+    [look, owners, packs, ready.portraits],
+  );
+  return <LooksContext.Provider value={value}>{children}</LooksContext.Provider>;
+}
+
+/**
+ * O lugar de um dono: os filhos vestem a aparência dele (`owners[owner]`, ou a de quem olha se ele não está lá). Não pede nada (o provedor
+ * já pediu a união) e não põe nó no DOM: os seletores da mesa ficam como estão.
+ */
+export function LookZone({ owner, children }: { owner: PlayerId; children: ReactNode }) {
+  const parent = useContext(LooksContext);
+  const look = parent.owners[owner] ?? parent.viewer;
+  const value = useMemo(() => (look === parent.look ? parent : { ...parent, look }), [parent, look]);
   return <LooksContext.Provider value={value}>{children}</LooksContext.Provider>;
 }

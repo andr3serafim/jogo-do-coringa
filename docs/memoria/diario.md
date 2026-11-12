@@ -37,6 +37,13 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     Celestial, sempre com o Egípcio; sempre um objeto novo) e `PastGame.looks?: { me, opponent }` (`PastLooks`) no `past-games.ts`: lido com
     `normalizeLook` em cada lado quando é objeto; fora disso o campo fica de fora e a linha vale (nunca a derruba). O `attachReplay` passa pelo
     mesmo `parsePastGame` e guarda o campo. Testes novos em `looks.test.ts` (as seis aparências) e `past-games.test.ts`; modelo 1256 testes.
+  - **Task 3 (o contexto: os donos, a zona e o retrato): feita.** O `LooksValue` ganhou `viewer` (a de quem olha), `owners` e `portraits`;
+    o `look` continua sendo a do lugar, que o `useCardArt` lê como antes. `useLook()` e `usePortrait()` no `looks-context.ts`. O
+    `LooksProvider` recebe `owners` (estável: quem chama memoiza) e pede a união dos pacotes de todos (em texto, ordenada, uma vez cada); o
+    `LookZone owner` não pede nada, não põe nó no DOM e, numa zona dentro de outra, veste o próprio dono (cai na de quem olha, nunca na da zona
+    de fora). Testes em `look-zone.test.tsx` (novo) e no `looks-catalog`. **Ruling:** sem `loadPortrait`: o retrato chega no próprio `import()`
+    do pacote de raça (`m.portrait`, o caminho que o plano deixa escolher), fica no `ready.ts` (`readyPortrait`) e é aquecido com as imagens —
+    uma função só para o teste chamar seria código morto; custo: se um dia o retrato precisar chegar sem o pacote da raça, ela volta.
 
 ---
 

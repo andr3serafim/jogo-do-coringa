@@ -4,7 +4,7 @@ import { ART_META, DECK_LABEL, RACE_LABEL } from '../../src/looks/catalog.ts';
 import { urls as bestiario } from '../../src/looks/bestiario/index.ts';
 import { urls as celestial } from '../../src/looks/celestial/index.ts';
 import { portrait, urls as egipcio } from '../../src/looks/egipcio/index.ts';
-import { loadPack, readyPack, resetPacks } from '../../src/looks/load.ts';
+import { loadPack, readyPack, readyPortrait, resetPacks } from '../../src/looks/load.ts';
 
 const NUMBERS: ArtKey[] = ['02', '03', '04', '05', '06', '07', '08', '09', '10'];
 const SPECIALS: ArtKey[] = ['K', 'J', 'Q', 'A', 'WILD'];
@@ -120,6 +120,15 @@ describe('o pacote pronto e a nova tentativa (fatia 2, Minor 1 e 3)', () => {
     await expect(loadPack('celestial')).resolves.toEqual(celestial);
     expect(calls).toBe(2);
     expect(readyPack('celestial')).toEqual(celestial);
+  });
+
+  it('o retrato da raça chega com o pacote dela (fatia 2, Task 3): o do Anúbis; os decks não têm retrato', async () => {
+    expect(readyPortrait('egipcio')).toBeUndefined();
+    await loadPack('egipcio');
+    await loadPack('bestiario');
+    expect(readyPortrait('egipcio')).toBe(portrait);
+    expect(readyPortrait('egipcio')).toMatch(/retrato-anubis\.webp$/);
+    expect(readyPortrait('bestiario')).toBeUndefined();
   });
 
   it('o pacote que chegou continua sendo a mesma promessa', async () => {
