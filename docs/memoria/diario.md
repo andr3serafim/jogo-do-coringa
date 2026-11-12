@@ -60,7 +60,14 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     dono, a Devastação sem campo): o lugar fica como está, sem duplicar o bloco das cópias — custo: nenhum. **Ruling:** as cores do verso
     (Bestiário `#2b1640`/`#4a2a6b`, Celestial `#14305c`/`#2c5a96`, o fio `#d9b25a`) e o retrato a 82% se conferem nas fotos da Task 6.
     `pnpm check` verde depois dela (web 2753; JS inicial 183,9 KB).
-  - **Task 5 (o replay com as aparências gravadas, G3): código feito, falta rodar a medição uma vez.** O `ReplayViewer` veste
+  - **Task 5 (o replay com as aparências gravadas, G3): feita** (a medição da Ressurreição com
+    `MEDIR_APARENCIA=bestiario:egipcio/celestial:egipcio` passa nas duas larguras, com as imagens carregadas). **Achado ao rodar a medição
+    (um defeito da Task 1):** a primeira rodada falhou na espera pelas imagens. A causa: o pedido adiantado do `ReplayScreen` resolvia
+    **depois** do desenho do provedor e **antes** do efeito dele; o efeito via o `readyPack` e pulava o pacote, e o `useMemo` ficava com a
+    lista de antes, sem arte, para sempre. No jsdom o `act` roda o efeito colado ao desenho, e nenhum teste pegava. Conserto: o efeito sempre
+    passa pelo `loadPack(...).then` (o pacote pronto resolve logo e acorda o desenho); o teste novo (`look-zone.test.tsx`, "a corrida…") deixa
+    o pacote pronto durante o desenho de um filho e falhava antes. **Armadilha:** um estado de módulo lido no desenho precisa de um gatilho
+    de estado do React para cada mudança; "já está pronto, então pulo" esquece o intervalo entre o desenho e o efeito. O `ReplayViewer` veste
     `game.looks` (`replayLooks`: o seu lado e o lugar de quem olha com o `me`, o do oponente com o `opponent`; sem `looks`, Cordel dos dois
     lados) e não lê mais a preferência; o `ReplayScreen` pede os pacotes das gravadas. O `medir-cena.ts` grava `looks` na primeira partida da
     fixture (`MEDIR_APARENCIA=bestiario:egipcio/celestial:egipcio`; sem barra, a mesma dos dois lados; o prefixo troca `:` e `/` por `-`), e

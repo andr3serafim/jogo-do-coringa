@@ -8,6 +8,7 @@ import { urls as bestiario } from '../../src/looks/bestiario/index.ts';
 import { urls as celestial } from '../../src/looks/celestial/index.ts';
 import { portrait, urls as egipcio } from '../../src/looks/egipcio/index.ts';
 import { loadPack, resetPacks } from '../../src/looks/load.ts';
+import { markReady } from '../../src/looks/ready.ts';
 import { Card } from '../../src/ui/cards/Card.tsx';
 import { LooksProvider, LookZone } from '../../src/ui/cards/LooksProvider.tsx';
 import type { LooksValue } from '../../src/ui/cards/looks-context.ts';
@@ -179,6 +180,26 @@ describe('os pacotes: a união dos donos, pedida uma vez', () => {
     await act(async () => vi.dynamicImportSettled());
     expect(calls).toEqual({ bestiario: 0, celestial: 0, egipcio: 0 });
     expect(container.querySelector('img')).toBeNull();
+  });
+});
+
+describe('a corrida do pacote que fica pronto entre o desenho e o efeito', () => {
+  // No navegador, o pedido adiantado (o replay, o treino) pode resolver depois de o provedor desenhar e antes de o efeito dele rodar: o
+  // efeito acha o pacote pronto, e o desenho já foi feito sem ele. O filho abaixo deixa o pacote pronto nesse intervalo.
+  function ReadyDuringRender() {
+    markReady('celestial', { '07': '/arte/07-leao-alado.webp' }, undefined);
+    return null;
+  }
+
+  it('a arte chega mesmo assim', async () => {
+    const { container } = render(
+      <LooksProvider look={{ deck: 'celestial', race: 'bufao' }}>
+        <ReadyDuringRender />
+        <Card card={seven} size="field" />
+      </LooksProvider>,
+    );
+    await act(async () => vi.dynamicImportSettled());
+    await vi.waitFor(() => expect(srcOf(container)).toMatch(/07-leao-alado\.webp$/));
   });
 });
 

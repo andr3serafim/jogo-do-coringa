@@ -44,8 +44,9 @@ export function LooksProvider({ look, owners = NO_OWNERS, children, packs: given
   useEffect(() => {
     if (external || wanted === '') return;
     let live = true;
+    // Sem pular o pacote que já está pronto: ele pode ter ficado pronto depois deste desenho e antes do efeito (o pedido adiantado da tela),
+    // e o desenho foi feito sem ele. O `then` de um pacote pronto resolve logo e acorda o desenho; se o estado já o tem, nada muda.
     for (const id of wanted.split(',') as PackId[]) {
-      if (readyPack(id) !== undefined) continue;
       loadPack(id).then(
         (urls) => {
           if (live) setLoaded((prev) => (prev[id] === urls ? prev : { ...prev, [id]: urls }));
