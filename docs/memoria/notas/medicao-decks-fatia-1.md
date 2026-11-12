@@ -76,3 +76,20 @@ chega a 6 quadros/s (a arte deu 17 e 11 no PC). A segunda saída entra.
 **Medianas:** no PC, Cordel 24 e arte 14 (−10); no celular, Cordel 28 e arte 20,5 (−7,5). **Não passa**, e não melhora: o desfoque (o halo e a
 aura) não era o custo principal. Antes da terceira saída (a imagem de 208 px), um experimento: a mesma arte com um GIF de 1 px no lugar da
 imagem, para saber se é a imagem que custa.
+
+## Sonda descartada: o GIF de 1 px no lugar da imagem (bateria a 75%)
+
+Cordel 13 e 26 no PC (31 e 35 no celular); a arte com o GIF, 7 e 6 (9 e 14). **Não vale como controle:** trocou um desenho de imagem por
+outro, provavelmente mais caro (1 px esticado à carta inteira). Só confirma o perfil: desenhar o `<img>` enquanto a carta se move é caro. E o
+próprio Cordel variou de 13 a 26 na mesma ABBA.
+
+## O que fica, e o que falta
+
+- **Na bateria a medição não decide:** o ruído entre duas execuções iguais (13 contra 26 quadros/s no mesmo Cordel) é várias vezes a
+  tolerância de 2 da F5. Nem as saídas 1 e 2 se provam boas ou ruins. As duas estão no código, como "medição pendente": ficam só se a medição
+  limpa mostrar que ajudam.
+- **A medição limpa** (com o notebook na tomada): `MEDIR_APARENCIAS=cordel,bestiario:egipcio MEDIR_REPETICOES=3` (as aparências em
+  alternância, na mesma build e no mesmo servidor), e dois controles antes de decidir a terceira saída: a imagem carregada mas escondida
+  (`<img hidden>`: se ficar perto do Cordel, o custo é desenhar a imagem) e a imagem numa camada própria (`will-change: transform` no
+  invólucro: se recuperar a diferença, a carta com arte era repintada a cada quadro do voo). Conferir os dois a 360 (camadas a mais pesam no
+  celular).
