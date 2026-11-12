@@ -1,22 +1,20 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-12**, a fatia 2 dos decks pronta na branch, revisada e corrigida; o merge espera o
-> autor. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
+> Sobrescrito a cada atualização. **Última: 2026-11-12**, a fatia 2 dos decks na `main`; falta conferir a CI dela e apagar o ledger.
+> Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **A fatia 2 dos decks (o dono por lado): pronta na branch, esperando o "sim" do autor para o merge.** "execute o plano da fatia 2 dos
-  decks" (o autor, 2026-11-12), pelo plano `docs/superpowers/plans/2026-11-12-decks-fatia-2.md`, aprovado com as G1 a G8 (`decisoes.md`
-  2026-11-12 (1)). O que mudou na mesa, as `Ruling:` e as armadilhas: `diario.md` 2026-11-12 (2); o que a execução decidiu: a §16 da spec.
-  - **Branch:** `feat/decks-fatia-2`, no checkout principal (`D:\andr3\jogo-coringa`), saída da `main` em `2f2aa51`, no GitHub (o pre-push
-    com o `pnpm check` verde).
-  - **Verificado:** `pnpm check` (web 2758+ testes; JS inicial 183,8 KB), `pnpm e2e` inteiro (113 passaram, 4 pulados, antes das correções
-    da revisão; o `looks.spec.ts` de novo depois delas, 6 de 6), a medição G7 na tomada com a `main` e a branch na mesma sessão (passa nas
-    quatro: `notas/medicao-decks-fatia-2.md`), as fotos em `.superpowers/fotos-decks-fatia-2/` (nesta máquina, fora do git) e a revisão
-    da branch inteira (nenhum Critical nem Important; os 6 Minor corrigidos nesta branch).
-  - **Próximo passo exato:** conferir as duas CI do GitHub (`check` e `e2e`) no topo da branch (pela API pública, com `curl`); com o "sim"
-    do autor, o merge por fast-forward da `main` (ou squash), o push da `main` e a CI dela; depois, apagar o ledger
-    `.superpowers/sdd/2026-11-12-decks-fatia-2/` (as `Ruling:` estão no diário). Em seguida, a Fila (a fatia 3, com plano aprovado antes).
+- **A fatia 2 dos decks e raças (o dono por lado) está na `main`** ("sim", o autor, 2026-11-12), por fast-forward de `feat/decks-fatia-2`
+  até `bb186ef`, com as duas CI verdes (`check` e `e2e`) no topo da branch. No treino com um deck de arte, o bot veste o outro deck com o
+  Egípcio (G1); cada lado da mesa, do placar (o retrato do Anúbis), do momento e das cópias das cenas veste o deck do dono, com o verso na
+  cor do deck; a partida guardada leva `looks`, e o replay veste as gravadas. Com a aparência padrão nada muda; o tutorial e o online ficam
+  em Cordel até a fatia 3. Plano `docs/superpowers/plans/2026-11-12-decks-fatia-2.md` (G1 a G8, `decisoes.md` 2026-11-12 (1)); a
+  execução, as `Ruling:`, a revisão (nenhum Critical nem Important; os 6 Minor corrigidos com teste) e as armadilhas no `diario.md`
+  2026-11-12 (2); a medição G7 em `notas/medicao-decks-fatia-2.md` (passa nas quatro); o que a execução decidiu na §16 da spec.
+  `RULES_VERSION`, `STATE_SCHEMA` e `PROTOCOL_VERSION` não mudaram (só a web mudou).
+  - **Próximo passo exato:** conferir as duas CI do push da `main` (pela API pública, com `curl`) e, verdes, apagar o ledger
+    `.superpowers/sdd/2026-11-12-decks-fatia-2/` (as `Ruling:` estão no diário). Depois, nada em curso: a Fila.
   - **O que não pode regredir:** com a preferência padrão, o bot em Cordel (G1), nenhum `img` de carta, o verso de listras sem
     `data-verso-deck` e o `<Coringa>` no placar; o treino em Cordel não grava `looks`. O `LookZone` não põe nó no DOM, e há um provedor
     só. O que chegou mora na loja do `ready.ts`, que o provedor assina (`useSyncExternalStore`); o provedor e o placar só importam
@@ -24,8 +22,8 @@
 - **A Devastação com arte não passa no celular** (medida em 2026-11-12, na tomada): 46 e 47 quadros/s com arte, contra 55 do Cordel; no PC,
   50 e 51 contra 50. O perfil: o recálculo de estilo das cartas da mesa inteira, umas 70 vezes na cena, já acontece no Cordel e dobra com a face
   com arte; a imagem numa camada própria foi medida e não muda nada. Tudo em `notas/medicao-decks-fatia-1.md`, seção "Antes da fatia 2", e
-  na §15 da spec. **O autor não decidiu o conserto** (a recomendação: um bloco curto que corte esse recálculo, antes da fatia 2, sem segurar o
-  deploy); a fatia 2 passou pelo portão relativo da G7 (`Esperando o autor`). Na medição A/B da fatia 2 (mais tarde no mesmo dia, a máquina
+  na §15 da spec. **O autor não decidiu o conserto** (a recomendação: um bloco curto que corte esse recálculo, sem segurar o deploy); a fatia 2
+  passou pelo portão relativo da G7 (`Esperando o autor`). Na medição A/B da fatia 2 (mais tarde no mesmo dia, a máquina
   mais rápida), a Devastação com arte deu 52 a 360 nas duas builds, contra 57 e 59 do Cordel: a perda segue (`notas/medicao-decks-fatia-2.md`).
 - **A fatia 1 dos decks e raças está na `main`** ("Sim, merge", o autor, 2026-11-12), por fast-forward de `feat/decks-fatia-1` até `bf6c335`,
   com as duas CI verdes no topo da branch e no push da `main`. No treino (fora do tutorial) e no replay, a carta veste a aparência escolhida
@@ -44,28 +42,25 @@
 
 ## Fila
 
-- **Decks e raças do Coringa, a fatia 3** (o online; spec §8 e §11): plano escrito e aprovado pelo autor antes da execução, depois da
-  fatia 2. A arte pintada, quando o autor quiser, segue a bíblia de arte (`docs/superpowers/specs/2026-11-11-biblia-de-arte.md`).
+- **Decks e raças do Coringa, a fatia 3** (o online; spec §8 e §11): plano escrito e aprovado pelo autor antes da execução (a fatia 2
+  já está na `main`). A arte pintada, quando o autor quiser, segue a bíblia de arte (`docs/superpowers/specs/2026-11-11-biblia-de-arte.md`).
 - **Bloco D** (pontos 5 e 14, spec do playtest §6: os botões de carimbo e o 14), com plano escrito e aprovado pelo autor antes da execução,
   como os blocos A, B, C e E.
 
 ## Esperando o autor
 
-- **A Devastação com arte no celular** (46 e 47 quadros/s, a meta é 50): consertar antes da fatia 2 (a recomendação: um bloco curto para
-  cortar o recálculo de estilo da mesa inteira, que ajuda o Cordel também) ou não. Sem resposta, a fatia 2 segue pela G7. Não segura o deploy:
-  só sente quem escolheu um deck de arte, no celular, nessa cena.
-- **O merge da fatia 2** ("sim, merge"), com as duas CI verdes. E um desvio para ele saber, apontado pelo revisor: na Task 1 o commit foi
-  antes do `pnpm check` completo (o pre-commit rodou a versão rápida; o check completo passou logo depois), contra o texto "pnpm check antes
-  de cada commit". Não teve efeito, e o squash apagaria esses commits.
-- **Jogar a fatia 2** quando ela chegar à `main` (no treino, com um deck de arte: o bot no outro deck, com o Egípcio; os versos e o retrato
-  dele; o replay com as aparências gravadas).
+- **A Devastação com arte no celular** (46 e 47 quadros/s, a meta é 50): consertar (a recomendação: um bloco curto para cortar o recálculo
+  de estilo da mesa inteira, que ajuda o Cordel também) ou não. A fatia 2 passou pela G7 e já está na `main`. Não segura o deploy: só sente
+  quem escolheu um deck de arte, no celular, nessa cena.
+- **Jogar a fatia 2 dos decks** no treino, com um deck de arte: o bot no outro deck, com o Egípcio; os versos e o retrato dele; o
+  replay com as aparências gravadas.
 - **O deploy** (`pnpm deploy:server`, só ele), agora que o bloco C está na `main`: fecha as salas online abertas (`STATE_SCHEMA` 6), e as
   partidas guardadas de antes abrem com o aviso de versão (`RULES_VERSION` 5).
 - **Jogar** os blocos A, B, C e E e as placas novas. O treino mostra tudo; o online só depois do deploy. As frases novas das placas são de
   quem escreveu (ele aprovou corrigir, não as palavras): conferir no playtest.
 - **Jogar a fatia 1 dos decks** no treino (o painel "Aparência" no Início e no menu da partida) e dizer se serve para os testes (a §14 da
   spec). As fotos de conferência estão em `.superpowers/fotos-decks-fatia-1/` (nesta máquina, fora do git). Os 8 Minor adiados da revisão
-  já estão decididos: entram na fatia 2 (G5, a Task 1 do plano).
+  entraram na fatia 2 (G5).
 - **A config do pnpm desta máquina:** o `%LOCALAPPDATA%\pnpm\config\config.yaml` tem `storeDir: D:.pnpm-store` (sem a barra), e o `pnpm add`
   falha; o `node_modules` usa `D:\.pnpm-store\v11`. Até corrigir, passe `--store-dir 'D:\.pnpm-store'`.
 - **Achado da medição do bloco C:** a virada de rodada depois de uma sequência longa (`exodia-devastacao.json` 236→237) fica a 42 e 48

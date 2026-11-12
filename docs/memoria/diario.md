@@ -67,7 +67,14 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     lista de antes, sem arte, para sempre. No jsdom o `act` roda o efeito colado ao desenho, e nenhum teste pegava. Conserto: o efeito sempre
     passa pelo `loadPack(...).then` (o pacote pronto resolve logo e acorda o desenho); o teste novo (`look-zone.test.tsx`, "a corrida…") deixa
     o pacote pronto durante o desenho de um filho e falhava antes. **Armadilha:** um estado de módulo lido no desenho precisa de um gatilho
-    de estado do React para cada mudança; "já está pronto, então pulo" esquece o intervalo entre o desenho e o efeito.
+    de estado do React para cada mudança; "já está pronto, então pulo" esquece o intervalo entre o desenho e o efeito. O `ReplayViewer` veste
+    `game.looks` (`replayLooks`: o seu lado e o lugar de quem olha com o `me`, o do oponente com o `opponent`; sem `looks`, Cordel dos dois
+    lados) e não lê mais a preferência; o `ReplayScreen` pede os pacotes das gravadas. O `medir-cena.ts` grava `looks` na primeira partida da
+    fixture (`MEDIR_APARENCIA=bestiario:egipcio/celestial:egipcio`; sem barra, a mesma dos dois lados; o prefixo troca `:` e `/` por `-`), e
+    não mais o `coringa:prefs`. Testes: três casos novos no `replay-screen.test.tsx` (os dois lados e o Equipar, a preferência que não entra,
+    a partida sem `looks` em Cordel) e o `replay-prefetch.test.tsx` pelas gravadas. **O teste que mudou por desenho (G3):** o caso da F4
+    ("com a preferência fantasy, o replay mostra as cartas com arte") passou a gravar `looks` na partida em vez da preferência, e confere o
+    mesmo.
   - **Task 6 (smoke, E2E, fotos, medição, documentação): feita, menos o `pnpm e2e` inteiro e o revisor.** O smoke: JS inicial 182,7 KB na
     `main` → 183,8 KB. O `e2e/looks.spec.ts` ganhou o bot no treino (os versos da Celestial, os dois retratos do Anúbis carregados, as
     fileiras de cada lado depois da revelação, o axe) e o replay da `especiais` com `looks` gravado, no PC e a 360, sem rolar de lado: 6 de 6.
@@ -95,14 +102,11 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     - (M6) o `estado.md` atualizado.
     - **Deixado ao autor pelo revisor:** o commit da Task 1 foi antes do `pnpm check` completo (a `Ruling:` da Task 1), contra o texto do
       plano e do `CLAUDE.md` ("`pnpm check` antes de cada commit"); o pre-commit rodou a versão rápida, o check completo passou logo depois, e
-      o squash apaga esses commits. Vai na mensagem final como desvio. O `ReplayViewer` veste
-    `game.looks` (`replayLooks`: o seu lado e o lugar de quem olha com o `me`, o do oponente com o `opponent`; sem `looks`, Cordel dos dois
-    lados) e não lê mais a preferência; o `ReplayScreen` pede os pacotes das gravadas. O `medir-cena.ts` grava `looks` na primeira partida da
-    fixture (`MEDIR_APARENCIA=bestiario:egipcio/celestial:egipcio`; sem barra, a mesma dos dois lados; o prefixo troca `:` e `/` por `-`), e
-    não mais o `coringa:prefs`. Testes: três casos novos no `replay-screen.test.tsx` (os dois lados e o Equipar, a preferência que não entra,
-    a partida sem `looks` em Cordel) e o `replay-prefetch.test.tsx` pelas gravadas. **O teste que mudou por desenho (G3):** o caso da F4
-    ("com a preferência fantasy, o replay mostra as cartas com arte") passou a gravar `looks` na partida em vez da preferência, e confere o
-    mesmo.
+      o squash apaga esses commits. Vai na mensagem final como desvio.
+  - **2026-11-12, o merge ("sim"):** com as duas CI verdes em `bb186ef` (o topo da branch, com as correções da revisão), fast-forward
+    da `main` e push (o pre-push com o `pnpm check`). O ledger `.superpowers/sdd/2026-11-12-decks-fatia-2/` é apagado depois da CI da
+    `main` (as `Ruling:` estão aqui); as fotos ficam em `.superpowers/fotos-decks-fatia-2/`. Ao fechar, a descrição da Task 5 (o replay),
+    que tinha ido parar no fim desta entrada, voltou ao item dela.
 
 ---
 
