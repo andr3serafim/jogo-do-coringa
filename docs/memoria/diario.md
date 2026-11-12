@@ -5,6 +5,28 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-12 (1): a Devastação com arte medida, e o plano da fatia 2 dos decks
+
+- **Pedido:** depois do merge da fatia 1, "ok, prossiga" (o autor). Lido como o próximo passo da Fila que não depende dele: medir a
+  Devastação com arte (o "Para o plano da 2") e escrever o plano da fatia 2 para ele aprovar. Branch `feat/decks-fatia-2`, saída da `main`
+  em `2f2aa51`. Nada de código de produção.
+- **A medição** (na tomada, `notas/medicao-decks-fatia-1.md`, seção "Antes da fatia 2"): a Devastação (210→211) com arte fica em 46 e 47
+  quadros/s a 360, contra 55 do Cordel; no PC, 50 e 51 contra 50. **A F5 não passa nessa cena no celular.** A camada própria
+  (`will-change: transform` no invólucro da imagem) foi medida e não mudou nada (desfeita, sem commit). O perfil: o compositor desenha o
+  mesmo número de quadros; a thread principal perde (140 → 114 quadros); a rasterização e a decodificação quase não mudam; o recálculo de
+  estilo dobra nos recálculos grandes (a mesa inteira, ~70 vezes na cena, até 59 elementos no Cordel e ~230 na arte). Commit `925879c`; a §15
+  da spec e o `estado.md` dizem que o "passa" da fatia 1 vale só para a troca de mão.
+- **O plano** (`docs/superpowers/plans/2026-11-12-decks-fatia-2.md`): o dono por lado com um provedor só e o `LookZone` sem DOM; o bot; o
+  verso por deck; o retrato por raça; o momento e as cópias das cenas; a partida guardada com `looks` e o replay com as gravadas; os 8 Minor
+  da fatia 1. Oito escolhas (G1 a G8) para o autor. **Ruling:** a Devastação no celular não entra no plano: é defeito da fatia 1, já na
+  `main`, e vai ao autor como achado à parte (a fatia 2 não põe mais carta com arte na mesa). **Ruling:** a regra do bot da spec (§7.1, o
+  deck seguinte) punha o Bestiário no treino padrão e quebrava a §0; o plano recomenda o bot em Cordel quando você está em Cordel (G1).
+- **Armadilhas:** o rastro do `medir-cena.ts` (`MEDIR_PERFIL=1`) já traz o `invalidationTracking` e a contagem de elementos de cada
+  `UpdateLayoutTree` (`args.elementCount`): dá para achar o recálculo grande sem outra medição. Os quadros do compositor (`DrawFrame`) e os da
+  thread principal (`BeginMainThreadFrame`) se contam à parte; a medida do projeto conta os da thread principal (`requestAnimationFrame`).
+
+---
+
 ## 2026-11-11 (1): a fatia 1 dos decks e raças (a carta com arte e o seletor, no treino)
 
 - **Pedido:** o plano `docs/superpowers/plans/2026-11-11-decks-fatia-1.md` aprovado com as F1 a F7 (`decisoes.md` 2026-11-11 (3)); depois do

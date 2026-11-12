@@ -1,6 +1,6 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-12**, a medição da Devastação com arte e o plano da fatia 2 dos decks, em curso. Antes de
+> Sobrescrito a cada atualização. **Última: 2026-11-12**, a Devastação medida e o plano da fatia 2 escritos; esperando o autor. Antes de
 > seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
@@ -10,8 +10,11 @@
      51 contra 50). O perfil: o recálculo de estilo das cartas da mesa inteira, umas 70 vezes na cena, já acontece no Cordel e dobra com a face
      com arte; a imagem numa camada própria foi medida e não muda nada (desfeita, sem commit). Tudo em `notas/medicao-decks-fatia-1.md`,
      seção "Antes da fatia 2", e na §15 da spec. **Vai ao autor antes do deploy:** a fatia 1 já está na `main` com isso.
-  2. **O plano da fatia 2** (`docs/superpowers/plans/2026-11-12-decks-fatia-2.md`), escrito a partir do código da `main`, para o autor
-     aprovar antes de qualquer código. Nada de implementação antes da aprovação.
+  2. **O plano da fatia 2: escrito** (`docs/superpowers/plans/2026-11-12-decks-fatia-2.md`), a partir do código da `main`, com as escolhas
+     G1 a G8 para o autor aprovar. **Nada de código antes da aprovação.** A G1 resolve um conflito da spec (o bot no deck seguinte punha arte
+     no treino padrão): recomenda o bot em Cordel quando você está em Cordel. A G5 traz os 8 Minor da fatia 1; a G7, o portão contra a `main`.
+  - **Próximo passo:** o autor decide (a) o que fazer com a Devastação no celular (o conserto antes da fatia 2, ou não) e (b) se aprova o
+    plano com as G1 a G8 como recomendadas. A resposta entra no `decisoes.md` antes de qualquer código; a execução começa pela Task 0.
 - **A fatia 1 dos decks e raças está na `main`** ("Sim, merge", o autor, 2026-11-12), por fast-forward de `feat/decks-fatia-1` até `bf6c335`,
   com as duas CI verdes no topo da branch e no push da `main`. No treino (fora do tutorial) e no replay, a carta veste a aparência escolhida
   (Cordel, Bestiário ou Celestial; Bufão ou Egípcio), a sua dos dois lados; o online fica em Cordel até a fatia 3. Plano
@@ -41,6 +44,7 @@
 
 ## Esperando o autor
 
+- **A Devastação com arte no celular (46 e 47 quadros/s, a meta é 50) e o plano da fatia 2:** as duas decisões do "Próximo passo" acima.
 - **O deploy** (`pnpm deploy:server`, só ele), agora que o bloco C está na `main`: fecha as salas online abertas (`STATE_SCHEMA` 6), e as
   partidas guardadas de antes abrem com o aviso de versão (`RULES_VERSION` 5).
 - **Jogar** os blocos A, B, C e E e as placas novas. O treino mostra tudo; o online só depois do deploy. As frases novas das placas são de
