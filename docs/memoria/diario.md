@@ -18,7 +18,8 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   tem. Só dois testes mudam por desenho: a nota do Início (H4) e o do `NicknameBodySchema`, que vira `JoinRoomBodySchema`.
 - **Armadilha para quem executa:** cada mensagem `room` traz um `seats` novo (presença, pronto, `woAt`); o memo das aparências da mesa tem
   de ser pelos textos do deck e da raça, ou o contexto de toda carta muda a cada mensagem de presença.
-- **Ficou:** a aprovação do autor. Nada de código.
+- **A aprovação:** "Aprovo como está" (`decisoes.md` 2026-11-12 (2)), com as H1 a H7 e as duas frases como recomendadas. Nada de código;
+  a execução começa pela Task 0 quando o autor pedir.
 
 ---
 

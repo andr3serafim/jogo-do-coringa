@@ -6,6 +6,29 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-12 (2): o plano da fatia 3 aprovado
+
+Depois do resumo do plano da fatia 3 (o online), perguntado "Aprova o plano da fatia 3 com as H1 a H7 como recomendadas?", ele respondeu:
+
+> Aprovo como está
+
+**Leitura:**
+- O plano `docs/superpowers/plans/2026-11-12-decks-fatia-3.md` está aprovado com as H1 a H7 como recomendadas:
+  - **H1:** quem está no padrão (o Cordel) não manda a aparência; o servidor só grava a que o corpo trouxe (normalizada), e a mensagem `room`
+    só a devolve para o assento que a tem. Afina a §8.2 da spec ("grava quando o corpo trouxe").
+  - **H2:** a sua aparência na sala vem do assento; a preferência mudada depois não vale para a sala aberta (a §8.3, confirmada).
+  - **H3:** no menu da partida online, sem o seletor, a linha "A aparência desta sala é a que você tinha ao entrar." (no lugar do painel
+    apagado da §6).
+  - **H4:** a nota do painel "Aparência" do Início passa a ser "Na sala online, vale a que você tinha ao entrar."
+  - **H5:** a partida online guardada leva `looks` dos assentos do fim, só quando algum dos dois não é o padrão (tira a G4 da fatia 2 para o
+    online, como a §7.3 manda).
+  - **H6:** sem medição nova.
+  - **H7:** a execução no Claude Code local, tarefa por tarefa, teste primeiro, na branch `feat/decks-fatia-3`, com um revisor novo no fim.
+- **[I]** As duas frases (H3 e H4) foram aprovadas com o plano, palavra por palavra.
+- **[I]** Ele não disse quando executar: a execução começa pela Task 0 do plano quando ele pedir, nesta sessão ou noutra.
+
+---
+
 ## 2026-11-12 (1): o plano da fatia 2 aprovado; a execução em outra sessão
 
 Depois de ler o achado da Devastação no celular (46 e 47 quadros/s com arte, contra 55 do Cordel; a minha posição: um bloco curto para

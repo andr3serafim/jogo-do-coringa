@@ -3,8 +3,8 @@
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 > **De onde vem este plano:** escrito no Claude Code, no checkout principal, com o código da `main` em `b6c2caf` (as fatias 1 e 2
-> inteiras), na branch `feat/decks-fatia-3`. Os nomes de arquivo, de função e de teste foram lidos do código. **Esperando a aprovação do
-> autor**, com as escolhas H1 a H7 abaixo; nada de código antes dela.
+> inteiras), na branch `feat/decks-fatia-3`. Os nomes de arquivo, de função e de teste foram lidos do código. **O autor aprovou as
+> escolhas H1 a H7 como recomendadas** (`decisoes.md` 2026-11-12 (2)); a execução começa pela Task 0.
 
 **Goal:** na sala online, cada lado da mesa veste a aparência do dono:
 - **Quem cria a sala ou entra nela leva a sua aparência** (a das preferências), e o servidor a guarda no assento.
@@ -40,7 +40,10 @@ Workers com Durable Objects (os testes do `worker` no pool do workerd), React 19
 - **Trocar de aparência no meio de uma partida online** (spec §12) e mostrar a aparência do outro no lobby (a spec não pede).
 - **O tutorial** segue em Cordel (§7.2).
 
-## Escolhas do plano (para o autor aprovar)
+## Escolhas do plano (aprovadas)
+
+**O autor aprovou as sete como recomendadas** (`decisoes.md` 2026-11-12 (2)), com as duas frases da H3 e da H4 como estão. Onde a spec diz
+outra coisa, vale o plano: a H1 afina a §8.2, a H3 fica no lugar do painel apagado da §6, e a H5 tira a G4 da fatia 2 para o online.
 
 - **H1. O que vai pelo fio com a aparência padrão.**
   - **Recomendo:** quem está no padrão (o Cordel, que sempre anda com o Bufão) não manda o campo. O servidor só grava a aparência quando o
