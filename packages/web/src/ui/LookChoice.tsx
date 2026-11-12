@@ -81,7 +81,7 @@ export function LookChoice({ value, onChange, note, packs }: LookChoiceProps) {
       <LooksProvider look={value} packs={packs}>
         <div data-amostra aria-hidden="true" className="flex justify-center gap-3">
           {SAMPLE.map((card) => (
-            <Card key={card.id} card={card} size="hand" animated={false} />
+            <Card key={card.id} card={card} size="hand" animated={false} ghost />
           ))}
         </div>
       </LooksProvider>

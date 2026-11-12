@@ -72,7 +72,8 @@ describe('a carta com arte', () => {
       for (const props of [{}, { quad: true }, { selected: true, onSelect: () => undefined }, { target: true }]) {
         const { container, unmount } = render(withLook(<Card card={seven} size={size} {...props} />));
         const list = tokens(root(container));
-        expect(list.filter((token) => token.startsWith('bg-')), size).toEqual(['bg-tinta']);
+        // `bg-clip-*` não é fundo: é onde ele termina (o tracejado do rascunho).
+        expect(list.filter((token) => token.startsWith('bg-') && !token.startsWith('bg-clip-')), size).toEqual(['bg-tinta']);
         expect(list.filter((token) => /(^|:)shadow-/.test(token))).toEqual([]);
         unmount();
       }
@@ -89,6 +90,36 @@ describe('a carta com arte', () => {
     expect(aura(two)).toBeNull();
     expect(aura(ten)).toContain('14px 3px');
     expect(aura(k)).toContain('8px 1px');
+  });
+
+  // Revisão da branch (Important 1): a aura é um filho posicionado e pinta por cima do `box-shadow` da raiz (o anel ouro de alvo e de
+  // seleção, o halo do foco) e da seta da frente, que vem antes da face.
+  it('com o anel ouro (alvo ou selecionada), a carta não tem aura: o anel fica à vista', () => {
+    for (const props of [{ target: true }, { selected: true, onSelect: () => undefined }]) {
+      const { container, unmount } = render(withLook(<Card card={ten} size="field" {...props} />));
+      expect(root(container).className).toContain('anel-ouro');
+      expect(container.querySelector('[data-aura]')).toBeNull();
+      unmount();
+    }
+  });
+
+  it('no foco do teclado, a aura some (a carta é o grupo dela), e o halo do foco fica à vista', () => {
+    const { container } = render(withLook(<Card card={ten} size="hand" onSelect={() => undefined} />));
+    expect(tokens(root(container))).toContain('group/carta');
+    expect(tokens(container.querySelector('[data-aura]')!)).toContain('group-focus-visible/carta:hidden');
+  });
+
+  it('a seta da frente vem depois da face com arte: a aura não a cobre', () => {
+    const { container } = render(withLook(<Card card={ten} size="field" front />));
+    const aura = container.querySelector('[data-aura]')!;
+    const arrow = container.querySelector('[data-frente]')!;
+    expect(aura.compareDocumentPosition(arrow) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  // Revisão da branch (Important 2): com o fundo de tinta indo até a borda, os vãos do tracejado mostravam tinta sob tinta.
+  it('o rascunho com arte mostra o tracejado: o fundo para dentro da borda', () => {
+    const { container } = render(withLook(<Card card={seven} size="field" draft />));
+    expect(tokens(root(container))).toEqual(expect.arrayContaining(['border-dashed', 'bg-clip-padding']));
   });
 
   it.each([

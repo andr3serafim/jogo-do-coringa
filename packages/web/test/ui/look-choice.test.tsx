@@ -99,7 +99,7 @@ describe('o seletor da aparência', () => {
 
   it('a amostra: três cartas (uma baixa, uma alta e o K), com arte quando os pacotes vêm prontos', () => {
     const { container, rerender } = render(<LookChoice value={DEFAULT_LOOK} onChange={() => undefined} packs={PACKS} />);
-    const sample = () => container.querySelectorAll('[data-amostra] [data-card-id]');
+    const sample = () => container.querySelectorAll('[data-amostra] > *');
     expect(sample()).toHaveLength(3);
     expect(container.querySelectorAll('[data-amostra] img')).toHaveLength(0);
     rerender(<LookChoice value={{ deck: 'bestiario', race: 'egipcio' }} onChange={() => undefined} packs={PACKS} />);
@@ -108,6 +108,14 @@ describe('o seletor da aparência', () => {
       '/arte/10-dragao.webp',
       '/arte/k-mascara.webp',
     ]);
+  });
+
+  // Revisão da branch (Important 3): com `data-card-id`, as cartas da amostra do menu entravam em todo seletor das cartas da mesa (e o teste
+  // da troca no treino podia passar só por elas).
+  it('as cartas da amostra são cópias: sem data-card-id, fora dos seletores das cartas da mesa', () => {
+    const { container } = render(<LookChoice value={{ deck: 'bestiario', race: 'egipcio' }} onChange={() => undefined} packs={PACKS} />);
+    expect(container.querySelectorAll('[data-amostra] img')).toHaveLength(3);
+    expect(container.querySelectorAll('[data-card-id]')).toHaveLength(0);
   });
 
   it('a nota de quem chama aparece embaixo', () => {

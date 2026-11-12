@@ -41,13 +41,15 @@ export interface ArtFaceProps {
   as?: WildRole;
   roleText?: string;
   quad?: boolean;
+  /** A carta tem o anel ouro (alvo ou selecionada): sem aura, que pintaria por cima dele (o anel é `box-shadow` da raiz da carta). */
+  ringed?: boolean;
   art: CardArt;
 }
 
-export function ArtFace({ card, size, as, roleText, quad = false, art }: ArtFaceProps) {
+export function ArtFace({ card, size, as, roleText, quad = false, ringed = false, art }: ArtFaceProps) {
   const metal = { color: art.metal };
   const place = ART_SIZE[size];
-  const aura = AURA[art.tier];
+  const aura = ringed ? null : AURA[art.tier];
   let mark: ReactNode = null;
   if (card.kind !== 'WILD') {
     mark = (
@@ -71,11 +73,13 @@ export function ArtFace({ card, size, as, roleText, quad = false, art }: ArtFace
   }
   return (
     <>
+      {/* A aura é um filho posicionado: pinta por cima do `box-shadow` da raiz. Some no foco do teclado (a carta é o `group/carta`), para o
+          halo do foco ficar à vista; com o anel ouro, nem entra (`ringed`). */}
       {aura ? (
         <span
           aria-hidden="true"
           data-aura
-          className="pointer-events-none absolute -inset-px rounded-[inherit]"
+          className="pointer-events-none absolute -inset-px rounded-[inherit] group-focus-visible/carta:hidden"
           style={{ boxShadow: `0 0 ${aura.blur}px ${aura.spread}px ${withAlpha(art.metal, aura.alpha)}` }}
         />
       ) : null}

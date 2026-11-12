@@ -259,6 +259,9 @@ export function Card({
     SIZE[size].box,
     // Um fundo só: duas classes `bg-*` disputam a mesma propriedade e quem ganha é a ordem do CSS gerado, não a da lista.
     art ? 'bg-tinta' : card.kind === 'WILD' ? 'bg-ouro' : quad ? QUAD_FACE : 'bg-papel',
+    // Com arte, o fundo de tinta para dentro da borda (senão os vãos do tracejado do rascunho mostram tinta sob tinta), e a carta é o grupo
+    // do foco: a aura some no `:focus-visible`, para o halo do foco ficar à vista (`ArtFace`).
+    art ? 'bg-clip-padding group/carta' : '',
     selected ? '-translate-y-3.5 anel-ouro' : target ? 'anel-ouro' : '',
     grave ? 'grayscale opacity-90' : '',
     draft ? 'border-dashed opacity-70' : '',
@@ -300,20 +303,23 @@ export function Card({
         }
       : {}),
   };
+  const arrow = front ? (
+    <span
+      aria-hidden="true"
+      data-frente
+      className="absolute -left-[9px] top-1/2 h-0 w-0 -translate-y-1/2 border-y-[5px] border-r-[6px] border-y-transparent border-r-tinta pc:-left-[11px] pc:border-y-[6px] pc:border-r-[7px]"
+    />
+  ) : null;
   const inside = (
     <>
-      {front ? (
-        <span
-          aria-hidden="true"
-          data-frente
-          className="absolute -left-[9px] top-1/2 h-0 w-0 -translate-y-1/2 border-y-[5px] border-r-[6px] border-y-transparent border-r-tinta pc:-left-[11px] pc:border-y-[6px] pc:border-r-[7px]"
-        />
-      ) : null}
+      {art ? null : arrow}
       {art ? (
-        <ArtFace card={card} size={size} as={as} roleText={roleText} quad={quad} art={art} />
+        <ArtFace card={card} size={size} as={as} roleText={roleText} quad={quad} ringed={selected === true || target} art={art} />
       ) : (
         <Face card={card} size={size} as={as} roleText={roleText} />
       )}
+      {/* Com arte, a seta vem depois da face: a aura (um filho posicionado) a cobriria. */}
+      {art ? arrow : null}
       {quad ? <QuadMarks reduced={anim.reduced} /> : null}
       {marked ? (
         <span aria-hidden="true" data-marca-novo className="absolute bottom-[3px] left-[3px] h-[4px] w-[46%] bg-vermelho" />
