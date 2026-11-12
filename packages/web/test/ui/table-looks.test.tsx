@@ -15,10 +15,12 @@ import { roomNames } from '../../src/model/history.ts';
 import { SCENE_MOMENTS } from '../../src/model/scene-moments.ts';
 import { buildTimeline } from '../../src/model/timeline.ts';
 import type { SceneBox } from '../../src/ui/anim/scene-box.ts';
+import { BeatOverlay } from '../../src/ui/anim/Scene.tsx';
 import { LooksProvider } from '../../src/ui/cards/LooksProvider.tsx';
 import { Devastation } from '../../src/ui/scenes/Devastation.tsx';
 import { Resurrection } from '../../src/ui/scenes/Resurrection.tsx';
 import { PlayTable } from '../../src/ui/table/PlayTable.tsx';
+import { stateMessage } from '../fixtures.ts';
 import { cleanup, connect, emit, MINE, mount, THEIRS } from './anim-harness.tsx';
 import { seriousViolations } from './support.tsx';
 
@@ -153,14 +155,21 @@ describe('a troca no menu (G2): o bot acompanha a sua', () => {
 });
 
 describe('a carta que muda de lado (o Roubo)', () => {
-  it('a carta que entra no campo do bot passa a vestir a aparência dele', async () => {
+  it('a mesma carta (o mesmo id) sai do seu campo com a sua e entra no do bot com a dele', async () => {
     await allPacks();
     const m = mount(THEIRS, { training: 'medio', prefs: { look: BESTIARIO_EGIPCIO } });
-    // O 10 da sua fileira de ataque vai para a fileira de ataque do bot.
-    emit(m, { ...THEIRS, self: { ...THEIRS.self, attackRow: [8, 4, 7, 9] }, opponent: { ...THEIRS.opponent, attackRow: [6, 9, 3, 10, 10] } }, []);
-    const theirs = srcs(theirField());
-    expect(theirs.filter((src) => src === celestial['10'])).toHaveLength(2);
-    expect(theirs).not.toContain(bestiario['10']);
+    const { view } = m;
+    const ten = view.self.attackRow.find((card) => card.value === 10)!;
+    const face = (root: ParentNode) => root.querySelector(`[data-card-id="${ten.id}"] img`)?.getAttribute('src');
+    expect(face(myField())).toBe(bestiario['10']);
+    // O 10 da sua fileira de ataque vai para a fileira de ataque do bot, com o mesmo id.
+    const moved = {
+      ...view,
+      self: { ...view.self, attackRow: view.self.attackRow.filter((card) => card.id !== ten.id) },
+      opponent: { ...view.opponent, attackRow: [...view.opponent.attackRow, ten] },
+    };
+    act(() => m.connection.emitState(stateMessage(moved, { seq: 50, events: [] })));
+    expect(face(theirField())).toBe(celestial['10']);
   });
 });
 
@@ -232,6 +241,18 @@ describe('as cópias das cenas vestem a aparência de quem a cena fala', () => {
       </LooksProvider>,
     );
     expect(srcs(document, '[data-carta-caindo] img')).toEqual([celestial['05'], celestial['07']]);
+  });
+
+  // A §3 da spec: as cenas raras seguem em cordel. As quatro cartas da figura (o painel de reserva) não vestem a aparência de ninguém.
+  it('a figura da cena rara fica em cordel, mesmo dentro do provedor com arte', () => {
+    const [beat] = buildTimeline([{ type: 'Exodia', player: 'p2' }], { mode: 'live', reducedMotion: true, decisionPending: false });
+    render(
+      <LooksProvider look={BESTIARIO_EGIPCIO} owners={OWNERS} packs={PACKS}>
+        <BeatOverlay scene={beat!} curtain names={roomNames('p1', [])} reduced me="p1" hitLanded={false} />
+      </LooksProvider>,
+    );
+    expect(document.querySelectorAll('[data-figura] [data-card-id]')).toHaveLength(4);
+    expect(document.querySelectorAll('[data-figura] img')).toHaveLength(0);
   });
 
   it('a Ressurreição: as cópias da quadra e a carta que volta vestem a de quem ressuscita', () => {

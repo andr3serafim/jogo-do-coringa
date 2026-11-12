@@ -68,7 +68,7 @@ export function Resurrection(props: SceneProps) {
     revealRow(palco, event.player, event.row);
   });
   // As cópias (a quadra e a carta que volta) vestem a aparência de quem ressuscita (decks e raças, fatia 2).
-  const owner = event.type === 'Resurrected' ? event.player : props.me;
+  const owner = event.type === 'Resurrected' ? event.player : null;
   return (
     <div ref={anchor} className="absolute inset-0">
       {measured ? (

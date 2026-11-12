@@ -1021,12 +1021,13 @@ describe('o replay com as aparências gravadas (decks e raças, fatia 2, G3)', (
     const view = render(<ReplayScreen store={store} id={game.id} />);
     const equip = srcs(document);
     await user.selectOptions(screen.getByLabelText('Rodada'), '3');
-    return { ...view, equip };
+    return { ...view, equip, user };
   }
 
   it('o seu lado e o seu Equipar com a sua; o lado do oponente com a dele; o retrato dele, o Coringa', async () => {
-    const { equip } = await openAtRound3({ looks: LOOKS });
-    // O começo (o Equipar): só o que é seu aparece com arte.
+    const { equip, user } = await openAtRound3({ looks: LOOKS });
+    // O começo (o Equipar): o que aparece com arte é o seu.
+    expect(equip.length).toBeGreaterThan(0);
     for (const src of equip) expect(BESTIARIO.has(src) || EGIPCIO.has(src), src).toBe(true);
     const own = srcs(mine());
     expect(own.some((src) => BESTIARIO.has(src))).toBe(true);
@@ -1037,6 +1038,12 @@ describe('o replay com as aparências gravadas (decks e raças, fatia 2, G3)', (
     for (const src of other) expect(CELESTIAL.has(src), src).toBe(true);
     expect(portraitImage('voce')).toHaveAttribute('src', portrait);
     expect(portraitImage('oponente')).toBeNull();
+    // O cemitério é de quem olha: numa rodada em que ele tem cartas.
+    const withGrave = TRACK.rounds.find((round) => TRACK.frames[round.frame]!.state.view.graveyard.length > 0)!;
+    await user.selectOptions(screen.getByLabelText('Rodada'), String(withGrave.round));
+    const grave = srcs(document.querySelector('[data-cemiterio]')!.parentElement!, 'img');
+    expect(grave.length).toBeGreaterThan(0);
+    for (const src of grave) expect(BESTIARIO.has(src) || EGIPCIO.has(src), src).toBe(true);
   });
 
   it('a preferência de agora não entra: com ela em Celestial, a partida gravada em Bestiário segue em Bestiário', async () => {

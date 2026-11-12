@@ -1,6 +1,7 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import type { ArtKey, PackId } from '../../src/model/looks.ts';
-import { ART_META, DECK_LABEL, RACE_LABEL } from '../../src/looks/catalog.ts';
+import { readFileSync } from 'node:fs';
+import { ART_META, BACK_CLASS, DECK_LABEL, RACE_LABEL } from '../../src/looks/catalog.ts';
 import { urls as bestiario } from '../../src/looks/bestiario/index.ts';
 import { urls as celestial } from '../../src/looks/celestial/index.ts';
 import { portrait, urls as egipcio } from '../../src/looks/egipcio/index.ts';
@@ -91,6 +92,18 @@ describe('o catálogo das aparências (spec dos decks §2.3 e §4.4)', () => {
     const first = loadPack('bestiario');
     expect(loadPack('bestiario')).toBe(first);
     await expect(first).resolves.toEqual(bestiario);
+  });
+});
+
+describe('as cores do verso (fatia 2, revisão)', () => {
+  it.each(['bestiario', 'celestial'] as const)('o verso do %s mora em variáveis do styles.css, que o da mão e o do momento usam', (deck) => {
+    const css = readFileSync(new URL('../../src/styles.css', import.meta.url), 'utf8');
+    expect(BACK_CLASS[deck]).not.toMatch(/#[0-9a-f]{3,6}/i);
+    const names = [...BACK_CLASS[deck].matchAll(/var\((--verso-[a-z0-9-]+)\)/g)].map((match) => match[1]!);
+    expect(names.length).toBeGreaterThanOrEqual(3);
+    for (const name of names) expect(css).toMatch(new RegExp(`${name}:\\s*#`));
+    const rule = new RegExp(`\\.momento-verso\\[data-verso-deck='${deck}'\\]\\s*\\{[^}]*\\}`).exec(css)?.[0] ?? '';
+    for (const name of names) expect(rule).toContain(`var(${name})`);
   });
 });
 

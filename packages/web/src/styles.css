@@ -38,6 +38,16 @@
 @custom-variant pc-baixo (@media (width >= theme(--breakpoint-pc)) and (height < 900px));
 
 /* O navegador também fala a língua da Peleja (spec §10.2): seleção, cursor, foco, rolagem e sublinhado. */
+/* As cores do verso de cada deck de arte (decks e raças, fatia 2): o verso da mão (`BACK_CLASS`, no `catalog.ts`) e o da carta do
+   momento usam as mesmas. */
+:root {
+  --verso-bestiario-1: #2b1640;
+  --verso-bestiario-2: #4a2a6b;
+  --verso-celestial-1: #14305c;
+  --verso-celestial-2: #2c5a96;
+  --verso-fio: #d9b25a;
+}
+
 @layer base {
   html {
     color-scheme: light;
@@ -931,13 +941,13 @@ li[data-joga]::after {
 
 /* O verso no deck de quem jogou (decks e raças, fatia 2, G6): as cores do verso da mão dele (`BACK_CLASS`, no `catalog.ts`). */
 .momento-verso[data-verso-deck='bestiario'] {
-  border-color: #d9b25a;
-  background: repeating-linear-gradient(45deg, #2b1640 0 3px, #4a2a6b 3px 6px);
+  border-color: var(--verso-fio);
+  background: repeating-linear-gradient(45deg, var(--verso-bestiario-1) 0 3px, var(--verso-bestiario-2) 3px 6px);
 }
 
 .momento-verso[data-verso-deck='celestial'] {
-  border-color: #d9b25a;
-  background: repeating-linear-gradient(45deg, #14305c 0 3px, #2c5a96 3px 6px);
+  border-color: var(--verso-fio);
+  background: repeating-linear-gradient(45deg, var(--verso-celestial-1) 0 3px, var(--verso-celestial-2) 3px 6px);
 }
 
 /*

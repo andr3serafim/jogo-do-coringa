@@ -28,7 +28,10 @@ export interface LooksValue {
   portraits: Partial<Record<PackId, string>>;
 }
 
-export const LooksContext = createContext<LooksValue>({ look: DEFAULT_LOOK, viewer: DEFAULT_LOOK, owners: {}, packs: {}, portraits: {} });
+/** O contexto sem aparência: toda carta de cordel (o padrão sem provedor, e o lugar que a §3 deixa sempre em cordel, como as cenas raras). */
+export const CORDEL_LOOKS: LooksValue = { look: DEFAULT_LOOK, viewer: DEFAULT_LOOK, owners: {}, packs: {}, portraits: {} };
+
+export const LooksContext = createContext<LooksValue>(CORDEL_LOOKS);
 
 /** A aparência do lugar: a do `LookZone` mais próximo; fora de zona, a de quem olha; sem provedor, `DEFAULT_LOOK`. */
 export function useLook(): Look {

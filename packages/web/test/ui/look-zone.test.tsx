@@ -203,6 +203,26 @@ describe('a corrida do pacote que fica pronto entre o desenho e o efeito', () =>
   });
 });
 
+describe('a falha passageira (fatia 2, revisão)', () => {
+  it('o pacote que falhou para a mesa e chegou por outro pedido (a amostra do menu) veste a mesa sem remontar', async () => {
+    let calls = 0;
+    resetPacks({
+      celestial: () => (++calls === 1 ? Promise.reject(new Error('sem rede')) : Promise.resolve({ urls: celestial })),
+    });
+    const { container } = render(
+      <LooksProvider look={{ deck: 'celestial', race: 'bufao' }}>
+        <Card card={seven} size="field" />
+      </LooksProvider>,
+    );
+    await act(async () => vi.dynamicImportSettled());
+    expect(srcOf(container)).toBeNull();
+    await act(async () => {
+      await loadPack('celestial');
+    });
+    expect(srcOf(container)).toMatch(/07-leao-alado\.webp$/);
+  });
+});
+
 describe('o retrato da raça', () => {
   it('com o pacote egípcio pronto, o lugar egípcio tem o retrato do Anúbis; o do Bufão, nenhum', async () => {
     await loadPack('egipcio');

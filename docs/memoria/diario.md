@@ -78,7 +78,24 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     documentos sem commit guardados no `stash`, e não num worktree novo: o `node_modules` é o mesmo (a fatia não muda dependência) e um
     worktree pediria um `pnpm install` com a config quebrada do pnpm desta máquina — custo: nenhum (o script volta à branch e devolve o stash).
     **Armadilha:** na medição a CPU desta máquina variou o Cordel de 53 a 59 entre rodadas; com a tolerância de 2, só a A/B na mesma sessão
-    decide. O `ReplayViewer` veste
+    decide. `pnpm e2e` inteiro: 113 passaram, 4 pulados. A branch subiu em `5c16dff` (o pre-push verde).
+  - **A revisão da branch inteira (G8; subagente novo, Opus, `2f2aa51..5c16dff`): "pronto para merge: sim"** — nenhum Critical nem
+    Important, 6 Minor. Como o Step 8 do plano manda, entraram nesta branch, cada um com o teste:
+    - (M4, o de mais efeito) depois de uma falha passageira, a mesa podia ficar em Cordel enquanto a amostra do menu, que pediu de novo, já
+      mostrava a arte. O `ready.ts` virou uma loja assinável (`readyState`, `subscribeReady`), e o provedor a lê com `useSyncExternalStore`:
+      sem o `useState` de antes, todo pacote que chega acorda a mesa, também no intervalo entre o desenho e o efeito (a corrida da Task 5
+      fica coberta pelo mesmo caminho). Teste "a falha passageira" (`look-zone.test.tsx`): vermelho antes.
+    - (M1) a figura da cena rara (o painel de reserva) vestia a aparência de quem olha; a §3 manda as cenas em cordel. Ela ganhou o contexto
+      sem aparência (`CORDEL_LOOKS`, no `looks-context.ts`). Teste no `table-looks.test.tsx`: vermelho antes.
+    - (M2) o teste do Roubo mudava o id da carta (os ids do fixture são por posição) e não provava nada: agora a mesma carta (o mesmo id) sai
+      do seu campo e entra no do bot. Passou de primeira (o comportamento já estava certo; faltava a prova).
+    - (M3) o teste do replay podia não conferir nada: agora exige cartas no Equipar e confere o cemitério numa rodada que o tem.
+    - (M5) as cores do verso moravam em dois lugares: agora em variáveis do `styles.css` (`--verso-*`), que o `BACK_CLASS` e o
+      `.momento-verso` usam (teste no `looks-catalog`: vermelho antes); e a Ressurreição usa `owner={null}` em vez do resto `props.me`.
+    - (M6) o `estado.md` atualizado.
+    - **Deixado ao autor pelo revisor:** o commit da Task 1 foi antes do `pnpm check` completo (a `Ruling:` da Task 1), contra o texto do
+      plano e do `CLAUDE.md` ("`pnpm check` antes de cada commit"); o pre-commit rodou a versão rápida, o check completo passou logo depois, e
+      o squash apaga esses commits. Vai na mensagem final como desvio. O `ReplayViewer` veste
     `game.looks` (`replayLooks`: o seu lado e o lugar de quem olha com o `me`, o do oponente com o `opponent`; sem `looks`, Cordel dos dois
     lados) e não lê mais a preferência; o `ReplayScreen` pede os pacotes das gravadas. O `medir-cena.ts` grava `looks` na primeira partida da
     fixture (`MEDIR_APARENCIA=bestiario:egipcio/celestial:egipcio`; sem barra, a mesma dos dois lados; o prefixo troca `:` e `/` por `-`), e

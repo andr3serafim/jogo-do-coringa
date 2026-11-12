@@ -31,6 +31,7 @@ import { useRef, useState, type ReactNode } from 'react';
 import { sceneText, type FieldTarget, type FinalBlowInfo, type RisingInfo } from '../../model/effects.ts';
 import { RIBBON_SCENES, SCENE_INVERT_LEAD_MS, type Beat, type SceneKind } from '../../model/timeline.ts';
 import { Card } from '../cards/Card.tsx';
+import { CORDEL_LOOKS, LooksContext } from '../cards/looks-context.ts';
 import { useSceneBox } from './scene-box.ts';
 import { useScenes } from './scenes-loader.ts';
 
@@ -187,11 +188,15 @@ function figureCards(rare: RareScene): SpecialCard[] {
   return PLACES[rare.layout].map((_, i) => ({ id: `cena-${rare.kind}-${i}`, kind: rare.kind, suit: SUITS[i]! }));
 }
 
-/** As cartas da cena rara: entram uma a uma, com mola; com movimento reduzido, já paradas no lugar. */
+/**
+ * As cartas da cena rara: entram uma a uma, com mola; com movimento reduzido, já paradas no lugar. Ficam em cordel, como as seis cenas
+ * (spec dos decks e raças, §3): o contexto da figura é o sem aparência.
+ */
 function Figure({ rare, reduced }: { rare: RareScene; reduced: boolean }) {
   const tall = rare.layout === 'cross';
   const cards = figureCards(rare);
   return (
+    <LooksContext.Provider value={CORDEL_LOOKS}>
     <div
       data-figura={rare.layout}
       className={`relative mx-auto mb-3 w-full ${tall ? 'h-[calc(var(--card-w)*3.3)]' : 'h-[calc(var(--card-w)*1.75)]'}`}
@@ -215,6 +220,7 @@ function Figure({ rare, reduced }: { rare: RareScene; reduced: boolean }) {
         );
       })}
     </div>
+    </LooksContext.Provider>
   );
 }
 

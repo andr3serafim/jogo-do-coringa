@@ -3,14 +3,15 @@
 // chega, e se ele falhar (F3), sem erro e sem aviso; uma nova montagem pede de novo. Um provedor só na mesa: provedores por lado
 // multiplicariam os pedidos e o cordel que pisca.
 //
-// O pacote que já chegou (por outro provedor, ou pelo pedido adiantado da tela) entra no próprio desenho, pelo `readyPack`: o provedor que
-// nasce depois dele, ou a troca para um deck já carregado, não passa por um quadro de cordel. Do `load.ts` só se usa o `loadPack` (o teste
-// do pacote que falha troca aquele módulo inteiro; o que está pronto mora no `ready.ts`).
+// O que chegou mora numa loja (`ready.ts`) que o provedor assina com `useSyncExternalStore`: o pacote que já chegou entra no próprio
+// desenho (o provedor que nasce depois dele, ou a troca para um deck já carregado, não passa por um quadro de cordel), e o que chega por
+// qualquer pedido (o adiantado da tela, a amostra do menu, uma nova tentativa depois de uma falha) acorda a mesa, mesmo entre o desenho e o
+// efeito. Do `load.ts` só se usa o `loadPack` (o teste do pacote que falha troca aquele módulo inteiro).
 import type { PlayerId } from '@coringa/engine';
 import type { Look } from '@coringa/protocol';
-import { useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useContext, useEffect, useMemo, useSyncExternalStore, type ReactNode } from 'react';
 import { loadPack } from '../../looks/load.ts';
-import { readyPack, readyPortrait } from '../../looks/ready.ts';
+import { readyState, subscribeReady } from '../../looks/ready.ts';
 import { packsOf, type PackId } from '../../model/looks.ts';
 import { LooksContext, type LooksValue } from './looks-context.ts';
 
@@ -38,38 +39,25 @@ function wantedPacks(looks: readonly Look[]): string {
 }
 
 export function LooksProvider({ look, owners = NO_OWNERS, children, packs: given }: LooksProviderProps) {
-  const [loaded, setLoaded] = useState<LooksValue['packs']>({});
+  const arrived = useSyncExternalStore(subscribeReady, readyState, readyState);
   const external = given !== undefined;
   const wanted = wantedPacks([look, ...Object.values(owners).filter((one): one is Look => one !== undefined)]);
   useEffect(() => {
     if (external || wanted === '') return;
-    let live = true;
-    // Sem pular o pacote que já está pronto: ele pode ter ficado pronto depois deste desenho e antes do efeito (o pedido adiantado da tela),
-    // e o desenho foi feito sem ele. O `then` de um pacote pronto resolve logo e acorda o desenho; se o estado já o tem, nada muda.
-    for (const id of wanted.split(',') as PackId[]) {
-      loadPack(id).then(
-        (urls) => {
-          if (live) setLoaded((prev) => (prev[id] === urls ? prev : { ...prev, [id]: urls }));
-        },
-        // F3: o pacote que não chega deixa a carta de cordel.
-        () => undefined,
-      );
-    }
-    return () => {
-      live = false;
-    };
+    // O que chega vai à loja, que acorda o desenho; F3: o pacote que não chega deixa a carta de cordel.
+    for (const id of wanted.split(',') as PackId[]) loadPack(id).catch(() => undefined);
   }, [external, wanted]);
   const ready = useMemo(() => {
     const packs: LooksValue['packs'] = {};
     const portraits: LooksValue['portraits'] = {};
     for (const id of (wanted === '' ? [] : wanted.split(',')) as PackId[]) {
-      const urls = readyPack(id) ?? loaded[id];
+      const urls = arrived.packs[id];
       if (urls !== undefined) packs[id] = urls;
-      const portrait = readyPortrait(id);
+      const portrait = arrived.portraits[id];
       if (portrait !== undefined) portraits[id] = portrait;
     }
     return { packs, portraits };
-  }, [wanted, loaded]);
+  }, [wanted, arrived]);
   const packs = given ?? ready.packs;
   const value = useMemo(
     () => ({ look, viewer: look, owners, packs, portraits: ready.portraits }),
