@@ -59,6 +59,15 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     `data-verso-deck` só existe fora do Cordel (o DOM do padrão fica o de hoje). **Ruling:** o `LookZone` aceita `owner={null}` (o evento sem
     dono, a Devastação sem campo): o lugar fica como está, sem duplicar o bloco das cópias — custo: nenhum. **Ruling:** as cores do verso
     (Bestiário `#2b1640`/`#4a2a6b`, Celestial `#14305c`/`#2c5a96`, o fio `#d9b25a`) e o retrato a 82% se conferem nas fotos da Task 6.
+    `pnpm check` verde depois dela (web 2753; JS inicial 183,9 KB).
+  - **Task 5 (o replay com as aparências gravadas, G3): código feito, falta rodar a medição uma vez.** O `ReplayViewer` veste
+    `game.looks` (`replayLooks`: o seu lado e o lugar de quem olha com o `me`, o do oponente com o `opponent`; sem `looks`, Cordel dos dois
+    lados) e não lê mais a preferência; o `ReplayScreen` pede os pacotes das gravadas. O `medir-cena.ts` grava `looks` na primeira partida da
+    fixture (`MEDIR_APARENCIA=bestiario:egipcio/celestial:egipcio`; sem barra, a mesma dos dois lados; o prefixo troca `:` e `/` por `-`), e
+    não mais o `coringa:prefs`. Testes: três casos novos no `replay-screen.test.tsx` (os dois lados e o Equipar, a preferência que não entra,
+    a partida sem `looks` em Cordel) e o `replay-prefetch.test.tsx` pelas gravadas. **O teste que mudou por desenho (G3):** o caso da F4
+    ("com a preferência fantasy, o replay mostra as cartas com arte") passou a gravar `looks` na partida em vez da preferência, e confere o
+    mesmo.
 
 ---
 

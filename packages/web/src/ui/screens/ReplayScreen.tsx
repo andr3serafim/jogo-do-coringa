@@ -45,11 +45,12 @@ function load(store: KeyValueStore, id: string): Loaded {
   if (track.frames.length === 0 && track.stoppedAt !== null) {
     return { kind: 'text', text: replayStoppedText(track.stoppedAt.step, track.stoppedAt.message) };
   }
-  const prefs = loadPrefs(store);
-  // Os pacotes da aparência, pedidos assim que a partida é achada e antes de a mesa montar, sem esperar nem falhar (decks e raças,
-  // fatia 2): a mesa que nasce depois deles já tem a arte. Pedir duas vezes (o modo estrito) é pedir uma: a promessa fica guardada.
-  requestLook(prefs.look);
-  return { kind: 'viewer', game, track, prefs };
+  // Os pacotes das aparências gravadas com a partida (G3), pedidos assim que ela é achada e antes de a mesa montar, sem esperar nem falhar
+  // (decks e raças, fatia 2): a mesa que nasce depois deles já tem a arte. Pedir duas vezes (o modo estrito) é pedir uma: a promessa fica
+  // guardada.
+  requestLook(game.looks?.me);
+  requestLook(game.looks?.opponent);
+  return { kind: 'viewer', game, track, prefs: loadPrefs(store) };
 }
 
 export default function ReplayScreen({ store, id }: ReplayScreenProps) {

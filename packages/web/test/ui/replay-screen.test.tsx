@@ -5,6 +5,10 @@ import { RULES_VERSION, type PlayerId } from '@coringa/engine';
 import { act, cleanup as unmountAll, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { urls as bestiarioUrls } from '../../src/looks/bestiario/index.ts';
+import { urls as celestialUrls } from '../../src/looks/celestial/index.ts';
+import { portrait, urls as egipcioUrls } from '../../src/looks/egipcio/index.ts';
+import { loadPack, resetPacks } from '../../src/looks/load.ts';
 import { EMPTY_HISTORY, roomNames } from '../../src/model/history.ts';
 import { recordPastGame, type PastGame } from '../../src/model/past-games.ts';
 import { buildTrack, type ReplayTrack } from '../../src/model/replay-track.ts';
@@ -972,16 +976,80 @@ describe('<ReplayViewer />: cenas de Ataque Absoluto em passos seguidos', () => 
 });
 
 describe('o replay e a aparência (decks e raças, fatia 1)', () => {
-  it('com a preferência fantasy, o replay mostra as cartas com arte (F4: a aparência de agora, dos dois lados)', async () => {
+  // A F4 da fatia 1 (a aparência de agora) saiu com a G3 da fatia 2: o replay veste as aparências gravadas com a partida.
+  it('com as aparências gravadas na partida, o replay mostra as cartas com arte', async () => {
     fakeUi();
     const store = memoryStore();
-    savePrefs(store, { ...DEFAULT_PREFS, look: { deck: 'bestiario', race: 'egipcio' } });
-    const game = recordPastGame(store, entry(), 1_000)!;
+    const fantasy = { deck: 'bestiario', race: 'egipcio' } as const;
+    const game = recordPastGame(store, entry({ looks: { me: fantasy, opponent: fantasy } }), 1_000)!;
     render(<ReplayScreen store={store} id={game.id} />);
     await act(async () => vi.dynamicImportSettled());
     await act(async () => vi.dynamicImportSettled());
     const images = [...document.querySelectorAll('[data-card-id] img')].map((img) => img.getAttribute('src') ?? '');
     expect(images.length).toBeGreaterThan(0);
     for (const src of images) expect(src).toMatch(/\/looks\/(bestiario|egipcio)\//);
+  });
+});
+
+describe('o replay com as aparências gravadas (decks e raças, fatia 2, G3)', () => {
+  const MINE = { deck: 'bestiario', race: 'egipcio' } as const;
+  const THEIRS = { deck: 'celestial', race: 'bufao' } as const;
+  const LOOKS = { me: MINE, opponent: THEIRS };
+  const ofPack = (urls: Record<string, string | undefined>) => new Set(Object.values(urls).filter((url): url is string => url !== undefined));
+  const BESTIARIO = ofPack(bestiarioUrls);
+  const CELESTIAL = ofPack(celestialUrls);
+  const EGIPCIO = ofPack(egipcioUrls);
+  const srcs = (root: ParentNode, selector = '[data-card-id] img'): string[] =>
+    [...root.querySelectorAll(selector)].map((img) => img.getAttribute('src') ?? '');
+  const theirs = () => screen.getByRole('region', { name: 'Campo de Duda' });
+  const mine = () => screen.getByRole('region', { name: 'Seu campo' });
+  const portraitImage = (side: 'voce' | 'oponente') => document.querySelector(`[data-retrato="${side}"] img`);
+
+  // O cache dos pacotes é do módulo; os três ficam prontos antes da tela, e o primeiro desenho já tem a arte.
+  beforeEach(async () => {
+    resetPacks();
+    await Promise.all([loadPack('bestiario'), loadPack('celestial'), loadPack('egipcio')]);
+  });
+  afterEach(() => resetPacks());
+
+  /** Abre a partida gravada e vai à rodada 3, com cartas nos dois campos. */
+  async function openAtRound3(extra: Partial<Entry>, prefsLook?: { deck: 'bestiario' | 'celestial'; race: 'bufao' | 'egipcio' }) {
+    const user = fakeUi();
+    const store = memoryStore();
+    if (prefsLook) savePrefs(store, { ...DEFAULT_PREFS, look: prefsLook });
+    const game = recordPastGame(store, entry(extra), 1_000)!;
+    const view = render(<ReplayScreen store={store} id={game.id} />);
+    const equip = srcs(document);
+    await user.selectOptions(screen.getByLabelText('Rodada'), '3');
+    return { ...view, equip };
+  }
+
+  it('o seu lado e o seu Equipar com a sua; o lado do oponente com a dele; o retrato dele, o Coringa', async () => {
+    const { equip } = await openAtRound3({ looks: LOOKS });
+    // O começo (o Equipar): só o que é seu aparece com arte.
+    for (const src of equip) expect(BESTIARIO.has(src) || EGIPCIO.has(src), src).toBe(true);
+    const own = srcs(mine());
+    expect(own.some((src) => BESTIARIO.has(src))).toBe(true);
+    for (const src of own) expect(BESTIARIO.has(src) || EGIPCIO.has(src), src).toBe(true);
+    const other = srcs(theirs());
+    expect(other.some((src) => CELESTIAL.has(src))).toBe(true);
+    // O Bufão dele: as especiais dele são de cordel.
+    for (const src of other) expect(CELESTIAL.has(src), src).toBe(true);
+    expect(portraitImage('voce')).toHaveAttribute('src', portrait);
+    expect(portraitImage('oponente')).toBeNull();
+  });
+
+  it('a preferência de agora não entra: com ela em Celestial, a partida gravada em Bestiário segue em Bestiário', async () => {
+    await openAtRound3({ looks: LOOKS }, { deck: 'celestial', race: 'egipcio' });
+    const own = srcs(mine());
+    expect(own.some((src) => BESTIARIO.has(src))).toBe(true);
+    expect(own.some((src) => CELESTIAL.has(src))).toBe(false);
+  });
+
+  it('a partida sem aparências (de antes da fatia 2, online, tutorial) fica em Cordel, mesmo com a preferência fantasy', async () => {
+    const { container, equip } = await openAtRound3({}, { deck: 'bestiario', race: 'egipcio' });
+    expect(equip).toEqual([]);
+    expect(container.querySelectorAll('img')).toHaveLength(0);
+    expect(document.querySelectorAll('[data-verso-deck]')).toHaveLength(0);
   });
 });

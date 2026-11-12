@@ -16,7 +16,7 @@
 // - "Tocar" avança um passo quando passaram 700 ms E o palco assentou. Um passo sem batida (o Equipar do oponente, um Equipar
 //   vazio) nunca avisa que assentou, então a pergunta "está ocupado?" é feita ao palco quando os 700 ms acabam: se não está,
 //   avança; se está, espera o `onSettled`. Pausar, navegar na mão ou sair da tela cancelam o timer e a espera.
-import { DEFAULT_LOOK, type RoomMessage, type SeatInfo, type StateMessage } from '@coringa/protocol';
+import { DEFAULT_LOOK, type Look, type RoomMessage, type SeatInfo, type StateMessage } from '@coringa/protocol';
 import { RULES_VERSION, type PlayerId } from '@coringa/engine';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DIVERGED_TEXT, myName, opponentName, OTHER_RULES_VERSION_TEXT, replayStoppedText } from '../../model/past-games-copy.ts';
@@ -115,6 +115,17 @@ function replayRoom(game: PastGame): RoomMessage {
   };
 }
 
+/**
+ * As aparências do replay (decks e raças, fatia 2, G3): as gravadas com a partida, o seu lado e o lugar de quem olha com a sua, o lado do
+ * oponente com a dele. Sem elas (as partidas de antes da fatia 2, as online e as do tutorial), Cordel dos dois lados. A preferência de agora
+ * não entra.
+ */
+function replayLooks(game: PastGame): { look: Look; owners: Partial<Record<PlayerId, Look>> | undefined } {
+  const { looks } = game;
+  if (looks === undefined) return { look: DEFAULT_LOOK, owners: undefined };
+  return { look: looks.me, owners: { [game.seat]: looks.me, [game.seat === 'p1' ? 'p2' : 'p1']: looks.opponent } };
+}
+
 export function ReplayViewer(props: ReplayViewerProps) {
   // Uma trilha sem quadro nenhum (a partida nem foi criada) não tem o que mostrar: a `ReplayScreen` diz por quê.
   if (props.track.frames.length === 0) return null;
@@ -127,6 +138,7 @@ function Playback({ game, track, prefs }: ReplayViewerProps) {
   const dispatch = useCallback((action: NavAction) => setNav((prev) => reduce(track, prev, action)), [track]);
 
   const room = useMemo(() => replayRoom(game), [game]);
+  const looks = useMemo(() => replayLooks(game), [game]);
   const snapshot = useMemo(
     () => replaySnapshot(track, nav.message, nav.frame, room, prefs),
     [track, nav.message, nav.frame, room, prefs],
@@ -209,8 +221,8 @@ function Playback({ game, track, prefs }: ReplayViewerProps) {
 
   return (
     <div ref={root} className="contents">
-      {/* A aparência de agora, dos dois lados (decks e raças, fatia 1, F4); a fatia 2 a troca pela gravada com a partida. */}
-      <LooksProvider look={prefs.look ?? DEFAULT_LOOK}>
+      {/* As aparências gravadas com a partida (decks e raças, fatia 2, G3): cada lado com a do dono. */}
+      <LooksProvider look={looks.look} owners={looks.owners}>
         <Stage snapshot={snapshot} reducedMotion={reducedMotion} onSettled={onSettled}>
           <Table
             snapshot={snapshot}

@@ -12,11 +12,14 @@
 // - `MEDIR_MS`: a duração da cena; `MEDIR_FOTOS`: os instantes das fotos, em ms depois do clique (opcional).
 // - `MEDIR_SAIDA`: a pasta das fotos (`<largura>-<ms>.png`) e da medida (`<largura>.json`). Fora do repositório.
 // - `MEDIR_PORTA` (opcional): a porta do servidor da medição, quando a 8787 está ocupada (ver `medir.config.ts`).
-// - `MEDIR_APARENCIA` (opcional): `<deck>:<raça>` (ex.: `bestiario:egipcio`), gravado em `coringa:prefs` antes de abrir o replay, que veste
-//   a aparência de agora (decks e raças, fatia 1, F4). A medida espera as imagens das cartas carregarem. Sem a variável, nada muda.
+// - `MEDIR_APARENCIA` (opcional): `<deck>:<raça>` (ex.: `bestiario:egipcio`), gravado como as aparências (`looks`) da primeira partida
+//   da fixture antes de abrir o replay, que veste as gravadas (decks e raças, fatia 2, G3). Sem barra, a mesma dos dois lados; com ela, a sua
+//   e a do oponente (`bestiario:egipcio/celestial:egipcio`; `cordel` vale de um lado). A medida espera as imagens das cartas carregarem.
+//   Sem a variável, a fixture fica como está (sem `looks`: Cordel).
 // - `MEDIR_APARENCIAS` e `MEDIR_REPETICOES` (opcionais): para comparar aparências na mesma build e no mesmo servidor, uma lista
-//   (`cordel,bestiario:egipcio`; `cordel` é o padrão, sem nada gravado) medida em alternância (A, B, A, B…) tantas vezes quanto
-//   `MEDIR_REPETICOES` (padrão 1). Os arquivos ganham o prefixo `<aparência>-<repetição>-` (`cordel-2-1366.json`).
+//   (`cordel,bestiario:egipcio/celestial:egipcio`; `cordel` é o padrão, sem nada gravado) medida em alternância (A, B, A, B…) tantas
+//   vezes quanto `MEDIR_REPETICOES` (padrão 1). Os arquivos ganham o prefixo `<aparência>-<repetição>-`, com o `:` e a `/` trocados por
+//   `-` (`bestiario-egipcio-celestial-egipcio-2-1366.json`).
 // - `MEDIR_PERFIL=1` (opcional): grava também o perfil do Chromium do clique medido em `<largura>-perfil.json` (abre no painel Performance do DevTools). O
 //   rastreamento pesa: com ele, os números da medida não valem. Meça sem ele e use o perfil só para ver do que é feito cada quadro.
 //
@@ -44,13 +47,35 @@ const lookList = process.env.MEDIR_APARENCIAS;
 const repetitions = Number(process.env.MEDIR_REPETICOES ?? '1');
 /** As medidas, na ordem em que rodam: cada repetição passa por todas as aparências (A, B, A, B…). Sem lista, uma só, sem prefixo. */
 const looks = (lookList ?? process.env.MEDIR_APARENCIA ?? '').split(',').map((look) => look.trim());
+interface MeasuredLook {
+  deck: string;
+  race: string;
+}
+const CORDEL: MeasuredLook = { deck: 'cordel', race: 'bufao' };
+/** `<deck>:<raça>` → a aparência; `cordel` ou vazio → nenhuma (o padrão). */
+function parseLook(text: string): MeasuredLook | null {
+  if (text === '' || text === 'cordel') return null;
+  const [deck, race] = text.split(':');
+  if (!deck || !race) throw new Error(`aparência inválida: "${text}" (o uso está no começo de e2e/medir-cena.ts)`);
+  return { deck, race };
+}
 const runs = Array.from({ length: repetitions }, (_, index) => looks.map((look) => ({ look, rep: index + 1 })))
   .flat()
   .map(({ look, rep }) => {
-    const [deck, race] = look === 'cordel' ? [] : look.split(':');
-    const prefix = lookList === undefined && repetitions === 1 ? '' : `${look === '' ? 'cordel' : look.replace(':', '-')}-${rep}-`;
-    return { deck, race, prefix };
+    const [mine = '', theirs = mine] = look.split('/');
+    const me = parseLook(mine);
+    const opponent = parseLook(theirs);
+    const prefix = lookList === undefined && repetitions === 1 ? '' : `${look === '' ? 'cordel' : look.replaceAll(/[:/]/g, '-')}-${rep}-`;
+    return { looks: me === null && opponent === null ? null : { me: me ?? CORDEL, opponent: opponent ?? CORDEL }, prefix };
   });
+
+/** A fixture com as aparências gravadas na primeira partida (a que a medida abre). */
+function fixtureWith(gameLooks: { me: MeasuredLook; opponent: MeasuredLook } | null): string {
+  if (gameLooks === null) return fixture;
+  const games = JSON.parse(fixture) as Array<Record<string, unknown>>;
+  games[0] = { ...games[0], looks: gameLooks };
+  return JSON.stringify(games);
+}
 /** O que o perfil grava: a linha do tempo do DevTools e as amostras de JS (para saber de qual função é cada trecho). */
 const TRACE_CATEGORIES = ['devtools.timeline', 'disabled-by-default-devtools.timeline', 'disabled-by-default-devtools.timeline.frame', 'v8.execute', 'disabled-by-default-v8.cpu_profiler', 'disabled-by-default-devtools.timeline.invalidationTracking'];
 /** Depois do toque, a janela em que o passo chega à mesa. */
@@ -59,7 +84,7 @@ const fixture = readFileSync(new URL(`./fixtures/${fixtureName}.json`, import.me
 const gameId = (JSON.parse(fixture) as Array<{ id: string }>)[0]!.id;
 mkdirSync(out, { recursive: true });
 
-for (const { deck: lookDeck, race: lookRace, prefix } of runs) {
+for (const { looks: gameLooks, prefix } of runs) {
   for (const viewport of [
     { width: 1366, height: 768 },
     { width: 360, height: 640 },
@@ -67,11 +92,7 @@ for (const { deck: lookDeck, race: lookRace, prefix } of runs) {
     test(`${prefix}${viewport.width} × ${viewport.height}`, async ({ page, browser }) => {
       test.setTimeout(90_000);
       await page.setViewportSize(viewport);
-      await page.addInitScript((games) => window.localStorage.setItem('coringa:partidas', games), fixture);
-      if (lookDeck && lookRace) {
-        const prefs = JSON.stringify({ autoPass: true, reduceMotion: false, sound: true, look: { deck: lookDeck, race: lookRace } });
-        await page.addInitScript((value) => window.localStorage.setItem('coringa:prefs', value), prefs);
-      }
+      await page.addInitScript((games) => window.localStorage.setItem('coringa:partidas', games), fixtureWith(gameLooks));
       await page.goto(`/partidas/${gameId}`);
       await page.getByRole('combobox', { name: 'Rodada' }).selectOption(round);
       const next = replayControl(page, 'Próximo passo');
@@ -83,7 +104,7 @@ for (const { deck: lookDeck, race: lookRace, prefix } of runs) {
       const idle = page.locator('[data-palco]:not([data-ocupado])');
       await expect(idle).toHaveCount(1);
       // Com uma aparência de arte, a medida começa com as imagens das cartas já carregadas (o pacote chega por `import()`).
-      if (lookDeck && lookRace) {
+      if (gameLooks !== null) {
         await expect
           .poll(() =>
             page.evaluate(() => {
