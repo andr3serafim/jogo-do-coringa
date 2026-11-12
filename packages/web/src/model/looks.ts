@@ -25,6 +25,16 @@ export function artOf(card: Card, look: Look): { pack: PackId; key: ArtKey } | n
   return look.race === 'bufao' ? null : { pack: look.race, key: card.kind };
 }
 
+/**
+ * A aparência do bot no treino (fatia 2, G1, que substitui a §7.1 da spec): com o Cordel, o Cordel com o Bufão (o treino padrão fica
+ * idêntico ao de hoje); com um deck de arte, o outro deck de arte, com a raça Egípcia. Sempre um objeto novo. Calculada da sua a cada
+ * desenho (G2): trocar o seu deck troca o dele.
+ */
+export function botLook(mine: Look): Look {
+  if (mine.deck === 'cordel') return { deck: 'cordel', race: 'bufao' };
+  return { deck: mine.deck === 'bestiario' ? 'celestial' : 'bestiario', race: 'egipcio' };
+}
+
 /** Os pacotes que uma aparência pede, sem repetir (nenhum para o padrão). */
 export function packsOf(look: Look): PackId[] {
   const packs: PackId[] = [];

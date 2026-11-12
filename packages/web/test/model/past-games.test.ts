@@ -1105,3 +1105,42 @@ describe('apagar', () => {
     });
   });
 });
+
+describe('as aparências na partida guardada (decks e raças, fatia 2, G3)', () => {
+  const LOOKS = { me: { deck: 'bestiario', race: 'egipcio' }, opponent: { deck: 'celestial', race: 'egipcio' } } as const;
+
+  it('a entrada sem looks carrega sem o campo, igual a hoje', () => {
+    const store = fakeStore();
+    const game = recordPastGame(store, entry(), 1_000)!;
+    expect(game).not.toHaveProperty('looks');
+    expect(loadPastGames(store)[0]).not.toHaveProperty('looks');
+  });
+
+  it('gravar e ler devolve as aparências dos dois lados', () => {
+    const store = fakeStore();
+    const game = recordPastGame(store, entry({ looks: LOOKS }), 1_000)!;
+    expect(game.looks).toEqual(LOOKS);
+    expect(loadPastGames(store)[0]!.looks).toEqual(LOOKS);
+    expect(findPastGame(store, game.id)!.looks).toEqual(LOOKS);
+  });
+
+  it('cada lado passa pelo normalizeLook: o id desconhecido vira o padrão, e o Cordel trava o Bufão', () => {
+    const store = fakeStore();
+    put(store, [
+      { ...rawGame('a'), looks: { me: { deck: 'dragao', race: 'egipcio' }, opponent: { deck: 'cordel', race: 'egipcio' } } },
+      { ...rawGame('b'), looks: { me: { deck: 'celestial', race: 'faraonico', extra: 1 } } },
+    ]);
+    const [a, b] = loadPastGames(store);
+    expect(a!.looks).toEqual({ me: { deck: 'cordel', race: 'bufao' }, opponent: { deck: 'cordel', race: 'bufao' } });
+    expect(b!.looks).toEqual({ me: { deck: 'celestial', race: 'bufao' }, opponent: { deck: 'cordel', race: 'bufao' } });
+  });
+
+  it.each([['x'], [null], [42], [[LOOKS.me, LOOKS.opponent]]])('com looks = %j, a linha vale inteira e fica sem o campo', (looks) => {
+    const store = fakeStore();
+    put(store, [{ ...rawGame('a'), looks }]);
+    const games = loadPastGames(store);
+    expect(games).toHaveLength(1);
+    expect(games[0]).toEqual({ ...rawGame('a') });
+    expect(games[0]).not.toHaveProperty('looks');
+  });
+});

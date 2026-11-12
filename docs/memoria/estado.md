@@ -6,8 +6,8 @@
 ## Agora
 
 - **A fatia 2 dos decks (o dono por lado): em execução** desde 2026-11-12, numa sessão nova do Claude Code ("execute o plano da fatia 2 dos
-  decks", o autor), inline (`superpowers:executing-plans`), tarefa por tarefa, teste primeiro. **Feita: a Task 0. Em curso: a Task 1**
-  (os 8 Minor; o código está commitado, falta o `pnpm check` completo, o E2E `looks.spec.ts` e conferir o smoke à mão; depois, a Task 2). O andamento de cada tarefa, com as `Ruling:`, vai no `diario.md` 2026-11-12 (2). O ledger
+  decks", o autor), inline (`superpowers:executing-plans`), tarefa por tarefa, teste primeiro. **Feitas: as Tasks 0, 1 e 2. Próxima: a Task 3**
+  (o contexto: os donos, o `LookZone` e o retrato). O andamento de cada tarefa, com as `Ruling:`, vai no `diario.md` 2026-11-12 (2). O ledger
   está em `.superpowers/sdd/2026-11-12-decks-fatia-2/` (fora do git). Quem assumir: retome na primeira tarefa sem "feita" no diário.
 - **O plano aprovado:** "Aprovo como está mas irei implementar em outra sessão"
   (o autor, 2026-11-12; `decisoes.md` 2026-11-12 (1)): as escolhas G1 a G8 como recomendadas.

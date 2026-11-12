@@ -16,7 +16,9 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     `.claude/` e do `jogar-treino.bat` do autor. `pnpm check` verde (web: 2697 testes; JS inicial 182,7 KB). **Armadilha:** a primeira
     rodada caiu no vitest da web com um "Failed" seco, sem nenhum teste vermelho; sozinha, a web passou inteira, e a segunda rodada do
     `pnpm check` também. Se voltar, rode a web sozinha antes de caçar um teste.
-  - **Task 1 (os 8 Minor da fatia 1, G5): código feito, check completo em curso.** O cache síncrono num módulo à parte,
+  - **Task 1 (os 8 Minor da fatia 1, G5): feita** (`31791b2`; `pnpm check` verde, web 2710 testes, JS inicial 183,0 KB; o E2E
+    `looks.spec.ts` 3 de 3; o smoke reprova à mão um nome de `.webp` no JS inicial e um `.webp` no `index.html`; um controle temporário
+    provou que o filtro do E2E do tutorial pega o `font-*.css`, os `.webp` e a Cinzel no treino). O cache síncrono num módulo à parte,
     `src/looks/ready.ts` (`readyPack`), que o `loadPack` preenche e o `load.ts` reexporta; a promessa rejeitada sai do mapa e o pedido
     seguinte tenta de novo (muda a `Ruling:` da Task 3 da fatia 1, como a G5 manda); `resetPacks(fake?)` só para os testes. O provedor lê o
     pronto a cada desenho (o que nasce depois do pacote e a troca para um deck já carregado não passam pelo cordel). `requestLook` (no
@@ -28,7 +30,13 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     `load.ts`, porque o `training-looks-fail.test.tsx` troca o `load.ts` inteiro por um mock com só o `loadPack` (o vitest lança na exportação
     ausente) e o plano manda não mexer nesse teste — custo: um módulo minúsculo a mais. **Ruling:** o commit vai antes do `pnpm check`
     completo (como na fatia 1), para o estado ficar commitado antes do job longo; o pre-commit já roda lint, typecheck e os testes
-    relacionados. **Ruling:** o Minor 8 é só teste (passou de primeira: não havia erro, faltava a conferência).
+    relacionados. **Ruling:** o Minor 8 é só teste (passou de primeira: não havia erro, faltava a conferência). **Ruling:** o pedido do
+    `ReplayScreen` fica no `load()` (o inicializador do estado, antes de a mesa desenhar): num efeito da tela ele viria depois do efeito do
+    provedor (os filhos rodam primeiro) e não adiantaria nada — custo: um efeito idempotente durante o desenho.
+  - **Task 2 (o modelo: o bot e a partida guardada): feita.** `botLook` em `model/looks.ts` (G1: Cordel → Cordel + Bufão; Bestiário ↔
+    Celestial, sempre com o Egípcio; sempre um objeto novo) e `PastGame.looks?: { me, opponent }` (`PastLooks`) no `past-games.ts`: lido com
+    `normalizeLook` em cada lado quando é objeto; fora disso o campo fica de fora e a linha vale (nunca a derruba). O `attachReplay` passa pelo
+    mesmo `parsePastGame` e guarda o campo. Testes novos em `looks.test.ts` (as seis aparências) e `past-games.test.ts`; modelo 1256 testes.
 
 ---
 

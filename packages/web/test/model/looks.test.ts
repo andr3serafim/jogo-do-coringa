@@ -1,7 +1,7 @@
 import type { Card, Rank } from '@coringa/engine';
 import { DEFAULT_LOOK, type Look } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
-import { artOf, AURA, packsOf, RACE_TIER, tierOf } from '../../src/model/looks.ts';
+import { artOf, AURA, botLook, packsOf, RACE_TIER, tierOf } from '../../src/model/looks.ts';
 
 const num = (value: Rank): Card => ({ id: `n${value}`, kind: 'NUM', value, suit: 'copas' });
 const K: Card = { id: 'k', kind: 'K', suit: 'paus' };
@@ -75,5 +75,25 @@ describe('a aura por faixa (spec dos decks §4.1)', () => {
 
   it('as especiais de raça usam a faixa 3', () => {
     expect(RACE_TIER).toBe(3);
+  });
+});
+
+describe('a aparência do bot no treino (fatia 2, G1)', () => {
+  it.each([
+    [{ deck: 'cordel', race: 'bufao' }, { deck: 'cordel', race: 'bufao' }],
+    [{ deck: 'cordel', race: 'egipcio' }, { deck: 'cordel', race: 'bufao' }],
+    [{ deck: 'bestiario', race: 'bufao' }, { deck: 'celestial', race: 'egipcio' }],
+    [{ deck: 'bestiario', race: 'egipcio' }, { deck: 'celestial', race: 'egipcio' }],
+    [{ deck: 'celestial', race: 'bufao' }, { deck: 'bestiario', race: 'egipcio' }],
+    [{ deck: 'celestial', race: 'egipcio' }, { deck: 'bestiario', race: 'egipcio' }],
+  ] as const)('com %o, o bot joga com %o', (mine, bot) => {
+    expect(botLook(mine)).toEqual(bot);
+  });
+
+  it('a saída nunca é o objeto congelado do padrão, nem o de entrada', () => {
+    expect(botLook(DEFAULT_LOOK)).not.toBe(DEFAULT_LOOK);
+    expect(Object.isFrozen(botLook(DEFAULT_LOOK))).toBe(false);
+    const mine: Look = { deck: 'cordel', race: 'bufao' };
+    expect(botLook(mine)).not.toBe(mine);
   });
 });

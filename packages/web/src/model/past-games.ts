@@ -4,7 +4,7 @@
 // outra versão ou não caber, e a tela segue.
 // `TrainingLevel` entra só como tipo: o módulo da sala local carrega os bots e fica fora do JavaScript inicial, onde este mora.
 import type { GameResult, PlayerId, Replay } from '@coringa/engine';
-import type { Outcome, OutcomeCause, Score } from '@coringa/protocol';
+import { normalizeLook, type Look, type Outcome, type OutcomeCause, type Score } from '@coringa/protocol';
 import type { TrainingLevel } from './local-room.ts';
 import type { KeyValueStore } from './storage.ts';
 
@@ -25,6 +25,12 @@ export type LegacyResult = { kind: 'WIN'; winner: PlayerId; reason: 'ANTI_STALL'
 export type StoredResult = GameResult | LegacyResult;
 export type StoredOutcome = Omit<Outcome, 'result'> & { result: StoredResult | null };
 
+/** As aparências da mesa quando a partida acabou (decks e raças, fatia 2, G3): a de quem guardou e a do oponente. */
+export interface PastLooks {
+  me: Look;
+  opponent: Look;
+}
+
 export interface PastGame {
   /** Curto e seguro para a URL (`/partidas/<id>`). */
   id: string;
@@ -43,6 +49,11 @@ export interface PastGame {
   /** A `RULES_VERSION` de quando foi jogada. Outra versão não invalida a entrada: o aviso é da tela. */
   rulesVersion: number;
   replay?: Replay;
+  /**
+   * As aparências, que o replay veste. Só o treino fora do tutorial as grava (G4); sem elas (as partidas de antes da fatia 2, as online e
+   * as do tutorial), o replay fica em Cordel dos dois lados.
+   */
+  looks?: PastLooks;
 }
 
 // --- Validação à mão (o Zod fica só no servidor) ---
@@ -112,13 +123,15 @@ function isReplay(value: unknown): value is Replay {
  */
 function parsePastGame(value: unknown): PastGame | null {
   if (!isRecord(value)) return null;
-  const { id, key, date, mode, seat, names, outcome, rounds, score, rulesVersion, replay } = value;
+  const { id, key, date, mode, seat, names, outcome, rounds, score, rulesVersion, replay, looks } = value;
   if (!isText(id) || !isText(seat) || (key !== undefined && typeof key !== 'string')) return null;
   if (!isNumber(date) || !isNumber(rounds) || !isNumber(rulesVersion)) return null;
   if (!isMode(mode) || !isNames(names) || !isOutcome(outcome) || !isScore(score)) return null;
   const game: PastGame = { id, date, mode, seat, names, outcome, rounds, score: { p1: score.p1, p2: score.p2 }, rulesVersion };
   if (key !== undefined) game.key = key;
   if (replay !== undefined && isReplay(replay)) game.replay = replay;
+  // As aparências nunca derrubam a linha: um valor que não é objeto fica de fora, e cada lado vira uma aparência válida.
+  if (isRecord(looks)) game.looks = { me: normalizeLook(looks.me), opponent: normalizeLook(looks.opponent) };
   return game;
 }
 
