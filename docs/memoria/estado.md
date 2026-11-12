@@ -1,26 +1,26 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-12**, a fatia 2 dos decks executada (Tasks 0 a 6), com o revisor (G8) em curso. Antes de
-> seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
+> Sobrescrito a cada atualização. **Última: 2026-11-12**, a fatia 2 dos decks pronta na branch, revisada e corrigida; o merge espera o
+> autor. Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **A fatia 2 dos decks (o dono por lado): Tasks 0 a 6 feitas; o revisor (G8) em curso.** "execute o plano da fatia 2 dos decks" (o autor,
-  2026-11-12), pelo plano `docs/superpowers/plans/2026-11-12-decks-fatia-2.md`, aprovado com as G1 a G8 (`decisoes.md` 2026-11-12 (1)).
-  - **Branch:** `feat/decks-fatia-2`, no checkout principal (`D:\andr3\jogo-coringa`), saída da `main` em `2f2aa51`, no GitHub até `5c16dff`
-    (o pre-push com o `pnpm check` verde).
-  - **Verificado:** `pnpm check` (web 2758 testes; JS inicial 183,8 KB), `pnpm e2e` inteiro (113 passaram, 4 pulados), a medição G7 na
-    tomada, com a `main` e a branch na mesma sessão (passa nas quatro: `notas/medicao-decks-fatia-2.md`), e as fotos em
-    `.superpowers/fotos-decks-fatia-2/` (nesta máquina, fora do git). A CI do GitHub ainda não foi lida.
-  - **Próximo passo exato:** ler o parecer do revisor (um subagente novo, lendo `2f2aa51..5c16dff`); corrigir os Critical e Important nesta
-    branch, cada um com o teste que falha antes; os Minor vão ao diário como adiados. Depois, conferir as duas CI do GitHub no topo da branch e
-    levar ao autor o merge (fast-forward ou squash). O andamento de cada tarefa, com as `Ruling:`, está no `diario.md` 2026-11-12 (2); o
-    ledger em `.superpowers/sdd/2026-11-12-decks-fatia-2/` (fora do git).
+- **A fatia 2 dos decks (o dono por lado): pronta na branch, esperando o "sim" do autor para o merge.** "execute o plano da fatia 2 dos
+  decks" (o autor, 2026-11-12), pelo plano `docs/superpowers/plans/2026-11-12-decks-fatia-2.md`, aprovado com as G1 a G8 (`decisoes.md`
+  2026-11-12 (1)). O que mudou na mesa, as `Ruling:` e as armadilhas: `diario.md` 2026-11-12 (2); o que a execução decidiu: a §16 da spec.
+  - **Branch:** `feat/decks-fatia-2`, no checkout principal (`D:\andr3\jogo-coringa`), saída da `main` em `2f2aa51`, no GitHub (o pre-push
+    com o `pnpm check` verde).
+  - **Verificado:** `pnpm check` (web 2758+ testes; JS inicial 183,8 KB), `pnpm e2e` inteiro (113 passaram, 4 pulados, antes das correções
+    da revisão; o `looks.spec.ts` de novo depois delas, 6 de 6), a medição G7 na tomada com a `main` e a branch na mesma sessão (passa nas
+    quatro: `notas/medicao-decks-fatia-2.md`), as fotos em `.superpowers/fotos-decks-fatia-2/` (nesta máquina, fora do git) e a revisão
+    da branch inteira (nenhum Critical nem Important; os 6 Minor corrigidos nesta branch).
+  - **Próximo passo exato:** conferir as duas CI do GitHub (`check` e `e2e`) no topo da branch (pela API pública, com `curl`); com o "sim"
+    do autor, o merge por fast-forward da `main` (ou squash), o push da `main` e a CI dela; depois, apagar o ledger
+    `.superpowers/sdd/2026-11-12-decks-fatia-2/` (as `Ruling:` estão no diário). Em seguida, a Fila (a fatia 3, com plano aprovado antes).
   - **O que não pode regredir:** com a preferência padrão, o bot em Cordel (G1), nenhum `img` de carta, o verso de listras sem
-    `data-verso-deck` e o `<Coringa>` no placar; o treino em Cordel não grava `looks` (a linha fica a de hoje). O `LookZone` não põe nó
-    no DOM, e há um provedor só. O provedor e o placar só importam `loadPack` do `load.ts` (o que está pronto mora no `ready.ts`), e o efeito
-    do provedor passa sempre pelo `loadPack(...).then` (a corrida do pacote que fica pronto entre o desenho e o efeito). Nos testes,
-    `resetPacks()` no `beforeEach`.
+    `data-verso-deck` e o `<Coringa>` no placar; o treino em Cordel não grava `looks`. O `LookZone` não põe nó no DOM, e há um provedor
+    só. O que chegou mora na loja do `ready.ts`, que o provedor assina (`useSyncExternalStore`); o provedor e o placar só importam
+    `loadPack` do `load.ts`. Nos testes, `resetPacks()` no `beforeEach`. As cenas raras (a figura) ficam em cordel.
 - **A Devastação com arte não passa no celular** (medida em 2026-11-12, na tomada): 46 e 47 quadros/s com arte, contra 55 do Cordel; no PC,
   50 e 51 contra 50. O perfil: o recálculo de estilo das cartas da mesa inteira, umas 70 vezes na cena, já acontece no Cordel e dobra com a face
   com arte; a imagem numa camada própria foi medida e não muda nada. Tudo em `notas/medicao-decks-fatia-1.md`, seção "Antes da fatia 2", e
@@ -54,7 +54,11 @@
 - **A Devastação com arte no celular** (46 e 47 quadros/s, a meta é 50): consertar antes da fatia 2 (a recomendação: um bloco curto para
   cortar o recálculo de estilo da mesa inteira, que ajuda o Cordel também) ou não. Sem resposta, a fatia 2 segue pela G7. Não segura o deploy:
   só sente quem escolheu um deck de arte, no celular, nessa cena.
-- **Jogar a fatia 2** quando ela chegar à `main` (o bot com a aparência dele no treino).
+- **O merge da fatia 2** ("sim, merge"), com as duas CI verdes. E um desvio para ele saber, apontado pelo revisor: na Task 1 o commit foi
+  antes do `pnpm check` completo (o pre-commit rodou a versão rápida; o check completo passou logo depois), contra o texto "pnpm check antes
+  de cada commit". Não teve efeito, e o squash apagaria esses commits.
+- **Jogar a fatia 2** quando ela chegar à `main` (no treino, com um deck de arte: o bot no outro deck, com o Egípcio; os versos e o retrato
+  dele; o replay com as aparências gravadas).
 - **O deploy** (`pnpm deploy:server`, só ele), agora que o bloco C está na `main`: fecha as salas online abertas (`STATE_SCHEMA` 6), e as
   partidas guardadas de antes abrem com o aviso de versão (`RULES_VERSION` 5).
 - **Jogar** os blocos A, B, C e E e as placas novas. O treino mostra tudo; o online só depois do deploy. As frases novas das placas são de
