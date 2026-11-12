@@ -1,11 +1,16 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-12**, a fatia 1 dos decks na `main`; nada em curso. Antes de seguir, confira se não há
-> versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
+> Sobrescrito a cada atualização. **Última: 2026-11-12**, a medição da Devastação com arte e o plano da fatia 2 dos decks, em curso. Antes de
+> seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Nada em curso.** O checkout principal está na `main`.
+- **Em curso, na branch `feat/decks-fatia-2`** (saída da `main` em `2f2aa51`; o autor disse "ok, prossiga" depois do merge da fatia 1):
+  1. **A medição da Devastação com arte** (o "Para o plano da 2" da Fila), na tomada: `exodia-devastacao`, rodada 43, passo 210, 3,2 s,
+     `MEDIR_APARENCIAS=cordel,bestiario:egipcio,celestial:egipcio MEDIR_REPETICOES=3`. O resultado vai para
+     `notas/medicao-decks-fatia-1.md` (seção nova "Antes da fatia 2"). Se a máquina cair, rode de novo, na tomada (na bateria não decide).
+  2. **O plano da fatia 2** (`docs/superpowers/plans/2026-11-12-decks-fatia-2.md`), escrito a partir do código da `main`, para o autor
+     aprovar antes de qualquer código. Nada de implementação antes da aprovação.
 - **A fatia 1 dos decks e raças está na `main`** ("Sim, merge", o autor, 2026-11-12), por fast-forward de `feat/decks-fatia-1` até `bf6c335`,
   com as duas CI verdes no topo da branch e no push da `main`. No treino (fora do tutorial) e no replay, a carta veste a aparência escolhida
   (Cordel, Bestiário ou Celestial; Bufão ou Egípcio), a sua dos dois lados; o online fica em Cordel até a fatia 3. Plano
