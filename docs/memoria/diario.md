@@ -102,6 +102,9 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
       registrado e vai ao autor como recomendação para a fatia 2 (medir a Devastação com arte, ter pronta a imagem de 208 px ou a camada
       própria). **Ruling:** o clone do fantasma do arrasto leva o `style` com o metal; os E2E do arrasto já clonam cartas com `style` sob a CSP
       sem erro, então fica.
+  - **2026-11-12, o merge ("Sim, merge"):** com as duas CI verdes em `bf6c335` (o topo da branch, com as correções), fast-forward da `main` e
+    push (o pre-push com o `pnpm check` verde); a CI da `main` também passou. O ledger `.superpowers/sdd/2026-11-11-decks-fatia-1` foi apagado
+    (os rulings e os Minor estão aqui); as fotos ficam em `.superpowers/fotos-decks-fatia-1/`.
 
 ---
 

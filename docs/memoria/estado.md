@@ -1,29 +1,18 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-11**, a fatia 1 dos decks feita, revisada e corrigida, na branch, antes do merge. Antes de seguir, confira se não há versão
-> mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
+> Sobrescrito a cada atualização. **Última: 2026-11-12**, a fatia 1 dos decks na `main`; nada em curso. Antes de seguir, confira se não há
+> versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Em curso: a fatia 1 dos decks e raças**, na branch `feat/decks-fatia-1` (saída da `main` em `fe9a507`), no checkout principal. Plano
-  `docs/superpowers/plans/2026-11-11-decks-fatia-1.md`, aprovado (`decisoes.md` 2026-11-11 (3)); "prossiga por aqui" (o autor, 2026-11-11)
-  começou a execução: aqui mesmo, tarefa por tarefa, teste primeiro, com um revisor novo no fim (F7). O andamento, com as `Ruling:` de cada
-  tarefa, vai no `diario.md` 2026-11-11 (1).
-- **As Tasks 0 a 6 estão feitas e commitadas** (o andamento e as `Ruling:` no `diario.md` 2026-11-11 (1)): o smoke, o `e2e/looks.spec.ts` (3 de
-  3), a medição (a F5 passa, no limite no PC: 50 e 55 quadros/s com arte contra 56 e 58 do Cordel, na tomada; as saídas 1 e 2 entraram e
-  saíram), as fotos (em `.superpowers/fotos-decks-fatia-1/`, nesta máquina), a §15 da spec e o item "Aparências" do `CLAUDE.md`. O
-  `pnpm e2e` inteiro passou (110, 4 pulados).
-- **A revisão da branch inteira (F7)** foi "com correções" (0 Critical, 3 Important, 8 Minor); os 3 Important estão corrigidos com teste em
-  `0ac348d` (a aura sobre o anel ouro, o foco e a seta; o tracejado do rascunho; a amostra com `data-card-id`), e os Minor adiados e as
-  decisões sobre o que o revisor deixou de lado estão no `diario.md` 2026-11-11 (1).
-- **Próximo passo exato:**
-  1. Subir a branch com as correções (o pre-push roda o `pnpm check`) e ler a CI dos dois jobs no topo, pela API pública
-     (`curl -s "https://api.github.com/repos/andr3serafim/jogo-do-coringa/actions/runs?branch=feat/decks-fatia-1&per_page=3"`).
-  2. **O merge (pergunta ao autor):** com as duas CI verdes, PR para a `main` (sem `gh` nesta máquina: pelo app) ou fast-forward
-     (`git merge-base --is-ancestor main HEAD`, `git branch -f main HEAD` e o push das duas). Depois, apagar o ledger
-     `.superpowers/sdd/2026-11-11-decks-fatia-1` (os rulings já estão no diário) e fechar o `estado.md`.
-  3. **Para o autor:** jogar o treino com os três decks (a §14 da spec pede que ele diga que serve); ver as fotos; decidir os Minor
-     adiados; depois, o plano da fatia 2 (com folga para a F5: a mesa cheia está em 50 quadros/s no PC).
+- **Nada em curso.** O checkout principal está na `main`.
+- **A fatia 1 dos decks e raças está na `main`** ("Sim, merge", o autor, 2026-11-12), por fast-forward de `feat/decks-fatia-1` até `bf6c335`,
+  com as duas CI verdes no topo da branch e no push da `main`. No treino (fora do tutorial) e no replay, a carta veste a aparência escolhida
+  (Cordel, Bestiário ou Celestial; Bufão ou Egípcio), a sua dos dois lados; o online fica em Cordel até a fatia 3. Plano
+  `docs/superpowers/plans/2026-11-11-decks-fatia-1.md`; a execução, as `Ruling:`, a revisão (0 Critical, 3 Important corrigidos com teste,
+  8 Minor adiados) e as armadilhas no `diario.md` 2026-11-11 (1); a medição em `notas/medicao-decks-fatia-1.md` (a F5 passa no limite no PC:
+  50 quadros/s com arte na mesa mais cheia, contra 56 do Cordel); o que a execução decidiu na §15 da spec. O ledger da fatia foi apagado.
+  `RULES_VERSION`, `STATE_SCHEMA` e `PROTOCOL_VERSION` não mudaram.
 - **O bloco C está na `main`** (pontos 10, 11 e 13: a aura da iniciativa, os bônus em escala, o ouro de quem lidera), por fast-forward de
   `feat/playtest-bloco-c` até `21d1387`, com as duas CI verdes (`check` e `e2e`) no topo do código (`75d35c8`) e no push da `main`
   (`21d1387`). Plano `docs/superpowers/plans/2026-11-08-playtest-bloco-c.md`; a revisão da branch inteira e a segunda, só das correções
@@ -33,10 +22,13 @@
 
 ## Fila
 
-- **Decks e raças do Coringa, depois da fatia 1** (`decisoes.md` 2026-11-10 (2) e 2026-11-11 (1) a (3)): três decks (Cordel, Bestiário,
-  Celestial) e duas raças (Bufão, Egípcia), a aparência de cada lado da mesa pelo dono, também no online. Os planos das fatias 2 (o dono por
-  lado) e 3 (o online) vêm depois da fatia 1, cada um aprovado antes da execução. A arte pintada, quando o autor quiser, segue a bíblia de
-  arte (`docs/superpowers/specs/2026-11-11-biblia-de-arte.md`).
+- **Decks e raças do Coringa, as fatias 2 e 3** (`decisoes.md` 2026-11-10 (2) e 2026-11-11 (1) a (3); spec §11): a 2, o dono por lado (o
+  `LookZone`, o deck do bot, o verso por deck, o retrato por raça, o momento e as cópias das cenas, a partida guardada com as aparências); a
+  3, o online. Cada uma com plano escrito e aprovado pelo autor antes da execução, de preferência depois de ele jogar a fatia 1. **Para o
+  plano da 2:** a mesa cheia com arte está em 50 quadros/s no PC (a F5 no limite) e a fatia 2 põe mais arte nela: medir antes a Devastação com
+  arte (`MEDIR_APARENCIAS`, na tomada) e ter pronta uma saída (a imagem numa camada própria, `will-change: transform` no invólucro, ou a
+  imagem de 208 px com `srcset`). A arte pintada, quando o autor quiser, segue a bíblia de arte
+  (`docs/superpowers/specs/2026-11-11-biblia-de-arte.md`).
 - **Bloco D** (pontos 5 e 14, spec do playtest §6: os botões de carimbo e o 14), com plano escrito e aprovado pelo autor antes da execução,
   como os blocos A, B, C e E.
 
@@ -46,6 +38,12 @@
   partidas guardadas de antes abrem com o aviso de versão (`RULES_VERSION` 5).
 - **Jogar** os blocos A, B, C e E e as placas novas. O treino mostra tudo; o online só depois do deploy. As frases novas das placas são de
   quem escreveu (ele aprovou corrigir, não as palavras): conferir no playtest.
+- **Jogar a fatia 1 dos decks** no treino (o painel "Aparência" no Início e no menu da partida) e dizer se serve para os testes (a §14 da
+  spec). As fotos de conferência estão em `.superpowers/fotos-decks-fatia-1/` (nesta máquina, fora do git). Decidir os 8 Minor adiados da
+  revisão (`diario.md` 2026-11-11 (1)); os mais visíveis: o cordel pisca um quadro antes da arte, passar pelo Cordel desfaz a escolha do
+  Egípcio, e um pacote que falha uma vez só volta ao recarregar.
+- **A config do pnpm desta máquina:** o `%LOCALAPPDATA%\pnpm\config\config.yaml` tem `storeDir: D:.pnpm-store` (sem a barra), e o `pnpm add`
+  falha; o `node_modules` usa `D:\.pnpm-store\v11`. Até corrigir, passe `--store-dir 'D:\.pnpm-store'`.
 - **Achado da medição do bloco C:** a virada de rodada depois de uma sequência longa (`exodia-devastacao.json` 236→237) fica a 42 e 48
   quadros/s com a CPU 4×, abaixo da meta de 50; a `main` sem o bloco C já media 41 e 47. Fora dos blocos; a decisão de atacar é dele.
 - **Menores adiados** (nenhum quebra o jogo): bloco C no `diario.md` 2026-11-08 (1) ("Adiados"); bloco B no 2026-11-07 (2) ("Menores, para
@@ -93,6 +91,6 @@ toque "Próximo passo" a partir do passo:
   `.claude/worktrees/youthful-elgamal-3d5e8a` (de 2026-11-02, talvez de uma sessão do app: não apague). Uma pasta de worktree com
   `node_modules` que o `git worktree remove` não apaga ("Filename too long") sai no PowerShell com
   `Remove-Item -LiteralPath ('\\?\' + $p) -Recurse -Force`.
-- **Branches:** as locais estão mescladas na `main` (a `feat/playtest-bloco-c` também, em 2026-11-11), menos a `feat/online-equipar-vazio`
+- **Branches:** as locais estão mescladas na `main` (a `feat/playtest-bloco-c` em 2026-11-11 e a `feat/decks-fatia-1` em 2026-11-12), menos a `feat/online-equipar-vazio`
   (um rebase não publicado; o autor pode apagá-la). As remotas velhas, mescladas, são do autor (`notas/playtest.md`).
 - O `jogar-treino.bat` na raiz é o lançador do autor: não mexer nem commitar.
