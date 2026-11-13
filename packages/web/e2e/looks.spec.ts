@@ -1,9 +1,10 @@
 // E2E das cartas com arte (decks e raças, fatias 1 e 2): o painel "Aparência" do Início por teclado e guardado, a mesa do treino com as
 // imagens carregadas de verdade (sob a CSP do `wrangler dev`), a troca no menu, a trava do Cordel e o tutorial sempre em cordel; na fatia 2,
-// o bot com a aparência dele (os versos, o retrato e o campo) e o replay com as aparências gravadas na partida.
+// o bot com a aparência dele (os versos, o retrato e o campo) e o replay com as aparências gravadas na partida; na fatia 3, a sala online
+// de duas pessoas, cada tela com cada lado na aparência do assento.
 import { readFileSync } from 'node:fs';
-import { expect, test, type Locator, type Page } from '@playwright/test';
-import { axe, equipByUi, expectNoHorizontalScroll, failOnConsoleErrors, openMenu, table } from './helpers.ts';
+import { expect, test, type Browser, type BrowserContext, type Locator, type Page } from '@playwright/test';
+import { axe, equipByUi, expectNoHorizontalScroll, failOnConsoleErrors, openMenu, roundHeading, table } from './helpers.ts';
 import { RESURRECTION_E2E_SEED } from './seeds.ts';
 
 const TRAINING = `/treino?semente=${RESURRECTION_E2E_SEED}&nivel=medio`;
@@ -211,3 +212,127 @@ for (const size of [
     guard.expectClean();
   });
 }
+
+// --- A sala online (fatia 3): cada tela veste cada lado com a aparência do assento.
+
+const contexts: BrowserContext[] = [];
+
+// Os contextos criados à mão não são fechados pelo Playwright Test: sem isto as sessões (e os WebSockets) vazariam para os testes seguintes.
+test.afterEach(async () => {
+  await Promise.all(contexts.splice(0).map((context) => context.close()));
+});
+
+/** Um navegador isolado por pessoa (o `localStorage` e o token do assento são de cada uma). */
+async function newPerson(browser: Browser): Promise<{ page: Page; guard: ReturnType<typeof failOnConsoleErrors> }> {
+  const context = await browser.newContext();
+  contexts.push(context);
+  const page = await context.newPage();
+  return { page, guard: failOnConsoleErrors(page) };
+}
+
+/**
+ * Os versos da mão do outro (no campo dele), com o deck de cada um. Podem ser zero: com a semente do servidor de teste, no Equipar da
+ * rodada 1 a mão do outro está toda montando (nenhum verso à mostra); os versos de cada deck por assento estão no `room-looks.test.tsx`.
+ */
+function backDecks(page: Page): Promise<Array<string | null>> {
+  return theirField(page)
+    .locator('[data-verso]')
+    .evaluateAll((all) => all.map((back) => back.getAttribute('data-verso-deck')));
+}
+
+/** O retrato de um lado com o Anúbis carregado. */
+function portraitLoaded(page: Page, side: 'voce' | 'oponente') {
+  return page.evaluate((which) => {
+    const img = document.querySelector<HTMLImageElement>(`[data-retrato="${which}"] img`);
+    return img !== null && img.complete && img.naturalWidth > 0 && /anubis/.test(img.src);
+  }, side);
+}
+
+const ALL = (...packs: RegExp[]) => new RegExp(packs.map((pack) => pack.source).join('|'));
+
+test('aparência: na sala online, cada tela veste cada lado com a aparência do assento (Ana em Bestiário + Egípcio, Duda em Celestial + Bufão)', async ({
+  browser,
+}) => {
+  const ana = await newPerson(browser);
+  const duda = await newPerson(browser);
+
+  await test.step('Ana escolhe Bestiário + Egípcio no painel do Início e cria a sala', async () => {
+    await ana.page.goto('/');
+    const panel = ana.page.getByRole('region', { name: 'Aparência' });
+    await expect(panel.getByText('Na sala online, vale a que você tinha ao entrar.')).toBeVisible();
+    await panel.getByRole('radio', { name: 'Cordel' }).focus();
+    await ana.page.keyboard.press('ArrowRight');
+    await expect(panel.getByRole('radio', { name: 'Bestiário' })).toBeChecked();
+    await panel.getByRole('radio', { name: 'Bufão' }).focus();
+    await ana.page.keyboard.press('ArrowRight');
+    await expect(panel.getByRole('radio', { name: 'Egípcio' })).toBeChecked();
+    await ana.page.getByLabel('Seu apelido').fill('Ana');
+    await ana.page.getByRole('button', { name: 'Criar sala' }).click();
+    await expect(ana.page.getByRole('heading', { name: 'Sala de espera' })).toBeVisible();
+  });
+
+  await test.step('Duda, com Celestial + Bufão nas preferências, entra pelo link; os dois marcam pronto', async () => {
+    const code = /\/s\/([A-Z0-9]{6})$/.exec(ana.page.url())?.[1];
+    if (code === undefined) throw new Error(`o código da sala não está na URL: ${ana.page.url()}`);
+    // A entrada por link não mostra o painel: a aparência vem das preferências guardadas.
+    await duda.page.addInitScript(
+      (prefs) => window.localStorage.setItem('coringa:prefs', prefs),
+      JSON.stringify({ autoPass: true, reduceMotion: false, sound: true, look: { deck: 'celestial', race: 'bufao' } }),
+    );
+    await duda.page.goto(`/s/${code}`);
+    await duda.page.getByLabel('Seu apelido').fill('Duda');
+    await duda.page.getByRole('button', { name: 'Entrar', exact: true }).click();
+    await expect(duda.page.getByRole('heading', { name: 'Sala de espera' })).toBeVisible();
+    await expect(ana.page.getByText('Conectado', { exact: true })).toHaveCount(2);
+    await ana.page.getByRole('button', { name: 'Estou pronto' }).click();
+    await duda.page.getByRole('button', { name: 'Estou pronto' }).click();
+    for (const { page } of [ana, duda]) await expect(roundHeading(page)).toHaveText('Rodada 1');
+  });
+
+  await test.step('no Equipar: as suas cartas com a sua, os versos e o retrato do outro com a dele', async () => {
+    // Ana: as cartas dela do Bestiário (as especiais, do Egípcio); os versos de Duda da Celestial; o Anúbis dela e o Coringa de Duda.
+    const anaImages = await loadedCardImages(ana.page);
+    for (const src of anaImages) expect(src).toMatch(ALL(BESTIARIO, EGIPCIO));
+    expect(anaImages.some((src) => BESTIARIO.test(src))).toBe(true);
+    for (const deck of await backDecks(ana.page)) expect(deck).toBe('celestial');
+    await expect.poll(() => portraitLoaded(ana.page, 'voce')).toBe(true);
+    await expect(ana.page.locator('[data-retrato="oponente"] img')).toHaveCount(0);
+
+    // Duda: o contrário (as especiais dela, do Bufão, são de cordel).
+    const dudaImages = await loadedCardImages(duda.page);
+    for (const src of dudaImages) expect(src).toMatch(CELESTIAL);
+    for (const deck of await backDecks(duda.page)) expect(deck).toBe('bestiario');
+    await expect.poll(() => portraitLoaded(duda.page, 'oponente')).toBe(true);
+    await expect(duda.page.locator('[data-retrato="voce"] img')).toHaveCount(0);
+    await axe(ana.page);
+    await axe(duda.page);
+  });
+
+  await test.step('depois da revelação: as fileiras de Ana com o Bestiário e as de Duda com a Celestial, nas duas telas', async () => {
+    await Promise.all([equipByUi(ana.page), equipByUi(duda.page)]);
+    for (const { page } of [ana, duda]) await expect(roundHeading(page)).toHaveText('Rodada 2');
+
+    const anaMine = await loadedIn(myField(ana.page));
+    for (const src of anaMine) expect(src).toMatch(ALL(BESTIARIO, EGIPCIO));
+    expect(anaMine.some((src) => BESTIARIO.test(src))).toBe(true);
+    const anaTheirs = await loadedIn(theirField(ana.page));
+    for (const src of anaTheirs) expect(src).toMatch(CELESTIAL);
+
+    const dudaMine = await loadedIn(myField(duda.page));
+    for (const src of dudaMine) expect(src).toMatch(CELESTIAL);
+    const dudaTheirs = await loadedIn(theirField(duda.page));
+    for (const src of dudaTheirs) expect(src).toMatch(ALL(BESTIARIO, EGIPCIO));
+    expect(dudaTheirs.some((src) => BESTIARIO.test(src))).toBe(true);
+    await axe(ana.page);
+    await axe(duda.page);
+  });
+
+  await test.step('o menu da sala diz que a aparência é a de quem entrou, sem o seletor', async () => {
+    const menu = await openMenu(ana.page);
+    await expect(menu.getByText('A aparência desta sala é a que você tinha ao entrar.')).toBeVisible();
+    await expect(menu.getByRole('group', { name: 'Deck' })).toHaveCount(0);
+  });
+
+  ana.guard.expectClean();
+  duda.guard.expectClean();
+});
