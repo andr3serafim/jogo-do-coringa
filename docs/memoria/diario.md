@@ -47,6 +47,15 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     objeto para um `seats` novo com as mesmas aparências): a identidade do nó da imagem, que o plano pede, não pegaria uma troca de contexto,
     porque o React reaproveita o nó — custo: um arquivo a mais. **Ruling:** primeiro só a extração do hook (os testes da fatia 2 verdes, os
     novos vermelhos), depois o online, para ver os testes da mesa falharem de verdade.
+    `pnpm check` verde depois da Task 4 (web 2795 testes; servidor 289 e 37 no workerd).
+  - **Task 5 (E2E, smoke, documentação): em curso.** O E2E de duas pessoas no `looks.spec.ts` (`e50246d`): Ana escolhe Bestiário + Egípcio
+    no painel do Início e cria a sala; Duda, com Celestial + Bufão nas preferências (`addInitScript`), entra pelo link; no Equipar e depois
+    da revelação, cada tela veste cada lado com a do assento, o axe nas duas, e o menu com a linha `LOOK_ROOM_FIXED`. Passou sozinho. O smoke:
+    JavaScript inicial 183,9 KB (a branch antes do código, igual à `main` com a fatia 2) → 184,3 KB. O `CLAUDE.md` (o item "Aparências") e a
+    §17 da spec (`1868280`). **Ruling:** os versos do outro no E2E se conferem só quando existem: com a semente do servidor de teste
+    (`e2e2631`), no Equipar da rodada 1 a mão de Duda está toda "montando 4 cartas" (nenhum verso à mostra; a foto da primeira rodada do E2E
+    mostra isso), e o plano supôs versos ali; os versos de cada deck por assento estão provados no `room-looks.test.tsx` — custo: o E2E não
+    prova o verso no navegador de verdade.
 
 ---
 
