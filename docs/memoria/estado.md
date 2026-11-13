@@ -1,6 +1,7 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-13**, a fatia 3 dos decks (o online) na `main`, por fast-forward até `d885c84`.
+> Sobrescrito a cada atualização. **Última: 2026-11-13**, a fatia 3 dos decks (o online) na `main`, com as duas CI verdes no push
+> (`399e454`); o ledger apagado.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
@@ -15,8 +16,8 @@
   - **Verificado:** `pnpm check` verde (web 2795 testes; JavaScript inicial 183,9 → 184,3 KB); `pnpm e2e` inteiro verde (114, 4 pulados),
     com o teste novo de duas pessoas no `looks.spec.ts`. A revisão da branch inteira (H7, um subagente novo): nenhum Critical nem
     Important, "pronto para merge: sim"; os Minor de comentário e de memória corrigidos (`ead82e5` e o commit desta memória).
-  - **Próximo passo exato:** conferir a CI do push da `main` (o `check` e o `e2e`, pela API pública do GitHub, com `curl`); verde, apagar o
-    ledger `.superpowers/sdd/2026-11-12-decks-fatia-3/` e registrar aqui. Depois, o que o autor escolher na Fila ou em "Esperando o autor".
+  - **CI do push da `main`** (`399e454`): `check` e `e2e` verdes. O ledger da fatia foi apagado (as `Ruling:` estão no diário). **Próximo
+    passo:** o que o autor escolher na Fila ou em "Esperando o autor" (o deploy é dele e leva as aparências ao online).
   - **O que não pode regredir:** com o padrão, o corpo do POST é `{ nickname }` (mais o `hp`), o assento não tem a chave `look` e a mensagem
     `room` também não; o assento sem `look` (as salas de antes do deploy) é Cordel, sem erro. O `useTableLooks` é memoizado pelos textos
     do deck e da raça, nunca pelo `seats`. A preferência não entra na mesa online.
@@ -129,6 +130,6 @@ toque "Próximo passo" a partir do passo:
   `node_modules` que o `git worktree remove` não apaga ("Filename too long") sai no PowerShell com
   `Remove-Item -LiteralPath ('\\?\' + $p) -Recurse -Force`.
 - **Branches:** as locais estão mescladas na `main` (a `feat/playtest-bloco-c` em 2026-11-11 e a `feat/decks-fatia-1` em 2026-11-12), menos a `feat/online-equipar-vazio`
-  (um rebase não publicado; o autor pode apagá-la) e a `feat/decks-fatia-2` (a fatia em curso, já no GitHub: o plano aprovado, sem código).
+  (um rebase não publicado; o autor pode apagá-la) e a `feat/decks-fatia-2` e a `feat/decks-fatia-3` (mescladas na `main` por fast-forward; o autor pode apagá-las).
   As remotas velhas, mescladas, são do autor (`notas/playtest.md`).
 - O `jogar-treino.bat` na raiz é o lançador do autor: não mexer nem commitar.

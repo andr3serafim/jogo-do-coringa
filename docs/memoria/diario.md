@@ -75,7 +75,7 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
       online regravada muito depois do fim (o assento só sai no lobby); "apelido inválido" para um `look` malformado (o plano pede nenhum
       código novo, e a web nunca o manda).
 - **O merge:** "Sim, merge" (o autor, `decisoes.md` 2026-11-13 (1)): a `main` andou por fast-forward até `d885c84`, com as duas CI verdes
-  no topo da branch.
+  no topo da branch. O push da `main` (`399e454`, com a memória) teve as duas CI verdes; o ledger da fatia foi apagado.
 - **Armadilhas:**
   - Heredoc grande no Bash quebrou de novo (aspas e crases dentro): os scripts de edição foram gravados com a ferramenta de escrita e rodados
     com `node`.
