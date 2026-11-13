@@ -88,8 +88,8 @@ export interface GameMenuProps {
   /** O tutorial (um treino guiado): o menu diz "Tutorial" no lugar do nível do bot. */
   tutorial?: true;
   /**
-   * A aparência das cartas (decks e raças, fatia 1): com ela, o seletor aparece abaixo das chaves. Só o treino a passa (F1: o online fica
-   * em Cordel até a fatia 3, e o tutorial é sempre de cordel).
+   * A aparência das cartas (decks e raças, fatia 1): com ela, o seletor aparece abaixo das chaves. Só o treino a passa: na sala online a
+   * aparência é a do assento (fatia 3, que mostra o `lookNote` no lugar), e o tutorial é sempre de cordel.
    */
   look?: { value: Look; onChange: (look: Look) => void };
   /** Uma linha no lugar do seletor quando `look` não vem (a sala online, H3: a aparência da sala é a do assento). */

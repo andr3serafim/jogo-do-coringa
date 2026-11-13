@@ -50,8 +50,8 @@ export interface PastGame {
   rulesVersion: number;
   replay?: Replay;
   /**
-   * As aparências, que o replay veste. Só o treino fora do tutorial as grava (G4); sem elas (as partidas de antes da fatia 2, as online e
-   * as do tutorial), o replay fica em Cordel dos dois lados.
+   * As aparências, que o replay veste. O treino fora do tutorial e a sala online as gravam quando alguma não é o padrão (G3, H5); sem
+   * elas (as partidas de antes, as com os dois no padrão e as do tutorial), o replay fica em Cordel dos dois lados.
    */
   looks?: PastLooks;
 }

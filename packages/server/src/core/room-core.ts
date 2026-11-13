@@ -25,19 +25,20 @@ import type { CoreDeps, CoreResult, Effects, LookInput, RoomRecord, SeatId, Seat
 const isFinished = (record: RoomRecord): boolean => record.status === 'FINISHED';
 
 /**
- * Núcleo da sala: recebe entradas com `now` e devolve `Effects`. Não lê relógio, não sorteia e não
- * conhece a Cloudflare. As entradas assíncronas (`create`, `join`) gastam o `await` do SHA-256 ANTES de
- * ler o registro; depois disso, leem `seats`, escolhem o assento e gravam sem nenhum `await` no meio.
- * O Durable Object entrega outros eventos enquanto o `crypto.subtle` roda: lendo antes do `await`, dois
- * cliques em "Entrar" ocupariam o mesmo assento.
- */
-/**
  * A aparência que o assento grava (decks e raças, fatia 3, H1): normalizada (`normalizeLook`: id desconhecido vira o padrão, sem erro;
  * a trava do Cordel com o Bufão), e só quando o corpo a trouxe. É o lugar da conferência de posse da loja, mais tarde (§8.2).
  */
 function seatLook(look: LookInput | undefined): Pick<SeatRecord, 'look'> {
   return look === undefined ? {} : { look: normalizeLook(look) };
 }
+
+/**
+ * Núcleo da sala: recebe entradas com `now` e devolve `Effects`. Não lê relógio, não sorteia e não
+ * conhece a Cloudflare. As entradas assíncronas (`create`, `join`) gastam o `await` do SHA-256 ANTES de
+ * ler o registro; depois disso, leem `seats`, escolhem o assento e gravam sem nenhum `await` no meio.
+ * O Durable Object entrega outros eventos enquanto o `crypto.subtle` roda: lendo antes do `await`, dois
+ * cliques em "Entrar" ocupariam o mesmo assento.
+ */
 
 export class RoomCore {
   #record: RoomRecord | null;

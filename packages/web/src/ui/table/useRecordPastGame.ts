@@ -40,7 +40,10 @@ export function useRecordPastGame(
   names: TableNames,
   store: KeyValueStore | undefined,
   training: TrainingLevel | undefined,
-  /** As aparências da mesa (decks e raças, fatia 2, G3): a linha só as leva quando vêm (o treino fora do tutorial). Estável entre desenhos. */
+  /**
+   * As aparências da mesa (decks e raças, G3 e H5): a linha só as leva quando vêm (o treino fora do tutorial e a sala online, com alguma fora
+   * do padrão). Estável entre desenhos.
+   */
   looks?: PastLooks,
 ): PastGame | null {
   const { room, replay } = snapshot;

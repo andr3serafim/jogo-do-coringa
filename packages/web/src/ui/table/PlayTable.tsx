@@ -83,7 +83,10 @@ export interface PlayTableProps {
   endNote?: ReactNode;
 }
 
-/** A aparência se escolhe só no treino fora do tutorial (F1); no resto, a mesa fica no padrão e o menu não mostra o seletor. */
+/**
+ * A aparência se escolhe só no treino fora do tutorial (F1); no resto, o menu não mostra o seletor (online, a aparência é a do assento, e o
+ * tutorial fica em cordel).
+ */
 const chosenLook = ({ training, tutorial }: Pick<PlayTableProps, 'training' | 'tutorial'>): boolean => training !== undefined && !tutorial;
 
 /** De onde vêm as aparências da mesa: o treino fora do tutorial, a sala online (sem `training`) ou nenhuma (o tutorial). */
