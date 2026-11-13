@@ -1,13 +1,12 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-13**, a fatia 3 dos decks (o online) executada e revisada na branch
-> `feat/decks-fatia-3`, esperando a CI e o "sim" do autor para o merge.
+> Sobrescrito a cada atualização. **Última: 2026-11-13**, a fatia 3 dos decks (o online) na `main`, por fast-forward até `d885c84`.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **A fatia 3 dos decks e raças (o online): executada e revisada, na branch `feat/decks-fatia-3`** ("execute o plano da fatia 3 dos
-  decks", o autor, 2026-11-13). Na sala online, cada lado veste a aparência do assento: quem cria leva a do painel do Início, quem entra pelo
+- **A fatia 3 dos decks e raças (o online) está na `main`** ("Sim, merge", o autor, 2026-11-13, `decisoes.md` 2026-11-13 (1)), por
+  fast-forward de `feat/decks-fatia-3` até `d885c84`, com as duas CI verdes (`check` e `e2e`) no topo da branch. Na sala online, cada lado veste a aparência do assento: quem cria leva a do painel do Início, quem entra pelo
   link leva a das preferências; o servidor a grava no assento (normalizada, só quando o corpo traz) e a mensagem `room` a devolve; a sua na
   sala é a que você tinha ao entrar (a preferência mudada depois não vale); a partida online guardada leva `looks`. Com o padrão, nada muda
   (o pedido, o assento e a mensagem são os de antes). Plano `docs/superpowers/plans/2026-11-12-decks-fatia-3.md` (H1 a H7, `decisoes.md`
@@ -16,9 +15,8 @@
   - **Verificado:** `pnpm check` verde (web 2795 testes; JavaScript inicial 183,9 → 184,3 KB); `pnpm e2e` inteiro verde (114, 4 pulados),
     com o teste novo de duas pessoas no `looks.spec.ts`. A revisão da branch inteira (H7, um subagente novo): nenhum Critical nem
     Important, "pronto para merge: sim"; os Minor de comentário e de memória corrigidos (`ead82e5` e o commit desta memória).
-  - **Próximo passo exato:** conferir a CI das duas (`check` e `e2e`) no topo da branch (pela API pública do GitHub, com `curl`) e
-    levar ao autor o merge (fast-forward da `main` até o topo, como nas fatias 1 e 2); merge só com o "sim" dele. Depois do merge: a CI do
-    push da `main`, apagar o ledger `.superpowers/sdd/2026-11-12-decks-fatia-3/` e o deploy (dele), que leva as aparências ao online.
+  - **Próximo passo exato:** conferir a CI do push da `main` (o `check` e o `e2e`, pela API pública do GitHub, com `curl`); verde, apagar o
+    ledger `.superpowers/sdd/2026-11-12-decks-fatia-3/` e registrar aqui. Depois, o que o autor escolher na Fila ou em "Esperando o autor".
   - **O que não pode regredir:** com o padrão, o corpo do POST é `{ nickname }` (mais o `hp`), o assento não tem a chave `look` e a mensagem
     `room` também não; o assento sem `look` (as salas de antes do deploy) é Cordel, sem erro. O `useTableLooks` é memoizado pelos textos
     do deck e da raça, nunca pelo `seats`. A preferência não entra na mesa online.
@@ -64,7 +62,6 @@
 
 ## Esperando o autor
 
-- **O merge da fatia 3 dos decks** (`feat/decks-fatia-3`), com as duas CI verdes no topo: o "sim" é dele.
 - **Jogar a fatia 3** depois do deploy: uma sala online com cada um num deck de arte (os dois lados, os versos, os retratos, o replay da
   partida online com as aparências).
 - **A Devastação com arte no celular** (46 e 47 quadros/s, a meta é 50): consertar (a recomendação: um bloco curto para cortar o recálculo
@@ -72,7 +69,8 @@
   quem escolheu um deck de arte, no celular, nessa cena.
 - **Jogar a fatia 2 dos decks** no treino, com um deck de arte: o bot no outro deck, com o Egípcio; os versos e o retrato dele; o
   replay com as aparências gravadas.
-- **O deploy** (`pnpm deploy:server`, só ele), agora que o bloco C está na `main`: fecha as salas online abertas (`STATE_SCHEMA` 6), e as
+- **O deploy** (`pnpm deploy:server`, só ele), agora que o bloco C e as fatias 1 a 3 dos decks estão na `main` (a fatia 3 leva as
+  aparências ao online; as salas abertas seguem em Cordel): fecha as salas online abertas (`STATE_SCHEMA` 6), e as
   partidas guardadas de antes abrem com o aviso de versão (`RULES_VERSION` 5).
 - **Jogar** os blocos A, B, C e E e as placas novas. O treino mostra tudo; o online só depois do deploy. As frases novas das placas são de
   quem escreveu (ele aprovou corrigir, não as palavras): conferir no playtest.

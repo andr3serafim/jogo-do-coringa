@@ -6,6 +6,19 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-13 (1): o merge da fatia 3 dos decks
+
+Depois do resumo da execução da fatia 3 (o online; as `Ruling:`, a revisão sem Critical nem Important, as duas CI verdes em `d885c84`),
+perguntado "Faço o merge da fatia 3 na main (fast-forward)?", ele respondeu:
+
+> Sim, merge
+
+**Leitura:**
+- A `main` andou por fast-forward de `b6c2caf` até `d885c84` (o topo de `feat/decks-fatia-3`), como nas fatias 1 e 2.
+- **[I]** O "sim" vale para o merge, não para o deploy, que segue sendo dele (`pnpm deploy:server`).
+
+---
+
 ## 2026-11-12 (2): o plano da fatia 3 aprovado; a execução em outra sessão
 
 Depois do resumo do plano da fatia 3 (o online), perguntado "Aprova o plano da fatia 3 com as H1 a H7 como recomendadas?", ele respondeu:
