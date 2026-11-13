@@ -5,6 +5,18 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-13 (1): a fatia 3 dos decks (o online), a execução
+
+- **Pedido:** "execute o plano da fatia 3 dos decks" (o autor, 2026-11-13), numa sessão nova do Claude Code. O plano
+  `docs/superpowers/plans/2026-11-12-decks-fatia-3.md`, aprovado com as H1 a H7 (`decisoes.md` 2026-11-12 (2)). Inline
+  (`superpowers:executing-plans`), tarefa por tarefa, teste primeiro, na branch `feat/decks-fatia-3`; o revisor novo, num subagente, no fim
+  (H7).
+- **Andamento** (uma linha por tarefa, com os commits e as `Ruling:`):
+  - **Task 0 (o começo):** a `main` não andou (`b6c2caf`); a aprovação está no `decisoes.md`; nada sem commit além do `.claude/` e do
+    `jogar-treino.bat` do autor.
+
+---
+
 ## 2026-11-12 (3): o plano da fatia 3 dos decks (o online)
 
 - **Pedido:** "escreva o plano da fatia 3 dos decks" (o autor, 2026-11-12), na mesma sessão que executou a fatia 2 e fez o merge dela.
