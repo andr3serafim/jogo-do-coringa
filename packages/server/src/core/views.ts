@@ -33,6 +33,8 @@ export function roomMessage(record: RoomRecord, sockets: SocketInfo[], now: numb
     if (record.status === 'PLAYING' && seat.offlineSince !== null) {
       info.woAt = seat.offlineSince + TIMERS.reconnectMs;
     }
+    // Cópia: a mensagem fica nos efeitos até a casca serializar. Sem a aparência no assento, nenhuma chave (o padrão, H1).
+    if (seat.look) info.look = { ...seat.look };
     return info;
   });
 

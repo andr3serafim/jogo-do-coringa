@@ -73,6 +73,47 @@ describe('rotas HTTP', () => {
     expect((await post(`/api/rooms/${ana.code}/join`, { nickname: 'Bia', hp: 800 })).status).toBe(400);
   });
 
+  it('a aparência (decks e raças, fatia 3): criar 201 e entrar 200; id desconhecido vale; fora da forma é 400 BAD_NICKNAME', async () => {
+    const look = { deck: 'bestiario', race: 'egipcio' };
+    const created = await post('/api/rooms', { nickname: 'Ana', look });
+    expect(created.status).toBe(201);
+    const ana = (await created.json()) as CreateRoomResponse;
+    expect((await post(`/api/rooms/${ana.code}/join`, { nickname: 'Bia', look: { deck: 'celestial', race: 'bufao' } })).status).toBe(200);
+    expect((await post('/api/rooms', { nickname: 'Ana', hp: 800, look })).status).toBe(201);
+    expect((await post('/api/rooms', { nickname: 'Ana', look: { deck: 'xyz', race: 'abc' } })).status).toBe(201);
+
+    const bad: unknown[] = [
+      'bestiario',
+      { deck: 'bestiario' },
+      { deck: 'bestiario', race: 'egipcio', extra: 1 },
+      { deck: 'x'.repeat(33), race: 'bufao' },
+    ];
+    const room = (await (await post('/api/rooms', { nickname: 'Ana' })).json()) as CreateRoomResponse;
+    for (const badLook of bad) {
+      const onCreate = await post('/api/rooms', { nickname: 'Ana', look: badLook });
+      expect(onCreate.status, JSON.stringify(badLook)).toBe(400);
+      expect(((await onCreate.json()) as { error: string }).error).toBe('BAD_NICKNAME');
+      const onJoin = await post(`/api/rooms/${room.code}/join`, { nickname: 'Bia', look: badLook });
+      expect(onJoin.status, JSON.stringify(badLook)).toBe(400);
+      expect(((await onJoin.json()) as { error: string }).error).toBe('BAD_NICKNAME');
+    }
+  });
+
+  it('a aparência do corpo chega à mensagem room (o roteador a leva até a sala)', async () => {
+    const created = await post('/api/rooms', { nickname: 'Ana', look: { deck: 'cordel', race: 'egipcio' } });
+    const ana = (await created.json()) as CreateRoomResponse;
+    const joined = await post(`/api/rooms/${ana.code}/join`, { nickname: 'Bia', look: { deck: 'celestial', race: 'egipcio' } });
+    expect(((await joined.json()) as JoinRoomResponse).playerId).toBe('p2');
+    const socket = await open(ana.code);
+    await socket.hello(ana.token);
+    await socket.waitFor(() => (socket.room?.seats.length ?? 0) === 2, 'os dois assentos');
+    expect(socket.room!.seats.map((seat) => seat.look)).toEqual([
+      { deck: 'cordel', race: 'bufao' },
+      { deck: 'celestial', race: 'egipcio' },
+    ]);
+    socket.ws.close(1000);
+  });
+
   it('apelido inválido 400; corpo > 1 KiB 413; código fora do formato 404', async () => {
     for (const body of [{ nickname: '' }, { nickname: '   ' }, { nickname: 'x'.repeat(21) }, { nickname: 'a\u0007b' }]) {
       expect((await post('/api/rooms', body)).status, JSON.stringify(body)).toBe(400);

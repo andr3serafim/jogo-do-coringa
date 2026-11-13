@@ -1,5 +1,5 @@
 import type { GameEvent, GameResult, GameState, PlayerId, Replay, ReplayStep } from '@coringa/engine';
-import type { AckMessage, Outcome, OutcomeCause, RoomStatus, Score, ServerMessage } from '@coringa/protocol';
+import type { AckMessage, Look, Outcome, OutcomeCause, RoomStatus, Score, ServerMessage } from '@coringa/protocol';
 
 export type SeatId = 'p1' | 'p2';
 
@@ -12,6 +12,17 @@ export interface SeatRecord {
   wantsRematch: boolean;
   /** Instante em que o jogador ficou sem socket autenticado, ou `null` se está conectado. */
   offlineSince: number | null;
+  /**
+   * A aparência normalizada que o corpo trouxe ao criar ou entrar (decks e raças, fatia 3). Sem ela (quem estava no padrão, ou o
+   * registro de antes do deploy), o padrão: o Cordel.
+   */
+  look?: Look;
+}
+
+/** A aparência como o corpo a traz: a forma já conferida pelo esquema, o id ainda não (o núcleo normaliza). */
+export interface LookInput {
+  deck: string;
+  race: string;
 }
 
 /** O formato da partida gravada vem do motor; reexportado para o resto do núcleo do servidor. */

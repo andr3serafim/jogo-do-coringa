@@ -3,7 +3,7 @@ import type { CreateRoomResponse, JoinRoomResponse, RoomInfoResponse } from '@co
 import { emptyEffects, mergeEffects } from '../core/effects.ts';
 import { RoomCore } from '../core/room-core.ts';
 import { joinRecord, splitRecord, STORAGE_KEYS } from '../core/storage-layout.ts';
-import type { CoreDeps, Effects, SeatId, SocketInfo } from '../core/types.ts';
+import type { CoreDeps, Effects, LookInput, SeatId, SocketInfo } from '../core/types.ts';
 
 export type RpcResult<T, E extends string> = { ok: true; value: T } | { ok: false; error: E };
 
@@ -182,17 +182,22 @@ export class Room extends DurableObject<Env> {
     for (const line of effects.logs) console.log(JSON.stringify(line));
   }
 
-  async create(code: string, nickname: string, hp?: number): Promise<RpcResult<CreateRoomResponse, 'EXISTS' | 'BAD_NICKNAME'>> {
+  async create(
+    code: string,
+    nickname: string,
+    hp?: number,
+    look?: LookInput,
+  ): Promise<RpcResult<CreateRoomResponse, 'EXISTS' | 'BAD_NICKNAME'>> {
     return this.#enter(async (core, now) => {
-      const result = await core.create(code, nickname, now, hp);
+      const result = await core.create(code, nickname, now, hp, look);
       await this.#apply(core, result.effects);
       return result.ok ? { ok: true, value: result.value } : { ok: false, error: result.error };
     });
   }
 
-  async join(nickname: string): Promise<RpcResult<JoinRoomResponse, 'NOT_FOUND' | 'FULL' | 'BAD_NICKNAME'>> {
+  async join(nickname: string, look?: LookInput): Promise<RpcResult<JoinRoomResponse, 'NOT_FOUND' | 'FULL' | 'BAD_NICKNAME'>> {
     return this.#enter(async (core, now) => {
-      const result = await core.join(nickname, this.sockets(), now);
+      const result = await core.join(nickname, this.sockets(), now, look);
       await this.#apply(core, result.effects);
       return result.ok ? { ok: true, value: result.value } : { ok: false, error: result.error };
     });

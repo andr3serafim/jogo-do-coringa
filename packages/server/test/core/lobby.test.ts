@@ -505,3 +505,45 @@ describe('game: startGame, makeStep e stateFor', () => {
     expect(hidden.events).toEqual([{ type: 'CardsDealt', player: 'p1', count: 0 }]);
   });
 });
+
+describe('a aparência, a revanche e a reconexão (decks e raças, fatia 3)', () => {
+  it('a revanche mantém as aparências dos assentos, e a mensagem room da partida 2 as traz', async () => {
+    const h = new Harness();
+    const ana = await h.create('Ana', undefined, { deck: 'bestiario', race: 'egipcio' });
+    const bia = await h.join('Bia', { deck: 'celestial', race: 'bufao' });
+    const p1 = h.open();
+    await h.send(p1, h.hello(ana.token));
+    const p2 = h.open();
+    await h.send(p2, h.hello(bia.token));
+    await h.send(p1, { t: 'ready', ready: true });
+    await h.send(p2, { t: 'ready', ready: true });
+    await h.send(p2, { t: 'concede', id: 'c1' });
+    const rec = h.core.record!;
+    expect(rec.status).toBe('FINISHED');
+    await h.send(p1, { t: 'rematch', want: true });
+    await h.send(p2, { t: 'rematch', want: true });
+    expect(rec).toMatchObject({ status: 'PLAYING', gameNo: 2 });
+    expect(rec.seats.map((seat) => seat.look)).toEqual([
+      { deck: 'bestiario', race: 'egipcio' },
+      { deck: 'celestial', race: 'bufao' },
+    ]);
+    const room = h.messages(p2, 'room').at(-1)!;
+    expect(room.gameNo).toBe(2);
+    expect(room.seats.map((seat) => seat.look)).toEqual([
+      { deck: 'bestiario', race: 'egipcio' },
+      { deck: 'celestial', race: 'bufao' },
+    ]);
+  });
+
+  it('a reconexão (um hello novo com o mesmo token) não toca na aparência', async () => {
+    const h = new Harness();
+    const ana = await h.create('Ana', undefined, { deck: 'bestiario', race: 'egipcio' });
+    await h.join('Bia');
+    const p1 = h.open();
+    await h.send(p1, h.hello(ana.token));
+    h.close(p1);
+    const back = h.open();
+    await h.send(back, h.hello(ana.token));
+    expect(h.messages(back, 'room').at(-1)!.seats[0]!.look).toEqual({ deck: 'bestiario', race: 'egipcio' });
+  });
+});

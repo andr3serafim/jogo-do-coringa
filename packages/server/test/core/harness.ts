@@ -24,6 +24,7 @@ import type {
   Effects,
   GameRecord,
   LogLine,
+  LookInput,
   RoomRecord,
   SeatId,
   SocketInfo,
@@ -129,15 +130,15 @@ export class Harness {
     }
   }
 
-  async create(nickname = 'Ana', hp?: number): Promise<CreateRoomResponse> {
-    const r = await this.core.create(CODE, nickname, this.now, hp);
+  async create(nickname = 'Ana', hp?: number, look?: LookInput): Promise<CreateRoomResponse> {
+    const r = await this.core.create(CODE, nickname, this.now, hp, look);
     this.apply(r.effects);
     if (!r.ok) throw new Error(`create falhou: ${r.error}`);
     return r.value;
   }
 
-  async join(nickname = 'Bia'): Promise<JoinRoomResponse> {
-    const r = await this.core.join(nickname, this.sockets, this.now);
+  async join(nickname = 'Bia', look?: LookInput): Promise<JoinRoomResponse> {
+    const r = await this.core.join(nickname, this.sockets, this.now, look);
     this.apply(r.effects);
     if (!r.ok) throw new Error(`join falhou: ${r.error}`);
     return r.value;

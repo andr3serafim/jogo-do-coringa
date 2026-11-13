@@ -204,6 +204,64 @@ describe('sala: entrar', () => {
   });
 });
 
+describe('sala: a aparência no assento (decks e raças, fatia 3)', () => {
+  it('criar grava a aparência normalizada no p1; sem ela, o assento não tem a chave', async () => {
+    const cases: [{ deck: string; race: string }, { deck: string; race: string }][] = [
+      [{ deck: 'bestiario', race: 'egipcio' }, { deck: 'bestiario', race: 'egipcio' }],
+      // A trava (§2.1): o Cordel só anda com o Bufão.
+      [{ deck: 'cordel', race: 'egipcio' }, { deck: 'cordel', race: 'bufao' }],
+      // Id desconhecido não é erro: vira o padrão.
+      [{ deck: 'xyz', race: 'abc' }, { deck: 'cordel', race: 'bufao' }],
+      [{ deck: 'celestial', race: 'abc' }, { deck: 'celestial', race: 'bufao' }],
+    ];
+    for (const [sent, stored] of cases) {
+      const h = new Harness();
+      await h.create('Ana', undefined, sent);
+      expect(h.core.record!.seats[0]!.look, JSON.stringify(sent)).toEqual(stored);
+    }
+    const plain = new Harness();
+    await plain.create('Ana');
+    expect('look' in plain.core.record!.seats[0]!).toBe(false);
+  });
+
+  it('o assento guarda uma cópia: mudar o objeto do corpo depois não muda o registro', async () => {
+    const h = new Harness();
+    const sent = { deck: 'bestiario', race: 'egipcio' };
+    await h.create('Ana', undefined, sent);
+    sent.deck = 'celestial';
+    expect(h.core.record!.seats[0]!.look).toEqual({ deck: 'bestiario', race: 'egipcio' });
+  });
+
+  it('entrar grava a do p2, e a mensagem room traz o look só do assento que o tem', async () => {
+    const h = new Harness();
+    const ana = await h.create('Ana');
+    const p1 = h.open();
+    await h.send(p1, h.hello(ana.token));
+    await h.join('Bia', { deck: 'celestial', race: 'bufao' });
+    expect(h.core.record!.seats[1]!.look).toEqual({ deck: 'celestial', race: 'bufao' });
+    const room = h.messages(p1, 'room').at(-1)!;
+    expect(room.seats[1]!.look).toEqual({ deck: 'celestial', race: 'bufao' });
+    expect('look' in room.seats[0]!).toBe(false);
+  });
+
+  it('os dois com aparência: a mensagem de cada um traz as duas', async () => {
+    const h = new Harness();
+    const ana = await h.create('Ana', 800, { deck: 'bestiario', race: 'egipcio' });
+    const bia = await h.join('Bia', { deck: 'celestial', race: 'bufao' });
+    const p1 = h.open();
+    await h.send(p1, h.hello(ana.token));
+    const p2 = h.open();
+    await h.send(p2, h.hello(bia.token));
+    for (const sock of [p1, p2]) {
+      expect(h.messages(sock, 'room').at(-1)!.seats.map((seat) => seat.look)).toEqual([
+        { deck: 'bestiario', race: 'egipcio' },
+        { deck: 'celestial', race: 'bufao' },
+      ]);
+    }
+    expect(h.core.record!.hp).toBe(800);
+  });
+});
+
 describe('sala: info', () => {
   it('info: dados públicos sem token nem hash', async () => {
     const h = new Harness();
@@ -287,6 +345,22 @@ describe('roomMessage', () => {
     rec.outcome.cause = 'CONCEDE';
     expect(message.score).toEqual({ p1: 1, p2: 2 });
     expect(message.outcome).toEqual({ gameNo: 4, result: null, cause: 'ABANDONED' });
+  });
+
+  it('o assento sem look (o registro de antes do deploy) dá a mensagem sem look, sem erro', () => {
+    const message = roomMessage(base(), [], 0);
+    expect(message.seats.every((seat) => !('look' in seat))).toBe(true);
+  });
+
+  it('o look da mensagem é uma cópia do assento', () => {
+    const rec = base();
+    rec.seats[0]!.look = { deck: 'bestiario', race: 'egipcio' };
+    const message = roomMessage(rec, [], 0);
+    expect(message.seats[0]!.look).toEqual({ deck: 'bestiario', race: 'egipcio' });
+    expect(message.seats[0]!.look).not.toBe(rec.seats[0]!.look);
+    rec.seats[0]!.look.deck = 'celestial';
+    expect(message.seats[0]!.look).toEqual({ deck: 'bestiario', race: 'egipcio' });
+    expect('look' in message.seats[1]!).toBe(false);
   });
 
   it('expiresAt é o menor entre idleExpiry e hardExpiry', () => {

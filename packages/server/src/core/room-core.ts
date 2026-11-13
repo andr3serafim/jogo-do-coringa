@@ -1,4 +1,4 @@
-import { CLOSE, LIMITS, PROTOCOL_VERSION, normalizeNickname } from '@coringa/protocol';
+import { CLOSE, LIMITS, PROTOCOL_VERSION, normalizeLook, normalizeNickname } from '@coringa/protocol';
 import type {
   AckMessage,
   ClientMessage,
@@ -19,7 +19,7 @@ import type { Connection } from './lobby.ts';
 import { ROOM_LIMITS, STATE_SCHEMA, TIMERS } from './timers.ts';
 import { base64url, sha256Hex } from './tokens.ts';
 import { ackFail, deliverSteps, sendReplay, sendRoom } from './views.ts';
-import type { CoreDeps, CoreResult, Effects, RoomRecord, SeatId, SeatRecord, SocketInfo } from './types.ts';
+import type { CoreDeps, CoreResult, Effects, LookInput, RoomRecord, SeatId, SeatRecord, SocketInfo } from './types.ts';
 
 /** Função à parte para o TypeScript não fixar o `status` depois de um `continue` no laço do alarme. */
 const isFinished = (record: RoomRecord): boolean => record.status === 'FINISHED';
@@ -31,6 +31,14 @@ const isFinished = (record: RoomRecord): boolean => record.status === 'FINISHED'
  * O Durable Object entrega outros eventos enquanto o `crypto.subtle` roda: lendo antes do `await`, dois
  * cliques em "Entrar" ocupariam o mesmo assento.
  */
+/**
+ * A aparência que o assento grava (decks e raças, fatia 3, H1): normalizada (`normalizeLook`: id desconhecido vira o padrão, sem erro;
+ * a trava do Cordel com o Bufão), e só quando o corpo a trouxe. É o lugar da conferência de posse da loja, mais tarde (§8.2).
+ */
+function seatLook(look: LookInput | undefined): Pick<SeatRecord, 'look'> {
+  return look === undefined ? {} : { look: normalizeLook(look) };
+}
+
 export class RoomCore {
   #record: RoomRecord | null;
   readonly #deps: CoreDeps;
@@ -70,6 +78,8 @@ export class RoomCore {
     now: number,
     /** A vida inicial escolhida (o roteador já conferiu que é uma de `HP_CHOICES`); sem ela, a padrão do motor. */
     hp?: number,
+    /** A aparência de quem cria (fatia 3); só a forma foi conferida. Sem ela, o assento fica sem a chave (H1). */
+    look?: LookInput,
   ): Promise<CoreResult<CreateRoomResponse, 'EXISTS' | 'BAD_NICKNAME'>> {
     const clean = normalizeNickname(nickname);
     if (clean === null) return this.#fail('BAD_NICKNAME');
@@ -84,6 +94,7 @@ export class RoomCore {
       ready: false,
       wantsRematch: false,
       offlineSince: now,
+      ...seatLook(look),
     };
     this.#record = {
       schema: STATE_SCHEMA,
@@ -113,6 +124,8 @@ export class RoomCore {
     nickname: string,
     sockets: SocketInfo[],
     now: number,
+    /** A aparência de quem entra (fatia 3); só a forma foi conferida. Sem ela, o assento fica sem a chave (H1). */
+    look?: LookInput,
   ): Promise<CoreResult<JoinRoomResponse, 'NOT_FOUND' | 'FULL' | 'BAD_NICKNAME'>> {
     const clean = normalizeNickname(nickname);
     if (clean === null) return this.#fail('BAD_NICKNAME');
@@ -130,6 +143,7 @@ export class RoomCore {
       ready: false,
       wantsRematch: false,
       offlineSince: now,
+      ...seatLook(look),
     };
     record.seats = [...record.seats, seat].sort((a, b) => a.id.localeCompare(b.id));
     const effects = this.#effects();

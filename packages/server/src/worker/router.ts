@@ -1,7 +1,7 @@
 import { CLOSE, HP_CHOICES, LIMITS, generateCode, normalizeCode, normalizeNickname } from '@coringa/protocol';
 import { CreateRoomBodySchema, JoinRoomBodySchema } from '@coringa/protocol/schemas';
 import { ROOM_LIMITS } from '../core/timers.ts';
-import type { LogLine } from '../core/types.ts';
+import type { LogLine, LookInput } from '../core/types.ts';
 
 /**
  * Roteador HTTP do Worker (spec §3, §8.2, §8.5): limite por IP, validação do corpo, origem do WebSocket e a
@@ -75,8 +75,13 @@ async function readBody(request: Request): Promise<string | null> {
   return new TextDecoder().decode(bytes);
 }
 
-/** O corpo da criação: o apelido normalizado e a vida inicial (uma de `HP_CHOICES`), ou a resposta de erro. */
-async function readCreate(request: Request): Promise<{ nickname: string; hp?: number } | { error: Response }> {
+/**
+ * O corpo da criação: o apelido normalizado, a vida inicial (uma de `HP_CHOICES`) e a aparência como veio (o núcleo a normaliza), ou a
+ * resposta de erro.
+ */
+async function readCreate(
+  request: Request,
+): Promise<{ nickname: string; hp?: number; look?: LookInput } | { error: Response }> {
   const text = await readBody(request);
   if (text === null) return { error: fail(413, 'TOO_BIG', 'corpo grande demais') };
   let parsed: unknown;
@@ -90,11 +95,15 @@ async function readCreate(request: Request): Promise<{ nickname: string; hp?: nu
   if (nickname === null) return { error: fail(400, 'BAD_NICKNAME', 'apelido inválido') };
   const hp = body.success ? body.data.hp : undefined;
   if (hp !== undefined && !HP_CHOICES.includes(hp)) return { error: fail(400, 'BAD_HP', 'vida inicial inválida') };
-  return hp === undefined ? { nickname } : { nickname, hp };
+  const look = body.success ? body.data.look : undefined;
+  return { nickname, ...(hp === undefined ? {} : { hp }), ...(look === undefined ? {} : { look }) };
 }
 
-/** Apelido normalizado do corpo `{ nickname }`, ou a resposta de erro (413 corpo grande, 400 corpo ou apelido inválido). */
-async function readNickname(request: Request): Promise<{ nickname: string } | { error: Response }> {
+/**
+ * O corpo da entrada `{ nickname, look? }`: o apelido normalizado e a aparência como veio (o núcleo a normaliza), ou a resposta de erro
+ * (413 corpo grande, 400 corpo ou apelido inválido; a aparência fora da forma também é `BAD_NICKNAME`, como qualquer corpo fora do esquema).
+ */
+async function readJoin(request: Request): Promise<{ nickname: string; look?: LookInput } | { error: Response }> {
   const text = await readBody(request);
   if (text === null) return { error: fail(413, 'TOO_BIG', 'corpo grande demais') };
   let parsed: unknown;
@@ -106,7 +115,8 @@ async function readNickname(request: Request): Promise<{ nickname: string } | { 
   const body = JoinRoomBodySchema.safeParse(parsed);
   const nickname = body.success ? normalizeNickname(body.data.nickname) : null;
   if (nickname === null) return { error: fail(400, 'BAD_NICKNAME', 'apelido inválido') };
-  return { nickname };
+  const look = body.success ? body.data.look : undefined;
+  return look === undefined ? { nickname } : { nickname, look };
 }
 
 async function createRoom(request: Request, env: Env, ip: string): Promise<Response> {
@@ -115,7 +125,7 @@ async function createRoom(request: Request, env: Env, ip: string): Promise<Respo
   if ('error' in read) return read.error;
   for (let attempt = 0; attempt < ROOM_LIMITS.createAttempts; attempt += 1) {
     const code = generateCode((n) => crypto.getRandomValues(new Uint8Array(n)));
-    const result = await env.ROOMS.getByName(code).create(code, read.nickname, read.hp);
+    const result = await env.ROOMS.getByName(code).create(code, read.nickname, read.hp, read.look);
     if (result.ok) return json(result.value, 201);
     if (result.error === 'BAD_NICKNAME') return fail(400, 'BAD_NICKNAME', 'apelido inválido');
   }
@@ -123,9 +133,9 @@ async function createRoom(request: Request, env: Env, ip: string): Promise<Respo
 }
 
 async function joinRoom(request: Request, env: Env, code: string): Promise<Response> {
-  const read = await readNickname(request);
+  const read = await readJoin(request);
   if ('error' in read) return read.error;
-  const result = await env.ROOMS.getByName(code).join(read.nickname);
+  const result = await env.ROOMS.getByName(code).join(read.nickname, read.look);
   if (result.ok) return json(result.value, 200);
   switch (result.error) {
     case 'NOT_FOUND':
