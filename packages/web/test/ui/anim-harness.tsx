@@ -109,6 +109,8 @@ export interface MountOptions {
   room?: Parameters<typeof roomMessage>[0];
   /** Monta a mesa do treino (sem isso, a mesa é online: a sua especial segura o tempo do momento do oponente, A9a). */
   training?: TrainingLevel;
+  /** A cadeira de quem olha (padrão: `p1`); a `ViewSpec` precisa do mesmo `me`. */
+  playerId?: 'p1' | 'p2';
 }
 
 export function connect(spec: ViewSpec, options: MountOptions = {}) {
@@ -132,7 +134,7 @@ export function connect(spec: ViewSpec, options: MountOptions = {}) {
   });
   seq = 1;
   const connection = new FakeConnection({
-    playerId: 'p1',
+    playerId: options.playerId ?? 'p1',
     room,
     state: stateMessage(view, { seq, events: options.events ?? [] }),
     now: 0,

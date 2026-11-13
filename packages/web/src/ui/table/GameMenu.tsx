@@ -92,6 +92,8 @@ export interface GameMenuProps {
    * em Cordel até a fatia 3, e o tutorial é sempre de cordel).
    */
   look?: { value: Look; onChange: (look: Look) => void };
+  /** Uma linha no lugar do seletor quando `look` não vem (a sala online, H3: a aparência da sala é a do assento). */
+  lookNote?: string;
   /** Há partida em curso para desistir. */
   canConcede: boolean;
   /** Sem conexão não dá para desistir (o pedido se perderia). */
@@ -114,6 +116,7 @@ export function GameMenu({
   trainingLevel,
   tutorial,
   look,
+  lookNote,
   canConcede,
   concedeDisabled,
   onConcede,
@@ -196,7 +199,11 @@ export function GameMenu({
             onChange={(reduceMotion) => onPrefs({ ...prefs, reduceMotion })}
           />
           <Switch label={SOUND_LABEL} checked={prefs.sound} onChange={(sound) => onPrefs({ ...prefs, sound })} />
-          {look === undefined ? null : <LookChoice value={look.value} onChange={look.onChange} />}
+          {look === undefined ? (
+            lookNote === undefined ? null : <p className="text-sm">{lookNote}</p>
+          ) : (
+            <LookChoice value={look.value} onChange={look.onChange} />
+          )}
 
           <button type="button" className={ITEM} onClick={() => setRulesOpen(true)}>
             {RULES_LABEL}

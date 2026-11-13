@@ -620,6 +620,8 @@ export const LOOK_RACE_LABEL = 'Coringa';
 export const LOOK_LOCK_NOTE = 'O deck Cordel joga com o Coringa Bufão.';
 /** F1: por enquanto a aparência vale no treino (e no replay); o online fica em Cordel até a fatia 3. */
 export const LOOK_ONLINE_NOTE = 'Na sala online, vale a que você tinha ao entrar.';
+/** No menu da partida online, no lugar do seletor (fatia 3, H3): a aparência da sala é a do assento. */
+export const LOOK_ROOM_FIXED = 'A aparência desta sala é a que você tinha ao entrar.';
 
 /** O tempo de partida no painel de fim (U5): "12:34", ou "1:02:03" passando de uma hora. */
 export function durationText(ms: number): string {

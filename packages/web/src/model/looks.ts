@@ -1,7 +1,8 @@
 // A aparência das cartas (spec dos decks e raças, §2 e §4): que arte veste cada carta numa aparência, a faixa de raridade da numérica e a
 // aura de cada faixa. Puro: sem React nem DOM. O modelo (`Look`, os ids, `normalizeLook`) é do `@coringa/protocol`; aqui só o que a web usa.
-import type { Card, Rank } from '@coringa/engine';
-import { DEFAULT_LOOK, type DeckId, type Look, type RaceId } from '@coringa/protocol';
+import type { Card, PlayerId, Rank } from '@coringa/engine';
+import { DEFAULT_LOOK, normalizeLook, type DeckId, type Look, type RaceId, type SeatInfo } from '@coringa/protocol';
+import type { PastLooks } from './past-games.ts';
 
 /** A faixa de raridade (§2.2): só um número, sem nome em lugar nenhum. */
 export type Tier = 1 | 2 | 3 | 4 | 5;
@@ -46,6 +47,29 @@ export function isDefaultLook(look: Look): boolean {
  */
 export function sentLook(look: Look): Look | undefined {
   return isDefaultLook(look) ? undefined : { deck: look.deck, race: look.race };
+}
+
+/**
+ * As aparências da sala online (fatia 3, §8.3): a de cada assento, normalizada (`normalizeLook`); assento ausente (o lobby antes de alguém
+ * entrar) ou sem `look` (quem estava no padrão, ou a sala de antes do deploy), o padrão. A sua também vem do assento, nunca da preferência
+ * (H2). Sempre objetos novos: os do assento ficam na mensagem da sessão.
+ */
+export function roomLooks(
+  seats: readonly Pick<SeatInfo, 'playerId' | 'look'>[],
+  me: PlayerId,
+  opponent: PlayerId,
+): { mine: Look; theirs: Look } {
+  const of = (id: PlayerId): Look => normalizeLook(seats.find((seat) => seat.playerId === id)?.look);
+  return { mine: of(me), theirs: of(opponent) };
+}
+
+/**
+ * As aparências que a partida guardada leva (G3, H5): `undefined` quando as duas são o padrão, para a linha ficar a de hoje (sem elas o
+ * replay já é Cordel dos dois lados); senão as duas, em objetos novos.
+ */
+export function recordedLooks(mine: Look, theirs: Look): PastLooks | undefined {
+  if (isDefaultLook(mine) && isDefaultLook(theirs)) return undefined;
+  return { me: { deck: mine.deck, race: mine.race }, opponent: { deck: theirs.deck, race: theirs.race } };
 }
 
 /** Os pacotes que uma aparência pede, sem repetir (nenhum para o padrão). */

@@ -24,15 +24,14 @@
 // Fora da sua vez (Equipar, escolha da ordem, vez do oponente), tocar uma carta da mão não escolhe nada: o balão sobre a mão diz por
 // que ela não tem jogada agora (B2, o motivo é do motor: `noPlayReason`) e some sozinho depois do tempo de leitura, ou com outro toque
 // na mesma carta. Depois do passe, e no fim da partida, a mão fica só de vista.
-import { noPlayReason, type PlayerId, type SpecialCard } from '@coringa/engine';
-import { DEFAULT_LOOK, type Deadline, type Look, type PlayerAction, type StateMessage } from '@coringa/protocol';
+import { noPlayReason, type SpecialCard } from '@coringa/engine';
+import { DEFAULT_LOOK, type Deadline, type PlayerAction, type StateMessage } from '@coringa/protocol';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { navigate } from '../../app/router.ts';
-import { noPlaysText } from '../../model/copy.ts';
+import { LOOK_ROOM_FIXED, noPlaysText } from '../../model/copy.ts';
 import { playDropZones, resolvePlayDrop, type DropKey } from '../../model/drag.ts';
 import { rowKey } from '../../model/effects.ts';
 import type { TrainingLevel } from '../../model/local-room.ts';
-import { botLook } from '../../model/looks.ts';
 import type { PastLooks } from '../../model/past-games.ts';
 import { isLegal, liveHandIds, tablePlays, type CardPlay } from '../../model/plays.ts';
 import { readingMs } from '../../model/reading.ts';
@@ -56,6 +55,7 @@ import { ResurrectionPanel } from './ResurrectionPanel.tsx';
 import { Table, type TableHint } from './Table.tsx';
 import { useDeadlineExpired } from './useClock.ts';
 import { useRecordPastGame } from './useRecordPastGame.ts';
+import { useTableLooks, type TableLooksMode } from './useTableLooks.ts';
 
 export interface PlayTableProps {
   session: Session;
@@ -86,32 +86,10 @@ export interface PlayTableProps {
 /** A aparência se escolhe só no treino fora do tutorial (F1); no resto, a mesa fica no padrão e o menu não mostra o seletor. */
 const chosenLook = ({ training, tutorial }: Pick<PlayTableProps, 'training' | 'tutorial'>): boolean => training !== undefined && !tutorial;
 
-interface TableLooks {
-  /** A sua (a de quem olha). */
-  mine: Look;
-  /** A de cada dono, para o provedor. */
-  owners: Partial<Record<PlayerId, Look>>;
-  /**
-   * A sua e a do bot, para a gravação da partida (G3); nenhuma com o Cordel, para a linha do treino padrão ficar como a de hoje (sem elas o
-   * replay já é Cordel dos dois lados, e o bot em Cordel é a G1).
-   */
-  recorded: PastLooks | undefined;
-}
-
-/**
- * As aparências da mesa (decks e raças, fatia 2): no treino fora do tutorial, a sua (das preferências) e a do bot (`botLook`, G1),
- * calculada da sua a cada desenho (G2: trocar a sua no menu troca a dele); no tutorial e no online, nenhuma (o padrão dos dois lados, G4).
- * Memoizada pelo conteúdo: o `botLook` devolve um objeto novo, e um `owners` novo a cada desenho mudaria o contexto de toda carta.
- */
-function useTableLooks(chosen: Look | null, me: PlayerId | undefined, opponent: PlayerId | undefined): TableLooks | null {
-  const deck = chosen?.deck;
-  const race = chosen?.race;
-  return useMemo(() => {
-    if (deck === undefined || race === undefined || me === undefined || opponent === undefined) return null;
-    const mine: Look = { deck, race };
-    const bot = botLook(mine);
-    return { mine, owners: { [me]: mine, [opponent]: bot }, recorded: deck === 'cordel' ? undefined : { me: mine, opponent: bot } };
-  }, [deck, race, me, opponent]);
+/** De onde vêm as aparências da mesa: o treino fora do tutorial, a sala online (sem `training`) ou nenhuma (o tutorial). */
+function looksMode({ training, tutorial }: Pick<PlayTableProps, 'training' | 'tutorial'>): TableLooksMode {
+  if (training === undefined) return 'online';
+  return tutorial ? 'none' : 'training';
 }
 
 export function PlayTable(props: PlayTableProps) {
@@ -125,13 +103,13 @@ export function PlayTable(props: PlayTableProps) {
     sound.setEnabled(soundOn);
   }, [sound, soundOn]);
   const view = snapshot.state?.view;
-  const table = useTableLooks(chosenLook(props) ? (snapshot.prefs.look ?? DEFAULT_LOOK) : null, view?.me, view?.opponent.id);
+  const table = useTableLooks(looksMode(props), snapshot.prefs.look ?? DEFAULT_LOOK, snapshot.room?.seats, view?.me, view?.opponent.id);
   // Sem `state` ainda não há o que desenhar.
   if (snapshot.state === null) return null;
   return (
     // A aparência das cartas: no treino, a sua no seu lado e no que é seu (a mão, o Equipar, o cemitério), e a do bot no lado dele (fatia
-    // 2); o tutorial e o online ficam em cordel. Um provedor só, em volta do palco inteiro: o momento da especial e as cópias das cenas
-    // ficam no `LookZone` de quem a cena fala.
+    // 2); online, a de cada assento (fatia 3); o tutorial fica em cordel. Um provedor só, em volta do palco inteiro: o momento da especial
+    // e as cópias das cenas ficam no `LookZone` de quem a cena fala.
     <LooksProvider look={table?.mine ?? DEFAULT_LOOK} owners={table?.owners}>
       {/* Online (sem `training`, que o tutorial também passa), a sua especial espera o momento que o oponente vê (decisoes.md 2026-11-03 (5), A9a). */}
       <Stage snapshot={snapshot} reducedMotion={reducedMotion} online={props.training === undefined}>
@@ -629,6 +607,8 @@ function PlayTableView({
             ? { value: snapshot.prefs.look ?? DEFAULT_LOOK, onChange: (look) => changePrefs({ ...snapshot.prefs, look }) }
             : undefined
         }
+        // Online, a aparência da sala é a do assento (H2): no lugar do seletor, a linha que diz isso (H3).
+        lookNote={training === undefined ? LOOK_ROOM_FIXED : undefined}
         concedeWarning={concedeWarning}
         canConcede={room?.status === 'PLAYING' && phase !== 'GAME_OVER'}
         concedeDisabled={snapshot.status === 'reconnecting'}

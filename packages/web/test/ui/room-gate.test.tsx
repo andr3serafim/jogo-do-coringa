@@ -5,6 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createRoomApi } from '../../src/app/room-api.ts';
 import { getDiagnosticContext } from '../../src/app/diagnostic-context.ts';
 import { DEFAULT_PREFS, loadSeat, savePrefs, saveSeat } from '../../src/model/storage.ts';
+import { urls as bestiario } from '../../src/looks/bestiario/index.ts';
+import { urls as celestial } from '../../src/looks/celestial/index.ts';
+import { portrait, urls as egipcio } from '../../src/looks/egipcio/index.ts';
+import { resetPacks } from '../../src/looks/load.ts';
 import { RoomGate } from '../../src/ui/screens/RoomGate.tsx';
 import { FakeConnection, stateMessage, viewAt } from '../fixtures.ts';
 import { CODE, fakeApi, info, joined, memoryStore, roomMessage, seat, seriousViolations, TOKEN } from './support.tsx';
@@ -586,5 +590,45 @@ describe('reconexão pela API de verdade', () => {
     const { unmount } = render(<RoomGate code={CODE} api={api} store={store} marks={memoryStore()} />);
     unmount();
     expect(made[0]!.connection.calls).toEqual(['connect', 'close']);
+  });
+});
+
+describe('a sala pede os pacotes das aparências dos assentos (decks e raças, fatia 3)', () => {
+  function counting() {
+    const calls = { bestiario: 0, celestial: 0, egipcio: 0 };
+    resetPacks({
+      bestiario: () => (calls.bestiario++, Promise.resolve({ urls: bestiario })),
+      celestial: () => (calls.celestial++, Promise.resolve({ urls: celestial })),
+      egipcio: () => (calls.egipcio++, Promise.resolve({ urls: egipcio, portrait })),
+    });
+    return calls;
+  }
+  const seatInfo = (playerId: 'p1' | 'p2', nickname: string) => ({ playerId, nickname, connected: true, ready: false, wantsRematch: false });
+
+  afterEach(() => resetPacks());
+
+  it('no lobby, antes de qualquer mesa, o room com as duas aparências pede bestiario, egipcio e celestial (uma vez cada)', async () => {
+    const calls = counting();
+    const { api } = setup({ seated: true });
+    expect(await screen.findByRole('region', { name: 'Sala' })).toBeInTheDocument();
+    const lobby = roomMessage({
+      seats: [
+        { ...seatInfo('p1', 'Duda'), look: { deck: 'bestiario', race: 'egipcio' } },
+        { ...seatInfo('p2', 'Ana'), look: { deck: 'celestial', race: 'bufao' } },
+      ],
+    });
+    act(() => api.connections[0]!.emitRoom(lobby));
+    expect(calls).toEqual({ bestiario: 1, celestial: 1, egipcio: 1 });
+    // A presença (outro room com as mesmas aparências) não pede de novo.
+    act(() => api.connections[0]!.emitRoom({ ...lobby, seats: lobby.seats.map((s) => ({ ...s, ready: true })) }));
+    expect(calls).toEqual({ bestiario: 1, celestial: 1, egipcio: 1 });
+  });
+
+  it('com os dois no padrão (sem look), nenhum pacote', async () => {
+    const calls = counting();
+    const { api } = setup({ seated: true });
+    expect(await screen.findByRole('region', { name: 'Sala' })).toBeInTheDocument();
+    act(() => api.connections[0]!.emitRoom(roomMessage({ seats: [seatInfo('p1', 'Duda'), seatInfo('p2', 'Ana')] })));
+    expect(calls).toEqual({ bestiario: 0, celestial: 0, egipcio: 0 });
   });
 });

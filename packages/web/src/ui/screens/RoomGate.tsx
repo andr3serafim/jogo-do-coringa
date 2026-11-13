@@ -1,6 +1,6 @@
 // Entrar numa sala (spec §2.2) e viver nela (§6.2, §6.3). O lobby e a mesa são as telas de verdade; o fim de
 // partida (painel, revanche) e o menu da partida moram na própria mesa (`PlayTable`).
-import { DEFAULT_LOOK, HttpError, normalizeCode, normalizeNickname, parseTarget, roomLink } from '@coringa/protocol';
+import { DEFAULT_LOOK, HttpError, normalizeCode, normalizeLook, normalizeNickname, parseTarget, roomLink } from '@coringa/protocol';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { openStore } from '../../app/browser-store.ts';
 import { clearDiagnosticContext, setDiagnosticContext } from '../../app/diagnostic-context.ts';
@@ -18,6 +18,7 @@ import {
   type KeyValueStore,
   type SeatSession,
 } from '../../model/storage.ts';
+import { requestLook } from '../cards/LooksProvider.tsx';
 import { Button, Panel, Screen, TextField, Title } from '../parts.tsx';
 import { ConnectionBanner } from '../table/Banners.tsx';
 import { NICKNAME_ERROR, OFFLINE, ROOM_FULL, ROOM_MISSING, TOO_MANY } from '../text.ts';
@@ -371,6 +372,22 @@ function OnlineRoom({ session, code, api, store, reload }: OnlineRoomProps) {
     setDiagnosticContext({ code, seq, epoch });
     return clearDiagnosticContext;
   }, [code, seq, epoch]);
+
+  // Os pacotes das aparências dos assentos (decks e raças, fatia 3), pedidos assim que o `room` as traz, ainda no lobby: a mesa não nasce em
+  // cordel. A dependência é o texto das aparências, não o `seats` (um vetor novo a cada mensagem de presença); o padrão não pede nada.
+  const seatLooks = (snapshot.room?.seats ?? [])
+    .map((seat) => {
+      const look = normalizeLook(seat.look);
+      return `${look.deck}:${look.race}`;
+    })
+    .join(',');
+  useEffect(() => {
+    if (seatLooks === '') return;
+    for (const pair of seatLooks.split(',')) {
+      const [deck, race] = pair.split(':');
+      requestLook(normalizeLook({ deck, race }));
+    }
+  }, [seatLooks]);
 
   const { stop, status, room } = snapshot;
   if (stop === 'ROOM_GONE' || stop === 'PROTOCOL' || stop === 'OTHER_TAB') {
