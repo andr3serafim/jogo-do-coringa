@@ -421,3 +421,31 @@ G8 (`decisoes.md` 2026-11-12 (1)). As `Ruling:` de cada tarefa estão no `docs/m
 - **As fotos** (fora do repositório; o diário diz onde): o J do bot no Egípcio dele, os versos dos dois decks a 360, o Anúbis no retrato com a
   espada por cima, as cópias da Devastação e da Ressurreição do bot na Celestial dele. Nada mudou por causa delas.
 - **O JavaScript inicial** foi de 182,7 para 183,8 KB (gzip).
+
+## 17. O que a execução decidiu (fatia 3)
+
+Executada em 2026-11-13 na branch `feat/decks-fatia-3`, pelo plano `docs/superpowers/plans/2026-11-12-decks-fatia-3.md`, aprovado com as H1 a
+H7 (`decisoes.md` 2026-11-12 (2)). As `Ruling:` de cada tarefa estão no `docs/memoria/diario.md` 2026-11-13 (1).
+
+- **As escolhas H1 a H7, como ficaram:**
+  - **H1 (afina a §8.2):** quem está no padrão não manda a aparência. O núcleo grava `normalizeLook(look)` no assento **só quando o corpo a
+    trouxe**, e a mensagem `room` só a devolve para o assento que a tem (uma cópia); a web lê o assento sem ela como o padrão. Com o Cordel, o
+    corpo do POST, o assento gravado e a mensagem são os de antes. O `look` fora da forma (de outro tipo, sem um campo, com campo a mais, com
+    mais de 32 caracteres) é 400 `BAD_NICKNAME`, como qualquer corpo fora do esquema; nenhum código de erro novo.
+  - **H2 (a §8.3, confirmada):** a sua aparência na sala vem do assento. A preferência mudada depois (no Início, noutra aba, no meio da
+    partida) não vale para a sala aberta. A revanche e a reconexão mantêm os assentos, logo as aparências.
+  - **H3 (no lugar do painel apagado da §6):** o menu da partida online não tem o seletor e mostra a linha "A aparência desta sala é a que
+    você tinha ao entrar.".
+  - **H4:** a nota do painel "Aparência" do Início passou a ser "Na sala online, vale a que você tinha ao entrar.".
+  - **H5 (tira a G4 da fatia 2 para o online, como a §7.3 manda):** a partida online guardada leva `looks` dos assentos do fim, só quando
+    alguma não é o padrão (`recordedLooks`, a mesma regra do treino).
+  - **H6:** sem medição nova (a mesa online desenha o mesmo que a do treino com dois decks).
+  - **H7:** inline, tarefa por tarefa, teste primeiro; um revisor novo no fim.
+- **De onde vem a aparência:** a de quem cria, do painel do Início (a que está marcada na hora de criar); a de quem entra pelo link, das
+  preferências guardadas (`sentLook`: `undefined` no padrão).
+- **A mesa online:** `roomLooks` tira as duas aparências do `room.seats` (assento ausente ou sem `look`: o padrão). O `useTableLooks` saiu
+  do `PlayTable` para `ui/table/useTableLooks.ts` e é memoizado pelos textos do deck e da raça de cada lado: as mensagens `room` de
+  presença (a queda, o pronto, o `woAt`) não trocam o contexto das cartas. O provedor, o `LookZone` e a carta não mudaram.
+- **Os pacotes vêm cedo:** a sala (`OnlineRoom`) os pede assim que o `room` traz as aparências, ainda no lobby.
+- **Versões:** `RULES_VERSION`, `STATE_SCHEMA` (6) e `PROTOCOL_VERSION` não subiram; nenhuma partida de referência mudou. O deploy não fecha
+  as salas abertas: elas seguem sem `look`, em Cordel.
