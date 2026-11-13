@@ -12,8 +12,8 @@
   - **Branch:** `feat/decks-fatia-3`, no checkout principal, saída da `main` em `b6c2caf`, só com o plano e esta memória; no GitHub.
   - **Em curso (2026-11-13):** "execute o plano da fatia 3 dos decks" (o autor), inline (`superpowers:executing-plans`), tarefa por
     tarefa. O andamento por tarefa, com os commits e as `Ruling:`, fica no `diario.md` 2026-11-13 (1).
-  - **Próximo passo exato:** a Task 0 (o `pnpm check` da branch), depois a Task 1 (o protocolo). Quem assumir: o `git log` da branch diz
-    qual tarefa já tem commit; siga a primeira sem.
+  - **Próximo passo exato:** o `pnpm check` depois da Task 2 (o protocolo e o servidor já commitados), depois a Task 3 (a web: criar e entrar levam a
+    aparência). Quem assumir: o `git log` da branch diz qual tarefa já tem commit; siga a primeira sem.
 - **A fatia 2 dos decks e raças (o dono por lado) está na `main`** ("sim", o autor, 2026-11-12), por fast-forward de `feat/decks-fatia-2`
   até `bb186ef`, com as duas CI verdes (`check` e `e2e`) no topo da branch e no push da `main` (`56efcbc`). No treino com um deck de
   arte, o bot veste o outro deck com o Egípcio (G1); cada lado da mesa, do placar (o retrato do Anúbis), do momento e das cópias das cenas veste o deck do dono, com o verso na

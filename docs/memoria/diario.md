@@ -15,6 +15,19 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   - **Task 0 (o começo):** a `main` não andou (`b6c2caf`); a aprovação está no `decisoes.md`; nada sem commit além do `.claude/` e do
     `jogar-treino.bat` do autor.
 
+    `pnpm check` verde (com parte da Task 1 já no disco: as duas foram escritas enquanto ele rodava).
+  - **Task 1 (o protocolo): feita** (`1e4e1d1`). `SeatInfo.look?`, `LookBodySchema` (dois textos de até 32), `CreateRoomBodySchema` com
+    `look?`, `JoinRoomBodySchema` no lugar do `NicknameBodySchema` (o teste dele mudou por desenho: as três conferências de antes, mais
+    `look` válido e `hp` recusado); `createRoom(…, hp?, look?)` e `joinRoom(…, look?)`, e o `call` só põe no corpo as chaves que vieram.
+    **Ruling:** o commit da Task 1 leva o `router.ts` só com a troca do esquema (montado do `HEAD`), e o `pnpm check` completo roda depois
+    da Task 2, cobrindo as duas (o pre-commit já roda lint, typecheck e os testes relacionados) — custo: se a Task 1 sozinha quebrasse algo
+    fora dos relacionados, o check não diria de qual commit veio.
+  - **Task 2 (o servidor): feita** (`57a6d79`). `SeatRecord.look?` e `LookInput` (`core/types.ts`); o `seatLook` do `room-core.ts` grava
+    `normalizeLook(look)` só quando o corpo trouxe (H1); o `roomMessage` copia o `look` do assento; os RPC e o roteador (`readCreate`,
+    `readJoin` no lugar do `readNickname`) levam o `look`. Testes novos: o núcleo (a normalização com a trava e o id desconhecido, a cópia,
+    a entrada, a mensagem só com o `look` de quem tem, o registro antigo sem `look`), a revanche e a reconexão (`lobby.test.ts`) e o HTTP (os
+    códigos, e o `look` do corpo chegando à mensagem `room` por um socket de verdade: vermelho com o roteador sem passar o `look`). Nenhum
+    teste existente mudou.
 ---
 
 ## 2026-11-12 (3): o plano da fatia 3 dos decks (o online)
