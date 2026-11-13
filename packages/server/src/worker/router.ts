@@ -1,5 +1,5 @@
 import { CLOSE, HP_CHOICES, LIMITS, generateCode, normalizeCode, normalizeNickname } from '@coringa/protocol';
-import { CreateRoomBodySchema, NicknameBodySchema } from '@coringa/protocol/schemas';
+import { CreateRoomBodySchema, JoinRoomBodySchema } from '@coringa/protocol/schemas';
 import { ROOM_LIMITS } from '../core/timers.ts';
 import type { LogLine } from '../core/types.ts';
 
@@ -103,7 +103,7 @@ async function readNickname(request: Request): Promise<{ nickname: string } | { 
   } catch {
     return { error: fail(400, 'BAD_BODY', 'corpo inválido') };
   }
-  const body = NicknameBodySchema.safeParse(parsed);
+  const body = JoinRoomBodySchema.safeParse(parsed);
   const nickname = body.success ? normalizeNickname(body.data.nickname) : null;
   if (nickname === null) return { error: fail(400, 'BAD_NICKNAME', 'apelido inválido') };
   return { nickname };

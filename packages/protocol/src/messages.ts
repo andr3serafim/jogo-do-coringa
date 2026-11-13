@@ -1,5 +1,6 @@
 /** Tipos das mensagens do WebSocket e das respostas HTTP (spec §3, §4.3, §4.4). Só tipos. */
 import type { Action, GameEvent, GameResult, PlayerId, PlayerView, Replay, RuleErrorCode } from '@coringa/engine';
+import type { Look } from './looks.ts';
 
 /** Ação que o jogador pode enviar: o servidor injeta `TIMEOUT` e `FORFEIT`. */
 export type PlayerAction = Exclude<Action, { type: 'TIMEOUT' } | { type: 'FORFEIT' }>;
@@ -25,6 +26,11 @@ export interface SeatInfo {
   wantsRematch: boolean;
   /** Instante em que o W.O. por reconexão vence, para a interface mostrar a contagem. */
   woAt?: number;
+  /**
+   * A aparência que o jogador trouxe ao criar a sala ou ao entrar (decks e raças, fatia 3), já normalizada pelo servidor. Sem ela (quem
+   * estava no padrão, ou a sala de antes do deploy), o padrão.
+   */
+  look?: Look;
 }
 
 export interface Score {

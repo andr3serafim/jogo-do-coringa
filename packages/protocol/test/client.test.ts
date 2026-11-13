@@ -814,6 +814,28 @@ describe('chamadas HTTP', () => {
     expect((err as HttpError).status).toBe(409);
   });
 
+  it('createRoom: a aparência vai no corpo só quando vem (com e sem a vida)', async () => {
+    const look = { deck: 'bestiario', race: 'egipcio' } as const;
+    const a = fakeFetch(201, { code: 'ABC234', token: TOKEN, playerId: 'p1' });
+    await createRoom('http://s', 'Ana', a.impl, undefined, look);
+    expect(JSON.parse(a.calls[0]!.init?.body as string)).toEqual({ nickname: 'Ana', look: { deck: 'bestiario', race: 'egipcio' } });
+
+    const b = fakeFetch(201, { code: 'ABC234', token: TOKEN, playerId: 'p1' });
+    await createRoom('http://s', 'Ana', b.impl, 800, look);
+    expect(JSON.parse(b.calls[0]!.init?.body as string)).toEqual({ nickname: 'Ana', hp: 800, look: { deck: 'bestiario', race: 'egipcio' } });
+
+    const c = fakeFetch(201, { code: 'ABC234', token: TOKEN, playerId: 'p1' });
+    await createRoom('http://s', 'Ana', c.impl, 800);
+    expect(JSON.parse(c.calls[0]!.init?.body as string)).toEqual({ nickname: 'Ana', hp: 800 });
+  });
+
+  it('joinRoom: a aparência vai no corpo quando vem', async () => {
+    const look = { deck: 'celestial', race: 'bufao' } as const;
+    const ok = fakeFetch(200, { token: TOKEN, playerId: 'p2' });
+    await joinRoom('http://s', 'ABC234', 'Beto', ok.impl, look);
+    expect(JSON.parse(ok.calls[0]!.init?.body as string)).toEqual({ nickname: 'Beto', look: { deck: 'celestial', race: 'bufao' } });
+  });
+
   it('roomInfo: GET sem corpo; 404 vira HttpError', async () => {
     const ok = fakeFetch(200, { code: 'ABC234', status: 'LOBBY', nicknames: ['Ana'], full: false });
     await expect(roomInfo('http://s', 'ABC234', ok.impl)).resolves.toMatchObject({ full: false });

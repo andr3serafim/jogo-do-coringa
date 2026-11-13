@@ -44,11 +44,24 @@ export const ClientMessageSchema = z.discriminatedUnion('t', [
   z.strictObject({ t: z.literal('rematch'), want: z.boolean() }),
 ]);
 
-/** Corpo de `POST /api/rooms` e de `POST /api/rooms/:code/join`; o apelido é normalizado depois. */
-export const NicknameBodySchema = z.strictObject({ nickname: z.string().max(64) });
+/**
+ * A aparência no corpo (decks e raças, fatia 3): dois textos curtos. O núcleo normaliza (`normalizeLook`: id desconhecido vira o padrão,
+ * sem erro); aqui só a forma.
+ */
+export const LookBodySchema = z.strictObject({ deck: z.string().max(32), race: z.string().max(32) });
 
-/** O corpo da criação da sala: o apelido e, se quiser, a vida inicial (uma de `HP_CHOICES`, sub-projeto 5). */
-export const CreateRoomBodySchema = z.strictObject({ nickname: z.string().max(64), hp: z.number().int().optional() });
+/**
+ * O corpo da criação da sala (`POST /api/rooms`): o apelido (normalizado depois), se quiser a vida inicial (uma de `HP_CHOICES`,
+ * sub-projeto 5) e, fora do padrão, a aparência.
+ */
+export const CreateRoomBodySchema = z.strictObject({
+  nickname: z.string().max(64),
+  hp: z.number().int().optional(),
+  look: LookBodySchema.optional(),
+});
+
+/** O corpo da entrada (`POST /api/rooms/:code/join`): o apelido e, se quiser, a aparência. Sem `hp` (a vida é da sala). */
+export const JoinRoomBodySchema = z.strictObject({ nickname: z.string().max(64), look: LookBodySchema.optional() });
 
 /** Texto de um frame → mensagem validada, ou `null` para JSON quebrado ou fora do esquema. */
 export function parseClientMessage(raw: string): ClientMessage | null {

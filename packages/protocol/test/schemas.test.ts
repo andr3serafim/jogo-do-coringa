@@ -1,7 +1,7 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import type { z } from 'zod';
 import type { PlayerAction } from '../src/messages.ts';
-import { NicknameBodySchema, parseClientMessage, type PlayerActionSchema } from '../src/schemas.ts';
+import { CreateRoomBodySchema, JoinRoomBodySchema, parseClientMessage, type PlayerActionSchema } from '../src/schemas.ts';
 
 describe('esquemas do cliente', () => {
   it('aceita cada ação do jogador e recusa TIMEOUT/FORFEIT', () => {
@@ -75,10 +75,35 @@ describe('esquemas do cliente', () => {
     for (const msg of cases) expect(parseClientMessage(JSON.stringify(msg))).toEqual(msg);
   });
 
-  it('valida o corpo do apelido', () => {
-    expect(NicknameBodySchema.safeParse({ nickname: 'Ana' }).success).toBe(true);
-    expect(NicknameBodySchema.safeParse({ nickname: 'a'.repeat(65) }).success).toBe(false);
-    expect(NicknameBodySchema.safeParse({ nickname: 'Ana', extra: 1 }).success).toBe(false);
+  it('valida o corpo da entrada (o apelido e, se quiser, a aparência)', () => {
+    expect(JoinRoomBodySchema.safeParse({ nickname: 'Ana' }).success).toBe(true);
+    expect(JoinRoomBodySchema.safeParse({ nickname: 'a'.repeat(65) }).success).toBe(false);
+    expect(JoinRoomBodySchema.safeParse({ nickname: 'Ana', extra: 1 }).success).toBe(false);
+    expect(JoinRoomBodySchema.safeParse({ nickname: 'Ana', look: { deck: 'celestial', race: 'bufao' } }).success).toBe(true);
+    // A vida é da sala: quem entra não a escolhe.
+    expect(JoinRoomBodySchema.safeParse({ nickname: 'Ana', hp: 800 }).success).toBe(false);
+  });
+
+  it('o corpo da criação aceita a aparência na forma certa (o id, quem confere é o núcleo)', () => {
+    expect(CreateRoomBodySchema.safeParse({ nickname: 'Ana', look: { deck: 'bestiario', race: 'egipcio' } }).success).toBe(true);
+    expect(CreateRoomBodySchema.safeParse({ nickname: 'Ana', look: { deck: 'xyz', race: 'abc' } }).success).toBe(true);
+    expect(CreateRoomBodySchema.safeParse({ nickname: 'Ana', hp: 800, look: { deck: 'bestiario', race: 'egipcio' } }).success).toBe(true);
+  });
+
+  it('o corpo recusa a aparência fora da forma', () => {
+    const bad: unknown[] = [
+      'bestiario',
+      { deck: 'bestiario' },
+      { deck: 'bestiario', race: 'egipcio', extra: 1 },
+      { deck: 'x'.repeat(33), race: 'bufao' },
+      { deck: 'bestiario', race: 'y'.repeat(33) },
+      { deck: 1, race: 'bufao' },
+      null,
+    ];
+    for (const look of bad) {
+      expect(CreateRoomBodySchema.safeParse({ nickname: 'Ana', look }).success).toBe(false);
+      expect(JoinRoomBodySchema.safeParse({ nickname: 'Ana', look }).success).toBe(false);
+    }
   });
 
   it('o esquema da ação e o tipo do motor não divergem', () => {

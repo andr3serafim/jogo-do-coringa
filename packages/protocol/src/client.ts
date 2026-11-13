@@ -18,6 +18,7 @@ import {
   SLOW_RETRY_CODES,
   SLOW_RETRY_MS,
 } from './constants.ts';
+import type { Look } from './looks.ts';
 import type {
   AckMessage,
   ClientMessage,
@@ -443,7 +444,7 @@ export class HttpError extends Error {
 async function call<T>(
   fetchImpl: typeof fetch | undefined,
   url: string,
-  init?: { method: string; nickname: string; hp?: number },
+  init?: { method: string; nickname: string; hp?: number; look?: Look },
 ): Promise<T> {
   const doFetch = fetchImpl ?? globalThis.fetch;
   const res = await doFetch(
@@ -452,7 +453,12 @@ async function call<T>(
       ? {
           method: init.method,
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify(init.hp === undefined ? { nickname: init.nickname } : { nickname: init.nickname, hp: init.hp }),
+          // Só as chaves que vieram: sem a vida e sem a aparência, o corpo é o de sempre (`{ nickname }`).
+          body: JSON.stringify({
+            nickname: init.nickname,
+            ...(init.hp === undefined ? {} : { hp: init.hp }),
+            ...(init.look === undefined ? {} : { look: init.look }),
+          }),
         }
       : { method: 'GET' },
   );
@@ -464,25 +470,37 @@ function baseOf(server: string): string {
   return server.replace(/\/+$/, '');
 }
 
-/** Cria a sala; `hp` é a vida inicial escolhida (uma de `HP_CHOICES`), e sem ele vale a padrão. */
+/**
+ * Cria a sala; `hp` é a vida inicial escolhida (uma de `HP_CHOICES`), e sem ele vale a padrão. `look` é a aparência de quem cria
+ * (decks e raças, fatia 3); quem está no padrão não a manda.
+ */
 export function createRoom(
   server: string,
   nickname: string,
   fetchImpl?: typeof fetch,
   hp?: number,
+  look?: Look,
 ): Promise<CreateRoomResponse> {
-  return call(fetchImpl, `${baseOf(server)}/api/rooms`, { method: 'POST', nickname, ...(hp === undefined ? {} : { hp }) });
+  return call(fetchImpl, `${baseOf(server)}/api/rooms`, {
+    method: 'POST',
+    nickname,
+    ...(hp === undefined ? {} : { hp }),
+    ...(look === undefined ? {} : { look }),
+  });
 }
 
+/** Entra na sala; `look` é a aparência de quem entra (fatia 3), e quem está no padrão não a manda. */
 export function joinRoom(
   server: string,
   code: string,
   nickname: string,
   fetchImpl?: typeof fetch,
+  look?: Look,
 ): Promise<JoinRoomResponse> {
   return call(fetchImpl, `${baseOf(server)}/api/rooms/${encodeURIComponent(code)}/join`, {
     method: 'POST',
     nickname,
+    ...(look === undefined ? {} : { look }),
   });
 }
 
