@@ -5,7 +5,8 @@ import { DEFAULT_LOOK, HttpError, normalizeNickname, parseTarget, type Look } fr
 import { useState, type FormEvent } from 'react';
 import type { RoomApi } from '../../app/room-api.ts';
 import { navigate } from '../../app/router.ts';
-import { LEARN_LABEL, LOOK_PANEL_LABEL, LOOK_TRAINING_ONLY, PAST_GAMES_LABEL, SOUND_LABEL } from '../../model/copy.ts';
+import { LEARN_LABEL, LOOK_ONLINE_NOTE, LOOK_PANEL_LABEL, PAST_GAMES_LABEL, SOUND_LABEL } from '../../model/copy.ts';
+import { sentLook } from '../../model/looks.ts';
 import {
   loadNickname,
   loadPrefs,
@@ -58,7 +59,10 @@ export function Home({ api, store }: HomeProps) {
     sound.setEnabled(on);
   }
 
-  /** A aparência das cartas (decks e raças): guardada com as outras preferências; por enquanto vale no treino e no replay (F1). */
+  /**
+   * A aparência das cartas (decks e raças): guardada com as outras preferências. Vale no treino e, na sala online, a que você tinha ao
+   * criar ou entrar (fatia 3, H2).
+   */
   function changeLook(next: Look) {
     setLook(next);
     savePrefs(store, { ...loadPrefs(store), look: next });
@@ -75,7 +79,9 @@ export function Home({ api, store }: HomeProps) {
     setNicknameError(null);
     setBusy(true);
     try {
-      const room = await api.create(valid, hp);
+      // Fora do padrão, a aparência do painel vai junto (fatia 3, H1); no padrão, a chamada é a de hoje.
+      const sent = sentLook(look);
+      const room = await (sent === undefined ? api.create(valid, hp) : api.create(valid, hp, sent));
       saveNickname(store, valid);
       saveSeat(store, room.code, { token: room.token, playerId: room.playerId, nickname: valid });
       navigate(`/s/${room.code}`);
@@ -157,7 +163,7 @@ export function Home({ api, store }: HomeProps) {
         {PAST_GAMES_LABEL}
       </Button>
       <Panel label={LOOK_PANEL_LABEL}>
-        <LookChoice value={look} onChange={changeLook} note={LOOK_TRAINING_ONLY} />
+        <LookChoice value={look} onChange={changeLook} note={LOOK_ONLINE_NOTE} />
       </Panel>
       <Panel label="Preferências">
         <Switch label={SOUND_LABEL} checked={soundOn} onChange={changeSound} />

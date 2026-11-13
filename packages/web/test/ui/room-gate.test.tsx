@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createRoomApi } from '../../src/app/room-api.ts';
 import { getDiagnosticContext } from '../../src/app/diagnostic-context.ts';
-import { loadSeat, saveSeat } from '../../src/model/storage.ts';
+import { DEFAULT_PREFS, loadSeat, savePrefs, saveSeat } from '../../src/model/storage.ts';
 import { RoomGate } from '../../src/ui/screens/RoomGate.tsx';
 import { FakeConnection, stateMessage, viewAt } from '../fixtures.ts';
 import { CODE, fakeApi, info, joined, memoryStore, roomMessage, seat, seriousViolations, TOKEN } from './support.tsx';
@@ -101,6 +101,18 @@ describe('entrada: sem token', () => {
     expect(await screen.findByRole('region', { name: 'Sala' })).toBeInTheDocument();
     expect(loadSeat(store, CODE)).toEqual({ token: TOKEN, playerId: 'p2', nickname: 'Duda' });
     expect(api.connect).toHaveBeenCalledExactlyOnceWith(CODE, loadSeat(store, CODE));
+  });
+
+  it('a aparência (decks e raças, fatia 3): com a preferência fora do padrão, ela vai junto na entrada', async () => {
+    const store = memoryStore();
+    savePrefs(store, { ...DEFAULT_PREFS, look: { deck: 'celestial', race: 'bufao' } });
+    const api = fakeApi();
+    const user = userEvent.setup();
+    render(<RoomGate code={CODE} api={api} store={store} marks={memoryStore()} />);
+    await screen.findByLabelText('Seu apelido');
+    await fillNickname(user, 'Duda');
+    await user.click(screen.getByRole('button', { name: 'Entrar' }));
+    expect(api.join).toHaveBeenCalledExactlyOnceWith(CODE, 'Duda', { deck: 'celestial', race: 'bufao' });
   });
 
   it.each([

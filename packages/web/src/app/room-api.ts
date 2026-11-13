@@ -7,6 +7,7 @@ import {
   RoomClient,
   type CreateRoomResponse,
   type JoinRoomResponse,
+  type Look,
   type RoomClientOptions,
   type RoomConnection,
   type RoomInfoResponse,
@@ -16,9 +17,10 @@ import { loadPrefs, saveLastSeq, type KeyValueStore, type SeatSession } from '..
 import { fetchVersion } from './health.ts';
 
 export interface RoomApi {
-  /** Cria a sala; `hp` é a vida inicial escolhida (sem ele, a padrão). */
-  create(nickname: string, hp?: number): Promise<CreateRoomResponse>;
-  join(code: string, nickname: string): Promise<JoinRoomResponse>;
+  /** Cria a sala; `hp` é a vida inicial escolhida (sem ele, a padrão); `look`, a aparência de quem cria (fora do padrão, fatia 3). */
+  create(nickname: string, hp?: number, look?: Look): Promise<CreateRoomResponse>;
+  /** Entra na sala; `look` é a aparência de quem entra (fora do padrão, fatia 3). */
+  join(code: string, nickname: string, look?: Look): Promise<JoinRoomResponse>;
   info(code: string): Promise<RoomInfoResponse>;
   /** A versão publicada, de `/api/health` (spec §2.4); `null` se não deu para saber. Opcional: os falsos de teste não têm. */
   version?: () => Promise<string | null>;
@@ -90,8 +92,8 @@ export function createRoomApi({ store, server, makeClient, fetchImpl }: RoomApiO
   const origin = server ?? window.location.origin;
   const build = makeClient ?? ((options: RoomClientOptions): RoomConnection => new ReopenableClient(options));
   return {
-    create: (nickname, hp) => createRoom(origin, nickname, fetchImpl, hp),
-    join: (code, nickname) => joinRoom(origin, code, nickname, fetchImpl),
+    create: (nickname, hp, look) => createRoom(origin, nickname, fetchImpl, hp, look),
+    join: (code, nickname, look) => joinRoom(origin, code, nickname, fetchImpl, look),
     info: (code) => roomInfo(origin, code, fetchImpl),
     version: () => fetchVersion(origin, fetchImpl),
     connect(code, seat) {

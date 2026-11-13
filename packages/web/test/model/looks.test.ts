@@ -1,7 +1,7 @@
 import type { Card, Rank } from '@coringa/engine';
 import { DEFAULT_LOOK, type Look } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
-import { artOf, AURA, botLook, packsOf, RACE_TIER, tierOf } from '../../src/model/looks.ts';
+import { artOf, AURA, botLook, packsOf, RACE_TIER, sentLook, tierOf } from '../../src/model/looks.ts';
 
 const num = (value: Rank): Card => ({ id: `n${value}`, kind: 'NUM', value, suit: 'copas' });
 const K: Card = { id: 'k', kind: 'K', suit: 'paus' };
@@ -96,4 +96,20 @@ describe('a aparência do bot no treino (fatia 2, G1)', () => {
     const mine: Look = { deck: 'cordel', race: 'bufao' };
     expect(botLook(mine)).not.toBe(mine);
   });
+});
+
+describe('a aparência que vai pelo fio (fatia 3, H1)', () => {
+  it('o padrão não vai: undefined, para o pedido ficar o de hoje', () => {
+    expect(sentLook(DEFAULT_LOOK)).toBeUndefined();
+    expect(sentLook({ deck: 'cordel', race: 'bufao' })).toBeUndefined();
+  });
+
+  it.each<Look>([BESTIARIO_EGIPCIO, { deck: 'celestial', race: 'bufao' }, BESTIARIO_BUFAO, CELESTIAL_EGIPCIO])(
+    '%o vai igual, num objeto novo',
+    (look) => {
+      const sent = sentLook(look);
+      expect(sent).toEqual(look);
+      expect(sent).not.toBe(look);
+    },
+  );
 });

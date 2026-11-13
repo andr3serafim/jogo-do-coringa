@@ -1,15 +1,17 @@
 // Entrar numa sala (spec §2.2) e viver nela (§6.2, §6.3). O lobby e a mesa são as telas de verdade; o fim de
 // partida (painel, revanche) e o menu da partida moram na própria mesa (`PlayTable`).
-import { HttpError, normalizeCode, normalizeNickname, parseTarget, roomLink } from '@coringa/protocol';
+import { DEFAULT_LOOK, HttpError, normalizeCode, normalizeNickname, parseTarget, roomLink } from '@coringa/protocol';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { openStore } from '../../app/browser-store.ts';
 import { clearDiagnosticContext, setDiagnosticContext } from '../../app/diagnostic-context.ts';
 import type { RoomApi } from '../../app/room-api.ts';
 import { navigate } from '../../app/router.ts';
+import { sentLook } from '../../model/looks.ts';
 import type { Session } from '../../model/session.ts';
 import {
   forgetSeat,
   loadNickname,
+  loadPrefs,
   loadSeat,
   saveNickname,
   saveSeat,
@@ -165,7 +167,9 @@ function RoomEntry({ code, api, store, reload, marks }: EntryProps) {
     setNicknameError(null);
     setBusy(true);
     try {
-      const joined = await api.join(code, valid);
+      // A aparência das preferências, lida na hora de entrar (a entrada por link não mostra o painel); no padrão, a chamada é a de hoje (H1).
+      const sent = sentLook(loadPrefs(store).look ?? DEFAULT_LOOK);
+      const joined = await (sent === undefined ? api.join(code, valid) : api.join(code, valid, sent));
       const seat: SeatSession = { token: joined.token, playerId: joined.playerId, nickname: valid };
       saveNickname(store, valid);
       saveSeat(store, code, seat);

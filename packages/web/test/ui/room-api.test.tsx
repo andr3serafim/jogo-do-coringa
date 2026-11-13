@@ -153,3 +153,29 @@ describe('createRoomApi().connect com o cliente de verdade', () => {
     expect(sockets()).toHaveLength(1);
   });
 });
+
+describe('createRoomApi(): criar e entrar levam a aparência (decks e raças, fatia 3)', () => {
+  function fakeFetch() {
+    const bodies: unknown[] = [];
+    const impl = ((_url: string, init?: RequestInit) => {
+      bodies.push(JSON.parse(init?.body as string));
+      return Promise.resolve(new Response(JSON.stringify({ code: CODE, token: TOKEN, playerId: 'p1' }), { status: 201 }));
+    }) as typeof fetch;
+    return { impl, bodies };
+  }
+
+  it('com a aparência, ela vai no corpo; sem ela, o corpo é o de sempre', async () => {
+    const { impl, bodies } = fakeFetch();
+    const api = createRoomApi({ store: memoryStore(), server: 'http://s', fetchImpl: impl });
+    await api.create('Ana', 500, { deck: 'bestiario', race: 'egipcio' });
+    await api.join(CODE, 'Bia', { deck: 'celestial', race: 'bufao' });
+    await api.create('Ana', 500);
+    await api.join(CODE, 'Bia');
+    expect(bodies).toEqual([
+      { nickname: 'Ana', hp: 500, look: { deck: 'bestiario', race: 'egipcio' } },
+      { nickname: 'Bia', look: { deck: 'celestial', race: 'bufao' } },
+      { nickname: 'Ana', hp: 500 },
+      { nickname: 'Bia' },
+    ]);
+  });
+});

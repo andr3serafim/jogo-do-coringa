@@ -1,7 +1,7 @@
 // A aparência das cartas (spec dos decks e raças, §2 e §4): que arte veste cada carta numa aparência, a faixa de raridade da numérica e a
 // aura de cada faixa. Puro: sem React nem DOM. O modelo (`Look`, os ids, `normalizeLook`) é do `@coringa/protocol`; aqui só o que a web usa.
 import type { Card, Rank } from '@coringa/engine';
-import type { DeckId, Look, RaceId } from '@coringa/protocol';
+import { DEFAULT_LOOK, type DeckId, type Look, type RaceId } from '@coringa/protocol';
 
 /** A faixa de raridade (§2.2): só um número, sem nome em lugar nenhum. */
 export type Tier = 1 | 2 | 3 | 4 | 5;
@@ -33,6 +33,19 @@ export function artOf(card: Card, look: Look): { pack: PackId; key: ArtKey } | n
 export function botLook(mine: Look): Look {
   if (mine.deck === 'cordel') return { deck: 'cordel', race: 'bufao' };
   return { deck: mine.deck === 'bestiario' ? 'celestial' : 'bestiario', race: 'egipcio' };
+}
+
+/** A aparência é o padrão (o Cordel com o Bufão). */
+export function isDefaultLook(look: Look): boolean {
+  return look.deck === DEFAULT_LOOK.deck && look.race === DEFAULT_LOOK.race;
+}
+
+/**
+ * A aparência que vai pelo fio ao criar ou entrar na sala (fatia 3, H1): `undefined` no padrão, para o pedido ficar o de hoje; fora
+ * dele, uma cópia.
+ */
+export function sentLook(look: Look): Look | undefined {
+  return isDefaultLook(look) ? undefined : { deck: look.deck, race: look.race };
 }
 
 /** Os pacotes que uma aparência pede, sem repetir (nenhum para o padrão). */

@@ -2,8 +2,8 @@ import { HttpError } from '@coringa/protocol';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { LOOK_PANEL_LABEL, LOOK_TRAINING_ONLY } from '../../src/model/copy.ts';
-import { DEFAULT_PREFS, loadNickname, loadPrefs, loadSeat } from '../../src/model/storage.ts';
+import { LOOK_ONLINE_NOTE, LOOK_PANEL_LABEL } from '../../src/model/copy.ts';
+import { DEFAULT_PREFS, loadNickname, loadPrefs, loadSeat, savePrefs } from '../../src/model/storage.ts';
 import { Home } from '../../src/ui/screens/Home.tsx';
 import { CODE, created, fakeApi, memoryStore, seriousViolations, TOKEN } from './support.tsx';
 
@@ -51,6 +51,37 @@ describe('início: criar sala', () => {
     await fill(user, 'Seu apelido', 'Duda');
     await user.click(screen.getByRole('button', { name: 'Criar sala' }));
     expect(api.create).toHaveBeenCalledExactlyOnceWith('Duda', 800);
+  });
+
+  it('a aparência (decks e raças, fatia 3): com a preferência fora do padrão, ela vai junto na criação', async () => {
+    const api = fakeApi();
+    const store = memoryStore();
+    savePrefs(store, { ...DEFAULT_PREFS, look: { deck: 'bestiario', race: 'egipcio' } });
+    const user = userEvent.setup();
+    render(<Home api={api} store={store} />);
+    await fill(user, 'Seu apelido', 'Duda');
+    await user.click(screen.getByRole('button', { name: 'Criar sala' }));
+    expect(api.create).toHaveBeenCalledExactlyOnceWith('Duda', 500, { deck: 'bestiario', race: 'egipcio' });
+  });
+
+  it('a aparência trocada no painel antes de criar é a que vai', async () => {
+    const { api, user } = setup();
+    await user.click(screen.getByRole('radio', { name: 'Celestial' }));
+    await fill(user, 'Seu apelido', 'Duda');
+    await user.click(screen.getByRole('button', { name: 'Criar sala' }));
+    expect(api.create).toHaveBeenCalledExactlyOnceWith('Duda', 500, { deck: 'celestial', race: 'bufao' });
+  });
+
+  it('de volta ao Cordel no painel antes de criar, a criação é a de hoje (sem aparência)', async () => {
+    const api = fakeApi();
+    const store = memoryStore();
+    savePrefs(store, { ...DEFAULT_PREFS, look: { deck: 'bestiario', race: 'egipcio' } });
+    const user = userEvent.setup();
+    render(<Home api={api} store={store} />);
+    await user.click(screen.getByRole('radio', { name: 'Cordel' }));
+    await fill(user, 'Seu apelido', 'Duda');
+    await user.click(screen.getByRole('button', { name: 'Criar sala' }));
+    expect(api.create).toHaveBeenCalledExactlyOnceWith('Duda', 500);
   });
 
   it('lembra o apelido da última vez', () => {
@@ -233,11 +264,11 @@ describe('início: treino e acessibilidade', () => {
 });
 
 describe('início: o painel "Aparência" (decks e raças, fatia 1)', () => {
-  it('o painel existe, antes das preferências, com a nota de que por enquanto vale no treino', () => {
+  it('o painel existe, antes das preferências, com a nota de que na sala online vale a que você tinha ao entrar', () => {
     setup();
     const panel = screen.getByRole('region', { name: LOOK_PANEL_LABEL });
     expect(within(panel).getByRole('group', { name: 'Deck' })).toBeInTheDocument();
-    expect(within(panel).getByText(LOOK_TRAINING_ONLY)).toBeInTheDocument();
+    expect(within(panel).getByText(LOOK_ONLINE_NOTE)).toBeInTheDocument();
     const regions = screen.getAllByRole('region').map((region) => region.getAttribute('aria-label'));
     expect(regions.indexOf(LOOK_PANEL_LABEL)).toBe(regions.indexOf('Preferências') - 1);
   });
