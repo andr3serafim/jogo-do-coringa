@@ -56,6 +56,32 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     (`e2e2631`), no Equipar da rodada 1 a mão de Duda está toda "montando 4 cartas" (nenhum verso à mostra; a foto da primeira rodada do E2E
     mostra isso), e o plano supôs versos ali; os versos de cada deck por assento estão provados no `room-looks.test.tsx` — custo: o E2E não
     prova o verso no navegador de verdade.
+    `pnpm e2e` inteiro: 114 passaram, 4 pulados (9,4 min; eram 113 na fatia 2, o novo é o de duas pessoas). A branch subiu em `23cb2d3` (o
+    pre-push verde: web 2795 testes, JavaScript inicial 184,3 KB).
+  - **A revisão da branch inteira (H7; subagente novo, Opus, `b6c2caf..23cb2d3`): "pronto para merge: sim"** — nenhum Critical nem
+    Important, 4 Minor. O Step 6 do plano manda o achado virar correção nesta branch:
+    - (M1) o `seatLook` tinha entrado entre o docblock do `RoomCore` e a classe: subiu para antes dele (`ead82e5`).
+    - (M2) cinco comentários que a fatia deixou falsos (o `copy.ts` em cima do `LOOK_ONLINE_NOTE`, o `GameMenu`, o `past-games`, o
+      `useRecordPastGame`, o `PlayTable`): reescritos para o estado da fatia 3 (`ead82e5`). Nenhum comportamento mudou, e por isso nenhum
+      teste novo.
+    - (M3) o `estado.md` tinha dois próximos passos (o da fatia 2, velho) e a Fila dizia que a fatia 3 esperava a execução: reescrito.
+    - (M4) os versos do outro no E2E podem passar sem conferir nada (a `Ruling:` da Task 5). **Final: Ruling:** fica como está: na semente do
+      servidor de teste não há verso à mostra no Equipar da rodada 1, e um ponto com verso garantido pediria jogar até o Ataque; os versos por
+      assento estão no `room-looks.test.tsx` — custo: o atributo `data-verso-deck` no navegador de verdade só é provado pelo E2E do treino
+      (fatia 2), que usa o mesmo componente.
+    - O revisor deixou de lado (e eu confirmo, sem mudança): o lobby não mostra as aparências (fora do plano); a entrada por link não mostra a
+      aparência que vai (o plano diz que ela não tem o painel); a revanche não pega uma preferência trocada depois (H2); a posse (a loja); a aba
+      sem armazenamento (o Início cria com a do painel em memória, a entrada por link cai no Cordel: pequeno, num caminho sem painel); a linha
+      online regravada muito depois do fim (o assento só sai no lobby); "apelido inválido" para um `look` malformado (o plano pede nenhum
+      código novo, e a web nunca o manda).
+- **Armadilhas:**
+  - Heredoc grande no Bash quebrou de novo (aspas e crases dentro): os scripts de edição foram gravados com a ferramenta de escrita e rodados
+    com `node`.
+  - O `pnpm check` leva uns 4 minutos nesta máquina (a web com cobertura é o grosso); dá para escrever os testes da tarefa seguinte num
+    rascunho fora do repositório enquanto ele roda, e aplicar depois.
+  - A identidade do nó do DOM não prova que o contexto do React não mudou (o React reaproveita o nó): para provar um memo, `renderHook` com
+    `toBe`.
+  - Na sala online de teste (`E2E_SEED=e2e2631`), a mão de Duda no Equipar da rodada 1 está toda montando: nenhum verso à mostra.
 
 ---
 

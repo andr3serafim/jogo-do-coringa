@@ -1,30 +1,36 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-13**, a execução da fatia 3 dos decks (o online) em curso, na branch
-> `feat/decks-fatia-3`.
+> Sobrescrito a cada atualização. **Última: 2026-11-13**, a fatia 3 dos decks (o online) executada e revisada na branch
+> `feat/decks-fatia-3`, esperando a CI e o "sim" do autor para o merge.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **O plano da fatia 3 dos decks (o online): aprovado** ("Aprovo como está", `decisoes.md` 2026-11-12 (2)). "escreva o plano da fatia 3
-  dos decks" (o autor, 2026-11-12). O plano: `docs/superpowers/plans/2026-11-12-decks-fatia-3.md`, com as escolhas H1 a H7 (o que vai pelo fio com o padrão, a
-  sua aparência vinda do assento, a linha do menu online, a nota do Início, a partida online guardada, sem medição nova, a execução).
-  - **Branch:** `feat/decks-fatia-3`, no checkout principal, saída da `main` em `b6c2caf`, só com o plano e esta memória; no GitHub.
-  - **Em curso (2026-11-13):** "execute o plano da fatia 3 dos decks" (o autor), inline (`superpowers:executing-plans`), tarefa por
-    tarefa. O andamento por tarefa, com os commits e as `Ruling:`, fica no `diario.md` 2026-11-13 (1).
-  - **Próximo passo exato:** o revisor novo da branch inteira (H7, um subagente, `b6c2caf..23cb2d3`) está rodando; o que ele achar de
-    Critical ou Important vira correção nesta branch, com teste. As Tasks 0 a 5 estão feitas e commitadas, a branch está no GitHub (`23cb2d3`,
-    o pre-push verde), e o `pnpm e2e` inteiro passou (114, 4 pulados). Depois: a CI das duas (`check` e `e2e`) e o merge com o "sim" do autor.
+- **A fatia 3 dos decks e raças (o online): executada e revisada, na branch `feat/decks-fatia-3`** ("execute o plano da fatia 3 dos
+  decks", o autor, 2026-11-13). Na sala online, cada lado veste a aparência do assento: quem cria leva a do painel do Início, quem entra pelo
+  link leva a das preferências; o servidor a grava no assento (normalizada, só quando o corpo traz) e a mensagem `room` a devolve; a sua na
+  sala é a que você tinha ao entrar (a preferência mudada depois não vale); a partida online guardada leva `looks`. Com o padrão, nada muda
+  (o pedido, o assento e a mensagem são os de antes). Plano `docs/superpowers/plans/2026-11-12-decks-fatia-3.md` (H1 a H7, `decisoes.md`
+  2026-11-12 (2)); a execução, as `Ruling:`, a revisão e as armadilhas no `diario.md` 2026-11-13 (1); o que a execução decidiu na §17 da
+  spec. `RULES_VERSION`, `STATE_SCHEMA` (6) e `PROTOCOL_VERSION` não mudaram.
+  - **Verificado:** `pnpm check` verde (web 2795 testes; JavaScript inicial 183,9 → 184,3 KB); `pnpm e2e` inteiro verde (114, 4 pulados),
+    com o teste novo de duas pessoas no `looks.spec.ts`. A revisão da branch inteira (H7, um subagente novo): nenhum Critical nem
+    Important, "pronto para merge: sim"; os Minor de comentário e de memória corrigidos (`ead82e5` e o commit desta memória).
+  - **Próximo passo exato:** conferir a CI das duas (`check` e `e2e`) no topo da branch (pela API pública do GitHub, com `curl`) e
+    levar ao autor o merge (fast-forward da `main` até o topo, como nas fatias 1 e 2); merge só com o "sim" dele. Depois do merge: a CI do
+    push da `main`, apagar o ledger `.superpowers/sdd/2026-11-12-decks-fatia-3/` e o deploy (dele), que leva as aparências ao online.
+  - **O que não pode regredir:** com o padrão, o corpo do POST é `{ nickname }` (mais o `hp`), o assento não tem a chave `look` e a mensagem
+    `room` também não; o assento sem `look` (as salas de antes do deploy) é Cordel, sem erro. O `useTableLooks` é memoizado pelos textos
+    do deck e da raça, nunca pelo `seats`. A preferência não entra na mesa online.
 - **A fatia 2 dos decks e raças (o dono por lado) está na `main`** ("sim", o autor, 2026-11-12), por fast-forward de `feat/decks-fatia-2`
   até `bb186ef`, com as duas CI verdes (`check` e `e2e`) no topo da branch e no push da `main` (`56efcbc`). No treino com um deck de
   arte, o bot veste o outro deck com o Egípcio (G1); cada lado da mesa, do placar (o retrato do Anúbis), do momento e das cópias das cenas veste o deck do dono, com o verso na
-  cor do deck; a partida guardada leva `looks`, e o replay veste as gravadas. Com a aparência padrão nada muda; o tutorial e o online ficam
-  em Cordel até a fatia 3. Plano `docs/superpowers/plans/2026-11-12-decks-fatia-2.md` (G1 a G8, `decisoes.md` 2026-11-12 (1)); a
+  cor do deck; a partida guardada leva `looks`, e o replay veste as gravadas. Com a aparência padrão nada muda; o tutorial fica em
+  Cordel (o online ganhou as aparências na fatia 3, acima). Plano `docs/superpowers/plans/2026-11-12-decks-fatia-2.md` (G1 a G8, `decisoes.md` 2026-11-12 (1)); a
   execução, as `Ruling:`, a revisão (nenhum Critical nem Important; os 6 Minor corrigidos com teste) e as armadilhas no `diario.md`
   2026-11-12 (2); a medição G7 em `notas/medicao-decks-fatia-2.md` (passa nas quatro); o que a execução decidiu na §16 da spec.
   `RULES_VERSION`, `STATE_SCHEMA` e `PROTOCOL_VERSION` não mudaram (só a web mudou).
-  - O ledger da fatia foi apagado (as `Ruling:` estão no diário). **Próximo passo:** o que o autor escolher na Fila ou em "Esperando o
-    autor"; a fatia 3 e o bloco D só com plano aprovado antes.
+  - O ledger da fatia foi apagado (as `Ruling:` estão no diário).
   - **O que não pode regredir:** com a preferência padrão, o bot em Cordel (G1), nenhum `img` de carta, o verso de listras sem
     `data-verso-deck` e o `<Coringa>` no placar; o treino em Cordel não grava `looks`. O `LookZone` não põe nó no DOM, e há um provedor
     só. O que chegou mora na loja do `ready.ts`, que o provedor assina (`useSyncExternalStore`); o provedor e o placar só importam
@@ -52,12 +58,15 @@
 
 ## Fila
 
-- **Decks e raças do Coringa, a fatia 3** (o online; spec §8 e §11): o plano está aprovado (acima) e espera a execução. A arte pintada, quando o autor quiser, segue a bíblia de arte (`docs/superpowers/specs/2026-11-11-biblia-de-arte.md`).
+- **A arte pintada dos decks**, quando o autor quiser: segue a bíblia de arte (`docs/superpowers/specs/2026-11-11-biblia-de-arte.md`).
 - **Bloco D** (pontos 5 e 14, spec do playtest §6: os botões de carimbo e o 14), com plano escrito e aprovado pelo autor antes da execução,
   como os blocos A, B, C e E.
 
 ## Esperando o autor
 
+- **O merge da fatia 3 dos decks** (`feat/decks-fatia-3`), com as duas CI verdes no topo: o "sim" é dele.
+- **Jogar a fatia 3** depois do deploy: uma sala online com cada um num deck de arte (os dois lados, os versos, os retratos, o replay da
+  partida online com as aparências).
 - **A Devastação com arte no celular** (46 e 47 quadros/s, a meta é 50): consertar (a recomendação: um bloco curto para cortar o recálculo
   de estilo da mesa inteira, que ajuda o Cordel também) ou não. A fatia 2 passou pela G7 e já está na `main`. Não segura o deploy: só sente
   quem escolheu um deck de arte, no celular, nessa cena.
