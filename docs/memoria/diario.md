@@ -14,7 +14,6 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 - **Andamento** (uma linha por tarefa, com os commits e as `Ruling:`):
   - **Task 0 (o começo):** a `main` não andou (`b6c2caf`); a aprovação está no `decisoes.md`; nada sem commit além do `.claude/` e do
     `jogar-treino.bat` do autor.
-
     `pnpm check` verde (com parte da Task 1 já no disco: as duas foram escritas enquanto ele rodava).
   - **Task 1 (o protocolo): feita** (`1e4e1d1`). `SeatInfo.look?`, `LookBodySchema` (dois textos de até 32), `CreateRoomBodySchema` com
     `look?`, `JoinRoomBodySchema` no lugar do `NicknameBodySchema` (o teste dele mudou por desenho: as três conferências de antes, mais
@@ -28,6 +27,27 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     a entrada, a mensagem só com o `look` de quem tem, o registro antigo sem `look`), a revanche e a reconexão (`lobby.test.ts`) e o HTTP (os
     códigos, e o `look` do corpo chegando à mensagem `room` por um socket de verdade: vermelho com o roteador sem passar o `look`). Nenhum
     teste existente mudou.
+    `pnpm check` verde depois da Task 2 (web 2762 testes, servidor 289 e 37 no workerd).
+  - **Task 3 (a web: criar e entrar levam a aparência): feita** (`f6ea153`). `sentLook` e `isDefaultLook` em `model/looks.ts` (o padrão dá
+    `undefined`; fora dele, uma cópia); a `RoomApi` passa o `look`; o Início manda a do painel e a entrada por link a das preferências
+    (`loadPrefs(store).look ?? DEFAULT_LOOK`), cada um com a chamada de hoje no padrão. `LOOK_TRAINING_ONLY` virou `LOOK_ONLINE_NOTE`
+    ("Na sala online, vale a que você tinha ao entrar.", H4; o teste da nota mudou por desenho). Testes novos em `looks.test.ts`,
+    `home.test.tsx` (a preferência, a troca no painel, a volta ao Cordel), `room-gate.test.tsx` e `room-api.test.tsx` (a API de verdade
+    leva o `look` ao corpo). **Ruling:** o `pnpm check` completo da Task 3 rodou junto com o da Task 4 (o pre-commit rodou os 2228
+    relacionados) — custo: uma quebra fora deles só apareceria no da Task 4. **Ruling:** o `look-choice.test.tsx` usa a frase antiga como
+    texto de exemplo da prop `note`; fica (não confere o Início).
+  - **Task 4 (a web: a sala veste os assentos): feita** (`0df6e94`). `roomLooks` e `recordedLooks` em `model/looks.ts`; o `useTableLooks`
+    saiu do `PlayTable` para `ui/table/useTableLooks.ts` (modos `training`, `online` e `none`), memoizado pelos textos do deck e da raça de
+    cada lado e pelos dois ids; o `recorded` dos dois caminhos é o `recordedLooks` (no treino, o mesmo de antes). O menu ganhou `lookNote`
+    (a linha `LOOK_ROOM_FIXED` no online, H3). O `OnlineRoom` pede os pacotes dos assentos num efeito com o texto das aparências como
+    dependência (vale no lobby e na mesa). Testes: `room-looks.test.tsx` (novo: as duas cadeiras, a preferência que não entra, o assento sem
+    `look`, a presença, o axe, o memo, o menu, a gravação), `looks.test.ts`, os pacotes no lobby no `room-gate.test.tsx`; o `anim-harness`
+    ganhou a opção `playerId`. Os testes da fatia 2 sobre o online (`table-looks`, `end-and-menu`, `past-games-record`) seguiram verdes sem
+    mudar. **Ruling:** o `useTableLooks` mora num arquivo próprio e exportado, e o memo pelo conteúdo é provado com `renderHook` (o mesmo
+    objeto para um `seats` novo com as mesmas aparências): a identidade do nó da imagem, que o plano pede, não pegaria uma troca de contexto,
+    porque o React reaproveita o nó — custo: um arquivo a mais. **Ruling:** primeiro só a extração do hook (os testes da fatia 2 verdes, os
+    novos vermelhos), depois o online, para ver os testes da mesa falharem de verdade.
+
 ---
 
 ## 2026-11-12 (3): o plano da fatia 3 dos decks (o online)
