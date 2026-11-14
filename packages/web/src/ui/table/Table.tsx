@@ -7,6 +7,7 @@
 // celular e no tablet) e a zona de que ela fala, que ganha o contorno parado (`data-dica`, desenhado em `styles.css`).
 import type { PlayerId } from '@coringa/engine';
 import type { Deadline, StateMessage } from '@coringa/protocol';
+import * as m from 'motion/react-m';
 import { useEffect, useId, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { turnCue } from '../../model/clock.ts';
 import { equipOpponentText, scoreText } from '../../model/copy.ts';
@@ -230,8 +231,14 @@ function TableView({
           <FightHud view={view} names={names} face={face} deadline={state.deadline} />
           {/* Em telas baixas os campos e a faixa rolam por dentro; a mão e a barra de ação ficam sempre à vista, e a sua vez (o foco
               no painel de baixo) não rola nada. No PC eles não crescem além do que pedem (a sobra fica com a mão, centrada), e a
-              coluna do histórico, com o menu, nunca rola junto. */}
-          <div data-campos className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-none pc:flex-initial [&>*]:flex-none">
+              coluna do histórico, com o menu, nunca rola junto. O `layoutScroll` diz ao Motion que este contêiner rola: sem ele, a rolagem
+              (a da cena até a fileira atingida, a da sua vez de atacar) parecia mudança de lugar de toda carta, e o Motion animava cada
+              uma de volta, pela thread principal, a cada quadro (o conserto da Devastação no celular, 2026-11-14). */}
+          <m.div
+            layoutScroll
+            data-campos
+            className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-none pc:flex-initial [&>*]:flex-none"
+          >
             {/* A liderança (bloco C, ponto 13): as fileiras dos dois campos informam os totais num armazém só (não põe nó no DOM). */}
             <LeadProvider>
             {pc ? null : hint?.panel}
@@ -272,7 +279,7 @@ function TableView({
               <PlayerField side="self" view={view} player={self} name={names.self} />
             </LookZone>
             </LeadProvider>
-          </div>
+          </m.div>
           <div className="flex flex-none flex-col pb-[env(safe-area-inset-bottom)] pc:flex-1 pc:flex-row pc:items-center pc:gap-7 pc:px-6 pc:pb-0 pc:text-papel">
             <Hand cards={view.self.hand} />
             {actionBar ? (

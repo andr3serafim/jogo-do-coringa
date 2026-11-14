@@ -114,3 +114,62 @@ for (const viewport of [
     });
   });
 }
+
+// A rolagem dos campos no celular não anima as cartas (o conserto da Devastação, 2026-11-14): a 360 os campos rolam por dentro
+// (`[data-campos]`), e a cena rola até a fileira atingida (`revealRow`). Sem o `layoutScroll` nesse contêiner, o Motion lia a rolagem como
+// se toda carta tivesse mudado de lugar e animava cada uma de volta pela thread principal (o `transform` inline na raiz de 29 cartas, a cada
+// quadro, por ~800 ms, a partir de ~59 px), o que derrubava a Devastação com arte para 46 quadros/s. O que sobra é um deslize de fração de
+// pixel (a mesa muda de altura em menos de 1 px quando a fileira cai), que não é da rolagem: o teste olha os deslocamentos de 2 px ou mais.
+const DEVASTATION = (() => {
+  const games = JSON.parse(readFileSync(new URL('./fixtures/exodia-devastacao.json', import.meta.url), 'utf8')) as Array<Record<string, unknown>>;
+  games[0] = { ...games[0], looks: { me: { deck: 'bestiario', race: 'egipcio' }, opponent: { deck: 'celestial', race: 'egipcio' } } };
+  return { id: String(games[0].id), json: JSON.stringify(games) };
+})();
+
+test.describe('360 × 640, a rolagem dos campos', () => {
+  test.use({ viewport: { width: 360, height: 640 } });
+
+  test('a Devastação rola os campos até a fileira atingida, e nenhuma carta é animada pela rolagem', async ({ page }) => {
+    const guard = failOnConsoleErrors(page);
+    await page.addInitScript((games) => window.localStorage.setItem('coringa:partidas', games), DEVASTATION.json);
+    await page.goto(`/partidas/${DEVASTATION.id}`);
+    // Rodada 43, passo 210 → 211: a sua Devastação derruba a Defesa do Bot.
+    await page.getByRole('combobox', { name: 'Rodada' }).selectOption('43');
+    const next = replayControl(page, 'Próximo passo');
+    for (let i = 0; i < 30; i++) {
+      const text = (await replayCounter(page).textContent()) ?? '';
+      if (Number(/^Passo (\d+)/.exec(text)?.[1]) >= 210) break;
+      await next.click();
+    }
+    await expect(replayCounter(page)).toHaveText(/^Passo 210 de \d+$/);
+    await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1);
+    await page.evaluate(() => {
+      const flags = window as unknown as { animadas: Set<string>; rolagem: number[] };
+      flags.animadas = new Set();
+      const far = (style: string) => {
+        const found = /translate3d\(([-\d.]+)px, ([-\d.]+)px/.exec(style);
+        return found !== null && Math.max(Math.abs(Number(found[1])), Math.abs(Number(found[2]))) >= 2;
+      };
+      const fields = document.querySelector<HTMLElement>('[data-campos]')!;
+      flags.rolagem = [fields.scrollTop];
+      new MutationObserver((records) => {
+        for (const record of records) {
+          const el = record.target as HTMLElement;
+          const id = el.getAttribute('data-card-id');
+          if (id !== null && far(el.getAttribute('style') ?? '')) flags.animadas.add(id);
+        }
+        flags.rolagem.push(fields.scrollTop);
+      }).observe(document.querySelector('[data-palco]')!, { attributes: true, attributeFilter: ['style'], subtree: true });
+    });
+    await next.click();
+    await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1, { timeout: 10_000 });
+    const { animated, scrolls } = await page.evaluate(() => {
+      const flags = window as unknown as { animadas: Set<string>; rolagem: number[] };
+      return { animated: [...flags.animadas], scrolls: new Set(flags.rolagem).size };
+    });
+    // A prova vale: os campos rolaram de verdade durante a cena.
+    expect(scrolls, 'os campos rolaram').toBeGreaterThan(1);
+    expect(animated, 'cartas deslocadas 2 px ou mais pela rolagem').toEqual([]);
+    guard.expectClean();
+  });
+});
