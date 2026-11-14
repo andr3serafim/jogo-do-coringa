@@ -1,11 +1,16 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-14**, tudo pronto para o bloco D começar numa sessão nova ("vou iniciar em outra
-> sessão. prepare tudo", o autor); a `main` em `864dc27` ou mais nova, com as duas CI verdes.
+> Sobrescrito a cada atualização. **Última: 2026-11-14**, o bloco D em execução na branch `feat/playtest-bloco-d` (saída da `main` em
+> `8368eb1`): o plano escrito, nenhum código ainda.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
+- **Em curso: o bloco D, na `feat/playtest-bloco-d`** ("execute o bloco D", o autor, 2026-11-14). O plano:
+  `docs/superpowers/plans/2026-11-14-playtest-bloco-d.md` (as escolhas marcadas **[D]** são do Claude por delegação, não aprovadas pelo autor).
+  - **Feito:** o plano. **Próximo passo exato:** a Tarefa 1 (os botões de carimbo), teste primeiro (`test/ui/stamp-buttons.test.tsx`);
+    depois a Tarefa 2 (a faixa e a lápide), os portões do plano, o revisor num subagente, o diário, o push e as duas CI.
+  - O que segue abaixo é o preparo de antes, ainda válido (os portões e o "pronto quando").
 - **O próximo bloco: o D** (pontos 5 e 14 do playtest), numa sessão nova ("vou iniciar em outra sessão. prepare tudo", o autor, 2026-11-14).
   - **A spec:** `docs/superpowers/specs/2026-11-03-playtest-design.md` §6 (6.1 os botões de carimbo; 6.2 o monte e o cemitério no centro, com
     a lápide) e §8 (as restrições de todos os blocos). O protótipo aprovado, para olhar a forma: `docs/superpowers/specs/2026-11-03-playtest-prototipo.html`
