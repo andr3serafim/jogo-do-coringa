@@ -391,6 +391,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, online = false, chil
             ref={palco}
             data-palco
             data-ocupado={busy ? 'true' : undefined}
+            data-movimento-reduzido={reducedMotion ? '' : undefined}
             data-invertido={inverted ? 'true' : undefined}
             data-tremor={impact?.force}
             style={inverted ? { filter: 'invert(1)' } : undefined}

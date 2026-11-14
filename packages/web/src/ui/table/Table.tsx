@@ -16,6 +16,7 @@ import { newLineCount, type HistoryLine } from '../../model/history.ts';
 import type { TrainingLevel } from '../../model/local-room.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import type { HintZone } from '../../model/tutorial.ts';
+import { useAnim } from '../anim/context.ts';
 import { loadScenes } from '../anim/scenes-loader.ts';
 import { LookZone } from '../cards/LooksProvider.tsx';
 import { useMediaQuery } from '../useMediaQuery.ts';
@@ -28,6 +29,7 @@ import { Hand } from './Hand.tsx';
 import { HistoryButton, HistoryPanel, PC_QUERY } from './History.tsx';
 import { tableNames, type TableNames } from './labels.ts';
 import { LeadProvider } from './lead-store.ts';
+import { stampInk } from './stamp-ink.ts';
 import { PlayerField } from './PlayerField.tsx';
 import { useClock } from './useClock.ts';
 
@@ -130,6 +132,7 @@ function TableView({
   const [historyOpen, setHistoryOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const pc = useMediaQuery(PC_QUERY);
+  const { reduced } = useAnim();
   const hintZone = hint?.zone ?? null;
 
   // Abrir a gaveta conta como ver as linhas (spec §10.5, "quando você toca, foca…"): o contador do botão só conta as que chegam
@@ -285,6 +288,8 @@ function TableView({
             {actionBar ? (
               <div
                 data-dica={BAR_ZONES.has(hintZone) ? hintZone : undefined}
+                // Os pingos do carimbo (bloco D do playtest, ponto 5): um ouvinte só, aqui, para todos os carimbos da barra e dos painéis.
+                onPointerUp={reduced ? undefined : stampInk}
                 className="bg-tinta px-3 pb-3.5 pt-2.5 text-papel pc:min-w-0 pc:flex-1 pc:bg-transparent pc:px-0 pc:pb-0 pc:pt-0"
               >
                 {actionBar}

@@ -93,6 +93,8 @@ export const AUTO_PASS_NOTICE = 'Sem resposta possível; passando';
 
 export const SENDING_TEXT = 'Enviando…';
 export const ATTACK_LABEL = 'Atacar';
+/** A etiqueta do carimbo do Atacar com o Ataque Absoluto armado (bloco D do playtest, ponto 5): só desenho, o nome do botão já o diz. */
+export const ABSOLUTE_ATTACK_TAG = 'Ataque Absoluto';
 export const END_TURN_LABEL = 'Encerrar turno';
 /** Sob o "Encerrar turno": por que o botão principal não é "Atacar". */
 export const EMPTY_ATTACK_TEXT = 'Sua fileira de Ataque está vazia';

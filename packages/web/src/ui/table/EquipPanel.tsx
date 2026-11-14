@@ -36,7 +36,7 @@ import type { Notice, SessionSnapshot } from '../../model/session.ts';
 import { useAnim } from '../anim/context.ts';
 import { useDealIn } from '../anim/useDealIn.ts';
 import { Card } from '../cards/Card.tsx';
-import { NoticeLine, PRIMARY, PRIMARY_TITLE, SECONDARY, TwoLine } from './controls.tsx';
+import { NoticeLine, PRIMARY, PRIMARY_TITLE, ResetIcon, Seal, SECONDARY, TwoLine, UndoIcon } from './controls.tsx';
 import { DragGhost } from './DragGhost.tsx';
 import { AttackIcon, DefenseIcon } from './icons.tsx';
 import type { TableNames } from './labels.ts';
@@ -215,12 +215,8 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
           {complete ? EQUIP_READY_TEXT : equipLeftText(remaining.length)}
         </p>
         <div className="flex flex-none gap-2">
-          <button type="button" disabled={disabled || draft.length === 0} onClick={onUndo} className={SECONDARY}>
-            {UNDO_LABEL}
-          </button>
-          <button type="button" disabled={disabled || draft.length === 0} onClick={onReset} className={SECONDARY}>
-            {RESET_LABEL}
-          </button>
+          <Seal label={UNDO_LABEL} icon={<UndoIcon />} disabled={disabled || draft.length === 0} onClick={onUndo} />
+          <Seal label={RESET_LABEL} icon={<ResetIcon />} disabled={disabled || draft.length === 0} onClick={onReset} />
         </div>
       </div>
 

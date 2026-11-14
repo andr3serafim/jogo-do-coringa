@@ -17,6 +17,7 @@ import { noPlayReason, stealPreview, type GameEvent, type NumCard, type PlayerVi
 import type { PlayerAction } from '@coringa/protocol';
 import { useId, useMemo, type ReactNode, type RefObject } from 'react';
 import {
+  ABSOLUTE_ATTACK_TAG,
   ATTACK_LABEL,
   attackPreviewText,
   brokenEffectText,
@@ -46,7 +47,9 @@ import {
 import { previewsOf, previewsWithout, type Previews } from '../../model/preview.ts';
 import type { CardPlay, Target, TablePlays } from '../../model/plays.ts';
 import type { Notice } from '../../model/session.ts';
-import { PRIMARY, PRIMARY_TITLE, SECONDARY, TwoLine } from './controls.tsx';
+import { useAnim } from '../anim/context.ts';
+import { ATTACK, ATTACK_TITLE, PAPER_BIG, PRIMARY_TITLE, SECONDARY, STRIP, TwoLine } from './controls.tsx';
+import { AttackIcon } from './icons.tsx';
 import { resurrectDetailText, type TableNames } from './labels.ts';
 import { PassButton, ReactionNotice } from './ReactionPanel.tsx';
 import { ResurrectIcon } from './ResurrectIcon.tsx';
@@ -117,6 +120,10 @@ export function ActionBar(props: ActionBarProps) {
   const open = acting && !passed;
   const canPass = reacting && open && plays.pass;
   const tipId = useId();
+  // O Ataque Absoluto armado (do motor): a borda de ouro, a etiqueta e, fora do movimento reduzido, a faísca que corre a borda.
+  const attacking = plays.finish?.type === 'DECLARE_ATTACK';
+  const armed = attacking && previews.mine.absolute;
+  const { reduced } = useAnim();
 
   return (
     <section ref={barRef} data-painel tabIndex={-1} aria-label="Ações" className="relative flex flex-col gap-2.5 text-papel pc:gap-1.5">
@@ -170,17 +177,38 @@ export function ActionBar(props: ActionBarProps) {
       {open && (plays.finish || canPass || card) ? (
         <div className="flex gap-2">
           {canPass ? <PassButton disabled={disabled} onPass={() => props.onSend({ type: 'PASS' })} /> : null}
-          {plays.finish ? (
+          {plays.finish && attacking ? (
+            // O Atacar é o maior e o único vermelho, com a espada e a prévia numa tira lisa de papel. A etiqueta e a faísca do Absoluto são
+            // irmãs do botão, só desenho: o nome dele já diz "Ataque Absoluto" na prévia (WCAG 2.5.3, rótulo no nome).
+            <div className="relative flex flex-1 pc:flex-none">
+              <TwoLine
+                title={ATTACK_LABEL}
+                detail={attackPreviewText(previews.mine, opponent, previews.lives)}
+                titleClass={ATTACK_TITLE}
+                detailClass={STRIP}
+                strip
+                icon={<AttackIcon className="size-9 pc:size-10" />}
+                data-absoluto={armed ? '' : undefined}
+                disabled={disabled}
+                onClick={() => props.onSend(plays.finish!)}
+                className={`${ATTACK} w-full pc:min-w-[300px]`}
+              />
+              {armed ? (
+                <span aria-hidden="true" data-etiqueta-absoluto className="carimbo-etiqueta">
+                  {ABSOLUTE_ATTACK_TAG}
+                </span>
+              ) : null}
+              {armed && !reduced ? <span aria-hidden="true" data-faisca className="carimbo-faisca" /> : null}
+            </div>
+          ) : plays.finish ? (
             <TwoLine
-              title={plays.finish.type === 'DECLARE_ATTACK' ? ATTACK_LABEL : END_TURN_LABEL}
-              detail={
-                plays.finish.type === 'DECLARE_ATTACK' ? attackPreviewText(previews.mine, opponent, previews.lives) : EMPTY_ATTACK_TEXT
-              }
+              title={END_TURN_LABEL}
+              detail={EMPTY_ATTACK_TEXT}
               titleClass={PRIMARY_TITLE}
-              detailClass="text-xs font-semibold tabular-nums pc:text-[13px]"
+              detailClass="text-xs font-semibold pc:text-[13px]"
               disabled={disabled}
               onClick={() => props.onSend(plays.finish!)}
-              className={`${PRIMARY} flex-1 pc:min-w-[300px] pc:flex-none`}
+              className={`${PAPER_BIG} flex-1 pc:min-w-[300px] pc:flex-none`}
             />
           ) : null}
           {card ? (

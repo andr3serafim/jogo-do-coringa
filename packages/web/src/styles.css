@@ -16,6 +16,8 @@
   /* A cura (decisoes.md 2026-11-01 (1)): o "+N" e o trecho da barra que ela devolve. Outro verde que não o da capa do oponente,
    * para não parecer "do Bot"; o papel sobre ele tem 5,1:1. */
   --color-cura: #2a7339;
+  /* A madeira do carimbo (bloco D do playtest, ponto 5): a sombra dura dos botões, que são de tinta por cima da barra de tinta. */
+  --color-madeira: #8a5a2b;
 
   /* Tipo de madeira: títulos, botões e valor das cartas. Texto e números de jogo: Archivo, com `tabular-nums`. */
   --font-madeira: 'Alfa Slab One', serif;
@@ -630,8 +632,9 @@
  * (`--respira-i`, o índice dela, adianta o ciclo em 0,9 s). Na carta de quadra, um brilho passa a cada 3,2 s. Com os gestos das
  * placas de estado (bloco A dos pontos do playtest, ponto 6) e as marcas do poder que cresce (bloco C: o pulso e a brasa dos K, a
  * muralha dos Q e o brilho do ouro de quem lidera), são as únicas animações sem fim da folha (o teste do relógio confere): pouco
- * movimento, em área pequena, sem trocar a luminância da tela. Com movimento reduzido a mesa não põe as marcas (`data-respira`,
- * `.brilho-quadra`, `data-gesto`, `data-anima`, `data-muralha-zona`, `data-brilho-lider`).
+ * movimento, em área pequena, sem trocar a luminância da tela; a faísca do carimbo do Atacar com o Ataque Absoluto armado (bloco D, ponto 5)
+ * entra na mesma conta. Com movimento reduzido a mesa não põe as marcas (`data-respira`, `.brilho-quadra`, `data-gesto`, `data-anima`,
+ * `data-muralha-zona`, `data-brilho-lider`, `data-faisca`).
  */
 @keyframes respira {
   0%,
@@ -948,6 +951,278 @@ li[data-joga]::after {
 .momento-verso[data-verso-deck='celestial'] {
   border-color: var(--verso-fio);
   background: repeating-linear-gradient(45deg, var(--verso-celestial-1) 0 3px, var(--verso-celestial-2) 3px 6px);
+}
+
+/*
+ * Os carimbos de madeira (bloco D dos pontos do playtest, ponto 5; spec do playtest §6.1): os botões da barra de ação e dos painéis das
+ * fases. Borda grossa de tinta, sombra dura da cor da madeira (a barra é de tinta: a sombra de tinta sumiria nela) e a face na cor da
+ * variante (`--carimbo-face`): papel, ouro (Confirmar e a escolha principal) ou vermelho (só o Atacar). No toque o carimbo afunda: desloca
+ * pela sombra, que some; o `::after` do toque mantém o alvo no lugar, para o dedo na beirada não perder o clique. Sem levantar no ponteiro:
+ * um botão que se mexe debaixo do mouse treme na beirada. O grão de papel só nos grandes (`.carimbo-grande`, a segunda camada do fundo): os
+ * pequenos levam prévias e contas, e a prévia do Atacar vai numa tira lisa (spec §10.7). Com movimento reduzido (`data-movimento-reduzido`
+ * no palco, ou o pedido do sistema), nada desloca nem gira: o toque só escurece a face.
+ */
+:root {
+  --grao-carimbo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .09 0 0 0 0 .07 0 0 0 0 .06 0 0 0 .2 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+@layer components {
+  .carimbo {
+    --carimbo-face: var(--color-papel);
+    --carimbo-sombra: 3px;
+    position: relative;
+    border: 3px solid var(--color-tinta);
+    background-color: var(--carimbo-face);
+    color: var(--color-tinta);
+    box-shadow: var(--carimbo-sombra) var(--carimbo-sombra) 0 var(--color-madeira);
+    transition:
+      translate 120ms ease-out,
+      box-shadow 120ms ease-out;
+  }
+
+  .carimbo-ouro {
+    --carimbo-face: var(--color-ouro);
+  }
+
+  .carimbo-atacar {
+    --carimbo-face: var(--color-vermelho);
+    color: var(--color-papel);
+  }
+
+  .carimbo-grande {
+    --carimbo-sombra: 4px;
+    background-image: var(--grao-carimbo);
+    background-size: 180px 180px;
+  }
+
+  .carimbo:active:not(:disabled) {
+    translate: var(--carimbo-sombra) var(--carimbo-sombra);
+    box-shadow: 0 0 0 var(--color-madeira);
+    transition-duration: 50ms;
+  }
+
+  .carimbo:active:not(:disabled)::after {
+    content: '';
+    position: absolute;
+    inset: calc(-3px - var(--carimbo-sombra));
+  }
+
+  /* O contorno de foco de sempre (ouro com a borda de tinta): a sombra da classe, numa camada acima da base, apagaria a dele. */
+  .carimbo:focus-visible {
+    outline: 3px solid var(--color-ouro);
+    outline-offset: 0;
+    box-shadow: 0 0 0 6px var(--color-tinta);
+  }
+
+  .carimbo-atacar-titulo {
+    text-shadow: 2px 2px 0 var(--color-tinta);
+    letter-spacing: 0.03em;
+  }
+
+  /* A prévia do Atacar: a tira de papel lisa, por cima do grão. */
+  .carimbo-tira {
+    margin-top: 4px;
+    border: 2px solid var(--color-tinta);
+    background: var(--color-papel);
+    padding: 1px 6px;
+    color: var(--color-tinta);
+    line-height: 1.25;
+  }
+
+  /* O Ataque Absoluto armado: a borda de ouro por dentro (um `::before`: o `outline` e a sombra são do foco), a etiqueta e a faísca. */
+  .carimbo-atacar[data-absoluto] {
+    background-image: var(--grao-carimbo), linear-gradient(180deg, var(--color-vermelho), #8e1b13);
+    background-size:
+      180px 180px,
+      auto;
+  }
+
+  .carimbo-atacar[data-absoluto]::before {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border: 2px solid var(--color-ouro);
+    pointer-events: none;
+  }
+
+  .carimbo-etiqueta {
+    position: absolute;
+    top: -11px;
+    right: -5px;
+    z-index: 1;
+    border: 2px solid var(--color-tinta);
+    background: var(--color-ouro);
+    padding: 1px 6px;
+    color: var(--color-tinta);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    line-height: 1.3;
+    text-transform: uppercase;
+    white-space: nowrap;
+    rotate: 5deg;
+    pointer-events: none;
+  }
+
+  /* A faísca corre a borda do carimbo (o caminho é a caixa do invólucro); onde o navegador não tem `offset-path`, fica parada no canto. */
+  .carimbo-faisca {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .carimbo-faisca::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    border: 1.5px solid #fff6c8;
+    border-radius: 50%;
+    background: var(--color-ouro);
+    box-shadow: 0 0 8px 2px rgb(245 194 56 / 0.8);
+    offset-path: inset(0);
+    offset-rotate: 0deg;
+    animation: faisca-carimbo 2.8s linear infinite;
+  }
+
+  /* Os selos redondos (Desfazer, Recomeçar): o disco afunda e o desenho gira no toque; a legenda embaixo é o nome do botão. */
+  .carimbo-selo {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border: 0;
+    background: transparent;
+    padding: 0 2px;
+    color: var(--color-papel);
+  }
+
+  .carimbo-selo > [data-selo] {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border: 3px solid var(--color-tinta);
+    border-radius: 50%;
+    background: var(--grao-carimbo) 0 0 / 180px 180px, var(--color-papel);
+    box-shadow: 2px 2px 0 var(--color-madeira);
+    color: var(--color-tinta);
+    transition:
+      translate 120ms ease-out,
+      box-shadow 120ms ease-out;
+  }
+
+  .carimbo-selo > [data-selo] > svg {
+    width: 18px;
+    height: 18px;
+    transition: rotate 250ms cubic-bezier(0.3, 1.6, 0.5, 1);
+  }
+
+  .carimbo-selo:active:not(:disabled) > [data-selo] {
+    translate: 2px 2px;
+    box-shadow: 0 0 0 var(--color-madeira);
+    transition-duration: 50ms;
+  }
+
+  .carimbo-selo:active:not(:disabled) > [data-selo] > svg {
+    rotate: -60deg;
+  }
+
+  .carimbo-selo-legenda {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  @media (width >= theme(--breakpoint-pc)) {
+    .carimbo-selo > [data-selo] {
+      width: 40px;
+      height: 40px;
+    }
+
+    .carimbo-selo > [data-selo] > svg {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  /* Os pingos do toque (`stamp-ink.ts`): da cor da face, fora do fluxo e da rolagem. */
+  .carimbo-pingo {
+    position: fixed;
+    z-index: 60;
+    border-radius: 50%;
+    background: var(--color-papel);
+    pointer-events: none;
+  }
+
+  .carimbo-pingo[data-face='atacar'] {
+    background: var(--color-vermelho);
+  }
+
+  .carimbo-pingo[data-face='ouro'] {
+    background: var(--color-ouro);
+  }
+
+  /* Movimento reduzido: o afundar vira só a troca de cor, e o desenho do selo não gira. */
+  [data-movimento-reduzido] .carimbo,
+  [data-movimento-reduzido] .carimbo-selo > [data-selo],
+  [data-movimento-reduzido] .carimbo-selo > [data-selo] > svg {
+    transition: none;
+  }
+
+  [data-movimento-reduzido] .carimbo:active:not(:disabled) {
+    translate: none;
+    box-shadow: var(--carimbo-sombra) var(--carimbo-sombra) 0 var(--color-madeira);
+    background-color: color-mix(in oklab, var(--carimbo-face) 78%, var(--color-tinta));
+  }
+
+  [data-movimento-reduzido] .carimbo-selo:active:not(:disabled) > [data-selo] {
+    translate: none;
+    box-shadow: 2px 2px 0 var(--color-madeira);
+    background-color: color-mix(in oklab, var(--color-papel) 78%, var(--color-tinta));
+  }
+
+  [data-movimento-reduzido] .carimbo-selo:active:not(:disabled) > [data-selo] > svg {
+    rotate: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .carimbo,
+    .carimbo-selo > [data-selo],
+    .carimbo-selo > [data-selo] > svg {
+      transition: none;
+    }
+
+    .carimbo:active:not(:disabled) {
+      translate: none;
+      box-shadow: var(--carimbo-sombra) var(--carimbo-sombra) 0 var(--color-madeira);
+      background-color: color-mix(in oklab, var(--carimbo-face) 78%, var(--color-tinta));
+    }
+
+    .carimbo-selo:active:not(:disabled) > [data-selo] {
+      translate: none;
+      box-shadow: 2px 2px 0 var(--color-madeira);
+      background-color: color-mix(in oklab, var(--color-papel) 78%, var(--color-tinta));
+    }
+
+    .carimbo-selo:active:not(:disabled) > [data-selo] > svg {
+      rotate: none;
+    }
+  }
+}
+
+@keyframes faisca-carimbo {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
 }
 
 /*

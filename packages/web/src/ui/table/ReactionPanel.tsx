@@ -5,7 +5,7 @@
 import type { AttackPreview, GameEvent, PlayerView } from '@coringa/engine';
 import { attackDeclaredText, devastationCastText, guardPlayedText, PASS_LABEL, reflectPlayedText } from '../../model/copy.ts';
 import { livesOf } from '../../model/preview.ts';
-import { PRIMARY, PRIMARY_TITLE, TwoLine } from './controls.tsx';
+import { PAPER_BIG, PRIMARY_TITLE, TwoLine } from './controls.tsx';
 import type { TableNames } from './labels.ts';
 
 /** Quantos K o oponente pôs na Guarda neste `state`; `null` quando os eventos não vieram (recarga, resync). */
@@ -46,7 +46,7 @@ export function ReactionNotice({ view, names, threat, events }: ReactionNoticePr
   );
 }
 
-/** O botão principal da janela, longe da mão como o Atacar. */
+/** O botão principal da janela, longe da mão como o Atacar: um carimbo grande de papel (bloco D do playtest, ponto 5). */
 export function PassButton({ disabled, onPass }: { disabled: boolean; onPass: () => void }) {
   return (
     <TwoLine
@@ -54,7 +54,7 @@ export function PassButton({ disabled, onPass }: { disabled: boolean; onPass: ()
       titleClass={PRIMARY_TITLE}
       disabled={disabled}
       onClick={onPass}
-      className={`${PRIMARY} flex-1 pc:min-w-[300px] pc:flex-none`}
+      className={`${PAPER_BIG} flex-1 pc:min-w-[300px] pc:flex-none`}
     />
   );
 }
