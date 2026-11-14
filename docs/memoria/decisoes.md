@@ -6,6 +6,38 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-14 (1): o deploy feito; a Devastação aprovada; o bloco D delegado
+
+Perguntado "há alguma pendência a ser feita?", recebeu a lista numerada do que esperava por ele: (1) o deploy; (2) jogar a fatia 3 online e
+o resto no treino; (3) a Devastação com arte no celular (a recomendação: um bloco curto para cortar o recálculo de estilo da mesa inteira);
+(4) a virada de rodada lenta do bloco C (medir de novo na tomada antes de atacar); (5) o bloco D, com plano aprovado antes; (6) a arte pintada
+dos decks. Ele respondeu:
+
+> 1. feito
+> 2. feito
+> 3. aprovado.
+> 4. ignore.
+> 5. decida por mim
+> 6. quando o jogo estiver pronto e online irei solicitar para fazer isso.
+
+**Leitura:**
+- **(1)** O deploy (`pnpm deploy:server`) foi feito por ele, com o bloco C e as fatias 1 a 3 dos decks: as aparências estão no online, as
+  salas abertas antes fecharam (`STATE_SCHEMA` 6).
+- **(2)** Ele jogou. **Não trouxe achados**: as leituras **[I]** em aberto do `notas/playtest.md` e as frases novas das placas **não**
+  ficam confirmadas por isso; só saem da lista de espera os itens "Jogar …".
+- **(3)** Aprovada a recomendação: um bloco curto que estanque a invalidação de estilo das cartas da mesa inteira (a Devastação com arte a
+  360 px chegar a ≥ 50 quadros/s, sem piorar o Cordel). **[I]** As escolhas técnicas do bloco são de quem executa, registradas como
+  `Ruling:`; o merge segue pedindo o "sim" dele.
+- **(4)** A virada de rodada lenta do bloco C (42 e 48 quadros/s, talvez medida na bateria) **não** será atacada. Sai da lista sem ser dada
+  por consertada.
+- **(5)** **[I] Delegação:** as variantes do bloco D já eram dele (a A nos pontos 5 e 14, `decisoes.md` 2026-11-03 (4)); as escolhas do plano
+  do bloco D passam a ser decididas pelo Claude **por delegação**, registradas como tal, nunca como "aprovadas pelo autor". Não cobre o
+  merge nem o deploy. Ordem: o bloco D começa depois do merge da Devastação (os dois mexem na mesa, no `styles.css` e no portão de
+  ≥ 50 quadros/s da §8 da spec do playtest, que a Devastação muda).
+- **(6)** A arte pintada dos decks fica para quando o jogo estiver pronto e online, **a pedido dele**: não entra na fila de trabalho.
+
+---
+
 ## 2026-11-13 (1): o merge da fatia 3 dos decks
 
 Depois do resumo da execução da fatia 3 (o online; as `Ruling:`, a revisão sem Critical nem Important, as duas CI verdes em `d885c84`),

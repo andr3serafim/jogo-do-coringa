@@ -1,12 +1,25 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-13**, a fatia 3 dos decks (o online) na `main`, com as duas CI verdes no push
-> (`399e454`); o ledger apagado.
+> Sobrescrito a cada atualização. **Última: 2026-11-14**, o deploy feito pelo autor; o conserto da Devastação aprovado e começando na
+> branch `feat/devastacao-estilo`; o bloco D delegado (depois).
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **A fatia 3 dos decks e raças (o online) está na `main`** ("Sim, merge", o autor, 2026-11-13, `decisoes.md` 2026-11-13 (1)), por
+- **O conserto da Devastação com arte no celular: aprovado** ("3. aprovado.", `decisoes.md` 2026-11-14 (1)). Um bloco curto que estanque a
+  invalidação de estilo das cartas da mesa inteira (`notas/medicao-decks-fatia-1.md`, "Antes da fatia 2": ~1000 "Inline CSS style
+  declaration was mutated" na raiz das cartas, ~70 recálculos da mesa inteira numa cena de 3,2 s, já no Cordel; a face com arte dobra o custo).
+  - **Branch:** `feat/devastacao-estilo`, no checkout principal, saída da `main` em `5f1c1fb`.
+  - **Próximo passo exato:** diagnosticar quem escreve o `style` das cartas a cada quadro (procurar `.style.`, `setProperty` e `style={{…}}`
+    por quadro em `ui/cards`, `ui/anim`, `ui/table` e `ui/scenes`; confirmar com o perfil, `MEDIR_PERFIL=1` do `medir-cena.ts`), depois um
+    plano curto (`docs/superpowers/plans/`) com as escolhas como `Ruling:`, e a execução, teste primeiro.
+  - **O portão:** medição A/B na mesma sessão (a `main` e a branch): a Devastação com arte a 360 ≥ 50 quadros/s; o Cordel e a troca de mão
+    (236→237) sem piorar; os testes de fotossensibilidade e da linha do tempo intocados. **Armadilha:** o comando das notas da fatia 1 é
+    velho: desde a fatia 2 o replay veste o `looks` gravado (`MEDIR_APARENCIA=<sua>/<do oponente>`), não a preferência. Ler o começo do
+    `medir-cena.ts` antes de medir.
+- **Depois: o bloco D** (pontos 5 e 14, spec do playtest §6), com as escolhas do plano decididas pelo Claude por delegação ("5. decida por
+  mim", `decisoes.md` 2026-11-14 (1)); começa depois do merge da Devastação.
+- **A fatia 3 dos decks e raças (o online) está na `main` e no ar** (o deploy do autor, 2026-11-14) ("Sim, merge", o autor, 2026-11-13, `decisoes.md` 2026-11-13 (1)), por
   fast-forward de `feat/decks-fatia-3` até `d885c84`, com as duas CI verdes (`check` e `e2e`) no topo da branch. Na sala online, cada lado veste a aparência do assento: quem cria leva a do painel do Início, quem entra pelo
   link leva a das preferências; o servidor a grava no assento (normalizada, só quando o corpo traz) e a mensagem `room` a devolve; a sua na
   sala é a que você tinha ao entrar (a preferência mudada depois não vale); a partida online guardada leva `looks`. Com o padrão, nada muda
@@ -16,8 +29,7 @@
   - **Verificado:** `pnpm check` verde (web 2795 testes; JavaScript inicial 183,9 → 184,3 KB); `pnpm e2e` inteiro verde (114, 4 pulados),
     com o teste novo de duas pessoas no `looks.spec.ts`. A revisão da branch inteira (H7, um subagente novo): nenhum Critical nem
     Important, "pronto para merge: sim"; os Minor de comentário e de memória corrigidos (`ead82e5` e o commit desta memória).
-  - **CI do push da `main`** (`399e454`): `check` e `e2e` verdes. O ledger da fatia foi apagado (as `Ruling:` estão no diário). **Próximo
-    passo:** o que o autor escolher na Fila ou em "Esperando o autor" (o deploy é dele e leva as aparências ao online).
+  - **CI do push da `main`** (`399e454`): `check` e `e2e` verdes. O ledger da fatia foi apagado (as `Ruling:` estão no diário).
   - **O que não pode regredir:** com o padrão, o corpo do POST é `{ nickname }` (mais o `hp`), o assento não tem a chave `look` e a mensagem
     `room` também não; o assento sem `look` (as salas de antes do deploy) é Cordel, sem erro. O `useTableLooks` é memoizado pelos textos
     do deck e da raça, nunca pelo `seats`. A preferência não entra na mesa online.
@@ -57,33 +69,15 @@
 
 ## Fila
 
-- **A arte pintada dos decks**, quando o autor quiser: segue a bíblia de arte (`docs/superpowers/specs/2026-11-11-biblia-de-arte.md`).
-- **Bloco D** (pontos 5 e 14, spec do playtest §6: os botões de carimbo e o 14), com plano escrito e aprovado pelo autor antes da execução,
-  como os blocos A, B, C e E.
+- **O bloco D** (pontos 5 e 14, spec do playtest §6: os botões de carimbo e o monte com a lápide no centro), depois da Devastação; as
+  escolhas do plano por delegação (`decisoes.md` 2026-11-14 (1)).
+- **Fora da fila, a pedido:** a arte pintada dos decks, quando o jogo estiver pronto e online e o autor pedir (segue a bíblia de arte,
+  `docs/superpowers/specs/2026-11-11-biblia-de-arte.md`).
 
 ## Esperando o autor
 
-- **Jogar a fatia 3** depois do deploy: uma sala online com cada um num deck de arte (os dois lados, os versos, os retratos, o replay da
-  partida online com as aparências).
-- **A Devastação com arte no celular** (46 e 47 quadros/s, a meta é 50): consertar (a recomendação: um bloco curto para cortar o recálculo
-  de estilo da mesa inteira, que ajuda o Cordel também) ou não. A fatia 2 passou pela G7 e já está na `main`. Não segura o deploy: só sente
-  quem escolheu um deck de arte, no celular, nessa cena.
-- **Jogar a fatia 2 dos decks** no treino, com um deck de arte: o bot no outro deck, com o Egípcio; os versos e o retrato dele; o
-  replay com as aparências gravadas.
-- **O deploy** (`pnpm deploy:server`, só ele), agora que o bloco C e as fatias 1 a 3 dos decks estão na `main` (a fatia 3 leva as
-  aparências ao online; as salas abertas seguem em Cordel): fecha as salas online abertas (`STATE_SCHEMA` 6), e as
-  partidas guardadas de antes abrem com o aviso de versão (`RULES_VERSION` 5).
-- **Jogar** os blocos A, B, C e E e as placas novas. O treino mostra tudo; o online só depois do deploy. As frases novas das placas são de
-  quem escreveu (ele aprovou corrigir, não as palavras): conferir no playtest.
-- **Jogar a fatia 1 dos decks** no treino (o painel "Aparência" no Início e no menu da partida) e dizer se serve para os testes (a §14 da
-  spec). As fotos de conferência estão em `.superpowers/fotos-decks-fatia-1/` (nesta máquina, fora do git). Os 8 Minor adiados da revisão
-  entraram na fatia 2 (G5).
 - **A config do pnpm desta máquina:** o `%LOCALAPPDATA%\pnpm\config\config.yaml` tem `storeDir: D:.pnpm-store` (sem a barra), e o `pnpm add`
   falha; o `node_modules` usa `D:\.pnpm-store\v11`. Até corrigir, passe `--store-dir 'D:\.pnpm-store'`.
-- **Achado da medição do bloco C:** a virada de rodada depois de uma sequência longa (`exodia-devastacao.json` 236→237) fica a 42 e 48
-  quadros/s com a CPU 4×, abaixo da meta de 50; a `main` sem o bloco C já media 41 e 47. Fora dos blocos; a decisão de atacar é dele.
-  **[I]** Na tomada, na medição da fatia 1 (2026-11-11), a mesma troca de mão deu 56 e 58 no Cordel: o achado do bloco C deve ter sido
-  medido com a CPU mais lenta (a bateria). Conferir na tomada antes de atacar.
 - **Menores adiados** (nenhum quebra o jogo): bloco C no `diario.md` 2026-11-08 (1) ("Adiados"); bloco B no 2026-11-07 (2) ("Menores, para
   depois"); bloco A no 2026-11-03 (6) ("menores").
 - **O resto** (o que olhar no playtest por fatia e bloco, as leituras [I] por confirmar, o Roubo fraco, o que só ele pode fazer: proteção da
