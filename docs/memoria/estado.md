@@ -1,12 +1,13 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-14**, o deploy feito pelo autor; o conserto da Devastação aprovado e começando na
-> branch `feat/devastacao-estilo`; o bloco D delegado (depois).
+> Sobrescrito a cada atualização. **Última: 2026-11-14**, o conserto da Devastação na `main` (fast-forward até `0402869`); o próximo
+> bloco é o D, com as escolhas por delegação.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **O conserto da Devastação com arte no celular: aprovado** ("3. aprovado.", `decisoes.md` 2026-11-14 (1)). Um bloco curto que estanque a
+- **O conserto da Devastação com arte no celular está na `main`** ("Sim, merge", `decisoes.md` 2026-11-14 (2)), por fast-forward até
+  `0402869`, com as duas CI verdes no topo da branch; aprovado em "3. aprovado." (`decisoes.md` 2026-11-14 (1)). Um bloco curto que estanque a
   invalidação de estilo das cartas da mesa inteira (`notas/medicao-decks-fatia-1.md`, "Antes da fatia 2": ~1000 "Inline CSS style
   declaration was mutated" na raiz das cartas, ~70 recálculos da mesa inteira numa cena de 3,2 s, já no Cordel; a face com arte dobra o custo).
   - **Branch:** `feat/devastacao-estilo`, no checkout principal, saída da `main` em `5f1c1fb`.
@@ -14,9 +15,12 @@
     cartas de volta a cada quadro. O E2E novo no `fluidez.spec.ts` (vermelho antes: 29 cartas). A A/B (`notas/medicao-devastacao-estilo.md`):
     a Devastação com arte a 360 de 53 para 56 (o pior quadro de 167 para 50 ms); o Cordel e a troca de mão sem mudar. Hoje a `main` já dava
     51 a 54 (a máquina variou desde 2026-11-12).
-  - **Próximo passo exato:** o `pnpm check` e o `pnpm e2e`, subir a branch, a CI das duas e o merge com o "sim" do autor. Depois, o bloco D.
-- **Depois: o bloco D** (pontos 5 e 14, spec do playtest §6), com as escolhas do plano decididas pelo Claude por delegação ("5. decida por
-  mim", `decisoes.md` 2026-11-14 (1)); começa depois do merge da Devastação.
+  - **Próximo passo exato:** conferir a CI do push da `main`; verde, começar o bloco D (abaixo). O deploy (dele) leva o conserto ao ar.
+- **O próximo bloco: o D** (pontos 5 e 14, spec do playtest §6: os botões de carimbo e o monte com a lápide no centro), com as escolhas do
+  plano decididas pelo Claude por delegação ("5. decida por mim", `decisoes.md` 2026-11-14 (1)). Começa por um plano (`superpowers:writing-plans`)
+  numa branch nova saída da `main`, em duas tarefas (6.1 os botões; 6.2 a faixa do centro e a lápide), com os portões da spec: alvos ≥ 44 px,
+  o contorno de foco, as formas paradas do movimento reduzido, as âncoras `data-monte` e `data-cemiterio`, as fotos das quatro telas, o E2E de
+  1366 × 657 e a medição (≥ 50 quadros/s).
 - **A fatia 3 dos decks e raças (o online) está na `main` e no ar** (o deploy do autor, 2026-11-14) ("Sim, merge", o autor, 2026-11-13, `decisoes.md` 2026-11-13 (1)), por
   fast-forward de `feat/decks-fatia-3` até `d885c84`, com as duas CI verdes (`check` e `e2e`) no topo da branch. Na sala online, cada lado veste a aparência do assento: quem cria leva a do painel do Início, quem entra pelo
   link leva a das preferências; o servidor a grava no assento (normalizada, só quando o corpo traz) e a mensagem `room` a devolve; a sua na
@@ -67,8 +71,7 @@
 
 ## Fila
 
-- **O bloco D** (pontos 5 e 14, spec do playtest §6: os botões de carimbo e o monte com a lápide no centro), depois da Devastação; as
-  escolhas do plano por delegação (`decisoes.md` 2026-11-14 (1)).
+- **O bloco D** (acima, em "Agora").
 - **Fora da fila, a pedido:** a arte pintada dos decks, quando o jogo estiver pronto e online e o autor pedir (segue a bíblia de arte,
   `docs/superpowers/specs/2026-11-11-biblia-de-arte.md`).
 

@@ -18,6 +18,9 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   subpixel que sobra (0,42 px, ~26 cartas por ~330 ms, a mesa que muda menos de 1 px de altura quando a fileira cai) fica: um atraso de 1 ms
   no ronco não o tirou, e o portão já passa — custo: ~330 ms de recálculos grandes na cena. **Ruling:** o E2E olha deslocamentos de 2 px ou
   mais (o salto da rolagem), não o subpixel. **Ruling:** sem revisor novo (o conserto é uma linha e o teste prova o efeito no navegador).
+- **O merge:** "Sim, merge" (`decisoes.md` 2026-11-14 (2)): a `main` andou por fast-forward até `0402869`, com as duas CI verdes no topo.
+- **Armadilha nova:** um `node -e "…"` com crases dentro das aspas duplas executa o que está entre crases (aqui, um `pnpm check` e um
+  `pnpm e2e` de verdade, que foram parados). Script de edição sempre em arquivo, rodado com `node`.
 - **Armadilhas:** um `MutationObserver` no palco com `attributeFilter: ['style']` mostra o que o Motion reescreve, carta por carta; o
   perfil sozinho só dizia "Inline CSS style declaration was mutated". A máquina variou entre sessões: só a A/B na mesma sessão decide.
 

@@ -6,6 +6,18 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-14 (2): o merge do conserto da Devastação
+
+Depois do resumo do conserto (o `layoutScroll` no `[data-campos]`, a A/B de 53 para 56 quadros/s na Devastação com arte a 360, as duas CI
+verdes em `0402869`), perguntado "Faço o merge do conserto da Devastação na main?", ele respondeu:
+
+> Sim, merge
+
+**Leitura:** a `main` andou por fast-forward de `5f1c1fb` até `0402869` (o topo de `feat/devastacao-estilo`). **[I]** O "sim" vale para o merge;
+o deploy segue sendo dele.
+
+---
+
 ## 2026-11-14 (1): o deploy feito; a Devastação aprovada; o bloco D delegado
 
 Perguntado "há alguma pendência a ser feita?", recebeu a lista numerada do que esperava por ele: (1) o deploy; (2) jogar a fatia 3 online e
