@@ -1,27 +1,43 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-14**, o conserto da Devastação na `main`, com as duas CI verdes no push (`491687c`);
-> o próximo bloco é o D, com as escolhas por delegação.
+> Sobrescrito a cada atualização. **Última: 2026-11-14**, tudo pronto para o bloco D começar numa sessão nova ("vou iniciar em outra
+> sessão. prepare tudo", o autor); a `main` em `864dc27` ou mais nova, com as duas CI verdes.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
+- **O próximo bloco: o D** (pontos 5 e 14 do playtest), numa sessão nova ("vou iniciar em outra sessão. prepare tudo", o autor, 2026-11-14).
+  - **A spec:** `docs/superpowers/specs/2026-11-03-playtest-design.md` §6 (6.1 os botões de carimbo; 6.2 o monte e o cemitério no centro, com
+    a lápide) e §8 (as restrições de todos os blocos). O protótipo aprovado, para olhar a forma: `docs/superpowers/specs/2026-11-03-playtest-prototipo.html`
+    (a variante A nos dois pontos, `decisoes.md` 2026-11-03 (4)).
+  - **As escolhas do plano são do Claude, por delegação** ("5. decida por mim", `decisoes.md` 2026-11-14 (1)): registradas no plano e no
+    `diario.md` como "decididas pelo Claude por delegação", **nunca** como "aprovadas pelo autor". A delegação não cobre o merge nem o deploy:
+    o merge pede o "sim" dele, e o deploy é dele.
+  - **Próximo passo exato:** a regra 1 do `CLAUDE.md`; depois uma branch nova `feat/playtest-bloco-d` saída da `main`, e o plano
+    (`superpowers:writing-plans`, em `docs/superpowers/plans/`) com duas tarefas:
+    - **6.1, os botões:** `ActionBar.tsx`, `controls.tsx`, `EquipPanel.tsx`, `OrderPanel.tsx`, `ReactionPanel.tsx`, `styles.css`;
+    - **6.2, a faixa do centro e a lápide:** `CenterBand.tsx`, o gatilho do `GraveyardDialog.tsx`, `styles.css`. É o risco: o PC de
+      1366 × 657 tem de caber sem rolar, e a faixa mais alta come altura dos campos.
+  - **A execução:** tarefa por tarefa, com teste primeiro (`superpowers:executing-plans`), e um revisor novo num subagente no fim.
+  - **Os portões:**
+    - alvo de toque ≥ 44 px;
+    - o contorno de foco (ouro com borda de tinta) em todos;
+    - as formas paradas do movimento reduzido;
+    - as âncoras `data-monte` e `data-cemiterio` (os voos e as cenas medem por elas);
+    - o E2E de 1366 × 657 que já existe;
+    - as fotos das quatro telas (`e2e/medir-cena.ts`);
+    - ≥ 50 quadros/s com a CPU 4×, numa A/B contra a `main` na mesma sessão;
+    - arte original (§10.6) e números sem textura (§10.7);
+    - o E2E da rolagem dos campos (`fluidez.spec.ts`) verde: a faixa nova muda a altura dos campos no celular.
+  - **Pronto quando:** `pnpm check` e `pnpm e2e` verdes, a branch no GitHub, as duas CI verdes no topo, a memória atualizada; o merge, com o
+    "sim" do autor.
+  - Há um cartão de sessão proposto nesta conta ("Bloco D: botões de carimbo e a lápide no centro") com o mesmo pedido; abrir a sessão por ele
+    ou por um pedido novo dá no mesmo, porque tudo o que ela precisa está aqui.
 - **O conserto da Devastação com arte no celular está na `main`** ("Sim, merge", `decisoes.md` 2026-11-14 (2)), por fast-forward até
-  `0402869`, com as duas CI verdes no topo da branch; aprovado em "3. aprovado." (`decisoes.md` 2026-11-14 (1)). Um bloco curto que estanque a
-  invalidação de estilo das cartas da mesa inteira (`notas/medicao-decks-fatia-1.md`, "Antes da fatia 2": ~1000 "Inline CSS style
-  declaration was mutated" na raiz das cartas, ~70 recálculos da mesa inteira numa cena de 3,2 s, já no Cordel; a face com arte dobra o custo).
-  - **Branch:** `feat/devastacao-estilo`, no checkout principal, saída da `main` em `5f1c1fb`.
-  - **Feito** (`194d710`): o `[data-campos]` virou `m.div` com `layoutScroll` (`Table.tsx`); a cena rolava os campos e o Motion animava 29
-    cartas de volta a cada quadro. O E2E novo no `fluidez.spec.ts` (vermelho antes: 29 cartas). A A/B (`notas/medicao-devastacao-estilo.md`):
-    a Devastação com arte a 360 de 53 para 56 (o pior quadro de 167 para 50 ms); o Cordel e a troca de mão sem mudar. Hoje a `main` já dava
-    51 a 54 (a máquina variou desde 2026-11-12).
-  - **CI do push da `main`** (`491687c`): `check` e `e2e` verdes. O deploy (dele) leva o conserto ao ar.
-  - **Próximo passo exato:** o bloco D (abaixo), começando pelo plano.
-- **O próximo bloco: o D** (pontos 5 e 14, spec do playtest §6: os botões de carimbo e o monte com a lápide no centro), com as escolhas do
-  plano decididas pelo Claude por delegação ("5. decida por mim", `decisoes.md` 2026-11-14 (1)). Começa por um plano (`superpowers:writing-plans`)
-  numa branch nova saída da `main`, em duas tarefas (6.1 os botões; 6.2 a faixa do centro e a lápide), com os portões da spec: alvos ≥ 44 px,
-  o contorno de foco, as formas paradas do movimento reduzido, as âncoras `data-monte` e `data-cemiterio`, as fotos das quatro telas, o E2E de
-  1366 × 657 e a medição (≥ 50 quadros/s).
+  `0402869`, com as duas CI verdes no topo da branch e no push da `main` (`491687c`). O `[data-campos]` virou `m.div` com `layoutScroll`
+  (`Table.tsx`): a cena rolava os campos e o Motion animava 29 cartas de volta a cada quadro. A A/B (`notas/medicao-devastacao-estilo.md`): a
+  Devastação com arte a 360 de 53 para 56 quadros/s (o pior quadro de 167 para 50 ms). O diário: 2026-11-14 (1). O deploy (dele) leva o
+  conserto ao ar.
 - **A fatia 3 dos decks e raças (o online) está na `main` e no ar** (o deploy do autor, 2026-11-14) ("Sim, merge", o autor, 2026-11-13, `decisoes.md` 2026-11-13 (1)), por
   fast-forward de `feat/decks-fatia-3` até `d885c84`, com as duas CI verdes (`check` e `e2e`) no topo da branch. Na sala online, cada lado veste a aparência do assento: quem cria leva a do painel do Início, quem entra pelo
   link leva a das preferências; o servidor a grava no assento (normalizada, só quando o corpo traz) e a mensagem `room` a devolve; a sua na
@@ -111,6 +127,13 @@ toque "Próximo passo" a partir do passo:
 - Em `test/ui`, todo teste é `.test.tsx` (o Vitest da web não roda `.test.ts` ali, e nada avisa). O `animation.test.tsx` usa a sonda
   `installFlashProbe`. Uma marca que dura menos de meio segundo escapa do `toHaveCount`: quem procura é a página, a cada quadro.
 - O ledger `.superpowers/sdd/…` fica fora do git: vale o `diario.md` e o `git log` (regra 6 do `CLAUDE.md`).
+- **Crases dentro de aspas duplas no shell executam:** um `node -e "…"` cujo texto tinha `pnpm check` e `pnpm e2e` entre crases rodou os
+  dois de verdade (2026-11-14). Texto com crases (memória, specs) só por script gravado em arquivo e rodado com `node`.
+- **Para achar quem mexe no estilo das cartas:** o perfil do `medir-cena.ts` (`MEDIR_PERFIL=1`) diz quanto custa; um `MutationObserver` no
+  `[data-palco]` com `attributeFilter: ['style']` diz quem (o Motion reescreve o `transform` da raiz das cartas). Detalhes em
+  `notas/medicao-devastacao-estilo.md`.
+- **A medição varia entre sessões** (o Cordel de 53 a 59, a Devastação com arte de 46 a 54 na mesma build): só a A/B na mesma sessão decide.
+  Para a A/B, `git checkout --detach <main>` com a árvore limpa, medir, e voltar à branch (o `medir.config.ts` constrói a web a cada execução).
 
 ## Ambiente (máquina do autor)
 
@@ -126,6 +149,6 @@ toque "Próximo passo" a partir do passo:
   `node_modules` que o `git worktree remove` não apaga ("Filename too long") sai no PowerShell com
   `Remove-Item -LiteralPath ('\\?\' + $p) -Recurse -Force`.
 - **Branches:** as locais estão mescladas na `main` (a `feat/playtest-bloco-c` em 2026-11-11 e a `feat/decks-fatia-1` em 2026-11-12), menos a `feat/online-equipar-vazio`
-  (um rebase não publicado; o autor pode apagá-la) e a `feat/decks-fatia-2` e a `feat/decks-fatia-3` (mescladas na `main` por fast-forward; o autor pode apagá-las).
+  (um rebase não publicado; o autor pode apagá-la) e a `feat/decks-fatia-2`, a `feat/decks-fatia-3` e a `feat/devastacao-estilo` (mescladas na `main` por fast-forward; o autor pode apagá-las).
   As remotas velhas, mescladas, são do autor (`notas/playtest.md`).
 - O `jogar-treino.bat` na raiz é o lançador do autor: não mexer nem commitar.
