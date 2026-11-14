@@ -5,6 +5,23 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-14 (3): as regras 4.0 (`docs/JOGO-DO-CORINGA-4.0.md`)
+
+- **Pedido:** ignorar os `.txt` antigos e escrever um `JOGO-DO-CORINGA-4.0.md` em `docs/` (`decisoes.md` 2026-11-14 (4)).
+- **Feito:** o livro de regras, a partir da leitura inteira do motor (`config`, `flow`, `combat`, `preview`, `quads`, `actions/*`,
+  `legal-actions`), do `RULES_SECTIONS` da mesa e dos tempos do servidor (`TIMERS`). Regras numeradas (1.1, 1.2…), exemplos de mesa nos
+  casos difíceis (o ataque, o Reflect, o Ataque Absoluto contra a Defesa Absoluta, a cura passiva) e a seção 14 com as seis leituras
+  **[I]** do motor ainda sem o "ok" dele.
+- **Onde:** a branch `feat/regras-4-0`, num worktree próprio saído da `main` (`8368eb1`), porque o checkout principal tem o bloco D em
+  curso, sem commit. O `estado.md` **não** foi mexido aqui: o mais novo é o do bloco D (`f37ae09`), e um commit dele nesta branch
+  esconderia aquele da regra 1.
+- **O que ficou:** a revisão do autor, ponto a ponto; o merge, com o "sim" dele. No merge, `decisoes.md` e `diario.md` podem conflitar
+  no topo com o bloco D (as duas entradas ficam, a mais nova em cima).
+- **Rebase (2026-11-15):** a branch foi refeita sobre a `main` (`d3f65a9`, com o bloco D). As entradas ganharam os números
+  seguintes aos da `main`: esta é a (3) do diário, e a decisão é a (4).
+
+---
+
 ## 2026-11-14 (2): o bloco D (os botões de carimbo e a lápide no centro), a execução
 
 - **Pedido:** "execute o bloco D" (o autor). As escolhas são do Claude **por delegação** (`decisoes.md` 2026-11-14 (1)): **o autor não as viu**.

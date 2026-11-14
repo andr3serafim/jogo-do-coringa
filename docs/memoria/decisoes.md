@@ -6,6 +6,25 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-14 (4): as regras 4.0 em `docs/`, no lugar dos textos antigos
+
+*(Registrada às 15h51 do dia 14, na branch `feat/regras-4-0`, como (3), antes do merge do bloco D; renumerada (4) ao
+entrar sobre a `main`, que já tinha a (3).)*
+
+Dito que as regras originais estavam em `JOGO DO CORINGA.txt` e `JOGO DO CORINGA 3.0.txt` (o `2.0`, citado na spec do motor, não existe
+mais), ele respondeu:
+
+> esses arquivos estão desatualizados. algumas regras foram alteradas ao longo do tempo. pode ignora los e criar um novo
+> JOGO-DO-CORINGA-4.0.md em docs
+
+**Leitura:**
+- Os `.txt` deixam de ser referência. O texto das regras passa a ser `docs/JOGO-DO-CORINGA-4.0.md`, escrito a partir do motor
+  (`RULES_VERSION` 5) e do resumo da mesa (`RULES_SECTIONS`).
+- **[I]** O documento é um rascunho até ele revisar: as regras são numeradas para a resposta em lote, e a seção 14 lista as leituras
+  **[I]** do motor que ele ainda não confirmou. Nada nele muda regra; se o texto e o motor discordarem, vale o motor.
+
+---
+
 ## 2026-11-14 (3): o merge do bloco D
 
 Depois do resumo do bloco D (os botões de carimbo e a lápide no centro; `pnpm check`, `pnpm e2e` e as duas CI verdes em `08f728f`; as doze
