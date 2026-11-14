@@ -5,6 +5,24 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-14 (1): a Devastação no celular (a rolagem dos campos e o Motion)
+
+- **Pedido:** "3. aprovado." (o autor, `decisoes.md` 2026-11-14 (1)), sobre o bloco curto que estanque o recálculo de estilo da mesa inteira.
+  Na mesma entrada ele deu o deploy por feito, mandou ignorar a virada de rodada lenta e delegou as escolhas do bloco D.
+- **Diagnóstico:** o perfil apontou o Motion (`applyProjectionStyles`, 617 mutações do `style` da raiz das cartas); uma sonda temporária
+  (fora do git) mostrou que o tremor não pesava e que o Motion animava 29 cartas a cada quadro, a partir de ~59 px, porque a cena rola os
+  campos (`revealRow`) e o `[data-campos]` não estava declarado como área de rolagem. Detalhes em `notas/medicao-devastacao-estilo.md`.
+- **Feito:** o plano curto (`a97ff4f`); o conserto, `layoutScroll` no `[data-campos]` (`194d710`), com o E2E no `fluidez.spec.ts`
+  (vermelho antes: 29 cartas; verde depois); a medição A/B (Devastação com arte a 360: 53 → 56; o resto igual).
+- **Ruling:** o conserto é na causa (a rolagem lida como mudança de layout), não na face com arte — custo: nenhum. **Ruling:** o deslize
+  subpixel que sobra (0,42 px, ~26 cartas por ~330 ms, a mesa que muda menos de 1 px de altura quando a fileira cai) fica: um atraso de 1 ms
+  no ronco não o tirou, e o portão já passa — custo: ~330 ms de recálculos grandes na cena. **Ruling:** o E2E olha deslocamentos de 2 px ou
+  mais (o salto da rolagem), não o subpixel. **Ruling:** sem revisor novo (o conserto é uma linha e o teste prova o efeito no navegador).
+- **Armadilhas:** um `MutationObserver` no palco com `attributeFilter: ['style']` mostra o que o Motion reescreve, carta por carta; o
+  perfil sozinho só dizia "Inline CSS style declaration was mutated". A máquina variou entre sessões: só a A/B na mesma sessão decide.
+
+---
+
 ## 2026-11-13 (1): a fatia 3 dos decks (o online), a execução
 
 - **Pedido:** "execute o plano da fatia 3 dos decks" (o autor, 2026-11-13), numa sessão nova do Claude Code. O plano

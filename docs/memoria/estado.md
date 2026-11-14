@@ -10,15 +10,11 @@
   invalidação de estilo das cartas da mesa inteira (`notas/medicao-decks-fatia-1.md`, "Antes da fatia 2": ~1000 "Inline CSS style
   declaration was mutated" na raiz das cartas, ~70 recálculos da mesa inteira numa cena de 3,2 s, já no Cordel; a face com arte dobra o custo).
   - **Branch:** `feat/devastacao-estilo`, no checkout principal, saída da `main` em `5f1c1fb`.
-  - **Diagnóstico feito** (o plano curto `docs/superpowers/plans/2026-11-14-devastacao-estilo.md`): a cena rola os campos (`revealRow`), e
-    o Motion, sem saber que o `[data-campos]` rola, anima 29 cartas de volta a cada quadro (o `transform` inline na raiz de cada uma). O
-    conserto: `layoutScroll` no `[data-campos]`.
-  - **Próximo passo exato:** o E2E vermelho no `fluidez.spec.ts` (nenhuma carta animada pela rolagem), o conserto no `Table.tsx`, `pnpm check`,
-    `pnpm e2e`, a medição A/B e a nota `notas/medicao-devastacao-estilo.md`.
-  - **O portão:** medição A/B na mesma sessão (a `main` e a branch): a Devastação com arte a 360 ≥ 50 quadros/s; o Cordel e a troca de mão
-    (236→237) sem piorar; os testes de fotossensibilidade e da linha do tempo intocados. **Armadilha:** o comando das notas da fatia 1 é
-    velho: desde a fatia 2 o replay veste o `looks` gravado (`MEDIR_APARENCIA=<sua>/<do oponente>`), não a preferência. Ler o começo do
-    `medir-cena.ts` antes de medir.
+  - **Feito** (`194d710`): o `[data-campos]` virou `m.div` com `layoutScroll` (`Table.tsx`); a cena rolava os campos e o Motion animava 29
+    cartas de volta a cada quadro. O E2E novo no `fluidez.spec.ts` (vermelho antes: 29 cartas). A A/B (`notas/medicao-devastacao-estilo.md`):
+    a Devastação com arte a 360 de 53 para 56 (o pior quadro de 167 para 50 ms); o Cordel e a troca de mão sem mudar. Hoje a `main` já dava
+    51 a 54 (a máquina variou desde 2026-11-12).
+  - **Próximo passo exato:** o `pnpm check` e o `pnpm e2e`, subir a branch, a CI das duas e o merge com o "sim" do autor. Depois, o bloco D.
 - **Depois: o bloco D** (pontos 5 e 14, spec do playtest §6), com as escolhas do plano decididas pelo Claude por delegação ("5. decida por
   mim", `decisoes.md` 2026-11-14 (1)); começa depois do merge da Devastação.
 - **A fatia 3 dos decks e raças (o online) está na `main` e no ar** (o deploy do autor, 2026-11-14) ("Sim, merge", o autor, 2026-11-13, `decisoes.md` 2026-11-13 (1)), por
