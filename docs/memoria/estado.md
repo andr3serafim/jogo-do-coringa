@@ -1,46 +1,22 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-14**, o bloco D em execução na branch `feat/playtest-bloco-d` (saída da `main` em
-> `8368eb1`): as duas tarefas feitas, faltam o E2E, a medição, a revisão e o diário.
+> Sobrescrito a cada atualização. **Última: 2026-11-14**, o bloco D pronto na branch `feat/playtest-bloco-d`, esperando o "sim" do autor
+> para o merge.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Em curso: o bloco D, na `feat/playtest-bloco-d`** ("execute o bloco D", o autor, 2026-11-14). O plano:
-  `docs/superpowers/plans/2026-11-14-playtest-bloco-d.md` (as escolhas marcadas **[D]** são do Claude por delegação, não aprovadas pelo autor).
-  - **Feito:** o plano (`f37ae09`); a Tarefa 1, os botões de carimbo (`b8aa957`); a Tarefa 2, a faixa de três colunas com o monte em pilha
-    e a lápide (o commit seguinte). `pnpm check` verde com as duas (web 2819 testes; JavaScript inicial 185,5 KB). As fotos das quatro telas
-    tiradas (a faixa: 67 px no celular, 68 no PC; na `main` eram 88 e 70).
-  - **Próximo passo exato:** `pnpm e2e` inteiro (o alvo do cemitério no `mobile.spec.ts`, o 1366 × 657, o `fluidez.spec.ts`); a A/B de
-    quadros/s contra a `main` (`e2e/medir-cena.ts`); o revisor num subagente; a §6.3 da spec e o diário com as **[D]**; o push e as duas CI.
-  - O que segue abaixo é o preparo de antes, ainda válido (os portões e o "pronto quando").
-- **O próximo bloco: o D** (pontos 5 e 14 do playtest), numa sessão nova ("vou iniciar em outra sessão. prepare tudo", o autor, 2026-11-14).
-  - **A spec:** `docs/superpowers/specs/2026-11-03-playtest-design.md` §6 (6.1 os botões de carimbo; 6.2 o monte e o cemitério no centro, com
-    a lápide) e §8 (as restrições de todos os blocos). O protótipo aprovado, para olhar a forma: `docs/superpowers/specs/2026-11-03-playtest-prototipo.html`
-    (a variante A nos dois pontos, `decisoes.md` 2026-11-03 (4)).
-  - **As escolhas do plano são do Claude, por delegação** ("5. decida por mim", `decisoes.md` 2026-11-14 (1)): registradas no plano e no
-    `diario.md` como "decididas pelo Claude por delegação", **nunca** como "aprovadas pelo autor". A delegação não cobre o merge nem o deploy:
-    o merge pede o "sim" dele, e o deploy é dele.
-  - **Próximo passo exato:** a regra 1 do `CLAUDE.md`; depois uma branch nova `feat/playtest-bloco-d` saída da `main`, e o plano
-    (`superpowers:writing-plans`, em `docs/superpowers/plans/`) com duas tarefas:
-    - **6.1, os botões:** `ActionBar.tsx`, `controls.tsx`, `EquipPanel.tsx`, `OrderPanel.tsx`, `ReactionPanel.tsx`, `styles.css`;
-    - **6.2, a faixa do centro e a lápide:** `CenterBand.tsx`, o gatilho do `GraveyardDialog.tsx`, `styles.css`. É o risco: o PC de
-      1366 × 657 tem de caber sem rolar, e a faixa mais alta come altura dos campos.
-  - **A execução:** tarefa por tarefa, com teste primeiro (`superpowers:executing-plans`), e um revisor novo num subagente no fim.
-  - **Os portões:**
-    - alvo de toque ≥ 44 px;
-    - o contorno de foco (ouro com borda de tinta) em todos;
-    - as formas paradas do movimento reduzido;
-    - as âncoras `data-monte` e `data-cemiterio` (os voos e as cenas medem por elas);
-    - o E2E de 1366 × 657 que já existe;
-    - as fotos das quatro telas (`e2e/medir-cena.ts`);
-    - ≥ 50 quadros/s com a CPU 4×, numa A/B contra a `main` na mesma sessão;
-    - arte original (§10.6) e números sem textura (§10.7);
-    - o E2E da rolagem dos campos (`fluidez.spec.ts`) verde: a faixa nova muda a altura dos campos no celular.
-  - **Pronto quando:** `pnpm check` e `pnpm e2e` verdes, a branch no GitHub, as duas CI verdes no topo, a memória atualizada; o merge, com o
-    "sim" do autor.
-  - Há um cartão de sessão proposto nesta conta ("Bloco D: botões de carimbo e a lápide no centro") com o mesmo pedido; abrir a sessão por ele
-    ou por um pedido novo dá no mesmo, porque tudo o que ela precisa está aqui.
+- **O bloco D está pronto na `feat/playtest-bloco-d`** (pontos 5 e 14: os botões de carimbo; o monte e o cemitério no centro, com a
+  lápide), **esperando o "sim" do autor para o merge**. O código em `6359b60`. O plano `docs/superpowers/plans/2026-11-14-playtest-bloco-d.md`;
+  o diário 2026-11-14 (2); as doze escolhas na §6.3 da spec do playtest; as telas e a A/B em `notas/medicao-bloco-d.md`.
+  - **As escolhas são do Claude por delegação** (`decisoes.md` 2026-11-14 (1)): **o autor não as viu**. Nunca as rotule como aprovadas.
+  - **Verificado:** `pnpm check` verde (web 2819 testes; JavaScript inicial 185,7 KB); `pnpm e2e` inteiro verde (115, 4 pulados); a revisão
+    num subagente novo (nenhum Critical; os 2 Important corrigidos). A A/B passa o portão e **custa ~2 quadros/s na troca de mão**.
+  - **Próximo passo exato:** conferir as duas CI no topo da branch (pela API pública do GitHub, com `curl`); com elas verdes, perguntar ao
+    autor "Faço o merge do bloco D na main?" e, com o "sim" registrado no `decisoes.md`, o fast-forward e o push da `main`. O deploy é dele.
+  - **O que não pode regredir:** a poeira é do `Leaving` e sai da página ao fim (uma animação presa no fim derruba os E2E que esperam a tela
+    parar); só uma carta de verdade (`data-card-id`) na lápide; a faixa do PC com ≤ 70 px (mais que isso e os campos rolam em 1440 × 900);
+    a etiqueta e a faísca do Absoluto fora do botão; a prévia do Atacar na tira lisa.
 - **O conserto da Devastação com arte no celular está na `main`** ("Sim, merge", `decisoes.md` 2026-11-14 (2)), por fast-forward até
   `0402869`, com as duas CI verdes no topo da branch e no push da `main` (`491687c`). O `[data-campos]` virou `m.div` com `layoutScroll`
   (`Table.tsx`): a cena rolava os campos e o Motion animava 29 cartas de volta a cada quadro. A A/B (`notas/medicao-devastacao-estilo.md`): a
@@ -96,7 +72,7 @@
 
 ## Fila
 
-- **O bloco D** (acima, em "Agora").
+- **O merge do bloco D** (acima, em "Agora"), com o "sim" do autor. Depois dele, a fila do playtest está vazia.
 - **Fora da fila, a pedido:** a arte pintada dos decks, quando o jogo estiver pronto e online e o autor pedir (segue a bíblia de arte,
   `docs/superpowers/specs/2026-11-11-biblia-de-arte.md`).
 
@@ -104,7 +80,8 @@
 
 - **A config do pnpm desta máquina:** o `%LOCALAPPDATA%\pnpm\config\config.yaml` tem `storeDir: D:.pnpm-store` (sem a barra), e o `pnpm add`
   falha; o `node_modules` usa `D:\.pnpm-store\v11`. Até corrigir, passe `--store-dir 'D:\.pnpm-store'`.
-- **Menores adiados** (nenhum quebra o jogo): bloco C no `diario.md` 2026-11-08 (1) ("Adiados"); bloco B no 2026-11-07 (2) ("Menores, para
+- **O bloco D:** o "sim" para o merge, e olhar as doze escolhas da §6.3 da spec do playtest (são do Claude, por delegação).
+- **Menores adiados** (nenhum quebra o jogo): bloco D no `diario.md` 2026-11-14 (2) ("Adiados"); bloco C no `diario.md` 2026-11-08 (1) ("Adiados"); bloco B no 2026-11-07 (2) ("Menores, para
   depois"); bloco A no 2026-11-03 (6) ("menores").
 - **O resto** (o que olhar no playtest por fatia e bloco, as leituras [I] por confirmar, o Roubo fraco, o que só ele pode fazer: proteção da
   `main`, `wrangler login`, branches remotas velhas): `notas/playtest.md`.

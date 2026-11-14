@@ -5,6 +5,36 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-14 (2): o bloco D (os botões de carimbo e a lápide no centro), a execução
+
+- **Pedido:** "execute o bloco D" (o autor). As escolhas são do Claude **por delegação** (`decisoes.md` 2026-11-14 (1)): **o autor não as viu**.
+- **Feito**, na `feat/playtest-bloco-d` (saída da `main` em `8368eb1`): o plano (`f37ae09`); a Tarefa 1, os carimbos (`b8aa957`); a
+  Tarefa 2, a faixa de três colunas com o monte em pilha e a lápide (`0cf538c`); as correções da revisão (`6359b60`).
+- **Ruling (por delegação):** as doze escolhas estão na §6.3 da spec do playtest (a sombra de madeira, o grão só nos grandes, o que é de papel e
+  o que é de ouro, a etiqueta irmã do botão, os pingos da cor da face, sem levantar no ponteiro, sem inclinar, o replay como está, a faixa que
+  não engordou, a carta do topo em pé, o "Monte" só para o leitor de tela no celular, a poeira no `Leaving`).
+- **Desvios do plano:** a faixa do PC ficou compacta nas duas alturas (o plano dizia ~96 px no PC: com isso os campos rolavam em 1440 × 900);
+  a carta do topo ficou em pé (o plano dizia inclinada); a poeira saiu da faixa e foi para o `Leaving`.
+- **A ordem dos testes:** na Tarefa 1 o teste foi escrito antes do código, mas **não foi rodado vermelho** antes de implementar; na Tarefa 2
+  foi (8 de 11 vermelhos).
+- **Verificado:** `pnpm check` verde (web 2819 testes; JavaScript inicial 183,9 → 185,7 KB); `pnpm e2e` inteiro verde (115, 4 pulados). As
+  fotos das quatro telas e a A/B em `notas/medicao-bloco-d.md`: passa o portão, **custa ~2 quadros/s na troca de mão** (de onde vêm, não
+  investigado), e uma repetição isolada deu 48 a 1366.
+- **A revisão** (um subagente novo, só leitura): nenhum Critical; 2 Important, os dois corrigidos (a poeira com atraso fixo, que tocava antes
+  de a carta chegar quando havia cena; o toque do Atacar armado sem retorno com movimento reduzido); dos Minor, corrigidos: palavra comprida nas
+  laterais da faixa, pingos só no botão principal do mouse, a faísca parada com o botão desligado, um teste dos pingos de ouro.
+- **Adiados (Minor):** o punho vermelho da espada some no Atacar vermelho, e os raios de ouro do Ressuscitar ficam fracos no papel (desenho);
+  "Cemitério" a 9 px no celular (o contraste passa, o tamanho está no limite); o grão do carimbo repete o SVG do `grao` (~400 bytes); as
+  formas paradas do `:active` não têm teste (são CSS puro); a etiqueta do Absoluto não afunda com o botão.
+- **Armadilhas:**
+  - Uma animação CSS com `fill` para a frente num nó que fica na página **nunca termina** para o `helpers.ts` do E2E (o `axe` espera
+    `document.getAnimations()` só com as sem fim): a poeira assim derrubou 10 testes. Efeito de uma vez só: `backwards`, e o nó sai ao fim.
+  - `data-verso` já é dos versos da mão do oponente (um teste conta todos): os da pilha do monte são `data-monte-verso`.
+  - `CI=true pnpm e2e` nesta máquina faz o pnpm tentar um `install` e bater na config quebrada do store; com a 8787 livre, rode sem o `CI=true`.
+  - O painel do navegador do app não segura o tamanho da tela entre chamadas: as fotos saíram de um script do Playwright contra o Vite (5173).
+
+---
+
 ## 2026-11-14 (1): a Devastação no celular (a rolagem dos campos e o Motion)
 
 - **Pedido:** "3. aprovado." (o autor, `decisoes.md` 2026-11-14 (1)), sobre o bloco curto que estanque o recálculo de estilo da mesa inteira.

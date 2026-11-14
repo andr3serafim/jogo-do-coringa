@@ -248,6 +248,27 @@ escolhas estão no `diario.md` 2026-11-08 (1), e a medição em `docs/memoria/no
 - **Onde mexe:** `CenterBand.tsx`, `GraveyardDialog.tsx` (só o gatilho), `styles.css`; as âncoras `data-monte` e `data-cemiterio` (os voos
   da fatia 5 e as cenas medem por elas) continuam.
 
+### 6.3 O que a execução decidiu (bloco D, 2026-11-14)
+
+As escolhas abaixo são **do Claude, por delegação** ("5. decida por mim", `decisoes.md` 2026-11-14 (1)): o autor ainda não as viu.
+
+- **A sombra do carimbo é da cor da madeira** (`--color-madeira`): a barra é de tinta, e a sombra de tinta do protótipo sumiria nela.
+- **O grão só nos carimbos grandes** (Atacar, Passar, Encerrar turno, Confirmar, os selos); os pequenos levam prévias e contas, e a prévia do
+  Atacar vai numa tira lisa de papel (§8, números sem textura).
+- **"Encerrar turno" e "Passar" são de papel; "Atacar primeiro" e a Ressurreição da janela, de ouro.** Só o Atacar é vermelho.
+- **A etiqueta e a faísca do Ataque Absoluto são irmãs do botão**, só desenho: o nome dele já diz "Ataque Absoluto" (WCAG 2.5.3).
+- **Os pingos são da cor da face** (tinta sobre a barra de tinta não se vê), e o carimbo **não levanta no ponteiro** (um botão que se mexe
+  debaixo do mouse treme na beirada).
+- **Os carimbos não ficam inclinados** (o protótipo os inclinava 1°): a prévia é número de jogo, e o texto inclinado perde nitidez.
+- **Os controles do replay ficam como estão** (a spec lista só a barra e os painéis).
+- **A faixa não engordou.** No celular ela tinha 88 px (o conteúdo quebrava em duas linhas) e ficou com 67; no PC, 70 → 68. Com 96 px no PC,
+  os campos passavam a rolar em 1440 × 900.
+- **A carta do topo fica em pé**, encostada na pedra: o Motion mede a carta que voa até ali, e inclinada ela mediria maior. A segunda carta é
+  só um canto de papel inclinado atrás (a de verdade poria outro `data-card-id` na mesa).
+- **O rótulo "Monte" some no celular** (fica para o leitor de tela): a pilha de versos com o número já o diz, e a largura não sobra.
+- **A poeira é do `Leaving`**, na chegada do voo de cada batida de saída; as cartas que estouram em cacos e as das cenas não a levantam.
+- **Medido:** `docs/memoria/notas/medicao-bloco-d.md` (passa o portão; custa ~2 quadros/s na troca de mão).
+
 ## 7. Bloco E: a Ressurreição no instante da quadra (ponto 16)
 
 ### 7.1 O que os números dizem
