@@ -10,9 +10,11 @@
   invalidação de estilo das cartas da mesa inteira (`notas/medicao-decks-fatia-1.md`, "Antes da fatia 2": ~1000 "Inline CSS style
   declaration was mutated" na raiz das cartas, ~70 recálculos da mesa inteira numa cena de 3,2 s, já no Cordel; a face com arte dobra o custo).
   - **Branch:** `feat/devastacao-estilo`, no checkout principal, saída da `main` em `5f1c1fb`.
-  - **Próximo passo exato:** diagnosticar quem escreve o `style` das cartas a cada quadro (procurar `.style.`, `setProperty` e `style={{…}}`
-    por quadro em `ui/cards`, `ui/anim`, `ui/table` e `ui/scenes`; confirmar com o perfil, `MEDIR_PERFIL=1` do `medir-cena.ts`), depois um
-    plano curto (`docs/superpowers/plans/`) com as escolhas como `Ruling:`, e a execução, teste primeiro.
+  - **Diagnóstico feito** (o plano curto `docs/superpowers/plans/2026-11-14-devastacao-estilo.md`): a cena rola os campos (`revealRow`), e
+    o Motion, sem saber que o `[data-campos]` rola, anima 29 cartas de volta a cada quadro (o `transform` inline na raiz de cada uma). O
+    conserto: `layoutScroll` no `[data-campos]`.
+  - **Próximo passo exato:** o E2E vermelho no `fluidez.spec.ts` (nenhuma carta animada pela rolagem), o conserto no `Table.tsx`, `pnpm check`,
+    `pnpm e2e`, a medição A/B e a nota `notas/medicao-devastacao-estilo.md`.
   - **O portão:** medição A/B na mesma sessão (a `main` e a branch): a Devastação com arte a 360 ≥ 50 quadros/s; o Cordel e a troca de mão
     (236→237) sem piorar; os testes de fotossensibilidade e da linha do tempo intocados. **Armadilha:** o comando das notas da fatia 1 é
     velho: desde a fatia 2 o replay veste o `looks` gravado (`MEDIR_APARENCIA=<sua>/<do oponente>`), não a preferência. Ler o começo do
