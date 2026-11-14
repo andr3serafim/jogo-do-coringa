@@ -954,6 +954,169 @@ li[data-joga]::after {
 }
 
 /*
+ * O monte e a lápide do cemitério, no centro da faixa de tinta (bloco D dos pontos do playtest, ponto 14; spec do playtest §6.2). O monte
+ * é uma pilha de até três versos de cordel, deslocados; vazio, um contorno tracejado. A lápide é pedra de topo redondo, com as rachas
+ * desenhadas e o gravado em papel (o contraste do texto passa de 4,5:1 na pedra inteira); o canto de papel da segunda carta fica atrás da
+ * do topo (`isolation`: as camadas de desenho descem para trás do conteúdo, e o botão segue por cima de tudo). A poeira da carta que
+ * chega toca uma vez, só com `transform` e `opacity`. Desenho original; os números ficam na fonte de texto, sem textura (spec §10.7).
+ */
+@layer components {
+  .monte-pilha {
+    position: relative;
+    flex: none;
+    width: calc(var(--mini-w) + 4px);
+    height: calc(var(--mini-h) + 4px);
+  }
+
+  .monte-pilha > [data-monte-verso] {
+    position: absolute;
+    top: 4px;
+    left: 0;
+    width: var(--mini-w);
+    height: var(--mini-h);
+    border: 1.5px solid var(--color-papel);
+    border-radius: 3px;
+    background: repeating-linear-gradient(45deg, var(--color-tinta) 0 3px, var(--color-papel) 3px 6px);
+  }
+
+  .monte-pilha > [data-monte-verso]:nth-child(2) {
+    top: 2px;
+    left: 2px;
+  }
+
+  .monte-pilha > [data-monte-verso]:nth-child(3) {
+    top: 0;
+    left: 4px;
+  }
+
+  .monte-pilha[data-monte-vazio]::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 0;
+    width: var(--mini-w);
+    height: var(--mini-h);
+    box-sizing: border-box;
+    border: 1.5px dashed color-mix(in oklab, var(--color-papel) 50%, transparent);
+    border-radius: 3px;
+  }
+
+  .lapide {
+    isolation: isolate;
+    border: 2px solid #0b0908;
+    border-radius: 22px 22px 4px 4px;
+    background: linear-gradient(180deg, #5d544c, #3b342e);
+    box-shadow:
+      inset 0 0 0 2px #6e655c,
+      3px 3px 0 #000;
+  }
+
+  .lapide-gravado {
+    text-shadow: 0 1px 0 #2a2420;
+  }
+
+  .lapide-rachas {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .lapide-segunda {
+    position: absolute;
+    right: 3px;
+    bottom: 5px;
+    z-index: -1;
+    box-sizing: border-box;
+    width: var(--mini-w);
+    height: var(--mini-h);
+    border: 1.5px solid var(--color-tinta);
+    border-radius: 3px;
+    background: color-mix(in oklab, var(--color-papel) 82%, var(--color-tinta));
+    rotate: -9deg;
+    pointer-events: none;
+  }
+
+  .lapide-poeira {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 0;
+    pointer-events: none;
+  }
+
+  .lapide-poeira > span {
+    position: absolute;
+    bottom: -2px;
+    left: var(--poeira-x, 50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #8a7d70;
+    opacity: 0;
+    animation: poeira-lapide 480ms ease-out 280ms 1 both;
+  }
+
+  .lapide-poeira > span:nth-child(1) {
+    --poeira-x: 38%;
+    --poeira-dx: -16px;
+    --poeira-dy: -9px;
+  }
+
+  .lapide-poeira > span:nth-child(2) {
+    --poeira-x: 55%;
+    --poeira-dx: -7px;
+    --poeira-dy: -15px;
+  }
+
+  .lapide-poeira > span:nth-child(3) {
+    --poeira-x: 70%;
+    --poeira-dx: 3px;
+    --poeira-dy: -17px;
+  }
+
+  .lapide-poeira > span:nth-child(4) {
+    --poeira-x: 84%;
+    --poeira-dx: 11px;
+    --poeira-dy: -12px;
+  }
+
+  .lapide-poeira > span:nth-child(5) {
+    --poeira-x: 94%;
+    --poeira-dx: 18px;
+    --poeira-dy: -6px;
+  }
+
+  @media (width >= theme(--breakpoint-pc)) {
+    .lapide {
+      border-width: 3px;
+      border-radius: 28px 28px 5px 5px;
+      box-shadow:
+        inset 0 0 0 3px #6e655c,
+        4px 4px 0 #000;
+    }
+  }
+}
+
+@keyframes poeira-lapide {
+  /* Invisível durante o atraso (a carta ainda está no ar): o grão nasce na chegada. */
+  from {
+    opacity: 0;
+    transform: translate(0, 0) scale(1);
+  }
+  15% {
+    opacity: 0.9;
+  }
+  to {
+    opacity: 0;
+    transform: translate(var(--poeira-dx, 0), var(--poeira-dy, -12px)) scale(1.8);
+  }
+}
+
+/*
  * Os carimbos de madeira (bloco D dos pontos do playtest, ponto 5; spec do playtest §6.1): os botões da barra de ação e dos painéis das
  * fases. Borda grossa de tinta, sombra dura da cor da madeira (a barra é de tinta: a sombra de tinta sumiria nela) e a face na cor da
  * variante (`--carimbo-face`): papel, ouro (Confirmar e a escolha principal) ou vermelho (só o Atacar). No toque o carimbo afunda: desloca

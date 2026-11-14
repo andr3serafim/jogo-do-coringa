@@ -1,15 +1,18 @@
 # Estado do projeto
 
 > Sobrescrito a cada atualização. **Última: 2026-11-14**, o bloco D em execução na branch `feat/playtest-bloco-d` (saída da `main` em
-> `8368eb1`): o plano escrito, nenhum código ainda.
+> `8368eb1`): as duas tarefas feitas, faltam o E2E, a medição, a revisão e o diário.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
 - **Em curso: o bloco D, na `feat/playtest-bloco-d`** ("execute o bloco D", o autor, 2026-11-14). O plano:
   `docs/superpowers/plans/2026-11-14-playtest-bloco-d.md` (as escolhas marcadas **[D]** são do Claude por delegação, não aprovadas pelo autor).
-  - **Feito:** o plano. **Próximo passo exato:** a Tarefa 1 (os botões de carimbo), teste primeiro (`test/ui/stamp-buttons.test.tsx`);
-    depois a Tarefa 2 (a faixa e a lápide), os portões do plano, o revisor num subagente, o diário, o push e as duas CI.
+  - **Feito:** o plano (`f37ae09`); a Tarefa 1, os botões de carimbo (`b8aa957`); a Tarefa 2, a faixa de três colunas com o monte em pilha
+    e a lápide (o commit seguinte). `pnpm check` verde com as duas (web 2819 testes; JavaScript inicial 185,5 KB). As fotos das quatro telas
+    tiradas (a faixa: 67 px no celular, 68 no PC; na `main` eram 88 e 70).
+  - **Próximo passo exato:** `pnpm e2e` inteiro (o alvo do cemitério no `mobile.spec.ts`, o 1366 × 657, o `fluidez.spec.ts`); a A/B de
+    quadros/s contra a `main` (`e2e/medir-cena.ts`); o revisor num subagente; a §6.3 da spec e o diário com as **[D]**; o push e as duas CI.
   - O que segue abaixo é o preparo de antes, ainda válido (os portões e o "pronto quando").
 - **O próximo bloco: o D** (pontos 5 e 14 do playtest), numa sessão nova ("vou iniciar em outra sessão. prepare tudo", o autor, 2026-11-14).
   - **A spec:** `docs/superpowers/specs/2026-11-03-playtest-design.md` §6 (6.1 os botões de carimbo; 6.2 o monte e o cemitério no centro, com

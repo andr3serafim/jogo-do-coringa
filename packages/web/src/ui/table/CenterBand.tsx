@@ -4,11 +4,18 @@
 // anúncios para leitor de tela saem por uma região viva escondida que mora aqui, fora do relógio (`live`, de `useClock`). No
 // treino (spec §2.6) não há prazo: a faixa diz "Treino · Médio, sem relógio" (com o nível do bot), e a mesma região anuncia a vez
 // do jogador. Na mesa do replay (`replay`) ela diz "Revendo a partida".
+//
+// Desde o bloco D dos pontos do playtest (ponto 14, spec do playtest §6.2) a faixa é uma grade de três colunas: a situação da rodada à
+// esquerda, o monte e o cemitério no centro da mesa, lado a lado, e o treino (ou o replay) à direita; online a direita fica vazia, e o
+// centro segue no centro. O monte é uma pilha de versos; o cemitério, uma lápide de pedra com a carta do topo encostada, e a carta que
+// chega levanta poeira. As âncoras `data-monte` e `data-cemiterio` continuam: os voos e as cenas medem por elas.
 import type { PlayerView } from '@coringa/engine';
+import { useState } from 'react';
 import type { ClockFace } from '../../model/clock.ts';
 import { pausedTurnText, REPLAY_BAND_TEXT, TIMES_UP_TEXT, trainingBandText, TUTORIAL_BAND_TEXT } from '../../model/copy.ts';
 import type { TrainingLevel } from '../../model/local-room.ts';
 import { DROP } from '../../model/drag.ts';
+import { useAnim } from '../anim/context.ts';
 import { Card, cardName } from '../cards/Card.tsx';
 import { useTableUi } from './context.ts';
 import { graveyardName, turnText, type TableNames } from './labels.ts';
@@ -38,12 +45,13 @@ export function CenterBand({ view, names, face, live, training, replay, tutorial
       face && face.pausedTurnSeconds !== null && !face.mine
       ? pausedTurnText(face.pausedTurnSeconds)
       : null;
+  const side = 'text-[11px] font-bold uppercase leading-tight tracking-[0.08em] text-ouro pc:text-xs pc:tracking-[0.12em]';
   return (
     <section
       aria-label="Situação da rodada"
-      className="flex flex-none flex-wrap items-center gap-x-2.5 gap-y-1 bg-tinta px-3 py-1.5 text-papel pc:min-h-[68px] pc:gap-x-7 pc-baixo:min-h-14 pc:px-6 pc:py-1"
+      className="grid flex-none grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-2 bg-tinta px-3 py-1.5 text-papel pc:gap-x-7 pc:px-6 pc:py-1"
     >
-      <div className="flex min-w-0 max-w-[11rem] flex-col pc:max-w-[16rem]">
+      <div className="flex min-w-0 flex-col">
         <p className="text-xs font-semibold leading-tight text-ouro pc:text-sm">{turnText(view, names)}</p>
         {note ? (
           <p data-numero className="font-texto text-[11px] font-bold leading-tight tabular-nums">
@@ -57,26 +65,21 @@ export function CenterBand({ view, names, face, live, training, replay, tutorial
         {live.text === '' ? null : <span key={live.id}>{live.text}</span>}
       </div>
 
-      {face ? null : replay ? (
-        <p className="max-w-[10.5rem] text-[11px] font-bold uppercase leading-tight tracking-[0.12em] text-ouro pc:max-w-none pc:text-xs">
-          {REPLAY_BAND_TEXT}
-        </p>
-      ) : training !== undefined ? (
-        // Sem relógio, a faixa diz por quê. Não é região viva: o anúncio é o da vez, acima.
-        <p className="max-w-[10.5rem] text-[11px] font-bold uppercase leading-tight tracking-[0.12em] text-ouro pc:max-w-none pc:text-xs">
-          {tutorial ? TUTORIAL_BAND_TEXT : trainingBandText(training)}
-        </p>
-      ) : null}
-
-      <div className="ml-auto flex items-center gap-2">
-        {/* O monte é de onde a compra voa (`data-monte`, sub-projeto 6 §8). */}
-        <div data-monte className="flex flex-col items-center">
-          <span className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">Monte</span>
-          <span data-numero className="font-texto text-[15px] font-bold tabular-nums pc:text-xl">
-            {view.deckCount}
-          </span>
-        </div>
+      {/* O centro da mesa: o monte e o cemitério, lado a lado. As cartas da faixa são menores que as "mini" da mesa (o tamanho "mini" e a
+          pilha leem estas duas variáveis): no PC a faixa fica compacta, ~72 px, porque uma mais alta fazia os campos rolarem em 1440 × 900. */}
+      <div className="flex items-end gap-2.5 [--mini-h:36px] [--mini-w:26px] pc:gap-5 pc:[--mini-h:44px] pc:[--mini-w:31px]">
+        <Deck count={view.deckCount} />
         <Graveyard view={view} onOpen={onOpenGraveyard} />
+      </div>
+
+      {/* A coluna da direita existe sempre, para o centro ficar no centro. Sem relógio, ela diz por quê (não é região viva: o anúncio é
+          o da vez, acima). */}
+      <div className="flex min-w-0 justify-end text-right">
+        {face ? null : replay ? (
+          <p className={side}>{REPLAY_BAND_TEXT}</p>
+        ) : training !== undefined ? (
+          <p className={side}>{tutorial ? TUTORIAL_BAND_TEXT : trainingBandText(training)}</p>
+        ) : null}
       </div>
     </section>
   );
@@ -84,57 +87,116 @@ export function CenterBand({ view, names, face, live, training, replay, tutorial
 
 // ---------------------------------------------------------------------------------------------
 
+/** O monte: uma pilha de até três versos (só desenho) e a conta. É de onde a compra voa (`data-monte`, sub-projeto 6 §8). */
+function Deck({ count }: { count: number }) {
+  const layers = Math.min(count, 3);
+  return (
+    <div data-monte className="flex items-center gap-1.5 pc:gap-2.5">
+      <span aria-hidden="true" data-monte-vazio={layers === 0 ? '' : undefined} className="monte-pilha">
+        {Array.from({ length: layers }, (_, i) => (
+          <span key={i} data-monte-verso />
+        ))}
+      </span>
+      <span className="flex flex-col items-start">
+        {/* No celular a pilha de versos com o número já diz que é o monte: o rótulo fica só para o leitor de tela. */}
+        <span className="text-[10px] font-bold uppercase tracking-[0.12em] max-tablet:sr-only pc:text-[11px]">Monte</span>{' '}
+        <span data-numero className="font-texto text-[15px] font-bold tabular-nums pc:text-xl">
+          {count}
+        </span>
+      </span>
+    </div>
+  );
+}
+
+/** As rachas da pedra: desenho original, dois traços. */
+function Cracks() {
+  return (
+    <svg aria-hidden="true" data-rachas viewBox="0 0 120 104" preserveAspectRatio="none" className="lapide-rachas" fill="none">
+      <path d="M82 14l-6 14 7 8-5 12" stroke="#2a2420" strokeWidth="1.6" />
+      <path d="M22 58l8 6-3 9" stroke="#2a2420" strokeWidth="1.4" />
+    </svg>
+  );
+}
+
 function Graveyard({ view, onOpen }: { view: PlayerView; onOpen: (() => void) | undefined }) {
   const { marked, onSeen } = useTableUi();
+  const { reduced } = useAnim();
   const { graveyard } = view;
+  const count = graveyard.length;
+  // A carta que chega levanta poeira: quando a conta cresce (nunca na montagem nem com movimento reduzido), a poeira toca de novo. O
+  // estado segue a conta durante o desenho, sem efeito.
+  const [arrivals, setArrivals] = useState({ count, dust: 0 });
+  if (arrivals.count !== count) setArrivals({ count, dust: count > arrivals.count && !reduced ? arrivals.dust + 1 : arrivals.dust });
   const top = graveyard.at(-1) ?? null;
   const news = graveyard.filter((card) => marked.has(card.id));
   const seen = onSeen && news.length > 0 ? () => news.forEach((card) => onSeen(card.id)) : undefined;
-  const name = graveyardName(graveyard.length, top === null ? null : cardName(top), news.length > 0);
+  const name = graveyardName(count, top === null ? null : cardName(top), news.length > 0);
   // A carta de cima fica fora do botão, para o texto visível dele ser só "Cemitério 3" (e "novo"): o axe (WCAG 2.5.3, rótulo no nome)
-  // exige que o texto visível seja trecho contínuo do nome acessível, que já diz a carta de cima. Com o botão, ela é só desenho.
+  // exige que o texto visível seja trecho contínuo do nome acessível, que já diz a carta de cima. Com o botão, ela é só desenho. É a
+  // primeira filha da caixa, e fica à direita, encostada na pedra (`order-2`). Fica em pé: o Motion mede a carta que voa até aqui, e
+  // uma carta inclinada mediria maior do que é.
   const card = top ? (
-    // A carta de cima é menor na faixa do celular: o tamanho "mini" lê estas duas variáveis.
-    <span aria-hidden={onOpen ? true : undefined} className="flex [--mini-h:36px] [--mini-w:26px] pc:[--mini-h:54px] pc:[--mini-w:38px]">
+    <span aria-hidden={onOpen ? true : undefined} className="order-2 flex">
       <Card card={top} size="mini" grave />
     </span>
   ) : (
-    <span aria-hidden="true" className="h-9 w-[26px] rounded-[3px] border-[1.5px] border-dashed border-papel/50 pc:h-[54px] pc:w-[38px]" />
+    <span aria-hidden="true" className="order-2 h-(--mini-h) w-(--mini-w) rounded-[3px] border-[1.5px] border-dashed border-papel/50" />
   );
   const label = (
     <span className="flex flex-col items-start">
-      <span className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">Cemitério</span>
+      <span className="lapide-gravado text-[9px] font-bold uppercase tracking-[0.1em] pc:text-[11px] pc:tracking-[0.12em]">Cemitério</span>
       {/* Entre itens de flex o espaço some (o layout não muda), mas separa as palavras do texto visível: "Cemitério vazio", e não "Cemitériovazio". */}{' '}
-      {top ? (
-        <span data-numero className="font-texto text-[15px] font-bold leading-tight tabular-nums pc:text-xl">
-          {graveyard.length}
-        </span>
-      ) : (
-        <span className="text-xs">vazio</span>
-      )}
-      {news.length > 0 ? (
-        <>
-          {' '}
-          <NovoChip />
-        </>
-      ) : null}
+      {/* A conta e o "novo" na mesma linha: a lápide não cresce quando o selo aparece. */}
+      <span className="flex items-center gap-1.5">
+        {top ? (
+          <span data-numero className="font-texto text-[15px] font-bold leading-tight tabular-nums pc:text-xl">
+            {count}
+          </span>
+        ) : (
+          <span className="text-xs">vazio</span>
+        )}
+        {news.length > 0 ? (
+          <>
+            {' '}
+            <NovoChip />
+          </>
+        ) : null}
+      </span>
     </span>
   );
-  const box = 'flex min-h-11 items-center gap-1.5 border-[1.5px] border-papel/50 px-1.5 py-0.5 pc:min-h-[62px] pc:gap-2.5 pc:px-2.5';
+  // Só desenho, depois da carta e do botão: as rachas, o canto de papel da segunda carta (a de verdade poria outro `data-card-id` na
+  // mesa, e os voos e as cenas procuram as cartas por ele) e a poeira.
+  const art = (
+    <>
+      <Cracks />
+      {count >= 2 ? <span aria-hidden="true" data-segunda className="lapide-segunda" /> : null}
+      {arrivals.dust > 0 ? (
+        <span key={arrivals.dust} aria-hidden="true" data-poeira className="lapide-poeira">
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
+        </span>
+      ) : null}
+    </>
+  );
+  const box = 'lapide relative flex min-h-11 items-end gap-1.5 px-2 pb-1 pt-2.5 pc:gap-2.5 pc:px-3 pc:pb-1 pc:pt-1.5';
   if (onOpen) {
     // O botão cobre a caixa inteira (`after:inset-0`): o alvo de toque e o clique na carta são os mesmos de antes. O foco aparece na
     // caixa, e não só em volta do texto.
     return (
       <div
         data-cemiterio=""
+        data-lapide=""
         data-soltar={DROP.graveyard}
-        className={`${box} relative has-[:focus-visible]:shadow-[0_0_0_6px_var(--color-tinta)] has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-ouro`}
+        className={`${box} has-[:focus-visible]:shadow-[0_0_0_6px_var(--color-tinta)] has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-ouro`}
       >
         {card}
         <button
           type="button"
           aria-label={name}
-          className="bg-transparent p-0 text-left text-papel after:absolute after:inset-0 focus-visible:shadow-none focus-visible:outline-none"
+          className="self-center bg-transparent p-0 text-left text-papel after:absolute after:inset-0 focus-visible:shadow-none focus-visible:outline-none"
           onClick={onOpen}
           onPointerEnter={seen}
           onPointerDown={seen}
@@ -142,13 +204,15 @@ function Graveyard({ view, onOpen }: { view: PlayerView; onOpen: (() => void) | 
         >
           {label}
         </button>
+        {art}
       </div>
     );
   }
   return (
-    <div data-cemiterio="" data-soltar={DROP.graveyard} className={box} onPointerEnter={seen} onPointerDown={seen}>
+    <div data-cemiterio="" data-lapide="" data-soltar={DROP.graveyard} className={box} onPointerEnter={seen} onPointerDown={seen}>
       {card}
-      {label}
+      <span className="self-center">{label}</span>
+      {art}
     </div>
   );
 }
