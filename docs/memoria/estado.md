@@ -12,8 +12,9 @@
   - **As escolhas são do Claude por delegação** (`decisoes.md` 2026-11-14 (1)): **o autor não as viu**. Nunca as rotule como aprovadas.
   - **Verificado:** `pnpm check` verde (web 2819 testes; JavaScript inicial 185,7 KB); `pnpm e2e` inteiro verde (115, 4 pulados); a revisão
     num subagente novo (nenhum Critical; os 2 Important corrigidos). A A/B passa o portão e **custa ~2 quadros/s na troca de mão**.
-  - **Próximo passo exato:** conferir as duas CI no topo da branch (pela API pública do GitHub, com `curl`); com elas verdes, perguntar ao
-    autor "Faço o merge do bloco D na main?" e, com o "sim" registrado no `decisoes.md`, o fast-forward e o push da `main`. O deploy é dele.
+  - **A branch está no GitHub, com as duas CI (`check` e `e2e`) verdes em `08f728f`** (o commit seguinte só mexe nesta memória).
+  - **Próximo passo exato:** perguntar ao autor "Faço o merge do bloco D na main?" e, com o "sim" registrado no `decisoes.md`, o
+    fast-forward e o push da `main` (conferindo as duas CI do push). O deploy é dele.
   - **O que não pode regredir:** a poeira é do `Leaving` e sai da página ao fim (uma animação presa no fim derruba os E2E que esperam a tela
     parar); só uma carta de verdade (`data-card-id`) na lápide; a faixa do PC com ≤ 70 px (mais que isso e os campos rolam em 1440 × 900);
     a etiqueta e a faísca do Absoluto fora do botão; a prévia do Atacar na tira lisa.
