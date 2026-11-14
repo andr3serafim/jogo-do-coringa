@@ -1,7 +1,7 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-14**, o conserto da Devastação na `main` (fast-forward até `0402869`); o próximo
-> bloco é o D, com as escolhas por delegação.
+> Sobrescrito a cada atualização. **Última: 2026-11-14**, o conserto da Devastação na `main`, com as duas CI verdes no push (`491687c`);
+> o próximo bloco é o D, com as escolhas por delegação.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
@@ -15,7 +15,8 @@
     cartas de volta a cada quadro. O E2E novo no `fluidez.spec.ts` (vermelho antes: 29 cartas). A A/B (`notas/medicao-devastacao-estilo.md`):
     a Devastação com arte a 360 de 53 para 56 (o pior quadro de 167 para 50 ms); o Cordel e a troca de mão sem mudar. Hoje a `main` já dava
     51 a 54 (a máquina variou desde 2026-11-12).
-  - **Próximo passo exato:** conferir a CI do push da `main`; verde, começar o bloco D (abaixo). O deploy (dele) leva o conserto ao ar.
+  - **CI do push da `main`** (`491687c`): `check` e `e2e` verdes. O deploy (dele) leva o conserto ao ar.
+  - **Próximo passo exato:** o bloco D (abaixo), começando pelo plano.
 - **O próximo bloco: o D** (pontos 5 e 14, spec do playtest §6: os botões de carimbo e o monte com a lápide no centro), com as escolhas do
   plano decididas pelo Claude por delegação ("5. decida por mim", `decisoes.md` 2026-11-14 (1)). Começa por um plano (`superpowers:writing-plans`)
   numa branch nova saída da `main`, em duas tarefas (6.1 os botões; 6.2 a faixa do centro e a lápide), com os portões da spec: alvos ≥ 44 px,
