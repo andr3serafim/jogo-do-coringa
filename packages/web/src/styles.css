@@ -958,7 +958,9 @@ li[data-joga]::after {
  * é uma pilha de até três versos de cordel, deslocados; vazio, um contorno tracejado. A lápide é pedra de topo redondo, com as rachas
  * desenhadas e o gravado em papel (o contraste do texto passa de 4,5:1 na pedra inteira); o canto de papel da segunda carta fica atrás da
  * do topo (`isolation`: as camadas de desenho descem para trás do conteúdo, e o botão segue por cima de tudo). A poeira da carta que
- * chega toca uma vez, só com `transform` e `opacity`. Desenho original; os números ficam na fonte de texto, sem textura (spec §10.7).
+ * chega é posta pelo `Leaving` na camada dos efeitos, no pé da lápide, com o atraso da chegada (`--poeira-atraso`): toca uma vez, só com
+ * `transform` e `opacity`, e sai da página ao fim (sem `fill` para a frente: uma animação presa no fim nunca "termina" para quem espera a
+ * tela parar). Desenho original; os números ficam na fonte de texto, sem textura (spec §10.7).
  */
 @layer components {
   .monte-pilha {
@@ -1041,9 +1043,6 @@ li[data-joga]::after {
 
   .lapide-poeira {
     position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
     height: 0;
     pointer-events: none;
   }
@@ -1057,7 +1056,7 @@ li[data-joga]::after {
     border-radius: 50%;
     background: #8a7d70;
     opacity: 0;
-    animation: poeira-lapide 480ms ease-out 280ms 1 both;
+    animation: poeira-lapide 480ms ease-out var(--poeira-atraso, 0ms) 1 backwards;
   }
 
   .lapide-poeira > span:nth-child(1) {
@@ -1338,10 +1337,11 @@ li[data-joga]::after {
     transition: none;
   }
 
+  /* O filtro, e não a cor de fundo: o gradiente do Absoluto armado cobre a cor, e o toque ficaria sem retorno. */
   [data-movimento-reduzido] .carimbo:active:not(:disabled) {
     translate: none;
     box-shadow: var(--carimbo-sombra) var(--carimbo-sombra) 0 var(--color-madeira);
-    background-color: color-mix(in oklab, var(--carimbo-face) 78%, var(--color-tinta));
+    filter: brightness(0.8);
   }
 
   [data-movimento-reduzido] .carimbo-selo:active:not(:disabled) > [data-selo] {
@@ -1364,7 +1364,7 @@ li[data-joga]::after {
     .carimbo:active:not(:disabled) {
       translate: none;
       box-shadow: var(--carimbo-sombra) var(--carimbo-sombra) 0 var(--color-madeira);
-      background-color: color-mix(in oklab, var(--carimbo-face) 78%, var(--color-tinta));
+      filter: brightness(0.8);
     }
 
     .carimbo-selo:active:not(:disabled) > [data-selo] {

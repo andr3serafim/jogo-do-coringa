@@ -1,9 +1,9 @@
 // A faixa do centro (bloco D dos pontos do playtest, ponto 14; spec do playtest §6.2): o monte e o cemitério no meio, lado a lado, com a
-// situação da rodada à esquerda e o treino à direita. O cemitério é uma lápide, com a carta do topo encostada; a que chega levanta poeira.
+// situação da rodada à esquerda e o treino à direita. O cemitério é uma lápide, com a carta do topo encostada (a poeira da que chega é do
+// `Leaving`: `leaving.test.tsx`).
 // A estrutura de acessibilidade do cemitério (o nome, o texto visível, o botão que cobre a caixa) segue testada no `table.test.tsx`.
 import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { AnimContext, IDLE_ANIM } from '../../src/ui/anim/context.ts';
 import { CenterBand, type CenterBandProps } from '../../src/ui/table/CenterBand.tsx';
 import { scenarioAt, type ViewSpec } from '../fixtures.ts';
 
@@ -16,7 +16,7 @@ const DRAFT: ViewSpec = {
 
 const viewOf = (graveyard: ViewSpec['graveyard']) => scenarioAt({ ...DRAFT, graveyard }).view;
 
-function band(extra: Partial<CenterBandProps> = {}, reduced = false) {
+function band(extra: Partial<CenterBandProps> = {}) {
   const props: CenterBandProps = {
     view: viewOf(DRAFT.graveyard),
     names: { self: 'André', opponent: 'Duda' },
@@ -24,9 +24,7 @@ function band(extra: Partial<CenterBandProps> = {}, reduced = false) {
     live: { id: 0, text: '' },
     ...extra,
   };
-  const wrap = (p: CenterBandProps) => <AnimContext value={{ ...IDLE_ANIM, reduced }}>{<CenterBand {...p} />}</AnimContext>;
-  const view$ = render(wrap(props));
-  return { props, ...view$, update: (next: Partial<CenterBandProps>) => view$.rerender(wrap({ ...props, ...next })) };
+  return { props, ...render(<CenterBand {...props} />) };
 }
 
 const region = () => screen.getByRole('region', { name: 'Situação da rodada' });
@@ -120,38 +118,5 @@ describe('faixa do centro: a lápide', () => {
     expect(count.className).toContain('font-texto');
     expect(count.className).toContain('tabular-nums');
     expect(count.className).not.toMatch(/grao|textura/);
-  });
-});
-
-describe('faixa do centro: a poeira da carta que chega', () => {
-  const dust = () => grave().querySelector('[data-poeira]');
-
-  it('na montagem não há poeira; quando a conta cresce, cinco grãos sobem do pé da lápide', () => {
-    const { update } = band();
-    expect(dust()).toBeNull();
-    update({ view: viewOf([3, 5, 8, 9]) });
-    expect(dust()).toHaveAttribute('aria-hidden', 'true');
-    expect(dust()!.children).toHaveLength(5);
-  });
-
-  it('cada chegada toca a poeira de novo (um nó novo)', () => {
-    const { update } = band();
-    update({ view: viewOf([3, 5, 8, 9]) });
-    const first = dust();
-    update({ view: viewOf([3, 5, 8, 9, 2]) });
-    expect(dust()).not.toBeNull();
-    expect(dust()).not.toBe(first);
-  });
-
-  it('a conta que diminui (a Ressurreição) não levanta poeira', () => {
-    const { update } = band();
-    update({ view: viewOf([3, 5]) });
-    expect(dust()).toBeNull();
-  });
-
-  it('com movimento reduzido, nenhuma poeira', () => {
-    const { update } = band({}, true);
-    update({ view: viewOf([3, 5, 8, 9]) });
-    expect(dust()).toBeNull();
   });
 });

@@ -114,6 +114,47 @@ describe('a carta que sai sem quebrar voa ao cemitério na batida dela (E2)', ()
     expect(copyOf(m.container, 'x-p2-ATK-0')).toBeNull();
     expect(shardCount(m.container)).toBe(0);
   });
+
+  // Bloco D dos pontos do playtest, ponto 14: a carta que chega ao cemitério levanta poeira no pé da lápide.
+  const dust = (container: HTMLElement) => layer(container).querySelectorAll('[data-poeira]');
+  const spend = (m: ReturnType<typeof mount>) => {
+    const spent = [6, 9, 3, 10].map((value, i) => row(`x-p2-ATK-${i}`, value as NumCard['value']));
+    emit(m, { ...BEFORE, opponent: { ...BEFORE.opponent, attackRow: [] } }, [
+      TURN,
+      { type: 'CardsRemovedFromRow', player: 'p2', row: 'ATK', cards: spent },
+    ]);
+  };
+
+  it('a poeira da lápide: uma só para a batida, cinco grãos, com o atraso da chegada do voo, e sai da página ao fim', () => {
+    const m = mount(BEFORE);
+    spend(m);
+    expect(dust(m.container)).toHaveLength(1);
+    const puff = dust(m.container)[0] as HTMLElement;
+    expect(puff).toHaveAttribute('aria-hidden', 'true');
+    expect(puff.className).toContain('lapide-poeira');
+    expect(puff.children).toHaveLength(5);
+    expect(puff.style.getPropertyValue('--poeira-atraso')).toBe(`${400 + TABLE_MOTION.exitMs}ms`);
+    advance(400 + TABLE_MOTION.exitMs + 479);
+    expect(dust(m.container)).toHaveLength(1);
+    advance(1);
+    expect(dust(m.container)).toHaveLength(0);
+  });
+
+  it('com movimento reduzido, nenhuma poeira', () => {
+    const m = mount(BEFORE, { prefs: { reduceMotion: true } });
+    spend(m);
+    expect(dust(m.container)).toHaveLength(0);
+  });
+
+  it('as cartas que estouram em cacos não levantam poeira; no pulo, a poeira sai com as cópias', () => {
+    const m = mount(BEFORE);
+    emit(m, after([KS[3]!, 5]), [TURN, broken([KS[3]!])]);
+    expect(dust(m.container)).toHaveLength(0);
+    spend(m);
+    expect(dust(m.container)).toHaveLength(1);
+    act(() => stage(m.container).click());
+    expect(dust(m.container)).toHaveLength(0);
+  });
 });
 
 describe('quando não há cópia', () => {

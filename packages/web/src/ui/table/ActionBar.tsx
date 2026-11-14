@@ -198,7 +198,7 @@ export function ActionBar(props: ActionBarProps) {
                   {ABSOLUTE_ATTACK_TAG}
                 </span>
               ) : null}
-              {armed && !reduced ? <span aria-hidden="true" data-faisca className="carimbo-faisca" /> : null}
+              {armed && !reduced && !disabled ? <span aria-hidden="true" data-faisca className="carimbo-faisca" /> : null}
             </div>
           ) : plays.finish ? (
             <TwoLine

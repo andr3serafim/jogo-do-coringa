@@ -77,6 +77,10 @@ function asCopy(clone: HTMLElement, id: string, rect: DOMRect, layer: DOMRect): 
   return clone;
 }
 
+/** A poeira da lápide: quantos grãos, e por quanto tempo sobem (o `poeira-lapide` do `styles.css` dura o mesmo). */
+const DUST_GRAINS = 5;
+const DUST_MS = 480;
+
 export class Leaving extends Component<LeavingProps> {
   static contextType = FxLayerContext;
   declare context: ContextType<typeof FxLayerContext>;
@@ -114,6 +118,13 @@ export class Leaving extends Component<LeavingProps> {
     const grave = stage.querySelector('[data-cemiterio]')?.getBoundingClientRect() ?? null;
     const shattering = new Map<number, number>();
     for (const { leaving } of snapshot) if (leaving.shatter) shattering.set(leaving.startMs, (shattering.get(leaving.startMs) ?? 0) + 1);
+    // A carta que chega ao cemitério levanta poeira no pé da lápide (bloco D dos pontos do playtest, ponto 14): uma vez por batida de
+    // saída, na chegada do voo. As que estouram em cacos não voam, e com movimento reduzido não há poeira.
+    if (grave !== null && !this.props.reduced) {
+      const arrivals = new Set<number>();
+      for (const { leaving } of snapshot) if (!leaving.shatter) arrivals.add(leaving.startMs + TABLE_MOTION.exitMs);
+      for (const atMs of arrivals) this.dust(grave, layerBox, atMs);
+    }
     for (const { id, rect, clone, leaving } of snapshot) {
       // A carta da Defesa que cura solta a essência verde até o retrato de quem curou (bloco A dos pontos do playtest, ponto 9).
       const heal = this.props.run.heals.get(id);
@@ -144,6 +155,22 @@ export class Leaving extends Component<LeavingProps> {
   private gone(copy: HTMLElement): void {
     copy.remove();
     this.copies = this.copies.filter((other) => other !== copy);
+  }
+
+  /** Cinco grãos de poeira sobem do pé da lápide na chegada da carta (o desenho e o tempo são do `styles.css`), e saem da página ao fim. */
+  private dust(grave: DOMRect, layer: DOMRect, atMs: number): void {
+    const puff = document.createElement('span');
+    puff.setAttribute('data-poeira', '');
+    puff.setAttribute('aria-hidden', 'true');
+    puff.className = 'lapide-poeira';
+    puff.style.left = `${(grave.left - layer.left).toFixed(1)}px`;
+    puff.style.top = `${(grave.bottom - layer.top).toFixed(1)}px`;
+    puff.style.width = `${grave.width.toFixed(1)}px`;
+    puff.style.setProperty('--poeira-atraso', `${Math.round(atMs)}ms`);
+    for (let i = 0; i < DUST_GRAINS; i += 1) puff.appendChild(document.createElement('span'));
+    this.context.layer()?.appendChild(puff);
+    this.copies.push(puff);
+    this.at(atMs + DUST_MS, () => this.gone(puff));
   }
 
   /** A cópia voa ao centro do cemitério, encolhendo e apagando; a sua, da mão, recua antes. */

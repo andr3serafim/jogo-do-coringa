@@ -14,7 +14,9 @@ function faceOf(stamp: Element): Face {
   return stamp.classList.contains('carimbo-ouro') ? 'ouro' : 'papel';
 }
 
-export function stampInk(event: { target: EventTarget | null; currentTarget: EventTarget | null }): void {
+export function stampInk(event: { target: EventTarget | null; currentTarget: EventTarget | null; button?: number }): void {
+  // Só o toque e o botão principal do mouse: o do meio e o direito não carimbam.
+  if (event.button !== undefined && event.button !== 0) return;
   const host = event.currentTarget;
   const from = event.target;
   if (!(host instanceof HTMLElement) || !(from instanceof Element)) return;

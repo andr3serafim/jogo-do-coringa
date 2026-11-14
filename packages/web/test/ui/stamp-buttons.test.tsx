@@ -181,6 +181,17 @@ describe('carimbos: os pingos do toque', () => {
     expect(drops().length).toBe(0);
   });
 
+  it('os pingos são da cor da face do carimbo (o Confirmar, de ouro), e o botão direito do mouse não carimba', () => {
+    mount(EQUIP);
+    fireEvent.click(within(inEquip().getByRole('list', { name: 'Destinos' })).getAllByRole('button')[0]!);
+    const confirm = inEquip().getByRole('button', { name: 'Confirmar' });
+    fireEvent.pointerUp(confirm, { button: 2 });
+    expect(drops().length).toBe(0);
+    fireEvent.pointerUp(confirm, { button: 0 });
+    expect(drops().length).toBe(7);
+    for (const drop of drops()) expect(drop).toHaveAttribute('data-face', 'ouro');
+  });
+
   it('carimbo desligado não solta pingos', () => {
     mount(EQUIP);
     fireEvent.pointerUp(inEquip().getByRole('button', { name: 'Desfazer' }));

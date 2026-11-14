@@ -7,15 +7,13 @@
 //
 // Desde o bloco D dos pontos do playtest (ponto 14, spec do playtest §6.2) a faixa é uma grade de três colunas: a situação da rodada à
 // esquerda, o monte e o cemitério no centro da mesa, lado a lado, e o treino (ou o replay) à direita; online a direita fica vazia, e o
-// centro segue no centro. O monte é uma pilha de versos; o cemitério, uma lápide de pedra com a carta do topo encostada, e a carta que
-// chega levanta poeira. As âncoras `data-monte` e `data-cemiterio` continuam: os voos e as cenas medem por elas.
+// centro segue no centro. O monte é uma pilha de versos; o cemitério, uma lápide de pedra com a carta do topo encostada (a poeira da
+// carta que chega é do `Leaving`, que sabe a batida da chegada). As âncoras `data-monte` e `data-cemiterio` continuam: os voos e as cenas medem por elas.
 import type { PlayerView } from '@coringa/engine';
-import { useState } from 'react';
 import type { ClockFace } from '../../model/clock.ts';
 import { pausedTurnText, REPLAY_BAND_TEXT, TIMES_UP_TEXT, trainingBandText, TUTORIAL_BAND_TEXT } from '../../model/copy.ts';
 import type { TrainingLevel } from '../../model/local-room.ts';
 import { DROP } from '../../model/drag.ts';
-import { useAnim } from '../anim/context.ts';
 import { Card, cardName } from '../cards/Card.tsx';
 import { useTableUi } from './context.ts';
 import { graveyardName, turnText, type TableNames } from './labels.ts';
@@ -45,14 +43,15 @@ export function CenterBand({ view, names, face, live, training, replay, tutorial
       face && face.pausedTurnSeconds !== null && !face.mine
       ? pausedTurnText(face.pausedTurnSeconds)
       : null;
-  const side = 'text-[11px] font-bold uppercase leading-tight tracking-[0.08em] text-ouro pc:text-xs pc:tracking-[0.12em]';
+  // As laterais são estreitas no celular: uma palavra comprida (um apelido) quebra em vez de invadir o centro.
+  const side = 'text-[11px] font-bold uppercase leading-tight tracking-[0.08em] text-ouro [overflow-wrap:anywhere] pc:text-xs pc:tracking-[0.12em]';
   return (
     <section
       aria-label="Situação da rodada"
       className="grid flex-none grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-2 bg-tinta px-3 py-1.5 text-papel pc:gap-x-7 pc:px-6 pc:py-1"
     >
       <div className="flex min-w-0 flex-col">
-        <p className="text-xs font-semibold leading-tight text-ouro pc:text-sm">{turnText(view, names)}</p>
+        <p className="text-xs font-semibold leading-tight text-ouro [overflow-wrap:anywhere] pc:text-sm">{turnText(view, names)}</p>
         {note ? (
           <p data-numero className="font-texto text-[11px] font-bold leading-tight tabular-nums">
             {note}
@@ -120,13 +119,8 @@ function Cracks() {
 
 function Graveyard({ view, onOpen }: { view: PlayerView; onOpen: (() => void) | undefined }) {
   const { marked, onSeen } = useTableUi();
-  const { reduced } = useAnim();
   const { graveyard } = view;
   const count = graveyard.length;
-  // A carta que chega levanta poeira: quando a conta cresce (nunca na montagem nem com movimento reduzido), a poeira toca de novo. O
-  // estado segue a conta durante o desenho, sem efeito.
-  const [arrivals, setArrivals] = useState({ count, dust: 0 });
-  if (arrivals.count !== count) setArrivals({ count, dust: count > arrivals.count && !reduced ? arrivals.dust + 1 : arrivals.dust });
   const top = graveyard.at(-1) ?? null;
   const news = graveyard.filter((card) => marked.has(card.id));
   const seen = onSeen && news.length > 0 ? () => news.forEach((card) => onSeen(card.id)) : undefined;
@@ -165,20 +159,11 @@ function Graveyard({ view, onOpen }: { view: PlayerView; onOpen: (() => void) | 
     </span>
   );
   // Só desenho, depois da carta e do botão: as rachas, o canto de papel da segunda carta (a de verdade poria outro `data-card-id` na
-  // mesa, e os voos e as cenas procuram as cartas por ele) e a poeira.
+  // mesa, e os voos e as cenas procuram as cartas por ele).
   const art = (
     <>
       <Cracks />
       {count >= 2 ? <span aria-hidden="true" data-segunda className="lapide-segunda" /> : null}
-      {arrivals.dust > 0 ? (
-        <span key={arrivals.dust} aria-hidden="true" data-poeira className="lapide-poeira">
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-        </span>
-      ) : null}
     </>
   );
   const box = 'lapide relative flex min-h-11 items-end gap-1.5 px-2 pb-1 pt-2.5 pc:gap-2.5 pc:px-3 pc:pb-1 pc:pt-1.5';
