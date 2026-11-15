@@ -1,20 +1,21 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-14**, o bloco D pronto na branch `feat/playtest-bloco-d`, esperando o "sim" do autor
-> para o merge.
+> Sobrescrito a cada atualização. **Última: 2026-11-14**, o bloco D indo para a `main` por fast-forward ("Sim, merge", `decisoes.md`
+> 2026-11-14 (3)); falta conferir a CI do push da `main`.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **O bloco D está pronto na `feat/playtest-bloco-d`** (pontos 5 e 14: os botões de carimbo; o monte e o cemitério no centro, com a
-  lápide), **esperando o "sim" do autor para o merge**. O código em `6359b60`. O plano `docs/superpowers/plans/2026-11-14-playtest-bloco-d.md`;
+- **O bloco D está na `main`** ("Sim, merge", `decisoes.md` 2026-11-14 (3)), por fast-forward de `feat/playtest-bloco-d` (pontos 5 e 14: os
+  botões de carimbo; o monte e o cemitério no centro, com a lápide). O código em `6359b60`. O plano `docs/superpowers/plans/2026-11-14-playtest-bloco-d.md`;
   o diário 2026-11-14 (2); as doze escolhas na §6.3 da spec do playtest; as telas e a A/B em `notas/medicao-bloco-d.md`.
-  - **As escolhas são do Claude por delegação** (`decisoes.md` 2026-11-14 (1)): **o autor não as viu**. Nunca as rotule como aprovadas.
+  - **As escolhas são do Claude por delegação** (`decisoes.md` 2026-11-14 (1)): o autor as viu só resumidas, ao dar o "sim" do merge. Nunca
+    as rotule como aprovadas uma a uma; mudam se ele pedir depois de jogar.
   - **Verificado:** `pnpm check` verde (web 2819 testes; JavaScript inicial 185,7 KB); `pnpm e2e` inteiro verde (115, 4 pulados); a revisão
     num subagente novo (nenhum Critical; os 2 Important corrigidos). A A/B passa o portão e **custa ~2 quadros/s na troca de mão**.
   - **A branch está no GitHub, com as duas CI (`check` e `e2e`) verdes em `08f728f`** (o commit seguinte só mexe nesta memória).
-  - **Próximo passo exato:** perguntar ao autor "Faço o merge do bloco D na main?" e, com o "sim" registrado no `decisoes.md`, o
-    fast-forward e o push da `main` (conferindo as duas CI do push). O deploy é dele.
+  - **Próximo passo exato:** conferir as duas CI do push da `main` (pela API pública do GitHub, com `curl`) e anotar aqui. O deploy é dele
+    (`pnpm deploy:server`): leva o bloco D e o conserto da Devastação ao ar.
   - **O que não pode regredir:** a poeira é do `Leaving` e sai da página ao fim (uma animação presa no fim derruba os E2E que esperam a tela
     parar); só uma carta de verdade (`data-card-id`) na lápide; a faixa do PC com ≤ 70 px (mais que isso e os campos rolam em 1440 × 900);
     a etiqueta e a faísca do Absoluto fora do botão; a prévia do Atacar na tira lisa.
@@ -73,7 +74,7 @@
 
 ## Fila
 
-- **O merge do bloco D** (acima, em "Agora"), com o "sim" do autor. Depois dele, a fila do playtest está vazia.
+- **Vazia:** os blocos A a E do playtest estão na `main`. O próximo trabalho vem do autor (o que ele achar jogando o bloco D).
 - **Fora da fila, a pedido:** a arte pintada dos decks, quando o jogo estiver pronto e online e o autor pedir (segue a bíblia de arte,
   `docs/superpowers/specs/2026-11-11-biblia-de-arte.md`).
 
@@ -81,7 +82,8 @@
 
 - **A config do pnpm desta máquina:** o `%LOCALAPPDATA%\pnpm\config\config.yaml` tem `storeDir: D:.pnpm-store` (sem a barra), e o `pnpm add`
   falha; o `node_modules` usa `D:\.pnpm-store\v11`. Até corrigir, passe `--store-dir 'D:\.pnpm-store'`.
-- **O bloco D:** o "sim" para o merge, e olhar as doze escolhas da §6.3 da spec do playtest (são do Claude, por delegação).
+- **O bloco D:** o deploy, e jogar para olhar as doze escolhas da §6.3 da spec do playtest (são do Claude, por delegação) e o Atacar com o
+  Ataque Absoluto armado (a faísca não foi vista no navegador, só nos testes).
 - **Menores adiados** (nenhum quebra o jogo): bloco D no `diario.md` 2026-11-14 (2) ("Adiados"); bloco C no `diario.md` 2026-11-08 (1) ("Adiados"); bloco B no 2026-11-07 (2) ("Menores, para
   depois"); bloco A no 2026-11-03 (6) ("menores").
 - **O resto** (o que olhar no playtest por fatia e bloco, as leituras [I] por confirmar, o Roubo fraco, o que só ele pode fazer: proteção da

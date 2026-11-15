@@ -23,6 +23,7 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 - **A revisão** (um subagente novo, só leitura): nenhum Critical; 2 Important, os dois corrigidos (a poeira com atraso fixo, que tocava antes
   de a carta chegar quando havia cena; o toque do Atacar armado sem retorno com movimento reduzido); dos Minor, corrigidos: palavra comprida nas
   laterais da faixa, pingos só no botão principal do mouse, a faísca parada com o botão desligado, um teste dos pingos de ouro.
+- **O merge:** "Sim, merge" (`decisoes.md` 2026-11-14 (3)): a `main` andou por fast-forward até o topo da branch, com as duas CI verdes em `08f728f`.
 - **Adiados (Minor):** o punho vermelho da espada some no Atacar vermelho, e os raios de ouro do Ressuscitar ficam fracos no papel (desenho);
   "Cemitério" a 9 px no celular (o contraste passa, o tamanho está no limite); o grão do carimbo repete o SVG do `grao` (~400 bytes); as
   formas paradas do `:active` não têm teste (são CSS puro); a etiqueta do Absoluto não afunda com o botão.

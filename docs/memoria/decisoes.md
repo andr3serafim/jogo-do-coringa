@@ -6,6 +6,21 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-14 (3): o merge do bloco D
+
+Depois do resumo do bloco D (os botões de carimbo e a lápide no centro; `pnpm check`, `pnpm e2e` e as duas CI verdes em `08f728f`; as doze
+escolhas da §6.3 da spec ditas como "minhas, por delegação, e você não as viu", com as quatro que mais fogem do protótipo; a faixa que não
+engordou; o custo de ~2 quadros/s na troca de mão; o Ataque Absoluto armado não visto no navegador), perguntado "Faço o merge do bloco D na
+main?", ele respondeu:
+
+> Sim, merge
+
+**Leitura:** a `main` anda por fast-forward até o topo de `feat/playtest-bloco-d`. **[I]** O "sim" vale para o merge; **não** é a aprovação,
+uma a uma, das doze escolhas da §6.3, que ele só viu resumidas: seguem como escolhas do Claude por delegação, e mudam se ele pedir depois de
+jogar. O deploy segue sendo dele.
+
+---
+
 ## 2026-11-14 (2): o merge do conserto da Devastação
 
 Depois do resumo do conserto (o `layoutScroll` no `[data-campos]`, a A/B de 53 para 56 quadros/s na Devastação com arte a 360, as duas CI
