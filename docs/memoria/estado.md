@@ -1,7 +1,7 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-14**, o bloco D indo para a `main` por fast-forward ("Sim, merge", `decisoes.md`
-> 2026-11-14 (3)); falta conferir a CI do push da `main`.
+> Sobrescrito a cada atualização. **Última: 2026-11-14**, o bloco D na `main` por fast-forward até `302bbaf` ("Sim, merge", `decisoes.md`
+> 2026-11-14 (3)), com as duas CI verdes no push; a fila está vazia, e o deploy é do autor.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
@@ -14,8 +14,9 @@
   - **Verificado:** `pnpm check` verde (web 2819 testes; JavaScript inicial 185,7 KB); `pnpm e2e` inteiro verde (115, 4 pulados); a revisão
     num subagente novo (nenhum Critical; os 2 Important corrigidos). A A/B passa o portão e **custa ~2 quadros/s na troca de mão**.
   - **A branch está no GitHub, com as duas CI (`check` e `e2e`) verdes em `08f728f`** (o commit seguinte só mexe nesta memória).
-  - **Próximo passo exato:** conferir as duas CI do push da `main` (pela API pública do GitHub, com `curl`) e anotar aqui. O deploy é dele
-    (`pnpm deploy:server`): leva o bloco D e o conserto da Devastação ao ar.
+  - **CI do push da `main`** (`302bbaf`): `check` e `e2e` verdes.
+  - **Próximo passo exato:** nenhum de código. O deploy é dele (`pnpm deploy:server`): leva o bloco D e o conserto da Devastação ao ar. O
+    próximo trabalho sai do que ele achar jogando (as escolhas da §6.3, o Atacar com o Absoluto armado).
   - **O que não pode regredir:** a poeira é do `Leaving` e sai da página ao fim (uma animação presa no fim derruba os E2E que esperam a tela
     parar); só uma carta de verdade (`data-card-id`) na lápide; a faixa do PC com ≤ 70 px (mais que isso e os campos rolam em 1440 × 900);
     a etiqueta e a faísca do Absoluto fora do botão; a prévia do Atacar na tira lisa.
@@ -137,6 +138,6 @@ toque "Próximo passo" a partir do passo:
   `node_modules` que o `git worktree remove` não apaga ("Filename too long") sai no PowerShell com
   `Remove-Item -LiteralPath ('\\?\' + $p) -Recurse -Force`.
 - **Branches:** as locais estão mescladas na `main` (a `feat/playtest-bloco-c` em 2026-11-11 e a `feat/decks-fatia-1` em 2026-11-12), menos a `feat/online-equipar-vazio`
-  (um rebase não publicado; o autor pode apagá-la) e a `feat/decks-fatia-2`, a `feat/decks-fatia-3` e a `feat/devastacao-estilo` (mescladas na `main` por fast-forward; o autor pode apagá-las).
+  (um rebase não publicado; o autor pode apagá-la) e a `feat/decks-fatia-2`, a `feat/decks-fatia-3`, a `feat/devastacao-estilo` e a `feat/playtest-bloco-d` (mescladas na `main` por fast-forward; o autor pode apagá-las).
   As remotas velhas, mescladas, são do autor (`notas/playtest.md`).
 - O `jogar-treino.bat` na raiz é o lançador do autor: não mexer nem commitar.
