@@ -21,9 +21,11 @@
   `.claude/worktrees/roubo`, saída da `feat/dominio` em `e1c12b1`). O código está em `e248b45`: `stealAmount` no motor (valor × (1 + J)
   ou × (1 + Q), sem a quadra), o K fora do Roubo, o `StealDamage` sem `blocked`, os bots, os replays de referência regravados,
   `RULES_VERSION` 6, a prévia, o resumo das regras, a dica do tutorial e o livro de regras.
-  - **Em curso:** a medição (`pnpm sim:e3`, `pnpm sim:calibrate`, `pnpm sim:dificil --recomecar`), em background no worktree.
-  - **Próximo passo exato:** ler os três relatórios (`packages/sim/reports/`), escrever `notas/medicao-roubo-buff.md` (o greedy que rouba
-    contra o que não rouba: era 39,2%), commitar os relatórios, a revisão num subagente, o push e a CI, e o "sim" do merge.
+  - **Medido** (`notas/medicao-roubo-buff.md`; o diário 2026-11-16 (3)): o Roubo ficou cerca de 3,5 vezes maior (dano de 54 para 200 por
+    partida), mas o greedy que rouba segue em 39,5% contra o que não rouba; **a Exódia quase dobrou** (greedy × greedy 1,9% → 3,6%, fora da
+    meta); o portão do Difícil aprovou de primeira.
+  - **Próximo passo exato:** a CI da branch e a decisão do autor sobre o achado da Exódia (manter, ensinar o greedy, ou mexer na regra) e
+    sobre o merge. O merge do domínio (`feat/dominio`, as duas CI verdes em `e1c12b1`) também espera o "sim".
 - **A arte do cemitério saiu da fila** ("Todas as direções reprovadas. ignore esta demanda", `decisoes.md` 2026-11-16 (3)).
 - **A config do pnpm desta máquina foi corrigida** (item 12): `storeDir: D:\.pnpm-store`, o mesmo store de todos os projetos dele.
 - **As regras 4.0 estão na `main`** ("finalize", `decisoes.md` 2026-11-15 (1)), por fast-forward de `feat/regras-4-0b` até `b5f93e3` (a branch e o worktree já apagados),

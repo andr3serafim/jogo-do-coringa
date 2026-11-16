@@ -23,73 +23,73 @@
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 14,
+          "median": 12,
           "p10": 7,
           "p90": 25,
           "p95": 29,
-          "max": 41
+          "max": 59
         },
-        "initiativeWin": 0.527,
+        "initiativeWin": 0.509,
         "endReasons": {
-          "HP": 0.9810000000000008,
-          "EXODIA": 0.01900000000000001,
+          "HP": 0.9640000000000007,
+          "EXODIA": 0.036000000000000025,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.752,
-        "orderFirst": 0.29331633337807006,
+        "quads": 0.738,
+        "orderFirst": 0.3141339298196561,
         "perGame": {
-          "BuffPlayed": 12.174,
-          "GuardPlayed": 6.654,
-          "TrapUsed": 6.177,
-          "Sacrificed": 2.557,
+          "BuffPlayed": 10.807,
+          "GuardPlayed": 6.328,
+          "TrapUsed": 3.186,
+          "Sacrificed": 2.774,
           "ReflectPlayed": 0.148,
           "ReflectTriggered": 0.147,
           "ReflectCanceled": 0,
-          "Resurrected": 2.061,
-          "HandLimitPenalty": 0.109,
-          "CardStolen": 7.385,
-          "StealDamage": 7.385,
-          "Healed": 8.543,
-          "DevastationCast": 0.408,
-          "RowDevastated": 0.408,
+          "Resurrected": 2.08,
+          "HandLimitPenalty": 0.113,
+          "CardStolen": 9.9,
+          "StealDamage": 9.9,
+          "Healed": 11.595,
+          "DevastationCast": 0.361,
+          "RowDevastated": 0.361,
           "DevastationCanceled": 0,
-          "QuadFormed": 2.101,
-          "AbsoluteAttack": 0.165,
-          "AbsoluteDefenseStarted": 0.335,
-          "GuardBroken": 5.798
+          "QuadFormed": 2.112,
+          "AbsoluteAttack": 0.258,
+          "AbsoluteDefenseStarted": 0.487,
+          "GuardBroken": 5.534
         },
         "resurrections": {
-          "mean": 2.061,
+          "mean": 2.08,
           "p90": 5,
-          "max": 12,
-          "atLeast3": 0.332
+          "max": 15,
+          "atLeast3": 0.313
         }
       },
       "targets": [
         {
           "metric": "Duração (mediana de rodadas de Ataque)",
-          "value": 14,
+          "value": 12,
           "target": "8–14",
           "ok": true
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.527,
+          "value": 0.509,
           "target": "45–55%",
           "ok": true
         },
         {
           "metric": "Exódia",
-          "value": 0.01900000000000001,
+          "value": 0.036000000000000025,
           "target": "1–3%",
-          "ok": true
+          "ok": false
         },
         {
           "metric": "Fallen is Back",
-          "value": 0.752,
+          "value": 0.738,
           "target": "10–25%",
           "ok": false
         }
@@ -112,40 +112,40 @@
           "p95": 40,
           "max": 65
         },
-        "initiativeWin": 0.491,
+        "initiativeWin": 0.493,
         "endReasons": {
-          "HP": 0.8830000000000007,
-          "EXODIA": 0.11700000000000009,
+          "HP": 0.8860000000000007,
+          "EXODIA": 0.11400000000000009,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.611,
-        "orderFirst": 0.4920027656141968,
+        "quads": 0.613,
+        "orderFirst": 0.4917043045441976,
         "perGame": {
-          "BuffPlayed": 14.343,
+          "BuffPlayed": 14.349,
           "GuardPlayed": 8.632,
-          "TrapUsed": 7.512,
-          "Sacrificed": 4.942,
-          "ReflectPlayed": 0.603,
-          "ReflectTriggered": 0.599,
+          "TrapUsed": 7.505,
+          "Sacrificed": 4.939,
+          "ReflectPlayed": 0.604,
+          "ReflectTriggered": 0.6,
           "ReflectCanceled": 0,
-          "Resurrected": 1.191,
-          "HandLimitPenalty": 1.296,
-          "CardStolen": 12.861,
-          "StealDamage": 12.861,
-          "Healed": 17.032,
+          "Resurrected": 1.197,
+          "HandLimitPenalty": 1.298,
+          "CardStolen": 12.864,
+          "StealDamage": 12.864,
+          "Healed": 17.047,
           "DevastationCast": 0.15,
           "RowDevastated": 0.15,
           "DevastationCanceled": 0,
-          "QuadFormed": 1.212,
+          "QuadFormed": 1.22,
           "AbsoluteAttack": 0.253,
-          "AbsoluteDefenseStarted": 0.338,
-          "GuardBroken": 5.67
+          "AbsoluteDefenseStarted": 0.341,
+          "GuardBroken": 5.675
         },
         "resurrections": {
-          "mean": 1.191,
+          "mean": 1.197,
           "p90": 3,
           "max": 8,
           "atLeast3": 0.15
@@ -160,19 +160,19 @@
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.491,
+          "value": 0.493,
           "target": "45–55%",
           "ok": true
         },
         {
           "metric": "Exódia",
-          "value": 0.11700000000000009,
+          "value": 0.11400000000000009,
           "target": "1–3%",
           "ok": false
         },
         {
           "metric": "Fallen is Back",
-          "value": 0.611,
+          "value": 0.613,
           "target": "10–25%",
           "ok": false
         }
@@ -189,73 +189,73 @@
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 20,
-          "p10": 9,
-          "p90": 45,
-          "p95": 59,
-          "max": 136
+          "median": 18,
+          "p10": 8,
+          "p90": 41,
+          "p95": 50,
+          "max": 84
         },
-        "initiativeWin": 0.492,
+        "initiativeWin": 0.483,
         "endReasons": {
-          "HP": 0.9250000000000007,
-          "EXODIA": 0.07500000000000005,
+          "HP": 0.8430000000000006,
+          "EXODIA": 0.1570000000000001,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.852,
-        "orderFirst": 0.30280649926144754,
+        "quads": 0.846,
+        "orderFirst": 0.3196867701607364,
         "perGame": {
-          "BuffPlayed": 19.38,
-          "GuardPlayed": 10.546,
-          "TrapUsed": 11.969,
-          "Sacrificed": 4.052,
-          "ReflectPlayed": 0.348,
-          "ReflectTriggered": 0.346,
+          "BuffPlayed": 15.43,
+          "GuardPlayed": 9.61,
+          "TrapUsed": 5.398,
+          "Sacrificed": 4.044,
+          "ReflectPlayed": 0.268,
+          "ReflectTriggered": 0.262,
           "ReflectCanceled": 0,
-          "Resurrected": 3.555,
-          "HandLimitPenalty": 1.327,
-          "CardStolen": 10.232,
-          "StealDamage": 10.232,
-          "Healed": 16.079,
-          "DevastationCast": 0.58,
-          "RowDevastated": 0.58,
+          "Resurrected": 3.361,
+          "HandLimitPenalty": 0.748,
+          "CardStolen": 14.64,
+          "StealDamage": 14.64,
+          "Healed": 21.349,
+          "DevastationCast": 0.464,
+          "RowDevastated": 0.464,
           "DevastationCanceled": 0,
-          "QuadFormed": 3.611,
-          "AbsoluteAttack": 0.24,
-          "AbsoluteDefenseStarted": 0.61,
-          "GuardBroken": 9.051
+          "QuadFormed": 3.432,
+          "AbsoluteAttack": 0.438,
+          "AbsoluteDefenseStarted": 1.247,
+          "GuardBroken": 7.722
         },
         "resurrections": {
-          "mean": 3.555,
+          "mean": 3.361,
           "p90": 8,
-          "max": 24,
-          "atLeast3": 0.524
+          "max": 23,
+          "atLeast3": 0.485
         }
       },
       "targets": [
         {
           "metric": "Duração (mediana de rodadas de Ataque)",
-          "value": 20,
+          "value": 18,
           "target": "8–14",
           "ok": false
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.492,
+          "value": 0.483,
           "target": "45–55%",
           "ok": true
         },
         {
           "metric": "Exódia",
-          "value": 0.07500000000000005,
+          "value": 0.1570000000000001,
           "target": "1–3%",
           "ok": false
         },
         {
           "metric": "Fallen is Back",
-          "value": 0.852,
+          "value": 0.846,
           "target": "10–25%",
           "ok": false
         }
@@ -274,73 +274,73 @@
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 14,
+          "median": 12,
           "p10": 7,
           "p90": 25,
           "p95": 29,
-          "max": 41
+          "max": 59
         },
-        "initiativeWin": 0.527,
+        "initiativeWin": 0.509,
         "endReasons": {
-          "HP": 0.9810000000000008,
-          "EXODIA": 0.01900000000000001,
+          "HP": 0.9640000000000007,
+          "EXODIA": 0.036000000000000025,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.752,
-        "orderFirst": 0.29331633337807006,
+        "quads": 0.738,
+        "orderFirst": 0.3141339298196561,
         "perGame": {
-          "BuffPlayed": 12.174,
-          "GuardPlayed": 6.654,
-          "TrapUsed": 6.177,
-          "Sacrificed": 2.557,
+          "BuffPlayed": 10.807,
+          "GuardPlayed": 6.328,
+          "TrapUsed": 3.186,
+          "Sacrificed": 2.774,
           "ReflectPlayed": 0.148,
           "ReflectTriggered": 0.147,
           "ReflectCanceled": 0,
-          "Resurrected": 2.061,
-          "HandLimitPenalty": 0.109,
-          "CardStolen": 7.385,
-          "StealDamage": 7.385,
-          "Healed": 8.543,
-          "DevastationCast": 0.408,
-          "RowDevastated": 0.408,
+          "Resurrected": 2.08,
+          "HandLimitPenalty": 0.113,
+          "CardStolen": 9.9,
+          "StealDamage": 9.9,
+          "Healed": 11.595,
+          "DevastationCast": 0.361,
+          "RowDevastated": 0.361,
           "DevastationCanceled": 0,
-          "QuadFormed": 2.101,
-          "AbsoluteAttack": 0.165,
-          "AbsoluteDefenseStarted": 0.335,
-          "GuardBroken": 5.798
+          "QuadFormed": 2.112,
+          "AbsoluteAttack": 0.258,
+          "AbsoluteDefenseStarted": 0.487,
+          "GuardBroken": 5.534
         },
         "resurrections": {
-          "mean": 2.061,
+          "mean": 2.08,
           "p90": 5,
-          "max": 12,
-          "atLeast3": 0.332
+          "max": 15,
+          "atLeast3": 0.313
         }
       },
       "targets": [
         {
           "metric": "Duração (mediana de rodadas de Ataque)",
-          "value": 14,
+          "value": 12,
           "target": "8–14",
           "ok": true
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.527,
+          "value": 0.509,
           "target": "45–55%",
           "ok": true
         },
         {
           "metric": "Exódia",
-          "value": 0.01900000000000001,
+          "value": 0.036000000000000025,
           "target": "1–3%",
-          "ok": true
+          "ok": false
         },
         {
           "metric": "Fallen is Back",
-          "value": 0.752,
+          "value": 0.738,
           "target": "10–25%",
           "ok": false
         }
@@ -359,73 +359,73 @@
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 14,
+          "median": 13,
           "p10": 7,
           "p90": 25,
           "p95": 29,
-          "max": 49
+          "max": 53
         },
-        "initiativeWin": 0.493,
+        "initiativeWin": 0.481,
         "endReasons": {
-          "HP": 0.9740000000000008,
-          "EXODIA": 0.026000000000000016,
+          "HP": 0.9660000000000007,
+          "EXODIA": 0.03400000000000002,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.755,
+        "quads": 0.754,
         "orderFirst": null,
         "perGame": {
-          "BuffPlayed": 12.329,
-          "GuardPlayed": 6.625,
-          "TrapUsed": 6.591,
-          "Sacrificed": 2.558,
-          "ReflectPlayed": 0.176,
-          "ReflectTriggered": 0.174,
+          "BuffPlayed": 11.525,
+          "GuardPlayed": 6.528,
+          "TrapUsed": 4.265,
+          "Sacrificed": 2.736,
+          "ReflectPlayed": 0.171,
+          "ReflectTriggered": 0.17,
           "ReflectCanceled": 0,
-          "Resurrected": 2.067,
-          "HandLimitPenalty": 0.106,
-          "CardStolen": 7.142,
-          "StealDamage": 7.142,
-          "Healed": 8.833,
-          "DevastationCast": 0.328,
-          "RowDevastated": 0.328,
+          "Resurrected": 2.219,
+          "HandLimitPenalty": 0.102,
+          "CardStolen": 9.388,
+          "StealDamage": 9.388,
+          "Healed": 11.807,
+          "DevastationCast": 0.298,
+          "RowDevastated": 0.298,
           "DevastationCanceled": 0,
-          "QuadFormed": 2.118,
-          "AbsoluteAttack": 0.106,
-          "AbsoluteDefenseStarted": 0.386,
-          "GuardBroken": 5.577
+          "QuadFormed": 2.263,
+          "AbsoluteAttack": 0.159,
+          "AbsoluteDefenseStarted": 0.552,
+          "GuardBroken": 5.484
         },
         "resurrections": {
-          "mean": 2.067,
+          "mean": 2.219,
           "p90": 5,
-          "max": 13,
-          "atLeast3": 0.329
+          "max": 16,
+          "atLeast3": 0.353
         }
       },
       "targets": [
         {
           "metric": "Duração (mediana de rodadas de Ataque)",
-          "value": 14,
+          "value": 13,
           "target": "8–14",
           "ok": true
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.493,
+          "value": 0.481,
           "target": "45–55%",
           "ok": true
         },
         {
           "metric": "Exódia",
-          "value": 0.026000000000000016,
+          "value": 0.03400000000000002,
           "target": "1–3%",
-          "ok": true
+          "ok": false
         },
         {
           "metric": "Fallen is Back",
-          "value": 0.755,
+          "value": 0.754,
           "target": "10–25%",
           "ok": false
         }
@@ -444,73 +444,73 @@
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 13,
+          "median": 12,
           "p10": 7,
           "p90": 24,
-          "p95": 28,
-          "max": 48
+          "p95": 29,
+          "max": 72
         },
-        "initiativeWin": 0.489,
+        "initiativeWin": 0.492,
         "endReasons": {
-          "HP": 0.9680000000000007,
-          "EXODIA": 0.03200000000000002,
+          "HP": 0.9580000000000007,
+          "EXODIA": 0.04200000000000003,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.775,
-        "orderFirst": 0.29103008080396553,
+        "quads": 0.75,
+        "orderFirst": 0.29397742410432587,
         "perGame": {
-          "BuffPlayed": 12.149,
-          "GuardPlayed": 6.856,
-          "TrapUsed": 5.589,
-          "Sacrificed": 2.788,
-          "ReflectPlayed": 0.083,
-          "ReflectTriggered": 0.083,
+          "BuffPlayed": 10.792,
+          "GuardPlayed": 6.58,
+          "TrapUsed": 2.757,
+          "Sacrificed": 3.088,
+          "ReflectPlayed": 0.077,
+          "ReflectTriggered": 0.076,
           "ReflectCanceled": 0,
-          "Resurrected": 2.149,
-          "HandLimitPenalty": 0.089,
-          "CardStolen": 5.722,
-          "StealDamage": 5.722,
-          "Healed": 7.319,
-          "DevastationCast": 0.266,
-          "RowDevastated": 0.266,
+          "Resurrected": 2.139,
+          "HandLimitPenalty": 0.086,
+          "CardStolen": 8.155,
+          "StealDamage": 8.155,
+          "Healed": 10.215,
+          "DevastationCast": 0.262,
+          "RowDevastated": 0.262,
           "DevastationCanceled": 0,
-          "QuadFormed": 2.205,
-          "AbsoluteAttack": 0.177,
-          "AbsoluteDefenseStarted": 0.382,
-          "GuardBroken": 5.974
+          "QuadFormed": 2.179,
+          "AbsoluteAttack": 0.255,
+          "AbsoluteDefenseStarted": 0.471,
+          "GuardBroken": 5.691
         },
         "resurrections": {
-          "mean": 2.149,
+          "mean": 2.139,
           "p90": 5,
-          "max": 15,
-          "atLeast3": 0.317
+          "max": 19,
+          "atLeast3": 0.321
         }
       },
       "targets": [
         {
           "metric": "Duração (mediana de rodadas de Ataque)",
-          "value": 13,
+          "value": 12,
           "target": "8–14",
           "ok": true
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.489,
+          "value": 0.492,
           "target": "45–55%",
           "ok": true
         },
         {
           "metric": "Exódia",
-          "value": 0.03200000000000002,
+          "value": 0.04200000000000003,
           "target": "1–3%",
           "ok": false
         },
         {
           "metric": "Fallen is Back",
-          "value": 0.775,
+          "value": 0.75,
           "target": "10–25%",
           "ok": false
         }
@@ -529,73 +529,73 @@
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 13,
+          "median": 12,
           "p10": 7,
-          "p90": 25,
+          "p90": 24,
           "p95": 29,
-          "max": 47
+          "max": 78
         },
-        "initiativeWin": 0.529,
+        "initiativeWin": 0.507,
         "endReasons": {
-          "HP": 0.9860000000000008,
-          "EXODIA": 0.014000000000000005,
+          "HP": 0.9710000000000008,
+          "EXODIA": 0.02900000000000002,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.752,
-        "orderFirst": 0.29038552109264615,
+        "quads": 0.738,
+        "orderFirst": 0.3106796116504854,
         "perGame": {
-          "BuffPlayed": 12.145,
-          "GuardPlayed": 6.611,
-          "TrapUsed": 6.199,
-          "Sacrificed": 2.563,
-          "ReflectPlayed": 0.154,
-          "ReflectTriggered": 0.154,
+          "BuffPlayed": 10.737,
+          "GuardPlayed": 6.254,
+          "TrapUsed": 3.111,
+          "Sacrificed": 2.789,
+          "ReflectPlayed": 0.147,
+          "ReflectTriggered": 0.147,
           "ReflectCanceled": 0,
-          "Resurrected": 1.777,
-          "HandLimitPenalty": 0.106,
-          "CardStolen": 7.351,
-          "StealDamage": 7.351,
-          "Healed": 8.379,
-          "DevastationCast": 0.415,
-          "RowDevastated": 0.415,
+          "Resurrected": 1.739,
+          "HandLimitPenalty": 0.115,
+          "CardStolen": 9.905,
+          "StealDamage": 9.905,
+          "Healed": 11.572,
+          "DevastationCast": 0.363,
+          "RowDevastated": 0.363,
           "DevastationCanceled": 0,
-          "QuadFormed": 2.124,
-          "AbsoluteAttack": 0.168,
-          "AbsoluteDefenseStarted": 0.331,
-          "GuardBroken": 5.801
+          "QuadFormed": 2.09,
+          "AbsoluteAttack": 0.263,
+          "AbsoluteDefenseStarted": 0.486,
+          "GuardBroken": 5.511
         },
         "resurrections": {
-          "mean": 1.777,
+          "mean": 1.739,
           "p90": 4,
-          "max": 11,
-          "atLeast3": 0.273
+          "max": 14,
+          "atLeast3": 0.255
         }
       },
       "targets": [
         {
           "metric": "Duração (mediana de rodadas de Ataque)",
-          "value": 13,
+          "value": 12,
           "target": "8–14",
           "ok": true
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.529,
+          "value": 0.507,
           "target": "45–55%",
           "ok": true
         },
         {
           "metric": "Exódia",
-          "value": 0.014000000000000005,
+          "value": 0.02900000000000002,
           "target": "1–3%",
           "ok": true
         },
         {
           "metric": "Fallen is Back",
-          "value": 0.752,
+          "value": 0.738,
           "target": "10–25%",
           "ok": false
         }
@@ -607,112 +607,112 @@
       "lead": 10,
       "games": 1000,
       "branches": 1000,
-      "turtle": 0.325,
-      "greedy": 0.541,
-      "difference": -0.21600000000000003,
+      "turtle": 0.381,
+      "greedy": 0.567,
+      "difference": -0.18599999999999994,
       "turtleEnds": {
-        "HP": 282,
-        "LOSS": 675,
-        "EXODIA": 43
+        "LOSS": 619,
+        "HP": 270,
+        "EXODIA": 111
       }
     },
     {
       "lead": 20,
       "games": 1000,
       "branches": 999,
-      "turtle": 0.3303303303303303,
-      "greedy": 0.5765765765765766,
-      "difference": -0.24624624624624625,
+      "turtle": 0.38238238238238237,
+      "greedy": 0.5845845845845846,
+      "difference": -0.20220220220220225,
       "turtleEnds": {
-        "HP": 282,
-        "LOSS": 669,
-        "EXODIA": 48
+        "LOSS": 617,
+        "HP": 265,
+        "EXODIA": 117
       }
     }
   ],
   "order": {
     "points": 200,
-    "firstBetter": 0.5,
-    "decisive": 0.03,
-    "meanDifference": -0.01125,
-    "meanDecisiveSize": 0.3020833333333333,
-    "greedyFirst": 0.265,
+    "firstBetter": 0.6428571428571429,
+    "decisive": 0.07,
+    "meanDifference": -0.0059375,
+    "meanDecisiveSize": 0.3125,
+    "greedyFirst": 0.29,
     "detail": [
       {
         "seed": "ordem-0",
         "round": 7,
-        "difference": 0.125,
-        "stderr": 0.125,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-1",
-        "round": 13,
-        "difference": 0,
-        "stderr": 0,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-2",
-        "round": 15,
         "difference": -0.0625,
         "stderr": 0.11063265039459795,
         "verdict": "TIE"
       },
       {
+        "seed": "ordem-1",
+        "round": 25,
+        "difference": 0.0625,
+        "stderr": 0.14343262065048754,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-2",
+        "round": 13,
+        "difference": 0.0625,
+        "stderr": 0.0625,
+        "verdict": "TIE"
+      },
+      {
         "seed": "ordem-3",
-        "round": 97,
+        "round": 39,
         "difference": 0,
-        "stderr": 0.09128709291752768,
+        "stderr": 0,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-4",
-        "round": 33,
-        "difference": 0.25,
-        "stderr": 0.11180339887498948,
-        "verdict": "FIRST"
+        "round": 23,
+        "difference": 0,
+        "stderr": 0,
+        "verdict": "TIE"
       },
       {
         "seed": "ordem-5",
-        "round": 17,
-        "difference": -0.1875,
-        "stderr": 0.10077822185373188,
+        "round": 25,
+        "difference": 0,
+        "stderr": 0.09128709291752768,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-6",
         "round": 9,
-        "difference": 0.25,
-        "stderr": 0.1707825127659933,
+        "difference": 0.125,
+        "stderr": 0.17969882210706523,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-7",
-        "round": 33,
-        "difference": 0.1875,
-        "stderr": 0.13597640726733934,
+        "round": 17,
+        "difference": 0,
+        "stderr": 0.09128709291752768,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-8",
         "round": 9,
-        "difference": -0.3125,
-        "stderr": 0.1505199322349037,
-        "verdict": "SECOND"
+        "difference": -0.125,
+        "stderr": 0.20155644370746376,
+        "verdict": "TIE"
       },
       {
         "seed": "ordem-9",
         "round": 3,
-        "difference": -0.25,
-        "stderr": 0.14433756729740643,
+        "difference": -0.125,
+        "stderr": 0.15478479684172258,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-10",
-        "round": 17,
-        "difference": 0,
-        "stderr": 0.09128709291752768,
+        "round": 15,
+        "difference": -0.25,
+        "stderr": 0.14433756729740643,
         "verdict": "TIE"
       },
       {
@@ -724,9 +724,9 @@
       },
       {
         "seed": "ordem-12",
-        "round": 15,
-        "difference": 0,
-        "stderr": 0.15811388300841897,
+        "round": 17,
+        "difference": -0.125,
+        "stderr": 0.20155644370746376,
         "verdict": "TIE"
       },
       {
@@ -738,205 +738,205 @@
       },
       {
         "seed": "ordem-14",
-        "round": 5,
+        "round": 9,
+        "difference": -0.0625,
+        "stderr": 0.0625,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-15",
+        "round": 11,
         "difference": 0,
         "stderr": 0,
         "verdict": "TIE"
       },
       {
-        "seed": "ordem-15",
-        "round": 7,
-        "difference": 0.1875,
-        "stderr": 0.13597640726733934,
-        "verdict": "TIE"
-      },
-      {
         "seed": "ordem-16",
-        "round": 21,
+        "round": 13,
         "difference": 0.0625,
         "stderr": 0.0625,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-17",
-        "round": 41,
-        "difference": -0.0625,
-        "stderr": 0.0625,
+        "round": 35,
+        "difference": -0.1875,
+        "stderr": 0.10077822185373188,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-18",
         "round": 5,
-        "difference": -0.125,
-        "stderr": 0.17969882210706523,
+        "difference": 0,
+        "stderr": 0.15811388300841897,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-19",
-        "round": 11,
-        "difference": -0.125,
-        "stderr": 0.15478479684172258,
+        "round": 9,
+        "difference": -0.0625,
+        "stderr": 0.0625,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-20",
-        "round": 23,
-        "difference": -0.125,
-        "stderr": 0.17969882210706523,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-21",
-        "round": 11,
-        "difference": -0.1875,
+        "round": 13,
+        "difference": 0.1875,
         "stderr": 0.16377703339194621,
         "verdict": "TIE"
       },
       {
-        "seed": "ordem-22",
-        "round": 29,
+        "seed": "ordem-21",
+        "round": 13,
         "difference": -0.125,
         "stderr": 0.08539125638299665,
         "verdict": "TIE"
       },
       {
+        "seed": "ordem-22",
+        "round": 23,
+        "difference": -0.0625,
+        "stderr": 0.19297560294849017,
+        "verdict": "TIE"
+      },
+      {
         "seed": "ordem-23",
-        "round": 35,
+        "round": 47,
         "difference": -0.1875,
         "stderr": 0.13597640726733934,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-24",
-        "round": 19,
-        "difference": -0.1875,
-        "stderr": 0.13597640726733934,
+        "round": 25,
+        "difference": 0,
+        "stderr": 0,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-25",
-        "round": 7,
-        "difference": -0.1875,
-        "stderr": 0.1875,
+        "round": 5,
+        "difference": 0,
+        "stderr": 0.15811388300841897,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-26",
         "round": 43,
-        "difference": 0.25,
-        "stderr": 0.14433756729740643,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-27",
-        "round": 27,
-        "difference": 0.125,
-        "stderr": 0.08539125638299665,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-28",
-        "round": 7,
-        "difference": 0.0625,
-        "stderr": 0.17001838135919303,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-29",
-        "round": 15,
         "difference": 0.0625,
         "stderr": 0.0625,
         "verdict": "TIE"
       },
       {
-        "seed": "ordem-30",
-        "round": 7,
-        "difference": 0.0625,
-        "stderr": 0.14343262065048754,
+        "seed": "ordem-27",
+        "round": 69,
+        "difference": 0.1875,
+        "stderr": 0.13597640726733934,
         "verdict": "TIE"
       },
       {
-        "seed": "ordem-31",
-        "round": 7,
+        "seed": "ordem-28",
+        "round": 5,
+        "difference": 0,
+        "stderr": 0.12909944487358055,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-29",
+        "round": 13,
         "difference": -0.0625,
         "stderr": 0.11063265039459795,
         "verdict": "TIE"
       },
       {
+        "seed": "ordem-30",
+        "round": 9,
+        "difference": 0,
+        "stderr": 0,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-31",
+        "round": 7,
+        "difference": 0.1875,
+        "stderr": 0.10077822185373188,
+        "verdict": "TIE"
+      },
+      {
         "seed": "ordem-32",
-        "round": 41,
-        "difference": -0.125,
+        "round": 29,
+        "difference": 0.125,
         "stderr": 0.125,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-33",
         "round": 17,
-        "difference": 0.125,
-        "stderr": 0.08539125638299665,
+        "difference": 0.0625,
+        "stderr": 0.11063265039459795,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-34",
-        "round": 11,
-        "difference": 0.0625,
-        "stderr": 0.0625,
+        "round": 13,
+        "difference": -0.0625,
+        "stderr": 0.14343262065048754,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-35",
-        "round": 33,
-        "difference": 0.0625,
-        "stderr": 0.17001838135919303,
+        "round": 29,
+        "difference": -0.125,
+        "stderr": 0.125,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-36",
         "round": 3,
-        "difference": -0.0625,
-        "stderr": 0.21347814095749162,
-        "verdict": "TIE"
+        "difference": -0.3125,
+        "stderr": 0.1505199322349037,
+        "verdict": "SECOND"
       },
       {
         "seed": "ordem-37",
-        "round": 49,
-        "difference": 0,
-        "stderr": 0.09128709291752768,
+        "round": 33,
+        "difference": 0.125,
+        "stderr": 0.125,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-38",
-        "round": 15,
-        "difference": -0.3125,
-        "stderr": 0.11967838846954226,
-        "verdict": "SECOND"
+        "round": 23,
+        "difference": 0.1875,
+        "stderr": 0.16377703339194621,
+        "verdict": "TIE"
       },
       {
         "seed": "ordem-39",
         "round": 23,
-        "difference": -0.1875,
-        "stderr": 0.10077822185373188,
+        "difference": 0,
+        "stderr": 0.15811388300841897,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-40",
         "round": 9,
-        "difference": 0,
-        "stderr": 0.09128709291752768,
+        "difference": -0.0625,
+        "stderr": 0.11063265039459795,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-41",
         "round": 17,
-        "difference": 0.0625,
-        "stderr": 0.0625,
+        "difference": -0.125,
+        "stderr": 0.125,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-42",
-        "round": 11,
-        "difference": 0,
-        "stderr": 0.12909944487358055,
+        "round": 7,
+        "difference": -0.1875,
+        "stderr": 0.10077822185373188,
         "verdict": "TIE"
       },
       {
@@ -948,23 +948,23 @@
       },
       {
         "seed": "ordem-44",
-        "round": 15,
-        "difference": 0.25,
-        "stderr": 0.11180339887498948,
-        "verdict": "FIRST"
+        "round": 13,
+        "difference": 0.125,
+        "stderr": 0.125,
+        "verdict": "TIE"
       },
       {
         "seed": "ordem-45",
-        "round": 31,
+        "round": 15,
         "difference": 0.0625,
         "stderr": 0.0625,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-46",
-        "round": 35,
-        "difference": 0.1875,
-        "stderr": 0.10077822185373188,
+        "round": 31,
+        "difference": 0.125,
+        "stderr": 0.08539125638299665,
         "verdict": "TIE"
       },
       {
@@ -976,17 +976,17 @@
       },
       {
         "seed": "ordem-48",
-        "round": 19,
-        "difference": 0,
-        "stderr": 0.09128709291752768,
+        "round": 17,
+        "difference": -0.0625,
+        "stderr": 0.0625,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-49",
         "round": 7,
-        "difference": -0.0625,
-        "stderr": 0.0625,
-        "verdict": "TIE"
+        "difference": 0.25,
+        "stderr": 0.11180339887498948,
+        "verdict": "FIRST"
       },
       {
         "seed": "ordem-50",
@@ -998,133 +998,133 @@
       {
         "seed": "ordem-51",
         "round": 9,
-        "difference": 0.125,
-        "stderr": 0.125,
+        "difference": -0.25,
+        "stderr": 0.14433756729740643,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-52",
         "round": 29,
-        "difference": 0,
-        "stderr": 0,
+        "difference": -0.0625,
+        "stderr": 0.0625,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-53",
         "round": 9,
-        "difference": 0,
-        "stderr": 0.09128709291752768,
+        "difference": -0.0625,
+        "stderr": 0.0625,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-54",
-        "round": 17,
-        "difference": 0.0625,
+        "round": 19,
+        "difference": -0.0625,
         "stderr": 0.0625,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-55",
         "round": 7,
-        "difference": 0.125,
-        "stderr": 0.125,
+        "difference": -0.0625,
+        "stderr": 0.14343262065048754,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-56",
-        "round": 5,
-        "difference": 0,
-        "stderr": 0.12909944487358055,
+        "round": 3,
+        "difference": -0.125,
+        "stderr": 0.15478479684172258,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-57",
-        "round": 25,
-        "difference": 0,
-        "stderr": 0.12909944487358055,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-58",
-        "round": 3,
-        "difference": -0.25,
-        "stderr": 0.14433756729740643,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-59",
-        "round": 63,
-        "difference": 0,
-        "stderr": 0,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-60",
-        "round": 5,
-        "difference": -0.0625,
-        "stderr": 0.0625,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-61",
-        "round": 35,
+        "round": 27,
         "difference": 0,
         "stderr": 0.09128709291752768,
         "verdict": "TIE"
       },
       {
+        "seed": "ordem-58",
+        "round": 3,
+        "difference": -0.0625,
+        "stderr": 0.11063265039459795,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-59",
+        "round": 35,
+        "difference": 0.1875,
+        "stderr": 0.13597640726733934,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-60",
+        "round": 11,
+        "difference": 0.25,
+        "stderr": 0.11180339887498948,
+        "verdict": "FIRST"
+      },
+      {
+        "seed": "ordem-61",
+        "round": 15,
+        "difference": -0.25,
+        "stderr": 0.11180339887498948,
+        "verdict": "SECOND"
+      },
+      {
         "seed": "ordem-62",
-        "round": 25,
+        "round": 19,
+        "difference": -0.1875,
+        "stderr": 0.13597640726733934,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-63",
+        "round": 17,
+        "difference": 0.0625,
+        "stderr": 0.0625,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-64",
+        "round": 27,
+        "difference": -0.1875,
+        "stderr": 0.13597640726733934,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-65",
+        "round": 17,
+        "difference": 0,
+        "stderr": 0.09128709291752768,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-66",
+        "round": 15,
+        "difference": -0.125,
+        "stderr": 0.15478479684172258,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-67",
+        "round": 15,
+        "difference": 0,
+        "stderr": 0.12909944487358055,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-68",
+        "round": 23,
         "difference": 0.125,
         "stderr": 0.125,
         "verdict": "TIE"
       },
       {
-        "seed": "ordem-63",
-        "round": 15,
-        "difference": 0.0625,
-        "stderr": 0.11063265039459795,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-64",
-        "round": 35,
-        "difference": -0.125,
-        "stderr": 0.125,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-65",
-        "round": 9,
-        "difference": 0,
-        "stderr": 0,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-66",
-        "round": 17,
-        "difference": 0,
-        "stderr": 0,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-67",
-        "round": 31,
-        "difference": -0.0625,
-        "stderr": 0.0625,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-68",
-        "round": 25,
-        "difference": 0.0625,
-        "stderr": 0.0625,
-        "verdict": "TIE"
-      },
-      {
         "seed": "ordem-69",
         "round": 13,
-        "difference": -0.125,
+        "difference": 0.125,
         "stderr": 0.08539125638299665,
         "verdict": "TIE"
       },
@@ -1137,23 +1137,23 @@
       },
       {
         "seed": "ordem-71",
-        "round": 15,
-        "difference": 0.125,
-        "stderr": 0.125,
+        "round": 9,
+        "difference": -0.125,
+        "stderr": 0.15478479684172258,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-72",
-        "round": 25,
-        "difference": -0.0625,
-        "stderr": 0.0625,
+        "round": 19,
+        "difference": 0.0625,
+        "stderr": 0.14343262065048754,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-73",
-        "round": 33,
-        "difference": 0.125,
-        "stderr": 0.08539125638299665,
+        "round": 73,
+        "difference": 0.0625,
+        "stderr": 0.17001838135919303,
         "verdict": "TIE"
       },
       {
@@ -1165,23 +1165,23 @@
       },
       {
         "seed": "ordem-75",
-        "round": 13,
-        "difference": -0.0625,
-        "stderr": 0.0625,
+        "round": 11,
+        "difference": 0,
+        "stderr": 0.12909944487358055,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-76",
         "round": 5,
-        "difference": 0,
-        "stderr": 0.15811388300841897,
+        "difference": -0.1875,
+        "stderr": 0.1875,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-77",
-        "round": 47,
-        "difference": 0,
-        "stderr": 0.15811388300841897,
+        "round": 27,
+        "difference": 0.0625,
+        "stderr": 0.0625,
         "verdict": "TIE"
       },
       {
@@ -1193,37 +1193,37 @@
       },
       {
         "seed": "ordem-79",
-        "round": 17,
-        "difference": 0,
-        "stderr": 0.12909944487358055,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-80",
-        "round": 31,
-        "difference": 0.125,
-        "stderr": 0.125,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-81",
-        "round": 29,
-        "difference": 0.25,
-        "stderr": 0.14433756729740643,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-82",
-        "round": 33,
-        "difference": 0.0625,
+        "round": 13,
+        "difference": -0.0625,
         "stderr": 0.14343262065048754,
         "verdict": "TIE"
       },
       {
-        "seed": "ordem-83",
+        "seed": "ordem-80",
+        "round": 17,
+        "difference": 0,
+        "stderr": 0.09128709291752768,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-81",
+        "round": 43,
+        "difference": 0,
+        "stderr": 0,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-82",
         "round": 35,
-        "difference": 0.0625,
+        "difference": -0.0625,
         "stderr": 0.11063265039459795,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-83",
+        "round": 15,
+        "difference": 0.0625,
+        "stderr": 0.14343262065048754,
         "verdict": "TIE"
       },
       {
@@ -1235,65 +1235,65 @@
       },
       {
         "seed": "ordem-85",
-        "round": 77,
-        "difference": 0.0625,
-        "stderr": 0.0625,
+        "round": 43,
+        "difference": 0,
+        "stderr": 0,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-86",
         "round": 3,
-        "difference": -0.1875,
-        "stderr": 0.16377703339194621,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-87",
-        "round": 9,
-        "difference": -0.125,
-        "stderr": 0.20155644370746376,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-88",
-        "round": 11,
-        "difference": 0.0625,
-        "stderr": 0.19297560294849017,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-89",
-        "round": 3,
-        "difference": 0,
-        "stderr": 0.09128709291752768,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-90",
-        "round": 35,
-        "difference": -0.1875,
-        "stderr": 0.10077822185373188,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-91",
-        "round": 13,
         "difference": -0.0625,
         "stderr": 0.11063265039459795,
         "verdict": "TIE"
       },
       {
+        "seed": "ordem-87",
+        "round": 9,
+        "difference": -0.5,
+        "stderr": 0.15811388300841897,
+        "verdict": "SECOND"
+      },
+      {
+        "seed": "ordem-88",
+        "round": 11,
+        "difference": 0.125,
+        "stderr": 0.20155644370746376,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-89",
+        "round": 3,
+        "difference": 0.125,
+        "stderr": 0.08539125638299665,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-90",
+        "round": 53,
+        "difference": 0,
+        "stderr": 0,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-91",
+        "round": 13,
+        "difference": 0,
+        "stderr": 0.09128709291752768,
+        "verdict": "TIE"
+      },
+      {
         "seed": "ordem-92",
-        "round": 17,
-        "difference": -0.125,
-        "stderr": 0.125,
+        "round": 11,
+        "difference": 0.0625,
+        "stderr": 0.11063265039459795,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-93",
-        "round": 33,
-        "difference": -0.125,
-        "stderr": 0.08539125638299665,
+        "round": 31,
+        "difference": 0.125,
+        "stderr": 0.125,
         "verdict": "TIE"
       },
       {
@@ -1305,255 +1305,255 @@
       },
       {
         "seed": "ordem-95",
-        "round": 9,
-        "difference": -0.0625,
-        "stderr": 0.19297560294849017,
+        "round": 11,
+        "difference": 0,
+        "stderr": 0.15811388300841897,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-96",
-        "round": 7,
-        "difference": 0.1875,
-        "stderr": 0.16377703339194621,
+        "round": 5,
+        "difference": -0.25,
+        "stderr": 0.1707825127659933,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-97",
-        "round": 9,
-        "difference": -0.0625,
-        "stderr": 0.14343262065048754,
+        "round": 11,
+        "difference": 0,
+        "stderr": 0.2041241452319315,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-98",
-        "round": 23,
+        "round": 19,
         "difference": 0,
         "stderr": 0,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-99",
-        "round": 21,
-        "difference": -0.1875,
-        "stderr": 0.10077822185373188,
+        "round": 13,
+        "difference": 0.0625,
+        "stderr": 0.0625,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-100",
         "round": 11,
-        "difference": 0.1875,
-        "stderr": 0.10077822185373188,
+        "difference": -0.0625,
+        "stderr": 0.11063265039459795,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-101",
-        "round": 19,
+        "round": 15,
         "difference": 0,
         "stderr": 0,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-102",
-        "round": 31,
-        "difference": 0.3125,
-        "stderr": 0.1505199322349037,
-        "verdict": "FIRST"
+        "round": 43,
+        "difference": -0.0625,
+        "stderr": 0.14343262065048754,
+        "verdict": "TIE"
       },
       {
         "seed": "ordem-103",
         "round": 17,
+        "difference": -0.25,
+        "stderr": 0.11180339887498948,
+        "verdict": "SECOND"
+      },
+      {
+        "seed": "ordem-104",
+        "round": 3,
         "difference": -0.0625,
         "stderr": 0.11063265039459795,
         "verdict": "TIE"
       },
       {
-        "seed": "ordem-104",
-        "round": 3,
-        "difference": -0.125,
-        "stderr": 0.15478479684172258,
-        "verdict": "TIE"
-      },
-      {
         "seed": "ordem-105",
         "round": 3,
-        "difference": -0.125,
-        "stderr": 0.20155644370746376,
+        "difference": 0.0625,
+        "stderr": 0.17001838135919303,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-106",
         "round": 11,
         "difference": -0.0625,
-        "stderr": 0.11063265039459795,
+        "stderr": 0.0625,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-107",
-        "round": 13,
-        "difference": -0.0625,
-        "stderr": 0.14343262065048754,
-        "verdict": "TIE"
+        "round": 7,
+        "difference": 0.25,
+        "stderr": 0.11180339887498948,
+        "verdict": "FIRST"
       },
       {
         "seed": "ordem-108",
-        "round": 21,
-        "difference": 0.125,
-        "stderr": 0.08539125638299665,
+        "round": 23,
+        "difference": -0.1875,
+        "stderr": 0.10077822185373188,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-109",
         "round": 13,
-        "difference": -0.0625,
-        "stderr": 0.11063265039459795,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-110",
-        "round": 9,
-        "difference": 0,
-        "stderr": 0.18257418583505536,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-111",
-        "round": 17,
-        "difference": -0.125,
-        "stderr": 0.08539125638299665,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-112",
-        "round": 5,
-        "difference": 0.125,
-        "stderr": 0.125,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-113",
-        "round": 3,
-        "difference": -0.0625,
-        "stderr": 0.17001838135919303,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-114",
-        "round": 41,
-        "difference": 0.0625,
-        "stderr": 0.19297560294849017,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-115",
-        "round": 5,
-        "difference": -0.125,
-        "stderr": 0.15478479684172258,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-116",
-        "round": 11,
-        "difference": 0.0625,
-        "stderr": 0.0625,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-117",
-        "round": 15,
-        "difference": -0.0625,
-        "stderr": 0.11063265039459795,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-118",
-        "round": 13,
-        "difference": -0.125,
-        "stderr": 0.125,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-119",
-        "round": 5,
-        "difference": 0,
-        "stderr": 0.12909944487358055,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-120",
-        "round": 23,
         "difference": 0,
         "stderr": 0.09128709291752768,
         "verdict": "TIE"
       },
       {
-        "seed": "ordem-121",
-        "round": 5,
-        "difference": -0.0625,
-        "stderr": 0.11063265039459795,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-122",
-        "round": 21,
-        "difference": 0.125,
-        "stderr": 0.08539125638299665,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-123",
-        "round": 3,
-        "difference": -0.0625,
-        "stderr": 0.19297560294849017,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-124",
-        "round": 7,
-        "difference": 0.0625,
-        "stderr": 0.0625,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-125",
-        "round": 41,
-        "difference": 0.0625,
-        "stderr": 0.11063265039459795,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-126",
-        "round": 19,
-        "difference": -0.0625,
-        "stderr": 0.14343262065048754,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-127",
+        "seed": "ordem-110",
         "round": 13,
-        "difference": -0.0625,
-        "stderr": 0.19297560294849017,
+        "difference": 0,
+        "stderr": 0.15811388300841897,
         "verdict": "TIE"
       },
       {
-        "seed": "ordem-128",
-        "round": 11,
-        "difference": 0.25,
-        "stderr": 0.14433756729740643,
+        "seed": "ordem-111",
+        "round": 17,
+        "difference": 0.0625,
+        "stderr": 0.11063265039459795,
         "verdict": "TIE"
       },
       {
-        "seed": "ordem-129",
-        "round": 75,
+        "seed": "ordem-112",
+        "round": 7,
+        "difference": -0.375,
+        "stderr": 0.15478479684172258,
+        "verdict": "SECOND"
+      },
+      {
+        "seed": "ordem-113",
+        "round": 3,
+        "difference": -0.125,
+        "stderr": 0.15478479684172258,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-114",
+        "round": 33,
+        "difference": 0,
+        "stderr": 0,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-115",
+        "round": 5,
         "difference": 0,
         "stderr": 0.12909944487358055,
         "verdict": "TIE"
       },
       {
-        "seed": "ordem-130",
-        "round": 9,
-        "difference": -0.375,
+        "seed": "ordem-116",
+        "round": 11,
+        "difference": -0.0625,
+        "stderr": 0.11063265039459795,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-117",
+        "round": 15,
+        "difference": 0,
+        "stderr": 0.18257418583505536,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-118",
+        "round": 11,
+        "difference": 0.1875,
+        "stderr": 0.13597640726733934,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-119",
+        "round": 7,
+        "difference": 0.4375,
+        "stderr": 0.128086884574495,
+        "verdict": "FIRST"
+      },
+      {
+        "seed": "ordem-120",
+        "round": 23,
+        "difference": -0.125,
         "stderr": 0.17969882210706523,
-        "verdict": "SECOND"
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-121",
+        "round": 5,
+        "difference": 0,
+        "stderr": 0,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-122",
+        "round": 25,
+        "difference": -0.0625,
+        "stderr": 0.0625,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-123",
+        "round": 3,
+        "difference": -0.125,
+        "stderr": 0.17969882210706523,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-124",
+        "round": 5,
+        "difference": 0.1875,
+        "stderr": 0.10077822185373188,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-125",
+        "round": 25,
+        "difference": -0.0625,
+        "stderr": 0.0625,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-126",
+        "round": 17,
+        "difference": 0.125,
+        "stderr": 0.17969882210706523,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-127",
+        "round": 7,
+        "difference": 0.125,
+        "stderr": 0.08539125638299665,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-128",
+        "round": 13,
+        "difference": 0.0625,
+        "stderr": 0.0625,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-129",
+        "round": 31,
+        "difference": 0,
+        "stderr": 0.09128709291752768,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-130",
+        "round": 15,
+        "difference": -0.0625,
+        "stderr": 0.0625,
+        "verdict": "TIE"
       },
       {
         "seed": "ordem-131",
@@ -1572,118 +1572,118 @@
       {
         "seed": "ordem-133",
         "round": 11,
-        "difference": 0.0625,
-        "stderr": 0.0625,
+        "difference": 0.125,
+        "stderr": 0.15478479684172258,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-134",
-        "round": 11,
-        "difference": 0,
-        "stderr": 0.18257418583505536,
+        "round": 9,
+        "difference": 0.125,
+        "stderr": 0.20155644370746376,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-135",
-        "round": 17,
+        "round": 13,
         "difference": 0,
         "stderr": 0,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-136",
-        "round": 19,
-        "difference": 0,
-        "stderr": 0,
+        "round": 25,
+        "difference": 0.125,
+        "stderr": 0.15478479684172258,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-137",
-        "round": 11,
-        "difference": 0,
-        "stderr": 0.09128709291752768,
+        "round": 9,
+        "difference": -0.0625,
+        "stderr": 0.11063265039459795,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-138",
-        "round": 11,
-        "difference": -0.125,
-        "stderr": 0.17969882210706523,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-139",
-        "round": 11,
-        "difference": -0.0625,
-        "stderr": 0.0625,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-140",
-        "round": 5,
-        "difference": -0.0625,
-        "stderr": 0.19297560294849017,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-141",
-        "round": 33,
-        "difference": 0.0625,
-        "stderr": 0.14343262065048754,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-142",
-        "round": 25,
-        "difference": -0.125,
-        "stderr": 0.08539125638299665,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-143",
-        "round": 13,
-        "difference": -0.25,
-        "stderr": 0.2140872096444188,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-144",
-        "round": 9,
+        "round": 15,
         "difference": 0.0625,
         "stderr": 0.17001838135919303,
         "verdict": "TIE"
       },
       {
+        "seed": "ordem-139",
+        "round": 19,
+        "difference": 0.125,
+        "stderr": 0.15478479684172258,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-140",
+        "round": 5,
+        "difference": -0.1875,
+        "stderr": 0.22764647299412893,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-141",
+        "round": 31,
+        "difference": -0.125,
+        "stderr": 0.15478479684172258,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-142",
+        "round": 25,
+        "difference": -0.25,
+        "stderr": 0.14433756729740643,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-143",
+        "round": 13,
+        "difference": -0.3125,
+        "stderr": 0.1983000672381799,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-144",
+        "round": 13,
+        "difference": 0.25,
+        "stderr": 0.11180339887498948,
+        "verdict": "FIRST"
+      },
+      {
         "seed": "ordem-145",
         "round": 11,
-        "difference": -0.1875,
-        "stderr": 0.13597640726733934,
+        "difference": -0.0625,
+        "stderr": 0.17001838135919303,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-146",
-        "round": 15,
-        "difference": 0.125,
-        "stderr": 0.08539125638299665,
+        "round": 9,
+        "difference": -0.25,
+        "stderr": 0.14433756729740643,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-147",
-        "round": 19,
-        "difference": 0,
-        "stderr": 0.15811388300841897,
+        "round": 23,
+        "difference": 0.0625,
+        "stderr": 0.11063265039459795,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-148",
         "round": 7,
-        "difference": -0.0625,
-        "stderr": 0.0625,
+        "difference": -0.1875,
+        "stderr": 0.10077822185373188,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-149",
-        "round": 25,
+        "round": 23,
         "difference": 0,
         "stderr": 0,
         "verdict": "TIE"
@@ -1692,84 +1692,84 @@
         "seed": "ordem-150",
         "round": 7,
         "difference": 0,
-        "stderr": 0.09128709291752768,
+        "stderr": 0.12909944487358055,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-151",
-        "round": 23,
-        "difference": 0.25,
-        "stderr": 0.14433756729740643,
+        "round": 27,
+        "difference": 0.0625,
+        "stderr": 0.14343262065048754,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-152",
-        "round": 15,
-        "difference": -0.125,
-        "stderr": 0.125,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-153",
-        "round": 7,
-        "difference": 0,
-        "stderr": 0.18257418583505536,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-154",
-        "round": 17,
+        "round": 13,
         "difference": -0.1875,
         "stderr": 0.16377703339194621,
         "verdict": "TIE"
       },
       {
+        "seed": "ordem-153",
+        "round": 7,
+        "difference": -0.0625,
+        "stderr": 0.21347814095749162,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-154",
+        "round": 55,
+        "difference": -0.1875,
+        "stderr": 0.10077822185373188,
+        "verdict": "TIE"
+      },
+      {
         "seed": "ordem-155",
         "round": 17,
-        "difference": -0.0625,
-        "stderr": 0.14343262065048754,
+        "difference": 0.1875,
+        "stderr": 0.13597640726733934,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-156",
-        "round": 19,
+        "round": 27,
         "difference": 0,
         "stderr": 0,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-157",
-        "round": 17,
-        "difference": -0.0625,
-        "stderr": 0.0625,
+        "round": 9,
+        "difference": 0.125,
+        "stderr": 0.17969882210706523,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-158",
-        "round": 31,
-        "difference": -0.0625,
-        "stderr": 0.11063265039459795,
+        "round": 17,
+        "difference": 0.125,
+        "stderr": 0.20155644370746376,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-159",
-        "round": 17,
-        "difference": 0.125,
-        "stderr": 0.08539125638299665,
+        "round": 15,
+        "difference": -0.1875,
+        "stderr": 0.10077822185373188,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-160",
         "round": 3,
         "difference": 0.0625,
-        "stderr": 0.19297560294849017,
+        "stderr": 0.11063265039459795,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-161",
         "round": 9,
-        "difference": 0.125,
-        "stderr": 0.15478479684172258,
+        "difference": 0.1875,
+        "stderr": 0.16377703339194621,
         "verdict": "TIE"
       },
       {
@@ -1781,31 +1781,31 @@
       },
       {
         "seed": "ordem-163",
-        "round": 43,
-        "difference": 0.125,
-        "stderr": 0.08539125638299665,
+        "round": 21,
+        "difference": 0,
+        "stderr": 0,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-164",
         "round": 3,
-        "difference": -0.0625,
-        "stderr": 0.21347814095749162,
+        "difference": 0,
+        "stderr": 0.18257418583505536,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-165",
-        "round": 13,
-        "difference": 0.0625,
-        "stderr": 0.17001838135919303,
-        "verdict": "TIE"
+        "round": 17,
+        "difference": 0.375,
+        "stderr": 0.15478479684172258,
+        "verdict": "FIRST"
       },
       {
         "seed": "ordem-166",
         "round": 5,
-        "difference": -0.25,
-        "stderr": 0.14433756729740643,
-        "verdict": "TIE"
+        "difference": 0.25,
+        "stderr": 0.11180339887498948,
+        "verdict": "FIRST"
       },
       {
         "seed": "ordem-167",
@@ -1817,76 +1817,76 @@
       {
         "seed": "ordem-168",
         "round": 7,
-        "difference": -0.0625,
-        "stderr": 0.0625,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-169",
-        "round": 11,
-        "difference": -0.125,
-        "stderr": 0.17969882210706523,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-170",
-        "round": 25,
         "difference": 0,
         "stderr": 0,
         "verdict": "TIE"
       },
       {
+        "seed": "ordem-169",
+        "round": 9,
+        "difference": -0.0625,
+        "stderr": 0.0625,
+        "verdict": "TIE"
+      },
+      {
+        "seed": "ordem-170",
+        "round": 33,
+        "difference": 0.3125,
+        "stderr": 0.11967838846954226,
+        "verdict": "FIRST"
+      },
+      {
         "seed": "ordem-171",
-        "round": 11,
-        "difference": 0,
-        "stderr": 0.09128709291752768,
+        "round": 9,
+        "difference": -0.0625,
+        "stderr": 0.0625,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-172",
         "round": 11,
         "difference": 0,
-        "stderr": 0.12909944487358055,
+        "stderr": 0.09128709291752768,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-173",
-        "round": 49,
+        "round": 35,
         "difference": 0,
         "stderr": 0,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-174",
-        "round": 19,
-        "difference": -0.125,
-        "stderr": 0.125,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-175",
-        "round": 23,
+        "round": 15,
         "difference": 0,
         "stderr": 0.15811388300841897,
         "verdict": "TIE"
       },
       {
+        "seed": "ordem-175",
+        "round": 45,
+        "difference": 0.125,
+        "stderr": 0.125,
+        "verdict": "TIE"
+      },
+      {
         "seed": "ordem-176",
-        "round": 5,
-        "difference": 0,
-        "stderr": 0.09128709291752768,
+        "round": 3,
+        "difference": 0.1875,
+        "stderr": 0.1875,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-177",
-        "round": 19,
-        "difference": -0.0625,
-        "stderr": 0.11063265039459795,
+        "round": 13,
+        "difference": -0.125,
+        "stderr": 0.15478479684172258,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-178",
-        "round": 29,
+        "round": 31,
         "difference": 0,
         "stderr": 0,
         "verdict": "TIE"
@@ -1894,22 +1894,22 @@
       {
         "seed": "ordem-179",
         "round": 3,
-        "difference": -0.1875,
-        "stderr": 0.13597640726733934,
-        "verdict": "TIE"
+        "difference": 0.3125,
+        "stderr": 0.1505199322349037,
+        "verdict": "FIRST"
       },
       {
         "seed": "ordem-180",
         "round": 13,
-        "difference": 0.125,
-        "stderr": 0.17969882210706523,
+        "difference": -0.25,
+        "stderr": 0.19364916731037085,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-181",
-        "round": 61,
-        "difference": 0.0625,
-        "stderr": 0.0625,
+        "round": 29,
+        "difference": 0.125,
+        "stderr": 0.08539125638299665,
         "verdict": "TIE"
       },
       {
@@ -1921,30 +1921,30 @@
       },
       {
         "seed": "ordem-183",
-        "round": 17,
+        "round": 19,
         "difference": 0,
         "stderr": 0,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-184",
-        "round": 35,
-        "difference": -0.0625,
-        "stderr": 0.17001838135919303,
+        "round": 33,
+        "difference": 0.0625,
+        "stderr": 0.0625,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-185",
-        "round": 5,
-        "difference": -0.1875,
-        "stderr": 0.13597640726733934,
+        "round": 3,
+        "difference": 0,
+        "stderr": 0.09128709291752768,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-186",
-        "round": 17,
-        "difference": -0.0625,
-        "stderr": 0.0625,
+        "round": 19,
+        "difference": 0.1875,
+        "stderr": 0.13597640726733934,
         "verdict": "TIE"
       },
       {
@@ -1957,21 +1957,21 @@
       {
         "seed": "ordem-188",
         "round": 9,
-        "difference": 0.0625,
-        "stderr": 0.11063265039459795,
-        "verdict": "TIE"
-      },
-      {
-        "seed": "ordem-189",
-        "round": 39,
         "difference": 0,
         "stderr": 0.09128709291752768,
         "verdict": "TIE"
       },
       {
+        "seed": "ordem-189",
+        "round": 25,
+        "difference": 0,
+        "stderr": 0,
+        "verdict": "TIE"
+      },
+      {
         "seed": "ordem-190",
-        "round": 17,
-        "difference": 0.0625,
+        "round": 13,
+        "difference": -0.0625,
         "stderr": 0.0625,
         "verdict": "TIE"
       },
@@ -1979,61 +1979,61 @@
         "seed": "ordem-191",
         "round": 3,
         "difference": 0,
-        "stderr": 0.12909944487358055,
+        "stderr": 0.15811388300841897,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-192",
         "round": 25,
         "difference": 0,
-        "stderr": 0,
+        "stderr": 0.09128709291752768,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-193",
-        "round": 3,
-        "difference": -0.125,
-        "stderr": 0.15478479684172258,
+        "round": 5,
+        "difference": -0.0625,
+        "stderr": 0.17001838135919303,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-194",
         "round": 9,
-        "difference": 0,
-        "stderr": 0.09128709291752768,
+        "difference": -0.1875,
+        "stderr": 0.10077822185373188,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-195",
-        "round": 39,
-        "difference": -0.25,
-        "stderr": 0.14433756729740643,
+        "round": 25,
+        "difference": 0,
+        "stderr": 0.12909944487358055,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-196",
-        "round": 17,
+        "round": 23,
         "difference": 0,
-        "stderr": 0,
+        "stderr": 0.12909944487358055,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-197",
-        "round": 21,
-        "difference": 0.1875,
-        "stderr": 0.16377703339194621,
+        "round": 23,
+        "difference": 0.125,
+        "stderr": 0.17969882210706523,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-198",
         "round": 11,
-        "difference": 0.125,
-        "stderr": 0.125,
+        "difference": -0.25,
+        "stderr": 0.14433756729740643,
         "verdict": "TIE"
       },
       {
         "seed": "ordem-199",
-        "round": 41,
+        "round": 27,
         "difference": 0,
         "stderr": 0,
         "verdict": "TIE"
@@ -2058,9 +2058,9 @@
           "p10": 4,
           "p90": 16,
           "p95": 19,
-          "max": 40
+          "max": 44
         },
-        "initiativeWin": 0.532,
+        "initiativeWin": 0.503,
         "endReasons": {
           "HP": 0.9940000000000008,
           "EXODIA": 0.006,
@@ -2069,34 +2069,34 @@
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.509,
-        "orderFirst": 0.2981274984220492,
+        "quads": 0.5,
+        "orderFirst": 0.33177009488493836,
         "perGame": {
-          "BuffPlayed": 7.975,
-          "GuardPlayed": 4.067,
-          "TrapUsed": 3.155,
-          "Sacrificed": 1.569,
-          "ReflectPlayed": 0.114,
-          "ReflectTriggered": 0.114,
+          "BuffPlayed": 7.41,
+          "GuardPlayed": 3.88,
+          "TrapUsed": 1.873,
+          "Sacrificed": 1.666,
+          "ReflectPlayed": 0.118,
+          "ReflectTriggered": 0.117,
           "ReflectCanceled": 0,
-          "Resurrected": 0.998,
-          "HandLimitPenalty": 0.101,
-          "CardStolen": 5.204,
-          "StealDamage": 5.204,
-          "Healed": 5.575,
-          "DevastationCast": 0.226,
-          "RowDevastated": 0.226,
+          "Resurrected": 0.977,
+          "HandLimitPenalty": 0.103,
+          "CardStolen": 6.257,
+          "StealDamage": 6.257,
+          "Healed": 6.822,
+          "DevastationCast": 0.222,
+          "RowDevastated": 0.222,
           "DevastationCanceled": 0,
-          "QuadFormed": 1.024,
-          "AbsoluteAttack": 0.059,
-          "AbsoluteDefenseStarted": 0.19,
-          "GuardBroken": 3.573
+          "QuadFormed": 0.992,
+          "AbsoluteAttack": 0.084,
+          "AbsoluteDefenseStarted": 0.233,
+          "GuardBroken": 3.493
         },
         "resurrections": {
-          "mean": 0.998,
+          "mean": 0.977,
           "p90": 3,
-          "max": 9,
-          "atLeast3": 0.124
+          "max": 10,
+          "atLeast3": 0.111
         }
       },
       "targets": [
@@ -2108,7 +2108,7 @@
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.532,
+          "value": 0.503,
           "target": "45–55%",
           "ok": true
         },
@@ -2120,7 +2120,7 @@
         },
         {
           "metric": "Fallen is Back",
-          "value": 0.509,
+          "value": 0.5,
           "target": "10–25%",
           "ok": false
         }
@@ -2139,73 +2139,73 @@
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 11,
+          "median": 10,
           "p10": 6,
-          "p90": 21,
+          "p90": 20,
           "p95": 25,
-          "max": 41
+          "max": 67
         },
-        "initiativeWin": 0.529,
+        "initiativeWin": 0.5,
         "endReasons": {
-          "HP": 0.9870000000000008,
-          "EXODIA": 0.013000000000000005,
+          "HP": 0.9820000000000008,
+          "EXODIA": 0.01800000000000001,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.663,
-        "orderFirst": 0.29300244100895034,
+        "quads": 0.635,
+        "orderFirst": 0.3221683929168059,
         "perGame": {
-          "BuffPlayed": 10.141,
-          "GuardPlayed": 5.393,
-          "TrapUsed": 4.627,
-          "Sacrificed": 2.09,
-          "ReflectPlayed": 0.127,
-          "ReflectTriggered": 0.127,
+          "BuffPlayed": 9.274,
+          "GuardPlayed": 5.192,
+          "TrapUsed": 2.577,
+          "Sacrificed": 2.282,
+          "ReflectPlayed": 0.133,
+          "ReflectTriggered": 0.132,
           "ReflectCanceled": 0,
-          "Resurrected": 1.543,
-          "HandLimitPenalty": 0.106,
-          "CardStolen": 6.353,
-          "StealDamage": 6.353,
-          "Healed": 7.057,
-          "DevastationCast": 0.311,
-          "RowDevastated": 0.311,
+          "Resurrected": 1.498,
+          "HandLimitPenalty": 0.108,
+          "CardStolen": 8.162,
+          "StealDamage": 8.162,
+          "Healed": 9.337,
+          "DevastationCast": 0.293,
+          "RowDevastated": 0.293,
           "DevastationCanceled": 0,
-          "QuadFormed": 1.574,
-          "AbsoluteAttack": 0.114,
-          "AbsoluteDefenseStarted": 0.27,
-          "GuardBroken": 4.753
+          "QuadFormed": 1.523,
+          "AbsoluteAttack": 0.159,
+          "AbsoluteDefenseStarted": 0.366,
+          "GuardBroken": 4.616
         },
         "resurrections": {
-          "mean": 1.543,
+          "mean": 1.498,
           "p90": 4,
-          "max": 11,
-          "atLeast3": 0.23
+          "max": 20,
+          "atLeast3": 0.212
         }
       },
       "targets": [
         {
           "metric": "Duração (mediana de rodadas de Ataque)",
-          "value": 11,
+          "value": 10,
           "target": "8–14",
           "ok": true
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.529,
+          "value": 0.5,
           "target": "45–55%",
           "ok": true
         },
         {
           "metric": "Exódia",
-          "value": 0.013000000000000005,
+          "value": 0.01800000000000001,
           "target": "1–3%",
           "ok": true
         },
         {
           "metric": "Fallen is Back",
-          "value": 0.663,
+          "value": 0.635,
           "target": "10–25%",
           "ok": false
         }
@@ -2224,73 +2224,73 @@
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 16,
+          "median": 15,
           "p10": 8,
           "p90": 28,
-          "p95": 32,
-          "max": 51
+          "p95": 33,
+          "max": 66
         },
-        "initiativeWin": 0.535,
+        "initiativeWin": 0.519,
         "endReasons": {
-          "HP": 0.9730000000000008,
-          "EXODIA": 0.027000000000000017,
+          "HP": 0.9480000000000007,
+          "EXODIA": 0.05200000000000004,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.8,
-        "orderFirst": 0.2861653607765174,
+        "quads": 0.802,
+        "orderFirst": 0.3044756419486441,
         "perGame": {
-          "BuffPlayed": 13.939,
-          "GuardPlayed": 7.698,
-          "TrapUsed": 7.462,
-          "Sacrificed": 2.947,
-          "ReflectPlayed": 0.166,
-          "ReflectTriggered": 0.166,
+          "BuffPlayed": 12.255,
+          "GuardPlayed": 7.437,
+          "TrapUsed": 3.719,
+          "Sacrificed": 3.259,
+          "ReflectPlayed": 0.16,
+          "ReflectTriggered": 0.159,
           "ReflectCanceled": 0,
-          "Resurrected": 2.507,
-          "HandLimitPenalty": 0.109,
-          "CardStolen": 8.288,
-          "StealDamage": 8.288,
-          "Healed": 9.863,
-          "DevastationCast": 0.492,
-          "RowDevastated": 0.492,
+          "Resurrected": 2.661,
+          "HandLimitPenalty": 0.114,
+          "CardStolen": 11.834,
+          "StealDamage": 11.834,
+          "Healed": 14.207,
+          "DevastationCast": 0.437,
+          "RowDevastated": 0.437,
           "DevastationCanceled": 0,
-          "QuadFormed": 2.547,
-          "AbsoluteAttack": 0.203,
-          "AbsoluteDefenseStarted": 0.395,
-          "GuardBroken": 6.682
+          "QuadFormed": 2.714,
+          "AbsoluteAttack": 0.357,
+          "AbsoluteDefenseStarted": 0.609,
+          "GuardBroken": 6.482
         },
         "resurrections": {
-          "mean": 2.507,
+          "mean": 2.661,
           "p90": 6,
-          "max": 14,
-          "atLeast3": 0.409
+          "max": 18,
+          "atLeast3": 0.401
         }
       },
       "targets": [
         {
           "metric": "Duração (mediana de rodadas de Ataque)",
-          "value": 16,
+          "value": 15,
           "target": "8–14",
           "ok": false
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.535,
+          "value": 0.519,
           "target": "45–55%",
           "ok": true
         },
         {
           "metric": "Exódia",
-          "value": 0.027000000000000017,
+          "value": 0.05200000000000004,
           "target": "1–3%",
-          "ok": true
+          "ok": false
         },
         {
           "metric": "Fallen is Back",
-          "value": 0.8,
+          "value": 0.802,
           "target": "10–25%",
           "ok": false
         }
@@ -2309,67 +2309,67 @@
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 20,
+          "median": 18,
           "p10": 10,
-          "p90": 36,
-          "p95": 41,
-          "max": 58
+          "p90": 35,
+          "p95": 42,
+          "max": 80
         },
-        "initiativeWin": 0.543,
+        "initiativeWin": 0.522,
         "endReasons": {
-          "HP": 0.9390000000000007,
-          "EXODIA": 0.06100000000000005,
+          "HP": 0.9190000000000007,
+          "EXODIA": 0.08100000000000006,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
         "quads": 0.893,
-        "orderFirst": 0.2836586930620475,
+        "orderFirst": 0.28812260536398465,
         "perGame": {
-          "BuffPlayed": 17.693,
-          "GuardPlayed": 10.014,
-          "TrapUsed": 10.439,
-          "Sacrificed": 3.79,
-          "ReflectPlayed": 0.197,
-          "ReflectTriggered": 0.196,
+          "BuffPlayed": 14.688,
+          "GuardPlayed": 9.535,
+          "TrapUsed": 4.713,
+          "Sacrificed": 4.115,
+          "ReflectPlayed": 0.174,
+          "ReflectTriggered": 0.172,
           "ReflectCanceled": 0,
-          "Resurrected": 3.611,
-          "HandLimitPenalty": 0.111,
-          "CardStolen": 10.285,
-          "StealDamage": 10.285,
-          "Healed": 12.982,
-          "DevastationCast": 0.668,
-          "RowDevastated": 0.668,
+          "Resurrected": 3.742,
+          "HandLimitPenalty": 0.119,
+          "CardStolen": 15.288,
+          "StealDamage": 15.288,
+          "Healed": 19.052,
+          "DevastationCast": 0.573,
+          "RowDevastated": 0.573,
           "DevastationCanceled": 0,
-          "QuadFormed": 3.673,
-          "AbsoluteAttack": 0.306,
-          "AbsoluteDefenseStarted": 0.541,
-          "GuardBroken": 8.567
+          "QuadFormed": 3.809,
+          "AbsoluteAttack": 0.584,
+          "AbsoluteDefenseStarted": 0.861,
+          "GuardBroken": 8.165
         },
         "resurrections": {
-          "mean": 3.611,
-          "p90": 7,
-          "max": 17,
-          "atLeast3": 0.563
+          "mean": 3.742,
+          "p90": 8,
+          "max": 21,
+          "atLeast3": 0.572
         }
       },
       "targets": [
         {
           "metric": "Duração (mediana de rodadas de Ataque)",
-          "value": 20,
+          "value": 18,
           "target": "8–14",
           "ok": false
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.543,
+          "value": 0.522,
           "target": "45–55%",
           "ok": true
         },
         {
           "metric": "Exódia",
-          "value": 0.06100000000000005,
+          "value": 0.08100000000000006,
           "target": "1–3%",
           "ok": false
         },
@@ -2394,73 +2394,73 @@
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 16,
+          "median": 15,
           "p10": 8,
-          "p90": 31,
-          "p95": 37,
-          "max": 63
+          "p90": 28,
+          "p95": 32,
+          "max": 117
         },
-        "initiativeWin": 0.534,
+        "initiativeWin": 0.519,
         "endReasons": {
-          "HP": 0.9590000000000007,
-          "EXODIA": 0.04100000000000003,
+          "HP": 0.9510000000000007,
+          "EXODIA": 0.04900000000000004,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.635,
-        "orderFirst": 0.2847062684607811,
+        "quads": 0.628,
+        "orderFirst": 0.29748390871854885,
         "perGame": {
-          "BuffPlayed": 14.232,
-          "GuardPlayed": 8.081,
-          "TrapUsed": 7.118,
-          "Sacrificed": 3.097,
-          "ReflectPlayed": 0.151,
-          "ReflectTriggered": 0.15,
+          "BuffPlayed": 12.102,
+          "GuardPlayed": 7.48,
+          "TrapUsed": 3.093,
+          "Sacrificed": 3.372,
+          "ReflectPlayed": 0.133,
+          "ReflectTriggered": 0.131,
           "ReflectCanceled": 0,
-          "Resurrected": 1.426,
-          "HandLimitPenalty": 0.094,
-          "CardStolen": 9.411,
-          "StealDamage": 9.411,
-          "Healed": 11.627,
-          "DevastationCast": 0.434,
-          "RowDevastated": 0.434,
+          "Resurrected": 1.358,
+          "HandLimitPenalty": 0.093,
+          "CardStolen": 12.341,
+          "StealDamage": 12.341,
+          "Healed": 15.099,
+          "DevastationCast": 0.399,
+          "RowDevastated": 0.399,
           "DevastationCanceled": 0,
-          "QuadFormed": 1.448,
-          "AbsoluteAttack": 0.244,
-          "AbsoluteDefenseStarted": 0.474,
-          "GuardBroken": 7.053
+          "QuadFormed": 1.378,
+          "AbsoluteAttack": 0.372,
+          "AbsoluteDefenseStarted": 0.612,
+          "GuardBroken": 6.574
         },
         "resurrections": {
-          "mean": 1.426,
-          "p90": 4,
-          "max": 16,
-          "atLeast3": 0.197
+          "mean": 1.358,
+          "p90": 3,
+          "max": 14,
+          "atLeast3": 0.175
         }
       },
       "targets": [
         {
           "metric": "Duração (mediana de rodadas de Ataque)",
-          "value": 16,
+          "value": 15,
           "target": "8–14",
           "ok": false
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.534,
+          "value": 0.519,
           "target": "45–55%",
           "ok": true
         },
         {
           "metric": "Exódia",
-          "value": 0.04100000000000003,
+          "value": 0.04900000000000004,
           "target": "1–3%",
           "ok": false
         },
         {
           "metric": "Fallen is Back",
-          "value": 0.635,
+          "value": 0.628,
           "target": "10–25%",
           "ok": false
         }
@@ -2479,73 +2479,73 @@
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 15,
+          "median": 14,
           "p10": 7,
           "p90": 27,
-          "p95": 31,
-          "max": 56
+          "p95": 32,
+          "max": 55
         },
-        "initiativeWin": 0.51,
+        "initiativeWin": 0.488,
         "endReasons": {
-          "HP": 0.9760000000000008,
-          "EXODIA": 0.024000000000000014,
+          "HP": 0.9630000000000007,
+          "EXODIA": 0.037000000000000026,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.703,
-        "orderFirst": 0.2832208234507085,
+        "quads": 0.69,
+        "orderFirst": 0.30181124880838894,
         "perGame": {
-          "BuffPlayed": 13.249,
-          "GuardPlayed": 7.324,
-          "TrapUsed": 6.708,
-          "Sacrificed": 2.778,
+          "BuffPlayed": 11.508,
+          "GuardPlayed": 6.977,
+          "TrapUsed": 3.236,
+          "Sacrificed": 3.119,
           "ReflectPlayed": 0.145,
-          "ReflectTriggered": 0.143,
+          "ReflectTriggered": 0.144,
           "ReflectCanceled": 0,
-          "Resurrected": 1.788,
-          "HandLimitPenalty": 0.098,
-          "CardStolen": 8.279,
-          "StealDamage": 8.279,
-          "Healed": 9.803,
-          "DevastationCast": 0.427,
-          "RowDevastated": 0.427,
+          "Resurrected": 1.901,
+          "HandLimitPenalty": 0.101,
+          "CardStolen": 11.151,
+          "StealDamage": 11.151,
+          "Healed": 13.432,
+          "DevastationCast": 0.371,
+          "RowDevastated": 0.371,
           "DevastationCanceled": 0,
-          "QuadFormed": 1.819,
-          "AbsoluteAttack": 0.204,
-          "AbsoluteDefenseStarted": 0.372,
-          "GuardBroken": 6.417
+          "QuadFormed": 1.928,
+          "AbsoluteAttack": 0.318,
+          "AbsoluteDefenseStarted": 0.576,
+          "GuardBroken": 6.031
         },
         "resurrections": {
-          "mean": 1.788,
-          "p90": 4,
-          "max": 11,
-          "atLeast3": 0.294
+          "mean": 1.901,
+          "p90": 5,
+          "max": 12,
+          "atLeast3": 0.299
         }
       },
       "targets": [
         {
           "metric": "Duração (mediana de rodadas de Ataque)",
-          "value": 15,
+          "value": 14,
           "target": "8–14",
-          "ok": false
+          "ok": true
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.51,
+          "value": 0.488,
           "target": "45–55%",
           "ok": true
         },
         {
           "metric": "Exódia",
-          "value": 0.024000000000000014,
+          "value": 0.037000000000000026,
           "target": "1–3%",
-          "ok": true
+          "ok": false
         },
         {
           "metric": "Fallen is Back",
-          "value": 0.703,
+          "value": 0.69,
           "target": "10–25%",
           "ok": false
         }
@@ -2564,73 +2564,73 @@
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 13,
-          "p10": 7,
+          "median": 11,
+          "p10": 6,
           "p90": 23,
-          "p95": 27,
-          "max": 45
+          "p95": 28,
+          "max": 54
         },
-        "initiativeWin": 0.523,
+        "initiativeWin": 0.535,
         "endReasons": {
-          "HP": 0.9790000000000008,
-          "EXODIA": 0.02100000000000001,
+          "HP": 0.9710000000000008,
+          "EXODIA": 0.02900000000000002,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.761,
-        "orderFirst": 0.2903458733482562,
+        "quads": 0.743,
+        "orderFirst": 0.3264783427495292,
         "perGame": {
-          "BuffPlayed": 11.337,
-          "GuardPlayed": 6.196,
-          "TrapUsed": 5.636,
-          "Sacrificed": 2.421,
-          "ReflectPlayed": 0.151,
-          "ReflectTriggered": 0.151,
+          "BuffPlayed": 10.312,
+          "GuardPlayed": 5.862,
+          "TrapUsed": 3.172,
+          "Sacrificed": 2.58,
+          "ReflectPlayed": 0.14,
+          "ReflectTriggered": 0.14,
           "ReflectCanceled": 0,
-          "Resurrected": 2.24,
-          "HandLimitPenalty": 0.114,
-          "CardStolen": 7,
-          "StealDamage": 7,
-          "Healed": 7.92,
-          "DevastationCast": 0.382,
-          "RowDevastated": 0.382,
+          "Resurrected": 2.159,
+          "HandLimitPenalty": 0.115,
+          "CardStolen": 9.04,
+          "StealDamage": 9.04,
+          "Healed": 10.309,
+          "DevastationCast": 0.327,
+          "RowDevastated": 0.327,
           "DevastationCanceled": 0,
-          "QuadFormed": 2.289,
-          "AbsoluteAttack": 0.111,
-          "AbsoluteDefenseStarted": 0.332,
-          "GuardBroken": 5.407
+          "QuadFormed": 2.207,
+          "AbsoluteAttack": 0.21,
+          "AbsoluteDefenseStarted": 0.485,
+          "GuardBroken": 5.151
         },
         "resurrections": {
-          "mean": 2.24,
+          "mean": 2.159,
           "p90": 5,
-          "max": 12,
-          "atLeast3": 0.354
+          "max": 19,
+          "atLeast3": 0.317
         }
       },
       "targets": [
         {
           "metric": "Duração (mediana de rodadas de Ataque)",
-          "value": 13,
+          "value": 11,
           "target": "8–14",
           "ok": true
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.523,
+          "value": 0.535,
           "target": "45–55%",
           "ok": true
         },
         {
           "metric": "Exódia",
-          "value": 0.02100000000000001,
+          "value": 0.02900000000000002,
           "target": "1–3%",
           "ok": true
         },
         {
           "metric": "Fallen is Back",
-          "value": 0.761,
+          "value": 0.743,
           "target": "10–25%",
           "ok": false
         }
@@ -2649,73 +2649,73 @@
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 12,
+          "median": 11,
           "p10": 6,
           "p90": 22,
-          "p95": 26,
-          "max": 44
+          "p95": 25,
+          "max": 53
         },
-        "initiativeWin": 0.515,
+        "initiativeWin": 0.521,
         "endReasons": {
-          "HP": 0.9830000000000008,
-          "EXODIA": 0.017000000000000008,
+          "HP": 0.9730000000000008,
+          "EXODIA": 0.027000000000000017,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.781,
-        "orderFirst": 0.29963178889229825,
+        "quads": 0.747,
+        "orderFirst": 0.3147039792947266,
         "perGame": {
-          "BuffPlayed": 10.764,
-          "GuardPlayed": 5.767,
-          "TrapUsed": 5.163,
-          "Sacrificed": 2.296,
-          "ReflectPlayed": 0.155,
-          "ReflectTriggered": 0.155,
+          "BuffPlayed": 9.699,
+          "GuardPlayed": 5.443,
+          "TrapUsed": 2.971,
+          "Sacrificed": 2.421,
+          "ReflectPlayed": 0.151,
+          "ReflectTriggered": 0.151,
           "ReflectCanceled": 0,
-          "Resurrected": 2.308,
-          "HandLimitPenalty": 0.121,
-          "CardStolen": 6.664,
-          "StealDamage": 6.664,
-          "Healed": 7.374,
-          "DevastationCast": 0.35,
-          "RowDevastated": 0.35,
+          "Resurrected": 2.264,
+          "HandLimitPenalty": 0.115,
+          "CardStolen": 8.295,
+          "StealDamage": 8.295,
+          "Healed": 9.229,
+          "DevastationCast": 0.293,
+          "RowDevastated": 0.293,
           "DevastationCanceled": 0,
-          "QuadFormed": 2.378,
-          "AbsoluteAttack": 0.112,
-          "AbsoluteDefenseStarted": 0.293,
-          "GuardBroken": 5.044
+          "QuadFormed": 2.31,
+          "AbsoluteAttack": 0.167,
+          "AbsoluteDefenseStarted": 0.424,
+          "GuardBroken": 4.833
         },
         "resurrections": {
-          "mean": 2.308,
+          "mean": 2.264,
           "p90": 5,
-          "max": 18,
-          "atLeast3": 0.362
+          "max": 26,
+          "atLeast3": 0.326
         }
       },
       "targets": [
         {
           "metric": "Duração (mediana de rodadas de Ataque)",
-          "value": 12,
+          "value": 11,
           "target": "8–14",
           "ok": true
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.515,
+          "value": 0.521,
           "target": "45–55%",
           "ok": true
         },
         {
           "metric": "Exódia",
-          "value": 0.017000000000000008,
+          "value": 0.027000000000000017,
           "target": "1–3%",
           "ok": true
         },
         {
           "metric": "Fallen is Back",
-          "value": 0.781,
+          "value": 0.747,
           "target": "10–25%",
           "ok": false
         }
@@ -2736,73 +2736,73 @@
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 13,
+          "median": 12,
           "p10": 7,
           "p90": 24,
-          "p95": 28,
-          "max": 48
+          "p95": 29,
+          "max": 56
         },
-        "initiativeWin": 0.494,
+        "initiativeWin": 0.492,
         "endReasons": {
-          "HP": 0.9700000000000008,
-          "EXODIA": 0.03000000000000002,
+          "HP": 0.9620000000000007,
+          "EXODIA": 0.03800000000000003,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.766,
-        "orderFirst": 0.29243605525919847,
+        "quads": 0.74,
+        "orderFirst": 0.29255621975519497,
         "perGame": {
-          "BuffPlayed": 12.007,
-          "GuardPlayed": 6.688,
-          "TrapUsed": 5.365,
-          "Sacrificed": 2.756,
-          "ReflectPlayed": 0.148,
-          "ReflectTriggered": 0.147,
+          "BuffPlayed": 10.694,
+          "GuardPlayed": 6.389,
+          "TrapUsed": 2.606,
+          "Sacrificed": 3.017,
+          "ReflectPlayed": 0.13,
+          "ReflectTriggered": 0.128,
           "ReflectCanceled": 0,
-          "Resurrected": 2.105,
+          "Resurrected": 2.088,
           "HandLimitPenalty": 0.084,
-          "CardStolen": 5.591,
-          "StealDamage": 5.591,
-          "Healed": 7.144,
-          "DevastationCast": 0.316,
-          "RowDevastated": 0.316,
+          "CardStolen": 7.867,
+          "StealDamage": 7.867,
+          "Healed": 9.791,
+          "DevastationCast": 0.307,
+          "RowDevastated": 0.307,
           "DevastationCanceled": 0,
-          "QuadFormed": 2.155,
-          "AbsoluteAttack": 0.2,
-          "AbsoluteDefenseStarted": 0.376,
-          "GuardBroken": 5.855
+          "QuadFormed": 2.132,
+          "AbsoluteAttack": 0.274,
+          "AbsoluteDefenseStarted": 0.46,
+          "GuardBroken": 5.537
         },
         "resurrections": {
-          "mean": 2.105,
+          "mean": 2.088,
           "p90": 5,
-          "max": 14,
-          "atLeast3": 0.311
+          "max": 19,
+          "atLeast3": 0.312
         }
       },
       "targets": [
         {
           "metric": "Duração (mediana de rodadas de Ataque)",
-          "value": 13,
+          "value": 12,
           "target": "8–14",
           "ok": true
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.494,
+          "value": 0.492,
           "target": "45–55%",
           "ok": true
         },
         {
           "metric": "Exódia",
-          "value": 0.03000000000000002,
+          "value": 0.03800000000000003,
           "target": "1–3%",
           "ok": false
         },
         {
           "metric": "Fallen is Back",
-          "value": 0.766,
+          "value": 0.74,
           "target": "10–25%",
           "ok": false
         }
@@ -2823,67 +2823,67 @@
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 15,
+          "median": 14,
           "p10": 7,
-          "p90": 26,
-          "p95": 29,
-          "max": 41
+          "p90": 27,
+          "p95": 32,
+          "max": 63
         },
-        "initiativeWin": 0.493,
+        "initiativeWin": 0.524,
         "endReasons": {
-          "HP": 0.9980000000000008,
-          "EXODIA": 0.002,
+          "HP": 0.9930000000000008,
+          "EXODIA": 0.007,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
         "quads": 0.841,
-        "orderFirst": 0.29196802436239055,
+        "orderFirst": 0.3306680098218221,
         "perGame": {
-          "BuffPlayed": 9.963,
-          "GuardPlayed": 5.288,
-          "TrapUsed": 6.584,
-          "Sacrificed": 1.341,
-          "ReflectPlayed": 0.072,
-          "ReflectTriggered": 0.072,
+          "BuffPlayed": 8.899,
+          "GuardPlayed": 5.31,
+          "TrapUsed": 3.663,
+          "Sacrificed": 1.486,
+          "ReflectPlayed": 0.064,
+          "ReflectTriggered": 0.064,
           "ReflectCanceled": 0,
-          "Resurrected": 2.858,
+          "Resurrected": 3.16,
           "HandLimitPenalty": 0.041,
-          "CardStolen": 9.309,
-          "StealDamage": 9.309,
-          "Healed": 9.993,
-          "DevastationCast": 0.29,
-          "RowDevastated": 0.29,
+          "CardStolen": 12.779,
+          "StealDamage": 12.779,
+          "Healed": 14.681,
+          "DevastationCast": 0.24,
+          "RowDevastated": 0.24,
           "DevastationCanceled": 0,
-          "QuadFormed": 2.912,
-          "AbsoluteAttack": 0.027,
-          "AbsoluteDefenseStarted": 0.083,
-          "GuardBroken": 4.518
+          "QuadFormed": 3.216,
+          "AbsoluteAttack": 0.072,
+          "AbsoluteDefenseStarted": 0.228,
+          "GuardBroken": 4.469
         },
         "resurrections": {
-          "mean": 2.858,
+          "mean": 3.16,
           "p90": 7,
-          "max": 20,
-          "atLeast3": 0.455
+          "max": 21,
+          "atLeast3": 0.495
         }
       },
       "targets": [
         {
           "metric": "Duração (mediana de rodadas de Ataque)",
-          "value": 15,
+          "value": 14,
           "target": "8–14",
-          "ok": false
+          "ok": true
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.493,
+          "value": 0.524,
           "target": "45–55%",
           "ok": true
         },
         {
           "metric": "Exódia",
-          "value": 0.002,
+          "value": 0.007,
           "target": "1–3%",
           "ok": false
         },
@@ -2910,73 +2910,73 @@
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 13,
+          "median": 12,
           "p10": 7,
-          "p90": 25,
-          "p95": 28,
-          "max": 49
+          "p90": 22,
+          "p95": 26,
+          "max": 52
         },
-        "initiativeWin": 0.532,
+        "initiativeWin": 0.52,
         "endReasons": {
-          "HP": 0.9420000000000007,
-          "EXODIA": 0.058000000000000045,
+          "HP": 0.9410000000000007,
+          "EXODIA": 0.059000000000000045,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.696,
-        "orderFirst": 0.29180372807017546,
+        "quads": 0.678,
+        "orderFirst": 0.31583571271689,
         "perGame": {
-          "BuffPlayed": 13.916,
-          "GuardPlayed": 7.766,
-          "TrapUsed": 5.504,
-          "Sacrificed": 3.872,
-          "ReflectPlayed": 0.257,
-          "ReflectTriggered": 0.251,
+          "BuffPlayed": 12.378,
+          "GuardPlayed": 7.212,
+          "TrapUsed": 2.771,
+          "Sacrificed": 3.983,
+          "ReflectPlayed": 0.24,
+          "ReflectTriggered": 0.235,
           "ReflectCanceled": 0,
-          "Resurrected": 1.6,
-          "HandLimitPenalty": 0.231,
-          "CardStolen": 6.416,
-          "StealDamage": 6.416,
-          "Healed": 7.921,
-          "DevastationCast": 0.491,
-          "RowDevastated": 0.491,
+          "Resurrected": 1.571,
+          "HandLimitPenalty": 0.234,
+          "CardStolen": 8.396,
+          "StealDamage": 8.396,
+          "Healed": 10.001,
+          "DevastationCast": 0.434,
+          "RowDevastated": 0.434,
           "DevastationCanceled": 0,
-          "QuadFormed": 1.622,
-          "AbsoluteAttack": 0.307,
-          "AbsoluteDefenseStarted": 0.634,
-          "GuardBroken": 6.927
+          "QuadFormed": 1.601,
+          "AbsoluteAttack": 0.428,
+          "AbsoluteDefenseStarted": 0.672,
+          "GuardBroken": 6.475
         },
         "resurrections": {
-          "mean": 1.6,
+          "mean": 1.571,
           "p90": 4,
-          "max": 17,
-          "atLeast3": 0.226
+          "max": 15,
+          "atLeast3": 0.217
         }
       },
       "targets": [
         {
           "metric": "Duração (mediana de rodadas de Ataque)",
-          "value": 13,
+          "value": 12,
           "target": "8–14",
           "ok": true
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.532,
+          "value": 0.52,
           "target": "45–55%",
           "ok": true
         },
         {
           "metric": "Exódia",
-          "value": 0.058000000000000045,
+          "value": 0.059000000000000045,
           "target": "1–3%",
           "ok": false
         },
         {
           "metric": "Fallen is Back",
-          "value": 0.696,
+          "value": 0.678,
           "target": "10–25%",
           "ok": false
         }
@@ -2999,47 +2999,47 @@
         "attackRounds": {
           "median": 13,
           "p10": 7,
-          "p90": 25,
-          "p95": 28,
-          "max": 41
+          "p90": 23,
+          "p95": 27,
+          "max": 48
         },
-        "initiativeWin": 0.482,
+        "initiativeWin": 0.497,
         "endReasons": {
-          "HP": 0.9830000000000008,
-          "EXODIA": 0.017000000000000008,
+          "HP": 0.9750000000000008,
+          "EXODIA": 0.025000000000000015,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.629,
-        "orderFirst": 0.3014383145384563,
+        "quads": 0.59,
+        "orderFirst": 0.3255156823961571,
         "perGame": {
-          "BuffPlayed": 13.708,
-          "GuardPlayed": 7.735,
-          "TrapUsed": 6.555,
-          "Sacrificed": 3.365,
-          "ReflectPlayed": 0.267,
-          "ReflectTriggered": 0.26,
+          "BuffPlayed": 12.395,
+          "GuardPlayed": 7.436,
+          "TrapUsed": 3.617,
+          "Sacrificed": 3.444,
+          "ReflectPlayed": 0.234,
+          "ReflectTriggered": 0.226,
           "ReflectCanceled": 0,
-          "Resurrected": 1.244,
-          "HandLimitPenalty": 0.254,
-          "CardStolen": 10.073,
-          "StealDamage": 10.073,
-          "Healed": 11.015,
-          "DevastationCast": 0.677,
-          "RowDevastated": 0.677,
+          "Resurrected": 1.222,
+          "HandLimitPenalty": 0.238,
+          "CardStolen": 12.353,
+          "StealDamage": 12.353,
+          "Healed": 13.45,
+          "DevastationCast": 0.603,
+          "RowDevastated": 0.603,
           "DevastationCanceled": 0,
-          "QuadFormed": 1.269,
-          "AbsoluteAttack": 0.257,
-          "AbsoluteDefenseStarted": 0.496,
-          "GuardBroken": 6.846
+          "QuadFormed": 1.241,
+          "AbsoluteAttack": 0.384,
+          "AbsoluteDefenseStarted": 0.637,
+          "GuardBroken": 6.71
         },
         "resurrections": {
-          "mean": 1.244,
+          "mean": 1.222,
           "p90": 3,
-          "max": 11,
-          "atLeast3": 0.158
+          "max": 13,
+          "atLeast3": 0.145
         }
       },
       "targets": [
@@ -3051,19 +3051,19 @@
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.482,
+          "value": 0.497,
           "target": "45–55%",
           "ok": true
         },
         {
           "metric": "Exódia",
-          "value": 0.017000000000000008,
+          "value": 0.025000000000000015,
           "target": "1–3%",
           "ok": true
         },
         {
           "metric": "Fallen is Back",
-          "value": 0.629,
+          "value": 0.59,
           "target": "10–25%",
           "ok": false
         }
@@ -3084,73 +3084,73 @@
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 14,
+          "median": 12,
           "p10": 7,
-          "p90": 25,
-          "p95": 28,
-          "max": 44
+          "p90": 23,
+          "p95": 27,
+          "max": 51
         },
-        "initiativeWin": 0.518,
+        "initiativeWin": 0.543,
         "endReasons": {
-          "HP": 0.9840000000000008,
-          "EXODIA": 0.016000000000000007,
+          "HP": 0.9750000000000008,
+          "EXODIA": 0.025000000000000015,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.704,
-        "orderFirst": 0.2997761390571504,
+        "quads": 0.693,
+        "orderFirst": 0.32736409966024915,
         "perGame": {
-          "BuffPlayed": 13.23,
-          "GuardPlayed": 7.286,
-          "TrapUsed": 6.626,
-          "Sacrificed": 2.958,
-          "ReflectPlayed": 0.227,
-          "ReflectTriggered": 0.222,
+          "BuffPlayed": 11.413,
+          "GuardPlayed": 6.754,
+          "TrapUsed": 3.257,
+          "Sacrificed": 3.029,
+          "ReflectPlayed": 0.2,
+          "ReflectTriggered": 0.197,
           "ReflectCanceled": 0,
-          "Resurrected": 1.722,
-          "HandLimitPenalty": 0.172,
-          "CardStolen": 8.681,
-          "StealDamage": 8.681,
-          "Healed": 9.711,
-          "DevastationCast": 0.541,
-          "RowDevastated": 0.541,
+          "Resurrected": 1.665,
+          "HandLimitPenalty": 0.161,
+          "CardStolen": 11.05,
+          "StealDamage": 11.05,
+          "Healed": 12.37,
+          "DevastationCast": 0.459,
+          "RowDevastated": 0.459,
           "DevastationCanceled": 0,
-          "QuadFormed": 1.757,
-          "AbsoluteAttack": 0.185,
-          "AbsoluteDefenseStarted": 0.381,
-          "GuardBroken": 6.447
+          "QuadFormed": 1.69,
+          "AbsoluteAttack": 0.293,
+          "AbsoluteDefenseStarted": 0.567,
+          "GuardBroken": 6.044
         },
         "resurrections": {
-          "mean": 1.722,
+          "mean": 1.665,
           "p90": 4,
-          "max": 12,
-          "atLeast3": 0.264
+          "max": 11,
+          "atLeast3": 0.245
         }
       },
       "targets": [
         {
           "metric": "Duração (mediana de rodadas de Ataque)",
-          "value": 14,
+          "value": 12,
           "target": "8–14",
           "ok": true
         },
         {
           "metric": "Vitória de quem começa com a iniciativa",
-          "value": 0.518,
+          "value": 0.543,
           "target": "45–55%",
           "ok": true
         },
         {
           "metric": "Exódia",
-          "value": 0.016000000000000007,
+          "value": 0.025000000000000015,
           "target": "1–3%",
           "ok": true
         },
         {
           "metric": "Fallen is Back",
-          "value": 0.704,
+          "value": 0.693,
           "target": "10–25%",
           "ok": false
         }

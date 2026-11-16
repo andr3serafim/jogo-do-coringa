@@ -144,15 +144,17 @@ Todas as decisões abaixo foram confirmadas pelo autor e estão marcadas como **
 
 **A — Roubo [autor, 2026-10-30; sem naipe desde 2026-10-31; E3 do sub-projeto 5]**
 - O Ás serve, à escolha na hora, de **Armadilha** ou de **Roubo**, de qualquer naipe. O Coringa Selvagem no papel de A também.
-- Só na **fase principal do seu turno** (não abre janela de reação **[I]**). Pega **uma numérica** de qualquer fileira do oponente
-  (em qualquer posição **[I]**) e a põe **no fim da fileira que o ladrão escolher**; com ela cheia, a **última** dela vai para o
+- Só na **fase principal do seu turno** (não abre janela de reação, confirmado em 2026-11-15). Pega **uma numérica** de qualquer fileira
+  do oponente (em qualquer posição, confirmado em 2026-11-16) e a põe **no fim da fileira que o ladrão escolher**; com ela cheia, a **última** dela vai para o
   cemitério antes. O Ás vai para o cemitério. As quadras dos dois lados se refazem.
-- Todo roubo, de qualquer naipe (o naipe não muda nada), tem dois efeitos, sempre pelo **valor seco** da carta roubada (sem
-  buffs nem bônus de quadra):
-  - **o dano:** o oponente leva dano igual ao valor. Um **K na Guarda** dele **anula** esse dano e **não quebra**. O dano do roubo
-    **não conta para a iniciativa** **[I]** e **não mata**: a vida do oponente fica em no mínimo 1;
-  - **a cura:** quem roubou **cura** o valor, até a vida inicial. A cura é o valor cheio mesmo quando o K anula o dano ou o "não
-    mata" o corta **[I]**.
+- Todo roubo, de qualquer naipe (o naipe não muda nada), tem dois efeitos, pelo **valor do roubo**: o da carta **com o buff da
+  fileira de onde ela sai**, valor × (1 + nº de J) do Ataque e valor × (1 + nº de Q) da Defesa, **sem** o bônus de quadra, contado no
+  instante do roubo (`RULES_VERSION` 6, `decisoes.md` 2026-11-16 (1) e (3); até a 5 era o valor seco, e o K anulava o dano):
+  - **o dano:** o oponente leva dano igual ao valor. O **K** da Guarda **não anula** esse dano e **não quebra**. O dano do roubo
+    **não conta para a iniciativa** e **não mata**: a vida do oponente fica em no mínimo 1;
+  - **a cura:** quem roubou **cura** o valor, até a vida inicial. A cura é o valor cheio mesmo quando o "não mata" corta o dano
+    (confirmado em 2026-11-15).
+  - Exemplo: ele tem 10 e 4 no Ataque e 3 J; o roubo do 10 tira 40 dele e cura 40. O mesmo 10 na Defesa, com 2 Q, vale 30.
 - Antes (2026-10-30), o naipe decidia: ♣ ♠ davam só o dano, ♥ ♦ só a cura. O autor tirou o efeito do naipe em 2026-10-31, e o
   naipe voltou a ser só visual (§1.1).
 - A **Defesa Absoluta** do oponente **bloqueia o roubo inteiro**: nada é roubado.

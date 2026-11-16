@@ -43,71 +43,6 @@
       "easyBlunder": 0.7,
       "hardVsGreedy": {
         "games": 200,
-        "rate": 0.69,
-        "se": 0.032703210851535665,
-        "wins": 138,
-        "losses": 62,
-        "unfinished": 0,
-        "withInitiative": {
-          "games": 100,
-          "rate": 0.72
-        },
-        "withoutInitiative": {
-          "games": 100,
-          "rate": 0.66
-        }
-      },
-      "greedyVsEasy": {
-        "games": 200,
-        "rate": 0.815,
-        "se": 0.027456784225396828,
-        "wins": 163,
-        "losses": 37,
-        "unfinished": 0,
-        "withInitiative": {
-          "games": 100,
-          "rate": 0.84
-        },
-        "withoutInitiative": {
-          "games": 100,
-          "rate": 0.79
-        }
-      },
-      "timing": {
-        "decisions": 8886,
-        "p50Ms": 86.5573000000004,
-        "p95Ms": 168.24259999999776,
-        "maxMs": 606.7906000000075,
-        "searching": {
-          "decisions": 6776,
-          "p50Ms": 100.69969999999739,
-          "p95Ms": 178.19189999997616,
-          "maxMs": 606.7906000000075
-        }
-      },
-      "passes": {
-        "hardVsGreedy": true,
-        "greedyVsEasy": true,
-        "p95": true
-      },
-      "approved": true,
-      "seconds": 727.2356775
-    },
-    {
-      "label": "a busca na janela da Ressurreição (horizonte 3)",
-      "notes": [],
-      "hard": {
-        "rolloutsPerCandidate": 8,
-        "maxCandidates": 4,
-        "horizon": {
-          "EQUIP": 2,
-          "RESURRECTION": 3,
-          "ATTACK_MAIN": 3
-        }
-      },
-      "easyBlunder": 0.7,
-      "hardVsGreedy": {
-        "games": 200,
         "rate": 0.675,
         "se": 0.03311910324872942,
         "wins": 135,
@@ -115,71 +50,7 @@
         "unfinished": 0,
         "withInitiative": {
           "games": 100,
-          "rate": 0.71
-        },
-        "withoutInitiative": {
-          "games": 100,
-          "rate": 0.64
-        }
-      },
-      "greedyVsEasy": {
-        "games": 200,
-        "rate": 0.815,
-        "se": 0.027456784225396828,
-        "wins": 163,
-        "losses": 37,
-        "unfinished": 0,
-        "withInitiative": {
-          "games": 100,
-          "rate": 0.84
-        },
-        "withoutInitiative": {
-          "games": 100,
-          "rate": 0.79
-        }
-      },
-      "timing": {
-        "decisions": 8958,
-        "p50Ms": 79.97019999998156,
-        "p95Ms": 149.39199999999255,
-        "maxMs": 430.1999000000069,
-        "searching": {
-          "decisions": 7007,
-          "p50Ms": 90.28840000007767,
-          "p95Ms": 154.84769999999844,
-          "maxMs": 430.1999000000069
-        }
-      },
-      "passes": {
-        "hardVsGreedy": true,
-        "greedyVsEasy": true,
-        "p95": true
-      },
-      "approved": true,
-      "seconds": 658.0972447
-    },
-    {
-      "label": "de volta sem a busca na janela (a rodada 2 pontuou menos), numa máquina sem outra medição",
-      "notes": [],
-      "hard": {
-        "rolloutsPerCandidate": 8,
-        "maxCandidates": 4,
-        "horizon": {
-          "EQUIP": 2,
-          "ATTACK_MAIN": 3
-        }
-      },
-      "easyBlunder": 0.7,
-      "hardVsGreedy": {
-        "games": 200,
-        "rate": 0.69,
-        "se": 0.032703210851535665,
-        "wins": 138,
-        "losses": 62,
-        "unfinished": 0,
-        "withInitiative": {
-          "games": 100,
-          "rate": 0.72
+          "rate": 0.69
         },
         "withoutInitiative": {
           "games": 100,
@@ -188,30 +59,30 @@
       },
       "greedyVsEasy": {
         "games": 200,
-        "rate": 0.815,
-        "se": 0.027456784225396828,
-        "wins": 163,
-        "losses": 37,
+        "rate": 0.735,
+        "se": 0.031206970375222264,
+        "wins": 147,
+        "losses": 53,
         "unfinished": 0,
         "withInitiative": {
           "games": 100,
-          "rate": 0.84
+          "rate": 0.78
         },
         "withoutInitiative": {
           "games": 100,
-          "rate": 0.79
+          "rate": 0.69
         }
       },
       "timing": {
-        "decisions": 8886,
-        "p50Ms": 84.70329999993555,
-        "p95Ms": 188.9147000000812,
-        "maxMs": 605.6113999999943,
+        "decisions": 8945,
+        "p50Ms": 75.65279999998165,
+        "p95Ms": 136.3963999999687,
+        "maxMs": 430.32560000001104,
         "searching": {
-          "decisions": 6776,
-          "p50Ms": 98.24409999999625,
-          "p95Ms": 218.67379999998957,
-          "maxMs": 605.6113999999943
+          "decisions": 6762,
+          "p50Ms": 87.50210000000516,
+          "p95Ms": 140.57730000000447,
+          "maxMs": 430.32560000001104
         }
       },
       "passes": {
@@ -220,71 +91,7 @@
         "p95": true
       },
       "approved": true,
-      "seconds": 750.5503386
-    },
-    {
-      "label": "a sequência da iniciativa no estado (bloco C), sem mudança de regra",
-      "notes": [],
-      "hard": {
-        "rolloutsPerCandidate": 8,
-        "maxCandidates": 4,
-        "horizon": {
-          "EQUIP": 2,
-          "ATTACK_MAIN": 3
-        }
-      },
-      "easyBlunder": 0.7,
-      "hardVsGreedy": {
-        "games": 200,
-        "rate": 0.69,
-        "se": 0.032703210851535665,
-        "wins": 138,
-        "losses": 62,
-        "unfinished": 0,
-        "withInitiative": {
-          "games": 100,
-          "rate": 0.72
-        },
-        "withoutInitiative": {
-          "games": 100,
-          "rate": 0.66
-        }
-      },
-      "greedyVsEasy": {
-        "games": 200,
-        "rate": 0.815,
-        "se": 0.027456784225396828,
-        "wins": 163,
-        "losses": 37,
-        "unfinished": 0,
-        "withInitiative": {
-          "games": 100,
-          "rate": 0.84
-        },
-        "withoutInitiative": {
-          "games": 100,
-          "rate": 0.79
-        }
-      },
-      "timing": {
-        "decisions": 8886,
-        "p50Ms": 80.92990000001737,
-        "p95Ms": 146.26149999999325,
-        "maxMs": 303.8610000000044,
-        "searching": {
-          "decisions": 6776,
-          "p50Ms": 94.1978999999701,
-          "p95Ms": 151.875800000038,
-          "maxMs": 303.8610000000044
-        }
-      },
-      "passes": {
-        "hardVsGreedy": true,
-        "greedyVsEasy": true,
-        "p95": true
-      },
-      "approved": true,
-      "seconds": 645.3266754
+      "seconds": 599.9163747
     }
   ]
 }

@@ -5,6 +5,36 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-16 (3): o Roubo com o buff da fileira (RULES_VERSION 6)
+
+- **Pedido:** a regra nova do Roubo (`decisoes.md` 2026-11-16 (1), item 8) com as três [I] confirmadas ("Ok nas três", 2026-11-16 (3)), e
+  "prossiga com as pendências para o deploy e finalização". **Sem plano à parte:** a regra veio fechada do autor; as escolhas técnicas abaixo
+  são `Ruling:` de quem executou.
+- **Feito,** na `feat/roubo-buff` (worktree `.claude/worktrees/roubo`, saída da `feat/dominio` em `e1c12b1`, para a memória seguir linear):
+  - `e248b45`: `stealAmount(card, fromRow, victim)` no motor (valor × (1 + J) ou × (1 + Q), sem a quadra, contado antes de a carta sair);
+    `stealOutcome` sem o K; o `StealDamage` sem `blocked` e com o valor do roubo; a cura pelo mesmo valor; o `stealPreview` acha a
+    fileira da carta. Os testes do Roubo e da prévia foram reescritos antes (3 vermelhos, depois verdes). O `eval.ts` do greedy avalia o
+    Roubo pela conta nova; o texto do histórico e o experimento `e3` perderam o caso do K. Os replays de referência foram regravados
+    (`record-golden`), os resumos revistos (o greedy rouba mais: no `greedy-0`, de 8 para 16) e o `RULES_VERSION` foi a 6, com o digest.
+    Na web: a prévia do alvo ("−27 para Duda · +27 para você"), o resumo das regras e a dica do tutorial; o teste do Equipar vazio trocou a
+    semente `diag-12` pela `diag-3` (as partidas mudaram). O livro de regras (8.5 e 14.1).
+  - Depois: a spec das regras (§ do Roubo) e o comentário do `StealDamage`; a medição.
+- **Ruling:** o campo `blocked` saiu do `StealDamage` e do `StealOutcome` (o K não anula mais nada) — custo: um evento a menos para
+  explicar; a web antiga em cache lê `undefined` e segue.
+- **Ruling:** `STATE_SCHEMA` e `PROTOCOL_VERSION` não sobem: a forma do estado não muda, e um jogo aberto no deploy segue com a regra nova
+  (o valor do Roubo é calculado na hora) — custo: uma sala aberta no instante do deploy troca a regra no meio da partida.
+- **Ruling:** o greedy não foi reajustado à regra nova além da conta do `stealValue` (o limiar `stealMain` segue 12) — custo: o achado da
+  Exódia abaixo fica para o autor decidir.
+- **Medição** (`notas/medicao-roubo-buff.md`): o dano do roubo por partida foi de 54 para 200 e a cura de 60 para 187, mas o greedy que
+  rouba segue fazendo **39,5%** contra o que não rouba (antes, 39,2%). **A Exódia quase dobrou** (greedy × greedy 1,9% → 3,6%, fora da
+  meta de 1–3%; turtle × greedy 7,5% → 15,7%): o greedy gasta o A no Roubo em vez de destruir os K de quem junta Guarda. O portão do
+  Difícil aprovou de primeira (67,5% · 73,5% · p95 136 ms).
+- **Armadilha (de novo):** um `node -e "…"` com crases dentro das aspas duplas executou os comandos entre crases (`pnpm sim:e3`,
+  `pnpm sim:calibrate`, `pnpm sim:dificil --recomecar\`). Só o último chegou a rodar e parou no argumento errado; nada foi gravado. **Todo
+  texto com crases vai por script em arquivo.**
+
+---
+
 ## 2026-11-16 (2): o domínio jogodocoringa.com.br
 
 - **Pedido:** "já comprei o domínio jogodocoringa.com.br e está criado na cloudflare", com o `www` redirecionando (`decisoes.md` 2026-11-16 (3)).

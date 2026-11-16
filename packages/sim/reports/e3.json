@@ -10,780 +10,139 @@
         "attackRounds": {
           "median": 13,
           "p10": 7,
-          "p90": 25,
+          "p90": 24,
           "p95": 29,
-          "max": 44
-        },
-        "initiativeWin": 0.501,
-        "endReasons": {
-          "HP": 0.9770000000000008,
-          "EXODIA": 0.023000000000000013,
-          "FORFEIT": 0,
-          "UNFINISHED": 0
-        },
-        "capped": 0,
-        "cappedWithAbsoluteDefense": 0,
-        "quads": 0.764,
-        "orderFirst": 0.2934709294482666,
-        "perGame": {
-          "BuffPlayed": 12.166,
-          "GuardPlayed": 6.629,
-          "TrapUsed": 6.147,
-          "Sacrificed": 2.512,
-          "ReflectPlayed": 0.165,
-          "ReflectTriggered": 0.163,
-          "ReflectCanceled": 0,
-          "Resurrected": 1.756,
-          "HandLimitPenalty": 0,
-          "CardStolen": 7.323,
-          "StealDamage": 7.323,
-          "Healed": 8.342,
-          "DevastationCast": 0.408,
-          "RowDevastated": 0.408,
-          "DevastationCanceled": 0,
-          "QuadFormed": 2.122,
-          "AbsoluteAttack": 0.131,
-          "AbsoluteDefenseStarted": 0.363,
-          "GuardBroken": 5.768
-        },
-        "resurrections": {
-          "mean": 1.756,
-          "p90": 4,
-          "max": 10,
-          "atLeast3": 0.272
-        }
-      },
-      "stats": {
-        "steals": 7.323,
-        "stealBlocked": 0.1929537074969275,
-        "stealDamage": 54.784,
-        "stealHeal": 59.913,
-        "defenseHeal": 12.714,
-        "equipHeal": 1.946,
-        "healGames": 0.283,
-        "reflects": 0.165,
-        "clashes": 0,
-        "devastations": 0.408,
-        "devastationsReflected": 0.002,
-        "exodiaAtOnce": 0,
-        "exodiaBuilt": 0.023,
-        "burned": 0,
-        "discarded": 0,
-        "fewer": 0
-      }
-    },
-    {
-      "limit": "sem limite",
-      "label": "turtle × greedy",
-      "metrics": {
-        "games": 1000,
-        "terminated": 1,
-        "attackRounds": {
-          "median": 20,
-          "p10": 9,
-          "p90": 48,
-          "p95": 61,
-          "max": 145
-        },
-        "initiativeWin": 0.529,
-        "endReasons": {
-          "HP": 0.8850000000000007,
-          "EXODIA": 0.11500000000000009,
-          "FORFEIT": 0,
-          "UNFINISHED": 0
-        },
-        "capped": 0,
-        "cappedWithAbsoluteDefense": 0,
-        "quads": 0.85,
-        "orderFirst": 0.3019351830263465,
-        "perGame": {
-          "BuffPlayed": 20.41,
-          "GuardPlayed": 11.429,
-          "TrapUsed": 13.201,
-          "Sacrificed": 4.154,
-          "ReflectPlayed": 0.499,
-          "ReflectTriggered": 0.493,
-          "ReflectCanceled": 0,
-          "Resurrected": 2.932,
-          "HandLimitPenalty": 0,
-          "CardStolen": 10.883,
-          "StealDamage": 10.883,
-          "Healed": 18.25,
-          "DevastationCast": 0.552,
-          "RowDevastated": 0.552,
-          "DevastationCanceled": 0,
-          "QuadFormed": 3.812,
-          "AbsoluteAttack": 0.277,
-          "AbsoluteDefenseStarted": 0.63,
-          "GuardBroken": 9.444
-        },
-        "resurrections": {
-          "mean": 2.932,
-          "p90": 7,
-          "max": 21,
-          "atLeast3": 0.447
-        }
-      },
-      "stats": {
-        "steals": 10.883,
-        "stealBlocked": 0.2947716622254893,
-        "stealDamage": 71.499,
-        "stealHeal": 89.322,
-        "defenseHeal": 63.278,
-        "equipHeal": 9.355,
-        "healGames": 0.602,
-        "reflects": 0.499,
-        "clashes": 0,
-        "devastations": 0.552,
-        "devastationsReflected": 0.006,
-        "exodiaAtOnce": 0,
-        "exodiaBuilt": 0.115,
-        "burned": 0,
-        "discarded": 0,
-        "fewer": 0
-      }
-    },
-    {
-      "limit": "sem limite",
-      "label": "random × random",
-      "metrics": {
-        "games": 1000,
-        "terminated": 1,
-        "attackRounds": {
-          "median": 19,
-          "p10": 11,
-          "p90": 34,
-          "p95": 39,
-          "max": 58
-        },
-        "initiativeWin": 0.493,
-        "endReasons": {
-          "HP": 0.8850000000000007,
-          "EXODIA": 0.11500000000000009,
-          "FORFEIT": 0,
-          "UNFINISHED": 0
-        },
-        "capped": 0,
-        "cappedWithAbsoluteDefense": 0,
-        "quads": 0.588,
-        "orderFirst": 0.5041119607560237,
-        "perGame": {
-          "BuffPlayed": 14.101,
-          "GuardPlayed": 8.399,
-          "TrapUsed": 7.289,
-          "Sacrificed": 4.766,
-          "ReflectPlayed": 0.63,
-          "ReflectTriggered": 0.624,
-          "ReflectCanceled": 0.005,
-          "Resurrected": 0.88,
-          "HandLimitPenalty": 0,
-          "CardStolen": 12.647,
-          "StealDamage": 12.647,
-          "Healed": 16.714,
-          "DevastationCast": 0.135,
-          "RowDevastated": 0.135,
-          "DevastationCanceled": 0,
-          "QuadFormed": 1.161,
-          "AbsoluteAttack": 0.252,
-          "AbsoluteDefenseStarted": 0.345,
-          "GuardBroken": 5.57
-        },
-        "resurrections": {
-          "mean": 0.88,
-          "p90": 2,
-          "max": 7,
-          "atLeast3": 0.086
-        }
-      },
-      "stats": {
-        "steals": 12.647,
-        "stealBlocked": 0.26860124930813634,
-        "stealDamage": 55.007,
-        "stealHeal": 59.081,
-        "defenseHeal": 29.008,
-        "equipHeal": 3.173,
-        "healGames": 0.563,
-        "reflects": 0.63,
-        "clashes": 0.005,
-        "devastations": 0.135,
-        "devastationsReflected": 0.001,
-        "exodiaAtOnce": 0.004,
-        "exodiaBuilt": 0.111,
-        "burned": 0,
-        "discarded": 0,
-        "fewer": 0
-      }
-    },
-    {
-      "limit": "BURN",
-      "label": "greedy × greedy",
-      "metrics": {
-        "games": 1000,
-        "terminated": 1,
-        "attackRounds": {
-          "median": 13,
-          "p10": 7,
-          "p90": 25,
-          "p95": 29,
-          "max": 47
-        },
-        "initiativeWin": 0.511,
-        "endReasons": {
-          "HP": 0.9790000000000008,
-          "EXODIA": 0.02100000000000001,
-          "FORFEIT": 0,
-          "UNFINISHED": 0
-        },
-        "capped": 0,
-        "cappedWithAbsoluteDefense": 0,
-        "quads": 0.761,
-        "orderFirst": 0.29605352074604674,
-        "perGame": {
-          "BuffPlayed": 12.118,
-          "GuardPlayed": 6.603,
-          "TrapUsed": 6.148,
-          "Sacrificed": 2.502,
-          "ReflectPlayed": 0.155,
-          "ReflectTriggered": 0.153,
-          "ReflectCanceled": 0,
-          "Resurrected": 1.741,
-          "HandLimitPenalty": 0.089,
-          "CardStolen": 7.268,
-          "StealDamage": 7.268,
-          "Healed": 8.313,
-          "DevastationCast": 0.405,
-          "RowDevastated": 0.405,
-          "DevastationCanceled": 0,
-          "QuadFormed": 2.094,
-          "AbsoluteAttack": 0.124,
-          "AbsoluteDefenseStarted": 0.34,
-          "GuardBroken": 5.758
-        },
-        "resurrections": {
-          "mean": 1.741,
-          "p90": 4,
-          "max": 15,
-          "atLeast3": 0.265
-        }
-      },
-      "stats": {
-        "steals": 7.268,
-        "stealBlocked": 0.19455145844799118,
-        "stealDamage": 54.322,
-        "stealHeal": 59.581,
-        "defenseHeal": 13.228,
-        "equipHeal": 2.015,
-        "healGames": 0.286,
-        "reflects": 0.155,
-        "clashes": 0,
-        "devastations": 0.405,
-        "devastationsReflected": 0.002,
-        "exodiaAtOnce": 0,
-        "exodiaBuilt": 0.021,
-        "burned": 0.107,
-        "discarded": 0,
-        "fewer": 0
-      }
-    },
-    {
-      "limit": "BURN",
-      "label": "turtle × greedy",
-      "metrics": {
-        "games": 1000,
-        "terminated": 1,
-        "attackRounds": {
-          "median": 21,
-          "p10": 9,
-          "p90": 46,
-          "p95": 54,
-          "max": 105
-        },
-        "initiativeWin": 0.524,
-        "endReasons": {
-          "HP": 0.8990000000000007,
-          "EXODIA": 0.10100000000000008,
-          "FORFEIT": 0,
-          "UNFINISHED": 0
-        },
-        "capped": 0,
-        "cappedWithAbsoluteDefense": 0,
-        "quads": 0.852,
-        "orderFirst": 0.3039156261365014,
-        "perGame": {
-          "BuffPlayed": 19.743,
-          "GuardPlayed": 10.819,
-          "TrapUsed": 12.332,
-          "Sacrificed": 4.112,
-          "ReflectPlayed": 0.345,
-          "ReflectTriggered": 0.34,
-          "ReflectCanceled": 0,
-          "Resurrected": 2.903,
-          "HandLimitPenalty": 1.345,
-          "CardStolen": 10.191,
-          "StealDamage": 10.191,
-          "Healed": 16.384,
-          "DevastationCast": 0.532,
-          "RowDevastated": 0.532,
-          "DevastationCanceled": 0,
-          "QuadFormed": 3.73,
-          "AbsoluteAttack": 0.25,
-          "AbsoluteDefenseStarted": 0.592,
-          "GuardBroken": 9.195
-        },
-        "resurrections": {
-          "mean": 2.903,
-          "p90": 7,
-          "max": 17,
-          "atLeast3": 0.458
-        }
-      },
-      "stats": {
-        "steals": 10.191,
-        "stealBlocked": 0.27445785497007164,
-        "stealDamage": 68.985,
-        "stealHeal": 86.009,
-        "defenseHeal": 62.233,
-        "equipHeal": 8.705,
-        "healGames": 0.589,
-        "reflects": 0.345,
-        "clashes": 0,
-        "devastations": 0.532,
-        "devastationsReflected": 0.005,
-        "exodiaAtOnce": 0,
-        "exodiaBuilt": 0.101,
-        "burned": 1.836,
-        "discarded": 0,
-        "fewer": 0
-      }
-    },
-    {
-      "limit": "BURN",
-      "label": "random × random",
-      "metrics": {
-        "games": 1000,
-        "terminated": 1,
-        "attackRounds": {
-          "median": 20,
-          "p10": 11,
-          "p90": 35,
-          "p95": 40,
           "max": 68
         },
-        "initiativeWin": 0.491,
+        "initiativeWin": 0.514,
         "endReasons": {
-          "HP": 0.8940000000000007,
-          "EXODIA": 0.10600000000000008,
+          "HP": 0.9700000000000008,
+          "EXODIA": 0.03000000000000002,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.585,
-        "orderFirst": 0.5014076706512207,
+        "quads": 0.739,
+        "orderFirst": 0.320214795449728,
         "perGame": {
-          "BuffPlayed": 14.369,
-          "GuardPlayed": 8.667,
-          "TrapUsed": 7.466,
-          "Sacrificed": 5.011,
-          "ReflectPlayed": 0.567,
-          "ReflectTriggered": 0.56,
-          "ReflectCanceled": 0.006,
-          "Resurrected": 0.889,
-          "HandLimitPenalty": 1.289,
-          "CardStolen": 12.826,
-          "StealDamage": 12.826,
-          "Healed": 16.841,
-          "DevastationCast": 0.118,
-          "RowDevastated": 0.118,
-          "DevastationCanceled": 0,
-          "QuadFormed": 1.169,
-          "AbsoluteAttack": 0.262,
-          "AbsoluteDefenseStarted": 0.342,
-          "GuardBroken": 5.801
-        },
-        "resurrections": {
-          "mean": 0.889,
-          "p90": 2,
-          "max": 7,
-          "atLeast3": 0.096
-        }
-      },
-      "stats": {
-        "steals": 12.826,
-        "stealBlocked": 0.26430687665679087,
-        "stealDamage": 56.179,
-        "stealHeal": 60.451,
-        "defenseHeal": 29.322,
-        "equipHeal": 3.025,
-        "healGames": 0.548,
-        "reflects": 0.567,
-        "clashes": 0.006,
-        "devastations": 0.118,
-        "devastationsReflected": 0.001,
-        "exodiaAtOnce": 0.002,
-        "exodiaBuilt": 0.104,
-        "burned": 1.6,
-        "discarded": 0,
-        "fewer": 0
-      }
-    },
-    {
-      "limit": "CHOOSE",
-      "label": "greedy × greedy",
-      "metrics": {
-        "games": 1000,
-        "terminated": 1,
-        "attackRounds": {
-          "median": 13,
-          "p10": 7,
-          "p90": 25,
-          "p95": 29,
-          "max": 44
-        },
-        "initiativeWin": 0.503,
-        "endReasons": {
-          "HP": 0.9790000000000008,
-          "EXODIA": 0.02100000000000001,
-          "FORFEIT": 0,
-          "UNFINISHED": 0
-        },
-        "capped": 0,
-        "cappedWithAbsoluteDefense": 0,
-        "quads": 0.761,
-        "orderFirst": 0.29488567176295494,
-        "perGame": {
-          "BuffPlayed": 12.087,
-          "GuardPlayed": 6.614,
-          "TrapUsed": 6.111,
-          "Sacrificed": 2.494,
-          "ReflectPlayed": 0.156,
-          "ReflectTriggered": 0.154,
+          "BuffPlayed": 10.695,
+          "GuardPlayed": 6.297,
+          "TrapUsed": 3.129,
+          "Sacrificed": 2.838,
+          "ReflectPlayed": 0.151,
+          "ReflectTriggered": 0.148,
           "ReflectCanceled": 0,
-          "Resurrected": 1.745,
-          "HandLimitPenalty": 0.093,
-          "CardStolen": 7.298,
-          "StealDamage": 7.298,
-          "Healed": 8.296,
-          "DevastationCast": 0.415,
-          "RowDevastated": 0.415,
-          "DevastationCanceled": 0,
-          "QuadFormed": 2.092,
-          "AbsoluteAttack": 0.129,
-          "AbsoluteDefenseStarted": 0.335,
-          "GuardBroken": 5.767
-        },
-        "resurrections": {
-          "mean": 1.745,
-          "p90": 4,
-          "max": 10,
-          "atLeast3": 0.267
-        }
-      },
-      "stats": {
-        "steals": 7.298,
-        "stealBlocked": 0.19169635516579886,
-        "stealDamage": 54.739,
-        "stealHeal": 59.849,
-        "defenseHeal": 12.481,
-        "equipHeal": 1.894,
-        "healGames": 0.279,
-        "reflects": 0.156,
-        "clashes": 0,
-        "devastations": 0.415,
-        "devastationsReflected": 0.002,
-        "exodiaAtOnce": 0,
-        "exodiaBuilt": 0.021,
-        "burned": 0,
-        "discarded": 0.111,
-        "fewer": 0
-      }
-    },
-    {
-      "limit": "CHOOSE",
-      "label": "turtle × greedy",
-      "metrics": {
-        "games": 1000,
-        "terminated": 1,
-        "attackRounds": {
-          "median": 20,
-          "p10": 9,
-          "p90": 46,
-          "p95": 55,
-          "max": 107
-        },
-        "initiativeWin": 0.529,
-        "endReasons": {
-          "HP": 0.8920000000000007,
-          "EXODIA": 0.10800000000000008,
-          "FORFEIT": 0,
-          "UNFINISHED": 0
-        },
-        "capped": 0,
-        "cappedWithAbsoluteDefense": 0,
-        "quads": 0.849,
-        "orderFirst": 0.3008817046289493,
-        "perGame": {
-          "BuffPlayed": 19.412,
-          "GuardPlayed": 10.936,
-          "TrapUsed": 12.41,
-          "Sacrificed": 4.031,
-          "ReflectPlayed": 0.403,
-          "ReflectTriggered": 0.398,
-          "ReflectCanceled": 0,
-          "Resurrected": 2.837,
-          "HandLimitPenalty": 0.934,
-          "CardStolen": 10.372,
-          "StealDamage": 10.372,
-          "Healed": 16.496,
-          "DevastationCast": 0.55,
-          "RowDevastated": 0.55,
-          "DevastationCanceled": 0,
-          "QuadFormed": 3.635,
-          "AbsoluteAttack": 0.191,
-          "AbsoluteDefenseStarted": 0.528,
-          "GuardBroken": 9.198
-        },
-        "resurrections": {
-          "mean": 2.837,
-          "p90": 6,
-          "max": 24,
-          "atLeast3": 0.45
-        }
-      },
-      "stats": {
-        "steals": 10.372,
-        "stealBlocked": 0.28914384882375627,
-        "stealDamage": 68.8,
-        "stealHeal": 86.935,
-        "defenseHeal": 57.624,
-        "equipHeal": 8.16,
-        "healGames": 0.599,
-        "reflects": 0.403,
-        "clashes": 0,
-        "devastations": 0.55,
-        "devastationsReflected": 0.005,
-        "exodiaAtOnce": 0,
-        "exodiaBuilt": 0.108,
-        "burned": 0,
-        "discarded": 1.206,
-        "fewer": 0
-      }
-    },
-    {
-      "limit": "CHOOSE",
-      "label": "random × random",
-      "metrics": {
-        "games": 1000,
-        "terminated": 1,
-        "attackRounds": {
-          "median": 20,
-          "p10": 11,
-          "p90": 35,
-          "p95": 39,
-          "max": 66
-        },
-        "initiativeWin": 0.487,
-        "endReasons": {
-          "HP": 0.8960000000000007,
-          "EXODIA": 0.10400000000000008,
-          "FORFEIT": 0,
-          "UNFINISHED": 0
-        },
-        "capped": 0,
-        "cappedWithAbsoluteDefense": 0,
-        "quads": 0.582,
-        "orderFirst": 0.5001406337896118,
-        "perGame": {
-          "BuffPlayed": 14.075,
-          "GuardPlayed": 8.478,
-          "TrapUsed": 7.371,
-          "Sacrificed": 4.829,
-          "ReflectPlayed": 0.57,
-          "ReflectTriggered": 0.563,
-          "ReflectCanceled": 0.004,
-          "Resurrected": 0.88,
-          "HandLimitPenalty": 1.269,
-          "CardStolen": 12.749,
-          "StealDamage": 12.749,
-          "Healed": 16.652,
-          "DevastationCast": 0.115,
-          "RowDevastated": 0.115,
-          "DevastationCanceled": 0,
-          "QuadFormed": 1.148,
-          "AbsoluteAttack": 0.238,
-          "AbsoluteDefenseStarted": 0.309,
-          "GuardBroken": 5.732
-        },
-        "resurrections": {
-          "mean": 0.88,
-          "p90": 2,
-          "max": 6,
-          "atLeast3": 0.091
-        }
-      },
-      "stats": {
-        "steals": 12.749,
-        "stealBlocked": 0.2657463330457291,
-        "stealDamage": 55.683,
-        "stealHeal": 60.184,
-        "defenseHeal": 28.662,
-        "equipHeal": 2.797,
-        "healGames": 0.549,
-        "reflects": 0.57,
-        "clashes": 0.004,
-        "devastations": 0.115,
-        "devastationsReflected": 0.003,
-        "exodiaAtOnce": 0.003,
-        "exodiaBuilt": 0.101,
-        "burned": 0,
-        "discarded": 1.584,
-        "fewer": 0
-      }
-    },
-    {
-      "limit": "FEWER",
-      "label": "greedy × greedy",
-      "metrics": {
-        "games": 1000,
-        "terminated": 1,
-        "attackRounds": {
-          "median": 13,
-          "p10": 7,
-          "p90": 25,
-          "p95": 29,
-          "max": 44
-        },
-        "initiativeWin": 0.501,
-        "endReasons": {
-          "HP": 0.9770000000000008,
-          "EXODIA": 0.023000000000000013,
-          "FORFEIT": 0,
-          "UNFINISHED": 0
-        },
-        "capped": 0,
-        "cappedWithAbsoluteDefense": 0,
-        "quads": 0.764,
-        "orderFirst": 0.2934709294482666,
-        "perGame": {
-          "BuffPlayed": 12.166,
-          "GuardPlayed": 6.629,
-          "TrapUsed": 6.147,
-          "Sacrificed": 2.512,
-          "ReflectPlayed": 0.165,
-          "ReflectTriggered": 0.163,
-          "ReflectCanceled": 0,
-          "Resurrected": 1.756,
+          "Resurrected": 2.033,
           "HandLimitPenalty": 0,
-          "CardStolen": 7.323,
-          "StealDamage": 7.323,
-          "Healed": 8.342,
-          "DevastationCast": 0.408,
-          "RowDevastated": 0.408,
+          "CardStolen": 9.872,
+          "StealDamage": 9.872,
+          "Healed": 11.572,
+          "DevastationCast": 0.359,
+          "RowDevastated": 0.359,
           "DevastationCanceled": 0,
-          "QuadFormed": 2.122,
-          "AbsoluteAttack": 0.131,
-          "AbsoluteDefenseStarted": 0.363,
-          "GuardBroken": 5.768
+          "QuadFormed": 2.06,
+          "AbsoluteAttack": 0.208,
+          "AbsoluteDefenseStarted": 0.463,
+          "GuardBroken": 5.411
         },
         "resurrections": {
-          "mean": 1.756,
-          "p90": 4,
-          "max": 10,
-          "atLeast3": 0.272
+          "mean": 2.033,
+          "p90": 5,
+          "max": 15,
+          "atLeast3": 0.313
         }
       },
       "stats": {
-        "steals": 7.323,
-        "stealBlocked": 0.1929537074969275,
-        "stealDamage": 54.784,
-        "stealHeal": 59.913,
-        "defenseHeal": 12.714,
-        "equipHeal": 1.946,
-        "healGames": 0.283,
-        "reflects": 0.165,
+        "steals": 9.872,
+        "stealDamage": 199.991,
+        "stealHeal": 186.401,
+        "defenseHeal": 25.46,
+        "equipHeal": 3.554,
+        "healGames": 0.274,
+        "reflects": 0.151,
         "clashes": 0,
-        "devastations": 0.408,
-        "devastationsReflected": 0.002,
+        "devastations": 0.359,
+        "devastationsReflected": 0.003,
         "exodiaAtOnce": 0,
-        "exodiaBuilt": 0.023,
+        "exodiaBuilt": 0.03,
         "burned": 0,
         "discarded": 0,
         "fewer": 0
       }
     },
     {
-      "limit": "FEWER",
+      "limit": "sem limite",
       "label": "turtle × greedy",
       "metrics": {
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
           "median": 20,
-          "p10": 9,
-          "p90": 48,
-          "p95": 58,
-          "max": 145
+          "p10": 8,
+          "p90": 44,
+          "p95": 56,
+          "max": 116
         },
-        "initiativeWin": 0.524,
+        "initiativeWin": 0.489,
         "endReasons": {
-          "HP": 0.9040000000000007,
-          "EXODIA": 0.09600000000000007,
+          "HP": 0.8190000000000006,
+          "EXODIA": 0.18100000000000013,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.85,
-        "orderFirst": 0.2965332069809682,
+        "quads": 0.834,
+        "orderFirst": 0.3004062976130015,
         "perGame": {
-          "BuffPlayed": 20.189,
-          "GuardPlayed": 11.173,
-          "TrapUsed": 12.84,
-          "Sacrificed": 4.116,
-          "ReflectPlayed": 0.455,
-          "ReflectTriggered": 0.449,
+          "BuffPlayed": 16.752,
+          "GuardPlayed": 10.383,
+          "TrapUsed": 6.313,
+          "Sacrificed": 4.387,
+          "ReflectPlayed": 0.34,
+          "ReflectTriggered": 0.339,
           "ReflectCanceled": 0,
-          "Resurrected": 2.827,
-          "HandLimitPenalty": 1.108,
-          "CardStolen": 10.612,
-          "StealDamage": 10.612,
-          "Healed": 17.355,
-          "DevastationCast": 0.564,
-          "RowDevastated": 0.564,
+          "Resurrected": 3.625,
+          "HandLimitPenalty": 0,
+          "CardStolen": 15.995,
+          "StealDamage": 15.995,
+          "Healed": 24.797,
+          "DevastationCast": 0.478,
+          "RowDevastated": 0.478,
           "DevastationCanceled": 0,
-          "QuadFormed": 3.651,
-          "AbsoluteAttack": 0.33,
-          "AbsoluteDefenseStarted": 0.618,
-          "GuardBroken": 9.301
+          "QuadFormed": 3.697,
+          "AbsoluteAttack": 0.447,
+          "AbsoluteDefenseStarted": 1.554,
+          "GuardBroken": 8.141
         },
         "resurrections": {
-          "mean": 2.827,
-          "p90": 6,
-          "max": 17,
-          "atLeast3": 0.446
+          "mean": 3.625,
+          "p90": 9,
+          "max": 26,
+          "atLeast3": 0.497
         }
       },
       "stats": {
-        "steals": 10.612,
-        "stealBlocked": 0.2846777233320769,
-        "stealDamage": 70.673,
-        "stealHeal": 88.588,
-        "defenseHeal": 62.936,
-        "equipHeal": 9.521,
-        "healGames": 0.601,
-        "reflects": 0.455,
+        "steals": 15.995,
+        "stealDamage": 366.255,
+        "stealHeal": 337.112,
+        "defenseHeal": 116.945,
+        "equipHeal": 15.105,
+        "healGames": 0.62,
+        "reflects": 0.34,
         "clashes": 0,
-        "devastations": 0.564,
-        "devastationsReflected": 0.006,
-        "exodiaAtOnce": 0,
-        "exodiaBuilt": 0.096,
+        "devastations": 0.478,
+        "devastationsReflected": 0.001,
+        "exodiaAtOnce": 0.001,
+        "exodiaBuilt": 0.18,
         "burned": 0,
         "discarded": 0,
-        "fewer": 1.593
+        "fewer": 0
       }
     },
     {
-      "limit": "FEWER",
+      "limit": "sem limite",
       "label": "random × random",
       "metrics": {
         "games": 1000,
@@ -792,10 +151,10 @@
           "median": 19,
           "p10": 11,
           "p90": 34,
-          "p95": 39,
-          "max": 58
+          "p95": 38,
+          "max": 72
         },
-        "initiativeWin": 0.494,
+        "initiativeWin": 0.499,
         "endReasons": {
           "HP": 0.8880000000000007,
           "EXODIA": 0.11200000000000009,
@@ -804,66 +163,695 @@
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.592,
-        "orderFirst": 0.5043511523381466,
+        "quads": 0.584,
+        "orderFirst": 0.5017337699865151,
         "perGame": {
-          "BuffPlayed": 14.15,
-          "GuardPlayed": 8.445,
-          "TrapUsed": 7.341,
-          "Sacrificed": 4.811,
-          "ReflectPlayed": 0.635,
+          "BuffPlayed": 14.112,
+          "GuardPlayed": 8.301,
+          "TrapUsed": 7.297,
+          "Sacrificed": 4.728,
+          "ReflectPlayed": 0.637,
           "ReflectTriggered": 0.629,
           "ReflectCanceled": 0.005,
-          "Resurrected": 0.905,
-          "HandLimitPenalty": 0.126,
-          "CardStolen": 12.684,
-          "StealDamage": 12.684,
-          "Healed": 16.714,
-          "DevastationCast": 0.141,
-          "RowDevastated": 0.141,
+          "Resurrected": 1.171,
+          "HandLimitPenalty": 0,
+          "CardStolen": 12.614,
+          "StealDamage": 12.614,
+          "Healed": 16.775,
+          "DevastationCast": 0.138,
+          "RowDevastated": 0.138,
           "DevastationCanceled": 0,
-          "QuadFormed": 1.189,
-          "AbsoluteAttack": 0.25,
-          "AbsoluteDefenseStarted": 0.33,
-          "GuardBroken": 5.623
+          "QuadFormed": 1.194,
+          "AbsoluteAttack": 0.283,
+          "AbsoluteDefenseStarted": 0.34,
+          "GuardBroken": 5.556
         },
         "resurrections": {
-          "mean": 0.905,
-          "p90": 2,
-          "max": 7,
-          "atLeast3": 0.09
+          "mean": 1.171,
+          "p90": 3,
+          "max": 9,
+          "atLeast3": 0.149
         }
       },
       "stats": {
-        "steals": 12.684,
-        "stealBlocked": 0.26695048880479344,
-        "stealDamage": 55.326,
-        "stealHeal": 59.406,
-        "defenseHeal": 28.438,
-        "equipHeal": 2.959,
-        "healGames": 0.568,
-        "reflects": 0.635,
+        "steals": 12.614,
+        "stealDamage": 117.043,
+        "stealHeal": 98.539,
+        "defenseHeal": 38.538,
+        "equipHeal": 3.416,
+        "healGames": 0.621,
+        "reflects": 0.637,
         "clashes": 0.005,
-        "devastations": 0.141,
-        "devastationsReflected": 0.001,
+        "devastations": 0.138,
+        "devastationsReflected": 0.003,
         "exodiaAtOnce": 0.003,
         "exodiaBuilt": 0.109,
         "burned": 0,
         "discarded": 0,
-        "fewer": 0.148
+        "fewer": 0
+      }
+    },
+    {
+      "limit": "BURN",
+      "label": "greedy × greedy",
+      "metrics": {
+        "games": 1000,
+        "terminated": 1,
+        "attackRounds": {
+          "median": 13,
+          "p10": 7,
+          "p90": 24,
+          "p95": 29,
+          "max": 68
+        },
+        "initiativeWin": 0.514,
+        "endReasons": {
+          "HP": 0.9700000000000008,
+          "EXODIA": 0.03000000000000002,
+          "FORFEIT": 0,
+          "UNFINISHED": 0
+        },
+        "capped": 0,
+        "cappedWithAbsoluteDefense": 0,
+        "quads": 0.736,
+        "orderFirst": 0.32308128410459924,
+        "perGame": {
+          "BuffPlayed": 10.65,
+          "GuardPlayed": 6.26,
+          "TrapUsed": 3.087,
+          "Sacrificed": 2.799,
+          "ReflectPlayed": 0.142,
+          "ReflectTriggered": 0.139,
+          "ReflectCanceled": 0,
+          "Resurrected": 2.031,
+          "HandLimitPenalty": 0.09,
+          "CardStolen": 9.839,
+          "StealDamage": 9.839,
+          "Healed": 11.481,
+          "DevastationCast": 0.354,
+          "RowDevastated": 0.354,
+          "DevastationCanceled": 0,
+          "QuadFormed": 2.059,
+          "AbsoluteAttack": 0.205,
+          "AbsoluteDefenseStarted": 0.465,
+          "GuardBroken": 5.402
+        },
+        "resurrections": {
+          "mean": 2.031,
+          "p90": 5,
+          "max": 15,
+          "atLeast3": 0.312
+        }
+      },
+      "stats": {
+        "steals": 9.839,
+        "stealDamage": 199.885,
+        "stealHeal": 186.741,
+        "defenseHeal": 24.85,
+        "equipHeal": 3.588,
+        "healGames": 0.271,
+        "reflects": 0.142,
+        "clashes": 0,
+        "devastations": 0.354,
+        "devastationsReflected": 0.003,
+        "exodiaAtOnce": 0,
+        "exodiaBuilt": 0.03,
+        "burned": 0.108,
+        "discarded": 0,
+        "fewer": 0
+      }
+    },
+    {
+      "limit": "BURN",
+      "label": "turtle × greedy",
+      "metrics": {
+        "games": 1000,
+        "terminated": 1,
+        "attackRounds": {
+          "median": 19,
+          "p10": 8,
+          "p90": 43,
+          "p95": 55,
+          "max": 132
+        },
+        "initiativeWin": 0.503,
+        "endReasons": {
+          "HP": 0.8200000000000006,
+          "EXODIA": 0.18000000000000013,
+          "FORFEIT": 0,
+          "UNFINISHED": 0
+        },
+        "capped": 0,
+        "cappedWithAbsoluteDefense": 0,
+        "quads": 0.827,
+        "orderFirst": 0.30056937368894215,
+        "perGame": {
+          "BuffPlayed": 16.409,
+          "GuardPlayed": 10.218,
+          "TrapUsed": 6.027,
+          "Sacrificed": 4.391,
+          "ReflectPlayed": 0.254,
+          "ReflectTriggered": 0.253,
+          "ReflectCanceled": 0,
+          "Resurrected": 3.568,
+          "HandLimitPenalty": 0.769,
+          "CardStolen": 15.688,
+          "StealDamage": 15.688,
+          "Healed": 24.26,
+          "DevastationCast": 0.461,
+          "RowDevastated": 0.461,
+          "DevastationCanceled": 0,
+          "QuadFormed": 3.643,
+          "AbsoluteAttack": 0.443,
+          "AbsoluteDefenseStarted": 1.472,
+          "GuardBroken": 8.044
+        },
+        "resurrections": {
+          "mean": 3.568,
+          "p90": 9,
+          "max": 25,
+          "atLeast3": 0.49
+        }
+      },
+      "stats": {
+        "steals": 15.688,
+        "stealDamage": 368.353,
+        "stealHeal": 340.31,
+        "defenseHeal": 117.891,
+        "equipHeal": 14.351,
+        "healGames": 0.621,
+        "reflects": 0.254,
+        "clashes": 0,
+        "devastations": 0.461,
+        "devastationsReflected": 0.001,
+        "exodiaAtOnce": 0,
+        "exodiaBuilt": 0.18,
+        "burned": 0.981,
+        "discarded": 0,
+        "fewer": 0
+      }
+    },
+    {
+      "limit": "BURN",
+      "label": "random × random",
+      "metrics": {
+        "games": 1000,
+        "terminated": 1,
+        "attackRounds": {
+          "median": 19,
+          "p10": 11,
+          "p90": 35,
+          "p95": 39,
+          "max": 70
+        },
+        "initiativeWin": 0.502,
+        "endReasons": {
+          "HP": 0.8980000000000007,
+          "EXODIA": 0.10200000000000008,
+          "FORFEIT": 0,
+          "UNFINISHED": 0
+        },
+        "capped": 0,
+        "cappedWithAbsoluteDefense": 0,
+        "quads": 0.582,
+        "orderFirst": 0.5007511031827997,
+        "perGame": {
+          "BuffPlayed": 14.161,
+          "GuardPlayed": 8.489,
+          "TrapUsed": 7.304,
+          "Sacrificed": 4.884,
+          "ReflectPlayed": 0.529,
+          "ReflectTriggered": 0.523,
+          "ReflectCanceled": 0.005,
+          "Resurrected": 1.193,
+          "HandLimitPenalty": 1.297,
+          "CardStolen": 12.627,
+          "StealDamage": 12.627,
+          "Healed": 16.614,
+          "DevastationCast": 0.118,
+          "RowDevastated": 0.118,
+          "DevastationCanceled": 0,
+          "QuadFormed": 1.215,
+          "AbsoluteAttack": 0.278,
+          "AbsoluteDefenseStarted": 0.346,
+          "GuardBroken": 5.713
+        },
+        "resurrections": {
+          "mean": 1.193,
+          "p90": 3,
+          "max": 8,
+          "atLeast3": 0.156
+        }
+      },
+      "stats": {
+        "steals": 12.627,
+        "stealDamage": 117.711,
+        "stealHeal": 98.516,
+        "defenseHeal": 36.124,
+        "equipHeal": 3.305,
+        "healGames": 0.603,
+        "reflects": 0.529,
+        "clashes": 0.005,
+        "devastations": 0.118,
+        "devastationsReflected": 0.001,
+        "exodiaAtOnce": 0.002,
+        "exodiaBuilt": 0.1,
+        "burned": 1.619,
+        "discarded": 0,
+        "fewer": 0
+      }
+    },
+    {
+      "limit": "CHOOSE",
+      "label": "greedy × greedy",
+      "metrics": {
+        "games": 1000,
+        "terminated": 1,
+        "attackRounds": {
+          "median": 13,
+          "p10": 7,
+          "p90": 24,
+          "p95": 29,
+          "max": 68
+        },
+        "initiativeWin": 0.515,
+        "endReasons": {
+          "HP": 0.9690000000000007,
+          "EXODIA": 0.03100000000000002,
+          "FORFEIT": 0,
+          "UNFINISHED": 0
+        },
+        "capped": 0,
+        "cappedWithAbsoluteDefense": 0,
+        "quads": 0.74,
+        "orderFirst": 0.3209509658246657,
+        "perGame": {
+          "BuffPlayed": 10.631,
+          "GuardPlayed": 6.302,
+          "TrapUsed": 3.121,
+          "Sacrificed": 2.799,
+          "ReflectPlayed": 0.138,
+          "ReflectTriggered": 0.135,
+          "ReflectCanceled": 0,
+          "Resurrected": 2.016,
+          "HandLimitPenalty": 0.091,
+          "CardStolen": 9.852,
+          "StealDamage": 9.852,
+          "Healed": 11.537,
+          "DevastationCast": 0.359,
+          "RowDevastated": 0.359,
+          "DevastationCanceled": 0,
+          "QuadFormed": 2.044,
+          "AbsoluteAttack": 0.207,
+          "AbsoluteDefenseStarted": 0.447,
+          "GuardBroken": 5.441
+        },
+        "resurrections": {
+          "mean": 2.016,
+          "p90": 5,
+          "max": 15,
+          "atLeast3": 0.307
+        }
+      },
+      "stats": {
+        "steals": 9.852,
+        "stealDamage": 199.492,
+        "stealHeal": 186.264,
+        "defenseHeal": 25.614,
+        "equipHeal": 3.718,
+        "healGames": 0.277,
+        "reflects": 0.138,
+        "clashes": 0,
+        "devastations": 0.359,
+        "devastationsReflected": 0.003,
+        "exodiaAtOnce": 0,
+        "exodiaBuilt": 0.031,
+        "burned": 0,
+        "discarded": 0.109,
+        "fewer": 0
+      }
+    },
+    {
+      "limit": "CHOOSE",
+      "label": "turtle × greedy",
+      "metrics": {
+        "games": 1000,
+        "terminated": 1,
+        "attackRounds": {
+          "median": 19,
+          "p10": 9,
+          "p90": 44,
+          "p95": 56,
+          "max": 116
+        },
+        "initiativeWin": 0.504,
+        "endReasons": {
+          "HP": 0.8090000000000006,
+          "EXODIA": 0.19100000000000014,
+          "FORFEIT": 0,
+          "UNFINISHED": 0
+        },
+        "capped": 0,
+        "cappedWithAbsoluteDefense": 0,
+        "quads": 0.826,
+        "orderFirst": 0.30672161794697483,
+        "perGame": {
+          "BuffPlayed": 16.542,
+          "GuardPlayed": 10.434,
+          "TrapUsed": 6.314,
+          "Sacrificed": 4.426,
+          "ReflectPlayed": 0.293,
+          "ReflectTriggered": 0.292,
+          "ReflectCanceled": 0,
+          "Resurrected": 3.527,
+          "HandLimitPenalty": 0.566,
+          "CardStolen": 15.935,
+          "StealDamage": 15.935,
+          "Healed": 24.544,
+          "DevastationCast": 0.471,
+          "RowDevastated": 0.471,
+          "DevastationCanceled": 0,
+          "QuadFormed": 3.601,
+          "AbsoluteAttack": 0.395,
+          "AbsoluteDefenseStarted": 1.389,
+          "GuardBroken": 8.223
+        },
+        "resurrections": {
+          "mean": 3.527,
+          "p90": 9,
+          "max": 24,
+          "atLeast3": 0.491
+        }
+      },
+      "stats": {
+        "steals": 15.935,
+        "stealDamage": 365.934,
+        "stealHeal": 337.688,
+        "defenseHeal": 116.441,
+        "equipHeal": 14.292,
+        "healGames": 0.623,
+        "reflects": 0.293,
+        "clashes": 0,
+        "devastations": 0.471,
+        "devastationsReflected": 0.001,
+        "exodiaAtOnce": 0,
+        "exodiaBuilt": 0.191,
+        "burned": 0,
+        "discarded": 0.694,
+        "fewer": 0
+      }
+    },
+    {
+      "limit": "CHOOSE",
+      "label": "random × random",
+      "metrics": {
+        "games": 1000,
+        "terminated": 1,
+        "attackRounds": {
+          "median": 19,
+          "p10": 11,
+          "p90": 34,
+          "p95": 38,
+          "max": 74
+        },
+        "initiativeWin": 0.497,
+        "endReasons": {
+          "HP": 0.8880000000000007,
+          "EXODIA": 0.11200000000000009,
+          "FORFEIT": 0,
+          "UNFINISHED": 0
+        },
+        "capped": 0,
+        "cappedWithAbsoluteDefense": 0,
+        "quads": 0.587,
+        "orderFirst": 0.5030631479736098,
+        "perGame": {
+          "BuffPlayed": 14.063,
+          "GuardPlayed": 8.386,
+          "TrapUsed": 7.397,
+          "Sacrificed": 4.741,
+          "ReflectPlayed": 0.558,
+          "ReflectTriggered": 0.551,
+          "ReflectCanceled": 0.003,
+          "Resurrected": 1.149,
+          "HandLimitPenalty": 1.27,
+          "CardStolen": 12.636,
+          "StealDamage": 12.636,
+          "Healed": 16.652,
+          "DevastationCast": 0.118,
+          "RowDevastated": 0.118,
+          "DevastationCanceled": 0,
+          "QuadFormed": 1.168,
+          "AbsoluteAttack": 0.267,
+          "AbsoluteDefenseStarted": 0.319,
+          "GuardBroken": 5.624
+        },
+        "resurrections": {
+          "mean": 1.149,
+          "p90": 3,
+          "max": 8,
+          "atLeast3": 0.148
+        }
+      },
+      "stats": {
+        "steals": 12.636,
+        "stealDamage": 116.446,
+        "stealHeal": 97.999,
+        "defenseHeal": 38.142,
+        "equipHeal": 3.296,
+        "healGames": 0.603,
+        "reflects": 0.558,
+        "clashes": 0.003,
+        "devastations": 0.118,
+        "devastationsReflected": 0.004,
+        "exodiaAtOnce": 0.002,
+        "exodiaBuilt": 0.11,
+        "burned": 0,
+        "discarded": 1.597,
+        "fewer": 0
+      }
+    },
+    {
+      "limit": "FEWER",
+      "label": "greedy × greedy",
+      "metrics": {
+        "games": 1000,
+        "terminated": 1,
+        "attackRounds": {
+          "median": 13,
+          "p10": 7,
+          "p90": 24,
+          "p95": 29,
+          "max": 68
+        },
+        "initiativeWin": 0.514,
+        "endReasons": {
+          "HP": 0.9700000000000008,
+          "EXODIA": 0.03000000000000002,
+          "FORFEIT": 0,
+          "UNFINISHED": 0
+        },
+        "capped": 0,
+        "cappedWithAbsoluteDefense": 0,
+        "quads": 0.739,
+        "orderFirst": 0.320214795449728,
+        "perGame": {
+          "BuffPlayed": 10.695,
+          "GuardPlayed": 6.297,
+          "TrapUsed": 3.129,
+          "Sacrificed": 2.838,
+          "ReflectPlayed": 0.151,
+          "ReflectTriggered": 0.148,
+          "ReflectCanceled": 0,
+          "Resurrected": 2.033,
+          "HandLimitPenalty": 0,
+          "CardStolen": 9.872,
+          "StealDamage": 9.872,
+          "Healed": 11.572,
+          "DevastationCast": 0.359,
+          "RowDevastated": 0.359,
+          "DevastationCanceled": 0,
+          "QuadFormed": 2.06,
+          "AbsoluteAttack": 0.208,
+          "AbsoluteDefenseStarted": 0.463,
+          "GuardBroken": 5.411
+        },
+        "resurrections": {
+          "mean": 2.033,
+          "p90": 5,
+          "max": 15,
+          "atLeast3": 0.313
+        }
+      },
+      "stats": {
+        "steals": 9.872,
+        "stealDamage": 199.991,
+        "stealHeal": 186.401,
+        "defenseHeal": 25.46,
+        "equipHeal": 3.554,
+        "healGames": 0.274,
+        "reflects": 0.151,
+        "clashes": 0,
+        "devastations": 0.359,
+        "devastationsReflected": 0.003,
+        "exodiaAtOnce": 0,
+        "exodiaBuilt": 0.03,
+        "burned": 0,
+        "discarded": 0,
+        "fewer": 0
+      }
+    },
+    {
+      "limit": "FEWER",
+      "label": "turtle × greedy",
+      "metrics": {
+        "games": 1000,
+        "terminated": 1,
+        "attackRounds": {
+          "median": 20,
+          "p10": 8,
+          "p90": 43,
+          "p95": 56,
+          "max": 153
+        },
+        "initiativeWin": 0.488,
+        "endReasons": {
+          "HP": 0.8190000000000006,
+          "EXODIA": 0.18100000000000013,
+          "FORFEIT": 0,
+          "UNFINISHED": 0
+        },
+        "capped": 0,
+        "cappedWithAbsoluteDefense": 0,
+        "quads": 0.832,
+        "orderFirst": 0.29971242493444983,
+        "perGame": {
+          "BuffPlayed": 16.757,
+          "GuardPlayed": 10.378,
+          "TrapUsed": 6.279,
+          "Sacrificed": 4.372,
+          "ReflectPlayed": 0.328,
+          "ReflectTriggered": 0.326,
+          "ReflectCanceled": 0,
+          "Resurrected": 3.569,
+          "HandLimitPenalty": 0.457,
+          "CardStolen": 15.96,
+          "StealDamage": 15.96,
+          "Healed": 24.771,
+          "DevastationCast": 0.474,
+          "RowDevastated": 0.474,
+          "DevastationCanceled": 0,
+          "QuadFormed": 3.645,
+          "AbsoluteAttack": 0.468,
+          "AbsoluteDefenseStarted": 1.573,
+          "GuardBroken": 8.133
+        },
+        "resurrections": {
+          "mean": 3.569,
+          "p90": 9,
+          "max": 29,
+          "atLeast3": 0.496
+        }
+      },
+      "stats": {
+        "steals": 15.96,
+        "stealDamage": 367.852,
+        "stealHeal": 338.504,
+        "defenseHeal": 118.817,
+        "equipHeal": 15.144,
+        "healGames": 0.621,
+        "reflects": 0.328,
+        "clashes": 0,
+        "devastations": 0.474,
+        "devastationsReflected": 0.002,
+        "exodiaAtOnce": 0.001,
+        "exodiaBuilt": 0.18,
+        "burned": 0,
+        "discarded": 0,
+        "fewer": 0.605
+      }
+    },
+    {
+      "limit": "FEWER",
+      "label": "random × random",
+      "metrics": {
+        "games": 1000,
+        "terminated": 1,
+        "attackRounds": {
+          "median": 19,
+          "p10": 11,
+          "p90": 34,
+          "p95": 37,
+          "max": 84
+        },
+        "initiativeWin": 0.496,
+        "endReasons": {
+          "HP": 0.8910000000000007,
+          "EXODIA": 0.10900000000000008,
+          "FORFEIT": 0,
+          "UNFINISHED": 0
+        },
+        "capped": 0,
+        "cappedWithAbsoluteDefense": 0,
+        "quads": 0.591,
+        "orderFirst": 0.502324244021661,
+        "perGame": {
+          "BuffPlayed": 14.129,
+          "GuardPlayed": 8.345,
+          "TrapUsed": 7.306,
+          "Sacrificed": 4.772,
+          "ReflectPlayed": 0.628,
+          "ReflectTriggered": 0.62,
+          "ReflectCanceled": 0.005,
+          "Resurrected": 1.176,
+          "HandLimitPenalty": 0.127,
+          "CardStolen": 12.696,
+          "StealDamage": 12.696,
+          "Healed": 16.801,
+          "DevastationCast": 0.138,
+          "RowDevastated": 0.138,
+          "DevastationCanceled": 0,
+          "QuadFormed": 1.201,
+          "AbsoluteAttack": 0.282,
+          "AbsoluteDefenseStarted": 0.333,
+          "GuardBroken": 5.606
+        },
+        "resurrections": {
+          "mean": 1.176,
+          "p90": 3,
+          "max": 9,
+          "atLeast3": 0.145
+        }
+      },
+      "stats": {
+        "steals": 12.696,
+        "stealDamage": 117.795,
+        "stealHeal": 99.242,
+        "defenseHeal": 37.653,
+        "equipHeal": 3.404,
+        "healGames": 0.62,
+        "reflects": 0.628,
+        "clashes": 0.005,
+        "devastations": 0.138,
+        "devastationsReflected": 0.003,
+        "exodiaAtOnce": 0.002,
+        "exodiaBuilt": 0.107,
+        "burned": 0,
+        "discarded": 0,
+        "fewer": 0.15
       }
     }
   ],
   "pairs": [
     {
       "label": "greedy (rouba) × greedy sem Roubo",
-      "score": 0.392,
-      "margin": 0.030258743820588452
+      "score": 0.395,
+      "margin": 0.030299279859429002
     },
     {
       "label": "greedy (devasta) × greedy sem Devastação",
-      "score": 0.497,
-      "margin": 0.030989763238850342
+      "score": 0.491,
+      "margin": 0.03098530023091595
     }
   ],
   "heal": [
@@ -873,98 +861,98 @@
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 14,
+          "median": 13,
           "p10": 7,
-          "p90": 25,
+          "p90": 24,
           "p95": 29,
-          "max": 45
+          "max": 54
         },
-        "initiativeWin": 0.519,
+        "initiativeWin": 0.53,
         "endReasons": {
-          "HP": 0.9770000000000008,
-          "EXODIA": 0.023000000000000013,
+          "HP": 0.9560000000000007,
+          "EXODIA": 0.04400000000000003,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.763,
-        "orderFirst": 0.2973730526041327,
+        "quads": 0.741,
+        "orderFirst": 0.31900328587075577,
         "perGame": {
-          "BuffPlayed": 12.493,
-          "GuardPlayed": 6.882,
-          "TrapUsed": 6.494,
-          "Sacrificed": 2.602,
-          "ReflectPlayed": 0.177,
-          "ReflectTriggered": 0.177,
+          "BuffPlayed": 10.937,
+          "GuardPlayed": 6.479,
+          "TrapUsed": 3.212,
+          "Sacrificed": 2.839,
+          "ReflectPlayed": 0.155,
+          "ReflectTriggered": 0.154,
           "ReflectCanceled": 0,
-          "Resurrected": 1.715,
+          "Resurrected": 2.114,
           "HandLimitPenalty": 0.097,
-          "CardStolen": 7.439,
-          "StealDamage": 7.439,
-          "Healed": 8.617,
-          "DevastationCast": 0.402,
-          "RowDevastated": 0.402,
+          "CardStolen": 10.154,
+          "StealDamage": 10.154,
+          "Healed": 11.871,
+          "DevastationCast": 0.357,
+          "RowDevastated": 0.357,
           "DevastationCanceled": 0,
-          "QuadFormed": 2.107,
-          "AbsoluteAttack": 0.131,
-          "AbsoluteDefenseStarted": 0.323,
-          "GuardBroken": 5.988
+          "QuadFormed": 2.163,
+          "AbsoluteAttack": 0.223,
+          "AbsoluteDefenseStarted": 0.464,
+          "GuardBroken": 5.637
         },
         "resurrections": {
-          "mean": 1.715,
-          "p90": 4,
-          "max": 10,
-          "atLeast3": 0.262
+          "mean": 2.114,
+          "p90": 5,
+          "max": 11,
+          "atLeast3": 0.35
         }
       },
       "off": {
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 14,
+          "median": 13,
           "p10": 7,
-          "p90": 25,
+          "p90": 24,
           "p95": 29,
-          "max": 44
+          "max": 71
         },
-        "initiativeWin": 0.515,
+        "initiativeWin": 0.541,
         "endReasons": {
-          "HP": 0.9720000000000008,
-          "EXODIA": 0.028000000000000018,
+          "HP": 0.9570000000000007,
+          "EXODIA": 0.04300000000000003,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.765,
-        "orderFirst": 0.3000654878847413,
+        "quads": 0.742,
+        "orderFirst": 0.3321487151448879,
         "perGame": {
-          "BuffPlayed": 12.412,
-          "GuardPlayed": 6.86,
-          "TrapUsed": 6.442,
-          "Sacrificed": 2.597,
-          "ReflectPlayed": 0.171,
-          "ReflectTriggered": 0.171,
+          "BuffPlayed": 10.928,
+          "GuardPlayed": 6.494,
+          "TrapUsed": 3.28,
+          "Sacrificed": 2.844,
+          "ReflectPlayed": 0.153,
+          "ReflectTriggered": 0.152,
           "ReflectCanceled": 0,
-          "Resurrected": 1.709,
+          "Resurrected": 2.149,
           "HandLimitPenalty": 0.097,
-          "CardStolen": 7.422,
-          "StealDamage": 7.422,
-          "Healed": 7.422,
-          "DevastationCast": 0.398,
-          "RowDevastated": 0.398,
+          "CardStolen": 10.135,
+          "StealDamage": 10.135,
+          "Healed": 10.135,
+          "DevastationCast": 0.356,
+          "RowDevastated": 0.356,
           "DevastationCanceled": 0,
-          "QuadFormed": 2.115,
-          "AbsoluteAttack": 0.129,
-          "AbsoluteDefenseStarted": 0.314,
-          "GuardBroken": 5.961
+          "QuadFormed": 2.191,
+          "AbsoluteAttack": 0.222,
+          "AbsoluteDefenseStarted": 0.46,
+          "GuardBroken": 5.64
         },
         "resurrections": {
-          "mean": 1.709,
-          "p90": 4,
-          "max": 9,
-          "atLeast3": 0.262
+          "mean": 2.149,
+          "p90": 5,
+          "max": 15,
+          "atLeast3": 0.354
         }
       }
     },
@@ -976,96 +964,96 @@
         "attackRounds": {
           "median": 19,
           "p10": 8,
-          "p90": 44,
-          "p95": 52,
-          "max": 105
+          "p90": 42,
+          "p95": 51,
+          "max": 93
         },
-        "initiativeWin": 0.498,
+        "initiativeWin": 0.486,
         "endReasons": {
-          "HP": 0.9060000000000007,
-          "EXODIA": 0.09400000000000007,
+          "HP": 0.8600000000000007,
+          "EXODIA": 0.1400000000000001,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.84,
-        "orderFirst": 0.30347192456065153,
+        "quads": 0.841,
+        "orderFirst": 0.3188341206881184,
         "perGame": {
-          "BuffPlayed": 18.517,
-          "GuardPlayed": 10.185,
-          "TrapUsed": 11.259,
-          "Sacrificed": 3.916,
-          "ReflectPlayed": 0.307,
-          "ReflectTriggered": 0.3,
+          "BuffPlayed": 15.884,
+          "GuardPlayed": 9.858,
+          "TrapUsed": 5.758,
+          "Sacrificed": 4.114,
+          "ReflectPlayed": 0.296,
+          "ReflectTriggered": 0.295,
           "ReflectCanceled": 0,
-          "Resurrected": 2.621,
-          "HandLimitPenalty": 1.307,
-          "CardStolen": 9.854,
-          "StealDamage": 9.854,
-          "Healed": 15.27,
-          "DevastationCast": 0.538,
-          "RowDevastated": 0.538,
+          "Resurrected": 3.454,
+          "HandLimitPenalty": 0.658,
+          "CardStolen": 15.136,
+          "StealDamage": 15.136,
+          "Healed": 22.435,
+          "DevastationCast": 0.467,
+          "RowDevastated": 0.467,
           "DevastationCanceled": 0,
-          "QuadFormed": 3.37,
-          "AbsoluteAttack": 0.226,
-          "AbsoluteDefenseStarted": 0.567,
-          "GuardBroken": 8.638
+          "QuadFormed": 3.524,
+          "AbsoluteAttack": 0.397,
+          "AbsoluteDefenseStarted": 1.392,
+          "GuardBroken": 7.92
         },
         "resurrections": {
-          "mean": 2.621,
-          "p90": 6,
-          "max": 17,
-          "atLeast3": 0.416
+          "mean": 3.454,
+          "p90": 8,
+          "max": 28,
+          "atLeast3": 0.503
         }
       },
       "off": {
         "games": 1000,
         "terminated": 1,
         "attackRounds": {
-          "median": 19,
+          "median": 18,
           "p10": 8,
-          "p90": 42,
-          "p95": 48,
-          "max": 95
+          "p90": 39,
+          "p95": 47,
+          "max": 87
         },
-        "initiativeWin": 0.49,
+        "initiativeWin": 0.497,
         "endReasons": {
-          "HP": 0.9020000000000007,
-          "EXODIA": 0.09800000000000007,
+          "HP": 0.8560000000000006,
+          "EXODIA": 0.1440000000000001,
           "FORFEIT": 0,
           "UNFINISHED": 0
         },
         "capped": 0,
         "cappedWithAbsoluteDefense": 0,
-        "quads": 0.837,
-        "orderFirst": 0.31591689409278984,
+        "quads": 0.833,
+        "orderFirst": 0.3579315164220825,
         "perGame": {
-          "BuffPlayed": 18.035,
-          "GuardPlayed": 9.851,
-          "TrapUsed": 10.825,
-          "Sacrificed": 3.873,
-          "ReflectPlayed": 0.294,
-          "ReflectTriggered": 0.289,
+          "BuffPlayed": 15.064,
+          "GuardPlayed": 9.276,
+          "TrapUsed": 5.352,
+          "Sacrificed": 3.957,
+          "ReflectPlayed": 0.279,
+          "ReflectTriggered": 0.278,
           "ReflectCanceled": 0,
-          "Resurrected": 2.612,
-          "HandLimitPenalty": 1.295,
-          "CardStolen": 9.628,
-          "StealDamage": 9.628,
-          "Healed": 9.628,
-          "DevastationCast": 0.522,
-          "RowDevastated": 0.522,
+          "Resurrected": 3.279,
+          "HandLimitPenalty": 0.731,
+          "CardStolen": 14.502,
+          "StealDamage": 14.502,
+          "Healed": 14.502,
+          "DevastationCast": 0.432,
+          "RowDevastated": 0.432,
           "DevastationCanceled": 0,
-          "QuadFormed": 3.315,
-          "AbsoluteAttack": 0.223,
-          "AbsoluteDefenseStarted": 0.56,
-          "GuardBroken": 8.283
+          "QuadFormed": 3.348,
+          "AbsoluteAttack": 0.372,
+          "AbsoluteDefenseStarted": 1.279,
+          "GuardBroken": 7.278
         },
         "resurrections": {
-          "mean": 2.612,
-          "p90": 6,
-          "max": 17,
-          "atLeast3": 0.411
+          "mean": 3.279,
+          "p90": 7,
+          "max": 20,
+          "atLeast3": 0.494
         }
       }
     }
@@ -1073,67 +1061,67 @@
   "hoard": [
     {
       "limit": "sem limite",
-      "exodia": 0.2960000000000002,
-      "atOnce": 0.29,
-      "score": 0.562,
-      "margin": 0.03075114452504166
+      "exodia": 0.2830000000000002,
+      "atOnce": 0.278,
+      "score": 0.579,
+      "margin": 0.030601055119064115
     },
     {
       "limit": "BURN 4",
-      "exodia": 0.20600000000000016,
-      "atOnce": 0.2,
-      "score": 0.447,
-      "margin": 0.030815725621831457
+      "exodia": 0.20400000000000015,
+      "atOnce": 0.193,
+      "score": 0.453,
+      "margin": 0.030853102041772072
     },
     {
       "limit": "CHOOSE 4",
-      "exodia": 0.2850000000000002,
-      "atOnce": 0.28,
-      "score": 0.503,
-      "margin": 0.030989763238850342
+      "exodia": 0.2700000000000002,
+      "atOnce": 0.26,
+      "score": 0.504,
+      "margin": 0.030989329363508338
     },
     {
       "limit": "FEWER 4",
-      "exodia": 0.2940000000000002,
-      "atOnce": 0.288,
-      "score": 0.562,
-      "margin": 0.03075114452504166
+      "exodia": 0.2820000000000002,
+      "atOnce": 0.277,
+      "score": 0.579,
+      "margin": 0.030601055119064115
     },
     {
       "limit": "BURN 3",
       "exodia": 0.003,
       "atOnce": 0,
-      "score": 0.131,
-      "margin": 0.020912290701881515
+      "score": 0.148,
+      "margin": 0.02200932515094454
     },
     {
       "limit": "CHOOSE 3",
-      "exodia": 0.003,
+      "exodia": 0.001,
       "atOnce": 0,
-      "score": 0.122,
-      "margin": 0.020285384531726285
+      "score": 0.123,
+      "margin": 0.02035674909213158
     }
   ],
   "stealThresholds": [
     {
       "threshold": 12,
+      "score": 0.395,
+      "margin": 0.030299279859429002
+    },
+    {
+      "threshold": 25,
+      "score": 0.409,
+      "margin": 0.030472737166194964
+    },
+    {
+      "threshold": 40,
       "score": 0.404,
       "margin": 0.03041374384057313
     },
     {
-      "threshold": 25,
-      "score": 0.42,
-      "margin": 0.030591073207718623
-    },
-    {
-      "threshold": 40,
-      "score": 0.432,
-      "margin": 0.030702384949707083
-    },
-    {
       "threshold": 60,
-      "score": 0.485,
-      "margin": 0.030976372285985973
+      "score": 0.436,
+      "margin": 0.030735399890029085
     }
   ]
 }
