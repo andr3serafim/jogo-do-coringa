@@ -6,6 +6,67 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-16 (1): o lote de 2026-11-15 respondido; o Roubo mais forte; o cemitério; o bug das cenas
+
+Depois da lista de doze perguntas (A: cinco regras que o motor decidiu sozinho; B: o Equipar sem escolha e o apagar do histórico; C: o
+Roubo fraco, os naipes, as onze escolhas do bloco D; D: as branches velhas e a config do pnpm), ele respondeu:
+
+> 1. ok
+> 2. ok
+> 3. ok
+> 4. ok
+> 5. ok
+> 6. ok
+> 7. ok
+> 8. como forma de deixar o roubo menos fraco, o roubo então passa a curar o valor da carta no seu estado de buff atual (exemplo: roubar
+> um 10 de uma fileira com 3 J cura = 30 e tira 30 de dano) e o K passa a não anular o dano do roubo. O dano do roubo ainda NÃO conta para
+> a iniciativa. O dano do roubo continua não sendo letal.
+> 9. ok, mantenha os naipes.
+> 10. ok, alterar apenas a arte do cemitério, deixar mais caracterizado com cemitério, ao abrir uma carta para reviver o deve estar com
+> visual com identidade de cemitério também.
+> 11. não precisa, ignore-as.
+> 12. sim, mas .pnpm-store em D: é o que eu uso nos meus projetos de trabalho. corrija sem compromete-los.
+>
+> * Identifiquei um bug durantes os treinos.
+>
+> A cinematic exibida em jogo (ressureição, ataque absoluto, devastação, etc...) fica sempre repetindo em todas as rodadas seguintes.
+> exemplo: usei devastação e na rodada do oponente, quando é dado ênfase na jogada (a carta aproxima da tela antes de ir pra mesa), é
+> repetida a ultima cinametic exibida . Isso acontece até quando um jogo acaba e eu inicio outro novo. exemplo: terminei o jogo com um
+> ataque absoluto, no novo jogo a animação do ataque absoluto é exibida novamente na jogada do oponente, mas sem efeito de ataque
+> absoluto, apenas a animação.
+
+Perguntado depois que o exemplo (10 com 3 J = 30) não batia com a conta do jogo (× (1 + J) daria 40), ele escolheu **"× (1 + buffs)"**
+(igual ao resto do jogo: 10 com 3 J = 40; da Defesa, com os Q) e, sobre a quadra, **"Não entra"** (só os J ou os Q multiplicam a carta
+roubada; o bônus de quadra é da fileira).
+
+**Leitura:**
+- **(1 a 5)** Confirmadas como regra: o Roubo pega qualquer numérica em qualquer posição (8.5); a cura passiva conta os K que sobram
+  (11.3); o Reflect contra atacante sob Defesa Absoluta só segura (10.1.5); Reflect contra Reflect num ataque (10.1.2); o fim da Defesa
+  Absoluta (11.1). Fecham também as leituras [I] 2, 3 e 8 do plano 1 (`notas/medicao-e3.md` §4) e as [I] da E1 e do Reflect
+  (`notas/playtest.md`). As 9 e 10 do plano 1 são dos modos CHOOSE e FEWER, fora do padrão (BURN), e não foram perguntadas.
+- **(6 e 7)** Confirmadas as [I] da E2 (o Equipar sem escolha, na ordem de compra) e da F1 (o apagar do histórico).
+- **(8) Regra nova do Roubo** (muda o resultado de partidas: `RULES_VERSION` novo, os replays de referência regravados, a calibração e o
+  portão do Difícil medidos de novo):
+  - o valor do Roubo é o da carta **com o buff da fileira de onde sai**: valor × (1 + número de J), se sai do Ataque; valor × (1 + número
+    de Q), se sai da Defesa; **sem** o bônus de quadra. Conta a mesa do oponente **no instante do Roubo**, antes de a carta sair. **[I]**
+  - o oponente perde esse valor e quem rouba cura o mesmo valor, cheio, até a vida inicial (a 14.1 segue: cura cheia mesmo quando o "nunca
+    mata" corta o dano);
+  - **o K não anula mais** o dano do Roubo. **[I]** O K também não quebra: a Guarda fica fora do Roubo;
+  - segue igual: o dano do Roubo não conta para a iniciativa, nunca mata (a vida fica em no mínimo 1), não abre janela de reação, e a
+    Defesa Absoluta do oponente bloqueia o Roubo inteiro (8.8). **[I]** (ele não falou da Defesa Absoluta; fica como está).
+  - Exemplo: o oponente tem 10, 4 no Ataque e 3 J; você rouba o 10: ele perde 40 e você cura 40. Do mesmo 10 na Defesa com 2 Q: 30.
+- **(9)** Os naipes ficam desenhados nas cartas. Sai da lista o "desenho do naipe" ([I] de 2026-10-31 (8)).
+- **(10)** As onze escolhas do bloco D (a §6.3 da spec do playtest) ficam aprovadas, **menos a arte do cemitério**: a lápide e a área do
+  cemitério ficam mais caracterizadas como cemitério, e o painel que se abre para reviver uma carta (a Ressurreição) ganha a mesma
+  identidade. **[I]** É trabalho de desenho: a direção (o que muda e como) vai a ele antes do código, como nos outros blocos visuais.
+- **(11)** As branches remotas velhas ficam como estão: sai da lista de espera.
+- **(12)** Corrigir o `storeDir` da config do pnpm desta máquina **sem mudar onde ficam os pacotes dos projetos de trabalho dele**.
+- **O bug das cenas:** depois de uma cena rara (a Ressurreição, o Ataque Absoluto, a Devastação…), a mesma animação volta no momento de
+  ênfase das jogadas seguintes do oponente, até numa partida nova, sem o efeito de jogo. Vem antes do deploy. **[I]** Visto no treino; o
+  online pode ter o mesmo.
+
+---
+
 ## 2026-11-15 (1): as seis leituras da §14 das regras 4.0 confirmadas; o fim da branch
 
 Perguntado como enviar a branch das regras 4.0 (o force-push tinha sido barrado), e com as seis leituras da §14 listadas (1: o Roubo cura o
