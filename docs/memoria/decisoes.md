@@ -6,7 +6,24 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
-## 2026-11-16 (3): o cemitério fora; o domínio; as três [I] do Roubo; o www
+## 2026-11-16 (4): o Roubo fica; o bot barra a Exódia; o merge do domínio e do Roubo
+
+Depois do resumo do domínio e do Roubo novo (as duas CI verdes em cada branch; a medição: o Roubo 3,5 vezes maior, o greedy que rouba ainda
+em 39,5%, a Exódia quase dobrando nos bots), com as três opções (1: manter; 2: ensinar o bot a preferir a Armadilha nos K; 3: mexer na
+regra) e a pergunta "Faço o merge do domínio e do Roubo na main?", ele respondeu:
+
+> 1. manter como está mas ensina o bot pois deveria usar o A pra remover o K quando tiver perto de formar o exódia (4k)
+>
+> Sim, faça o merge dos dois
+
+**Leitura:**
+- A regra do Roubo fica como está (`RULES_VERSION` 6).
+- **O bot:** quando o oponente estiver perto da Exódia, o A vai para a Armadilha num K da Guarda dele, em vez do Roubo. **[I]** "Perto" é
+  ter 3 K na Guarda (um a menos que a Exódia, `exodiaGuard` − 1); a mudança é do greedy (o Fácil e o Médio usam o greedy, e o Difícil o
+  usa nas simulações). É um bloco à parte, com a calibração e o portão do Difícil de novo, e o merge pede o "sim".
+- **O merge:** a `main` anda por fast-forward até o topo de `feat/roubo-buff` (`426de18`), que contém a `feat/dominio`. O deploy é dele.
+
+: o cemitério fora; o domínio; as três [I] do Roubo; o www
 
 Depois do esboço das três direções do cemitério (A: campo-santo de cordel; B: pedra antiga; C: cova aberta), ele respondeu:
 

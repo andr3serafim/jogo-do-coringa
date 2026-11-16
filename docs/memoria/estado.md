@@ -1,15 +1,13 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-16**, o domínio `jogodocoringa.com.br` na branch `feat/dominio` (a rota no `wrangler.jsonc`),
-> esperando a CI e o "sim" do merge; o cemitério saiu da fila; o Roubo mais forte é o próximo bloco (`decisoes.md` 2026-11-16 (3)).
+> Sobrescrito a cada atualização. **Última: 2026-11-16**, o domínio e o Roubo novo na `main` por fast-forward até `426de18` ("Sim, faça o merge
+> dos dois", `decisoes.md` 2026-11-16 (4)); falta ler a CI do push da `main`. O próximo bloco: o greedy barra a Exódia com o A.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **O domínio `jogodocoringa.com.br`** (`decisoes.md` 2026-11-16 (3); o diário 2026-11-16 (2)), na branch `feat/dominio`: a rota
-  `custom_domain` no `wrangler.jsonc` e o teste. Nada mais muda (a mesma origem serve a interface e a API).
-  - **Próximo passo exato:** a CI da branch, o "sim" do autor e o fast-forward da `main`. Depois, o autor: o `www` no painel (os passos no
-    diário 2026-11-16 (2)) e o `pnpm deploy:server`.
+- **O domínio `jogodocoringa.com.br` está na `main`** (`decisoes.md` 2026-11-16 (3) e (4); o diário 2026-11-16 (2)): a rota
+  `custom_domain` no `wrangler.jsonc`. O autor: o `www` no painel (os passos no diário 2026-11-16 (2)) e o `pnpm deploy:server`.
 - **O conserto das cenas que repetiam está na `main`** ("Sim, merge", `decisoes.md` 2026-11-16 (2)), por fast-forward de
   `feat/cenas-repetidas` até `1d92cd7`, com as duas CI verdes no topo da branch e no push da `main` (`b9a057f`). O véu do momento do oponente não traz mais de volta a última cena (`Stage.tsx`, uma
   condição; o teste novo no `moment.test.tsx`; a A/B no replay da `exodia-devastacao`, rodada 43). O diário 2026-11-16 (1). Só a web:
@@ -17,7 +15,7 @@
   - **Verificado:** `pnpm check` verde (web 2820 testes); `check` e `e2e` verdes em `1d92cd7`.
   - **Próximo passo exato:** nenhum de código aqui. O deploy é dele (`pnpm deploy:server`) e leva o bloco D e este conserto ao ar.
   - **O que não pode regredir:** a última cena só fica com a cortina **da cena** (`veil === 'scene'`); o véu do momento nunca a mostra.
-- **O Roubo mais forte, em execução** (`decisoes.md` 2026-11-16 (1), item 8, e (3)), na branch `feat/roubo-buff` (worktree
+- **O Roubo mais forte está na `main`** ("Sim, faça o merge dos dois", `decisoes.md` 2026-11-16 (4)); a regra fica como está. Era (`decisoes.md` 2026-11-16 (1), item 8, e (3)), na branch `feat/roubo-buff` (worktree
   `.claude/worktrees/roubo`, saída da `feat/dominio` em `e1c12b1`). O código está em `e248b45`: `stealAmount` no motor (valor × (1 + J)
   ou × (1 + Q), sem a quadra), o K fora do Roubo, o `StealDamage` sem `blocked`, os bots, os replays de referência regravados,
   `RULES_VERSION` 6, a prévia, o resumo das regras, a dica do tutorial e o livro de regras.
@@ -26,8 +24,9 @@
     meta); o portão do Difícil aprovou de primeira.
   - **A regra mora na chave `stealBuffed`** (ligada no `makeConfig()`): os replays de antes, sem a chave, reproduzem o Roubo de antes. O
     primeiro push reprovou no `e2e` por isso (as fixtures de replay divergiam).
-  - **Próximo passo exato:** a CI da branch e a decisão do autor sobre o achado da Exódia (manter, ensinar o greedy, ou mexer na regra) e
-    sobre o merge. O merge do domínio (`feat/dominio`, as duas CI verdes em `e1c12b1`) também espera o "sim".
+  - **Próximo passo exato:** o push da `main` e a CI dele; depois, o bloco do greedy que barra a Exódia (`decisoes.md` 2026-11-16 (4)):
+    com o oponente a 3 K da Exódia, o A vai para a Armadilha num K dele em vez do Roubo; a calibração e o portão do Difícil de novo
+    (`--ajuste`), a CI e o "sim" do merge.
 - **A arte do cemitério saiu da fila** ("Todas as direções reprovadas. ignore esta demanda", `decisoes.md` 2026-11-16 (3)).
 - **A config do pnpm desta máquina foi corrigida** (item 12): `storeDir: D:\.pnpm-store`, o mesmo store de todos os projetos dele.
 - **As regras 4.0 estão na `main`** ("finalize", `decisoes.md` 2026-11-15 (1)), por fast-forward de `feat/regras-4-0b` até `b5f93e3` (a branch e o worktree já apagados),
