@@ -1,10 +1,10 @@
 # Portão do Difícil
 
-**Veredito: APROVADO.** (a) 67.5% (limiar 58.0%), (b) 73.5% (limiar 65.0%), p95 136 ms (limiar 300 ms).
+**Veredito: APROVADO.** (a) 72.5% (limiar 58.0%), (b) 73.5% (limiar 65.0%), p95 140 ms (limiar 300 ms).
 
 ## Como foi medido
 
-- Config: a padrão, `makeConfig()`: `{"hp":500,"rowLimit":8,"buffLimit":4,"cardsPerEquip":4,"exodiaGuard":4,"resurrectMinRounds":3,"deck":{"numericCopies":8,"faceCopies":6,"aceCopies":8},"initiativeChoice":true,"wildJokers":true,"defenseHealGuard":2,"specialLimit":{"max":4,"penalty":"BURN"},"resurrectOnQuad":true}`.
+- Config: a padrão, `makeConfig()`: `{"hp":500,"rowLimit":8,"buffLimit":4,"cardsPerEquip":4,"exodiaGuard":4,"resurrectMinRounds":3,"deck":{"numericCopies":8,"faceCopies":6,"aceCopies":8},"initiativeChoice":true,"wildJokers":true,"defenseHealGuard":2,"specialLimit":{"max":4,"penalty":"BURN"},"resurrectOnQuad":true,"stealBuffed":true}`.
 - Sementes: `dificil-0 … dificil-99` (100 sementes), cada uma jogada duas vezes com os assentos trocados: 200 partidas por medida. O mesmo monte e a mesma iniciativa sorteada em cada par: o bot medido fica com a iniciativa em exatamente uma das duas.
 - Bots da rodada 1 (os `HARD_DEFAULTS` e o `EASY_BLUNDER` de então): Difícil `{"rolloutsPerCandidate":8,"maxCandidates":4,"horizon":{"EQUIP":2,"ATTACK_MAIN":3}}`; Fácil erra com probabilidade `0.7`.
 - Máquina: Node v26.13.0, win32 x64, Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz (12 núcleos). O tempo por decisão depende dela.
@@ -15,19 +15,19 @@
 
 | Medida | Valor | EP | Limiar | Margem | Passa |
 | --- | --- | --- | --- | --- | --- |
-| (a) hard × greedy: pontuação do hard | 67.5% | 3.3% | ≥ 58.0% | 2.9 EP | sim |
+| (a) hard × greedy: pontuação do hard | 72.5% | 3.2% | ≥ 58.0% | 4.6 EP | sim |
 | (b) greedy × easy: pontuação do greedy | 73.5% | 3.1% | ≥ 65.0% | 2.7 EP | sim |
-| (c) p95 do tempo por decisão do hard | 136 ms |  | ≤ 300 ms |  | sim |
+| (c) p95 do tempo por decisão do hard | 140 ms |  | ≤ 300 ms |  | sim |
 
-- (a) hard: vitórias/derrotas/sem fim 135/65/0; com a iniciativa 69.0% (100 partidas), sem ela 66.0% (100).
-- (b) greedy: vitórias/derrotas/sem fim 147/53/0; com a iniciativa 78.0% (100 partidas), sem ela 69.0% (100).
+- (a) hard: vitórias/derrotas/sem fim 145/55/0; com a iniciativa 76.0% (100 partidas), sem ela 69.0% (100).
+- (b) greedy: vitórias/derrotas/sem fim 147/53/0; com a iniciativa 79.0% (100 partidas), sem ela 68.0% (100).
 
 ### Tempo por decisão do hard
 
 | Decisões com 2 ou mais ações | Nº | p50 | p95 | Máx |
 | --- | --- | --- | --- | --- |
-| todas as fases | 8945 | 76 ms | 136 ms | 430 ms |
-| só as fases com busca (EQUIP, ATTACK_MAIN) | 6762 | 88 ms | 141 ms | 430 ms |
+| todas as fases | 8842 | 78 ms | 140 ms | 229 ms |
+| só as fases com busca (EQUIP, ATTACK_MAIN) | 6718 | 90 ms | 144 ms | 229 ms |
 
 ## Por que estes valores
 

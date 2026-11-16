@@ -18,7 +18,8 @@
       "max": 4,
       "penalty": "BURN"
     },
-    "resurrectOnQuad": true
+    "resurrectOnQuad": true,
+    "stealBuffed": true
   },
   "seedPrefix": "dificil",
   "seeds": 100,
@@ -43,18 +44,18 @@
       "easyBlunder": 0.7,
       "hardVsGreedy": {
         "games": 200,
-        "rate": 0.675,
-        "se": 0.03311910324872942,
-        "wins": 135,
-        "losses": 65,
+        "rate": 0.725,
+        "se": 0.031573327350787724,
+        "wins": 145,
+        "losses": 55,
         "unfinished": 0,
         "withInitiative": {
           "games": 100,
-          "rate": 0.69
+          "rate": 0.76
         },
         "withoutInitiative": {
           "games": 100,
-          "rate": 0.66
+          "rate": 0.69
         }
       },
       "greedyVsEasy": {
@@ -66,23 +67,23 @@
         "unfinished": 0,
         "withInitiative": {
           "games": 100,
-          "rate": 0.78
+          "rate": 0.79
         },
         "withoutInitiative": {
           "games": 100,
-          "rate": 0.69
+          "rate": 0.68
         }
       },
       "timing": {
-        "decisions": 8945,
-        "p50Ms": 75.65279999998165,
-        "p95Ms": 136.3963999999687,
-        "maxMs": 430.32560000001104,
+        "decisions": 8842,
+        "p50Ms": 77.62280000001192,
+        "p95Ms": 139.9900000000016,
+        "maxMs": 228.6898000000001,
         "searching": {
-          "decisions": 6762,
-          "p50Ms": 87.50210000000516,
-          "p95Ms": 140.57730000000447,
-          "maxMs": 430.32560000001104
+          "decisions": 6718,
+          "p50Ms": 90.23619999998482,
+          "p95Ms": 143.69409999996424,
+          "maxMs": 228.6898000000001
         }
       },
       "passes": {
@@ -91,7 +92,7 @@
         "p95": true
       },
       "approved": true,
-      "seconds": 599.9163747
+      "seconds": 609.9624391
     }
   ]
 }

@@ -5,6 +5,27 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-16 (4): o merge do domínio e do Roubo; o greedy barra a Exódia
+
+- **Pedido:** "manter como está mas ensina o bot pois deveria usar o A pra remover o K quando tiver perto de formar o exódia (4k)" e "Sim,
+  faça o merge dos dois" (`decisoes.md` 2026-11-16 (4)).
+- **O merge:** a `main` andou por fast-forward até `426de18` (o topo da `feat/roubo-buff`, que contém a `feat/dominio`); com a memória,
+  `6070478`. O push da `main` passou no `pnpm check`, e as duas CI ficaram verdes em `6070478`.
+- **O bot** (`feat/bot-exodia`, saída da `main` em `6070478`, no mesmo worktree `.claude/worktrees/roubo`):
+  - **O diagnóstico:** o greedy já mirava o K a 1 da Exódia (o alvo valia 1000, acima de qualquer Roubo, e a reação ao K jogado também). O
+    que mudou com o Roubo mais forte foi antes disso: ele gastava os A roubando com o oponente a 2 K e chegava ao terceiro sem nenhum. Uma
+    sonda de 1000 partidas (script fora do git, com o `measureSeries` do `e3`): todas as Exódias foram montadas aos poucos, nenhuma de
+    uma vez, então o A podia barrar.
+  - **O conserto** (`6536e9c`): `GREEDY.exodiaWatch` = 2 (o A num K a 2 K da Exódia, na fase principal e na reação), com dois testes no
+    `greedy.test.ts` (vermelhos com 1, verdes com 2). Os testes do simulador e da web não mudaram (o roteiro offline não passa por isso).
+  - **A medição** (`notas/medicao-roubo-buff.md`, seção "Depois"): a Exódia no greedy × greedy de 3,6% para 1,3% (dentro da meta), no
+    turtle × greedy de 15,7% para 6,3%; o portão do Difícil aprovado (72,5% · 73,5% · p95 140 ms).
+- **Ruling:** o limiar é 2 (a sonda: 1 não muda nada; 2 resolve) — custo: o greedy gasta um A a mais em K que talvez nunca virassem Exódia.
+- **Ruling:** o portão foi medido do zero (`--recomecar`): o `--ajuste` recusou porque a config ganhou a chave `stealBuffed` — custo:
+  o histórico de rodadas do relatório recomeça.
+
+---
+
 ## 2026-11-16 (3): o Roubo com o buff da fileira (RULES_VERSION 6)
 
 - **Pedido:** a regra nova do Roubo (`decisoes.md` 2026-11-16 (1), item 8) com as três [I] confirmadas ("Ok nas três", 2026-11-16 (3)), e

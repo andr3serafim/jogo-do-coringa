@@ -1,7 +1,7 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-16**, o domínio e o Roubo novo na `main` por fast-forward até `426de18` ("Sim, faça o merge
-> dos dois", `decisoes.md` 2026-11-16 (4)); falta ler a CI do push da `main`. O próximo bloco: o greedy barra a Exódia com o A.
+> Sobrescrito a cada atualização. **Última: 2026-11-16**, o domínio e o Roubo novo na `main` (`6070478`, as duas CI verdes); o greedy que barra
+> a Exódia na branch `feat/bot-exodia`, medido e esperando a CI e o "sim" do merge. O deploy é do autor.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
@@ -29,8 +29,9 @@
   saída da `main` em `6070478`): `GREEDY.exodiaWatch` = 2 (o A vai num K da Guarda do oponente a 2 K da Exódia, na fase principal e na
   reação ao K jogado; antes era a 1). A sonda de 1000 partidas: a Exódia no greedy × greedy de 3,0% para 1,3%, no turtle × greedy de
   12,6% para 5,5%. Os testes novos no `greedy.test.ts` (vermelhos com 1, verdes com 2).
-  - **Em curso:** `pnpm sim:e3`, `pnpm sim:calibrate` e `pnpm sim:dificil --ajuste "…"`, em background no worktree.
-  - **Próximo passo exato:** ler os relatórios, acrescentar à `notas/medicao-roubo-buff.md`, commitar, o push e a CI, e o "sim" do merge.
+  - **Medido** (`notas/medicao-roubo-buff.md`, "Depois"; o diário 2026-11-16 (4)): a Exódia de volta à meta (greedy × greedy 1,3%;
+    turtle × greedy 6,3%); o portão do Difícil aprovado do zero (72,5% · 73,5% · p95 140 ms).
+  - **Próximo passo exato:** o push da branch, as duas CI, o "sim" do autor e o fast-forward da `main`. Depois, o deploy (dele).
 - **A arte do cemitério saiu da fila** ("Todas as direções reprovadas. ignore esta demanda", `decisoes.md` 2026-11-16 (3)).
 - **A config do pnpm desta máquina foi corrigida** (item 12): `storeDir: D:\.pnpm-store`, o mesmo store de todos os projetos dele.
 - **As regras 4.0 estão na `main`** ("finalize", `decisoes.md` 2026-11-15 (1)), por fast-forward de `feat/regras-4-0b` até `b5f93e3` (a branch e o worktree já apagados),

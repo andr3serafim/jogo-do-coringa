@@ -50,3 +50,20 @@ p95 136 ms (limiar 300 ms).
 1. **Manter a regra como está.** O Roubo ficou forte no efeito; a Exódia mais frequente vem do bot que troca a Armadilha pelo Roubo.
 2. **Ensinar o bot** a não trocar a Armadilha num K pelo Roubo quando o oponente junta Guarda (mudança só no greedy, sem mexer na regra).
 3. **Mexer na regra** de novo (por exemplo, o Roubo também quebrar 1 K, ou o A como Armadilha valer mais).
+
+## Depois: o greedy barra a Exódia (`exodiaWatch` 2, `decisoes.md` 2026-11-16 (4))
+
+O autor escolheu manter a regra e ensinar o bot: o greedy gasta o A num K da Guarda do oponente quando ele está a **2** K da Exódia (antes,
+a 1), na fase principal e na reação ao K jogado. Medido sobre `6536e9c`.
+
+| Medida | Roubo novo, bot antigo | Roubo novo, bot novo | Antes do Roubo novo |
+| --- | --- | --- | --- |
+| Exódia, greedy × greedy (meta 1–3%) | 3,6% | **1,3%** | 1,9% |
+| Exódia, turtle × greedy | 15,7% | **6,3%** | 7,5% |
+| Rodadas de Ataque, greedy × greedy (mediana) | 12 | 12 | 14 |
+| Vitória de quem começa com a iniciativa (greedy × greedy) | 50,9% | 51,8% | 52,7% |
+| Roubo do greedy contra o greedy sem Roubo | 39,5% | 39,7% | 39,2% |
+| Portão do Difícil: (a) · (b) · p95 | 67,5% · 73,5% · 136 ms | **72,5% · 73,5% · 140 ms** | 69,0% · 81,5% · 146 ms |
+
+A Exódia volta para a meta (e abaixo do que era antes do Roubo novo). O portão do Difícil foi medido do zero (`--recomecar`): o `--ajuste`
+recusou porque a config ganhou a chave `stealBuffed` depois da rodada anterior, embora a regra seja a mesma.
