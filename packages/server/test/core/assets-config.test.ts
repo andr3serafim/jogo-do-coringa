@@ -16,6 +16,10 @@ describe('configuração dos assets (spec §11)', () => {
     });
   });
 
+  it('o Worker atende o domínio do jogo (decisoes.md 2026-11-16 (3)); o www redireciona por regra da zona, fora daqui', () => {
+    expect(wrangler.routes).toEqual([{ pattern: 'jogodocoringa.com.br', custom_domain: true }]);
+  });
+
   it('o _headers da web fecha a CSP à própria origem e dá cache longo só ao /assets/*', () => {
     const headers = read('../../../web/public/_headers');
     expect(headers).toContain(
