@@ -1,17 +1,17 @@
 # Estado do projeto
 
 > Sobrescrito a cada atualização. **Última: 2026-11-16**, o conserto das cenas que repetiam na `main` por fast-forward até `1d92cd7` ("Sim, merge",
-> `decisoes.md` 2026-11-16 (2)), com as duas CI verdes no topo da branch; falta ler a CI do push da `main`. O deploy é do autor; o Roubo mais forte e a arte do cemitério esperam as respostas dele.
+> `decisoes.md` 2026-11-16 (2)), com as duas CI verdes no topo da branch e no push da `main` (`b9a057f`). O deploy é do autor; o Roubo mais forte e a arte do cemitério esperam as respostas dele.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
 - **O conserto das cenas que repetiam está na `main`** ("Sim, merge", `decisoes.md` 2026-11-16 (2)), por fast-forward de
-  `feat/cenas-repetidas` até `1d92cd7`, com as duas CI verdes no topo da branch; falta ler a CI do push da `main`. O véu do momento do oponente não traz mais de volta a última cena (`Stage.tsx`, uma
+  `feat/cenas-repetidas` até `1d92cd7`, com as duas CI verdes no topo da branch e no push da `main` (`b9a057f`). O véu do momento do oponente não traz mais de volta a última cena (`Stage.tsx`, uma
   condição; o teste novo no `moment.test.tsx`; a A/B no replay da `exodia-devastacao`, rodada 43). O diário 2026-11-16 (1). Só a web:
   `RULES_VERSION`, `STATE_SCHEMA` e `PROTOCOL_VERSION` não mudaram.
   - **Verificado:** `pnpm check` verde (web 2820 testes); `check` e `e2e` verdes em `1d92cd7`.
-  - **Próximo passo exato:** ler a CI do push da `main` pela API e registrar aqui.
+  - **Próximo passo exato:** nenhum de código aqui. O deploy é dele (`pnpm deploy:server`) e leva o bloco D e este conserto ao ar.
   - **O que não pode regredir:** a última cena só fica com a cortina **da cena** (`veil === 'scene'`); o véu do momento nunca a mostra.
 - **O Roubo mais forte** (`decisoes.md` 2026-11-16 (1), item 8): o valor com o buff da fileira de onde a carta sai (× (1 + J) ou × (1 + Q),
   sem a quadra), o K não anula, segue sem contar para a iniciativa e sem matar. Bloco próprio, num worktree separado, com `RULES_VERSION` 6.
