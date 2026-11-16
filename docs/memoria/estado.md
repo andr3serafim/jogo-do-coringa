@@ -1,16 +1,18 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-16**, o conserto das cenas que repetiam na branch `feat/cenas-repetidas` (`523adcc`),
-> esperando o push, a CI e o "sim" do merge; o Roubo mais forte e a arte do cemitério decididos (`decisoes.md` 2026-11-16 (1)), em blocos à parte.
+> Sobrescrito a cada atualização. **Última: 2026-11-16**, o conserto das cenas que repetiam na `main` por fast-forward até `1d92cd7` ("Sim, merge",
+> `decisoes.md` 2026-11-16 (2)), com as duas CI verdes no topo da branch; falta ler a CI do push da `main`. O deploy é do autor; o Roubo mais forte e a arte do cemitério esperam as respostas dele.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **O conserto das cenas que repetiam** (`decisoes.md` 2026-11-16 (1); o diário 2026-11-16 (1)), na branch `feat/cenas-repetidas`, saída da
-  `main` em `88bad49`: o véu do momento do oponente não traz mais de volta a última cena (`Stage.tsx`, uma condição; o teste novo no
-  `moment.test.tsx`; a A/B no replay da `exodia-devastacao`, rodada 43). Só a web.
-  - **Próximo passo exato:** o push (o pre-push roda o `pnpm check`), as duas CI verdes na branch, o "sim" do autor e o fast-forward da
-    `main`. Com ele na `main`, o deploy pode sair sem esperar os outros dois blocos (a escolha é do autor).
+- **O conserto das cenas que repetiam está na `main`** ("Sim, merge", `decisoes.md` 2026-11-16 (2)), por fast-forward de
+  `feat/cenas-repetidas` até `1d92cd7`, com as duas CI verdes no topo da branch; falta ler a CI do push da `main`. O véu do momento do oponente não traz mais de volta a última cena (`Stage.tsx`, uma
+  condição; o teste novo no `moment.test.tsx`; a A/B no replay da `exodia-devastacao`, rodada 43). O diário 2026-11-16 (1). Só a web:
+  `RULES_VERSION`, `STATE_SCHEMA` e `PROTOCOL_VERSION` não mudaram.
+  - **Verificado:** `pnpm check` verde (web 2820 testes); `check` e `e2e` verdes em `1d92cd7`.
+  - **Próximo passo exato:** ler a CI do push da `main` pela API e registrar aqui.
+  - **O que não pode regredir:** a última cena só fica com a cortina **da cena** (`veil === 'scene'`); o véu do momento nunca a mostra.
 - **O Roubo mais forte** (`decisoes.md` 2026-11-16 (1), item 8): o valor com o buff da fileira de onde a carta sai (× (1 + J) ou × (1 + Q),
   sem a quadra), o K não anula, segue sem contar para a iniciativa e sem matar. Bloco próprio, num worktree separado, com `RULES_VERSION` 6.
   **Antes da calibração e do portão do Difícil**, as três [I] vão ao autor: (1) o K não quebra no Roubo; (2) a Defesa Absoluta segue
@@ -102,7 +104,7 @@
 
 ## Esperando o autor
 
-- **O "sim" do merge do conserto das cenas**, as três [I] do Roubo e a direção do cemitério (acima).
+- **As três [I] do Roubo e a direção do cemitério** (acima; a recomendação: a direção A, o campo-santo de cordel).
 - **O bloco D:** o deploy, e ver no navegador o Atacar com o Ataque Absoluto armado (a faísca só foi vista nos testes). As escolhas da
   §6.3 ficaram aprovadas, menos a arte do cemitério (`decisoes.md` 2026-11-16 (1), item 10).
 - **Menores adiados** (nenhum quebra o jogo): bloco D no `diario.md` 2026-11-14 (2) ("Adiados"); bloco C no `diario.md` 2026-11-08 (1) ("Adiados"); bloco B no 2026-11-07 (2) ("Menores, para

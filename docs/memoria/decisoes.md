@@ -6,6 +6,18 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-16 (2): o merge do conserto das cenas que repetiam
+
+Depois do resumo do conserto (a cortina do momento trazia de volta a última cena; uma condição no `Stage.tsx`; o teste novo; a A/B no replay
+da Devastação; o `pnpm check` e as duas CI verdes em `1d92cd7`), perguntado "Faço o merge do conserto das cenas na main?", ele respondeu:
+
+> Sim, merge
+
+**Leitura:** a `main` anda por fast-forward até o topo de `feat/cenas-repetidas` (`1d92cd7`). **[I]** O "sim" vale para o merge; o deploy
+segue sendo dele. As três [I] do Roubo e a direção do cemitério seguem esperando a resposta dele.
+
+---
+
 ## 2026-11-16 (1): o lote de 2026-11-15 respondido; o Roubo mais forte; o cemitério; o bug das cenas
 
 Depois da lista de doze perguntas (A: cinco regras que o motor decidiu sozinho; B: o Equipar sem escolha e o apagar do histórico; C: o
