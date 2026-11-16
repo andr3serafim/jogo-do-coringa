@@ -17,10 +17,13 @@
   - **Verificado:** `pnpm check` verde (web 2820 testes); `check` e `e2e` verdes em `1d92cd7`.
   - **Próximo passo exato:** nenhum de código aqui. O deploy é dele (`pnpm deploy:server`) e leva o bloco D e este conserto ao ar.
   - **O que não pode regredir:** a última cena só fica com a cortina **da cena** (`veil === 'scene'`); o véu do momento nunca a mostra.
-- **O Roubo mais forte** (`decisoes.md` 2026-11-16 (1), item 8, e as três [I] confirmadas em 2026-11-16 (3)): o valor com o buff da
-  fileira de onde a carta sai (× (1 + J) ou × (1 + Q), sem a quadra, contado antes de a carta sair), o K não anula nem quebra, a Defesa
-  Absoluta segue bloqueando, sem contar para a iniciativa e sem matar. Bloco próprio, num worktree separado, com `RULES_VERSION` 6, a
-  calibração e o portão do Difícil. A medida que ele quer ver: o bot que rouba contra o que não rouba (eram 39%, `notas/medicao-e3.md`).
+- **O Roubo mais forte, em execução** (`decisoes.md` 2026-11-16 (1), item 8, e (3)), na branch `feat/roubo-buff` (worktree
+  `.claude/worktrees/roubo`, saída da `feat/dominio` em `e1c12b1`). O código está em `e248b45`: `stealAmount` no motor (valor × (1 + J)
+  ou × (1 + Q), sem a quadra), o K fora do Roubo, o `StealDamage` sem `blocked`, os bots, os replays de referência regravados,
+  `RULES_VERSION` 6, a prévia, o resumo das regras, a dica do tutorial e o livro de regras.
+  - **Em curso:** a medição (`pnpm sim:e3`, `pnpm sim:calibrate`, `pnpm sim:dificil --recomecar`), em background no worktree.
+  - **Próximo passo exato:** ler os três relatórios (`packages/sim/reports/`), escrever `notas/medicao-roubo-buff.md` (o greedy que rouba
+    contra o que não rouba: era 39,2%), commitar os relatórios, a revisão num subagente, o push e a CI, e o "sim" do merge.
 - **A arte do cemitério saiu da fila** ("Todas as direções reprovadas. ignore esta demanda", `decisoes.md` 2026-11-16 (3)).
 - **A config do pnpm desta máquina foi corrigida** (item 12): `storeDir: D:\.pnpm-store`, o mesmo store de todos os projetos dele.
 - **As regras 4.0 estão na `main`** ("finalize", `decisoes.md` 2026-11-15 (1)), por fast-forward de `feat/regras-4-0b` até `b5f93e3` (a branch e o worktree já apagados),
