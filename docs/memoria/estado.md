@@ -1,11 +1,15 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-16**, o conserto das cenas que repetiam na `main` por fast-forward até `1d92cd7` ("Sim, merge",
-> `decisoes.md` 2026-11-16 (2)), com as duas CI verdes no topo da branch e no push da `main` (`b9a057f`). O deploy é do autor; o Roubo mais forte e a arte do cemitério esperam as respostas dele.
+> Sobrescrito a cada atualização. **Última: 2026-11-16**, o domínio `jogodocoringa.com.br` na branch `feat/dominio` (a rota no `wrangler.jsonc`),
+> esperando a CI e o "sim" do merge; o cemitério saiu da fila; o Roubo mais forte é o próximo bloco (`decisoes.md` 2026-11-16 (3)).
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
+- **O domínio `jogodocoringa.com.br`** (`decisoes.md` 2026-11-16 (3); o diário 2026-11-16 (2)), na branch `feat/dominio`: a rota
+  `custom_domain` no `wrangler.jsonc` e o teste. Nada mais muda (a mesma origem serve a interface e a API).
+  - **Próximo passo exato:** a CI da branch, o "sim" do autor e o fast-forward da `main`. Depois, o autor: o `www` no painel (os passos no
+    diário 2026-11-16 (2)) e o `pnpm deploy:server`.
 - **O conserto das cenas que repetiam está na `main`** ("Sim, merge", `decisoes.md` 2026-11-16 (2)), por fast-forward de
   `feat/cenas-repetidas` até `1d92cd7`, com as duas CI verdes no topo da branch e no push da `main` (`b9a057f`). O véu do momento do oponente não traz mais de volta a última cena (`Stage.tsx`, uma
   condição; o teste novo no `moment.test.tsx`; a A/B no replay da `exodia-devastacao`, rodada 43). O diário 2026-11-16 (1). Só a web:
@@ -13,13 +17,11 @@
   - **Verificado:** `pnpm check` verde (web 2820 testes); `check` e `e2e` verdes em `1d92cd7`.
   - **Próximo passo exato:** nenhum de código aqui. O deploy é dele (`pnpm deploy:server`) e leva o bloco D e este conserto ao ar.
   - **O que não pode regredir:** a última cena só fica com a cortina **da cena** (`veil === 'scene'`); o véu do momento nunca a mostra.
-- **O Roubo mais forte** (`decisoes.md` 2026-11-16 (1), item 8): o valor com o buff da fileira de onde a carta sai (× (1 + J) ou × (1 + Q),
-  sem a quadra), o K não anula, segue sem contar para a iniciativa e sem matar. Bloco próprio, num worktree separado, com `RULES_VERSION` 6.
-  **Antes da calibração e do portão do Difícil**, as três [I] vão ao autor: (1) o K não quebra no Roubo; (2) a Defesa Absoluta segue
-  bloqueando o Roubo; (3) o buff conta no instante do Roubo, antes de a carta sair. A medida que ele quer ver: o bot que rouba contra o que
-  não rouba (eram 39%, `notas/medicao-e3.md`).
-- **A arte do cemitério** (item 10): a lápide e a área do cemitério mais caracterizadas, e o painel da Ressurreição com a mesma identidade.
-  A direção vai ao autor antes do código (as outras onze escolhas do bloco D ficam aprovadas).
+- **O Roubo mais forte** (`decisoes.md` 2026-11-16 (1), item 8, e as três [I] confirmadas em 2026-11-16 (3)): o valor com o buff da
+  fileira de onde a carta sai (× (1 + J) ou × (1 + Q), sem a quadra, contado antes de a carta sair), o K não anula nem quebra, a Defesa
+  Absoluta segue bloqueando, sem contar para a iniciativa e sem matar. Bloco próprio, num worktree separado, com `RULES_VERSION` 6, a
+  calibração e o portão do Difícil. A medida que ele quer ver: o bot que rouba contra o que não rouba (eram 39%, `notas/medicao-e3.md`).
+- **A arte do cemitério saiu da fila** ("Todas as direções reprovadas. ignore esta demanda", `decisoes.md` 2026-11-16 (3)).
 - **A config do pnpm desta máquina foi corrigida** (item 12): `storeDir: D:\.pnpm-store`, o mesmo store de todos os projetos dele.
 - **As regras 4.0 estão na `main`** ("finalize", `decisoes.md` 2026-11-15 (1)), por fast-forward de `feat/regras-4-0b` até `b5f93e3` (a branch e o worktree já apagados),
   com as duas CI verdes no topo da branch e no push da `main` (`aa2a6b1`). O texto das regras é o `docs/JOGO-DO-CORINGA-4.0.md` (`decisoes.md` 2026-11-14 (4)); o diário 2026-11-15 (1).
@@ -104,7 +106,7 @@
 
 ## Esperando o autor
 
-- **As três [I] do Roubo e a direção do cemitério** (acima; a recomendação: a direção A, o campo-santo de cordel).
+- **O "sim" do merge do domínio**, o `www` no painel da Cloudflare e o deploy (acima).
 - **O bloco D:** o deploy, e ver no navegador o Atacar com o Ataque Absoluto armado (a faísca só foi vista nos testes). As escolhas da
   §6.3 ficaram aprovadas, menos a arte do cemitério (`decisoes.md` 2026-11-16 (1), item 10).
 - **Menores adiados** (nenhum quebra o jogo): bloco D no `diario.md` 2026-11-14 (2) ("Adiados"); bloco C no `diario.md` 2026-11-08 (1) ("Adiados"); bloco B no 2026-11-07 (2) ("Menores, para

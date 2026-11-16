@@ -6,6 +6,30 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-16 (3): o cemitério fora; o domínio; as três [I] do Roubo; o www
+
+Depois do esboço das três direções do cemitério (A: campo-santo de cordel; B: pedra antiga; C: cova aberta), ele respondeu:
+
+> Todas as direções reprovadas. ignore esta demanda e prossiga com as pendências para o deploy e finalização. já comprei o domínio
+> jogodocoringa.com.br e está criado na cloudflare
+
+Perguntado em seguida se podia seguir com as três leituras do Roubo ((1) o K não quebra no Roubo, a Guarda fica de fora; (2) a Defesa
+Absoluta continua bloqueando o Roubo inteiro; (3) o buff conta antes de a carta sair), ele escolheu **"Ok nas três"**; sobre o
+`www.jogodocoringa.com.br`, **"www redireciona"** (o `www` manda para o endereço sem `www`).
+
+**Leitura:**
+- **O cemitério sai da fila:** a lápide e o diálogo ficam como estão (o bloco D). Substitui o item 10 de 2026-11-16 (1) na parte do
+  cemitério; as outras escolhas do bloco D seguem aprovadas.
+- **O domínio:** o jogo passa a morar em `https://jogodocoringa.com.br`, servido pelo mesmo Worker (`custom_domain` no `wrangler.jsonc`). A
+  zona está na conta Cloudflare dele. **[I]** O `workers.dev` segue ligado (não atrapalha e serve de reserva).
+- **O `www`:** redireciona para o endereço sem `www`, com uma origem só (o histórico de partidas fica no `localStorage` de uma origem).
+  **[I]** O redirecionamento é uma regra da zona no painel da Cloudflare (o Worker não vê os pedidos dos assets), e é ele quem a cria.
+- **O Roubo:** as três [I] de 2026-11-16 (1), item 8, viram regra. O bloco segue com `RULES_VERSION` 6, a calibração e o portão do Difícil.
+- **"prossiga com as pendências para o deploy e finalização":** **[I]** o domínio primeiro (é o que o deploy precisa), depois o Roubo. Os
+  merges seguem pedindo o "sim" dele; o deploy é dele.
+
+---
+
 ## 2026-11-16 (2): o merge do conserto das cenas que repetiam
 
 Depois do resumo do conserto (a cortina do momento trazia de volta a última cena; uma condição no `Stage.tsx`; o teste novo; a A/B no replay

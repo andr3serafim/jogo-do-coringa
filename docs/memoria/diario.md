@@ -5,6 +5,26 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-16 (2): o domínio jogodocoringa.com.br
+
+- **Pedido:** "já comprei o domínio jogodocoringa.com.br e está criado na cloudflare", com o `www` redirecionando (`decisoes.md` 2026-11-16 (3)).
+- **Feito,** na `feat/dominio` (saída da `main` em `ca2b4d0`): a rota `{ pattern: 'jogodocoringa.com.br', custom_domain: true }` no
+  `wrangler.jsonc`, com o teste no `assets-config.test.ts` (vermelho antes, verde depois). O `wrangler deploy --dry-run` aceita a rota.
+- **Por que só isso:** a interface e a API saem do mesmo Worker, e o servidor aceita sempre a própria origem (`isOriginAllowed`); o
+  `ALLOWED_ORIGINS` só serve a outras origens (o Vite local). O CSP do `_headers` é `'self'`. Nenhum endereço do `workers.dev` está no
+  código: o link da sala sai da origem da página.
+- **Ruling:** o `www` não entra no Worker: com `run_worker_first` só em `/api/*`, o Worker não vê os pedidos dos assets e não teria como
+  redirecionar a página. O redirecionamento é a regra da zona, no painel (o autor faz) — custo: um passo fora do repositório.
+- **Ruling:** o `workers.dev` fica ligado (reserva; não divide nada, porque ninguém o usa como endereço do jogo) — custo: dois endereços
+  respondem.
+- **O que o autor faz no painel da Cloudflare** (zona `jogodocoringa.com.br`), antes ou depois do deploy:
+  1. **DNS:** um registro `CNAME` `www` → `jogodocoringa.com.br`, com o proxy ligado (nuvem laranja).
+  2. **Rules → Redirect Rules → "Redirect from WWW to Root"** (o modelo pronto), com 301 e a query mantida.
+  3. O `pnpm deploy:server` cria sozinho o registro do domínio sem `www` e o certificado (o `custom_domain`). Se a zona já tiver um
+     registro `A`/`AAAA`/`CNAME` na raiz, o deploy recusa: apague-o antes.
+
+---
+
 ## 2026-11-16 (1): o lote respondido, a config do pnpm e o bug das cenas que repetiam
 
 - **Pedido:** as respostas ao lote de doze perguntas e o bug visto no treino (`decisoes.md` 2026-11-16 (1)). O Roubo mais forte e a arte do
