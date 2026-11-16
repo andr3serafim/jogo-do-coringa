@@ -1,19 +1,18 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-15**, as regras 4.0 na branch nova `feat/regras-4-0b` (sobre a `main` `d3f65a9`), com
-> a §14 confirmada pelo autor e o "finalize" dele (`decisoes.md` 2026-11-15 (1)): falta a CI da branch e o fast-forward da `main`.
+> Sobrescrito a cada atualização. **Última: 2026-11-15**, as regras 4.0 na `main` por fast-forward até `b5f93e3` ("finalize",
+> `decisoes.md` 2026-11-15 (1)), com as duas CI verdes no topo da branch; falta ler a CI do push da `main`. A fila de código está vazia; o deploy é do autor.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **As regras 4.0 vão para a `main`** (`decisoes.md` 2026-11-14 (4) e 2026-11-15 (1); o diário 2026-11-15 (1)). O
-  `docs/JOGO-DO-CORINGA-4.0.md` foi escrito em 2026-11-14 numa sessão paralela ao bloco D (`feat/regras-4-0`); em 2026-11-15 foi refeito
-  sobre a `main` e, como o force-push foi barrado, sobe na branch nova `feat/regras-4-0b` (worktree `.claude/worktrees/regras-4`).
-  - **A §14 está confirmada** ("ok" às seis): a §14 virou "Leituras confirmadas" e os comentários `[I]` delas no motor dizem
-    "confirmado pelo autor, 2026-11-15". Nada muda regra (`RULES_VERSION` 5). O resto do texto descreve o motor, sem revisão regra a regra.
-  - **Próximo passo exato:** o push da `feat/regras-4-0b` (o pre-push roda o `pnpm check`), as duas CI verdes nela (ler pela API com
-    `curl`), a `main` por fast-forward até o topo dela ("finalize" = o "sim", `decisoes.md` 2026-11-15 (1)), o push da `main` e a CI dele.
-    A `feat/regras-4-0` remota fica velha: apagá-la é do autor.
+- **As regras 4.0 estão na `main`** ("finalize", `decisoes.md` 2026-11-15 (1)), por fast-forward de `feat/regras-4-0b` até `b5f93e3`,
+  com as duas CI verdes no topo da branch; falta ler a CI do push da `main`. O texto das regras é o `docs/JOGO-DO-CORINGA-4.0.md` (`decisoes.md` 2026-11-14 (4)); o diário 2026-11-15 (1).
+  - **A §14 está confirmada** ("ok" às seis leituras): virou "Leituras confirmadas", e os comentários delas no motor dizem "confirmado
+    pelo autor, 2026-11-15". Nada mudou regra (`RULES_VERSION` 5). O resto do texto descreve o motor e não foi revisado regra a regra:
+    se o texto e o motor discordarem, vale o motor, e o texto é corrigido.
+  - **Verificado:** `pnpm check` verde no pre-push da branch (web 2819 testes); `check` e `e2e` verdes em `b5f93e3`.
+  - **Próximo passo exato:** ler a CI do push da `main` pela API e registrar aqui.
 - **O bloco D está na `main`** ("Sim, merge", `decisoes.md` 2026-11-14 (3)), por fast-forward de `feat/playtest-bloco-d` (pontos 5 e 14: os
   botões de carimbo; o monte e o cemitério no centro, com a lápide). O código em `6359b60`. O plano `docs/superpowers/plans/2026-11-14-playtest-bloco-d.md`;
   o diário 2026-11-14 (2); as doze escolhas na §6.3 da spec do playtest; as telas e a A/B em `notas/medicao-bloco-d.md`.
@@ -83,14 +82,14 @@
 
 ## Fila
 
-- **As regras 4.0:** a `feat/regras-4-0b` para a `main` (acima).
-- **De código, vazia:** os blocos A a E do playtest estão na `main`. O próximo trabalho vem do autor (o que ele achar jogando o bloco D).
+- **Vazia:** os blocos A a E do playtest estão na `main`. O próximo trabalho vem do autor (o que ele achar jogando o bloco D).
 - **Fora da fila, a pedido:** a arte pintada dos decks, quando o jogo estiver pronto e online e o autor pedir (segue a bíblia de arte,
   `docs/superpowers/specs/2026-11-11-biblia-de-arte.md`).
 
 ## Esperando o autor
 
-- **As regras 4.0:** apagar a branch remota velha `feat/regras-4-0` (a nova é a `feat/regras-4-0b`).
+- **As regras 4.0:** apagar as branches remotas `feat/regras-4-0` (a velha, de antes do rebase, nunca mesclada) e `feat/regras-4-0b`
+  (mesclada). Se quiser, responder em lote às regras numeradas do `docs/JOGO-DO-CORINGA-4.0.md`.
 - **A config do pnpm desta máquina:** o `%LOCALAPPDATA%\pnpm\config\config.yaml` tem `storeDir: D:.pnpm-store` (sem a barra), e o `pnpm add`
   falha; o `node_modules` usa `D:\.pnpm-store\v11`. Até corrigir, passe `--store-dir 'D:\.pnpm-store'`.
 - **O bloco D:** o deploy, e jogar para olhar as doze escolhas da §6.3 da spec do playtest (são do Claude, por delegação) e o Atacar com o
