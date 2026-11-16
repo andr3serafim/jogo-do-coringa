@@ -31,6 +31,11 @@ export const GREEDY = {
   reflectAttack: 30,
   /** Quanto a Devastação precisa mexer na avaliação de mesa (a meu favor) para valer as 3 cartas. */
   devastation: 25,
+  /**
+   * A quantos K da Exódia o greedy passa a gastar o A num K da Guarda do oponente, na fase principal e na reação ao K jogado
+   * (decisoes.md 2026-11-16 (4)): com o Roubo mais forte, ele gastava os A roubando e chegava ao terceiro K sem nenhum.
+   */
+  exodiaWatch: 2,
 } as const;
 
 type Of<T extends Action['type']> = Extract<Action, { type: T }>;
@@ -85,7 +90,7 @@ export function prefersFirst(view: PlayerView): boolean {
 export function targetValue(view: PlayerView, targetId: string): number {
   const { self, opponent, config } = view;
   if (opponent.guard.some((c) => c.id === targetId)) {
-    if (opponent.guard.length >= config.exodiaGuard - 1) return 1000;
+    if (opponent.guard.length >= config.exodiaGuard - GREEDY.exodiaWatch) return 1000;
     return opponent.guard.length === 1 ? hpDamage(self, without(opponent, targetId), config.buffLimit) : 0;
   }
   if (opponent.attackBuffs.some((c) => c.id === targetId)) {
@@ -179,7 +184,7 @@ function reaction(view: PlayerView, legal: Action[], trigger: ReactionTrigger, r
   const traps = ofType(legal, 'TRAP');
   if (traps.length === 0) return pass;
   if (trigger === 'K_PLAYED') {
-    return opponent.guard.length >= config.exodiaGuard - 1 ? cheapest(traps, view, rng) : pass;
+    return opponent.guard.length >= config.exodiaGuard - GREEDY.exodiaWatch ? cheapest(traps, view, rng) : pass;
   }
   // ATTACK: a Armadilha que mais reduz o dano que vou levar.
   const incoming = hpDamage(opponent, self, config.buffLimit);

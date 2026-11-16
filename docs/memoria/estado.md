@@ -24,9 +24,13 @@
     meta); o portão do Difícil aprovou de primeira.
   - **A regra mora na chave `stealBuffed`** (ligada no `makeConfig()`): os replays de antes, sem a chave, reproduzem o Roubo de antes. O
     primeiro push reprovou no `e2e` por isso (as fixtures de replay divergiam).
-  - **Próximo passo exato:** o push da `main` e a CI dele; depois, o bloco do greedy que barra a Exódia (`decisoes.md` 2026-11-16 (4)):
-    com o oponente a 3 K da Exódia, o A vai para a Armadilha num K dele em vez do Roubo; a calibração e o portão do Difícil de novo
-    (`--ajuste`), a CI e o "sim" do merge.
+  - **Próximo passo exato:** o bloco do greedy que barra a Exódia (abaixo).
+- **O greedy barra a Exódia, em execução** (`decisoes.md` 2026-11-16 (4)), na branch `feat/bot-exodia` (worktree `.claude/worktrees/roubo`,
+  saída da `main` em `6070478`): `GREEDY.exodiaWatch` = 2 (o A vai num K da Guarda do oponente a 2 K da Exódia, na fase principal e na
+  reação ao K jogado; antes era a 1). A sonda de 1000 partidas: a Exódia no greedy × greedy de 3,0% para 1,3%, no turtle × greedy de
+  12,6% para 5,5%. Os testes novos no `greedy.test.ts` (vermelhos com 1, verdes com 2).
+  - **Em curso:** `pnpm sim:e3`, `pnpm sim:calibrate` e `pnpm sim:dificil --ajuste "…"`, em background no worktree.
+  - **Próximo passo exato:** ler os relatórios, acrescentar à `notas/medicao-roubo-buff.md`, commitar, o push e a CI, e o "sim" do merge.
 - **A arte do cemitério saiu da fila** ("Todas as direções reprovadas. ignore esta demanda", `decisoes.md` 2026-11-16 (3)).
 - **A config do pnpm desta máquina foi corrigida** (item 12): `storeDir: D:\.pnpm-store`, o mesmo store de todos os projetos dele.
 - **As regras 4.0 estão na `main`** ("finalize", `decisoes.md` 2026-11-15 (1)), por fast-forward de `feat/regras-4-0b` até `b5f93e3` (a branch e o worktree já apagados),

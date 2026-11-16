@@ -43,6 +43,22 @@ describe('greedy', () => {
     expect(action.type).toBe('TRAP');
   });
 
+  it('com o oponente a 2 K da Exódia, o A vai num K da Guarda dele, e não num Roubo gordo (decisoes.md 2026-11-16 (4))', () => {
+    const s = setup({ p1: { hand: ['A'], hp: 300 }, p2: { guard: 2, attack: [10, 4], attackBuffs: ['J', 'J', 'J'] } });
+    const action = decide(greedyBot, s);
+    expect(action.type).toBe('TRAP');
+    expect(action.type === 'TRAP' && s.players[1].guard.some((k) => k.id === action.targetId)).toBe(true);
+    // Longe da Exódia (1 K), o Roubo de 40 segue valendo mais.
+    const far = setup({ p1: { hand: ['A'], hp: 300 }, p2: { guard: 1, attack: [10, 4], attackBuffs: ['J', 'J', 'J'] } });
+    expect(decide(greedyBot, far).type).toBe('STEAL');
+  });
+
+  it('na janela do K jogado, quebra um K quando o oponente fica a 2 da Exódia', () => {
+    const s = setup({ p1: { hand: ['A'] }, p2: { guard: 2 }, phase: { kind: 'REACTION', responder: P1, trigger: 'K_PLAYED' } });
+    expect(decide(greedyBot, s).type).toBe('TRAP');
+    expect(GREEDY.exodiaWatch).toBe(2);
+  });
+
   it('no Equipar, manda a numérica para a fileira que mais rende (J no Ataque → Ataque; 2 Q na Defesa → Defesa)', () => {
     const opponent: PlayerSetup = { attack: [10, 10], attackBuffs: ['J'] };
     const base = { phase: { kind: 'EQUIP' } as const, roundKind: 'EQUIP' as const, p2: opponent };
