@@ -85,6 +85,23 @@ describe('o véu do momento', () => {
     expect(curtain!.className).toContain('transition-[opacity,background-color]');
   });
 
+  it('o véu não traz de volta a última cena (o bug de 2026-11-16: a cena rara repetia no momento seguinte do Bot)', () => {
+    const m = mount(THEIRS, { training: 'medio' });
+    const QB: SpecialCard = { id: 'qb', kind: 'Q', suit: 'paus' };
+    const WALL: ViewSpec = { ...THEIRS, opponent: { ...THEIRS.opponent, defenseBuffs: [QB], absoluteDefense: true } };
+    emit(m, WALL, [{ type: 'AbsoluteDefenseStarted', player: 'p2' }]);
+    advance(10);
+    expect(m.container.querySelector('[data-camada-cena]')).toHaveAttribute('data-cena', 'ABSOLUTE_DEFENSE');
+    busyFor(m.container);
+    advance(2_000);
+    expect(m.container.querySelector('[data-cortina][data-ativa]')).toBeNull();
+    emit(m, { ...WALL, opponent: { ...WALL.opponent, attackBuffs: [JB] } }, [botBuff(JB)]);
+    advance(10);
+    expect(veil(m.container)).not.toBeNull();
+    expect(m.container.querySelector('[data-camada-cena]')).not.toHaveAttribute('data-cena');
+    expect(m.container.querySelector('[data-painel-cena]')).not.toHaveAttribute('data-ativo');
+  });
+
   it('com movimento reduzido, nenhum véu', () => {
     const m = mount(THEIRS, { training: 'medio', prefs: { reduceMotion: true } });
     emit(m, BOT_ONE, [botBuff(JB)]);

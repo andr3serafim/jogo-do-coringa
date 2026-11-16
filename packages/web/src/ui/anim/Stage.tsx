@@ -228,11 +228,13 @@ export function Stage({ snapshot, reducedMotion, onSettled, online = false, chil
     if (cue !== null) sound.play(cue);
   }, [beat, run.catchUp, me, sound]);
 
-  // A cena em curso e a última que passou: a cortina segura o painel da última até descer (e o pulo o apaga já).
+  // A cena em curso e a última que passou: a cortina segura o painel da última até descer (e o pulo o apaga já). Só a cortina da cena: o
+  // véu do momento do oponente é a mesma cortina, e com ele a última cena (até a de outra partida) remontava e tocava de novo (o bug de
+  // 2026-11-16).
   const sceneNow = beat !== null && beat.kind === 'scene' && beat.scene !== null ? beat : null;
   const [lastScene, setLastScene] = useState<Beat | null>(null);
   if (sceneNow !== null && sceneNow !== lastScene) setLastScene(sceneNow);
-  const scene = sceneNow ?? (curtain && busy ? lastScene : null);
+  const scene = sceneNow ?? (curtain && veil === 'scene' && busy ? lastScene : null);
 
   // A fita (sub-projeto 6 §4): a trava pode segurá-la no ar depois da batida dela, então fica a última que passou. O objeto só
   // troca quando o texto troca (o `anim` não muda a cada desenho por causa dela).
