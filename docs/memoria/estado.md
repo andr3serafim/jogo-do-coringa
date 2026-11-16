@@ -1,11 +1,20 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-14**, o bloco D na `main` por fast-forward até `302bbaf` ("Sim, merge", `decisoes.md`
-> 2026-11-14 (3)), com as duas CI verdes no push; a fila está vazia, e o deploy é do autor.
+> Sobrescrito a cada atualização. **Última: 2026-11-15**, a branch `feat/regras-4-0` (o livro de regras 4.0) refeita sobre a `main`
+> (`d3f65a9`), à espera da revisão do autor e do "sim" do merge. O bloco D segue na `main` (`302bbaf`, as duas CI verdes); o deploy é do autor.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
+- **As regras 4.0 esperam o autor** (`decisoes.md` 2026-11-14 (4); o diário 2026-11-14 (3)). O `docs/JOGO-DO-CORINGA-4.0.md` foi escrito
+  em 2026-11-14, numa sessão paralela ao bloco D, na branch `feat/regras-4-0` (worktree `.claude/worktrees/regras-4`), e ficou fora do
+  `estado.md` da `main`. Em 2026-11-15 a branch foi refeita sobre a `main` (`d3f65a9`): a decisão virou a (4) e a entrada do diário a (3),
+  porque a `main` já tinha a (3) e a (2) do bloco D. Só docs: nada muda regra (se o texto e o motor discordarem, vale o motor).
+  - **É rascunho:** o autor não o revisou. A §14 lista as seis leituras **[I]** do motor ainda sem o "ok" dele (o Roubo cura o valor
+    cheio; o Roubo não abre janela; a Devastação contra fileira vazia e contra Defesa Absoluta; Reflect contra Reflect na Devastação;
+    a Devastação refletida contra a Defesa Absoluta; a cura da carta trocada no Equipar depois das novas).
+  - **Próximo passo exato:** o "sim" do autor para o merge (fast-forward da `main` até o topo da branch, com as duas CI verdes) e, quando
+    ele quiser, a resposta em lote à §14 (cada "não" vira mudança de regra, com `RULES_VERSION` novo, num bloco à parte).
 - **O bloco D está na `main`** ("Sim, merge", `decisoes.md` 2026-11-14 (3)), por fast-forward de `feat/playtest-bloco-d` (pontos 5 e 14: os
   botões de carimbo; o monte e o cemitério no centro, com a lápide). O código em `6359b60`. O plano `docs/superpowers/plans/2026-11-14-playtest-bloco-d.md`;
   o diário 2026-11-14 (2); as doze escolhas na §6.3 da spec do playtest; as telas e a A/B em `notas/medicao-bloco-d.md`.
@@ -75,12 +84,14 @@
 
 ## Fila
 
-- **Vazia:** os blocos A a E do playtest estão na `main`. O próximo trabalho vem do autor (o que ele achar jogando o bloco D).
+- **As regras 4.0:** o merge da `feat/regras-4-0`, com o "sim" do autor (acima).
+- **De código, vazia:** os blocos A a E do playtest estão na `main`. O próximo trabalho vem do autor (o que ele achar jogando o bloco D).
 - **Fora da fila, a pedido:** a arte pintada dos decks, quando o jogo estiver pronto e online e o autor pedir (segue a bíblia de arte,
   `docs/superpowers/specs/2026-11-11-biblia-de-arte.md`).
 
 ## Esperando o autor
 
+- **As regras 4.0:** o "sim" do merge da `feat/regras-4-0` e a revisão do `docs/JOGO-DO-CORINGA-4.0.md` (a §14 primeiro).
 - **A config do pnpm desta máquina:** o `%LOCALAPPDATA%\pnpm\config\config.yaml` tem `storeDir: D:.pnpm-store` (sem a barra), e o `pnpm add`
   falha; o `node_modules` usa `D:\.pnpm-store\v11`. Até corrigir, passe `--store-dir 'D:\.pnpm-store'`.
 - **O bloco D:** o deploy, e jogar para olhar as doze escolhas da §6.3 da spec do playtest (são do Claude, por delegação) e o Atacar com o
@@ -134,7 +145,9 @@ toque "Próximo passo" a partir do passo:
   `pnpm install` que troque o workerd perde o paliativo. A correção: instalar o VC++ x64 mais recente
   (`https://aka.ms/vs/17/release/vc_redist.x64.exe`) e apagar as três DLLs.
 - **Worktrees:** `D:\andr3\jogo-coringa` (o principal); `.claude/worktrees/inspiring-sammet-387417` (`feat/ajustes`, da conta anterior) e
-  `.claude/worktrees/youthful-elgamal-3d5e8a` (de 2026-11-02, talvez de uma sessão do app: não apague). Uma pasta de worktree com
+  `.claude/worktrees/youthful-elgamal-3d5e8a` (de 2026-11-02, talvez de uma sessão do app: não apague); `.claude/worktrees/regras-4`
+  (`feat/regras-4-0`, as regras 4.0; sai depois do merge). O `node_modules` dele não tinha as DLLs do paliativo do workerd: foram
+  copiadas do principal em 2026-11-15. Uma pasta de worktree com
   `node_modules` que o `git worktree remove` não apaga ("Filename too long") sai no PowerShell com
   `Remove-Item -LiteralPath ('\\?\' + $p) -Recurse -Force`.
 - **Branches:** as locais estão mescladas na `main` (a `feat/playtest-bloco-c` em 2026-11-11 e a `feat/decks-fatia-1` em 2026-11-12), menos a `feat/online-equipar-vazio`
