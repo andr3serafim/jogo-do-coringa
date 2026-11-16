@@ -15,6 +15,8 @@ export const DEFAULT_CONFIG: RulesConfig = {
   specialLimit: { max: 4, penalty: 'BURN' },
   // A Ressurreição no instante da quadra (ponto 16, autor em 2026-11-03).
   resurrectOnQuad: true,
+  // O Roubo com o buff da fileira, sem o K anular (decisoes.md 2026-11-16 (1) e (3)).
+  stealBuffed: true,
 };
 
 export type ConfigOverrides = Partial<Omit<RulesConfig, 'deck'>> & {
@@ -68,6 +70,7 @@ export function validateConfig(c: RulesConfig): ConfigError | null {
       'specialLimit deve ser { max: inteiro ≥ 3, penalty: BURN | CHOOSE | FEWER }',
     ],
     [c.resurrectOnQuad === undefined || typeof c.resurrectOnQuad === 'boolean', 'resurrectOnQuad deve ser verdadeiro ou falso'],
+    [c.stealBuffed === undefined || typeof c.stealBuffed === 'boolean', 'stealBuffed deve ser verdadeiro ou falso'],
   ];
   for (const [ok, message] of checks) {
     if (!ok) return { code: 'INVALID_CONFIG', message };

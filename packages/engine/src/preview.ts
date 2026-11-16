@@ -85,32 +85,43 @@ export function previewAttack(view: PlayerView, attacker: 'self' | 'opponent'): 
 }
 
 /**
- * O valor do Roubo (decisoes.md 2026-11-16 (1) e (3)): a carta com o buff da fileira de onde ela sai, valor × (1 + nº de J) do Ataque e
- * valor × (1 + nº de Q) da Defesa, sem o bônus de quadra. Conta a mesa da vítima no instante do Roubo (os buffs são da fileira e ficam).
+ * O valor do Roubo. Com `stealBuffed` (decisoes.md 2026-11-16 (1) e (3)): a carta com o buff da fileira de onde ela sai, valor × (1 + nº
+ * de J) do Ataque e valor × (1 + nº de Q) da Defesa, sem o bônus de quadra, contado no instante do Roubo (os buffs são da fileira e
+ * ficam). Sem a chave (replays de antes): o valor seco.
  */
 export function stealAmount(
   card: Pick<NumCard, 'value'>,
   fromRow: RowName,
   victim: { attackBuffs: readonly unknown[]; defenseBuffs: readonly unknown[] },
+  config: Pick<RulesConfig, 'stealBuffed'>,
 ): number {
+  if (config.stealBuffed !== true) return card.value;
   return card.value * (1 + (fromRow === 'ATK' ? victim.attackBuffs.length : victim.defenseBuffs.length));
 }
 
-/** O efeito de um Roubo na vida: o valor (com o buff, `stealAmount`), o dano que sai de fato e a cura. */
+/** O efeito de um Roubo na vida: o valor (`stealAmount`), o dano que sai de fato e a cura. */
 export interface StealOutcome {
   value: number;
-  /** O K não anula (2026-11-16 (1)); nunca mata: a vida da vítima fica em no mínimo 1. */
+  /** Nunca mata: a vida da vítima fica em no mínimo 1. 0 quando um K anula (`blocked`, só sem `stealBuffed`). */
   damage: number;
   /** A cura de quem rouba, cheia mesmo quando o dano sai menor, até a vida inicial. */
   heal: number;
+  blocked: boolean;
 }
 
 /** A conta do Roubo de `value` (o `stealAmount` da carta), a mesma do motor e da prévia da mesa. */
-export function stealOutcome(value: number, victim: { hp: number }, thief: { hp: number }, config: Pick<RulesConfig, 'hp'>): StealOutcome {
+export function stealOutcome(
+  value: number,
+  victim: { hp: number; guard: readonly unknown[] },
+  thief: { hp: number },
+  config: Pick<RulesConfig, 'hp' | 'stealBuffed'>,
+): StealOutcome {
+  const blocked = config.stealBuffed !== true && victim.guard.length > 0;
   return {
     value,
-    damage: Math.max(0, Math.min(value, victim.hp - 1)),
+    damage: blocked ? 0 : Math.max(0, Math.min(value, victim.hp - 1)),
     heal: Math.max(0, Math.min(value, config.hp - thief.hp)),
+    blocked,
   };
 }
 
@@ -124,5 +135,5 @@ export function stealPreview(view: PlayerView, targetId: string): StealOutcome |
       : null;
   if (fromRow === null) return null;
   const card = (fromRow === 'ATK' ? opponent.attackRow : opponent.defenseRow).find((c) => c.id === targetId)!;
-  return stealOutcome(stealAmount(card, fromRow, opponent), opponent, view.self, view.config);
+  return stealOutcome(stealAmount(card, fromRow, opponent, view.config), opponent, view.self, view.config);
 }

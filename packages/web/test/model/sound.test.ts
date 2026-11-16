@@ -44,7 +44,7 @@ const SAMPLES: { [T in GameEvent['type']]: Extract<GameEvent, { type: T }> } = {
   ReflectTriggered: { type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 4 },
   HandLimitPenalty: { type: 'HandLimitPenalty', player: 'p1', penalty: 'BURN', cards: [face('k1')], fewer: 0 },
   CardStolen: { type: 'CardStolen', player: 'p1', from: 'p2', card: num('n1'), fromRow: 'ATK', toRow: 'DEF', ace: face('a1', 'A') },
-  StealDamage: { type: 'StealDamage', player: 'p1', victim: 'p2', value: 7, damage: 7 },
+  StealDamage: { type: 'StealDamage', player: 'p1', victim: 'p2', value: 7, damage: 7, blocked: false },
   Healed: { type: 'Healed', player: 'p1', amount: 5, source: 'STEAL', card: num('n1') },
   DevastationCast: { type: 'DevastationCast', player: 'p1', target: 'p2', row: 'ATK', k: face('k1'), a: face('a1', 'A'), x: face('j1', 'J') },
   RowDevastated: { type: 'RowDevastated', player: 'p2', row: 'ATK', cards: [num('n1')], reflected: false },
@@ -184,8 +184,8 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
     });
 
     it('o dano do Roubo soa como golpe; anulado pelo K, mudo', () => {
-      expect(cueFor({ type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 9 })).toBe('golpe-leve');
-      expect(cueFor({ type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 0 })).toBeNull();
+      expect(cueFor({ type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 9, blocked: false })).toBe('golpe-leve');
+      expect(cueFor({ type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 0, blocked: true })).toBeNull();
     });
 
     it('dano 0 é mudo', () => {

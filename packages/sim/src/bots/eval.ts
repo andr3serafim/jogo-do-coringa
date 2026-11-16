@@ -13,6 +13,7 @@ import {
   type RulesConfig,
   type SpecialCard,
   stealAmount,
+  stealOutcome,
 } from '@coringa/engine';
 
 /** ATK − DEF sem K, Reflect nem Absolutos (o "líquido" da spec §1.9, passo 6). */
@@ -71,9 +72,8 @@ export function stealValue(view: PlayerView, action: Extract<Action, { type: 'ST
   const mine = action.row === 'ATK' ? self.attackRow : self.defenseRow;
   const row = [...(mine.length >= config.rowLimit ? mine.slice(0, -1) : mine), card];
   const thief = action.row === 'ATK' ? { ...self, attackRow: row } : { ...self, defenseRow: row };
-  const amount = stealAmount(card, opponent.attackRow.some((c) => c.id === card.id) ? 'ATK' : 'DEF', opponent);
-  const damage = Math.max(0, Math.min(amount, opponent.hp - 1));
-  const heal = Math.max(0, Math.min(amount, config.hp - self.hp));
+  const amount = stealAmount(card, opponent.attackRow.some((c) => c.id === card.id) ? 'ATK' : 'DEF', opponent, config);
+  const { damage, heal } = stealOutcome(amount, opponent, self, config);
   return boardScore(thief, victim) - boardScore(self, opponent) + damage + heal;
 }
 

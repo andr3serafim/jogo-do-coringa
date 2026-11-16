@@ -19,10 +19,17 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     Na web: a prévia do alvo ("−27 para Duda · +27 para você"), o resumo das regras e a dica do tutorial; o teste do Equipar vazio trocou a
     semente `diag-12` pela `diag-3` (as partidas mudaram). O livro de regras (8.5 e 14.1).
   - Depois: a spec das regras (§ do Roubo) e o comentário do `StealDamage`; a medição.
-- **Ruling:** o campo `blocked` saiu do `StealDamage` e do `StealOutcome` (o K não anula mais nada) — custo: um evento a menos para
-  explicar; a web antiga em cache lê `undefined` e segue.
-- **Ruling:** `STATE_SCHEMA` e `PROTOCOL_VERSION` não sobem: a forma do estado não muda, e um jogo aberto no deploy segue com a regra nova
-  (o valor do Roubo é calculado na hora) — custo: uma sala aberta no instante do deploy troca a regra no meio da partida.
+- **A CI reprovou o primeiro push** (`350f4c9`, o `e2e`): as fixtures de replay do E2E (`absolutos`, `especiais`) foram gravadas com a
+  regra de antes, e o replay roda no motor de agora: a vida e o fim das partidas mudavam (345 virou 364, a rodada do golpe final sumiu).
+  As partidas que o autor guardou no navegador divergiriam do mesmo jeito.
+- **Ruling (o conserto):** a regra nova fica atrás da chave `stealBuffed` do `RulesConfig`, ligada no `makeConfig()`, como a
+  `resurrectOnQuad` do ponto 16. Sem a chave (os replays de antes, as fixtures, as partidas guardadas), vale o Roubo de antes: o valor
+  seco, e o K anula. Por isso o `blocked` **voltou** ao `StealDamage` e ao `StealOutcome` (sempre `false` com a chave), a prévia da web
+  voltou a saber do K, e o texto do histórico do simulador e os testes da web que só tiravam o `blocked` voltaram ao de antes. Os replays
+  de referência foram regravados de novo, e os resumos e o digest da versão 6 não mudaram — custo: um ramo a mais no motor para as regras
+  antigas.
+- **Ruling:** `STATE_SCHEMA` e `PROTOCOL_VERSION` não sobem: a forma do estado não muda, e a sala online guarda a config no estado: a
+  aberta antes do deploy segue até o fim com o Roubo de antes (sem a chave) — custo: nenhum visto.
 - **Ruling:** o greedy não foi reajustado à regra nova além da conta do `stealValue` (o limiar `stealMain` segue 12) — custo: o achado da
   Exódia abaixo fica para o autor decidir.
 - **Medição** (`notas/medicao-roubo-buff.md`): o dano do roubo por partida foi de 54 para 200 e a cura de 60 para 187, mas o greedy que

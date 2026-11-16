@@ -51,7 +51,7 @@ describe('Roubo (E3)', () => {
       expect(player(r.state, P2).hp).toBe(60);
       expect(player(r.state, P1).hp).toBe(90);
       expect(player(r.state, P1).damageThisRound).toBe(0);
-      expect(r.events).toContainEqual({ type: 'StealDamage', player: P1, victim: P2, value: 40, damage: 40 });
+      expect(r.events).toContainEqual({ type: 'StealDamage', player: P1, victim: P2, value: 40, damage: 40, blocked: false });
       expect(r.events).toContainEqual(expect.objectContaining({ type: 'Healed', player: P1, amount: 40, source: 'STEAL' }));
       // Os J ficam com ele: o buff é da fileira, não da carta.
       expect(player(r.state, P2).attackBuffs).toHaveLength(3);
@@ -61,11 +61,11 @@ describe('Roubo (E3)', () => {
   it('da Defesa, o buff é o dos Q (um 10 com 2 Q vale 30); o bônus de quadra não entra', () => {
     const s = setup({ p1: { hand: ['A'], hp: 50 }, p2: { defense: [10], defenseBuffs: ['Q', 'Q'] } });
     const r = act(s, P1, stealOf(s, player(s, P2).defenseRow[0]!, 'ATK'));
-    expect(r.events).toContainEqual({ type: 'StealDamage', player: P1, victim: P2, value: 30, damage: 30 });
+    expect(r.events).toContainEqual({ type: 'StealDamage', player: P1, victim: P2, value: 30, damage: 30, blocked: false });
     expect(player(r.state, P1).hp).toBe(80);
     const quad = setup({ p1: { hand: ['A'], hp: 50 }, p2: { defense: [6, 6, 6, 6], defenseBuffs: ['Q'] } });
     const q = act(quad, P1, stealOf(quad, player(quad, P2).defenseRow[0]!, 'DEF'));
-    expect(q.events).toContainEqual({ type: 'StealDamage', player: P1, victim: P2, value: 12, damage: 12 });
+    expect(q.events).toContainEqual({ type: 'StealDamage', player: P1, victim: P2, value: 12, damage: 12, blocked: false });
   });
 
   it('um K na Guarda do oponente não anula o dano nem quebra', () => {
@@ -74,8 +74,17 @@ describe('Roubo (E3)', () => {
     const r = act(s, P1, stealOf(s, card, 'ATK'));
     expect(player(r.state, P2).hp).toBe(91);
     expect(player(r.state, P2).guard).toHaveLength(1);
-    expect(r.events).toContainEqual({ type: 'StealDamage', player: P1, victim: P2, value: 9, damage: 9 });
+    expect(r.events).toContainEqual({ type: 'StealDamage', player: P1, victim: P2, value: 9, damage: 9, blocked: false });
     expect(player(r.state, P1).hp).toBe(99);
+  });
+
+  it('sem stealBuffed (os replays de antes da RULES_VERSION 6): o valor seco, e um K na Guarda anula o dano e fica', () => {
+    const s = setup({ config: { stealBuffed: false }, p1: { hand: ['A'], hp: 50 }, p2: { attack: [10, 2], attackBuffs: ['J', 'J', 'J'], guard: 1 } });
+    const r = act(s, P1, stealOf(s, player(s, P2).attackRow[0]!, 'ATK'));
+    expect(r.events).toContainEqual({ type: 'StealDamage', player: P1, victim: P2, value: 10, damage: 0, blocked: true });
+    expect(player(r.state, P2).hp).toBe(100);
+    expect(player(r.state, P2).guard).toHaveLength(1);
+    expect(player(r.state, P1).hp).toBe(60);
   });
 
   it('o dano do roubo não mata (a vida do oponente fica em no mínimo 1), e a cura é o valor cheio', () => {

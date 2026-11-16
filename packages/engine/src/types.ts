@@ -61,6 +61,12 @@ export interface RulesConfig {
    * fase principal, só em fileira com vaga.
    */
   resurrectOnQuad?: boolean;
+  /**
+   * O Roubo com o buff da fileira (RULES_VERSION 6, decisoes.md 2026-11-16 (1) e (3)): o valor é o da carta × (1 + J) do Ataque ou
+   * × (1 + Q) da Defesa, sem a quadra, e o K não anula o dano. Sem o campo (replays de antes), a regra de antes: o valor seco, e um K na
+   * Guarda da vítima anula o dano.
+   */
+  stealBuffed?: boolean;
 }
 
 export type Destination = 'ATK' | 'DEF' | 'REPLACE_LAST_ATK' | 'REPLACE_LAST_DEF' | 'DISCARD';
@@ -263,8 +269,11 @@ export type GameEvent =
   | { type: 'DevastationCanceled'; player: PlayerId; reason: 'REFLECT_CLASH' | 'ABSOLUTE_DEFENSE' }
   /** Roubo (E3): `player` levou `card` da fileira `fromRow` de `from` para a própria `toRow`, gastando `ace` (`as` com o Selvagem). */
   | { type: 'CardStolen'; player: PlayerId; from: PlayerId; card: NumCard; fromRow: RowName; toRow: RowName; ace: SpecialCard; as?: 'A' }
-  /** O dano do roubo: `value` é o valor do roubo (a carta com o buff da fileira, `stealAmount`); `damage`, o que saiu da vida (no mínimo 1 fica). */
-  | { type: 'StealDamage'; player: PlayerId; victim: PlayerId; value: number; damage: number }
+  /**
+   * O dano do roubo: `value` é o valor do roubo (`stealAmount`); `damage`, o que saiu da vida (no mínimo 1 fica); `blocked`, um K anulou
+   * o dano (só sem `stealBuffed`, nos replays de antes).
+   */
+  | { type: 'StealDamage'; player: PlayerId; victim: PlayerId; value: number; damage: number; blocked: boolean }
   /** Cura (E3): `amount` é o que entrou na vida (nunca passa da inicial); `card`, a carta que curou. */
   | { type: 'Healed'; player: PlayerId; amount: number; source: 'STEAL' | 'DEFENSE'; card: NumCard }
   /** Penalidade do limite de especiais (E3): `cards` foram ao cemitério (BURN, CHOOSE); `fewer`, as cartas a menos na compra (FEWER). */

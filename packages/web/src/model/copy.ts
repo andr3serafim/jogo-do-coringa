@@ -60,10 +60,13 @@ export const STEAL_TEXT: Record<RowName, string> = {
 
 /**
  * A prévia do Roubo no botão do alvo, com a conta do motor (`stealPreview`, o valor com o buff da fileira de onde a carta sai):
- * "−27 para Duda · +27 para você"; o dano cortado ("não mata") e a vida já cheia também aparecem.
+ * "−27 para Duda · +27 para você"; o dano cortado ("não mata") e a vida já cheia também aparecem. O K que anula só existe sem
+ * `stealBuffed` (as regras de antes da RULES_VERSION 6).
  */
 export function stealEffectText(outcome: StealOutcome, opponent: string): string {
-  const damage = `−${outcome.damage} para ${opponent}${outcome.damage < outcome.value ? ' (o roubo não mata)' : ''}`;
+  const damage = outcome.blocked
+    ? `o K de ${opponent} anula o dano`
+    : `−${outcome.damage} para ${opponent}${outcome.damage < outcome.value ? ' (o roubo não mata)' : ''}`;
   const heal = outcome.heal > 0 ? `+${outcome.heal} para você` : 'sua vida já está cheia';
   return `${damage} · ${heal}`;
 }

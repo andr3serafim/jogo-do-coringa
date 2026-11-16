@@ -18,6 +18,7 @@ describe('config', () => {
       defenseHealGuard: 2,
       specialLimit: { max: 4, penalty: 'BURN' },
       resurrectOnQuad: true,
+      stealBuffed: true,
     });
   });
 

@@ -170,7 +170,7 @@ export function eventText(e: GameEvent, names: Names): string | null {
     case 'CardStolen':
       return `${who(e.player)} roubou ${cardText(e.card)} da fileira de ${ROW_NAME[e.fromRow]} ${de(e.from)} com ${cardText(e.ace)}${e.as ? ` (como ${e.as})` : ''} e a pôs na fileira de ${ROW_NAME[e.toRow]}`;
     case 'StealDamage':
-      return `${who(e.victim)} levou ${e.damage} de dano do roubo`;
+      return e.blocked ? `O K ${de(e.victim)} anulou o dano do roubo (${e.value})` : `${who(e.victim)} levou ${e.damage} de dano do roubo`;
     case 'Healed':
       return `${who(e.player)} curou ${e.amount}${e.source === 'STEAL' ? ' com o roubo' : ' pela Defesa'}`;
     case 'DevastationCast':

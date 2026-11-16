@@ -170,22 +170,27 @@ describe('stealPreview (o Roubo com o buff da fileira, decisoes.md 2026-11-16 (1
 
   it('do Ataque com 2 J, um 9 vale 27: o oponente perde 27 e quem rouba cura 27, até a vida inicial', () => {
     const s = setup({ p1: { hp: 50 }, p2: { attack: [9], attackBuffs: ['J', 'J'] } });
-    expect(stealPreview(viewFor(s, P1), targetOf(s))).toEqual({ value: 27, damage: 27, heal: 27 });
+    expect(stealPreview(viewFor(s, P1), targetOf(s))).toEqual({ value: 27, damage: 27, heal: 27, blocked: false });
   });
 
   it('da Defesa, conta os Q', () => {
     const s = setup({ p1: { hp: 50 }, p2: { defense: [7], defenseBuffs: ['Q'] } });
-    expect(stealPreview(viewFor(s, P1), s.players[1].defenseRow[0]!.id)).toEqual({ value: 14, damage: 14, heal: 14 });
+    expect(stealPreview(viewFor(s, P1), s.players[1].defenseRow[0]!.id)).toEqual({ value: 14, damage: 14, heal: 14, blocked: false });
   });
 
   it('o K na Guarda do oponente não anula o dano', () => {
     const s = setup({ p1: { hp: 80 }, p2: { attack: [9], guard: 1 } });
-    expect(stealPreview(viewFor(s, P1), targetOf(s))).toEqual({ value: 9, damage: 9, heal: 9 });
+    expect(stealPreview(viewFor(s, P1), targetOf(s))).toEqual({ value: 9, damage: 9, heal: 9, blocked: false });
+  });
+
+  it('sem stealBuffed (replays de antes): o valor seco, e o K anula o dano', () => {
+    const s = setup({ config: { stealBuffed: false }, p1: { hp: 80 }, p2: { attack: [9], attackBuffs: ['J', 'J'], guard: 1 } });
+    expect(stealPreview(viewFor(s, P1), targetOf(s))).toEqual({ value: 9, damage: 0, heal: 9, blocked: true });
   });
 
   it('o dano não mata (o corte aparece) e a cura para na vida inicial', () => {
     const s = setup({ p1: { hp: 96 }, p2: { hp: 4, attack: [9] } });
-    expect(stealPreview(viewFor(s, P1), targetOf(s))).toEqual({ value: 9, damage: 3, heal: 4 });
+    expect(stealPreview(viewFor(s, P1), targetOf(s))).toEqual({ value: 9, damage: 3, heal: 4, blocked: false });
   });
 
   it('um alvo fora das fileiras do oponente não tem prévia', () => {

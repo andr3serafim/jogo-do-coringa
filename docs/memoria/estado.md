@@ -24,6 +24,8 @@
   - **Medido** (`notas/medicao-roubo-buff.md`; o diário 2026-11-16 (3)): o Roubo ficou cerca de 3,5 vezes maior (dano de 54 para 200 por
     partida), mas o greedy que rouba segue em 39,5% contra o que não rouba; **a Exódia quase dobrou** (greedy × greedy 1,9% → 3,6%, fora da
     meta); o portão do Difícil aprovou de primeira.
+  - **A regra mora na chave `stealBuffed`** (ligada no `makeConfig()`): os replays de antes, sem a chave, reproduzem o Roubo de antes. O
+    primeiro push reprovou no `e2e` por isso (as fixtures de replay divergiam).
   - **Próximo passo exato:** a CI da branch e a decisão do autor sobre o achado da Exódia (manter, ensinar o greedy, ou mexer na regra) e
     sobre o merge. O merge do domínio (`feat/dominio`, as duas CI verdes em `e1c12b1`) também espera o "sim".
 - **A arte do cemitério saiu da fila** ("Todas as direções reprovadas. ignore esta demanda", `decisoes.md` 2026-11-16 (3)).

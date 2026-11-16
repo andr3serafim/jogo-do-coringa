@@ -200,7 +200,7 @@ describe('damageBeatIndex: onde a vida e os totais contam até o valor novo', ()
   it('o dano e a cura do Roubo (E3) também contam: a vida dos dois lados conta na primeira batida deles', () => {
     const beats = beatsOf(
       { type: 'CardStolen', player: 'p1', from: 'p2', card: num('n1', 9), fromRow: 'ATK', toRow: 'DEF', ace: face('a1', 'A') },
-      { type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 9 },
+      { type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 9, blocked: false },
       { type: 'Healed', player: 'p1', amount: 9, source: 'STEAL', card: num('n1', 9) },
     );
     expect(damageBeatIndex(beats)).toBe(1);
@@ -406,8 +406,8 @@ describe('effectsOf: o efeito de cada evento (spec §4.2)', () => {
   });
 
   it('o dano do Roubo sobe no Coringa de quem foi roubado; anulado pelo K, nada sobe', () => {
-    expect(fx({ type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 9 }).damage).toEqual({ target: 'p2', amount: 9 });
-    expect(fx({ type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 0 }).damage).toBeNull();
+    expect(fx({ type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 9, blocked: false }).damage).toEqual({ target: 'p2', amount: 9 });
+    expect(fx({ type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 0, blocked: true }).damage).toBeNull();
   });
 
   it('a cura (do Roubo ou da Defesa) sobe "+N" no Coringa de quem curou', () => {
@@ -802,7 +802,7 @@ describe('o peso do golpe (sub-projeto 6 §5)', () => {
 
   it('o Roubo e o ataque que volta pelo Reflect também batem; a cura não', () => {
     const fx = (event: GameEvent) => effectsOf(beatsOf(event)[0]!, view).impact;
-    expect(fx({ type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 9 })).toEqual({ target: 'p2', force: 'leve' });
+    expect(fx({ type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 9, blocked: false })).toEqual({ target: 'p2', force: 'leve' });
     // O dano devolvido acende dentro da cena, e o golpe de cena treme forte, como o do Ataque Absoluto.
     const reflected = beatsOf({ type: 'ReflectTriggered', owner: 'p2', attacker: 'p1', damage: 60 })[0]!;
     expect(effectsOf(reflected, view, true).impact).toEqual({ target: 'p1', force: 'forte' });

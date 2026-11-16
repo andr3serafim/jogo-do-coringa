@@ -133,14 +133,14 @@ export function devastateRow(s: GameState, victim: PlayerState, row: RowName, re
 }
 
 /**
- * O dano do roubo: o `value` (o da carta com o buff da fileira de onde saiu, `stealAmount`). O K não anula nem quebra
- * (decisoes.md 2026-11-16 (1) e (3)); o dano nunca mata (a vida fica em no mínimo 1) e não entra em `damageThisRound`, porque não
- * conta para a iniciativa. Por isso não usa o `loseHp` do combate.
+ * O dano do roubo: o `value` (`stealAmount`). Com `stealBuffed`, o K não anula nem quebra (decisoes.md 2026-11-16 (1) e (3)); sem a
+ * chave (replays de antes), um K na Guarda da vítima anula e fica. O dano nunca mata (a vida fica em no mínimo 1) e não entra em
+ * `damageThisRound`, porque não conta para a iniciativa. Por isso não usa o `loseHp` do combate.
  */
 function stealDamage(s: GameState, thief: PlayerState, victim: PlayerState, value: number, ev: GameEvent[]): void {
-  const { damage } = stealOutcome(value, victim, thief, s.config);
+  const { damage, blocked } = stealOutcome(value, victim, thief, s.config);
   victim.hp -= damage;
-  ev.push({ type: 'StealDamage', player: thief.id, victim: victim.id, value, damage });
+  ev.push({ type: 'StealDamage', player: thief.id, victim: victim.id, value, damage, blocked });
 }
 
 /**
@@ -161,7 +161,7 @@ export function steal(s: GameState, p: PlayerState, cardId: string, targetId: st
       : null;
   if (fromRow === null) fail('INVALID_TARGET', 'o Roubo só leva numéricas das fileiras do oponente');
   const ace = takeFromHand(p, cardId, ['A', 'WILD']);
-  const amount = stealAmount(rowCards(victim, fromRow).find((c) => c.id === targetId) as NumCard, fromRow, victim);
+  const amount = stealAmount(rowCards(victim, fromRow).find((c) => c.id === targetId) as NumCard, fromRow, victim, s.config);
   const card = removeById(rowCards(victim, fromRow), targetId) as NumCard;
   toGraveyard(s, [ace]);
   ev.push({ type: 'CardStolen', player: p.id, from: victim.id, card, fromRow, toRow: row, ace, ...(ace.kind === 'WILD' ? { as: 'A' as const } : {}) });
