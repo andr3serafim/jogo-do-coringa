@@ -96,7 +96,7 @@ const SAMPLES: { event: GameEvent; kind: Beat['kind']; scene?: SceneKind; cards?
     kind: 'banner',
     cards: ['n1', 'a1'],
   },
-  { event: { type: 'StealDamage', player: 'p1', victim: 'p2', value: 7, damage: 7, blocked: false }, kind: 'damage' },
+  { event: { type: 'StealDamage', player: 'p1', victim: 'p2', value: 7, damage: 7 }, kind: 'damage' },
   { event: { type: 'Healed', player: 'p1', amount: 5, source: 'STEAL', card: num('n1') }, kind: 'damage' },
   {
     event: { type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 4 },

@@ -53,7 +53,7 @@ describe('resumo das regras: o bloco E3 + F2 + F3 (o motor de 2026-10-31)', () =
 
   it('o Roubo: sem naipe, o dano que o K anula e que nunca mata, e a cura do mesmo valor', () => {
     const steal = items.find((i) => i.startsWith('A (Armadilha ou Roubo)'))!;
-    expect(steal).toContain('ele perde o valor dela de vida (um K na Guarda dele anula esse dano; o roubo nunca mata) e você cura o mesmo valor');
+    expect(steal).toContain('ele perde de vida o valor dela com o bônus da fileira de onde ela sai (× (1 + J) do Ataque, × (1 + Q) da Defesa, sem a quadra; o K não anula, e o roubo nunca mata) e você cura o mesmo valor');
     expect(text).not.toMatch(/♣|♠|♥|♦|naipe/);
   });
 

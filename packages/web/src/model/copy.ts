@@ -59,13 +59,11 @@ export const STEAL_TEXT: Record<RowName, string> = {
 };
 
 /**
- * A prévia do Roubo no botão do alvo, com a conta do motor (`stealPreview`): "−9 para Duda · +9 para você"; com o K dele,
- * "o K de Duda anula o dano · +9 para você"; o dano cortado ("não mata") e a vida já cheia também aparecem.
+ * A prévia do Roubo no botão do alvo, com a conta do motor (`stealPreview`, o valor com o buff da fileira de onde a carta sai):
+ * "−27 para Duda · +27 para você"; o dano cortado ("não mata") e a vida já cheia também aparecem.
  */
 export function stealEffectText(outcome: StealOutcome, opponent: string): string {
-  const damage = outcome.blocked
-    ? `o K de ${opponent} anula o dano`
-    : `−${outcome.damage} para ${opponent}${outcome.damage < outcome.value ? ' (o roubo não mata)' : ''}`;
+  const damage = `−${outcome.damage} para ${opponent}${outcome.damage < outcome.value ? ' (o roubo não mata)' : ''}`;
   const heal = outcome.heal > 0 ? `+${outcome.heal} para você` : 'sua vida já está cheia';
   return `${damage} · ${heal}`;
 }
@@ -786,7 +784,7 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
       'J (Bônus de Ataque) e Q (Bônus de Defesa): cada um soma 1 ao multiplicador de ataque ou de defesa. Cabem 4 de cada.',
       'K (Guarda): absorve o dano, como acima. Você pode jogar vários K de uma vez; o oponente ganha uma janela de reação.',
       'Cura passiva (pela Defesa): Com 2 K ou mais na Guarda, cada numérica da sua fileira de Defesa que vai para o cemitério cura você o valor dela × (1 + número de Q), até a vida inicial. As cartas que a Devastação destrói não curam.',
-      'A (Armadilha ou Roubo): como Armadilha, destrói 1 J, Q ou K do campo do oponente, no seu turno ou na janela de reação. Como Roubo, só no seu turno: leva uma numérica de qualquer fileira do oponente para o fim da fileira que você escolher; ele perde o valor dela de vida (um K na Guarda dele anula esse dano; o roubo nunca mata) e você cura o mesmo valor, até a vida inicial. Nada disso alcança quem está sob Defesa Absoluta.',
+      'A (Armadilha ou Roubo): como Armadilha, destrói 1 J, Q ou K do campo do oponente, no seu turno ou na janela de reação. Como Roubo, só no seu turno: leva uma numérica de qualquer fileira do oponente para o fim da fileira que você escolher; ele perde de vida o valor dela com o bônus da fileira de onde ela sai (× (1 + J) do Ataque, × (1 + Q) da Defesa, sem a quadra; o K não anula, e o roubo nunca mata) e você cura o mesmo valor, até a vida inicial. Nada disso alcança quem está sob Defesa Absoluta.',
       'Sacrifício: no seu turno, descarte um J da mão para destruir um J do oponente, ou um Q para destruir um Q. Não funciona contra Defesa Absoluta.',
       'Coringa Selvagem: assume o papel de J, Q ou A, nunca o de K.',
       'Reflect (K + J + Q da mão): só na janela de reação, contra um ataque ou uma Devastação. Contra o ataque, quem atacou perde todos os K e Q que tiver e leva de volta o próprio ataque, com o multiplicador, menos metade (arredondada para baixo) da Defesa base dele, sem o multiplicador (o dano nunca fica abaixo de 0); você não leva nada. Se ele estiver sob Defesa Absoluta, o Reflect só segura o golpe. Contra a Devastação, ela volta para quem a lançou.',

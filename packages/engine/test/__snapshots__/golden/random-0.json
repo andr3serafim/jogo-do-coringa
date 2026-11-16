@@ -7,8 +7,8 @@
   },
   "rounds": 35,
   "finalHp": {
-    "p1": -66,
-    "p2": 322
+    "p1": -64,
+    "p2": 303
   },
   "events": {
     "AbsoluteAttack": 1,

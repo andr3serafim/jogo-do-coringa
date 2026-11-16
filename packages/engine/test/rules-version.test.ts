@@ -22,6 +22,9 @@ const RULES_DIGESTS: Record<number, string> = {
   // 5 (ponto 16 do playtest): a Ressurreição no instante da quadra (a janela depois da revelação do Equipar, a troca da última carta
   // com as duas fileiras cheias e a quadra protegida) e os bots que a usam. Os commits seguintes da mesma branch trocam só este digest.
   5: '5e37bfa45e7e7db16a210cd08afdcf8b3216d55b7199ca12dbf387812de1dcd3',
+  // 6 (decisoes.md 2026-11-16 (1) e (3)): o Roubo vale a carta com o buff da fileira de onde ela sai (× (1 + J) ou × (1 + Q), sem a
+  // quadra), e o K não o anula; os bots avaliam o Roubo pela conta nova. Os commits seguintes da mesma branch trocam só este digest.
+  6: '33a8ef357f7400f64d052697c20d13b0752dacb9eca51134251ef3dcbb680faa',
 };
 
 const GOLDEN_DIR = new URL('./__snapshots__/golden/', import.meta.url);

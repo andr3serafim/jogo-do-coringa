@@ -25,6 +25,7 @@ export {
   absoluteAttackArmed,
   previewAttack,
   previewBetween,
+  stealAmount,
   stealOutcome,
   stealPreview,
   type AttackOutcome,

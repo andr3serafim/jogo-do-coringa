@@ -264,7 +264,7 @@ export type GameEvent =
   /** Roubo (E3): `player` levou `card` da fileira `fromRow` de `from` para a própria `toRow`, gastando `ace` (`as` com o Selvagem). */
   | { type: 'CardStolen'; player: PlayerId; from: PlayerId; card: NumCard; fromRow: RowName; toRow: RowName; ace: SpecialCard; as?: 'A' }
   /** O dano do roubo de uma carta ♣ ♠: `value` é o valor seco; `damage`, o que saiu da vida (a vida fica em no mínimo 1). */
-  | { type: 'StealDamage'; player: PlayerId; victim: PlayerId; value: number; damage: number; blocked: boolean }
+  | { type: 'StealDamage'; player: PlayerId; victim: PlayerId; value: number; damage: number }
   /** Cura (E3): `amount` é o que entrou na vida (nunca passa da inicial); `card`, a carta que curou. */
   | { type: 'Healed'; player: PlayerId; amount: number; source: 'STEAL' | 'DEFENSE'; card: NumCard }
   /** Penalidade do limite de especiais (E3): `cards` foram ao cemitério (BURN, CHOOSE); `fewer`, as cartas a menos na compra (FEWER). */

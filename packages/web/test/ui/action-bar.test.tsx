@@ -251,20 +251,20 @@ describe('barra de ação: Armadilha e alvos (spec §3.2, §3.4)', () => {
     const buttons = within(inBar().getByRole('list', { name: 'Alvos' })).getAllByRole('button');
     expect(buttons).toHaveLength(opponent.attackRow.length + opponent.defenseRow.length);
     const nine = opponent.attackRow[1]!;
-    // Duda tem um K na Guarda: o dano do roubo é anulado, e a cura (você tem 187 de 500) vem cheia.
-    expect(buttons[1]).toHaveAccessibleName(`${cardText(nine)} do Ataque de Duda o K de Duda anula o dano · +9 para você`);
+    // Duda tem 2 J no Ataque: o 9 vale 27 (o K na Guarda dele não anula), e a cura (você tem 187 de 500) vem cheia.
+    expect(buttons[1]).toHaveAccessibleName(`${cardText(nine)} do Ataque de Duda −27 para Duda · +27 para você`);
     expect(buttons[4]).toHaveAccessibleName(startsWith(`${cardText(opponent.defenseRow[0]!)} da Defesa de Duda`));
     await m.user.click(buttons[1]!);
     expect(sentAction(m)).toEqual({ type: 'STEAL', cardId: handCards(m.view, 'A')[0]!.id, targetId: nine.id, row: 'ATK' });
   });
 
-  it('sem o K de Duda, a prévia do Roubo diz o dano e a cura', async () => {
+  it('sem o K de Duda, a prévia do Roubo é a mesma conta: o 10 com 2 J vale 30', async () => {
     const m = mount({ ...DRAFT, opponent: { ...DRAFT.opponent, guard: [] } });
     await m.user.click(handCard('A'));
     await m.user.click(inBar().getByRole('button', { name: 'Roubar para a sua Defesa' }));
     const ten = m.view.opponent.attackRow[3]!;
     const button = within(inBar().getByRole('list', { name: 'Alvos' })).getAllByRole('button')[3]!;
-    expect(button).toHaveAccessibleName(`${cardText(ten)} do Ataque de Duda −10 para Duda · +10 para você`);
+    expect(button).toHaveAccessibleName(`${cardText(ten)} do Ataque de Duda −30 para Duda · +30 para você`);
   });
 
   it('a barra lista os alvos como botões grandes, e a mesa destaca os mesmos', async () => {

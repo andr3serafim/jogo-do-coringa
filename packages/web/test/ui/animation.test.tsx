@@ -1327,7 +1327,7 @@ describe('efeitos da batida (spec §4.2)', () => {
     const m = mount(MINE);
     const nine = { id: 'n-9', kind: 'NUM', value: 9, suit: 'copas' } as const;
     emit(m, MINE, [
-      { type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 9, blocked: false },
+      { type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 9 },
       { type: 'Healed', player: 'p1', amount: 9, source: 'STEAL', card: nine },
     ]);
     advance(0);

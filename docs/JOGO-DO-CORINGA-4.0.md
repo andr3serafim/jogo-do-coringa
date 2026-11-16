@@ -1,7 +1,7 @@
 # Jogo do Coringa 4.0: as regras
 
 > **Escrito em 2026-11-14 a partir do que o motor faz hoje
-> (`packages/engine`, `RULES_VERSION` 5, `main` em `8368eb1`) e do resumo de regras da mesa (`RULES_SECTIONS`, em
+> (`packages/engine`, `RULES_VERSION` 5, `main` em `8368eb1`; o Roubo atualizado para o `RULES_VERSION` 6 em 2026-11-16) e do resumo de regras da mesa (`RULES_SECTIONS`, em
 > `packages/web/src/model/copy.ts`). Substitui os textos antigos (`JOGO DO CORINGA.txt`, `2.0`, `3.0`), que ficaram para trás.
 > Se este texto e o motor discordarem, quem manda é o motor, e o texto é corrigido.
 >
@@ -137,13 +137,15 @@ do oponente (12.1). O K absorve dano (7.4, passo 3), liga a cura passiva com 2 o
 8.5. **A, como Roubo** (só no seu turno):
 1. Leve **uma numérica de qualquer fileira do oponente** para o **fim** da fileira sua que você escolher. Se a sua fileira
    estiver cheia, a última dela vai para o cemitério (e cura, se for a Defesa e você tiver a cura passiva).
-2. O oponente perde de vida o **valor seco** da carta, sem J, Q nem quadra. Se ele tiver **pelo menos 1 K** na Guarda, o dano
-   é anulado e o K fica. O Roubo **nunca mata**: a vida dele fica em no mínimo 1.
+2. O valor do Roubo é o da carta **com o bônus da fileira de onde ela sai**: valor × (1 + número de J), se sai do Ataque; valor ×
+   (1 + número de Q), se sai da Defesa. O bônus de quadra não entra. Conta a mesa dele no instante do Roubo. O oponente perde esse
+   valor de vida. **O K não anula** o dano do Roubo, e a Guarda fica como está. O Roubo **nunca mata**: a vida dele fica em no mínimo 1.
 3. Você cura o mesmo valor, até a vida inicial.
 4. O dano do Roubo não conta para a iniciativa. O Roubo não abre janela de reação.
 
-**Exemplo.** Você rouba um 9 da Defesa dele e põe no seu Ataque. Ele perde 9 de vida, ou nada se tiver um K, e você ganha 9.
-Se o 9 completar uma quadra no seu Ataque, você ganha uma Ressurreição.
+**Exemplo.** Ele tem 10 e 4 no Ataque e 3 J. Você rouba o 10 e põe no seu Ataque: ele perde 10 × 4 = **40** de vida, mesmo com K
+na Guarda, e você cura 40. A fileira dele fica com o 4 e os 3 J. O mesmo 10 na Defesa dele, com 2 Q, valeria 10 × 3 = **30**. Se o
+10 completar uma quadra no seu Ataque, você ganha uma Ressurreição.
 
 8.6. **Sacrifício** (só no seu turno): descarte um **J** da mão para destruir um **J** dos Bônus de Ataque do oponente, ou um
 **Q** para destruir um **Q** dos Bônus de Defesa dele. As duas cartas vão para o cemitério.
@@ -286,7 +288,8 @@ estouros no mesmo passo, a partida é abandonada, sem vencedor.
 
 Pontos que o motor tinha decidido sozinho e que o autor confirmou em 2026-11-15 ("ok" a cada um). Cada um diz onde está.
 
-14.1. O Roubo cura quem rouba o valor **cheio**, mesmo quando um K anula o dano ou o "nunca mata" o corta
+14.1. O Roubo cura quem rouba o valor **cheio**, mesmo quando o "nunca mata" corta o dano (desde 2026-11-16 o K não anula mais o
+Roubo, 8.5)
 (`actions/main.ts`, `steal`).
 
 14.2. O Roubo **não abre** janela de reação (`actions/main.ts`, `steal`).

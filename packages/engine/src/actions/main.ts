@@ -3,7 +3,7 @@ import { endTurn, openReaction } from '../flow.ts';
 import { assertDistinct, getPlayer, opponentOf, removeById, takeFromHand, toGraveyard } from '../state.ts';
 import { reevaluateQuads, resurrectionRows, rowCards, validResurrections } from '../quads.ts';
 import { heal, healFromDefense } from '../combat.ts';
-import { stealOutcome } from '../preview.ts';
+import { stealAmount, stealOutcome } from '../preview.ts';
 import type { GameEvent, GameState, NumCard, PlayerId, PlayerState, ReflectState, RowName, SpecialCard } from '../types.ts';
 
 export function requireMain(s: GameState, playerId: PlayerId): PlayerState {
@@ -133,21 +133,22 @@ export function devastateRow(s: GameState, victim: PlayerState, row: RowName, re
 }
 
 /**
- * O dano do roubo (E3): o valor seco da carta, sem buffs nem quadra. Um K na Guarda da vítima anula e fica; o dano nunca
- * mata (a vida fica em no mínimo 1) e não entra em `damageThisRound`, porque não conta para a iniciativa. Por isso não usa o
- * `loseHp` do combate.
+ * O dano do roubo: o `value` (o da carta com o buff da fileira de onde saiu, `stealAmount`). O K não anula nem quebra
+ * (decisoes.md 2026-11-16 (1) e (3)); o dano nunca mata (a vida fica em no mínimo 1) e não entra em `damageThisRound`, porque não
+ * conta para a iniciativa. Por isso não usa o `loseHp` do combate.
  */
-function stealDamage(s: GameState, thief: PlayerState, victim: PlayerState, card: NumCard, ev: GameEvent[]): void {
-  const { damage, blocked } = stealOutcome(card.value, victim, thief, s.config);
+function stealDamage(s: GameState, thief: PlayerState, victim: PlayerState, value: number, ev: GameEvent[]): void {
+  const { damage } = stealOutcome(value, victim, thief, s.config);
   victim.hp -= damage;
-  ev.push({ type: 'StealDamage', player: thief.id, victim: victim.id, value: card.value, damage, blocked });
+  ev.push({ type: 'StealDamage', player: thief.id, victim: victim.id, value, damage });
 }
 
 /**
  * Roubo (E3 do sub-projeto 5), só na fase principal: o Ás (ou o Selvagem como A) leva uma numérica de qualquer fileira do oponente
- * para o fim da fileira que o ladrão escolher; com ela cheia, a última dela vai ao cemitério. Sem naipe (autor, 2026-10-31): o
- * oponente leva o valor seco e o ladrão cura o mesmo valor, cheio, mesmo quando um K anula o dano ou o "não mata" o corta (confirmado pelo autor, 2026-11-15). A
- * Defesa Absoluta do oponente bloqueia o roubo inteiro. Não abre janela de reação (confirmado pelo autor, 2026-11-15).
+ * para o fim da fileira que o ladrão escolher; com ela cheia, a última dela vai ao cemitério. Sem naipe (autor, 2026-10-31). O valor
+ * é o da carta com o buff da fileira de onde ela sai, contado antes de ela sair (`stealAmount`, decisoes.md 2026-11-16 (1) e (3)): o
+ * oponente o perde e o ladrão cura o mesmo valor, cheio, mesmo quando o "não mata" corta o dano (confirmado pelo autor, 2026-11-15).
+ * A Defesa Absoluta do oponente bloqueia o roubo inteiro. Não abre janela de reação (confirmado pelo autor, 2026-11-15).
  */
 export function steal(s: GameState, p: PlayerState, cardId: string, targetId: string, row: RowName, ev: GameEvent[]): void {
   if (row !== 'ATK' && row !== 'DEF') fail('INVALID_TARGET', 'fileira inválida');
@@ -160,6 +161,7 @@ export function steal(s: GameState, p: PlayerState, cardId: string, targetId: st
       : null;
   if (fromRow === null) fail('INVALID_TARGET', 'o Roubo só leva numéricas das fileiras do oponente');
   const ace = takeFromHand(p, cardId, ['A', 'WILD']);
+  const amount = stealAmount(rowCards(victim, fromRow).find((c) => c.id === targetId) as NumCard, fromRow, victim);
   const card = removeById(rowCards(victim, fromRow), targetId) as NumCard;
   toGraveyard(s, [ace]);
   ev.push({ type: 'CardStolen', player: p.id, from: victim.id, card, fromRow, toRow: row, ace, ...(ace.kind === 'WILD' ? { as: 'A' as const } : {}) });
@@ -174,8 +176,8 @@ export function steal(s: GameState, p: PlayerState, cardId: string, targetId: st
   target.push(card);
   reevaluateQuads(s, victim, ev);
   reevaluateQuads(s, p, ev);
-  stealDamage(s, p, victim, card, ev);
-  heal(s, p, card.value, 'STEAL', card, ev);
+  stealDamage(s, p, victim, amount, ev);
+  heal(s, p, amount, 'STEAL', card, ev);
 }
 
 /**

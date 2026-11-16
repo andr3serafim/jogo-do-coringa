@@ -7,8 +7,8 @@
   },
   "rounds": 49,
   "finalHp": {
-    "p1": 445,
-    "p2": -20
+    "p1": 428,
+    "p2": -15
   },
   "events": {
     "AttackDeclared": 47,

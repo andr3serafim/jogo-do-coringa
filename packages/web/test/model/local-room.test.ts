@@ -424,8 +424,9 @@ describe('LocalRoom', () => {
 
     it('o EQUIP vazio nunca sai no mesmo instante do passo que deu as cartas: a mesa só desenharia o último `state`, e o golpe que fecha a rodada (com a cena do Ataque Absoluto) sumia (decisoes.md 2026-11-03 (1), ponto 17)', async () => {
       // Sementes em que, com o jogador jogando como o greedy, ele recebe zero numéricas logo depois do último golpe de uma rodada
-      // (procuradas de novo no ponto 16: com o greedy na janela da Ressurreição, as partidas mudaram).
-      for (const seed of ['diag-1', 'diag-12', 'diag-20']) {
+      // (procuradas de novo no ponto 16, com o greedy na janela da Ressurreição, e no Roubo com o buff da fileira, 2026-11-16: as partidas
+      // mudaram).
+      for (const seed of ['diag-1', 'diag-3', 'diag-20']) {
         const { room, timers } = setup(seed);
         room.connect();
         const rng = createRng(`${seed}/me`);

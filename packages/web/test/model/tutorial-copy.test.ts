@@ -34,7 +34,7 @@ describe('hintParagraphs', () => {
 
   it('a dica do Roubo diz o dano que o K anula e que nunca mata, e a cura do mesmo valor', () => {
     const [steal] = hintParagraphs('steal');
-    expect(steal).toContain('um K na Guarda dele anula esse dano, e o roubo nunca mata');
+    expect(steal).toContain('um 10 com 3 J vale 40; o K não anula, e o roubo nunca mata');
     expect(steal).toContain('você cura o mesmo valor');
   });
 

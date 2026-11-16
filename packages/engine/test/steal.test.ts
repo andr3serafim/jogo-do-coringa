@@ -1,7 +1,8 @@
 // Roubo (E3 do sub-projeto 5): o Ás (ou o Selvagem como A) pega uma numérica de qualquer fileira do oponente e a põe no fim da
-// fileira que o ladrão escolher; com a fileira cheia, a última dela vai ao cemitério. Sem naipe (autor, 2026-10-31): o oponente
-// leva o valor seco da carta (um K na Guarda dele anula e fica; não mata; não conta para a iniciativa) e o ladrão cura o mesmo
-// valor, até a vida inicial. A Defesa Absoluta do oponente bloqueia o roubo inteiro.
+// fileira que o ladrão escolher; com a fileira cheia, a última dela vai ao cemitério. Sem naipe (autor, 2026-10-31). O valor do roubo
+// (decisoes.md 2026-11-16 (1) e (3)) é o da carta com o buff da fileira de onde ela sai: valor × (1 + J) do Ataque, × (1 + Q) da
+// Defesa, sem a quadra, contado antes de ela sair. O oponente perde esse valor (o K não anula nem quebra; não mata; não conta para a
+// iniciativa) e o ladrão cura o mesmo valor, até a vida inicial. A Defesa Absoluta do oponente bloqueia o roubo inteiro.
 import { describe, expect, it } from 'vitest';
 import { applyAction } from '../src/apply-action.ts';
 import { legalActions } from '../src/legal-actions.ts';
@@ -42,26 +43,38 @@ describe('Roubo (E3)', () => {
     expect(r.state.graveyard.map((c) => (c.kind === 'NUM' ? c.value : c.kind))).toEqual(expect.arrayContaining([8, 'A']));
   });
 
-  it('qualquer naipe: o oponente leva o valor seco (10, com 3 J na fileira dele) e o ladrão cura o mesmo valor, sem iniciativa', () => {
+  it('qualquer naipe: do Ataque com 3 J, um 10 vale 40; o oponente perde 40 e o ladrão cura 40, sem iniciativa', () => {
     for (const suit of ['espadas', 'copas'] as const) {
-      const s = setup({ p1: { hand: ['A'], hp: 80 }, p2: { attack: [10, 2], attackBuffs: ['J', 'J', 'J'] } });
+      const s = setup({ p1: { hand: ['A'], hp: 50 }, p2: { attack: [10, 2], attackBuffs: ['J', 'J', 'J'] } });
       const card = withSuit(player(s, P2).attackRow[0]!, suit);
       const r = act(s, P1, stealOf(s, card, 'ATK'));
-      expect(player(r.state, P2).hp).toBe(90);
+      expect(player(r.state, P2).hp).toBe(60);
       expect(player(r.state, P1).hp).toBe(90);
       expect(player(r.state, P1).damageThisRound).toBe(0);
-      expect(r.events).toContainEqual({ type: 'StealDamage', player: P1, victim: P2, value: 10, damage: 10, blocked: false });
-      expect(r.events).toContainEqual(expect.objectContaining({ type: 'Healed', player: P1, amount: 10, source: 'STEAL' }));
+      expect(r.events).toContainEqual({ type: 'StealDamage', player: P1, victim: P2, value: 40, damage: 40 });
+      expect(r.events).toContainEqual(expect.objectContaining({ type: 'Healed', player: P1, amount: 40, source: 'STEAL' }));
+      // Os J ficam com ele: o buff é da fileira, não da carta.
+      expect(player(r.state, P2).attackBuffs).toHaveLength(3);
     }
   });
 
-  it('um K na Guarda do oponente anula só o dano (e não quebra); o ladrão cura mesmo assim', () => {
+  it('da Defesa, o buff é o dos Q (um 10 com 2 Q vale 30); o bônus de quadra não entra', () => {
+    const s = setup({ p1: { hand: ['A'], hp: 50 }, p2: { defense: [10], defenseBuffs: ['Q', 'Q'] } });
+    const r = act(s, P1, stealOf(s, player(s, P2).defenseRow[0]!, 'ATK'));
+    expect(r.events).toContainEqual({ type: 'StealDamage', player: P1, victim: P2, value: 30, damage: 30 });
+    expect(player(r.state, P1).hp).toBe(80);
+    const quad = setup({ p1: { hand: ['A'], hp: 50 }, p2: { defense: [6, 6, 6, 6], defenseBuffs: ['Q'] } });
+    const q = act(quad, P1, stealOf(quad, player(quad, P2).defenseRow[0]!, 'DEF'));
+    expect(q.events).toContainEqual({ type: 'StealDamage', player: P1, victim: P2, value: 12, damage: 12 });
+  });
+
+  it('um K na Guarda do oponente não anula o dano nem quebra', () => {
     const s = setup({ p1: { hand: ['A'], hp: 90 }, p2: { attack: [9], guard: 1 } });
     const card = withSuit(player(s, P2).attackRow[0]!, 'paus');
     const r = act(s, P1, stealOf(s, card, 'ATK'));
-    expect(player(r.state, P2).hp).toBe(100);
+    expect(player(r.state, P2).hp).toBe(91);
     expect(player(r.state, P2).guard).toHaveLength(1);
-    expect(r.events).toContainEqual({ type: 'StealDamage', player: P1, victim: P2, value: 9, damage: 0, blocked: true });
+    expect(r.events).toContainEqual({ type: 'StealDamage', player: P1, victim: P2, value: 9, damage: 9 });
     expect(player(r.state, P1).hp).toBe(99);
   });
 

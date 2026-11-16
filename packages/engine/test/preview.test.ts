@@ -165,22 +165,27 @@ describe('preview bate com a resolução', () => {
   });
 });
 
-describe('stealPreview (E3, o Roubo sem naipe)', () => {
+describe('stealPreview (o Roubo com o buff da fileira, decisoes.md 2026-11-16 (1) e (3))', () => {
   const targetOf = (s: ReturnType<typeof setup>) => s.players[1].attackRow[0]!.id;
 
-  it('o oponente perde o valor seco e quem rouba cura o mesmo', () => {
-    const s = setup({ p1: { hp: 80 }, p2: { attack: [9], attackBuffs: ['J', 'J'] } });
-    expect(stealPreview(viewFor(s, P1), targetOf(s))).toEqual({ value: 9, damage: 9, heal: 9, blocked: false });
+  it('do Ataque com 2 J, um 9 vale 27: o oponente perde 27 e quem rouba cura 27, até a vida inicial', () => {
+    const s = setup({ p1: { hp: 50 }, p2: { attack: [9], attackBuffs: ['J', 'J'] } });
+    expect(stealPreview(viewFor(s, P1), targetOf(s))).toEqual({ value: 27, damage: 27, heal: 27 });
   });
 
-  it('o K na Guarda do oponente anula só o dano; a cura fica cheia', () => {
+  it('da Defesa, conta os Q', () => {
+    const s = setup({ p1: { hp: 50 }, p2: { defense: [7], defenseBuffs: ['Q'] } });
+    expect(stealPreview(viewFor(s, P1), s.players[1].defenseRow[0]!.id)).toEqual({ value: 14, damage: 14, heal: 14 });
+  });
+
+  it('o K na Guarda do oponente não anula o dano', () => {
     const s = setup({ p1: { hp: 80 }, p2: { attack: [9], guard: 1 } });
-    expect(stealPreview(viewFor(s, P1), targetOf(s))).toEqual({ value: 9, damage: 0, heal: 9, blocked: true });
+    expect(stealPreview(viewFor(s, P1), targetOf(s))).toEqual({ value: 9, damage: 9, heal: 9 });
   });
 
   it('o dano não mata (o corte aparece) e a cura para na vida inicial', () => {
     const s = setup({ p1: { hp: 96 }, p2: { hp: 4, attack: [9] } });
-    expect(stealPreview(viewFor(s, P1), targetOf(s))).toEqual({ value: 9, damage: 3, heal: 4, blocked: false });
+    expect(stealPreview(viewFor(s, P1), targetOf(s))).toEqual({ value: 9, damage: 3, heal: 4 });
   });
 
   it('um alvo fora das fileiras do oponente não tem prévia', () => {
