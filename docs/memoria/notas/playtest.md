@@ -155,13 +155,13 @@ Os blocos C e D da spec do playtest (`2026-11-03-playtest-design.md`), nessa ord
     candidato à fatia 5 (fluidez).
 
 - **Bloco E3 + F2 + F3, para o playtest** (números em `notas/medicao-e3.md` §5 e §6):
-  - **O Roubo segue fraco:** mesmo com dano e cura, o bot que rouba vence 39% contra o que não rouba (o A vale mais como
+  - **O Roubo segue fraco (respondido: a regra nova do valor com buff, `decisoes.md` 2026-11-16 (1), item 8):** mesmo com dano e cura, o bot que rouba vence 39% contra o que não rouba (o A vale mais como
     Armadilha contra um K). A regra é a que ele pediu; se ele quiser o Roubo competitivo, as alavancas são o dano contar para a
     iniciativa, o K não anular ou o Roubo valer mais.
   - **A marca "Cura passiva" ([I] de 2026-10-31 (10)):** nos dois campos, fundo de papel (o ouro é dos Absolutos), sem o
     multiplicador dos Q; o item do resumo das regras virou "Cura passiva (pela Defesa)". O histórico segue dizendo "curou N pela
     Defesa".
-  - **O desenho do naipe:** a regra não tem mais naipe, mas as cartas seguem desenhadas com ele ([I] em `decisoes.md` 2026-10-31
+  - **O desenho do naipe (fica, `decisoes.md` 2026-11-16 (1), item 9):** a regra não tem mais naipe, mas as cartas seguem desenhadas com ele ([I] em `decisoes.md` 2026-10-31
     (8)). Tirar o desenho é outra tarefa, se ele quiser.
   - **As [I] do plano 2:** o placar da iniciativa na faixa do centro e o motivo na pergunta da ordem; a faixa do fim de rodada
     sempre, por 1,2 s fora do teto de decisão; o Roubo como duas jogadas do A ("para o seu Ataque", "para a sua Defesa"); a cena
@@ -184,16 +184,16 @@ Os blocos C e D da spec do playtest (`2026-11-03-playtest-design.md`), nessa ord
     do turtle caiu para **7,9%** (calibração de 2026-10-31);
   - uma partida online sem limite de rodadas faz o log de passos crescer sem teto. O storage aguenta 2 MB por chave (~20 mil
     passos com a margem do teste, cem vezes uma partida típica), e a sala expira em 24 h. Detalhes na spec do servidor §9.4.
-- **[I] da E2 (Equipar livre), para ele confirmar no playtest:**
+- **[I] da E2 (Equipar livre): confirmadas** (`decisoes.md` 2026-11-16 (1), item 6).
   - sem tocar numa carta, o destino vale para a primeira que falta, na ordem de compra (o fluxo de antes segue em um toque);
   - no envio antecipado (faltam 1,5 s) e no tempo esgotado, as que faltam entram depois das escolhidas, na ordem de compra;
   - o terminal do simulador (`pnpm play`) continua perguntando na ordem de compra.
-- **[I] da F1 (apagar o histórico), para ele confirmar no playtest:**
+- **[I] da F1 (apagar o histórico): confirmadas** (`decisoes.md` 2026-11-16 (1), item 7).
   - apagar uma partida só também pede confirmação;
   - apagar tudo não mexe no tutorial, nas preferências, no apelido nem no nível;
   - uma partida online apagada volta à lista se ele reabrir o link daquela sala terminada em até 24 h (a sala manda o
     desfecho de novo, e a junção pela `key` não acha mais a linha).
-- **[I] da E1 e do Reflect, para o playtest (sem resposta dele até aqui):**
+- **[I] da E1 e do Reflect: confirmadas** (`decisoes.md` 2026-11-16 (1), itens 3 a 5).
   - Defesa Absoluta até o ataque: o Ataque Absoluto e o ataque devolvido por Reflect contam como ataque; Reflect contra Reflect,
     Armadilha, Sacrifício, Roubo e Devastação não a encerram; ao acabar, sai 1 Q como hoje (`decisoes.md` 2026-10-30 (4)).
   - Defesa Absoluta contra o Reflect: o Reflect segura o golpe (o dono leva 0), mas não devolve dano nem quebra Q e K do

@@ -1,11 +1,24 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-15**, as regras 4.0 na `main` por fast-forward até `b5f93e3` ("finalize",
-> `decisoes.md` 2026-11-15 (1)), com as duas CI verdes no topo da branch e no push da `main` (`aa2a6b1`). A fila de código está vazia; o deploy é do autor.
+> Sobrescrito a cada atualização. **Última: 2026-11-16**, o conserto das cenas que repetiam na branch `feat/cenas-repetidas` (`523adcc`),
+> esperando o push, a CI e o "sim" do merge; o Roubo mais forte e a arte do cemitério decididos (`decisoes.md` 2026-11-16 (1)), em blocos à parte.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
+- **O conserto das cenas que repetiam** (`decisoes.md` 2026-11-16 (1); o diário 2026-11-16 (1)), na branch `feat/cenas-repetidas`, saída da
+  `main` em `88bad49`: o véu do momento do oponente não traz mais de volta a última cena (`Stage.tsx`, uma condição; o teste novo no
+  `moment.test.tsx`; a A/B no replay da `exodia-devastacao`, rodada 43). Só a web.
+  - **Próximo passo exato:** o push (o pre-push roda o `pnpm check`), as duas CI verdes na branch, o "sim" do autor e o fast-forward da
+    `main`. Com ele na `main`, o deploy pode sair sem esperar os outros dois blocos (a escolha é do autor).
+- **O Roubo mais forte** (`decisoes.md` 2026-11-16 (1), item 8): o valor com o buff da fileira de onde a carta sai (× (1 + J) ou × (1 + Q),
+  sem a quadra), o K não anula, segue sem contar para a iniciativa e sem matar. Bloco próprio, num worktree separado, com `RULES_VERSION` 6.
+  **Antes da calibração e do portão do Difícil**, as três [I] vão ao autor: (1) o K não quebra no Roubo; (2) a Defesa Absoluta segue
+  bloqueando o Roubo; (3) o buff conta no instante do Roubo, antes de a carta sair. A medida que ele quer ver: o bot que rouba contra o que
+  não rouba (eram 39%, `notas/medicao-e3.md`).
+- **A arte do cemitério** (item 10): a lápide e a área do cemitério mais caracterizadas, e o painel da Ressurreição com a mesma identidade.
+  A direção vai ao autor antes do código (as outras onze escolhas do bloco D ficam aprovadas).
+- **A config do pnpm desta máquina foi corrigida** (item 12): `storeDir: D:\.pnpm-store`, o mesmo store de todos os projetos dele.
 - **As regras 4.0 estão na `main`** ("finalize", `decisoes.md` 2026-11-15 (1)), por fast-forward de `feat/regras-4-0b` até `b5f93e3` (a branch e o worktree já apagados),
   com as duas CI verdes no topo da branch e no push da `main` (`aa2a6b1`). O texto das regras é o `docs/JOGO-DO-CORINGA-4.0.md` (`decisoes.md` 2026-11-14 (4)); o diário 2026-11-15 (1).
   - **A §14 está confirmada** ("ok" às seis leituras): virou "Leituras confirmadas", e os comentários delas no motor dizem "confirmado
@@ -89,13 +102,9 @@
 
 ## Esperando o autor
 
-- **O lote de perguntas de 2026-11-15:** a lista numerada das leituras e escolhas ainda abertas (as [I] fora da §14, o E2, o F1, o
-  Roubo fraco, o naipe, as escolhas do bloco D, as branches velhas e a config do pnpm) foi mandada ao autor, que vai responder em lote.
-  As respostas entram no `decisoes.md`; um "não" que mude regra vira bloco à parte, com `RULES_VERSION` novo.
-- **A config do pnpm desta máquina:** o `%LOCALAPPDATA%\pnpm\config\config.yaml` tem `storeDir: D:.pnpm-store` (sem a barra), e o `pnpm add`
-  falha; o `node_modules` usa `D:\.pnpm-store\v11`. Até corrigir, passe `--store-dir 'D:\.pnpm-store'`.
-- **O bloco D:** o deploy, e jogar para olhar as doze escolhas da §6.3 da spec do playtest (são do Claude, por delegação) e o Atacar com o
-  Ataque Absoluto armado (a faísca não foi vista no navegador, só nos testes).
+- **O "sim" do merge do conserto das cenas**, as três [I] do Roubo e a direção do cemitério (acima).
+- **O bloco D:** o deploy, e ver no navegador o Atacar com o Ataque Absoluto armado (a faísca só foi vista nos testes). As escolhas da
+  §6.3 ficaram aprovadas, menos a arte do cemitério (`decisoes.md` 2026-11-16 (1), item 10).
 - **Menores adiados** (nenhum quebra o jogo): bloco D no `diario.md` 2026-11-14 (2) ("Adiados"); bloco C no `diario.md` 2026-11-08 (1) ("Adiados"); bloco B no 2026-11-07 (2) ("Menores, para
   depois"); bloco A no 2026-11-03 (6) ("menores").
 - **O resto** (o que olhar no playtest por fatia e bloco, as leituras [I] por confirmar, o Roubo fraco, o que só ele pode fazer: proteção da

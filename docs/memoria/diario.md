@@ -5,6 +5,40 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-16 (1): o lote respondido, a config do pnpm e o bug das cenas que repetiam
+
+- **Pedido:** as respostas ao lote de doze perguntas e o bug visto no treino (`decisoes.md` 2026-11-16 (1)). O Roubo mais forte e a arte do
+  cemitério ficaram para blocos próprios (abaixo, "O que ficou").
+- **A config do pnpm (12):** o `%LOCALAPPDATA%\pnpm\config\config.yaml` tinha `storeDir: D:.pnpm-store` (caminho relativo ao drive). Todos os
+  projetos com `node_modules` em `D:` (os do trabalho e os pessoais, conferidos pelo `.modules.yaml` de cada um) já usavam `D:\.pnpm-store`
+  (v10 ou v11, conforme a versão do pnpm que instalou). A linha virou `storeDir: D:\.pnpm-store` (sem BOM); o backup ficou em
+  `config.yaml.bak-2026-11-16`. O `pnpm store path` dá `D:\.pnpm-store\v11` aqui e nos projetos do trabalho, como antes.
+- **O bug das cenas:** depois de uma cena (a Devastação, o Ataque Absoluto…), o momento seguinte da especial do oponente mostrava a cena de
+  novo, sem efeito de jogo, até numa partida nova.
+  - **A causa:** o `Stage` segura a última cena enquanto a cortina está no ar (`curtain && busy ? lastScene : null`, de 2026-10-21), e o
+    véu do momento (bloco A, 2026-11-03) sobe a mesma cortina, com `veil = 'moment'`. Com o véu no ar, a camada recebia o `lastScene` (que
+    nunca é limpo, nem entre partidas, porque o `Stage` fica montado), e o desenho da cena remontava e tocava. A Devastação, que não tem
+    cortina própria, voltava do mesmo jeito.
+  - **O conserto** (`523adcc`): a última cena só fica com a cortina **da cena** (`curtain && veil === 'scene' && busy`). O teste novo no
+    `moment.test.tsx` (a Defesa Absoluta do Bot e depois um J dele) falhou antes (a camada voltava a `ABSOLUTE_DEFENSE`) e passa depois.
+  - **A/B no navegador:** o replay da fixture `exodia-devastacao`, rodada 43, com um `MutationObserver` na camada: sem o conserto, a
+    sequência foi `DEVASTATION` → o momento `BuffPlayed` do Bot → `DEVASTATION` com o véu; com ele, o véu sobe sem a cena. O `Stage` é o
+    mesmo no treino, no online e no replay: a leitura [I] "o online pode ter o mesmo" fica coberta, e a partida nova sai pelo mesmo caminho.
+  - **Ruling:** um conserto só (a condição do véu), sem limpar o `lastScene` ao baixar a cortina — custo: nenhum visto; a cortina da cena
+    nunca sobe sem uma cena em curso.
+- **O que ficou:**
+  - **O Roubo mais forte** (`decisoes.md` 2026-11-16 (1), item 8): bloco próprio, num worktree separado (o dev server e o `jogar-treino.bat`
+    do autor servem o checkout principal, e uma regra em obra ali misturaria `RULES_VERSION`). Antes da calibração e do portão do Difícil, as
+    três [I] dele vão ao autor (o K não quebra no Roubo; a Defesa Absoluta segue bloqueando; o buff conta antes de a carta sair).
+  - **A arte do cemitério** (item 10): a direção vai ao autor antes do código.
+- **Armadilhas:**
+  - A CI só roda em `main`, em `feat/**` e nos PRs: uma branch `fix/…` sobe sem CI. Use `feat/…`.
+  - O replay serve para reproduzir cenas no navegador (o mesmo `Stage`), mas escolha um trecho com momento do oponente **depois** da cena:
+    na `absolutos`, rodada 11, os momentos do Bot vêm antes do Ataque Absoluto, e o bug não aparece.
+  - O painel do navegador escondido tem tela 0 × 0: o `resize_window` com um tamanho resolve.
+
+---
+
 ## 2026-11-15 (1): as regras 4.0, a §14 confirmada e a branch nova
 
 - **Achado ao retomar:** a `feat/regras-4-0` (as regras 4.0, de uma sessão paralela ao bloco D) estava no GitHub sem merge e fora do
