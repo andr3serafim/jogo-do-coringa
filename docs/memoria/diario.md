@@ -16,6 +16,8 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   (`actions/main.ts`, `reaction.ts`, `equip.ts`) dizem "confirmado pelo autor, 2026-11-15". Só comentários: nada muda regra.
 - **Ruling:** os dois `[I]` do motor fora da §14 (o tempo esgotado do Equipar em `equip.ts` e a conferência da cura em `combat.ts`)
   ficam como estão — custo: seguem sem o "ok" dele.
+- **O merge:** "finalize" (`decisoes.md` 2026-11-15 (1)): a `feat/regras-4-0b` subiu com o `pnpm check` verde no pre-push e as duas CI
+  verdes em `b5f93e3`; a `main` andou por fast-forward até ela, e o push da `main` (`aa2a6b1`) teve as duas CI verdes.
 - **Armadilha:** o worktree `regras-4` não tinha as DLLs do paliativo do workerd; sem elas os testes do servidor caem. Copiadas do principal.
 
 ---

@@ -1,18 +1,19 @@
 # Estado do projeto
 
 > Sobrescrito a cada atualização. **Última: 2026-11-15**, as regras 4.0 na `main` por fast-forward até `b5f93e3` ("finalize",
-> `decisoes.md` 2026-11-15 (1)), com as duas CI verdes no topo da branch; falta ler a CI do push da `main`. A fila de código está vazia; o deploy é do autor.
+> `decisoes.md` 2026-11-15 (1)), com as duas CI verdes no topo da branch e no push da `main` (`aa2a6b1`). A fila de código está vazia; o deploy é do autor.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
 - **As regras 4.0 estão na `main`** ("finalize", `decisoes.md` 2026-11-15 (1)), por fast-forward de `feat/regras-4-0b` até `b5f93e3`,
-  com as duas CI verdes no topo da branch; falta ler a CI do push da `main`. O texto das regras é o `docs/JOGO-DO-CORINGA-4.0.md` (`decisoes.md` 2026-11-14 (4)); o diário 2026-11-15 (1).
+  com as duas CI verdes no topo da branch e no push da `main` (`aa2a6b1`). O texto das regras é o `docs/JOGO-DO-CORINGA-4.0.md` (`decisoes.md` 2026-11-14 (4)); o diário 2026-11-15 (1).
   - **A §14 está confirmada** ("ok" às seis leituras): virou "Leituras confirmadas", e os comentários delas no motor dizem "confirmado
     pelo autor, 2026-11-15". Nada mudou regra (`RULES_VERSION` 5). O resto do texto descreve o motor e não foi revisado regra a regra:
     se o texto e o motor discordarem, vale o motor, e o texto é corrigido.
   - **Verificado:** `pnpm check` verde no pre-push da branch (web 2819 testes); `check` e `e2e` verdes em `b5f93e3`.
-  - **Próximo passo exato:** ler a CI do push da `main` pela API e registrar aqui.
+  - **Próximo passo exato:** nenhum de código. O próximo trabalho vem do autor (o que ele achar jogando o bloco D, ou uma resposta em
+    lote às regras numeradas). Só docs e comentários: o deploy não muda nada no ar.
 - **O bloco D está na `main`** ("Sim, merge", `decisoes.md` 2026-11-14 (3)), por fast-forward de `feat/playtest-bloco-d` (pontos 5 e 14: os
   botões de carimbo; o monte e o cemitério no centro, com a lápide). O código em `6359b60`. O plano `docs/superpowers/plans/2026-11-14-playtest-bloco-d.md`;
   o diário 2026-11-14 (2); as doze escolhas na §6.3 da spec do playtest; as telas e a A/B em `notas/medicao-bloco-d.md`.
@@ -144,7 +145,7 @@ toque "Próximo passo" a partir do passo:
   (`https://aka.ms/vs/17/release/vc_redist.x64.exe`) e apagar as três DLLs.
 - **Worktrees:** `D:\andr3\jogo-coringa` (o principal); `.claude/worktrees/inspiring-sammet-387417` (`feat/ajustes`, da conta anterior) e
   `.claude/worktrees/youthful-elgamal-3d5e8a` (de 2026-11-02, talvez de uma sessão do app: não apague); `.claude/worktrees/regras-4`
-  (`feat/regras-4-0b`, as regras 4.0; sai depois do merge). O `node_modules` dele não tinha as DLLs do paliativo do workerd: foram
+  (`feat/regras-4-0b`, mesclada; pode sair). O `node_modules` dele não tinha as DLLs do paliativo do workerd: foram
   copiadas do principal em 2026-11-15. Uma pasta de worktree com
   `node_modules` que o `git worktree remove` não apaga ("Filename too long") sai no PowerShell com
   `Remove-Item -LiteralPath ('\\?\' + $p) -Recurse -Force`.
