@@ -109,7 +109,7 @@ export function takeReflectCards(p: PlayerState, kId: string, jId: string, qId: 
 
 /**
  * Devastação (F3 do sub-projeto 5): K + A + J da mão esvazia a Fileira de Ataque do oponente, K + A + Q a de Defesa. Abre a janela
- * dele, onde só o Reflect responde. Não vale contra Defesa Absoluta nem contra fileira vazia ([I]).
+ * dele, onde só o Reflect responde. Não vale contra Defesa Absoluta nem contra fileira vazia (confirmado pelo autor, 2026-11-15).
  */
 export function devastate(s: GameState, p: PlayerState, kId: string, aId: string, xId: string, row: RowName, ev: GameEvent[]): void {
   if (row !== 'ATK' && row !== 'DEF') fail('INVALID_TARGET', 'fileira inválida');
@@ -146,8 +146,8 @@ function stealDamage(s: GameState, thief: PlayerState, victim: PlayerState, card
 /**
  * Roubo (E3 do sub-projeto 5), só na fase principal: o Ás (ou o Selvagem como A) leva uma numérica de qualquer fileira do oponente
  * para o fim da fileira que o ladrão escolher; com ela cheia, a última dela vai ao cemitério. Sem naipe (autor, 2026-10-31): o
- * oponente leva o valor seco e o ladrão cura o mesmo valor, cheio, mesmo quando um K anula o dano ou o "não mata" o corta ([I]). A
- * Defesa Absoluta do oponente bloqueia o roubo inteiro. Não abre janela de reação ([I]).
+ * oponente leva o valor seco e o ladrão cura o mesmo valor, cheio, mesmo quando um K anula o dano ou o "não mata" o corta (confirmado pelo autor, 2026-11-15). A
+ * Defesa Absoluta do oponente bloqueia o roubo inteiro. Não abre janela de reação (confirmado pelo autor, 2026-11-15).
  */
 export function steal(s: GameState, p: PlayerState, cardId: string, targetId: string, row: RowName, ev: GameEvent[]): void {
   if (row !== 'ATK' && row !== 'DEF') fail('INVALID_TARGET', 'fileira inválida');

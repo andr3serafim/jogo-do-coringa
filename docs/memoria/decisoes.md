@@ -6,6 +6,32 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-15 (1): as seis leituras da §14 das regras 4.0 confirmadas; o fim da branch
+
+Perguntado como enviar a branch das regras 4.0 (o force-push tinha sido barrado), e com as seis leituras da §14 listadas (1: o Roubo cura o
+valor cheio, mesmo com o dano anulado; 2: o Roubo não abre janela; 3: a Devastação não vale contra fileira vazia nem contra Defesa
+Absoluta; 4: Reflect contra Reflect na Devastação, ela não acontece e quem a lançou segue no turno; 5: a Devastação refletida contra a
+Defesa Absoluta, ninguém perde nada; 6: a carta trocada no Equipar cura depois que as novas entram), ele respondeu:
+
+> 1. ok.
+> 2. ok.
+> 3. ok.
+> 4. ok.
+> 5. ok.
+> 6. ok.
+>
+> use uma branch nova e finalize
+
+**Leitura:**
+- As seis leituras da §14 passam a ser regra confirmada. Nada muda no motor (`RULES_VERSION` segue 5); os comentários `[I]` delas no
+  código viram "confirmado pelo autor, 2026-11-15", e a §14 vira "Leituras confirmadas".
+- **[I]** O "ok" vale para as seis da §14, não para o documento inteiro, regra a regra: o resto do texto descreve o motor e ele pode
+  responder em lote quando quiser.
+- A branch vai ao GitHub com nome novo (`feat/regras-4-0b`), sem reescrever a `feat/regras-4-0` remota, que fica velha (apagá-la é dele).
+- **[I]** "finalize" é o "sim" do merge: a `main` anda por fast-forward até o topo da branch nova, com o `pnpm check` e as duas CI verdes.
+
+---
+
 ## 2026-11-14 (4): as regras 4.0 em `docs/`, no lugar dos textos antigos
 
 *(Registrada às 15h51 do dia 14, na branch `feat/regras-4-0`, como (3), antes do merge do bloco D; renumerada (4) ao

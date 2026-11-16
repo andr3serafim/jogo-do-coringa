@@ -5,6 +5,21 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-15 (1): as regras 4.0, a §14 confirmada e a branch nova
+
+- **Achado ao retomar:** a `feat/regras-4-0` (as regras 4.0, de uma sessão paralela ao bloco D) estava no GitHub sem merge e fora do
+  `estado.md` da `main`, com números de entrada repetidos (a decisão (3) e o diário (2), que a `main` já usava para o bloco D).
+- **Feito:** o rebase sobre a `main` (`d3f65a9`), com a decisão renumerada (4) e a entrada do diário (3); o `estado.md` com a
+  pendência. O `--force-with-lease` da branch foi barrado pelo modo automático; o autor mandou usar uma branch nova
+  (`feat/regras-4-0b`) e confirmou as seis leituras da §14 (`decisoes.md` 2026-11-15 (1)). A §14 virou "Leituras confirmadas", o
+  cabeçalho do documento deixou de dizer "rascunho" (diz que só a §14 foi revista), e os seis comentários `[I]` do motor
+  (`actions/main.ts`, `reaction.ts`, `equip.ts`) dizem "confirmado pelo autor, 2026-11-15". Só comentários: nada muda regra.
+- **Ruling:** os dois `[I]` do motor fora da §14 (o tempo esgotado do Equipar em `equip.ts` e a conferência da cura em `combat.ts`)
+  ficam como estão — custo: seguem sem o "ok" dele.
+- **Armadilha:** o worktree `regras-4` não tinha as DLLs do paliativo do workerd; sem elas os testes do servidor caem. Copiadas do principal.
+
+---
+
 ## 2026-11-14 (3): as regras 4.0 (`docs/JOGO-DO-CORINGA-4.0.md`)
 
 - **Pedido:** ignorar os `.txt` antigos e escrever um `JOGO-DO-CORINGA-4.0.md` em `docs/` (`decisoes.md` 2026-11-14 (4)).

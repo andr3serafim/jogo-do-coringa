@@ -1,12 +1,13 @@
 # Jogo do Coringa 4.0: as regras
 
-> **Rascunho para a revisão do autor, ainda não aprovado.** Escrito em 2026-11-14 a partir do que o motor faz hoje
+> **Escrito em 2026-11-14 a partir do que o motor faz hoje
 > (`packages/engine`, `RULES_VERSION` 5, `main` em `8368eb1`) e do resumo de regras da mesa (`RULES_SECTIONS`, em
 > `packages/web/src/model/copy.ts`). Substitui os textos antigos (`JOGO DO CORINGA.txt`, `2.0`, `3.0`), que ficaram para trás.
 > Se este texto e o motor discordarem, quem manda é o motor, e o texto é corrigido.
 >
-> As regras são numeradas para a revisão em lote ("1.2 ok, 7.4 não…"). As leituras que o código fez e o autor ainda não
-> confirmou estão na seção 14.
+> As regras são numeradas para a revisão em lote ("1.2 ok, 7.4 não…"). As seis leituras que o código tinha feito sozinho (seção 14)
+> foram confirmadas pelo autor em 2026-11-15 (`docs/memoria/decisoes.md` 2026-11-15 (1)); o resto do texto descreve o motor e
+> não foi revisado regra a regra.
 
 ---
 
@@ -281,9 +282,9 @@ ordem e a janela de reação não contam.
 13.4. **W.O.:** perde quem estoura o tempo **3 vezes seguidas** ou fica **mais de 1 minuto** fora da sala. Se os dois chegam a 3
 estouros no mesmo passo, a partida é abandonada, sem vencedor.
 
-## 14. Leituras a confirmar
+## 14. Leituras confirmadas
 
-Pontos que o motor decidiu sozinho (marcados **[I]** no código) e que o autor ainda não confirmou. Cada um diz onde está.
+Pontos que o motor tinha decidido sozinho e que o autor confirmou em 2026-11-15 ("ok" a cada um). Cada um diz onde está.
 
 14.1. O Roubo cura quem rouba o valor **cheio**, mesmo quando um K anula o dano ou o "nunca mata" o corta
 (`actions/main.ts`, `steal`).

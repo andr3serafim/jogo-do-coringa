@@ -118,7 +118,7 @@ function resolveEquip(s: GameState, ev: GameEvent[]): void {
   for (const p of s.players) {
     const destinations = p.submittedDestinations ?? [];
     const placements: Placement[] = [];
-    // As que saem da própria Defesa pela troca vão ao cemitério: curam depois de as cartas entrarem (E3, [I]).
+    // As que saem da própria Defesa pela troca vão ao cemitério: curam depois de as cartas entrarem (confirmado pelo autor, 2026-11-15).
     const leftDefense: NumCard[] = [];
     p.pending.forEach((card, i) => {
       const destination = destinations[i];

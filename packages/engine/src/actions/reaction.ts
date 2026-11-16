@@ -38,7 +38,7 @@ export function closeReaction(s: GameState, ev: GameEvent[]): void {
     s.phase = { kind: 'ATTACK_MAIN', player: actor.id };
   } else if (phase.trigger === 'REFLECT_PLAYED' && phase.devastation) {
     // A Devastação refletida volta para quem a lançou: perde a própria fileira do mesmo tipo, sem quebrar Q nem K. Sob Defesa
-    // Absoluta o Reflect é anulado e ninguém perde nada ([I]).
+    // Absoluta o Reflect é anulado e ninguém perde nada (confirmado pelo autor, 2026-11-15).
     const { devastation } = phase;
     const caster = getPlayer(s, phase.responder);
     const reflect = actor.reflect;
@@ -101,7 +101,7 @@ export function cancelReflect(s: GameState, playerId: PlayerId, kId: string, jId
   ev.push({ type: 'ReflectCanceled', player: responder.id, owner: actor.id });
   ev.push({ type: 'ReactionWindowClosed', responder: responder.id, trigger });
   if (devastation) {
-    // Contra a Devastação, os dois Reflects se anulam e ela não acontece; quem a lançou segue no turno ([I]).
+    // Contra a Devastação, os dois Reflects se anulam e ela não acontece; quem a lançou segue no turno (confirmado pelo autor, 2026-11-15).
     toGraveyard(s, [devastation.k, devastation.a, devastation.x]);
     ev.push({ type: 'DevastationCanceled', player: responder.id, reason: 'REFLECT_CLASH' });
     s.phase = { kind: 'ATTACK_MAIN', player: responder.id };

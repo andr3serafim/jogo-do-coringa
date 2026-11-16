@@ -1,20 +1,19 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-15**, a branch `feat/regras-4-0` (o livro de regras 4.0) refeita sobre a `main`
-> (`d3f65a9`), à espera da revisão do autor e do "sim" do merge. O bloco D segue na `main` (`302bbaf`, as duas CI verdes); o deploy é do autor.
+> Sobrescrito a cada atualização. **Última: 2026-11-15**, as regras 4.0 na branch nova `feat/regras-4-0b` (sobre a `main` `d3f65a9`), com
+> a §14 confirmada pelo autor e o "finalize" dele (`decisoes.md` 2026-11-15 (1)): falta a CI da branch e o fast-forward da `main`.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **As regras 4.0 esperam o autor** (`decisoes.md` 2026-11-14 (4); o diário 2026-11-14 (3)). O `docs/JOGO-DO-CORINGA-4.0.md` foi escrito
-  em 2026-11-14, numa sessão paralela ao bloco D, na branch `feat/regras-4-0` (worktree `.claude/worktrees/regras-4`), e ficou fora do
-  `estado.md` da `main`. Em 2026-11-15 a branch foi refeita sobre a `main` (`d3f65a9`): a decisão virou a (4) e a entrada do diário a (3),
-  porque a `main` já tinha a (3) e a (2) do bloco D. Só docs: nada muda regra (se o texto e o motor discordarem, vale o motor).
-  - **É rascunho:** o autor não o revisou. A §14 lista as seis leituras **[I]** do motor ainda sem o "ok" dele (o Roubo cura o valor
-    cheio; o Roubo não abre janela; a Devastação contra fileira vazia e contra Defesa Absoluta; Reflect contra Reflect na Devastação;
-    a Devastação refletida contra a Defesa Absoluta; a cura da carta trocada no Equipar depois das novas).
-  - **Próximo passo exato:** o "sim" do autor para o merge (fast-forward da `main` até o topo da branch, com as duas CI verdes) e, quando
-    ele quiser, a resposta em lote à §14 (cada "não" vira mudança de regra, com `RULES_VERSION` novo, num bloco à parte).
+- **As regras 4.0 vão para a `main`** (`decisoes.md` 2026-11-14 (4) e 2026-11-15 (1); o diário 2026-11-15 (1)). O
+  `docs/JOGO-DO-CORINGA-4.0.md` foi escrito em 2026-11-14 numa sessão paralela ao bloco D (`feat/regras-4-0`); em 2026-11-15 foi refeito
+  sobre a `main` e, como o force-push foi barrado, sobe na branch nova `feat/regras-4-0b` (worktree `.claude/worktrees/regras-4`).
+  - **A §14 está confirmada** ("ok" às seis): a §14 virou "Leituras confirmadas" e os comentários `[I]` delas no motor dizem
+    "confirmado pelo autor, 2026-11-15". Nada muda regra (`RULES_VERSION` 5). O resto do texto descreve o motor, sem revisão regra a regra.
+  - **Próximo passo exato:** o push da `feat/regras-4-0b` (o pre-push roda o `pnpm check`), as duas CI verdes nela (ler pela API com
+    `curl`), a `main` por fast-forward até o topo dela ("finalize" = o "sim", `decisoes.md` 2026-11-15 (1)), o push da `main` e a CI dele.
+    A `feat/regras-4-0` remota fica velha: apagá-la é do autor.
 - **O bloco D está na `main`** ("Sim, merge", `decisoes.md` 2026-11-14 (3)), por fast-forward de `feat/playtest-bloco-d` (pontos 5 e 14: os
   botões de carimbo; o monte e o cemitério no centro, com a lápide). O código em `6359b60`. O plano `docs/superpowers/plans/2026-11-14-playtest-bloco-d.md`;
   o diário 2026-11-14 (2); as doze escolhas na §6.3 da spec do playtest; as telas e a A/B em `notas/medicao-bloco-d.md`.
@@ -84,14 +83,14 @@
 
 ## Fila
 
-- **As regras 4.0:** o merge da `feat/regras-4-0`, com o "sim" do autor (acima).
+- **As regras 4.0:** a `feat/regras-4-0b` para a `main` (acima).
 - **De código, vazia:** os blocos A a E do playtest estão na `main`. O próximo trabalho vem do autor (o que ele achar jogando o bloco D).
 - **Fora da fila, a pedido:** a arte pintada dos decks, quando o jogo estiver pronto e online e o autor pedir (segue a bíblia de arte,
   `docs/superpowers/specs/2026-11-11-biblia-de-arte.md`).
 
 ## Esperando o autor
 
-- **As regras 4.0:** o "sim" do merge da `feat/regras-4-0` e a revisão do `docs/JOGO-DO-CORINGA-4.0.md` (a §14 primeiro).
+- **As regras 4.0:** apagar a branch remota velha `feat/regras-4-0` (a nova é a `feat/regras-4-0b`).
 - **A config do pnpm desta máquina:** o `%LOCALAPPDATA%\pnpm\config\config.yaml` tem `storeDir: D:.pnpm-store` (sem a barra), e o `pnpm add`
   falha; o `node_modules` usa `D:\.pnpm-store\v11`. Até corrigir, passe `--store-dir 'D:\.pnpm-store'`.
 - **O bloco D:** o deploy, e jogar para olhar as doze escolhas da §6.3 da spec do playtest (são do Claude, por delegação) e o Atacar com o
@@ -146,7 +145,7 @@ toque "Próximo passo" a partir do passo:
   (`https://aka.ms/vs/17/release/vc_redist.x64.exe`) e apagar as três DLLs.
 - **Worktrees:** `D:\andr3\jogo-coringa` (o principal); `.claude/worktrees/inspiring-sammet-387417` (`feat/ajustes`, da conta anterior) e
   `.claude/worktrees/youthful-elgamal-3d5e8a` (de 2026-11-02, talvez de uma sessão do app: não apague); `.claude/worktrees/regras-4`
-  (`feat/regras-4-0`, as regras 4.0; sai depois do merge). O `node_modules` dele não tinha as DLLs do paliativo do workerd: foram
+  (`feat/regras-4-0b`, as regras 4.0; sai depois do merge). O `node_modules` dele não tinha as DLLs do paliativo do workerd: foram
   copiadas do principal em 2026-11-15. Uma pasta de worktree com
   `node_modules` que o `git worktree remove` não apaga ("Filename too long") sai no PowerShell com
   `Remove-Item -LiteralPath ('\\?\' + $p) -Recurse -Force`.
