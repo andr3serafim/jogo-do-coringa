@@ -1,7 +1,8 @@
 # Estado do projeto
 
 > Sobrescrito a cada atualização. **Última: 2026-11-17**, o greedy que barra a Exódia na `main` por fast-forward até `2caeb5a` ("Sim, merge",
-> `decisoes.md` 2026-11-17 (1)), com as duas CI verdes no topo da branch (`2caeb5a`) e no push da `main` (`355f2e6`). O deploy é dele e sai **sem a abertura** ("Deploy sem ela", `decisoes.md` 2026-11-17 (2)), que fica parada na `feat/abertura`.
+> `decisoes.md` 2026-11-17 (1)), com as duas CI verdes no topo da branch (`2caeb5a`) e no push da `main` (`355f2e6`). **O deploy do autor saiu** (2026-11-17, `8266a4f`, sem a abertura): o jogo está no ar em
+> `https://jogodocoringa.com.br` (diário 2026-11-17 (1)). A abertura fica parada na `feat/abertura`.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
@@ -18,9 +19,12 @@
   - **Próximo passo exato:** o rebase sobre a `main` (renumerando a memória), o E2E inteiro com a máquina livre, apagar o config temporário,
     o push, as duas CI, mostrar ao autor e o "sim" do merge. **Só quando ele pedir:** o deploy sai sem ela ("Deploy sem ela",
     `decisoes.md` 2026-11-17 (2)).
-- **Tudo o que foi pedido está na `main`; falta o deploy, que é do autor** (`pnpm deploy:server`). Ele leva ao ar o bloco D, o conserto
-  da Devastação, o das cenas que repetiam, o Roubo novo, o bot que barra a Exódia e o domínio. Antes ou depois, o `www` no painel da
-  Cloudflare (os passos no diário 2026-11-16 (2)). Se a zona tiver um registro `A`/`AAAA`/`CNAME` na raiz, o deploy recusa: apague-o antes.
+- **O jogo está no ar em `https://jogodocoringa.com.br`** (o deploy do autor, 2026-11-17, `8266a4f`, sem a abertura; o diário 2026-11-17
+  (1)): o bloco D, o conserto da Devastação, o das cenas que repetiam, o Roubo novo, o bot que barra a Exódia e o domínio. O `/api/health`
+  devolve a versão; o `www` redireciona com 301 (regra no painel). **O próximo deploy** é o mesmo `pnpm deploy:server`; a conta já tem o
+  subdomínio `workers.dev` (sem ele, o deploy falha com o código 10063).
+  - **Ruído conhecido, não é erro do jogo:** o console mostra o `beacon.min.js` da Cloudflare Web Analytics barrado pela CSP
+    (`script-src 'self'`). É a injeção automática da zona; desligar no painel (Web Analytics) ou deixar. Não afrouxe a CSP por ele.
 - **O greedy barra a Exódia está na `main`** ("Sim, merge", `decisoes.md` 2026-11-17 (1)), por fast-forward de `feat/bot-exodia` até
   `2caeb5a`, com as duas CI verdes no topo da branch (`2caeb5a`) e no push da `main` (`355f2e6`). `GREEDY.exodiaWatch` = 2: o A vai num K da Guarda do oponente a 2 K da Exódia, na fase principal e na reação ao K
   jogado. A Exódia volta à meta (greedy × greedy 1,3%, turtle × greedy 6,3%); o portão do Difícil aprovado do zero (72,5% · 73,5% · p95
@@ -31,7 +35,7 @@
   replays de antes, sem a chave, reproduzem o Roubo de antes, e a sala online aberta antes do deploy termina com ele. O diário 2026-11-16 (3).
   - **O que não pode regredir:** a chave `stealBuffed` (tirar o ramo das regras de antes quebra as fixtures do E2E e as partidas guardadas).
 - **O domínio `jogodocoringa.com.br` está na `main`** (`decisoes.md` 2026-11-16 (3) e (4); o diário 2026-11-16 (2)): a rota
-  `custom_domain` no `wrangler.jsonc`. O `workers.dev` segue ligado.
+  `custom_domain` no `wrangler.jsonc`, no ar desde o deploy de 2026-11-17.
 - **O conserto das cenas que repetiam está na `main`** ("Sim, merge", `decisoes.md` 2026-11-16 (2)): o véu do momento do oponente não
   traz mais de volta a última cena (`Stage.tsx`). O diário 2026-11-16 (1).
   - **O que não pode regredir:** a última cena só fica com a cortina **da cena** (`veil === 'scene'`); o véu do momento nunca a mostra.
@@ -120,8 +124,7 @@
 
 ## Esperando o autor
 
-- **O deploy** (`pnpm deploy:server`) e o `www` no painel da Cloudflare (acima).
-- **O bloco D:** o deploy, e ver no navegador o Atacar com o Ataque Absoluto armado (a faísca só foi vista nos testes). As escolhas da
+- **O bloco D:** ver no navegador o Atacar com o Ataque Absoluto armado (a faísca só foi vista nos testes). As escolhas da
   §6.3 ficaram aprovadas, menos a arte do cemitério (`decisoes.md` 2026-11-16 (1), item 10).
 - **Menores adiados** (nenhum quebra o jogo): bloco D no `diario.md` 2026-11-14 (2) ("Adiados"); bloco C no `diario.md` 2026-11-08 (1) ("Adiados"); bloco B no 2026-11-07 (2) ("Menores, para
   depois"); bloco A no 2026-11-03 (6) ("menores").

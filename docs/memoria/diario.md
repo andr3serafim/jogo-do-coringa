@@ -5,6 +5,20 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-17 (1): o deploy no ar
+
+- **Feito pelo autor:** `pnpm deploy:server` na `main` em `8266a4f` (sem a abertura, "Deploy sem ela", `decisoes.md` 2026-11-17 (2)).
+- **A primeira tentativa falhou** com o código 10063 ("You need a workers.dev subdomain"): a conta nunca tinha criado o subdomínio
+  `workers.dev`. O `wrangler` 4 não tem comando para isso; o autor o criou no painel (Workers & Pages, "Your subdomain") e o deploy passou.
+- **Conferido depois:** `https://jogodocoringa.com.br/api/health` → `{"ok":true,"version":"8266a4f"}`; a página inicial e o treino
+  (`/treino?semente=prod-1&nivel=medio`) abrem e o bot joga; `https://www.jogodocoringa.com.br/treino?semente=x` → 301 para a raiz com a
+  query preservada.
+- **Armadilhas:** o `ALLOWED_ORIGINS` de produção é `http://localhost:*`, e está certo: o upgrade aceita sempre a própria origem
+  (`router.ts`). O console mostra o beacon da Cloudflare Web Analytics barrado pela CSP; é a injeção automática da zona, não o jogo.
+- **O que ficou:** a abertura na `feat/abertura` (o `estado.md`); o playtest do autor no ar.
+
+---
+
 ## 2026-11-16 (4): o merge do domínio e do Roubo; o greedy barra a Exódia
 
 - **Pedido:** "manter como está mas ensina o bot pois deveria usar o A pra remover o K quando tiver perto de formar o exódia (4k)" e "Sim,
