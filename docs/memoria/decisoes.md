@@ -6,7 +6,18 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
-## 2026-11-17 (1): o merge do greedy que barra a Exódia
+## 2026-11-17 (2): o deploy sem a abertura
+
+Dito que a abertura do jogo (`feat/abertura`, de outra sessão) estava parada pelo limite de uso, sem push, sem o `pnpm check` completo, com
+a memória em conflito com a da `main` e sem ele ter visto a animação, e perguntado "Assumo a abertura do jogo para ela entrar no deploy?",
+ele respondeu:
+
+> Deploy sem ela
+
+**Leitura:** o deploy sai com o que está na `main` (`9f01d3c` em diante). A abertura fica parada na `feat/abertura`, como está, até ele
+pedir; nada nela é apagado. **[I]** Não é uma recusa da abertura, só a ordem: ela não entra neste deploy.
+
+: o merge do greedy que barra a Exódia
 
 Depois do resumo do bot (o A num K a 2 K da Exódia; a Exódia de volta à meta: greedy × greedy 1,3%, turtle × greedy 6,3%; o portão do
 Difícil aprovado; o `pnpm check` e as duas CI verdes em `2caeb5a`), perguntado "Faço o merge do bot que barra a Exódia na main?", ele

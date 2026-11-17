@@ -1,7 +1,7 @@
 # Estado do projeto
 
 > Sobrescrito a cada atualização. **Última: 2026-11-17**, o greedy que barra a Exódia na `main` por fast-forward até `2caeb5a` ("Sim, merge",
-> `decisoes.md` 2026-11-17 (1)), com as duas CI verdes no topo da branch (`2caeb5a`) e no push da `main` (`355f2e6`). O deploy é dele. **Fora da `main`, de outra sessão: a abertura do jogo** (`feat/abertura`, abaixo).
+> `decisoes.md` 2026-11-17 (1)), com as duas CI verdes no topo da branch (`2caeb5a`) e no push da `main` (`355f2e6`). O deploy é dele e sai **sem a abertura** ("Deploy sem ela", `decisoes.md` 2026-11-17 (2)), que fica parada na `feat/abertura`.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
@@ -16,7 +16,8 @@
     2026-11-15 (1));
   - o autor aprovou o plano, mas **não viu** a animação pronta nem respondeu sobre a logo.
   - **Próximo passo exato:** o rebase sobre a `main` (renumerando a memória), o E2E inteiro com a máquina livre, apagar o config temporário,
-    o push, as duas CI, mostrar ao autor e o "sim" do merge. O deploy pode sair antes dela, sem ela.
+    o push, as duas CI, mostrar ao autor e o "sim" do merge. **Só quando ele pedir:** o deploy sai sem ela ("Deploy sem ela",
+    `decisoes.md` 2026-11-17 (2)).
 - **Tudo o que foi pedido está na `main`; falta o deploy, que é do autor** (`pnpm deploy:server`). Ele leva ao ar o bloco D, o conserto
   da Devastação, o das cenas que repetiam, o Roubo novo, o bot que barra a Exódia e o domínio. Antes ou depois, o `www` no painel da
   Cloudflare (os passos no diário 2026-11-16 (2)). Se a zona tiver um registro `A`/`AAAA`/`CNAME` na raiz, o deploy recusa: apague-o antes.
