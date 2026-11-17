@@ -1,4 +1,4 @@
-// A abertura do jogo (decisoes.md 2026-11-16 (5)): os tempos, as pistas de som e o que pula. O que a pessoa vê (a ordem das cenas, o
+// A abertura do jogo (decisoes.md 2026-11-16 (5); a logo do dragão, 2026-11-17 (3)): os tempos, as pistas de som e o que pula. O que a pessoa vê (a ordem das cenas, o
 // aviso, o esmaecer) sai destes números: o CSS da abertura só lê as variáveis que o componente monta a partir daqui.
 import { describe, expect, it } from 'vitest';
 import { INTRO, INTRO_REDUCED, SKIP_FADE_MS, introPlan, skipsIntro, type IntroKey } from '../../src/model/intro.ts';
@@ -6,22 +6,39 @@ import { INTRO, INTRO_REDUCED, SKIP_FADE_MS, introPlan, skipsIntro, type IntroKe
 const key = (name: string, mods: Partial<IntroKey> = {}): IntroKey => ({ key: name, ctrlKey: false, metaKey: false, altKey: false, ...mods });
 
 describe('a abertura: os tempos', () => {
-  it('dura entre 4 e 6 segundos', () => {
+  it('dura entre 4 e 6 segundos, com folga para a medida do navegador (até 5,7 s)', () => {
     expect(INTRO.total).toBeGreaterThanOrEqual(4000);
-    expect(INTRO.total).toBeLessThanOrEqual(6000);
+    expect(INTRO.total).toBeLessThanOrEqual(5700);
   });
 
-  it('a logo fica na tela cerca de 1,5 s, e a intro do jogo de 3 a 4 s', () => {
+  it('a logo (o voo do dragão) fica na tela cerca de 2,2 s, e a intro do jogo de 3 a 4 s', () => {
     const logo = INTRO.themeAt - INTRO.logoAt;
-    expect(logo).toBeGreaterThanOrEqual(1300);
-    expect(logo).toBeLessThanOrEqual(1700);
+    expect(logo).toBeGreaterThanOrEqual(1900);
+    expect(logo).toBeLessThanOrEqual(2500);
     const theme = INTRO.total - INTRO.themeAt;
     expect(theme).toBeGreaterThanOrEqual(3000);
     expect(theme).toBeLessThanOrEqual(4000);
   });
 
-  it('as cenas vêm em ordem: a logo, o olho que abre, a saída da logo, as cartas, a virada, o título, o menu', () => {
-    const order = [0, INTRO.logoAt, INTRO.logoCueAt, INTRO.eyeAt, INTRO.logoOutAt, INTRO.themeAt, INTRO.gatherAt, INTRO.flipAt, INTRO.titleCueAt, INTRO.titleAt, INTRO.fadeAt, INTRO.total];
+  it('as cenas vêm em ordem: a lua, o dragão que chega, o giro, a volta, as asas, o nome, a saída da logo, as cartas, a virada, o título, o menu', () => {
+    const order = [
+      0,
+      INTRO.logoAt,
+      INTRO.logoCueAt,
+      INTRO.flyAt,
+      INTRO.spinAt,
+      INTRO.returnAt,
+      INTRO.wingsAt,
+      INTRO.nameAt,
+      INTRO.logoOutAt,
+      INTRO.themeAt,
+      INTRO.gatherAt,
+      INTRO.flipAt,
+      INTRO.titleCueAt,
+      INTRO.titleAt,
+      INTRO.fadeAt,
+      INTRO.total,
+    ];
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     expect(new Set(order).size).toBe(order.length);
   });
@@ -32,6 +49,11 @@ describe('a abertura: os tempos', () => {
     expect(gaps.every((gap) => gap > 0)).toBe(true);
     expect([...gaps].sort((a, b) => b - a)).toEqual(gaps);
     expect(INTRO.themeAt + INTRO.cardDelays[3]! + INTRO.cardRiseMs).toBeLessThanOrEqual(INTRO.gatherAt);
+  });
+
+  it('o dragão pousa (as asas abertas e assentadas) antes de a logo sair, e a logo inteira fica parada pelo menos meio segundo', () => {
+    expect(INTRO.wingsAt + INTRO.settleMs).toBeLessThanOrEqual(INTRO.nameAt + 400);
+    expect(INTRO.logoOutAt - (INTRO.nameAt + INTRO.nameMs)).toBeGreaterThanOrEqual(500);
   });
 
   it('o aviso de pular entra aos 0,5 s, nas duas versões', () => {
@@ -56,7 +78,7 @@ describe('a abertura: os tempos', () => {
 });
 
 describe('a abertura: o plano de cada versão', () => {
-  it('a completa toca o sopro da logo e a chamada do título, nos instantes delas', () => {
+  it('a completa toca o voo do dragão (as batidas, o giro, o mergulho e as asas que se abrem) e a chamada do título, nos instantes deles', () => {
     expect(introPlan(false)).toEqual({
       variant: 'completa',
       hintAt: INTRO.hintAt,
@@ -69,13 +91,13 @@ describe('a abertura: o plano de cada versão', () => {
     });
   });
 
-  it('a curta só toca o sopro da logo', () => {
+  it('a curta, com a logo parada, só toca o baque das asas', () => {
     expect(introPlan(true)).toEqual({
       variant: 'curta',
       hintAt: INTRO_REDUCED.hintAt,
       fadeAt: INTRO_REDUCED.fadeAt,
       total: INTRO_REDUCED.total,
-      cues: [{ at: INTRO_REDUCED.logoCueAt, cue: 'abertura-logo' }],
+      cues: [{ at: INTRO_REDUCED.logoCueAt, cue: 'abertura-logo-curta' }],
     });
   });
 });

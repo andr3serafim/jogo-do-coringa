@@ -33,8 +33,10 @@ export type Cue =
   | 'reflect-cancelado'
   | 'ressurreicao'
   | 'golpe-final'
-  /** As duas da abertura do jogo (`model/intro.ts`): não vêm de batida nenhuma, quem as toca é a tela da abertura. */
+  /** As da abertura do jogo (`model/intro.ts`): não vêm de batida nenhuma, quem as toca é a tela da abertura. */
   | 'abertura-logo'
+  /** A da versão curta (movimento reduzido): só o baque das asas que se abrem e o brilho da lua. */
+  | 'abertura-logo-curta'
   | 'abertura-titulo';
 
 /** A pista do golpe de `damage` pontos, pelo peso dele (`impactForce`, o mesmo do tremor); dano zero (a defesa segurou tudo) é mudo. */

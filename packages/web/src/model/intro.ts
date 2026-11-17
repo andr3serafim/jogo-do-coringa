@@ -1,4 +1,4 @@
-// A abertura do jogo (decisoes.md 2026-11-16 (5)): a logo "LUSACAN productions" e a intro do jogo, até o menu. Puro: só os tempos, as
+// A abertura do jogo (decisoes.md 2026-11-16 (5); a logo do dragão, 2026-11-17 (3)): a logo "LUSACAN productions" e a intro do jogo, até o menu. Puro: só os tempos, as
 // pistas de som e a regra do que pula. O componente (`ui/intro/Intro.tsx`) entrega estes números ao CSS como variáveis, e o
 // sintetizador os usa para pôr o impacto no instante certo: quem muda o ritmo da abertura muda aqui, e só aqui.
 import type { Cue } from './sound.ts';
@@ -7,35 +7,50 @@ import type { Cue } from './sound.ts';
 export const INTRO = {
   /** O aviso de pular. */
   hintAt: 500,
-  /** A logo começa a entrar (o capuz do olho corta a tela). */
-  logoAt: 250,
-  /** A pista da logo: o sopro começa aqui e o impacto dela cai em `eyeAt`. */
-  logoCueAt: 330,
-  /** O olho abre: a lua acende e a fenda aparece. */
-  eyeAt: 600,
+  /** A lua aparece no céu. */
+  logoAt: 100,
+  /** A pista da logo: as batidas de asa do voo, o giro, o mergulho e o baque das asas que se abrem em `wingsAt`. */
+  logoCueAt: 180,
+  /** O dragão entra voando, pequeno, longe, batendo as asas. */
+  flyAt: 200,
+  /** O dragão gira no ar (um parafuso) em volta da lua. */
+  spinAt: 650,
+  /** O dragão volta, de asas recolhidas, mergulhando na direção de quem olha. */
+  returnAt: 950,
+  /** As asas se abrem de uma vez, e os veios de raio acendem: o dragão para na pose da logo. */
+  wingsAt: 1200,
+  /** Quanto o dragão leva para assentar na pose depois de abrir as asas (um leve passar do ponto e voltar). */
+  settleMs: 300,
+  /** O nome começa a subir, letra a letra; "PRODUCTIONS" e os filetes vêm no fim. */
+  nameAt: 1300,
+  /** Quanto o nome leva para ficar inteiro. */
+  nameMs: 450,
   /** A logo começa a sair. */
-  logoOutAt: 1500,
+  logoOutAt: 2300,
   /** A intro do jogo: a primeira carta sobe. */
-  themeAt: 1750,
+  themeAt: 2500,
   /** O atraso de cada uma das quatro cartas depois de `themeAt`: cada intervalo é menor que o anterior. */
   cardDelays: [0, 170, 310, 420],
   /** Quanto cada carta leva para subir até o leque. */
   cardRiseMs: 420,
   /** As cartas se juntam no centro, e a aura cresce. */
-  gatherAt: 2600,
+  gatherAt: 3350,
   /** O maço vira e mostra o Coringa. */
-  flipAt: 2950,
+  flipAt: 3700,
   /** A pista do título: a subida começa aqui e a chamada cai em `titleAt`. */
-  titleCueAt: 3100,
+  titleCueAt: 3850,
   /** O título é carimbado. */
-  titleAt: 3400,
+  titleAt: 4150,
   /** A abertura começa a esmaecer para o menu. */
-  fadeAt: 4700,
+  fadeAt: 5150,
   /** O menu. */
-  total: 5200,
+  total: 5600,
 } as const;
 
-/** A versão curta, com movimento reduzido (o sistema ou o menu do jogo): a logo parada, com um esmaecer na entrada e outro na saída. */
+/**
+ * A versão curta, com movimento reduzido (o sistema ou o menu do jogo): a logo parada (o dragão já de asas abertas), com um esmaecer na
+ * entrada e outro na saída, e só o baque das asas no som.
+ */
 export const INTRO_REDUCED = {
   hintAt: 500,
   logoCueAt: 150,
@@ -64,7 +79,7 @@ export function introPlan(reduced: boolean): IntroPlan {
       hintAt: INTRO_REDUCED.hintAt,
       fadeAt: INTRO_REDUCED.fadeAt,
       total: INTRO_REDUCED.total,
-      cues: [{ at: INTRO_REDUCED.logoCueAt, cue: 'abertura-logo' }],
+      cues: [{ at: INTRO_REDUCED.logoCueAt, cue: 'abertura-logo-curta' }],
     };
   }
   return {

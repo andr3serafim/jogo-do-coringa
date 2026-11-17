@@ -19,5 +19,6 @@ cada pacote.
   com o nome reservado (*Reserved Font Name*) "Alfa Slab". O arquivo vai sem modificação nossa, com o nome original.
 - **Archivo:** Copyright 2020 The Archivo Project Authors (https://github.com/Omnibus-Type/Archivo).
 - **Cinzel:** Copyright 2020 The Cinzel Project Authors (https://github.com/NDISCOVER/Cinzel). O arquivo vai sem modificação nossa,
-  com o nome original.
+  com o nome original. A logo "LUSACAN productions" da abertura (`src/ui/intro/lusacan-shapes.ts` e `src/assets/lusacan/`) usa os
+  contornos das letras da Cinzel (pesos 600 e 500) como traçado: é arte feita com a fonte, que a SIL OFL permite, e não a fonte.
 - A versão do pacote vem do `pnpm-lock.yaml`; ao atualizar um pacote de fonte, atualize esta tabela.

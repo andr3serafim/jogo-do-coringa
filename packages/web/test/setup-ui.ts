@@ -4,6 +4,7 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterEach, beforeAll } from 'vitest';
 import { loadScenes } from '../src/ui/anim/scenes-loader.ts';
+import { loadIntro } from '../src/ui/intro/intro-loader.ts';
 
 afterEach(() => {
   cleanup();
@@ -13,6 +14,9 @@ afterEach(() => {
 // desenha não depender de quando o `import()` resolve (a sobreposição sem a mesa medida segue mostrando o painel).
 beforeAll(async () => {
   await loadScenes();
+  // A abertura também mora num pedaço à parte; aqui ela já chega carregada, e o `App` a desenha no primeiro quadro, como as cenas.
+  // O arquivo que finge o pedaço que falha (`app-chunk-intro-fails.test.tsx`) troca o módulo inteiro, e a carga falha: ele segue sem ela.
+  await loadIntro().catch(() => undefined);
 });
 
 // O jsdom não implementa estes dois; o `navigate` rola para o topo e o axe sonda o canvas. Sem o aviso no log.

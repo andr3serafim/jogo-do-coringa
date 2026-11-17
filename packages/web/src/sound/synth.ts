@@ -120,6 +120,15 @@ const MIRROR_CARD_MS = 220;
 /** Um instante da cena (ms desde o começo dela), em segundos de pista. */
 const s = (ms: number): number => ms / 1000;
 
+/** As asas do dragão que se abrem de uma vez: o estalo da membrana, o baque grave, o ruído que assenta e o brilho da lua. */
+function wingsOpen({ tone, noise }: Voices, at: number): void {
+  noise({ filter: 'bandpass', from: 1800, q: 2, at, length: 0.05, peak: 0.3 });
+  tone({ wave: 'sine', from: 90, to: 36, at, length: 0.55, peak: 0.46 });
+  noise({ filter: 'lowpass', from: 2600, to: 200, at, length: 0.3, peak: 0.32 });
+  tone({ wave: 'sine', from: 1568, at: at + 0.04, length: 0.5, peak: 0.07 });
+  tone({ wave: 'sine', from: 2349, at: at + 0.08, length: 0.4, peak: 0.04 });
+}
+
 /** O sino de vidro: parciais agudas e longas, sem alma de metal. */
 function glassBell({ tone, noise }: Voices, at: number): void {
   tone({ wave: 'sine', from: 1319, at, length: 0.8, peak: 0.2 });
@@ -364,14 +373,23 @@ const RECIPES: Record<Cue, (voices: Voices) => void> = {
     tone({ wave: 'sine', from: 160, to: 70, at: s(FIN.thudAt), length: 0.18, peak: 0.35 });
     noise({ filter: 'lowpass', from: 900, at: s(FIN.thudAt), length: 0.08, peak: 0.25 });
   },
-  // A logo da abertura (decisoes.md 2026-11-16 (5)): o sopro do capuz que corta a tela e, quando o olho abre, o baque grave com um
-  // brilho curto por cima.
-  'abertura-logo': ({ tone, noise }) => {
-    const open = s(INTRO.eyeAt - INTRO.logoCueAt);
-    noise({ filter: 'bandpass', from: 500, to: 2600, q: 0.8, attack: open * 0.8, length: open + 0.04, peak: 0.24 });
-    tone({ wave: 'sine', from: 110, to: 38, at: open, length: 0.5, peak: 0.46 });
-    noise({ filter: 'lowpass', from: 2400, to: 220, at: open, length: 0.28, peak: 0.3 });
-    tone({ wave: 'sine', from: 1175, at: open, length: 0.45, peak: 0.08 });
+  // A logo da abertura (decisoes.md 2026-11-17 (3)): o voo do dragão. Três batidas de asa abafadas enquanto ele chega, o sopro do giro, o
+  // mergulho que sobe e, quando as asas se abrem, o estalo da membrana, o baque grave e um brilho de lua por cima.
+  'abertura-logo': (voices) => {
+    const { noise } = voices;
+    const at = (ms: number) => s(ms - INTRO.logoCueAt);
+    const beat = (INTRO.spinAt - INTRO.flyAt) / 3;
+    for (let i = 0; i < 3; i++) {
+      noise({ filter: 'lowpass', from: 320, to: 120, at: at(INTRO.flyAt + beat * (i + 0.5)), attack: 0.03, length: 0.12, peak: 0.16 + i * 0.03 });
+    }
+    noise({ filter: 'bandpass', from: 400, to: 1800, q: 0.9, at: at(INTRO.spinAt), attack: 0.15, length: s(INTRO.returnAt - INTRO.spinAt), peak: 0.18 });
+    const dive = s(INTRO.wingsAt - INTRO.returnAt);
+    noise({ filter: 'bandpass', from: 300, to: 2400, q: 0.8, at: at(INTRO.returnAt), attack: dive * 0.85, length: dive + 0.03, peak: 0.26 });
+    wingsOpen(voices, at(INTRO.wingsAt));
+  },
+  // A versão curta (movimento reduzido): só as asas que se abrem.
+  'abertura-logo-curta': (voices) => {
+    wingsOpen(voices, 0.04);
   },
   // O título da abertura: a subida que puxa o carimbo e, na batida dele, o baque e a chamada (quinta e oitava abertas, em Ré, com um
   // brilho que chega um instante depois).

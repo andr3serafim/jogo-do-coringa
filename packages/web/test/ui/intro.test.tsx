@@ -6,7 +6,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { INTRO_SKIP_HINT, INTRO_SKIP_HINT_TOUCH } from '../../src/model/copy.ts';
 import { INTRO, INTRO_REDUCED, SKIP_FADE_MS } from '../../src/model/intro.ts';
 import type { Cue } from '../../src/model/sound.ts';
-import { Intro, IntroBoundary } from '../../src/ui/intro/Intro.tsx';
+import { flightAnimation, wingAnimation } from '../../src/ui/intro/dragon-flight.ts';
+import { Intro } from '../../src/ui/intro/Intro.tsx';
+import { IntroBoundary } from '../../src/ui/intro/IntroBoundary.tsx';
 import { SoundContext, type SoundApi } from '../../src/ui/sound-context.ts';
 
 function fakeSound() {
@@ -63,8 +65,9 @@ describe('<Intro />: a versão completa', () => {
     const { overlay } = mount();
     const time = (name: string) => overlay.style.getPropertyValue(name);
     expect(time('--t-aviso')).toBe(`${INTRO.hintAt}ms`);
-    expect(time('--t-logo')).toBe(`${INTRO.logoAt}ms`);
-    expect(time('--t-olho')).toBe(`${INTRO.eyeAt}ms`);
+    expect(time('--t-lua')).toBe(`${INTRO.logoAt}ms`);
+    expect(time('--t-asas')).toBe(`${INTRO.wingsAt}ms`);
+    expect(time('--t-nome')).toBe(`${INTRO.nameAt}ms`);
     expect(time('--t-logo-sai')).toBe(`${INTRO.logoOutAt}ms`);
     expect(time('--t-tema')).toBe(`${INTRO.themeAt}ms`);
     expect(time('--t-junta')).toBe(`${INTRO.gatherAt}ms`);
@@ -87,7 +90,7 @@ describe('<Intro />: a versão completa', () => {
     expect(onDone).toHaveBeenCalledTimes(1);
   });
 
-  it('toca o sopro da logo e a chamada do título nos instantes deles', () => {
+  it('toca o voo do dragão e a chamada do título nos instantes deles', () => {
     const { sound } = mount();
     wait(INTRO.logoCueAt - 1);
     expect(sound.played).toEqual([]);
@@ -97,6 +100,57 @@ describe('<Intro />: a versão completa', () => {
     expect(sound.played).toEqual(['abertura-logo']);
     wait(1);
     expect(sound.played).toEqual(['abertura-logo', 'abertura-titulo']);
+  });
+});
+
+describe('<Intro />: o voo do dragão', () => {
+  /** O jsdom não tem a Web Animations: um `animate` falso anota quem pediu o quê, e devolve uma animação que se deixa cancelar. */
+  function stubAnimate() {
+    const calls: { element: Element; keyframes: Keyframe[]; options: KeyframeAnimationOptions; canceled: boolean }[] = [];
+    const animate = function (this: Element, keyframes: Keyframe[], options: KeyframeAnimationOptions) {
+      const call = { element: this, keyframes, options, canceled: false };
+      calls.push(call);
+      return { cancel: () => void (call.canceled = true) } as unknown as Animation;
+    };
+    Object.defineProperty(Element.prototype, 'animate', { value: animate, configurable: true, writable: true });
+    return calls;
+  }
+
+  afterEach(() => {
+    delete (Element.prototype as { animate?: unknown }).animate;
+  });
+
+  it('na completa, o dragão inteiro voa e as duas asas batem, com as animações do voo, que só deixam o desenho ao fim', () => {
+    const calls = stubAnimate();
+    const { overlay } = mount();
+    expect(calls).toHaveLength(3);
+    const [flight, ...wings] = calls;
+    expect(flight!.element).toBe(overlay.querySelector('[data-dragao-voo]'));
+    expect(flight!.keyframes).toEqual(flightAnimation().keyframes);
+    expect(flight!.options).toEqual({ delay: flightAnimation().delay, duration: flightAnimation().duration, fill: 'backwards' });
+    expect(wings.map((call) => call.element.getAttribute('data-dragao-asa'))).toEqual(['esquerda', 'direita']);
+    for (const wing of wings) {
+      expect(wing.keyframes).toEqual(wingAnimation().keyframes);
+      expect(wing.options).toEqual({ delay: wingAnimation().delay, duration: wingAnimation().duration, fill: 'backwards' });
+    }
+  });
+
+  it('ao sair da tela, as animações do voo são canceladas', () => {
+    const calls = stubAnimate();
+    const { unmount } = mount();
+    unmount();
+    expect(calls.map((call) => call.canceled)).toEqual([true, true, true]);
+  });
+
+  it('com movimento reduzido, o dragão fica parado na pose', () => {
+    const calls = stubAnimate();
+    mount({ reduced: true });
+    expect(calls).toEqual([]);
+  });
+
+  it('sem a Web Animations no navegador, o dragão fica parado na pose, sem erro', () => {
+    const { overlay } = mount();
+    expect(overlay.querySelector('[data-dragao-voo]')).not.toBeNull();
   });
 });
 
@@ -198,13 +252,13 @@ describe('<Intro />: com movimento reduzido', () => {
     expect(overlay.style.getPropertyValue('--d-some')).toBe(`${INTRO_REDUCED.total - INTRO_REDUCED.fadeAt}ms`);
   });
 
-  it('termina em menos de 2 s e só toca o sopro da logo', () => {
+  it('termina em menos de 2 s e só toca o baque das asas', () => {
     const { onDone, sound } = mount({ reduced: true });
     wait(INTRO_REDUCED.total - 1);
     expect(onDone).not.toHaveBeenCalled();
     wait(1);
     expect(onDone).toHaveBeenCalledTimes(1);
-    expect(sound.played).toEqual(['abertura-logo']);
+    expect(sound.played).toEqual(['abertura-logo-curta']);
   });
 
   it('também se pula', () => {

@@ -1,8 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 126 66" role="img" aria-labelledby="t">
-  <title id="t">LUSACAN</title>
-  <desc>Logo original do projeto Jogo do Coringa: o olho de um dragão guardião da noite, com a lua como íris. Só o símbolo, para fundo escuro.</desc>
-  <circle cx="58" cy="40" r="15" fill="#f5c238"/>
-  <path d="M58 28Q63.6 41 58 54Q52.4 41 58 28Z" fill="#17120f"/>
-  <path d="M4 46C22 26 44 10 72 8C92 7 110 6 124 4C114 14 104 22 92 26C74 31 40 30 4 46Z" fill="#f1f0ea"/>
-  <path d="M4 46C30 66 80 64 108 24" fill="none" stroke="#f1f0ea" stroke-width="3" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 180" role="img" aria-labelledby="lusacan-t">
+  <title id="lusacan-t">LUSACAN</title>
+  <desc>Logo original do projeto Jogo do Coringa: um dragão de asas abertas diante da lua cheia. Só o símbolo, para fundo escuro.</desc>
+  <defs>
+    <radialGradient id="lusacan-lua" cx=".4" cy=".36" r=".72"><stop offset="0" stop-color="#fbfaff"/><stop offset=".55" stop-color="#d6d4e8"/><stop offset="1" stop-color="#9f9dbd"/></radialGradient>
+    <linearGradient id="lusacan-prata" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6f5fb"/><stop offset="1" stop-color="#b3b0c8"/></linearGradient>
+    <radialGradient id="lusacan-halo"><stop offset="0" stop-color="#cfc8ff" stop-opacity=".45"/><stop offset="1" stop-color="#cfc8ff" stop-opacity="0"/></radialGradient>
+  </defs>
+  <circle cx="210" cy="90" r="104" fill="url(#lusacan-halo)"/>
+  <circle cx="210" cy="90" r="62" fill="url(#lusacan-lua)"/>
+  <g fill="#8f8db0" opacity=".35"><circle cx="188" cy="66" r="11"/><circle cx="232" cy="104" r="15"/><circle cx="182" cy="112" r="7"/><circle cx="246" cy="70" r="6"/><circle cx="205" cy="136" r="5"/></g>
+  <g transform="translate(210 118)">
+    <path d="M8 40C6 54 -16 60 -40 54C-56 50 -66 40 -66 28L-60 30C-58 40 -48 46 -36 47C-18 49 -4 46 -2 36ZM-66 28L-76 22L-62 18L-60 30Z" fill="#0d0a17" stroke="#4a3a86" stroke-width="1.2" stroke-linejoin="round"/>
+    <g transform="translate(-20 0)">
+      <path d="M0 -6C-14 -20 -28 -34 -40 -40C-56 -50 -66 -62 -80 -68L-90 -84L-78 -71C-108 -86 -144 -104 -176 -112Q-152 -74 -196 -46Q-150 -24 -168 10Q-124 4 -118 40Q-62 8 -10 24L0 10Z" fill="#1b1432" stroke="#4a3a86" stroke-width="1.2" stroke-linejoin="round"/>
+    </g>
+    <g transform="translate(20 0) scale(-1 1)">
+      <path d="M0 -6C-14 -20 -28 -34 -40 -40C-56 -50 -66 -62 -80 -68L-90 -84L-78 -71C-108 -86 -144 -104 -176 -112Q-152 -74 -196 -46Q-150 -24 -168 10Q-124 4 -118 40Q-62 8 -10 24L0 10Z" fill="#1b1432" stroke="#4a3a86" stroke-width="1.2" stroke-linejoin="round"/>
+    </g>
+    <path d="M12 -72Q-2 -88 -24 -96Q-2 -82 18 -70ZM22 -76Q12 -96 -2 -112Q22 -96 30 -75ZM20 -46L4 -52L18 -54Z" fill="#0d0a17" stroke="#4a3a86" stroke-width="1.2" stroke-linejoin="round"/>
+    <path d="M-23 -14L-34 -18L-24 -24ZM-20 -32L-32 -38L-18 -42ZM-11 -50L-20 -60L-4 -58Z" fill="#0d0a17" stroke="#4a3a86" stroke-width="1.2" stroke-linejoin="round"/>
+    <path d="M-24 -2C-24 -16 -22 -34 -12 -50C-6 -60 0 -66 8 -70C16 -76 26 -78 32 -74C36 -72 38 -70 42 -68C52 -64 66 -60 78 -55L76 -51L62 -51L54 -50L68 -46C60 -42 46 -40 34 -42C24 -44 16 -46 12 -44C6 -38 4 -28 8 -18C12 -10 18 -6 26 -2C30 12 24 32 12 46C6 52 -6 52 -12 46C-24 32 -30 12 -24 -2Z" fill="#0d0a17" stroke="#4a3a86" stroke-width="1.2" stroke-linejoin="round"/>
+    <path d="M-16 6Q0 13 18 6M-16 16Q0 23 16 16M-14 26Q0 33 14 26M-11 36Q0 42 10 36" fill="none" stroke="#3a2d63" stroke-width="1.4" stroke-linecap="round"/>
+    <circle cx="44" cy="-64" r="2.2" fill="#d2b4ff"/>
+  </g>
 </svg>

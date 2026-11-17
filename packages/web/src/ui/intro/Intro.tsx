@@ -1,17 +1,20 @@
-// A abertura do jogo (decisoes.md 2026-11-16 (5)): a logo "LUSACAN productions" e a intro do jogo (as cartas dos quatro naipes
-// sobem, juntam-se, o maço vira no Coringa e o título é carimbado), até o menu. É uma camada por cima do Início, que já está montado
+// A abertura do jogo (decisoes.md 2026-11-16 (5)): a logo "LUSACAN productions" (o dragão que voa e abre as asas diante da lua,
+// 2026-11-17 (3)) e a intro do jogo (as cartas dos quatro naipes sobem, juntam-se, o maço vira no Coringa e o título é carimbado), até
+// o menu. É uma camada por cima do Início, que já está montado
 // por baixo (inerte): nada do menu espera a abertura para carregar.
 //
-// O movimento é todo do CSS (`intro.css`), que lê os instantes do modelo (`model/intro.ts`) pelas variáveis que esta camada
-// entrega; daqui só saem o som nos instantes dele, o fim e o pulo. Clique, toque e "qualquer tecla" pulam (`skipsIntro`).
+// Os instantes moram no modelo (`model/intro.ts`). O CSS (`intro.css`) faz os gestos simples e os lê pelas variáveis que esta camada
+// entrega; o voo do dragão, que tem fases (chegar, girar, voltar, abrir as asas), é a Web Animations do `dragon-flight.ts`, ligada
+// aqui antes do primeiro quadro. Daqui também saem o som nos instantes dele, o fim e o pulo. Clique, toque e "qualquer tecla" pulam (`skipsIntro`).
 // Com movimento reduzido, é a versão curta: a logo parada e um esmaecer.
-import { Component, useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import type { Suit as SuitName } from '@coringa/engine';
 import { INTRO_SKIP_HINT, INTRO_SKIP_HINT_TOUCH, INTRO_TITLE } from '../../model/copy.ts';
 import { INTRO, SKIP_FADE_MS, introPlan, skipsIntro } from '../../model/intro.ts';
 import { Coringa } from '../cards/Coringa.tsx';
 import { Suit, isRedSuit } from '../cards/Suit.tsx';
 import { useSound } from '../sound-context.ts';
+import { flightAnimation, wingAnimation, type DragonAnimation } from './dragon-flight.ts';
 import './intro.css';
 import { LusacanLogo } from './LusacanLogo.tsx';
 
@@ -24,6 +27,12 @@ const ms = (value: number): string => `${value}ms`;
 
 /** Variáveis de CSS no `style` (o React as põe pelo CSSOM, que a CSP do site deixa passar). */
 const cssVars = (values: Record<`--${string}`, string | number>): CSSProperties => values as CSSProperties;
+
+/** Liga uma animação do dragão no elemento, se o navegador tiver a Web Animations (o jsdom não tem: o dragão fica parado na pose). */
+function play(element: Element, { delay, duration, keyframes }: DragonAnimation): Animation | null {
+  if (typeof element.animate !== 'function') return null;
+  return element.animate(keyframes, { delay, duration, fill: 'backwards' });
+}
 
 /** Uma tela de toque não tem "qualquer tecla": o aviso muda. */
 function isCoarsePointer(): boolean {
@@ -47,6 +56,7 @@ export function Intro({ reduced, onDone }: IntroProps) {
   const closing = useRef(false);
   const onDoneRef = useRef(onDone);
   const skipButton = useRef<HTMLButtonElement>(null);
+  const root = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     onDoneRef.current = onDone;
@@ -89,6 +99,18 @@ export function Intro({ reduced, onDone }: IntroProps) {
     return () => window.removeEventListener('keydown', onKey);
   }, [skip]);
 
+  // O voo do dragão, antes do primeiro quadro (com o efeito comum, o dragão apareceria um quadro na pose antes de sumir para entrar
+  // voando). Na versão curta ele fica parado.
+  useLayoutEffect(() => {
+    if (plan.variant !== 'completa' || root.current === null) return;
+    const flight = root.current.querySelector('[data-dragao-voo]');
+    const wings = root.current.querySelectorAll('[data-dragao-asa]');
+    const running = [flight ? play(flight, flightAnimation()) : null, ...[...wings].map((wing) => play(wing, wingAnimation()))];
+    return () => {
+      for (const animation of running) animation?.cancel();
+    };
+  }, [plan]);
+
   // O foco vai ao aviso: o leitor de tela o anuncia, e o Tab não passeia pelo menu coberto.
   useEffect(() => {
     skipButton.current?.focus({ preventScroll: true });
@@ -97,8 +119,9 @@ export function Intro({ reduced, onDone }: IntroProps) {
   const times: Record<`--${string}`, string> =
     plan.variant === 'completa'
       ? {
-          '--t-logo': ms(INTRO.logoAt),
-          '--t-olho': ms(INTRO.eyeAt),
+          '--t-lua': ms(INTRO.logoAt),
+          '--t-asas': ms(INTRO.wingsAt),
+          '--t-nome': ms(INTRO.nameAt),
           '--t-logo-sai': ms(INTRO.logoOutAt),
           '--t-tema': ms(INTRO.themeAt),
           '--d-sobe': ms(INTRO.cardRiseMs),
@@ -116,7 +139,14 @@ export function Intro({ reduced, onDone }: IntroProps) {
   });
 
   return (
-    <div data-abertura={plan.variant} data-saindo={leaving ? 'true' : undefined} className="abertura" style={style} onClick={skip}>
+    <div
+      ref={root}
+      data-abertura={plan.variant}
+      data-saindo={leaving ? 'true' : undefined}
+      className="abertura"
+      style={style}
+      onClick={skip}
+    >
       <div className="abertura-logo">
         <LusacanLogo className="abertura-logo-arte" />
       </div>
@@ -150,23 +180,4 @@ export function Intro({ reduced, onDone }: IntroProps) {
       </button>
     </div>
   );
-}
-
-/**
- * A abertura é enfeite: se ela quebrar ao desenhar, o menu abre na hora, em vez de o app inteiro cair no "Algo deu errado".
- */
-export class IntroBoundary extends Component<{ children: ReactNode; onError(): void }, { failed: boolean }> {
-  state = { failed: false };
-
-  static getDerivedStateFromError(): { failed: boolean } {
-    return { failed: true };
-  }
-
-  componentDidCatch(): void {
-    this.props.onError();
-  }
-
-  render(): ReactNode {
-    return this.state.failed ? null : this.props.children;
-  }
 }

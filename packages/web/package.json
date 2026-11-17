@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "smoke": "vite build && node scripts/smoke.ts",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "logo": "node scripts/gerar-logo-lusacan.ts"
   },
   "dependencies": {
     "@coringa/engine": "workspace:*",

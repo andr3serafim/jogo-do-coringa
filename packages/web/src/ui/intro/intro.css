@@ -41,9 +41,18 @@ html:has(.abertura) {
   grid-area: 1 / 1;
 }
 
+/* O céu da noite da logo: um brilho azulado no meio, que se perde no escuro das bordas. Some com a logo, antes das cartas. */
+.abertura-logo {
+  display: grid;
+  place-items: center;
+  place-self: stretch;
+  background: radial-gradient(ellipse 75% 65% at 50% 42%, #1d1b3a 0%, #110f20 55%, var(--color-tinta) 100%);
+}
+
+/* O dragão voa por fora da caixa da logo (ele entra pequeno e longe): o SVG não corta. */
 .abertura-logo-arte {
   display: block;
-  width: min(80vw, 70vh, 500px);
+  width: min(94vw, 105vh, 680px);
   height: auto;
   overflow: visible;
 }
@@ -92,7 +101,13 @@ html:has(.abertura) {
   }
 }
 
-/* --- A logo: o capuz corta a tela, o fio se desenha, a lua acende, a pupila fecha em fenda, as letras sobem em fila. --- */
+/*
+ * --- A logo (decisoes.md 2026-11-17 (3)): a lua acende, o dragão voa (a Web Animations do `dragon-flight.ts`, que o `Intro.tsx` liga),
+ * as asas se abrem e os veios de raio acendem com o halo da lua, o nome sobe letra a letra, e "PRODUCTIONS" e os filetes chegam no fim.
+ * Os veios e o halo acendem uma vez só, num brilho local (sem piscar a tela).
+ * As letras têm `transform` no SVG: a animação usa `translate`, que se soma a ele, em unidades da fonte (1000 por eme).
+ * ---
+ */
 
 [data-abertura='completa'] .abertura-logo {
   animation: abertura-logo-sai 250ms ease-in var(--t-logo-sai) forwards;
@@ -101,107 +116,87 @@ html:has(.abertura) {
 @keyframes abertura-logo-sai {
   to {
     opacity: 0;
-    scale: 1.05;
+    scale: 1.04;
   }
 }
 
-/* As letras e os grupos da logo têm `transform` no SVG: as animações usam `translate` e `scale`, que se somam a ele. */
-[data-abertura='completa'] .lusacan-capuz {
-  animation: lusacan-capuz 260ms cubic-bezier(0.2, 0.9, 0.2, 1) var(--t-logo) both;
-}
-
-@keyframes lusacan-capuz {
-  from {
-    opacity: 0;
-    translate: -28px 9px;
-  }
-}
-
-[data-abertura='completa'] .lusacan-fio {
-  stroke-dasharray: 1;
-  animation: lusacan-fio 300ms ease-out calc(var(--t-logo) + 90ms) both;
-}
-
-@keyframes lusacan-fio {
-  from {
-    opacity: 0;
-    stroke-dashoffset: 1;
-  }
-  5% {
-    opacity: 1;
-  }
-  to {
-    opacity: 1;
-    stroke-dashoffset: 0;
-  }
-}
-
-[data-abertura='completa'] .lusacan-iris,
-[data-abertura='completa'] .lusacan-fenda {
+[data-abertura='completa'] .lusacan-lua {
   transform-box: fill-box;
   transform-origin: center;
-}
-
-/* A lua acende um pouco antes do instante do olho (`--t-olho`), e pulsa nele. */
-[data-abertura='completa'] .lusacan-iris {
-  animation:
-    lusacan-lua 220ms cubic-bezier(0.3, 1.5, 0.5, 1) calc(var(--t-olho) - 190ms) both,
-    lusacan-brilho 700ms ease-out var(--t-olho) forwards;
+  animation: lusacan-lua 500ms ease-out var(--t-lua) both;
 }
 
 @keyframes lusacan-lua {
   from {
-    scale: 0;
+    opacity: 0;
+    scale: 0.9;
   }
 }
 
-@keyframes lusacan-brilho {
+[data-abertura='completa'] .lusacan-halo {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: lusacan-halo 700ms ease-out var(--t-asas) both;
+}
+
+@keyframes lusacan-halo {
   from {
-    filter: drop-shadow(0 0 0 color-mix(in srgb, var(--color-ouro) 0%, transparent));
+    opacity: 0.6;
+    scale: 0.92;
   }
-  25% {
-    filter: drop-shadow(0 0 9px var(--color-ouro));
+  30% {
+    opacity: 1;
+    scale: 1.1;
   }
   to {
-    filter: drop-shadow(0 0 3px color-mix(in srgb, var(--color-ouro) 55%, transparent));
+    opacity: 1;
+    scale: 1;
   }
 }
 
-/* A pupila nasce redonda, com a lua, e no instante do olho fecha na fenda: o dragão olhou para você. */
-[data-abertura='completa'] .lusacan-fenda {
-  animation: lusacan-fenda 330ms linear calc(var(--t-olho) - 190ms) both;
+[data-abertura='completa'] .lusacan-veios,
+[data-abertura='completa'] .lusacan-olho {
+  animation: lusacan-acende 550ms ease-out var(--t-asas) both;
 }
 
-@keyframes lusacan-fenda {
+@keyframes lusacan-acende {
   from {
-    scale: 0 0;
+    opacity: 0;
   }
-  45% {
-    scale: 2.5 0.92;
-    animation-timing-function: cubic-bezier(0.7, 0, 0.2, 1);
-  }
-  58% {
-    scale: 2.5 0.92;
-    animation-timing-function: cubic-bezier(0.7, 0, 0.2, 1);
+  30% {
+    opacity: 1;
   }
   to {
-    scale: 1 1;
+    opacity: 0.85;
   }
 }
 
 [data-abertura='completa'] .lusacan-letra {
-  animation: lusacan-letra 280ms cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--t-olho) + 60ms + var(--i) * 45ms) both;
+  animation: lusacan-letra 300ms cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--t-nome) + var(--i) * 25ms) both;
 }
 
 @keyframes lusacan-letra {
   from {
     opacity: 0;
-    translate: 0 9px;
+    translate: 0 170px;
   }
 }
 
 [data-abertura='completa'] .lusacan-tag {
-  animation: abertura-surge 300ms ease-out calc(var(--t-olho) + 440ms) both;
+  animation: abertura-surge 300ms ease-out calc(var(--t-nome) + 150ms) both;
+}
+
+[data-abertura='completa'] .lusacan-filete {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: lusacan-filete 350ms cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--t-nome) + 100ms) both;
+}
+
+@keyframes lusacan-filete {
+  from {
+    opacity: 0;
+    scale: 0.4 1;
+  }
 }
 
 /* --- A intro do jogo: as quatro cartas sobem em leque, juntam-se, o maço vira no Coringa e o título é carimbado. --- */

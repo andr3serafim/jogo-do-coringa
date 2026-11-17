@@ -11,6 +11,8 @@
  * - as duas telas das partidas anteriores (a lista e o visualizador do replay) também: entram por `React.lazy`. Mesma dupla.
  * - a tela do tutorial (o painel, os textos das dicas e a semente) também: entra por `React.lazy`. Mesma dupla.
  * - as cenas refeitas no sub-projeto 6 (`src/ui/scenes/`) também: entram por `import()` dinâmico (`loadScenes`). Mesma dupla.
+ * - a abertura do jogo (`src/ui/intro/`: a logo do dragão, as letras em traçado e o CSS dela) também: entra por `import()` dinâmico
+ *   (`loadIntro`). Mesma dupla.
  * - os pacotes de arte dos decks e das raças (`src/looks/<pacote>/index.ts`) também: entram por `import()` (`loadPack`). Mesma dupla, e
  *   nenhum nome de imagem de `src/looks/` (lidos da pasta, o retrato incluído) no JavaScript inicial.
  *   E mais duas: o `index.html` não pré-carrega nenhuma imagem `.webp`, e o CSS que ele pede não traz a fonte Cinzel, que só existe
@@ -34,6 +36,8 @@ const HARD_TEXT_MARK = 'hardSearch sem ação legal';
 const BOT_MARKS = [BOT_NAME_MARK, BOT_TEXT_MARK, HARD_TEXT_MARK];
 /** Marca das cenas do sub-projeto 6: o atributo do quadro onde a cena é desenhada (`SceneFrame.tsx`), um literal que sobrevive à minificação. */
 const SCENES_MARK = 'data-palco-cena';
+/** Marca da abertura do jogo: o atributo do grupo do dragão que voa (`LusacanLogo.tsx`), um literal que sobrevive à minificação. */
+const INTRO_MARK = 'data-dragao-voo';
 /**
  * Marcas do sintetizador. Nenhuma sobrevive só no nome de um identificador nosso (o minificador renomeia): `createDynamicsCompressor`
  * é o método do Web Audio que monta o limitador (nome de propriedade do navegador, que não se renomeia) e `sawtooth` é um literal de
@@ -170,6 +174,9 @@ for (const url of initial) {
   if (source.includes(SCENES_MARK)) {
     problems.push(`${url} contém as cenas do sub-projeto 6 ("${SCENES_MARK}"): elas têm que entrar por import() dinâmico, fora do inicial`);
   }
+  if (source.includes(INTRO_MARK)) {
+    problems.push(`${url} contém a abertura do jogo ("${INTRO_MARK}"): ela tem que entrar por import() dinâmico, fora do inicial`);
+  }
   for (const { pack, mark } of LOOK_PACK_MARKS) {
     if (source.includes(mark)) problems.push(`${url} contém ${pack} ("${mark}"): o pacote de arte tem que entrar por import(), fora do inicial`);
   }
@@ -261,6 +268,14 @@ if (sceneChunks.length === 0) {
   problems.push(`as cenas do sub-projeto 6 ("${SCENES_MARK}") não estão em nenhum chunk carregado sob demanda: o import() dinâmico sumiu, ou a marca mudou`);
 } else {
   console.log(`Cenas do sub-projeto 6 (fora do inicial): ${sceneChunks.map(fromDist).join(', ')}`);
+}
+
+// A abertura do jogo também.
+const introChunks = all.filter((path) => !initialPaths.has(path) && readFileSync(path).includes(INTRO_MARK));
+if (introChunks.length === 0) {
+  problems.push(`a abertura do jogo ("${INTRO_MARK}") não está em nenhum chunk carregado sob demanda: o import() dinâmico sumiu, ou a marca mudou`);
+} else {
+  console.log(`Abertura do jogo (fora do inicial): ${introChunks.map(fromDist).join(', ')}`);
 }
 
 // Os pacotes de arte têm que existir em algum chunk que não é o inicial, pelo mesmo motivo.

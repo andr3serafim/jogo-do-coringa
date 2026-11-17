@@ -1,12 +1,15 @@
 // Casca da interface: o `Storage`, a porta do servidor e o controlador de som nascem aqui, uma vez, e a rota escolhe a tela
 // (spec §2.1). O som chega às telas pelo `SoundContext`; os ouvintes de gesto do controlador moram no `document`. A abertura do jogo
-// (a logo e a intro, `ui/intro/Intro.tsx`) é uma camada por cima do Início, só quando a página abre nele.
-import { Suspense, useCallback, useEffect, useState, type ReactNode } from 'react';
+// (a logo e a intro, `ui/intro/Intro.tsx`) é uma camada por cima do Início, só quando a página abre nele, e chega num pedaço à parte
+// (`intro-loader.ts`): até ele chegar, uma capa escura cobre o menu.
+import { Suspense, useCallback, useEffect, useState, type ComponentType, type ReactNode } from 'react';
 import { LEARN_LABEL, SCREEN_LOADING_TEXT } from '../model/copy.ts';
 import { introSkipped, loadPrefs, type KeyValueStore } from '../model/storage.ts';
 import { SoundController, browserSoundDeps } from '../sound/controller.ts';
 import { useReducedMotion } from '../ui/anim/useReducedMotion.ts';
-import { Intro, IntroBoundary } from '../ui/intro/Intro.tsx';
+import type { IntroProps } from '../ui/intro/Intro.tsx';
+import { IntroBoundary } from '../ui/intro/IntroBoundary.tsx';
+import { loadIntro, loadedIntro } from '../ui/intro/intro-loader.ts';
 import { Button, Screen } from '../ui/parts.tsx';
 import { Home } from '../ui/screens/Home.tsx';
 import { NotFound } from '../ui/screens/NotFound.tsx';
@@ -51,6 +54,26 @@ export function App({ api: injected, intro = false }: AppProps = {}) {
   const [menuReducesMotion] = useState(() => loadPrefs(store).reduceMotion);
   const reducedMotion = useReducedMotion(menuReducesMotion);
   const closeIntro = useCallback(() => setIntroOpen(false), []);
+  // O pedaço da abertura: já carregado (os testes o carregam antes), ou pedido agora. Se não chegar, a abertura não toca e o menu abre.
+  const [introScreen, setIntroScreen] = useState<{ Intro: ComponentType<IntroProps> } | null>(() => {
+    const loaded = introOpen ? loadedIntro() : null;
+    return loaded === null ? null : { Intro: loaded };
+  });
+  useEffect(() => {
+    if (!introOpen || introScreen !== null) return;
+    let live = true;
+    loadIntro().then(
+      (Intro) => {
+        if (live) setIntroScreen({ Intro });
+      },
+      () => {
+        if (live) closeIntro();
+      },
+    );
+    return () => {
+      live = false;
+    };
+  }, [introOpen, introScreen, closeIntro]);
   // A abertura toca antes de qualquer gesto: o controlador tenta ligar o áudio, e onde o navegador não deixa ela roda muda.
   useEffect(() => {
     if (introOpen) sound.prime();
@@ -74,10 +97,14 @@ export function App({ api: injected, intro = false }: AppProps = {}) {
           ) : null}
           <Routes api={api} store={store} />
         </div>
-        {introOpen ? (
+        {introOpen && introScreen !== null ? (
           <IntroBoundary onError={closeIntro}>
-            <Intro reduced={reducedMotion} onDone={closeIntro} />
+            <introScreen.Intro reduced={reducedMotion} onDone={closeIntro} />
           </IntroBoundary>
+        ) : null}
+        {/* A capa, enquanto o pedaço da abertura não chega: o escuro de onde a abertura começa. Um toque nela abre o menu. */}
+        {introOpen && introScreen === null ? (
+          <div data-abertura-capa="" aria-hidden="true" className="fixed inset-0 z-100 bg-tinta" onClick={closeIntro} />
         ) : null}
       </SoundContext>
     </ErrorBoundary>
