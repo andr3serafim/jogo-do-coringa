@@ -1,9 +1,12 @@
 // Casca da interface: o `Storage`, a porta do servidor e o controlador de som nascem aqui, uma vez, e a rota escolhe a tela
-// (spec §2.1). O som chega às telas pelo `SoundContext`; os ouvintes de gesto do controlador moram no `document`.
-import { Suspense, useEffect, useState, type ReactNode } from 'react';
+// (spec §2.1). O som chega às telas pelo `SoundContext`; os ouvintes de gesto do controlador moram no `document`. A abertura do jogo
+// (a logo e a intro, `ui/intro/Intro.tsx`) é uma camada por cima do Início, só quando a página abre nele.
+import { Suspense, useCallback, useEffect, useState, type ReactNode } from 'react';
 import { LEARN_LABEL, SCREEN_LOADING_TEXT } from '../model/copy.ts';
-import { loadPrefs, type KeyValueStore } from '../model/storage.ts';
+import { introSkipped, loadPrefs, type KeyValueStore } from '../model/storage.ts';
 import { SoundController, browserSoundDeps } from '../sound/controller.ts';
+import { useReducedMotion } from '../ui/anim/useReducedMotion.ts';
+import { Intro, IntroBoundary } from '../ui/intro/Intro.tsx';
 import { Button, Screen } from '../ui/parts.tsx';
 import { Home } from '../ui/screens/Home.tsx';
 import { NotFound } from '../ui/screens/NotFound.tsx';
@@ -15,7 +18,7 @@ import { openStore } from './browser-store.ts';
 import { ErrorBoundary } from './ErrorBoundary.tsx';
 import { lazyScreen, ScreenBoundary } from './lazy-screen.tsx';
 import { createRoomApi, type RoomApi } from './room-api.ts';
-import { useRoute } from './router.ts';
+import { parseRoute, useRoute } from './router.ts';
 
 // A lista das partidas e o visualizador do replay chegam sob demanda: nada deles pesa no JavaScript inicial (`scripts/smoke.ts`).
 // Se o `import()` falhar, a rota mostra o aviso com "Atualizar" (`lazy-screen.tsx`), e não o erro genérico do app.
@@ -27,29 +30,55 @@ const Tutorial = lazyScreen(() => import('../ui/screens/Tutorial.tsx'));
 export interface AppProps {
   /** Troca o HTTP e a conexão (testes). O padrão fala com o próprio site. */
   api?: RoomApi;
+  /**
+   * Mostra a abertura do jogo (decisoes.md 2026-11-16 (5)) quando a página abre no Início. Só o `main.tsx` liga: nos testes, e num
+   * `App` solto, o padrão é sem ela.
+   */
+  intro?: boolean;
 }
 
-export function App({ api: injected }: AppProps = {}) {
+export function App({ api: injected, intro = false }: AppProps = {}) {
   const [{ store, available }] = useState(() => openStore('local'));
   const [api] = useState(() => injected ?? createRoomApi({ store }));
   const [warned, setWarned] = useState(!available);
   // Um controlador só, com a preferência guardada. Sem gesto não há contexto de áudio nem sintetizador (`controller.ts`).
   const [sound] = useState(() => new SoundController(browserSoundDeps, loadPrefs(store).sound));
   useEffect(() => sound.attach(document), [sound]);
+  // A abertura só toca quando a página ABRE no Início: um link de sala, a reconexão, o treino e o replay abrem direto (ninguém espera
+  // 5 s com o relógio da partida correndo), e voltar ao Início por dentro do app não a traz de volta. Não há "já vi" guardado; a
+  // marca do armazenamento é só dos testes de ponta a ponta (`introSkipped`).
+  const [introOpen, setIntroOpen] = useState(() => intro && parseRoute(window.location.pathname).name === 'home' && !introSkipped(store));
+  const [menuReducesMotion] = useState(() => loadPrefs(store).reduceMotion);
+  const reducedMotion = useReducedMotion(menuReducesMotion);
+  const closeIntro = useCallback(() => setIntroOpen(false), []);
+  // A abertura toca antes de qualquer gesto: o controlador tenta ligar o áudio, e onde o navegador não deixa ela roda muda.
+  useEffect(() => {
+    if (introOpen) sound.prime();
+    // Só ao abrir: o fim da abertura não tenta de novo.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sound]);
 
   return (
     <ErrorBoundary>
       <SoundContext value={sound}>
-        {warned ? (
-          // Um único aviso para o site inteiro, e não um por tela (spec §6.1).
-          <aside aria-label="Aviso do navegador" className="flex items-center gap-3 bg-tinta px-4 py-3 text-papel">
-            <p className="flex-1">{STORAGE_WARNING}</p>
-            <Button variant="secondary" onClick={() => setWarned(false)}>
-              Entendi
-            </Button>
-          </aside>
+        {/* O app inteiro fica inerte por baixo da abertura (já montado, carregando o que o menu precisa). `contents`: a caixa não existe para o layout. */}
+        <div className="contents" inert={introOpen}>
+          {warned ? (
+            // Um único aviso para o site inteiro, e não um por tela (spec §6.1).
+            <aside aria-label="Aviso do navegador" className="flex items-center gap-3 bg-tinta px-4 py-3 text-papel">
+              <p className="flex-1">{STORAGE_WARNING}</p>
+              <Button variant="secondary" onClick={() => setWarned(false)}>
+                Entendi
+              </Button>
+            </aside>
+          ) : null}
+          <Routes api={api} store={store} />
+        </div>
+        {introOpen ? (
+          <IntroBoundary onError={closeIntro}>
+            <Intro reduced={reducedMotion} onDone={closeIntro} />
+          </IntroBoundary>
         ) : null}
-        <Routes api={api} store={store} />
       </SoundContext>
     </ErrorBoundary>
   );

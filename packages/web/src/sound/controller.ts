@@ -87,6 +87,35 @@ export class SoundController {
     }
   }
 
+  /**
+   * Tenta ligar o áudio sem gesto: só a abertura do jogo chama (decisoes.md 2026-11-16 (5)), porque ela toca antes de a pessoa
+   * tocar em qualquer coisa. Onde o navegador deixa (o site liberado, um app instalado), o contexto passa a tocar e o sintetizador
+   * carrega. Onde não deixa, que é o comum, a retomada fica à espera e nada soa, sem erro: o contexto fica guardado, suspenso, e o
+   * primeiro gesto o retoma pelo caminho de sempre (`onGesture`). O Chrome escreve um aviso no console (não um erro) ao criar o
+   * contexto fora de um gesto.
+   */
+  prime(): void {
+    if (!this.enabled || this.ctx !== null) return;
+    let ctx: AudioContextLike;
+    try {
+      ctx = this.deps.createContext();
+    } catch {
+      return; // sem Web Audio neste navegador
+    }
+    this.ctx = ctx;
+    if (ctx.state === 'running') {
+      void this.load(ctx);
+      return;
+    }
+    // A retomada pode resolver só depois do primeiro gesto, que então já carregou (ou está carregando) o sintetizador.
+    ctx
+      .resume()
+      .then(() => {
+        if (ctx.state === 'running' && this.synth === null) void this.load(ctx);
+      })
+      .catch(ignore);
+  }
+
   /** Corta as pistas que estão soando (o pulo das batidas, sub-projeto 6 §10). Sem sintetizador, não há o que cortar. */
   cut(): void {
     try {

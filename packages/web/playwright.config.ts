@@ -52,11 +52,15 @@ export default defineConfig({
     trace: 'off',
     video: 'off',
     screenshot: 'only-on-failure',
+    // A abertura do jogo (a logo e a intro, ~5 s) toca sempre que a página abre no Início. Os testes abrem direto no menu: esta
+    // marca no armazenamento a desliga (`introSkipped`, no `storage.ts`), em todo contexto, inclusive os de `browser.newContext()`.
+    // Só o `abertura.spec.ts` a tira, para ver a abertura tocar.
+    storageState: { cookies: [], origins: [{ origin: `http://${HOST}:${PORT}`, localStorage: [{ name: 'coringa:abertura', value: 'pular' }] }] },
   },
   projects: [
     {
       name: 'desktop',
-      testMatch: ['online.spec.ts', 'training.spec.ts', 'replay.spec.ts', 'sound.spec.ts', 'tutorial.spec.ts', 'drag.spec.ts', 'layout.spec.ts', 'scenes.spec.ts', 'fluidez.spec.ts', 'moment.spec.ts', 'resurrection.spec.ts', 'power.spec.ts', 'looks.spec.ts'],
+      testMatch: ['abertura.spec.ts', 'online.spec.ts', 'training.spec.ts', 'replay.spec.ts', 'sound.spec.ts', 'tutorial.spec.ts', 'drag.spec.ts', 'layout.spec.ts', 'scenes.spec.ts', 'fluidez.spec.ts', 'moment.spec.ts', 'resurrection.spec.ts', 'power.spec.ts', 'looks.spec.ts'],
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
     },
     {

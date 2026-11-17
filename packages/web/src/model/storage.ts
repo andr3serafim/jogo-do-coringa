@@ -224,6 +224,23 @@ export function saveTutorialState(store: KeyValueStore, state: TutorialState): v
   writeValue(store, TUTORIAL_KEY, state);
 }
 
+// --- A abertura do jogo ---
+
+const INTRO_KEY = 'coringa:abertura';
+
+/**
+ * `true` se a abertura não deve tocar neste navegador. É a marca dos testes de ponta a ponta (o `playwright.config.ts` grava
+ * `pular`, para cada teste que abre no Início não esperar a abertura); o jogo nunca grava esta chave, e não há "já vi" guardado:
+ * para quem joga, a abertura toca inteira em toda abertura (decisoes.md 2026-11-16 (5)).
+ */
+export function introSkipped(store: KeyValueStore): boolean {
+  try {
+    return store.get(INTRO_KEY) === 'pular';
+  } catch {
+    return false;
+  }
+}
+
 // --- Diagnóstico copiável (spec §6.5) ---
 
 // O token do servidor é base64url de 32 bytes (43 caracteres). Mascara qualquer corrida desse tamanho ou maior.

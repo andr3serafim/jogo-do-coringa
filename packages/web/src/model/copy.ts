@@ -689,6 +689,11 @@ export const AUTO_PASS_LABEL = 'Passar sozinho quando não tenho resposta';
 export const REDUCE_MOTION_LABEL = 'Reduzir animações';
 export const REDUCE_MOTION_SYSTEM_HINT = 'Ligada porque o seu sistema pede menos movimento.';
 export const SOUND_LABEL = 'Som';
+/** O aviso discreto da abertura do jogo (decisoes.md 2026-11-16 (5)); numa tela de toque não há tecla. */
+export const INTRO_SKIP_HINT = 'Pressione qualquer tecla para pular';
+export const INTRO_SKIP_HINT_TOUCH = 'Toque para pular';
+/** O título do jogo, como a abertura o carimba (o do menu é o `Title` do Início). */
+export const INTRO_TITLE = 'Jogo do Coringa';
 export const SWITCH_ON = 'Ligado';
 export const SWITCH_OFF = 'Desligado';
 export const RULES_LABEL = 'Resumo das regras';

@@ -3,6 +3,7 @@ import {
   DEFAULT_PREFS,
   diagnostic,
   forgetSeat,
+  introSkipped,
   loadNickname,
   loadPrefs,
   loadSeat,
@@ -440,5 +441,23 @@ describe('diagnostic', () => {
   it('não mexe em mensagens comuns', () => {
     const text = diagnostic({ ...info, message: 'TypeError: cannot read properties of undefined' });
     expect(text).toContain('TypeError: cannot read properties of undefined');
+  });
+});
+
+describe('a abertura: a marca dos testes de ponta a ponta (decisoes.md 2026-11-16 (5))', () => {
+  it('sem a marca, a abertura toca', () => {
+    expect(introSkipped(safeStore(memoryStorage()).store)).toBe(false);
+  });
+
+  it("com 'pular' em coringa:abertura, não toca", () => {
+    const raw = memoryStorage();
+    raw.setItem('coringa:abertura', 'pular');
+    expect(introSkipped(safeStore(raw).store)).toBe(true);
+  });
+
+  it('outro valor não vale: a abertura toca', () => {
+    const raw = memoryStorage();
+    raw.setItem('coringa:abertura', 'true');
+    expect(introSkipped(safeStore(raw).store)).toBe(false);
   });
 });

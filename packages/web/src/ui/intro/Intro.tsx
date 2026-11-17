@@ -1,0 +1,172 @@
+// A abertura do jogo (decisoes.md 2026-11-16 (5)): a logo "LUSACAN productions" e a intro do jogo (as cartas dos quatro naipes
+// sobem, juntam-se, o maço vira no Coringa e o título é carimbado), até o menu. É uma camada por cima do Início, que já está montado
+// por baixo (inerte): nada do menu espera a abertura para carregar.
+//
+// O movimento é todo do CSS (`intro.css`), que lê os instantes do modelo (`model/intro.ts`) pelas variáveis que esta camada
+// entrega; daqui só saem o som nos instantes dele, o fim e o pulo. Clique, toque e "qualquer tecla" pulam (`skipsIntro`).
+// Com movimento reduzido, é a versão curta: a logo parada e um esmaecer.
+import { Component, useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import type { Suit as SuitName } from '@coringa/engine';
+import { INTRO_SKIP_HINT, INTRO_SKIP_HINT_TOUCH, INTRO_TITLE } from '../../model/copy.ts';
+import { INTRO, SKIP_FADE_MS, introPlan, skipsIntro } from '../../model/intro.ts';
+import { Coringa } from '../cards/Coringa.tsx';
+import { Suit, isRedSuit } from '../cards/Suit.tsx';
+import { useSound } from '../sound-context.ts';
+import './intro.css';
+import { LusacanLogo } from './LusacanLogo.tsx';
+
+/** As quatro cartas que sobem, na ordem do leque (preto e vermelho alternados). */
+const SUITS: readonly SuitName[] = ['espadas', 'copas', 'ouros', 'paus'];
+/** As faíscas do carimbo do título: o ângulo de cada uma, em graus. */
+const SPARKS = [0, 45, 90, 135, 180, 225, 270, 315];
+
+const ms = (value: number): string => `${value}ms`;
+
+/** Variáveis de CSS no `style` (o React as põe pelo CSSOM, que a CSP do site deixa passar). */
+const cssVars = (values: Record<`--${string}`, string | number>): CSSProperties => values as CSSProperties;
+
+/** Uma tela de toque não tem "qualquer tecla": o aviso muda. */
+function isCoarsePointer(): boolean {
+  return typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+}
+
+export interface IntroProps {
+  /** Movimento reduzido (o sistema ou o menu do jogo): a versão curta. Lido uma vez, ao abrir. */
+  reduced: boolean;
+  /** A abertura acabou (sozinha ou pulada): o menu fica livre. Chamado uma vez. */
+  onDone(): void;
+}
+
+export function Intro({ reduced, onDone }: IntroProps) {
+  const sound = useSound();
+  // A versão é a de quando a abertura abriu: trocar a preferência no meio não a recomeça.
+  const [plan] = useState(() => introPlan(reduced));
+  const [hint] = useState(() => (isCoarsePointer() ? INTRO_SKIP_HINT_TOUCH : INTRO_SKIP_HINT));
+  const [leaving, setLeaving] = useState(false);
+  /** `true` do pulo em diante, e desde que ela começa a esmaecer sozinha: daí em diante não há o que pular. */
+  const closing = useRef(false);
+  const onDoneRef = useRef(onDone);
+  const skipButton = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    onDoneRef.current = onDone;
+  }, [onDone]);
+
+  // O relógio da abertura: as pistas de som nos instantes delas e o fim. Depois do pulo, só o esmaecer curto.
+  useEffect(() => {
+    const done = () => onDoneRef.current();
+    if (leaving) {
+      const timer = window.setTimeout(done, SKIP_FADE_MS);
+      return () => window.clearTimeout(timer);
+    }
+    const timers = plan.cues.map(({ at, cue }) => window.setTimeout(() => sound.play(cue), at));
+    timers.push(
+      window.setTimeout(() => {
+        closing.current = true;
+      }, plan.fadeAt),
+    );
+    timers.push(window.setTimeout(done, plan.total));
+    return () => {
+      for (const timer of timers) window.clearTimeout(timer);
+    };
+  }, [leaving, plan, sound]);
+
+  const skip = useCallback(() => {
+    if (closing.current) return;
+    closing.current = true;
+    sound.cut();
+    setLeaving(true);
+  }, [sound]);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (!skipsIntro(event)) return;
+      // A tecla é da abertura: o Espaço não rola a página, e o Enter não aciona nada.
+      event.preventDefault();
+      skip();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [skip]);
+
+  // O foco vai ao aviso: o leitor de tela o anuncia, e o Tab não passeia pelo menu coberto.
+  useEffect(() => {
+    skipButton.current?.focus({ preventScroll: true });
+  }, []);
+
+  const times: Record<`--${string}`, string> =
+    plan.variant === 'completa'
+      ? {
+          '--t-logo': ms(INTRO.logoAt),
+          '--t-olho': ms(INTRO.eyeAt),
+          '--t-logo-sai': ms(INTRO.logoOutAt),
+          '--t-tema': ms(INTRO.themeAt),
+          '--d-sobe': ms(INTRO.cardRiseMs),
+          '--t-junta': ms(INTRO.gatherAt),
+          '--t-vira': ms(INTRO.flipAt),
+          '--t-titulo': ms(INTRO.titleAt),
+        }
+      : {};
+  const style = cssVars({
+    ...times,
+    '--t-aviso': ms(plan.hintAt),
+    '--t-some': ms(plan.fadeAt),
+    '--d-some': ms(plan.total - plan.fadeAt),
+    '--d-pulo': ms(SKIP_FADE_MS),
+  });
+
+  return (
+    <div data-abertura={plan.variant} data-saindo={leaving ? 'true' : undefined} className="abertura" style={style} onClick={skip}>
+      <div className="abertura-logo">
+        <LusacanLogo className="abertura-logo-arte" />
+      </div>
+      {plan.variant === 'completa' ? (
+        <div className="abertura-tema" aria-hidden="true">
+          <div className="abertura-palco">
+            <div className="abertura-aura" />
+            <div className="abertura-onda" />
+            {SUITS.map((suit, index) => (
+              <div
+                key={suit}
+                className="abertura-carta"
+                data-naipe={suit}
+                style={cssVars({ '--i': index, '--d': ms(INTRO.cardDelays[index]!) })}
+              >
+                <Suit suit={suit} className={isRedSuit(suit) ? 'abertura-naipe text-vermelho' : 'abertura-naipe text-tinta'} />
+              </div>
+            ))}
+            <div className="abertura-coringa">
+              <Coringa className="abertura-coringa-arte" />
+            </div>
+            {SPARKS.map((angle) => (
+              <span key={angle} className="abertura-faisca" style={cssVars({ '--a': `${angle}deg` })} />
+            ))}
+          </div>
+          <p className="abertura-titulo">{INTRO_TITLE}</p>
+        </div>
+      ) : null}
+      <button ref={skipButton} type="button" className="abertura-aviso">
+        {hint}
+      </button>
+    </div>
+  );
+}
+
+/**
+ * A abertura é enfeite: se ela quebrar ao desenhar, o menu abre na hora, em vez de o app inteiro cair no "Algo deu errado".
+ */
+export class IntroBoundary extends Component<{ children: ReactNode; onError(): void }, { failed: boolean }> {
+  state = { failed: false };
+
+  static getDerivedStateFromError(): { failed: boolean } {
+    return { failed: true };
+  }
+
+  componentDidCatch(): void {
+    this.props.onError();
+  }
+
+  render(): ReactNode {
+    return this.state.failed ? null : this.props.children;
+  }
+}

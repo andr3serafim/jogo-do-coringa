@@ -2,6 +2,7 @@
 // e por isso mora num chunk à parte. Tudo sai de código: osciladores, ruído filtrado e envelopes curtos do Web Audio, sem
 // arquivo de áudio e sem licença a conferir. Cada pista é uma receita de poucas vozes (um tom ou uma rajada de ruído); todas
 // passam por um volume geral moderado e por um compressor que faz de limitador, então nada fura o teto.
+import { INTRO } from '../model/intro.ts';
 import { SCENE_MOMENTS } from '../model/scene-moments.ts';
 import { TABLE_MOTION } from '../model/table-motion.ts';
 import type { Cue } from '../model/sound.ts';
@@ -362,6 +363,28 @@ const RECIPES: Record<Cue, (voices: Voices) => void> = {
     noise({ filter: 'lowpass', from: 2600, to: 220, at: s(FIN.hitAt), length: 0.35, peak: 0.4 });
     tone({ wave: 'sine', from: 160, to: 70, at: s(FIN.thudAt), length: 0.18, peak: 0.35 });
     noise({ filter: 'lowpass', from: 900, at: s(FIN.thudAt), length: 0.08, peak: 0.25 });
+  },
+  // A logo da abertura (decisoes.md 2026-11-16 (5)): o sopro do capuz que corta a tela e, quando o olho abre, o baque grave com um
+  // brilho curto por cima.
+  'abertura-logo': ({ tone, noise }) => {
+    const open = s(INTRO.eyeAt - INTRO.logoCueAt);
+    noise({ filter: 'bandpass', from: 500, to: 2600, q: 0.8, attack: open * 0.8, length: open + 0.04, peak: 0.24 });
+    tone({ wave: 'sine', from: 110, to: 38, at: open, length: 0.5, peak: 0.46 });
+    noise({ filter: 'lowpass', from: 2400, to: 220, at: open, length: 0.28, peak: 0.3 });
+    tone({ wave: 'sine', from: 1175, at: open, length: 0.45, peak: 0.08 });
+  },
+  // O título da abertura: a subida que puxa o carimbo e, na batida dele, o baque e a chamada (quinta e oitava abertas, em Ré, com um
+  // brilho que chega um instante depois).
+  'abertura-titulo': ({ tone, noise }) => {
+    const hit = s(INTRO.titleAt - INTRO.titleCueAt);
+    noise({ filter: 'bandpass', from: 700, to: 3400, q: 1.2, attack: hit * 0.85, length: hit + 0.04, peak: 0.22 });
+    tone({ wave: 'sine', from: 98, to: 44, at: hit, length: 0.5, peak: 0.48 });
+    noise({ filter: 'lowpass', from: 3000, to: 240, at: hit, length: 0.3, peak: 0.3 });
+    tone({ wave: 'triangle', from: 293.66, at: hit, length: 0.9, peak: 0.2 });
+    tone({ wave: 'triangle', from: 440, at: hit, length: 0.9, peak: 0.16 });
+    tone({ wave: 'triangle', from: 587.33, at: hit + 0.06, length: 0.9, peak: 0.14 });
+    tone({ wave: 'sine', from: 1174.66, at: hit + 0.12, length: 0.7, peak: 0.08 });
+    noise({ filter: 'highpass', from: 6000, at: hit, length: 0.07, peak: 0.16 });
   },
 };
 

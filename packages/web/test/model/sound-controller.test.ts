@@ -287,3 +287,141 @@ describe('SoundController', () => {
     expect(r.contexts).toHaveLength(1);
   });
 });
+
+describe('SoundController: a tentativa sem gesto (a abertura, decisoes.md 2026-11-16 (5))', () => {
+  /** Troca o `resume` dos contextos falsos enquanto `body` roda. */
+  async function withResume(resume: (this: FakeContext) => Promise<void>, body: () => Promise<void>): Promise<void> {
+    const original = FakeContext.prototype.resume;
+    FakeContext.prototype.resume = resume;
+    try {
+      await body();
+    } finally {
+      FakeContext.prototype.resume = original;
+    }
+  }
+
+  /** O navegador que deixa: a retomada sem gesto põe o contexto a tocar. */
+  function allowed(this: FakeContext): Promise<void> {
+    this.resumes += 1;
+    this.state = 'running';
+    return Promise.resolve();
+  }
+
+  /** O navegador que bloqueia (o comum): a retomada fica à espera de um gesto e não resolve. */
+  function blocked(this: FakeContext): Promise<void> {
+    this.resumes += 1;
+    return new Promise<void>(() => {});
+  }
+
+  it('onde o navegador deixa, o contexto passa a tocar sem gesto e a pista sai', async () => {
+    await withResume(allowed, async () => {
+      const r = rig({ contextState: 'suspended' });
+      r.controller.prime();
+      await flush();
+      expect(r.contexts).toHaveLength(1);
+      expect(r.synthLoads).toBe(1);
+      await r.finishLoad();
+      r.controller.play('abertura-logo');
+      expect(r.played).toEqual(['abertura-logo']);
+    });
+  });
+
+  it('um contexto que já nasce tocando carrega o sintetizador sem retomada', async () => {
+    const r = rig();
+    r.controller.prime();
+    expect(r.contexts[0]!.resumes).toBe(0);
+    expect(r.synthLoads).toBe(1);
+    await r.finishLoad();
+    r.controller.play('abertura-titulo');
+    expect(r.played).toEqual(['abertura-titulo']);
+  });
+
+  it('com o áudio bloqueado, nada carrega e a pista é descartada, sem erro; o primeiro gesto retoma o mesmo contexto', async () => {
+    await withResume(blocked, async () => {
+      const r = rig({ contextState: 'suspended' });
+      r.controller.prime();
+      await flush();
+      expect(r.synthLoads).toBe(0);
+      r.controller.play('abertura-logo');
+      expect(r.played).toEqual([]);
+
+      gesture(r.target, 'click');
+      expect(r.contexts).toHaveLength(1);
+      expect(r.contexts[0]!.resumes).toBe(2);
+      expect(r.synthLoads).toBe(1);
+    });
+  });
+
+  it('a retomada que só resolve depois do gesto não carrega o sintetizador outra vez', async () => {
+    let release: () => void = () => {};
+    await withResume(
+      function (this: FakeContext) {
+        this.resumes += 1;
+        return new Promise<void>((resolve) => {
+          release = resolve;
+        });
+      },
+      async () => {
+        const r = rig({ contextState: 'suspended' });
+        r.controller.prime();
+        const releasePrime = release;
+        gesture(r.target, 'click');
+        await r.finishLoad();
+        expect(r.synthLoads).toBe(1);
+        r.contexts[0]!.state = 'running';
+        releasePrime();
+        await flush();
+        expect(r.synthLoads).toBe(1);
+      },
+    );
+  });
+
+  it('a retomada recusada não derruba nada', async () => {
+    await withResume(
+      function (this: FakeContext) {
+        this.resumes += 1;
+        return Promise.reject(new Error('recusado'));
+      },
+      async () => {
+        const r = rig({ contextState: 'suspended' });
+        expect(() => r.controller.prime()).not.toThrow();
+        await flush();
+        expect(r.synthLoads).toBe(0);
+      },
+    );
+  });
+
+  it('desligado, não cria contexto', () => {
+    const r = rig({ enabled: false });
+    r.controller.prime();
+    expect(r.contexts).toHaveLength(0);
+  });
+
+  it('chamada duas vezes, ou depois de um gesto, não cria outro contexto', async () => {
+    await withResume(blocked, async () => {
+      const r = rig({ contextState: 'suspended' });
+      r.controller.prime();
+      r.controller.prime();
+      expect(r.contexts).toHaveLength(1);
+    });
+    const after = rig();
+    gesture(after.target, 'click');
+    after.controller.prime();
+    expect(after.contexts).toHaveLength(1);
+    expect(after.synthLoads).toBe(1);
+  });
+
+  it('sem Web Audio (criar o contexto lança), não derruba nada', () => {
+    const controller = new SoundController(
+      {
+        createContext() {
+          throw new Error('sem Web Audio');
+        },
+        loadSynth: () => Promise.reject(new Error('não chega aqui')),
+      },
+      true,
+    );
+    expect(() => controller.prime()).not.toThrow();
+    expect(() => controller.play('abertura-logo')).not.toThrow();
+  });
+});

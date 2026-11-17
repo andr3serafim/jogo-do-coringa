@@ -1,5 +1,5 @@
 import { RULES_VERSION } from '@coringa/engine';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Suspense } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -8,6 +8,7 @@ import { ErrorBoundary } from '../../src/app/ErrorBoundary.tsx';
 import { lazyScreen, ScreenBoundary } from '../../src/app/lazy-screen.tsx';
 import { navigate } from '../../src/app/router.ts';
 import { recordPastGame } from '../../src/model/past-games.ts';
+import { INTRO, INTRO_REDUCED } from '../../src/model/intro.ts';
 import { safeStore } from '../../src/model/storage.ts';
 import { STORAGE_WARNING } from '../../src/ui/text.ts';
 import { realReplay } from '../fixtures.ts';
@@ -272,5 +273,131 @@ describe('as telas sob demanda: o import que falha', () => {
     const { container } = render(screens(lazyScreen(chunkFailure)));
     expect(await screen.findByRole('heading', { name: 'Partidas anteriores' })).toBeInTheDocument();
     expect(await seriousViolations(container)).toEqual([]);
+  });
+});
+
+describe('<App intro />: a abertura (decisoes.md 2026-11-16 (5))', () => {
+  const overlay = (container: HTMLElement) => container.querySelector('[data-abertura]');
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  it('sem a prop (os testes, um componente solto), não há abertura', () => {
+    const { container } = render(<App api={fakeApi()} />);
+    expect(overlay(container)).toBeNull();
+    expect(container.querySelector('[inert]')).toBeNull();
+  });
+
+  it('ao abrir no início, a abertura cobre o menu, que já está montado por baixo e inerte', () => {
+    const { container } = render(<App api={fakeApi()} intro />);
+    expect(overlay(container)).toHaveAttribute('data-abertura', 'completa');
+    const heading = screen.getByRole('heading', { name: /Jogo do Coringa/ });
+    expect(heading.closest('[inert]')).not.toBeNull();
+    expect(overlay(container)!.closest('[inert]')).toBeNull();
+  });
+
+  it('no fim da abertura, o menu fica livre e ela sai da página', () => {
+    vi.useFakeTimers();
+    const { container } = render(<App api={fakeApi()} intro />);
+    act(() => void vi.advanceTimersByTime(INTRO.total));
+    expect(overlay(container)).toBeNull();
+    expect(container.querySelector('[inert]')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Treinar contra o bot' })).toBeEnabled();
+  });
+
+  it('pulando com uma tecla, o menu abre em seguida e funciona', async () => {
+    const { container } = render(<App api={fakeApi()} intro />);
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(overlay(container)).toBeNull());
+    await userEvent.click(screen.getByRole('button', { name: 'Partidas anteriores' }));
+    expect(window.location.pathname).toBe('/partidas');
+  });
+
+  it.each(['/s/oi', '/partidas', '/treino?nivel=medio&semente=abertura', '/rota-que-nao-existe'])('abrindo direto em %s, não há abertura', (path) => {
+    window.history.replaceState(null, '', path);
+    const { container } = render(<App api={fakeApi()} intro />);
+    expect(overlay(container)).toBeNull();
+  });
+
+  it('voltar ao início por dentro do app não toca a abertura', () => {
+    window.history.replaceState(null, '', '/s/oi');
+    const { container } = render(<App api={fakeApi()} intro />);
+    act(() => navigate('/'));
+    expect(screen.getByRole('heading', { name: /Jogo do Coringa/ })).toBeInTheDocument();
+    expect(overlay(container)).toBeNull();
+  });
+
+  it('com a marca dos testes de ponta a ponta no armazenamento, não há abertura', () => {
+    window.localStorage.setItem('coringa:abertura', 'pular');
+    const { container } = render(<App api={fakeApi()} intro />);
+    expect(overlay(container)).toBeNull();
+  });
+
+  it('com o sistema pedindo menos movimento, é a versão curta', () => {
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: query === '(prefers-reduced-motion: reduce)',
+      addEventListener() {},
+      removeEventListener() {},
+    }));
+    vi.useFakeTimers();
+    const { container } = render(<App api={fakeApi()} intro />);
+    expect(overlay(container)).toHaveAttribute('data-abertura', 'curta');
+    act(() => void vi.advanceTimersByTime(INTRO_REDUCED.total));
+    expect(overlay(container)).toBeNull();
+  });
+
+  it('com "Reduzir movimento" ligado no menu do jogo, também', () => {
+    window.localStorage.setItem('coringa:prefs', JSON.stringify({ reduceMotion: true }));
+    const { container } = render(<App api={fakeApi()} intro />);
+    expect(overlay(container)).toHaveAttribute('data-abertura', 'curta');
+  });
+
+  describe('o som', () => {
+    /** Um `AudioContext` que só conta as instâncias e nunca sai do suspenso (o navegador que bloqueia o áudio sem gesto). */
+    function stubAudioContext() {
+      const created: unknown[] = [];
+      class BlockedAudioContext {
+        state = 'suspended';
+        constructor() {
+          created.push(this);
+        }
+        resume() {
+          return new Promise<void>(() => {});
+        }
+        suspend() {
+          return Promise.resolve();
+        }
+      }
+      vi.stubGlobal('AudioContext', BlockedAudioContext);
+      return created;
+    }
+
+    it('a abertura tenta ligar o áudio sem gesto; bloqueado, roda muda até o menu, sem erro', () => {
+      const created = stubAudioContext();
+      const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.useFakeTimers();
+      const { container } = render(<App api={fakeApi()} intro />);
+      expect(created).toHaveLength(1);
+      act(() => void vi.advanceTimersByTime(INTRO.total));
+      expect(overlay(container)).toBeNull();
+      expect(errors).not.toHaveBeenCalled();
+    });
+
+    it('sem abertura (outra rota, ou sem a prop), nada de áudio antes do gesto', () => {
+      const created = stubAudioContext();
+      window.history.replaceState(null, '', '/partidas');
+      render(<App api={fakeApi()} intro />);
+      expect(created).toHaveLength(0);
+    });
+
+    it('com o som desligado nas preferências, a abertura nem tenta', () => {
+      const created = stubAudioContext();
+      window.localStorage.setItem('coringa:prefs', JSON.stringify({ sound: false }));
+      const { container } = render(<App api={fakeApi()} intro />);
+      expect(overlay(container)).not.toBeNull();
+      expect(created).toHaveLength(0);
+    });
   });
 });

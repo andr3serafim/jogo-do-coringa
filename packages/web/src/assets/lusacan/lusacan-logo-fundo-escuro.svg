@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 152" role="img" aria-labelledby="t">
+  <title id="t">LUSACAN productions</title>
+  <desc>Logo original do projeto Jogo do Coringa: o olho de um dragão guardião da noite, com a lua como íris. Versão para fundo escuro.</desc>
+  <g transform="translate(47 10)">
+    <circle cx="58" cy="40" r="15" fill="#f5c238"/>
+    <path d="M58 28Q63.6 41 58 54Q52.4 41 58 28Z" fill="#17120f"/>
+    <path d="M4 46C22 26 44 10 72 8C92 7 110 6 124 4C114 14 104 22 92 26C74 31 40 30 4 46Z" fill="#f1f0ea"/>
+    <path d="M4 46C30 66 80 64 108 24" fill="none" stroke="#f1f0ea" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(17.5 88)">
+    <path transform="translate(0 0)" d="M0 0h6v22h11v6H0z" fill="#f1f0ea"/>
+    <path transform="translate(24 0)" d="M3 0V16.5A8.5 8.5 0 0 0 20 16.5V0" fill="none" stroke="#f1f0ea" stroke-width="6"/>
+    <path transform="translate(54 0)" d="M16.34 6.18A7 5.5 0 1 0 10 14A7 5.5 0 1 1 3.66 21.82" fill="none" stroke="#f1f0ea" stroke-width="6"/>
+    <path transform="translate(79 0)" d="M0 28L9 0h6l9 28h-6.4L12 10.58L6.4 28z" fill="#f1f0ea"/>
+    <path transform="translate(107 0)" d="M19.2 7.91A8.5 8.5 0 0 0 3 11.5V16.5A8.5 8.5 0 0 0 19.2 20.09" fill="none" stroke="#f1f0ea" stroke-width="6"/>
+    <path transform="translate(133 0)" d="M0 28L9 0h6l9 28h-6.4L12 10.58L6.4 28z" fill="#f1f0ea"/>
+    <path transform="translate(162 0)" d="M0 28V0h6.5L17 17.5V0h6v28h-6.5L6 10.5V28z" fill="#f1f0ea"/>
+  </g>
+  <g transform="translate(45.25 130)">
+    <path transform="translate(0 0)" d="M0 8V0H3.5A2.25 2.25 0 0 1 3.5 4.5H0" fill="none" stroke="#f5c238" stroke-width="1.5"/>
+    <path transform="translate(13 0)" d="M0 8V0H3.5A2.25 2.25 0 0 1 3.5 4.5H0M3 4.5L6 8" fill="none" stroke="#f5c238" stroke-width="1.5"/>
+    <path transform="translate(26 0)" d="M3 0A3 4 0 1 0 3 8A3 4 0 1 0 3 0Z" fill="none" stroke="#f5c238" stroke-width="1.5"/>
+    <path transform="translate(39 0)" d="M0 0H2A4 4 0 0 1 2 8H0Z" fill="none" stroke="#f5c238" stroke-width="1.5"/>
+    <path transform="translate(52 0)" d="M0 0V5A3 3 0 0 0 6 5V0" fill="none" stroke="#f5c238" stroke-width="1.5"/>
+    <path transform="translate(65 0)" d="M5.4 1.59A3 4 0 1 0 5.4 6.41" fill="none" stroke="#f5c238" stroke-width="1.5"/>
+    <path transform="translate(77.5 0)" d="M0 0H6M3 0V8" fill="none" stroke="#f5c238" stroke-width="1.5"/>
+    <path transform="translate(90.5 0)" d="M0 0V8" fill="none" stroke="#f5c238" stroke-width="1.5"/>
+    <path transform="translate(97.5 0)" d="M3 0A3 4 0 1 0 3 8A3 4 0 1 0 3 0Z" fill="none" stroke="#f5c238" stroke-width="1.5"/>
+    <path transform="translate(110.5 0)" d="M0 8V0L6 8V0" fill="none" stroke="#f5c238" stroke-width="1.5"/>
+    <path transform="translate(123.5 0)" d="M5.36 1.15A2.6 2 0 1 0 3 4A2.6 2 0 1 1 0.64 6.85" fill="none" stroke="#f5c238" stroke-width="1.5"/>
+  </g>
+</svg>

@@ -1,0 +1,466 @@
+/*
+ * A abertura do jogo (decisoes.md 2026-11-16 (5)): a logo "LUSACAN productions" e a intro do jogo, até o menu. Uma camada de tinta
+ * por cima do Início. Todo instante vem do modelo (`model/intro.ts`), pelas variáveis `--t-*` e `--d-*` que o `Intro.tsx` põe na
+ * camada: aqui só fica quanto cada gesto dura e como ele se move. Só `transform`, `opacity` e o traço do SVG se animam.
+ *
+ * Fotossensibilidade (spec §10.4): nada pisca na tela inteira. O brilho é local (a lua, a aura, as faíscas), e a passagem do escuro
+ * para o menu é um esmaecer só. Com movimento reduzido (`data-abertura='curta'`), só a logo, parada, com um esmaecer.
+ */
+.abertura {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--color-tinta);
+  color: var(--color-papel);
+  touch-action: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  animation: abertura-some var(--d-some) ease-in var(--t-some) forwards;
+}
+
+.abertura[data-saindo] {
+  animation: abertura-some var(--d-pulo) ease-out forwards;
+}
+
+@keyframes abertura-some {
+  to {
+    opacity: 0;
+  }
+}
+
+/* A barra de rolagem do menu, que fica por baixo, some no escuro enquanto a abertura está na tela (sem mexer no layout dele). */
+html:has(.abertura) {
+  scrollbar-color: var(--color-tinta) var(--color-tinta);
+}
+
+.abertura-logo,
+.abertura-tema {
+  grid-area: 1 / 1;
+}
+
+.abertura-logo-arte {
+  display: block;
+  width: min(80vw, 70vh, 500px);
+  height: auto;
+  overflow: visible;
+}
+
+/* --- O aviso de pular: discreto, embaixo. --- */
+
+.abertura-aviso {
+  position: absolute;
+  inset: auto 0 max(20px, env(safe-area-inset-bottom));
+  width: fit-content;
+  margin: 0 auto;
+  padding: 8px 14px;
+  border: 0;
+  background: none;
+  color: var(--color-papel);
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  opacity: 0;
+  cursor: pointer;
+  animation: abertura-aviso 400ms ease-out var(--t-aviso) forwards;
+}
+
+/* O aviso nasce com o foco, e a tela inteira é dele: no lugar do contorno, um sublinhado. */
+.abertura-aviso:focus-visible {
+  outline: none;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@keyframes abertura-aviso {
+  to {
+    opacity: 0.72;
+  }
+}
+
+/* --- A versão curta: a logo parada, com um esmaecer na entrada. --- */
+
+[data-abertura='curta'] .abertura-logo {
+  animation: abertura-surge 300ms ease-out both;
+}
+
+@keyframes abertura-surge {
+  from {
+    opacity: 0;
+  }
+}
+
+/* --- A logo: o capuz corta a tela, o fio se desenha, a lua acende, a pupila fecha em fenda, as letras sobem em fila. --- */
+
+[data-abertura='completa'] .abertura-logo {
+  animation: abertura-logo-sai 250ms ease-in var(--t-logo-sai) forwards;
+}
+
+@keyframes abertura-logo-sai {
+  to {
+    opacity: 0;
+    scale: 1.05;
+  }
+}
+
+/* As letras e os grupos da logo têm `transform` no SVG: as animações usam `translate` e `scale`, que se somam a ele. */
+[data-abertura='completa'] .lusacan-capuz {
+  animation: lusacan-capuz 260ms cubic-bezier(0.2, 0.9, 0.2, 1) var(--t-logo) both;
+}
+
+@keyframes lusacan-capuz {
+  from {
+    opacity: 0;
+    translate: -28px 9px;
+  }
+}
+
+[data-abertura='completa'] .lusacan-fio {
+  stroke-dasharray: 1;
+  animation: lusacan-fio 300ms ease-out calc(var(--t-logo) + 90ms) both;
+}
+
+@keyframes lusacan-fio {
+  from {
+    opacity: 0;
+    stroke-dashoffset: 1;
+  }
+  5% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+[data-abertura='completa'] .lusacan-iris,
+[data-abertura='completa'] .lusacan-fenda {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* A lua acende um pouco antes do instante do olho (`--t-olho`), e pulsa nele. */
+[data-abertura='completa'] .lusacan-iris {
+  animation:
+    lusacan-lua 220ms cubic-bezier(0.3, 1.5, 0.5, 1) calc(var(--t-olho) - 190ms) both,
+    lusacan-brilho 700ms ease-out var(--t-olho) forwards;
+}
+
+@keyframes lusacan-lua {
+  from {
+    scale: 0;
+  }
+}
+
+@keyframes lusacan-brilho {
+  from {
+    filter: drop-shadow(0 0 0 color-mix(in srgb, var(--color-ouro) 0%, transparent));
+  }
+  25% {
+    filter: drop-shadow(0 0 9px var(--color-ouro));
+  }
+  to {
+    filter: drop-shadow(0 0 3px color-mix(in srgb, var(--color-ouro) 55%, transparent));
+  }
+}
+
+/* A pupila nasce redonda, com a lua, e no instante do olho fecha na fenda: o dragão olhou para você. */
+[data-abertura='completa'] .lusacan-fenda {
+  animation: lusacan-fenda 330ms linear calc(var(--t-olho) - 190ms) both;
+}
+
+@keyframes lusacan-fenda {
+  from {
+    scale: 0 0;
+  }
+  45% {
+    scale: 2.5 0.92;
+    animation-timing-function: cubic-bezier(0.7, 0, 0.2, 1);
+  }
+  58% {
+    scale: 2.5 0.92;
+    animation-timing-function: cubic-bezier(0.7, 0, 0.2, 1);
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+[data-abertura='completa'] .lusacan-letra {
+  animation: lusacan-letra 280ms cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--t-olho) + 60ms + var(--i) * 45ms) both;
+}
+
+@keyframes lusacan-letra {
+  from {
+    opacity: 0;
+    translate: 0 9px;
+  }
+}
+
+[data-abertura='completa'] .lusacan-tag {
+  animation: abertura-surge 300ms ease-out calc(var(--t-olho) + 440ms) both;
+}
+
+/* --- A intro do jogo: as quatro cartas sobem em leque, juntam-se, o maço vira no Coringa e o título é carimbado. --- */
+
+.abertura-tema {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(18px, 4.5vh, 40px);
+  width: 100%;
+}
+
+/* Tudo no palco se mede pela altura da carta, que se mede pela janela (a altura dela e, no celular em pé, a largura). */
+.abertura-palco {
+  --carta-h: clamp(96px, min(25vh, 30vw), 200px);
+  --carta-w: calc(var(--carta-h) * 0.72);
+  --passo: calc(var(--carta-w) * 0.8);
+  position: relative;
+  width: min(92vw, calc(var(--carta-w) * 4.4));
+  height: calc(var(--carta-h) * 1.6);
+}
+
+.abertura-carta,
+.abertura-coringa {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: var(--carta-w);
+  height: var(--carta-h);
+  margin: calc(var(--carta-h) / -2) 0 0 calc(var(--carta-w) / -2);
+  border-radius: calc(var(--carta-h) * 0.08);
+  background: var(--color-papel);
+  outline: 2px solid var(--color-tinta);
+  outline-offset: calc(var(--carta-h) * -0.07);
+}
+
+/* O leque: cada carta no seu passo, inclinada, as de fora um pouco mais baixas. */
+.abertura-carta {
+  --x: calc((var(--i) - 1.5) * var(--passo));
+  --y: calc((var(--i) - 1.5) * (var(--i) - 1.5) * var(--carta-h) * 0.045);
+  --r: calc((var(--i) - 1.5) * 9deg);
+  transform-origin: 50% 120%;
+  animation:
+    abertura-sobe var(--d-sobe) cubic-bezier(0.16, 0.9, 0.24, 1.12) calc(var(--t-tema) + var(--d)) both,
+    abertura-junta 300ms cubic-bezier(0.6, 0, 0.8, 0.4) var(--t-junta) forwards,
+    abertura-vira-sai 150ms ease-in var(--t-vira) forwards;
+}
+
+.abertura-naipe {
+  width: 56%;
+  height: auto;
+}
+
+@keyframes abertura-sobe {
+  from {
+    opacity: 0;
+    transform: translate(calc(var(--x) * 0.3), 75vh) rotate(calc(var(--r) * -2));
+  }
+  20% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: translate(var(--x), var(--y)) rotate(var(--r));
+  }
+}
+
+@keyframes abertura-junta {
+  from {
+    transform: translate(var(--x), var(--y)) rotate(var(--r));
+  }
+  to {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes abertura-vira-sai {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* O Coringa: a outra metade da virada do maço, um pouco maior, com o filete de ouro; no carimbo do título ele dá um pulo. */
+.abertura-coringa {
+  outline-color: var(--color-ouro);
+  outline-width: 3px;
+  animation:
+    abertura-vira-entra 240ms cubic-bezier(0.2, 1.3, 0.4, 1) calc(var(--t-vira) + 150ms) both,
+    abertura-pulo 420ms ease-out var(--t-titulo) forwards;
+}
+
+.abertura-coringa-arte {
+  width: 76%;
+  height: auto;
+}
+
+@keyframes abertura-vira-entra {
+  from {
+    transform: scale(0, 1.12);
+  }
+  to {
+    transform: scale(1.12, 1.12);
+  }
+}
+
+@keyframes abertura-pulo {
+  from {
+    transform: scale(1.12);
+  }
+  35% {
+    transform: scale(1.27);
+  }
+  to {
+    transform: scale(1.16);
+  }
+}
+
+/* A aura de ouro: cresce enquanto as cartas se juntam e pulsa no carimbo. */
+.abertura-aura {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--carta-h) * 3.4);
+  height: calc(var(--carta-h) * 3.4);
+  margin: calc(var(--carta-h) * -1.7) 0 0 calc(var(--carta-h) * -1.7);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-ouro) 62%, transparent) 0%,
+    color-mix(in srgb, var(--color-ouro) 22%, transparent) 38%,
+    transparent 68%
+  );
+  opacity: 0;
+  animation:
+    abertura-aura calc(var(--t-titulo) - var(--t-junta)) cubic-bezier(0.5, 0, 0.9, 0.5) var(--t-junta) forwards,
+    abertura-aura-pulso 1100ms ease-out var(--t-titulo) forwards;
+}
+
+@keyframes abertura-aura {
+  from {
+    opacity: 0;
+    transform: scale(0.15);
+  }
+  to {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+}
+
+@keyframes abertura-aura-pulso {
+  from {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(1.35);
+  }
+  to {
+    opacity: 0.7;
+    transform: scale(1.15);
+  }
+}
+
+/* A onda e as faíscas do carimbo: saem do Coringa quando o título bate. */
+.abertura-onda {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--carta-h) * 1.2);
+  height: calc(var(--carta-h) * 1.2);
+  margin: calc(var(--carta-h) * -0.6) 0 0 calc(var(--carta-h) * -0.6);
+  border: 3px solid var(--color-ouro);
+  border-radius: 50%;
+  opacity: 0;
+  animation: abertura-onda 650ms cubic-bezier(0.1, 0.6, 0.3, 1) var(--t-titulo) forwards;
+}
+
+@keyframes abertura-onda {
+  from {
+    opacity: 0.9;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 0;
+    transform: scale(3.4);
+  }
+}
+
+.abertura-faisca {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--carta-h) * 0.07);
+  height: calc(var(--carta-h) * 0.07);
+  margin: calc(var(--carta-h) * -0.035) 0 0 calc(var(--carta-h) * -0.035);
+  background: var(--color-ouro);
+  opacity: 0;
+  animation: abertura-faisca 620ms cubic-bezier(0.1, 0.7, 0.3, 1) var(--t-titulo) forwards;
+}
+
+@keyframes abertura-faisca {
+  from {
+    opacity: 1;
+    transform: rotate(var(--a)) translateY(calc(var(--carta-h) * -0.62)) rotate(45deg) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: rotate(var(--a)) translateY(calc(var(--carta-h) * -1.9)) rotate(45deg) scale(0.3);
+  }
+}
+
+/* O título: o tipo de madeira, em ouro, carimbado; um brilho passa por ele em seguida. */
+.abertura-titulo {
+  margin: 0;
+  padding: 0 16px;
+  font-family: var(--font-madeira);
+  font-size: clamp(30px, min(9vw, 9.5vh), 72px);
+  line-height: 1.05;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--color-ouro);
+  background: linear-gradient(
+      100deg,
+      var(--color-ouro) 42%,
+      color-mix(in srgb, var(--color-ouro) 30%, var(--color-papel)) 50%,
+      var(--color-ouro) 58%
+    )
+    100% 0 / 260% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 0 var(--color-madeira));
+  animation:
+    abertura-carimbo 220ms cubic-bezier(0.2, 1.5, 0.4, 1) var(--t-titulo) both,
+    abertura-brilho 900ms ease-in-out calc(var(--t-titulo) + 260ms) forwards;
+}
+
+@keyframes abertura-carimbo {
+  from {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes abertura-brilho {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0% 0;
+  }
+}

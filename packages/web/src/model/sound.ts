@@ -32,7 +32,10 @@ export type Cue =
   | 'reflect-segurado'
   | 'reflect-cancelado'
   | 'ressurreicao'
-  | 'golpe-final';
+  | 'golpe-final'
+  /** As duas da abertura do jogo (`model/intro.ts`): não vêm de batida nenhuma, quem as toca é a tela da abertura. */
+  | 'abertura-logo'
+  | 'abertura-titulo';
 
 /** A pista do golpe de `damage` pontos, pelo peso dele (`impactForce`, o mesmo do tremor); dano zero (a defesa segurou tudo) é mudo. */
 function strikeCue(damage: number): Cue | null {

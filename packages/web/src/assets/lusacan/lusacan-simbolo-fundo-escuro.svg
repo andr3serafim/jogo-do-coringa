@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 126 66" role="img" aria-labelledby="t">
+  <title id="t">LUSACAN</title>
+  <desc>Logo original do projeto Jogo do Coringa: o olho de um dragão guardião da noite, com a lua como íris. Só o símbolo, para fundo escuro.</desc>
+  <circle cx="58" cy="40" r="15" fill="#f5c238"/>
+  <path d="M58 28Q63.6 41 58 54Q52.4 41 58 28Z" fill="#17120f"/>
+  <path d="M4 46C22 26 44 10 72 8C92 7 110 6 124 4C114 14 104 22 92 26C74 31 40 30 4 46Z" fill="#f1f0ea"/>
+  <path d="M4 46C30 66 80 64 108 24" fill="none" stroke="#f1f0ea" stroke-width="3" stroke-linecap="round"/>
+</svg>

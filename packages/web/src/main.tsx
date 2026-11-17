@@ -13,6 +13,6 @@ if (!root) throw new Error('o index.html não tem o elemento #root');
 
 createRoot(root).render(
   <StrictMode>
-    <App />
+    <App intro />
   </StrictMode>,
 );

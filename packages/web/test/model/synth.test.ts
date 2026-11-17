@@ -180,6 +180,8 @@ const ALL_CUES: Record<Cue, true> = {
   'reflect-cancelado': true,
   ressurreicao: true,
   'golpe-final': true,
+  'abertura-logo': true,
+  'abertura-titulo': true,
 };
 const CUES = Object.keys(ALL_CUES) as Cue[];
 
@@ -405,6 +407,9 @@ describe('createSynth', () => {
     'reflect-cancelado': 1.4,
     ressurreicao: 4.6,
     'golpe-final': 2.4,
+    // As duas da abertura (decisoes.md 2026-11-16 (5)): o sopro e o impacto da logo; a subida e a chamada do título.
+    'abertura-logo': 0.9,
+    'abertura-titulo': 1.5,
   };
 
   it.each(CUES)('%s: dura no máximo 600 ms (a espada, 1,2 s; as das cenas, a cena) e começa agora', (cue) => {
