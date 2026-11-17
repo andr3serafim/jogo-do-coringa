@@ -22,6 +22,51 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-16 (5): a abertura do jogo (a logo LUSACAN e a intro)
+
+- **Pedido:** a sequência de abertura ao iniciar o jogo: a logo "LUSACAN productions" (~1,5 s) e a intro do jogo (~3 a 4 s), com som,
+  pulo, movimento reduzido e a logo em SVG (`decisoes.md` 2026-11-16 (5), com o pedido e as três respostas ao plano).
+- **Rebase (2026-11-17):** registrada na branch como 2026-11-16 (2); a `main` já usava o número, e no rebase sobre ela (o código
+  aplicado de uma vez, sem conflito; a memória reescrita) a entrada virou esta. Os commits de antes ficaram na tag local
+  `abertura-antes-do-rebase` (`3aae1de`).
+- **Onde (antes do rebase):** a branch `feat/abertura`, no worktree `.claude/worktrees/abertura`, **saída da `feat/cenas-repetidas` (`1d92cd7`)**, e não
+  da `main`: o checkout principal estava com aquele conserto em curso (outra sessão o commitou e subiu durante este trabalho), e sair
+  dela evita o conflito no topo do `estado.md`, do `diario.md` e do `decisoes.md`. A `feat/cenas-repetidas` entra na `main` antes ou junto.
+- **Feito** (`085e043`):
+  - **A logo:** um olho de dragão (o nome vem de um dragão antigo, guardião da noite): a lua é a íris, a pupila é uma fenda, a pálpebra
+    de cima é um capuz que sobe como um chifre. Desenho original, com as letras desenhadas (sem fonte). Os traçados moram em
+    `ui/intro/lusacan-shapes.ts`; os quatro SVG (o conjunto e o símbolo, para fundo escuro e claro) em `src/assets/lusacan/`, com `LEIAME.md`.
+  - **A abertura** (`ui/intro/Intro.tsx`, `intro.css`, `model/intro.ts`): a logo entra por partes (o capuz corta, a lua acende, a
+    pupila fecha na fenda, as letras sobem em fila), as quatro cartas dos naipes sobem em leque, juntam-se com a aura, o maço vira no
+    Coringa e o título é carimbado (onda, faíscas, um brilho); esmaece para o menu. 5,2 s; com movimento reduzido, a logo parada, 1,8 s.
+  - **O som:** as pistas `abertura-logo` e `abertura-titulo` no `synth.ts`; o `SoundController.prime()` tenta o áudio sem gesto.
+  - **O `App`:** `<App intro />` (só o `main.tsx`); a camada fica por cima do app inteiro, que já monta, dentro de um `div` `contents` com `inert`.
+- **Ruling:** os SVG de assets e o componente partilham os traçados por um teste, e não por um arquivo só — custo: quem muda o desenho
+  mexe no módulo e regrava os SVG (o programa que os gravou não está no repositório; são 4 arquivos de ~3 KB, editáveis à mão).
+- **Ruling:** o contexto de áudio criado sem gesto fica guardado, suspenso, e o primeiro gesto o retoma (o caminho que já existia para o
+  contexto interrompido) — custo: no Chrome, um aviso no console (não um erro) a cada abertura com o som ligado.
+- **Ruling:** a abertura é desligada nos E2E por uma chave do armazenamento (`coringa:abertura = pular`, pelo `storageState` do
+  `playwright.config.ts`) — custo: quem gravar essa chave à mão no navegador não vê a abertura. O jogo nunca a grava.
+- **Ruling:** o `div` com `inert` em volta das rotas fica sempre no DOM (com `display: contents`), para o Início não remontar quando a
+  abertura sai — custo: um nó a mais na árvore, sem caixa.
+- **Ruling:** sem spec nem plano em `docs/superpowers/`: o autor pediu plano curto na conversa, aprovou e mandou implementar. A regra do
+  que foi decidido está no `decisoes.md`; o como, no `CLAUDE.md` e nos comentários do código.
+- **A ordem dos testes:** os testes do modelo, do componente, da logo, do controlador, do armazenamento e do `App` foram escritos antes
+  e vistos vermelhos (18 falhas e 4 arquivos sem o módulo); o `abertura.spec.ts` foi escrito depois do código.
+- **Verificado:** ver o `estado.md` (o que rodou e o que falta).
+- **Armadilhas:**
+  - **O E2E com a 8787 ocupada** (o `wrangler dev` do autor): um config temporário ao lado do `playwright.config.ts`, que troca a porta
+    em `use` (o `baseURL` e a origem do `storageState`) e no `webServer`, como o `onPort` do `medir.config.ts`, com
+    `reuseExistingServer: false`; rodar com `pnpm exec playwright test -c <config>`. Não commitar.
+  - O `preview_start` do app lê o `.claude/launch.json` do checkout **principal**, mesmo com a sessão num worktree: a entrada
+    `web-abertura` (Vite do worktree, porta 5174) foi acrescentada lá.
+  - O Vite reescreve `new URL('…', import.meta.url)` nos testes do jsdom: para ler um arquivo do disco, `resolve(import.meta.dirname, …)`.
+  - Uma animação de CSS com `transform` apaga o `transform` do atributo do SVG: nas letras da logo, anime `translate` e `scale`.
+  - Para olhar um instante da abertura: montar o `Intro` sozinho numa página temporária e, com `document.getAnimations()`, pausar
+    todas e pôr `currentTime` no instante (o `onDone` vazio deixa a camada na tela).
+
+---
+
 ## 2026-11-16 (4): o merge do domínio e do Roubo; o greedy barra a Exódia
 
 - **Pedido:** "manter como está mas ensina o bot pois deveria usar o A pra remover o K quando tiver perto de formar o exódia (4k)" e "Sim,

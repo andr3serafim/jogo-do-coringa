@@ -1,24 +1,22 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-17**, o greedy que barra a Exódia na `main` por fast-forward até `2caeb5a` ("Sim, merge",
+> Sobrescrito a cada atualização. **Última: 2026-11-17**, a logo da abertura em redesenho (o dragão) na `feat/abertura`, refeita sobre a `main`; antes, o greedy que barra a Exódia na `main` por fast-forward até `2caeb5a` ("Sim, merge",
 > `decisoes.md` 2026-11-17 (1)), com as duas CI verdes no topo da branch (`2caeb5a`) e no push da `main` (`355f2e6`). **O deploy do autor saiu** (2026-11-17, `8266a4f`, sem a abertura): o jogo está no ar em
 > `https://jogodocoringa.com.br` (diário 2026-11-17 (1)). A abertura fica parada na `feat/abertura`.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **A abertura do jogo está fora da `main`, parada pelo limite de uso de outra sessão** (achada em 2026-11-17 ao conferir os worktrees;
-  `decisoes.md` 2026-11-16 (2) **da branch**, a logo "LUSACAN productions" e a intro de 5,2 s até o menu). Branch `feat/abertura` (`3aae1de`),
-  worktree `.claude/worktrees/abertura`, saída da `feat/cenas-repetidas` em `1d92cd7`; **não subiu** ao GitHub. Sem commit lá, de propósito:
-  `packages/web/e2e-porta.config.ts` (o config temporário da porta 8797). O `estado.md` da branch diz o que falta:
-  - o `pnpm check` inteiro não rodou; o E2E inteiro parou no teto de 600 s (119 verdes, 4 pulados, 11 por rodar, com a CPU disputada);
-  - **a memória dela conflita com a da `main`:** a decisão da abertura é a "2026-11-16 (2)" e a entrada do diário também, números que a `main`
-    já usa (o merge das cenas e o domínio). No rebase sobre a `main`, elas ganham os números seguintes, como nas regras 4.0 (diário
-    2026-11-15 (1));
-  - o autor aprovou o plano, mas **não viu** a animação pronta nem respondeu sobre a logo.
-  - **Próximo passo exato:** o rebase sobre a `main` (renumerando a memória), o E2E inteiro com a máquina livre, apagar o config temporário,
-    o push, as duas CI, mostrar ao autor e o "sim" do merge. **Só quando ele pedir:** o deploy sai sem ela ("Deploy sem ela",
-    `decisoes.md` 2026-11-17 (2)).
+- **A abertura do jogo, com a logo redesenhada (o dragão), em curso** na branch `feat/abertura` (worktree `.claude/worktrees/abertura`),
+  **refeita sobre a `main` em 2026-11-17** (o código aplicado de uma vez; a memória renumerada: a decisão e o diário da abertura viraram
+  2026-11-16 (5); os commits de antes na tag local `abertura-antes-do-rebase`). `decisoes.md` 2026-11-16 (5) (a abertura) e 2026-11-17 (3)
+  (a logo nova: um dragão de asas abertas diante da lua, "LUSACAN" sóbrio e "PRODUCTIONS" no plural; o dragão voa, gira, volta, abre as
+  asas e para na pose). **Não subiu** ao GitHub. Sem commit, de propósito: `packages/web/e2e-porta.config.ts` (a porta 8797 do E2E).
+  - **Feito antes do redesenho:** a abertura inteira com a logo do olho (que sai); o `pnpm check` inteiro **não rodou**; o E2E inteiro
+    parou no teto de 600 s (119 verdes, 4 pulados, 11 por rodar, com a CPU disputada).
+  - **Próximo passo exato:** o redesenho da logo (as letras da Cinzel em traçado, o dragão original em SVG, a animação do voo, os tempos e
+    o som), conferido no navegador; depois o E2E inteiro com a máquina livre, apagar o config temporário, o push (o pre-push roda o
+    `pnpm check`), as duas CI, mostrar ao autor e o "sim" do merge. **O deploy é só quando ele pedir** (`decisoes.md` 2026-11-17 (2)).
 - **O jogo está no ar em `https://jogodocoringa.com.br`** (o deploy do autor, 2026-11-17, `8266a4f`, sem a abertura; o diário 2026-11-17
   (1)): o bloco D, o conserto da Devastação, o das cenas que repetiam, o Roubo novo, o bot que barra a Exódia e o domínio. O `/api/health`
   devolve a versão; o `www` redireciona com 301 (regra no painel). **O próximo deploy** é o mesmo `pnpm deploy:server`; a conta já tem o

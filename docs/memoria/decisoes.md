@@ -6,6 +6,32 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-17 (3): a logo LUSACAN redesenhada: o dragão
+
+Depois de ver os dois SVG da logo do olho (enviados na conversa), ele mandou uma imagem de referência (uma arte de fantasia escura, feita
+fora do projeto: um dragão negro de asas abertas com veios violeta, à frente de uma lua cheia, sobre ruínas; "LUSACAN" em letras romanas
+de metal e "PRODUCTION" embaixo) e escreveu:
+
+> a logo deve ser redesenhada, irei enviar uma imagem para usar de inspiração e referencia. a animação da logo pode ser de um dragão
+> voando, gira, volta, abre as asas e fica na mesma posição da imagem. o texto production deve estar no plural e o texto Lusacan menos
+> extravagante. Te dou liberdade criativa.
+
+**Leitura:**
+- A logo do olho (2026-11-16 (5)) sai. A nova: um dragão de asas abertas diante de uma lua cheia, "LUSACAN" e, embaixo, "PRODUCTIONS"
+  (no plural).
+- **A referência é inspiração, não molde:** o dragão é desenho original do projeto (vetor feito à mão, por código), sem decalque nem
+  traçado por cima da imagem, que tem autoria fora do projeto (a mesma regra da arte do jogo, spec §10.6).
+- **"Menos extravagante":** **[I]** letras romanas com serifa (a Cinzel, já do projeto, SIL OFL), de peso médio, lisas e de uma cor só,
+  sem o metal rachado, o brilho e a estrela da referência; elas viram traçado no SVG (não dependem da fonte instalada).
+- **A animação:** o dragão entra voando, faz um giro, volta, abre as asas e para na pose da logo. **[I]** O resto é escolha do Claude,
+  por "liberdade criativa": a paleta da noite da referência (preto azulado, violeta, a lua de prata), os veios violeta das asas que
+  acendem quando elas abrem (um brilho local, sem piscar a tela: a regra de fotossensibilidade vale), o som do bater das asas.
+- **[I] O tempo da logo cresce** de ~1,5 s para ~2,3 s, para o voo caber; a intro do jogo encurta, e a abertura inteira segue entre 4 e
+  6 s (o critério de aceite do pedido de 2026-11-16 (5)).
+- Ele ainda **não viu** o dragão; o desenho e o ritmo mudam se ele pedir.
+
+---
+
 ## 2026-11-17 (2): o deploy sem a abertura
 
 Dito que a abertura do jogo (`feat/abertura`, de outra sessão) estava parada pelo limite de uso, sem push, sem o `pnpm check` completo, com
@@ -17,7 +43,7 @@ ele respondeu:
 **Leitura:** o deploy sai com o que está na `main` (`9f01d3c` em diante). A abertura fica parada na `feat/abertura`, como está, até ele
 pedir; nada nela é apagado. **[I]** Não é uma recusa da abertura, só a ordem: ela não entra neste deploy.
 
-: o merge do greedy que barra a Exódia
+## 2026-11-17 (1): o merge do greedy que barra a Exódia
 
 Depois do resumo do bot (o A num K a 2 K da Exódia; a Exódia de volta à meta: greedy × greedy 1,3%, turtle × greedy 6,3%; o portão do
 Difícil aprovado; o `pnpm check` e as duas CI verdes em `2caeb5a`), perguntado "Faço o merge do bot que barra a Exódia na main?", ele
@@ -28,7 +54,46 @@ respondeu:
 **Leitura:** a `main` anda por fast-forward até o topo de `feat/bot-exodia` (`2caeb5a`). **[I]** O "sim" vale para o merge; o deploy segue
 sendo dele.
 
-: o Roubo fica; o bot barra a Exódia; o merge do domínio e do Roubo
+## 2026-11-16 (5): a abertura do jogo (a logo "LUSACAN productions" e a intro)
+
+O pedido (resumido nas partes de regra; o texto dele):
+
+> Tarefa: criar a sequência de abertura exibida ao iniciar o jogo.
+> 1. Logo "LUSACAN productions" (você cria) — ~1.5s, fundo escuro, entrada elegante.
+> 2. Intro temática do jogo — ~3–4s, com tom de empolgação crescente (ex.: naipes/cartas surgindo, brilho/aura, revelação do título),
+> terminando na tela de menu. Duração total: 4–6s.
+> Logo: entregar em SVG (versões clara e escura), salva em assets, reutilizável fora do jogo. […] legível em tamanho pequeno.
+> Som: um "whoosh"/impacto na logo e um stinger curto na revelação do título. […] Tratar política de autoplay da plataforma; se o áudio
+> estiver bloqueado, a intro roda muda sem erro. Respeitar volume/mute global do jogo, se existir.
+> Pular: clique, toque, Enter, Espaço ou Esc pulam direto para o menu. Indicação discreta "Pressione qualquer tecla para pular" após
+> ~0.5s. Intro completa em toda abertura.
+> Acessibilidade/perf: com prefers-reduced-motion: versão estática curta (logo + fade). Sem travar o carregamento: carregar assets do
+> menu em paralelo.
+> Restrições: NÃO redesenhar os menus nesta tarefa (será outra). Sem novas dependências sem me consultar.
+
+Ao plano (os arquivos, o storyboard de seis quadros em 5,2 s e três perguntas), ele respondeu:
+
+> 1. ok.
+> 2. ok.
+> 3. ok, seja minimalista mas com impacto. lusacan é meu nick em jogos, eu tirei ele da histório do jogo dragon age inquisition, ele é
+> um dragão antigo, guardião da noite
+
+**Leitura:** (registrada na branch `feat/abertura` como 2026-11-16 (2), número que a `main` já usava; renumerada no rebase de
+2026-11-17. A logo descrita aqui foi trocada pela do dragão, 2026-11-17 (3).)
+- **(1) Onde toca:** só quando a página **abre** em `/` (o menu). Link de sala, reconexão, treino, tutorial e replay abrem direto; voltar
+  ao menu por dentro do app não toca de novo; recarregar em `/` toca ("intro completa em toda abertura": sem lembrar que já foi vista).
+- **(2) O som:** a abertura tenta tocar e, com o áudio bloqueado pelo navegador (o caso comum: o áudio só destrava com um gesto, e todo
+  gesto pula), roda muda, sem erro. Sem tela de "toque para começar". Respeita a chave "Som" (não há volume no jogo).
+- **(3) A direção:** a do projeto (cordel: tinta, papel, ouro), "minimalista mas com impacto". A logo sai do nome: um dragão antigo,
+  guardião da noite. **[I]** Um olho de dragão (a pupila em fenda) com a lua como íris, sob uma sobrancelha em lâmina; desenho original,
+  sem nada do jogo de onde o nome veio (nem o dragão dele, nem marca, nem arte). O "L" vazado num selo, do plano, sai.
+- **[I]** "Qualquer tecla" pula, menos as de modificador e os atalhos (Ctrl+R, F5…); no celular o aviso diz "Toque para pular".
+- **[I]** Os tempos, o storyboard e os dois sons são os do plano mostrado a ele (5,2 s; com movimento reduzido, a logo com fade, ~1,8 s).
+  O desenho da logo e a animação ele ainda **não viu**: mudam se ele pedir.
+
+---
+
+## 2026-11-16 (4): o Roubo fica; o bot barra a Exódia; o merge do domínio e do Roubo
 
 Depois do resumo do domínio e do Roubo novo (as duas CI verdes em cada branch; a medição: o Roubo 3,5 vezes maior, o greedy que rouba ainda
 em 39,5%, a Exódia quase dobrando nos bots), com as três opções (1: manter; 2: ensinar o bot a preferir a Armadilha nos K; 3: mexer na
@@ -45,7 +110,7 @@ regra) e a pergunta "Faço o merge do domínio e do Roubo na main?", ele respond
   usa nas simulações). É um bloco à parte, com a calibração e o portão do Difícil de novo, e o merge pede o "sim".
 - **O merge:** a `main` anda por fast-forward até o topo de `feat/roubo-buff` (`426de18`), que contém a `feat/dominio`. O deploy é dele.
 
-: o cemitério fora; o domínio; as três [I] do Roubo; o www
+## 2026-11-16 (3): o cemitério fora; o domínio; as três [I] do Roubo; o www
 
 Depois do esboço das três direções do cemitério (A: campo-santo de cordel; B: pedra antiga; C: cova aberta), ele respondeu:
 
