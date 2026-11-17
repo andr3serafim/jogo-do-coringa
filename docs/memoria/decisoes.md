@@ -6,7 +6,18 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
-## 2026-11-16 (4): o Roubo fica; o bot barra a Exódia; o merge do domínio e do Roubo
+## 2026-11-17 (1): o merge do greedy que barra a Exódia
+
+Depois do resumo do bot (o A num K a 2 K da Exódia; a Exódia de volta à meta: greedy × greedy 1,3%, turtle × greedy 6,3%; o portão do
+Difícil aprovado; o `pnpm check` e as duas CI verdes em `2caeb5a`), perguntado "Faço o merge do bot que barra a Exódia na main?", ele
+respondeu:
+
+> Sim, merge
+
+**Leitura:** a `main` anda por fast-forward até o topo de `feat/bot-exodia` (`2caeb5a`). **[I]** O "sim" vale para o merge; o deploy segue
+sendo dele.
+
+: o Roubo fica; o bot barra a Exódia; o merge do domínio e do Roubo
 
 Depois do resumo do domínio e do Roubo novo (as duas CI verdes em cada branch; a medição: o Roubo 3,5 vezes maior, o greedy que rouba ainda
 em 39,5%, a Exódia quase dobrando nos bots), com as três opções (1: manter; 2: ensinar o bot a preferir a Armadilha nos K; 3: mexer na

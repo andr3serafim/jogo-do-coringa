@@ -1,39 +1,30 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-16**, o domínio e o Roubo novo na `main` (`6070478`, as duas CI verdes); o greedy que barra
-> a Exódia na branch `feat/bot-exodia`, medido e esperando a CI e o "sim" do merge. O deploy é do autor.
+> Sobrescrito a cada atualização. **Última: 2026-11-17**, o greedy que barra a Exódia na `main` por fast-forward até `2caeb5a` ("Sim, merge",
+> `decisoes.md` 2026-11-17 (1)), com as duas CI verdes no topo da branch (`2caeb5a`); falta ler a CI do push da `main`. Tudo o que o autor pediu está na `main`; o deploy é dele.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
+- **Tudo o que foi pedido está na `main`; falta o deploy, que é do autor** (`pnpm deploy:server`). Ele leva ao ar o bloco D, o conserto
+  da Devastação, o das cenas que repetiam, o Roubo novo, o bot que barra a Exódia e o domínio. Antes ou depois, o `www` no painel da
+  Cloudflare (os passos no diário 2026-11-16 (2)). Se a zona tiver um registro `A`/`AAAA`/`CNAME` na raiz, o deploy recusa: apague-o antes.
+- **O greedy barra a Exódia está na `main`** ("Sim, merge", `decisoes.md` 2026-11-17 (1)), por fast-forward de `feat/bot-exodia` até
+  `2caeb5a`, com as duas CI verdes no topo da branch (`2caeb5a`); falta ler a CI do push da `main`. `GREEDY.exodiaWatch` = 2: o A vai num K da Guarda do oponente a 2 K da Exódia, na fase principal e na reação ao K
+  jogado. A Exódia volta à meta (greedy × greedy 1,3%, turtle × greedy 6,3%); o portão do Difícil aprovado do zero (72,5% · 73,5% · p95
+  140 ms). O diário 2026-11-16 (4); `notas/medicao-roubo-buff.md`, "Depois".
+- **O Roubo mais forte está na `main`** ("Sim, faça o merge dos dois", `decisoes.md` 2026-11-16 (4); a regra em 2026-11-16 (1) e (3)):
+  o valor da carta × (1 + J) do Ataque ou × (1 + Q) da Defesa, sem a quadra; o K não anula nem quebra; segue sem matar, sem contar para a
+  iniciativa, bloqueado pela Defesa Absoluta. `RULES_VERSION` 6. A regra mora na chave `stealBuffed` (ligada no `makeConfig()`): os
+  replays de antes, sem a chave, reproduzem o Roubo de antes, e a sala online aberta antes do deploy termina com ele. O diário 2026-11-16 (3).
+  - **O que não pode regredir:** a chave `stealBuffed` (tirar o ramo das regras de antes quebra as fixtures do E2E e as partidas guardadas).
 - **O domínio `jogodocoringa.com.br` está na `main`** (`decisoes.md` 2026-11-16 (3) e (4); o diário 2026-11-16 (2)): a rota
-  `custom_domain` no `wrangler.jsonc`. O autor: o `www` no painel (os passos no diário 2026-11-16 (2)) e o `pnpm deploy:server`.
-- **O conserto das cenas que repetiam está na `main`** ("Sim, merge", `decisoes.md` 2026-11-16 (2)), por fast-forward de
-  `feat/cenas-repetidas` até `1d92cd7`, com as duas CI verdes no topo da branch e no push da `main` (`b9a057f`). O véu do momento do oponente não traz mais de volta a última cena (`Stage.tsx`, uma
-  condição; o teste novo no `moment.test.tsx`; a A/B no replay da `exodia-devastacao`, rodada 43). O diário 2026-11-16 (1). Só a web:
-  `RULES_VERSION`, `STATE_SCHEMA` e `PROTOCOL_VERSION` não mudaram.
-  - **Verificado:** `pnpm check` verde (web 2820 testes); `check` e `e2e` verdes em `1d92cd7`.
-  - **Próximo passo exato:** nenhum de código aqui. O deploy é dele (`pnpm deploy:server`) e leva o bloco D e este conserto ao ar.
+  `custom_domain` no `wrangler.jsonc`. O `workers.dev` segue ligado.
+- **O conserto das cenas que repetiam está na `main`** ("Sim, merge", `decisoes.md` 2026-11-16 (2)): o véu do momento do oponente não
+  traz mais de volta a última cena (`Stage.tsx`). O diário 2026-11-16 (1).
   - **O que não pode regredir:** a última cena só fica com a cortina **da cena** (`veil === 'scene'`); o véu do momento nunca a mostra.
-- **O Roubo mais forte está na `main`** ("Sim, faça o merge dos dois", `decisoes.md` 2026-11-16 (4)); a regra fica como está. Era (`decisoes.md` 2026-11-16 (1), item 8, e (3)), na branch `feat/roubo-buff` (worktree
-  `.claude/worktrees/roubo`, saída da `feat/dominio` em `e1c12b1`). O código está em `e248b45`: `stealAmount` no motor (valor × (1 + J)
-  ou × (1 + Q), sem a quadra), o K fora do Roubo, o `StealDamage` sem `blocked`, os bots, os replays de referência regravados,
-  `RULES_VERSION` 6, a prévia, o resumo das regras, a dica do tutorial e o livro de regras.
-  - **Medido** (`notas/medicao-roubo-buff.md`; o diário 2026-11-16 (3)): o Roubo ficou cerca de 3,5 vezes maior (dano de 54 para 200 por
-    partida), mas o greedy que rouba segue em 39,5% contra o que não rouba; **a Exódia quase dobrou** (greedy × greedy 1,9% → 3,6%, fora da
-    meta); o portão do Difícil aprovou de primeira.
-  - **A regra mora na chave `stealBuffed`** (ligada no `makeConfig()`): os replays de antes, sem a chave, reproduzem o Roubo de antes. O
-    primeiro push reprovou no `e2e` por isso (as fixtures de replay divergiam).
-  - **Próximo passo exato:** o bloco do greedy que barra a Exódia (abaixo).
-- **O greedy barra a Exódia, em execução** (`decisoes.md` 2026-11-16 (4)), na branch `feat/bot-exodia` (worktree `.claude/worktrees/roubo`,
-  saída da `main` em `6070478`): `GREEDY.exodiaWatch` = 2 (o A vai num K da Guarda do oponente a 2 K da Exódia, na fase principal e na
-  reação ao K jogado; antes era a 1). A sonda de 1000 partidas: a Exódia no greedy × greedy de 3,0% para 1,3%, no turtle × greedy de
-  12,6% para 5,5%. Os testes novos no `greedy.test.ts` (vermelhos com 1, verdes com 2).
-  - **Medido** (`notas/medicao-roubo-buff.md`, "Depois"; o diário 2026-11-16 (4)): a Exódia de volta à meta (greedy × greedy 1,3%;
-    turtle × greedy 6,3%); o portão do Difícil aprovado do zero (72,5% · 73,5% · p95 140 ms).
-  - **Próximo passo exato:** o push da branch, as duas CI, o "sim" do autor e o fast-forward da `main`. Depois, o deploy (dele).
 - **A arte do cemitério saiu da fila** ("Todas as direções reprovadas. ignore esta demanda", `decisoes.md` 2026-11-16 (3)).
-- **A config do pnpm desta máquina foi corrigida** (item 12): `storeDir: D:\.pnpm-store`, o mesmo store de todos os projetos dele.
+- **A config do pnpm desta máquina foi corrigida**: `storeDir: D:\.pnpm-store`, o mesmo store de todos os projetos dele.
 - **As regras 4.0 estão na `main`** ("finalize", `decisoes.md` 2026-11-15 (1)), por fast-forward de `feat/regras-4-0b` até `b5f93e3` (a branch e o worktree já apagados),
   com as duas CI verdes no topo da branch e no push da `main` (`aa2a6b1`). O texto das regras é o `docs/JOGO-DO-CORINGA-4.0.md` (`decisoes.md` 2026-11-14 (4)); o diário 2026-11-15 (1).
   - **A §14 está confirmada** ("ok" às seis leituras): virou "Leituras confirmadas", e os comentários delas no motor dizem "confirmado
@@ -117,7 +108,7 @@
 
 ## Esperando o autor
 
-- **O "sim" do merge do domínio**, o `www` no painel da Cloudflare e o deploy (acima).
+- **O deploy** (`pnpm deploy:server`) e o `www` no painel da Cloudflare (acima).
 - **O bloco D:** o deploy, e ver no navegador o Atacar com o Ataque Absoluto armado (a faísca só foi vista nos testes). As escolhas da
   §6.3 ficaram aprovadas, menos a arte do cemitério (`decisoes.md` 2026-11-16 (1), item 10).
 - **Menores adiados** (nenhum quebra o jogo): bloco D no `diario.md` 2026-11-14 (2) ("Adiados"); bloco C no `diario.md` 2026-11-08 (1) ("Adiados"); bloco B no 2026-11-07 (2) ("Menores, para
