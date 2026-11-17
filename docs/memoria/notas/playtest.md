@@ -7,10 +7,10 @@ risca aqui e diz no `diario.md`.
 
 - **Playtest online:** um no celular e um no PC, pelo link publicado; cair e voltar; revanche. Incluir Firefox e iOS Safari: a
   CI só tem Chromium, e o `pointerdown` que pula as batidas e o arrasto com o dedo não são cobertos lá.
-- **Primeiro deploy:** `wrangler login` e depois `pnpm deploy:server` (roda o `pnpm check`, constrói a web e publica). Conferir
-  se o plano Free aceita o binding `ratelimits`.
-- **GitHub:** proteção da `main`; instalar o `gh` (opcional, para PRs); apagar as branches remotas que sobraram
-  (`origin/feat/web`, `origin/feat/polish`, `origin/feat/ajustes-fase-a`): o modo automático barrou o `push --delete`.
+- ~~**Primeiro deploy**~~ feito: no ar em `https://jogodocoringa.com.br` desde 2026-11-17 (`diario.md` 2026-11-17 (1)). O plano
+  Free aceitou o binding `ratelimits`. A conta precisou do subdomínio `workers.dev` (sem ele, o erro 10063).
+- **GitHub (opcional):** proteção da `main`. As branches remotas que sobraram ficam (o autor: "não precisa, ignore-as",
+  `decisoes.md` 2026-11-16 (1), item 11).
 - **Tartaruga:** ele disse que testa depois do jogo pronto (`tartaruga.md`).
 - **Critério final do MVP:** jogar com um amigo pelo link publicado.
 

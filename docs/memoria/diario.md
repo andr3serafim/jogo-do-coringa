@@ -16,6 +16,9 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 - **Armadilhas:** o `ALLOWED_ORIGINS` de produção é `http://localhost:*`, e está certo: o upgrade aceita sempre a própria origem
   (`router.ts`). O console mostra o beacon da Cloudflare Web Analytics barrado pela CSP; é a injeção automática da zona, não o jogo.
 - **O que ficou:** a abertura na `feat/abertura` (o `estado.md`); o playtest do autor no ar.
+- **Limpeza ("Sim, limpe"):** removidos os worktrees `inspiring-sammet-387417` e `youthful-elgamal-3d5e8a` e as branches locais
+  `feat/ajustes` e `claude/inspiring-sammet-387417` (já na `main`, nada sem commit). Fica só o worktree da abertura. A nota
+  `notas/playtest.md` risca o primeiro deploy.
 
 ---
 
