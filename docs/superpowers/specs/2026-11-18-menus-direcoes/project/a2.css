@@ -52,3 +52,6 @@
 .A2.pc .item-menor { min-height: 58px; grid-template-columns: 28px minmax(0, 1fr) 20px; padding: 8px 18px; margin-top: 6px; }
 .A2.pc .item-menor .item-nome { font-size: 17px; }
 .A2 a.item, .A2 a.voltar { text-decoration: none; }
+.A2 .chave-lado { flex-direction: column-reverse; gap: 3px; }
+.A2 .chave-estado { font-size: 12px; }
+.A2 .chave-txt { flex: 1; min-width: 0; line-height: 1.2; }
