@@ -6,6 +6,40 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-18 (3): só o Folheto; o Coringa de antes com o leque; o menu em mini cartas; sem o rosa e sem o varal
+
+Depois de ver a rodada 2 (A2 · Folheto com menu e D · Mesa), ele escreveu:
+
+> Folheto segue como preferencia, descarte todos as outras direções.
+>
+> A Imagem nova do coringa está reprovada. O coringa anterior estava melhor. só que não gostei da arte de fundo (essas listras preto e
+> branca.) Gostei dos baralhos acima da cabeça do coringa. Remover texto abaixo do coringa.
+>
+> Eu gostei do menu serem no formato de mini cartas de baralho com efeito do design Mesa, mas não copie igual, adapte a identidade do
+> jogo. E quando o mouse tiver por cima deve ter o mesmo efeito do jogo (efeito semelhante ao 3D).
+>
+> Gostei dos menus coloridos (Mesa) ao entrar nos menus. não copie exatamente ou deixar igual mas se aproximar um pouco.
+>
+> Quero alterar esse background rosa de fundo, esses menus quadrado estão muito brutos. remova esse varal com pregadores.
+>
+> Tudo deve ser fluído e intuitivo proporcionando uma experiência agradável ao usuário.
+
+**Leitura:**
+- **Só o Folheto segue.** A B (Matriz), a C (Noite) e a D (Mesa) saem do canvas e da pasta (ficam no histórico do git).
+- **O Coringa:** volta o desenho de antes (o do jogo, `Coringa.tsx`, o da capa da rodada 1), com o leque das quatro cartas acima da
+  cabeça (da rodada 2). Saem os raios pretos e brancos do fundo e o texto embaixo do Coringa. O Coringa novo da rodada 2 está reprovado.
+- **O menu do Início vira mini cartas de baralho**, no movimento da Mesa (o leque que respira) e na identidade do jogo (papel, tinta,
+  carimbo, as cores da mesa), sem copiar a Mesa. **No mouse, o mesmo efeito da mão do jogo** (`Hand.tsx`): a carta inclina em 3D até
+  13° seguindo o ponteiro, a sombra acompanha, e respira (3 px, 3,6 s); no toque, sobe 8 px.
+- **As telas de cada entrada ficam coloridas**, perto da Mesa sem igualar: **[I]** cada entrada com uma cor da paleta do jogo
+  (Jogar online no vermelho, Treinar no verde da cura, Opções no ouro), e os botões com a cor da ação.
+- **Sai o fundo rosa**, saem os pregadores e o varal; os menus quadrados ficam mais suaves (**[I]** cantos arredondados, borda mais fina).
+  **[I]** O fundo novo não foi dito: três opções lado a lado (tinta, anil, papel) para ele escolher.
+- **"Fluído e intuitivo":** **[I]** as cartas entram dando-se na abertura da tela, as telas entram em sequência, tudo com movimento
+  reduzido respeitado.
+
+---
+
 ## 2026-11-18 (2): o Folheto fica; o Início vira um menu; uma direção nova com o Balatro de referência
 
 Depois de ver as três direções no canvas (A · Folheto, B · Matriz, C · Noite), ele escreveu:
