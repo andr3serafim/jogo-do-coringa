@@ -6,6 +6,31 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-18 (5): a A4 aprovada; o tema rosa (padrão) ou verde; seguir com spec, plano e código
+
+Depois de ver a rodada 4 (A4), ele escreveu:
+
+> gostei muito do rosa e gostei muito da arte fundo verde. as telas de menus adentrado ficaram muito boas, gostei também.
+>
+> Adicione uma espécie de toggle para o player alternar entre cor rosa e verde de forma discreta. A cor rosa deve ser o tema pré
+> settado em produçao.
+>
+> Prossiga com o design, plano e implementaçao.
+
+**Leitura:**
+- **A A4 · Folheto está aprovada** como direção: o Início com o Coringa maior que o disco e o menu em lista de mini cartas (o hover da
+  mão do jogo), as telas Jogar online, Treinar e Opções com os carimbos de madeira da mesa. O vinho sai.
+- **Dois temas de fundo nos menus:** rosa (a moldura dupla da capa) e verde (o filete e a costura da mesa). **O rosa é o padrão**; um
+  controle discreto deixa a pessoa trocar, e a escolha fica guardada. **[I]** O controle mora no canto do Início (uma bolinha com a
+  outra cor) e vale para todas as telas fora da mesa; a mesa não muda.
+- **"Prossiga com o design, plano e implementação":** a spec e o plano saem agora e o código segue sem parar para aprovação de cada um.
+  **[I]** As escolhas em aberto (a navegação do menu, o lugar de "Partidas anteriores", as chaves novas nas Opções, o resto das telas
+  fora da mesa) são do Claude por delegação, marcadas na spec, para ele conferir no merge, como no bloco D (`decisoes.md` 2026-11-14
+  (1)). **[I]** Os botões e a tipografia **dentro da partida** ficam para depois ("futuramente", 2026-11-18 (4)): esta entrega não muda a
+  mesa nem os diálogos da partida.
+
+---
+
 ## 2026-11-18 (4): o menu em lista de mini cartas; o Coringa maior, saindo do círculo; três fundos novos; as telas com a identidade do jogo
 
 Depois de ver a rodada 3 (A3), ele escreveu:
