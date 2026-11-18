@@ -6,6 +6,47 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-18 (4): o menu em lista de mini cartas; o Coringa maior, saindo do círculo; três fundos novos; as telas com a identidade do jogo
+
+Depois de ver a rodada 3 (A3), ele escreveu:
+
+> Faça uma adaptação em A2 - Folheto com menu;
+>
+> modelo deve ser: imagem do coringa e menus abaixo dela, não ao lado.
+>
+> Gostei desse efeito de hover nos menus, mantenha. Mas o menu deve ser diferente:
+> [mini carta de baralho com efeito hover atual com símbolo de globo de internet] Jogar online
+> [... símbolo de duas espadas cruzadas] Treinar
+> [... símbolo de ampulheta] Partidas anteriores
+> [... símbolo de regulagem (mesmo que está)] Opções
+>
+> Background reprovado, crie mais 3 direções com cores  e arte (pode voltar com rosa numa das cores no lugar do papel e outro verde
+> padrão mesa de poker /baralho). O background deve ser algo minimalista que não provoque enjoo visual mas que tenha identidade. crie 3
+> direções seja criativo ou pegue referencias.
+>
+> Remova as quatro cartas de cima do coringa, ficou esquisito. aumente a imagem do coringa a ponto de sair do circulo, para
+> preenchimento visual na tela adequada.
+>
+> Refinar os menus adentrados, deixar menos arredondados e com mais identidade real do jogo. Menos colorido. Futuramente essa
+> identidade será replicada para botões e tipografia in game.
+
+**Leitura:**
+- **A base é o modelo da A2** (a imagem do Coringa em cima e o menu embaixo, também no PC: nada ao lado), **com o hover da A3**
+  (a mini carta respira, inclina em 3D e sobe). **[I]** O "adaptação em A2" junta as duas: o leque, o círculo e o hover que ele cita são
+  da A3.
+- **O menu vira uma lista de quatro linhas**, cada uma com a mini carta e o símbolo, e o nome ao lado: Jogar online (globo), Treinar
+  (espadas cruzadas), Partidas anteriores (ampulheta), Opções (a regulagem). "Partidas anteriores" deixa de ser o item menor.
+- **O Coringa:** sem as quatro cartas de cima; maior, saindo do círculo (os guizos, o chapéu e a gola passam da borda).
+- **Os fundos de tinta, anil e papel estão reprovados.** Três novos, minimalistas, parados e com identidade: **[I]** o rosa da capa (no
+  lugar do papel), o verde de mesa de baralho e um terceiro à escolha do Claude. **[I]** "Não provoque enjoo visual": nada se mexe no
+  fundo (sai o desenho de naipes que deslizava).
+- **As telas de cada entrada:** menos arredondadas, menos coloridas e com a identidade real do jogo. **[I]** Os carimbos de madeira da
+  mesa (`styles.css`, `.carimbo`: borda de tinta, cantos retos, sombra dura cor de madeira, face de papel ou ouro, o grão nos grandes,
+  afundam no toque) e os títulos em tipo de madeira com a textura áspera (`#textura-aspera`). **Ele avisa que essa identidade vai depois
+  para os botões e a tipografia dentro da partida.**
+
+---
+
 ## 2026-11-18 (3): só o Folheto; o Coringa de antes com o leque; o menu em mini cartas; sem o rosa e sem o varal
 
 Depois de ver a rodada 2 (A2 · Folheto com menu e D · Mesa), ele escreveu:
