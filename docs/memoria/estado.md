@@ -12,8 +12,12 @@
 - **O redesenho visual dos menus** (`decisoes.md` 2026-11-18 (1)): só a camada visual das telas fora da mesa e dos diálogos da
   partida; nada de regra, fluxo, estado, rede ou handler (se algo visual pedir lógica, parar e perguntar). Branch `feat/menus-visual`,
   no checkout principal (sem worktree).
-  - **Em curso:** três direções em rascunho (Início no celular e no PC, uma tela secundária, os componentes), num HTML em
-    `docs/superpowers/specs/2026-11-18-menus-direcoes.html` e num artifact privado mandado ao autor.
+  - **Feito:** as três direções em rascunho, mandadas ao autor: **A · Folheto** (a capa de cordel pendurada no barbante, sobre o rosa),
+    **B · Matriz** (o taco entalhado: tinta com veio de madeira, título em ouro com a sombra de madeira; a recomendada) e **C · Noite**
+    (a lua e a silhueta do Coringa, Cinzel e ouro, continuando a logo LUSACAN). Cada uma com o Início no celular e no PC e o menu da
+    partida; mais as fotos de hoje. Os arquivos: `docs/superpowers/specs/2026-11-18-menus-direcoes/project/` (as pranchetas `.dc.html`,
+    `base.css`, `a.css`, `b.css`, `c.css`, o `canvas.json`); o canvas privado do autor: `https://claude.ai/artifact/9cuwRLquhG6Hhu1AcjzEgy`.
+    Como abrir sem o canvas: o diário 2026-11-18 (1).
   - **Próximo passo exato:** o autor escolher uma direção (ou pedir outra rodada). Depois: a decisão no `decisoes.md`, a spec curta
     em `docs/superpowers/specs/` e o plano. Nenhum código antes disso.
   - **O que não pode mudar:** o valor dos tokens de hoje (a mesa usa todos), o `html`, o `:focus-visible` e o `::selection` globais;

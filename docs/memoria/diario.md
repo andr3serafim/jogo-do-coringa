@@ -5,6 +5,39 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-18 (1): três direções para o redesenho visual dos menus
+
+- **Pedido:** redesenhar a camada visual dos menus (fundos, painéis, botões, tipos, ícones, efeitos, arte), sem mexer em regra, fluxo,
+  estado, rede ou handler; três direções para ele escolher (`decisoes.md` 2026-11-18 (1)).
+- **Feito:** a branch `feat/menus-visual`; as fotos das telas de hoje (Início, escolha do nível, menu da partida, no celular); as três
+  direções em pranchetas de canvas (Início no celular e no PC, o menu da partida), com os mesmos controles e a mesma ordem de hoje:
+  - **A · Folheto:** o Início é a capa de um folheto de cordel pendurada no barbante (pregadores de madeira); o título em tipo de madeira
+    impresso fora de registro (tinta + vermelho), a xilo do Coringa num sol de raios; painéis de papel com a faixa de tinta cortada como
+    fita; botões de carimbo com o bloco de madeira por baixo; fundo rosa com fibra de papel. Nenhuma fonte nova.
+  - **B · Matriz** (a recomendada): o Início é o taco entalhado; fundo de tinta com veio de madeira (`feTurbulence`), traços de goiva
+    em papel saindo do Coringa entalhado (hachura em papel, guizos de ouro); o título em ouro com a sombra de madeira, igual ao quadro
+    final da abertura; tacos com marcas de goiva nos cantos; a opção marcada vira "papel impresso". Nenhuma fonte nova (o Archivo largo,
+    `font-stretch: 125%`, nos títulos dos painéis).
+  - **C · Noite:** o céu índigo, a lua de prata e a silhueta do Coringa diante dela com veios violeta (a rima com o dragão da logo),
+    ruínas no chão, Cinzel e metal de ouro, estrelas que cintilam devagar. A Cinzel entraria no primeiro carregamento (fonte, não JS).
+- **Ruling:** os rascunhos são HTML e CSS estáticos (sem React), com a arte do jogo (o `Coringa.tsx` e os naipes do `Suit.tsx`) — custo:
+  o efeito de movimento (o brilho do título, o reflexo do botão, as estrelas) só se vê no navegador, não na foto.
+- **Ruling:** no PC as três usam a mesma grade (herói à esquerda, painéis em duas colunas na ordem do DOM); um layout centrado com três
+  colunas não cabe em 900 px de altura sem mudar a ordem da Aparência e das Preferências — custo: os três PCs parecem parentes no arranjo.
+- **Ruling:** os títulos visíveis dos painéis ("Criar sala"…) repetem o `aria-label` que o `Panel` já tem; no código, viram um `<h2>`
+  (muda a árvore de títulos, não a lógica).
+- **Para abrir sem o canvas:** sirva a pasta `docs/superpowers/specs/2026-11-18-menus-direcoes/project/` num servidor estático (ex.:
+  `npx serve`) e abra cada `.dc.html`; aberto direto do disco, os CSS relativos não carregam. As fontes vêm do Google Fonts (só no
+  rascunho; o jogo as serve do próprio Worker).
+- **O que não pode passar para o código** (achado ao mapear): os testes que olham classe (`bg-ouro` no "Aprender jogando" em destaque,
+  `text-base` nos campos, `tabular-nums`) guardam garantias; a direção escolhida mantém a garantia mesmo que a classe mude. O `Switch`,
+  o `Button` e o `Panel` do `parts.tsx` também vestem o menu da partida e o fim (`GameMenu`, `EndPanel`): mudar a peça muda os dois.
+- **Armadilhas:** o painel do navegador abre `file://` como foto estática (sem CSS relativo): para conferir, um servidor
+  (`.claude/launch.json`, entrada `menus-rascunhos`, porta 8798) e as fotos em tamanho real pelo Playwright do projeto (um script no
+  scratchpad que importa o `@playwright/test` do `packages/web`).
+
+---
+
 ## 2026-11-17 (2): a logo LUSACAN redesenhada (o dragão) e a abertura sobre a `main`
 
 - **Pedido:** a logo redesenhada a partir de uma imagem de referência (um dragão de asas abertas diante da lua), com a animação de um
