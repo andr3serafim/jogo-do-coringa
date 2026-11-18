@@ -41,7 +41,7 @@ async function expectMenuWorks(page: Page): Promise<void> {
   await expect(overlay(page)).toHaveCount(0);
   await expect(menuTitle(page)).toBeVisible();
   await expect(page.locator('[inert]')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Partidas anteriores' }).click();
+  await page.getByRole('link', { name: 'Partidas anteriores' }).click();
   await expect(page).toHaveURL(/\/partidas$/);
 }
 
@@ -118,7 +118,7 @@ test.describe('pular', () => {
   }
 
   test('um clique em qualquer ponto pula direto para o menu, e não aciona o que está por baixo', async ({ page }) => {
-    // No meio do alto da página fica o menu (o título, "Aprender jogando"): o clique é da abertura, e a rota não muda.
+    // No meio do alto da página fica o menu (o emblema do Coringa): o clique é da abertura, e a rota não muda.
     await skipWith(page, () => page.mouse.click(720, 150));
   });
 

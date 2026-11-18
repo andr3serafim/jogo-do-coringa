@@ -101,6 +101,10 @@ test('duas pessoas jogam uma sala: do lobby ao fim, com queda e revanche', async
     await ana.page.goto('/');
     await expect(ana.page.getByRole('heading', { name: 'Jogo do Coringa' })).toBeVisible();
     await axe(ana.page);
+    // Pelo menu do Início (decisoes.md 2026-11-18 (2)): Jogar online leva aos formulários de criar e entrar.
+    await ana.page.getByRole('link', { name: 'Jogar online' }).click();
+    await expect(ana.page).toHaveURL(/\/jogar$/);
+    await axe(ana.page);
     await ana.page.getByLabel('Seu apelido').fill(ana.name);
     await ana.page.getByRole('button', { name: 'Criar sala' }).click();
     await expect(ana.page.getByRole('heading', { name: 'Sala de espera' })).toBeVisible();
@@ -274,7 +278,7 @@ test('duas pessoas jogam uma sala: do lobby ao fim, com queda e revanche', async
 
 /** Ana cria a sala, Duda entra pelo link e os dois marcam pronto: a partida começa na rodada 1, e a função devolve o código da sala. */
 async function startOnlineGame(ana: Player, duda: Player): Promise<string> {
-  await ana.page.goto('/');
+  await ana.page.goto('/jogar');
   await ana.page.getByLabel('Seu apelido').fill(ana.name);
   await ana.page.getByRole('button', { name: 'Criar sala' }).click();
   await expect(ana.page.getByRole('heading', { name: 'Sala de espera' })).toBeVisible();

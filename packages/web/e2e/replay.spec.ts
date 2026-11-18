@@ -165,7 +165,7 @@ test('treino: desistir, "Rever a partida", andar e voltar pelos passos, e achar 
 test('a tela inicial leva às partidas anteriores; vazia, a lista diz que não há nenhuma, e um id desconhecido não quebra', async ({ page }) => {
   const guard = failOnConsoleErrors(page);
   await page.goto('/');
-  await page.getByRole('button', { name: 'Partidas anteriores' }).click();
+  await page.getByRole('link', { name: 'Partidas anteriores' }).click();
   await expect(page).toHaveURL(/\/partidas$/);
   await expect(page.getByRole('heading', { name: 'Partidas anteriores' })).toBeVisible();
   await expect(page.getByText('Nenhuma partida terminada neste navegador.')).toBeVisible();

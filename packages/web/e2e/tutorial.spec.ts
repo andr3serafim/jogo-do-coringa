@@ -71,14 +71,18 @@ async function equipToOrder(page: Page): Promise<void> {
   await expect(orderPanel(page).getByRole('button', { name: 'Atacar primeiro' })).toBeVisible();
 }
 
-test('a tela inicial convida ("Aprender jogando" em destaque) e leva ao tutorial', async ({ page }) => {
+test('a tela inicial convida (o selo no Treinar, "Aprender jogando" em ouro) e leva ao tutorial', async ({ page }) => {
   const guard = failOnConsoleErrors(page);
   await page.goto('/');
-  const learn = page.getByRole('button', { name: 'Aprender jogando' });
-  await expect(learn).toBeVisible();
-  // Enquanto o tutorial não foi feito nem pulado, é o botão principal (em ouro), antes de "Criar sala".
-  await expect(learn).toHaveAttribute('data-destaque', 'true');
+  // Enquanto o tutorial não foi feito nem pulado, a carta do Treinar leva o selo (decisoes.md 2026-11-18 (2) e (5)).
+  const practice = page.getByRole('link', { name: 'Treinar' });
+  await expect(practice.locator('[data-selo-tutorial]')).toHaveCount(1);
   expect(await stored(page)).toBeNull();
+  await axe(page);
+  await practice.click();
+  await expect(page).toHaveURL(/\/treinar$/);
+  const learn = page.getByRole('link', { name: 'Aprender jogando' });
+  await expect(learn).toHaveAttribute('data-tom', 'gold');
   await axe(page);
 
   await learn.click();
@@ -150,11 +154,13 @@ test('tutorial: a dica do Equipar, a seguinte quando a situação muda, e "Pular
   await expect(outlined(page)).toHaveCount(0);
   expect(await stored(page)).toBe('skipped');
 
-  // Pulado, o botão da tela inicial vira um botão comum (a pessoa já decidiu), e continua lá para quem quiser rever.
+  // Pulado, o selo sai do Treinar e "Aprender jogando" fica de papel (a pessoa já decidiu), e continua lá para quem quiser rever.
   await page.goto('/');
-  const learn = page.getByRole('button', { name: 'Aprender jogando' });
+  await expect(page.getByRole('link', { name: 'Treinar' }).locator('[data-selo-tutorial]')).toHaveCount(0);
+  await page.goto('/treinar');
+  const learn = page.getByRole('link', { name: 'Aprender jogando' });
   await expect(learn).toBeVisible();
-  await expect(learn).not.toHaveAttribute('data-destaque', 'true');
+  await expect(learn).toHaveAttribute('data-tom', 'paper');
   guard.expectClean();
 });
 
@@ -188,7 +194,7 @@ test('tutorial, o fim: a dica do fim (a 12, com as do Roubo, da Devastação e d
   await friend.click();
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole('heading', { name: 'Jogo do Coringa' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Aprender jogando' })).not.toHaveAttribute('data-destaque', 'true');
+  await expect(page.getByRole('link', { name: 'Treinar' }).locator('[data-selo-tutorial]')).toHaveCount(0);
   guard.expectClean();
 });
 

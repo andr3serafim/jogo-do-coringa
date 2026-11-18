@@ -100,6 +100,7 @@ for (const size of [
 
       await page.goto('/');
       await expect(page.getByRole('heading', { name: 'Jogo do Coringa' })).toBeVisible();
+      await page.getByRole('link', { name: 'Jogar online' }).click();
       await expectNoHorizontalScroll(page);
       await expectTouchTargets(page.getByRole('main').getByRole('button'));
       await axe(page);

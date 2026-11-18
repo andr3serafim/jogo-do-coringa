@@ -1,4 +1,4 @@
-// E2E das cartas com arte (decks e raças, fatias 1 e 2): o painel "Aparência" do Início por teclado e guardado, a mesa do treino com as
+// E2E das cartas com arte (decks e raças, fatias 1 e 2): o painel "Aparência" das Opções (era do Início) por teclado e guardado, a mesa do treino com as
 // imagens carregadas de verdade (sob a CSP do `wrangler dev`), a troca no menu, a trava do Cordel e o tutorial sempre em cordel; na fatia 2,
 // o bot com a aparência dele (os versos, o retrato e o campo) e o replay com as aparências gravadas na partida; na fatia 3, a sala online
 // de duas pessoas, cada tela com cada lado na aparência do assento.
@@ -36,9 +36,9 @@ async function loadedCardImages(page: Page): Promise<string[]> {
 
 const FANTASY_PREFS = JSON.stringify({ autoPass: true, reduceMotion: false, sound: true, look: { deck: 'bestiario', race: 'egipcio' } });
 
-test('aparência: escolhida no Início por teclado, guardada, e a mesa do treino com as imagens carregadas', async ({ page }) => {
+test('aparência: escolhida nas Opções por teclado, guardada, e a mesa do treino com as imagens carregadas', async ({ page }) => {
   const guard = failOnConsoleErrors(page);
-  await page.goto('/');
+  await page.goto('/opcoes');
   const panel = page.getByRole('region', { name: 'Aparência' });
   await expect(panel.getByRole('radio', { name: 'Egípcio' })).toBeDisabled();
 
@@ -256,8 +256,8 @@ test('aparência: na sala online, cada tela veste cada lado com a aparência do 
   const ana = await newPerson(browser);
   const duda = await newPerson(browser);
 
-  await test.step('Ana escolhe Bestiário + Egípcio no painel do Início e cria a sala', async () => {
-    await ana.page.goto('/');
+  await test.step('Ana escolhe Bestiário + Egípcio nas Opções e cria a sala', async () => {
+    await ana.page.goto('/opcoes');
     const panel = ana.page.getByRole('region', { name: 'Aparência' });
     await expect(panel.getByText('Na sala online, vale a que você tinha ao entrar.')).toBeVisible();
     await panel.getByRole('radio', { name: 'Cordel' }).focus();
@@ -266,6 +266,8 @@ test('aparência: na sala online, cada tela veste cada lado com a aparência do 
     await panel.getByRole('radio', { name: 'Bufão' }).focus();
     await ana.page.keyboard.press('ArrowRight');
     await expect(panel.getByRole('radio', { name: 'Egípcio' })).toBeChecked();
+    await ana.page.getByRole('link', { name: 'Início' }).click();
+    await ana.page.getByRole('link', { name: 'Jogar online' }).click();
     await ana.page.getByLabel('Seu apelido').fill('Ana');
     await ana.page.getByRole('button', { name: 'Criar sala' }).click();
     await expect(ana.page.getByRole('heading', { name: 'Sala de espera' })).toBeVisible();
