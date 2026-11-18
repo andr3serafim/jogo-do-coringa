@@ -25,7 +25,8 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   - **O voo:** `ui/intro/dragon-flight.ts` (as poses: entra pequeno no alto à esquerda, cruza por cima da lua, desce pela direita e passa
     girando na frente dela, volta de asas recolhidas maior que a pose, abre as asas e assenta) e as três batidas de asa; Web Animations
     ligada num `useLayoutEffect` do `Intro.tsx`. O CSS faz a lua, o halo e os veios que acendem, o nome letra a letra e os filetes.
-  - **Os tempos:** a logo ~2,4 s (de 1,5 s), as cartas em 3,1 s, o total 5,6 s; a logo inteira fica parada 550 ms antes de sair.
+  - **Os tempos:** a logo ~2,3 s (de 1,5 s), as cartas em 3,0 s, o desenho inteiro em 5,35 s (era 5,6 s no `1473c43`; ver "Depois",
+    abaixo); a logo inteira fica parada 500 ms antes de sair.
   - **O som:** `abertura-logo` virou o voo (três batidas abafadas, o sopro do giro, o mergulho, as asas que se abrem); a versão curta toca
     `abertura-logo-curta` (só as asas).
   - **O orçamento:** com o dragão e as letras, o JavaScript inicial ia a 193,9 de 200 KB. A abertura saiu do inicial (`intro-loader.ts`,
@@ -43,7 +44,19 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 - **Verificado:** o pre-commit (1856 testes relacionados); o `abertura.spec.ts` (15) verde no build de produção, com a CSP e o console
   limpo; o smoke (186,9 KB); a medição temporária com a CPU 4× (a logo a 57 quadros/s no PC e 59,5 no celular, o pior quadro 33 ms; as
   cartas a 58 e 59). Os quadros no navegador, no PC e no celular, e a versão curta.
+- **Depois** (`0b2250e`, `b47a2af`, achados numa revisão por subagente):
+  - **A capa só fechava com o clique:** com a rede lenta, Enter, Espaço e Esc não faziam nada até o pedaço chegar. Agora as teclas do
+    `skipsIntro` fecham a capa também (testes no `app.test.tsx`, com o `forgetIntro()` do carregador, só para testes).
+  - **O E2E mede da capa ao menu**, como a pessoa vê; assim a abertura dava 6,0 s (a capa somava ~0,4 s aos 5,6 s). O desenho foi a
+    5,35 s (o voo começa 100 ms antes; as cartas em 3,0 s), e o `main.tsx` pede o pedaço antes do primeiro desenho. Medido da capa ao
+    menu, três vezes: 5,82 s (a primeira, sem cache: a capa em 0,44 s), 5,61 e 5,61 s (a capa em 0,25 s).
+  - **O teto do E2E:** a execução inteira parou duas vezes nos 600 s do `globalTimeout`, sem falha (114 verdes e 16 por rodar, com a
+    máquina livre), e a CI da `main` já levava 545 s no `pnpm e2e` (2026-11-17, pela API). O teto foi a 780 s (o job tem 15 min).
+- **O E2E, ao fim:** a execução inteira (com o teto antigo) deu 114 verdes, 4 pulados, nenhuma falha e 16 por rodar; os que faltaram
+  (`mobile.spec` e `drag.spec`, nos dois projetos) rodaram à parte, verdes (39, 4 pulados); o `abertura.spec` (15) verde no build final.
 - **Armadilhas:**
+  - **Um teste com `userEvent` na capa** acha a abertura no lugar dela: o pedaço já carregado chega enquanto o `userEvent` espera. Na capa,
+    use o evento síncrono (`fireEvent`, `dispatchEvent`).
   - O Vite reescreve `new URL(..., import.meta.url)`; e um `.mjs` que gera TS com crases dentro de um template quebra: depois de gerado,
     o `lusacan-shapes.ts` é editado direto.
   - Uma letra da Cinzel tem quadráticas de TrueType com pontos de controle seguidos (o ponto do meio é implícito): o extrator os trata.
