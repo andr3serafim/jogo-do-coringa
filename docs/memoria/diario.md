@@ -5,6 +5,45 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-18 (5): os menus no Folheto, no código (spec, plano e as Tasks 1 a 6)
+
+- **Pedido:** `decisoes.md` 2026-11-18 (5) (a A4 aprovada nos fundos rosa e verde; o controle discreto do tema; spec, plano e código).
+- **Spec e plano:** `docs/superpowers/specs/2026-11-18-menus-folheto-design.md` e `docs/superpowers/plans/2026-11-18-menus-folheto.md`
+  (`60d6d46`). Sem o leitor de spec em subagente (a sessão não abre agentes sem pedido): a spec foi relida como quem constrói.
+- **Feito:**
+  - **Task 1 (`eafcf78`):** `Prefs.menuTheme?: 'pink' | 'green'` (ausente é rosa; valor estranho some) e `menuThemeOf`; o provedor
+    `MenuThemeProvider` (`src/ui/menu/menu-theme.tsx`), com o tema e o movimento do menu.
+  - **Tasks 2 a 4 (`cb35e32`):** as rotas `/jogar`, `/treinar`, `/opcoes`; `src/ui/menu/` (`menu.css`, `MenuScreen`, `Emblem` com os
+    traçados exportados do `Coringa.tsx`, `MiniCard` e `MenuItem` com a inclinação da mão, `ThemeToggle`, `parts.tsx` com o título, o
+    painel, os carimbos, o campo e a chave); o Início novo; `PlayOnline` (os formulários que eram do Início), `Practice`, `Options`; o
+    `skin="menu"` no `HpChoice` e no `LookChoice`; a copy nova no `copy.ts`.
+  - **Task 5 (`1e4fcaa`):** a `Screen` de `ui/parts.tsx` virou a `MenuScreen`; dentro dela (`InMenuContext`), o `Title`, o `Panel`, o
+    `Button`, o `TextField` e o `Switch` vestem o Folheto; a escolha do nível do treino em carimbos de ouro.
+  - **Task 6 (`b723fe6`):** os E2E pelo menu novo (um passa por Início → Jogar online; o tutorial pelo selo do Treinar e o ouro do
+    "Aprender jogando"; a aparência nas Opções; "Partidas anteriores" como link).
+- **Ruling:** as entradas são rotas próprias (`/jogar`, `/treinar`, `/opcoes`), e não estado do Início — custo: três rotas a mais; em
+  troca, o Voltar do navegador e o gesto do celular voltam ao Início, e o link direto abre a tela (sem a abertura).
+- **Ruling:** as telas que já existiam vestem o Folheto pelo contexto (`useInMenu()` nas peças de `ui/parts.tsx`), e não reescritas uma a
+  uma — custo: uma peça com dois ramos; em troca, a partida (o fim, a dica, o menu dela) fica igual sem tocar nela, e a mudança é pequena.
+- **Ruling:** o movimento reduzido do menu é lido do armazenamento a cada desenho (`useMenuMotion`), e não guardado no provedor — custo:
+  um `JSON.parse` pequeno por desenho; em troca, a chave mudada no menu da partida vale ao voltar ao menu.
+- **Ruling:** o controle do tema tem o nome fixo "Fundo verde" e o estado no `aria-pressed` (o plano dizia nome trocando) — custo: nenhum;
+  é o padrão do botão de alternar.
+- **Ruling:** o degradê do fundo mora na camada fixa (`.menu-fundo`), e não no `background-attachment: fixed` — custo: nenhum; rola mais
+  leve e a foto de página inteira não mostra a faixa clara.
+- **Ruling:** o título que recebe o foco ao abrir (`tabIndex=-1`, fora do Tab) não mostra o anel no menu — custo: o foco programático não
+  se vê; ele serve ao leitor de tela.
+- **A ordem dos testes (honesta):** Tasks 1 e 2, os testes antes e vistos vermelhos. **Tasks 3 e 4: o código antes dos testes** (as peças,
+  o CSS e as telas saíram juntos; os testes do Início, de Jogar online, Treinar, Opções e da inclinação vieram depois, e passaram de
+  primeira, menos o do Som pelo `App`). Task 5: a suíte de antes como guarda (2 falhas do foco do título nas partidas, consertadas).
+- **Verificado:** a suíte inteira da web (2994), o lint, o typecheck, o smoke (191,4 KB); as fotos do app no dev server. **Falta:** o
+  `pnpm e2e` inteiro, o `pnpm check` do pre-push, as duas CI.
+- **Armadilhas:** um `useImperativeHandle` na peça de fora e outro na de dentro sobre o mesmo `ref`: o de fora (que roda depois) apagava o
+  de dentro (`useImperativeHandle(inMenu ? undefined : outer, …)`). Em `node -e`, a barra de `/\/jogar$/` se perde na fuga: gravar o
+  texto com `String.fromCharCode(92)` ou editar o arquivo. Um `cat > arquivo` sem entrada trava o shell.
+
+---
+
 ## 2026-11-18 (4): a rodada 4 dos menus (A4 · Folheto)
 
 - **Pedido:** `decisoes.md` 2026-11-18 (4).

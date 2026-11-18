@@ -35,17 +35,16 @@
     O PC e as telas internas no verde. `a4.css` e `A4-*.dc.html`; a A3, a A2 e a A embaixo.
   - **A4 aprovada, nos fundos rosa (padrão) e verde, com um controle discreto do tema** (`decisoes.md` 2026-11-18 (5)); ele pediu spec,
     plano e código sem parar. **Spec:** `docs/superpowers/specs/2026-11-18-menus-folheto-design.md`. **Plano:**
-    `docs/superpowers/plans/2026-11-18-menus-folheto.md` (Tasks 1 a 6). **Feito:** Task 1 (`eafcf78`). **Em curso, sem commit:** as Tasks 2
-    a 4 escritas juntas (as rotas, `src/ui/menu/*`, o Início, `PlayOnline`/`Practice`/`Options`, a pele `skin="menu"` no `HpChoice` e no
-    `LookChoice`, os testes `home`, `play-online`, `practice`, `options`, `menu-parts`); os do menu passam; falta a suíte inteira, o lint e
-    o smoke, e então o commit.
-  - **Próximo passo exato:** seguir o plano task a task (commit e memória a cada uma; `pnpm check` antes do commit de código). As escolhas
-    [C] da spec são do Claude por delegação: ele confere no merge.
-  - (Antes da aprovação, o que estava em aberto: o como da navegação nova (rotas próprias ou estado no Início, o Voltar do celular, os E2E que clicam "Criar sala" no
-    Início), onde fica "Partidas anteriores", as duas chaves novas nas Opções (Reduzir animações e Passar sozinho), e o custo do
-    movimento no celular (as cartas respirando e o fundo que desliza, medidos com a CPU 4×). Nenhum código antes disso.
-  - **O que não pode mudar:** o valor dos tokens de hoje (a mesa usa todos), o `html`, o `:focus-visible` e o `::selection` globais;
-    o JavaScript inicial (187,4 de 200 KB): ilustração entra por arquivo, nunca por JSX; nada de biblioteca de ícones.
+    `docs/superpowers/plans/2026-11-18-menus-folheto.md` (Tasks 1 a 6). **Feito e commitado:** Task 1 (`eafcf78`), Tasks 2 a 4
+    (`cb35e32`), Task 5 (`1e4fcaa`), os E2E (`b723fe6`). A suíte inteira da web verde (2994 testes) e o smoke (JavaScript inicial 191,4 de
+    200 KB). Conferido no app de verdade (fotos do dev server): o Início rosa e verde a 390, 360 e 1440 px, Jogar online, Treinar, Opções,
+    a escolha do nível, as partidas anteriores e o erro da sala. As decisões técnicas: o diário 2026-11-18 (5).
+  - **Próximo passo exato:** o `pnpm e2e` inteiro (em curso, em segundo plano, depois deste commit); verde, o push (o pre-push roda o
+    `pnpm check`), o PR para a `main` e as duas CI; então as fotos e o resumo ao autor. As escolhas [C] da spec e as `Ruling:` do diário
+    são do Claude por delegação: ele confere no merge, que espera o "sim" dele.
+  - **O que não pode regredir:** o rosa por padrão sem gravar nada (`menuTheme` ausente); o tema não se perde quando o menu da partida
+    grava as preferências (ele espalha `prefs`); o menu da partida, o fim e a dica com a roupa de antes (`useInMenu()` é falso fora da
+    `MenuScreen`); o CSS do menu fora do `styles.css` (o `phases.test.tsx` conta as animações sem fim de lá); o JavaScript inicial ≤ 200 KB.
 
 - **A abertura do jogo, com a logo do dragão, está na `main`** ("Sim, merge", `decisoes.md` 2026-11-17 (4)), por fast-forward até o topo de
   `feat/abertura` (`52452c0`), com as duas CI verdes no push da `main` (`check` 365 s; `e2e` 630 s de job, que o teto antigo de 600 s no
