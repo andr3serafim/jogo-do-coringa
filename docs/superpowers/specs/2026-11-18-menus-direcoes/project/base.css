@@ -1,0 +1,33 @@
+/* Base comum dos rascunhos: o que não muda entre as direções (as cartas são as de cordel do jogo, que não entram no redesenho). */
+.tela, .tela * { box-sizing: border-box; }
+.tela { position: relative; overflow: hidden; font-family: 'Archivo', sans-serif; font-size: 16px; line-height: 1.35; }
+.tela button, .tela input { font: inherit; color: inherit; margin: 0; }
+.tela h1, .tela h2, .tela p, .tela figure, .tela fieldset, .tela legend { margin: 0; padding: 0; }
+.tela fieldset { border: 0; min-width: 0; }
+.sr { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; padding: 0; }
+.fundo { position: absolute; inset: 0; pointer-events: none; }
+.fundo svg { position: absolute; display: block; }
+.ico { width: 22px; height: 22px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* A amostra da Aparência: três cartas de cordel, como o jogo desenha hoje. */
+.amostra { display: flex; justify-content: center; gap: 12px; padding: 4px 0; }
+.carta { position: relative; width: 62px; height: 87px; flex: none; background: #f1f0ea; border: 2.5px solid #17120f; border-radius: 5px; color: #17120f; box-shadow: 0 3px 0 rgba(23, 18, 15, .35); }
+.carta-v { position: absolute; left: 5px; top: 1px; font-family: 'Alfa Slab One', serif; font-size: 25px; line-height: 1.1; }
+.carta-n { position: absolute; right: 5px; top: 7px; width: 13px; height: 13px; fill: currentColor; }
+.carta.ver { color: #b8261c; }
+.amostra .carta:nth-child(1) { transform: rotate(-5deg) translateY(4px); }
+.amostra .carta:nth-child(3) { transform: rotate(5deg) translateY(4px); }
+
+/* A mesa por trás do menu da partida, esmaecida (só para situar o diálogo). */
+.mesa-fundo { position: absolute; inset: 0; display: flex; flex-direction: column; }
+.mesa-fundo .m-placar { height: 84px; background: #17120f; }
+.mesa-fundo .m-op { flex: 1.1; background: #6fa86c; }
+.mesa-fundo .m-faixa { height: 46px; background: #17120f; }
+.mesa-fundo .m-voce { flex: 0.8; background: #ee9db5; }
+.mesa-fundo .m-barra { height: 300px; background: #17120f; }
+.veu { position: absolute; inset: 0; background: rgba(12, 9, 7, .62); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tela *, .tela *::before, .tela *::after { animation: none !important; transition: none !important; }
+}

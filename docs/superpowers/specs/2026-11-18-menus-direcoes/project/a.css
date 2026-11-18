@@ -1,0 +1,101 @@
+/* A · Folheto — a capa de cordel pendurada no barbante. Os materiais da mesa: capa rosa, papel, tinta, vermelho de segunda cor,
+   ouro e a madeira do carimbo. Tipos: Alfa Slab One (títulos e botões) e Archivo (texto e números). */
+.A {
+  --tinta: #17120f; --papel: #f1f0ea; --papel-claro: #fbfaf6; --capa: #ee9db5; --capa-funda: #d97f9b;
+  --vermelho: #b8261c; --ouro: #f5c238; --madeira: #8a5a2b; --barbante: #6b4a2a;
+  background: var(--capa); color: var(--tinta);
+}
+.A .conteudo { position: relative; display: flex; flex-direction: column; gap: 22px; padding: 40px 20px 40px; }
+.A .ico { stroke-width: 2.4; }
+
+/* O folheto: a capa, com moldura dupla, título fora de registro e a xilo no meio. */
+.A .folheto { position: relative; align-self: center; width: 330px; background: var(--papel); padding: 24px 20px 20px;
+  border: 3px solid var(--tinta); box-shadow: inset 0 0 0 5px var(--papel), inset 0 0 0 7px var(--tinta), 0 22px 30px -16px rgba(96, 22, 48, .55); }
+.A .titulo { text-align: center; font-family: 'Alfa Slab One', serif; text-transform: uppercase; color: var(--tinta); font-weight: 400; }
+.A .titulo-pre { display: block; font-size: 19px; letter-spacing: .32em; margin: 6px 0 2px; padding-left: .32em; }
+.A .titulo-nome { display: block; font-size: 49px; line-height: .95; letter-spacing: .01em; text-shadow: 3px 2px 0 var(--vermelho); }
+.A .xilo { display: block; width: 100%; height: auto; margin: 16px 0 14px; border: 4px solid var(--tinta); background: var(--papel); }
+.A .sub { text-align: center; font-size: 15.5px; font-weight: 560; line-height: 1.4; text-wrap: balance; }
+.A .fio { display: flex; align-items: center; gap: 8px; margin-top: 12px; color: var(--tinta); }
+.A .fio::before, .A .fio::after { content: ''; flex: 1; height: 2px; background: var(--tinta); }
+.A .fio svg { width: 12px; height: 12px; fill: var(--vermelho); }
+.A .pregador { position: absolute; top: -26px; width: 14px; height: 40px; border-radius: 3px; background: linear-gradient(90deg, #a06b37, var(--madeira) 55%, #6e4520); box-shadow: 0 2px 2px rgba(0, 0, 0, .25); }
+.A .pregador::after { content: ''; position: absolute; left: 2px; right: 2px; top: 15px; height: 6px; border-radius: 3px; border: 2px solid #4a4743; }
+
+/* Botões de carimbo: a face, a borda de tinta e o bloco de madeira por baixo; no toque, afundam. */
+.A .btn { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 56px; padding: 10px 18px;
+  border: 3px solid var(--tinta); border-radius: 3px; font-family: 'Alfa Slab One', serif; font-size: 18px; letter-spacing: .04em;
+  text-transform: uppercase; cursor: pointer; box-shadow: 4px 5px 0 var(--madeira); transition: transform .08s, box-shadow .08s; }
+.A .btn:active { transform: translate(3px, 4px); box-shadow: 1px 1px 0 var(--madeira); }
+.A .btn-ouro { background: var(--ouro); color: var(--tinta); }
+.A .btn-papel { background: var(--papel); color: var(--tinta); }
+.A .btn-perigo { background: var(--papel); color: var(--vermelho); border-color: var(--vermelho); box-shadow: 4px 5px 0 rgba(184, 38, 28, .35); }
+.A .btn-grande { min-height: 66px; font-size: 19px; letter-spacing: .02em; position: relative; }
+.A .btn-grande .selo { position: absolute; right: -12px; top: -14px; width: 40px; height: 40px; transform: rotate(14deg); }
+.A .btn .ico { width: 24px; height: 24px; }
+
+/* Painéis: folhas impressas, com a faixa de tinta do título cortada como fita. */
+.A .painel { display: flex; flex-direction: column; gap: 16px; background: var(--papel); border: 3px solid var(--tinta);
+  box-shadow: 6px 6px 0 var(--tinta); padding: 0 18px 20px; }
+.A .painel-tit { display: flex; align-items: center; gap: 10px; margin: 0 -18px 2px; padding: 10px 26px 10px 18px; background: var(--tinta);
+  color: var(--papel); font-family: 'Alfa Slab One', serif; font-weight: 400; font-size: 17px; letter-spacing: .06em; text-transform: uppercase;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 50%, 100% 100%, 0 100%); align-self: stretch; }
+.A .painel-tit .ico { width: 20px; height: 20px; color: var(--ouro); }
+.A .campo { display: flex; flex-direction: column; gap: 6px; }
+.A .rotulo { display: block; font-weight: 760; font-size: 15px; }
+.A .grupo .rotulo { margin-bottom: 8px; }
+.A .entrada { width: 100%; height: 50px; padding: 0 14px; border: 3px solid var(--tinta); border-radius: 2px; background: var(--papel-claro);
+  font-size: 16px; color: var(--tinta); box-shadow: inset 3px 3px 0 rgba(23, 18, 15, .09); }
+.A .entrada.foco { outline: 3px solid var(--ouro); box-shadow: 0 0 0 6px var(--tinta); }
+.A .dica, .A .nota { font-size: 14px; }
+
+.A .opcoes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.A .opcoes.duas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.A .opcao { position: relative; display: flex; align-items: center; justify-content: center; min-height: 48px; padding: 4px 6px;
+  border: 3px solid var(--tinta); background: var(--papel-claro); font-weight: 760; text-align: center; cursor: pointer; line-height: 1.15; }
+.A .opcao.marcada { background: var(--tinta); color: var(--papel); }
+.A .opcao.marcada::after { content: ''; position: absolute; top: 3px; right: 3px; border-top: 11px solid var(--ouro); border-left: 11px solid transparent; }
+.A .opcao.travada { color: rgba(23, 18, 15, .5); border-color: rgba(23, 18, 15, .4); cursor: not-allowed;
+  background: repeating-linear-gradient(-45deg, var(--papel-claro) 0 5px, rgba(23, 18, 15, .14) 5px 7px); }
+
+/* Os atalhos do treino e das partidas: dois carimbos lado a lado, com a gravura em cima. */
+.A .atalhos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.A .atalho { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 116px; padding: 12px 8px;
+  background: var(--papel); border: 3px solid var(--tinta); border-radius: 3px; box-shadow: 4px 5px 0 var(--madeira); cursor: pointer;
+  font-family: 'Alfa Slab One', serif; font-size: 15px; line-height: 1.15; letter-spacing: .03em; text-transform: uppercase; text-align: center; }
+.A .atalho .gravura { width: 44px; height: 44px; }
+
+/* A chave: a caixa nativa vestida de alavanca (só CSS no jogo). */
+.A .chave { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 58px; padding: 8px 14px;
+  border: 3px solid var(--tinta); background: var(--papel-claro); font-weight: 760; cursor: pointer; }
+.A .chave-txt { display: flex; align-items: center; gap: 10px; }
+.A .chave-lado { display: flex; align-items: center; gap: 10px; }
+.A .chave-estado { font-size: 14px; font-weight: 500; }
+.A .trilho { position: relative; width: 56px; height: 32px; flex: none; border: 3px solid var(--tinta); border-radius: 16px; background: var(--papel); }
+.A .trilho .pino { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--tinta); }
+.A .chave.ligada .trilho { background: var(--ouro); }
+.A .chave.ligada .pino { left: auto; right: 3px; }
+
+/* O fundo: fibra de papel e os raios de xilo, em rosa mais fundo. */
+.A .raios { opacity: .55; }
+
+/* PC: o folheto à esquerda, os painéis em duas colunas à direita (a ordem do Tab é a mesma do celular). */
+.A.pc .conteudo { position: absolute; inset: 0; padding: 0; display: block; }
+.A.pc .heroi { position: absolute; left: 96px; top: 46px; width: 460px; display: flex; flex-direction: column; gap: 30px; }
+.A.pc .folheto { width: 460px; padding: 28px 26px 24px; }
+.A.pc .titulo-pre { font-size: 22px; }
+.A.pc .titulo-nome { font-size: 76px; text-shadow: 4px 3px 0 var(--vermelho); }
+.A.pc .sub { font-size: 17px; }
+.A.pc .col { position: absolute; top: 58px; display: flex; flex-direction: column; gap: 26px; }
+.A.pc .col-1 { left: 640px; width: 340px; }
+.A.pc .col-2 { left: 1024px; width: 340px; }
+
+/* O menu da partida. */
+.A .dialogo { position: absolute; left: 16px; right: 16px; top: 24px; background: var(--papel); border: 4px solid var(--tinta); box-shadow: 8px 8px 0 var(--tinta); }
+.A .dialogo .painel-tit { margin: 0; font-size: 22px; padding: 14px 28px 14px 18px; }
+.A .dialogo-corpo { display: flex; flex-direction: column; gap: 14px; padding: 16px 18px 22px; }
+.A .carimbo { align-self: flex-start; padding: 3px 10px; border: 2px solid var(--vermelho); color: var(--vermelho); font-weight: 800; font-size: 13px;
+  letter-spacing: .12em; text-transform: uppercase; transform: rotate(-2deg); }
+.A .regua { height: 0; border-top: 2px dashed rgba(23, 18, 15, .45); margin: 2px 0; }
+.A .itens { display: flex; flex-direction: column; gap: 12px; }
+.A .itens .btn { justify-content: flex-start; font-size: 16px; min-height: 52px; }
