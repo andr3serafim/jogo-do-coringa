@@ -29,7 +29,7 @@ describe('<App intro />: o pedaço da abertura não chega', () => {
     await waitFor(() => expect(container.querySelector('[data-abertura-capa]')).toBeNull());
     expect(container.querySelector('[inert]')).toBeNull();
     expect(screen.queryByRole('heading', { name: 'Algo deu errado' })).toBeNull();
-    await userEvent.click(screen.getByRole('link', { name: 'Partidas anteriores' }));
+    await userEvent.click(screen.getByRole('link', { name: /^Partidas anteriores/ }));
     expect(window.location.pathname).toBe('/partidas');
   });
 });

@@ -24,7 +24,7 @@ function setup(store = memoryStore()) {
 }
 
 const menu = () => screen.getByRole('navigation', { name: 'Menu' });
-const seal = (name: string) => within(menu()).getByRole('link', { name }).querySelector('[data-selo-tutorial]');
+const seal = (name: string) => within(menu()).getByRole('link', { name: new RegExp(`^${name}`) }).querySelector('[data-selo-tutorial]');
 
 describe('início: o menu', () => {
   it('o título da tela e as quatro entradas, na ordem, cada uma com a sua rota', () => {
@@ -33,18 +33,17 @@ describe('início: o menu', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Jogo do Coringa' })).toBeInTheDocument();
     const links = within(menu()).getAllByRole('link');
     expect(links.map((link) => link.textContent)).toEqual([
-      'Jogar onlineCriar sala ou entrar numa sala',
-      'TreinarJogar com o bot ou aprender jogando',
-      'Partidas anterioresReveja as partidas jogadas',
-      'OpçõesAparência e preferências',
+      'Jogar online Criar sala ou entrar numa sala',
+      'Treinar Jogar com o bot ou aprender jogando',
+      'Partidas anteriores Reveja as partidas jogadas',
+      'Opções Aparência e preferências',
     ]);
     expect(links.map((link) => link.getAttribute('href'))).toEqual(['/jogar', '/treinar', '/partidas', '/opcoes']);
   });
 
-  it('o nome de cada link é o da entrada, e a linha curta é a descrição', () => {
+  it('o nome de cada link é o texto visível inteiro, a entrada e a linha (WCAG 2.5.3)', () => {
     setup();
-    const online = screen.getByRole('link', { name: 'Jogar online' });
-    expect(online).toHaveAccessibleDescription('Criar sala ou entrar numa sala');
+    expect(screen.getByRole('link', { name: 'Jogar online Criar sala ou entrar numa sala' })).toHaveAttribute('href', '/jogar');
   });
 
   it.each([
@@ -54,7 +53,7 @@ describe('início: o menu', () => {
     ['Opções', '/opcoes'],
   ])('o clique simples em "%s" navega para %s sem recarregar', async (name, path) => {
     const { user } = setup();
-    await user.click(screen.getByRole('link', { name }));
+    await user.click(screen.getByRole('link', { name: new RegExp(`^${name}`) }));
     expect(window.location.pathname).toBe(path);
   });
 

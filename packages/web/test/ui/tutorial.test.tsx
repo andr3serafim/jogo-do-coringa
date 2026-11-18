@@ -290,7 +290,7 @@ describe('/tutorial: o painel da dica', () => {
     const dialog = within(screen.getByRole('dialog', { name: 'Bot venceu' }));
     expect(dialog.getByText(END_HINT)).toBeInTheDocument();
     const friend = dialog.getByRole('link', { name: 'Jogar com um amigo' });
-    expect(friend).toHaveAttribute('href', '/');
+    expect(friend).toHaveAttribute('href', '/jogar');
     // Fora do diálogo (onde, no navegador, tudo fica inerte) não há dica nenhuma: nem a do Equipar, que ninguém marcou, nem a do fim.
     expect(hint().queryByText(END_HINT)).not.toBeInTheDocument();
     expect(hint().queryByText(EQUIP_HINT)).not.toBeInTheDocument();
@@ -347,11 +347,11 @@ describe('/tutorial: o painel da dica', () => {
     expect(outlined()).toEqual([]);
   });
 
-  it('"Jogar com um amigo", dentro do painel de fim, leva à tela inicial', async () => {
+  it('"Jogar com um amigo", dentro do painel de fim, leva a Jogar online', async () => {
     const clock = await openTutorial();
     await concede(clock);
     await clock.user.click(within(screen.getByRole('dialog', { name: 'Bot venceu' })).getByRole('link', { name: 'Jogar com um amigo' }));
-    expect(window.location.pathname).toBe('/');
+    expect(window.location.pathname).toBe('/jogar');
   });
 
   it('uma dica nova leva o painel à vista (os campos rolam por dentro no celular e no tablet)', async () => {

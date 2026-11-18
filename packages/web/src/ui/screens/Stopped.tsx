@@ -20,7 +20,7 @@ export function Stopped({ reason, onUseHere, onReload }: StoppedProps) {
           <Title>Essa sala não existe mais</Title>
           <Panel>
             <p>Ela expirou ou foi encerrada.</p>
-            <Button onClick={() => navigate('/')}>Criar sala</Button>
+            <Button onClick={() => navigate('/jogar')}>Criar sala</Button>
           </Panel>
         </Screen>
       );

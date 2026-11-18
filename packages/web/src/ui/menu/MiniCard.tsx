@@ -2,7 +2,7 @@
 // Início (`MenuItem`) é o link inteiro; a carta dela respira e, sob o mouse, inclina em 3D com a conta da mão do jogo (`Hand.tsx`: até 13°,
 // a sombra acompanhando), escrita direto no estilo do invólucro (sem redesenhar); no toque, sobe 8 px e inclina para o lado do dedo. Com
 // movimento reduzido, nada disso.
-import { useId, useRef, type CSSProperties, type PointerEvent } from 'react';
+import { useRef, type CSSProperties, type PointerEvent } from 'react';
 import { navigate } from '../../app/router.ts';
 import { suitPath } from '../cards/Suit.tsx';
 import { useMenuMotion } from './menu-theme.tsx';
@@ -113,7 +113,6 @@ export interface MenuItemProps {
 
 /** Uma linha do menu do Início: um link de verdade (abre em outra aba), que no clique simples navega pelo roteador. */
 export function MenuItem({ to, kind, name, line, seal = false, index }: MenuItemProps) {
-  const id = useId();
   const tilt = useRef<HTMLSpanElement>(null);
   const { reduced } = useMenuMotion();
   const lean = (transform: string, shadow: string) => {
@@ -145,8 +144,6 @@ export function MenuItem({ to, kind, name, line, seal = false, index }: MenuItem
       href={to}
       className="menu-item"
       style={{ '--i': index } as CSSProperties}
-      aria-labelledby={`${id}-nome`}
-      aria-describedby={`${id}-linha`}
       onClick={(event) => {
         if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return;
         event.preventDefault();
@@ -162,10 +159,9 @@ export function MenuItem({ to, kind, name, line, seal = false, index }: MenuItem
         <MiniCard kind={kind} seal={seal} />
       </span>
       <span>
-        <span id={`${id}-nome`} className="menu-item-nome">
-          {name}
-        </span>
-        <span id={`${id}-linha`} className="menu-item-linha">
+        <span className="menu-item-nome">{name}</span>
+        {/* O nome do link é o texto visível inteiro, entrada e linha (WCAG 2.5.3: o axe barra um nome que não o contenha); o espaço separa as palavras. */}{' '}
+        <span className="menu-item-linha">
           {line}
         </span>
       </span>

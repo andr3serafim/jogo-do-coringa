@@ -133,7 +133,7 @@ export function EndHintNote({ onShown }: { onShown: () => void }) {
       </p>
       <p>{END_HINT}</p>
       <div>
-        <AppLink to="/">{HINT_FRIEND_LABEL}</AppLink>
+        <AppLink to="/jogar">{HINT_FRIEND_LABEL}</AppLink>
       </div>
     </div>
   );

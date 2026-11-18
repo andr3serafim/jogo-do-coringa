@@ -19,7 +19,7 @@ function item(reduceMotion = false) {
       </MenuScreen>
     </MenuThemeProvider>,
   );
-  const link = screen.getByRole('link', { name: 'Jogar online' });
+  const link = screen.getByRole('link', { name: /^Jogar online/ });
   return { link, tilt: link.querySelector<HTMLElement>('[data-inclina]')! };
 }
 

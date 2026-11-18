@@ -1,6 +1,6 @@
 // Treinar (`/treinar`; spec 2026-11-18-menus-folheto-design.md §2): jogar com o bot (a escolha do nível, `/treino`) ou aprender jogando
 // (o tutorial, `/tutorial`). Enquanto o tutorial não foi feito nem pulado, "Aprender jogando" vem em ouro, com o selo.
-import { useId, useState, type CSSProperties, type ReactNode } from 'react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import { LEARN_LABEL, LEARN_LINE, PLAY_BOT_LABEL, PLAY_BOT_LINE, PRACTICE_LABEL, PRACTICE_LINE } from '../../model/copy.ts';
 import { loadTutorialState, type KeyValueStore } from '../../model/storage.ts';
 import { MenuScreen } from '../menu/MenuScreen.tsx';
@@ -23,25 +23,21 @@ const BOOK_ICON = (
 );
 
 function Choice({ to, icon, name, line, gold, seal, order }: { to: string; icon: ReactNode; name: string; line: string; gold: boolean; seal: boolean; order: number }) {
-  const id = useId();
   return (
     <a
       href={to}
       onClick={followLink(to)}
       className={`carimbo carimbo-grande menu-escolha ${gold ? 'carimbo-ouro' : 'carimbo-papel'}`}
       data-tom={gold ? 'gold' : 'paper'}
-      aria-labelledby={`${id}-nome`}
-      aria-describedby={`${id}-linha`}
       style={{ '--d': order } as CSSProperties}
     >
       <span className="menu-escolha-bloco" aria-hidden="true">
         {icon}
       </span>
       <span>
-        <span id={`${id}-nome`} className="menu-escolha-nome">
-          {name}
-        </span>
-        <span id={`${id}-linha`} className="menu-escolha-linha">
+        <span className="menu-escolha-nome">{name}</span>
+        {/* O nome do link é o texto visível inteiro (WCAG 2.5.3), com o espaço entre as palavras. */}{' '}
+        <span className="menu-escolha-linha">
           {line}
         </span>
       </span>

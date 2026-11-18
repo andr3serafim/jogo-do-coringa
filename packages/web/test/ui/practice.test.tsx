@@ -23,9 +23,9 @@ describe('treinar', () => {
     setup();
     expect(screen.getByRole('heading', { level: 1, name: 'Treinar' })).toHaveFocus();
     expect(screen.getByRole('link', { name: 'Início' })).toHaveAttribute('href', '/');
-    expect(screen.getByRole('link', { name: 'Jogar com o bot' })).toHaveAttribute('href', '/treino');
-    expect(screen.getByRole('link', { name: 'Aprender jogando' })).toHaveAttribute('href', '/tutorial');
-    expect(screen.getByRole('link', { name: 'Jogar com o bot' })).toHaveAccessibleDescription('Fácil, Médio ou Difícil');
+    expect(screen.getByRole('link', { name: /^Jogar com o bot/ })).toHaveAttribute('href', '/treino');
+    expect(screen.getByRole('link', { name: /^Aprender jogando/ })).toHaveAttribute('href', '/tutorial');
+    expect(screen.getByRole('link', { name: 'Jogar com o bot Fácil, Médio ou Difícil' })).toBeInTheDocument();
   });
 
   it.each([
@@ -34,21 +34,21 @@ describe('treinar', () => {
     ['Início', '/'],
   ])('"%s" navega para %s', async (name, path) => {
     const { user } = setup();
-    await user.click(screen.getByRole('link', { name }));
+    await user.click(screen.getByRole('link', { name: new RegExp(`^${name}`) }));
     expect(window.location.pathname).toBe(path);
   });
 
   it('com o tutorial por fazer, "Aprender jogando" vem em ouro e com o selo', () => {
     setup();
-    const learn = screen.getByRole('link', { name: 'Aprender jogando' });
+    const learn = screen.getByRole('link', { name: /^Aprender jogando/ });
     expect(learn).toHaveAttribute('data-tom', 'gold');
     expect(learn.querySelector('[data-selo-tutorial]')).not.toBeNull();
-    expect(screen.getByRole('link', { name: 'Jogar com o bot' })).toHaveAttribute('data-tom', 'paper');
+    expect(screen.getByRole('link', { name: /^Jogar com o bot/ })).toHaveAttribute('data-tom', 'paper');
   });
 
   it.each(['done', 'skipped'])('com coringa:tutorial = %s, de papel e sem selo', (state) => {
     setup(state);
-    const learn = screen.getByRole('link', { name: 'Aprender jogando' });
+    const learn = screen.getByRole('link', { name: /^Aprender jogando/ });
     expect(learn).toHaveAttribute('data-tom', 'paper');
     expect(learn.querySelector('[data-selo-tutorial]')).toBeNull();
   });

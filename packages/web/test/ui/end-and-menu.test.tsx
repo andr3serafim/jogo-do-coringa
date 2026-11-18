@@ -543,11 +543,11 @@ describe('na sala (RoomGate): Nova sala, link e versão', () => {
     return { made, user, ...rendered };
   }
 
-  it('"Nova sala" volta ao início, solta a sessão e fecha a conexão', async () => {
+  it('"Nova sala" leva ao formulário de criar (Jogar online), solta a sessão e fecha a conexão', async () => {
     const { made, user } = realRoom();
     await user.click(within(endDialog('Você venceu')).getByRole('button', { name: 'Nova sala' }));
-    expect(window.location.pathname).toBe('/');
-    expect(screen.getByRole('heading', { name: 'Jogo do Coringa' })).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/jogar');
+    expect(screen.getByRole('heading', { name: 'Jogar online' })).toBeInTheDocument();
     expect(screen.queryByRole('main', { name: 'Mesa' })).not.toBeInTheDocument();
     expect(made[0]!.calls).toContain('close');
   });

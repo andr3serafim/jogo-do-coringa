@@ -221,7 +221,7 @@ function RoomEntry({ code, api, store, reload, marks }: EntryProps) {
         <Screen>
           <Title>{ROOM_MISSING}</Title>
           <Panel>
-            <Button onClick={() => navigate('/')}>Criar sala</Button>
+            <Button onClick={() => navigate('/jogar')}>Criar sala</Button>
           </Panel>
         </Screen>
       );
@@ -230,7 +230,7 @@ function RoomEntry({ code, api, store, reload, marks }: EntryProps) {
         <Screen>
           <Title>{ROOM_FULL}</Title>
           <Panel>
-            <Button onClick={() => navigate('/')}>Criar outra sala</Button>
+            <Button onClick={() => navigate('/jogar')}>Criar outra sala</Button>
           </Panel>
         </Screen>
       );
@@ -352,7 +352,7 @@ function Connecting() {
 }
 
 /** "Nova sala": sair da tela da sala desmonta `Online`, cujo efeito descarta a sessão e fecha a conexão. */
-const goHome = (): void => navigate('/');
+const goPlay = (): void => navigate('/jogar');
 
 interface OnlineRoomProps {
   session: Session;
@@ -414,7 +414,8 @@ function OnlineRoom({ session, code, api, store, reload }: OnlineRoomProps) {
       store={store}
       inviteLink={roomLink(window.location.origin, code)}
       loadVersion={api.version}
-      onNewRoom={goHome}
+      // "Nova sala" leva direto ao formulário de criar (o Início virou um menu, decisoes.md 2026-11-18 (2)).
+      onNewRoom={goPlay}
     />
   );
 }

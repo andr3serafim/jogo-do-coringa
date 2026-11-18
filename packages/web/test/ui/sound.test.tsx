@@ -390,7 +390,7 @@ describe('o App liga o controlador ao documento', () => {
     const user = userEvent.setup();
     render(<App api={fakeApi()} />);
     // Do Início às Opções: os dois cliques são gestos, e com o som desligado nenhum cria contexto.
-    await user.click(screen.getByRole('link', { name: 'Opções' }));
+    await user.click(screen.getByRole('link', { name: /^Opções/ }));
     await user.click(screen.getByRole('heading', { name: 'Opções' }));
     expect(created).toHaveLength(0);
     await user.click(screen.getByRole('switch', { name: 'Som' }));

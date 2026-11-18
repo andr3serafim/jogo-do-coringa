@@ -158,7 +158,7 @@ describe('entrada: erros do servidor', () => {
     const { user } = await gate((api) => api.info.mockRejectedValue(new HttpError(404)));
     expect(await screen.findByRole('heading', { name: 'Essa sala não existe ou já expirou' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Criar sala' }));
-    expect(window.location.pathname).toBe('/');
+    expect(window.location.pathname).toBe('/jogar');
   });
 
   it('sala cheia: "Essa sala já está com dois jogadores", com Criar outra sala', async () => {
@@ -166,7 +166,7 @@ describe('entrada: erros do servidor', () => {
     expect(await screen.findByRole('heading', { name: 'Essa sala já está com dois jogadores' })).toBeInTheDocument();
     expect(api.connect).not.toHaveBeenCalled();
     await user.click(screen.getByRole('button', { name: 'Criar outra sala' }));
-    expect(window.location.pathname).toBe('/');
+    expect(window.location.pathname).toBe('/jogar');
   });
 
   it('sala fora do LOBBY também é "cheia" (não há espectador)', async () => {
@@ -240,7 +240,7 @@ describe('sala parada', () => {
     expect(screen.getByRole('heading', { name: 'Essa sala não existe mais' })).toBeInTheDocument();
     expect(loadSeat(store, CODE)).toBeNull();
     await user.click(screen.getByRole('button', { name: 'Criar sala' }));
-    expect(window.location.pathname).toBe('/');
+    expect(window.location.pathname).toBe('/jogar');
   });
 
   it('4009 (OTHER_TAB): "Usar aqui" chama wake()', async () => {

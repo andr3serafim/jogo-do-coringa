@@ -57,9 +57,9 @@ describe('<App />: rotas', () => {
       return array;
     }) as typeof crypto.getRandomValues);
     render(<App api={fakeApi()} />);
-    await userEvent.click(screen.getByRole('link', { name: 'Treinar' }));
+    await userEvent.click(screen.getByRole('link', { name: /^Treinar/ }));
     expect(window.location.pathname).toBe('/treinar');
-    await userEvent.click(screen.getByRole('link', { name: 'Jogar com o bot' }));
+    await userEvent.click(screen.getByRole('link', { name: /^Jogar com o bot/ }));
     expect(window.location.pathname).toBe('/treino');
     // Sem `?nivel=`, o treino pergunta o nível antes da mesa.
     await userEvent.click(await screen.findByRole('button', { name: /^Médio/ }));
@@ -196,7 +196,7 @@ describe('<App />: sem armazenamento do navegador', () => {
     throwingStorage();
     const api = fakeApi();
     render(<App api={api} />);
-    await userEvent.click(screen.getByRole('link', { name: 'Jogar online' }));
+    await userEvent.click(screen.getByRole('link', { name: /^Jogar online/ }));
     await userEvent.type(screen.getByLabelText('Seu apelido'), 'Duda');
     await userEvent.click(screen.getByRole('button', { name: 'Criar sala' }));
     expect(window.location.pathname).toBe(`/s/${CODE}`);
@@ -308,18 +308,18 @@ describe('<App intro />: a abertura (decisoes.md 2026-11-16 (5))', () => {
     act(() => void vi.advanceTimersByTime(INTRO.total));
     expect(overlay(container)).toBeNull();
     expect(container.querySelector('[inert]')).toBeNull();
-    expect(screen.getByRole('link', { name: 'Treinar' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^Treinar/ })).toBeInTheDocument();
   });
 
   it('pulando com uma tecla, o menu abre em seguida e funciona', async () => {
     const { container } = render(<App api={fakeApi()} intro />);
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(overlay(container)).toBeNull());
-    await userEvent.click(screen.getByRole('link', { name: 'Partidas anteriores' }));
+    await userEvent.click(screen.getByRole('link', { name: /^Partidas anteriores/ }));
     expect(window.location.pathname).toBe('/partidas');
   });
 
-  it.each(['/s/oi', '/partidas', '/treino?nivel=medio&semente=abertura', '/rota-que-nao-existe'])('abrindo direto em %s, não há abertura', (path) => {
+  it.each(['/s/oi', '/partidas', '/treino?nivel=medio&semente=abertura', '/rota-que-nao-existe', '/jogar', '/treinar', '/opcoes'])('abrindo direto em %s, não há abertura', (path) => {
     window.history.replaceState(null, '', path);
     const { container } = render(<App api={fakeApi()} intro />);
     expect(overlay(container)).toBeNull();

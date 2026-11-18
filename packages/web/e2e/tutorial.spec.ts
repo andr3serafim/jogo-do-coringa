@@ -188,12 +188,13 @@ test('tutorial, o fim: a dica do fim (a 12, com as do Roubo, da Devastação e d
   expect(await stored(page)).toBe('done');
   await axe(page);
 
-  // O link leva à tela inicial (sem recarregar a sala: é o treino local), onde o botão do tutorial já é comum.
+  // O link leva a Jogar online (sem recarregar a sala: é o treino local); no Início, o Treinar já está sem o selo.
   const friend = note.getByRole('link', { name: 'Jogar com um amigo' });
-  await expect(friend).toHaveAttribute('href', '/');
+  await expect(friend).toHaveAttribute('href', '/jogar');
   await friend.click();
-  await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole('heading', { name: 'Jogo do Coringa' })).toBeVisible();
+  await expect(page).toHaveURL(/\/jogar$/);
+  await expect(page.getByRole('heading', { name: 'Jogar online' })).toBeVisible();
+  await page.getByRole('link', { name: 'Início' }).click();
   await expect(page.getByRole('link', { name: 'Treinar' }).locator('[data-selo-tutorial]')).toHaveCount(0);
   guard.expectClean();
 });

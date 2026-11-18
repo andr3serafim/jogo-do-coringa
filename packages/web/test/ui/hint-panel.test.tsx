@@ -206,17 +206,17 @@ describe('<HintPanel />', () => {
 });
 
 describe('<EndHintNote />', () => {
-  it('a dica do fim e o link "Jogar com um amigo" para o início, sem "Entendi" nem "Pular"', async () => {
+  it('a dica do fim e o link "Jogar com um amigo" para Jogar online, sem "Entendi" nem "Pular"', async () => {
     const user = userEvent.setup();
     render(<EndHintNote onShown={noop} />);
     const note = document.querySelector<HTMLElement>('[data-dica-nota]')!;
     expect(note).toHaveTextContent(hintParagraphs('end')[0]!);
     const link = within(note).getByRole('link', { name: 'Jogar com um amigo' });
-    expect(link).toHaveAttribute('href', '/');
+    expect(link).toHaveAttribute('href', '/jogar');
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
     window.history.replaceState(null, '', '/tutorial');
     await user.click(link);
-    expect(window.location.pathname).toBe('/');
+    expect(window.location.pathname).toBe('/jogar');
   });
 
   it('avisa que apareceu uma vez por montagem (é aí que o tutorial fica concluído)', () => {
