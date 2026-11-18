@@ -1,173 +1,41 @@
-// Início (spec §2.1): criar sala, entrar com código ou link e treinar contra o bot. O apelido fica lembrado, e a chave "Som"
-// já mora aqui (guardada em `coringa:prefs`, com as outras preferências como estavam).
-import { DEFAULT_CONFIG } from '@coringa/engine';
-import { DEFAULT_LOOK, HttpError, normalizeNickname, parseTarget, type Look } from '@coringa/protocol';
-import { useState, type FormEvent } from 'react';
-import type { RoomApi } from '../../app/room-api.ts';
-import { navigate } from '../../app/router.ts';
-import { LEARN_LABEL, LOOK_ONLINE_NOTE, LOOK_PANEL_LABEL, PAST_GAMES_LABEL, SOUND_LABEL } from '../../model/copy.ts';
-import { sentLook } from '../../model/looks.ts';
+// O Início no Folheto (decisoes.md 2026-11-18 (2) a (5); spec 2026-11-18-menus-folheto-design.md §2): o emblema do Coringa e o menu em
+// lista de mini cartas — Jogar online, Treinar, Partidas anteriores e Opções —, cada entrada com a sua rota. O controle discreto do tema
+// fica no canto. Enquanto o tutorial não foi feito nem pulado, a carta do Treinar leva o selo (dentro, "Aprender jogando" vem em ouro).
+import { useState } from 'react';
 import {
-  loadNickname,
-  loadPrefs,
-  loadTutorialState,
-  saveNickname,
-  savePrefs,
-  saveSeat,
-  type KeyValueStore,
-} from '../../model/storage.ts';
-import { HpChoice } from '../HpChoice.tsx';
-import { LookChoice } from '../LookChoice.tsx';
-import { Button, Panel, Screen, Switch, TextField, Title } from '../parts.tsx';
-import { useSound } from '../sound-context.ts';
-import { NICKNAME_ERROR, OFFLINE, TOO_MANY } from '../text.ts';
-
-const TARGET_ERROR = 'Digite o código de 6 caracteres ou o link da sala.';
+  MENU_NAV_LABEL,
+  OPTIONS_LABEL,
+  OPTIONS_LINE,
+  PAST_GAMES_LABEL,
+  PAST_GAMES_LINE,
+  PLAY_ONLINE_LABEL,
+  PLAY_ONLINE_LINE,
+  PRACTICE_LABEL,
+  PRACTICE_LINE,
+} from '../../model/copy.ts';
+import { loadTutorialState, type KeyValueStore } from '../../model/storage.ts';
+import { Emblem } from '../menu/Emblem.tsx';
+import { MenuScreen } from '../menu/MenuScreen.tsx';
+import { MenuItem } from '../menu/MiniCard.tsx';
+import { ThemeToggle } from '../menu/ThemeToggle.tsx';
 
 export interface HomeProps {
-  api: RoomApi;
   store: KeyValueStore;
 }
 
-export function Home({ api, store }: HomeProps) {
-  const [nickname, setNickname] = useState(() => loadNickname(store));
-  const [hp, setHp] = useState(DEFAULT_CONFIG.hp);
-  const [nicknameError, setNicknameError] = useState<string | null>(null);
-  const [createError, setCreateError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [target, setTarget] = useState('');
-  const [targetError, setTargetError] = useState<string | null>(null);
-  const sound = useSound();
-  const [soundOn, setSoundOn] = useState(() => loadPrefs(store).sound);
-  const [look, setLook] = useState<Look>(() => loadPrefs(store).look ?? DEFAULT_LOOK);
-  // "Aprender jogando" vem em destaque (no alto, em ouro) enquanto o tutorial não foi feito nem pulado; depois, é um botão comum, entre os do treino.
+export function Home({ store }: HomeProps) {
   const [tutorialPending] = useState(() => loadTutorialState(store) === null);
-  const learn = (
-    <Button
-      variant={tutorialPending ? 'primary' : 'secondary'}
-      data-destaque={tutorialPending ? 'true' : undefined}
-      onClick={() => navigate('/tutorial')}
-    >
-      {LEARN_LABEL}
-    </Button>
-  );
-
-  /** Liga ou desliga o som. O controlador é avisado na hora, no próprio clique (ver `PlayTable.changePrefs`). */
-  function changeSound(on: boolean) {
-    setSoundOn(on);
-    savePrefs(store, { ...loadPrefs(store), sound: on });
-    sound.setEnabled(on);
-  }
-
-  /**
-   * A aparência das cartas (decks e raças): guardada com as outras preferências. Vale no treino e, na sala online, a que você tinha ao
-   * criar ou entrar (fatia 3, H2).
-   */
-  function changeLook(next: Look) {
-    setLook(next);
-    savePrefs(store, { ...loadPrefs(store), look: next });
-  }
-
-  async function create(event: FormEvent) {
-    event.preventDefault();
-    setCreateError(null);
-    const valid = normalizeNickname(nickname);
-    if (valid === null) {
-      setNicknameError(NICKNAME_ERROR);
-      return;
-    }
-    setNicknameError(null);
-    setBusy(true);
-    try {
-      // Fora do padrão, a aparência do painel vai junto (fatia 3, H1); no padrão, a chamada é a de hoje.
-      const sent = sentLook(look);
-      const room = await (sent === undefined ? api.create(valid, hp) : api.create(valid, hp, sent));
-      saveNickname(store, valid);
-      saveSeat(store, room.code, { token: room.token, playerId: room.playerId, nickname: valid });
-      navigate(`/s/${room.code}`);
-    } catch (error) {
-      setBusy(false);
-      if (error instanceof HttpError && error.status === 400) setNicknameError(NICKNAME_ERROR);
-      else if (error instanceof HttpError && error.status === 429) setCreateError(TOO_MANY);
-      else if (error instanceof HttpError) setCreateError('Não deu para criar a sala. Tente de novo.');
-      else setCreateError(`${OFFLINE}. Confira a internet e tente de novo.`);
-    }
-  }
-
-  function join(event: FormEvent) {
-    event.preventDefault();
-    let code: string | null;
-    try {
-      // O servidor do link é ignorado: a interface só fala com o próprio site.
-      code = parseTarget(target, window.location.origin).code;
-    } catch {
-      code = null;
-    }
-    if (code === null) {
-      setTargetError(TARGET_ERROR);
-      return;
-    }
-    navigate(`/s/${code}`);
-  }
-
   return (
-    <Screen>
-      <Title>Jogo do Coringa</Title>
-      <p className="text-lg">Duelo de cartas para dois jogadores, direto no navegador.</p>
-      {tutorialPending ? learn : null}
-      <Panel label="Criar sala">
-        <form onSubmit={(event) => void create(event)} className="flex flex-col gap-4" noValidate>
-          <TextField
-            label="Seu apelido"
-            hint="De 1 a 20 caracteres."
-            value={nickname}
-            onChange={(event) => setNickname(event.target.value)}
-            error={nicknameError}
-            autoComplete="nickname"
-            autoCapitalize="words"
-            enterKeyHint="go"
-          />
-          <HpChoice value={hp} onChange={setHp} />
-          {createError ? (
-            <p role="alert" className="font-bold text-vermelho">
-              {createError}
-            </p>
-          ) : null}
-          <Button type="submit" disabled={busy}>
-            Criar sala
-          </Button>
-        </form>
-      </Panel>
-      <Panel label="Entrar numa sala">
-        <form onSubmit={join} className="flex flex-col gap-4" noValidate>
-          <TextField
-            label="Código ou link da sala"
-            value={target}
-            onChange={(event) => setTarget(event.target.value)}
-            error={targetError}
-            autoComplete="off"
-            autoCapitalize="characters"
-            spellCheck={false}
-            enterKeyHint="go"
-          />
-          <Button type="submit" variant="secondary">
-            Entrar
-          </Button>
-        </form>
-      </Panel>
-      {tutorialPending ? null : learn}
-      <Button variant="secondary" onClick={() => navigate('/treino')}>
-        Treinar contra o bot
-      </Button>
-      <Button variant="secondary" onClick={() => navigate('/partidas')}>
-        {PAST_GAMES_LABEL}
-      </Button>
-      <Panel label={LOOK_PANEL_LABEL}>
-        <LookChoice value={look} onChange={changeLook} note={LOOK_ONLINE_NOTE} />
-      </Panel>
-      <Panel label="Preferências">
-        <Switch label={SOUND_LABEL} checked={soundOn} onChange={changeSound} />
-      </Panel>
-    </Screen>
+    <MenuScreen home>
+      <h1 className="sr-only">Jogo do Coringa</h1>
+      <ThemeToggle />
+      <Emblem />
+      <nav aria-label={MENU_NAV_LABEL} className="menu-lista">
+        <MenuItem to="/jogar" kind="online" name={PLAY_ONLINE_LABEL} line={PLAY_ONLINE_LINE} index={0} />
+        <MenuItem to="/treinar" kind="practice" name={PRACTICE_LABEL} line={PRACTICE_LINE} seal={tutorialPending} index={1} />
+        <MenuItem to="/partidas" kind="pastGames" name={PAST_GAMES_LABEL} line={PAST_GAMES_LINE} index={2} />
+        <MenuItem to="/opcoes" kind="options" name={OPTIONS_LABEL} line={OPTIONS_LINE} index={3} />
+      </nav>
+    </MenuScreen>
   );
 }

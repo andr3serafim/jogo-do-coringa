@@ -4,6 +4,10 @@ import { useMemo, useSyncExternalStore } from 'react';
 
 export type Route =
   | { name: 'home' }
+  /** As entradas do menu do Início (decisoes.md 2026-11-18 (2) e (5)): `/jogar`, `/treinar` e `/opcoes`. */
+  | { name: 'play' }
+  | { name: 'practice' }
+  | { name: 'options' }
   | { name: 'room'; code: string | null }
   | { name: 'training' }
   /** `/tutorial`: uma partida de treino guiada, com dicas por situação (spec do polimento, fatia 4). */
@@ -20,6 +24,9 @@ const PAST_GAME_PATH = /^\/partidas\/([0-9a-z]+(?:-[0-9a-z]+)*)$/;
 export function parseRoute(pathname: string): Route {
   const path = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
   if (path === '/' || path === '') return { name: 'home' };
+  if (path === '/jogar') return { name: 'play' };
+  if (path === '/treinar') return { name: 'practice' };
+  if (path === '/opcoes') return { name: 'options' };
   if (path === '/treino') return { name: 'training' };
   if (path === '/tutorial') return { name: 'tutorial' };
   if (path === '/partidas') return { name: 'pastGames' };

@@ -11,7 +11,7 @@ import type { Cue } from '../../src/model/sound.ts';
 import { App } from '../../src/app/App.tsx';
 import { loadPrefs, savePrefs, type KeyValueStore } from '../../src/model/storage.ts';
 import { SoundController, type AudioContextLike, type Synth } from '../../src/sound/controller.ts';
-import { Home } from '../../src/ui/screens/Home.tsx';
+import { Options } from '../../src/ui/screens/Options.tsx';
 import { SoundContext, type SoundApi } from '../../src/ui/sound-context.ts';
 import { PlayTable, type PlayTableProps } from '../../src/ui/table/PlayTable.tsx';
 import type { ViewSpec } from '../fixtures.ts';
@@ -248,7 +248,7 @@ describe('a chave "Som" do menu da partida', () => {
 
 // ---------------------------------------------------------------------------------------------
 
-describe('a chave "Som" da tela inicial', () => {
+describe('a chave "Som" das Opções (era da tela inicial)', () => {
   function home(prefs?: Record<string, unknown>) {
     const sound = fakeSound();
     const store: KeyValueStore = memoryStore();
@@ -256,7 +256,7 @@ describe('a chave "Som" da tela inicial', () => {
     const user = userEvent.setup();
     render(
       <SoundContext value={sound.api}>
-        <Home api={fakeApi()} store={store} />
+        <Options store={store} />
       </SoundContext>,
     );
     return { sound, store, user, soundSwitch: () => screen.getByRole('switch', { name: 'Som' }) };
@@ -288,7 +288,7 @@ describe('a chave "Som" da tela inicial', () => {
   it('sem um SoundContext (testes, componentes fora do App) a chave funciona e não lança', async () => {
     const store = memoryStore();
     const user = userEvent.setup();
-    render(<Home api={fakeApi()} store={store} />);
+    render(<Options store={store} />);
     await user.click(screen.getByRole('switch', { name: 'Som' }));
     expect(loadPrefs(store).sound).toBe(false);
   });
@@ -322,7 +322,7 @@ describe('o clique na chave que liga o som', () => {
     const user = userEvent.setup();
     render(
       <SoundContext value={ctrl}>
-        <Home api={fakeApi()} store={store} />
+        <Options store={store} />
       </SoundContext>,
     );
     // Desligado, nenhum gesto (nem o ponteiro que sobe antes do clique) cria contexto...
@@ -384,12 +384,14 @@ describe('o App liga o controlador ao documento', () => {
     expect(created).toHaveLength(1);
   });
 
-  it('com sound: false guardado, os gestos não criam contexto; ligar pela chave da tela inicial já o cria no mesmo clique', async () => {
+  it('com sound: false guardado, os gestos não criam contexto; ligar pela chave das Opções já o cria no mesmo clique', async () => {
     const created = stubAudioContext();
     window.localStorage.setItem('coringa:prefs', JSON.stringify({ autoPass: true, reduceMotion: false, sound: false }));
     const user = userEvent.setup();
     render(<App api={fakeApi()} />);
-    await user.click(screen.getByRole('heading', { name: /Jogo do Coringa/ }));
+    // Do Início às Opções: os dois cliques são gestos, e com o som desligado nenhum cria contexto.
+    await user.click(screen.getByRole('link', { name: 'Opções' }));
+    await user.click(screen.getByRole('heading', { name: 'Opções' }));
     expect(created).toHaveLength(0);
     await user.click(screen.getByRole('switch', { name: 'Som' }));
     expect(created).toHaveLength(1);

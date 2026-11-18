@@ -13,6 +13,9 @@ const PATHS: Record<SuitName, string> = {
   paus: 'M12 3a3.6 3.6 0 0 0-3.4 4.8A3.6 3.6 0 1 0 9.7 15c.7 0 1.4-.2 1.9-.6-.3 2.6-1.2 4.6-2.6 6.1h6c-1.4-1.5-2.3-3.5-2.6-6.1.5.4 1.2.6 1.9.6a3.6 3.6 0 1 0 1.1-7.2A3.6 3.6 0 0 0 12 3z',
 };
 
+/** O traçado de um naipe (24 × 24), para quem desenha o próprio `<svg>` (a mini carta do menu). */
+export const suitPath = (suit: SuitName): string => PATHS[suit];
+
 /** Copas e ouros são vermelhos; espadas e paus, pretos. */
 export const isRedSuit = (suit: SuitName): boolean => suit === 'copas' || suit === 'ouros';
 

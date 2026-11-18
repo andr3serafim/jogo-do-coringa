@@ -38,6 +38,15 @@ describe('parseRoute', () => {
     ['/partidas/lz3k9a/mais', { name: 'notFound' }],
     ['/partidas//', { name: 'pastGames' }],
     ['/partida', { name: 'notFound' }],
+    // As entradas do menu (decisoes.md 2026-11-18 (2) e (5)).
+    ['/jogar', { name: 'play' }],
+    ['/jogar/', { name: 'play' }],
+    ['/jogar/x', { name: 'notFound' }],
+    ['/treinar', { name: 'practice' }],
+    ['/treinar/', { name: 'practice' }],
+    ['/opcoes', { name: 'options' }],
+    ['/opcoes/', { name: 'options' }],
+    ['/opções', { name: 'notFound' }],
   ])('%s', (path, route) => {
     expect(parseRoute(path)).toEqual(route);
   });

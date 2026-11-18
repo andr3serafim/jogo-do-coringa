@@ -12,8 +12,12 @@ import type { IntroProps } from '../ui/intro/Intro.tsx';
 import { IntroBoundary } from '../ui/intro/IntroBoundary.tsx';
 import { loadIntro, loadedIntro } from '../ui/intro/intro-loader.ts';
 import { Button, Screen } from '../ui/parts.tsx';
+import { MenuThemeProvider } from '../ui/menu/menu-theme.tsx';
 import { Home } from '../ui/screens/Home.tsx';
 import { NotFound } from '../ui/screens/NotFound.tsx';
+import { Options } from '../ui/screens/Options.tsx';
+import { PlayOnline } from '../ui/screens/PlayOnline.tsx';
+import { Practice } from '../ui/screens/Practice.tsx';
 import { RoomGate } from '../ui/screens/RoomGate.tsx';
 import { Training } from '../ui/screens/Training.tsx';
 import { SoundContext } from '../ui/sound-context.ts';
@@ -107,7 +111,10 @@ export function App({ api: injected, intro = false }: AppProps = {}) {
               </Button>
             </aside>
           ) : null}
-          <Routes api={api} store={store} />
+          {/* O tema e o movimento das telas fora da mesa (rosa ou verde), uma vez para o site inteiro. */}
+          <MenuThemeProvider store={store}>
+            <Routes api={api} store={store} />
+          </MenuThemeProvider>
         </div>
         {introOpen && introScreen !== null ? (
           <IntroBoundary onError={closeIntro}>
@@ -127,7 +134,13 @@ function Routes({ api, store }: { api: RoomApi; store: KeyValueStore }) {
   const route = useRoute();
   switch (route.name) {
     case 'home':
-      return <Home api={api} store={store} />;
+      return <Home store={store} />;
+    case 'play':
+      return <PlayOnline api={api} store={store} />;
+    case 'practice':
+      return <Practice store={store} />;
+    case 'options':
+      return <Options store={store} />;
     case 'room':
       return <RoomGate code={route.code} api={api} store={store} />;
     case 'training':

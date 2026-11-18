@@ -50,14 +50,16 @@ describe('<App />: rotas', () => {
     expect(screen.getByRole('heading', { name: 'Código inválido' })).toBeInTheDocument();
   });
 
-  it('o botão "Treinar contra o bot" do início leva à mesa do treino', async () => {
+  it('o menu do início leva à mesa do treino (Treinar, depois Jogar com o bot)', async () => {
     // Sem `?semente=` o navegador sorteia a partida; o sorteio é fixo aqui, como todo o aleatório dos testes.
     vi.spyOn(globalThis.crypto, 'getRandomValues').mockImplementation(((array: Uint32Array) => {
       array[0] = 123_456_789;
       return array;
     }) as typeof crypto.getRandomValues);
     render(<App api={fakeApi()} />);
-    await userEvent.click(screen.getByRole('button', { name: 'Treinar contra o bot' }));
+    await userEvent.click(screen.getByRole('link', { name: 'Treinar' }));
+    expect(window.location.pathname).toBe('/treinar');
+    await userEvent.click(screen.getByRole('link', { name: 'Jogar com o bot' }));
     expect(window.location.pathname).toBe('/treino');
     // Sem `?nivel=`, o treino pergunta o nível antes da mesa.
     await userEvent.click(await screen.findByRole('button', { name: /^Médio/ }));
@@ -194,6 +196,7 @@ describe('<App />: sem armazenamento do navegador', () => {
     throwingStorage();
     const api = fakeApi();
     render(<App api={api} />);
+    await userEvent.click(screen.getByRole('link', { name: 'Jogar online' }));
     await userEvent.type(screen.getByLabelText('Seu apelido'), 'Duda');
     await userEvent.click(screen.getByRole('button', { name: 'Criar sala' }));
     expect(window.location.pathname).toBe(`/s/${CODE}`);
@@ -305,14 +308,14 @@ describe('<App intro />: a abertura (decisoes.md 2026-11-16 (5))', () => {
     act(() => void vi.advanceTimersByTime(INTRO.total));
     expect(overlay(container)).toBeNull();
     expect(container.querySelector('[inert]')).toBeNull();
-    expect(screen.getByRole('button', { name: 'Treinar contra o bot' })).toBeEnabled();
+    expect(screen.getByRole('link', { name: 'Treinar' })).toBeInTheDocument();
   });
 
   it('pulando com uma tecla, o menu abre em seguida e funciona', async () => {
     const { container } = render(<App api={fakeApi()} intro />);
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(overlay(container)).toBeNull());
-    await userEvent.click(screen.getByRole('button', { name: 'Partidas anteriores' }));
+    await userEvent.click(screen.getByRole('link', { name: 'Partidas anteriores' }));
     expect(window.location.pathname).toBe('/partidas');
   });
 

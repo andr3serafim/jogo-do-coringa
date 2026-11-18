@@ -30,16 +30,21 @@ interface GroupProps<T extends string> {
   describedBy?: string;
   disabled?: (id: T) => boolean;
   onChange: (id: T) => void;
+  menu: boolean;
 }
 
-function Group<T extends string>({ legend, ids, labels, value, describedBy, disabled, onChange }: GroupProps<T>) {
+function Group<T extends string>({ legend, ids, labels, value, describedBy, disabled, onChange, menu }: GroupProps<T>) {
   const name = useId();
   return (
     <fieldset aria-describedby={describedBy} className="flex flex-col gap-2 border-0 p-0">
-      <legend className="mb-2 font-bold">{legend}</legend>
-      <div className="flex flex-wrap gap-2">
+      <legend className={menu ? 'menu-legenda' : 'mb-2 font-bold'}>{legend}</legend>
+      <div className={menu ? 'menu-opcoes' : 'flex flex-wrap gap-2'}>
         {ids.map((id) => (
-          <label key={id} className={`${OPTION} ${value === id ? 'bg-tinta text-papel' : 'bg-papel text-tinta'}`}>
+          <label
+            key={id}
+            data-marcada={menu && value === id ? '' : undefined}
+            className={menu ? 'menu-opcao' : `${OPTION} ${value === id ? 'bg-tinta text-papel' : 'bg-papel text-tinta'}`}
+          >
             <input
               type="radio"
               name={name}
@@ -64,9 +69,12 @@ export interface LookChoiceProps {
   note?: string;
   /** Os pacotes prontos para a amostra (os testes); sem eles, a amostra os pede como a mesa. */
   packs?: LooksValue['packs'];
+  /** A roupa das telas fora da mesa (spec 2026-11-18-menus-folheto-design.md §5); o menu da partida usa a de hoje. */
+  skin?: 'menu';
 }
 
-export function LookChoice({ value, onChange, note, packs }: LookChoiceProps) {
+export function LookChoice({ value, onChange, note, packs, skin }: LookChoiceProps) {
+  const menu = skin === 'menu';
   const locked = value.deck === 'cordel';
   const lockNote = useId();
   // A última raça escolhida fora do Cordel: a que volta quando o deck sai dele.
@@ -79,7 +87,7 @@ export function LookChoice({ value, onChange, note, packs }: LookChoiceProps) {
   };
   return (
     <div className="flex flex-col gap-4">
-      <Group legend={LOOK_DECK_LABEL} ids={DECK_IDS} labels={DECK_LABEL} value={value.deck} onChange={(deck) => change({ deck })} />
+      <Group legend={LOOK_DECK_LABEL} ids={DECK_IDS} labels={DECK_LABEL} value={value.deck} onChange={(deck) => change({ deck })} menu={menu} />
       <Group
         legend={LOOK_RACE_LABEL}
         ids={RACE_IDS}
@@ -88,9 +96,10 @@ export function LookChoice({ value, onChange, note, packs }: LookChoiceProps) {
         describedBy={locked ? lockNote : undefined}
         disabled={(id) => locked && id !== 'bufao'}
         onChange={(id) => change({ race: id })}
+        menu={menu}
       />
       {locked ? (
-        <p id={lockNote} className="text-sm">
+        <p id={lockNote} className={menu ? 'menu-dica' : 'text-sm'}>
           {LOOK_LOCK_NOTE}
         </p>
       ) : null}
@@ -101,7 +110,7 @@ export function LookChoice({ value, onChange, note, packs }: LookChoiceProps) {
           ))}
         </div>
       </LooksProvider>
-      {note ? <p className="text-sm">{note}</p> : null}
+      {note ? <p className={menu ? 'menu-dica' : 'text-sm'}>{note}</p> : null}
     </div>
   );
 }

@@ -737,6 +737,29 @@ export const TRAINING_FAILED_TITLE = 'Não deu para carregar o treino';
 export const TRAINING_FAILED_TEXT = 'Confira a internet e tente de novo.';
 
 // ---------------------------------------------------------------------------------------------
+// O menu do Início no Folheto (decisoes.md 2026-11-18 (2) a (5)): as entradas, as linhas curtas e o tema
+
+/** O nome da lista do Início, para o leitor de tela. */
+export const MENU_NAV_LABEL = 'Menu';
+/** O carimbo que volta ao Início nas telas de cada entrada. */
+export const HOME_LABEL = 'Início';
+export const PLAY_ONLINE_LABEL = 'Jogar online';
+export const PLAY_ONLINE_LINE = 'Criar sala ou entrar numa sala';
+export const PRACTICE_LABEL = 'Treinar';
+export const PRACTICE_LINE = 'Jogar com o bot ou aprender jogando';
+export const PAST_GAMES_LINE = 'Reveja as partidas jogadas';
+export const OPTIONS_LABEL = 'Opções';
+export const OPTIONS_LINE = 'Aparência e preferências';
+/** As duas escolhas de Treinar. */
+export const PLAY_BOT_LABEL = 'Jogar com o bot';
+export const PLAY_BOT_LINE = 'Fácil, Médio ou Difícil';
+export const LEARN_LINE = 'Uma partida com dicas, contra o Fácil';
+/** O painel das preferências nas Opções. */
+export const PREFERENCES_LABEL = 'Preferências';
+/** O controle discreto do tema, no canto do Início: o nome fixo, o estado no aria-pressed (ligado é o verde). */
+export const MENU_THEME_LABEL = 'Fundo verde';
+
+// ---------------------------------------------------------------------------------------------
 // Partidas anteriores (spec do polimento §4.3): a lista local e o replay, telas que chegam sob demanda
 
 /** O botão da tela inicial e o título da lista. */

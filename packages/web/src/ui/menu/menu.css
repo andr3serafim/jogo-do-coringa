@@ -1,0 +1,701 @@
+/*
+ * As telas fora da mesa no Folheto (spec 2026-11-18-menus-folheto-design.md; rascunho aprovado: A4). Fica fora do `styles.css`: o teste
+ * das animações sem fim (`phases.test.tsx`) conta as da mesa, e as do menu (a respiração das mini cartas, o flutuar do emblema) são outras,
+ * pequenas e locais, e param com movimento reduzido (o sistema ou a chave do menu, `data-movimento-reduzido` na raiz). Os botões usam o
+ * `.carimbo` da mesa (`styles.css`) e os títulos a `textura` dela; aqui só o que é do menu.
+ */
+.menu {
+  --menu-texto: var(--color-papel);
+  --menu-texto-2: color-mix(in oklab, var(--color-papel) 80%, transparent);
+  --menu-linha: color-mix(in oklab, var(--color-papel) 20%, transparent);
+  --menu-realce: color-mix(in oklab, white 7%, transparent);
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  overflow-x: clip;
+  color: var(--menu-texto);
+}
+
+/* Os dois fundos, parados: uma cor, uma luz suave no alto e um motivo só. */
+.menu[data-tema='pink'] {
+  --menu-texto: var(--color-tinta);
+  --menu-texto-2: color-mix(in oklab, var(--color-tinta) 76%, transparent);
+  --menu-linha: color-mix(in oklab, var(--color-tinta) 20%, transparent);
+  --menu-realce: color-mix(in oklab, white 28%, transparent);
+  background: radial-gradient(110% 70% at 50% 28%, #f6b6c8 0%, var(--color-capa-voce) 48%, #d9849e 100%) fixed;
+}
+
+.menu[data-tema='green'] {
+  background: radial-gradient(110% 70% at 50% 30%, #23805a 0%, #175f42 50%, #0c3b29 100%) fixed;
+}
+
+.menu-fundo {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.menu-fundo > * {
+  position: absolute;
+}
+
+.menu-grao {
+  inset: 0;
+  opacity: 0.55;
+}
+
+.menu-vinheta {
+  inset: 0;
+  background: radial-gradient(120% 85% at 50% 40%, transparent 58%, rgb(0 0 0 / 0.3) 100%);
+}
+
+.menu[data-tema='pink'] .menu-vinheta {
+  background: radial-gradient(120% 85% at 50% 40%, transparent 62%, rgb(110 30 55 / 0.18) 100%);
+}
+
+/* Rosa: a moldura dupla da capa de folheto, com os losangos nos cantos. */
+.menu-moldura {
+  inset: 14px;
+  border: 1.5px solid color-mix(in oklab, var(--color-tinta) 30%, transparent);
+}
+
+.menu-moldura::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid color-mix(in oklab, var(--color-tinta) 20%, transparent);
+}
+
+.menu-moldura i {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  background: var(--color-vermelho);
+  rotate: 45deg;
+}
+
+.menu-moldura i:nth-child(1) {
+  left: -5px;
+  top: -5px;
+}
+
+.menu-moldura i:nth-child(2) {
+  right: -5px;
+  top: -5px;
+}
+
+.menu-moldura i:nth-child(3) {
+  left: -5px;
+  bottom: -5px;
+}
+
+.menu-moldura i:nth-child(4) {
+  right: -5px;
+  bottom: -5px;
+}
+
+/* Verde: o filete de ouro da borda da mesa e a costura por dentro. */
+.menu-trilho {
+  inset: 14px;
+  border: 1.5px solid color-mix(in oklab, var(--color-ouro) 32%, transparent);
+  border-radius: 44px;
+}
+
+.menu-trilho::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1.5px dashed color-mix(in oklab, var(--color-papel) 13%, transparent);
+  border-radius: 38px;
+}
+
+/* A coluna de cada tela. */
+.menu-coluna {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 30rem;
+  margin: 0 auto;
+  padding: 28px 22px 40px;
+}
+
+.menu[data-inicio] .menu-coluna {
+  min-height: 100dvh;
+  max-width: 33rem;
+  justify-content: center;
+  gap: 18px;
+  padding: 34px 24px;
+}
+
+/* O controle discreto do tema: uma bolinha da outra cor no canto, num alvo de 44 px. */
+.menu-tema {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.menu-tema > span {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--color-tinta);
+  box-shadow: 0 0 0 2px var(--color-papel);
+  transition: scale 0.15s ease-out;
+}
+
+.menu[data-tema='pink'] .menu-tema > span {
+  background: #175f42;
+}
+
+.menu[data-tema='green'] .menu-tema > span {
+  background: var(--color-capa-voce);
+}
+
+.menu-tema:hover > span {
+  scale: 1.18;
+}
+
+/* O emblema: o Coringa do jogo maior que o disco. */
+.menu-emblema {
+  display: block;
+  align-self: center;
+  width: min(286px, 76vw);
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 6px 0 rgb(0 0 0 / 0.2)) drop-shadow(0 16px 22px rgb(0 0 0 / 0.28));
+  animation:
+    menu-entra 0.7s cubic-bezier(0.2, 0.9, 0.25, 1.15) backwards,
+    menu-flutua 7s ease-in-out 0.7s infinite;
+}
+
+.menu[data-tema='pink'] .menu-emblema {
+  filter: drop-shadow(0 6px 0 rgb(110 30 55 / 0.2)) drop-shadow(0 16px 22px rgb(110 30 55 / 0.22));
+}
+
+/* A lista do Início: a linha inteira é o link; a mini carta respira, sobe e inclina (o ponteiro escreve a inclinação no
+   `[data-inclina]`, como a mão do jogo). */
+.menu-lista {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-item {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 16px;
+  min-height: 96px;
+  padding: 6px 10px 6px 8px;
+  border-radius: 4px;
+  border-bottom: 1.5px solid var(--menu-linha);
+  color: var(--menu-texto);
+  text-decoration: none;
+  transition: background-color 0.2s;
+  animation: menu-sobe 0.5s cubic-bezier(0.2, 0.9, 0.25, 1.1) backwards;
+  animation-delay: calc(0.3s + var(--i, 0) * 0.07s);
+}
+
+.menu-item:last-child {
+  border-bottom: 0;
+}
+
+.menu-item:hover,
+.menu-item:focus-visible {
+  background: var(--menu-realce);
+}
+
+.menu-inclina {
+  display: block;
+  transition:
+    transform 0.15s ease-out,
+    filter 0.15s ease-out;
+}
+
+.menu-mini {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 86px;
+  border-radius: 7px;
+  border: 2.5px solid var(--color-tinta);
+  background: var(--color-papel);
+  color: var(--color-tinta);
+  box-shadow:
+    inset 0 0 0 3px var(--color-papel),
+    inset 0 0 0 4px color-mix(in oklab, var(--color-tinta) 22%, transparent),
+    0 4px 0 rgb(0 0 0 / 0.26),
+    0 10px 16px rgb(0 0 0 / 0.22);
+  animation: menu-respira 3.6s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * -0.9s);
+  transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+
+.menu-item:hover .menu-mini,
+.menu-item:focus-visible .menu-mini {
+  transform: translateY(-6px);
+}
+
+.menu-mini-icone {
+  width: 30px;
+  height: 30px;
+}
+
+.menu-indice {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+}
+
+.menu-indice:first-child {
+  left: 6px;
+  top: 6px;
+}
+
+.menu-indice + .menu-indice {
+  right: 6px;
+  bottom: 6px;
+  rotate: 180deg;
+}
+
+.menu-selo {
+  position: absolute;
+  right: -13px;
+  top: -14px;
+  width: 32px;
+  height: 32px;
+  rotate: 14deg;
+}
+
+.menu-item-nome {
+  display: block;
+  font-family: var(--font-madeira);
+  font-size: 21px;
+  line-height: 1.05;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.menu-item-linha {
+  display: block;
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--menu-texto-2);
+}
+
+.menu-seta {
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+}
+
+/* O título de cada tela: a mini carta da entrada e o nome em tipo de madeira, com a textura da mesa. */
+.menu-titulo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 4px 0 2px;
+  animation: menu-sobe 0.45s cubic-bezier(0.2, 0.9, 0.25, 1.1) backwards;
+}
+
+.menu-titulo .menu-mini {
+  width: 52px;
+  height: 72px;
+  flex: none;
+  rotate: -6deg;
+  animation: none;
+}
+
+.menu-titulo .menu-mini-icone {
+  width: 26px;
+  height: 26px;
+}
+
+.menu-titulo-nome {
+  font-family: var(--font-madeira);
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--menu-texto);
+}
+
+.menu-titulo-nome:focus {
+  outline: none;
+}
+
+.menu-titulo-linha {
+  margin-top: 5px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--menu-texto-2);
+}
+
+/* O texto solto sobre o fundo (avisos, a linha de baixo). */
+.menu-texto {
+  font-size: 16px;
+  color: var(--menu-texto);
+}
+
+/* Os carimbos (a classe `.carimbo` da mesa dá a borda, a face e a sombra de madeira). */
+.menu-carimbo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 16px;
+  font-family: var(--font-madeira);
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.menu-carimbo[data-tamanho='grande'] {
+  width: 100%;
+  min-height: 56px;
+  font-size: 18px;
+}
+
+.menu-carimbo:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.menu-carimbo svg {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+.menu-voltar {
+  align-self: flex-start;
+  padding: 5px 16px 5px 10px;
+}
+
+/* Os painéis: papel, borda de tinta, sombra dura, o título em tipo de madeira. */
+.menu-painel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px 18px 20px;
+  border: 3px solid var(--color-tinta);
+  background: var(--color-papel);
+  color: var(--color-tinta);
+  box-shadow: 5px 5px 0 color-mix(in oklab, var(--color-tinta) 88%, transparent);
+  animation: menu-sobe 0.5s cubic-bezier(0.2, 0.9, 0.25, 1.1) backwards;
+  animation-delay: calc(0.1s + var(--d, 0) * 0.08s);
+}
+
+.menu-painel-tit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--color-tinta);
+  font-family: var(--font-madeira);
+  font-size: 19px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.menu-painel-tit svg {
+  width: 22px;
+  height: 22px;
+  flex: none;
+}
+
+/* Os campos. */
+.menu-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.menu-rotulo {
+  font-weight: 750;
+  font-size: 15px;
+}
+
+.menu-entrada {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 12px;
+  border: 3px solid var(--color-tinta);
+  border-radius: 2px;
+  background: #fbfaf6;
+  color: var(--color-tinta);
+  font-size: 1rem;
+}
+
+.menu-dica {
+  font-size: 14px;
+  color: color-mix(in oklab, var(--color-tinta) 76%, transparent);
+}
+
+.menu-erro {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-vermelho);
+}
+
+/* As opções de rádio (vida, deck, Coringa) na pele do menu: carimbos pequenos; a marcada afunda, em tinta. */
+.menu-opcoes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
+  gap: 10px;
+}
+
+.menu-opcao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 4px 6px;
+  border: 3px solid var(--color-tinta);
+  border-radius: 2px;
+  background: #fbfaf6;
+  color: var(--color-tinta);
+  box-shadow: 3px 3px 0 var(--color-madeira);
+  font-weight: 750;
+  text-align: center;
+  line-height: 1.15;
+  cursor: pointer;
+  transition:
+    translate 0.12s,
+    box-shadow 0.12s;
+}
+
+.menu-opcao[data-marcada] {
+  background: var(--color-tinta);
+  color: var(--color-papel);
+  translate: 3px 3px;
+  box-shadow: 0 0 0 var(--color-madeira);
+}
+
+.menu-opcao:has(:focus-visible) {
+  outline: 3px solid var(--color-ouro);
+  outline-offset: 2px;
+}
+
+.menu-opcao:has(:disabled) {
+  color: color-mix(in oklab, var(--color-tinta) 45%, transparent);
+  border-color: color-mix(in oklab, var(--color-tinta) 40%, transparent);
+  box-shadow: none;
+  cursor: not-allowed;
+  background: repeating-linear-gradient(-45deg, #fbfaf6 0 5px, color-mix(in oklab, var(--color-tinta) 12%, transparent) 5px 7px);
+}
+
+.menu-legenda {
+  margin-bottom: 8px;
+  font-weight: 750;
+  font-size: 15px;
+}
+
+/* As escolhas de Treinar: carimbos grandes com o símbolo num bloco de tinta. */
+.menu-escolha {
+  position: relative;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 14px;
+  min-height: 92px;
+  padding: 12px 14px;
+  text-align: left;
+  text-decoration: none;
+  animation: menu-sobe 0.5s cubic-bezier(0.2, 0.9, 0.25, 1.1) backwards;
+  animation-delay: calc(0.1s + var(--d, 0) * 0.08s);
+}
+
+.menu-escolha-bloco {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 2px;
+  background: var(--color-tinta);
+  color: var(--color-papel);
+}
+
+.carimbo-ouro .menu-escolha-bloco {
+  color: var(--color-ouro);
+}
+
+.menu-escolha-bloco svg {
+  width: 30px;
+  height: 30px;
+}
+
+.menu-escolha-nome {
+  display: block;
+  font-family: var(--font-madeira);
+  font-size: 20px;
+  line-height: 1.05;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.menu-escolha-linha {
+  display: block;
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 620;
+}
+
+/* A chave: o estado escrito embaixo do trilho; ligada, o trilho fica de ouro. */
+.menu-chave {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 12px;
+  border: 2px solid var(--color-tinta);
+  border-radius: 2px;
+  background: #fbfaf6;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.menu-chave-texto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.menu-chave-dica {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.menu-chave-lado {
+  display: flex;
+  flex: none;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 3px;
+}
+
+.menu-chave-estado {
+  font-size: 12px;
+  font-weight: 600;
+  color: color-mix(in oklab, var(--color-tinta) 74%, transparent);
+}
+
+.menu-trilho-chave {
+  position: relative;
+  width: 52px;
+  height: 28px;
+  border: 2.5px solid var(--color-tinta);
+  border-radius: 3px;
+  background: #e3dfd2;
+}
+
+.menu-trilho-chave::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 19px;
+  height: 19px;
+  border-radius: 2px;
+  background: var(--color-tinta);
+}
+
+.menu-chave:has(:checked) .menu-trilho-chave {
+  background: var(--color-ouro);
+}
+
+.menu-chave:has(:checked) .menu-trilho-chave::after {
+  left: auto;
+  right: 2px;
+}
+
+.menu-chave:has(:focus-visible) {
+  outline: 3px solid var(--color-ouro);
+  outline-offset: 2px;
+}
+
+.menu-chave:has(:disabled) {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+/* PC: o emblema e a lista maiores. */
+@media (width >= 1024px) {
+  .menu-emblema {
+    width: 340px;
+  }
+}
+
+/* Movimento reduzido: nada respira, flutua, entra, sobe nem inclina. */
+.menu[data-movimento-reduzido] *,
+.menu[data-movimento-reduzido] *::before,
+.menu[data-movimento-reduzido] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+.menu[data-movimento-reduzido] .menu-item:hover .menu-mini,
+.menu[data-movimento-reduzido] .menu-item:focus-visible .menu-mini {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu *,
+  .menu *::before,
+  .menu *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@keyframes menu-respira {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+
+  50% {
+    translate: 0 -3px;
+  }
+}
+
+@keyframes menu-flutua {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+
+  50% {
+    translate: 0 -3px;
+  }
+}
+
+@keyframes menu-entra {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.95);
+  }
+}
+
+@keyframes menu-sobe {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
