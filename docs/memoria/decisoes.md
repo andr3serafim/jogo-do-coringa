@@ -6,6 +6,30 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-18 (1): o redesenho visual dos menus
+
+Ele pediu, numa conversa nova:
+
+> Tarefa: redesenhar toda a interface de menus do jogo — backgrounds, painéis, botões, tipografia, ícones, efeitos, artes..
+>
+> Escopo: SOMENTE camada visual. Não alterar regras do jogo, fluxos de navegação, estado, rede ou lógica de handlers. Se algo visual
+> exigir mudança de lógica, pare e me pergunte.
+>
+> Me apresente 3 direções com design para que eu possa escolher.
+
+**Leitura:**
+- O pedido é de três direções para ele escolher; nada vira spec nem código antes da escolha.
+- **"Só camada visual":** cores, fundos, painéis, botões, tipos, ícones, efeitos e arte (SVG e CSS originais). Ficam como estão os
+  controles, a ordem deles, os destinos, o estado, a rede e os handlers. **[I]** Nada de aba, sanfona ou carrossel novos (todos pedem
+  estado); um efeito que dependa de estado que já existe (por exemplo, o menu tingido pelo deck escolhido) vai marcado como "pede o OK
+  dele" antes de entrar.
+- **[I] O que é "menu":** as telas fora da mesa (Início, a escolha do nível do treino, a entrada pela sala, o lobby, as partidas
+  anteriores, a partida parada, a página não achada) e os diálogos da partida (o menu da partida, a confirmação, o resumo das regras, o
+  fim). A mesa, as cartas, o placar e as cenas ficam fora.
+- **[I] Os tokens de hoje não mudam de valor** (a mesa usa todos): cada direção acrescenta os seus, só para os menus.
+
+---
+
 ## 2026-11-17 (4): o merge da abertura
 
 Depois do resumo da logo do dragão e da abertura (os quadros do voo mandados na conversa, a animação aberta no painel do navegador; os

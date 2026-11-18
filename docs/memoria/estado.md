@@ -1,11 +1,23 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-17**, a abertura do jogo com a logo do dragão na `main` por fast-forward até `52452c0` ("Sim, merge", `decisoes.md` 2026-11-17 (4)), com as duas CI verdes no push da `main`; o deploy é do autor, quando ele pedir; antes, o greedy que barra a Exódia na `main` por fast-forward até `2caeb5a` ("Sim, merge",
-> `decisoes.md` 2026-11-17 (1)), com as duas CI verdes no topo da branch (`2caeb5a`) e no push da `main` (`355f2e6`). **O deploy do autor saiu** (2026-11-17, `8266a4f`, sem a abertura): o jogo está no ar em
-> `https://jogodocoringa.com.br` (diário 2026-11-17 (1)). A abertura fica parada na `feat/abertura`.
+> Sobrescrito a cada atualização. **Última: 2026-11-18**, o redesenho visual dos menus começou na branch `feat/menus-visual` (saída da
+> `main` em `97a1a6b`): três direções em rascunho para o autor escolher (`decisoes.md` 2026-11-18 (1)). Antes: a abertura do jogo com a
+> logo do dragão na `main` por fast-forward até `52452c0` ("Sim, merge", `decisoes.md` 2026-11-17 (4)), com as duas CI verdes no push da
+> `main`; o deploy é do autor, quando ele pedir. **O deploy do autor saiu** (2026-11-17, `8266a4f`, sem a abertura): o jogo está no ar em
+> `https://jogodocoringa.com.br` (diário 2026-11-17 (1)).
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
+
+- **O redesenho visual dos menus** (`decisoes.md` 2026-11-18 (1)): só a camada visual das telas fora da mesa e dos diálogos da
+  partida; nada de regra, fluxo, estado, rede ou handler (se algo visual pedir lógica, parar e perguntar). Branch `feat/menus-visual`,
+  no checkout principal (sem worktree).
+  - **Em curso:** três direções em rascunho (Início no celular e no PC, uma tela secundária, os componentes), num HTML em
+    `docs/superpowers/specs/2026-11-18-menus-direcoes.html` e num artifact privado mandado ao autor.
+  - **Próximo passo exato:** o autor escolher uma direção (ou pedir outra rodada). Depois: a decisão no `decisoes.md`, a spec curta
+    em `docs/superpowers/specs/` e o plano. Nenhum código antes disso.
+  - **O que não pode mudar:** o valor dos tokens de hoje (a mesa usa todos), o `html`, o `:focus-visible` e o `::selection` globais;
+    o JavaScript inicial (187,4 de 200 KB): ilustração entra por arquivo, nunca por JSX; nada de biblioteca de ícones.
 
 - **A abertura do jogo, com a logo do dragão, está na `main`** ("Sim, merge", `decisoes.md` 2026-11-17 (4)), por fast-forward até o topo de
   `feat/abertura` (`52452c0`), com as duas CI verdes no push da `main` (`check` 365 s; `e2e` 630 s de job, que o teto antigo de 600 s no
