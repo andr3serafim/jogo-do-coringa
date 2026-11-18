@@ -1,7 +1,7 @@
 # Estado do projeto
 
 > Sobrescrito a cada atualização. **Última: 2026-11-18**, os menus no Folheto no código, na branch `feat/menus-visual` (saída da
-> `main` em `97a1a6b`; `decisoes.md` 2026-11-18 (1) a (5)), a caminho do PR. Antes: a abertura do jogo com a
+> `main` em `97a1a6b`; `decisoes.md` 2026-11-18 (1) a (5)), no PR #2 com as duas CI verdes, esperando o "sim" do autor. Antes: a abertura do jogo com a
 > logo do dragão na `main` por fast-forward até `52452c0` ("Sim, merge", `decisoes.md` 2026-11-17 (4)), com as duas CI verdes no push da
 > `main`; o deploy é do autor, quando ele pedir. **O deploy do autor saiu** (2026-11-17, `8266a4f`, sem a abertura): o jogo está no ar em
 > `https://jogodocoringa.com.br` (diário 2026-11-17 (1)).
@@ -40,8 +40,11 @@
     da web verde e o smoke (JavaScript inicial 191,4 de 200 KB). O `pnpm e2e` inteiro: 128 verdes e 2 do axe, consertados (os dois specs
     de novo: 8 verdes). Conferido no app de verdade (fotos do dev server): o Início rosa e verde a 390, 360 e 1440 px, Jogar online,
     Treinar, Opções, a escolha do nível, as partidas anteriores e o erro da sala. As decisões técnicas: o diário 2026-11-18 (5) e (6).
-  - **Próximo passo exato:** o push (o pre-push roda o `pnpm check`), o PR para a `main` e as duas CI; então as fotos e o resumo ao
-    autor. As escolhas [C] da spec e as `Ruling:` do diário são do Claude por delegação: ele confere no merge, que espera o "sim" dele.
+  - **No GitHub, PR #2 para a `main`** (`https://github.com/andr3serafim/jogo-do-coringa/pull/2`), com as duas CI verdes no push de
+    `ee77578` (`check` 209 s; `e2e` 677 s). As fotos e o resumo foram mandados ao autor.
+  - **Próximo passo exato:** esperar o autor. Ele confere as escolhas [C] da spec e as `Ruling:` do diário (são do Claude por delegação);
+    a primeira que ele precisa ver é o destino dos cinco links de criar sala (`/jogar`, spec §2). O merge espera o "sim" dele; o deploy é
+    dele.
     **Não visto no navegador:** a sala de espera (Lobby) com a roupa nova (precisa do `wrangler dev`); os E2E online passam por ela.
   - **O que não pode regredir:** o rosa por padrão sem gravar nada (`menuTheme` ausente); o tema não se perde quando o menu da partida
     grava as preferências (ele espalha `prefs`); o menu da partida, o fim e a dica com a roupa de antes (`useInMenu()` é falso fora da
@@ -212,7 +215,8 @@ toque "Próximo passo" a partir do passo:
 
 ## Ambiente (máquina do autor)
 
-- Node 26.13 e pnpm 11.9. Sem `gh`, sem a CLI `claude`, sem Python. A CI se lê pela API pública do GitHub, com `curl`.
+- Node 26.13 e pnpm 11.9. O `gh` 2.103 está instalado e logado (2026-11-18; abriu o PR #2). Sem a CLI `claude`, sem Python. A CI também
+  se lê pela API pública do GitHub, com `curl`.
 - E2E: `pnpm --filter @coringa/web exec playwright install chromium` na primeira vez.
 - **Workerd (paliativo; a correção é do autor):** o VC++ Redistributable desta máquina é de 2020 (14.28) e derruba o `workerd.exe`. As
   DLLs `msvcp140.dll`, `vcruntime140.dll` e `vcruntime140_1.dll` do Edge (`C:\Program Files (x86)\Microsoft\Edge\Application\156.0.4314.50\`)
