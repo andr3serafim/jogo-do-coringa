@@ -5,6 +5,20 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-18 (6): os menus no Folheto, o `pnpm e2e` e o conserto do nome dos links
+
+- **O `pnpm e2e` inteiro:** 128 passaram e 2 falharam, os dois no axe (`label-content-name-mismatch`, WCAG 2.5.3): o nome das linhas do
+  Início e das escolhas de Treinar era só a entrada ("Jogar online"), e o texto visível tem também a linha curta.
+- **Feito (`1b8ce40`):** o nome do link é o texto visível inteiro (a entrada, um espaço, a linha); saíram o `aria-labelledby` e o
+  `aria-describedby`. Os testes de unidade procuram o nome pelo começo (`/^Jogar online/`) e um confere o nome inteiro. A spec §7 corrigida.
+- **Ruling:** o que promete criar uma sala leva direto a `/jogar` ("Criar sala" da sala que não existe e da partida parada, "Criar outra
+  sala" da sala cheia, "Nova sala" no fim da partida online, "Jogar com um amigo" no fim do tutorial), e não ao Início, que virou menu —
+  custo: muda o destino de cinco links (é o [C] da spec §2); em troca, o link cumpre o que diz. "Voltar ao início" segue em `/`.
+- **Verificado:** depois do conserto, o `online.spec` e o `tutorial.spec` de novo: 8 passaram. A suíte da web verde no pre-commit.
+  **Falta:** o `pnpm check` do pre-push, as duas CI do PR.
+
+---
+
 ## 2026-11-18 (5): os menus no Folheto, no código (spec, plano e as Tasks 1 a 6)
 
 - **Pedido:** `decisoes.md` 2026-11-18 (5) (a A4 aprovada nos fundos rosa e verde; o controle discreto do tema; spec, plano e código).

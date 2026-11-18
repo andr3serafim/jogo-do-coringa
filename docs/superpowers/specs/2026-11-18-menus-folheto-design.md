@@ -99,7 +99,8 @@ visualizador fica como está. As peças de `parts.tsx` seguem como estão para a
 Um `<h1>` por tela (o do Início, "Jogo do Coringa", só para o leitor de tela; nas telas que a rota troca, o foco vai a ele ao abrir, como o
 `Title` de hoje); a lista num `<nav aria-label="Menu">`; alvos de toque de 44 px ou mais; campos de 16 px; o contorno de foco ouro com a
 borda de tinta; contraste AA (tinta sobre o rosa; papel sobre o verde, ~6,6:1); a chave com `role="switch"` e o estado escrito; o selo e a
-mini carta decorativos (`aria-hidden`). O nome de cada link é o nome da entrada (a linha curta entra na descrição).
+mini carta decorativos (`aria-hidden`). O nome de cada link é o texto visível inteiro, a entrada e a linha curta (WCAG 2.5.3: o axe
+dos E2E barra o nome que não contém o texto que se vê; na primeira versão, a linha ia na descrição e o `pnpm e2e` reprovou).
 
 ## 8. Orçamento e desempenho [OBRIGATÓRIO]
 
