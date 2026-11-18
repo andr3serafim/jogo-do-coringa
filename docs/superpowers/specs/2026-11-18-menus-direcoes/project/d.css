@@ -41,7 +41,7 @@
 .D .vez-2 .carta-menu { animation-delay: -1.1s; }
 .D .vez-3 .carta-menu { animation-delay: -2.2s; }
 .D .carta-menu:hover { transform: translateY(-14px) scale(1.04) rotate(-1.5deg); }
-@keyframes d-balanca { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-5px) rotate(.8deg); } }
+@keyframes d-balanca { 0%, 100% { translate: 0 0; rotate: 0deg; } 50% { translate: 0 -5px; rotate: .8deg; } }
 .D .canto { position: absolute; width: 16px; height: 16px; fill: currentColor; }
 .D .canto-1 { left: 9px; top: 9px; }
 .D .canto-2 { right: 9px; bottom: 44px; transform: rotate(180deg); }
