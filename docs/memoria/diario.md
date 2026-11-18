@@ -5,6 +5,35 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-18 (2): a rodada 2 dos menus (A2 · Folheto com menu e D · Mesa)
+
+- **Pedido:** `decisoes.md` 2026-11-18 (2) (o Folheto fica; o Início vira menu de três entradas; o Coringa da capa repaginado e sem o
+  título grande; uma direção nova com o Balatro de referência).
+- **O Coringa novo** (um desenho só, nas duas direções): o busto com o chapéu de três pontas e guizos, a piscadela, o sorriso torto, as
+  bochechas, o losango sob o olho, a gola em zigue-zague e o peito de losangos (arlequim). Na A2 é xilo de duas cores (tinta e vermelho,
+  hachura no gomo do meio) diante do sol de raios, com o leque dos quatro naipes atrás do chapéu; na D é colorido, de contorno grosso.
+  Conferido sozinho antes de entrar nas telas (rosto aumentado na segunda passada).
+- **A2:** `a2.css` (herda o `a.css`); o menu de carimbos grandes (a gravura num bloco de tinta, o nome e a linha do que tem dentro), o
+  selo vermelho no Treinar (tutorial por fazer), Partidas anteriores num item menor; as telas com o Voltar e o nome numa placa
+  pendurada no barbante.
+- **D:** `d.css`; o feltro com o desenho dos naipes que desliza devagar, a luz quente no alto, a costura da mesa; o Coringa atrás da
+  borda de madeira; as três cartas do menu balançam, cada uma no seu tempo (no toque, sobem); fichas de cor no feltro; botões grossos
+  com sombra dura; as telas com a fita de título na cor da carta.
+- **Ruling:** o "texto grande" é o título da capa; sai, e o `<h1>` fica só para o leitor de tela — custo: o nome do jogo não aparece
+  escrito no Início (a abertura o carimba antes).
+- **Ruling:** o Treinar segue a ordem dele (Jogar com o bot, Aprender jogando); com o tutorial por fazer, o Aprender vai em ouro com o
+  selo, e o Treinar do menu também leva o selo — custo: quem chega pela primeira vez dá um toque a mais até o tutorial.
+- **Ruling:** do Balatro, só a estrutura (cartas no centro, movimento com peso, botões de cor por ação); nada do desenho dele (spec da
+  web §10.6) — custo: não "parece Balatro", de propósito.
+- **Em aberto, para a spec depois da escolha:** a navegação nova (rotas ou estado; o Voltar; os E2E de "Criar sala"), o lugar de
+  "Partidas anteriores", e as chaves Reduzir animações e Passar sozinho nas Opções do Início (fiação nova para preferências que já
+  existem).
+- **Armadilhas:** o scratchpad da sessão mudou de pasta no meio do trabalho (o `.claude/launch.json` aponta o servidor `menus-rascunhos`
+  para o novo); o `fotos.mjs` grava `<nome>.png` só para `.dc.html`. Uma publicação no canvas foi recusada por versão mais nova (era o
+  próprio tipo do canvas que tinha atualizado): ler o `canvas.json` de novo e publicar por cima.
+
+---
+
 ## 2026-11-18 (1): três direções para o redesenho visual dos menus
 
 - **Pedido:** redesenhar a camada visual dos menus (fundos, painéis, botões, tipos, ícones, efeitos, arte), sem mexer em regra, fluxo,

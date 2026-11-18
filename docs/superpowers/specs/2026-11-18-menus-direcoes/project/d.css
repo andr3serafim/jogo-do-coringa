@@ -142,3 +142,11 @@
 .D.pc .vez-1 { transform: rotate(-9deg) translateY(26px); }
 .D.pc .vez-3 { transform: rotate(9deg) translateY(26px); }
 .D.pc .rodape { position: absolute; left: 0; right: 0; top: 712px; display: flex; justify-content: center; }
+.D .cor-verde { background: var(--verde); }
+.D .chave-lado { flex-direction: column-reverse; gap: 3px; }
+.D .chave-estado { font-size: 12px; }
+.D .chave-txt { flex: 1; min-width: 0; }
+.D .carta { box-shadow: 0 4px 0 rgba(0, 0, 0, .35), 0 10px 16px rgba(0, 0, 0, .35); }
+.D .titulo-fita { font-size: 22px; white-space: nowrap; padding: 12px 30px 11px; }
+.D .ficha.contorno { text-shadow: 0 2px 0 var(--contorno); }
+.D .escolha.btn-ouro { color: var(--tinta); }

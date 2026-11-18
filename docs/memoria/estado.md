@@ -18,11 +18,15 @@
     partida; mais as fotos de hoje. Os arquivos: `docs/superpowers/specs/2026-11-18-menus-direcoes/project/` (as pranchetas `.dc.html`,
     `base.css`, `a.css`, `b.css`, `c.css`, o `canvas.json`); o canvas privado do autor: `https://claude.ai/artifact/9cuwRLquhG6Hhu1AcjzEgy`.
     Como abrir sem o canvas: o diário 2026-11-18 (1).
-  - **Segunda rodada, em curso** (`decisoes.md` 2026-11-18 (2)): o Folheto fica (A2: o Início vira menu de três entradas, Jogar
-    online, Treinar e Opções, cada uma com a sua tela; a capa sem o título grande, com o Coringa redesenhado) e entra uma direção
-    nova com o Balatro de referência (D), no mesmo menu. As pranchetas novas vão no mesmo canvas e na mesma pasta.
-  - **Próximo passo exato:** terminar e publicar a A2 e a D; depois, o autor escolher. Então: a spec curta (com o como da navegação
-    nova: rotas ou estado, o Voltar, os E2E) e o plano. Nenhum código antes disso.
+  - **Segunda rodada, publicada** (`decisoes.md` 2026-11-18 (2)): **A2 · Folheto com menu** (o Início em três entradas, Jogar online,
+    Treinar e Opções, mais Partidas anteriores num item menor; a capa sem o título grande, com o Coringa novo: piscando, com o leque dos
+    quatro naipes atrás do chapéu) e **D · Mesa** (feltro à noite, o Coringa colorido dá as cartas, e as três entradas são cartas que
+    balançam; botões grossos de cor; o Balatro só pela estrutura). Cada uma com o Início no celular e no PC e as telas Jogar online,
+    Treinar e Opções no celular, ligadas por links (o Play do canvas navega). A rodada 1 ficou embaixo, no mesmo canvas.
+  - **Próximo passo exato:** o autor escolher entre a A2 e a D (ou pedir ajuste). Então: a spec curta e o plano, com o que a escolha
+    deixa em aberto: o como da navegação nova (rotas próprias ou estado no Início, o Voltar do celular, os E2E que clicam "Criar
+    sala" no Início), onde fica "Partidas anteriores" e as duas chaves novas nas Opções (Reduzir animações e Passar sozinho, que hoje
+    só existem no menu da partida). Nenhum código antes disso.
   - **O que não pode mudar:** o valor dos tokens de hoje (a mesa usa todos), o `html`, o `:focus-visible` e o `::selection` globais;
     o JavaScript inicial (187,4 de 200 KB): ilustração entra por arquivo, nunca por JSX; nada de biblioteca de ícones.
 
