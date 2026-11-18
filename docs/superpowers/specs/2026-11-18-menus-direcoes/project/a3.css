@@ -159,3 +159,5 @@
 .A3 .bg-papel { background: var(--papel); --s: rgba(0, 0, 0, .4); color: var(--tinta); }
 .A3 .escolha.bg-papel { color: var(--tinta); }
 .A3 .escolha .medalhao.bg-verde { background: var(--verde); color: var(--papel); }
+/* Reserva: sem o manipulador do ponteiro, a carta ainda inclina no hover (o estilo que o ponteiro escreve vence esta regra). */
+.A3 .inclina:hover { transform: perspective(600px) rotateX(6deg) rotateY(-8deg); filter: drop-shadow(4px 6px 0 rgba(0, 0, 0, .3)); }
