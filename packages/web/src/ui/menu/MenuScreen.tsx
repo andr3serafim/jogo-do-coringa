@@ -2,7 +2,7 @@
 // moldura da capa, ou verde com o filete e a costura da mesa), parado, com o grão do papel e a vinheta. O filtro da textura dos títulos
 // (`#textura-aspera`, o mesmo da mesa) mora aqui: a mesa e o menu nunca estão montados juntos.
 import type { ReactNode } from 'react';
-import { useMenuMotion, useMenuTheme } from './menu-theme.tsx';
+import { InMenuContext, useMenuMotion, useMenuTheme } from './menu-theme.tsx';
 import './menu.css';
 
 export interface MenuScreenProps {
@@ -36,7 +36,9 @@ export function MenuScreen({ children, home = false }: MenuScreenProps) {
           </filter>
         </svg>
       </div>
-      <div className="menu-coluna">{children}</div>
+      <div className="menu-coluna">
+        <InMenuContext value>{children}</InMenuContext>
+      </div>
     </main>
   );
 }

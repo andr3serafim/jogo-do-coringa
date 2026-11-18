@@ -159,8 +159,8 @@ function LevelChoice({ levels, initial, initialHp, onChoose }: LevelChoiceProps)
   return (
     <Screen>
       <Title>{TRAINING_CHOICE_TITLE}</Title>
-      <p className="text-lg">{TRAINING_CHOICE_HINT}</p>
-      <HpChoice value={hp} onChange={setHp} />
+      <p className="menu-texto">{TRAINING_CHOICE_HINT}</p>
+      <HpChoice value={hp} onChange={setHp} skin="menu" />
       <div role="group" aria-label={TRAINING_CHOICE_LABEL} className="flex flex-col gap-3">
         {levels.map((level) => (
           <button
@@ -169,11 +169,11 @@ function LevelChoice({ levels, initial, initialHp, onChoose }: LevelChoiceProps)
             // O nome do botão é o texto visível inteiro, nível e linha (WCAG 2.5.3: o axe barra um nome que não o contenha).
             autoFocus={level === initial}
             onClick={() => onChoose(level, hp)}
-            className="flex min-h-20 flex-col items-start gap-0.5 border-4 border-tinta bg-ouro px-5 py-3 text-left text-tinta"
+            className="carimbo carimbo-grande carimbo-ouro menu-carimbo menu-nivel"
           >
-            <span className="font-madeira text-2xl uppercase leading-tight tracking-wide">{LEVEL_NAME[level]}</span>
+            <span className="menu-nivel-nome">{LEVEL_NAME[level]}</span>
             {/* Entre itens de flex o espaço some (o layout não muda), mas separa as palavras do nome acessível: "Fácil Joga…", e não "FácilJoga…". */}{' '}
-            <span className="text-base">{LEVEL_LINE[level]}</span>
+            <span className="menu-nivel-linha">{LEVEL_LINE[level]}</span>
           </button>
         ))}
       </div>

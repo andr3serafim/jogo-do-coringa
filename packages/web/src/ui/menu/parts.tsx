@@ -68,7 +68,7 @@ export function MenuPanel({ title, icon, order = 0, children }: { title: string;
   );
 }
 
-type StampLook = { tone?: 'paper' | 'gold'; size?: 'small' | 'big' };
+type StampLook = { tone?: 'paper' | 'gold' | 'danger'; size?: 'small' | 'big' };
 
 function stampClass({ tone = 'paper', size = 'big' }: StampLook, extra = ''): string {
   return `carimbo menu-carimbo ${size === 'big' ? 'carimbo-grande' : ''} ${tone === 'gold' ? 'carimbo-ouro' : 'carimbo-papel'} ${extra}`;
@@ -81,7 +81,7 @@ export function StampButton({ tone, size, className = '', ...rest }: ComponentPr
       type="button"
       className={stampClass({ tone, size }, className)}
       data-tamanho={size === 'small' ? 'pequeno' : 'grande'}
-      data-tom={tone === 'gold' ? 'gold' : 'paper'}
+      data-tom={tone ?? 'paper'}
       {...rest}
     />
   );
@@ -95,7 +95,7 @@ export function StampLink({ to, tone, size, className = '', children }: StampLoo
       onClick={followLink(to)}
       className={stampClass({ tone, size }, className)}
       data-tamanho={size === 'small' ? 'pequeno' : 'grande'}
-      data-tom={tone === 'gold' ? 'gold' : 'paper'}
+      data-tom={tone ?? 'paper'}
     >
       {children}
     </a>

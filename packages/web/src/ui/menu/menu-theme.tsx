@@ -31,6 +31,10 @@ const MenuMotionContext = createContext<MotionSource>({ store: null, version: 0,
 
 export const useMenuTheme = (): MenuThemeValue => useContext(MenuThemeContext);
 
+/** Dentro de uma `MenuScreen`: as peças de `ui/parts.tsx` vestem o Folheto; fora (o fim, a dica e o menu da partida), a roupa de antes. */
+export const InMenuContext = createContext(false);
+export const useInMenu = (): boolean => useContext(InMenuContext);
+
 export function useMenuMotion(): MenuMotionValue {
   // A `version` no contexto faz quem lê redesenhar quando o menu troca a chave; a leitura é a cada desenho (um JSON pequeno): o valor
   // que o menu da partida gravou também vale ao voltar ao menu.

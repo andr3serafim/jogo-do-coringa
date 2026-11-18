@@ -1,18 +1,17 @@
-// Peças compartilhadas das telas de início e de entrada e do menu da partida, no tema da Peleja (spec §10): capa colorida,
-// tinta, títulos em tipo de madeira e botões ouro. Alvos de toque ≥ 44 px; campos de texto com 16 px.
+// Peças compartilhadas das telas fora da mesa e dos diálogos da partida (spec §10). Dentro de uma tela de menu (`Screen`, que é a
+// `MenuScreen` do Folheto, spec 2026-11-18-menus-folheto-design.md §5) elas vestem o Folheto: o título com a textura, o painel de papel,
+// os carimbos da mesa, o campo e a chave do menu. Fora dela — o fim, a dica e o menu da partida — a roupa de antes (os botões e a
+// tipografia da partida ficam para depois, decisoes.md 2026-11-18 (4)). Alvos de toque ≥ 44 px; campos de texto com 16 px.
 import { useEffect, useId, useImperativeHandle, useRef, type ComponentPropsWithoutRef, type ReactNode, type Ref } from 'react';
 import { navigate } from '../app/router.ts';
 import { SWITCH_OFF, SWITCH_ON } from '../model/copy.ts';
+import { useInMenu } from './menu/menu-theme.tsx';
+import { MenuScreen } from './menu/MenuScreen.tsx';
+import { MenuField, MenuSwitch, MenuTitle, StampButton } from './menu/parts.tsx';
 
-/** A tela inteira: um `<main>` sobre a capa rosa (a sua) ou verde (a do oponente). */
-export function Screen({ children, tone = 'voce' }: { children: ReactNode; tone?: 'voce' | 'oponente' }) {
-  return (
-    <main
-      className={`min-h-dvh px-4 py-8 text-tinta ${tone === 'voce' ? 'bg-capa-voce' : 'bg-capa-oponente'}`}
-    >
-      <div className="mx-auto flex w-full max-w-md flex-col gap-5">{children}</div>
-    </main>
-  );
+/** A tela inteira fora da mesa: a do Folheto, no fundo do tema (rosa ou verde). */
+export function Screen({ children }: { children: ReactNode }) {
+  return <MenuScreen>{children}</MenuScreen>;
 }
 
 /**
@@ -30,12 +29,20 @@ export function Title({
   /** Para a tela levar o foco de volta ao título (a lista das partidas, quando a linha que tinha o foco sai). */
   ref?: Ref<HTMLHeadingElement>;
 }) {
+  const inMenu = useInMenu();
   const ref = useRef<HTMLHeadingElement>(null);
-  // O `<h1>` já está na página quando o React chama isto.
-  useImperativeHandle(outer, () => ref.current!, []);
+  // O `<h1>` já está na página quando o React chama isto. No menu, quem entrega o título ao `ref` de fora é o `MenuTitle`.
+  useImperativeHandle(inMenu ? undefined : outer, () => ref.current!, []);
   useEffect(() => {
-    if (focusOnMount) ref.current?.focus({ preventScroll: true });
-  }, [focusOnMount]);
+    if (focusOnMount && !inMenu) ref.current?.focus({ preventScroll: true });
+  }, [focusOnMount, inMenu]);
+  if (inMenu) {
+    return (
+      <MenuTitle focusOnMount={focusOnMount} ref={outer}>
+        {children}
+      </MenuTitle>
+    );
+  }
   return (
     <h1
       ref={ref}
@@ -49,6 +56,14 @@ export function Title({
 
 /** Folha de papel com borda de carimbo para agrupar um formulário ou uma mensagem. */
 export function Panel({ children, label }: { children: ReactNode; label?: string }) {
+  const inMenu = useInMenu();
+  if (inMenu) {
+    return (
+      <section aria-label={label} className="menu-painel">
+        {children}
+      </section>
+    );
+  }
   return (
     <section aria-label={label} className="flex flex-col gap-4 border-4 border-tinta bg-papel p-5">
       {children}
@@ -70,6 +85,11 @@ export function Button({
   className = '',
   ...rest
 }: ComponentPropsWithoutRef<'button'> & { variant?: keyof typeof BUTTON_TONES }) {
+  const inMenu = useInMenu();
+  if (inMenu) {
+    const tone = variant === 'primary' ? 'gold' : variant === 'danger' ? 'danger' : 'paper';
+    return <StampButton tone={tone} className={className} {...rest} />;
+  }
   return <button type="button" className={`${BUTTON_BASE} ${BUTTON_TONES[variant]} ${className}`} {...rest} />;
 }
 
@@ -99,10 +119,12 @@ export function TextField({
   error,
   ...rest
 }: Omit<ComponentPropsWithoutRef<'input'>, 'id' | 'className'> & { label: string; hint?: string; error?: string | null }) {
+  const inMenu = useInMenu();
   const id = useId();
   const hintId = `${id}-hint`;
   const errorId = `${id}-erro`;
   const described = [hint ? hintId : null, error ? errorId : null].filter(Boolean).join(' ');
+  if (inMenu) return <MenuField label={label} hint={hint} error={error} {...rest} />;
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={id} className="font-bold">
@@ -139,8 +161,10 @@ export interface SwitchProps {
 
 /** Uma chave: caixa nativa com `role="switch"`. O estado também vem escrito, e não só pela forma. */
 export function Switch({ label, checked, onChange, disabled = false, hint }: SwitchProps) {
+  const inMenu = useInMenu();
   const labelId = useId();
   const hintId = useId();
+  if (inMenu) return <MenuSwitch label={label} checked={checked} onChange={onChange} disabled={disabled} hint={hint} />;
   return (
     <label className="flex min-h-11 items-center justify-between gap-3 border-2 border-tinta px-3 py-1.5 font-bold">
       <span className="flex min-w-0 flex-col">

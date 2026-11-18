@@ -22,11 +22,19 @@
   --menu-texto-2: color-mix(in oklab, var(--color-tinta) 76%, transparent);
   --menu-linha: color-mix(in oklab, var(--color-tinta) 20%, transparent);
   --menu-realce: color-mix(in oklab, white 28%, transparent);
-  background: radial-gradient(110% 70% at 50% 28%, #f6b6c8 0%, var(--color-capa-voce) 48%, #d9849e 100%) fixed;
+  background-color: var(--color-capa-voce);
+}
+
+.menu[data-tema='pink'] .menu-fundo {
+  background: radial-gradient(110% 70% at 50% 28%, #f6b6c8 0%, var(--color-capa-voce) 48%, #d9849e 100%);
 }
 
 .menu[data-tema='green'] {
-  background: radial-gradient(110% 70% at 50% 30%, #23805a 0%, #175f42 50%, #0c3b29 100%) fixed;
+  background-color: #175f42;
+}
+
+.menu[data-tema='green'] .menu-fundo {
+  background: radial-gradient(110% 70% at 50% 30%, #23805a 0%, #175f42 50%, #0c3b29 100%);
 }
 
 .menu-fundo {
@@ -132,10 +140,10 @@
 
 /* O controle discreto do tema: uma bolinha da outra cor no canto, num alvo de 44 px. */
 .menu-tema {
-  position: absolute;
+  position: fixed;
   top: 22px;
   right: 22px;
-  z-index: 1;
+  z-index: 2;
   display: grid;
   place-items: center;
   width: 44px;
@@ -280,7 +288,7 @@
 .menu-item-nome {
   display: block;
   font-family: var(--font-madeira);
-  font-size: 21px;
+  font-size: clamp(18px, 5.3vw, 21px);
   line-height: 1.05;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -331,8 +339,11 @@
   color: var(--menu-texto);
 }
 
-.menu-titulo-nome:focus {
+/* O título recebe o foco ao abrir a tela só para o leitor de tela começar por ele (fora da ordem do Tab): sem o anel. */
+.menu-titulo-nome:focus,
+.menu-titulo-nome:focus-visible {
   outline: none;
+  box-shadow: none;
 }
 
 .menu-titulo-linha {
@@ -368,6 +379,38 @@
   width: 100%;
   min-height: 56px;
   font-size: 18px;
+}
+
+/* A ação sem volta (apagar partidas, desistir): o vermelho, como o Desistir do menu da partida. */
+.menu-carimbo[data-tom='danger'] {
+  border-color: var(--color-vermelho);
+  color: var(--color-vermelho);
+}
+
+/* A escolha do nível do treino: o nome e a linha, à esquerda. */
+.menu-nivel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: 80px;
+  padding: 10px 18px;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.menu-nivel-nome {
+  font-family: var(--font-madeira);
+  font-size: 24px;
+  line-height: 1.1;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.menu-nivel-linha {
+  font-family: var(--font-texto);
+  font-size: 16px;
 }
 
 .menu-carimbo:disabled {
