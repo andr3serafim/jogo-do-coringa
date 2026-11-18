@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>A3 · Folheto — Jogar online</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="a3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&amp;family=Archivo:wdth,wght@62..125,400..900&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="tela A3 fundo-tinta" style="width: 390px; height: 880px">
+<div class="fundo" aria-hidden="true">
+<svg class="naipes" width="390" height="880" style="left: 0; top: 0">
+<defs><pattern id="a3j-naipes" width="96" height="96" patternUnits="userSpaceOnUse"><g fill="currentColor"><path transform="translate(10 10) scale(.9)" d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.6 4.5c2.1 0 3.6 1.1 5.4 3.1 1.8-2 3.3-3.1 5.4-3.1 3.6 0 5.7 3.9 4.2 7.3C19.5 16.4 12 21 12 21z"></path><path transform="translate(58 10) scale(.9)" d="M12 2 20 12 12 22 4 12z"></path><path transform="translate(10 58) scale(.9)" d="M12 3a3.6 3.6 0 0 0-3.4 4.8A3.6 3.6 0 1 0 9.7 15c.7 0 1.4-.2 1.9-.6-.3 2.6-1.2 4.6-2.6 6.1h6c-1.4-1.5-2.3-3.5-2.6-6.1.5.4 1.2.6 1.9.6a3.6 3.6 0 1 0 1.1-7.2A3.6 3.6 0 0 0 12 3z"></path><path transform="translate(58 58) scale(.9)" d="M12 2s-8 6.2-8 11.2C4 16 6 18 8.5 18c1.4 0 2.6-.6 3.1-1.4-.3 2-1.2 3.6-2.6 4.9h6c-1.4-1.3-2.3-2.9-2.6-4.9.5.8 1.7 1.4 3.1 1.4C18 18 20 16 20 13.2 20 8.2 12 2 12 2z"></path></g></pattern></defs>
+<rect class="deriva" x="-96" y="-96" width="582" height="1072" fill="url(#a3j-naipes)"></rect>
+</svg>
+<div class="luz" style="top: -200px"></div>
+<div class="vinheta"></div>
+</div>
+<div class="conteudo">
+<div class="topo"><a class="pilula" href="A3-inicio-tinta.dc.html"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>Início</a></div>
+<header class="faixa bg-vermelho">
+<span class="mini cor-vermelho" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.6 4.5c2.1 0 3.6 1.1 5.4 3.1 1.8-2 3.3-3.1 5.4-3.1 3.6 0 5.7 3.9 4.2 7.3C19.5 16.4 12 21 12 21z"></path></svg></span>
+<div><h1 class="faixa-nome">Jogar online</h1><p class="faixa-sub">Criar sala ou entrar numa sala</p></div>
+</header>
+
+<section class="painel entra" aria-label="Criar sala" style="--d: 1">
+<h2 class="ficha bg-vermelho"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M12 8.5v7M8.5 12h7"></path></svg>Criar sala</h2>
+<div class="campo">
+<label class="rotulo" for="a3j-apelido">Seu apelido</label>
+<input id="a3j-apelido" class="entrada foco" value="Duda" autocomplete="nickname">
+<p class="dica">De 1 a 20 caracteres.</p>
+</div>
+<fieldset class="grupo">
+<legend class="rotulo">Vida inicial</legend>
+<div class="opcoes">
+<label class="opcao"><input type="radio" name="a3j-vida" class="sr"><span class="num">300</span></label>
+<label class="opcao marcada"><input type="radio" name="a3j-vida" class="sr"><span class="num">500 · padrão</span></label>
+<label class="opcao"><input type="radio" name="a3j-vida" class="sr"><span class="num">800</span></label>
+</div>
+</fieldset>
+<button type="submit" class="btn bg-vermelho">Criar sala</button>
+</section>
+
+<section class="painel entra" aria-label="Entrar numa sala" style="--d: 2">
+<h2 class="ficha bg-escuro"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M3 12h11M10 8l4 4-4 4"></path></svg>Entrar numa sala</h2>
+<div class="campo">
+<label class="rotulo" for="a3j-codigo">Código ou link da sala</label>
+<input id="a3j-codigo" class="entrada" value="" autocomplete="off">
+</div>
+<button type="submit" class="btn bg-escuro">Entrar</button>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":880}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+/* A3 · Folheto (rodada 3): o Coringa do jogo com o leque das quatro cartas, numa carta grande; o menu em mini cartas que respiram e
+   inclinam em 3D como a mão do jogo (`Hand.tsx`: até 13°, a sombra acompanha; no toque, sobe 8 px); as telas de cada entrada na cor dela
+   (Jogar online no vermelho, Treinar no verde da cura, Opções no ouro). Cantos arredondados, borda mais fina; sem varal, sem raios.
+   Os materiais do jogo: papel, tinta, vermelho, ouro, madeira; Alfa Slab One e Archivo. Três fundos para escolher: tinta, anil, papel. */
+.A3 {
+  --tinta: #17120f; --papel: #f1f0ea; --papel-claro: #fbfaf6; --vermelho: #b8261c; --vermelho-s: #7a160f; --verde: #2a7339; --verde-s: #174a22;
+  --ouro: #f5c238; --ouro-s: #a37a12; --madeira: #8a5a2b; --escuro: #2c241e; --escuro-s: #0b0907; --linha: 2.5px; --tinta-75: rgba(23, 18, 15, .75);
+  color: var(--papel);
+}
+.A3.fundo-tinta { background: radial-gradient(120% 75% at 50% 32%, #33281f 0%, #1c1612 52%, #0d0a08 100%); }
+.A3.fundo-anil { background: radial-gradient(120% 75% at 50% 32%, #3463ad 0%, #1e3c74 52%, #0e2044 100%); }
+.A3.fundo-papel { background: radial-gradient(120% 75% at 50% 32%, #fdfaf1 0%, #efe6d1 58%, #d9cbab 100%); color: var(--tinta); }
+.A3.pc.fundo-tinta { background: radial-gradient(70% 85% at 50% 40%, #33281f 0%, #1c1612 55%, #0d0a08 100%); }
+.A3 .naipes { color: var(--papel); opacity: .055; }
+.A3.fundo-papel .naipes { color: var(--tinta); opacity: .06; }
+.A3 .deriva { animation: a3-deriva 40s linear infinite; }
+.A3 .vinheta { position: absolute; inset: 0; background: radial-gradient(120% 80% at 50% 40%, transparent 55%, rgba(0, 0, 0, .38) 100%); }
+.A3.fundo-papel .vinheta { background: radial-gradient(120% 80% at 50% 40%, transparent 60%, rgba(90, 64, 30, .16) 100%); }
+.A3 .luz { position: absolute; left: 50%; width: 560px; height: 560px; margin-left: -280px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(245, 194, 56, .2), rgba(245, 194, 56, 0)); }
+.A3.fundo-papel .luz { background: radial-gradient(closest-side, rgba(245, 194, 56, .28), rgba(245, 194, 56, 0)); }
+
+.A3 .conteudo { position: relative; display: flex; flex-direction: column; gap: 22px; padding: 18px 20px 40px; }
+.A3 .conteudo.inicio { min-height: 100%; justify-content: center; gap: 28px; padding-top: 24px; }
+.A3 .ico { stroke-width: 2.3; }
+
+/* O emblema: o Coringa do jogo num disco de papel, com o leque dos quatro naipes saindo de trás da cabeça. Redondo, sem moldura. */
+.A3 .emblema { display: block; align-self: center; width: 300px; height: auto; overflow: visible; filter: drop-shadow(0 6px 0 rgba(0, 0, 0, .22)) drop-shadow(0 18px 26px rgba(0, 0, 0, .32));
+  animation: a3-heroi .75s cubic-bezier(.2, .9, .25, 1.15) backwards, a3-flutua 6s ease-in-out .75s infinite; }
+.A3.fundo-papel .emblema { filter: drop-shadow(0 6px 0 rgba(23, 18, 15, .16)) drop-shadow(0 18px 26px rgba(90, 64, 30, .22)); }
+
+/* O menu: três mini cartas em leque. A posição fica no invólucro (e a entrada, que dá as cartas), a inclinação 3D no `.inclina`
+   (escrita pelo ponteiro, como na mão do jogo), a respiração e o subir na carta. */
+.A3 .leque { display: flex; justify-content: center; padding-top: 4px; }
+.A3 .vez { flex: none; width: 108px; transform: var(--pos); animation: a3-da .6s cubic-bezier(.2, .9, .25, 1.2) backwards; animation-delay: calc(.35s + var(--i) * .09s); }
+.A3 .vez + .vez { margin-left: 6px; }
+.A3 .vez-1 { --pos: rotate(-6deg) translateY(10px); --i: 0; }
+.A3 .vez-2 { --pos: translateY(-2px); --i: 1; z-index: 1; }
+.A3 .vez-3 { --pos: rotate(6deg) translateY(10px); --i: 2; }
+.A3 .inclina { display: block; transition: transform .15s ease-out, filter .15s ease-out; }
+.A3 .carta-menu { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: space-between; width: 108px; height: 152px;
+  padding: 16px 8px 11px; border-radius: 12px; background: var(--papel); color: var(--tinta); border: var(--linha) solid var(--tinta); text-decoration: none; cursor: pointer;
+  box-shadow: inset 0 0 0 4px var(--papel), inset 0 0 0 5px rgba(23, 18, 15, .22), 0 5px 0 rgba(0, 0, 0, .3), 0 16px 24px rgba(0, 0, 0, .32);
+  animation: a3-respira 3.6s ease-in-out infinite; animation-delay: calc(var(--i) * -.9s); transition: transform .2s cubic-bezier(.2, .9, .3, 1.3); }
+.A3 .carta-menu:hover, .A3 .carta-menu:focus-visible { transform: translateY(-10px); }
+.A3 .carta-menu:active { transform: translateY(-4px) scale(.97); }
+.A3 .indice { position: absolute; width: 14px; height: 14px; fill: currentColor; }
+.A3 .indice-1 { left: 9px; top: 9px; }
+.A3 .indice-2 { right: 9px; bottom: 40px; transform: rotate(180deg); }
+.A3 .medalhao { display: grid; place-items: center; width: 58px; height: 58px; margin-top: 4px; border-radius: 50%; border: var(--linha) solid var(--tinta); color: var(--papel);
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, .18), inset 0 2px 0 rgba(255, 255, 255, .25); }
+.A3 .medalhao .ico { width: 30px; height: 30px; stroke-width: 2.4; }
+.A3 .carimbo { align-self: stretch; padding: 5px 2px 4px; border-radius: 6px; border: 2px solid var(--tinta); color: var(--papel); text-align: center;
+  font-family: 'Alfa Slab One', serif; font-size: 12.5px; line-height: 1.05; letter-spacing: .03em; text-transform: uppercase; transform: rotate(-2deg);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, .25); }
+.A3 .bg-vermelho { background: var(--vermelho); --s: var(--vermelho-s); }
+.A3 .bg-verde { background: var(--verde); --s: var(--verde-s); }
+.A3 .bg-ouro { background: var(--ouro); --s: var(--ouro-s); color: var(--tinta); text-shadow: none; }
+.A3 .bg-escuro { background: var(--escuro); --s: var(--escuro-s); }
+.A3 .cor-vermelho { color: var(--vermelho); }
+.A3 .cor-tinta { color: var(--tinta); }
+.A3 .carta-menu .selo { position: absolute; right: -13px; top: -15px; width: 38px; height: 38px; transform: rotate(14deg); }
+
+/* O item menor (Partidas anteriores) e o Voltar: pílulas de linha. */
+.A3 .pilula { display: inline-flex; align-self: center; align-items: center; gap: 10px; min-height: 48px; padding: 8px 22px 8px 16px; border-radius: 999px;
+  border: 2px solid currentColor; background: rgba(255, 255, 255, .06); color: inherit; text-decoration: none; cursor: pointer;
+  font-family: 'Alfa Slab One', serif; font-size: 14px; letter-spacing: .04em; text-transform: uppercase; transition: background-color .15s, transform .15s; }
+.A3 .pilula:hover { background: rgba(255, 255, 255, .14); transform: translateY(-2px); }
+.A3.fundo-papel .pilula { background: rgba(23, 18, 15, .05); }
+.A3 .pilula .ico { width: 20px; height: 20px; }
+.A3 .entra { animation: a3-sobe .5s cubic-bezier(.2, .9, .25, 1.1) backwards; animation-delay: calc(.12s + var(--d, 0) * .08s); }
+
+/* As telas de cada entrada: a faixa na cor da entrada, com a mini carta dela; painéis de papel arredondados. */
+.A3 .topo { display: flex; align-items: center; }
+.A3 .topo .pilula { align-self: auto; min-height: 44px; padding: 6px 18px 6px 12px; }
+.A3 .faixa { position: relative; display: flex; align-items: center; gap: 14px; padding: 14px 18px 14px 14px; border-radius: 16px; border: var(--linha) solid var(--tinta);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .2), 0 6px 0 var(--s), 0 16px 26px rgba(0, 0, 0, .3); animation: a3-desce .5s cubic-bezier(.2, .9, .25, 1.15) backwards; }
+.A3 .faixa .mini { display: grid; place-items: center; flex: none; width: 50px; height: 70px; border-radius: 8px; background: var(--papel); border: 2px solid var(--tinta);
+  transform: rotate(-8deg); box-shadow: 0 4px 0 rgba(0, 0, 0, .25); }
+.A3 .faixa .mini svg { width: 26px; height: 26px; fill: currentColor; }
+.A3 .faixa-nome { display: block; font-family: 'Alfa Slab One', serif; font-weight: 400; font-size: 25px; line-height: 1; letter-spacing: .03em; text-transform: uppercase; }
+.A3 .faixa-sub { display: block; margin-top: 5px; font-size: 14px; font-weight: 650; opacity: .92; }
+.A3 .painel { position: relative; display: flex; flex-direction: column; gap: 14px; margin-top: 12px; padding: 26px 18px 18px; border-radius: 16px;
+  background: var(--papel); color: var(--tinta); border: var(--linha) solid var(--tinta); box-shadow: 0 5px 0 rgba(0, 0, 0, .26), 0 16px 26px rgba(0, 0, 0, .28); }
+.A3 .ficha { position: absolute; left: 14px; top: -16px; display: inline-flex; align-items: center; gap: 7px; padding: 5px 13px 4px 9px; border-radius: 999px;
+  border: 2px solid var(--tinta); color: var(--papel); font-family: 'Alfa Slab One', serif; font-size: 13.5px; letter-spacing: .05em; text-transform: uppercase;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, .3); }
+.A3 .ficha.bg-ouro { color: var(--tinta); }
+.A3 .ficha .ico { width: 17px; height: 17px; stroke-width: 2.7; }
+.A3 .campo { display: flex; flex-direction: column; gap: 6px; }
+.A3 .rotulo { display: block; font-weight: 750; font-size: 15px; }
+.A3 .grupo .rotulo { margin-bottom: 8px; }
+.A3 .entrada { width: 100%; height: 50px; padding: 0 14px; border-radius: 10px; border: 2px solid var(--tinta); background: var(--papel-claro); color: var(--tinta);
+  font-size: 16px; box-shadow: inset 0 2px 0 rgba(23, 18, 15, .08); }
+.A3 .entrada.foco { outline: 3px solid var(--ouro); outline-offset: 2px; box-shadow: 0 0 0 6px rgba(245, 194, 56, .22); }
+.A3 .dica, .A3 .nota { font-size: 14px; color: var(--tinta-75); }
+.A3 .opcoes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.A3 .opcoes.duas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.A3 .opcao { position: relative; display: flex; align-items: center; justify-content: center; min-height: 46px; padding: 4px 6px; border-radius: 10px;
+  border: 2px solid var(--tinta); background: var(--papel-claro); font-weight: 750; text-align: center; line-height: 1.15; cursor: pointer;
+  box-shadow: 0 3px 0 rgba(23, 18, 15, .22); transition: transform .12s, box-shadow .12s; }
+.A3 .opcao.marcada { background: var(--tinta); color: var(--papel); transform: translateY(2px); box-shadow: 0 1px 0 rgba(23, 18, 15, .22); }
+.A3 .opcao.marcada::after { content: ''; position: absolute; top: 5px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--ouro); }
+.A3 .opcao.travada { color: rgba(23, 18, 15, .45); border-color: rgba(23, 18, 15, .35); box-shadow: none; cursor: not-allowed;
+  background: repeating-linear-gradient(-45deg, var(--papel-claro) 0 5px, rgba(23, 18, 15, .1) 5px 7px); }
+.A3 .btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 54px; padding: 10px 18px; border-radius: 12px;
+  border: var(--linha) solid var(--tinta); color: var(--papel); font-family: 'Alfa Slab One', serif; font-size: 17px; letter-spacing: .04em; text-transform: uppercase;
+  text-decoration: none; cursor: pointer; text-shadow: 0 2px 0 rgba(0, 0, 0, .22);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .22), 0 5px 0 var(--s), 0 10px 16px rgba(0, 0, 0, .2); transition: transform .08s, box-shadow .08s; }
+.A3 .btn:active { transform: translateY(4px); box-shadow: inset 0 2px 0 rgba(255, 255, 255, .22), 0 1px 0 var(--s); }
+.A3 .btn.bg-ouro { color: var(--tinta); text-shadow: none; }
+.A3 .btn .ico { width: 22px; height: 22px; }
+.A3 .escolhas { display: flex; flex-direction: column; gap: 18px; margin-top: 6px; }
+.A3 .escolha { position: relative; display: grid; grid-template-columns: 60px minmax(0, 1fr) 22px; align-items: center; gap: 14px; min-height: 100px; padding: 14px 14px 14px 16px;
+  border-radius: 16px; border: var(--linha) solid var(--tinta); color: var(--papel); text-decoration: none; cursor: pointer;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .2), 0 6px 0 var(--s), 0 14px 22px rgba(0, 0, 0, .28); transition: transform .12s, box-shadow .12s; }
+.A3 .escolha:hover { transform: translateY(-3px); }
+.A3 .escolha:active { transform: translateY(4px); box-shadow: inset 0 2px 0 rgba(255, 255, 255, .2), 0 1px 0 var(--s); }
+.A3 .escolha.bg-ouro { color: var(--tinta); }
+.A3 .escolha .medalhao { margin: 0; width: 60px; height: 60px; background: rgba(0, 0, 0, .16); }
+.A3 .escolha.bg-ouro .medalhao { color: var(--tinta); background: rgba(255, 255, 255, .35); }
+.A3 .escolha-nome { display: block; font-family: 'Alfa Slab One', serif; font-size: 21px; line-height: 1.05; letter-spacing: .03em; text-transform: uppercase; }
+.A3 .escolha-sub { display: block; margin-top: 5px; font-size: 14.5px; font-weight: 650; }
+.A3 .escolha .seta { width: 22px; height: 22px; stroke-width: 3; }
+.A3 .escolha .selo { position: absolute; right: -12px; top: -14px; width: 40px; height: 40px; transform: rotate(14deg); }
+.A3 .chave { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 58px; padding: 8px 14px; border-radius: 12px;
+  border: 2px solid var(--tinta); background: var(--papel-claro); font-weight: 750; cursor: pointer; }
+.A3 .chave-txt { display: flex; flex: 1; min-width: 0; align-items: center; gap: 10px; line-height: 1.2; }
+.A3 .chave-lado { display: flex; flex: none; flex-direction: column-reverse; align-items: center; gap: 3px; }
+.A3 .chave-estado { font-size: 12px; font-weight: 600; color: var(--tinta-75); }
+.A3 .trilho { position: relative; width: 54px; height: 30px; border-radius: 15px; border: 2px solid var(--tinta); background: #e3dfd2; transition: background-color .2s; }
+.A3 .trilho .pino { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--tinta); transition: left .2s; }
+.A3 .chave.ligada .trilho { background: var(--verde); }
+.A3 .chave.ligada .pino { left: auto; right: 3px; background: var(--papel); }
+
+/* PC: a carta do Coringa no alto e o leque embaixo, maiores, no meio da tela. */
+.A3.pc .conteudo.inicio { position: absolute; inset: 0; padding: 0; align-items: center; gap: 34px; }
+.A3.pc .emblema { width: 400px; }
+.A3.pc .vez { width: 172px; }
+.A3.pc .vez + .vez { margin-left: 22px; }
+.A3.pc .vez-1 { --pos: rotate(-6deg) translateY(16px); }
+.A3.pc .vez-3 { --pos: rotate(6deg) translateY(16px); }
+.A3.pc .carta-menu { width: 172px; height: 242px; padding: 24px 12px 15px; border-radius: 16px; }
+.A3.pc .indice { width: 20px; height: 20px; }
+.A3.pc .indice-1 { left: 12px; top: 12px; }
+.A3.pc .indice-2 { right: 12px; bottom: 58px; }
+.A3.pc .medalhao { width: 92px; height: 92px; margin-top: 10px; }
+.A3.pc .medalhao .ico { width: 48px; height: 48px; }
+.A3.pc .carimbo { font-size: 17px; padding: 8px 4px 7px; }
+
+@keyframes a3-deriva { from { transform: translate(0, 0); } to { transform: translate(-96px, -96px); } }
+@keyframes a3-respira { 0%, 100% { translate: 0 0; } 50% { translate: 0 -3px; } }
+@keyframes a3-flutua { 0%, 100% { translate: 0 0; rotate: 0deg; } 50% { translate: 0 -5px; rotate: .6deg; } }
+@keyframes a3-heroi { from { opacity: 0; transform: translateY(18px) scale(.94) rotate(-2deg); } }
+@keyframes a3-da { from { opacity: 0; transform: translateY(80px) rotate(0deg) scale(.85); } to { opacity: 1; transform: var(--pos); } }
+@keyframes a3-sobe { from { opacity: 0; transform: translateY(18px); } }
+@keyframes a3-desce { from { opacity: 0; transform: translateY(-14px); } }
+.A3 .ficha, .A3 .faixa-nome, .A3 .escolha-nome, .A3 .carimbo { font-weight: 400; }
+.A3 .bg-papel { background: var(--papel); --s: rgba(0, 0, 0, .4); color: var(--tinta); }
+.A3 .escolha.bg-papel { color: var(--tinta); }
+.A3 .escolha .medalhao.bg-verde { background: var(--verde); color: var(--papel); }

@@ -23,10 +23,15 @@
     quatro naipes atrás do chapéu) e **D · Mesa** (feltro à noite, o Coringa colorido dá as cartas, e as três entradas são cartas que
     balançam; botões grossos de cor; o Balatro só pela estrutura). Cada uma com o Início no celular e no PC e as telas Jogar online,
     Treinar e Opções no celular, ligadas por links (o Play do canvas navega). A rodada 1 ficou embaixo, no mesmo canvas.
-  - **Próximo passo exato:** o autor escolher entre a A2 e a D (ou pedir ajuste). Então: a spec curta e o plano, com o que a escolha
-    deixa em aberto: o como da navegação nova (rotas próprias ou estado no Início, o Voltar do celular, os E2E que clicam "Criar
-    sala" no Início), onde fica "Partidas anteriores" e as duas chaves novas nas Opções (Reduzir animações e Passar sozinho, que hoje
-    só existem no menu da partida). Nenhum código antes disso.
+  - **Terceira rodada, publicada** (`decisoes.md` 2026-11-18 (3): só o Folheto; a B, a C e a D saíram do canvas e da pasta, ficam no
+    git): **A3 · Folheto** — o Coringa do jogo num disco de papel com o leque dos quatro naipes atrás da cabeça (sem raios, sem texto,
+    sem varal); o menu em três mini cartas que respiram e inclinam em 3D sob o mouse, como a mão do jogo (`Hand.tsx`), e entram dando-se;
+    as telas na cor da entrada (vermelho, verde, ouro), com painéis de papel arredondados. O Início em três fundos para ele escolher
+    (tinta, anil, papel); o PC e as telas no fundo tinta. `a3.css` e as pranchetas `A3-*.dc.html`; a rodada 2 (A2) e a 1 (A) embaixo.
+  - **Próximo passo exato:** o autor escolher o fundo e aprovar a A3 (ou pedir ajuste). Então: a spec curta e o plano, com o que segue
+    em aberto: o como da navegação nova (rotas próprias ou estado no Início, o Voltar do celular, os E2E que clicam "Criar sala" no
+    Início), onde fica "Partidas anteriores", as duas chaves novas nas Opções (Reduzir animações e Passar sozinho), e o custo do
+    movimento no celular (as cartas respirando e o fundo que desliza, medidos com a CPU 4×). Nenhum código antes disso.
   - **O que não pode mudar:** o valor dos tokens de hoje (a mesa usa todos), o `html`, o `:focus-visible` e o `::selection` globais;
     o JavaScript inicial (187,4 de 200 KB): ilustração entra por arquivo, nunca por JSX; nada de biblioteca de ícones.
 

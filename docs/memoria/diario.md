@@ -5,6 +5,32 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-18 (3): a rodada 3 dos menus (A3 · Folheto)
+
+- **Pedido:** `decisoes.md` 2026-11-18 (3).
+- **Feito:** `a3.css` e sete pranchetas: o Início no celular em três fundos (`A3-inicio-tinta`, `-anil`, `-papel`), o Início no PC
+  (tinta) e as telas Jogar online, Treinar e Opções (tinta). A B, a C e a D saíram do canvas e da pasta (`git rm`); a A2 e a A ficaram
+  embaixo como rodadas anteriores.
+  - **O emblema:** o Coringa do `Coringa.tsx` (o da capa da rodada 1, gola vermelha) num disco de papel com o anel pontilhado, e o leque
+    das quatro cartas (♥ ♠ ♦ ♣) saindo de trás da cabeça. Primeiro saiu numa carta grande (5:7); sobrava papel e era mais um retângulo,
+    então virou o disco, que também segura o chapéu preto no fundo tinta.
+  - **O menu:** três mini cartas em leque (Jogar online ♥ no vermelho, Treinar ♠ no verde da cura, Opções ♦ no ouro: "ouros"), com o
+    medalhão do ícone e o nome num carimbo de cor levemente torto. Respiram (3 px, 3,6 s, cada uma num tempo, como a mão); sob o mouse
+    inclinam em 3D até 13° com a sombra acompanhando (o mesmo cálculo do `Hand.tsx`, num manipulador do canvas); no toque, sobem 8 px;
+    entram dando-se ao abrir a tela.
+  - **As telas:** a faixa de título na cor da entrada, com a mini carta dela; painéis de papel arredondados com a ficha de cor por cima;
+    botões com a cor da ação e sombra dura que afunda; em Treinar, "Jogar com o bot" em papel (o verde já é da faixa) e "Aprender
+    jogando" em ouro com o selo.
+- **Ruling:** a entrada das cartas anima `transform` com `backwards`, e a respiração anima `translate` — custo: nenhum, mas um
+  `both`/`forwards` na entrada prenderia o `transform` e mataria o hover (foi o erro da D na rodada 2).
+- **Ruling:** os títulos em Alfa Slab dentro de `h1`/`h2` levam `font-weight: 400` — a fonte só tem um peso, e o negrito do navegador a
+  borra (as fichas saíram borradas na primeira foto).
+- **Não conferido:** a inclinação 3D roda no canvas (o manipulador `onPointerMove` da prancheta); localmente só se vê o subir do hover.
+- **Armadilhas:** o `fotos.mjs` agora espera 1,6 s (as entradas animadas); uma página do Playwright aberta com `setContent` não carrega
+  `file://` (a folha lado a lado saiu vazia).
+
+---
+
 ## 2026-11-18 (2): a rodada 2 dos menus (A2 · Folheto com menu e D · Mesa)
 
 - **Pedido:** `decisoes.md` 2026-11-18 (2) (o Folheto fica; o Início vira menu de três entradas; o Coringa da capa repaginado e sem o

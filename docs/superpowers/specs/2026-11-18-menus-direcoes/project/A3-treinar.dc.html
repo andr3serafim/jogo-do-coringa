@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>A3 · Folheto — Treinar</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="a3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&amp;family=Archivo:wdth,wght@62..125,400..900&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="tela A3 fundo-tinta" style="width: 390px; height: 844px">
+<div class="fundo" aria-hidden="true">
+<svg class="naipes" width="390" height="844" style="left: 0; top: 0">
+<defs><pattern id="a3t-naipes" width="96" height="96" patternUnits="userSpaceOnUse"><g fill="currentColor"><path transform="translate(10 10) scale(.9)" d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.6 4.5c2.1 0 3.6 1.1 5.4 3.1 1.8-2 3.3-3.1 5.4-3.1 3.6 0 5.7 3.9 4.2 7.3C19.5 16.4 12 21 12 21z"></path><path transform="translate(58 10) scale(.9)" d="M12 2 20 12 12 22 4 12z"></path><path transform="translate(10 58) scale(.9)" d="M12 3a3.6 3.6 0 0 0-3.4 4.8A3.6 3.6 0 1 0 9.7 15c.7 0 1.4-.2 1.9-.6-.3 2.6-1.2 4.6-2.6 6.1h6c-1.4-1.5-2.3-3.5-2.6-6.1.5.4 1.2.6 1.9.6a3.6 3.6 0 1 0 1.1-7.2A3.6 3.6 0 0 0 12 3z"></path><path transform="translate(58 58) scale(.9)" d="M12 2s-8 6.2-8 11.2C4 16 6 18 8.5 18c1.4 0 2.6-.6 3.1-1.4-.3 2-1.2 3.6-2.6 4.9h6c-1.4-1.3-2.3-2.9-2.6-4.9.5.8 1.7 1.4 3.1 1.4C18 18 20 16 20 13.2 20 8.2 12 2 12 2z"></path></g></pattern></defs>
+<rect class="deriva" x="-96" y="-96" width="582" height="1072" fill="url(#a3t-naipes)"></rect>
+</svg>
+<div class="luz" style="top: -200px"></div>
+<div class="vinheta"></div>
+</div>
+<div class="conteudo">
+<div class="topo"><a class="pilula" href="A3-inicio-tinta.dc.html"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>Início</a></div>
+<header class="faixa bg-verde">
+<span class="mini cor-tinta" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2s-8 6.2-8 11.2C4 16 6 18 8.5 18c1.4 0 2.6-.6 3.1-1.4-.3 2-1.2 3.6-2.6 4.9h6c-1.4-1.3-2.3-2.9-2.6-4.9.5.8 1.7 1.4 3.1 1.4C18 18 20 16 20 13.2 20 8.2 12 2 12 2z"></path></svg></span>
+<div><h1 class="faixa-nome">Treinar</h1><p class="faixa-sub">Jogar com o bot ou aprender jogando</p></div>
+</header>
+<div class="escolhas">
+<a class="escolha bg-papel entra" href="#treino" style="--d: 1"><span class="medalhao bg-verde" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><rect x="4.5" y="8" width="15" height="11" rx="2.5"></rect><path d="M12 4.5V8M9 12.5v1M15 12.5v1M9 16h6M2.5 12v3M21.5 12v3"></path><circle cx="12" cy="3.5" r="1.2"></circle></svg></span><span><span class="escolha-nome">Jogar com o bot</span><span class="escolha-sub">Fácil, Médio ou Difícil</span></span><svg class="ico seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></a>
+<a class="escolha bg-ouro entra" href="#tutorial" style="--d: 2"><span class="medalhao" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><path d="M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V5c-3-.5-6 0-8 1.5zM12 6.5v13"></path></svg></span><span><span class="escolha-nome">Aprender jogando</span><span class="escolha-sub">Uma partida com dicas, contra o Fácil</span></span><svg class="ico seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg><svg class="selo" viewBox="0 0 40 40" aria-hidden="true"><polygon points="39,20 31.1,24.6 33.4,33.4 24.6,31.1 20,39 15.4,31.1 6.6,33.4 8.9,24.6 1,20 8.9,15.4 6.6,6.6 15.4,8.9 20,1 24.6,8.9 33.4,6.6 31.1,15.4" fill="#b8261c" stroke="#17120f" stroke-width="2"></polygon><circle cx="20" cy="20" r="6" fill="#f5c238" stroke="#17120f" stroke-width="2"></circle></svg></a>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
