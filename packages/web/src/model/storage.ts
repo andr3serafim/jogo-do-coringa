@@ -149,9 +149,19 @@ export interface Prefs {
    * `prefs.look ?? DEFAULT_LOOK` (de `@coringa/protocol`).
    */
   look?: Look;
+  /**
+   * O fundo das telas fora da mesa (decisoes.md 2026-11-18 (5)): opcional, como o `look`, e ausente até a pessoa trocar. Quem lê usa
+   * `menuThemeOf(prefs)`, que dá o rosa, o padrão.
+   */
+  menuTheme?: MenuTheme;
 }
 
+/** Os dois fundos do menu: rosa (a capa da mesa, o padrão) e verde (a mesa de baralho). */
+export type MenuTheme = 'pink' | 'green';
+
 export const DEFAULT_PREFS: Prefs = { autoPass: true, reduceMotion: false, sound: true };
+
+export const menuThemeOf = (prefs: Prefs): MenuTheme => prefs.menuTheme ?? 'pink';
 
 const PREFS_KEY = 'coringa:prefs';
 const NICKNAME_KEY = 'coringa:apelido';
@@ -164,6 +174,7 @@ export function loadPrefs(store: KeyValueStore): Prefs {
   if (typeof value.reduceMotion === 'boolean') prefs.reduceMotion = value.reduceMotion;
   if (typeof value.sound === 'boolean') prefs.sound = value.sound;
   if ('look' in value) prefs.look = normalizeLook(value.look);
+  if (value.menuTheme === 'pink' || value.menuTheme === 'green') prefs.menuTheme = value.menuTheme;
   return prefs;
 }
 

@@ -8,6 +8,7 @@ import {
   loadPrefs,
   loadSeat,
   loadTutorialState,
+  menuThemeOf,
   safeStore,
   saveLastSeq,
   saveNickname,
@@ -290,6 +291,30 @@ describe('preferências', () => {
     const store = fresh();
     store.set('coringa:prefs', JSON.stringify({ autoPass: 'sim', reduceMotion: 1, sound: 'alto' }));
     expect(loadPrefs(store)).toEqual(DEFAULT_PREFS);
+  });
+
+  it('o tema do menu (decisoes.md 2026-11-18 (5)): ausente até a pessoa escolher, e então rosa; verde e rosa voltam; outro valor some', () => {
+    const store = fresh();
+    expect(loadPrefs(store)).not.toHaveProperty('menuTheme');
+    expect(menuThemeOf(loadPrefs(store))).toBe('pink');
+    store.set('coringa:prefs', JSON.stringify({ menuTheme: 'green' }));
+    expect(loadPrefs(store).menuTheme).toBe('green');
+    expect(menuThemeOf(loadPrefs(store))).toBe('green');
+    store.set('coringa:prefs', JSON.stringify({ menuTheme: 'pink' }));
+    expect(menuThemeOf(loadPrefs(store))).toBe('pink');
+    for (const menuTheme of ['azul', 1, null, {}, []]) {
+      store.set('coringa:prefs', JSON.stringify({ menuTheme }));
+      expect(loadPrefs(store)).not.toHaveProperty('menuTheme');
+      expect(menuThemeOf(loadPrefs(store))).toBe('pink');
+    }
+  });
+
+  it('trocar outra preferência espalhando as de agora (como o menu da partida faz) não apaga o tema', () => {
+    const store = fresh();
+    savePrefs(store, { ...loadPrefs(store), menuTheme: 'green' });
+    savePrefs(store, { ...loadPrefs(store), reduceMotion: true });
+    savePrefs(store, { ...loadPrefs(store), sound: false });
+    expect(loadPrefs(store)).toEqual({ autoPass: true, reduceMotion: true, sound: false, menuTheme: 'green' });
   });
 
   it.each(['{quebrado', 'null', '"x"', '[]', '7'])('JSON %s dá os padrões', (raw) => {
