@@ -1,13 +1,15 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-17**, a logo do dragão feita na `feat/abertura` (`b47a2af`), refeita sobre a `main`, com as duas CI verdes em `ee2ff6e`, esperando o autor ver a animação e o "sim" do merge; antes, o greedy que barra a Exódia na `main` por fast-forward até `2caeb5a` ("Sim, merge",
+> Sobrescrito a cada atualização. **Última: 2026-11-17**, a abertura do jogo com a logo do dragão na `main` por fast-forward ("Sim, merge", `decisoes.md` 2026-11-17 (4)), esperando a CI do push da `main`; o deploy é do autor, quando ele pedir; antes, o greedy que barra a Exódia na `main` por fast-forward até `2caeb5a` ("Sim, merge",
 > `decisoes.md` 2026-11-17 (1)), com as duas CI verdes no topo da branch (`2caeb5a`) e no push da `main` (`355f2e6`). **O deploy do autor saiu** (2026-11-17, `8266a4f`, sem a abertura): o jogo está no ar em
 > `https://jogodocoringa.com.br` (diário 2026-11-17 (1)). A abertura fica parada na `feat/abertura`.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **A abertura do jogo, com a logo do dragão, na branch `feat/abertura`** (worktree `.claude/worktrees/abertura`), refeita sobre a `main`
+- **A abertura do jogo, com a logo do dragão, está na `main`** ("Sim, merge", `decisoes.md` 2026-11-17 (4)), por fast-forward até o topo de
+  `feat/abertura`. **Falta:** a CI do push da `main`; o deploy (`pnpm deploy:server`), só quando ele pedir. A branch, de antes do merge:
+  `feat/abertura` (worktree `.claude/worktrees/abertura`), refeita sobre a `main`
   em 2026-11-17 (a memória renumerada: a abertura é a 2026-11-16 (5); os commits de antes na tag local `abertura-antes-do-rebase`).
   `decisoes.md` 2026-11-16 (5) (a abertura) e 2026-11-17 (3) (a logo nova); o diário 2026-11-17 (2). O código em `b47a2af`. A abertura
   dura 5,35 s de desenho (5,6 a 5,8 s da capa ao menu); fica num pedaço à parte (o inicial em 187,4 KB).
@@ -17,7 +19,9 @@
   - **O autor viu** a pose parada do dragão (as duas versões, mandadas na conversa); **não viu** a animação.
   - **No GitHub, com as duas CI verdes em `ee2ff6e`** (`check` 240 s; `e2e` 605 s de job, com o teto novo; o pre-push com o `pnpm check`
     inteiro verde, web 2960 testes). Os quadros do voo foram mandados ao autor, e a animação ficou aberta no painel (`web-abertura`, 5174).
-  - **Próximo passo exato:** o autor ver a animação e dizer o "sim" do merge (fast-forward da `main` até o topo da branch). **O deploy é só quando ele pedir** (`decisoes.md` 2026-11-17 (2)).
+  - **Próximo passo exato:** ler a CI do push da `main` e registrá-la aqui. Nada mais de código; o deploy leva a abertura ao ar.
+  - **O que não pode regredir:** a abertura fora do JavaScript inicial (o smoke confere a marca `data-dragao-voo`); a capa que pula com
+    clique e tecla; da capa ao menu ≤ 6 s (o `abertura.spec` mede); a marca `coringa:abertura = pular` só nos E2E; nenhum flash de tela. **O deploy é só quando ele pedir** (`decisoes.md` 2026-11-17 (2)).
 - **O jogo está no ar em `https://jogodocoringa.com.br`** (o deploy do autor, 2026-11-17, `8266a4f`, sem a abertura; o diário 2026-11-17
   (1)): o bloco D, o conserto da Devastação, o das cenas que repetiam, o Roubo novo, o bot que barra a Exódia e o domínio. O `/api/health`
   devolve a versão; o `www` redireciona com 301 (regra no painel). **O próximo deploy** é o mesmo `pnpm deploy:server`; a conta já tem o

@@ -56,6 +56,7 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 - **O E2E, ao fim:** a execução inteira (com o teto antigo) deu 114 verdes, 4 pulados, nenhuma falha e 16 por rodar; os que faltaram
   (`mobile.spec` e `drag.spec`, nos dois projetos) rodaram à parte, verdes (39, 4 pulados); o `abertura.spec` (15) verde no build final.
 - **CI:** as duas verdes em `ee2ff6e` (`check` 240 s, `e2e` 605 s de job).
+- **O merge:** "Sim, merge" (`decisoes.md` 2026-11-17 (4)): a `main` andou por fast-forward até o topo da branch.
 - **Armadilhas:**
   - **Um teste com `userEvent` na capa** acha a abertura no lugar dela: o pedaço já carregado chega enquanto o `userEvent` espera. Na capa,
     use o evento síncrono (`fireEvent`, `dispatchEvent`).

@@ -6,6 +6,20 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-17 (4): o merge da abertura
+
+Depois do resumo da logo do dragão e da abertura (os quadros do voo mandados na conversa, a animação aberta no painel do navegador; os
+tempos: a logo ~2,3 s, o desenho em 5,35 s, 5,6 a 5,8 s da capa ao menu; a abertura num pedaço à parte, com a capa escura; o teto do E2E
+em 780 s; as duas CI verdes em `ee2ff6e`), perguntado "Depois de ver a animação, faço o merge da abertura na main?", ele respondeu:
+
+> Sim, merge
+
+**Leitura:** a `main` anda por fast-forward até o topo de `feat/abertura`. **[I]** O "sim" vale para o merge (e aceita o que o resumo
+disse ter mudado além do pedido: os tempos, a capa, o teto do E2E, os títulos consertados); o deploy segue sendo dele
+(`decisoes.md` 2026-11-17 (2): "só quando ele pedir").
+
+---
+
 ## 2026-11-17 (3): a logo LUSACAN redesenhada: o dragão
 
 Depois de ver os dois SVG da logo do olho (enviados na conversa), ele mandou uma imagem de referência (uma arte de fantasia escura, feita
