@@ -6,6 +6,37 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-18 (2): o Folheto fica; o Início vira um menu; uma direção nova com o Balatro de referência
+
+Depois de ver as três direções no canvas (A · Folheto, B · Matriz, C · Noite), ele escreveu:
+
+> Gostei do Folheto, os botões e artes estão legais - segue melhorias propostas por mim:
+>
+> 1. Quero uma página inicial com menu:
+>
+> Jogar online; (* criar sala; * entrar numa sala)
+> Treinar (* Jogar com Bot; * aprender jogando)
+> Opções (aparencia e preferencias de jogo)
+>
+> 2. Dê uma repaginada na imagem principal do coringa e remova esse texto grande.
+>
+> Além do folheto, gere mais uma direção seguindo minha proposta de menu. tema usando balatro como referencia
+
+**Leitura:**
+- A direção A (Folheto) segue, com os botões e a arte; a B e a C saem da mesa. Uma direção nova entra, com o mesmo menu.
+- **O Início vira um menu de três entradas**, cada uma com a sua tela: Jogar online (criar sala, entrar numa sala), Treinar (jogar
+  com o bot, aprender jogando) e Opções (aparência e preferências). **Isto muda a navegação**, que o pedido 2026-11-18 (1) deixava de
+  fora: a proposta é dele, então vale; **[I]** o como (rotas próprias ou estado no Início, o botão Voltar, os E2E que clicam "Criar
+  sala" no Início) fica para a spec, depois da escolha.
+- **[I] "Esse texto grande"** é o título "JOGO DO CORINGA" na capa do folheto: sai, e a capa fica só com a imagem.
+- **[I] O que a lista dele não cita:** "Partidas anteriores" (hoje só se abre pelo Início) entra como um item menor no menu, para
+  ele confirmar; as Opções trazem as preferências que o jogo já guarda (Som, Reduzir animações, Passar sozinho), não só o Som.
+- **[I] O Balatro entra pela estrutura e pelo acabamento** (cartas como protagonistas, botões grossos de cor que afundam, fundo vivo,
+  movimento com peso), nunca pelo desenho: sem o redemoinho, a fonte de pixel, o CRT e a paleta dele (spec da web §10.6 e o
+  anti-objetivo da direção visual: "Copiar o desenho de qualquer anime ou jogo").
+
+---
+
 ## 2026-11-18 (1): o redesenho visual dos menus
 
 Ele pediu, numa conversa nova:
