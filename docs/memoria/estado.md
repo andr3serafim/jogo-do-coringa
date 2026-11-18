@@ -1,6 +1,6 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-17**, a abertura do jogo com a logo do dragão na `main` por fast-forward ("Sim, merge", `decisoes.md` 2026-11-17 (4)), esperando a CI do push da `main`; o deploy é do autor, quando ele pedir; antes, o greedy que barra a Exódia na `main` por fast-forward até `2caeb5a` ("Sim, merge",
+> Sobrescrito a cada atualização. **Última: 2026-11-17**, a abertura do jogo com a logo do dragão na `main` por fast-forward até `52452c0` ("Sim, merge", `decisoes.md` 2026-11-17 (4)), com as duas CI verdes no push da `main`; o deploy é do autor, quando ele pedir; antes, o greedy que barra a Exódia na `main` por fast-forward até `2caeb5a` ("Sim, merge",
 > `decisoes.md` 2026-11-17 (1)), com as duas CI verdes no topo da branch (`2caeb5a`) e no push da `main` (`355f2e6`). **O deploy do autor saiu** (2026-11-17, `8266a4f`, sem a abertura): o jogo está no ar em
 > `https://jogodocoringa.com.br` (diário 2026-11-17 (1)). A abertura fica parada na `feat/abertura`.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
@@ -8,7 +8,9 @@
 ## Agora
 
 - **A abertura do jogo, com a logo do dragão, está na `main`** ("Sim, merge", `decisoes.md` 2026-11-17 (4)), por fast-forward até o topo de
-  `feat/abertura`. **Falta:** a CI do push da `main`; o deploy (`pnpm deploy:server`), só quando ele pedir. A branch, de antes do merge:
+  `feat/abertura` (`52452c0`), com as duas CI verdes no push da `main` (`check` 365 s; `e2e` 630 s de job, que o teto antigo de 600 s no
+  Playwright não comportaria). **Falta:** o deploy (`pnpm deploy:server`), só quando ele pedir. O worktree foi removido; ficam a branch
+  local e a remota `feat/abertura` (mescladas; o autor pode apagá-las) e a tag local `abertura-antes-do-rebase`. A branch, de antes do merge:
   `feat/abertura` (worktree `.claude/worktrees/abertura`), refeita sobre a `main`
   em 2026-11-17 (a memória renumerada: a abertura é a 2026-11-16 (5); os commits de antes na tag local `abertura-antes-do-rebase`).
   `decisoes.md` 2026-11-16 (5) (a abertura) e 2026-11-17 (3) (a logo nova); o diário 2026-11-17 (2). O código em `b47a2af`. A abertura
@@ -19,7 +21,7 @@
   - **O autor viu** a pose parada do dragão (as duas versões, mandadas na conversa); **não viu** a animação.
   - **No GitHub, com as duas CI verdes em `ee2ff6e`** (`check` 240 s; `e2e` 605 s de job, com o teto novo; o pre-push com o `pnpm check`
     inteiro verde, web 2960 testes). Os quadros do voo foram mandados ao autor, e a animação ficou aberta no painel (`web-abertura`, 5174).
-  - **Próximo passo exato:** ler a CI do push da `main` e registrá-la aqui. Nada mais de código; o deploy leva a abertura ao ar.
+  - **Próximo passo exato:** nenhum de código. O deploy (dele) leva a abertura ao ar; o próximo trabalho vem do autor.
   - **O que não pode regredir:** a abertura fora do JavaScript inicial (o smoke confere a marca `data-dragao-voo`); a capa que pula com
     clique e tecla; da capa ao menu ≤ 6 s (o `abertura.spec` mede); a marca `coringa:abertura = pular` só nos E2E; nenhum flash de tela. **O deploy é só quando ele pedir** (`decisoes.md` 2026-11-17 (2)).
 - **O jogo está no ar em `https://jogodocoringa.com.br`** (o deploy do autor, 2026-11-17, `8266a4f`, sem a abertura; o diário 2026-11-17
@@ -177,8 +179,7 @@ toque "Próximo passo" a partir do passo:
   estão copiadas em `node_modules/.pnpm/@cloudflare+workerd-windows-64@1.20261012.1/node_modules/@cloudflare/workerd-windows-64/bin/`. Um
   `pnpm install` que troque o workerd perde o paliativo. A correção: instalar o VC++ x64 mais recente
   (`https://aka.ms/vs/17/release/vc_redist.x64.exe`) e apagar as três DLLs.
-- **Worktrees:** `D:\andr3\jogo-coringa` (o principal); `.claude/worktrees/inspiring-sammet-387417` (`feat/ajustes`, da conta anterior) e
-  `.claude/worktrees/youthful-elgamal-3d5e8a` (de 2026-11-02, talvez de uma sessão do app: não apague). Um worktree novo não traz as DLLs do paliativo do workerd no `node_modules`: copie-as do principal. Uma pasta de worktree com
+- **Worktrees:** só o principal, `D:\andr3\jogo-coringa` (`git worktree list`, 2026-11-17; o da abertura removido depois do merge). Um worktree novo não traz as DLLs do paliativo do workerd no `node_modules`: copie-as do principal. Uma pasta de worktree com
   `node_modules` que o `git worktree remove` não apaga ("Filename too long") sai no PowerShell com
   `Remove-Item -LiteralPath ('\\?\' + $p) -Recurse -Force`.
 - **Branches:** as locais estão mescladas na `main` (a `feat/playtest-bloco-c` em 2026-11-11 e a `feat/decks-fatia-1` em 2026-11-12), menos a `feat/online-equipar-vazio`
