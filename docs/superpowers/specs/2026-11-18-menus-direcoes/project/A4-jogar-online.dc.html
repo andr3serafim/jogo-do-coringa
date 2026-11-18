@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>A4 · Folheto — Jogar online</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="a4.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&amp;family=Archivo:wdth,wght@62..125,400..900&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="tela A4 fundo-verde" style="width: 390px; height: 880px">
+<div class="fundo" aria-hidden="true">
+<svg width="390" height="880" style="left: 0; top: 0; opacity: .45"><filter id="a4j-grao" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="7"></feTurbulence><feColorMatrix values="0 0 0 0 .09 0 0 0 0 .07 0 0 0 0 .06 0 0 0 .55 -.2"></feColorMatrix></filter><rect width="390" height="880" filter="url(#a4j-grao)"></rect></svg>
+<div class="trilho-mesa"></div>
+<div class="vinheta"></div>
+<svg width="0" height="0"><filter id="a4-textura"><feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" result="ruido"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="ruido" scale="2.4"></feDisplacementMap></filter></svg>
+</div>
+<div class="conteudo">
+<div class="topo"><a class="carimbo voltar" href="A4-inicio-verde.dc.html"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>Início</a></div>
+<header class="titulo-tela">
+<span class="mini" aria-hidden="true"><svg class="indice indice-1 vermelho" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.6 4.5c2.1 0 3.6 1.1 5.4 3.1 1.8-2 3.3-3.1 5.4-3.1 3.6 0 5.7 3.9 4.2 7.3C19.5 16.4 12 21 12 21z"></path></svg><svg class="indice indice-2 vermelho" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.6 4.5c2.1 0 3.6 1.1 5.4 3.1 1.8-2 3.3-3.1 5.4-3.1 3.6 0 5.7 3.9 4.2 7.3C19.5 16.4 12 21 12 21z"></path></svg><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c3.5 3.2 3.5 14.8 0 18M12 3c-3.5 3.2-3.5 14.8 0 18"></path></svg></span>
+<div><h1 class="titulo-nome textura">Jogar online</h1><p class="titulo-sub">Criar sala ou entrar numa sala</p></div>
+</header>
+
+<section class="painel" aria-label="Criar sala" style="--d: 1">
+<h2 class="painel-tit"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M12 8.5v7M8.5 12h7"></path></svg><span class="textura">Criar sala</span></h2>
+<div class="campo">
+<label class="rotulo" for="a4j-apelido">Seu apelido</label>
+<input id="a4j-apelido" class="entrada foco" value="Duda" autocomplete="nickname">
+<p class="dica">De 1 a 20 caracteres.</p>
+</div>
+<fieldset class="grupo">
+<legend class="rotulo">Vida inicial</legend>
+<div class="opcoes">
+<label class="opcao"><input type="radio" name="a4j-vida" class="sr"><span class="num">300</span></label>
+<label class="opcao marcada"><input type="radio" name="a4j-vida" class="sr"><span class="num">500 · padrão</span></label>
+<label class="opcao"><input type="radio" name="a4j-vida" class="sr"><span class="num">800</span></label>
+</div>
+</fieldset>
+<button type="submit" class="carimbo carimbo-grande carimbo-ouro">Criar sala</button>
+</section>
+
+<section class="painel" aria-label="Entrar numa sala" style="--d: 2">
+<h2 class="painel-tit"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M3 12h11M10 8l4 4-4 4"></path></svg><span class="textura">Entrar numa sala</span></h2>
+<div class="campo">
+<label class="rotulo" for="a4j-codigo">Código ou link da sala</label>
+<input id="a4j-codigo" class="entrada" value="" autocomplete="off">
+</div>
+<button type="submit" class="carimbo carimbo-grande">Entrar</button>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":880}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

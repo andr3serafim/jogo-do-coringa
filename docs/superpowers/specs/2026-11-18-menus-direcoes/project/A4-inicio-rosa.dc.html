@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>A4 · Folheto — Início (fundo rosa)</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="a4.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&amp;family=Archivo:wdth,wght@62..125,400..900&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="tela A4 fundo-rosa" style="width: 390px; height: 844px">
+<div class="fundo" aria-hidden="true">
+<svg width="390" height="844" style="left: 0; top: 0; opacity: .6"><filter id="a4r-grao" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="7"></feTurbulence><feColorMatrix values="0 0 0 0 .09 0 0 0 0 .07 0 0 0 0 .06 0 0 0 .55 -.2"></feColorMatrix></filter><rect width="390" height="844" filter="url(#a4r-grao)"></rect></svg>
+<div class="moldura"><i></i><i></i><i></i><i></i></div>
+<div class="vinheta"></div>
+</div>
+<div class="conteudo inicio">
+<h1 class="sr">Jogo do Coringa</h1>
+<svg class="emblema" viewBox="0 0 300 264" aria-hidden="true">
+<circle cx="150" cy="150" r="92" fill="#f1f0ea" stroke="#17120f" stroke-width="3.5"></circle>
+<circle cx="150" cy="150" r="83" fill="none" stroke="#17120f" stroke-opacity=".38" stroke-width="1.5" stroke-dasharray="3 5"></circle>
+<g transform="translate(150 158) scale(3.4) translate(-32 -34)" stroke-linejoin="round" stroke-linecap="round">
+<path fill="none" stroke="#17120f" stroke-width="3" d="M14 31C10 23 6 17 4 10c8 2 14 6 18 12 2-8 6-14 10-18 4 4 8 10 10 18 4-6 10-10 18-12-2 7-6 13-10 21z"></path>
+<path fill="#17120f" stroke="#f1f0ea" stroke-width="1.8" paint-order="stroke" d="M14 31C10 23 6 17 4 10c8 2 14 6 18 12 2-8 6-14 10-18 4 4 8 10 10 18 4-6 10-10 18-12-2 7-6 13-10 21z"></path>
+<path fill="none" stroke="#f1f0ea" stroke-width="1.1" d="M10 16c4 2 7 5 9 9M32 10v14M54 16c-4 2-7 5-9 9"></path>
+<circle fill="#f1f0ea" stroke="#17120f" stroke-width="1.5" cx="4" cy="10" r="3.4"></circle>
+<circle fill="#f1f0ea" stroke="#17120f" stroke-width="1.5" cx="32" cy="4" r="3.4"></circle>
+<circle fill="#f1f0ea" stroke="#17120f" stroke-width="1.5" cx="60" cy="10" r="3.4"></circle>
+<circle fill="#f1f0ea" stroke="#17120f" stroke-width="1.8" cx="32" cy="40" r="12"></circle>
+<path fill="none" stroke="#17120f" stroke-width="1.7" d="M26 37.5l3-2M35 35.5l3 2M25.5 43c3.5 5.5 9.5 5.5 13 0"></path>
+<circle fill="#b8261c" cx="24.5" cy="41" r="1.8"></circle>
+<circle fill="#b8261c" cx="39.5" cy="41" r="1.8"></circle>
+<path fill="none" stroke="#17120f" stroke-width="3" d="M16 54l6-6 5 6 5-6 5 6 5-6 6 6-2 9H18z"></path>
+<path fill="#b8261c" stroke="#f1f0ea" stroke-width="1.8" paint-order="stroke" d="M16 54l6-6 5 6 5-6 5 6 5-6 6 6-2 9H18z"></path>
+<path fill="none" stroke="#17120f" stroke-width=".9" d="M16 54l6-6 5 6 5-6 5 6 5-6 6 6-2 9H18z"></path>
+</g>
+</svg>
+
+<nav class="menu" aria-label="Menu">
+<a class="item" href="A4-jogar-online.dc.html" style="--i: 0" onPointerMove="{{ inclina }}" onPointerLeave="{{ solta }}" onPointerDown="{{ toca }}" onPointerUp="{{ solta }}" onPointerCancel="{{ solta }}">
+<span class="inclina" aria-hidden="true"><span class="mini"><svg class="indice indice-1 vermelho" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.6 4.5c2.1 0 3.6 1.1 5.4 3.1 1.8-2 3.3-3.1 5.4-3.1 3.6 0 5.7 3.9 4.2 7.3C19.5 16.4 12 21 12 21z"></path></svg><svg class="indice indice-2 vermelho" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.6 4.5c2.1 0 3.6 1.1 5.4 3.1 1.8-2 3.3-3.1 5.4-3.1 3.6 0 5.7 3.9 4.2 7.3C19.5 16.4 12 21 12 21z"></path></svg><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c3.5 3.2 3.5 14.8 0 18M12 3c-3.5 3.2-3.5 14.8 0 18"></path></svg></span></span>
+<span><span class="item-nome">Jogar online</span><span class="item-sub">Criar sala ou entrar numa sala</span></span>
+<svg class="ico seta" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"><path d="M9 5l7 7-7 7"></path></svg>
+</a>
+<a class="item" href="A4-treinar.dc.html" style="--i: 1" onPointerMove="{{ inclina }}" onPointerLeave="{{ solta }}" onPointerDown="{{ toca }}" onPointerUp="{{ solta }}" onPointerCancel="{{ solta }}">
+<span class="inclina" aria-hidden="true"><span class="mini"><svg class="indice indice-1" viewBox="0 0 24 24"><path d="M12 2s-8 6.2-8 11.2C4 16 6 18 8.5 18c1.4 0 2.6-.6 3.1-1.4-.3 2-1.2 3.6-2.6 4.9h6c-1.4-1.3-2.3-2.9-2.6-4.9.5.8 1.7 1.4 3.1 1.4C18 18 20 16 20 13.2 20 8.2 12 2 12 2z"></path></svg><svg class="indice indice-2" viewBox="0 0 24 24"><path d="M12 2s-8 6.2-8 11.2C4 16 6 18 8.5 18c1.4 0 2.6-.6 3.1-1.4-.3 2-1.2 3.6-2.6 4.9h6c-1.4-1.3-2.3-2.9-2.6-4.9.5.8 1.7 1.4 3.1 1.4C18 18 20 16 20 13.2 20 8.2 12 2 12 2z"></path></svg><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4l10 10M12 16l4-4M14 14l4.5 4.5M20 4L10 14M8 12l4 4M10 14l-4.5 4.5"></path></svg><svg class="selo" viewBox="0 0 40 40"><polygon points="39,20 31.1,24.6 33.4,33.4 24.6,31.1 20,39 15.4,31.1 6.6,33.4 8.9,24.6 1,20 8.9,15.4 6.6,6.6 15.4,8.9 20,1 24.6,8.9 33.4,6.6 31.1,15.4" fill="#b8261c" stroke="#17120f" stroke-width="2"></polygon><circle cx="20" cy="20" r="6" fill="#f5c238" stroke="#17120f" stroke-width="2"></circle></svg></span></span>
+<span><span class="item-nome">Treinar</span><span class="item-sub">Jogar com o bot ou aprender jogando</span></span>
+<svg class="ico seta" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"><path d="M9 5l7 7-7 7"></path></svg>
+</a>
+<a class="item" href="#partidas" style="--i: 2" onPointerMove="{{ inclina }}" onPointerLeave="{{ solta }}" onPointerDown="{{ toca }}" onPointerUp="{{ solta }}" onPointerCancel="{{ solta }}">
+<span class="inclina" aria-hidden="true"><span class="mini"><svg class="indice indice-1" viewBox="0 0 24 24"><path d="M12 3a3.6 3.6 0 0 0-3.4 4.8A3.6 3.6 0 1 0 9.7 15c.7 0 1.4-.2 1.9-.6-.3 2.6-1.2 4.6-2.6 6.1h6c-1.4-1.5-2.3-3.5-2.6-6.1.5.4 1.2.6 1.9.6a3.6 3.6 0 1 0 1.1-7.2A3.6 3.6 0 0 0 12 3z"></path></svg><svg class="indice indice-2" viewBox="0 0 24 24"><path d="M12 3a3.6 3.6 0 0 0-3.4 4.8A3.6 3.6 0 1 0 9.7 15c.7 0 1.4-.2 1.9-.6-.3 2.6-1.2 4.6-2.6 6.1h6c-1.4-1.5-2.3-3.5-2.6-6.1.5.4 1.2.6 1.9.6a3.6 3.6 0 1 0 1.1-7.2A3.6 3.6 0 0 0 12 3z"></path></svg><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 3h12M6 21h12M7 3c0 4.5 4 6 4 9s-4 4.5-4 9M17 3c0 4.5-4 6-4 9s4 4.5 4 9"></path><path d="M9 19.5h6l-3-3z" fill="#b8261c" stroke="none"></path></svg></span></span>
+<span><span class="item-nome">Partidas anteriores</span><span class="item-sub">Reveja as partidas jogadas</span></span>
+<svg class="ico seta" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"><path d="M9 5l7 7-7 7"></path></svg>
+</a>
+<a class="item" href="A4-opcoes.dc.html" style="--i: 3" onPointerMove="{{ inclina }}" onPointerLeave="{{ solta }}" onPointerDown="{{ toca }}" onPointerUp="{{ solta }}" onPointerCancel="{{ solta }}">
+<span class="inclina" aria-hidden="true"><span class="mini"><svg class="indice indice-1 vermelho" viewBox="0 0 24 24"><path d="M12 2 20 12 12 22 4 12z"></path></svg><svg class="indice indice-2 vermelho" viewBox="0 0 24 24"><path d="M12 2 20 12 12 22 4 12z"></path></svg><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg></span></span>
+<span><span class="item-nome">Opções</span><span class="item-sub">Aparência e preferências</span></span>
+<svg class="ico seta" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"><path d="M9 5l7 7-7 7"></path></svg>
+</a>
+</nav>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+// A inclinação da mão do jogo (Hand.tsx): até 13° seguindo o mouse, com a sombra acompanhando; no toque, a carta sobe 8 px.
+// O ponteiro vale para a linha inteira; quem inclina é a mini carta dela.
+var reduz = function () { return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches; };
+var ponto = function (e) { var b = e.currentTarget.getBoundingClientRect(); var c = function (v) { return Math.max(-0.5, Math.min(0.5, v)); }; return { x: b.width ? c((e.clientX - b.left) / b.width - 0.5) : 0, y: b.height ? c((e.clientY - b.top) / b.height - 0.5) : 0 }; };
+var carta = function (e) { return e.currentTarget.querySelector('.inclina'); };
+var pinta = function (el, t, f) { if (!el) return; el.style.transform = t; el.style.filter = f; };
+return {
+inclina: function (e) { if (reduz() || e.pointerType !== 'mouse') return; var p = ponto(e); pinta(carta(e), 'perspective(600px) rotateX(' + (-p.y * 26).toFixed(1) + 'deg) rotateY(' + (p.x * 26).toFixed(1) + 'deg)', 'drop-shadow(' + (-p.x * 8).toFixed(1) + 'px ' + (4 - p.y * 6).toFixed(1) + 'px 0 rgba(0, 0, 0, .3))'); },
+toca: function (e) { if (reduz() || e.pointerType !== 'touch') return; var p = ponto(e); pinta(carta(e), 'translateY(-8px) perspective(600px) rotateY(' + (p.x * 12).toFixed(1) + 'deg)', 'drop-shadow(0 6px 0 rgba(0, 0, 0, .28))'); },
+solta: function (e) { if (e.type === 'pointerleave' || e.pointerType === 'touch') pinta(carta(e), '', ''); }
+};
+}
+}
+</script>
+</body>
+</html>

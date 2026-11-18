@@ -1,0 +1,138 @@
+/* A4 · Folheto (rodada 4): o modelo da A2 (o Coringa em cima, o menu embaixo, também no PC) com o hover da A3. O Coringa do jogo num
+   disco de papel, maior que o disco (o chapéu, os guizos e a gola passam da borda). O menu é uma lista: a mini carta com o símbolo, que
+   respira e inclina em 3D como a mão do jogo, e o nome ao lado. Fundos parados (nada desliza): rosa da capa, verde de mesa, vinho de
+   verso de baralho. As telas de cada entrada com a identidade da mesa: carimbos de madeira (`.carimbo` do jogo), títulos em tipo de
+   madeira com a textura áspera, cantos retos, pouca cor. */
+.A4 {
+  --tinta: #17120f; --papel: #f1f0ea; --papel-claro: #fbfaf6; --vermelho: #b8261c; --ouro: #f5c238; --madeira: #8a5a2b;
+  --texto: var(--papel); --texto-2: rgba(241, 240, 234, .78); --linha-lista: rgba(241, 240, 234, .2); --realce: rgba(255, 255, 255, .07);
+  --grao: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .09 0 0 0 0 .07 0 0 0 0 .06 0 0 0 .2 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  color: var(--texto);
+}
+
+/* Os três fundos: uma cor, uma luz suave no alto e um motivo só, parado. */
+.A4.fundo-rosa { background: radial-gradient(110% 70% at 50% 28%, #f6b6c8 0%, #ee9db5 48%, #d9849e 100%);
+  --texto: var(--tinta); --texto-2: rgba(23, 18, 15, .74); --linha-lista: rgba(23, 18, 15, .2); --realce: rgba(255, 255, 255, .28); }
+.A4.fundo-verde { background: radial-gradient(110% 70% at 50% 30%, #23805a 0%, #175f42 50%, #0c3b29 100%); }
+.A4.fundo-vinho { background: radial-gradient(110% 70% at 50% 30%, #8f2a22 0%, #6b1a15 50%, #430e0b 100%); }
+.A4.pc.fundo-rosa { background: radial-gradient(75% 85% at 50% 32%, #f6b6c8 0%, #ee9db5 50%, #d9849e 100%); }
+.A4.pc.fundo-verde { background: radial-gradient(75% 85% at 50% 34%, #23805a 0%, #175f42 52%, #0c3b29 100%); }
+.A4.pc.fundo-vinho { background: radial-gradient(75% 85% at 50% 34%, #8f2a22 0%, #6b1a15 52%, #430e0b 100%); }
+.A4 .vinheta { position: absolute; inset: 0; background: radial-gradient(120% 85% at 50% 40%, transparent 58%, rgba(0, 0, 0, .3) 100%); }
+.A4.fundo-rosa .vinheta { background: radial-gradient(120% 85% at 50% 40%, transparent 62%, rgba(110, 30, 55, .18) 100%); }
+/* Rosa: a moldura dupla da capa de folheto, com os losangos nos cantos. */
+.A4 .moldura { position: absolute; inset: 14px; border: 1.5px solid rgba(23, 18, 15, .3); }
+.A4 .moldura::after { content: ''; position: absolute; inset: 4px; border: 1px solid rgba(23, 18, 15, .2); }
+.A4 .moldura i { position: absolute; width: 9px; height: 9px; background: var(--vermelho); transform: rotate(45deg); }
+.A4 .moldura i:nth-child(1) { left: -5px; top: -5px; }
+.A4 .moldura i:nth-child(2) { right: -5px; top: -5px; }
+.A4 .moldura i:nth-child(3) { left: -5px; bottom: -5px; }
+.A4 .moldura i:nth-child(4) { right: -5px; bottom: -5px; }
+/* Verde: o filete de ouro da borda da mesa e a costura por dentro. */
+.A4 .trilho-mesa { position: absolute; inset: 14px; border: 1.5px solid rgba(245, 194, 56, .32); border-radius: 44px; }
+.A4 .trilho-mesa::after { content: ''; position: absolute; inset: 6px; border: 1.5px dashed rgba(241, 240, 234, .13); border-radius: 38px; }
+/* Vinho: a treliça fina e a margem dupla do verso de uma carta. */
+.A4 .trelica { position: absolute; inset: 0;
+  background-image: repeating-linear-gradient(45deg, rgba(241, 240, 234, .045) 0 1px, transparent 1px 24px),
+    repeating-linear-gradient(-45deg, rgba(241, 240, 234, .045) 0 1px, transparent 1px 24px); }
+.A4 .margem-verso { position: absolute; inset: 14px; border: 1.5px solid rgba(241, 240, 234, .26); border-radius: 20px; }
+.A4 .margem-verso::after { content: ''; position: absolute; inset: 5px; border: 1px solid rgba(245, 194, 56, .3); border-radius: 15px; }
+
+.A4 .conteudo { position: relative; display: flex; flex-direction: column; gap: 20px; padding: 26px 22px 40px; }
+.A4 .conteudo.inicio { min-height: 100%; justify-content: center; gap: 18px; padding: 34px 26px 34px; }
+.A4 .ico { width: 22px; height: 22px; flex: none; stroke-width: 2.3; }
+
+/* O emblema: o Coringa do jogo maior que o disco, com um contorno de papel onde sai da borda. */
+.A4 .emblema { display: block; align-self: center; width: 286px; height: auto; overflow: visible;
+  filter: drop-shadow(0 6px 0 rgba(0, 0, 0, .2)) drop-shadow(0 16px 22px rgba(0, 0, 0, .28));
+  animation: a4-entra .7s cubic-bezier(.2, .9, .25, 1.15) backwards, a4-flutua 7s ease-in-out .7s infinite; }
+.A4.fundo-rosa .emblema { filter: drop-shadow(0 6px 0 rgba(110, 30, 55, .2)) drop-shadow(0 16px 22px rgba(110, 30, 55, .22)); }
+
+/* O menu: a lista de mini cartas. A linha inteira é o link; a carta respira, sobe e inclina (o ponteiro escreve a inclinação no
+   `.inclina`, como a mão do jogo; sem ele, a regra de hover dá uma inclinação fixa). */
+.A4 .menu { display: flex; flex-direction: column; }
+.A4 .item { position: relative; display: grid; grid-template-columns: 64px minmax(0, 1fr) 20px; align-items: center; gap: 16px; min-height: 98px;
+  padding: 6px 10px 6px 8px; border-radius: 4px; color: var(--texto); text-decoration: none; cursor: pointer;
+  border-bottom: 1.5px solid var(--linha-lista); transition: background-color .2s;
+  animation: a4-sobe .5s cubic-bezier(.2, .9, .25, 1.1) backwards; animation-delay: calc(.3s + var(--i) * .07s); }
+.A4 .item:last-child { border-bottom: 0; }
+.A4 .item:hover, .A4 .item:focus-visible { background: var(--realce); }
+.A4 .inclina { display: block; transition: transform .15s ease-out, filter .15s ease-out; }
+.A4 .item:hover .inclina { transform: perspective(600px) rotateX(6deg) rotateY(-10deg); filter: drop-shadow(4px 6px 0 rgba(0, 0, 0, .22)); }
+.A4 .mini { position: relative; display: grid; place-items: center; width: 62px; height: 86px; border-radius: 7px; background: var(--papel); color: var(--tinta);
+  border: 2.5px solid var(--tinta); box-shadow: inset 0 0 0 3px var(--papel), inset 0 0 0 4px rgba(23, 18, 15, .22), 0 4px 0 rgba(0, 0, 0, .26), 0 10px 16px rgba(0, 0, 0, .22);
+  animation: a4-respira 3.6s ease-in-out infinite; animation-delay: calc(var(--i) * -.9s); transition: transform .2s cubic-bezier(.2, .9, .3, 1.3); }
+.A4 .item:hover .mini { transform: translateY(-6px); }
+.A4 .mini .ico { width: 30px; height: 30px; stroke-width: 2.2; }
+.A4 .indice { position: absolute; width: 11px; height: 11px; fill: currentColor; }
+.A4 .indice-1 { left: 6px; top: 6px; }
+.A4 .indice-2 { right: 6px; bottom: 6px; transform: rotate(180deg); }
+.A4 .vermelho { color: var(--vermelho); }
+.A4 .mini .selo { position: absolute; right: -13px; top: -14px; width: 32px; height: 32px; transform: rotate(14deg); }
+.A4 .item-nome { display: block; font-family: 'Alfa Slab One', serif; font-weight: 400; font-size: 21px; line-height: 1.05; letter-spacing: .03em; text-transform: uppercase; }
+.A4 .item-sub { display: block; margin-top: 4px; font-size: 14px; font-weight: 600; color: var(--texto-2); }
+.A4 .seta { width: 20px; height: 20px; stroke-width: 3; opacity: .7; }
+
+/* PC: o emblema maior no alto, a lista embaixo, no meio da tela. */
+.A4.pc .conteudo.inicio { position: absolute; inset: 0; padding: 0; align-items: center; gap: 22px; }
+.A4.pc .emblema { width: 360px; }
+.A4.pc .menu { width: 520px; }
+.A4.pc .item { min-height: 92px; }
+
+/* As telas de cada entrada: a identidade da mesa. */
+.A4 .topo { display: flex; align-items: center; }
+.A4 .carimbo { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 10px; border: 3px solid var(--tinta); border-radius: 2px;
+  background-color: var(--face, var(--papel)); color: var(--tinta); box-shadow: var(--s, 3px) var(--s, 3px) 0 var(--madeira); text-decoration: none; cursor: pointer;
+  font-family: 'Alfa Slab One', serif; font-weight: 400; letter-spacing: .04em; text-transform: uppercase; transition: translate .12s ease-out, box-shadow .12s ease-out; }
+.A4 .carimbo:active { translate: var(--s, 3px) var(--s, 3px); box-shadow: 0 0 0 var(--madeira); transition-duration: 50ms; }
+.A4 .carimbo-ouro { --face: var(--ouro); }
+.A4 .carimbo-grande { --s: 4px; width: 100%; min-height: 56px; padding: 8px 16px; font-size: 18px; background-image: var(--grao); background-size: 180px 180px; }
+.A4 .voltar { min-height: 44px; padding: 5px 16px 5px 10px; font-size: 14px; }
+.A4 .voltar .ico { width: 18px; height: 18px; stroke-width: 3; }
+.A4 .titulo-tela { display: flex; align-items: center; gap: 16px; margin: 6px 0 2px; animation: a4-sobe .45s cubic-bezier(.2, .9, .25, 1.1) backwards; }
+.A4 .titulo-tela .mini { width: 52px; height: 72px; flex: none; transform: rotate(-6deg); animation: none; }
+.A4 .titulo-tela .mini .ico { width: 26px; height: 26px; }
+.A4 .titulo-nome { font-family: 'Alfa Slab One', serif; font-weight: 400; font-size: 30px; line-height: 1; letter-spacing: .02em; text-transform: uppercase; color: var(--texto); }
+.A4 .titulo-sub { margin-top: 5px; font-size: 14px; font-weight: 600; color: var(--texto-2); }
+.A4 .painel { display: flex; flex-direction: column; gap: 14px; padding: 14px 18px 20px; border: 3px solid var(--tinta); border-radius: 2px; background: var(--papel); color: var(--tinta);
+  box-shadow: 5px 5px 0 rgba(23, 18, 15, .88); animation: a4-sobe .5s cubic-bezier(.2, .9, .25, 1.1) backwards; animation-delay: calc(.1s + var(--d, 0) * .08s); }
+.A4 .painel-tit { display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 2px solid var(--tinta);
+  font-family: 'Alfa Slab One', serif; font-weight: 400; font-size: 19px; letter-spacing: .04em; text-transform: uppercase; }
+.A4 .campo { display: flex; flex-direction: column; gap: 6px; }
+.A4 .rotulo { display: block; font-weight: 750; font-size: 15px; }
+.A4 .grupo .rotulo { margin-bottom: 8px; }
+.A4 .entrada { width: 100%; height: 50px; padding: 0 12px; border: 3px solid var(--tinta); border-radius: 2px; background: var(--papel-claro); color: var(--tinta); font-size: 16px; }
+.A4 .entrada.foco { outline: 3px solid var(--ouro); outline-offset: 0; box-shadow: 0 0 0 6px var(--tinta); }
+.A4 .dica, .A4 .nota { font-size: 14px; color: rgba(23, 18, 15, .76); }
+.A4 .opcoes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.A4 .opcoes.duas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.A4 .opcao { display: flex; align-items: center; justify-content: center; min-height: 46px; padding: 4px 6px; border: 3px solid var(--tinta); border-radius: 2px;
+  background: var(--papel-claro); box-shadow: 3px 3px 0 var(--madeira); font-weight: 750; text-align: center; line-height: 1.15; cursor: pointer; transition: translate .12s, box-shadow .12s; }
+.A4 .opcao.marcada { background: var(--tinta); color: var(--papel); translate: 3px 3px; box-shadow: 0 0 0 var(--madeira); }
+.A4 .opcao.travada { color: rgba(23, 18, 15, .45); border-color: rgba(23, 18, 15, .4); box-shadow: none; cursor: not-allowed;
+  background: repeating-linear-gradient(-45deg, var(--papel-claro) 0 5px, rgba(23, 18, 15, .12) 5px 7px); }
+.A4 .escolhas { display: flex; flex-direction: column; gap: 18px; }
+.A4 .escolha { display: grid; grid-template-columns: 52px minmax(0, 1fr) 20px; justify-content: stretch; align-items: center; gap: 14px; min-height: 92px; padding: 12px 14px;
+  text-align: left; text-transform: none; letter-spacing: 0; animation: a4-sobe .5s cubic-bezier(.2, .9, .25, 1.1) backwards; animation-delay: calc(.1s + var(--d, 0) * .08s); }
+.A4 .escolha .bloco { display: grid; place-items: center; width: 52px; height: 52px; background: var(--tinta); color: var(--papel); border-radius: 2px; }
+.A4 .escolha.carimbo-ouro .bloco { color: var(--ouro); }
+.A4 .escolha .bloco .ico { width: 30px; height: 30px; stroke-width: 2.2; }
+.A4 .escolha-nome { display: block; font-size: 20px; letter-spacing: .03em; text-transform: uppercase; line-height: 1.05; }
+.A4 .escolha-sub { display: block; margin-top: 4px; font-family: 'Archivo', sans-serif; font-size: 14px; font-weight: 620; }
+.A4 .escolha .seta { opacity: 1; }
+.A4 .escolha .selo { position: absolute; right: -13px; top: -15px; width: 38px; height: 38px; transform: rotate(14deg); }
+.A4 .chave { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 8px 12px; border: 2px solid var(--tinta); border-radius: 2px;
+  background: var(--papel-claro); font-weight: 750; cursor: pointer; }
+.A4 .chave-txt { display: flex; flex: 1; min-width: 0; align-items: center; gap: 10px; line-height: 1.2; }
+.A4 .chave-lado { display: flex; flex: none; flex-direction: column-reverse; align-items: center; gap: 3px; }
+.A4 .chave-estado { font-size: 12px; font-weight: 600; color: rgba(23, 18, 15, .74); }
+.A4 .trilho { position: relative; width: 52px; height: 28px; border: 2.5px solid var(--tinta); border-radius: 3px; background: #e3dfd2; }
+.A4 .trilho .pino { position: absolute; top: 2px; left: 2px; width: 19px; height: 19px; border-radius: 2px; background: var(--tinta); }
+.A4 .chave.ligada .trilho { background: var(--ouro); }
+.A4 .chave.ligada .pino { left: auto; right: 2px; }
+.A4 .textura { filter: url(#a4-textura); }
+
+@keyframes a4-respira { 0%, 100% { translate: 0 0; } 50% { translate: 0 -3px; } }
+@keyframes a4-flutua { 0%, 100% { translate: 0 0; } 50% { translate: 0 -3px; } }
+@keyframes a4-entra { from { opacity: 0; transform: translateY(14px) scale(.95); } }
+@keyframes a4-sobe { from { opacity: 0; transform: translateY(14px); } }
