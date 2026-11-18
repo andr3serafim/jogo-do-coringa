@@ -1,6 +1,6 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-17**, a logo do dragão feita na `feat/abertura` (`b47a2af`), refeita sobre a `main`, esperando o push e as CI; antes, o greedy que barra a Exódia na `main` por fast-forward até `2caeb5a` ("Sim, merge",
+> Sobrescrito a cada atualização. **Última: 2026-11-17**, a logo do dragão feita na `feat/abertura` (`b47a2af`), refeita sobre a `main`, com as duas CI verdes em `ee2ff6e`, esperando o autor ver a animação e o "sim" do merge; antes, o greedy que barra a Exódia na `main` por fast-forward até `2caeb5a` ("Sim, merge",
 > `decisoes.md` 2026-11-17 (1)), com as duas CI verdes no topo da branch (`2caeb5a`) e no push da `main` (`355f2e6`). **O deploy do autor saiu** (2026-11-17, `8266a4f`, sem a abertura): o jogo está no ar em
 > `https://jogodocoringa.com.br` (diário 2026-11-17 (1)). A abertura fica parada na `feat/abertura`.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
@@ -15,8 +15,9 @@
     partes (a execução inteira parou no teto antigo de 600 s, sem falha; o resto rodou à parte, verde; o `abertura.spec` verde no build
     final). O teto agora é 780 s (`0b2250e`): a CI da `main` já levava 545 s.
   - **O autor viu** a pose parada do dragão (as duas versões, mandadas na conversa); **não viu** a animação.
-  - **Próximo passo exato:** o push da branch (o pre-push roda o `pnpm check`); as duas CI verdes (`check` e `e2e`, este com o teto
-    novo); mostrar a animação ao autor; o "sim" do merge. **O deploy é só quando ele pedir** (`decisoes.md` 2026-11-17 (2)).
+  - **No GitHub, com as duas CI verdes em `ee2ff6e`** (`check` 240 s; `e2e` 605 s de job, com o teto novo; o pre-push com o `pnpm check`
+    inteiro verde, web 2960 testes). Os quadros do voo foram mandados ao autor, e a animação ficou aberta no painel (`web-abertura`, 5174).
+  - **Próximo passo exato:** o autor ver a animação e dizer o "sim" do merge (fast-forward da `main` até o topo da branch). **O deploy é só quando ele pedir** (`decisoes.md` 2026-11-17 (2)).
 - **O jogo está no ar em `https://jogodocoringa.com.br`** (o deploy do autor, 2026-11-17, `8266a4f`, sem a abertura; o diário 2026-11-17
   (1)): o bloco D, o conserto da Devastação, o das cenas que repetiam, o Roubo novo, o bot que barra a Exódia e o domínio. O `/api/health`
   devolve a versão; o `www` redireciona com 301 (regra no painel). **O próximo deploy** é o mesmo `pnpm deploy:server`; a conta já tem o

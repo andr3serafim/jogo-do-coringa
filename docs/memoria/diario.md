@@ -50,10 +50,12 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   - **O E2E mede da capa ao menu**, como a pessoa vê; assim a abertura dava 6,0 s (a capa somava ~0,4 s aos 5,6 s). O desenho foi a
     5,35 s (o voo começa 100 ms antes; as cartas em 3,0 s), e o `main.tsx` pede o pedaço antes do primeiro desenho. Medido da capa ao
     menu, três vezes: 5,82 s (a primeira, sem cache: a capa em 0,44 s), 5,61 e 5,61 s (a capa em 0,25 s).
+  - **A ordem dos testes:** os da capa com teclas foram escritos depois do código (o da capa que falha, antes).
   - **O teto do E2E:** a execução inteira parou duas vezes nos 600 s do `globalTimeout`, sem falha (114 verdes e 16 por rodar, com a
     máquina livre), e a CI da `main` já levava 545 s no `pnpm e2e` (2026-11-17, pela API). O teto foi a 780 s (o job tem 15 min).
 - **O E2E, ao fim:** a execução inteira (com o teto antigo) deu 114 verdes, 4 pulados, nenhuma falha e 16 por rodar; os que faltaram
   (`mobile.spec` e `drag.spec`, nos dois projetos) rodaram à parte, verdes (39, 4 pulados); o `abertura.spec` (15) verde no build final.
+- **CI:** as duas verdes em `ee2ff6e` (`check` 240 s, `e2e` 605 s de job).
 - **Armadilhas:**
   - **Um teste com `userEvent` na capa** acha a abertura no lugar dela: o pedaço já carregado chega enquanto o `userEvent` espera. Na capa,
     use o evento síncrono (`fireEvent`, `dispatchEvent`).
