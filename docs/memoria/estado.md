@@ -28,8 +28,14 @@
     sem varal); o menu em três mini cartas que respiram e inclinam em 3D sob o mouse, como a mão do jogo (`Hand.tsx`), e entram dando-se;
     as telas na cor da entrada (vermelho, verde, ouro), com painéis de papel arredondados. O Início em três fundos para ele escolher
     (tinta, anil, papel); o PC e as telas no fundo tinta. `a3.css` e as pranchetas `A3-*.dc.html`; a rodada 2 (A2) e a 1 (A) embaixo.
-  - **Próximo passo exato:** o autor escolher o fundo e aprovar a A3 (ou pedir ajuste). Então: a spec curta e o plano, com o que segue
-    em aberto: o como da navegação nova (rotas próprias ou estado no Início, o Voltar do celular, os E2E que clicam "Criar sala" no
+  - **Quarta rodada, publicada** (`decisoes.md` 2026-11-18 (4)): **A4 · Folheto** — o modelo da A2 (o Coringa em cima, o menu embaixo,
+    também no PC) com o hover da A3; o Coringa do jogo maior que o disco, sem o leque; o menu em lista de quatro linhas (Jogar online,
+    Treinar, Partidas anteriores, Opções), cada uma com a mini carta e o símbolo; três fundos parados para escolher (rosa com a moldura
+    da capa, verde mesa com o filete e a costura, vinho com a treliça do verso); as telas internas com os carimbos de madeira da mesa.
+    O PC e as telas internas no verde. `a4.css` e `A4-*.dc.html`; a A3, a A2 e a A embaixo.
+  - **Próximo passo exato:** o autor escolher o fundo da A4 e aprová-la (ou pedir ajuste). A identidade das telas internas (carimbo,
+    tipo de madeira com textura) vai depois para os botões e a tipografia da partida (ele avisou). Então: a spec curta e o plano, com o
+    que segue em aberto: o como da navegação nova (rotas próprias ou estado no Início, o Voltar do celular, os E2E que clicam "Criar sala" no
     Início), onde fica "Partidas anteriores", as duas chaves novas nas Opções (Reduzir animações e Passar sozinho), e o custo do
     movimento no celular (as cartas respirando e o fundo que desliza, medidos com a CPU 4×). Nenhum código antes disso.
   - **O que não pode mudar:** o valor dos tokens de hoje (a mesa usa todos), o `html`, o `:focus-visible` e o `::selection` globais;

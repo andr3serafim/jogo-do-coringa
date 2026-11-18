@@ -5,6 +5,29 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-18 (4): a rodada 4 dos menus (A4 · Folheto)
+
+- **Pedido:** `decisoes.md` 2026-11-18 (4).
+- **Feito:** `a4.css` e sete pranchetas: o Início no celular em três fundos (`A4-inicio-rosa`, `-verde`, `-vinho`), o Início no PC
+  (verde) e as telas Jogar online, Treinar e Opções (verde). A A3 desceu para a linha da rodada 3.
+  - **O emblema:** o Coringa do `Coringa.tsx` em escala 3,4 num disco de raio 92: os guizos, as pontas do chapéu e a gola passam da
+    borda. Onde sai do disco, um contorno de papel com fio de tinta por fora (o chapéu e a gola desenhados duas vezes, `paint-order`),
+    para ler sobre qualquer fundo.
+  - **O menu:** quatro linhas (globo, espadas cruzadas, ampulheta, regulagem; os índices ♥ ♠ ♣ ♦), divididas por um fio; a linha toda é
+    o link, e o ponteiro dela inclina a mini carta (o mesmo cálculo da mão, preso entre -0,5 e 0,5); sem o manipulador, a regra de hover
+    inclina e sobe a carta (conferido: `matrix3d` e -6 px).
+  - **Os fundos, parados:** rosa da capa com a moldura dupla e os losangos vermelhos nos cantos; verde de mesa com o filete de ouro e a
+    costura tracejada; vinho com a treliça fina e a margem dupla de verso de carta. Saiu o desenho de naipes que deslizava.
+  - **As telas internas:** os carimbos do `styles.css` do jogo (borda de 3 px, cantos retos, sombra de madeira de 3 a 4 px, o grão nos
+    grandes, afundam no toque); a opção marcada é o carimbo afundado (tinta); títulos em tipo de madeira com a textura áspera
+    (`#a4-textura`, o mesmo filtro do `#textura-aspera` da mesa); a chave retangular, com o pino de tinta e o trilho em ouro ligado.
+- **Ruling:** o terceiro fundo é o vinho do verso de baralho — custo: é a única cor fora da paleta da mesa; a treliça fica em 4,5% para
+  não tremer.
+- **Ruling:** o PC e as telas internas foram desenhados só no verde (o pedido dele de "verde padrão mesa de poker") — custo: com outro
+  fundo escolhido, refazer essas quatro pranchetas.
+
+---
+
 ## 2026-11-18 (3): a rodada 3 dos menus (A3 · Folheto)
 
 - **Pedido:** `decisoes.md` 2026-11-18 (3).
