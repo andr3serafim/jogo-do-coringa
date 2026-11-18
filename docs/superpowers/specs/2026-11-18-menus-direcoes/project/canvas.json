@@ -1,88 +1,43 @@
 {
   "v": 3,
-  "createdOnFiles": {
-    "v": 1,
-    "at": "2026-11-18T04:20:00Z"
-  },
-  "title": "Menus do Coringa — 3 direções",
-  "launch": {
-    "view": "canvas"
-  },
+  "createdOnFiles": { "v": 1, "at": "2026-11-18T04:20:00Z" },
+  "title": "Menus do Coringa — direções",
+  "launch": { "view": "canvas" },
   "pages": [],
   "boards": {
-    "Main.dc.html": {
-      "x": 0,
-      "y": 0,
-      "w": 1290,
-      "h": 960,
-      "title": "Hoje — as telas de agora (celular)"
-    },
-    "A-inicio-celular.dc.html": {
-      "x": 0,
-      "y": 1360,
-      "w": 390,
-      "h": 2060,
-      "title": "A · Folheto — Início (celular)"
-    },
-    "A-inicio-pc.dc.html": {
-      "x": 470,
-      "y": 1360,
-      "w": 1440,
-      "h": 900,
-      "title": "A · Folheto — Início (PC)"
-    },
-    "A-menu-partida.dc.html": {
-      "x": 1990,
-      "y": 1360,
-      "w": 390,
-      "h": 1180,
-      "title": "A · Folheto — Menu da partida"
-    },
-    "B-inicio-celular.dc.html": {
-      "x": 0,
-      "y": 3820,
-      "w": 390,
-      "h": 2060,
-      "title": "B · Matriz — Início (celular)"
-    },
-    "B-inicio-pc.dc.html": {
-      "x": 470,
-      "y": 3820,
-      "w": 1440,
-      "h": 900,
-      "title": "B · Matriz — Início (PC)"
-    },
-    "B-menu-partida.dc.html": {
-      "x": 1990,
-      "y": 3820,
-      "w": 390,
-      "h": 1180,
-      "title": "B · Matriz — Menu da partida"
-    },
-    "C-inicio-celular.dc.html": {
-      "x": 0,
-      "y": 6280,
-      "w": 390,
-      "h": 2060,
-      "title": "C · Noite — Início (celular)"
-    },
-    "C-inicio-pc.dc.html": {
-      "x": 470,
-      "y": 6280,
-      "w": 1440,
-      "h": 900,
-      "title": "C · Noite — Início (PC)"
-    },
-    "C-menu-partida.dc.html": {
-      "x": 1990,
-      "y": 6280,
-      "w": 390,
-      "h": 1180,
-      "title": "C · Noite — Menu da partida"
-    }
+    "Main.dc.html": { "x": 0, "y": 0, "w": 1290, "h": 960, "title": "Hoje — as telas de agora (celular)" },
+    "A2-inicio-celular.dc.html": { "x": 0, "y": 1360, "w": 390, "h": 880, "title": "A2 · Folheto — Início (celular)", "is_interactive": true },
+    "A2-inicio-pc.dc.html": { "x": 470, "y": 1360, "w": 1440, "h": 900, "title": "A2 · Folheto — Início (PC)", "is_interactive": true },
+    "A2-jogar-online.dc.html": { "x": 1990, "y": 1360, "w": 390, "h": 880, "title": "A2 · Folheto — Jogar online", "is_interactive": true },
+    "A2-treinar.dc.html": { "x": 2460, "y": 1360, "w": 390, "h": 880, "title": "A2 · Folheto — Treinar", "is_interactive": true },
+    "A2-opcoes.dc.html": { "x": 2930, "y": 1360, "w": 390, "h": 1000, "title": "A2 · Folheto — Opções", "is_interactive": true },
+    "D-inicio-celular.dc.html": { "x": 0, "y": 2760, "w": 390, "h": 880, "title": "D · Mesa — Início (celular)", "is_interactive": true },
+    "D-inicio-pc.dc.html": { "x": 470, "y": 2760, "w": 1440, "h": 900, "title": "D · Mesa — Início (PC)", "is_interactive": true },
+    "D-jogar-online.dc.html": { "x": 1990, "y": 2760, "w": 390, "h": 880, "title": "D · Mesa — Jogar online", "is_interactive": true },
+    "D-treinar.dc.html": { "x": 2460, "y": 2760, "w": 390, "h": 880, "title": "D · Mesa — Treinar", "is_interactive": true },
+    "D-opcoes.dc.html": { "x": 2930, "y": 2760, "w": 390, "h": 1000, "title": "D · Mesa — Opções", "is_interactive": true },
+    "A-inicio-celular.dc.html": { "x": 0, "y": 4360, "w": 390, "h": 2060, "title": "A · Folheto (rodada 1) — Início (celular)" },
+    "A-inicio-pc.dc.html": { "x": 470, "y": 4360, "w": 1440, "h": 900, "title": "A · Folheto (rodada 1) — Início (PC)" },
+    "A-menu-partida.dc.html": { "x": 1990, "y": 4360, "w": 390, "h": 1180, "title": "A · Folheto (rodada 1) — Menu da partida" },
+    "B-inicio-celular.dc.html": { "x": 0, "y": 6820, "w": 390, "h": 2060, "title": "B · Matriz (rodada 1) — Início (celular)" },
+    "B-inicio-pc.dc.html": { "x": 470, "y": 6820, "w": 1440, "h": 900, "title": "B · Matriz (rodada 1) — Início (PC)" },
+    "B-menu-partida.dc.html": { "x": 1990, "y": 6820, "w": 390, "h": 1180, "title": "B · Matriz (rodada 1) — Menu da partida" },
+    "C-inicio-celular.dc.html": { "x": 0, "y": 9280, "w": 390, "h": 2060, "title": "C · Noite (rodada 1) — Início (celular)" },
+    "C-inicio-pc.dc.html": { "x": 470, "y": 9280, "w": 1440, "h": 900, "title": "C · Noite (rodada 1) — Início (PC)" },
+    "C-menu-partida.dc.html": { "x": 1990, "y": 9280, "w": 390, "h": 1180, "title": "C · Noite (rodada 1) — Menu da partida" }
   },
   "order": [
     "Main.dc.html",
+    "A2-inicio-celular.dc.html",
+    "A2-inicio-pc.dc.html",
+    "A2-jogar-online.dc.html",
+    "A2-treinar.dc.html",
+    "A2-opcoes.dc.html",
+    "D-inicio-celular.dc.html",
+    "D-inicio-pc.dc.html",
+    "D-jogar-online.dc.html",
+    "D-treinar.dc.html",
+    "D-opcoes.dc.html",
     "A-inicio-celular.dc.html",
     "A-inicio-pc.dc.html",
     "A-menu-partida.dc.html",
@@ -94,66 +49,18 @@
     "C-menu-partida.dc.html"
   ],
   "notes": {
-    "t-hoje": {
-      "x": 0,
-      "y": -300,
-      "text": "Hoje",
-      "kind": "title1",
-      "maxW": 2380
-    },
-    "t-a": {
-      "x": 0,
-      "y": 1060,
-      "text": "A · Folheto — a capa de cordel pendurada no barbante",
-      "kind": "title1",
-      "maxW": 2380
-    },
-    "t-b": {
-      "x": 0,
-      "y": 3520,
-      "text": "B · Matriz — o taco de madeira entalhado (recomendada)",
-      "kind": "title1",
-      "maxW": 2380
-    },
-    "t-c": {
-      "x": 0,
-      "y": 5980,
-      "text": "C · Noite — a lua e a fantasia da abertura",
-      "kind": "title1",
-      "maxW": 2380
-    },
-    "n-hoje": {
-      "x": 1370,
-      "y": 0,
-      "w": 420,
-      "size": "m",
-      "fill": "gray",
-      "text": "As telas de hoje, no celular (375 px): o Início, a escolha do nível do treino e o menu da partida. Os três rascunhos abaixo têm os mesmos controles, na mesma ordem: só muda a camada visual."
-    },
-    "n-a": {
-      "x": 2460,
-      "y": 1360,
-      "w": 420,
-      "size": "m",
-      "fill": "pink",
-      "text": "A · Folheto\nO Início é a capa de um folheto de cordel, pendurada no barbante: título em tipo de madeira impresso fora de registro (tinta + vermelho), a xilo do Coringa no meio, o fundo rosa da sua capa com fibra de papel.\n\nCusto: zero emenda com a mesa (os mesmos materiais) e nenhuma fonte nova. Mas a abertura termina escura e o Início volta ao rosa, como hoje."
-    },
-    "n-b": {
-      "x": 2460,
-      "y": 3820,
-      "w": 420,
-      "size": "m",
-      "fill": "orange",
-      "text": "B · Matriz\nNa xilogravura, a matriz é o taco entalhado; a folha impressa é o negativo dele. O Início é o taco: fundo de tinta com veio de madeira, traços de goiva em papel, o título em ouro com a sombra de madeira — o mesmo quadro final da abertura. A mesa (a folha impressa) vem depois.\n\nCusto: nenhuma fonte nova; a faixa central e a barra de ação da mesa já são de tinta. Risco: tela escura cheia de traço fica carregada se exagerar."
-    },
-    "n-c": {
-      "x": 2460,
-      "y": 6280,
-      "w": 420,
-      "size": "m",
-      "fill": "purple",
-      "text": "C · Noite\nContinua a noite da logo LUSACAN: céu índigo, a lua de prata, a silhueta do Coringa diante dela com veios violeta, ruínas no chão, letras romanas (Cinzel) e metal de ouro.\n\nCusto: a maior emenda — do céu de fantasia para a mesa de cordel rosa e verde; a Cinzel entra no primeiro carregamento (fonte, não JavaScript); estrelas e halo animados pedem cuidado no celular."
-    }
+    "t-hoje": { "x": 0, "y": -300, "text": "Hoje", "kind": "title1", "maxW": 3320 },
+    "t-a2": { "x": 0, "y": 1060, "text": "A2 · Folheto com menu — rodada 2", "kind": "title1", "maxW": 3320 },
+    "t-d": { "x": 0, "y": 2460, "text": "D · Mesa — o Coringa dá as cartas (Balatro como referência) — rodada 2", "kind": "title1", "maxW": 3320 },
+    "t-a": { "x": 0, "y": 4060, "text": "Rodada 1 · A · Folheto", "kind": "title1", "maxW": 2380 },
+    "t-b": { "x": 0, "y": 6520, "text": "Rodada 1 · B · Matriz (fora)", "kind": "title1", "maxW": 2380 },
+    "t-c": { "x": 0, "y": 8980, "text": "Rodada 1 · C · Noite (fora)", "kind": "title1", "maxW": 2380 },
+    "n-hoje": { "x": 1370, "y": 0, "w": 420, "size": "m", "fill": "gray", "text": "As telas de hoje, no celular (375 px): o Início, a escolha do nível do treino e o menu da partida." },
+    "n-a2": { "x": 3400, "y": 1360, "w": 420, "size": "m", "fill": "pink", "text": "A2 · Folheto com menu\nO Início vira o menu de três entradas (Jogar online, Treinar, Opções), cada uma com a sua tela, e Partidas anteriores num item menor. A capa perde o título grande e ganha o Coringa novo: piscando, com o leque dos quatro naipes atrás do chapéu.\n\nNo Play, o menu leva às telas e o Voltar traz de volta." },
+    "n-d": { "x": 3400, "y": 2760, "w": 420, "size": "m", "fill": "green", "text": "D · Mesa\nUma mesa de feltro à noite: o Coringa é quem dá as cartas, e as três entradas do menu são cartas na mão dele, balançando de leve. Botões grossos de cor, que afundam no toque.\n\nDo Balatro vem a estrutura (cartas no centro, movimento com peso, cores por ação), não o desenho: nada de redemoinho, fonte de pixel ou CRT." },
+    "n-a": { "x": 2460, "y": 4360, "w": 420, "size": "m", "fill": "pink", "text": "Rodada 1 · A · Folheto\nAprovado nos botões e na arte; virou a A2 acima." },
+    "n-b": { "x": 2460, "y": 6820, "w": 420, "size": "m", "fill": "gray", "text": "Rodada 1 · B · Matriz — fora da rodada 2." },
+    "n-c": { "x": 2460, "y": 9280, "w": 420, "size": "m", "fill": "gray", "text": "Rodada 1 · C · Noite — fora da rodada 2." }
   },
   "designSystems": []
 }
