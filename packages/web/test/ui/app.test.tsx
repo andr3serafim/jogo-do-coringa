@@ -1,5 +1,5 @@
 import { RULES_VERSION } from '@coringa/engine';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Suspense } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -10,6 +10,7 @@ import { navigate } from '../../src/app/router.ts';
 import { recordPastGame } from '../../src/model/past-games.ts';
 import { INTRO, INTRO_REDUCED } from '../../src/model/intro.ts';
 import { safeStore } from '../../src/model/storage.ts';
+import { forgetIntro, loadIntro } from '../../src/ui/intro/intro-loader.ts';
 import { STORAGE_WARNING } from '../../src/ui/text.ts';
 import { realReplay } from '../fixtures.ts';
 import { CODE, fakeApi, seriousViolations } from './support.tsx';
@@ -327,6 +328,52 @@ describe('<App intro />: a abertura (decisoes.md 2026-11-16 (5))', () => {
     act(() => navigate('/'));
     expect(screen.getByRole('heading', { name: /Jogo do Coringa/ })).toBeInTheDocument();
     expect(overlay(container)).toBeNull();
+  });
+
+  describe('enquanto o pedaço da abertura não chega', () => {
+    afterEach(async () => {
+      await loadIntro();
+    });
+
+    it('a capa escura cobre o menu, e depois vem a abertura', async () => {
+      forgetIntro();
+      const { container } = render(<App api={fakeApi()} intro />);
+      expect(container.querySelector('[data-abertura-capa]')).not.toBeNull();
+      expect(overlay(container)).toBeNull();
+      expect(await screen.findByRole('img', { name: 'LUSACAN productions' })).toBeInTheDocument();
+      expect(container.querySelector('[data-abertura-capa]')).toBeNull();
+    });
+
+    it.each(['Escape', 'Enter', ' '])('a tecla %j na capa abre o menu, e a abertura não toca depois', async (key) => {
+      forgetIntro();
+      const { container } = render(<App api={fakeApi()} intro />);
+      const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+      act(() => void window.dispatchEvent(event));
+      expect(event.defaultPrevented).toBe(true);
+      expect(container.querySelector('[data-abertura-capa]')).toBeNull();
+      expect(container.querySelector('[inert]')).toBeNull();
+      await loadIntro();
+      await act(async () => {});
+      expect(overlay(container)).toBeNull();
+    });
+
+    it('um atalho na capa (Ctrl+R) não abre o menu nem é engolido', () => {
+      forgetIntro();
+      const { container } = render(<App api={fakeApi()} intro />);
+      const event = new KeyboardEvent('keydown', { key: 'r', ctrlKey: true, bubbles: true, cancelable: true });
+      act(() => void window.dispatchEvent(event));
+      expect(event.defaultPrevented).toBe(false);
+      expect(container.querySelector('[data-abertura-capa]')).not.toBeNull();
+    });
+
+    it('um toque na capa abre o menu', () => {
+      forgetIntro();
+      const { container } = render(<App api={fakeApi()} intro />);
+      // síncrono: o pedaço já carregado nos outros testes chega em seguida, e um clique que espera acharia a abertura no lugar da capa
+      fireEvent.click(container.querySelector('[data-abertura-capa]')!);
+      expect(container.querySelector('[data-abertura-capa]')).toBeNull();
+      expect(container.querySelector('[inert]')).toBeNull();
+    });
   });
 
   it('com a marca dos testes de ponta a ponta no armazenamento, não há abertura', () => {

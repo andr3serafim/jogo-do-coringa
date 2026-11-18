@@ -15,13 +15,13 @@ interface Marks {
   out: number;
 }
 
-/** Anota, no relógio da página, quando a camada da abertura entrou no DOM e quando saiu. */
+/** Anota, no relógio da página, quando a abertura entrou no DOM (a capa escura, enquanto o pedaço dela não chega, ou a camada) e quando saiu. */
 async function watchIntro(page: Page): Promise<void> {
   await page.addInitScript(() => {
     const marks = { in: 0, out: 0 };
     (window as unknown as { __abertura: typeof marks }).__abertura = marks;
     new MutationObserver(() => {
-      const on = document.querySelector('[data-abertura]') !== null;
+      const on = document.querySelector('[data-abertura], [data-abertura-capa]') !== null;
       if (on && marks.in === 0) marks.in = performance.now();
       if (!on && marks.in !== 0 && marks.out === 0) marks.out = performance.now();
     }).observe(document, { childList: true, subtree: true });

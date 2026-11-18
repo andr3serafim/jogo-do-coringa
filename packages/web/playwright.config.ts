@@ -32,8 +32,9 @@ const E2E_SEED = 'e2e2631';
 export default defineConfig({
   testDir: './e2e',
   retries: 0,
-  // O job da CI tem 15 min: se algo travar, o Playwright encerra a 10 e ainda sobra tempo para gerar e enviar o relatório.
-  globalTimeout: 600_000,
+  // O job da CI tem 15 min: se algo travar, o Playwright encerra a 13 e ainda sobra tempo para gerar e enviar o relatório. Era 10: a
+  // execução da CI já levava ~545 s (2026-11-17), e a abertura do jogo (`abertura.spec.ts`) somou ~40 s.
+  globalTimeout: 780_000,
   // Prazos de verdade (3 s da ordem automática, 2 s do passe, reconexão com espera): cada teste tem folga larga.
   timeout: 120_000,
   expect: { timeout: 15_000 },

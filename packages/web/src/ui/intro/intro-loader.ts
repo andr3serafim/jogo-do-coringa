@@ -22,5 +22,11 @@ export function loadIntro(): Promise<ComponentType<IntroProps>> {
   return pending;
 }
 
+/** Esquece o pedaço carregado, para o próximo `App` mostrar a capa até ele chegar de novo. Só para os testes. */
+export function forgetIntro(): void {
+  loaded = null;
+  pending = null;
+}
+
 /** A abertura, se o pedaço já chegou (os testes o carregam antes, no `setup-ui.ts`); `null` enquanto não. */
 export const loadedIntro = (): ComponentType<IntroProps> | null => loaded;

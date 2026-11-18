@@ -4,6 +4,7 @@
 // (`intro-loader.ts`): até ele chegar, uma capa escura cobre o menu.
 import { Suspense, useCallback, useEffect, useState, type ComponentType, type ReactNode } from 'react';
 import { LEARN_LABEL, SCREEN_LOADING_TEXT } from '../model/copy.ts';
+import { skipsIntro } from '../model/intro.ts';
 import { introSkipped, loadPrefs, type KeyValueStore } from '../model/storage.ts';
 import { SoundController, browserSoundDeps } from '../sound/controller.ts';
 import { useReducedMotion } from '../ui/anim/useReducedMotion.ts';
@@ -74,6 +75,17 @@ export function App({ api: injected, intro = false }: AppProps = {}) {
       live = false;
     };
   }, [introOpen, introScreen, closeIntro]);
+  // Também na capa, as teclas que pulam a abertura (`skipsIntro`) abrem o menu: com a rede lenta, a capa pode durar um segundo ou mais.
+  useEffect(() => {
+    if (!introOpen || introScreen !== null) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (!skipsIntro(event)) return;
+      event.preventDefault();
+      closeIntro();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [introOpen, introScreen, closeIntro]);
   // A abertura toca antes de qualquer gesto: o controlador tenta ligar o áudio, e onde o navegador não deixa ela roda muda.
   useEffect(() => {
     if (introOpen) sound.prime();
@@ -102,7 +114,7 @@ export function App({ api: injected, intro = false }: AppProps = {}) {
             <introScreen.Intro reduced={reducedMotion} onDone={closeIntro} />
           </IntroBoundary>
         ) : null}
-        {/* A capa, enquanto o pedaço da abertura não chega: o escuro de onde a abertura começa. Um toque nela abre o menu. */}
+        {/* A capa, enquanto o pedaço da abertura não chega: o escuro de onde a abertura começa. Um toque nela, ou uma tecla, abre o menu. */}
         {introOpen && introScreen === null ? (
           <div data-abertura-capa="" aria-hidden="true" className="fixed inset-0 z-100 bg-tinta" onClick={closeIntro} />
         ) : null}
