@@ -1,22 +1,24 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-17**, a logo da abertura em redesenho (o dragão) na `feat/abertura`, refeita sobre a `main`; antes, o greedy que barra a Exódia na `main` por fast-forward até `2caeb5a` ("Sim, merge",
+> Sobrescrito a cada atualização. **Última: 2026-11-17**, a logo do dragão feita na `feat/abertura` (`1473c43`), refeita sobre a `main`, esperando o E2E inteiro e o push; antes, o greedy que barra a Exódia na `main` por fast-forward até `2caeb5a` ("Sim, merge",
 > `decisoes.md` 2026-11-17 (1)), com as duas CI verdes no topo da branch (`2caeb5a`) e no push da `main` (`355f2e6`). **O deploy do autor saiu** (2026-11-17, `8266a4f`, sem a abertura): o jogo está no ar em
 > `https://jogodocoringa.com.br` (diário 2026-11-17 (1)). A abertura fica parada na `feat/abertura`.
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **A abertura do jogo, com a logo redesenhada (o dragão), em curso** na branch `feat/abertura` (worktree `.claude/worktrees/abertura`),
-  **refeita sobre a `main` em 2026-11-17** (o código aplicado de uma vez; a memória renumerada: a decisão e o diário da abertura viraram
-  2026-11-16 (5); os commits de antes na tag local `abertura-antes-do-rebase`). `decisoes.md` 2026-11-16 (5) (a abertura) e 2026-11-17 (3)
-  (a logo nova: um dragão de asas abertas diante da lua, "LUSACAN" sóbrio e "PRODUCTIONS" no plural; o dragão voa, gira, volta, abre as
-  asas e para na pose). **Não subiu** ao GitHub. Sem commit, de propósito: `packages/web/e2e-porta.config.ts` (a porta 8797 do E2E).
-  - **Feito antes do redesenho:** a abertura inteira com a logo do olho (que sai); o `pnpm check` inteiro **não rodou**; o E2E inteiro
-    parou no teto de 600 s (119 verdes, 4 pulados, 11 por rodar, com a CPU disputada).
-  - **Próximo passo exato:** o redesenho da logo (as letras da Cinzel em traçado, o dragão original em SVG, a animação do voo, os tempos e
-    o som), conferido no navegador; depois o E2E inteiro com a máquina livre, apagar o config temporário, o push (o pre-push roda o
-    `pnpm check`), as duas CI, mostrar ao autor e o "sim" do merge. **O deploy é só quando ele pedir** (`decisoes.md` 2026-11-17 (2)).
+- **A abertura do jogo, com a logo do dragão, na branch `feat/abertura`** (worktree `.claude/worktrees/abertura`), refeita sobre a `main`
+  em 2026-11-17 (a memória renumerada: a abertura é a 2026-11-16 (5); os commits de antes na tag local `abertura-antes-do-rebase`).
+  `decisoes.md` 2026-11-16 (5) (a abertura) e 2026-11-17 (3) (a logo nova); o diário 2026-11-17 (2). O código em `1473c43`. **Não subiu**
+  ao GitHub. Sem commit, de propósito: `packages/web/e2e-porta.config.ts` (a porta 8797 do E2E, com a 8787 ocupada).
+  - **Verificado:** o pre-commit (1856 testes relacionados); o `abertura.spec.ts` (15) no build de produção; o smoke (186,9 KB); a
+    medição com a CPU 4× (57 e 59,5 quadros/s na logo). **Falta:** o E2E inteiro (antes parou no teto de 600 s com a CPU disputada) e o
+    `pnpm check` inteiro (o pre-push).
+  - **O autor viu** a pose parada do dragão (as duas versões, mandadas na conversa); **não viu** a animação.
+  - **Próximo passo exato:** o E2E inteiro com a máquina livre (`pnpm exec playwright test -c e2e-porta.config.ts`, em `packages/web`; se
+    bater nos 600 s, subir o `globalTimeout` do `playwright.config.ts`: o job da CI tem 15 min); apagar o config temporário; o push (o
+    pre-push roda o `pnpm check`); as duas CI; mostrar a animação ao autor; o "sim" do merge. **O deploy é só quando ele pedir**
+    (`decisoes.md` 2026-11-17 (2)).
 - **O jogo está no ar em `https://jogodocoringa.com.br`** (o deploy do autor, 2026-11-17, `8266a4f`, sem a abertura; o diário 2026-11-17
   (1)): o bloco D, o conserto da Devastação, o das cenas que repetiam, o Roubo novo, o bot que barra a Exódia e o domínio. O `/api/health`
   devolve a versão; o `www` redireciona com 301 (regra no painel). **O próximo deploy** é o mesmo `pnpm deploy:server`; a conta já tem o

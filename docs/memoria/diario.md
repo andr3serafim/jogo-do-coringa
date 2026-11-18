@@ -5,6 +5,52 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-17 (2): a logo LUSACAN redesenhada (o dragão) e a abertura sobre a `main`
+
+- **Pedido:** a logo redesenhada a partir de uma imagem de referência (um dragão de asas abertas diante da lua), com a animação de um
+  dragão que voa, gira, volta, abre as asas e para na pose; "PRODUCTIONS" no plural, "LUSACAN" menos extravagante; liberdade criativa
+  (`decisoes.md` 2026-11-17 (3)).
+- **Antes:** a `feat/abertura` refeita sobre a `main` (o código de antes aplicado de uma vez, sem conflito; a memória reescrita: a
+  decisão e o diário da abertura viraram 2026-11-16 (5)), e os três títulos quebrados da `decisoes.md` da `main` consertados (as
+  entradas 2026-11-17 (1), 2026-11-16 (4) e (3) tinham perdido o `## data`). Commits `e011403` e `b0b3143`.
+- **Feito** (`1473c43`):
+  - **As letras:** os contornos da Cinzel 600 ("LUSACAN") e 500 ("PRODUCTIONS"), tirados do `.woff` do `@fontsource/cinzel` pelo
+    `scripts/cinzel-contornos.ts` (zlib do Node, sem dependência nova), conferidos contra a fonte de verdade no navegador. Com espaço
+    largo entre as letras, sem o metal e o brilho da referência.
+  - **O desenho:** `ui/intro/lusacan-shapes.ts` (a lua com crateras e halo; o dragão por peças, com o pivô na origem de cada uma: a asa no
+    ombro, o corpo no peito; os veios de raio; o rabo curto enrolado acima do nome, para não aparecer entre as letras; os filetes de
+    "PRODUCTIONS"), a paleta da noite (escura) e a de tinta (clara). Quatro iterações no navegador (o corpo de coluna, o gancho do
+    pescoço, a cabeça pequena), com a pose mandada ao autor antes da animação.
+  - **Os SVG:** `scripts/gerar-logo-lusacan.ts` (`pnpm --filter @coringa/web logo`), no repositório, lendo o módulo de formas.
+  - **O voo:** `ui/intro/dragon-flight.ts` (as poses: entra pequeno no alto à esquerda, cruza por cima da lua, desce pela direita e passa
+    girando na frente dela, volta de asas recolhidas maior que a pose, abre as asas e assenta) e as três batidas de asa; Web Animations
+    ligada num `useLayoutEffect` do `Intro.tsx`. O CSS faz a lua, o halo e os veios que acendem, o nome letra a letra e os filetes.
+  - **Os tempos:** a logo ~2,4 s (de 1,5 s), as cartas em 3,1 s, o total 5,6 s; a logo inteira fica parada 550 ms antes de sair.
+  - **O som:** `abertura-logo` virou o voo (três batidas abafadas, o sopro do giro, o mergulho, as asas que se abrem); a versão curta toca
+    `abertura-logo-curta` (só as asas).
+  - **O orçamento:** com o dragão e as letras, o JavaScript inicial ia a 193,9 de 200 KB. A abertura saiu do inicial (`intro-loader.ts`,
+    como as cenas; o smoke confere com a marca `data-dragao-voo`): 186,9 KB. Até o pedaço chegar, uma capa escura; se falhar, o menu abre
+    (`app-chunk-intro-fails.test.tsx`). A `IntroBoundary` foi para um arquivo próprio, no inicial.
+- **Ruling:** o voo é Web Animations, e não CSS, porque tem várias fases e os instantes têm de sair do modelo (keyframes de CSS não leem
+  variáveis nas porcentagens) — custo: o jsdom não anima; o teste confere as poses e a ligação, e o resto é o navegador.
+- **Ruling:** o rabo longo da referência (por baixo do texto) saiu: aparecia entre as letras na versão clara — custo: a cauda é curta.
+- **Ruling:** o contorno de luz do dragão no componente tem espessura fixa na tela (`non-scaling-stroke`, 1,8 px), para não sumir quando
+  ele está pequeno no voo; nos SVG de `assets`, o traço escala (1,2 da caixa) — custo: a logo do jogo e a dos arquivos diferem nesse traço.
+- **Ruling:** a abertura num pedaço à parte custa uma ida à rede antes do dragão (a capa escura cobre) — em troca, 7 KB de folga no
+  orçamento do inicial.
+- **A ordem dos testes:** os do modelo (os tempos novos, a pista curta) e o do pedaço que falha foram escritos antes e vistos vermelhos;
+  os da logo, do voo (`dragon-flight.test.tsx`) e da ligação das animações foram escritos depois do código, olhando o navegador.
+- **Verificado:** o pre-commit (1856 testes relacionados); o `abertura.spec.ts` (15) verde no build de produção, com a CSP e o console
+  limpo; o smoke (186,9 KB); a medição temporária com a CPU 4× (a logo a 57 quadros/s no PC e 59,5 no celular, o pior quadro 33 ms; as
+  cartas a 58 e 59). Os quadros no navegador, no PC e no celular, e a versão curta.
+- **Armadilhas:**
+  - O Vite reescreve `new URL(..., import.meta.url)`; e um `.mjs` que gera TS com crases dentro de um template quebra: depois de gerado,
+    o `lusacan-shapes.ts` é editado direto.
+  - Uma letra da Cinzel tem quadráticas de TrueType com pontos de controle seguidos (o ponto do meio é implícito): o extrator os trata.
+  - O `preview_start` lê o `.claude/launch.json` do checkout principal (a entrada `web-abertura`, porta 5174).
+
+---
+
 ## 2026-11-17 (1): o deploy no ar
 
 - **Feito pelo autor:** `pnpm deploy:server` na `main` em `8266a4f` (sem a abertura, "Deploy sem ela", `decisoes.md` 2026-11-17 (2)).
