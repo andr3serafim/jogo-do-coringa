@@ -33,9 +33,12 @@
     Treinar, Partidas anteriores, Opções), cada uma com a mini carta e o símbolo; três fundos parados para escolher (rosa com a moldura
     da capa, verde mesa com o filete e a costura, vinho com a treliça do verso); as telas internas com os carimbos de madeira da mesa.
     O PC e as telas internas no verde. `a4.css` e `A4-*.dc.html`; a A3, a A2 e a A embaixo.
-  - **Próximo passo exato:** o autor escolher o fundo da A4 e aprová-la (ou pedir ajuste). A identidade das telas internas (carimbo,
-    tipo de madeira com textura) vai depois para os botões e a tipografia da partida (ele avisou). Então: a spec curta e o plano, com o
-    que segue em aberto: o como da navegação nova (rotas próprias ou estado no Início, o Voltar do celular, os E2E que clicam "Criar sala" no
+  - **A4 aprovada, nos fundos rosa (padrão) e verde, com um controle discreto do tema** (`decisoes.md` 2026-11-18 (5)); ele pediu spec,
+    plano e código sem parar. **Spec:** `docs/superpowers/specs/2026-11-18-menus-folheto-design.md`. **Plano:**
+    `docs/superpowers/plans/2026-11-18-menus-folheto.md` (Tasks 1 a 6). **Em curso: a implementação, Task 1** (a preferência do tema).
+  - **Próximo passo exato:** seguir o plano task a task (commit e memória a cada uma; `pnpm check` antes do commit de código). As escolhas
+    [C] da spec são do Claude por delegação: ele confere no merge.
+  - (Antes da aprovação, o que estava em aberto: o como da navegação nova (rotas próprias ou estado no Início, o Voltar do celular, os E2E que clicam "Criar sala" no
     Início), onde fica "Partidas anteriores", as duas chaves novas nas Opções (Reduzir animações e Passar sozinho), e o custo do
     movimento no celular (as cartas respirando e o fundo que desliza, medidos com a CPU 4×). Nenhum código antes disso.
   - **O que não pode mudar:** o valor dos tokens de hoje (a mesa usa todos), o `html`, o `:focus-visible` e o `::selection` globais;
