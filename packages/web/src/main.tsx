@@ -7,6 +7,11 @@ import './styles.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './app/App.tsx';
+import { loadIntro } from './ui/intro/intro-loader.ts';
+
+// Abrindo no Início, o pedaço da abertura já sai agora, antes do primeiro desenho: a capa escura dura menos. Se ele falhar, o `App` tenta
+// de novo e abre o menu.
+if (window.location.pathname === '/') loadIntro().catch(() => undefined);
 
 const root = document.getElementById('root');
 if (!root) throw new Error('o index.html não tem o elemento #root');

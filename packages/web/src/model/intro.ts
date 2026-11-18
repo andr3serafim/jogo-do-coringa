@@ -3,48 +3,51 @@
 // sintetizador os usa para pôr o impacto no instante certo: quem muda o ritmo da abertura muda aqui, e só aqui.
 import type { Cue } from './sound.ts';
 
-/** Os instantes da abertura completa, em ms desde que ela aparece. */
+/**
+ * Os instantes da abertura completa, em ms desde que ela aparece. O total fica abaixo dos 6 s com folga: antes dela, a capa escura cobre
+ * o tempo de o pedaço dela chegar (`intro-loader.ts`, ~0,1 a 0,5 s), e a pessoa vê as duas como uma coisa só.
+ */
 export const INTRO = {
   /** O aviso de pular. */
   hintAt: 500,
   /** A lua aparece no céu. */
-  logoAt: 100,
+  logoAt: 50,
   /** A pista da logo: as batidas de asa do voo, o giro, o mergulho e o baque das asas que se abrem em `wingsAt`. */
-  logoCueAt: 180,
+  logoCueAt: 80,
   /** O dragão entra voando, pequeno, longe, batendo as asas. */
-  flyAt: 200,
+  flyAt: 100,
   /** O dragão gira no ar (um parafuso) em volta da lua. */
-  spinAt: 650,
+  spinAt: 550,
   /** O dragão volta, de asas recolhidas, mergulhando na direção de quem olha. */
-  returnAt: 950,
+  returnAt: 850,
   /** As asas se abrem de uma vez, e os veios de raio acendem: o dragão para na pose da logo. */
-  wingsAt: 1200,
+  wingsAt: 1100,
   /** Quanto o dragão leva para assentar na pose depois de abrir as asas (um leve passar do ponto e voltar). */
   settleMs: 300,
   /** O nome começa a subir, letra a letra; "PRODUCTIONS" e os filetes vêm no fim. */
-  nameAt: 1300,
+  nameAt: 1200,
   /** Quanto o nome leva para ficar inteiro. */
   nameMs: 450,
   /** A logo começa a sair. */
-  logoOutAt: 2300,
+  logoOutAt: 2150,
   /** A intro do jogo: a primeira carta sobe. */
-  themeAt: 2500,
+  themeAt: 2350,
   /** O atraso de cada uma das quatro cartas depois de `themeAt`: cada intervalo é menor que o anterior. */
   cardDelays: [0, 170, 310, 420],
   /** Quanto cada carta leva para subir até o leque. */
   cardRiseMs: 420,
   /** As cartas se juntam no centro, e a aura cresce. */
-  gatherAt: 3350,
+  gatherAt: 3200,
   /** O maço vira e mostra o Coringa. */
-  flipAt: 3700,
+  flipAt: 3500,
   /** A pista do título: a subida começa aqui e a chamada cai em `titleAt`. */
-  titleCueAt: 3850,
+  titleCueAt: 3650,
   /** O título é carimbado. */
-  titleAt: 4150,
+  titleAt: 3950,
   /** A abertura começa a esmaecer para o menu. */
-  fadeAt: 5150,
+  fadeAt: 4900,
   /** O menu. */
-  total: 5600,
+  total: 5350,
 } as const;
 
 /**
