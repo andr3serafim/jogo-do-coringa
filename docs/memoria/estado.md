@@ -1,6 +1,6 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-19**, em curso as três direções da mesa (branch `feat/mesa-visual`) e, parada à espera
+> Sobrescrito a cada atualização. **Última: 2026-11-19**, em curso a mesa no Feltro, em PR (#5, branch `feat/mesa-visual`) e, parada à espera
 > do autor, a logo LUSACAN em vídeo (branch `feat/intro-dragao-frente`); antes, o Coringa do Início menor no notebook na `main` (PR #4, sem deploy ainda); o
 > ajuste do autor no Treinar na `main` (PR #3, sem deploy ainda); antes, os menus no
 > Folheto, bloco encerrado; vieram da branch `feat/menus-visual` (apagada; saída da
@@ -24,8 +24,11 @@
   - **Feito:** os passos 1 e 2 da §7 (tokens e utilidades no `styles.css`; os componentes). A suíte da web verde (2997). Fotos do dev server
     conferidas (PC e celular, a jogada com arte e o Equipar), no scratchpad da sessão.
   - **A A/B da Devastação passou** (`notas/medicao-mesa-feltro.md`): a branch igual ou acima da `main` nos quatro casos.
-  - **Próximo passo exato:** o push (o pre-push roda o `pnpm check`), o PR para a `main` e o E2E pela CI; depois, mandar ao autor as
-    fotos e esperar o "sim" do merge (o deploy é dele).
+  - **No GitHub, PR #5 para a `main`** (`https://github.com/andr3serafim/jogo-do-coringa/pull/5`), com o `pnpm check` verde no pre-push
+    (web 2997); o `check` e o `e2e` da CI rodando. As fotos e o resumo mandados ao autor.
+  - **Esperando o autor:** conferir no jogo e dar o "sim" do merge (o deploy é dele). As escolhas [C] da spec seguem por conferir.
+  - **Próximo passo exato:** ler a CI do PR #5 (os dois jobs verdes antes do merge); se o `e2e` falhar, ver o axe (o contraste) e os
+    E2E de layout primeiro. Com o "sim", merge por fast-forward ou squash.
 
 - **A logo LUSACAN vira o vídeo do dragão** (`decisoes.md` 2026-11-19 (2), que substitui a leitura de (1)): o MP4 do autor (gerado no Google
   Veo, 3,92 s, 1920 × 1080, 2,6 MB, com áudio, `moov` no fim) entra no lugar do voo vetorial. Branch `feat/intro-dragao-frente`, saída da
