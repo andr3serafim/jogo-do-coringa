@@ -6,6 +6,20 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-19 (5): o merge da mesa no Feltro (PR #5)
+
+À pergunta "Faço o merge do PR #5 quando as duas CI ficarem verdes?", ele respondeu:
+
+> Sim, merge
+
+**Leitura:**
+- O merge do PR #5 na `main`, com o `check` e o `e2e` verdes. **[I]** Pelo auto-merge do GitHub, em squash (o `CLAUDE.md` admite squash
+  ou fast-forward): ele mescla sozinho quando os dois jobs passam, sem ninguém vigiar a CI.
+- **[I]** O "sim" vale também como conferência das escolhas [C] da spec da mesa no Feltro e das `Ruling:` do diário 2026-11-19 (2), como
+  em 2026-11-18 (7). O deploy segue dele.
+
+---
+
 ## 2026-11-19 (4): a mesa no Feltro (B), com o rosa mais claro; seguir com a implementação
 
 Depois de ver as três direções (A · Capa, B · Feltro, C · Tinta), ele escreveu:
