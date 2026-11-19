@@ -1,7 +1,6 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-18**, o Coringa do Início menor no notebook, no PR #4 com o "sim" do merge
-> (`feat/inicio-emblema-altura`); o
+> Sobrescrito a cada atualização. **Última: 2026-11-19**, o Coringa do Início menor no notebook na `main` (PR #4, sem deploy ainda); o
 > ajuste do autor no Treinar na `main` (PR #3, sem deploy ainda); antes, os menus no
 > Folheto, bloco encerrado; vieram da branch `feat/menus-visual` (apagada; saída da
 > `main` em `97a1a6b`; `decisoes.md` 2026-11-18 (1) a (6)), na `main` por fast-forward com o "Sim, merge" do autor (2026-11-18 (7));
@@ -57,16 +56,18 @@
     `copy.ts`, o commit dele `c87aa47`). PR #3 (`https://github.com/andr3serafim/jogo-do-coringa/pull/3`), mesclado por fast-forward até
     `7273b1d`, com o `check` e o `e2e` verdes no push da branch nesse commit (o `e2e` da execução do PR ainda rodava) e o `pnpm e2e` local
     verde (130, 4 pulados). A `feat/treinar-sem-linha` foi apagada, local e remota.
-  - **No ar ainda está `5f5821f`** (com a linha curta): o deploy do ajuste é dele, quando pedir.
   - **Em curso, o Coringa do Início menor no notebook** (`decisoes.md` 2026-11-18 (10)): o emblema encolhe com a altura da tela
     (`menu.css`: `--emblema-alto` na coluna do Início; abaixo de 760 px de altura, as folgas apertam), na branch
     `feat/inicio-emblema-altura` com PR para a `main`. Medido no navegador: 1534 × 692 (o notebook dele) 253 px e sem rolar; 1366 × 650
     220 px; 1440 × 900, 1918 × 866, 390 × 844 e 360 × 740 iguais a antes; 360 × 640 de 274 para 207 px (antes rolava). Fotos no
     scratchpad da sessão.
-  - **PR #4** (`https://github.com/andr3serafim/jogo-do-coringa/pull/4`), com o "Sim, merge" dele (`decisoes.md` 2026-11-18 (11)).
-  - **Próximo passo exato:** com as duas CI verdes em `e0878f6` (o push da branch), a `main` por fast-forward até o topo da branch (este
-    commit), o push da `main` e da branch juntos (sem apagar), e só depois a branch apagada (local e remota). O deploy é dele. Depois,
-    nenhum de código: o próximo trabalho vem do autor (os botões e a tipografia dentro da partida, quando ele pedir).
+  - **Na `main`** (PR #4, `https://github.com/andr3serafim/jogo-do-coringa/pull/4`; "Sim, merge", `decisoes.md` 2026-11-18 (11)), por
+    fast-forward até este commit, com o `check` e o `e2e` verdes em `e0878f6` (no push e no PR). O `pnpm e2e` local foi interrompido sem
+    querer pelo autor (112 verdes; as 3 "falhas" são os processos mortos, `Target crashed`). A branch `feat/inicio-emblema-altura` sai
+    depois do push da `main`, num push à parte.
+  - **No ar ainda está `5f5821f`**: sem o "Aprender jogando" sem linha e sem o Coringa menor; o deploy é dele, quando pedir.
+  - **Próximo passo exato:** nenhum de código. Se a `feat/inicio-emblema-altura` ainda existir (local ou remota), apagá-la. O próximo
+    trabalho vem do autor (os botões e a tipografia dentro da partida, quando ele pedir).
     **Não visto no navegador:** a sala de espera (Lobby) com a roupa nova (precisa do `wrangler dev`); os E2E online passam por ela.
   - **O que não pode regredir:** o rosa por padrão sem gravar nada (`menuTheme` ausente); o tema não se perde quando o menu da partida
     grava as preferências (ele espalha `prefs`); o menu da partida, o fim e a dica com a roupa de antes (`useInMenu()` é falso fora da
