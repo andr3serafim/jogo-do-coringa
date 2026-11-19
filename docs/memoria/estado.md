@@ -15,14 +15,14 @@
 - **A abertura sem a logo LUSACAN** (`decisoes.md` 2026-11-19 (6)): só a intro do jogo (as cartas, a virada no Coringa, o título), 3,15 s
   em vez de 5,35 s; com movimento reduzido, o Coringa e o título parados, mudos. Branch `feat/intro-sem-logo`, saída da `main` em
   `2050a5d`, no checkout principal.
-  - **Feito (sem commit de código até o `pnpm check`):** o `model/intro.ts` com a parte do jogo puxada para o começo (`themeAt` 150); o
+  - **Feito e commitado** (`7d32d37`, com o `pnpm check` verde: web 2958, o smoke com a abertura fora do inicial; o
+    `e2e/abertura.spec.ts` local 15 de 15): o `model/intro.ts` com a parte do jogo puxada para o começo (`themeAt` 150); o
     `Intro.tsx` e o `intro.css` sem a logo; saíram o `LusacanLogo.tsx`, o `dragon-flight.ts` (e o teste dele) e as pistas `abertura-logo` e
     `abertura-logo-curta` (o `wingsOpen` do `synth.ts`); o `lusacan-shapes.ts` foi para `scripts/` (a marca segue no repositório, fora do
     jogo: SVG, gerador e o teste `lusacan-assets.test.ts`); a marca do smoke virou `abertura-palco`; o `abertura.spec.ts` com a faixa nova
     (3 a 4,5 s; o pulo < 2 s); o `CLAUDE.md`, o `LICENSES.md` e o `LEIAME.md`. Typecheck, lint e os testes afetados verdes; conferido no
     dev server (fotos da completa a 0,6 s e 2,4 s e da curta).
-  - **Próximo passo exato:** `pnpm check`; commit; `pnpm --filter @coringa/web exec playwright test e2e/abertura.spec.ts` (com o
-    `wrangler dev`, como o `pnpm e2e`); diário; push e PR para a `main`. Merge só com o "sim" dele; deploy é dele.
+  - **Próximo passo exato:** push e PR para a `main`; esperar as duas CI. Merge só com o "sim" dele (fast-forward); deploy é dele.
   - **Espera o autor:** o que fazer com a `feat/intro-dragao-frente` (o vídeo da logo) e com a pasta solta
     `docs/superpowers/specs/2026-11-19-intro-lusacan/` (não versionada, no checkout principal); se a abertura de ~3 s está boa ou quer a
     parte do jogo mais longa.
