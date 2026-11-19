@@ -6,6 +6,18 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-18 (11): o merge do Coringa menor no Início (PR #4)
+
+Com o PR #4 aberto e a pergunta "Faço o merge do PR #4 quando a CI ficar verde?", ele respondeu:
+
+> Sim, merge
+
+**Leitura:** a `main` vai por fast-forward até o topo de `feat/inicio-emblema-altura` quando as duas CI estiverem verdes no último commit
+de código (`e0878f6`); a branch sai depois do push da `main` (no mesmo push, o GitHub fecha o PR em vez de marcá-lo mesclado, como no
+PR #3). O deploy é dele.
+
+---
+
 ## 2026-11-18 (10): o Coringa do Início menor no notebook
 
 Com uma foto do Início no notebook dele (o Coringa grande e a barra de rolagem; a foto tem 1917 × 865 px de tela, e com a escala de 125%
