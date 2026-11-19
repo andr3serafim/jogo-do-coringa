@@ -5,6 +5,23 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-19 (1): a prévia da abertura LUSACAN nova (o dragão de frente)
+
+- **Pedido** (`decisoes.md` 2026-11-19 (1)): melhorar a abertura LUSACAN a partir de um vídeo de referência do autor, vendo antes de
+  implementar. Ele escolheu o dragão de frente e a logo com ~3 s (as cartas encolhem).
+- **Feito** (branch `feat/intro-dragao-frente`): a prévia HyperFrames em `docs/superpowers/specs/2026-11-19-intro-lusacan/`, com o
+  gerador (`gerar-prototipo.ts`), o dragão de frente (`dragao-frente.ts`), o projeto (`prototipo/`) e as folhas de quadros. O
+  `hyperframes check` passa (só o aviso de não ter som).
+- **Armadilhas:**
+  - O `svgOrigin` do GSAP desloca peças que mudam de escala: a prévia anima o atributo `transform` do SVG (a string inteira), que
+    é também o que o jogo faz.
+  - O giro positivo levanta a ponta da asa esquerda (o y cresce para baixo).
+  - Sem FFmpeg na máquina, não há render em MP4; o `snapshot` funciona.
+  - O vídeo de referência fica fora do git.
+- **Ficou:** a opinião do autor sobre a prévia, e só depois o porte para o jogo (a lista está no `estado.md`).
+
+---
+
 ## 2026-11-18 (9): o Coringa do Início menor no notebook
 
 - **Pedido:** `decisoes.md` 2026-11-18 (10). A foto dele tem pixels de tela: com a escala de 125% do Windows, a página tem ~1534 × 692 px

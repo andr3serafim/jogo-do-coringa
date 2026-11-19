@@ -12,11 +12,18 @@
 
 - **A abertura LUSACAN nova, em prévia** (`decisoes.md` 2026-11-19 (1)): o dragão de frente, como o vídeo de referência do autor (fora do
   git), logo com ~3 s e as cartas mais curtas. Branch `feat/intro-dragao-frente`, saída da `main` em `3fd5565`, no checkout principal.
-  - **Em curso:** o protótipo HyperFrames em `docs/superpowers/specs/2026-11-19-intro-lusacan/` (o céu com nuvens, a lua com halo, o
-    dragão de frente em vetor, o voo em volta da lua, o nome). Nada do código do jogo mudou.
-  - **Próximo passo exato:** terminar o protótipo, abrir a prévia (`hyperframes preview` ou a página de comparação lado a lado) e
-    mostrar ao autor; só com o "sim" dele portar para `lusacan-shapes.ts`, `dragon-flight.ts`, `model/intro.ts` (logo ~3 s, cartas
-    mais curtas, teto de 6 s), `synth.ts` (as batidas de asa) e os SVG/gerador da logo.
+  - **Feito:** a prévia em HyperFrames, em `docs/superpowers/specs/2026-11-19-intro-lusacan/` (o `LEIAME.md` de lá diz como abrir e o
+    ritmo; as folhas de quadros em `quadros/`). Ela tem o céu com nuvens feitas por código, a lua grande com halo e o voo de perfil
+    (a silhueta da logo de hoje), que entra pelo alto à direita, contorna a lua e mergulha no meio. Ali o dragão vira de frente
+    (`dragao-frente.ts`, vetor novo), abre as asas e o nome sobe. A logo leva ~3 s; o esmaecer vai de 3,0 a 3,3 s. Nada do código do
+    jogo mudou.
+  - **Esperando o autor:** ver a prévia e dizer o que muda (o desenho do dragão, as cores, o ritmo).
+  - **Próximo passo exato:** com o "sim" (ou os ajustes) dele, mudar o `gerar-prototipo.ts`/`dragao-frente.ts` e regerar. Aprovada a
+    prévia, portar para o jogo: a geometria para `lusacan-shapes.ts` (caixa nova); o voo para `dragon-flight.ts`, que ganha a troca de
+    perfil para frente; os tempos para `model/intro.ts` (logo ~3 s, cartas mais curtas, abaixo dos 6 s); o céu e as nuvens para o
+    `intro.css`/`LusacanLogo.tsx` (as nuvens pré-desenhadas, nunca `feTurbulence` animado); os batimentos para o `synth.ts`; os SVG,
+    o gerador e o `LEIAME.md` da logo, e os testes. Uma página de comparação lado a lado (referência × prévia) existe só na máquina
+    desta conta, fora do git.
   - **Sem FFmpeg na máquina:** o render em MP4 do HyperFrames não roda; instalar é do autor (perguntar antes).
 
 - **O redesenho visual dos menus, na `main`** (`decisoes.md` 2026-11-18 (1) a (7)): só a camada visual das telas fora da mesa e dos diálogos da
