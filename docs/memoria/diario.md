@@ -11,7 +11,10 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   pelo pre-push: o autor editava o `copy.ts` ao mesmo tempo (a linha do `LEARN_LINE` comentada e no stage; o typecheck da web quebrou).
   Nada subiu. Perguntado, ele disse que o ajuste era dele e deixou `LEARN_LINE = ''`.
 - **Feito:** a branch `feat/treinar-sem-linha` (da `main` local, com o commit da memória que não tinha subido), o ajuste dele como está,
-  e a memória; o push apaga a `feat/menus-visual` remota no mesmo comando.
+  e a memória; o push apagou a `feat/menus-visual` remota no mesmo comando. O `git commit` dele (com o pre-commit, que demora) terminou
+  depois do `git checkout -b`, e o commit dele (`c87aa47`) caiu na branch nova: o resultado certo, por sorte.
+- **PR #3**, mesclado por fast-forward até `7273b1d` ("Conferir e mesclar"): `check` e `e2e` verdes no push da branch nesse commit; o
+  `pnpm e2e` local verde (130, 4 pulados, 10,6 min). O deploy do ajuste é dele.
 - **Armadilhas:** o pre-push confere a árvore de trabalho, não o commit: uma edição feita durante o push barra um commit que estava bom.
   Antes de concluir que o código quebrou, `git status` e a hora do arquivo (`stat`). A `main` não tem proteção e o repositório não liga o
   auto-merge: o `set_auto_merge` mesclaria na hora, sem esperar a CI.

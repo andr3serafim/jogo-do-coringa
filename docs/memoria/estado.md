@@ -1,6 +1,6 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-18**, o ajuste do autor no Treinar em PR (`feat/treinar-sem-linha`); antes, os menus no
+> Sobrescrito a cada atualização. **Última: 2026-11-18**, o ajuste do autor no Treinar na `main` (PR #3, sem deploy ainda); antes, os menus no
 > Folheto, bloco encerrado; vieram da branch `feat/menus-visual` (apagada; saída da
 > `main` em `97a1a6b`; `decisoes.md` 2026-11-18 (1) a (6)), na `main` por fast-forward com o "Sim, merge" do autor (2026-11-18 (7));
 > o PR #2 mesclado, as duas CI verdes no push da `main`; **no ar** em `https://jogodocoringa.com.br` desde o deploy `5f5821f`, rodado pelo
@@ -49,13 +49,15 @@
     (web 2997 testes, o smoke, 17 arquivos novos subidos; versão do Worker `1fc2dd91-f600-4f60-919d-ec1b16d5235d`). O `/api/health`
     devolve `5f5821f` (no primeiro minuto, misturado com `97a1a6b`: as instâncias trocam aos poucos). Conferido no navegador: o Início
     rosa com as quatro mini cartas; no console, só o `beacon.min.js` barrado pela CSP (o ruído conhecido, abaixo).
-  - **O bloco está encerrado** ("finalizado", `decisoes.md` 2026-11-18 (9)): a `feat/menus-visual` local foi apagada; a remota sai no
-    push da `feat/treinar-sem-linha` (estava toda na `main`, em `9f10887`).
-  - **Em curso, o ajuste do autor** (`decisoes.md` 2026-11-18 (9)): "Aprender jogando" sem a linha curta (`LEARN_LINE = ''` no
-    `copy.ts`), na branch `feat/treinar-sem-linha` com PR para a `main`; o "suba e faz o merge" dele já é o sim.
-  - **Próximo passo exato:** com as duas CI do PR verdes (e o `pnpm e2e` local), a `main` por fast-forward até o topo da
-    `feat/treinar-sem-linha`, o push, e a branch apagada (local e remota). O deploy desse ajuste é dele (não pediu). Depois, nenhum de
-    código: o próximo trabalho vem do autor (os botões e a tipografia dentro da partida, quando ele pedir).
+  - **O bloco está encerrado** ("finalizado", `decisoes.md` 2026-11-18 (9)): a `feat/menus-visual` foi apagada, local e remota (estava
+    toda na `main`, em `9f10887`).
+  - **O ajuste do autor está na `main`** (`decisoes.md` 2026-11-18 (9)): "Aprender jogando" sem a linha curta (`LEARN_LINE = ''` no
+    `copy.ts`, o commit dele `c87aa47`). PR #3 (`https://github.com/andr3serafim/jogo-do-coringa/pull/3`), mesclado por fast-forward até
+    `7273b1d`, com o `check` e o `e2e` verdes no push da branch nesse commit (o `e2e` da execução do PR ainda rodava) e o `pnpm e2e` local
+    verde (130, 4 pulados). A `feat/treinar-sem-linha` foi apagada, local e remota.
+  - **No ar ainda está `5f5821f`** (com a linha curta): o deploy do ajuste é dele, quando pedir.
+  - **Próximo passo exato:** nenhum de código. O próximo trabalho vem do autor (os botões e a tipografia dentro da partida, quando ele
+    pedir).
     **Não visto no navegador:** a sala de espera (Lobby) com a roupa nova (precisa do `wrangler dev`); os E2E online passam por ela.
   - **O que não pode regredir:** o rosa por padrão sem gravar nada (`menuTheme` ausente); o tema não se perde quando o menu da partida
     grava as preferências (ele espalha `prefs`); o menu da partida, o fim e a dica com a roupa de antes (`useInMenu()` é falso fora da
@@ -173,7 +175,8 @@
   (`21d1387`). Plano `docs/superpowers/plans/2026-11-08-playtest-bloco-c.md`; a revisão da branch inteira e a segunda, só das correções
   (nenhum Critical nem Important), os rulings e os menores adiados no `diario.md` 2026-11-08 (1); a medição em `notas/medicao-bloco-c.md`;
   o que a execução decidiu na §5.4 da spec do playtest. `STATE_SCHEMA` 6, `RULES_VERSION` 5 (igual). O ledger do bloco foi apagado.
-- **Sem commit, de propósito:** o `.claude/launch.json` (o servidor `web` do preview do app) e o `jogar-treino.bat` do autor.
+- **Fora do git:** o `.claude/launch.json` (o servidor `web` do preview do app) e o `jogar-treino.bat` do autor ficavam sem commit, de
+  propósito; em 2026-11-18, por volta das 22:43, sumiram da pasta (não foi o Claude). Se voltarem, seguem fora do git.
 
 ## Fila
 
