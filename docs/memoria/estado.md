@@ -1,6 +1,6 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-18**, os menus no Folheto no código, na branch `feat/menus-visual` (saída da
+> Sobrescrito a cada atualização. **Última: 2026-11-18**, os menus no Folheto, bloco encerrado; vieram da branch `feat/menus-visual` (já apagada; saída da
 > `main` em `97a1a6b`; `decisoes.md` 2026-11-18 (1) a (6)), na `main` por fast-forward com o "Sim, merge" do autor (2026-11-18 (7));
 > o PR #2 mesclado, as duas CI verdes no push da `main`; **no ar** em `https://jogodocoringa.com.br` desde o deploy `5f5821f`, rodado pelo
 > Claude a pedido (2026-11-18 (8)). Antes dele estava no ar `97a1a6b` (a `main` com a abertura do jogo e a logo do dragão).
@@ -49,7 +49,8 @@
     devolve `5f5821f` (no primeiro minuto, misturado com `97a1a6b`: as instâncias trocam aos poucos). Conferido no navegador: o Início
     rosa com as quatro mini cartas; no console, só o `beacon.min.js` barrado pela CSP (o ruído conhecido, abaixo).
   - **Próximo passo exato:** nenhum de código. O próximo trabalho vem do autor (o que ele achar usando os menus; os botões e a tipografia
-    dentro da partida, quando ele pedir). A branch `feat/menus-visual` (local e remota) está mesclada; ele pode apagá-la.
+    dentro da partida, quando ele pedir). **O bloco está encerrado** ("apague a branch feat/menus-visual. finalizado.", 2026-11-18): a
+    branch `feat/menus-visual`, local e remota, foi apagada (estava toda na `main`, em `9f10887`).
     **Não visto no navegador:** a sala de espera (Lobby) com a roupa nova (precisa do `wrangler dev`); os E2E online passam por ela.
   - **O que não pode regredir:** o rosa por padrão sem gravar nada (`menuTheme` ausente); o tema não se perde quando o menu da partida
     grava as preferências (ele espalha `prefs`); o menu da partida, o fim e a dica com a roupa de antes (`useInMenu()` é falso fora da
