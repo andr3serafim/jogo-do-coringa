@@ -6,6 +6,20 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-18 (8): o deploy dos menus, rodado pelo Claude a pedido
+
+Com os menus na `main` (`9f10887`; o `check` do push da `main` verde, o `e2e` ainda rodando, verde no mesmo código em `ee77578`), ele
+tentou rodar o deploy pela caixa da conversa (o `!` foi junto para o PowerShell e nada rodou) e depois escreveu:
+
+> rode o deploy para mim
+
+**Leitura:**
+- O Claude roda o `pnpm deploy:server` desta vez, na `main`, com o `wrangler login` que já estava feito nesta máquina.
+- **[I]** Vale só para este deploy: a regra de sempre segue ("o deploy é só dele", `decisoes.md` 2026-11-17 (2) e o `CLAUDE.md`); o
+  Claude não publica sem um pedido assim, a cada vez.
+
+---
+
 ## 2026-11-18 (7): o merge dos menus no Folheto
 
 Com o PR #2 aberto (as duas CI verdes no último commit de código, `ee77578`; os seguintes só mexem em docs) e a pergunta "Posso fazer o
