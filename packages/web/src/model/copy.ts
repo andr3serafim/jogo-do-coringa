@@ -753,7 +753,7 @@ export const OPTIONS_LINE = 'Aparência e preferências';
 /** As duas escolhas de Treinar. */
 export const PLAY_BOT_LABEL = 'Jogar com o bot';
 export const PLAY_BOT_LINE = 'Fácil, Médio ou Difícil';
-export const LEARN_LINE = 'Uma partida com dicas, contra o Fácil';
+export const LEARN_LINE = '';
 /** O painel das preferências nas Opções. */
 export const PREFERENCES_LABEL = 'Preferências';
 /** O controle discreto do tema, no canto do Início: o nome fixo, o estado no aria-pressed (ligado é o verde). */
