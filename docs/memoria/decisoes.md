@@ -6,6 +6,21 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-19 (7): o merge da abertura sem a logo (PR #6)
+
+Depois de ver a abertura no navegador, à pergunta "Faço o merge do PR #6 quando as duas CI ficarem verdes?", ele respondeu:
+
+> Sim, merge
+
+**Leitura:**
+- O merge do PR #6 na `main` com o `check` e o `e2e` verdes. **[I]** Por fast-forward, como nos PRs #2 a #5; os commits depois do código
+  (`7d32d37`) são só de memória.
+- **[I]** O "sim" vale também como aceite das leituras [I] de 2026-11-19 (6): ~3,15 s de abertura, a versão curta com o Coringa e o título
+  parados e muda, a marca LUSACAN mantida fora do jogo. O deploy segue dele. A `feat/intro-dragao-frente` e a pasta solta
+  `2026-11-19-intro-lusacan/` seguem à espera da resposta dele.
+
+---
+
 ## 2026-11-19 (6): a abertura sem a logo LUSACAN, só a parte do jogo
 
 Ele escreveu:
