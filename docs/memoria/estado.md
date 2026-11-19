@@ -1,7 +1,8 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-19**, a mesa no Feltro na `main` (PR #5, sem deploy ainda) e, parada à espera
-> do autor, a logo LUSACAN em vídeo (branch `feat/intro-dragao-frente`); antes, o Coringa do Início menor no notebook na `main` (PR #4, sem deploy ainda); o
+> Sobrescrito a cada atualização. **Última: 2026-11-19**, a abertura sem a logo LUSACAN (branch `feat/intro-sem-logo`, em curso); antes,
+> a mesa no Feltro na `main` (PR #5, sem deploy ainda) e a logo LUSACAN em vídeo (branch `feat/intro-dragao-frente`, parada, agora sem
+> objeto); antes, o Coringa do Início menor no notebook na `main` (PR #4, sem deploy ainda); o
 > ajuste do autor no Treinar na `main` (PR #3, sem deploy ainda); antes, os menus no
 > Folheto, bloco encerrado; vieram da branch `feat/menus-visual` (apagada; saída da
 > `main` em `97a1a6b`; `decisoes.md` 2026-11-18 (1) a (6)), na `main` por fast-forward com o "Sim, merge" do autor (2026-11-18 (7));
@@ -10,6 +11,21 @@
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
+
+- **A abertura sem a logo LUSACAN** (`decisoes.md` 2026-11-19 (6)): só a intro do jogo (as cartas, a virada no Coringa, o título), 3,15 s
+  em vez de 5,35 s; com movimento reduzido, o Coringa e o título parados, mudos. Branch `feat/intro-sem-logo`, saída da `main` em
+  `2050a5d`, no checkout principal.
+  - **Feito (sem commit de código até o `pnpm check`):** o `model/intro.ts` com a parte do jogo puxada para o começo (`themeAt` 150); o
+    `Intro.tsx` e o `intro.css` sem a logo; saíram o `LusacanLogo.tsx`, o `dragon-flight.ts` (e o teste dele) e as pistas `abertura-logo` e
+    `abertura-logo-curta` (o `wingsOpen` do `synth.ts`); o `lusacan-shapes.ts` foi para `scripts/` (a marca segue no repositório, fora do
+    jogo: SVG, gerador e o teste `lusacan-assets.test.ts`); a marca do smoke virou `abertura-palco`; o `abertura.spec.ts` com a faixa nova
+    (3 a 4,5 s; o pulo < 2 s); o `CLAUDE.md`, o `LICENSES.md` e o `LEIAME.md`. Typecheck, lint e os testes afetados verdes; conferido no
+    dev server (fotos da completa a 0,6 s e 2,4 s e da curta).
+  - **Próximo passo exato:** `pnpm check`; commit; `pnpm --filter @coringa/web exec playwright test e2e/abertura.spec.ts` (com o
+    `wrangler dev`, como o `pnpm e2e`); diário; push e PR para a `main`. Merge só com o "sim" dele; deploy é dele.
+  - **Espera o autor:** o que fazer com a `feat/intro-dragao-frente` (o vídeo da logo) e com a pasta solta
+    `docs/superpowers/specs/2026-11-19-intro-lusacan/` (não versionada, no checkout principal); se a abertura de ~3 s está boa ou quer a
+    parte do jogo mais longa.
 
 - **A mesa com a identidade dos menus: três direções** (`decisoes.md` 2026-11-19 (3)). Branch `feat/mesa-visual`, saída da `main` em
   `3fd5565`, no checkout principal (a `feat/intro-dragao-frente` fica parada, à espera do autor; as entradas 2026-11-19 (1) e (2) do

@@ -6,6 +6,27 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-19 (6): a abertura sem a logo LUSACAN, só a parte do jogo
+
+Ele escreveu:
+
+> remova lusacan productions da intro, deixe apenas a parte do jogo do coringa
+
+**Leitura:**
+- **A logo "LUSACAN productions" sai da abertura** (substitui a logo na abertura de 2026-11-16 (5) e 2026-11-17 (3)): fica só a intro do
+  jogo (as quatro cartas sobem, juntam-se, o maço vira no Coringa e o título é carimbado), até o menu. Onde ela toca, o pulo, a capa e o
+  pedaço à parte seguem iguais.
+- **[I]** O ritmo da parte do jogo não muda: ela só vem para o começo. A abertura passa de 5,35 s para ~3,1 s, abaixo da faixa de 4 a 6 s
+  de 2026-11-16 (5), que cai junto com a logo (esticar a parte do jogo seria outra decisão, dele).
+- **[I]** Com movimento reduzido, no lugar da logo parada, o Coringa e o título parados, com o esmaecer; o som dela, o baque das asas,
+  sai (fica mudo).
+- **[I]** Sai do jogo só o que era da abertura: o componente da logo, o voo do dragão e as pistas de som dele. A marca da produtora fica no
+  repositório (`src/assets/lusacan/`, o `lusacan-shapes.ts` e o gerador `pnpm --filter @coringa/web logo`), para uso fora do jogo.
+- **[I]** O vídeo do dragão para a logo (2026-11-19 (1) e (2), na branch parada `feat/intro-dragao-frente`) perde o objeto; a branch e a
+  pasta solta `docs/superpowers/specs/2026-11-19-intro-lusacan/` ficam até ele dizer o que fazer com elas.
+
+---
+
 ## 2026-11-19 (5): o merge da mesa no Feltro (PR #5)
 
 À pergunta "Faço o merge do PR #5 quando as duas CI ficarem verdes?", ele respondeu:
