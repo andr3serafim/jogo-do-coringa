@@ -6,6 +6,24 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-19 (4): a mesa no Feltro (B), com o rosa mais claro; seguir com a implementação
+
+Depois de ver as três direções (A · Capa, B · Feltro, C · Tinta), ele escreveu:
+
+> Seguir com B, pode deixar a cor rosa um pouco mais claro e prosseguir com a implementação
+
+**Leitura:**
+- **A B · Feltro está aprovada** como direção da mesa: os panos de feltro com o filete de ouro e a costura, o trilho de madeira no
+  centro, a madeira escura no placar, no histórico e no fundo da mão, as barras de vida em trilho, os botões de contorno em carimbo.
+  A A e a C saem (ficam no git, na pasta `2026-11-19-mesa-direcoes/`).
+- **O rosa um pouco mais claro** que o rosa-vinho do rascunho. **[I]** O quanto: o mais claro que ainda deixa as marcas pequenas em papel
+  legíveis (contraste de texto pequeno ≥ 4,5 : 1 onde elas ficam), para ele conferir nas fotos.
+- **"Prosseguir com a implementação":** **[I]** como em 2026-11-18 (5), a spec e o plano saem curtos e o código segue sem parar para
+  aprovação de cada um; as escolhas em aberto são do Claude por delegação, marcadas na spec, para ele conferir no merge. O merge e o
+  deploy seguem dele.
+
+---
+
 ## 2026-11-19 (3): a mesa com a identidade nova dos menus; três direções
 
 (As entradas 2026-11-19 (1) e (2), da logo LUSACAN em vídeo, estão na branch `feat/intro-dragao-frente`.)

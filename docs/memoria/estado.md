@@ -19,9 +19,10 @@
     `docs/superpowers/specs/2026-11-19-mesa-direcoes/` (o script das fotos, as folhas e as fotos).
   - **Feito:** as três direções, **A · Capa**, **B · Feltro** (a recomendada) e **C · Tinta**, com as fotos e a página publicada
     (`https://claude.ai/artifact/GdD7tfjewgDmVEPLsNua58`, privada); o resumo de cada uma no diário 2026-11-19 (1). Mandadas ao autor.
-  - **Esperando o autor:** a escolha (ou uma rodada nova). Nada está aprovado.
-  - **Próximo passo exato:** com a escolha dele, registrar no `decisoes.md` com o texto dele; depois, spec
-    (`docs/superpowers/specs/2026-11-19-mesa-visual-design.md`), plano e código, levando as notas "Para o código" do diário 2026-11-19 (1).
+  - **A B · Feltro aprovada, com o rosa mais claro** (`decisoes.md` 2026-11-19 (4)); seguir com spec, plano e código sem parar. Spec e
+    plano: `docs/superpowers/specs/2026-11-19-mesa-feltro-design.md` (o plano é a §7).
+  - **Próximo passo exato:** a §7 da spec, na ordem: tokens e classes no `styles.css`, os componentes, os testes e as fotos, a A/B da
+    Devastação, o `pnpm check`, o PR.
 
 - **A logo LUSACAN vira o vídeo do dragão** (`decisoes.md` 2026-11-19 (2), que substitui a leitura de (1)): o MP4 do autor (gerado no Google
   Veo, 3,92 s, 1920 × 1080, 2,6 MB, com áudio, `moov` no fim) entra no lugar do voo vetorial. Branch `feat/intro-dragao-frente`, saída da
