@@ -22,8 +22,9 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   a logo) e a curta (pela preferência `reduceMotion`).
 - **Armadilha:** um `git mv`/`git rm` deixa o arquivo em stage, e o commit seguinte (o da memória) o leva junto. Desfeito antes do push
   (`reset --soft`); commite a memória com `git add` de caminhos explícitos **e** sem nada de código em stage.
-- **Ficou com o autor:** a `feat/intro-dragao-frente` (o vídeo da logo) e a pasta solta `docs/superpowers/specs/2026-11-19-intro-lusacan/`;
-  se ~3 s está bom.
+- **PR #6**, com o "sim" dele depois de ver no navegador (`decisoes.md` 2026-11-19 (7)): na `main` por fast-forward (`95cf2ed`), com o
+  `check` e o `e2e` verdes no PR em `72f1414`; a `feat/intro-sem-logo` apagada. Sem deploy (é dele).
+- **Ficou com o autor:** a `feat/intro-dragao-frente` (o vídeo da logo) e a pasta solta `docs/superpowers/specs/2026-11-19-intro-lusacan/`.
 
 ---
 
