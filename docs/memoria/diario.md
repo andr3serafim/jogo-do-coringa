@@ -5,6 +5,24 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-19 (2): o vídeo do dragão como logo LUSACAN: decisão, otimização e medição
+
+- **Pedido** (`decisoes.md` 2026-11-19 (2)): trocar a logo LUSACAN pelo vídeo do autor, medindo rede e desempenho e otimizando; versão
+  9:16 para o celular em pé (ele gera); a prévia HyperFrames abandonada.
+- **Feito** (branch `feat/intro-dragao-frente`): a decisão e o estado (`0a29cf4`, que também apaga os três arquivos da prévia que ele
+  apagou); o FFmpeg 9.0.2 instalado pelo winget; as variantes e a medição em `notas/medicao-video-intro.md`. Escolhida a H.264 720p CRF
+  27 sem áudio e com `+faststart` (557 KB; no 3G com CPU 4×, primeiro quadro em 0,66 s, sem travar). Nada do código do jogo mudou.
+- **Armadilhas:**
+  - O Chromium do Playwright não toca H.264: medir com `channel: 'msedge'`.
+  - O Edge do Playwright às vezes trava no `browser.close()` (e o `page.setContent` com `file://` não carrega mídia): abrir uma página
+    `.html` ao lado do arquivo, ou servir por HTTP, e encerrar o processo com prazo.
+  - O FFmpeg do winget só entra no `PATH` de um shell novo; o binário fica em
+    `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg_*\ffmpeg-9.0.2-full_build\bin`.
+  - O VMAF do AV1 em WebM sai ~65 em qualquer CRF (medição, não compressão); ficou de fora.
+- **Ficou:** o porte para o jogo (a lista no `estado.md`) e a versão 9:16 do autor.
+
+---
+
 ## 2026-11-19 (1): a prévia da abertura LUSACAN nova (o dragão de frente)
 
 - **Pedido** (`decisoes.md` 2026-11-19 (1)): melhorar a abertura LUSACAN a partir de um vídeo de referência do autor, vendo antes de

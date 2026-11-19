@@ -18,9 +18,12 @@
     (`Dragon_flying_in_night_sky_e8417f02_1080p.mp4`); quem assume em outra máquina pede o arquivo a ele.
   - **Medido:** brilho médio 0,19 a 0,24 do começo ao fim (sem flash: a regra de fotossensibilidade passa). No celular em pé, cortado
     (`cover`) perde o "LUSACAN"; inteiro (`contain`) fica numa faixa de ~1/4 da altura.
-  - **Próximo passo exato:** instalar o FFmpeg (`winget install Gyan.FFmpeg`, liberado pelo autor); gerar variantes sem áudio e com
-    `+faststart` (720p e 540p, H.264 e AV1/WebM) e medir o peso e o tempo até o primeiro quadro (rede limitada, CPU 4×); escolher a
-    variante; então portar para o jogo (o `<video>` muted/playsinline no pedaço da intro, a capa até o primeiro quadro, prazo de
+  - **Feito:** o FFmpeg instalado; as variantes medidas (`notas/medicao-video-intro.md`, com os comandos). Escolhida a **H.264 720p
+    CRF 27, sem áudio, `+faststart`**: 557 KB (−79%), VMAF 82,8, sem diferença visível; no 3G com CPU 4× o primeiro quadro sai em
+    0,66 s e toca sem travar (o original: 16 s para tocar 3,9 s). Mais o pôster WebP do último quadro (49 KB).
+  - **Esperando o autor:** o ritmo. 3,92 s de vídeo + a parte das cartas de hoje (3,2 s) dá ~7,1 s, acima do teto de 6 s; a proposta é o
+    vídeo em velocidade normal e as cartas e o título encolhidos para ~1,8 s.
+  - **Próximo passo exato:** com o "sim" dele, portar para o jogo (o `<video>` muted/playsinline no pedaço da intro, a capa até o primeiro quadro, prazo de
     desistência para o menu, o pôster WebP do último quadro na versão de movimento reduzido, os tempos do `model/intro.ts` abaixo dos
     6 s com as cartas mais curtas, o smoke barrando o vídeo no pacote inicial e no `index.html`, os testes e o `abertura.spec.ts`, o
     `LICENSES.md`, o `CLAUDE.md` da abertura).
