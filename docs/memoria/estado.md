@@ -22,7 +22,11 @@
     jogo: SVG, gerador e o teste `lusacan-assets.test.ts`); a marca do smoke virou `abertura-palco`; o `abertura.spec.ts` com a faixa nova
     (3 a 4,5 s; o pulo < 2 s); o `CLAUDE.md`, o `LICENSES.md` e o `LEIAME.md`. Typecheck, lint e os testes afetados verdes; conferido no
     dev server (fotos da completa a 0,6 s e 2,4 s e da curta).
-  - **Próximo passo exato:** push e PR para a `main`; esperar as duas CI. Merge só com o "sim" dele (fast-forward); deploy é dele.
+  - **No GitHub, PR #6** (`https://github.com/andr3serafim/jogo-do-coringa/pull/6`); o `check` e o `e2e` da CI rodando no push e no PR de
+    `72f1414` (o código está em `7d32d37`; os commits depois são só de memória).
+  - **O "sim" do autor para o merge** (`decisoes.md` 2026-11-19 (7)), com as duas CI verdes.
+  - **Próximo passo exato:** com o `check` e o `e2e` verdes em `72f1414` (ou depois), `git checkout main && git merge --ff-only
+    feat/intro-sem-logo && git push origin main`; depois apagar a `feat/intro-sem-logo` (local e remota). Deploy é dele.
   - **Espera o autor:** o que fazer com a `feat/intro-dragao-frente` (o vídeo da logo) e com a pasta solta
     `docs/superpowers/specs/2026-11-19-intro-lusacan/` (não versionada, no checkout principal); se a abertura de ~3 s está boa ou quer a
     parte do jogo mais longa.
