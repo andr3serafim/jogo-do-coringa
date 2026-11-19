@@ -22,12 +22,12 @@ os filetes são desenho original do projeto, feito à mão em vetor; a imagem de
 
 ## Mudar o desenho
 
-A fonte única é `src/ui/intro/lusacan-shapes.ts` (as formas, as letras e as cores); a abertura do jogo a anima (`LusacanLogo.tsx` e
-`dragon-flight.ts`). O jogo não importa estes SVG. Depois de mudar o desenho, regrave-os:
+A fonte única é `scripts/lusacan-shapes.ts` (as formas, as letras e as cores). O jogo não mostra a logo (a abertura saiu dela em
+`decisoes.md` 2026-11-19 (6)) nem importa estes SVG. Depois de mudar o desenho, regrave-os:
 
 ```
 pnpm --filter @coringa/web logo
 ```
 
-O teste `test/ui/lusacan-logo.test.tsx` reprova os SVG que não forem, byte a byte, o que o gerador grava. Para mudar o texto, o
+O teste `test/ui/lusacan-assets.test.ts` reprova os SVG que não forem, byte a byte, o que o gerador grava. Para mudar o texto, o
 `scripts/cinzel-contornos.ts` tira os contornos de outras letras da Cinzel (o uso está no começo dele).

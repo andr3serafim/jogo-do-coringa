@@ -1,5 +1,5 @@
-// A abertura (decisoes.md 2026-11-16 (5)) mora num pedaço à parte, fora do JavaScript inicial: o dragão, as letras em traçado e o CSS dela
-// pesam ~8 KB comprimidos, e o orçamento do inicial é de 200 KB (`scripts/smoke.ts`). O `App` pede o pedaço ao abrir no Início e cobre o
+// A abertura (decisoes.md 2026-11-16 (5)) mora num pedaço à parte, fora do JavaScript inicial: as cartas que sobem e o CSS dela
+// pesam alguns KB comprimidos, e o orçamento do inicial é de 200 KB (`scripts/smoke.ts`). O `App` pede o pedaço ao abrir no Início e cobre o
 // menu com uma capa escura até ele chegar; se falhar, o menu abre na hora. O mesmo jeito das cenas (`anim/scenes-loader.ts`).
 import type { ComponentType } from 'react';
 import type { IntroProps } from './Intro.tsx';

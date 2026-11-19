@@ -1,10 +1,10 @@
 /*
- * A abertura do jogo (decisoes.md 2026-11-16 (5)): a logo "LUSACAN productions" e a intro do jogo, até o menu. Uma camada de tinta
+ * A abertura do jogo (decisoes.md 2026-11-16 (5); sem a logo LUSACAN desde 2026-11-19 (6)): a intro do jogo, até o menu. Uma camada de tinta
  * por cima do Início. Todo instante vem do modelo (`model/intro.ts`), pelas variáveis `--t-*` e `--d-*` que o `Intro.tsx` põe na
- * camada: aqui só fica quanto cada gesto dura e como ele se move. Só `transform`, `opacity` e o traço do SVG se animam.
+ * camada: aqui só fica quanto cada gesto dura e como ele se move. Só `transform` e `opacity` se animam (e o brilho que passa no título).
  *
- * Fotossensibilidade (spec §10.4): nada pisca na tela inteira. O brilho é local (a lua, a aura, as faíscas), e a passagem do escuro
- * para o menu é um esmaecer só. Com movimento reduzido (`data-abertura='curta'`), só a logo, parada, com um esmaecer.
+ * Fotossensibilidade (spec §10.4): nada pisca na tela inteira. O brilho é local (a aura, as faíscas), e a passagem do escuro
+ * para o menu é um esmaecer só. Com movimento reduzido (`data-abertura='curta'`), só o Coringa e o título, parados, com um esmaecer.
  */
 .abertura {
   position: fixed;
@@ -34,27 +34,6 @@
 /* A barra de rolagem do menu, que fica por baixo, some no escuro enquanto a abertura está na tela (sem mexer no layout dele). */
 html:has(.abertura) {
   scrollbar-color: var(--color-tinta) var(--color-tinta);
-}
-
-.abertura-logo,
-.abertura-tema {
-  grid-area: 1 / 1;
-}
-
-/* O céu da noite da logo: um brilho azulado no meio, que se perde no escuro das bordas. Some com a logo, antes das cartas. */
-.abertura-logo {
-  display: grid;
-  place-items: center;
-  place-self: stretch;
-  background: radial-gradient(ellipse 75% 65% at 50% 42%, #1d1b3a 0%, #110f20 55%, var(--color-tinta) 100%);
-}
-
-/* O dragão voa por fora da caixa da logo (ele entra pequeno e longe): o SVG não corta. */
-.abertura-logo-arte {
-  display: block;
-  width: min(94vw, 105vh, 680px);
-  height: auto;
-  overflow: visible;
 }
 
 /* --- O aviso de pular: discreto, embaixo. --- */
@@ -89,9 +68,9 @@ html:has(.abertura) {
   }
 }
 
-/* --- A versão curta: a logo parada, com um esmaecer na entrada. --- */
+/* --- A versão curta: o Coringa e o título parados, com um esmaecer na entrada (e o da saída, de toda a camada). --- */
 
-[data-abertura='curta'] .abertura-logo {
+[data-abertura='curta'] .abertura-tema {
   animation: abertura-surge 300ms ease-out both;
 }
 
@@ -101,102 +80,13 @@ html:has(.abertura) {
   }
 }
 
-/*
- * --- A logo (decisoes.md 2026-11-17 (3)): a lua acende, o dragão voa (a Web Animations do `dragon-flight.ts`, que o `Intro.tsx` liga),
- * as asas se abrem e os veios de raio acendem com o halo da lua, o nome sobe letra a letra, e "PRODUCTIONS" e os filetes chegam no fim.
- * Os veios e o halo acendem uma vez só, num brilho local (sem piscar a tela).
- * As letras têm `transform` no SVG: a animação usa `translate`, que se soma a ele, em unidades da fonte (1000 por eme).
- * ---
- */
-
-[data-abertura='completa'] .abertura-logo {
-  animation: abertura-logo-sai 250ms ease-in var(--t-logo-sai) forwards;
+[data-abertura='curta'] .abertura-coringa {
+  transform: scale(1.12);
+  animation: none;
 }
 
-@keyframes abertura-logo-sai {
-  to {
-    opacity: 0;
-    scale: 1.04;
-  }
-}
-
-[data-abertura='completa'] .lusacan-lua {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: lusacan-lua 500ms ease-out var(--t-lua) both;
-}
-
-@keyframes lusacan-lua {
-  from {
-    opacity: 0;
-    scale: 0.9;
-  }
-}
-
-[data-abertura='completa'] .lusacan-halo {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: lusacan-halo 700ms ease-out var(--t-asas) both;
-}
-
-@keyframes lusacan-halo {
-  from {
-    opacity: 0.6;
-    scale: 0.92;
-  }
-  30% {
-    opacity: 1;
-    scale: 1.1;
-  }
-  to {
-    opacity: 1;
-    scale: 1;
-  }
-}
-
-[data-abertura='completa'] .lusacan-veios,
-[data-abertura='completa'] .lusacan-olho {
-  animation: lusacan-acende 550ms ease-out var(--t-asas) both;
-}
-
-@keyframes lusacan-acende {
-  from {
-    opacity: 0;
-  }
-  30% {
-    opacity: 1;
-  }
-  to {
-    opacity: 0.85;
-  }
-}
-
-[data-abertura='completa'] .lusacan-letra {
-  animation: lusacan-letra 300ms cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--t-nome) + var(--i) * 25ms) both;
-}
-
-@keyframes lusacan-letra {
-  from {
-    opacity: 0;
-    translate: 0 170px;
-  }
-}
-
-[data-abertura='completa'] .lusacan-tag {
-  animation: abertura-surge 300ms ease-out calc(var(--t-nome) + 150ms) both;
-}
-
-[data-abertura='completa'] .lusacan-filete {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: lusacan-filete 350ms cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--t-nome) + 100ms) both;
-}
-
-@keyframes lusacan-filete {
-  from {
-    opacity: 0;
-    scale: 0.4 1;
-  }
+[data-abertura='curta'] .abertura-titulo {
+  animation: none;
 }
 
 /* --- A intro do jogo: as quatro cartas sobem em leque, juntam-se, o maço vira no Coringa e o título é carimbado. --- */

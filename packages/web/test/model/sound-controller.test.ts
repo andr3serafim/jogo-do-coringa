@@ -321,8 +321,8 @@ describe('SoundController: a tentativa sem gesto (a abertura, decisoes.md 2026-1
       expect(r.contexts).toHaveLength(1);
       expect(r.synthLoads).toBe(1);
       await r.finishLoad();
-      r.controller.play('abertura-logo');
-      expect(r.played).toEqual(['abertura-logo']);
+      r.controller.play('abertura-titulo');
+      expect(r.played).toEqual(['abertura-titulo']);
     });
   });
 
@@ -342,7 +342,7 @@ describe('SoundController: a tentativa sem gesto (a abertura, decisoes.md 2026-1
       r.controller.prime();
       await flush();
       expect(r.synthLoads).toBe(0);
-      r.controller.play('abertura-logo');
+      r.controller.play('abertura-titulo');
       expect(r.played).toEqual([]);
 
       gesture(r.target, 'click');
@@ -422,6 +422,6 @@ describe('SoundController: a tentativa sem gesto (a abertura, decisoes.md 2026-1
       true,
     );
     expect(() => controller.prime()).not.toThrow();
-    expect(() => controller.play('abertura-logo')).not.toThrow();
+    expect(() => controller.play('abertura-titulo')).not.toThrow();
   });
 });

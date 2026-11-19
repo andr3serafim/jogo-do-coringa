@@ -180,8 +180,6 @@ const ALL_CUES: Record<Cue, true> = {
   'reflect-cancelado': true,
   ressurreicao: true,
   'golpe-final': true,
-  'abertura-logo': true,
-  'abertura-logo-curta': true,
   'abertura-titulo': true,
 };
 const CUES = Object.keys(ALL_CUES) as Cue[];
@@ -408,9 +406,7 @@ describe('createSynth', () => {
     'reflect-cancelado': 1.4,
     ressurreicao: 4.6,
     'golpe-final': 2.4,
-    // As da abertura (decisoes.md 2026-11-17 (3)): o voo do dragão até as asas abertas; só as asas; a subida e a chamada do título.
-    'abertura-logo': 1.7,
-    'abertura-logo-curta': 0.7,
+    // A da abertura: a subida e a chamada do título.
     'abertura-titulo': 1.5,
   };
 

@@ -1,62 +1,38 @@
-// A abertura do jogo (decisoes.md 2026-11-16 (5); a logo do dragão, 2026-11-17 (3)): a logo "LUSACAN productions" e a intro do jogo, até o menu. Puro: só os tempos, as
-// pistas de som e a regra do que pula. O componente (`ui/intro/Intro.tsx`) entrega estes números ao CSS como variáveis, e o
+// A abertura do jogo (decisoes.md 2026-11-16 (5); sem a logo LUSACAN desde 2026-11-19 (6)): a intro do jogo, até o menu. Puro: só os
+// tempos, as pistas de som e a regra do que pula. O componente (`ui/intro/Intro.tsx`) entrega estes números ao CSS como variáveis, e o
 // sintetizador os usa para pôr o impacto no instante certo: quem muda o ritmo da abertura muda aqui, e só aqui.
 import type { Cue } from './sound.ts';
 
 /**
- * Os instantes da abertura completa, em ms desde que ela aparece. O total fica abaixo dos 6 s com folga: antes dela, a capa escura cobre
- * o tempo de o pedaço dela chegar (`intro-loader.ts`, ~0,1 a 0,5 s), e a pessoa vê as duas como uma coisa só.
+ * Os instantes da abertura completa, em ms desde que ela aparece. Antes dela, a capa escura cobre o tempo de o pedaço dela chegar
+ * (`intro-loader.ts`, ~0,1 a 0,5 s), e a pessoa vê as duas como uma coisa só.
  */
 export const INTRO = {
   /** O aviso de pular. */
   hintAt: 500,
-  /** A lua aparece no céu. */
-  logoAt: 50,
-  /** A pista da logo: as batidas de asa do voo, o giro, o mergulho e o baque das asas que se abrem em `wingsAt`. */
-  logoCueAt: 80,
-  /** O dragão entra voando, pequeno, longe, batendo as asas. */
-  flyAt: 100,
-  /** O dragão gira no ar (um parafuso) em volta da lua. */
-  spinAt: 550,
-  /** O dragão volta, de asas recolhidas, mergulhando na direção de quem olha. */
-  returnAt: 850,
-  /** As asas se abrem de uma vez, e os veios de raio acendem: o dragão para na pose da logo. */
-  wingsAt: 1100,
-  /** Quanto o dragão leva para assentar na pose depois de abrir as asas (um leve passar do ponto e voltar). */
-  settleMs: 300,
-  /** O nome começa a subir, letra a letra; "PRODUCTIONS" e os filetes vêm no fim. */
-  nameAt: 1200,
-  /** Quanto o nome leva para ficar inteiro. */
-  nameMs: 450,
-  /** A logo começa a sair. */
-  logoOutAt: 2150,
-  /** A intro do jogo: a primeira carta sobe. */
-  themeAt: 2350,
+  /** A primeira carta sobe (um respiro depois da capa escura). */
+  themeAt: 150,
   /** O atraso de cada uma das quatro cartas depois de `themeAt`: cada intervalo é menor que o anterior. */
   cardDelays: [0, 170, 310, 420],
   /** Quanto cada carta leva para subir até o leque. */
   cardRiseMs: 420,
   /** As cartas se juntam no centro, e a aura cresce. */
-  gatherAt: 3200,
+  gatherAt: 1000,
   /** O maço vira e mostra o Coringa. */
-  flipAt: 3500,
+  flipAt: 1300,
   /** A pista do título: a subida começa aqui e a chamada cai em `titleAt`. */
-  titleCueAt: 3650,
+  titleCueAt: 1450,
   /** O título é carimbado. */
-  titleAt: 3950,
+  titleAt: 1750,
   /** A abertura começa a esmaecer para o menu. */
-  fadeAt: 4900,
+  fadeAt: 2700,
   /** O menu. */
-  total: 5350,
+  total: 3150,
 } as const;
 
-/**
- * A versão curta, com movimento reduzido (o sistema ou o menu do jogo): a logo parada (o dragão já de asas abertas), com um esmaecer na
- * entrada e outro na saída, e só o baque das asas no som.
- */
+/** A versão curta, com movimento reduzido (o sistema ou o menu do jogo): o Coringa e o título parados, um esmaecer na entrada e outro na saída, sem som. */
 export const INTRO_REDUCED = {
   hintAt: 500,
-  logoCueAt: 150,
   fadeAt: 1400,
   total: 1800,
 } as const;
@@ -82,7 +58,7 @@ export function introPlan(reduced: boolean): IntroPlan {
       hintAt: INTRO_REDUCED.hintAt,
       fadeAt: INTRO_REDUCED.fadeAt,
       total: INTRO_REDUCED.total,
-      cues: [{ at: INTRO_REDUCED.logoCueAt, cue: 'abertura-logo-curta' }],
+      cues: [],
     };
   }
   return {
@@ -90,10 +66,7 @@ export function introPlan(reduced: boolean): IntroPlan {
     hintAt: INTRO.hintAt,
     fadeAt: INTRO.fadeAt,
     total: INTRO.total,
-    cues: [
-      { at: INTRO.logoCueAt, cue: 'abertura-logo' },
-      { at: INTRO.titleCueAt, cue: 'abertura-titulo' },
-    ],
+    cues: [{ at: INTRO.titleCueAt, cue: 'abertura-titulo' }],
   };
 }
 

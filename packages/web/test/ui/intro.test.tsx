@@ -1,4 +1,4 @@
-// A abertura (decisoes.md 2026-11-16 (5)): a logo, a intro do jogo e o menu. Aqui: o que ela mostra em cada versão, quando termina, o
+// A abertura (decisoes.md 2026-11-16 (5); sem a logo LUSACAN desde 2026-11-19 (6)): a intro do jogo e o menu. Aqui: o que ela mostra em cada versão, quando termina, o
 // que pula (clique, toque, teclas), o som nos instantes dele e o pulo que corta o som. O relógio é o falso do Vitest; o jsdom não anima
 // o CSS, então o que a pessoa vê em cada instante é conferido pelas variáveis de tempo que o componente entrega ao CSS.
 import { act, fireEvent, render, screen } from '@testing-library/react';
@@ -6,7 +6,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { INTRO_SKIP_HINT, INTRO_SKIP_HINT_TOUCH } from '../../src/model/copy.ts';
 import { INTRO, INTRO_REDUCED, SKIP_FADE_MS } from '../../src/model/intro.ts';
 import type { Cue } from '../../src/model/sound.ts';
-import { flightAnimation, wingAnimation } from '../../src/ui/intro/dragon-flight.ts';
 import { Intro } from '../../src/ui/intro/Intro.tsx';
 import { IntroBoundary } from '../../src/ui/intro/IntroBoundary.tsx';
 import { SoundContext, type SoundApi } from '../../src/ui/sound-context.ts';
@@ -46,10 +45,10 @@ afterEach(() => {
 });
 
 describe('<Intro />: a versão completa', () => {
-  it('mostra a logo, as quatro cartas dos naipes, o Coringa e o título', () => {
+  it('mostra as quatro cartas dos naipes, o Coringa e o título, sem a logo da produtora', () => {
     const { overlay } = mount();
     expect(overlay).toHaveAttribute('data-abertura', 'completa');
-    expect(screen.getByRole('img', { name: 'LUSACAN productions' })).toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: /LUSACAN/ })).toBeNull();
     expect([...overlay.querySelectorAll('[data-naipe]')].map((card) => card.getAttribute('data-naipe'))).toEqual(['espadas', 'copas', 'ouros', 'paus']);
     expect(overlay.querySelector('.abertura-coringa svg')).not.toBeNull();
     expect(overlay.querySelector('.abertura-titulo')).toHaveTextContent('Jogo do Coringa');
@@ -65,10 +64,6 @@ describe('<Intro />: a versão completa', () => {
     const { overlay } = mount();
     const time = (name: string) => overlay.style.getPropertyValue(name);
     expect(time('--t-aviso')).toBe(`${INTRO.hintAt}ms`);
-    expect(time('--t-lua')).toBe(`${INTRO.logoAt}ms`);
-    expect(time('--t-asas')).toBe(`${INTRO.wingsAt}ms`);
-    expect(time('--t-nome')).toBe(`${INTRO.nameAt}ms`);
-    expect(time('--t-logo-sai')).toBe(`${INTRO.logoOutAt}ms`);
     expect(time('--t-tema')).toBe(`${INTRO.themeAt}ms`);
     expect(time('--t-junta')).toBe(`${INTRO.gatherAt}ms`);
     expect(time('--t-vira')).toBe(`${INTRO.flipAt}ms`);
@@ -90,67 +85,12 @@ describe('<Intro />: a versão completa', () => {
     expect(onDone).toHaveBeenCalledTimes(1);
   });
 
-  it('toca o voo do dragão e a chamada do título nos instantes deles', () => {
+  it('toca a chamada do título no instante dela, e nada antes', () => {
     const { sound } = mount();
-    wait(INTRO.logoCueAt - 1);
+    wait(INTRO.titleCueAt - 1);
     expect(sound.played).toEqual([]);
     wait(1);
-    expect(sound.played).toEqual(['abertura-logo']);
-    wait(INTRO.titleCueAt - INTRO.logoCueAt - 1);
-    expect(sound.played).toEqual(['abertura-logo']);
-    wait(1);
-    expect(sound.played).toEqual(['abertura-logo', 'abertura-titulo']);
-  });
-});
-
-describe('<Intro />: o voo do dragão', () => {
-  /** O jsdom não tem a Web Animations: um `animate` falso anota quem pediu o quê, e devolve uma animação que se deixa cancelar. */
-  function stubAnimate() {
-    const calls: { element: Element; keyframes: Keyframe[]; options: KeyframeAnimationOptions; canceled: boolean }[] = [];
-    const animate = function (this: Element, keyframes: Keyframe[], options: KeyframeAnimationOptions) {
-      const call = { element: this, keyframes, options, canceled: false };
-      calls.push(call);
-      return { cancel: () => void (call.canceled = true) } as unknown as Animation;
-    };
-    Object.defineProperty(Element.prototype, 'animate', { value: animate, configurable: true, writable: true });
-    return calls;
-  }
-
-  afterEach(() => {
-    delete (Element.prototype as { animate?: unknown }).animate;
-  });
-
-  it('na completa, o dragão inteiro voa e as duas asas batem, com as animações do voo, que só deixam o desenho ao fim', () => {
-    const calls = stubAnimate();
-    const { overlay } = mount();
-    expect(calls).toHaveLength(3);
-    const [flight, ...wings] = calls;
-    expect(flight!.element).toBe(overlay.querySelector('[data-dragao-voo]'));
-    expect(flight!.keyframes).toEqual(flightAnimation().keyframes);
-    expect(flight!.options).toEqual({ delay: flightAnimation().delay, duration: flightAnimation().duration, fill: 'backwards' });
-    expect(wings.map((call) => call.element.getAttribute('data-dragao-asa'))).toEqual(['esquerda', 'direita']);
-    for (const wing of wings) {
-      expect(wing.keyframes).toEqual(wingAnimation().keyframes);
-      expect(wing.options).toEqual({ delay: wingAnimation().delay, duration: wingAnimation().duration, fill: 'backwards' });
-    }
-  });
-
-  it('ao sair da tela, as animações do voo são canceladas', () => {
-    const calls = stubAnimate();
-    const { unmount } = mount();
-    unmount();
-    expect(calls.map((call) => call.canceled)).toEqual([true, true, true]);
-  });
-
-  it('com movimento reduzido, o dragão fica parado na pose', () => {
-    const calls = stubAnimate();
-    mount({ reduced: true });
-    expect(calls).toEqual([]);
-  });
-
-  it('sem a Web Animations no navegador, o dragão fica parado na pose, sem erro', () => {
-    const { overlay } = mount();
-    expect(overlay.querySelector('[data-dragao-voo]')).not.toBeNull();
+    expect(sound.played).toEqual(['abertura-titulo']);
   });
 });
 
@@ -206,10 +146,10 @@ describe('<Intro />: pular', () => {
 
   it('depois do pulo, nenhum som da abertura toca mais', () => {
     const { overlay, sound, onDone } = mount();
-    wait(INTRO.logoCueAt);
+    wait(INTRO.titleCueAt);
     fireEvent.click(overlay);
     wait(INTRO.total);
-    expect(sound.played).toEqual(['abertura-logo']);
+    expect(sound.played).toEqual(['abertura-titulo']);
     expect(onDone).toHaveBeenCalledTimes(1);
   });
 
@@ -243,22 +183,25 @@ describe('<Intro />: pular', () => {
 });
 
 describe('<Intro />: com movimento reduzido', () => {
-  it('é a versão curta: só a logo, sem a cena do jogo', () => {
+  it('é a versão curta: o Coringa e o título parados, sem as cartas que sobem nem o carimbo', () => {
     const { overlay } = mount({ reduced: true });
     expect(overlay).toHaveAttribute('data-abertura', 'curta');
-    expect(screen.getByRole('img', { name: 'LUSACAN productions' })).toBeInTheDocument();
-    expect(overlay.querySelector('.abertura-tema')).toBeNull();
+    expect(overlay.querySelector('.abertura-coringa svg')).not.toBeNull();
+    expect(overlay.querySelector('.abertura-titulo')).toHaveTextContent('Jogo do Coringa');
+    expect(overlay.querySelector('[data-naipe]')).toBeNull();
+    expect(overlay.querySelector('.abertura-faisca')).toBeNull();
+    expect(overlay.style.getPropertyValue('--t-titulo')).toBe('');
     expect(overlay.style.getPropertyValue('--t-some')).toBe(`${INTRO_REDUCED.fadeAt}ms`);
     expect(overlay.style.getPropertyValue('--d-some')).toBe(`${INTRO_REDUCED.total - INTRO_REDUCED.fadeAt}ms`);
   });
 
-  it('termina em menos de 2 s e só toca o baque das asas', () => {
+  it('termina em menos de 2 s, muda', () => {
     const { onDone, sound } = mount({ reduced: true });
     wait(INTRO_REDUCED.total - 1);
     expect(onDone).not.toHaveBeenCalled();
     wait(1);
     expect(onDone).toHaveBeenCalledTimes(1);
-    expect(sound.played).toEqual(['abertura-logo-curta']);
+    expect(sound.played).toEqual([]);
   });
 
   it('também se pula', () => {

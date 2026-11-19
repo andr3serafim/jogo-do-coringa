@@ -1,44 +1,24 @@
-// A abertura do jogo (decisoes.md 2026-11-16 (5); a logo do dragão, 2026-11-17 (3)): os tempos, as pistas de som e o que pula. O que a pessoa vê (a ordem das cenas, o
-// aviso, o esmaecer) sai destes números: o CSS da abertura só lê as variáveis que o componente monta a partir daqui.
+// A abertura do jogo (decisoes.md 2026-11-16 (5); sem a logo LUSACAN desde 2026-11-19 (6)): os tempos, as pistas de som e o que pula. O
+// que a pessoa vê (a ordem das cenas, o aviso, o esmaecer) sai destes números: o CSS da abertura só lê as variáveis que o componente
+// monta a partir daqui.
 import { describe, expect, it } from 'vitest';
 import { INTRO, INTRO_REDUCED, SKIP_FADE_MS, introPlan, skipsIntro, type IntroKey } from '../../src/model/intro.ts';
 
 const key = (name: string, mods: Partial<IntroKey> = {}): IntroKey => ({ key: name, ctrlKey: false, metaKey: false, altKey: false, ...mods });
 
 describe('a abertura: os tempos', () => {
-  it('dura entre 4 e 6 segundos, com folga para a medida do navegador (até 5,7 s)', () => {
-    expect(INTRO.total).toBeGreaterThanOrEqual(4000);
-    expect(INTRO.total).toBeLessThanOrEqual(5700);
+  it('é só a intro do jogo: de 3 a 4 segundos', () => {
+    expect(INTRO.total).toBeGreaterThanOrEqual(3000);
+    expect(INTRO.total).toBeLessThanOrEqual(4000);
   });
 
-  it('a logo (o voo do dragão) fica na tela cerca de 2,2 s, e a intro do jogo de 3 a 4 s', () => {
-    const logo = INTRO.themeAt - INTRO.logoAt;
-    expect(logo).toBeGreaterThanOrEqual(1900);
-    expect(logo).toBeLessThanOrEqual(2500);
-    const theme = INTRO.total - INTRO.themeAt;
-    expect(theme).toBeGreaterThanOrEqual(3000);
-    expect(theme).toBeLessThanOrEqual(4000);
+  it('a primeira carta sobe logo, com um respiro curto depois da capa escura', () => {
+    expect(INTRO.themeAt).toBeGreaterThan(0);
+    expect(INTRO.themeAt).toBeLessThanOrEqual(300);
   });
 
-  it('as cenas vêm em ordem: a lua, o dragão que chega, o giro, a volta, as asas, o nome, a saída da logo, as cartas, a virada, o título, o menu', () => {
-    const order = [
-      0,
-      INTRO.logoAt,
-      INTRO.logoCueAt,
-      INTRO.flyAt,
-      INTRO.spinAt,
-      INTRO.returnAt,
-      INTRO.wingsAt,
-      INTRO.nameAt,
-      INTRO.logoOutAt,
-      INTRO.themeAt,
-      INTRO.gatherAt,
-      INTRO.flipAt,
-      INTRO.titleCueAt,
-      INTRO.titleAt,
-      INTRO.fadeAt,
-      INTRO.total,
-    ];
+  it('as cenas vêm em ordem: as cartas, a junção, a virada, o título, o menu', () => {
+    const order = [0, INTRO.themeAt, INTRO.gatherAt, INTRO.flipAt, INTRO.titleCueAt, INTRO.titleAt, INTRO.fadeAt, INTRO.total];
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     expect(new Set(order).size).toBe(order.length);
   });
@@ -51,9 +31,8 @@ describe('a abertura: os tempos', () => {
     expect(INTRO.themeAt + INTRO.cardDelays[3]! + INTRO.cardRiseMs).toBeLessThanOrEqual(INTRO.gatherAt);
   });
 
-  it('o dragão pousa (as asas abertas e assentadas) antes de a logo sair, e a logo inteira fica parada pelo menos meio segundo', () => {
-    expect(INTRO.wingsAt + INTRO.settleMs).toBeLessThanOrEqual(INTRO.nameAt + 400);
-    expect(INTRO.logoOutAt - (INTRO.nameAt + INTRO.nameMs)).toBeGreaterThanOrEqual(500);
+  it('o título carimbado fica parado pelo menos meio segundo antes do esmaecer', () => {
+    expect(INTRO.fadeAt - INTRO.titleAt).toBeGreaterThanOrEqual(500);
   });
 
   it('o aviso de pular entra aos 0,5 s, nas duas versões', () => {
@@ -66,7 +45,7 @@ describe('a abertura: os tempos', () => {
     expect(INTRO_REDUCED.total - INTRO_REDUCED.fadeAt).toBeGreaterThanOrEqual(300);
   });
 
-  it('com movimento reduzido é curta: a logo e o esmaecer, em menos de 2 s', () => {
+  it('com movimento reduzido é curta: o Coringa e o título parados e o esmaecer, em menos de 2 s', () => {
     expect(INTRO_REDUCED.total).toBeLessThan(2000);
     expect(INTRO_REDUCED.fadeAt).toBeGreaterThan(INTRO_REDUCED.hintAt);
   });
@@ -78,26 +57,23 @@ describe('a abertura: os tempos', () => {
 });
 
 describe('a abertura: o plano de cada versão', () => {
-  it('a completa toca o voo do dragão (as batidas, o giro, o mergulho e as asas que se abrem) e a chamada do título, nos instantes deles', () => {
+  it('a completa toca a chamada do título, no instante dela', () => {
     expect(introPlan(false)).toEqual({
       variant: 'completa',
       hintAt: INTRO.hintAt,
       fadeAt: INTRO.fadeAt,
       total: INTRO.total,
-      cues: [
-        { at: INTRO.logoCueAt, cue: 'abertura-logo' },
-        { at: INTRO.titleCueAt, cue: 'abertura-titulo' },
-      ],
+      cues: [{ at: INTRO.titleCueAt, cue: 'abertura-titulo' }],
     });
   });
 
-  it('a curta, com a logo parada, só toca o baque das asas', () => {
+  it('a curta, parada, é muda', () => {
     expect(introPlan(true)).toEqual({
       variant: 'curta',
       hintAt: INTRO_REDUCED.hintAt,
       fadeAt: INTRO_REDUCED.fadeAt,
       total: INTRO_REDUCED.total,
-      cues: [{ at: INTRO_REDUCED.logoCueAt, cue: 'abertura-logo-curta' }],
+      cues: [],
     });
   });
 });

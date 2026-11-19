@@ -3,8 +3,8 @@
 // decalcado). As letras são os contornos da Cinzel (SIL OFL 1.1, `@fontsource/cinzel`, pesos 600 e 500), em unidades da fonte (1000 por
 // eme): o SVG não depende de fonte instalada.
 //
-// Esta é a fonte única da logo. O componente da abertura (`LusacanLogo.tsx`) a desenha e anima; o `scripts/gerar-logo-lusacan.ts` grava
-// com ela os SVG de `src/assets/lusacan/`, e o teste `lusacan-logo.test.tsx` confere que os dois não se afastam.
+// Esta é a fonte única da logo. O `scripts/gerar-logo-lusacan.ts` grava com ela os SVG de `src/assets/lusacan/`, e o teste
+// `lusacan-assets.test.ts` confere que eles não se afastam dela. O jogo não a mostra (a abertura saiu dela em 2026-11-19 (6)).
 //
 // O dragão se move por peças: cada uma tem o pivô na origem do próprio desenho (a asa, no ombro; o corpo, no peito), e quem a põe no
 // lugar é um `<g transform>` de fora. Assim a animação (no `<g>` de dentro) gira a asa no ombro sem `transform-origin`.

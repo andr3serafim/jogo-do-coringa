@@ -5,6 +5,28 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-19 (3): a abertura sem a logo LUSACAN
+
+- **Pedido:** `decisoes.md` 2026-11-19 (6) ("remova lusacan productions da intro, deixe apenas a parte do jogo do coringa"). Branch
+  `feat/intro-sem-logo`, saída da `main` em `2050a5d`.
+- **Feito:** o `model/intro.ts` só com a parte do jogo, no mesmo ritmo, puxada para o começo (`themeAt` 150, título 1750, menu 3150); a
+  curta (movimento reduzido) com o Coringa e o título parados, muda (`cues: []`). O `Intro.tsx` sem a logo nem o `useLayoutEffect` do voo;
+  o `.abertura-tema` existe nas duas versões (na curta, só o Coringa e o título; no CSS, `animation: none` neles e um esmaecer no tema).
+  Saíram o `LusacanLogo.tsx`, o `dragon-flight.ts`, o `dragon-flight.test.tsx`, as pistas `abertura-logo` e `abertura-logo-curta` e o
+  `wingsOpen` do sintetizador. A marca da produtora fica no repositório, fora do jogo: o `lusacan-shapes.ts` foi para `scripts/` (ao lado
+  do gerador), e o `lusacan-logo.test.tsx` virou `lusacan-assets.test.ts` (só os SVG byte a byte).
+- **Ruling:** a marca do smoke para a abertura é a classe `abertura-palco` (o `data-abertura` não serve: é prefixo do
+  `data-abertura-capa`, que está no inicial). No E2E, o total cai para 3 a 4,5 s (com a capa) e o pulo para < 2 s, para ainda separar um
+  pulo de uma abertura inteira.
+- **Conferido:** typecheck, lint e os testes afetados; no dev server, a completa (as cartas aos 0,6 s, o Coringa e o título aos 2,4 s, sem
+  a logo) e a curta (pela preferência `reduceMotion`).
+- **Armadilha:** um `git mv`/`git rm` deixa o arquivo em stage, e o commit seguinte (o da memória) o leva junto. Desfeito antes do push
+  (`reset --soft`); commite a memória com `git add` de caminhos explícitos **e** sem nada de código em stage.
+- **Ficou com o autor:** a `feat/intro-dragao-frente` (o vídeo da logo) e a pasta solta `docs/superpowers/specs/2026-11-19-intro-lusacan/`;
+  se ~3 s está bom.
+
+---
+
 ## 2026-11-19 (2): a mesa no Feltro, implementada
 
 - **Pedido:** `decisoes.md` 2026-11-19 (4) (a B, com o rosa mais claro, seguir com a implementação). Spec e plano:

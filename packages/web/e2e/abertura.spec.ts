@@ -1,4 +1,4 @@
-// A abertura do jogo (decisoes.md 2026-11-16 (5)): a logo "LUSACAN productions", a intro e o menu. No navegador de verdade: quanto
+// A abertura do jogo (decisoes.md 2026-11-16 (5); sem a logo LUSACAN desde 2026-11-19 (6)): a intro do jogo e o menu. No navegador de verdade: quanto
 // dura, o que pula (clique, toque, Enter, Espaço, Esc, qualquer tecla), o console limpo com o áudio bloqueado, a versão curta com
 // movimento reduzido e as rotas que abrem direto. Os outros testes não a veem (a marca do `playwright.config.ts`); aqui ela toca.
 import { expect, test, type Page } from '@playwright/test';
@@ -45,13 +45,14 @@ async function expectMenuWorks(page: Page): Promise<void> {
   await expect(page).toHaveURL(/\/partidas$/);
 }
 
-test('a abertura toca inteira ao abrir no início: a logo, o título, de 4 a 6 s, e termina no menu, sem erro no console', async ({ page }) => {
+test('a abertura toca inteira ao abrir no início: as cartas, o título, de 3 a 4,5 s, e termina no menu, sem erro no console', async ({ page }) => {
   const guard = failOnConsoleErrors(page);
   await watchIntro(page);
   await page.goto('/');
 
   await expect(overlay(page)).toHaveAttribute('data-abertura', 'completa');
-  await expect(page.getByRole('img', { name: 'LUSACAN productions' })).toBeVisible();
+  await expect(page.locator('.abertura-palco')).toBeVisible();
+  await expect(page.getByRole('img', { name: /LUSACAN/ })).toHaveCount(0);
   // O menu já está montado por baixo, inerte: nada dele espera a abertura.
   await expect(page.locator('[inert] h1')).toHaveCount(1);
   // O aviso é discreto e entra depois de meio segundo.
@@ -61,8 +62,8 @@ test('a abertura toca inteira ao abrir no início: a logo, o título, de 4 a 6 s
 
   await expect(overlay(page)).toHaveCount(0, { timeout: 10_000 });
   const lasted = await introLasted(page);
-  expect(lasted).toBeGreaterThanOrEqual(4000);
-  expect(lasted).toBeLessThanOrEqual(6000);
+  expect(lasted).toBeGreaterThanOrEqual(3000);
+  expect(lasted).toBeLessThanOrEqual(4500);
 
   await expectMenuWorks(page);
   guard.expectClean();
@@ -92,7 +93,7 @@ test('com o áudio bloqueado pelo navegador, a abertura roda muda até o menu, s
   await expect(overlay(page)).toHaveCount(0, { timeout: 10_000 });
   // A abertura tentou ligar o som (um contexto, sem gesto) e seguiu sem ele.
   expect(await page.evaluate(() => (window as unknown as { __contextos: AudioContext[] }).__contextos.length)).toBe(1);
-  expect(await introLasted(page)).toBeGreaterThanOrEqual(4000);
+  expect(await introLasted(page)).toBeGreaterThanOrEqual(3000);
   await expectMenuWorks(page);
   guard.expectClean();
 });
@@ -103,10 +104,10 @@ test.describe('pular', () => {
     const guard = failOnConsoleErrors(page);
     await watchIntro(page);
     await page.goto('/');
-    await expect(page.getByRole('img', { name: 'LUSACAN productions' })).toBeVisible();
+    await expect(page.locator('.abertura-palco')).toBeVisible();
     await gesture();
     await expect(overlay(page)).toHaveCount(0, { timeout: 2000 });
-    expect(await introLasted(page)).toBeLessThan(3000);
+    expect(await introLasted(page)).toBeLessThan(2000);
     await expectMenuWorks(page);
     guard.expectClean();
   }
@@ -132,7 +133,7 @@ test.describe('pular', () => {
 
   test('um atalho do navegador não pula: Ctrl+A e o Shift sozinho deixam a abertura seguir', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByRole('img', { name: 'LUSACAN productions' })).toBeVisible();
+    await expect(page.locator('.abertura-palco')).toBeVisible();
     await page.keyboard.press('Control+KeyA');
     await page.keyboard.press('Shift');
     await expect(overlay(page)).not.toHaveAttribute('data-saindo', 'true');
@@ -143,13 +144,14 @@ test.describe('pular', () => {
 test.describe('com movimento reduzido', () => {
   test.use({ reducedMotion: 'reduce' });
 
-  test('é a versão curta: a logo parada e o esmaecer, em menos de 2,5 s, e o menu', async ({ page }) => {
+  test('é a versão curta: o Coringa e o título parados e o esmaecer, em menos de 2,5 s, e o menu', async ({ page }) => {
     const guard = failOnConsoleErrors(page);
     await watchIntro(page);
     await page.goto('/');
     await expect(overlay(page)).toHaveAttribute('data-abertura', 'curta');
-    await expect(page.getByRole('img', { name: 'LUSACAN productions' })).toBeVisible();
-    await expect(page.locator('.abertura-tema')).toHaveCount(0);
+    await expect(page.locator('.abertura-titulo')).toBeVisible();
+    await expect(page.locator('.abertura-coringa')).toBeVisible();
+    await expect(page.locator('.abertura-carta')).toHaveCount(0);
     await expect(overlay(page)).toHaveCount(0, { timeout: 5000 });
     expect(await introLasted(page)).toBeLessThan(2500);
     await expectMenuWorks(page);

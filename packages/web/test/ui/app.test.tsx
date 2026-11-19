@@ -343,7 +343,7 @@ describe('<App intro />: a abertura (decisoes.md 2026-11-16 (5))', () => {
       const { container } = render(<App api={fakeApi()} intro />);
       expect(container.querySelector('[data-abertura-capa]')).not.toBeNull();
       expect(overlay(container)).toBeNull();
-      expect(await screen.findByRole('img', { name: 'LUSACAN productions' })).toBeInTheDocument();
+      await waitFor(() => expect(overlay(container)).not.toBeNull());
       expect(container.querySelector('[data-abertura-capa]')).toBeNull();
     });
 

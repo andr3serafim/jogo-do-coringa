@@ -1,8 +1,8 @@
 /// <reference types="node" />
 /**
- * Grava os SVG da logo "LUSACAN productions" em `src/assets/lusacan/` a partir do `src/ui/intro/lusacan-shapes.ts`, a fonte única do
+ * Grava os SVG da logo "LUSACAN productions" em `src/assets/lusacan/` a partir do `scripts/lusacan-shapes.ts`, a fonte única do
  * desenho (decisoes.md 2026-11-17 (3)). Roda no Node puro: `pnpm --filter @coringa/web logo`. Quem muda o desenho muda o módulo e roda
- * isto; o teste `lusacan-logo.test.tsx` reprova os SVG que não saíram daqui.
+ * isto; o teste `lusacan-assets.test.ts` reprova os SVG que não saíram daqui.
  *
  * Os arquivos saem do jogo sozinhos: sem fonte (as letras já são contornos), sem folha de estilo, sem classe e sem arquivo de fora; os
  * degradês moram no `<defs>` do próprio arquivo.
@@ -25,7 +25,7 @@ import {
   flourishPath,
   type LogoPalette,
   type TextLine,
-} from '../src/ui/intro/lusacan-shapes.ts';
+} from './lusacan-shapes.ts';
 
 const OUT = join(import.meta.dirname, '..', 'src', 'assets', 'lusacan');
 const ABOUT = 'Logo original do projeto Jogo do Coringa: um dragão de asas abertas diante da lua cheia.';

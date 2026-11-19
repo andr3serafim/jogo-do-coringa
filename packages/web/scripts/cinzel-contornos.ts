@@ -2,7 +2,7 @@
 /**
  * Tira de um `.woff` (WOFF 1, tabelas em zlib) o contorno de cada letra pedida, em unidades da fonte (o y para baixo, a linha de base em
  * 0), com o avanço de cada uma, e imprime em JSON. Foi assim que as letras da logo "LUSACAN productions" saíram da Cinzel (SIL OFL 1.1,
- * `@fontsource/cinzel`, pesos 600 e 500) para o `src/ui/intro/lusacan-shapes.ts` (decisoes.md 2026-11-17 (3)). Quem mudar o texto da
+ * `@fontsource/cinzel`, pesos 600 e 500) para o `scripts/lusacan-shapes.ts` (decisoes.md 2026-11-17 (3)). Quem mudar o texto da
  * logo roda isto e põe os contornos novos lá (arredondados a inteiros), e depois o `gerar-logo-lusacan.ts`.
  *
  * Uso: `node scripts/cinzel-contornos.ts node_modules/@fontsource/cinzel/files/cinzel-latin-600-normal.woff LUSACN`
