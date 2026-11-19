@@ -6,6 +6,22 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-18 (7): o merge dos menus no Folheto
+
+Com o PR #2 aberto (as duas CI verdes no último commit de código, `ee77578`; os seguintes só mexem em docs) e a pergunta "Posso fazer o
+merge do PR #2 na main?", ele respondeu:
+
+> Sim, merge
+
+**Leitura:**
+- A `main` vai por fast-forward até o topo de `feat/menus-visual` (o histórico limpo, como nos merges de antes), e o GitHub fecha o PR #2
+  como mesclado.
+- **[I]** O "sim" do merge vale também como conferência das escolhas [C] da spec dos menus e das `Ruling:` do diário 2026-11-18 (5) e (6),
+  que estavam listadas no PR e na conversa; nenhuma vira [A] uma a uma, e mudam se ele pedir depois de usar.
+- O deploy continua dele (`pnpm deploy:server`), quando pedir.
+
+---
+
 ## 2026-11-18 (6): os links de criar sala levam a `/jogar`
 
 No PR #2 (os menus no Folheto), a pergunta foi se os cinco links de criar sala ("Criar sala" da sala que não existe e da partida parada,

@@ -1,7 +1,8 @@
 # Estado do projeto
 
 > Sobrescrito a cada atualização. **Última: 2026-11-18**, os menus no Folheto no código, na branch `feat/menus-visual` (saída da
-> `main` em `97a1a6b`; `decisoes.md` 2026-11-18 (1) a (5)), no PR #2 com as duas CI verdes, esperando o "sim" do autor. Antes: a abertura do jogo com a
+> `main` em `97a1a6b`; `decisoes.md` 2026-11-18 (1) a (6)), na `main` por fast-forward com o "Sim, merge" do autor (2026-11-18 (7));
+> o PR #2 fecha como mesclado. Antes: a abertura do jogo com a
 > logo do dragão na `main` por fast-forward até `52452c0` ("Sim, merge", `decisoes.md` 2026-11-17 (4)), com as duas CI verdes no push da
 > `main`; o deploy é do autor, quando ele pedir. **O deploy do autor saiu** (2026-11-17, `8266a4f`, sem a abertura): o jogo está no ar em
 > `https://jogodocoringa.com.br` (diário 2026-11-17 (1)).
@@ -9,7 +10,7 @@
 
 ## Agora
 
-- **O redesenho visual dos menus** (`decisoes.md` 2026-11-18 (1)): só a camada visual das telas fora da mesa e dos diálogos da
+- **O redesenho visual dos menus, na `main`** (`decisoes.md` 2026-11-18 (1) a (7)): só a camada visual das telas fora da mesa e dos diálogos da
   partida; nada de regra, fluxo, estado, rede ou handler (se algo visual pedir lógica, parar e perguntar). Branch `feat/menus-visual`,
   no checkout principal (sem worktree).
   - **Feito:** as três direções em rascunho, mandadas ao autor: **A · Folheto** (a capa de cordel pendurada no barbante, sobre o rosa),
@@ -43,8 +44,9 @@
   - **No GitHub, PR #2 para a `main`** (`https://github.com/andr3serafim/jogo-do-coringa/pull/2`), com as duas CI verdes no push de
     `ee77578` (`check` 209 s; `e2e` 677 s). As fotos e o resumo foram mandados ao autor.
   - **O destino dos cinco links de criar sala (`/jogar`) está aprovado** ("Concordo", `decisoes.md` 2026-11-18 (6)).
-  - **Próximo passo exato:** esperar o autor. As outras escolhas [C] da spec e as `Ruling:` do diário seguem por conferir (são do Claude
-    por delegação). O merge espera o "sim" dele; o deploy é dele.
+  - **Na `main`** ("Sim, merge", `decisoes.md` 2026-11-18 (7)), por fast-forward até o topo de `feat/menus-visual` (este commit).
+  - **Próximo passo exato:** ler a CI do push da `main` e registrá-la aqui. Depois, nenhum de código: o deploy (`pnpm deploy:server`) é
+    dele e leva os menus e a abertura ao ar; a branch `feat/menus-visual` (local e remota) fica mesclada, e ele pode apagá-la.
     **Não visto no navegador:** a sala de espera (Lobby) com a roupa nova (precisa do `wrangler dev`); os E2E online passam por ela.
   - **O que não pode regredir:** o rosa por padrão sem gravar nada (`menuTheme` ausente); o tema não se perde quando o menu da partida
     grava as preferências (ele espalha `prefs`); o menu da partida, o fim e a dica com a roupa de antes (`useInMenu()` é falso fora da
