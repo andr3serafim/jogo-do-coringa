@@ -209,7 +209,7 @@ function TableView({
     <TableUiContext value={ui}>
       <main
         aria-label="Mesa"
-        className="relative isolate flex h-dvh flex-col overflow-y-auto overflow-x-hidden overscroll-none bg-capa-voce pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] text-tinta pc:flex-row pc:justify-center pc:bg-tinta"
+        className="relative isolate flex h-dvh flex-col overflow-y-auto overflow-x-hidden overscroll-none feltro-voce pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] text-tinta pc:flex-row pc:justify-center pc:madeira-escura"
       >
         <svg width="0" height="0" aria-hidden="true" focusable="false" className="absolute">
           <defs>
@@ -263,7 +263,7 @@ function TableView({
                     onToggle={() => (historyOpen ? closeHistory() : setHistoryOpen(true))}
                     buttonRef={toggleRef}
                   />
-                  {onOpenMenu ? <MenuButton onClick={onOpenMenu} className="pc:hidden" /> : null}
+                  {onOpenMenu ? <MenuButton onClick={onOpenMenu} tone="papel" className="pc:hidden" /> : null}
                 </div>
               }
             />
@@ -290,7 +290,7 @@ function TableView({
                 data-dica={BAR_ZONES.has(hintZone) ? hintZone : undefined}
                 // Os pingos do carimbo (bloco D do playtest, ponto 5): um ouvinte só, aqui, para todos os carimbos da barra e dos painéis.
                 onPointerUp={reduced ? undefined : stampInk}
-                className="bg-tinta px-3 pb-3.5 pt-2.5 text-papel pc:min-w-0 pc:flex-1 pc:bg-transparent pc:px-0 pc:pb-0 pc:pt-0"
+                className="madeira-escura px-3 pb-3.5 pt-2.5 text-papel pc:min-w-0 pc:flex-1 pc:bg-none pc:px-0 pc:pb-0 pc:pt-0"
               >
                 {actionBar}
               </div>

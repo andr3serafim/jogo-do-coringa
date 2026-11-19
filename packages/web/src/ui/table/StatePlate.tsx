@@ -42,7 +42,7 @@ export function StatePlate({ kind, does, icon, count = 1 }: StatePlateProps) {
   return (
     <li
       data-placa-estado={kind}
-      className={`flex items-center gap-1.5 border-2 border-tinta py-0.5 pl-0.5 pr-2 ${STRONG.has(kind) ? 'bg-ouro' : 'bg-papel'}`}
+      className={`flex items-center gap-1.5 border-2 border-tinta py-0.5 pl-0.5 pr-2 text-tinta ${STRONG.has(kind) ? 'bg-ouro' : 'bg-papel'}`}
     >
       <span
         aria-hidden="true"

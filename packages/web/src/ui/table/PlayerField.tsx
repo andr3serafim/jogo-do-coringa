@@ -75,9 +75,10 @@ export function PlayerField({ side, view, player, name, away = false, equip, too
       aria-label={self ? 'Seu campo' : `Campo de ${name}`}
       data-campo={player.id}
       data-apagado={apagado ? '' : undefined}
-      className={`campo relative isolate px-3 py-2.5 pc:min-h-[286px] pc:px-6 pc:py-5 pc-baixo:min-h-0 pc-baixo:py-2.5 ${self ? 'bg-capa-voce' : 'pc:flex pc:flex-col pc:justify-end bg-capa-oponente'}`}
+      // O pano de feltro do dono (a mesa no Feltro, spec 2026-11-19 §5): rosa o seu, verde o do oponente; o texto do campo em papel.
+      className={`campo feltro relative isolate px-3 py-2.5 text-papel pc:min-h-[286px] pc:px-6 pc:py-5 pc-baixo:min-h-0 pc-baixo:py-2.5 ${self ? 'feltro-voce' : 'pc:flex pc:flex-col pc:justify-end feltro-oponente'}`}
     >
-      <span aria-hidden="true" data-grao className="grao pointer-events-none absolute inset-0 -z-10 opacity-45 mix-blend-multiply" />
+      <span aria-hidden="true" data-grao className="grao pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply" />
       <div className={`campo-grade ${self ? 'campo-grade--voce' : 'campo-grade--oponente'}`}>
         {self ? (
           <>
@@ -319,7 +320,7 @@ function Zone({ label, icon, listLabel, cards, wildAs, count = false, mark, drop
           <li
             aria-hidden="true"
             data-vaga
-            className="h-(--mini-h) w-(--mini-w) rounded-[3px] border-[1.5px] border-dashed border-tinta/40"
+            className="h-(--mini-h) w-(--mini-w) rounded-[3px] border-[1.5px] border-dashed border-papel/30"
           />
         ) : null}
       </ul>

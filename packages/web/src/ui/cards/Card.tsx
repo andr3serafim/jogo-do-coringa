@@ -308,7 +308,7 @@ export function Card({
     <span
       aria-hidden="true"
       data-frente
-      className="absolute -left-[9px] top-1/2 h-0 w-0 -translate-y-1/2 border-y-[5px] border-r-[6px] border-y-transparent border-r-tinta pc:-left-[11px] pc:border-y-[6px] pc:border-r-[7px]"
+      className="absolute -left-[9px] top-1/2 h-0 w-0 -translate-y-1/2 border-y-[5px] border-r-[6px] border-y-transparent border-r-papel pc:-left-[11px] pc:border-y-[6px] pc:border-r-[7px]"
     />
   ) : null;
   const inside = (

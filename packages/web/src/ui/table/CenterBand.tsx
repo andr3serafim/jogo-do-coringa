@@ -48,7 +48,7 @@ export function CenterBand({ view, names, face, live, training, replay, tutorial
   return (
     <section
       aria-label="Situação da rodada"
-      className="grid flex-none grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-2 bg-tinta px-3 py-1.5 text-papel pc:gap-x-7 pc:px-6 pc:py-1"
+      className="grid flex-none grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-2 trilho-madeira px-3 py-1.5 text-papel pc:gap-x-7 pc:px-6 pc:py-1"
     >
       <div className="flex min-w-0 flex-col">
         <p className="text-xs font-semibold leading-tight text-ouro [overflow-wrap:anywhere] pc:text-sm">{turnText(view, names)}</p>

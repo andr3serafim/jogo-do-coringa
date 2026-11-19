@@ -18,6 +18,13 @@
   --color-cura: #2a7339;
   /* A madeira do carimbo (bloco D do playtest, ponto 5): a sombra dura dos botões, que são de tinta por cima da barra de tinta. */
   --color-madeira: #8a5a2b;
+  /*
+   * A mesa no Feltro (spec 2026-11-19-mesa-feltro-design.md, decisoes.md 2026-11-19 (4)): o pano de cada campo (o meio de cada um; a luz e
+   * a borda saem dele) e a madeira da borda da mesa. O rosa do pano é o mais claro que ainda dá 4,5:1 ao papel no meio (as marcas pequenas).
+   */
+  --color-feltro-voce: #a45274;
+  --color-feltro-oponente: #1d6b47;
+  --color-madeira-escura: #1d120b;
 
   /* Tipo de madeira: títulos, botões e valor das cartas. Texto e números de jogo: Archivo, com `tabular-nums`. */
   --font-madeira: 'Alfa Slab One', serif;
@@ -148,6 +155,46 @@
 @utility grao {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .09 0 0 0 0 .07 0 0 0 0 .06 0 0 0 .7 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   background-size: 180px 180px;
+}
+
+/*
+ * Os materiais da mesa no Feltro (spec 2026-11-19-mesa-feltro-design.md §5), como utilidades para valerem com os pontos de quebra
+ * (`pc:madeira-escura`). Tudo é fundo parado do contêiner: sem sombra com desfoque e sem filtro (a Devastação com arte já está no limite
+ * no celular).
+ *
+ * O pano de cada campo: a luz do lado de dentro da mesa (no alto do seu, embaixo do do oponente) e a borda mais escura.
+ */
+@utility feltro-voce {
+  background: radial-gradient(120% 95% at 50% 0%, #bd6c8b 0%, var(--color-feltro-voce) 52%, #86405f 100%);
+}
+
+@utility feltro-oponente {
+  background: radial-gradient(120% 95% at 50% 100%, #2b8a5c 0%, var(--color-feltro-oponente) 50%, #124a31 100%);
+}
+
+/* O trilho de madeira entre os dois panos (a faixa do centro): o veio parado e o filete de ouro em cima e embaixo. */
+@utility trilho-madeira {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='120'%3E%3Cfilter id='v'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.004 .18' numOctaves='3' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .05 0 0 0 0 .02 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23v)'/%3E%3C/svg%3E")
+      0 0 / 600px 120px,
+    linear-gradient(180deg, #5a3720 0%, #43281a 55%, #2f1c11 100%);
+  box-shadow:
+    inset 0 2px 0 color-mix(in oklab, var(--color-ouro) 45%, transparent),
+    inset 0 3px 0 rgb(0 0 0 / 0.35),
+    inset 0 -2px 0 color-mix(in oklab, var(--color-ouro) 45%, transparent),
+    inset 0 -3px 0 rgb(0 0 0 / 0.35);
+}
+
+/* A borda da mesa (o placar, o histórico, o fundo da mão e da barra): a madeira escura com o grão leve. */
+@utility madeira-escura {
+  background:
+    var(--grao-carimbo) 0 0 / 180px 180px,
+    linear-gradient(180deg, #2a1a10, var(--color-madeira-escura));
+}
+
+/* O filete de ouro embaixo do placar: uma sombra por dentro, que não muda a altura dele (o E2E mede o placar). */
+@utility filete-ouro-baixo {
+  box-shadow: inset 0 -2px 0 color-mix(in oklab, var(--color-ouro) 40%, transparent);
 }
 
 /* Alvo e seleção: contorno ouro com borda de tinta (spec §10.1). Com o foco, um anel de papel por fora o distingue. */
@@ -282,6 +329,31 @@
 
   .campo[data-apagado] {
     filter: saturate(0.35) sepia(0.4);
+  }
+
+  /*
+   * O filete de ouro e a costura de papel do feltro (spec da mesa no Feltro §5), os do fundo verde dos menus (`.menu-trilho`): dois
+   * pseudo-elementos parados por baixo do conteúdo (`z-index: -1` dentro do `isolate` do campo; o grão fica mais embaixo, em `-z-10`).
+   * O pano mora nas utilidades `feltro-voce` e `feltro-oponente`, mais abaixo.
+   */
+  .feltro::before,
+  .feltro::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .feltro::before {
+    inset: 6px;
+    border: 1.5px solid color-mix(in oklab, var(--color-ouro) 38%, transparent);
+    border-radius: 22px;
+  }
+
+  .feltro::after {
+    inset: 11px;
+    border: 1.5px dashed color-mix(in oklab, var(--color-papel) 16%, transparent);
+    border-radius: 17px;
   }
 
   .campo-grade {
@@ -453,6 +525,8 @@
     width: 2.5rem;
     height: 2.5rem;
     border: 2px solid var(--color-papel);
+    /* Os cantos do pano (a mesa no Feltro). */
+    border-radius: 8px;
     transition:
       border-color 250ms,
       box-shadow 250ms;
@@ -515,14 +589,13 @@
     max-width: 310px;
     height: 0.625rem;
     overflow: hidden;
-    border: 2px solid var(--color-papel);
+    /* O trilho da mesa no Feltro: arredondado, com o filete de ouro, sobre o feltro escuro com a hachura leve. */
+    border: 2px solid color-mix(in oklab, var(--color-ouro) 60%, transparent);
+    border-radius: 999px;
     background:
-      repeating-linear-gradient(
-        135deg,
-        color-mix(in oklab, var(--color-papel) 16%, var(--color-tinta)) 0 2px,
-        transparent 2px 7px
-      ),
-      color-mix(in oklab, var(--color-papel) 6%, var(--color-tinta));
+      repeating-linear-gradient(135deg, rgb(255 255 255 / 0.05) 0 2px, transparent 2px 7px),
+      #0f3b28;
+    box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.5);
   }
 
   /* O ouro e o rastro cobrem a barra inteira e encolhem por `scaleX` na direção do retrato (a origem fica do lado dele). */
@@ -553,11 +626,7 @@
   }
 
   .placar-barra > [data-vida] {
-    background: linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--color-ouro), var(--color-papel) 40%) 0 45%,
-      var(--color-ouro) 45%
-    );
+    background: linear-gradient(180deg, #ffe08a 0%, var(--color-ouro) 45%, #c8941c 100%);
     box-shadow: inset 0 -2px 0 color-mix(in oklab, var(--color-tinta) 18%, transparent);
   }
 
@@ -580,6 +649,7 @@
       width: 4.75rem;
       height: 4.75rem;
       border-width: 3px;
+      border-radius: 10px;
 
       @variant pc-baixo {
         width: 4rem;
@@ -614,7 +684,6 @@
 
     .placar-barra {
       height: 1.625rem;
-      border-width: 3px;
 
       @variant pc-baixo {
         height: 1.25rem;

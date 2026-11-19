@@ -21,8 +21,11 @@
     (`https://claude.ai/artifact/GdD7tfjewgDmVEPLsNua58`, privada); o resumo de cada uma no diário 2026-11-19 (1). Mandadas ao autor.
   - **A B · Feltro aprovada, com o rosa mais claro** (`decisoes.md` 2026-11-19 (4)); seguir com spec, plano e código sem parar. Spec e
     plano: `docs/superpowers/specs/2026-11-19-mesa-feltro-design.md` (o plano é a §7).
-  - **Próximo passo exato:** a §7 da spec, na ordem: tokens e classes no `styles.css`, os componentes, os testes e as fotos, a A/B da
-    Devastação, o `pnpm check`, o PR.
+  - **Feito:** os passos 1 e 2 da §7 (tokens e utilidades no `styles.css`; os componentes). A suíte da web verde (2997). Fotos do dev server
+    conferidas (PC e celular, a jogada com arte e o Equipar), no scratchpad da sessão.
+  - **Próximo passo exato:** a A/B da Devastação com arte (`medir-cena.ts`, `exodia-devastacao`, rodada 43, passo 210, 3200 ms,
+    `bestiario:egipcio/celestial:egipcio`, 3 repetições) nesta branch e na `main` (`git checkout --detach main`), o resultado em
+    `notas/medicao-mesa-feltro.md`; depois o `pnpm check` (pre-push), o PR e o E2E pela CI.
 
 - **A logo LUSACAN vira o vídeo do dragão** (`decisoes.md` 2026-11-19 (2), que substitui a leitura de (1)): o MP4 do autor (gerado no Google
   Veo, 3,92 s, 1920 × 1080, 2,6 MB, com áudio, `moov` no fim) entra no lugar do voo vetorial. Branch `feat/intro-dragao-frente`, saída da

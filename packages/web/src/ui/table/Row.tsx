@@ -210,7 +210,7 @@ export function Row({ label, kind, side, limit, aim, droppable = false, targets 
             key={`vaga-${index}`}
             aria-hidden="true"
             data-vaga
-            className="aspect-[0.72] min-w-0 rounded-[4px] border-[1.5px] border-dashed border-tinta/40 pc:border-2"
+            className="aspect-[0.72] min-w-0 rounded-[4px] border-[1.5px] border-dashed border-papel/30 pc:border-2"
           />
         ))}
       </ul>
@@ -234,7 +234,7 @@ export function Row({ label, kind, side, limit, aim, droppable = false, targets 
         {quads.length > 0 ? (
           <span
             data-quadra
-            className="mt-0.5 border-[1.5px] border-tinta bg-ouro px-1 font-texto text-[10px] font-bold uppercase leading-tight tabular-nums"
+            className="mt-0.5 border-[1.5px] border-tinta bg-ouro px-1 font-texto text-[10px] font-bold uppercase leading-tight tabular-nums text-tinta"
           >
             quadra {quads.map((value) => `+${value}`).join(' ')}
           </span>

@@ -40,10 +40,12 @@ export interface ReplayControlsProps {
   onRound: (frame: number) => void;
 }
 
+// Os carimbos da mesa no Feltro (spec 2026-11-19-mesa-feltro-design.md §5): papel com a borda de tinta e a sombra de madeira, como os do
+// Equipar e os das telas do menu; o Tocar, o de ouro, com o tipo de madeira.
 const BUTTON =
-  'min-h-11 border-2 px-2 py-1.5 text-sm font-bold leading-tight aria-disabled:cursor-not-allowed aria-disabled:opacity-50';
-const SECONDARY = `${BUTTON} border-papel bg-transparent text-papel`;
-const PRIMARY = `${BUTTON} border-ouro bg-ouro text-tinta`;
+  'carimbo min-h-11 px-2 py-1.5 text-sm font-bold leading-tight aria-disabled:cursor-not-allowed aria-disabled:opacity-50';
+const SECONDARY = BUTTON;
+const PRIMARY = `${BUTTON} carimbo-ouro font-madeira font-normal uppercase tracking-[0.04em]`;
 
 interface ControlProps {
   label: string;

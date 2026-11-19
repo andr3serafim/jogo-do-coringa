@@ -26,10 +26,10 @@ export function HistoryButton({ panelId, open, count, onToggle, buttonRef }: His
       aria-controls={panelId}
       aria-label={historyButtonName(count)}
       onClick={onToggle}
-      className="relative grid size-11 place-items-center border-2 border-tinta bg-transparent pc:hidden"
+      className="relative grid size-11 place-items-center border-2 border-papel/60 bg-transparent pc:hidden"
     >
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="size-5">
-        <path d="M4 7h16M4 12h16M4 17h10" className="stroke-tinta" strokeWidth="2.4" strokeLinecap="round" fill="none" />
+        <path d="M4 7h16M4 12h16M4 17h10" className="stroke-papel" strokeWidth="2.4" strokeLinecap="round" fill="none" />
       </svg>
       {count > 0 ? (
         <span
@@ -124,7 +124,7 @@ export function HistoryPanel({ id, open, onClose, lines, baseSeq, footer, top, t
         id={id}
         aria-label="Histórico da partida"
         onKeyDown={onKeyDown}
-        className={`flex min-h-0 flex-col gap-3.5 bg-tinta p-4 text-papel pc:h-full pc:min-w-[260px] pc:max-w-[420px] pc:flex-1 pc:border-l-2 pc:border-papel/20 pc:px-6 pc:py-[22px] ${open ? OPEN : CLOSED}`}
+        className={`flex min-h-0 flex-col gap-3.5 madeira-escura p-4 text-papel pc:h-full pc:min-w-[260px] pc:max-w-[420px] pc:flex-1 pc:border-l-2 pc:border-ouro/40 pc:px-6 pc:py-[22px] ${open ? OPEN : CLOSED}`}
       >
         <div className="flex items-center justify-between">
           <h2 className="textura font-madeira text-[22px] uppercase">Histórico</h2>

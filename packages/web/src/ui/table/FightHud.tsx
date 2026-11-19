@@ -56,7 +56,7 @@ export function FightHud({ view, names, face, deadline }: FightHudProps) {
   const auraOf = (side: SwordSide) => ({ streak: aura.holder === side ? aura.streak : 0, puff: aura.puff?.side === side ? aura.puff.serial : 0 });
   const score = initiativeScore(view);
   return (
-    <section ref={hud} aria-label="Placar" data-placar className="placar relative flex-none bg-tinta text-papel">
+    <section ref={hud} aria-label="Placar" data-placar className="placar madeira-escura filete-ouro-baixo relative flex-none text-papel">
       {/* Cada lado no lugar do dono (decks e raças, fatia 2): o retrato veste a raça dele. O LookZone não põe nó no DOM. */}
       <LookZone owner={view.self.id}>
         <Side side="voce" view={view} player={view.self} name={names.self} holder={sword.shown === 'voce'} aura={auraOf('voce')} />
