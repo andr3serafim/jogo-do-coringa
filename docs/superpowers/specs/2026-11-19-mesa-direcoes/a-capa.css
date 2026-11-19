@@ -1,0 +1,97 @@
+/*
+ * A · Capa — cada campo é a capa de um folheto, igual ao fundo rosa do Início (o padrão dos menus): o papel com a luz suave no alto,
+ * o grão e a moldura dupla com os losangos vermelhos nos cantos. O oponente na mesma capa, em verde. As faixas de tinta ganham o filete
+ * duplo impresso; o histórico vira um painel de papel, como os das telas do menu.
+ *
+ * Custo: dois gradientes e dois pseudo-elementos parados por campo, sem filtro nem mistura sobre as cartas (o grão de hoje fica).
+ */
+
+/* O papel das capas: a luz do Início (rosa) e a mesma receita no verde. */
+section[data-campo='p1'] {
+  background: radial-gradient(120% 90% at 50% 0%, #f7bccd 0%, var(--color-capa-voce) 46%, #da86a0 100%) !important;
+}
+
+section[data-campo='p2'] {
+  background: radial-gradient(120% 90% at 50% 100%, #94c48f 0%, var(--color-capa-oponente) 48%, #57905a 100%) !important;
+}
+
+section[data-campo] > [data-grao] {
+  opacity: 0.55 !important;
+}
+
+/* A moldura dupla da capa, como a `.menu-moldura` do Início. */
+section[data-campo]::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  z-index: -1;
+  pointer-events: none;
+  border: 1.5px solid color-mix(in oklab, var(--color-tinta) 30%, transparent);
+  box-shadow: inset 0 0 0 3px transparent, inset 0 0 0 4px color-mix(in oklab, var(--color-tinta) 18%, transparent);
+}
+
+/* Os losangos vermelhos nos quatro cantos da moldura. */
+section[data-campo]::after {
+  --losango: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Crect x='1.5' y='1.5' width='7' height='7' transform='rotate(45 5 5)' fill='%23b8261c'/%3E%3C/svg%3E");
+  content: '';
+  position: absolute;
+  inset: 2.5px;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    var(--losango) left top / 10px 10px no-repeat,
+    var(--losango) right top / 10px 10px no-repeat,
+    var(--losango) left bottom / 10px 10px no-repeat,
+    var(--losango) right bottom / 10px 10px no-repeat;
+}
+
+/* As faixas de tinta (o placar, o centro): o grão leve e o filete duplo impresso. */
+section[data-placar],
+section[aria-label='Situação da rodada'] {
+  background: var(--r-grao-fino) 0 0 / 180px 180px, var(--color-tinta) !important;
+  background-blend-mode: soft-light;
+}
+
+section[data-placar] {
+  box-shadow:
+    inset 0 -3px 0 var(--color-tinta),
+    inset 0 -4px 0 color-mix(in oklab, var(--color-papel) 30%, transparent),
+    inset 0 -6px 0 var(--color-tinta),
+    inset 0 -7px 0 color-mix(in oklab, var(--color-papel) 18%, transparent);
+}
+
+section[aria-label='Situação da rodada'] {
+  box-shadow:
+    inset 0 3px 0 var(--color-tinta),
+    inset 0 4px 0 color-mix(in oklab, var(--color-papel) 22%, transparent),
+    inset 0 -3px 0 var(--color-tinta),
+    inset 0 -4px 0 color-mix(in oklab, var(--color-papel) 22%, transparent);
+}
+
+/* O histórico: um painel de papel, como os das telas do menu. */
+aside[aria-label='Histórico da partida'] {
+  background: var(--grao-carimbo) 0 0 / 180px 180px, var(--color-papel) !important;
+  background-blend-mode: multiply;
+  color: var(--color-tinta) !important;
+  border-left: 3px solid var(--color-tinta) !important;
+  box-shadow: inset 4px 0 0 color-mix(in oklab, var(--color-tinta) 12%, transparent);
+}
+
+aside[aria-label='Histórico da partida'] .text-ouro {
+  color: var(--color-vermelho) !important;
+}
+
+aside[aria-label='Histórico da partida'] .border-papel\/25 {
+  border-color: color-mix(in oklab, var(--color-tinta) 25%, transparent) !important;
+}
+
+aside[aria-label='Histórico da partida'] li + li {
+  border-top: 1px dashed color-mix(in oklab, var(--color-tinta) 14%, transparent);
+  padding-top: 6px;
+}
+
+aside[aria-label='Histórico da partida'] button.border-papel,
+aside[aria-label='Histórico da partida'] button[class*='border-papel'] {
+  border-color: var(--color-tinta) !important;
+  color: var(--color-tinta) !important;
+}

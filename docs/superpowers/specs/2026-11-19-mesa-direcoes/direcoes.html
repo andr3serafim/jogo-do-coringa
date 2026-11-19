@@ -1,0 +1,441 @@
+<title>Direções da Mesa</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Archivo:wght@400;500;600;700;800&display=swap">
+<style>
+  /* A página mora no mundo do jogo: a tinta da mesa, o papel das cartas, o ouro, o vermelho e a madeira dos carimbos.
+     Layout: o seletor de direção no alto, a foto grande do PC, o celular ao lado, e a ficha de cada direção embaixo. */
+  :root {
+    --tinta: #17120f;
+    --tinta-2: #221a15;
+    --papel: #f1f0ea;
+    --papel-2: color-mix(in oklab, #f1f0ea 72%, transparent);
+    --linha: color-mix(in oklab, #f1f0ea 16%, transparent);
+    --ouro: #f5c238;
+    --vermelho: #b8261c;
+    --madeira: #8a5a2b;
+    --rosa: #ee9db5;
+    --verde: #6fa86c;
+    --f-madeira: 'Alfa Slab One', Rockwell, 'Roboto Slab', Georgia, serif;
+    --f-texto: 'Archivo', 'Segoe UI', system-ui, sans-serif;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--tinta);
+    color: var(--papel);
+    font-family: var(--f-texto);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .pagina {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 28px 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  header { display: grid; gap: 10px; max-width: 70ch; }
+
+  .sobre {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ouro);
+  }
+
+  h1 {
+    margin: 0;
+    font-family: var(--f-madeira);
+    font-weight: 400;
+    font-size: clamp(30px, 5vw, 46px);
+    line-height: 1.02;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  header p { margin: 0; color: var(--papel-2); }
+
+  /* O seletor: quatro carimbos. */
+  .seletor {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 5;
+    padding-block: 12px;
+    background: var(--tinta);
+    border-bottom: 1px solid var(--linha);
+  }
+
+  .seletor button {
+    font: inherit;
+    font-family: var(--f-madeira);
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    min-height: 44px;
+    padding: 8px 16px;
+    border: 3px solid var(--tinta);
+    background: var(--papel);
+    color: var(--tinta);
+    box-shadow: 3px 3px 0 var(--madeira);
+    transition: translate 0.1s ease-out, box-shadow 0.1s ease-out;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .seletor button:active { translate: 3px 3px; box-shadow: 0 0 0 var(--madeira); }
+  .seletor button[aria-pressed='true'] { background: var(--ouro); }
+  .seletor button:focus-visible { outline: 3px solid var(--ouro); outline-offset: 3px; }
+  .seletor .amostra { width: 14px; height: 14px; border: 2px solid var(--tinta); flex: none; }
+  .seletor .rec {
+    font-family: var(--f-texto);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    background: var(--vermelho);
+    color: var(--papel);
+    padding: 1px 5px;
+  }
+
+  /* A vista: a foto do PC grande e o celular ao lado. */
+  .vista {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 300px);
+    gap: 20px;
+    align-items: start;
+  }
+
+  @media (max-width: 860px) {
+    .vista { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  figure { margin: 0; display: grid; gap: 8px; min-width: 0; }
+
+  figure img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border: 3px solid var(--papel);
+    background: var(--tinta-2);
+  }
+
+  figcaption {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--papel-2);
+  }
+
+  .cel { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 860px) { .cel { max-width: 520px; } }
+
+  .cenas { display: flex; gap: 8px; flex-wrap: wrap; }
+  .cenas button {
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    min-height: 36px;
+    padding: 4px 12px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--papel);
+    border: 2px solid var(--linha);
+  }
+  .cenas button[aria-pressed='true'] { border-color: var(--ouro); color: var(--ouro); }
+  .cenas button:focus-visible { outline: 3px solid var(--ouro); outline-offset: 2px; }
+
+  /* A ficha da direção: papel, como os painéis das telas do menu. */
+  .ficha {
+    background: var(--papel);
+    color: var(--tinta);
+    border: 3px solid var(--tinta);
+    box-shadow: 5px 5px 0 var(--madeira);
+    padding: 22px clamp(16px, 3vw, 28px);
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 18px 36px;
+  }
+
+  @media (max-width: 860px) { .ficha { grid-template-columns: minmax(0, 1fr); } }
+
+  .ficha h2 {
+    margin: 0;
+    font-family: var(--f-madeira);
+    font-weight: 400;
+    font-size: 26px;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+  }
+
+  .ficha h2 .rec {
+    font-family: var(--f-texto);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    background: var(--vermelho);
+    color: var(--papel);
+    padding: 3px 8px;
+  }
+
+  .ficha p { margin: 0; max-width: 62ch; }
+  .ficha h3 {
+    margin: 0 0 6px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--vermelho);
+  }
+  .ficha ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+  .ficha .col { display: grid; gap: 16px; align-content: start; min-width: 0; }
+
+  .comum {
+    border-top: 1px solid var(--linha);
+    padding-top: 22px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px 36px;
+  }
+
+  .comum h2 {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-family: var(--f-madeira);
+    font-weight: 400;
+    font-size: 20px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .comum h3 {
+    margin: 0 0 6px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ouro);
+  }
+
+  .comum p, .comum ul { margin: 0; color: var(--papel-2); }
+  .comum ul { padding-left: 18px; display: grid; gap: 4px; }
+
+  /* As miniaturas das quatro, lado a lado. */
+  .mosaico {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+  }
+
+  .mosaico button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    display: grid;
+    gap: 6px;
+    text-align: left;
+  }
+
+  .mosaico img { border: 2px solid var(--linha); width: 100%; height: auto; display: block; }
+  .mosaico button[aria-pressed='true'] img { border-color: var(--ouro); }
+  .mosaico button:focus-visible { outline: 3px solid var(--ouro); outline-offset: 3px; }
+  .mosaico span { font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .seletor button { transition: none; }
+  }
+</style>
+
+<div class="pagina">
+  <header>
+    <span class="sobre">Jogo do Coringa · rascunho para escolher</span>
+    <h1>Direções da mesa</h1>
+    <p>A identidade dos menus (o Folheto: o grão, a moldura, o filete e a costura, os carimbos de madeira, o tipo de madeira) levada para
+      dentro da partida. As três vestem o app de verdade: a mesma jogada (rodada 17, com quadra, ouro de quem lidera e o oponente no deck
+      Bestiário) e o Equipar do treino, no PC e no celular. Só muda o material; o arranjo, as regras e os botões ficam onde estão.</p>
+  </header>
+
+  <nav class="seletor" aria-label="Direção">
+    <button type="button" data-dir="hoje"><span class="amostra" style="background:linear-gradient(90deg,#6fa86c 50%,#ee9db5 50%)"></span>Hoje</button>
+    <button type="button" data-dir="a"><span class="amostra" style="background:#ee9db5"></span>A · Capa</button>
+    <button type="button" data-dir="b"><span class="amostra" style="background:linear-gradient(90deg,#1d6b47 50%,#96496a 50%)"></span>B · Feltro <span class="rec">Recomendada</span></button>
+    <button type="button" data-dir="c"><span class="amostra" style="background:#120e0c"></span>C · Tinta</button>
+  </nav>
+
+  <div class="cenas" role="group" aria-label="Cena">
+    <button type="button" data-cena="jogada">A jogada cheia</button>
+    <button type="button" data-cena="equipar">O Equipar</button>
+  </div>
+
+  <section class="vista" aria-live="polite">
+    <figure>
+      <img id="foto-pc" src="fotos/b-pc-jogada.webp" width="1440" height="900" alt="">
+      <figcaption id="leg-pc">PC · 1440 × 900</figcaption>
+    </figure>
+    <div class="cel">
+      <figure>
+        <img id="foto-cel" src="fotos/b-cel-jogada.webp" width="390" height="844" alt="">
+        <figcaption>Celular · 390 × 844</figcaption>
+      </figure>
+      <figure>
+        <img id="foto-cel-hoje" src="fotos/hoje-cel-jogada.webp" width="390" height="844" alt="">
+        <figcaption>Hoje, para comparar</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <article class="ficha" id="ficha"></article>
+
+  <section aria-label="As quatro lado a lado">
+    <div class="mosaico" id="mosaico"></div>
+  </section>
+
+  <section class="comum">
+    <h2>O que vale para as três</h2>
+    <div>
+      <h3>Botões e tipos</h3>
+      <ul>
+        <li>Os botões chatos de contorno (o replay, o Fechar) viram carimbos de papel com a sombra de madeira, como os do Equipar e os do menu.</li>
+        <li>O Tocar vira o carimbo de ouro, com o tipo de madeira.</li>
+        <li>Vida, ATK/DEF, contas, prévia e relógio seguem na fonte de texto, sem textura.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Textura sem exagero</h3>
+      <ul>
+        <li>Grão parado, de baixo contraste, só no fundo dos campos e das faixas. Nada se mexe no fundo.</li>
+        <li>Nada sobre as cartas: as de arte e as de cordel ficam como estão.</li>
+        <li>Rosa é você, verde é o oponente, nas três.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>O que não muda</h3>
+      <ul>
+        <li>O arranjo da mesa, a ordem dos controles, as regras, o fluxo.</li>
+        <li>O placar e as barras de vida de ouro (a mudança delas pode vir numa segunda rodada).</li>
+        <li>As cenas e as inversões de tela (a conferir na direção escolhida).</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script>
+  const DIRECOES = {
+    hoje: {
+      nome: 'Hoje',
+      texto: 'A mesa como está no ar: os dois campos em cor chapada com um grão bem leve, as faixas de tinta e os botões de contorno no replay. É o visual de antes do redesenho dos menus.',
+      muda: ['Nada: é a referência.'],
+      custo: 'O de hoje.',
+      riscos: ['Destoa do menu: o jogador sai do Folheto e entra numa mesa sem moldura, sem filete e com botões chatos.'],
+    },
+    a: {
+      nome: 'A · Capa',
+      texto: 'Cada campo é a capa de um folheto, como o fundo rosa do Início: o papel com a luz suave no alto, o grão e a moldura dupla com os losangos vermelhos nos cantos. O oponente na mesma capa, em verde. As faixas de tinta ganham o filete duplo impresso, e o histórico vira um painel de papel, igual aos das telas do menu.',
+      muda: ['Os campos: a luz do papel, a moldura dupla e os losangos.', 'O placar e a faixa do centro: o filete duplo.', 'O histórico: papel com tinta, as rodadas em vermelho.'],
+      custo: 'Dois gradientes e dois pseudo-elementos parados por campo. Nenhum filtro sobre as cartas.',
+      riscos: ['É a mais próxima de hoje: a mudança dentro dos campos é sutil.', 'O painel claro do histórico ao lado da mesa escura pede conferir o equilíbrio no PC.'],
+    },
+    b: {
+      nome: 'B · Feltro',
+      rec: true,
+      texto: 'A mesa de baralho do fundo verde dos menus. Cada campo é um pano de feltro (rosa-vinho seu, verde do oponente) com o filete de ouro e a costura tracejada por dentro. A faixa do centro vira o trilho de madeira entre os dois panos, e o placar e o histórico são a borda escura da mesa. As cartas, de papel, saltam do pano.',
+      muda: ['Os campos: feltro mais escuro, com a sombra acolchoada, o filete de ouro e a costura.', 'O texto dos campos passa a papel.', 'A faixa do centro: madeira com veio e o filete de ouro.', 'O placar, o histórico e o fundo da mão: madeira escura.'],
+      custo: 'Um gradiente, o grão de hoje e dois pseudo-elementos por campo; o veio é uma imagem parada. Nada sobre as cartas.',
+      riscos: ['O rosa fica rosa-vinho: segue sendo seu, mas mais fechado que o rosa do menu.', 'O contraste das marcas pequenas em papel sobre o feltro (a conferir no código).'],
+      porque: 'É a que mais vira mesa de jogo, com a textura que ele pediu e sem exagero. Continua o fundo verde que ele elogiou nos menus (o filete e a costura são os mesmos), traz a madeira dos carimbos para a borda da mesa e faz as cartas, de cordel e de arte, saltarem.',
+    },
+    c: {
+      nome: 'C · Tinta',
+      texto: 'A mesa recua para as cartas aparecerem: a folha de tinta inteira, com o grão leve, e cada campo marcado pela cor do dono só na luz que vem do lado dele e na moldura dupla (rosa seu, verde do oponente), com os losangos na cor do dono. Filetes de ouro finos separam as faixas.',
+      muda: ['Os campos: tinta com a luz do dono e a moldura colorida.', 'As faixas e o histórico: a mesma tinta, com o filete de ouro.', 'O texto dos campos passa a papel.'],
+      custo: 'Dois gradientes e dois pseudo-elementos parados por campo. Nada sobre as cartas.',
+      riscos: ['O rosa e o verde deixam de ser o chão: quem é quem fica menos imediato.', 'As cenas que invertem a tela partem de uma mesa escura (a conferir pela regra de fotossensibilidade).', 'É a que mais se afasta do menu rosa.'],
+    },
+  };
+
+  const ORDEM = ['hoje', 'a', 'b', 'c'];
+  let dir = 'b';
+  let cena = 'jogada';
+
+  const $ = (sel) => document.querySelector(sel);
+  const esc = (t) => t.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+
+  function mosaico() {
+    $('#mosaico').innerHTML = ORDEM.map((d) => `
+      <button type="button" data-dir="${d}" aria-pressed="${d === dir}">
+        <img src="fotos/${d}-pc-${cena}.webp" width="1440" height="900" alt="${esc(DIRECOES[d].nome)}, ${cena === 'jogada' ? 'a jogada cheia' : 'o Equipar'}, no PC" loading="lazy">
+        <span>${esc(DIRECOES[d].nome)}</span>
+      </button>`).join('');
+  }
+
+  function render() {
+    const d = DIRECOES[dir];
+    const cenaNome = cena === 'jogada' ? 'a jogada cheia' : 'o Equipar';
+    $('#foto-pc').src = `fotos/${dir}-pc-${cena}.webp`;
+    $('#foto-pc').alt = `${d.nome}: ${cenaNome} no PC`;
+    $('#leg-pc').textContent = `${d.nome} · PC · 1440 × 900`;
+    $('#foto-cel').src = `fotos/${dir}-cel-${cena}.webp`;
+    $('#foto-cel').alt = `${d.nome}: ${cenaNome} no celular`;
+    $('#foto-cel-hoje').src = `fotos/hoje-cel-${cena}.webp`;
+    $('#foto-cel-hoje').alt = `Hoje: ${cenaNome} no celular`;
+    document.querySelectorAll('.seletor button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.dir === dir)));
+    document.querySelectorAll('.cenas button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.cena === cena)));
+    $('#ficha').innerHTML = `
+      <h2>${esc(d.nome)}${d.rec ? '<span class="rec">Recomendada</span>' : ''}</h2>
+      <div class="col">
+        <p>${esc(d.texto)}</p>
+        ${d.porque ? `<div><h3>Por que esta</h3><p>${esc(d.porque)}</p></div>` : ''}
+      </div>
+      <div class="col">
+        <div><h3>O que muda</h3><ul>${d.muda.map((m) => `<li>${esc(m)}</li>`).join('')}</ul></div>
+        <div><h3>Custo no celular</h3><p>${esc(d.custo)}</p></div>
+        <div><h3>A conferir</h3><ul>${d.riscos.map((r) => `<li>${esc(r)}</li>`).join('')}</ul></div>
+      </div>`;
+    mosaico();
+  }
+
+  function escolher(novo) {
+    if (!DIRECOES[novo]) return;
+    dir = novo;
+    if (location.hash !== `#${novo}`) history.replaceState(null, '', `#${novo}`);
+    render();
+  }
+
+  document.addEventListener('click', (ev) => {
+    const b = ev.target.closest('button');
+    if (!b) return;
+    if (b.dataset.dir) escolher(b.dataset.dir);
+    if (b.dataset.cena) { cena = b.dataset.cena; render(); }
+  });
+
+  window.addEventListener('hashchange', () => escolher(location.hash.slice(1)));
+  const inicial = location.hash.slice(1);
+  if (DIRECOES[inicial]) dir = inicial;
+  render();
+</script>

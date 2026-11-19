@@ -1,0 +1,85 @@
+/*
+ * B · Feltro — a mesa de baralho do fundo verde dos menus: cada campo é um pano de feltro (rosa-vinho seu, verde do oponente), com o
+ * filete de ouro e a costura tracejada por dentro (a `.menu-trilho`). A faixa do centro vira o trilho de madeira entre os dois panos;
+ * o placar e o histórico, a madeira escura da borda da mesa. As cartas (papel) saltam do pano mais escuro.
+ *
+ * Custo: um gradiente, o grão de hoje e dois pseudo-elementos parados por campo; o veio da madeira é um data-URI parado. Nada sobre
+ * as cartas. O texto dos campos passa a papel (o pano é escuro): a conferir o contraste das marcas pequenas.
+ */
+
+section[data-campo='p1'] {
+  background: radial-gradient(120% 95% at 50% 0%, #b0617d 0%, #96496a 52%, #74334f 100%) !important;
+}
+
+section[data-campo='p2'] {
+  background: radial-gradient(120% 95% at 50% 100%, #2b8a5c 0%, #1d6b47 50%, #124a31 100%) !important;
+}
+
+/* O pelo do feltro: o grão de hoje, mais leve. */
+section[data-campo] > [data-grao] {
+  opacity: 0.32 !important;
+}
+
+/* O filete de ouro e a costura, como no fundo verde do menu. */
+section[data-campo]::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  z-index: -1;
+  pointer-events: none;
+  border: 1.5px solid color-mix(in oklab, var(--color-ouro) 38%, transparent);
+  border-radius: 22px;
+}
+
+section[data-campo]::after {
+  content: '';
+  position: absolute;
+  inset: 11px;
+  z-index: -1;
+  pointer-events: none;
+  border: 1.5px dashed color-mix(in oklab, var(--color-papel) 16%, transparent);
+  border-radius: 17px;
+}
+
+/* O texto dos campos (títulos das zonas, contas, a mão do oponente) em papel; as cartas ficam como estão. */
+section[data-campo] :is(.zona-titulo, .campo-info, .campo-filas > * > :not(ul)) {
+  color: var(--color-papel);
+}
+
+section[data-campo] [data-vaga] {
+  border-color: color-mix(in oklab, var(--color-papel) 30%, transparent) !important;
+}
+
+/* O trilho de madeira no centro, com o veio parado e o filete de ouro. */
+section[aria-label='Situação da rodada'] {
+  --veio: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='120'%3E%3Cfilter id='v'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.004 .18' numOctaves='3' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .05 0 0 0 0 .02 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23v)'/%3E%3C/svg%3E");
+  background: var(--veio) 0 0 / 600px 120px, linear-gradient(180deg, #5a3720 0%, #43281a 55%, #2f1c11 100%) !important;
+  box-shadow:
+    inset 0 2px 0 color-mix(in oklab, var(--color-ouro) 45%, transparent),
+    inset 0 3px 0 rgb(0 0 0 / 0.35),
+    inset 0 -2px 0 color-mix(in oklab, var(--color-ouro) 45%, transparent),
+    inset 0 -3px 0 rgb(0 0 0 / 0.35);
+}
+
+/* A borda da mesa: o placar e o histórico em madeira escura, com o filete de ouro. */
+section[data-placar] {
+  background: var(--r-grao-fino) 0 0 / 180px 180px, linear-gradient(180deg, #2a1a10, #1d120b) !important;
+  background-blend-mode: soft-light;
+  box-shadow: inset 0 -2px 0 color-mix(in oklab, var(--color-ouro) 40%, transparent);
+}
+
+aside[aria-label='Histórico da partida'] {
+  background: var(--r-grao-fino) 0 0 / 180px 180px, linear-gradient(90deg, #22150d, #1a100a) !important;
+  background-blend-mode: soft-light;
+  border-left: 2px solid color-mix(in oklab, var(--color-ouro) 40%, transparent) !important;
+}
+
+main[aria-label='Mesa'] {
+  background: var(--r-grao-fino) 0 0 / 180px 180px, #1a100a !important;
+  background-blend-mode: soft-light;
+}
+
+/* O pano acolchoado: a sombra parada por dentro da borda (um `box-shadow` do campo, sem filtro). */
+section[data-campo] {
+  box-shadow: inset 0 0 48px rgb(0 0 0 / 0.32), inset 0 0 0 1px rgb(0 0 0 / 0.4);
+}

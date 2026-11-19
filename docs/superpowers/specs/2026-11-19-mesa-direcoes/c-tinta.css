@@ -1,0 +1,86 @@
+/*
+ * C · Tinta — a mesa recua para as cartas aparecerem: a folha de tinta inteira, com o grão leve, e cada campo marcado pela cor do
+ * dono só na luz que vem do lado dele e na moldura dupla (rosa seu, verde do oponente), com os losangos na cor do dono. Os filetes
+ * de ouro finos separam as faixas. É a mais calma e a de mais foco; o rosa e o verde deixam de ser o chão e viram assinatura.
+ *
+ * Custo: dois gradientes e dois pseudo-elementos parados por campo; nada sobre as cartas. A conferir: as cenas que invertem a tela
+ * (fotossensibilidade, spec §10.4) partem de uma mesa escura.
+ */
+
+section[data-campo='p1'] {
+  --dono: var(--color-capa-voce);
+  background:
+    radial-gradient(90% 120% at 50% 112%, color-mix(in oklab, var(--color-capa-voce) 30%, transparent) 0%, transparent 62%),
+    linear-gradient(180deg, #1b1414, #211618) !important;
+}
+
+section[data-campo='p2'] {
+  --dono: var(--color-capa-oponente);
+  background:
+    radial-gradient(90% 120% at 50% -12%, color-mix(in oklab, var(--color-capa-oponente) 28%, transparent) 0%, transparent 62%),
+    linear-gradient(180deg, #151a15, #121512) !important;
+}
+
+section[data-campo] > [data-grao] {
+  opacity: 0.5 !important;
+  mix-blend-mode: soft-light !important;
+}
+
+section[data-campo]::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  z-index: -1;
+  pointer-events: none;
+  border: 1.5px solid color-mix(in oklab, var(--dono) 55%, transparent);
+  box-shadow: inset 0 0 0 3px transparent, inset 0 0 0 4px color-mix(in oklab, var(--dono) 24%, transparent);
+}
+
+section[data-campo]::after {
+  --losango-cor: var(--dono);
+  content: '';
+  position: absolute;
+  inset: 3px;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(45deg, transparent 40%, var(--dono) 40% 60%, transparent 60%) left top / 9px 9px no-repeat,
+    linear-gradient(45deg, transparent 40%, var(--dono) 40% 60%, transparent 60%) right top / 9px 9px no-repeat,
+    linear-gradient(45deg, transparent 40%, var(--dono) 40% 60%, transparent 60%) left bottom / 9px 9px no-repeat,
+    linear-gradient(45deg, transparent 40%, var(--dono) 40% 60%, transparent 60%) right bottom / 9px 9px no-repeat;
+  clip-path: none;
+}
+
+section[data-campo] :is(.zona-titulo, .campo-info, .campo-filas > * > :not(ul)) {
+  color: var(--color-papel);
+}
+
+section[data-campo] [data-vaga] {
+  border-color: color-mix(in oklab, var(--dono) 45%, transparent) !important;
+}
+
+section[data-placar],
+section[aria-label='Situação da rodada'],
+aside[aria-label='Histórico da partida'],
+main[aria-label='Mesa'] {
+  background: var(--r-grao-fino) 0 0 / 180px 180px, #120e0c !important;
+  background-blend-mode: soft-light;
+}
+
+section[data-placar] {
+  box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--color-ouro) 45%, transparent);
+}
+
+section[aria-label='Situação da rodada'] {
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--color-ouro) 45%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, var(--color-ouro) 45%, transparent);
+}
+
+aside[aria-label='Histórico da partida'] {
+  border-left: 1px solid color-mix(in oklab, var(--color-ouro) 40%, transparent) !important;
+}
+
+section[data-campo] {
+  box-shadow: inset 0 0 60px rgb(0 0 0 / 0.45);
+}
