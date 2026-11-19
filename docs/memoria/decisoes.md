@@ -13,8 +13,8 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 > Sim, merge
 
 **Leitura:**
-- O merge do PR #5 na `main`, com o `check` e o `e2e` verdes. **[I]** Pelo auto-merge do GitHub, em squash (o `CLAUDE.md` admite squash
-  ou fast-forward): ele mescla sozinho quando os dois jobs passam, sem ninguém vigiar a CI.
+- O merge do PR #5 na `main`, com o `check` e o `e2e` verdes. **[I]** Por fast-forward, como nos PRs #2 a #4 (o auto-merge do GitHub não está
+  liberado no repositório: "Auto merge is not allowed for this repository").
 - **[I]** O "sim" vale também como conferência das escolhas [C] da spec da mesa no Feltro e das `Ruling:` do diário 2026-11-19 (2), como
   em 2026-11-18 (7). O deploy segue dele.
 

@@ -28,6 +28,10 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   Equipar no PC e no celular, o tutorial no celular).
 - **Fica como estava:** as cartas, as cenas, o menu da partida, o fim e a dica; o desenho da desolação (o `filter` do `data-apagado`) vale
   por cima do pano.
+- **A A/B:** `notas/medicao-mesa-feltro.md` (igual ou acima da `main`). **O PR #5**, com as duas CI verdes; na `main` por fast-forward com o
+  "Sim, merge" (`decisoes.md` 2026-11-19 (5)).
+- **Armadilha:** o auto-merge do GitHub não está liberado no repositório (`set_auto_merge` devolve "Auto merge is not allowed"): o merge
+  segue por fast-forward, como nos PRs anteriores.
 
 ---
 
