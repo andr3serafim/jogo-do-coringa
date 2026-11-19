@@ -5,6 +5,20 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-18 (7): os menus no Folheto na `main` e no ar
+
+- **PR #2** (`https://github.com/andr3serafim/jogo-do-coringa/pull/2`), aberto com o `gh` (agora instalado nesta máquina). O autor
+  concordou com os links de criar sala em `/jogar` (`decisoes.md` 2026-11-18 (6)) e deu o "Sim, merge" (2026-11-18 (7)): a `main` por
+  fast-forward até `9f10887`; o GitHub fechou o PR como mesclado. CI do push da `main`: `check` 365 s e `e2e` 617 s, verdes.
+- **O deploy, rodado pelo Claude a pedido** ("rode o deploy para mim", 2026-11-18 (8); a tentativa dele pela caixa da conversa levou o
+  `!` junto para o PowerShell e nada rodou): `pnpm deploy:server` em `5f5821f` (o commit da memória que registrou o deploy em curso),
+  verde. O `/api/health` devolve `5f5821f`.
+- **Armadilhas:** logo depois do deploy, o `/api/health` responde as duas versões, conforme a instância; espere um minuto antes de dizer que
+  caiu. O site já estava em `97a1a6b` antes (o autor tinha publicado a abertura depois do merge dela, e a memória dizia que faltava): olhe o
+  `/api/health` antes de afirmar o que está no ar.
+
+---
+
 ## 2026-11-18 (6): os menus no Folheto, o `pnpm e2e` e o conserto do nome dos links
 
 - **O `pnpm e2e` inteiro:** 128 passaram e 2 falharam, os dois no axe (`label-content-name-mismatch`, WCAG 2.5.3): o nome das linhas do

@@ -2,8 +2,8 @@
 
 > Sobrescrito a cada atualização. **Última: 2026-11-18**, os menus no Folheto no código, na branch `feat/menus-visual` (saída da
 > `main` em `97a1a6b`; `decisoes.md` 2026-11-18 (1) a (6)), na `main` por fast-forward com o "Sim, merge" do autor (2026-11-18 (7));
-> o PR #2 mesclado; **o deploy deles em curso**, rodado pelo Claude a pedido (2026-11-18 (8)). No ar antes dele: `97a1a6b` (a `main` com
-> a abertura do jogo e a logo do dragão), em `https://jogodocoringa.com.br`.
+> o PR #2 mesclado, as duas CI verdes no push da `main`; **no ar** em `https://jogodocoringa.com.br` desde o deploy `5f5821f`, rodado pelo
+> Claude a pedido (2026-11-18 (8)). Antes dele estava no ar `97a1a6b` (a `main` com a abertura do jogo e a logo do dragão).
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
@@ -43,12 +43,13 @@
     `ee77578` (`check` 209 s; `e2e` 677 s). As fotos e o resumo foram mandados ao autor.
   - **O destino dos cinco links de criar sala (`/jogar`) está aprovado** ("Concordo", `decisoes.md` 2026-11-18 (6)).
   - **Na `main`** ("Sim, merge", `decisoes.md` 2026-11-18 (7)), por fast-forward até o topo de `feat/menus-visual` (este commit).
-  - **CI do push da `main`** (`9f10887`): `check` verde (365 s); o `e2e` rodava quando o deploy começou (verde no mesmo código em `ee77578`).
-  - **O deploy, em curso** (rodado pelo Claude a pedido, `decisoes.md` 2026-11-18 (8)): `pnpm deploy:server` na `main`, no commit desta
-    memória. Antes dele, o `/api/health` dava `97a1a6b` (a abertura já estava no ar: o autor publicou depois do merge dela).
-  - **Próximo passo exato:** se este commit está na `main` local e o `/api/health` não devolve o hash dele, o deploy caiu no meio: rodar o
-    `pnpm deploy:server` de novo (o pedido vale só para este deploy). Com o hash certo no ar, registrar aqui e subir a `main`. A branch
-    `feat/menus-visual` (local e remota) fica mesclada; ele pode apagá-la.
+  - **CI do push da `main`** (`9f10887`): `check` (365 s) e `e2e` (617 s) verdes.
+  - **No ar** (o deploy rodado pelo Claude a pedido, `decisoes.md` 2026-11-18 (8)): `pnpm deploy:server` na `main` em `5f5821f`, verde
+    (web 2997 testes, o smoke, 17 arquivos novos subidos; versão do Worker `1fc2dd91-f600-4f60-919d-ec1b16d5235d`). O `/api/health`
+    devolve `5f5821f` (no primeiro minuto, misturado com `97a1a6b`: as instâncias trocam aos poucos). Conferido no navegador: o Início
+    rosa com as quatro mini cartas; no console, só o `beacon.min.js` barrado pela CSP (o ruído conhecido, abaixo).
+  - **Próximo passo exato:** nenhum de código. O próximo trabalho vem do autor (o que ele achar usando os menus; os botões e a tipografia
+    dentro da partida, quando ele pedir). A branch `feat/menus-visual` (local e remota) está mesclada; ele pode apagá-la.
     **Não visto no navegador:** a sala de espera (Lobby) com a roupa nova (precisa do `wrangler dev`); os E2E online passam por ela.
   - **O que não pode regredir:** o rosa por padrão sem gravar nada (`menuTheme` ausente); o tema não se perde quando o menu da partida
     grava as preferências (ele espalha `prefs`); o menu da partida, o fim e a dica com a roupa de antes (`useInMenu()` é falso fora da
