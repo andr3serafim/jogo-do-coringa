@@ -1,6 +1,6 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-19**, a abertura sem a logo LUSACAN (branch `feat/intro-sem-logo`, em curso); antes,
+> Sobrescrito a cada atualização. **Última: 2026-11-19**, a abertura sem a logo LUSACAN na `main` (PR #6, sem deploy ainda); antes,
 > a mesa no Feltro na `main` (PR #5, sem deploy ainda) e a logo LUSACAN em vídeo (branch `feat/intro-dragao-frente`, parada, agora sem
 > objeto); antes, o Coringa do Início menor no notebook na `main` (PR #4, sem deploy ainda); o
 > ajuste do autor no Treinar na `main` (PR #3, sem deploy ainda); antes, os menus no
@@ -25,8 +25,10 @@
   - **No GitHub, PR #6** (`https://github.com/andr3serafim/jogo-do-coringa/pull/6`); o `check` e o `e2e` da CI rodando no push e no PR de
     `72f1414` (o código está em `7d32d37`; os commits depois são só de memória).
   - **O "sim" do autor para o merge** (`decisoes.md` 2026-11-19 (7)), com as duas CI verdes.
-  - **Próximo passo exato:** com o `check` e o `e2e` verdes em `72f1414` (ou depois), `git checkout main && git merge --ff-only
-    feat/intro-sem-logo && git push origin main`; depois apagar a `feat/intro-sem-logo` (local e remota). Deploy é dele.
+  - **Na `main`**, por fast-forward até este commit, com o `check` e o `e2e` verdes no PR em `72f1414` (os commits depois são só de memória).
+  - **No ar ainda está o de antes:** o deploy (`pnpm deploy:server`) é dele; leva também a mesa no Feltro, o Coringa menor e o Treinar sem a linha.
+  - **Próximo passo exato:** se a `feat/intro-sem-logo` ainda existir (local ou remota), apagá-la. O próximo trabalho vem do autor
+    (a resposta sobre a `feat/intro-dragao-frente` e a pasta `2026-11-19-intro-lusacan/`).
   - **Espera o autor:** o que fazer com a `feat/intro-dragao-frente` (o vídeo da logo) e com a pasta solta
     `docs/superpowers/specs/2026-11-19-intro-lusacan/` (não versionada, no checkout principal); se a abertura de ~3 s está boa ou quer a
     parte do jogo mais longa.
