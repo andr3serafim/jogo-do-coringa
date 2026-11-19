@@ -95,3 +95,23 @@ aside[aria-label='Histórico da partida'] button[class*='border-papel'] {
   border-color: var(--color-tinta) !important;
   color: var(--color-tinta) !important;
 }
+
+/* O placar: a barra e o retrato na moldura dupla da capa; o ouro com o grão de papel do carimbo. Os números ficam lisos. */
+section[data-placar] .placar-barra {
+  border-color: var(--color-papel) !important;
+  box-shadow:
+    0 0 0 2px var(--color-tinta),
+    0 0 0 3px color-mix(in oklab, var(--color-papel) 40%, transparent);
+}
+
+section[data-placar] .placar-barra > [data-vida] {
+  background:
+    var(--grao-carimbo) 0 0 / 180px 180px,
+    linear-gradient(180deg, color-mix(in oklab, var(--color-ouro), var(--color-papel) 35%) 0 40%, var(--color-ouro) 40%) !important;
+}
+
+section[data-placar] .placar-retrato {
+  box-shadow:
+    0 0 0 2px var(--color-tinta),
+    0 0 0 3px color-mix(in oklab, var(--color-papel) 40%, transparent);
+}

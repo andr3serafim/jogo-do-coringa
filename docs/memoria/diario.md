@@ -19,11 +19,14 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
     o texto dos campos em papel.
   - **C · Tinta:** a mesa de tinta com a luz do dono vindo do lado dele e a moldura dupla na cor do dono; filetes de ouro finos.
   - **Nas três:** os botões de contorno (o replay, o Fechar) viram carimbos de papel com a sombra de madeira; o Tocar, o carimbo de ouro.
+  - **O placar em cada uma** (a barra amarela chapada era a peça mais antiga na tela): A, a barra e o retrato na moldura dupla e o ouro com
+    o grão de papel; B, a barra vira um trilho arredondado com o filete de ouro sobre o feltro e o retrato ganha cantos; C, o ouro liso com
+    um filete fino. Só a moldura e o fundo do `[data-vida]`: o `scaleX` dos filhos e os números ficam.
 - **Arquivos:** `docs/superpowers/specs/2026-11-19-mesa-direcoes/` (`base.css`, `a-capa.css`, `b-feltro.css`, `c-tinta.css`, o
   `fotos.mjs`, as fotos em WebP e a página `direcoes.html`). A página publicada (privada, do autor):
   `https://claude.ai/artifact/GdD7tfjewgDmVEPLsNua58`. Para abrir sem ela: sirva a pasta num servidor estático e abra `direcoes.html`.
 - **Ruling:** as direções são folhas de CSS injetadas por cima do app (no dev server não há CSP), em vez de pranchetas desenhadas à
-  mão como nos menus — custo: só mudam o material (cor, grão, moldura, filete) e os botões; o arranjo e o placar ficam iguais nas três,
+  mão como nos menus — custo: só mudam o material (cor, grão, moldura, filete), o placar e os botões; o arranjo fica igual nas três,
   o que deixa a comparação justa, mas uma ideia que peça layout não aparece aqui.
 - **Ruling:** a mesma jogada nas três (fixture `especiais`, rodada 17, com o oponente no deck Bestiário, para ver a carta de arte sobre o
   material novo) e o Equipar do treino (`semente=foto1`), a 1440 × 900 e a 390 × 844.
@@ -34,6 +37,7 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   os testes que olham classe de cor.
 - **Armadilhas:** o painel do navegador do app estava oculto, e as animações de entrada do menu não rodam assim: as fotos são do
   Playwright do projeto. O grão forte (`.grao`, alfa 0,7) com `multiply` deixa o papel cinza nos botões: use o `--grao-carimbo` (alfa 0,2).
+  Nas mesas escuras (B e C), o botão do histórico do celular (borda e traço de tinta, no campo do oponente) some: passa a papel.
   O `git checkout` da `feat/intro-dragao-frente` para a `main` deixa sem rastrear os caches do HyperFrames em
   `docs/superpowers/specs/2026-11-19-intro-lusacan/prototipo/` (ignorados lá): não commitar.
 

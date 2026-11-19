@@ -37,19 +37,27 @@ section[data-campo]::before {
 }
 
 section[data-campo]::after {
-  --losango-cor: var(--dono);
   content: '';
   position: absolute;
-  inset: 3px;
+  inset: 2.5px;
   z-index: -1;
   pointer-events: none;
   background:
-    linear-gradient(45deg, transparent 40%, var(--dono) 40% 60%, transparent 60%) left top / 9px 9px no-repeat,
-    linear-gradient(45deg, transparent 40%, var(--dono) 40% 60%, transparent 60%) right top / 9px 9px no-repeat,
-    linear-gradient(45deg, transparent 40%, var(--dono) 40% 60%, transparent 60%) left bottom / 9px 9px no-repeat,
-    linear-gradient(45deg, transparent 40%, var(--dono) 40% 60%, transparent 60%) right bottom / 9px 9px no-repeat;
-  clip-path: none;
+    var(--losango) left top / 10px 10px no-repeat,
+    var(--losango) right top / 10px 10px no-repeat,
+    var(--losango) left bottom / 10px 10px no-repeat,
+    var(--losango) right bottom / 10px 10px no-repeat;
 }
+
+/* Os losangos na cor do dono (variável não entra em data-URI: um por campo). */
+section[data-campo='p1']::after {
+  --losango: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Crect x='1.5' y='1.5' width='7' height='7' transform='rotate(45 5 5)' fill='%23ee9db5'/%3E%3C/svg%3E");
+}
+
+section[data-campo='p2']::after {
+  --losango: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Crect x='1.5' y='1.5' width='7' height='7' transform='rotate(45 5 5)' fill='%236fa86c'/%3E%3C/svg%3E");
+}
+
 
 section[data-campo] :is(.zona-titulo, .campo-info, .campo-filas > * > :not(ul)) {
   color: var(--color-papel);
@@ -83,4 +91,30 @@ aside[aria-label='Histórico da partida'] {
 
 section[data-campo] {
   box-shadow: inset 0 0 60px rgb(0 0 0 / 0.45);
+}
+
+/* O placar: a barra fina de ouro com o filete, sem o realce de papel; o retrato com a borda fina. */
+section[data-placar] .placar-barra {
+  border: 1px solid color-mix(in oklab, var(--color-ouro) 55%, transparent) !important;
+  background: #0b0908 !important;
+  box-shadow: 0 0 0 3px #120e0c, 0 0 0 4px color-mix(in oklab, var(--color-ouro) 22%, transparent);
+}
+
+section[data-placar] .placar-barra > [data-vida] {
+  background: linear-gradient(90deg, #c8941c, var(--color-ouro)) !important;
+  box-shadow: none !important;
+}
+
+section[data-placar] .placar-retrato:not([data-dono]) {
+  border-width: 1.5px;
+  border-color: color-mix(in oklab, var(--color-papel) 55%, transparent);
+}
+
+/* O botão do histórico no celular (no campo do oponente): papel sobre o pano escuro. */
+section[data-campo] button.border-tinta {
+  border-color: var(--color-papel) !important;
+}
+
+section[data-campo] button.border-tinta .stroke-tinta {
+  stroke: var(--color-papel);
 }
