@@ -6,6 +6,29 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-19 (3): a mesa com a identidade nova dos menus; três direções
+
+(As entradas 2026-11-19 (1) e (2), da logo LUSACAN em vídeo, estão na branch `feat/intro-dragao-frente`.)
+
+Ele escreveu, numa conversa nova:
+
+> os menus do jogo e visual e interface foram redesenhados e está em produção. essa nova identidade refinada e melhorada deve refletir
+> também in game, para coerência. menu do jogo está melhorado e quando entra para jogar está no visual antigo.
+> Quero melhorar a mesa, deixar com textura sem exagero também. crie 3 direções. vamos deixar esse jogo ainda mais incrivel in game
+
+**Leitura:**
+- O pedido é de três direções para ele escolher; nada vira spec nem código antes da escolha (como em 2026-11-18 (1)).
+- **[I]** É a continuação anunciada em 2026-11-18 (4) ("futuramente essa identidade será replicada para botões e tipografia in game"):
+  a identidade do Folheto (o grão, a moldura dupla com os losangos, o filete de ouro com a costura, os carimbos, os títulos em tipo de
+  madeira com a textura áspera) chega à mesa, ao placar, à faixa do centro, à barra de jogadas, à mão, ao histórico e aos controles do
+  replay.
+- **[I] "Textura sem exagero":** grão de papel ou de feltro parado, de baixo contraste, só no fundo dos campos e das faixas; nada que se
+  mexa (como nos menus, "sem enjoo visual"), nada sobre as cartas, e os números de jogo seguem sem textura (spec da web §10.7).
+- **[I] Só a camada visual,** como nos menus: o arranjo da mesa, as regras, o fluxo e os handlers ficam. Rosa é você, verde é o
+  oponente. Uma direção que pedir mudança de arranjo vem marcada como "pede o OK dele".
+
+---
+
 ## 2026-11-18 (11): o merge do Coringa menor no Início (PR #4)
 
 Com o PR #4 aberto e a pergunta "Faço o merge do PR #4 quando a CI ficar verde?", ele respondeu:

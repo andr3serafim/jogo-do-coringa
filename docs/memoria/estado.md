@@ -1,6 +1,7 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-19**, o Coringa do Início menor no notebook na `main` (PR #4, sem deploy ainda); o
+> Sobrescrito a cada atualização. **Última: 2026-11-19**, em curso as três direções da mesa (branch `feat/mesa-visual`) e, parada à espera
+> do autor, a logo LUSACAN em vídeo (branch `feat/intro-dragao-frente`); antes, o Coringa do Início menor no notebook na `main` (PR #4, sem deploy ainda); o
 > ajuste do autor no Treinar na `main` (PR #3, sem deploy ainda); antes, os menus no
 > Folheto, bloco encerrado; vieram da branch `feat/menus-visual` (apagada; saída da
 > `main` em `97a1a6b`; `decisoes.md` 2026-11-18 (1) a (6)), na `main` por fast-forward com o "Sim, merge" do autor (2026-11-18 (7));
@@ -9,6 +10,34 @@
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
+
+- **A mesa com a identidade dos menus: três direções** (`decisoes.md` 2026-11-19 (3)). Branch `feat/mesa-visual`, saída da `main` em
+  `3fd5565`, no checkout principal (a `feat/intro-dragao-frente` fica parada, à espera do autor; as entradas 2026-11-19 (1) e (2) do
+  `decisoes.md` moram nela). Só rascunho: nada vira spec nem código antes da escolha dele.
+  - **Método:** uma folha de CSS por direção, vestida no app de verdade (o dev server da web) pelo Playwright, com a mesma jogada cheia
+    (fixture `especiais`, rodada 17) a 1440 × 900 e a 390 × 844, mais as fotos de hoje. Pasta:
+    `docs/superpowers/specs/2026-11-19-mesa-direcoes/` (o script das fotos, as folhas e as fotos).
+  - **Próximo passo exato:** terminar as três folhas, tirar as fotos, publicar a página das direções e mandar ao autor; depois, esperar a
+    escolha.
+
+- **A logo LUSACAN vira o vídeo do dragão** (`decisoes.md` 2026-11-19 (2), que substitui a leitura de (1)): o MP4 do autor (gerado no Google
+  Veo, 3,92 s, 1920 × 1080, 2,6 MB, com áudio, `moov` no fim) entra no lugar do voo vetorial. Branch `feat/intro-dragao-frente`, saída da
+  `main` em `3fd5565`, no checkout principal. A prévia HyperFrames foi abandonada (os três arquivos que ele apagou saem neste commit;
+  `prototipo/` e `quadros/` ficam até ele dizer).
+  - **O vídeo de origem fica fora do git** até a versão otimizada existir: está em `Downloads` do autor
+    (`Dragon_flying_in_night_sky_e8417f02_1080p.mp4`); quem assume em outra máquina pede o arquivo a ele.
+  - **Medido:** brilho médio 0,19 a 0,24 do começo ao fim (sem flash: a regra de fotossensibilidade passa). No celular em pé, cortado
+    (`cover`) perde o "LUSACAN"; inteiro (`contain`) fica numa faixa de ~1/4 da altura.
+  - **Feito:** o FFmpeg instalado; as variantes medidas (`notas/medicao-video-intro.md`, com os comandos). Escolhida a **H.264 720p
+    CRF 27, sem áudio, `+faststart`**: 557 KB (−79%), VMAF 82,8, sem diferença visível; no 3G com CPU 4× o primeiro quadro sai em
+    0,66 s e toca sem travar (o original: 16 s para tocar 3,9 s). Mais o pôster WebP do último quadro (49 KB).
+  - **Esperando o autor:** o ritmo. 3,92 s de vídeo + a parte das cartas de hoje (3,2 s) dá ~7,1 s, acima do teto de 6 s; a proposta é o
+    vídeo em velocidade normal e as cartas e o título encolhidos para ~1,8 s.
+  - **Próximo passo exato:** com o "sim" dele, portar para o jogo (o `<video>` muted/playsinline no pedaço da intro, a capa até o primeiro quadro, prazo de
+    desistência para o menu, o pôster WebP do último quadro na versão de movimento reduzido, os tempos do `model/intro.ts` abaixo dos
+    6 s com as cartas mais curtas, o smoke barrando o vídeo no pacote inicial e no `index.html`, os testes e o `abertura.spec.ts`, o
+    `LICENSES.md`, o `CLAUDE.md` da abertura).
+  - **Esperando o autor:** a versão 9:16 do vídeo (gerada por ele no Veo); até lá, o 16:9 em faixa no celular em pé.
 
 - **O redesenho visual dos menus, na `main`** (`decisoes.md` 2026-11-18 (1) a (7)): só a camada visual das telas fora da mesa e dos diálogos da
   partida; nada de regra, fluxo, estado, rede ou handler (se algo visual pedir lógica, parar e perguntar). Branch `feat/menus-visual`,
