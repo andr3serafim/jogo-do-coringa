@@ -5,6 +5,40 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-19 (1): três direções para a mesa com a identidade dos menus
+
+(As entradas do diário da logo em vídeo, se houver, estão na branch `feat/intro-dragao-frente`.)
+
+- **Pedido:** `decisoes.md` 2026-11-19 (3): a identidade nova dos menus dentro da partida, a mesa com textura sem exagero, três direções.
+- **Feito:** a branch `feat/mesa-visual` (saída da `main` em `3fd5565`); as três direções vestidas no app de verdade, numa folha de CSS
+  cada, com as fotos de hoje para comparar:
+  - **A · Capa:** cada campo é a capa do folheto (a luz do rosa do Início, o grão, a moldura dupla com os losangos vermelhos); o verde
+    na mesma receita; o filete duplo nas faixas de tinta; o histórico num painel de papel com as rodadas em vermelho.
+  - **B · Feltro** (a recomendada): o pano de feltro (rosa-vinho seu, verde do oponente) com a sombra acolchoada, o filete de ouro e a
+    costura do fundo verde do menu; o centro vira o trilho de madeira com veio; o placar, o histórico e o fundo da mão em madeira escura;
+    o texto dos campos em papel.
+  - **C · Tinta:** a mesa de tinta com a luz do dono vindo do lado dele e a moldura dupla na cor do dono; filetes de ouro finos.
+  - **Nas três:** os botões de contorno (o replay, o Fechar) viram carimbos de papel com a sombra de madeira; o Tocar, o carimbo de ouro.
+- **Arquivos:** `docs/superpowers/specs/2026-11-19-mesa-direcoes/` (`base.css`, `a-capa.css`, `b-feltro.css`, `c-tinta.css`, o
+  `fotos.mjs`, as fotos em WebP e a página `direcoes.html`). A página publicada (privada, do autor):
+  `https://claude.ai/artifact/GdD7tfjewgDmVEPLsNua58`. Para abrir sem ela: sirva a pasta num servidor estático e abra `direcoes.html`.
+- **Ruling:** as direções são folhas de CSS injetadas por cima do app (no dev server não há CSP), em vez de pranchetas desenhadas à
+  mão como nos menus — custo: só mudam o material (cor, grão, moldura, filete) e os botões; o arranjo e o placar ficam iguais nas três,
+  o que deixa a comparação justa, mas uma ideia que peça layout não aparece aqui.
+- **Ruling:** a mesma jogada nas três (fixture `especiais`, rodada 17, com o oponente no deck Bestiário, para ver a carta de arte sobre o
+  material novo) e o Equipar do treino (`semente=foto1`), a 1440 × 900 e a 390 × 844.
+- **Para o código (quando ele escolher):** os seletores do rascunho (`section[data-campo]`, `section[aria-label='Situação da rodada']`,
+  `aside[aria-label='Histórico da partida']`, os `!important`) não vão para o jogo: viram classes no `styles.css` e tokens novos (os de hoje
+  não mudam de valor). Os pseudo-elementos `::before`/`::after` do `.campo` estão livres hoje. O `data-apagado` do campo (o `filter` da
+  desolação) segue valendo por cima do material novo. O texto dos campos em papel (B e C) pede conferir o contraste das marcas pequenas e
+  os testes que olham classe de cor.
+- **Armadilhas:** o painel do navegador do app estava oculto, e as animações de entrada do menu não rodam assim: as fotos são do
+  Playwright do projeto. O grão forte (`.grao`, alfa 0,7) com `multiply` deixa o papel cinza nos botões: use o `--grao-carimbo` (alfa 0,2).
+  O `git checkout` da `feat/intro-dragao-frente` para a `main` deixa sem rastrear os caches do HyperFrames em
+  `docs/superpowers/specs/2026-11-19-intro-lusacan/prototipo/` (ignorados lá): não commitar.
+
+---
+
 ## 2026-11-18 (9): o Coringa do Início menor no notebook
 
 - **Pedido:** `decisoes.md` 2026-11-18 (10). A foto dele tem pixels de tela: com a escala de 125% do Windows, a página tem ~1534 × 692 px
