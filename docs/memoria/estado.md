@@ -1,6 +1,6 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-19**, em curso a prévia da abertura LUSACAN nova (branch `feat/intro-dragao-frente`); antes, o Coringa do Início menor no notebook na `main` (PR #4, sem deploy ainda); o
+> Sobrescrito a cada atualização. **Última: 2026-11-19**, em curso a logo LUSACAN em vídeo (branch `feat/intro-dragao-frente`); antes, o Coringa do Início menor no notebook na `main` (PR #4, sem deploy ainda); o
 > ajuste do autor no Treinar na `main` (PR #3, sem deploy ainda); antes, os menus no
 > Folheto, bloco encerrado; vieram da branch `feat/menus-visual` (apagada; saída da
 > `main` em `97a1a6b`; `decisoes.md` 2026-11-18 (1) a (6)), na `main` por fast-forward com o "Sim, merge" do autor (2026-11-18 (7));
@@ -10,25 +10,21 @@
 
 ## Agora
 
-- **A abertura LUSACAN nova, em prévia** (`decisoes.md` 2026-11-19 (1)): o dragão de frente, como o vídeo de referência do autor (fora do
-  git), logo com ~3 s e as cartas mais curtas. Branch `feat/intro-dragao-frente`, saída da `main` em `3fd5565`, no checkout principal.
-  - **Feito:** a prévia em HyperFrames, em `docs/superpowers/specs/2026-11-19-intro-lusacan/` (o `LEIAME.md` de lá diz como abrir e o
-    ritmo; as folhas de quadros em `quadros/`). Ela tem o céu com nuvens feitas por código, a lua grande com halo e o voo de perfil
-    (a silhueta da logo de hoje), que entra pelo alto à direita, contorna a lua e mergulha no meio. Ali o dragão vira de frente
-    (`dragao-frente.ts`, vetor novo), abre as asas e o nome sobe. A logo leva ~3 s; o esmaecer vai de 3,0 a 3,3 s. Nada do código do
-    jogo mudou.
-  - **Esperando o autor:** ver a prévia e dizer o que muda (o desenho do dragão, as cores, o ritmo).
-  - **Próximo passo exato:** com o "sim" (ou os ajustes) dele, mudar o `gerar-prototipo.ts`/`dragao-frente.ts` e regerar. Aprovada a
-    prévia, portar para o jogo: a geometria para `lusacan-shapes.ts` (caixa nova); o voo para `dragon-flight.ts`, que ganha a troca de
-    perfil para frente; os tempos para `model/intro.ts` (logo ~3 s, cartas mais curtas, abaixo dos 6 s); o céu e as nuvens para o
-    `intro.css`/`LusacanLogo.tsx` (as nuvens pré-desenhadas, nunca `feTurbulence` animado); os batimentos para o `synth.ts`; os SVG,
-    o gerador e o `LEIAME.md` da logo, e os testes. Uma página de comparação lado a lado (referência × prévia) existe só na máquina
-    desta conta, fora do git.
-  - **Cuidado no porte:** o voo de perfil da prévia (e o `gerar-prototipo.ts`) usa o `BODY`/`WING` de perfil do `lusacan-shapes.ts`.
-    Quando a geometria de frente entrar lá, as peças de perfil ficam (viram o desenho do voo), senão quebram o voo e o gerador. A cena é
-    larga: do chifre ao "PRODUCTIONS" ela não cabe na caixa de 420 × 258 de hoje, então no celular em retrato a logo sai menor que a
-    atual; conferir em retrato antes de portar.
-  - **Sem FFmpeg na máquina:** o render em MP4 do HyperFrames não roda; instalar é do autor (perguntar antes).
+- **A logo LUSACAN vira o vídeo do dragão** (`decisoes.md` 2026-11-19 (2), que substitui a leitura de (1)): o MP4 do autor (gerado no Google
+  Veo, 3,92 s, 1920 × 1080, 2,6 MB, com áudio, `moov` no fim) entra no lugar do voo vetorial. Branch `feat/intro-dragao-frente`, saída da
+  `main` em `3fd5565`, no checkout principal. A prévia HyperFrames foi abandonada (os três arquivos que ele apagou saem neste commit;
+  `prototipo/` e `quadros/` ficam até ele dizer).
+  - **O vídeo de origem fica fora do git** até a versão otimizada existir: está em `Downloads` do autor
+    (`Dragon_flying_in_night_sky_e8417f02_1080p.mp4`); quem assume em outra máquina pede o arquivo a ele.
+  - **Medido:** brilho médio 0,19 a 0,24 do começo ao fim (sem flash: a regra de fotossensibilidade passa). No celular em pé, cortado
+    (`cover`) perde o "LUSACAN"; inteiro (`contain`) fica numa faixa de ~1/4 da altura.
+  - **Próximo passo exato:** instalar o FFmpeg (`winget install Gyan.FFmpeg`, liberado pelo autor); gerar variantes sem áudio e com
+    `+faststart` (720p e 540p, H.264 e AV1/WebM) e medir o peso e o tempo até o primeiro quadro (rede limitada, CPU 4×); escolher a
+    variante; então portar para o jogo (o `<video>` muted/playsinline no pedaço da intro, a capa até o primeiro quadro, prazo de
+    desistência para o menu, o pôster WebP do último quadro na versão de movimento reduzido, os tempos do `model/intro.ts` abaixo dos
+    6 s com as cartas mais curtas, o smoke barrando o vídeo no pacote inicial e no `index.html`, os testes e o `abertura.spec.ts`, o
+    `LICENSES.md`, o `CLAUDE.md` da abertura).
+  - **Esperando o autor:** a versão 9:16 do vídeo (gerada por ele no Veo); até lá, o 16:9 em faixa no celular em pé.
 
 - **O redesenho visual dos menus, na `main`** (`decisoes.md` 2026-11-18 (1) a (7)): só a camada visual das telas fora da mesa e dos diálogos da
   partida; nada de regra, fluxo, estado, rede ou handler (se algo visual pedir lógica, parar e perguntar). Branch `feat/menus-visual`,

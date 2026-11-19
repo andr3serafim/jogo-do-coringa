@@ -6,6 +6,40 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-19 (2): o vídeo do dragão vira a logo LUSACAN (substitui a leitura "o vídeo é referência, não peça" de 2026-11-19 (1))
+
+Ele perguntou:
+
+> É possível substituir a intro da logo lusacan productions por esse vídeo em anexo?
+
+O vídeo é o mesmo de 2026-11-19 (1). O Claude achou nele a credencial C2PA "Created by Google Generative AI", com a marca d'água
+SynthID (gerado no Veo), e mediu: 3,92 s, 1920 × 1080, H.264 com uma faixa de áudio AAC, 2,6 MB, o índice (`moov`) no fim do arquivo; o
+brilho médio fica entre 0,19 e 0,24 do começo ao fim (sem flash). Às quatro perguntas do Claude, respondeu:
+
+> Direitos (gerou e pode publicar?): "gostaria de publicar essa intro para ver como fica, mas quero que faça medição de impacto de rede,
+> desempenho, se necessário otimize o video para deixar mais leve e não tão pesado."
+>
+> Retrato: "Versão 9:16 (Recomendado)"
+>
+> FFmpeg: "Pode instalar (Recomendado)"
+>
+> Prévia HyperFrames apagada sem commit: "Sim, abandonar"
+
+**Leitura:**
+- **O vídeo entra no jogo** no lugar da logo desenhada por código (o voo do `dragon-flight.ts` e o `LusacanLogo.tsx`); substitui a leitura de
+  2026-11-19 (1) de que ele seria só referência e ficaria fora do git. **[I]** Ele não disse com essas palavras que gerou o vídeo; a
+  credencial C2PA aponta o Veo, e ele pediu para publicar. O `packages/web/LICENSES.md` passa a citar a origem (gerado por IA, Google Veo).
+- **"Publicar para ver como fica" [I]:** no jogo, numa branch, para ele ver (dev server e fotos); o deploy continua sendo só dele (ou a pedido
+  explícito), e o merge, com o "sim" dele.
+- **Peso e desempenho:** medir a rede e o desempenho antes e depois; otimizar com o FFmpeg (instalação liberada): menor resolução, sem
+  áudio (o som segue o sintetizador), o índice no começo (`+faststart`).
+- **Celular em pé:** uma versão 9:16 que ele gera no Veo; o jogo escolhe pela orientação da tela. Até ela chegar, o 16:9 inteiro numa faixa
+  no meio, com o fundo na cor do céu.
+- **A prévia HyperFrames sai:** os arquivos que ele apagou (`LEIAME.md`, `dragao-frente.ts`, `gerar-prototipo.ts`) vão num commit; o resto
+  da pasta (`prototipo/`, `quadros/`) não foi perguntado e fica até ele dizer.
+
+---
+
 ## 2026-11-19 (1): a abertura LUSACAN como o vídeo de referência (o dragão de frente), com prévia antes
 
 Ele mandou um vídeo de referência (3,9 s, 1920 × 1080, feito fora do projeto e fora do repositório: um dragão roxo pintado entra pelo canto
