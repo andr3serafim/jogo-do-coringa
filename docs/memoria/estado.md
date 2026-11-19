@@ -24,6 +24,10 @@
     `intro.css`/`LusacanLogo.tsx` (as nuvens pré-desenhadas, nunca `feTurbulence` animado); os batimentos para o `synth.ts`; os SVG,
     o gerador e o `LEIAME.md` da logo, e os testes. Uma página de comparação lado a lado (referência × prévia) existe só na máquina
     desta conta, fora do git.
+  - **Cuidado no porte:** o voo de perfil da prévia (e o `gerar-prototipo.ts`) usa o `BODY`/`WING` de perfil do `lusacan-shapes.ts`.
+    Quando a geometria de frente entrar lá, as peças de perfil ficam (viram o desenho do voo), senão quebram o voo e o gerador. A cena é
+    larga: do chifre ao "PRODUCTIONS" ela não cabe na caixa de 420 × 258 de hoje, então no celular em retrato a logo sai menor que a
+    atual; conferir em retrato antes de portar.
   - **Sem FFmpeg na máquina:** o render em MP4 do HyperFrames não roda; instalar é do autor (perguntar antes).
 
 - **O redesenho visual dos menus, na `main`** (`decisoes.md` 2026-11-18 (1) a (7)): só a camada visual das telas fora da mesa e dos diálogos da
