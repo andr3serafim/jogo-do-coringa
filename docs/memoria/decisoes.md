@@ -6,6 +6,34 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-19 (1): a abertura LUSACAN como o vídeo de referência (o dragão de frente), com prévia antes
+
+Ele mandou um vídeo de referência (3,9 s, 1920 × 1080, feito fora do projeto e fora do repositório: um dragão roxo pintado entra pelo canto
+de cima à direita, circula a lua cheia entre nuvens e pousa de frente, simétrico, de asas abertas diante dela; "LUSACAN" e
+"PRODUCTIONS" surgem aos ~2,5 s) e pediu:
+
+> melhore a exibição da intro Lusacan Productions; vou enviar um video de referencia.
+>
+> quero visualizar antes de implementar
+
+Às duas perguntas do Claude, respondeu:
+
+> Pose final: "De frente (Recomendado)"
+>
+> Duração: "Logo ~3 s, cartas mais curtas (Recomendado)"
+
+**Leitura:**
+- **O vídeo é referência, não peça:** vale a regra da arte original (spec §10.6) e a de 2026-11-17 (3). O dragão segue vetor desenhado por
+  código, sem decalque de quadro; o vídeo e os quadros dele não entram no git (o repositório é público e a origem do vídeo não é do projeto).
+- **A marca muda:** o dragão termina de frente e simétrico (sai o de perfil de 2026-11-17 (3)); os SVG da logo, o gerador e o `LEIAME.md`
+  mudam junto quando for implementado.
+- **[I]** Do vídeo vêm também o céu (nuvens em volta da lua, desenhadas por código), a lua grande com halo e a coreografia: entra pelo
+  alto à direita, contorna a lua, pousa de frente e abre as asas; o nome sobe por baixo.
+- **O tempo:** a logo passa de ~2,15 s para ~3 s; a parte das cartas e do título encolhe, e a abertura segue abaixo do teto de 6 s da capa ao menu.
+- **Primeiro a prévia** (HyperFrames, em `docs/superpowers/specs/2026-11-19-intro-lusacan/`); o código do jogo só muda depois que ele a vir.
+
+---
+
 ## 2026-11-18 (11): o merge do Coringa menor no Início (PR #4)
 
 Com o PR #4 aberto e a pergunta "Faço o merge do PR #4 quando a CI ficar verde?", ele respondeu:

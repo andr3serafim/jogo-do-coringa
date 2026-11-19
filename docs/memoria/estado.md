@@ -1,6 +1,6 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-19**, o Coringa do Início menor no notebook na `main` (PR #4, sem deploy ainda); o
+> Sobrescrito a cada atualização. **Última: 2026-11-19**, em curso a prévia da abertura LUSACAN nova (branch `feat/intro-dragao-frente`); antes, o Coringa do Início menor no notebook na `main` (PR #4, sem deploy ainda); o
 > ajuste do autor no Treinar na `main` (PR #3, sem deploy ainda); antes, os menus no
 > Folheto, bloco encerrado; vieram da branch `feat/menus-visual` (apagada; saída da
 > `main` em `97a1a6b`; `decisoes.md` 2026-11-18 (1) a (6)), na `main` por fast-forward com o "Sim, merge" do autor (2026-11-18 (7));
@@ -9,6 +9,15 @@
 > Antes de seguir, confira se não há versão mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
+
+- **A abertura LUSACAN nova, em prévia** (`decisoes.md` 2026-11-19 (1)): o dragão de frente, como o vídeo de referência do autor (fora do
+  git), logo com ~3 s e as cartas mais curtas. Branch `feat/intro-dragao-frente`, saída da `main` em `3fd5565`, no checkout principal.
+  - **Em curso:** o protótipo HyperFrames em `docs/superpowers/specs/2026-11-19-intro-lusacan/` (o céu com nuvens, a lua com halo, o
+    dragão de frente em vetor, o voo em volta da lua, o nome). Nada do código do jogo mudou.
+  - **Próximo passo exato:** terminar o protótipo, abrir a prévia (`hyperframes preview` ou a página de comparação lado a lado) e
+    mostrar ao autor; só com o "sim" dele portar para `lusacan-shapes.ts`, `dragon-flight.ts`, `model/intro.ts` (logo ~3 s, cartas
+    mais curtas, teto de 6 s), `synth.ts` (as batidas de asa) e os SVG/gerador da logo.
+  - **Sem FFmpeg na máquina:** o render em MP4 do HyperFrames não roda; instalar é do autor (perguntar antes).
 
 - **O redesenho visual dos menus, na `main`** (`decisoes.md` 2026-11-18 (1) a (7)): só a camada visual das telas fora da mesa e dos diálogos da
   partida; nada de regra, fluxo, estado, rede ou handler (se algo visual pedir lógica, parar e perguntar). Branch `feat/menus-visual`,
