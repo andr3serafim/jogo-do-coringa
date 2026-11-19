@@ -5,6 +5,32 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-19 (2): a mesa no Feltro, implementada
+
+- **Pedido:** `decisoes.md` 2026-11-19 (4) (a B, com o rosa mais claro, seguir com a implementação). Spec e plano:
+  `docs/superpowers/specs/2026-11-19-mesa-feltro-design.md`; as fotos do resultado em `docs/superpowers/specs/2026-11-19-mesa-feltro/`.
+- **Feito** (`c1c08fe`): os tokens `--color-feltro-voce` (`#a45274`), `--color-feltro-oponente` e `--color-madeira-escura`; as utilidades
+  `feltro-voce`, `feltro-oponente`, `trilho-madeira`, `madeira-escura` e `filete-ouro-baixo`; o filete e a costura em `.feltro::before` e
+  `::after`; a barra de vida em trilho e o retrato com cantos; nos componentes, o campo em feltro com o texto em papel (as vagas, a seta da
+  carta da frente e o botão do histórico e o do menu no campo do oponente em papel; as placas de estado e a etiqueta da quadra em tinta,
+  porque herdavam a cor), o centro em madeira, o placar, o histórico e o fundo em madeira escura, os botões do replay em `.carimbo`.
+- **Ruling:** os materiais são `@utility`, não classes do `@layer components`: só uma utilidade aceita variante (`pc:madeira-escura` no
+  `main`, que é rosa no celular e madeira no PC; `pc:bg-none` tira a madeira da barra no PC).
+- **Ruling:** o filete embaixo do placar é uma sombra por dentro (`filete-ouro-baixo`), não uma borda: a borda somaria 2 px à altura do
+  placar, que o E2E mede (`expectHudFits`).
+- **Ruling:** a sombra acolchoada do rascunho (`box-shadow` inset com 48 px de desfoque) saiu; a borda escura do pano é o próprio gradiente
+  radial (um desfoque grande repinta caro quando o campo repinta).
+- **Ruling:** o rosa: o meio do pano é `#a45274` (4,55 : 1 ao papel, o limite para as marcas pequenas), a luz do alto `#bd6c8b` e a borda
+  `#86405f`; o rascunho era `#96496a` no meio. As marcas pequenas do seu campo ficam embaixo (celular) ou na coluna da direita (PC), onde o
+  pano é o do meio ou mais escuro. O axe não mede contraste sobre gradiente (fica "incompleto"): a conta é esta.
+- **Ruling:** no celular, o fundo atrás da mão é o pano rosa (`feltro-voce` no `main`: a mão é sua), e a barra de baixo é madeira escura.
+- **Verificado:** a suíte da web (2997); o pre-commit (lint, typecheck, 1662 relacionados); as fotos no dev server (a jogada com arte e o
+  Equipar no PC e no celular, o tutorial no celular).
+- **Fica como estava:** as cartas, as cenas, o menu da partida, o fim e a dica; o desenho da desolação (o `filter` do `data-apagado`) vale
+  por cima do pano.
+
+---
+
 ## 2026-11-19 (1): três direções para a mesa com a identidade dos menus
 
 (As entradas do diário da logo em vídeo, se houver, estão na branch `feat/intro-dragao-frente`.)
