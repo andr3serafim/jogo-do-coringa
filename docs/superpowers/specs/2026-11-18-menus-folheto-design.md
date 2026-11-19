@@ -40,7 +40,8 @@ O Início vira um menu de quatro entradas, cada uma com a sua rota (o Voltar do 
 - **[C]** O tutorial por fazer: o selo vermelho na mini carta do Treinar e, dentro de Treinar, "Aprender jogando" em ouro com o selo. Feito
   ou pulado, os dois somem e "Aprender jogando" fica de papel.
 - A abertura continua só quando a página abre em `/` (`main.tsx`, `App.tsx`): abrir `/jogar` direto não a toca.
-- **[C]** O que promete criar uma sala leva direto a `/jogar` (o formulário), e não ao Início, que virou um menu: "Criar sala" da sala que
+- **[A]** (era [C]; "Concordo", `decisoes.md` 2026-11-18 (6)) O que promete criar uma sala leva direto a `/jogar` (o formulário), e não
+  ao Início, que virou um menu: "Criar sala" da sala que
   não existe e da partida parada, "Criar outra sala" da sala cheia, "Nova sala" no fim da partida online e "Jogar com um amigo" no fim
   do tutorial. "Voltar ao início" continua indo a `/`.
 

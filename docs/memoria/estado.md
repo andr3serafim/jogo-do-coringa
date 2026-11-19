@@ -42,9 +42,9 @@
     Treinar, Opções, a escolha do nível, as partidas anteriores e o erro da sala. As decisões técnicas: o diário 2026-11-18 (5) e (6).
   - **No GitHub, PR #2 para a `main`** (`https://github.com/andr3serafim/jogo-do-coringa/pull/2`), com as duas CI verdes no push de
     `ee77578` (`check` 209 s; `e2e` 677 s). As fotos e o resumo foram mandados ao autor.
-  - **Próximo passo exato:** esperar o autor. Ele confere as escolhas [C] da spec e as `Ruling:` do diário (são do Claude por delegação);
-    a primeira que ele precisa ver é o destino dos cinco links de criar sala (`/jogar`, spec §2). O merge espera o "sim" dele; o deploy é
-    dele.
+  - **O destino dos cinco links de criar sala (`/jogar`) está aprovado** ("Concordo", `decisoes.md` 2026-11-18 (6)).
+  - **Próximo passo exato:** esperar o autor. As outras escolhas [C] da spec e as `Ruling:` do diário seguem por conferir (são do Claude
+    por delegação). O merge espera o "sim" dele; o deploy é dele.
     **Não visto no navegador:** a sala de espera (Lobby) com a roupa nova (precisa do `wrangler dev`); os E2E online passam por ela.
   - **O que não pode regredir:** o rosa por padrão sem gravar nada (`menuTheme` ausente); o tema não se perde quando o menu da partida
     grava as preferências (ele espalha `prefs`); o menu da partida, o fim e a dica com a roupa de antes (`useInMenu()` é falso fora da

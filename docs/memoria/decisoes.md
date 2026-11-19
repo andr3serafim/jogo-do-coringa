@@ -6,6 +6,21 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-18 (6): os links de criar sala levam a `/jogar`
+
+No PR #2 (os menus no Folheto), a pergunta foi se os cinco links de criar sala ("Criar sala" da sala que não existe e da partida parada,
+"Criar outra sala" da sala cheia, "Nova sala" no fim da partida online e "Jogar com um amigo" no fim do tutorial) podem levar direto ao
+formulário (`/jogar`), e não ao Início, que virou menu. Ele respondeu:
+
+> Concordo
+
+**Leitura:**
+- O [C] da spec dos menus (§2, o último item) passa a [A]: os cinco links levam a `/jogar`; "Voltar ao início" segue em `/`.
+- **[I]** Vale só para esse item. As outras escolhas [C] da spec e as `Ruling:` do diário 2026-11-18 (5) e (6) seguem por conferir no
+  merge, que espera o "sim" dele.
+
+---
+
 ## 2026-11-18 (5): a A4 aprovada; o tema rosa (padrão) ou verde; seguir com spec, plano e código
 
 Depois de ver a rodada 4 (A4), ele escreveu:
