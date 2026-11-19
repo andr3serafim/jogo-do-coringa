@@ -6,6 +6,21 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-18 (10): o Coringa do Início menor no notebook
+
+Com uma foto do Início no notebook dele (o Coringa grande e a barra de rolagem; a foto tem 1917 × 865 px de tela, e com a escala de 125%
+do Windows a página tem ~1534 × 692 px de CSS), ele pediu:
+
+> diminua um pouco a arte do coringa porque está sendo exibida o scroll no meu notebook.
+
+**Leitura:**
+- O Início tem de caber na tela sem rolar; o emblema é o que encolhe (a lista fica como está).
+- **[I]** "Um pouco" não basta nessa altura: para não rolar a 692 px, o emblema vai de 340 para ~253 px. Para ele encolher menos, as
+  folgas e o vão do Início apertam antes, só em tela abaixo de 760 px de altura. Em tela alta (1440 × 900, 1918 × 866, os celulares de
+  hoje), nada muda.
+
+---
+
 ## 2026-11-18 (9): "Aprender jogando" sem a linha curta; o bloco dos menus encerrado
 
 Depois do deploy, ele pediu:

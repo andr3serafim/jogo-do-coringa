@@ -1,6 +1,7 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-18**, o ajuste do autor no Treinar na `main` (PR #3, sem deploy ainda); antes, os menus no
+> Sobrescrito a cada atualização. **Última: 2026-11-18**, o Coringa do Início menor no notebook, em PR (`feat/inicio-emblema-altura`); o
+> ajuste do autor no Treinar na `main` (PR #3, sem deploy ainda); antes, os menus no
 > Folheto, bloco encerrado; vieram da branch `feat/menus-visual` (apagada; saída da
 > `main` em `97a1a6b`; `decisoes.md` 2026-11-18 (1) a (6)), na `main` por fast-forward com o "Sim, merge" do autor (2026-11-18 (7));
 > o PR #2 mesclado, as duas CI verdes no push da `main`; **no ar** em `https://jogodocoringa.com.br` desde o deploy `5f5821f`, rodado pelo
@@ -56,8 +57,13 @@
     `7273b1d`, com o `check` e o `e2e` verdes no push da branch nesse commit (o `e2e` da execução do PR ainda rodava) e o `pnpm e2e` local
     verde (130, 4 pulados). A `feat/treinar-sem-linha` foi apagada, local e remota.
   - **No ar ainda está `5f5821f`** (com a linha curta): o deploy do ajuste é dele, quando pedir.
-  - **Próximo passo exato:** nenhum de código. O próximo trabalho vem do autor (os botões e a tipografia dentro da partida, quando ele
-    pedir).
+  - **Em curso, o Coringa do Início menor no notebook** (`decisoes.md` 2026-11-18 (10)): o emblema encolhe com a altura da tela
+    (`menu.css`: `--emblema-alto` na coluna do Início; abaixo de 760 px de altura, as folgas apertam), na branch
+    `feat/inicio-emblema-altura` com PR para a `main`. Medido no navegador: 1534 × 692 (o notebook dele) 253 px e sem rolar; 1366 × 650
+    220 px; 1440 × 900, 1918 × 866, 390 × 844 e 360 × 740 iguais a antes; 360 × 640 de 274 para 207 px (antes rolava). Fotos no
+    scratchpad da sessão.
+  - **Próximo passo exato:** o PR e as duas CI; o merge espera o "sim" dele; o deploy é dele. Depois, nenhum de código: o próximo trabalho
+    vem do autor (os botões e a tipografia dentro da partida, quando ele pedir).
     **Não visto no navegador:** a sala de espera (Lobby) com a roupa nova (precisa do `wrangler dev`); os E2E online passam por ela.
   - **O que não pode regredir:** o rosa por padrão sem gravar nada (`menuTheme` ausente); o tema não se perde quando o menu da partida
     grava as preferências (ele espalha `prefs`); o menu da partida, o fim e a dica com a roupa de antes (`useInMenu()` é falso fora da

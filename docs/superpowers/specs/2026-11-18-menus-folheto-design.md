@@ -76,6 +76,9 @@ O Início vira um menu de quatro entradas, cada uma com a sua rota (o Voltar do 
   botões **[OBRIGATÓRIO]** (spec da web §10.7).
 - **PC:** o Início com o emblema em cima e a lista embaixo, no meio da tela [A]; as telas de entrada numa coluna central **[C]** (até ~480
   px), no mesmo fundo.
+- **O Início cabe na altura da tela, sem rolar** [A] ("diminua um pouco a arte do coringa porque está sendo exibida o scroll no meu
+  notebook", `decisoes.md` 2026-11-18 (10)): o emblema encolhe com a altura que sobra da lista, entre 220 e 340 px no PC (200 e 286 px no
+  celular); abaixo de 760 px de altura, as folgas e o vão apertam antes **[C]**. Em tela alta, nada muda.
 
 ## 5. As outras telas fora da mesa [C]
 

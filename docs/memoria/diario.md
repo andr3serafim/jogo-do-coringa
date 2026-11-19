@@ -5,6 +5,22 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-18 (9): o Coringa do Início menor no notebook
+
+- **Pedido:** `decisoes.md` 2026-11-18 (10). A foto dele tem pixels de tela: com a escala de 125% do Windows, a página tem ~1534 × 692 px
+  de CSS (as linhas do menu, 123 px na foto, têm 99 px de CSS). Ali o Início pedia 779 px.
+- **Feito:** no `menu.css`, a coluna do Início ganhou `--inicio-folga`, `--inicio-vao` e `--emblema-alto` (100dvh menos as folgas, o vão
+  e 404 px da lista com margem); a largura do emblema é `clamp(200px, alto × 300/264, min(286px, 76vw))`, e no PC
+  `clamp(220px, …, 340px)`. Abaixo de 760 px de altura, as folgas vão de 34 para 22 px e o vão de 18 para 10 px.
+- **Ruling:** o emblema encolhe pela altura com `clamp`, e não com o emblema num item flexível que a coluna encolhe — custo: o número da
+  lista (404 px) mora no CSS e precisa mudar se a lista crescer; em troca, a coluna segue com `min-height` (a tela baixa demais ainda
+  rola, sem cortar o alto do conteúdo, o que o `justify-content: center` com altura fixa faria).
+- **Verificado:** no navegador (o dev server), as medidas no estado. **Falta:** o `pnpm check` do pre-push e as duas CI.
+- **Armadilhas:** a foto que o autor manda do Windows vem em pixels de tela; divida pela escala (125%) antes de medir. O `.claude/launch.json`
+  foi recriado só com o `web` (sumiu em 2026-11-18; fora do git).
+
+---
+
 ## 2026-11-18 (8): o ajuste do autor no Treinar ("Aprender jogando" sem a linha)
 
 - **Pedido:** `decisoes.md` 2026-11-18 (9). O push que apagava a `feat/menus-visual` remota (junto com a memória na `main`) foi barrado
