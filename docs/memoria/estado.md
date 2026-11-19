@@ -1,6 +1,7 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-18**, os menus no Folheto, bloco encerrado; vieram da branch `feat/menus-visual` (já apagada; saída da
+> Sobrescrito a cada atualização. **Última: 2026-11-18**, o ajuste do autor no Treinar em PR (`feat/treinar-sem-linha`); antes, os menus no
+> Folheto, bloco encerrado; vieram da branch `feat/menus-visual` (apagada; saída da
 > `main` em `97a1a6b`; `decisoes.md` 2026-11-18 (1) a (6)), na `main` por fast-forward com o "Sim, merge" do autor (2026-11-18 (7));
 > o PR #2 mesclado, as duas CI verdes no push da `main`; **no ar** em `https://jogodocoringa.com.br` desde o deploy `5f5821f`, rodado pelo
 > Claude a pedido (2026-11-18 (8)). Antes dele estava no ar `97a1a6b` (a `main` com a abertura do jogo e a logo do dragão).
@@ -48,9 +49,13 @@
     (web 2997 testes, o smoke, 17 arquivos novos subidos; versão do Worker `1fc2dd91-f600-4f60-919d-ec1b16d5235d`). O `/api/health`
     devolve `5f5821f` (no primeiro minuto, misturado com `97a1a6b`: as instâncias trocam aos poucos). Conferido no navegador: o Início
     rosa com as quatro mini cartas; no console, só o `beacon.min.js` barrado pela CSP (o ruído conhecido, abaixo).
-  - **Próximo passo exato:** nenhum de código. O próximo trabalho vem do autor (o que ele achar usando os menus; os botões e a tipografia
-    dentro da partida, quando ele pedir). **O bloco está encerrado** ("apague a branch feat/menus-visual. finalizado.", 2026-11-18): a
-    branch `feat/menus-visual`, local e remota, foi apagada (estava toda na `main`, em `9f10887`).
+  - **O bloco está encerrado** ("finalizado", `decisoes.md` 2026-11-18 (9)): a `feat/menus-visual` local foi apagada; a remota sai no
+    push da `feat/treinar-sem-linha` (estava toda na `main`, em `9f10887`).
+  - **Em curso, o ajuste do autor** (`decisoes.md` 2026-11-18 (9)): "Aprender jogando" sem a linha curta (`LEARN_LINE = ''` no
+    `copy.ts`), na branch `feat/treinar-sem-linha` com PR para a `main`; o "suba e faz o merge" dele já é o sim.
+  - **Próximo passo exato:** com as duas CI do PR verdes (e o `pnpm e2e` local), a `main` por fast-forward até o topo da
+    `feat/treinar-sem-linha`, o push, e a branch apagada (local e remota). O deploy desse ajuste é dele (não pediu). Depois, nenhum de
+    código: o próximo trabalho vem do autor (os botões e a tipografia dentro da partida, quando ele pedir).
     **Não visto no navegador:** a sala de espera (Lobby) com a roupa nova (precisa do `wrangler dev`); os E2E online passam por ela.
   - **O que não pode regredir:** o rosa por padrão sem gravar nada (`menuTheme` ausente); o tema não se perde quando o menu da partida
     grava as preferências (ele espalha `prefs`); o menu da partida, o fim e a dica com a roupa de antes (`useInMenu()` é falso fora da

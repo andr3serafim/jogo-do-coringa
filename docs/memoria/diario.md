@@ -5,6 +5,19 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-18 (8): o ajuste do autor no Treinar ("Aprender jogando" sem a linha)
+
+- **Pedido:** `decisoes.md` 2026-11-18 (9). O push que apagava a `feat/menus-visual` remota (junto com a memória na `main`) foi barrado
+  pelo pre-push: o autor editava o `copy.ts` ao mesmo tempo (a linha do `LEARN_LINE` comentada e no stage; o typecheck da web quebrou).
+  Nada subiu. Perguntado, ele disse que o ajuste era dele e deixou `LEARN_LINE = ''`.
+- **Feito:** a branch `feat/treinar-sem-linha` (da `main` local, com o commit da memória que não tinha subido), o ajuste dele como está,
+  e a memória; o push apaga a `feat/menus-visual` remota no mesmo comando.
+- **Armadilhas:** o pre-push confere a árvore de trabalho, não o commit: uma edição feita durante o push barra um commit que estava bom.
+  Antes de concluir que o código quebrou, `git status` e a hora do arquivo (`stat`). A `main` não tem proteção e o repositório não liga o
+  auto-merge: o `set_auto_merge` mesclaria na hora, sem esperar a CI.
+
+---
+
 ## 2026-11-18 (7): os menus no Folheto na `main` e no ar
 
 - **PR #2** (`https://github.com/andr3serafim/jogo-do-coringa/pull/2`), aberto com o `gh` (agora instalado nesta máquina). O autor

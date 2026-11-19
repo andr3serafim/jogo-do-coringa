@@ -6,6 +6,29 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-18 (9): "Aprender jogando" sem a linha curta; o bloco dos menus encerrado
+
+Depois do deploy, ele pediu:
+
+> apague a branch feat/menus-visual. finalizado.
+
+O push que apagava a branch remota foi barrado pelo pre-push: no meio dele, o `copy.ts` tinha a linha do `LEARN_LINE` comentada (o
+typecheck quebrava). Perguntado de quem era a mudança, ele respondeu:
+
+> eu que estou fazendo esse ajuste pontual, aceite essas alterações, suba e faz o merge.
+
+e deixou a linha como `export const LEARN_LINE = '';`.
+
+**Leitura:**
+- Em Treinar, "Aprender jogando" fica sem a linha curta ("Uma partida com dicas, contra o Fácil" sai); "Jogar com o bot" mantém a dele.
+- O ajuste entra como ele o deixou (o texto vazio, o `Practice.tsx` igual), numa branch com PR, e o merge segue com as duas CI verdes. O
+  "suba e faz o merge" é o "sim" do merge deste ajuste.
+- **[I]** Com o texto vazio, a linha continua no DOM, vazia (a margem de 4 px dela fica): não se vê; tirá-la de vez é outro ajuste, se ele
+  quiser.
+- "finalizado": o bloco dos menus está encerrado; a `feat/menus-visual` sai, local e remota.
+
+---
+
 ## 2026-11-18 (8): o deploy dos menus, rodado pelo Claude a pedido
 
 Com os menus na `main` (`9f10887`; o `check` do push da `main` verde, o `e2e` ainda rodando, verde no mesmo código em `ee77578`), ele
