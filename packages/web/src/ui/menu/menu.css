@@ -130,12 +130,25 @@
   padding: 28px 22px 40px;
 }
 
+/* O Início cabe na altura da tela sem rolar: o emblema fica com a altura que sobra das folgas, do vão e da lista (as quatro linhas,
+   ~396 px, mais uma margem), e nunca passa do tamanho de sempre. Em tela baixa (o notebook com a escala do Windows), as folgas
+   apertam antes, para o emblema encolher menos. */
 .menu[data-inicio] .menu-coluna {
+  --inicio-folga: 34px;
+  --inicio-vao: 18px;
+  --emblema-alto: calc(100dvh - 2 * var(--inicio-folga) - var(--inicio-vao) - 404px);
   min-height: 100dvh;
   max-width: 33rem;
   justify-content: center;
-  gap: 18px;
-  padding: 34px 24px;
+  gap: var(--inicio-vao);
+  padding: var(--inicio-folga) 24px;
+}
+
+@media (height < 760px) {
+  .menu[data-inicio] .menu-coluna {
+    --inicio-folga: 22px;
+    --inicio-vao: 10px;
+  }
 }
 
 /* O controle discreto do tema: uma bolinha da outra cor no canto, num alvo de 44 px. */
@@ -173,11 +186,13 @@
   scale: 1.18;
 }
 
-/* O emblema: o Coringa do jogo maior que o disco. */
+/* O emblema: o Coringa do jogo maior que o disco. A largura sai da altura que sobra (`--emblema-alto`, na coluna do Início; o
+   desenho tem 300 × 264), entre um mínimo e o tamanho de sempre. */
 .menu-emblema {
   display: block;
+  flex-shrink: 0;
   align-self: center;
-  width: min(286px, 76vw);
+  width: clamp(200px, calc(var(--emblema-alto) * 300 / 264), min(286px, 76vw));
   height: auto;
   overflow: visible;
   filter: drop-shadow(0 6px 0 rgb(0 0 0 / 0.2)) drop-shadow(0 16px 22px rgb(0 0 0 / 0.28));
@@ -678,10 +693,10 @@
   opacity: 0.65;
 }
 
-/* PC: o emblema e a lista maiores. */
+/* PC: o emblema maior, também limitado pela altura que sobra. */
 @media (width >= 1024px) {
   .menu-emblema {
-    width: 340px;
+    width: clamp(220px, calc(var(--emblema-alto) * 300 / 264), 340px);
   }
 }
 
