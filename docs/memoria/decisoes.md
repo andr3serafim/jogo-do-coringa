@@ -6,6 +6,35 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-23 (7): cinco tarefas novas (histórico, cura passiva, figuras das placas, visitantes)
+
+Ele escreveu:
+
+> Tasks a implementar mantendo o altíssimo nível do projeto que já está em produção.
+> [ ] cards de históricos de partidas estão em branco;
+> [ ] Cura passiva ocorre e eu não sei o por que fui curado. talvez um efeito de cartas que vão para o cemitério virando hp e indo pro
+> coringa quando duplo K está ativado. Pense na melhor animação se houver;
+> [ ] O mesmo para quando tiver ressurreição disponível, cura passiva e outros.. deve haver uma figura representando cada coisa ao invés de
+> um texto simples. A idéia é sempre ter a melhor UX e UI;
+> [ ] Quando cura passiva está ativada, deve haver uma animação de +[valor] verde curando os pontos de vida de uma forma que fique mais
+> visível;
+> [ ] quero visualizar quantidade de visitantes do jogo. quantas pessoas acessaram o jogo online;
+>
+> 1. Evite regressões;
+> 2. Evite inferencias, me pergunte o que for necessário;
+> 3. Complexidades desnecessárias;
+> 4. Advisor deve revisar specs, planos ou implementações;
+
+**Leitura:**
+- Branch `feat/cura-historico-visitantes`, saída da `main` em `14adfff`. O advisor revisa a spec, o plano e a implementação.
+- **O histórico em branco** (achado, sem pergunta): no tema verde do menu, a linha de `/partidas` é `bg-papel` sem cor de texto e herda o
+  `--menu-texto` (papel): texto de papel sobre papel. No rosa (o padrão, o dos E2E) aparece. O Lobby tem o mesmo padrão em duas linhas.
+- **A cura, as placas e o "+N"** (itens 2 a 4) são um desenho só; já existem o "+N" verde no placar, o trecho verde da barra, a placa
+  "Cura passiva", a linha do histórico e a faixa da primeira cura. Nada decidido: as perguntas foram a ele.
+- **Visitantes:** nada decidido; as perguntas (quem vê, o que conta) foram a ele.
+
+---
+
 ## 2026-11-23 (6): o merge do PR #7
 
 À pergunta "Faço o merge do PR #7 quando as duas CI ficarem verdes?", ele respondeu:
