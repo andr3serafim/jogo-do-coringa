@@ -61,7 +61,7 @@ export default defineConfig({
   projects: [
     {
       name: 'desktop',
-      testMatch: ['abertura.spec.ts', 'online.spec.ts', 'training.spec.ts', 'replay.spec.ts', 'sound.spec.ts', 'tutorial.spec.ts', 'drag.spec.ts', 'layout.spec.ts', 'scenes.spec.ts', 'fluidez.spec.ts', 'moment.spec.ts', 'resurrection.spec.ts', 'power.spec.ts', 'looks.spec.ts'],
+      testMatch: ['abertura.spec.ts', 'online.spec.ts', 'training.spec.ts', 'replay.spec.ts', 'sound.spec.ts', 'tutorial.spec.ts', 'drag.spec.ts', 'layout.spec.ts', 'scenes.spec.ts', 'fluidez.spec.ts', 'moment.spec.ts', 'resurrection.spec.ts', 'power.spec.ts', 'looks.spec.ts', 'menu-verde.spec.ts'],
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
     },
     {

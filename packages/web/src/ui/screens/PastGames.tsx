@@ -27,6 +27,7 @@ import {
   PAST_GAMES_EMPTY_TEXT,
   pastGameDateText,
   pastGameModeText,
+  pastGameResultKind,
   pastGameResultText,
   REVIEW_LABEL,
 } from '../../model/past-games-copy.ts';
@@ -134,7 +135,12 @@ function Row({ game, onDelete }: { game: PastGame; onDelete: () => void }) {
   const infoId = useId();
   const date = new Date(game.date);
   return (
-    <li className="flex items-center justify-between gap-3 border-4 border-tinta bg-papel p-3">
+    // A cor do texto é a da tinta: dentro do menu verde a linha herdaria o papel, e o texto sumia no papel (decisoes.md 2026-11-23 (7)).
+    // O resultado dá o tom (a faixa e o degradê, no `menu.css`).
+    <li
+      data-resultado={pastGameResultKind(game.outcome, game.seat)}
+      className="partida-linha flex items-center justify-between gap-3 border-4 border-tinta bg-papel p-3 text-tinta"
+    >
       {/* O nome dos botões é só o texto visível ("Rever", "Apagar"); a linha inteira os descreve, para o leitor de tela saber de
           qual partida são. */}
       <div id={infoId} className="flex min-w-0 flex-col gap-0.5">

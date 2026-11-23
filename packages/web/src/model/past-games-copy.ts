@@ -29,6 +29,16 @@ export function pastGameResultText(outcome: StoredOutcome, seat: PlayerId): stri
   return result.winner === seat ? 'Vitória' : 'Derrota';
 }
 
+/**
+ * O tom da linha (decisoes.md 2026-11-23 (9) e (10)): a vitória em verde e a derrota em vermelho, do ponto de vista do seu assento; o
+ * empate e a partida sem resultado ficam neutros.
+ */
+export function pastGameResultKind(outcome: StoredOutcome, seat: PlayerId): 'vitoria' | 'derrota' | 'neutro' {
+  const { result } = outcome;
+  if (result === null || result.kind === 'DRAW') return 'neutro';
+  return result.winner === seat ? 'vitoria' : 'derrota';
+}
+
 /** "Treino · Médio" ou "Sala ABC234". */
 export const pastGameModeText = (mode: PastGameMode): string =>
   mode.kind === 'training' ? trainingLevelText(mode.level) : `Sala ${mode.code}`;

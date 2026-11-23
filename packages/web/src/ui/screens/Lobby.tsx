@@ -140,7 +140,7 @@ export function Lobby({ session }: { session: Session }) {
         </div>
       </Panel>
 
-      <p role="note" className="border-4 border-dashed border-tinta bg-papel px-4 py-3 font-bold">
+      <p role="note" className="border-4 border-dashed border-tinta bg-papel px-4 py-3 font-bold text-tinta">
         {LOBBY_WO_NOTICE}
       </p>
 
@@ -154,7 +154,8 @@ export function Lobby({ session }: { session: Session }) {
 
 function SeatItem({ seat, you }: { seat: SeatLike; you: boolean }) {
   return (
-    <li className="flex items-center justify-between gap-3 border-4 border-tinta bg-papel px-4 py-3">
+    // A cor do texto é a da tinta: no menu verde a linha herdaria o papel (decisoes.md 2026-11-23 (7)).
+    <li className="flex items-center justify-between gap-3 border-4 border-tinta bg-papel px-4 py-3 text-tinta">
       <div className="min-w-0">
         <p className="break-words text-lg font-bold">
           {seat.nickname}

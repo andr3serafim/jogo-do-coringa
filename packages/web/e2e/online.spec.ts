@@ -93,6 +93,11 @@ test.describe('casca estática', () => {
 test('duas pessoas jogam uma sala: do lobby ao fim, com queda e revanche', async ({ browser }) => {
   const ana = await newPlayer(browser, 'Ana');
   const duda = await newPlayer(browser, 'Duda');
+  // A Duda vê o menu no tema verde (decisoes.md 2026-11-23 (7)): os axe da tela de entrar e da Sala de espera dela conferem o contraste
+  // no verde, sem sala a mais (o limite é de 10 por minuto por IP). Só grava se não houver preferência, para não desfazer o que o teste muda.
+  await duda.page.addInitScript(() => {
+    if (localStorage.getItem('coringa:prefs') === null) localStorage.setItem('coringa:prefs', JSON.stringify({ menuTheme: 'green' }));
+  });
   const players = [ana, duda];
   const opponentOf = (player: Player): Player => (player === ana ? duda : ana);
   const socket: SocketControl = await controlSocket(duda.page);

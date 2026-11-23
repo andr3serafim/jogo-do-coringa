@@ -6,6 +6,7 @@ import {
   deletePastGameText,
   pastGameDateText,
   pastGameModeText,
+  pastGameResultKind,
   pastGameResultText,
   replayStoppedText,
   stepCounterText,
@@ -85,5 +86,15 @@ describe('apagar', () => {
     expect(deletePastGameText({ ...game, outcome: win('p2') }, true)).toBe(
       'A partida contra Duda de 25/10, 14:30 (Derrota) some deste navegador, junto com o replay. Não dá para desfazer.',
     );
+  });
+});
+
+describe('pastGameResultKind', () => {
+  it('o tom da linha do ponto de vista do assento: vitória, derrota e neutro (empate e sem resultado)', () => {
+    expect(pastGameResultKind(win('p1'), 'p1')).toBe('vitoria');
+    expect(pastGameResultKind(win('p2'), 'p1')).toBe('derrota');
+    expect(pastGameResultKind(win('p2'), 'p2')).toBe('vitoria');
+    expect(pastGameResultKind({ gameNo: 1, cause: 'NORMAL', result: { kind: 'DRAW', reason: 'ANTI_STALL' } }, 'p1')).toBe('neutro');
+    expect(pastGameResultKind({ gameNo: 1, cause: 'ABANDONED', result: null }, 'p1')).toBe('neutro');
   });
 });

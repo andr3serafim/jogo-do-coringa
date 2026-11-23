@@ -39,7 +39,7 @@ da batida. As placas viram um componente de figura com dica num portal.
 
 ---
 
-### Tarefa 1: O histórico e as telas do menu legíveis no verde, com o resultado em cor
+### Task 1 (Tarefa 1): O histórico e as telas do menu legíveis no verde, com o resultado em cor
 
 **Files:**
 - Modify: `packages/web/src/ui/screens/PastGames.tsx` (o `Row`)
@@ -74,7 +74,7 @@ it('cada linha tem a cor do texto da tinta e o data-resultado', () => {
 - [ ] **Step 5: Rodar:** `pnpm --filter @coringa/web exec vitest run test/ui/past-games.test.tsx` → PASS; `pnpm --filter @coringa/web exec playwright test e2e/menu-verde.spec.ts e2e/online.spec.ts` → PASS (sem violação do axe). Se o axe achar outra tela, consertar a cor do texto nela no mesmo passo.
 - [ ] **Step 6: Commit** `fix(web): o histórico e as telas do menu legíveis no verde; vitória e derrota em cor` e a memória.
 
-### Tarefa 2: A folga da cura no relógio (protocolo)
+### Task 2 (Tarefa 2): A folga da cura no relógio (protocolo)
 
 **Files:**
 - Modify: `packages/protocol/src/scenes.ts`
@@ -101,7 +101,7 @@ it('a folga da cura soma às cenas, até o teto', () => {
 - [ ] **Step 4: Rodar** o protocolo, o servidor e o `local-room` da web: `pnpm --filter @coringa/protocol exec vitest run`, `pnpm --filter @coringa/server exec vitest run`, `pnpm --filter @coringa/web exec vitest run test/model/local-room.test.ts` → PASS. Um teste que fixava a folga de um passo com cura muda o valor esperado (dizer no commit qual), nunca é apagado.
 - [ ] **Step 5: Commit** `feat(protocol): a cura dá folga ao relógio (HEAL_MS)` e a memória.
 
-### Tarefa 3: O motor garante o bruto da cura passiva
+### Task 3 (Tarefa 3): O motor garante o bruto da cura passiva
 
 **Files:**
 - Create: `packages/engine/test/heal-gross.test.ts`
@@ -110,7 +110,7 @@ it('a folga da cura soma às cenas, até o teto', () => {
 - [ ] **Step 2: Rodar:** `pnpm --filter @coringa/engine exec vitest run test/heal-gross.test.ts` → PASS (é a garantia da spec §4.1; se falhar, parar e levar o caso ao autor).
 - [ ] **Step 3: Commit** `test(engine): o bruto da cura passiva vale com o lado do fim do passo` e a memória.
 
-### Tarefa 4: A batida da cura e os efeitos dela (modelo da web)
+### Task 4 (Tarefa 4): A batida da cura e os efeitos dela (modelo da web)
 
 **Files:**
 - Create: `packages/web/src/model/heal-motion.ts`
@@ -161,7 +161,7 @@ it('a faixa da primeira cura segue na batida heal ao vivo', () => {/* teachHeal:
 - [ ] **Step 4: Rodar** os três arquivos → PASS; depois `pnpm --filter @coringa/web exec vitest run test/model` → PASS (os testes antigos que esperavam `kind: 'damage'` ao vivo são reescritos para a decisão nova, com o motivo no commit).
 - [ ] **Step 5: Commit** `feat(web): a batida da cura, sem teto, com o bruto, a conta e a origem` e a memória.
 
-### Tarefa 5: A vida conta na chegada; o brilho e o pulso no placar
+### Task 5 (Tarefa 5): A vida conta na chegada; o brilho e o pulso no placar
 
 **Files:**
 - Modify: `packages/web/src/ui/anim/useBeatPlayer.ts` (o agendamento do `landed`), `packages/web/src/ui/anim/Stage.tsx` (`life`), `packages/web/src/ui/table/FightHud.tsx` (`HpBar`, o número), `packages/web/src/styles.css`
@@ -177,7 +177,7 @@ it('a faixa da primeira cura segue na batida heal ao vivo', () => {/* teachHeal:
 - [ ] **Step 4: Rodar** `pnpm --filter @coringa/web exec vitest run test/ui` → PASS.
 - [ ] **Step 5: Commit** `feat(web): a vida sobe quando a cura chega, com o brilho na barra` e a memória.
 
-### Tarefa 6: A camada da cura: o brilho da origem, a gota, as faíscas e o carimbo
+### Task 6 (Tarefa 6): A camada da cura: o brilho da origem, a gota, as faíscas e o carimbo
 
 **Files:**
 - Create: `packages/web/src/ui/anim/Heal.tsx`
@@ -203,7 +203,7 @@ it('a faixa da primeira cura segue na batida heal ao vivo', () => {/* teachHeal:
 - [ ] **Step 4: Rodar** `pnpm --filter @coringa/web exec vitest run test/ui/heal.test.tsx` e `test/ui` → PASS.
 - [ ] **Step 5: Commit** `feat(web): a cura vira vida na mesa: a gota, as faíscas e o carimbo` e a memória.
 
-### Tarefa 7: O som da cura
+### Task 7 (Tarefa 7): O som da cura
 
 **Files:**
 - Modify: `packages/web/src/model/sound.ts` (`Cue`, `cueOf`), `packages/web/src/sound/synth.ts` (a receita)
@@ -219,7 +219,7 @@ it('a faixa da primeira cura segue na batida heal ao vivo', () => {/* teachHeal:
 - [ ] **Step 4: Rodar** os dois arquivos → PASS.
 - [ ] **Step 5: Commit** `feat(web): o som da cura` e a memória.
 
-### Tarefa 8: As marcas do Coringa só com a figura, com a dica
+### Task 8 (Tarefa 8): As marcas do Coringa só com a figura, com a dica
 
 **Files:**
 - Create: `packages/web/src/ui/table/MarkFigure.tsx`, `packages/web/src/ui/table/mark-tip.ts`
@@ -237,7 +237,7 @@ it('a faixa da primeira cura segue na batida heal ao vivo', () => {/* teachHeal:
 - [ ] **Step 4: Rodar** `pnpm --filter @coringa/web exec vitest run test/ui` → PASS; `pnpm --filter @coringa/web exec playwright test e2e/layout.spec.ts` → PASS.
 - [ ] **Step 5: Commit** `feat(web): as marcas do Coringa e o Reflect só com a figura, com a dica` e a memória.
 
-### Tarefa 9: Conferir de verdade e fechar
+### Task 9 (Tarefa 9): Conferir de verdade e fechar
 
 - [ ] **Step 1: Fotos** (o `medir-cena.ts` ou um `.mjs` com o Playwright, como os da pasta do protótipo): a sua cura e a do oponente (PC 1440 × 900 e celular 390 × 844; fixture `especiais`, rodada 29 e as curas do Bot nela), as marcas com a dica aberta, a lista de partidas nos dois temas. Guardar em `docs/superpowers/specs/2026-11-23-cura-direcoes/final/`. Conferir que o carimbo do oponente não cobre o centro nem o botão do menu.
 - [ ] **Step 2: Medir** com a CPU 4× (`medir-cena.ts`, `MEDIR_APARENCIA` com a arte no celular): a cura e a Devastação, antes (`main`) e depois, na mesma sessão. A cura não pode derrubar os quadros abaixo da Devastação de hoje.
