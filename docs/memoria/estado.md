@@ -27,10 +27,9 @@
     cheia), o verso em dois tons do fundo e o brilho da quadra em ouro. Fotos e scripts em
     `docs/superpowers/specs/2026-11-23-cordel-escuro-direcoes/` (o `LEIAME.md` de lá diz como rodar; a fixture com `looks` fica em
     `packages/web/public/tmp-especiais.json`, **fora do git**).
-  - **Próximo passo exato:** mandar as fotos ao autor; com o ok dele, o `pnpm e2e`, o push e o PR. Apagar o
-    `packages/web/public/tmp-especiais.json`. A limpeza da memória vem depois, só documentos.
-  - **Espera o autor:** o ok à carta escura nova e ao vermelho `#e53935` (3,4:1 sobre o fundo; o `#ff5a4e` daria 4,7:1); confirmar se a
-    carta presa era o que ele viu; o merge do PR; o deploy.
+  - **Aprovada** ("Aprovo, #e53935", `decisoes.md` 2026-11-23 (5)). O `tmp-especiais.json` já foi apagado.
+  - **Próximo passo exato:** o `pnpm e2e` (rodando), o push e o PR para a `main`. A limpeza da memória vem depois, só documentos.
+  - **Espera o autor:** confirmar se a carta presa era o que ele viu; o merge do PR; o deploy.
 
 - **A abertura sem a logo LUSACAN** (`decisoes.md` 2026-11-19 (6)): só a intro do jogo (as cartas, a virada no Coringa, o título), 3,15 s
   em vez de 5,35 s; com movimento reduzido, o Coringa e o título parados, mudos. Branch `feat/intro-sem-logo`, saída da `main` em
