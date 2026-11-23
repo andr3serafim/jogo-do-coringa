@@ -70,13 +70,20 @@ web já tem a batida dele (`timeline.ts`, `Healed`).
 - **O bruto e o líquido** (decisoes (9), 2): o carimbo mostra o **bruto**; a barra e o número sobem o **líquido** (`Healed.amount`, que o
   motor já corta na vida inicial).
   - Cura passiva: bruto = `defenseHealOf(card, lado)` (o que o `healRibbon` já usa). Conta: `7♥ × 4` (o valor e o naipe da carta, × (1 + Q)).
+    **Por que o lado do fim do passo serve:** num passo (uma ação), nada tira nem põe Q de quem cura depois do `healFromDefense`. Conferido
+    no motor: as Q só entram pela jogada da Q (`actions/main.ts`, uma ação à parte); saem pela Armadilha e pelo Sacrifício (ações à parte),
+    pelo Reflect (as do **atacante**, antes da Defesa cair, em `resolveAttack`) e pelo fim da Defesa Absoluta (`expireEffects`, em
+    `flow.ts`), que só vale para quem está sob ela, e sob ela a Defesa não cai nem cura. O Equipar (`equip.ts`) e a Ressurreição só mexem
+    em numéricas. Um teste do motor trava isso (o bruto de cada `Healed` de um passo é igual ao `defenseHealOf` com o lado do fim do
+    passo), para uma regra nova não quebrar o carimbo em silêncio. Nada muda no evento (nem nas partidas de referência).
   - Roubo: bruto = o `value` do `StealDamage` do mesmo passo (o valor com o bônus da fileira de onde a carta saiu, `stealAmount`). Conta:
     `7♥ × 2` (× (1 + J) ou × (1 + Q) **do oponente**).
   - Com o multiplicador 1, a conta é só a carta (`7♥`) **[minha]**.
 - **A vida já cheia** (o líquido é 0): **[pergunta]** pela regra dele (o bruto no carimbo, a vida sobe o líquido), a cura toca inteira e a
   barra não se mexe. Hoje ela passa quieta (sem número). Proposta: tocar, para o jogador ver que a cura existiu e que a vida estava cheia.
-- **Reconexão** (`catchUp`, a linha do tempo dos eventos perdidos): a cura fica curta, como hoje (o "+N" e a barra, dentro do teto da
-  reconexão) **[minha]**: quem volta precisa alcançar a mesa, não rever a animação.
+- **Reconexão** (`catchUp`, a linha do tempo dos eventos perdidos): a cura fica curta, como hoje (o "+N" do **líquido** e a barra,
+  dentro do teto da reconexão, sem carimbo nem conta) **[minha]**: quem volta precisa alcançar a mesa, e ali a vista é a do fim de vários
+  passos, que não garante o bruto.
 
 ### 4.2 O que se vê (na ordem; os tempos são do protótipo, a 1×)
 
@@ -90,7 +97,13 @@ A carta sai da Defesa e cai no cemitério como hoje (a batida de movimento, que 
    corre por ele (620 ms); o ouro e o número contam até a vida nova (520 ms) e o número pulsa; o **carimbo** bate logo abaixo da barra,
    centrado na ponta da vida nova (sem cobrir o centro do placar), inclinado, com o bruto em cima ("+28") e a conta embaixo ("7♥ × 4").
 4. **~1.400 ms:** a batida acaba e o jogo segue. O carimbo fica mais ~1,2 s por conta própria e sai subindo e esmaecendo, mesmo que a
-   batida seguinte já tenha começado. Uma nova cura ou um golpe do mesmo lado o substitui.
+   batida seguinte já tenha começado.
+
+**A vida do carimbo depois da batida** (peça nova: hoje o número vive só dentro da batida):
+- uma nova cura ou o número de um golpe do **mesmo lado** o substitui na hora;
+- uma cena rara (as que têm cortina) o corta na hora: a última cena só fica com a cortina da cena (o "não pode regredir" do `estado.md`);
+- o fim da partida (`GAME_OVER`) e o golpe final o cortam;
+- ao sair, ele deixa a página (como a poeira do `Leaving`), sem nó sobrando.
 
 **Lado do oponente:** o mesmo, espelhado: a barra dele cresce da direita, o carimbo fica sob a barra dele, sem cobrir o centro.
 
@@ -107,9 +120,11 @@ regra em palavras uma vez, e a animação mostra a conta toda vez.
 ### 4.3 O tempo e o relógio
 
 - A batida da cura vira **sem teto** (como as cenas e o momento): não encolhe para caber em `DECISION_CAP_MS`. Duração base: 1.400 ms.
-- **A folga do relógio:** `packages/protocol/src/scenes.ts` ganha `HEAL_MS = 1_400`, somado em `stepAllowanceMs` a cada `Healed` do
-  passo (dentro do teto `SCENE_ALLOWANCE_CAP_MS`). O servidor (que estende o prazo da decisão por ela), a web (que toca nesse tempo) e o
-  Bot do treino (que espera a folga, `local-room.ts`) leem a mesma tabela. Assim a animação nunca come o tempo de quem vai jogar.
+- **A folga do relógio:** `packages/protocol/src/scenes.ts` ganha `HEAL_MS = 1_400`, somado em `stepAllowanceMs` a cada `Healed` **que
+  toca** (dentro do teto `SCENE_ALLOWANCE_CAP_MS`): todos, se a resposta à pergunta da vida cheia (4.1) for "tocar"; só os com
+  `amount > 0`, se for "não tocar". A regra da folga e a da web saem da mesma função do protocolo, para nunca divergirem. O servidor
+  (`schedulePhase`, em `timing.ts`, que estende o prazo em qualquer fase, também no Equipar e na janela de reação), a web e o Bot do treino
+  (`local-room.ts`) leem a mesma tabela. Assim a animação nunca come o tempo de quem vai jogar.
 - Custo aceito pelo autor (decisoes (9), 4): ~1,4 s por cura, quase uma por ataque com a cura passiva ligada.
 - **O deploy:** a folga só vale online depois do deploy (o servidor e a web sobem juntos no Worker). Nada de estado muda.
 
@@ -132,6 +147,10 @@ regra em palavras uma vez, e a animação mostra a conta toda vez.
   três cartas e o espelho (`MirrorMark`) ficam.
 - **A dica:** um cartão de papel com contorno de tinta e sombra dura, com o nome e a linha, que abre ao passar o mouse, ao focar pelo
   teclado ou ao tocar; tocar de novo, tocar fora ou o Esc fecham. Uma dica aberta por vez.
+  - **Onde ela desenha:** em telas baixas os campos rolam por dentro, e uma dica presa ao campo seria cortada. Ela desenha numa camada da
+    mesa, por cima dos campos, posicionada pelo medalhão, e não sai da tela (vira para cima ou para o lado perto da borda).
+  - **O Esc:** o `Stage` e a `PlayTable` já ignoram o Esc com `defaultPrevented`; o da dica fecha e marca o evento, para não pular a cena
+    nem abrir o menu.
 - **Acessibilidade:** cada medalhão é um botão com o nome acessível "nome: linha" (o leitor de tela lê sem abrir a dica). São paradas de Tab
   novas na mesa **[minha]**: o teclado precisa chegar à dica.
 - **O toque durante as batidas:** o `Stage` termina as batidas com um toque na mesa e engole o clique. A lista das placas e o medalhão do
@@ -148,7 +167,8 @@ regra em palavras uma vez, e a animação mostra a conta toda vez.
   assento) e 172 (o selo "pronto", em ouro) também. Antes do plano, uma varredura de **todas** as telas dentro do `MenuScreen` no tema
   verde, comparando a cor do texto com a do fundo (o grep só acha os `bg-papel`).
 - **O resultado pela cor** (a opção que ele escolher em §3): vitória em verde (`--color-cura`), derrota em vermelho (`--color-vermelho`),
-  com contraste ≥ 4,5:1 da palavra sobre o papel; o empate e a partida sem resultado ficam neutros (o papel de hoje) **[minha]**. O resultado
+  com contraste ≥ 4,5:1 da palavra **sobre o fundo dela** (na opção 1, o degradê, que é mais escuro que o papel; medido, e o tom do
+  degradê desce se não passar); o empate e a partida sem resultado ficam neutros (o papel de hoje) **[minha]**. O resultado
   continua escrito ("Vitória", "Derrota"): a cor reforça, não substitui.
 - **O teste que reprova o verde:** um E2E no tema verde que abre `/partidas` com partidas guardadas e mede o contraste do texto de cada
   linha contra o fundo dela; o mesmo para o Lobby, no E2E online que já passa por ele.
@@ -161,6 +181,12 @@ regra em palavras uma vez, e a animação mostra a conta toda vez.
   Devastação e na cura antes de fechar.
 - **O replay:** as partidas guardadas tocam a cura nova (não muda o resultado, só o desenho).
 - **O orçamento:** o código novo fica na mesa (o pacote inicial não muda muito); o smoke confere os 200 KB.
+- **As paradas de Tab novas:** os E2E e os testes de acessibilidade (axe) que andam pela mesa com o teclado podem mudar de ordem; conferir
+  e ajustar, nunca afrouxar.
+- **Os tempos mais longos:** o Bot do treino e os E2E online esperam mais nos passos com cura; os prazos de espera dos E2E e do
+  `local-room.ts` podem precisar de folga.
+- **O carimbo do oponente no celular:** fica sob a barra dele, perto do botão do menu da partida no alto do campo dele; foto na
+  implementação para garantir que não cobre o botão.
 
 ## 8. O que fica para o construtor
 
