@@ -277,10 +277,11 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
       'DevastationCanceled',
       'InitiativeDecided',
       'QuadFormed',
+      'Healed',
     ]);
     const silent = (Object.keys(SAMPLES) as GameEvent['type'][]).filter((type) => !SOUNDING.has(type));
 
-    it('a lista dos mudos tem os 14 tipos restantes', () => {
+    it('a lista dos mudos tem os 13 tipos restantes', () => {
       expect(silent).toHaveLength(37 - SOUNDING.size);
     });
 
@@ -288,5 +289,20 @@ describe('cueOf: o mapa batida → pista dos sons', () => {
       expect(cueFor(SAMPLES[type], 'p1')).toBeNull();
       expect(cueFor(SAMPLES[type], 'p2')).toBeNull();
     });
+  });
+});
+
+describe('o som da cura (decisoes.md 2026-11-23 (10); spec da cura §4.5)', () => {
+  const card = num('n7');
+  const healed = (player: PlayerId, amount = 7): GameEvent => ({ type: 'Healed', player, amount, source: 'DEFENSE', card });
+
+  it('a batida de cura soa a pista da cura, a sua e a do oponente, também com a vida cheia', () => {
+    expect(cueFor(healed('p1'))).toBe('cura');
+    expect(cueFor(healed('p2'))).toBe('cura');
+    expect(cueFor(healed('p1', 0))).toBe('cura');
+  });
+
+  it('na reconexão a cura é muda, como antes', () => {
+    expect(cueOf(buildTimeline([healed('p1')], { ...LIVE, mode: 'catchUp' })[0]!, 'p1')).toBeNull();
   });
 });

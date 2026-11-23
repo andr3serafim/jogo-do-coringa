@@ -2,6 +2,7 @@
 // e por isso mora num chunk à parte. Tudo sai de código: osciladores, ruído filtrado e envelopes curtos do Web Audio, sem
 // arquivo de áudio e sem licença a conferir. Cada pista é uma receita de poucas vozes (um tom ou uma rajada de ruído); todas
 // passam por um volume geral moderado e por um compressor que faz de limitador, então nada fura o teto.
+import { HEAL_MOTION } from '../model/heal-motion.ts';
 import { INTRO } from '../model/intro.ts';
 import { SCENE_MOMENTS } from '../model/scene-moments.ts';
 import { TABLE_MOTION } from '../model/table-motion.ts';
@@ -353,6 +354,20 @@ const RECIPES: Record<Cue, (voices: Voices) => void> = {
     tone({ wave: 'sine', from: 2093, at: s(RES.colorAt), length: 0.7, peak: 0.07 });
     tone({ wave: 'sine', from: 180, to: 90, at: s(RES.landAt), length: 0.16, peak: 0.3 });
     noise({ filter: 'bandpass', from: 1800, q: 1.2, at: s(RES.landAt), length: 0.05, peak: 0.18 });
+  },
+  // A cura (decisoes.md 2026-11-23 (10); spec da cura §4.5), no compasso da batida (`HEAL_MOTION`): o brilho curto quando a carta acende, o
+  // glissando suave e o sopro que sobem com a gota, e na chegada à barra o arpejo de mi maior (que a separa da quadra, em dó, e da
+  // Ressurreição) e dois brilhos agudos que somem enquanto a barra enche. Baixa (≤ 0,14 por voz): a cura é frequente.
+  cura: ({ tone, noise }) => {
+    const drop = s(HEAL_MOTION.dropAt);
+    const arrive = s(HEAL_MOTION.arriveAt);
+    const flight = s(HEAL_MOTION.flightMs);
+    tone({ wave: 'sine', from: 1568, length: 0.12, peak: 0.08 });
+    tone({ wave: 'sine', from: 440, to: 880, at: drop, attack: flight * 0.5, length: flight, peak: 0.07 });
+    noise({ filter: 'bandpass', from: 600, to: 1800, q: 1.4, at: drop, attack: flight * 0.6, length: flight, peak: 0.05 });
+    [659, 831, 988].forEach((hz, i) => tone({ wave: 'triangle', from: hz, at: arrive + i * 0.05, length: 0.45 - i * 0.05, peak: 0.13 }));
+    tone({ wave: 'sine', from: 1976, at: arrive, length: 0.35, peak: 0.06 });
+    tone({ wave: 'sine', from: 2637, at: arrive + 0.06, length: 0.3, peak: 0.05 });
   },
   // O golpe final (bloco B dos pontos do playtest, ponto 15): o sopro que sobe com o corte, o baque do impacto (o grave que afunda, o corpo e o
   // ruído, mais fundo que o golpe forte) e a batida seca do carimbo que assenta.

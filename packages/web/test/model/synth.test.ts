@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Cue } from '../../src/model/sound.ts';
+import { HEAL_MOTION } from '../../src/model/heal-motion.ts';
 import { SCENE_MOMENTS } from '../../src/model/scene-moments.ts';
 import { TABLE_MOTION } from '../../src/model/table-motion.ts';
 import createSynthDefault, { createSynth } from '../../src/sound/synth.ts';
@@ -179,6 +180,7 @@ const ALL_CUES: Record<Cue, true> = {
   'reflect-segurado': true,
   'reflect-cancelado': true,
   ressurreicao: true,
+  cura: true,
   'golpe-final': true,
   'abertura-titulo': true,
 };
@@ -408,6 +410,8 @@ describe('createSynth', () => {
     'golpe-final': 2.4,
     // A da abertura: a subida e a chamada do título.
     'abertura-titulo': 1.5,
+    // A da cura acompanha a batida dela (a gota que sobe e a chegada à barra): termina antes do fim dela.
+    cura: HEAL_MOTION.beatMs / 1000,
   };
 
   it.each(CUES)('%s: dura no máximo 600 ms (a espada, 1,2 s; as das cenas, a cena) e começa agora', (cue) => {
@@ -470,5 +474,22 @@ describe('createSynth', () => {
     expect(voice.connections).toEqual([]);
     // a cadeia de saída, essa, continua de pé para a próxima pista
     expect(compressors[0]!.connections).toEqual([ctx.destination]);
+  });
+});
+
+describe('a pista da cura (spec da cura §4.5)', () => {
+  it('é baixa: nenhuma voz passa de 0,14, porque a cura é frequente', () => {
+    const { play } = setup();
+    const gains = play('cura').filter((node): node is FakeGain => node instanceof FakeGain);
+    expect(gains.length).toBeGreaterThan(0);
+    for (const gain of gains) expect(Math.max(...gain.gain.scheduled)).toBeLessThanOrEqual(0.14);
+  });
+
+  it('o arpejo maior chega com a gota, no instante da chegada', () => {
+    const { play } = setup();
+    const tones = play('cura').filter((node): node is FakeOscillator => node instanceof FakeOscillator);
+    const starts = tones.map((tone) => tone.startedAt! - NOW);
+    expect(starts.some((at) => Math.abs(at - HEAL_MOTION.arriveAt / 1000) < 1e-6)).toBe(true);
+    expect(Math.min(...starts)).toBeCloseTo(0, 6);
   });
 });
