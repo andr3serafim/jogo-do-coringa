@@ -1,7 +1,7 @@
 import type { GameEvent, NumCard, SpecialCard } from '@coringa/engine';
 import { MOMENT_TAIL_MS } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
-import { dustPerCard, healsOf, landingsOf, leavingOf, recoilsOf, shardsPerCard, shiftDelaysOf, TABLE_MOTION } from '../../src/model/table-motion.ts';
+import { dustPerCard, landingsOf, leavingOf, recoilsOf, shardsPerCard, shiftDelaysOf, TABLE_MOTION } from '../../src/model/table-motion.ts';
 import { delaysOf } from '../../src/model/effects.ts';
 import { BEAT_MS, buildTimeline, DECISION_CAP_MS, timelineMs, type Beat } from '../../src/model/timeline.ts';
 import { scenarioAt } from '../fixtures.ts';
@@ -189,22 +189,3 @@ describe('o momento da especial do oponente na mesa (bloco A do playtest, ponto 
   });
 });
 
-describe('a essência da cura passiva (bloco A do playtest, ponto 9)', () => {
-  it('a carta que sai da Defesa e cura: da batida da saída à batida da cura', () => {
-    const six = num('n6', 6);
-    const beats = beatsOf(
-      { type: 'CardsRemovedFromRow', player: 'p1', row: 'DEF', cards: [six] },
-      { type: 'Healed', player: 'p1', amount: 18, source: 'DEFENSE', card: six },
-    );
-    expect([...healsOf(beats)]).toEqual([['n6', { fromMs: 0, atMs: beats[1]!.startMs, player: 'p1' }]]);
-  });
-
-  it('a cura do Roubo e a que não curou nada não têm essência', () => {
-    const six = num('n6', 6);
-    const beats = beatsOf(
-      { type: 'Healed', player: 'p1', amount: 5, source: 'STEAL', card: six },
-      { type: 'Healed', player: 'p2', amount: 0, source: 'DEFENSE', card: num('n2', 2) },
-    );
-    expect(healsOf(beats).size).toBe(0);
-  });
-});

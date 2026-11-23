@@ -36,6 +36,7 @@ import { useSound } from '../sound-context.ts';
 import { AnimContext, IDLE_LIFE, type Anim, type CountPhase, type LifeCount } from './context.ts';
 import { useScenes } from './scenes-loader.ts';
 import { FxLayer } from './FxLayer.tsx';
+import { HealLayer } from './Heal.tsx';
 import { Leaving } from './Leaving.tsx';
 import { MomentLayer } from './Moment.tsx';
 import { BeatOverlay } from './Scene.tsx';
@@ -410,6 +411,8 @@ export function Stage({ snapshot, reducedMotion, onSettled, online = false, chil
             <FxLayer reduced={reducedMotion}>
               {children}
               <Leaving run={run} cut={cut} reduced={reducedMotion} />
+              {/* A cura que vira vida (spec 2026-11-23-cura-placas-historico-design.md §4.2): a gota, as faíscas e o carimbo. */}
+              <HealLayer beat={beat} fx={anim.fx.heal} cut={cut} reduced={reducedMotion} me={state ? me : null} />
             </FxLayer>
             <BeatOverlay
               scene={scene}

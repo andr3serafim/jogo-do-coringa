@@ -43,7 +43,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { bannerBeatAt, damageBeatIndex, dealsOf, delaysOf, type Deals } from '../../model/effects.ts';
 import { FIELD_SCENES, RIBBON_SCENES } from '../../model/timeline.ts';
 import { FLASH_WINDOW_MS, FlashLock } from '../../model/flash.ts';
-import { healsOf, landingsOf, leavingOf, recoilsOf, shiftDelaysOf, TABLE_MOTION, type Heal, type Landing, type Leaving } from '../../model/table-motion.ts';
+import { landingsOf, leavingOf, recoilsOf, shiftDelaysOf, TABLE_MOTION, type Landing, type Leaving } from '../../model/table-motion.ts';
 import { buildTimeline, quietOnly, timelineMs, type Beat, type TimelineOptions } from '../../model/timeline.ts';
 
 /** A cortina fica no ar pelo menos 1 s: a subida e a descida não cabem numa janela de 1 s com a inversão no meio. */
@@ -75,8 +75,6 @@ export interface Run {
   recoils: ReadonlyMap<string, number>;
   landings: ReadonlyMap<string, Landing>;
   leaving: ReadonlyMap<string, Leaving>;
-  /** A essência da cura passiva (bloco A dos pontos do playtest, ponto 9), só ao vivo: a carta que curou, de onde e até quando. */
-  heals: ReadonlyMap<string, Heal>;
 }
 
 const NOTHING = new Map<string, never>();
@@ -154,7 +152,6 @@ function makeMachine(state: StateMessage | null, options: TimelineOptions | null
     recoils,
     landings: live ? landingsOf(beats, me, draftShown) : NOTHING,
     leaving: live ? leavingOf(beats) : NOTHING,
-    heals: live ? healsOf(beats) : NOTHING,
   };
   return { run, index: beats.findIndex((beat) => beat.durationMs > 0), done: run.totalMs === 0, absorbed: null, moments, ownMoments };
 }

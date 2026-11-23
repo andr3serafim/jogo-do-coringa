@@ -40,7 +40,9 @@
   - **Feito:** tarefas 4 e 5 num commit (a batida `heal` sem teto, o `HealFx` com o bruto, a conta e a origem; a vida conta na chegada
     da gota, pela marca própria `healArrived`; o brilho na barra e o pulso do número). O "+N" sob o retrato some ao vivo: o carimbo é da
     Tarefa 6.
-  - **Próximo passo exato:** Tarefa 6 (`ui/anim/Heal.tsx`, a `HealLayer`: o brilho da origem, a gota, as faíscas e o carimbo).
+  - **Feito:** Tarefa 6 (`ui/anim/Heal.tsx`, a `HealLayer` no `FxLayer`: a origem acende, a gota sobe com o rastro, as faíscas e o carimbo
+    "+28 · 7♥ × 4" sob a barra, que fica 1,2 s além da batida; a essência antiga do `Leaving` saiu). Vista no replay (PC e celular).
+  - **Próximo passo exato:** o advisor revisa as tarefas 4 a 6; depois a Tarefa 7 (o som `cura`).
     Para a Tarefa 6: a primeira cura da partida tem a faixa (`healRibbon`) e o carimbo ao mesmo tempo; conferir que não se cobrem.
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`; o deploy (leva
   o PR #7 e os PRs #3 a #6).
