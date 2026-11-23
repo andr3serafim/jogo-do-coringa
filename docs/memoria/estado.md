@@ -14,8 +14,12 @@
   - **Como a cura aparece hoje** (fixture `especiais`, rodada 29, passo 137→138: o 7♥ cai da sua Defesa, 3 Q, +28): o "+28" pequeno sob o
     retrato, ~1 s; o trecho verde da barra; os K da Guarda acendem de leve; a linha "Você curou 28 pela Defesa". Nada liga a carta que cai à
     vida. A cura também vem do Roubo (`Healed.source`).
-  - **Próximo passo exato:** esperar as respostas dele às perguntas (o que faltou na cura, figura no lugar do texto das placas, quem vê
-    os visitantes e o que conta). Depois: as direções com fotos, a spec, o advisor, o plano.
+  - **Respostas dele** (`decisoes.md` 2026-11-23 (8)): a carta que cai vira vida **e** o "+N" maior, junto da barra; placas só com a
+    figura (o texto ao passar o mouse, focar ou tocar); visitantes fora (painel da Cloudflare). O Reflect nas figuras: sem resposta.
+  - **Protótipo das direções:** `docs/superpowers/specs/2026-11-23-cura-direcoes/` (A · Seiva, B · Gotas, C · Coração, e as placas;
+    `LEIAME.md` diz como abrir: a cópia em `packages/web/public/tmp-cura/`, fora do git pelo `.git/info/exclude`).
+  - **Próximo passo exato:** o advisor revisa as direções; depois elas vão ao autor (qual direção, o Reflect, o tempo a mais por cura).
+    Com a escolha: a spec (`docs/superpowers/specs/2026-11-23-cura-placas-historico-design.md`), o advisor, o plano.
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`; o deploy (leva
   o PR #7 e os PRs #3 a #6).
 
