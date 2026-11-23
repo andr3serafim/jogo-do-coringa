@@ -6,6 +6,24 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-23 (10): a spec da cura aprovada, com som de cura
+
+Diante da spec `docs/superpowers/specs/2026-11-23-cura-placas-historico-design.md` (oito escolhas minhas numeradas, a 4 sendo "sem som
+novo para a cura"; as perguntas da opção do histórico, com a recomendação da 1 · Faixa, e da vida já cheia, com a recomendação de tocar),
+ele respondeu:
+
+> Ajustes: 4. DEVE haver som de cura;
+> de resto siga com a recomendação. aprovado o restante
+
+**Leitura:**
+- A spec está aprovada, com um ajuste: **a cura tem som** (substitui a escolha 4).
+- As escolhas 1 a 3 e 5 a 8 ficam como escritas.
+- O histórico usa a **opção 1 · Faixa**, com a faixa mais clara que na foto para a palavra passar de 4,5:1.
+- **Com a vida já cheia**, a cura toca inteira (o carimbo com o bruto, a barra parada), e a folga do relógio vale para todo `Healed`.
+- **[I]** O desenho do som é meu, dentro do sintetizador de hoje, e entra na spec; ele ouve na implementação.
+
+---
+
 ## 2026-11-23 (9): a direção A da cura, o bruto no carimbo e o histórico em verde e vermelho
 
 Diante do protótipo (`docs/superpowers/specs/2026-11-23-cura-direcoes/`), às seis perguntas (1: qual direção; 2: a vida quase cheia, 490
