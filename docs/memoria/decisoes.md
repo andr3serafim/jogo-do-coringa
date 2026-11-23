@@ -6,6 +6,22 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-23 (4): o Cordel Escuro com a geometria do claro, fundo #2a2a2a e vermelho #e53935
+
+Diante das três direções (A, B e C, com filete e cantoneiras), ele escreveu:
+
+> O tamanho dos números e naipes de ambos os decks devem ser padronizados. essas direções que você me apresentou foge dessa regra. quero
+> um tema escuro que não seja um preto chapado de fundo apenas e o vermelho não seja chapado. pode ser a cor #2a2a2a de fundo e #e53935
+
+**Leitura:**
+- **Regra:** o valor e o naipe têm o mesmo tamanho e o mesmo lugar nos dois decks de cordel; o escuro muda a cor e o acabamento, nunca
+  a composição da carta. Saem o filete e as cantoneiras (substitui as direções de (3); nenhuma das três foi escolhida).
+- **As cores:** o fundo `#2a2a2a`, com textura (não liso), e o vermelho `#e53935`, com corpo (não liso).
+- **[I]** O contraste do `#e53935` sobre o `#2a2a2a` é 3,4:1: passa para o naipe e o número grande (3:1), não para o texto pequeno
+  (4,5:1; o número da carta de campo no celular tem ~15 px). Aplicado como ele pediu, e o ponto vai a ele com a alternativa mais próxima.
+
+---
+
 ## 2026-11-23 (3): o Cordel Escuro reprovado como está: "muito amador"
 
 Depois de ver a primeira versão (o papel e a tinta trocados dentro da carta), ele escreveu:

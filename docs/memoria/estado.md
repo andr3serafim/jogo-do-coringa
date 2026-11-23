@@ -21,14 +21,16 @@
     2026-11-23 (1) tem os detalhes.
   - **Ajustes da revisão** (`85b0d7a`): o alvo do esmaecer só na carta que entrou; a quadra escura legível; o seletor de deck em 2 × 2; o
     `CLAUDE.md`. A branch está no GitHub (o pre-push com o `pnpm check` verde); **ainda sem PR e sem `pnpm e2e`**.
-  - **O Cordel Escuro reprovado** ("muito amador", `decisoes.md` 2026-11-23 (3)). Três direções, só em CSS no `styles.css`
-    (`[data-tom='escuro']` é a A; `[data-variante='b']` e `'c'` são as outras; `[data-antes]` reproduz a reprovada), todas com grão,
-    luz de lamparina, filete e cantoneiras (fora da mão: `data-tamanho='hand'`). O jogo não liga `data-variante` nem `data-antes`: hoje
-    a tela mostra a A. Pranchas e scripts em `docs/superpowers/specs/2026-11-23-cordel-escuro-direcoes/` (o `direcoes.mjs` precisa do dev
-    server e de `packages/web/public/tmp-especiais.json`, a fixture `especiais` com `looks`, que **não vai para o git**). Recomendada: a A.
-  - **Próximo passo exato:** com a escolha dele, apagar as outras direções e o `[data-antes]` do CSS, o verso do Cordel Escuro na mesma
-    paleta, os testes, o `pnpm e2e`, o PR. Apagar o `public/tmp-especiais.json`. A limpeza da memória vem depois, só documentos.
-  - **Espera o autor:** a direção do Cordel Escuro (A, B ou C); confirmar se a carta presa era o que ele viu; o merge do PR; o deploy.
+  - **O Cordel Escuro, segunda versão** (`decisoes.md` 2026-11-23 (3) e (4)): a primeira versão e as direções A, B e C caíram (estas
+    fugiam do tamanho igual do valor e do naipe nos dois decks). Agora a carta tem a geometria do claro (medida no dev server: as mesmas
+    caixas, em proporção), o fundo `#2a2a2a` com grão e luz, a borda `#141414`, o vermelho `#e53935` com degradê no valor (o naipe na cor
+    cheia), o verso em dois tons do fundo e o brilho da quadra em ouro. Fotos e scripts em
+    `docs/superpowers/specs/2026-11-23-cordel-escuro-direcoes/` (o `LEIAME.md` de lá diz como rodar; a fixture com `looks` fica em
+    `packages/web/public/tmp-especiais.json`, **fora do git**).
+  - **Próximo passo exato:** mandar as fotos ao autor; com o ok dele, o `pnpm e2e`, o push e o PR. Apagar o
+    `packages/web/public/tmp-especiais.json`. A limpeza da memória vem depois, só documentos.
+  - **Espera o autor:** o ok à carta escura nova e ao vermelho `#e53935` (3,4:1 sobre o fundo; o `#ff5a4e` daria 4,7:1); confirmar se a
+    carta presa era o que ele viu; o merge do PR; o deploy.
 
 - **A abertura sem a logo LUSACAN** (`decisoes.md` 2026-11-19 (6)): só a intro do jogo (as cartas, a virada no Coringa, o título), 3,15 s
   em vez de 5,35 s; com movimento reduzido, o Coringa e o título parados, mudos. Branch `feat/intro-sem-logo`, saída da `main` em

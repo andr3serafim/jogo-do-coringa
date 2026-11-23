@@ -286,8 +286,6 @@ export function Card({
     title: hint ?? cardHint(card, as),
     'data-card-id': ghost ? undefined : card.id,
     'data-tom': art ? undefined : tone,
-    // O tamanho, para o tom escuro: na mão o naipe fica no alto, à direita, e o papel embaixo, sem canto livre para as cantoneiras.
-    'data-tamanho': tone ? size : undefined,
     'aria-hidden': ghost ? true : undefined,
     'data-novo': marked ? 'true' : undefined,
     'data-alvo': target ? 'true' : undefined,
