@@ -47,9 +47,14 @@
     o `StatePlate` saiu; a regra do `data-sem-pulo` no `CLAUDE.md`). E2E de layout, celular e treino verdes depois da 8.
   - **Advisor nas tarefas 7 e 8:** feito (a dica não fecha quando o histórico rola: `b0e8a02`).
   - **Tarefa 9 em curso:** fotos finais em `docs/superpowers/specs/2026-11-23-cura-direcoes/final/`; a cópia `public/tmp-cura` apagada.
-  - **Próximo passo exato:** a medição A/B com a CPU 4× (a cura e a Devastação, a branch e a `main`, scratchpad `medir/`); se a sessão
-    cair no meio, conferir que o checkout voltou para `feat/cura-historico-visitantes` e reconstruir a web. Depois: `CLAUDE.md`, `pnpm e2e`,
-    o pacote da revisão final para o advisor, o PR.
+  - **Medição A/B (CPU 4×, mesma sessão, 2 repetições):** a cura da branch fica igual ou acima da `main` (com arte: 33 a 41 contra 34 a 40
+    quadros/s; Cordel: 40 a 48 contra 39 a 45) e acima da Devastação de hoje com arte no celular (40 a 44). A Devastação não mudou. A primeira
+    rodada saiu inválida (1 a 2 quadros/s nos dois lados: a máquina com 6% de bateria, estrangulada); refeita depois de uma sonda normal.
+  - **Próximo passo exato:** o `CLAUDE.md` (a `HealLayer` no `Stage`, o `HEAL_MS` na `stepAllowanceMs`, a `MarkFigure` com a dica); corrigir o
+    `LEIAME.md` das direções (a linha do `.git/info/exclude` foi tirada: quem copiar a pasta deve pô-la de novo); o `pnpm e2e` completo
+    (a Tarefa 8 mudou a ordem do Tab; só layout, celular e treino rodaram depois dela); o pacote da revisão final
+    (`review-package` do executing-plans) para o advisor; o PR para a `main`. Depois, ao autor: as pranchas de `final/`, a lista das
+    `Ruling:` do diário 2026-11-23 (3) e o menor adiado (o `aria-expanded`), e pedir que teste no treino antes do merge.
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`; o deploy (leva
   o PR #7 e os PRs #3 a #6).
 

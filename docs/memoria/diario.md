@@ -58,6 +58,9 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   batida e a fechava com o mouse em cima — custo: uma dica que fica no ar se um contêiner que não a contém rolar por baixo dela.
 - **Ruling (T8):** o botão da figura leva `aria-expanded` (o plano pedia); a dica é `aria-hidden`, e o nome do botão já diz tudo — custo:
   o leitor de tela anuncia "expandido" sem conteúdo novo (fica como menor adiado).
+- **Tarefa 9 (em curso):** fotos finais em `2026-11-23-cura-direcoes/final/`; a cópia `public/tmp-cura` apagada (o Vite a levaria ao deploy);
+  a medição A/B passou (o estado tem os números). **Armadilha:** com a bateria baixa a máquina estrangula e a medição dá 1 a 2 quadros/s nos
+  dois lados; rode uma sonda (a Devastação, uma vez) antes da A/B.
 - **Armadilha:** um `git rm` fica em stage e entra no próximo commit, mesmo com `git add` de caminhos explícitos; e o pre-commit rápido
   confere a árvore de trabalho, não o que está em stage: um commit pode não compilar sozinho.
 
