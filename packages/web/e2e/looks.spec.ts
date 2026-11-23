@@ -43,7 +43,10 @@ test('aparência: escolhida nas Opções por teclado, guardada, e a mesa do trei
   await expect(panel.getByRole('radio', { name: 'Egípcio' })).toBeDisabled();
 
   // Por teclado: a seta anda no grupo e marca a opção (o rádio desligado fica de fora).
-  await panel.getByRole('radio', { name: 'Cordel' }).focus();
+  // O Cordel Escuro (decisoes.md 2026-11-23 (2)) vem logo depois do Cordel: a seta passa por ele.
+  await panel.getByRole('radio', { name: 'Cordel', exact: true }).focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(panel.getByRole('radio', { name: 'Cordel Escuro' })).toBeChecked();
   await page.keyboard.press('ArrowRight');
   await expect(panel.getByRole('radio', { name: 'Bestiário' })).toBeChecked();
   await panel.getByRole('radio', { name: 'Bufão' }).focus();
@@ -260,7 +263,8 @@ test('aparência: na sala online, cada tela veste cada lado com a aparência do 
     await ana.page.goto('/opcoes');
     const panel = ana.page.getByRole('region', { name: 'Aparência' });
     await expect(panel.getByText('Na sala online, vale a que você tinha ao entrar.')).toBeVisible();
-    await panel.getByRole('radio', { name: 'Cordel' }).focus();
+    await panel.getByRole('radio', { name: 'Cordel', exact: true }).focus();
+    await ana.page.keyboard.press('ArrowRight');
     await ana.page.keyboard.press('ArrowRight');
     await expect(panel.getByRole('radio', { name: 'Bestiário' })).toBeChecked();
     await panel.getByRole('radio', { name: 'Bufão' }).focus();
