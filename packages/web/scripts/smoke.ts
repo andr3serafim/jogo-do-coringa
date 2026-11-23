@@ -17,6 +17,7 @@
  *   nenhum nome de imagem de `src/looks/` (lidos da pasta, o retrato incluído) no JavaScript inicial.
  *   E mais duas: o `index.html` não pré-carrega nenhuma imagem `.webp`, e o CSS que ele pede não traz a fonte Cinzel, que só existe
  *   num CSS de chunk (`src/looks/font.css`, pedido junto com o pacote).
+ * - o favicon (decisoes.md 2026-11-23 (1)): o `index.html` aponta para o `favicon.svg` e o `apple-touch-icon.png`, e os dois estão no `dist`.
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -188,6 +189,18 @@ console.log(`  total: ${kb(total)} de ${kb(BUDGET_BYTES)}`);
 
 // As imagens das aparências nunca entram na abertura: nada de `.webp` pré-carregado pelo `index.html`.
 if (/\.webp\b/i.test(html)) problems.push('o index.html cita uma imagem .webp: as imagens dos decks só chegam com o pacote, por import()');
+
+// O favicon: o `index.html` aponta para os dois ícones, e eles estão no `dist` (o Vite copia o `public/`).
+for (const [rel, file] of [
+  ['icon', 'favicon.svg'],
+  ['apple-touch-icon', 'apple-touch-icon.png'],
+] as const) {
+  const linked = [...html.matchAll(/<link\b[^>]*>/g)].some(([tag]) => tag.includes(`rel="${rel}"`) && tag.includes(`href="/${file}"`));
+  if (!linked) {
+    problems.push(`o index.html não aponta para o /${file} (rel="${rel}")`);
+  }
+  if (!existsSync(join(dist, file))) problems.push(`o dist não tem o ${file}`);
+}
 
 // A Cinzel só existe num CSS de chunk (o `font.css`, pedido junto com o pacote); o CSS que o `index.html` pede não a traz.
 const initialCss = initialStyles(html);
