@@ -18,8 +18,13 @@
     figura (o texto ao passar o mouse, focar ou tocar); visitantes fora (painel da Cloudflare). O Reflect nas figuras: sem resposta.
   - **Protótipo das direções:** `docs/superpowers/specs/2026-11-23-cura-direcoes/` (A · Seiva, B · Gotas, C · Coração, e as placas;
     `LEIAME.md` diz como abrir: a cópia em `packages/web/public/tmp-cura/`, fora do git pelo `.git/info/exclude`).
-  - **Próximo passo exato:** o advisor revisa as direções; depois elas vão ao autor (qual direção, o Reflect, o tempo a mais por cura).
-    Com a escolha: a spec (`docs/superpowers/specs/2026-11-23-cura-placas-historico-design.md`), o advisor, o plano.
+  - **Achados do advisor, conferidos:** a cura para na vida inicial (`heal` em `combat.ts`: `Healed.amount` é o que entrou; o bruto é
+    `defenseHealOf`); o Roubo cura o valor × o bônus da fileira **do oponente** de onde a carta sai (`stealAmount`); com uma decisão
+    esperando, a linha do tempo inteira cabe em 1 s (`DECISION_CAP_MS`), por isso a cura de hoje quase não aparece. Para a cura ter tempo,
+    ela sai do teto como as cenas, com a folga do relógio na tabela do protocolo (`SCENE_MS`, lida pelo servidor e pela web). O
+    `Lobby.tsx:172` (`bg-ouro` sem cor de texto) também sofre no verde.
+  - **Próximo passo exato:** esperar as respostas dele ao lote (a direção, a vida cheia, a cura do oponente, o tempo, o Reflect, o "sim"
+    para consertar o histórico). Com elas: a spec (`docs/superpowers/specs/2026-11-23-cura-placas-historico-design.md`), o advisor, o plano.
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`; o deploy (leva
   o PR #7 e os PRs #3 a #6).
 
