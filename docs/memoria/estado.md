@@ -23,8 +23,12 @@
     esperando, a linha do tempo inteira cabe em 1 s (`DECISION_CAP_MS`), por isso a cura de hoje quase não aparece. Para a cura ter tempo,
     ela sai do teto como as cenas, com a folga do relógio na tabela do protocolo (`SCENE_MS`, lida pelo servidor e pela web). O
     `Lobby.tsx:172` (`bg-ouro` sem cor de texto) também sofre no verde.
-  - **Próximo passo exato:** esperar as respostas dele ao lote (a direção, a vida cheia, a cura do oponente, o tempo, o Reflect, o "sim"
-    para consertar o histórico). Com elas: a spec (`docs/superpowers/specs/2026-11-23-cura-placas-historico-design.md`), o advisor, o plano.
+  - **Respostas** (`decisoes.md` 2026-11-23 (9)): a direção A; o bruto no carimbo e o líquido na vida; a cura do oponente igual; o tempo
+    aceito; o Reflect também só figura; o histórico consertado, vitória em verde e derrota em vermelho ("tipo CS2").
+  - **Spec escrita** (rascunho): `docs/superpowers/specs/2026-11-23-cura-placas-historico-design.md`; as fotos do histórico em
+    `2026-11-23-cura-direcoes/prancha-historico.png` (1 · Faixa, 2 · Selo).
+  - **Próximo passo exato:** o advisor revisa a spec; depois ela vai ao autor com as duas perguntas dela (a opção do histórico; a cura com a
+    vida já cheia) e o pedido de "sim". Com o sim: o plano (`superpowers:writing-plans`), o advisor, a implementação.
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`; o deploy (leva
   o PR #7 e os PRs #3 a #6).
 
