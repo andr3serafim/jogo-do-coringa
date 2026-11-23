@@ -3,8 +3,8 @@
 Data: 2026-11-23. Origem: `docs/memoria/decisoes.md` 2026-11-23 (7), (8) e (9). Protótipo e fotos:
 `docs/superpowers/specs/2026-11-23-cura-direcoes/` (`LEIAME.md`). Branch `feat/cura-historico-visitantes`.
 
-**Estado: rascunho, à espera do "sim" do autor.** Os pontos marcados **[minha]** são escolhas minhas que ele não viu; os marcados
-**[pergunta]** esperam a resposta dele.
+**Estado: aprovada** (`decisoes.md` 2026-11-23 (10)), com o som de cura pedido por ele (§4.5). Os pontos **[minha]** foram aprovados
+como escritos; os **[pergunta]** foram respondidos (a opção 1 do histórico; a cura toca com a vida cheia).
 
 ## 1. Por quê
 
@@ -29,14 +29,14 @@ resultado pela cor.
 1. A animação da cura da direção A (Seiva), para a cura passiva (Defesa) e a do Roubo, dos dois lados.
 2. O carimbo "+N" junto da barra de vida, com o **bruto** e a conta; a vida sobe só o **líquido**.
 3. A cura sai do teto de decisão e ganha folga no relógio, como as cenas.
-4. As placas de estado e o Reflect só com a figura; o nome e o que faz ao passar o mouse, focar ou tocar.
-5. A lista de partidas legível no verde, com vitória em verde e derrota em vermelho; o mesmo conserto nas outras telas do menu.
+4. A cura tem som (`decisoes.md` 2026-11-23 (10)), no compasso da animação.
+5. As placas de estado e o Reflect só com a figura; o nome e o que faz ao passar o mouse, focar ou tocar.
+6. A lista de partidas legível no verde, com vitória em verde e derrota em vermelho; o mesmo conserto nas outras telas do menu.
 
 **Não metas**
 - Visitantes: o autor vê pelo painel da Cloudflare (decisoes (8)). A CSP fica como está.
 - Regra do jogo: nada muda no motor. Sem `RULES_VERSION` nem `STATE_SCHEMA` novos; as partidas de referência não mudam.
 - Os títulos das zonas (Guarda, Bônus de ataque, Bônus de defesa) seguem com a figura e o texto de hoje: são nomes de lugar, não estados.
-- Som novo para a cura **[minha]**: o sintetizador não tem pista de cura, e ninguém pediu. Fica para depois, se ele quiser.
 
 **Anti-metas** (o que faria falhar mesmo funcionando)
 - Flash de tela, filtro ou sombra com desfoque (a Devastação com arte no celular já está no limite; spec da web §10.4).
@@ -58,7 +58,7 @@ O autor escolheu a **A** (decisoes (9), 1).
 
 Para o histórico, duas opções com fotos (`prancha-historico.png`): **1 · Faixa** (a faixa colorida à esquerda e um degradê leve, a
 palavra do resultado na cor, como o histórico do CS2) e **2 · Selo** (o resultado num selo colorido e a borda e a sombra da linha na cor).
-**[pergunta]** Qual. A minha recomendação é a **1**: é o "tipo CS2" que ele citou, e no tema verde a borda verde da 2 some no fundo verde.
+**Escolhida: a 1** (decisoes (10)). A recomendação era a **1**: é o "tipo CS2" que ele citou, e no tema verde a borda verde da 2 some no fundo verde.
 
 ## 4. A cura (direção A)
 
@@ -79,8 +79,8 @@ web já tem a batida dele (`timeline.ts`, `Healed`).
   - Roubo: bruto = o `value` do `StealDamage` do mesmo passo (o valor com o bônus da fileira de onde a carta saiu, `stealAmount`). Conta:
     `7♥ × 2` (× (1 + J) ou × (1 + Q) **do oponente**).
   - Com o multiplicador 1, a conta é só a carta (`7♥`) **[minha]**.
-- **A vida já cheia** (o líquido é 0): **[pergunta]** pela regra dele (o bruto no carimbo, a vida sobe o líquido), a cura toca inteira e a
-  barra não se mexe. Hoje ela passa quieta (sem número). Proposta: tocar, para o jogador ver que a cura existiu e que a vida estava cheia.
+- **A vida já cheia** (o líquido é 0): a cura toca inteira e a barra não se mexe (decisoes (10)); hoje ela passa quieta. O jogador vê que
+  a cura existiu e que a vida estava cheia.
 - **Reconexão** (`catchUp`, a linha do tempo dos eventos perdidos): a cura fica curta, como hoje (o "+N" do **líquido** e a barra,
   dentro do teto da reconexão, sem carimbo nem conta) **[minha]**: quem volta precisa alcançar a mesa, e ali a vista é a do fim de vários
   passos, que não garante o bruto.
@@ -107,8 +107,8 @@ A carta sai da Defesa e cai no cemitério como hoje (a batida de movimento, que 
 
 **Lado do oponente:** o mesmo, espelhado: a barra dele cresce da direita, o carimbo fica sob a barra dele, sem cobrir o centro.
 
-**Movimento reduzido:** nada voa nem pisca; o carimbo e o verde da barra só aparecem (esmaecer de 200 ms), os K ficam acesos parados, e a
-vida vai direto ao valor novo.
+**Movimento reduzido:** nada voa nem pisca; no instante da chegada (760 ms, o mesmo do som) o carimbo e o verde da barra só aparecem
+(esmaecer de 200 ms), os K ficam acesos parados, e a vida vai direto ao valor novo.
 
 **O carimbo:** a fonte de texto com `tabular-nums` (números de jogo sem textura, spec da web §10.7), papel sobre o verde da cura
 (`--color-cura`), contorno de tinta e sombra dura (sem desfoque). No PC ~40 px; no celular ~22 px. Substitui o "+N" pequeno sob o retrato
@@ -121,8 +121,7 @@ regra em palavras uma vez, e a animação mostra a conta toda vez.
 
 - A batida da cura vira **sem teto** (como as cenas e o momento): não encolhe para caber em `DECISION_CAP_MS`. Duração base: 1.400 ms.
 - **A folga do relógio:** `packages/protocol/src/scenes.ts` ganha `HEAL_MS = 1_400`, somado em `stepAllowanceMs` a cada `Healed` **que
-  toca** (dentro do teto `SCENE_ALLOWANCE_CAP_MS`): todos, se a resposta à pergunta da vida cheia (4.1) for "tocar"; só os com
-  `amount > 0`, se for "não tocar". A regra da folga e a da web saem da mesma função do protocolo, para nunca divergirem. O servidor
+  toca** (dentro do teto `SCENE_ALLOWANCE_CAP_MS`): como a cura toca também com a vida cheia (4.1), **todo** `Healed`. A regra da folga e a da web saem da mesma função do protocolo, para nunca divergirem. O servidor
   (`schedulePhase`, em `timing.ts`, que estende o prazo em qualquer fase, também no Equipar e na janela de reação), a web e o Bot do treino
   (`local-room.ts`) leem a mesma tabela. Assim a animação nunca come o tempo de quem vai jogar.
 - Custo aceito pelo autor (decisoes (9), 4): ~1,4 s por cura, quase uma por ataque com a cura passiva ligada.
@@ -131,12 +130,26 @@ regra em palavras uma vez, e a animação mostra a conta toda vez.
 ### 4.4 Onde mexe (para o plano)
 
 - `protocol/src/scenes.ts`: `HEAL_MS` e a soma em `stepAllowanceMs` (e os testes dela).
-- `web/src/model/timeline.ts`: o `Healed` vira batida própria da cura (sem teto, `HEAL_MS`), também com o líquido 0 se a resposta à
-  pergunta de 4.1 for "tocar"; no `catchUp`, curta.
+- `web/src/model/timeline.ts`: o `Healed` vira batida própria da cura (sem teto, `HEAL_MS`), também com o líquido 0; no `catchUp`, curta.
 - `web/src/model/effects.ts`: o efeito da cura leva a origem (cemitério ou a carta roubada), o bruto, a conta e o líquido.
 - A camada da gota e das faíscas no `Stage` (as âncoras de hoje: `data-cemiterio`, `data-card-id`, a barra do placar); o carimbo e o
   brilho no `FightHud` (`HpBar`, o `DamageNumber` de hoje para a cura).
 - As regras de animação de sempre: só `transform` e `opacity`; nada de `filter` nem sombra com desfoque; com movimento reduzido, nada voa.
+
+### 4.5 O som (decisoes (10))
+
+Uma pista nova, `cura`, no sintetizador de hoje (`web/src/sound/synth.ts`; o mapa em `web/src/model/sound.ts`, `cueOf`): tudo de
+código, sem arquivo. Ela segue os instantes da batida, que moram num lugar só do modelo (como o `TABLE_MOTION` e o `SCENE_MOMENTS`), lidos
+pela animação e pelo som:
+
+1. **0 ms, a carta acende:** um brilho curto e agudo (seno ~1.568 Hz, 120 ms, baixo).
+2. **120 a 760 ms, a gota sobe:** um glissando suave que sobe com ela (seno ~440 → 880 Hz) e um sopro de ruído em banda que sobe junto.
+3. **760 ms, a chegada:** um arpejo maior quente (mi maior: ~659, 831 e 988 Hz, triângulo, as vozes entrando de 50 em 50 ms) e dois
+   brilhos agudos (~1.976 e 2.637 Hz) que somem enquanto a barra enche.
+
+Picos baixos (≤ 0,14 por voz, abaixo da quadra e da Ressurreição), para a cura, que é frequente, não cansar; o tom (mi maior) a separa
+da quadra (dó maior) e da Ressurreição (a escala em dó). Soa nos dois lados (a sua cura e a do oponente) **[minha]**, como a quadra, e
+também com o movimento reduzido (o som não é movimento). O autor ouve na implementação; o timbre fino é do construtor.
 
 ## 5. As placas só com a figura (decisoes (8) e (9), 5)
 
