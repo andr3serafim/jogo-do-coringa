@@ -46,7 +46,7 @@ da batida. As placas viram um componente de figura com dica num portal.
 - Modify: `packages/web/src/ui/screens/Lobby.tsx:143,157,172`
 - Modify: `packages/web/src/ui/menu/menu.css` (as regras da linha da partida)
 - Modify: `packages/web/src/model/past-games-copy.ts` (a função do resultado)
-- Test: `packages/web/test/ui/past-games.test.tsx` (existente; acrescenta), `packages/web/e2e/menu-verde.spec.ts` (novo)
+- Test: `packages/web/test/ui/past-games.test.tsx` (existente; acrescenta), `packages/web/e2e/menu-verde.spec.ts` (novo), `packages/web/e2e/online.spec.ts` (a Duda no verde)
 
 **Interfaces:**
 - Produces: `pastGameResultKind(outcome: StoredOutcome, seat: PlayerId): 'vitoria' | 'derrota' | 'neutro'` em `past-games-copy.ts`; a linha ganha `data-resultado` com esse valor.
@@ -70,8 +70,8 @@ it('cada linha tem a cor do texto da tinta e o data-resultado', () => {
 
 - [ ] **Step 2: Rodar e ver falhar:** `pnpm --filter @coringa/web exec vitest run test/ui/past-games.test.tsx` → FAIL (`pastGameResultKind` não existe).
 - [ ] **Step 3: Implementar** `pastGameResultKind`; no `Row`, `text-tinta`, a classe `partida-linha` e `data-resultado`; no Lobby, `text-tinta` nas linhas 143, 157 e 172. No `menu.css`, a opção 1 · Faixa (o `historico-fotos.mjs` da pasta do protótipo tem o CSS de referência), com estas cores: a faixa de 10 px em `--color-cura` / `--color-vermelho`; o degradê de 18 % da cor para o papel até 60 % da largura; a palavra do resultado em `#1f5c2c` (vitória) e `#9a1f16` (derrota), que passam de 4,5:1 sobre o degradê (≈5,6 e 5,4); `neutro` sem faixa nem degradê.
-- [ ] **Step 4: E2E no verde** (`e2e/menu-verde.spec.ts`): grava `coringa:prefs = {"menuTheme":"green"}` e três partidas (vitória, derrota, empate) no `addInitScript`; roda `axe(page)` (o helper já checa o contraste) em `/`, `/jogar`, `/treinar`, `/opcoes`, `/treino` sem `nivel` (a escolha do nível), `/partidas` e, criando uma sala pelo menu, na Sala de espera.
-- [ ] **Step 5: Rodar:** `pnpm --filter @coringa/web exec vitest run test/ui/past-games.test.tsx` → PASS; `pnpm --filter @coringa/web exec playwright test e2e/menu-verde.spec.ts` → PASS (sem violação do axe). Se o axe achar outra tela, consertar a cor do texto nela no mesmo passo.
+- [ ] **Step 4: E2E no verde** (`e2e/menu-verde.spec.ts`): grava `coringa:prefs = {"menuTheme":"green"}` e três partidas (vitória, derrota, empate) no `addInitScript`; roda `axe(page)` (o helper já checa o contraste) em `/`, `/jogar`, `/treinar`, `/opcoes`, `/treino` sem `nivel` (a escolha do nível) e `/partidas`, sem criar sala. **O Lobby e a tela de entrar:** no `online.spec.ts`, a Duda grava `menuTheme: green` antes de abrir o link; os `axe` que já rodam na tela de entrar e na Sala de espera dela passam a cobrir o verde (o limite é de 10 salas por minuto por IP: nada de sala nova).
+- [ ] **Step 5: Rodar:** `pnpm --filter @coringa/web exec vitest run test/ui/past-games.test.tsx` → PASS; `pnpm --filter @coringa/web exec playwright test e2e/menu-verde.spec.ts e2e/online.spec.ts` → PASS (sem violação do axe). Se o axe achar outra tela, consertar a cor do texto nela no mesmo passo.
 - [ ] **Step 6: Commit** `fix(web): o histórico e as telas do menu legíveis no verde; vitória e derrota em cor` e a memória.
 
 ### Tarefa 2: A folga da cura no relógio (protocolo)
@@ -106,7 +106,7 @@ it('a folga da cura soma às cenas, até o teto', () => {
 **Files:**
 - Create: `packages/engine/test/heal-gross.test.ts`
 
-- [ ] **Step 1: O teste** (só teste; o motor não muda): para cada partida de `test/fixtures/golden-replays.json`, aplicar passo a passo (`createGame`, `applyAction`, como `test/replay.ts`) e, em cada `Healed` com `source: 'DEFENSE'`, conferir `defenseHealOf(event.card, ladoDoFimDoPasso) >= event.amount` **e** que o número de Q de quem curou no fim do passo é o mesmo de antes do `healFromDefense` (o lado guardado antes do passo, menos as Q que saíram por eventos anteriores ao `Healed` no mesmo passo). Basta: nenhum `BuffRemoved`/`BuffPlayed`/`AbsoluteDefenseEnded` de quem curou depois do `Healed` no mesmo passo. Também afirmar que pelo menos uma partida tem `Healed` de Defesa (o teste não pode passar vazio).
+- [ ] **Step 1: O teste** (só teste; o motor não muda). Em cada passo (um `applyAction`), para cada `Healed` com `source: 'DEFENSE'`: nenhum `BuffRemoved`, `BuffPlayed` nem `AbsoluteDefenseEnded` de quem curou depois dele no mesmo passo, e `defenseHealOf(event.card, ladoDeQuemCurouNoFimDoPasso) >= event.amount`. Rodar sobre as 11 partidas de `test/fixtures/golden-replays.json` (passo a passo, como `test/replay.ts`) **e** sobre algumas centenas de partidas sorteadas com o `playout` (como o `properties.test.ts`), afirmando que a soma vista tem `Healed` de Defesa (o teste não pode passar vazio). Conferido no plano: uma mensagem `state` leva os eventos de um `applyAction` só, no servidor (`core/game.ts`) e no treino (`local-room.ts`, `#commit` por ação); a reconexão (`catchUp`) junta vários, e por isso nela a cura fica curta, sem bruto.
 - [ ] **Step 2: Rodar:** `pnpm --filter @coringa/engine exec vitest run test/heal-gross.test.ts` → PASS (é a garantia da spec §4.1; se falhar, parar e levar o caso ao autor).
 - [ ] **Step 3: Commit** `test(engine): o bruto da cura passiva vale com o lado do fim do passo` e a memória.
 
@@ -122,7 +122,7 @@ it('a folga da cura soma às cenas, até o teto', () => {
 - Produces:
   - `HEAL_MOTION = { glowMs: 420, dropAt: 120, flightMs: 640, arriveAt: 760, countMs: 520, shineMs: 620, sparksMs: 520, stampHoldMs: 1200, stampOutMs: 300, beatMs: HEAL_MS } as const` em `heal-motion.ts`.
   - `Beat.kind` ganha `'heal'`; `Beat.heal: { arriveAtMs: number; stealValue: number | null } | null` (absoluto, como `hit.atMs`).
-  - `BeatEffects.heal: HealFx | null`, com `interface HealFx { target: PlayerId; gross: number; net: number; caption: string; origin: { kind: 'graveyard' } | { kind: 'card'; id: string } }`.
+  - `BeatEffects.heal: HealFx | null`, com `interface HealFx { target: PlayerId; card: NumCard; gross: number; net: number; caption: string; origin: { kind: 'graveyard' } | { kind: 'card'; id: string } }` (`card` é a carta do `Healed`: no Equipar, outra carta pode cair no cemitério depois dela no mesmo passo, `equip.ts`, a revelação dos dois).
   - `healCaption(card: NumCard, gross: number): string` em `copy.ts` (`cardText(card)` + ` × ${gross / card.value}` quando o multiplicador passa de 1).
 
 - [ ] **Step 1: Testes**
@@ -153,10 +153,11 @@ it('a cura passiva: o bruto do motor, o líquido do evento, a conta e a origem n
 it('o Roubo: o bruto é o stealValue, a origem é a carta roubada', () => {/* origin { kind: 'card', id } */});
 it('sem Q, a conta é só a carta', () => {/* caption '7♥' */});
 it('a batida de cura não põe o número de dano; a da reconexão põe o "+N" de hoje', () => {/* damage null vs { heal: true } */});
+it('a faixa da primeira cura segue na batida heal ao vivo', () => {/* teachHeal: o beat heal tem teach, e ribbonOf o mostra */});
 ```
 
 - [ ] **Step 2: Falhar:** `pnpm --filter @coringa/web exec vitest run test/model/timeline.test.ts test/model/effects.test.ts test/model/heal-motion.test.ts` → FAIL.
-- [ ] **Step 3: Implementar.** Em `buildTimeline`, fora do `catchUp`: o `Healed` vira `kind: 'heal'`, `baseMs = HEAL_MS`, `uncapped = true`, e `heal.stealValue` vem do `StealDamage` mais perto antes dele no mesmo `events` (só com `source: 'STEAL'`). `damageBeatIndex` passa a exigir `amount > 0` no `Healed`. Em `effectsOf`, a batida `heal` dá `heal` (o lado de quem cura para o `defenseHealOf`; o `cause` dos K continua, só na Defesa) e `damage: null`; a `damage` da reconexão segue como hoje. O `teach` (a faixa da primeira cura) não muda.
+- [ ] **Step 3: Implementar.** Antes, conferir quem lê `beat.kind` (hoje: `BEAT_MS[kind]` e o `quietOnly` em `timeline.ts`, o `damageBeatIndex` e a faixa em `effects.ts`; um grep por `kind ===` e `'damage'` em `web/src`) e decidir cada um para a `'heal'`: a duração vem de `HEAL_MS`; não é quieta; não treme a mesa (sem `impact`). Em `buildTimeline`, fora do `catchUp`: o `Healed` vira `kind: 'heal'`, `baseMs = HEAL_MS`, `uncapped = true`, e `heal.stealValue` vem do `StealDamage` mais perto antes dele no mesmo `events` (só com `source: 'STEAL'`). `damageBeatIndex` passa a exigir `amount > 0` no `Healed`. Em `effectsOf`, a batida `heal` dá `heal` (o lado de quem cura para o `defenseHealOf`; o `cause` dos K continua, só na Defesa) e `damage: null`; a `damage` da reconexão segue como hoje. O `teach` (a faixa da primeira cura) não muda.
 - [ ] **Step 4: Rodar** os três arquivos → PASS; depois `pnpm --filter @coringa/web exec vitest run test/model` → PASS (os testes antigos que esperavam `kind: 'damage'` ao vivo são reescritos para a decisão nova, com o motivo no commit).
 - [ ] **Step 5: Commit** `feat(web): a batida da cura, sem teto, com o bruto, a conta e a origem` e a memória.
 
@@ -172,7 +173,7 @@ it('a batida de cura não põe o número de dano; a da reconexão põe o "+N" de
 
 - [ ] **Step 1: Testes** (relógio falso do Vitest): numa batida `heal` com líquido 10, a vida mostrada fica no valor antigo até `arriveAt`, chega ao novo em `countMs` depois, e o `data-cura-brilho` aparece na chegada; com o líquido 0, a vida não se mexe e não há contagem; com movimento reduzido, nada de brilho nem pulso (a vida segue a regra de hoje).
 - [ ] **Step 2: Falhar.**
-- [ ] **Step 3: Implementar.** No `useBeatPlayer`, `if (beat.heal) at(beat.heal.arriveAtMs, () => setLanded({ run, index: i }))` (o mesmo `landed` do golpe da cena). No `life` do `Stage`, para a batida com `heal`: `step` só com o `hitLanded`, e `ms = HEAL_MOTION.countMs`. No `HpBar`, o brilho é um filho a mais (`transform` e `opacity`, Web Animations), só com a cura chegada e sem movimento reduzido. O K que acende (`cause`, em `Card.tsx:463`) ganha borda de 4 px mais opaca (`bg-cura/35`).
+- [ ] **Step 3: Implementar.** No `useBeatPlayer`, uma marca própria, `healArrived` (como o `landed`: `{ run, index }` agendado em `beat.heal.arriveAtMs`, exposto no retorno ao lado do `hitLanded`). **Não** reusar o `hitLanded`: o `Stage` o lê também no retrato que racha (`defeated`), no `effectsOf` e na `BeatOverlay`, e uma cura logo antes do golpe final rachara o retrato cedo. No `life` do `Stage`, para a batida com `heal`: `step` só com o `healArrived`, e `ms = HEAL_MOTION.countMs`. Teste: uma cura seguida do golpe final não racha o retrato na chegada da cura. No `HpBar`, o brilho é um filho a mais (`transform` e `opacity`, Web Animations), só com a cura chegada e sem movimento reduzido. O K que acende (`cause`, em `Card.tsx:463`) ganha borda de 4 px mais opaca (`bg-cura/35`).
 - [ ] **Step 4: Rodar** `pnpm --filter @coringa/web exec vitest run test/ui` → PASS.
 - [ ] **Step 5: Commit** `feat(web): a vida sobe quando a cura chega, com o brilho na barra` e a memória.
 
@@ -188,14 +189,17 @@ it('a batida de cura não põe o número de dano; a da reconexão põe o "+N" de
 - Produces: `export function HealLayer(props: { run: Run; beat: Beat | null; cut: boolean; fx: HealFx | null; me: PlayerId; reduced: boolean }): null` (põe e tira nós na camada; não desenha pelo React). Marcas: `[data-cura-gota]`, `[data-cura-faisca]`, `[data-cura-carimbo]` (com o texto do bruto e da conta), `[data-cura-origem]`.
 
 - [ ] **Step 1: Testes** (jsdom com o relógio falso; `Element.prototype.animate` falso como no `leaving.test.tsx`):
-  - na batida `heal`, `[data-cura-origem]` e `[data-cura-gota]` aparecem; na chegada, `[data-cura-carimbo]` com "+28" e "7♥ × 4"; o carimbo do seu lado está dentro do lado `voce` (a âncora da sua barra) e o do oponente na do `oponente`;
+  - na batida `heal`, `[data-cura-origem]` e `[data-cura-gota]` aparecem; num passo do Equipar em que outra carta cai no cemitério depois da que curou, a origem acesa é o monte (`[data-cemiterio]`), não a carta de cima;
+  - o número de um golpe do mesmo lado troca o carimbo (o carimbo sai);
+  - um `state` novo (outra `run`) com o carimbo ainda no ar: ele termina a saída ou sai na hora, sem nó órfão;
+  - desmontar o `Stage` tira os nós e cancela os timers; na chegada, `[data-cura-carimbo]` com "+28" e "7♥ × 4"; o carimbo do seu lado está dentro do lado `voce` (a âncora da sua barra) e o do oponente na do `oponente`;
   - o carimbo continua depois do fim da batida e sai `stampHoldMs + stampOutMs` depois dela, sem nó sobrando;
   - uma cura nova do mesmo lado troca o carimbo (só um `[data-cura-carimbo]` por lado);
   - uma batida de cena (`kind: 'scene'`) ou um `GameOver` tira o carimbo na hora;
   - o pulo (`cut`) tira a gota, as faíscas e o carimbo;
   - com movimento reduzido, nada de gota nem faísca; o carimbo aparece na chegada.
 - [ ] **Step 2: Falhar.**
-- [ ] **Step 3: Implementar** com Web Animations sobre nós da camada, os tempos de `HEAL_MOTION`. A origem é o `[data-cemiterio]` (a carta de cima) na Defesa e a carta `data-card-id` no Roubo; o destino é a ponta da vida nova na barra de quem cura (a fração `vida/máx` da largura da barra, do lado do retrato). O carimbo pendura logo abaixo da barra, centrado na ponta, preso para não passar do fim da barra para o centro do placar (o espelho no lado do oponente). Tamanhos do carimbo e da gota pelo `pc:` (a largura que a mesa já usa).
+- [ ] **Step 3: Implementar** com Web Animations sobre nós da camada, os tempos de `HEAL_MOTION`. A origem: na Defesa, a carta `[data-cemiterio] [data-card-id="<fx.card.id>"]` se for ela a de cima, senão o monte `[data-cemiterio]`; no Roubo, a carta `data-card-id` na fileira de quem roubou; o destino é a ponta da vida nova na barra de quem cura (a fração `vida/máx` da largura da barra, do lado do retrato). O carimbo pendura logo abaixo da barra, centrado na ponta, preso para não passar do fim da barra para o centro do placar (o espelho no lado do oponente). Tamanhos do carimbo e da gota pelo `pc:` (a largura que a mesa já usa).
 - [ ] **Step 4: Rodar** `pnpm --filter @coringa/web exec vitest run test/ui/heal.test.tsx` e `test/ui` → PASS.
 - [ ] **Step 5: Commit** `feat(web): a cura vira vida na mesa: a gota, as faíscas e o carimbo` e a memória.
 
@@ -227,7 +231,7 @@ it('a batida de cura não põe o número de dano; a da reconexão põe o "+N" de
 
 - [ ] **Step 1: Testes**
   - `table.test.tsx`: no lugar de `getByText('Cura passiva')`, `getByRole('button', { name: /^Cura passiva: / })` no campo certo; o `line()` lê a parte depois de ": " do nome acessível; os casos de borda de `plateLine` (o mínimo da cura, o Ataque Absoluto do outro) seguem com os mesmos textos; o Reflect pelo botão `/^Reflect ativo: /` e as três cartas na lista "Cartas do Reflect".
-  - `mark-figure.test.tsx`: passar o mouse abre a dica com o nome e a linha; o foco pelo teclado abre; o clique alterna; abrir uma fecha a outra; tocar fora fecha; o Esc fecha e marca o evento (`defaultPrevented`), e o `Stage` não pula; a lista das marcas e o medalhão do Reflect têm `data-sem-pulo`; o selo da Ressurreição mostra o número; com movimento reduzido, sem `data-gesto`.
+  - `mark-figure.test.tsx`: o nome acessível da Ressurreição leva o número visível do selo (WCAG 2.5.3, o rótulo no nome): `resurrectionsText(2)` + ": traz 1 numérica do cemitério"; rolar ou redimensionar fecha a dica (ela é `position: fixed` e os campos rolam por dentro); passar o mouse abre a dica com o nome e a linha; o foco pelo teclado abre; o clique alterna; abrir uma fecha a outra; tocar fora fecha; o Esc fecha e marca o evento (`defaultPrevented`), e o `Stage` não pula; a lista das marcas e o medalhão do Reflect têm `data-sem-pulo`; o selo da Ressurreição mostra o número; com movimento reduzido, sem `data-gesto`.
 - [ ] **Step 2: Falhar.**
 - [ ] **Step 3: Implementar.** Medalhão de 36 px (`size-9`) e 44 px no PC (`pc:size-11`), com a figura e os gestos de hoje (copiar do `StatePlate`). A dica num portal no `document.body`, `position: fixed`, pela caixa do medalhão, virando para cima ou para o lado perto da borda; `pointer-events: none`; o texto dela fica `aria-hidden` (o nome acessível já diz tudo). O coração da cura em papel com contorno de tinta sobre o disco verde (o contraste da spec §5). No `CLAUDE.md`, a linha do `data-sem-pulo` ganha "e as figuras das marcas do Coringa".
 - [ ] **Step 4: Rodar** `pnpm --filter @coringa/web exec vitest run test/ui` → PASS; `pnpm --filter @coringa/web exec playwright test e2e/layout.spec.ts` → PASS.
