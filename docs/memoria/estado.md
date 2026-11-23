@@ -14,7 +14,11 @@
     o favicon (`9c930f5`); a carta que ficava presa quase transparente (`811c872` e `85b0d7a`); o seletor de deck em 2 × 2 e o `CLAUDE.md`.
   - **A limpeza da memória** (o item 3): este `estado.md` enxuto; o diário antigo no `arquivo/`. O `decisoes.md` (125 KB) só se arquiva
     com o "sim" do autor (a regra é que ele só cresce).
-  - **Próximo passo exato:** com o `pnpm e2e` verde, o push e o PR para a `main`; depois o "sim" do merge (dele).
+  - **`pnpm e2e` local:** 128 verdes e 2 falhas do `looks.spec.ts` (o nome "Cordel" casava "Cordel Escuro"), consertadas (`808e4de`;
+    o spec com 7 de 7).
+  - **No GitHub, PR #7** (`https://github.com/andr3serafim/jogo-do-coringa/pull/7`), com o `pnpm check` verde no pre-push; o `check` e o
+    `e2e` da CI rodando.
+  - **Próximo passo exato:** com as duas CI verdes e o "sim" dele, o merge por fast-forward e apagar a `feat/ajustes-producao`.
   - **Espera o autor:** confirmar se a carta presa era o que ele viu (ele não disse o momento; o outro suspeito é o `opacity-60` da mão
     travada durante as batidas e o `pending`); o arquivamento do `decisoes.md`; o merge; o deploy.
 
