@@ -30,6 +30,23 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   passo (pega também a Armadilha e o Sacrifício, que não emitem `BuffRemoved`) — custo: um caso raro que só 300 partidas achariam.
 - **Ruling (plano):** os títulos das tarefas viraram "Task N (Tarefa N)" porque o script do ledger só reconhece "Task".
 - **Armadilha:** o `playwright.config.ts` lista os specs de cada projeto (`testMatch`): um spec novo fora da lista não roda (nem avisa).
+- **Tarefas 4 e 5** (`aa00523`): a batida `heal` (sem teto, `HEAL_MS`, também com a vida cheia; a reconexão como antes), o `HealFx` (o
+  bruto, o líquido, a conta, a carta e a origem), a marca própria `healArrived` (a vida conta em `countMs` a partir da chegada), o brilho
+  na barra e o pulso do número. **Tarefa 6** (`0dd7ee5` e o conserto seguinte): a `HealLayer` (`ui/anim/Heal.tsx`).
+- **Ruling (T4/T5):** as duas num commit só: a 4 sozinha deixava 3 testes do placar vermelhos (a batida de cura passa a durar 1,4 s e o
+  "+N" vira o carimbo) — custo: um commit maior para revisar.
+- **Ruling (T6):** a essência antiga do `Leaving` (até o retrato, bloco A do playtest, ponto 9) saiu; a gota da direção A a substitui, e um
+  teste garante que ela não volta — custo: nenhum, a direção A foi escolhida no lugar dela.
+- **Ruling (T6):** a origem da gota é a carta do `Healed` se ela estiver na mesa (o topo do cemitério, ou a roubada na fileira), senão o
+  monte — uma regra só para o Equipar (outra carta por cima) e o Roubo — custo: nenhum.
+- **Ruling (T6):** com movimento reduzido a vida salta no começo da linha do tempo (a regra de antes, `IDLE_LIFE`), e não na chegada como
+  diz a spec §4.2; o carimbo aparece na chegada e fica na ponta da vida já final — custo: a vida muda ~0,8 s antes do carimbo, só com
+  movimento reduzido.
+- **Ruling (T6):** na primeira cura da partida (a faixa que ensina no ar), o carimbo sobe para a ponta da barra, em vez de pender abaixo
+  dela: no celular ele encostava na faixa (foto com a faixa forçada em toda cura, edição local desfeita) — custo: nessa cura ele cobre a
+  ponta da barra por ~2,6 s.
+- **Consertos da revisão (T6):** a saída das faíscas contava a chegada duas vezes; com movimento reduzido, a ponta da vida somava a cura de
+  novo. Os dois com teste visto falhar.
 
 ---
 

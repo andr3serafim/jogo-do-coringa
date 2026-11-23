@@ -171,6 +171,58 @@ describe('a camada da cura', () => {
     advance(HEAL_MOTION.beatMs + HEAL_MOTION.stampHoldMs + HEAL_MOTION.stampOutMs);
   });
 
+  it('as faíscas saem `sparksMs` depois da chegada, ainda dentro da batida', () => {
+    const m = mount(HEALER, { training: 'medio' });
+    emit(m, AFTER, [removed, healed()]);
+    toArrival();
+    expect(all(m.container, '[data-cura-faisca]').length).toBeGreaterThan(0);
+    advance(HEAL_MOTION.sparksMs + 1);
+    expect(all(m.container, '[data-cura-faisca]')).toHaveLength(0);
+    expect(stamps(m.container)).toHaveLength(1);
+  });
+
+  it('com movimento reduzido a vida já está na nova: o carimbo fica na ponta dela, sem somar a cura de novo', () => {
+    // A barra tem 100 px a partir da borda da camada; a vida mostrada já é a final (com movimento reduzido ela salta).
+    const real = HTMLElement.prototype.getBoundingClientRect;
+    HTMLElement.prototype.getBoundingClientRect = function (this: HTMLElement) {
+      if (this.getAttribute('role') === 'meter') return { left: 0, right: 100, top: 0, bottom: 10, width: 100, height: 10, x: 0, y: 0, toJSON() {} } as DOMRect;
+      return real.call(this);
+    };
+    try {
+      const m = mount(HEALER, { training: 'medio', prefs: { reduceMotion: true } });
+      emit(m, AFTER, [removed, healed()]);
+      toArrival();
+      const meter = m.container.querySelector('[data-lado="voce"] [role="meter"]')!;
+      const shown = Number(m.container.querySelector('[data-lado="voce"] [data-hp]')!.textContent);
+      const max = Number(meter.getAttribute('aria-valuemax'));
+      expect(stamps(m.container)[0]).toHaveStyle({ left: `${2 + 96 * (shown / max)}px` });
+    } finally {
+      HTMLElement.prototype.getBoundingClientRect = real;
+    }
+  });
+
+  it('na primeira cura da partida (a faixa que ensina, logo abaixo do placar), o carimbo sobe para a ponta da barra e livra a faixa', () => {
+    const real = HTMLElement.prototype.getBoundingClientRect;
+    HTMLElement.prototype.getBoundingClientRect = function (this: HTMLElement) {
+      if (this.getAttribute('role') === 'meter') return { left: 0, right: 100, top: 30, bottom: 40, width: 100, height: 10, x: 0, y: 30, toJSON() {} } as DOMRect;
+      return real.call(this);
+    };
+    try {
+      // A sessão marca sozinha a primeira cura passiva da partida: ela ensina (a faixa no ar), e o carimbo sobe para a ponta da barra.
+      const m = mount(HEALER, { training: 'medio' });
+      emit(m, AFTER, [removed, healed()]);
+      toArrival();
+      expect(stamps(m.container)[0]).toHaveStyle({ top: '30px' });
+      advance(HEAL_MOTION.beatMs + HEAL_MOTION.stampHoldMs + HEAL_MOTION.stampOutMs);
+      // A segunda cura não ensina: o carimbo pende logo abaixo da barra.
+      emit(m, AFTER, [removed, healed()]);
+      toArrival();
+      expect(stamps(m.container)[0]).toHaveStyle({ top: '36px' });
+    } finally {
+      HTMLElement.prototype.getBoundingClientRect = real;
+    }
+  });
+
   it('com movimento reduzido, nem gota nem faísca; o carimbo aparece na chegada', () => {
     const m = mount(HEALER, { training: 'medio', prefs: { reduceMotion: true } });
     emit(m, AFTER, [removed, healed()]);

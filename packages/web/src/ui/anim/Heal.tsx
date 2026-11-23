@@ -138,8 +138,9 @@ export function HealLayer({ beat, fx, cut, reduced, me }: HealLayerProps): null 
     const shown = Number(stage.querySelector(`[data-lado="${side}"] [data-hp]`)?.textContent ?? 0);
     const max = Number(meter?.getAttribute('aria-valuemax') ?? 1) || 1;
     const bar = meter?.getBoundingClientRect() ?? box;
-    // A ponta da vida nova (a de agora mais o líquido), do lado do retrato: a da esquerda cresce para a direita, a do oponente ao contrário.
-    const fraction = Math.max(0, Math.min(1, (shown + fx.net) / max));
+    // A ponta da vida nova, do lado do retrato: a da esquerda cresce para a direita, a do oponente ao contrário. A vida mostrada é a de
+    // antes da cura (ela conta na chegada), e a nova é ela mais o líquido; com movimento reduzido a vida já saltou para a final, e é ela.
+    const fraction = Math.max(0, Math.min(1, (reduced ? shown : shown + fx.net) / max));
     const span = Math.max(0, bar.width - 4) * fraction;
     const tip = { x: (side === 'voce' ? bar.left + 2 + span : bar.right - 2 - span) - box.left, y: bar.top + bar.height / 2 - box.top };
 
@@ -206,7 +207,7 @@ export function HealLayer({ beat, fx, cut, reduced, me }: HealLayerProps): null 
             ),
           );
         }
-        at(arriveAt + sparksMs, () => root.querySelectorAll('[data-cura-faisca]').forEach((el) => el.remove()));
+        at(sparksMs, () => root.querySelectorAll('[data-cura-faisca]').forEach((el) => el.remove()));
       }
       dropStamp(side);
       const stampBag = emptyBag();
@@ -218,10 +219,12 @@ export function HealLayer({ beat, fx, cut, reduced, me }: HealLayerProps): null 
       const caption = document.createElement('small');
       caption.textContent = fx.caption;
       stamp.append(value, caption);
-      // Pendurado logo abaixo da barra, centrado na ponta da vida nova, sem passar do fim da barra para o centro do placar.
+      // Pendurado logo abaixo da barra, centrado na ponta da vida nova, sem passar do fim da barra para o centro do placar. Na primeira cura
+      // da partida, a faixa que ensina a regra ocupa a faixa logo abaixo do placar: o carimbo sobe para cobrir a ponta da barra e a livra.
       const half = (stamp.offsetWidth || 0) / 2;
       const left = Math.min(Math.max(tip.x, bar.left - box.left + half), bar.right - box.left - half);
-      Object.assign(stamp.style, { left: `${left}px`, top: `${bar.bottom - box.top - 4}px` });
+      const top = beat.teach ? bar.top - box.top : bar.bottom - box.top - 4;
+      Object.assign(stamp.style, { left: `${left}px`, top: `${top}px` });
       stampBag.anims.push(
         reduced
           ? stamp.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 200, fill: 'forwards' })
