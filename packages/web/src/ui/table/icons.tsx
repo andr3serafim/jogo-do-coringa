@@ -162,3 +162,24 @@ export function LockIcon({ className }: ArtProps) {
     </Art>
   );
 }
+
+/** A troca (os destinos do Equipar, decisoes.md 2026-11-23 (1)): duas setas em roda, de tinta com contorno de papel, num disco de ouro. */
+export function SwapIcon({ className }: ArtProps) {
+  return (
+    <Art name="troca" className={className}>
+      <circle cx="12" cy="12" r="10.6" fill="var(--color-ouro)" stroke="var(--color-tinta)" strokeWidth="1.6" />
+      <path d="M6.6 10.4a5.6 5.6 0 0 1 9.8-2.6M17.4 13.6a5.6 5.6 0 0 1-9.8 2.6" stroke="var(--color-tinta)" strokeWidth="2" />
+      <path d="M17.6 4.6v4.2h-4.2ZM6.4 19.4v-4.2h4.2Z" fill="var(--color-tinta)" />
+    </Art>
+  );
+}
+
+/** O descarte no cemitério: a lápide de tinta (a mesma da Ressurreição), com a cruz de ouro. */
+export function DiscardIcon({ className }: ArtProps) {
+  return (
+    <Art name="descarte" className={className}>
+      <path d="M4.4 22.6V9.8c0-4 3-6.6 6.6-6.6h2c3.6 0 6.6 2.6 6.6 6.6v12.8Z" fill="var(--color-tinta)" stroke="var(--color-papel)" strokeWidth="1.6" />
+      <path d="M12 7.6v10M8.4 11.2h7.2" stroke="var(--color-ouro)" strokeWidth="2" />
+    </Art>
+  );
+}

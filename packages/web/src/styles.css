@@ -1246,6 +1246,35 @@ li[data-joga]::after {
     background-size: 180px 180px;
   }
 
+  /*
+   * O destino do Equipar (decisoes.md 2026-11-23 (1)): um carimbo de papel de tamanho fixo, a figura em cima e uma palavra embaixo. O
+   * tamanho não muda com quantas cartas faltam pôr; o nome inteiro fica no `aria-label`.
+   */
+  .carimbo-destino {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    width: 64px;
+    height: 56px;
+    padding: 2px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  @media (width >= theme(--breakpoint-pc)) {
+    .carimbo-destino {
+      width: 76px;
+      height: 64px;
+      font-size: 11px;
+    }
+  }
+
   .carimbo:active:not(:disabled) {
     translate: var(--carimbo-sombra) var(--carimbo-sombra);
     box-shadow: 0 0 0 var(--color-madeira);

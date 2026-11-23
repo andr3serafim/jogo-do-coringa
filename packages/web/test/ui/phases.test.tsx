@@ -163,17 +163,24 @@ const deadline = (kind: Deadline['kind'], at: number, players: Deadline['players
 // ---------------------------------------------------------------------------------------------
 
 describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
-  it('"Faltam 3 cartas", todas as numéricas à vista (a primeira escolhida) e os destinos nos rótulos do terminal', () => {
+  it('"Faltam 3 cartas", todas as numéricas à vista (a primeira escolhida) e os destinos com os nomes do terminal', () => {
     const m = mount(EQUIP);
     expect(inEquip().getByText('Faltam 3 cartas')).toBeInTheDocument();
     const cards = within(inEquip().getByRole('list', { name: 'Suas numéricas' })).getAllByRole('button');
     expect(cards.map((c) => c.getAttribute('data-card-id'))).toEqual(m.view.self.pending.map((c) => c.id));
     expect(cards.map((c) => c.getAttribute('aria-pressed'))).toEqual(['true', 'false', 'false']);
     expect(cards[0]).toHaveAccessibleName(new RegExp(`^7 de ${m.view.self.pending[0]!.suit}`));
-    const labels = within(inEquip().getByRole('list', { name: 'Destinos' }))
-      .getAllByRole('button')
-      .map((b) => b.textContent);
-    expect(labels).toEqual(['Fileira de Ataque', 'Fileira de Defesa']);
+    const buttons = within(inEquip().getByRole('list', { name: 'Destinos' })).getAllByRole('button');
+    expect(buttons.map((b) => b.getAttribute('aria-label'))).toEqual(['Fileira de Ataque', 'Fileira de Defesa']);
+  });
+
+  it('cada destino é um carimbo de tamanho fixo, com a figura e uma palavra; o nome inteiro na dica (decisoes.md 2026-11-23 (1))', () => {
+    mount(EQUIP);
+    const buttons = within(inEquip().getByRole('list', { name: 'Destinos' })).getAllByRole('button');
+    expect(buttons.map((b) => b.textContent)).toEqual(['Ataque', 'Defesa']);
+    expect(buttons.map((b) => b.getAttribute('data-destino'))).toEqual(['ATK', 'DEF']);
+    expect(buttons.map((b) => b.getAttribute('title'))).toEqual(['Fileira de Ataque', 'Fileira de Defesa']);
+    for (const b of buttons) expect(b).toHaveClass('carimbo-destino');
   });
 
   it('os destinos de fileira trazem a figura dela (espadas, escudo), escondida do leitor de tela', () => {
@@ -233,14 +240,19 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
 
   it('com as fileiras cheias aparecem as três opções de troca, com a carta que sai', async () => {
     const m = mount(FULL);
-    const labels = within(inEquip().getByRole('list', { name: 'Destinos' }))
-      .getAllByRole('button')
-      .map((b) => b.textContent);
+    const buttons = within(inEquip().getByRole('list', { name: 'Destinos' })).getAllByRole('button');
     // Atrás de cada fileira, a carta do fim: o 6♠ do Ataque e o 8♠ da Defesa.
-    expect(labels).toEqual([
+    expect(buttons.map((b) => b.getAttribute('aria-label'))).toEqual([
       'Trocar a última carta do Ataque (sai 6♠)',
       'Trocar a última carta da Defesa (sai 8♠)',
       'Descartar no cemitério',
+    ]);
+    // No carimbo, só a carta que sai (a figura da fileira e a da troca dizem o resto) e a palavra do descarte.
+    expect(buttons.map((b) => b.textContent)).toEqual(['sai 6♠', 'sai 8♠', 'Descartar']);
+    expect(buttons.map((b) => [...b.querySelectorAll('svg[data-arte]')].map((svg) => svg.getAttribute('data-arte')))).toEqual([
+      ['ataque', 'troca'],
+      ['defesa', 'troca'],
+      ['descarte'],
     ]);
     await choose(m, 'Trocar a última carta do Ataque (sai 6♠)', 'Descartar no cemitério', 'Descartar no cemitério');
     await m.user.click(inEquip().getByRole('button', { name: 'Confirmar' }));
@@ -260,7 +272,7 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
     mount({ ...EQUIP, self: { ...EQUIP.self, attackRow: [8, 4, 10, 7, 9, 2, 6] } });
     const labels = within(inEquip().getByRole('list', { name: 'Destinos' }))
       .getAllByRole('button')
-      .map((b) => b.textContent);
+      .map((b) => b.getAttribute('aria-label'));
     expect(labels).toEqual(['Fileira de Defesa']);
   });
 

@@ -287,6 +287,18 @@ export const equipQuadText = (value: number): string => `forma quadra de ${value
 /** O que sai da fileira numa troca: " (sai 9♠)". */
 export const leavingText = (card: Card): string => ` (sai ${cardText(card)})`;
 
+/** A palavra embaixo da figura de cada destino do Equipar (decisoes.md 2026-11-23 (1)); o nome inteiro fica no `aria-label` e na dica. */
+export const DESTINATION_SHORT = {
+  ATK: 'Ataque',
+  DEF: 'Defesa',
+  REPLACE_LAST_ATK: 'Trocar',
+  REPLACE_LAST_DEF: 'Trocar',
+  DISCARD: 'Descartar',
+} as const;
+
+/** Na troca, a carta que sai, embaixo da figura: "sai 9♠". */
+export const leavingShort = (card: Card): string => `sai ${cardText(card)}`;
+
 /** O que o oponente está fazendo no Equipar, no campo dele. */
 export const equipOpponentText = (pendingCount: number, submitted: boolean): string =>
   submitted || pendingCount === 0 ? 'pronto' : `montando ${pendingCount} ${pendingCount === 1 ? 'carta' : 'cartas'}…`;

@@ -18,11 +18,13 @@ import { DESTINATION_TEXT } from '@coringa/sim/text';
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import {
   CONFIRM_LABEL,
+  DESTINATION_SHORT,
   equipConfirmedText,
   equipLeftText,
   EQUIP_READY_TEXT,
   equipQuadText,
   equipWaitingText,
+  leavingShort,
   leavingText,
   NO_PENDING_TEXT,
   placedText,
@@ -36,9 +38,9 @@ import type { Notice, SessionSnapshot } from '../../model/session.ts';
 import { useAnim } from '../anim/context.ts';
 import { useDealIn } from '../anim/useDealIn.ts';
 import { Card } from '../cards/Card.tsx';
-import { NoticeLine, PRIMARY, PRIMARY_TITLE, ResetIcon, Seal, SECONDARY, TwoLine, UndoIcon } from './controls.tsx';
+import { NoticeLine, PRIMARY, PRIMARY_TITLE, ResetIcon, Seal, TwoLine, UndoIcon } from './controls.tsx';
 import { DragGhost } from './DragGhost.tsx';
-import { AttackIcon, DefenseIcon } from './icons.tsx';
+import { AttackIcon, DefenseIcon, DiscardIcon, SwapIcon } from './icons.tsx';
 import type { TableNames } from './labels.ts';
 import { useCardDrag } from './useCardDrag.ts';
 
@@ -64,22 +66,71 @@ export interface EquipPanelProps {
   panelRef: RefObject<HTMLElement | null>;
 }
 
-/** A figura da fileira do destino (decisoes.md 2026-11-01 (1)); o descarte não tem. */
+/** A figura do destino (decisoes.md 2026-11-01 (1) e 2026-11-23 (1)): a fileira; na troca, a fileira com o disco da troca; o descarte, a lápide. */
 function DestinationIcon({ destination }: { destination: Destination }) {
-  if (destination === 'ATK' || destination === 'REPLACE_LAST_ATK') return <AttackIcon className="size-5" />;
-  if (destination === 'DEF' || destination === 'REPLACE_LAST_DEF') return <DefenseIcon className="size-5" />;
-  return null;
+  const figure = 'size-6 pc:size-7';
+  if (destination === 'DISCARD') return <DiscardIcon className={figure} />;
+  const row = destination === 'ATK' || destination === 'REPLACE_LAST_ATK' ? <AttackIcon className={figure} /> : <DefenseIcon className={figure} />;
+  if (destination === 'ATK' || destination === 'DEF') return row;
+  return (
+    <span className="relative">
+      {row}
+      <SwapIcon className="absolute -bottom-1 -right-2 size-3.5 pc:size-4" />
+    </span>
+  );
+}
+
+/** A carta que sai na troca: a última da fileira do rascunho até aqui. */
+function leavingCard(view: PlayerView, chosen: EquipPick[], destination: Destination): NumCard | undefined {
+  if (destination !== 'REPLACE_LAST_ATK' && destination !== 'REPLACE_LAST_DEF') return undefined;
+  const board = draftBoard(view, chosen);
+  return (destination === 'REPLACE_LAST_ATK' ? board.attackRow : board.defenseRow).at(-1);
+}
+
+/**
+ * Um destino do Equipar (decisoes.md 2026-11-23 (1)): um carimbo de tamanho fixo, a figura e uma palavra (na troca, a carta que sai). O
+ * tamanho não depende de quantas cartas faltam: no PC, a lista das cartas é que quebra linha. O nome inteiro de hoje (o do terminal, com a
+ * carta que sai) fica no `aria-label` e na dica.
+ */
+function DestinationStamp({
+  view,
+  draft,
+  destination,
+  first,
+  disabled,
+  onClick,
+}: {
+  view: PlayerView;
+  draft: EquipPick[];
+  destination: Destination;
+  first: boolean;
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  const label = destinationLabel(view, draft, destination);
+  const leaving = leavingCard(view, draft, destination);
+  return (
+    <button
+      type="button"
+      data-foco={first ? '' : undefined}
+      data-destino={destination}
+      aria-label={label}
+      title={label}
+      disabled={disabled}
+      onClick={onClick}
+      className="carimbo carimbo-papel carimbo-destino disabled:cursor-wait disabled:opacity-60"
+    >
+      <DestinationIcon destination={destination} />
+      <span aria-hidden="true" data-numero={leaving ? '' : undefined} className={leaving ? 'font-texto tabular-nums normal-case tracking-normal' : undefined}>
+        {leaving ? leavingShort(leaving) : DESTINATION_SHORT[destination]}
+      </span>
+    </button>
+  );
 }
 
 /** O rótulo do terminal para o destino e, na troca, a carta que sai: a última da fileira do rascunho até aqui. */
 function destinationLabel(view: PlayerView, chosen: EquipPick[], destination: Destination): string {
-  const board = draftBoard(view, chosen);
-  const leaving =
-    destination === 'REPLACE_LAST_ATK'
-      ? board.attackRow.at(-1)
-      : destination === 'REPLACE_LAST_DEF'
-        ? board.defenseRow.at(-1)
-        : undefined;
+  const leaving = leavingCard(view, chosen, destination);
   return `${DESTINATION_TEXT[destination]}${leaving ? leavingText(leaving) : ''}`;
 }
 
@@ -131,6 +182,8 @@ function Panel({ panelRef, children }: { panelRef: RefObject<HTMLElement | null>
 /** Uma numérica que falta pôr: o toque a escolhe (a escolhida sobe), e o arrasto a leva direto até a zona do destino. */
 function PendingCard({
   card,
+  index,
+  count,
   selected,
   enabled,
   locked,
@@ -139,6 +192,9 @@ function PendingCard({
   onDrop,
 }: {
   card: NumCard;
+  /** A posição e quantas faltam: sem largura, as cartas se sobrepõem como as da mão (o valor, no canto esquerdo, segue à vista). */
+  index: number;
+  count: number;
   selected: boolean;
   enabled: boolean;
   /** Mesa travada (jogada em voo, reconexão, prazo esgotado): a carta apaga como a da mão, e o toque não a escolhe. */
@@ -156,7 +212,17 @@ function PendingCard({
   const item = useRef<HTMLLIElement>(null);
   useDealIn(item, flight ?? enter, { fly: flight !== null, fade: true });
   return (
-    <li ref={item} data-entra={enter === null ? undefined : String(enter)} className="relative flex-none">
+    <li
+      ref={item}
+      data-entra={enter === null ? undefined : String(enter)}
+      // A escolhida fica por cima das vizinhas que a cobririam.
+      className={`relative flex-none ${selected ? 'z-[1]' : ''}`}
+      style={
+        index > 0
+          ? { marginLeft: `clamp(calc(var(--hand-w) * -0.6), calc((100% - ${count} * var(--hand-w)) / ${count - 1}), 8px)` }
+          : undefined
+      }
+    >
       {/* No ar, a de origem esmaece (esta carta não é animada, então o Motion não põe `opacity` inline nela). */}
       <Card
         card={card}
@@ -183,8 +249,6 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
   const selected = remaining.find((card) => card.id === pickedId) ?? remaining[0];
   const board = draftBoard(view, draft);
   const options = complete ? [] : nextDestinations(view, legal, draft);
-  /** Até duas numéricas por pôr, os destinos cabem ao lado delas mesmo no celular. */
-  const besideCards = remaining.length <= 2;
   const focusFirstStep = () => panelRef.current?.querySelector<HTMLElement>('[data-foco]:not(:disabled)')?.focus();
   /** As zonas do destino da próxima carta, na hora (a soltura confere de novo com a lista de agora). */
   const dropZones = () => new Set(equipDropZones(view, legal, draft).keys());
@@ -229,14 +293,17 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
           ))}
         </ol>
       ) : (
-        // Os destinos em coluna ao lado das cartas, como antes da E2. No celular, com 3 ou mais numéricas por pôr não sobra largura:
-        // as cartas ficam em cima e os destinos embaixo, no máximo dois por linha. A altura do painel é curta no celular.
-        <div className={`flex gap-3 ${besideCards ? 'flex-row items-start' : 'flex-col gap-2 pc:flex-row pc:items-start pc:gap-3'}`}>
+        // Os destinos são carimbos de tamanho fixo (decisoes.md 2026-11-23 (1)): nunca encolhem. As cartas ficam com o espaço que sobra e
+        // se sobrepõem como as da mão quando falta largura. Os carimbos ficam ao lado das cartas quando cabem e descem para a linha de
+        // baixo quando não (no celular com 3 destinos; no PC só com 5 cartas e 3 destinos).
+        <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
           {/* O espaço de cima é o da carta escolhida, que sobe como na mão. */}
-          <ul role="list" aria-label="Suas numéricas" data-step="cartas" className="flex flex-none list-none flex-wrap gap-2 p-0 pt-3.5">
-            {remaining.map((card) => (
+          <ul role="list" aria-label="Suas numéricas" data-step="cartas" className="flex min-w-0 flex-auto list-none p-0 pt-3.5">
+            {remaining.map((card, index) => (
               <PendingCard
                 key={card.id}
+                index={index}
+                count={remaining.length}
                 card={card}
                 selected={card.id === selected?.id}
                 enabled={!disabled && options.length > 0}
@@ -251,21 +318,18 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
             role="list"
             aria-label="Destinos"
             data-step="destinos"
-            className={`flex min-w-0 flex-1 list-none gap-2 p-1.5 ${besideCards ? 'flex-col' : 'flex-wrap pc:flex-col pc:flex-nowrap'}`}
+            className="flex flex-none list-none gap-2 p-0 pt-3.5"
           >
             {options.map((destination, i) => (
-              // Embaixo, no máximo dois por linha (com as fileiras cheias, o terceiro destino desce e ocupa a linha toda).
-              <li key={destination} className={besideCards ? undefined : 'min-w-[calc(50%-0.25rem)] flex-1 pc:min-w-0 pc:flex-none'}>
-                <button
-                  type="button"
-                  data-foco={i === 0 ? '' : undefined}
+              <li key={destination} className="flex-none">
+                <DestinationStamp
+                  view={view}
+                  draft={draft}
+                  destination={destination}
+                  first={i === 0}
                   disabled={disabled}
                   onClick={() => onChoose(destination, selected?.id)}
-                  className={`${SECONDARY} flex w-full items-center gap-2`}
-                >
-                  <DestinationIcon destination={destination} />
-                  {destinationLabel(view, draft, destination)}
-                </button>
+                />
               </li>
             ))}
           </ul>
