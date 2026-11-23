@@ -47,6 +47,19 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   ponta da barra por ~2,6 s.
 - **Consertos da revisão (T6):** a saída das faíscas contava a chegada duas vezes; com movimento reduzido, a ponta da vida somava a cura de
   novo. Os dois com teste visto falhar.
+- **E2E completo depois da T6:** 133 verdes, 4 pulados (a cura mais longa não quebrou nenhum).
+- **Tarefa 7** (`cabdf72`): a pista `cura` (o brilho, o glissando com o sopro, o arpejo de mi maior na chegada), baixa (≤ 0,14), dos dois
+  lados, também com movimento reduzido (o `Stage` não corta o som), muda na reconexão.
+- **Tarefa 8** (`8f86965` e o conserto seguinte): `ui/table/MarkFigure.tsx` e `mark-tip.ts`; o `StatePlate` saiu; o título do Reflect
+  virou a figura dele; o coração da cura em papel; a regra do `data-sem-pulo` no `CLAUDE.md`.
+- **Ruling (T7/T8):** a remoção do `StatePlate.tsx` entrou por engano no commit do som (o `git rm` fica em stage); os dois commits locais,
+  ainda não enviados, foram refeitos com `reset --soft`, cada um compilando sozinho — custo: nenhum.
+- **Ruling (T8):** a dica fecha no rolar só quando o que rolou contém a figura (a página ou o campo): o histórico desce sozinho a cada
+  batida e a fechava com o mouse em cima — custo: uma dica que fica no ar se um contêiner que não a contém rolar por baixo dela.
+- **Ruling (T8):** o botão da figura leva `aria-expanded` (o plano pedia); a dica é `aria-hidden`, e o nome do botão já diz tudo — custo:
+  o leitor de tela anuncia "expandido" sem conteúdo novo (fica como menor adiado).
+- **Armadilha:** um `git rm` fica em stage e entra no próximo commit, mesmo com `git add` de caminhos explícitos; e o pre-commit rápido
+  confere a árvore de trabalho, não o que está em stage: um commit pode não compilar sozinho.
 
 ---
 

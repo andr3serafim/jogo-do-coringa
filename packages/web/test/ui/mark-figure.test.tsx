@@ -92,6 +92,22 @@ describe('<MarkFigure />', () => {
     expect(free.defaultPrevented).toBe(false);
   });
 
+  it('rolar outra área (o histórico que desce sozinho a cada batida) não fecha a dica; rolar o que contém a figura fecha', () => {
+    render(
+      <>
+        <div data-testid="historico" />
+        <div data-testid="campo">
+          <Two />
+        </div>
+      </>,
+    );
+    fireEvent.pointerEnter(cura(), { pointerType: 'mouse' });
+    fireEvent.scroll(screen.getByTestId('historico'));
+    expect(tip()).not.toBeNull();
+    fireEvent.scroll(screen.getByTestId('campo'));
+    expect(tip()).toBeNull();
+  });
+
   it('rolar ou redimensionar fecha a dica (ela fica presa à tela, e os campos rolam por dentro)', () => {
     render(<Two />);
     fireEvent.pointerEnter(cura(), { pointerType: 'mouse' });

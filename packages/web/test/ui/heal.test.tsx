@@ -6,7 +6,7 @@ import type { GameEvent, NumCard } from '@coringa/engine';
 import { act } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { HEAL_MOTION } from '../../src/model/heal-motion.ts';
-import { advance, cleanup, emit, HIT, mount, SCENE, THEIRS, TURN } from './anim-harness.tsx';
+import { advance, busy, cleanup, emit, HIT, mount, SCENE, THEIRS, TURN } from './anim-harness.tsx';
 import type { ViewSpec } from '../fixtures.ts';
 
 beforeEach(() => {
@@ -221,6 +221,21 @@ describe('a camada da cura', () => {
     } finally {
       HTMLElement.prototype.getBoundingClientRect = real;
     }
+  });
+
+  it('na mesa tocando, o toque na figura abre a dica sem pular as batidas, e o Esc fecha a dica sem pular', async () => {
+    const m = mount(HEALER, { training: 'medio' });
+    emit(m, AFTER, [removed, healed()]);
+    advance(HEAL_AT);
+    advance(1);
+    expect(busy(m.container)).toBe(true);
+    const figure = m.container.querySelector<HTMLElement>('[data-marca="cura"]')!;
+    await m.user.pointer({ keys: '[TouchA]', target: figure });
+    expect(document.querySelector('[data-dica-marca]')).not.toBeNull();
+    expect(busy(m.container)).toBe(true);
+    await m.user.keyboard('{Escape}');
+    expect(document.querySelector('[data-dica-marca]')).toBeNull();
+    expect(busy(m.container)).toBe(true);
   });
 
   it('com movimento reduzido, nem gota nem faísca; o carimbo aparece na chegada', () => {

@@ -62,15 +62,21 @@ export function MarkFigure({ kind, id, name, does, icon, count }: MarkFigureProp
       openTip(null);
     };
     const close = () => openTip(null);
+    // Só o rolar que mexe a figura (a página, ou o campo que a contém) solta a dica dela; o histórico, que desce sozinho a cada batida,
+    // não a fecha.
+    const scrolled = (event: Event) => {
+      const target = event.target;
+      if (target === document || (target instanceof Node && button.current !== null && target.contains(button.current))) openTip(null);
+    };
     // Na captura: o Esc chega aqui antes dos ouvintes da mesa (o pulo das batidas, o menu), que ignoram o evento já marcado.
     document.addEventListener('pointerdown', outside, true);
     document.addEventListener('keydown', escape, true);
-    document.addEventListener('scroll', close, true);
+    document.addEventListener('scroll', scrolled, true);
     window.addEventListener('resize', close);
     return () => {
       document.removeEventListener('pointerdown', outside, true);
       document.removeEventListener('keydown', escape, true);
-      document.removeEventListener('scroll', close, true);
+      document.removeEventListener('scroll', scrolled, true);
       window.removeEventListener('resize', close);
     };
   }, [open]);
