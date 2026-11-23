@@ -20,13 +20,13 @@ import {
   ReflectIcon,
 } from './icons.tsx';
 import { plateLine } from '../../model/copy.ts';
-import { handCountText } from './labels.ts';
+import { handCountText, resurrectionsText } from './labels.ts';
+import { MarkFigure, type MarkKind } from './MarkFigure.tsx';
 import { ResurrectIcon } from './ResurrectIcon.tsx';
 import { Row } from './Row.tsx';
 import { useLandingHold, withoutCards } from './landing-hold.ts';
 import { TableCard } from './TableCard.tsx';
 import { MirrorMark } from './MirrorMark.tsx';
-import { StatePlate } from './StatePlate.tsx';
 import { ZonePower } from './ZonePower.tsx';
 
 export interface PlayerFieldProps {
@@ -155,25 +155,23 @@ function Info({ player, name, away, equip, tool }: InfoProps) {
 // Guarda, buffs, Reflect e as marcas de estado
 
 function Zones({ player, name, view, self }: { player: PublicPlayer; name: string; view: PlayerView; self: boolean }) {
-  // Cada marca é uma placa com medalhão (bloco A dos pontos do playtest, ponto 6): a figura (decisoes.md 2026-11-01 (1)), o nome e a
-  // linha do que ela faz, do lado de quem a vê.
+  // Cada marca é só a figura (decisoes.md 2026-11-23 (8)): o medalhão com a figura de antes (decisoes.md 2026-11-01 (1)); o nome e a linha do
+  // que ela faz, do lado de quem a vê, ficam no nome acessível e na dica (`MarkFigure`).
   const plates: ReactNode[] = [];
-  const icon = 'size-4 pc:size-[18px]';
-  if (player.absoluteDefense) {
-    plates.push(<StatePlate key="def" kind="defesa" does={plateLine('defesa', self, view)} icon={<AbsoluteDefenseIcon className={icon} />} />);
-  }
+  const icon = 'size-[21px] pc:size-[26px]';
+  const mark = (kind: MarkKind, markName: string, art: ReactNode, count?: number) => (
+    <li key={kind} data-placa-estado={kind}>
+      <MarkFigure kind={kind} id={`${player.id}-${kind}`} name={markName} does={plateLine(kind, self, view)} icon={art} count={count} />
+    </li>
+  );
+  if (player.absoluteDefense) plates.push(mark('defesa', 'Defesa Absoluta', <AbsoluteDefenseIcon className={icon} />));
   // Enquanto houver 2 K ou mais na Guarda (a regra é do motor): as numéricas da Defesa que caem curam o dono.
-  if (defenseHealActive(player, view.config)) {
-    plates.push(<StatePlate key="cura" kind="cura" does={plateLine('cura', self, view)} icon={<HealIcon className={icon} />} />);
-  }
+  if (defenseHealActive(player, view.config)) plates.push(mark('cura', 'Cura passiva', <HealIcon className={icon} />));
   if (player.resurrectionCount > 0) {
-    plates.push(
-      <StatePlate key="res" kind="res" does={plateLine('res', self, view)} count={player.resurrectionCount} icon={<ResurrectIcon className={icon} />} />,
-    );
+    // O número visível do selo vai no nome acessível (WCAG 2.5.3): "2 Ressurreições disponíveis".
+    plates.push(mark('res', resurrectionsText(player.resurrectionCount), <ResurrectIcon className={icon} />, player.resurrectionCount));
   }
-  if (absoluteAttackArmed(player, view.config)) {
-    plates.push(<StatePlate key="atk" kind="ataque" does={plateLine('ataque', self, view)} icon={<AbsoluteAttackIcon className={icon} />} />);
-  }
+  if (absoluteAttackArmed(player, view.config)) plates.push(mark('ataque', 'Ataque Absoluto armado', <AbsoluteAttackIcon className={icon} />));
 
   // Os bônus em escala acompanham a mesa que toca, como o total e o ouro de quem lidera: a carta que ainda voa até a zona só conta no pouso
   // dela, e o escudo de ouro dos Q (a Defesa Absoluta) chega e sai com a insígnia do retrato.
@@ -215,7 +213,9 @@ function Zones({ player, name, view, self }: { player: PublicPlayer; name: strin
       {player.reflect ? (
         <Zone
           label="Reflect ativo"
-          does={plateLine('reflect', self, view)}
+          figure={
+            <MarkFigure kind="reflect" id={`${player.id}-reflect`} name="Reflect ativo" does={plateLine('reflect', self, view)} icon={<ReflectIcon className={icon} />} />
+          }
           icon={<ReflectIcon className={ZONE_ICON} />}
           listLabel="Cartas do Reflect"
           mark={<MirrorMark owner={player.id} />}
@@ -224,7 +224,8 @@ function Zones({ player, name, view, self }: { player: PublicPlayer; name: strin
         />
       ) : null}
       {plates.length > 0 ? (
-        <ul role="list" aria-label={`Estado do Coringa de ${name}`} className="campo-estado">
+        // `data-sem-pulo`: o toque numa figura é só da dica dela, e não termina as batidas da mesa.
+        <ul role="list" aria-label={`Estado do Coringa de ${name}`} data-sem-pulo="" className="campo-estado">
           {plates}
         </ul>
       ) : null}
@@ -248,8 +249,11 @@ interface ZoneProps {
   count?: boolean;
   /** O que fica no canto da zona, sem mudar a altura dela (o espelho do Reflect). */
   mark?: ReactNode;
-  /** O que a zona faz, numa linha embaixo do título (o Reflect; bloco A dos pontos do playtest, ponto 6). Some abaixo de 600 px. */
-  does?: string;
+  /**
+   * A figura no lugar do título (o Reflect, decisoes.md 2026-11-23 (9)): o nome e o que a zona faz moram no nome acessível dela e na dica, e
+   * o título de texto sai da vista. A lista segue com o `listLabel`.
+   */
+  figure?: ReactNode;
   /** O arrasto: a chave da zona inteira (a sua), `'targets'` (cada carta é uma zona `carta:<id>`, a do oponente) ou nada (o Reflect). */
   drop?: DropKey | 'targets';
   /** Os bônus em escala (bloco C dos pontos do playtest, ponto 10): o tipo da zona e o nível dela (`zoneLevel`). O Reflect não tem. */
@@ -258,7 +262,7 @@ interface ZoneProps {
   pending?: ReadonlySet<string>;
 }
 
-function Zone({ label, icon, listLabel, cards, wildAs, count = false, mark, drop, does, power, pending }: ZoneProps) {
+function Zone({ label, icon, listLabel, cards, wildAs, count = false, mark, drop, figure, power, pending }: ZoneProps) {
   const labelId = useId();
   const anim = useAnim();
   const level = power?.level ?? 0;
@@ -277,24 +281,26 @@ function Zone({ label, icon, listLabel, cards, wildAs, count = false, mark, drop
       {/* A linha do que a zona faz (o Reflect) fica embaixo do título, na largura dele: ao lado, no PC, ela se espremia entre o título e
           as cartas, uma ou duas palavras por linha. O título fica por cima das camadas de poder (`z-[1]`, como as cartas): no celular, a
           aura dos 4 J sobe até o título da zona e o da zona de baixo. */}
-      <div className="zona-titulo relative z-[1] flex flex-col gap-0.5">
-        <div className="flex items-center gap-1">
-          {icon}
-          <span id={labelId} className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">
-            {label}
-          </span>
-          {count && cards.length > 0 ? (
-            <span data-numero className="font-texto text-[11px] font-bold tabular-nums">
-              {cards.length}
-            </span>
-          ) : null}
+      {figure ? (
+        // `data-sem-pulo`: o toque na figura é só da dica dela.
+        <div className="zona-titulo relative z-[1] flex" data-sem-pulo="">
+          {figure}
         </div>
-        {does ? (
-          <p data-placa-faz className="placa-faz font-texto text-[10px] leading-tight pc:text-[11px]">
-            {does}
-          </p>
-        ) : null}
-      </div>
+      ) : (
+        <div className="zona-titulo relative z-[1] flex flex-col gap-0.5">
+          <div className="flex items-center gap-1">
+            {icon}
+            <span id={labelId} className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">
+              {label}
+            </span>
+            {count && cards.length > 0 ? (
+              <span data-numero className="font-texto text-[11px] font-bold tabular-nums">
+                {cards.length}
+              </span>
+            ) : null}
+          </div>
+        </div>
+      )}
       {/* A camada de poder fica atrás das cartas (vem antes da lista), no tamanho da lista. */}
       <div className="relative">
       {power && level > 0 ? <ZonePower kind={power.kind} level={level} reduced={anim.reduced} busy={anim.busy} /> : null}

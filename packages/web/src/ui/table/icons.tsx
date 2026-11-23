@@ -83,17 +83,20 @@ export function AbsoluteAttackIcon({ className }: ArtProps) {
   );
 }
 
-/** A Cura passiva: o coração verde com a cruz de papel. */
+/**
+ * A Cura passiva: o coração de papel com contorno de tinta e a cruz verde. Ele mora no disco verde do medalhão (decisoes.md 2026-11-23 (8)):
+ * verde sobre verde ele sumia (o protótipo).
+ */
 export function HealIcon({ className }: ArtProps) {
   return (
     <Art name="cura" className={className}>
       <path
         d="M12 21.2C6.4 17.2 2.6 13.6 2.6 9.1 2.6 6 5 3.6 7.9 3.6c1.8 0 3.3.9 4.1 2.3.8-1.4 2.3-2.3 4.1-2.3 2.9 0 5.3 2.4 5.3 5.5 0 4.5-3.8 8.1-9.4 12.1Z"
-        fill="var(--color-cura)"
+        fill="var(--color-papel)"
         stroke="var(--color-tinta)"
         strokeWidth="1.5"
       />
-      <path d="M12 8.6v7.2M8.4 12.2h7.2" stroke="var(--color-papel)" strokeWidth="2.4" />
+      <path d="M12 8.6v7.2M8.4 12.2h7.2" stroke="var(--color-cura)" strokeWidth="2.4" />
     </Art>
   );
 }

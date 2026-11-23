@@ -1146,13 +1146,6 @@ li[data-joga]::after {
   }
 }
 
-/* No celular a placa fica só com o nome: a linha do que ela faz não cabe no campo. */
-@media (max-width: 599px) {
-  .placa-faz {
-    display: none;
-  }
-}
-
 /*
  * O momento da especial do oponente (bloco A dos pontos do playtest, ponto 1): a carta grande vira de costas para a frente, então as faces
  * vivem em 3D e escondem o verso de cada uma. O verso é o mesmo xadrez de tinta dos versos da mão dele.
