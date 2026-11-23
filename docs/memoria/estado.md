@@ -33,8 +33,9 @@
     `.superpowers/sdd/2026-11-23-cura-placas-historico/progress.md`; o diário leva as `Ruling:`.
   - **Feito:** Tarefa 1 (o histórico e o Lobby legíveis no verde; vitória e derrota em cor; `e2e/menu-verde.spec.ts`; a Duda do
     `online.spec.ts` no verde); Tarefa 2 (`HEAL_MS` = 1.400 e `healsMs` na `stepAllowanceMs`: o servidor, a web e o Bot
-    do treino dão folga a cada `Healed`).
-  - **Próximo passo exato:** Tarefa 3 (o teste do motor que garante o bruto, `engine/test/heal-gross.test.ts`).
+    do treino dão folga a cada `Healed`); Tarefa 3 (`engine/test/heal-gross.test.ts`: as Q de quem cura não mudam depois do
+    `Healed` no mesmo passo, nas 11 de referência e em 90 sorteadas).
+  - **Próximo passo exato:** o advisor revisa as tarefas 1 a 3; depois a Tarefa 4 (a batida `heal` em `timeline.ts` e o `HealFx`).
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`; o deploy (leva
   o PR #7 e os PRs #3 a #6).
 
