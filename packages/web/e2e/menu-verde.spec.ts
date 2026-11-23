@@ -44,3 +44,34 @@ test('no tema verde, a lista de partidas mostra o texto e o resultado pela cor',
   expect(color).toBe('rgb(23, 18, 15)');
   await axe(page);
 });
+
+test('a palavra do resultado passa de 4,5:1 sobre o ponto mais escuro do degradê da linha', async ({ page }) => {
+  // O axe não julga texto sobre degradê (fica como "incompleto"): a conta é feita aqui. A amostra é a cor do começo do degradê, misturada
+  // como o CSS a mistura (oklab), lida em pixel por um canvas; a palavra é a cor calculada da primeira linha da linha.
+  await page.goto('/partidas');
+  const rows = page.getByRole('list').getByRole('listitem');
+  await expect(rows).toHaveCount(3);
+  for (const [index, tone] of [[0, '--color-cura'], [1, '--color-vermelho']] as const) {
+    const ratio = await rows.nth(index).evaluate((row, tone) => {
+      const probe = document.createElement('div');
+      probe.style.background = `color-mix(in oklab, var(${tone}) 18%, var(--color-papel))`;
+      row.appendChild(probe);
+      const pixel = (css: string): number[] => {
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = 1;
+        const ctx = canvas.getContext('2d')!;
+        ctx.fillStyle = css;
+        ctx.fillRect(0, 0, 1, 1);
+        return Array.from(ctx.getImageData(0, 0, 1, 1).data.slice(0, 3));
+      };
+      const back = pixel(getComputedStyle(probe).backgroundColor);
+      const ink = pixel(getComputedStyle(row.querySelector('p')!).color);
+      probe.remove();
+      const lum = ([r, g, b]: number[]) =>
+        [r!, g!, b!].map((c) => ((c /= 255) <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)).reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i]!, 0);
+      const [hi, lo] = [lum(back), lum(ink)].sort((a, b) => b - a);
+      return (hi! + 0.05) / (lo! + 0.05);
+    }, tone);
+    expect(ratio, `a palavra da linha ${index} sobre o degradê`).toBeGreaterThanOrEqual(4.5);
+  }
+});

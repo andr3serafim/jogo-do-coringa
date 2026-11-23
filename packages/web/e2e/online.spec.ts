@@ -123,6 +123,8 @@ test('duas pessoas jogam uma sala: do lobby ao fim, com queda e revanche', async
     expect(link).toMatch(/\/s\/[A-Z0-9]{6}$/);
     await duda.page.goto(link);
     await expect(duda.page.getByRole('heading', { name: /^Entrar na sala [A-Z0-9]{6}$/ })).toBeVisible();
+    // O axe de cada tela da Duda confere o contraste no verde (as linhas do Lobby herdavam o papel do tema).
+    await expect(duda.page.locator('main.menu[data-tema="green"]')).toBeVisible();
     await axe(duda.page);
     await duda.page.getByLabel('Seu apelido').fill(duda.name);
     await duda.page.getByRole('button', { name: 'Entrar', exact: true }).click();
@@ -134,6 +136,7 @@ test('duas pessoas jogam uma sala: do lobby ao fim, com queda e revanche', async
       await expect(player.page.getByText(duda.name).first()).toBeVisible();
     }
     await axe(ana.page);
+    await expect(duda.page.locator('main.menu[data-tema="green"]')).toBeVisible();
     await axe(duda.page);
   });
 

@@ -35,7 +35,10 @@
     `online.spec.ts` no verde); Tarefa 2 (`HEAL_MS` = 1.400 e `healsMs` na `stepAllowanceMs`: o servidor, a web e o Bot
     do treino dão folga a cada `Healed`); Tarefa 3 (`engine/test/heal-gross.test.ts`: as Q de quem cura não mudam depois do
     `Healed` no mesmo passo, nas 11 de referência e em 90 sorteadas).
-  - **Próximo passo exato:** o advisor revisa as tarefas 1 a 3; depois a Tarefa 4 (a batida `heal` em `timeline.ts` e o `HealFx`).
+  - **Advisor nas tarefas 1 a 3:** feito; os reforços (a Duda no verde conferida, a medição do contraste, as Q antes e depois) neste
+    commit. O diário 2026-11-23 (3) tem as `Ruling:`.
+  - **Próximo passo exato:** Tarefa 4 (a batida `heal` em `timeline.ts`, o `HealFx` com a carta em `effects.ts`, `HEAL_MOTION`).
+    Para a Tarefa 6: a primeira cura da partida tem a faixa (`healRibbon`) e o carimbo ao mesmo tempo; conferir que não se cobrem.
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`; o deploy (leva
   o PR #7 e os PRs #3 a #6).
 

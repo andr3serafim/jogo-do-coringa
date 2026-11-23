@@ -13,34 +13,35 @@ import { exodiaProfile, prefer } from './biased.ts';
 import { P1, P2 } from './helpers.ts';
 import { playout } from './playout.ts';
 
-/** O que mexe nas Q de quem curou: a Q que entra, a que sai, o fim da Defesa Absoluta. */
-const touchesQueens = (event: GameEvent, player: string): boolean =>
-  (event.type === 'BuffPlayed' || event.type === 'BuffRemoved' || event.type === 'AbsoluteDefenseEnded') && event.player === player;
+/** As Q de `player` (os ids, em ordem). */
+const queensOf = (state: GameState, player: string): string[] => state.players.find((p) => p.id === player)!.defenseBuffs.map((card) => card.id);
 
-/** Confere um passo; devolve quantas curas da Defesa ele teve. */
-function checkStep(after: GameState, events: readonly GameEvent[], where: string): number {
+/**
+ * Confere um passo; devolve quantas curas da Defesa ele teve. A garantia completa e simples: num passo com cura da Defesa, as Q de quem
+ * curou são as mesmas antes e depois do passo (pega a Q que entra, a que sai por evento próprio e a que a Armadilha ou o Sacrifício
+ * levam; e, se uma regra nova mexer nelas antes da cura, falha do lado seguro).
+ */
+function checkStep(before: GameState, after: GameState, events: readonly GameEvent[], where: string): number {
   let heals = 0;
-  events.forEach((event, i) => {
-    if (event.type !== 'Healed' || event.source !== 'DEFENSE') return;
+  for (const event of events) {
+    if (event.type !== 'Healed' || event.source !== 'DEFENSE') continue;
     heals += 1;
-    const later = events.slice(i + 1).filter((next) => touchesQueens(next, event.player));
-    expect(later, `${where}: as Q de ${event.player} mudam depois da cura`).toEqual([]);
+    expect(queensOf(after, event.player), `${where}: as Q de ${event.player} mudam no passo da cura`).toEqual(queensOf(before, event.player));
     const side = after.players.find((p) => p.id === event.player)!;
     expect(defenseHealOf(event.card, side), `${where}: o bruto do fim do passo é menor que o que entrou`).toBeGreaterThanOrEqual(event.amount);
-  });
+  }
   return heals;
 }
 
 describe('o bruto da cura passiva vale com o lado do fim do passo', () => {
-  it('a conferência pega a Q que sai depois da cura no mesmo passo (o caso que quebraria o carimbo)', () => {
+  it('a conferência pega a Q que some no passo da cura (o caso que quebraria o carimbo)', () => {
     const created = createGame(makeConfig(), 'x', [P1, P2]);
     if (!created.ok) throw new Error(created.error.message);
+    const before = structuredClone(created.state);
+    before.players[0]!.defenseBuffs.push({ id: 'q1', kind: 'Q', suit: 'copas' });
     const card = { id: 'n7', kind: 'NUM', value: 7, suit: 'copas' } as const;
-    const events: GameEvent[] = [
-      { type: 'Healed', player: 'p1', amount: 7, source: 'DEFENSE', card },
-      { type: 'BuffRemoved', player: 'p1', cards: [] },
-    ];
-    expect(() => checkStep(created.state, events, 'sintético')).toThrow(/as Q de p1 mudam depois da cura/);
+    const events: GameEvent[] = [{ type: 'Healed', player: 'p1', amount: 7, source: 'DEFENSE', card }];
+    expect(() => checkStep(before, created.state, events, 'sintético')).toThrow(/as Q de p1 mudam no passo da cura/);
   });
 
   it('nas partidas de referência', () => {
@@ -53,8 +54,8 @@ describe('o bruto da cura passiva vale com o lado do fim do passo', () => {
       replay.steps.forEach(({ player, action }, i) => {
         const result = applyAction(state, player, action);
         if (!result.ok) throw new Error(`${replay.name}, passo ${i}: ${result.error.code}`);
+        heals += checkStep(state, result.state, result.events, `${replay.name}, passo ${i}`);
         state = result.state;
-        heals += checkStep(state, result.events, `${replay.name}, passo ${i}`);
       });
     }
     expect(heals).toBeGreaterThan(0);
@@ -69,8 +70,8 @@ describe('o bruto da cura passiva vale com o lado do fim do passo', () => {
         choices: [i, i * 7 + 3, i * 13 + 5],
         chooser: choosers[i % choosers.length],
         maxSteps: 1_500,
-        onStep: (_before, after, events) => {
-          heals += checkStep(after, events, `cura-${i}`);
+        onStep: (before, after, events) => {
+          heals += checkStep(before, after, events, `cura-${i}`);
         },
       });
     }

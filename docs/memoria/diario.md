@@ -5,6 +5,34 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-23 (3): a cura que se vê, as placas e o histórico: spec, plano e tarefas 1 a 3
+
+- **Pedido:** `decisoes.md` 2026-11-23 (7) a (10). Branch `feat/cura-historico-visitantes`, saída da `main` em `14adfff`. Protótipo das
+  direções em `docs/superpowers/specs/2026-11-23-cura-direcoes/` (A · Seiva, a escolhida); spec
+  `docs/superpowers/specs/2026-11-23-cura-placas-historico-design.md` (aprovada, com som); plano
+  `docs/superpowers/plans/2026-11-23-cura-placas-historico.md` (9 tarefas; execução nativa, com o advisor depois das tarefas 3, 6 e 8).
+- **Achados que mudaram o desenho:** com uma decisão esperando, a linha do tempo inteira cabe em 1 s (`DECISION_CAP_MS`): era por isso
+  que a cura quase não aparecia; o motor corta a cura na vida inicial (`Healed.amount` é o líquido); o Roubo cura com o bônus da fileira do
+  **oponente**; no Equipar, outra carta pode cair no cemitério depois da que curou.
+- **Tarefa 1** (`d9448e7`): a linha de `/partidas` e as do Lobby com `text-tinta`; a lista marca o resultado (`data-resultado`,
+  `pastGameResultKind`; a faixa, o degradê e a palavra em `#1f5c2c` / `#9a1f16` no `menu.css`); `e2e/menu-verde.spec.ts` (o axe em `/`,
+  `/jogar`, `/treinar`, `/opcoes`, `/treino` e `/partidas` no verde, e a medição do contraste da palavra sobre o degradê); a Duda do
+  `online.spec.ts` no verde (a tela de entrar e a Sala de espera).
+- **Tarefa 2** (`d723709`): `HEAL_MS = 1_400` e `healsMs` na `stepAllowanceMs` (o servidor, a web e o Bot do treino dão folga a cada
+  `Healed`, também o de vida cheia).
+- **Tarefa 3** (`fcdae83` e o reforço deste commit): `engine/test/heal-gross.test.ts`: num passo com cura da Defesa, as Q de quem curou são
+  as mesmas antes e depois (as 11 de referência e 90 sorteadas).
+- **Ruling (T1):** o E2E do verde não foi visto falhar no código velho; o RED foi o do teste de unidade (`data-resultado`, `text-tinta`).
+  A medição do contraste foi vista falhar com o verde da mesa (3,98:1) — custo: nenhum, o axe e a medição pegam o texto em branco.
+- **Ruling (T1):** o axe não julga texto sobre degradê (fica "incompleto"); a conta do contraste da palavra é feita no E2E, com a cor
+  misturada em oklab lida em pixel — custo: se o degradê mudar de forma, a amostra (o ponto mais escuro) precisa acompanhar.
+- **Ruling (T3):** 90 partidas sorteadas (10 s) em vez de centenas (50 s no `pnpm check`); a conferência compara as Q antes e depois do
+  passo (pega também a Armadilha e o Sacrifício, que não emitem `BuffRemoved`) — custo: um caso raro que só 300 partidas achariam.
+- **Ruling (plano):** os títulos das tarefas viraram "Task N (Tarefa N)" porque o script do ledger só reconhece "Task".
+- **Armadilha:** o `playwright.config.ts` lista os specs de cada projeto (`testMatch`): um spec novo fora da lista não roda (nem avisa).
+
+---
+
 ## 2026-11-23 (2): a revisão do bloco e o Cordel Escuro refeito
 
 - **Revisão** (`85b0d7a`): o `animate: { opacity: 1 }` em toda carta animada gravava `opacity` inline também nas que nunca entraram
