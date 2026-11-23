@@ -299,7 +299,10 @@ export function Card({
           layoutId: card.id,
           layoutDependency: anim.layoutKey,
           initial: enter === null ? undefined : { opacity: 0 },
-          animate: enter !== null ? { opacity: 1 } : undefined,
+          // O alvo fica sempre: um `state` novo no meio da batida da compra troca a linha do tempo e o `enter` vira `null`; sem alvo, o
+          // Motion parava a carta no meio do esmaecer, quase transparente (escura sobre a barra, como travada). Com ele, ela termina de
+          // aparecer na hora (atraso 0). Na carta que já nasce inteira, ir a 1 não muda nada.
+          animate: { opacity: 1 },
           transition: {
             layout: layoutTransition(anim.delayOf(card.id), anim.instant(card.id)),
             opacity: { delay: enter ?? 0, duration: enterSeconds },
@@ -472,7 +475,8 @@ export function CardBack({ className = '', enter = null, fly = null }: { classNa
       data-verso-deck={deck === 'cordel' ? undefined : deck}
       data-entra={enter === null ? undefined : String(enter)}
       initial={enter === null ? undefined : { opacity: 0 }}
-      animate={enter === null ? undefined : { opacity: 1 }}
+      // O alvo fica sempre, como na carta: sem ele, o verso parava no meio do esmaecer quando o `enter` virava `null`.
+      animate={{ opacity: 1 }}
       transition={{ opacity: { delay: enter ?? 0, duration: 0.25 } }}
       className={`box-border inline-block h-[26px] w-[18px] flex-none rounded-[2px] border-[1.5px] ${BACK_CLASS[deck]} pc:h-[34px] pc:w-6 ${className}`}
     />
