@@ -42,11 +42,10 @@
     Tarefa 6.
   - **Feito:** Tarefa 6 (`ui/anim/Heal.tsx`, a `HealLayer` no `FxLayer`: a origem acende, a gota sobe com o rastro, as faíscas e o carimbo
     "+28 · 7♥ × 4" sob a barra, que fica 1,2 s além da batida; a essência antiga do `Leaving` saiu). Vista no replay (PC e celular).
-  - **Advisor nas tarefas 4 a 6:** feito (a primeira cura com a faixa conferida e o carimbo no alto da barra; as faíscas e a ponta com
-    movimento reduzido consertadas). Rodando o `pnpm e2e` completo antes da Tarefa 7.
-  - **Próximo passo exato:** ler o resultado do `pnpm e2e` (log em `.superpowers/sdd/2026-11-23-cura-placas-historico/e2e-full.log`,
-    fora do git); consertar o que a cura mais longa quebrou; depois a Tarefa 7 (o som `cura`).
-    Para a Tarefa 6: a primeira cura da partida tem a faixa (`healRibbon`) e o carimbo ao mesmo tempo; conferir que não se cobrem.
+  - **Advisor nas tarefas 4 a 6:** feito (consertos em `67b6de7`). O `pnpm e2e` completo depois da Tarefa 6: 133 verdes, 4 pulados.
+  - **Feito:** Tarefa 7 (`cabdf72`, o som `cura`); Tarefa 8 (`8f86965`, as marcas e o Reflect só com a figura, `MarkFigure` e a dica;
+    o `StatePlate` saiu; a regra do `data-sem-pulo` no `CLAUDE.md`). E2E de layout, celular e treino verdes depois da 8.
+  - **Próximo passo exato:** o advisor revisa as tarefas 7 e 8; depois a Tarefa 9 (fotos finais, medição, `pnpm e2e`, diário, PR).
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`; o deploy (leva
   o PR #7 e os PRs #3 a #6).
 
