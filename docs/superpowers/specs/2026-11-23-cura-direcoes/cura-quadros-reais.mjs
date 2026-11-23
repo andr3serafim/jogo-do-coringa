@@ -1,11 +1,13 @@
-// Quadros da cura de verdade (a camada da cura, `ui/anim/Heal.tsx`) no replay da fixture `especiais`, rodada 29, passo 137 → 138 (o 7♥ cai
-// da sua Defesa com 2 K e 3 Q: +28), no PC e no celular, um a cada `PASSO` ms depois do "Próximo passo". Pede o dev server da web; roda com
-// `node cura-quadros-reais.mjs <pasta>`. Uma prancha por tela junta os quadros.
+// Quadros da cura de verdade (a camada da cura, `ui/anim/Heal.tsx`) num passo do replay de uma fixture, no PC e no celular, um a cada `PASSO`
+// ms depois do "Próximo passo". Pede o dev server da web; roda com `node cura-quadros-reais.mjs <pasta> [fixture rodada passo]` (o padrão é
+// `especiais 29 138`: o 7♥ cai da sua Defesa com 2 K e 3 Q, +28). Uma prancha por tela junta os quadros.
 import { createRequire } from 'node:module';
-import { readFileSync } from 'node:fs';
 const require = createRequire('D:/andr3/jogo-coringa/packages/web/package.json');
 const { chromium } = require('@playwright/test');
 const out = process.argv[2];
+const FIXTURE = process.argv[3] ?? 'especiais';
+const RODADA = process.argv[4] ?? '29';
+const PASSO_CURA = Number(process.argv[5] ?? 138);
 const PASSO = 250;
 const QUADROS = 16;
 const browser = await chromium.launch();
@@ -13,14 +15,14 @@ for (const vp of [{ width: 1440, height: 900, name: 'pc', clip: [0, 0, 1100, 900
   const page = await browser.newPage({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 1 });
   await page.addInitScript(() => localStorage.setItem('coringa:abertura', 'pular'));
   await page.goto('http://localhost:5173/');
-  await page.evaluate(async () => localStorage.setItem('coringa:partidas', await (await fetch('/e2e/fixtures/especiais.json')).text()));
-  await page.goto('http://localhost:5173/partidas/especiais');
-  await page.getByRole('combobox', { name: 'Rodada' }).selectOption('29');
+  await page.evaluate(async (name) => localStorage.setItem('coringa:partidas', await (await fetch(`/e2e/fixtures/${name}.json`)).text()), FIXTURE);
+  await page.goto(`http://localhost:5173/partidas/${FIXTURE}`);
+  await page.getByRole('combobox', { name: 'Rodada' }).selectOption(RODADA);
   await page.waitForTimeout(2500);
   const next = page.getByRole('button', { name: 'Próximo passo' });
-  for (let i = 0; i < 10; i++) {
-    const txt = await page.getByText(/Passo \d+ de 179/).innerText();
-    if (txt.startsWith('Passo 137')) break;
+  for (let i = 0; i < 40; i++) {
+    const txt = await page.getByText(/^Passo \d+ de \d+$/).innerText();
+    if (Number(/Passo (\d+)/.exec(txt)[1]) >= PASSO_CURA - 1) break;
     await next.click();
     await page.waitForTimeout(2500);
   }
@@ -41,8 +43,8 @@ for (const vp of [{ width: 1440, height: 900, name: 'pc', clip: [0, 0, 1100, 900
     .map((s) => `<figure style="margin:0"><img style="width:${width}px;display:block" src="data:image/png;base64,${s.png}"><figcaption>${s.ms} ms</figcaption></figure>`)
     .join('')}</body>`);
   await p2.waitForTimeout(300);
-  await p2.screenshot({ path: `${out}/cura-real-${vp.name}.png`, fullPage: true });
+  await p2.screenshot({ path: `${out}/cura-real-${FIXTURE}-${PASSO_CURA}-${vp.name}.png`, fullPage: true });
   await p2.close();
 }
 await browser.close();
-console.log('ok', readFileSync ? '' : '');
+console.log('ok');

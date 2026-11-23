@@ -45,7 +45,11 @@
   - **Advisor nas tarefas 4 a 6:** feito (consertos em `67b6de7`). O `pnpm e2e` completo depois da Tarefa 6: 133 verdes, 4 pulados.
   - **Feito:** Tarefa 7 (`cabdf72`, o som `cura`); Tarefa 8 (`8f86965`, as marcas e o Reflect só com a figura, `MarkFigure` e a dica;
     o `StatePlate` saiu; a regra do `data-sem-pulo` no `CLAUDE.md`). E2E de layout, celular e treino verdes depois da 8.
-  - **Próximo passo exato:** o advisor revisa as tarefas 7 e 8; depois a Tarefa 9 (fotos finais, medição, `pnpm e2e`, diário, PR).
+  - **Advisor nas tarefas 7 e 8:** feito (a dica não fecha quando o histórico rola: `b0e8a02`).
+  - **Tarefa 9 em curso:** fotos finais em `docs/superpowers/specs/2026-11-23-cura-direcoes/final/`; a cópia `public/tmp-cura` apagada.
+  - **Próximo passo exato:** a medição A/B com a CPU 4× (a cura e a Devastação, a branch e a `main`, scratchpad `medir/`); se a sessão
+    cair no meio, conferir que o checkout voltou para `feat/cura-historico-visitantes` e reconstruir a web. Depois: `CLAUDE.md`, `pnpm e2e`,
+    o pacote da revisão final para o advisor, o PR.
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`; o deploy (leva
   o PR #7 e os PRs #3 a #6).
 
