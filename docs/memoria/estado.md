@@ -32,8 +32,9 @@
   - **Execução:** nativa com o advisor depois das tarefas 3, 6 e 8 (escolha do autor). Ledger fora do git em
     `.superpowers/sdd/2026-11-23-cura-placas-historico/progress.md`; o diário leva as `Ruling:`.
   - **Feito:** Tarefa 1 (o histórico e o Lobby legíveis no verde; vitória e derrota em cor; `e2e/menu-verde.spec.ts`; a Duda do
-    `online.spec.ts` no verde).
-  - **Próximo passo exato:** Tarefa 2 (a folga da cura, `HEAL_MS`, em `protocol/src/scenes.ts`).
+    `online.spec.ts` no verde); Tarefa 2 (`HEAL_MS` = 1.400 e `healsMs` na `stepAllowanceMs`: o servidor, a web e o Bot
+    do treino dão folga a cada `Healed`).
+  - **Próximo passo exato:** Tarefa 3 (o teste do motor que garante o bruto, `engine/test/heal-gross.test.ts`).
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`; o deploy (leva
   o PR #7 e os PRs #3 a #6).
 

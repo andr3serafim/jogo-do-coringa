@@ -1,10 +1,12 @@
 import type { GameEvent, SpecialCard } from '@coringa/engine';
 import { describe, expect, it } from 'vitest';
 import {
+  HEAL_MS,
   MOMENT_PLAYS,
   SCENE_ALLOWANCE_CAP_MS,
   SCENE_MS,
   SPECIAL_MOMENT_MS,
+  healsMs,
   isMomentFor,
   momentsMs,
   sceneAllowanceMs,
@@ -94,5 +96,25 @@ describe('folga de cena (sub-projeto 6 §9)', () => {
       ReflectCanceled: 1_400,
       Resurrected: 4_600,
     });
+  });
+});
+
+const healed = (amount: number): GameEvent => ({ type: 'Healed', player: 'p1', amount, source: 'DEFENSE', card: { id: 'n7', kind: 'NUM', value: 7, suit: 'copas' } });
+
+describe('a folga da cura (decisoes.md 2026-11-23 (9) e (10))', () => {
+  it('a cura dura HEAL_MS', () => {
+    expect(HEAL_MS).toBe(1_400);
+  });
+
+  it('cada Healed dá HEAL_MS de folga, também o de vida cheia (a cura toca com o líquido 0)', () => {
+    expect(healsMs([healed(28), healed(0)])).toBe(2 * HEAL_MS);
+    expect(healsMs([buff('p2')])).toBe(0);
+    expect(stepAllowanceMs([healed(10)], null)).toBe(HEAL_MS);
+  });
+
+  it('a folga da cura soma às cenas e aos momentos, até o teto', () => {
+    expect(stepAllowanceMs([{ type: 'Resurrected' } as GameEvent, healed(5)], null)).toBe(SCENE_MS.Resurrected! + HEAL_MS);
+    expect(stepAllowanceMs([buff('p2'), healed(5)], 'p1')).toBe(SPECIAL_MOMENT_MS.first + HEAL_MS);
+    expect(stepAllowanceMs([{ type: 'Exodia' } as GameEvent, healed(5), healed(5)], null)).toBe(SCENE_ALLOWANCE_CAP_MS);
   });
 });
