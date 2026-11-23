@@ -6,23 +6,18 @@
 
 ## Agora
 
-- **Cinco tarefas da produção** (`decisoes.md` 2026-11-23 (1) a (5); o diário 2026-11-23 (1) e (2)). Branch `feat/ajustes-producao`,
-  saída da `main` em `6382a33`, no checkout principal. Design `docs/superpowers/specs/2026-11-23-ajustes-producao-design.md`; plano
-  `docs/superpowers/plans/2026-11-23-ajustes-producao.md`.
-  - **Feito e commitado:** o deck Cordel Escuro (a versão aprovada, `cca2263`: a geometria do claro, fundo `#2a2a2a` com grão e luz,
-    vermelho `#e53935` com degradê no valor; o bot do treino veste o Cordel oposto); os destinos do Equipar em carimbos fixos (`daa453f`);
-    o favicon (`9c930f5`); a carta que ficava presa quase transparente (`811c872` e `85b0d7a`); o seletor de deck em 2 × 2 e o `CLAUDE.md`.
-  - **A limpeza da memória** (o item 3): este `estado.md` enxuto; o diário antigo no `arquivo/`. O `decisoes.md` (125 KB) só se arquiva
-    com o "sim" do autor (a regra é que ele só cresce).
-  - **`pnpm e2e` local:** 128 verdes e 2 falhas do `looks.spec.ts` (o nome "Cordel" casava "Cordel Escuro"), consertadas (`808e4de`;
-    o spec com 7 de 7).
-  - **No GitHub, PR #7** (`https://github.com/andr3serafim/jogo-do-coringa/pull/7`), com o `pnpm check` verde no pre-push; o `check` e o
-    `e2e` da CI rodando.
-  - **Na `main`** ("Sim, merge", `decisoes.md` 2026-11-23 (6)), por fast-forward até este commit, com o `check` e o `e2e` verdes em
-    `808e4de` (no push e no PR; os commits depois são só de memória). A `feat/ajustes-producao` foi apagada, local e remota.
-  - **Próximo passo exato:** nenhum de código. O próximo trabalho vem do autor.
-  - **Espera o autor:** confirmar se a carta presa era o que ele viu (ele não disse o momento; o outro suspeito é o `opacity-60` da mão
-    travada durante as batidas e o `pending`); o arquivamento do `decisoes.md`; o deploy (leva este bloco e os PRs #3 a #6).
+- **Cinco tarefas novas** (`decisoes.md` 2026-11-23 (7)): o histórico em branco, a cura passiva explicada, as placas em figura, o "+N"
+  mais visível e os visitantes. Branch `feat/cura-historico-visitantes`, saída da `main` em `14adfff`, no checkout principal. Nada de
+  código ainda (brainstorming; o advisor revisa spec, plano e implementação).
+  - **Achado do histórico:** no tema verde, a linha de `/partidas` (`PastGames.tsx`, `Row`) é `bg-papel` sem cor de texto e herda o
+    `--menu-texto` (papel). Conserto: `text-tinta` na linha; o mesmo no `Lobby.tsx` (linhas 143 e 157). Um teste que reprove o verde.
+  - **Como a cura aparece hoje** (fixture `especiais`, rodada 29, passo 137→138: o 7♥ cai da sua Defesa, 3 Q, +28): o "+28" pequeno sob o
+    retrato, ~1 s; o trecho verde da barra; os K da Guarda acendem de leve; a linha "Você curou 28 pela Defesa". Nada liga a carta que cai à
+    vida. A cura também vem do Roubo (`Healed.source`).
+  - **Próximo passo exato:** esperar as respostas dele às perguntas (o que faltou na cura, figura no lugar do texto das placas, quem vê
+    os visitantes e o que conta). Depois: as direções com fotos, a spec, o advisor, o plano.
+- **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`; o deploy (leva
+  o PR #7 e os PRs #3 a #6).
 
 ## No ar e na `main`
 
