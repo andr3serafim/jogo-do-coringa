@@ -6,6 +6,22 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-23 (3): o Cordel Escuro reprovado como está: "muito amador"
+
+Depois de ver a primeira versão (o papel e a tinta trocados dentro da carta), ele escreveu:
+
+> não gostei do deck cordel escuro. está preto chapado, o vermelho está chapado. as bordas brancas em volta branco chapado. eleve o
+> nível está muito amador
+
+**Leitura:**
+- O caminho A (um deck novo na lista) fica; o que cai é o desenho da carta: a inversão pura (fundo de tinta liso, vermelho liso, borda de
+  papel lisa).
+- **[I]** O que ele pede é acabamento de impressão no escuro: profundidade e textura no fundo (não um preto uniforme), um vermelho com
+  corpo de tinta, e um contorno que não seja um traço branco. Como na mesa (2026-11-19 (3)), vão a ele direções com fotos do jogo, e só a
+  escolhida vira código.
+
+---
+
 ## 2026-11-23 (2): o Cordel escuro é um deck novo; o bot veste o oposto
 
 À pergunta sobre o que seria o "Cordel tema escuro", ele respondeu:
