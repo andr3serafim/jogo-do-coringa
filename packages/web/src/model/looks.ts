@@ -1,7 +1,7 @@
 // A aparência das cartas (spec dos decks e raças, §2 e §4): que arte veste cada carta numa aparência, a faixa de raridade da numérica e a
 // aura de cada faixa. Puro: sem React nem DOM. O modelo (`Look`, os ids, `normalizeLook`) é do `@coringa/protocol`; aqui só o que a web usa.
 import type { Card, PlayerId, Rank } from '@coringa/engine';
-import { DEFAULT_LOOK, normalizeLook, type DeckId, type Look, type RaceId, type SeatInfo } from '@coringa/protocol';
+import { DEFAULT_LOOK, isCordelDeck, normalizeLook, type DeckId, type Look, type RaceId, type SeatInfo } from '@coringa/protocol';
 import type { PastLooks } from './past-games.ts';
 
 /** A faixa de raridade (§2.2): só um número, sem nome em lugar nenhum. */
@@ -12,8 +12,8 @@ export function tierOf(value: Rank): Tier {
   return Math.min(5, Math.floor(value / 2)) as Tier;
 }
 
-/** Os pacotes de arte: um por deck e por raça fantasy (o Cordel e o Bufão são o desenho de hoje, sem pacote). */
-export type PackId = Exclude<DeckId, 'cordel'> | Exclude<RaceId, 'bufao'>;
+/** Os pacotes de arte: um por deck e por raça fantasy (os dois Cordel e o Bufão são desenho de código, sem pacote). */
+export type PackId = Exclude<DeckId, 'cordel' | 'cordel-escuro'> | Exclude<RaceId, 'bufao'>;
 
 /** A chave da arte dentro do pacote: o valor em dois dígitos na numérica, a letra (ou `WILD`) na especial. */
 export type ArtKey = '02' | '03' | '04' | '05' | '06' | '07' | '08' | '09' | '10' | 'K' | 'J' | 'Q' | 'A' | 'WILD';
@@ -21,18 +21,18 @@ export type ArtKey = '02' | '03' | '04' | '05' | '06' | '07' | '08' | '09' | '10
 /** De que pacote e com que chave sai a arte desta carta nesta aparência; `null` = a carta de cordel. */
 export function artOf(card: Card, look: Look): { pack: PackId; key: ArtKey } | null {
   if (card.kind === 'NUM') {
-    return look.deck === 'cordel' ? null : { pack: look.deck, key: String(card.value).padStart(2, '0') as ArtKey };
+    return look.deck === 'cordel' || look.deck === 'cordel-escuro' ? null : { pack: look.deck, key: String(card.value).padStart(2, '0') as ArtKey };
   }
   return look.race === 'bufao' ? null : { pack: look.race, key: card.kind };
 }
 
 /**
- * A aparência do bot no treino (fatia 2, G1, que substitui a §7.1 da spec): com o Cordel, o Cordel com o Bufão (o treino padrão fica
- * idêntico ao de hoje); com um deck de arte, o outro deck de arte, com a raça Egípcia. Sempre um objeto novo. Calculada da sua a cada
- * desenho (G2): trocar o seu deck troca o dele.
+ * A aparência do bot no treino: o oposto da sua (decisoes.md 2026-11-23 (2), que substitui a G1 da fatia 2 para o Cordel). Com um Cordel,
+ * o outro Cordel (o claro ↔ o escuro), com o Bufão; com um deck de arte, o outro deck de arte, com a raça Egípcia. Sempre um objeto novo.
+ * Calculada da sua a cada desenho (G2): trocar o seu deck troca o dele.
  */
 export function botLook(mine: Look): Look {
-  if (mine.deck === 'cordel') return { deck: 'cordel', race: 'bufao' };
+  if (isCordelDeck(mine.deck)) return { deck: mine.deck === 'cordel' ? 'cordel-escuro' : 'cordel', race: 'bufao' };
   return { deck: mine.deck === 'bestiario' ? 'celestial' : 'bestiario', race: 'egipcio' };
 }
 
@@ -75,7 +75,7 @@ export function recordedLooks(mine: Look, theirs: Look): PastLooks | undefined {
 /** Os pacotes que uma aparência pede, sem repetir (nenhum para o padrão). */
 export function packsOf(look: Look): PackId[] {
   const packs: PackId[] = [];
-  if (look.deck !== 'cordel') packs.push(look.deck);
+  if (look.deck !== 'cordel' && look.deck !== 'cordel-escuro') packs.push(look.deck);
   if (look.race !== 'bufao') packs.push(look.race);
   return packs;
 }

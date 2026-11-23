@@ -97,7 +97,7 @@ test('aparência: a troca no menu do treino troca as imagens, e o Cordel trava o
   // Com o Cordel, o Egípcio não se marca: o Coringa volta ao Bufão e fica travado nele.
   await expect(menu.getByRole('radio', { name: 'Bufão' })).toBeChecked();
   await expect(menu.getByRole('radio', { name: 'Egípcio' })).toBeDisabled();
-  await expect(menu.getByText('O deck Cordel joga com o Coringa Bufão.')).toBeVisible();
+  await expect(menu.getByText('Os decks Cordel jogam com o Coringa Bufão.')).toBeVisible();
   guard.expectClean();
 });
 

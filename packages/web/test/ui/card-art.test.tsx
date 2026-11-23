@@ -242,3 +242,22 @@ describe('o pacote que já chegou não passa pelo cordel (fatia 2, Minor 1)', ()
     expect(container.querySelector('img')?.getAttribute('src')).toMatch(/07-leao-alado\.webp$/);
   });
 });
+
+describe('o deck Cordel Escuro (decisoes.md 2026-11-23 (2))', () => {
+  const DARK: Look = { deck: 'cordel-escuro', race: 'bufao' };
+
+  it.each([
+    ['a numérica', seven, 'escuro'],
+    ['o K do Bufão', k, 'escuro'],
+    ['o Selvagem, que segue dourado', wild, null],
+  ] as const)('%s', (_, card, tone) => {
+    const { container } = render(withLook(<Card card={card} size="field" as={card.kind === 'WILD' ? 'J' : undefined} />, DARK, {}));
+    expect(root(container).getAttribute('data-tom')).toBe(tone);
+    expect(container.querySelector('img')).toBeNull();
+  });
+
+  it('o Cordel claro e o deck de arte não ganham o tom', () => {
+    expect(root(render(withLook(<Card card={seven} size="field" />, DEFAULT_LOOK, {})).container)).not.toHaveAttribute('data-tom');
+    expect(root(render(withLook(<Card card={seven} size="field" />)).container)).not.toHaveAttribute('data-tom');
+  });
+});

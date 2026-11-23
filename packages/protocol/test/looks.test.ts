@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { DECK_IDS, DEFAULT_LOOK, normalizeLook, RACE_IDS } from '../src/looks.ts';
+import { DECK_IDS, DEFAULT_LOOK, isCordelDeck, normalizeLook, RACE_IDS } from '../src/looks.ts';
 
 describe('aparência (decks e raças, spec §2)', () => {
   it('as listas de ids e o padrão', () => {
-    expect(DECK_IDS).toEqual(['cordel', 'bestiario', 'celestial']);
+    expect(DECK_IDS).toEqual(['cordel', 'cordel-escuro', 'bestiario', 'celestial']);
     expect(RACE_IDS).toEqual(['bufao', 'egipcio']);
     expect(DEFAULT_LOOK).toEqual({ deck: 'cordel', race: 'bufao' });
     expect(Object.isFrozen(DEFAULT_LOOK)).toBe(true);
@@ -15,6 +15,7 @@ describe('aparência (decks e raças, spec §2)', () => {
 
   it.each([
     { deck: 'cordel', race: 'bufao' },
+    { deck: 'cordel-escuro', race: 'bufao' },
     { deck: 'bestiario', race: 'bufao' },
     { deck: 'bestiario', race: 'egipcio' },
     { deck: 'celestial', race: 'bufao' },
@@ -31,6 +32,13 @@ describe('aparência (decks e raças, spec §2)', () => {
 
   it('a trava (§2.1): o Cordel só anda com o Bufão', () => {
     expect(normalizeLook({ deck: 'cordel', race: 'egipcio' })).toEqual({ deck: 'cordel', race: 'bufao' });
+  });
+
+  it('a trava vale para o Cordel Escuro: também só com o Bufão', () => {
+    expect(normalizeLook({ deck: 'cordel-escuro', race: 'egipcio' })).toEqual({ deck: 'cordel-escuro', race: 'bufao' });
+    expect(isCordelDeck('cordel')).toBe(true);
+    expect(isCordelDeck('cordel-escuro')).toBe(true);
+    expect(isCordelDeck('bestiario')).toBe(false);
   });
 
   it('um campo a mais não aparece na saída', () => {

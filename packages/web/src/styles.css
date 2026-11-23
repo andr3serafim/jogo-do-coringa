@@ -1022,6 +1022,26 @@ li[data-joga]::after {
   background: repeating-linear-gradient(45deg, var(--verso-celestial-1) 0 3px, var(--verso-celestial-2) 3px 6px);
 }
 
+.momento-verso[data-verso-deck='cordel-escuro'] {
+  border-color: var(--color-papel);
+  background: repeating-linear-gradient(45deg, var(--color-papel) 0 1.5px, var(--color-tinta) 1.5px 6px);
+}
+
+/*
+ * O deck Cordel Escuro (decisoes.md 2026-11-23 (2)): a carta de cordel com o papel e a tinta trocados só dentro dela. As cores vêm
+ * literais (as do `@theme`), não de `var()` de si mesmas. O vermelho clareia para o naipe ter 6,1:1 sobre a tinta (o de hoje teria 2,9:1).
+ * A seta da carta da frente fica fora da carta, sobre o pano: segue em papel.
+ */
+[data-tom='escuro'] {
+  --color-papel: #17120f;
+  --color-tinta: #f1f0ea;
+  --color-vermelho: #ef6a5c;
+}
+
+[data-tom='escuro'] > [data-frente] {
+  border-right-color: #f1f0ea;
+}
+
 /*
  * O monte e a lápide do cemitério, no centro da faixa de tinta (bloco D dos pontos do playtest, ponto 14; spec do playtest §6.2). O monte
  * é uma pilha de até três versos de cordel, deslocados; vazio, um contorno tracejado. A lápide é pedra de topo redondo, com as rachas

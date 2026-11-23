@@ -153,6 +153,8 @@ describe('a mesa grava a partida terminada', () => {
       score: { p1: 1, p2: 0 },
       rulesVersion: RULES_VERSION,
       replay,
+      // O bot do treino padrão veste o Cordel Escuro (decisoes.md 2026-11-23 (2)): a partida o guarda, para o replay.
+      looks: { me: { deck: 'cordel', race: 'bufao' }, opponent: { deck: 'cordel-escuro', race: 'bufao' } },
     });
     // O treino não tem `key`: duas partidas de treino nunca são a mesma.
     expect(row).not.toHaveProperty('key');
@@ -655,11 +657,11 @@ describe('as aparências gravadas com a partida (decks e raças, fatia 2, G3 e G
     expect(rows(m)[0]!.looks).toEqual({ me: FANTASY, opponent: { deck: 'celestial', race: 'egipcio' } });
   });
 
-  it('o treino padrão não grava aparências: a linha fica como a de hoje, e sem elas o replay já é Cordel', () => {
+  it('o treino padrão grava o Cordel e o Cordel Escuro do bot (decisoes.md 2026-11-23 (2)), para o replay vestir o bot no escuro', () => {
     const m = mountWith({ training: 'medio' }, CORDEL);
     finish(m);
     expect(rows(m)).toHaveLength(1);
-    expect(rows(m)[0]).not.toHaveProperty('looks');
+    expect(rows(m)[0]!.looks).toEqual({ me: CORDEL, opponent: { deck: 'cordel-escuro', race: 'bufao' } });
   });
 
   it.each([

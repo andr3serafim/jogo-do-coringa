@@ -3,7 +3,7 @@
 // `normalizeLook`: com o deck Cordel, o Coringa fica travado no Bufão (§2.1), e uma linha diz por quê (a descrição do grupo Coringa).
 // Passar pelo Cordel não desfaz a raça: enquanto o seletor está aberto, ele lembra a última escolhida fora do Cordel e a devolve na saída.
 import type { Card as EngineCard } from '@coringa/engine';
-import { DECK_IDS, normalizeLook, RACE_IDS, type Look, type RaceId } from '@coringa/protocol';
+import { DECK_IDS, isCordelDeck, normalizeLook, RACE_IDS, type Look, type RaceId } from '@coringa/protocol';
 import { useId, useRef } from 'react';
 import { DECK_LABEL, RACE_LABEL } from '../looks/catalog.ts';
 import { LOOK_DECK_LABEL, LOOK_LOCK_NOTE, LOOK_RACE_LABEL } from '../model/copy.ts';
@@ -75,14 +75,14 @@ export interface LookChoiceProps {
 
 export function LookChoice({ value, onChange, note, packs, skin }: LookChoiceProps) {
   const menu = skin === 'menu';
-  const locked = value.deck === 'cordel';
+  const locked = isCordelDeck(value.deck);
   const lockNote = useId();
-  // A última raça escolhida fora do Cordel: a que volta quando o deck sai dele.
+  // A última raça escolhida fora dos Cordel: a que volta quando o deck sai deles.
   const race = useRef<RaceId>(value.race);
   const change = (next: Partial<Look>) => {
-    const leaving = locked && next.deck !== undefined && next.deck !== 'cordel';
+    const leaving = locked && next.deck !== undefined && !isCordelDeck(next.deck);
     const look = normalizeLook({ ...value, ...next, ...(leaving ? { race: race.current } : {}) });
-    if (look.deck !== 'cordel') race.current = look.race;
+    if (!isCordelDeck(look.deck)) race.current = look.race;
     onChange(look);
   };
   return (
