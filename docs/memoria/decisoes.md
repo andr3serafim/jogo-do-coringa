@@ -6,6 +6,27 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-23 (8): as respostas sobre a cura, as placas e os visitantes
+
+Às quatro perguntas (1: o que faltou na cura, a carta virando vida ou o "+N" maior; 2: as placas só com a figura (a) ou a figura maior com
+texto menor (b), e se o Reflect entra; 3: o "+N" junto da barra de vida ou sobre o campo; 4: quem vê os visitantes e o que conta), ele
+respondeu:
+
+> 1. os dois, com mais detalhes visuais mantendo a qualidade e nível alta do game.
+> 2. a;
+> 3. junto da barra de vida.
+> 4. ignore, é possível ver pelo painel da claudflare.
+
+**Leitura:**
+- **Cura:** a carta que sai da Defesa vira vida e vai até a barra, **e** o "+N" verde fica maior e mais visível, junto da barra de vida
+  (no placar), com mais detalhe visual. Vão a ele direções num protótipo, e só a escolhida vira código.
+- **Placas:** só a figura; a explicação (o nome e o que faz) aparece ao tocar ou passar o mouse, e o leitor de tela segue com o texto.
+- **Visitantes:** fora do bloco; ele vê pelo painel da Cloudflare. A CSP fica como está.
+- **[I]** Ele não respondeu se o Reflect (hoje uma marca na zona, não uma placa) entra nas figuras: a pergunta volta com o protótipo. A
+  cura do Roubo (o A) também é cura: a animação que liga a causa à vida vale para ela, com a carta roubada como origem (a confirmar).
+
+---
+
 ## 2026-11-23 (7): cinco tarefas novas (histórico, cura passiva, figuras das placas, visitantes)
 
 Ele escreveu:
