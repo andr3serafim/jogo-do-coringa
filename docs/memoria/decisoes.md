@@ -6,6 +6,49 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-23 (2): o Cordel escuro é um deck novo; o bot veste o oposto
+
+À pergunta sobre o que seria o "Cordel tema escuro", ele respondeu:
+
+> cordel tema escuro me refiro ao deck de cartas no tema escuro. cartas de baralho fundo claro já existe, quero que exista também a do tema
+> escuro e quando for jogar contra bot usar o oposto do usuário, como é feito com o deck celestial x bestiário.
+
+Entre três caminhos (A: um deck novo na lista; B: um "tom" claro/escuro à parte do deck; C: arte pintada nova), ele escolheu:
+
+> Deck novo (A)
+
+**Leitura:**
+- **Um quarto deck, o Cordel Escuro**, na lista do protocolo (`DECK_IDS`), preso ao Bufão como o Cordel. A carta é a de cordel de hoje com
+  o papel e a tinta trocados só dentro dela; sem imagem nova, sem peso no pacote inicial.
+- **O bot do treino veste o oposto** (substitui a G1 da fatia 2, "o treino padrão fica idêntico ao de hoje"): Cordel → Cordel Escuro,
+  Cordel Escuro → Cordel, sempre com o Bufão; os decks de arte seguem como estão (Bestiário ↔ Celestial, com o Egípcio).
+- **[I]** O Coringa Bufão (J, Q, K, A) também escurece no deck escuro; o Selvagem segue dourado; o tutorial fica no Cordel claro dos dois
+  lados. No online, o deck escuro só aparece para o adversário depois do deploy (até lá o servidor o normaliza para o Cordel, sem erro).
+
+---
+
+## 2026-11-23 (1): cinco tarefas da produção
+
+Ele escreveu:
+
+> Tasks a implementar mantendo o altíssimo nível do projeto que está em produçao.
+> [ ] Cordel tema escuro;
+> [ ] [BUG] - as cartas especiais ficam escuras como se estivesse bloqueadas em momentos em que estão livres para serem usadas;
+> [ ] Limpar memórias velhas. Otimizar contextos persistentes sem comprometer o story;
+> [ ] Favicon do jogo;
+> [ ] botões fileira de ataque e defesa estão quebrando quando há muitas cartas. ficaram da espessura de um palito quando estava jogando
+> online com um amigo (produção); e esses botões vão ficando mais largos a medida que vão diminuindo a quantidade de cartas (aumentam e
+> diminuem de tamanho). quero que esse botão seja mais discreto e intuitivo, com tamanho fixo, indicado por ícones (imagens) com menos
+> texto. atente-se ao responsivo;
+
+**Leitura:**
+- **[I]** Os "botões fileira de ataque e defesa" são os destinos do painel do Equipar (`EquipPanel.tsx`): no PC a lista das cartas não
+  encolhe e a coluna dos destinos fica com a sobra.
+- **[I]** "Limpar memórias velhas" não apaga história: o `estado.md` fica só com o presente, e as entradas antigas vão para `arquivo/`.
+  Mexer no `decisoes.md` (que só cresce) pede o "sim" dele à parte.
+
+---
+
 ## 2026-11-19 (7): o merge da abertura sem a logo (PR #6)
 
 Depois de ver a abertura no navegador, à pergunta "Faço o merge do PR #6 quando as duas CI ficarem verdes?", ele respondeu:

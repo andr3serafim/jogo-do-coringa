@@ -12,6 +12,13 @@
 
 ## Agora
 
+- **Cinco tarefas da produção** (`decisoes.md` 2026-11-23 (1) e (2)): o deck Cordel Escuro (o bot veste o oposto), os destinos do
+  Equipar em carimbos fixos, o favicon, o bug da mão apagada e a limpeza da memória. Branch `feat/ajustes-producao`, saída da `main` em
+  `6382a33`, no checkout principal. Design: `docs/superpowers/specs/2026-11-23-ajustes-producao-design.md`.
+  - **Próximo passo exato:** com o "sim" do autor ao design, o plano (writing-plans) e o código, item a item. A limpeza da memória vem
+    depois, só documentos.
+  - **Espera o autor:** o "sim" ao design; quando as especiais apareceram apagadas (na vez dele, na reação, depois de uma batida).
+
 - **A abertura sem a logo LUSACAN** (`decisoes.md` 2026-11-19 (6)): só a intro do jogo (as cartas, a virada no Coringa, o título), 3,15 s
   em vez de 5,35 s; com movimento reduzido, o Coringa e o título parados, mudos. Branch `feat/intro-sem-logo`, saída da `main` em
   `2050a5d`, no checkout principal.
