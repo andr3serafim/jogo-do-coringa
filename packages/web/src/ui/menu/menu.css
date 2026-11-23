@@ -517,6 +517,11 @@
   gap: 10px;
 }
 
+/* Quatro opções (os decks): 2 × 2, para nenhuma sobrar sozinha numa linha. */
+.menu-opcoes[data-pares] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .menu-opcao {
   display: flex;
   align-items: center;

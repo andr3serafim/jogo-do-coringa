@@ -1043,6 +1043,14 @@ li[data-joga]::after {
 }
 
 /*
+ * A face da quadra no escuro: o `QUAD_FACE` misturaria 45% de ouro com a tinta, um oliva onde o vermelho teria 2,2:1. Com 15%, o vermelho
+ * tem 4,7:1 e o papel 12,6:1; as marcas da quadra (`QuadMarks`) seguem em ouro.
+ */
+[data-tom='escuro'][data-quad='true'] {
+  background-color: color-mix(in oklab, var(--color-ouro) 15%, #17120f);
+}
+
+/*
  * O monte e a lápide do cemitério, no centro da faixa de tinta (bloco D dos pontos do playtest, ponto 14; spec do playtest §6.2). O monte
  * é uma pilha de até três versos de cordel, deslocados; vazio, um contorno tracejado. A lápide é pedra de topo redondo, com as rachas
  * desenhadas e o gravado em papel (o contraste do texto passa de 4,5:1 na pedra inteira); o canto de papel da segunda carta fica atrás da

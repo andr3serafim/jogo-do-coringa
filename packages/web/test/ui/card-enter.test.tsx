@@ -30,9 +30,17 @@ describe('a carta que entra esmaecendo', () => {
     await waitFor(() => expect(opacityOf(container)).toBe(1), { timeout: 2000 });
   });
 
-  it('sem entrada, a carta já nasce inteira', () => {
-    const { container } = render(at(null));
-    expect(opacityOf(container)).toBe(1);
+  it('sem entrada, a carta não leva opacidade inline: as classes do rascunho, da trava e do cemitério valem', () => {
+    const draft = (
+      <LazyMotion features={domAnimation}>
+        <Card card={k} size="field" draft />
+      </LazyMotion>
+    );
+    const { container } = render(draft);
+    const root = container.firstElementChild as HTMLElement;
+    expect(root.style.opacity).toBe('');
+    expect(root).toHaveClass('opacity-70');
+    expect((render(at(null)).container.firstElementChild as HTMLElement).style.opacity).toBe('');
   });
 });
 

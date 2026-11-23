@@ -8,7 +8,7 @@
 // (filtro), que não disputa o `box-shadow`.
 import type { Card as EngineCard } from '@coringa/engine';
 import * as m from 'motion/react-m';
-import { useCallback, useEffect, useRef, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { CardFx } from '../../model/effects.ts';
 import { TABLE_MOTION } from '../../model/table-motion.ts';
 import { useAnim } from '../anim/context.ts';
@@ -232,6 +232,10 @@ export function Card({
   // A da especial do oponente aparece de uma vez no impacto: a cópia do momento chega nela (bloco A dos pontos do playtest, ponto 1).
   const snapAt = landing?.snap ? landing.at : null;
   const enter = dealt ?? dropAt ?? snapAt;
+  // A carta que já entrou esmaecendo alguma vez guarda o alvo do esmaecer (abaixo); a que nunca entrou fica sem opacidade inline, para as
+  // classes do rascunho, da trava e do cemitério valerem.
+  const [entered, setEntered] = useState(enter !== null);
+  if (enter !== null && !entered) setEntered(true);
   const enterSeconds = dealt !== null ? 0.25 : dropAt !== null ? TABLE_MOTION.dropMs / 1000 : snapAt !== null ? SNAP_FADE_S : 0.25;
   const self = useRef<HTMLElement | null>(null);
   const bindRef = useCallback(
@@ -299,10 +303,10 @@ export function Card({
           layoutId: card.id,
           layoutDependency: anim.layoutKey,
           initial: enter === null ? undefined : { opacity: 0 },
-          // O alvo fica sempre: um `state` novo no meio da batida da compra troca a linha do tempo e o `enter` vira `null`; sem alvo, o
-          // Motion parava a carta no meio do esmaecer, quase transparente (escura sobre a barra, como travada). Com ele, ela termina de
-          // aparecer na hora (atraso 0). Na carta que já nasce inteira, ir a 1 não muda nada.
-          animate: { opacity: 1 },
+          // O alvo fica depois da entrada: um `state` novo no meio da batida da compra troca a linha do tempo e o `enter` vira `null`; sem
+          // alvo, o Motion parava a carta no meio do esmaecer, quase transparente (escura sobre a barra, como travada). Com ele, ela termina
+          // de aparecer na hora (atraso 0). A carta que nunca entrou não ganha alvo: o `opacity: 1` inline anularia as classes de opacidade.
+          animate: entered ? { opacity: 1 } : undefined,
           transition: {
             layout: layoutTransition(anim.delayOf(card.id), anim.instant(card.id)),
             opacity: { delay: enter ?? 0, duration: enterSeconds },
