@@ -27,8 +27,9 @@
     aceito; o Reflect também só figura; o histórico consertado, vitória em verde e derrota em vermelho ("tipo CS2").
   - **Spec escrita** (rascunho): `docs/superpowers/specs/2026-11-23-cura-placas-historico-design.md`; as fotos do histórico em
     `2026-11-23-cura-direcoes/prancha-historico.png` (1 · Faixa, 2 · Selo).
-  - **Próximo passo exato:** o advisor revisa a spec; depois ela vai ao autor com as duas perguntas dela (a opção do histórico; a cura com a
-    vida já cheia) e o pedido de "sim". Com o sim: o plano (`superpowers:writing-plans`), o advisor, a implementação.
+  - **Spec aprovada** (`decisoes.md` 2026-11-23 (10)): com som de cura; histórico na opção 1 · Faixa; a cura toca com a vida cheia.
+  - **Plano:** `docs/superpowers/plans/2026-11-23-cura-placas-historico.md` (9 tarefas).
+  - **Próximo passo exato:** o advisor revisa o plano; depois o autor escolhe o modo de execução e começa a Tarefa 1.
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`; o deploy (leva
   o PR #7 e os PRs #3 a #6).
 
