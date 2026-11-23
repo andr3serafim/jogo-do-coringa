@@ -5,7 +5,8 @@
 // As batidas são contíguas: `startMs` da batida i+1 = `startMs + durationMs` da batida i. Não há
 // sobreposição; o número de dano, a faixa e a tremida acontecem dentro da duração da própria batida.
 import type { GameEvent, PlayerId } from '@coringa/engine';
-import { MOMENT_TAIL_MS, MOMENT_TAIL_PLAYS, SCENE_MS, SPECIAL_MOMENT_MS, momentsMs } from '@coringa/protocol';
+import { HEAL_MS, MOMENT_TAIL_MS, MOMENT_TAIL_PLAYS, SCENE_MS, SPECIAL_MOMENT_MS, momentsMs } from '@coringa/protocol';
+import { HEAL_MOTION } from './heal-motion.ts';
 import { FINAL_BLOW_MS, SCENE_MOMENTS } from './scene-moments.ts';
 
 /** Duração de uma cena na tabela do protocolo (a mesma que dá a folga do relógio no servidor, sub-projeto 6 §9). */
@@ -113,7 +114,7 @@ const SCENE_INVERT_HOLD_MS = 600;
 
 export interface Beat {
   event: GameEvent;
-  kind: 'move' | 'damage' | 'banner' | 'scene' | 'quiet' | 'moment';
+  kind: 'move' | 'damage' | 'banner' | 'scene' | 'quiet' | 'moment' | 'heal';
   /** Instante de início, em ms desde o começo da linha do tempo. */
   startMs: number;
   durationMs: number;
@@ -138,10 +139,15 @@ export interface Beat {
    */
   moment: { flyAtMs: number; impactAtMs: number } | null;
   /**
-   * A primeira cura passiva da partida (bloco A dos pontos do playtest, ponto 9): a batida segue `damage`, e a faixa dela explica a regra
-   * com a conta (`healRibbon`).
+   * A primeira cura passiva da partida (bloco A dos pontos do playtest, ponto 9): a faixa da batida explica a regra com a conta
+   * (`healRibbon`).
    */
   teach: boolean;
+  /**
+   * A batida da cura ao vivo (spec `2026-11-23-cura-placas-historico-design.md` §4): quando a gota chega à barra (`arriveAtMs`, absoluto,
+   * como `startMs`) e, no Roubo, o `value` do `StealDamage` do passo (o bruto, com o bônus da fileira do oponente). `null` nas outras.
+   */
+  heal: { arriveAtMs: number; stealValue: number | null } | null;
 }
 
 export interface TimelineOptions {
@@ -165,8 +171,11 @@ export interface TimelineOptions {
 }
 
 interface Classified {
-  /** O momento não sai da tabela: é a especial de quem não é `viewer`, decidida depois (`buildTimeline`). */
-  kind: Exclude<Beat['kind'], 'moment'>;
+  /**
+   * O momento não sai da tabela: é a especial de quem não é `viewer`, decidida depois (`buildTimeline`). A cura ao vivo também
+   * (`heal`): a tabela dá a da reconexão.
+   */
+  kind: Exclude<Beat['kind'], 'moment' | 'heal'>;
   cards: string[];
   scene: SceneKind | null;
 }
@@ -242,7 +251,7 @@ function classify(event: GameEvent): Classified {
     case 'StealDamage':
       return plain('damage');
     case 'Healed':
-      // A cura que não curou nada (a vida já cheia) não tem número: passa quieta.
+      // A da reconexão (`catchUp`): o "+N" de antes, e a que não curou nada passa quieta. Ao vivo, `buildTimeline` a faz batida de cura.
       return plain(event.amount > 0 ? 'damage' : 'quiet');
     case 'DeckReshuffled':
     case 'AttackDeclared':
@@ -265,7 +274,8 @@ function baseDuration(kind: Classified['kind'], scene: SceneKind | null): number
  * em curso (`useBeatPlayer`; decisoes.md 2026-11-03 (1), ponto 17). Sem evento nenhum não conta: é o começo de uma partida.
  */
 export function quietOnly(events: readonly GameEvent[]): boolean {
-  return events.length > 0 && events.every((event) => classify(event).kind === 'quiet');
+  // A cura toca ao vivo também com a vida cheia (decisoes.md 2026-11-23 (10)): nunca é quieta.
+  return events.length > 0 && events.every((event) => event.type !== 'Healed' && classify(event).kind === 'quiet');
 }
 
 export function buildTimeline(events: GameEvent[], options: TimelineOptions): Beat[] {
@@ -273,7 +283,25 @@ export function buildTimeline(events: GameEvent[], options: TimelineOptions): Be
   const catchUp = options.mode === 'catchUp';
 
   // 1. Tipo e duração base. No `catchUp` as cenas viram faixa e tudo anda em velocidade dobrada.
-  const items = events.map((event) => {
+  const items = events.map((event, index) => {
+    // A cura ao vivo (decisoes.md 2026-11-23 (9) e (10)): batida própria, sem teto, também com a vida cheia; a folga dela no relógio é
+    // `healsMs` (protocolo), e no Roubo o bruto é o `value` do `StealDamage` de quem curou, mais perto antes dela no passo.
+    if (!catchUp && event.type === 'Healed') {
+      const steal = event.source === 'STEAL' ? events.slice(0, index).findLast((before) => before.type === 'StealDamage' && before.player === event.player) : undefined;
+      return {
+        event,
+        kind: 'heal' as Beat['kind'],
+        cards: [] as string[],
+        scene: null as SceneKind | null,
+        baseMs: HEAL_MS,
+        uncapped: true,
+        hit: null as Beat['hit'],
+        absorbed: false,
+        phases: null as (typeof MOMENT_MS)[keyof typeof MOMENT_MS] | null,
+        teach: false,
+        stealValue: steal?.type === 'StealDamage' ? steal.value : null,
+      };
+    }
     const classified = classify(event);
     const flattened = catchUp && classified.kind === 'scene';
     const kind: Classified['kind'] = flattened ? 'banner' : classified.kind;
@@ -291,6 +319,7 @@ export function buildTimeline(events: GameEvent[], options: TimelineOptions): Be
       absorbed: false,
       phases: null as (typeof MOMENT_MS)[keyof typeof MOMENT_MS] | null,
       teach: false,
+      stealValue: null as number | null,
     };
   });
   // A faixa que ensina a cura passiva, só ao vivo: na primeira cura da Defesa que curou algo.
@@ -403,6 +432,7 @@ export function buildTimeline(events: GameEvent[], options: TimelineOptions): Be
       intercepted: yields,
       moment,
       teach: item.teach,
+      heal: item.kind === 'heal' ? { arriveAtMs: startMs + HEAL_MOTION.arriveAt, stealValue: item.stealValue } : null,
     });
     startMs += durationMs;
   }

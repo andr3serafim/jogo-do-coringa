@@ -1,8 +1,8 @@
 // O que cada batida mostra (spec §4.2): efeitos nas cartas e nas fileiras, o número do dano, o texto das faixas e das
 // cenas, e o atraso das transições de layout. Puro: sem React nem DOM. Quem desenha é a interface (`ui/anim`).
-import { quadValues, type DevastationState, type GameEvent, type NumCard, type PlayerId, type PlayerView, type RowName } from '@coringa/engine';
+import { defenseHealOf, quadValues, type DevastationState, type GameEvent, type NumCard, type PlayerId, type PlayerView, type RowName } from '@coringa/engine';
 import { cardText, eventText, type Names } from '@coringa/sim/text';
-import { finalBlowTitle, initiativeRibbon, SCENE_TITLE, type Ribbon } from './copy.ts';
+import { finalBlowTitle, healCaption, initiativeRibbon, SCENE_TITLE, type Ribbon } from './copy.ts';
 import { impactForce, type ImpactForce } from './impact.ts';
 import { TABLE_MOTION } from './table-motion.ts';
 import { RIBBON_SCENES, type Beat } from './timeline.ts';
@@ -31,9 +31,25 @@ export interface BeatEffects {
   initiative: { holder: PlayerId; changed: boolean; streak: number } | null;
   /** O golpe (sub-projeto 6 §5): quem apanhou e com que peso. A mesa treme e respinga tinta no retrato dele. */
   impact: { target: PlayerId; force: ImpactForce } | null;
+  /** A cura ao vivo (a batida `heal`): o que a camada da cura desenha. `null` fora dela. */
+  heal: HealFx | null;
 }
 
-export const NO_EFFECTS: BeatEffects = { cards: new Map(), rows: new Set(), damage: null, shieldBreak: null, initiative: null, impact: null };
+/**
+ * A cura da batida `heal` (spec `2026-11-23-cura-placas-historico-design.md` §4.1; decisoes.md 2026-11-23 (9) e (10)): o carimbo mostra o
+ * bruto (`gross`, a conta da regra) e a vida sobe o líquido (`net`, o `amount` do motor, que para na vida inicial). `card` é a carta do
+ * `Healed`; `origin`, de onde a gota sai: o cemitério (a cura passiva; a carta de cima pode ser outra, no Equipar) ou a carta roubada.
+ */
+export interface HealFx {
+  target: PlayerId;
+  card: NumCard;
+  gross: number;
+  net: number;
+  caption: string;
+  origin: { kind: 'graveyard' } | { kind: 'card'; id: string };
+}
+
+export const NO_EFFECTS: BeatEffects = { cards: new Map(), rows: new Set(), damage: null, shieldBreak: null, initiative: null, impact: null, heal: null };
 
 /** As cartas da fileira da quadra: as da fileira com o valor dela (a `view` já é a de depois do evento). */
 function quadCards(view: PlayerView, player: PlayerId, row: RowName, value: number): string[] {
@@ -99,6 +115,7 @@ function effectsOfEvent(event: GameEvent, view: PlayerView): Partial<BeatEffects
  */
 export function effectsOf(beat: Beat | null, view: PlayerView, landed = false, sceneNumber = false): BeatEffects {
   if (beat === null) return NO_EFFECTS;
+  if (beat.heal !== null && beat.event.type === 'Healed') return healEffects(beat.event, beat.heal.stealValue, view);
   // Os dois espelhos que trincam já dizem o que o escudo do placar diria.
   if (beat.scene === 'REFLECT_CANCELED' && sceneNumber) return NO_EFFECTS;
   // O golpe que é o próprio evento da cena (o dano devolvido pelo Reflect) só vale quando acende.
@@ -107,6 +124,26 @@ export function effectsOf(beat: Beat | null, view: PlayerView, landed = false, s
   const hit = effectsOfEvent(beat.hit.event, view);
   const impact = hit.impact ? { target: hit.impact.target, force: 'forte' as const } : null;
   return { ...NO_EFFECTS, ...own, ...hit, impact, damage: sceneNumber ? null : (hit.damage ?? null) };
+}
+
+/**
+ * Os efeitos da batida de cura: o `HealFx` (o bruto do motor na cura passiva, o `value` do Roubo no Roubo) e, na passiva, os K da Guarda de
+ * quem curou acesos (a causa). Sem o número de dano: quem mostra é a camada da cura. O lado é o do fim do passo, e ele vale para o bruto
+ * (`engine/test/heal-gross.test.ts`).
+ */
+function healEffects(event: Extract<GameEvent, { type: 'Healed' }>, stealValue: number | null, view: PlayerView): BeatEffects {
+  const side = view.me === event.player ? view.self : view.opponent;
+  const passive = event.source === 'DEFENSE';
+  const gross = passive ? defenseHealOf(event.card, side) : (stealValue ?? event.amount);
+  const heal: HealFx = {
+    target: event.player,
+    card: event.card,
+    gross,
+    net: event.amount,
+    caption: healCaption(event.card, gross),
+    origin: passive ? { kind: 'graveyard' } : { kind: 'card', id: event.card.id },
+  };
+  return { ...NO_EFFECTS, heal, cards: passive ? fxMap(side.guard.map((card) => card.id), 'cause') : NO_EFFECTS.cards };
 }
 
 /**
@@ -262,8 +299,10 @@ export function dealsOf(beats: readonly Beat[]): Deals {
  */
 export function damageBeatIndex(beats: readonly Beat[]): number {
   const counts = new Set<GameEvent['type']>(['DamageDealt', 'ReflectTriggered', 'StealDamage', 'Healed']);
-  // A cura de 0 (a vida já cheia) é batida quieta: não é ela que conta.
-  return beats.findIndex((beat) => counts.has(beat.event.type) && beat.kind !== 'quiet');
+  // A cura de 0 (a vida já cheia) toca ao vivo (decisoes.md 2026-11-23 (10)), mas não mexe na vida: não é ela que conta.
+  return beats.findIndex(
+    (beat) => counts.has(beat.event.type) && beat.kind !== 'quiet' && !(beat.event.type === 'Healed' && beat.event.amount === 0),
+  );
 }
 
 /**

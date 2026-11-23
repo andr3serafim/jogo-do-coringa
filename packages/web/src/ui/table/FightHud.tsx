@@ -226,6 +226,8 @@ function Side({ side, view, player, name, holder, aura }: SideProps) {
   const damage = anim.fx.damage?.target === player.id ? anim.fx.damage : null;
   const impact = anim.fx.impact?.target === player.id ? anim.fx.impact : null;
   const hpName = `Vida de ${name}`;
+  // A cura chegou e a vida sobe (spec da cura §4.2): o número pulsa uma vez. Com movimento reduzido, nada.
+  const rising = !anim.reduced && hpTarget > shownHp;
 
   return (
     <div data-lado={side} className={`placar-lado placar-lado--${side}`}>
@@ -274,7 +276,7 @@ function Side({ side, view, player, name, holder, aura }: SideProps) {
           onSeen={seen}
         />
         <p className="flex items-baseline gap-1 leading-none" onPointerEnter={seen} onPointerDown={seen}>
-          <span data-hp className="font-texto text-[13px] font-extrabold tabular-nums pc:text-lg">
+          <span data-hp data-vida-pulsa={rising ? '' : undefined} className="font-texto text-[13px] font-extrabold tabular-nums pc:text-lg">
             {shownHp}
           </span>
           <span aria-hidden="true" className="font-texto text-[10px] font-semibold tabular-nums text-papel/65 pc:text-[13px]">
@@ -359,6 +361,8 @@ function HpBar({
       {reduced ? null : <div data-rastro style={{ transform: `scaleX(${percentOf(trail, max) / 100})` }} />}
       {healing ? <div data-cura-barra style={{ transform: `scaleX(${percentOf(target, max) / 100})` }} /> : null}
       <div data-vida style={{ transform: `scaleX(${percentOf(shown, max) / 100})` }} />
+      {/* O brilho que corre uma vez pela vida nova quando a cura chega (spec da cura §4.2), por cima do ouro e do verde. */}
+      {healing ? <div data-cura-brilho aria-hidden="true" style={{ transform: `scaleX(${percentOf(target, max) / 100})` }} /> : null}
     </div>
   );
 }

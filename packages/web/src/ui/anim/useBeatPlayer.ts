@@ -177,6 +177,11 @@ export interface BeatPlayer {
   index: number;
   /** O golpe que a cena do Ataque Absoluto absorveu já acendeu (o feixe acertou; sub-projeto 6 §7.1). */
   hitLanded: boolean;
+  /**
+   * A gota da batida de cura já chegou à barra (`Beat.heal.arriveAtMs`; spec da cura §4.2): a vida conta a partir dela. Marca própria, e
+   * não o `hitLanded`, que o retrato que racha e a cena também leem.
+   */
+  healArrived: boolean;
   busy: boolean;
   inverted: boolean;
   /** A cortina escura da cena está no ar (ela segura um pouco além da batida, e a regra de flash pode segurá-la mais). */
@@ -421,6 +426,8 @@ export function useBeatPlayer(
   const timers = useRef<number[]>([]);
   /** O golpe absorvido que já acendeu: o da batida `index` da linha do tempo `run`. */
   const [landed, setLanded] = useState<{ run: Run; index: number } | null>(null);
+  /** A gota da cura que já chegou: a da batida `index` da linha do tempo `run`. */
+  const [arrived, setArrived] = useState<{ run: Run; index: number } | null>(null);
   /** A linha do tempo cujos timers ainda valem: o pulo a solta, e o que ela agendou deixa de acontecer. */
   const live = useRef<Run | null>(null);
   useEffect(() => {
@@ -454,6 +461,7 @@ export function useBeatPlayer(
       }
       // O golpe que a cena do Ataque Absoluto absorveu acende no impacto do feixe (sub-projeto 6 §7.1), no mesmo relógio da inversão.
       if (beat.hit) at(beat.hit.atMs, () => setLanded({ run, index: i }));
+      if (beat.heal) at(beat.heal.arriveAtMs, () => setArrived({ run, index: i }));
       if (curtained(beat, reduced.current)) {
         // A cortina recusada tenta de novo quando a regra deixa, se ainda faltar bastante cena: numa cena longa, ela não fica de fora só
         // porque a anterior acabou há pouco. A espera confere o relógio de novo: um timer atrasado não a sobe no fim.
@@ -523,6 +531,7 @@ export function useBeatPlayer(
     beat,
     index: current.done ? -1 : current.index,
     hitLanded: !current.done && landed !== null && landed.run === run && landed.index === current.index,
+    healArrived: !current.done && arrived !== null && arrived.run === run && arrived.index === current.index,
     busy: !current.done,
     inverted,
     curtain,

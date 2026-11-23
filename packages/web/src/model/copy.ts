@@ -404,6 +404,15 @@ export interface Ribbon {
 }
 
 /**
+ * A conta do carimbo da cura (spec `2026-11-23-cura-placas-historico-design.md` §4.1): a carta e, se o bônus multiplica, " × N"
+ * ("7♥ × 4"). Sem multiplicador, só a carta ("7♥").
+ */
+export function healCaption(card: NumCard, gross: number): string {
+  const times = gross / card.value;
+  return times > 1 ? `${cardText(card)} × ${times}` : cardText(card);
+}
+
+/**
  * A faixa da primeira cura passiva da partida (bloco A dos pontos do playtest, ponto 9): a regra e a conta, com o bruto do motor
  * (`defenseHealOf`) e os Q que ele multiplica (a divisão do bruto pelo valor, como a conta da fileira). Se a vida chegou ao máximo antes, o
  * que entrou foi menos: a faixa diz.

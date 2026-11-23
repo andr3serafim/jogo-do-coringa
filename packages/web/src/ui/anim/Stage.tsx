@@ -24,6 +24,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent, typ
 import type { Ribbon } from '../../model/copy.ts';
 import { healRibbon } from '../../model/copy.ts';
 import { bannerRibbon, defeatShown, desolationShown, effectsOf, fieldTarget, finalBlowInfo, insigniaShown, lifeChange, NO_EFFECTS, resurrectionInfo, ribbonText } from '../../model/effects.ts';
+import { HEAL_MOTION } from '../../model/heal-motion.ts';
 import { roomNames } from '../../model/history.ts';
 import type { SessionSnapshot } from '../../model/session.ts';
 import type { ImpactForce } from '../../model/impact.ts';
@@ -114,7 +115,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, online = false, chil
     },
     onSettled,
   );
-  const { run, beat, index, busy, inverted, curtain, veil, bannerBeat, banner, released, skip, hitLanded, cut } = player;
+  const { run, beat, index, busy, inverted, curtain, veil, bannerBeat, banner, released, skip, hitLanded, healArrived, cut } = player;
 
   const count: CountPhase =
     !busy || reducedMotion || run.damageIndex < 0 || index > run.damageIndex
@@ -146,12 +147,14 @@ export function Stage({ snapshot, reducedMotion, onSettled, online = false, chil
       });
       const now = lifeSteps[index];
       const hit = run.beats[index]?.hit ?? null;
-      // Na cena com golpe, a vida espera o feixe acertar e desce em `HIT_COUNT_MS`.
-      const step = now?.player === who && (hit === null || hitLanded) ? now.delta : 0;
-      const ms = reducedMotion ? 0 : hit === null ? (run.beats[index]?.durationMs ?? 0) : HIT_COUNT_MS;
+      const heal = run.beats[index]?.heal ?? null;
+      // Na cena com golpe, a vida espera o feixe acertar e desce em `HIT_COUNT_MS`; na cura, espera a gota chegar à barra e sobe em
+      // `HEAL_MOTION.countMs` (spec da cura §4.2).
+      const step = now?.player === who && (hit === null || hitLanded) && (heal === null || healArrived) ? now.delta : 0;
+      const ms = reducedMotion ? 0 : heal !== null ? HEAL_MOTION.countMs : hit === null ? (run.beats[index]?.durationMs ?? 0) : HIT_COUNT_MS;
       return { playing: true, done, step, ms, total };
     },
-    [busy, reducedMotion, sceneHit, lifeSteps, index, run, hitLanded],
+    [busy, reducedMotion, sceneHit, lifeSteps, index, run, hitLanded, healArrived],
   );
   const insignia = useCallback(
     (who: PlayerId, active: boolean): boolean => (busy && index >= 0 ? insigniaShown(run.beats, index, who, active) : active),

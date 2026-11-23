@@ -37,7 +37,10 @@
     `Healed` no mesmo passo, nas 11 de referência e em 90 sorteadas).
   - **Advisor nas tarefas 1 a 3:** feito; os reforços (a Duda no verde conferida, a medição do contraste, as Q antes e depois) neste
     commit. O diário 2026-11-23 (3) tem as `Ruling:`.
-  - **Próximo passo exato:** Tarefa 4 (a batida `heal` em `timeline.ts`, o `HealFx` com a carta em `effects.ts`, `HEAL_MOTION`).
+  - **Feito:** tarefas 4 e 5 num commit (a batida `heal` sem teto, o `HealFx` com o bruto, a conta e a origem; a vida conta na chegada
+    da gota, pela marca própria `healArrived`; o brilho na barra e o pulso do número). O "+N" sob o retrato some ao vivo: o carimbo é da
+    Tarefa 6.
+  - **Próximo passo exato:** Tarefa 6 (`ui/anim/Heal.tsx`, a `HealLayer`: o brilho da origem, a gota, as faíscas e o carimbo).
     Para a Tarefa 6: a primeira cura da partida tem a faixa (`healRibbon`) e o carimbo ao mesmo tempo; conferir que não se cobrem.
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`; o deploy (leva
   o PR #7 e os PRs #3 a #6).
