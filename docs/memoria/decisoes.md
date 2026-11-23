@@ -6,6 +6,19 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-23 (5): a carta escura aprovada, com o #e53935
+
+Depois das fotos da segunda versão, à pergunta "Aprova a carta escura e qual vermelho fica?" (o `#e53935`, 3,4:1, ou o `#ff5a4e`,
+4,7:1), ele respondeu:
+
+> Aprovo, #e53935
+
+**Leitura:**
+- A carta escura de (4) fica como está (`cca2263`), com o vermelho `#e53935`; o contraste de 3,4:1 no número pequeno é escolha dele.
+- **[I]** Segue o fecho do bloco: o `pnpm e2e`, o push e o PR; o merge espera o "sim" dele.
+
+---
+
 ## 2026-11-23 (4): o Cordel Escuro com a geometria do claro, fundo #2a2a2a e vermelho #e53935
 
 Diante das três direções (A, B e C, com filete e cantoneiras), ele escreveu:
