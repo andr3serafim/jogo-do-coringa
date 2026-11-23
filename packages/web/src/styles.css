@@ -1028,26 +1028,112 @@ li[data-joga]::after {
 }
 
 /*
- * O deck Cordel Escuro (decisoes.md 2026-11-23 (2)): a carta de cordel com o papel e a tinta trocados só dentro dela. As cores vêm
- * literais (as do `@theme`), não de `var()` de si mesmas. O vermelho clareia para o naipe ter 6,1:1 sobre a tinta (o de hoje teria 2,9:1).
- * A seta da carta da frente fica fora da carta, sobre o pano: segue em papel.
+ * O deck Cordel Escuro (decisoes.md 2026-11-23 (2) e (3)): a carta de cordel impressa no escuro. Não é a inversão lisa do papel: o fundo
+ * tem o grão do papel tingido (desenho de código, como o `--grao-carimbo`) e a luz de lamparina no meio; a borda é escura, com um filete
+ * por dentro (um `::before`, para não brigar com o `box-shadow` do anel de ouro); o valor tem a sombra curta da prensa. As variáveis do
+ * `@theme` são trocadas só dentro da carta, com cores literais (um `var()` de si mesmo seria ciclo). Rascunho das direções A, B e C
+ * (`data-variante`), para as fotos; só a escolhida fica.
  */
 [data-tom='escuro'] {
-  --color-papel: #17120f;
-  --color-tinta: #f1f0ea;
-  --color-vermelho: #ef6a5c;
+  --escuro-fundo: #1d1610;
+  --escuro-luz: #3a2d20;
+  --escuro-borda-funda: #100c08;
+  --escuro-cantoneira: rgb(226 190 110 / 0.8);
+  --escuro-borda: #4a3a26;
+  --escuro-filete: rgb(214 178 98 / 0.5);
+  --color-papel: var(--escuro-fundo);
+  --color-tinta: #efe3c8;
+  --color-vermelho: #f07458;
+  border-color: var(--escuro-borda);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .94 0 0 0 0 .86 0 0 0 0 .7 0 0 0 .2 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 90% 75% at 50% 40%, var(--escuro-luz), var(--escuro-fundo) 62%, var(--escuro-borda-funda) 100%);
 }
 
+[data-tom='escuro'][data-variante='b'] {
+  --escuro-fundo: #172035;
+  --escuro-luz: #2a3a5c;
+  --escuro-borda-funda: #0c1120;
+  --escuro-cantoneira: rgb(236 230 214 / 0.6);
+  --escuro-borda: #34446a;
+  --escuro-filete: rgb(236 230 214 / 0.3);
+  --color-tinta: #ece6d6;
+  --color-vermelho: #f5866b;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .85 0 0 0 0 .88 0 0 0 0 .95 0 0 0 .18 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 90% 75% at 50% 40%, var(--escuro-luz), var(--escuro-fundo) 62%, var(--escuro-borda-funda) 100%);
+}
+
+[data-tom='escuro'][data-variante='c'] {
+  --escuro-fundo: #16110c;
+  --escuro-luz: #2c2218;
+  --escuro-borda-funda: #0a0806;
+  --escuro-cantoneira: rgb(240 205 120 / 0.95);
+  --escuro-borda: #8a6a2e;
+  --escuro-filete: rgb(232 195 106 / 0.65);
+  --color-tinta: #e8c36a;
+  --color-vermelho: #f0664f;
+  background-image:
+    repeating-linear-gradient(135deg, rgb(232 195 106 / 0.05) 0 1px, transparent 1px 5px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .9 0 0 0 0 .76 0 0 0 0 .42 0 0 0 .18 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 90% 75% at 50% 40%, var(--escuro-luz), var(--escuro-fundo) 62%, var(--escuro-borda-funda) 100%);
+}
+
+/* O filete de dentro: uma linha fina a 2 px da borda, no canto arredondado da carta. */
+[data-tom='escuro']::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border: 1px solid var(--escuro-filete);
+  border-radius: 2px 3px 2px 4px;
+  pointer-events: none;
+}
+
+/*
+ * As cantoneiras gravadas, como nas molduras dos folhetos: um L fino nos dois cantos livres (o de cima à direita e o de baixo à esquerda;
+ * o valor e o naipe ficam nos outros dois). Só gradientes num pseudoelemento: sem imagem, sem filtro.
+ */
+[data-tom='escuro']::after {
+  content: '';
+  position: absolute;
+  inset: 6%;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--escuro-cantoneira), var(--escuro-cantoneira)) top right / 22% 1.5px no-repeat,
+    linear-gradient(var(--escuro-cantoneira), var(--escuro-cantoneira)) top right / 1.5px 16% no-repeat,
+    linear-gradient(var(--escuro-cantoneira), var(--escuro-cantoneira)) bottom left / 22% 1.5px no-repeat,
+    linear-gradient(var(--escuro-cantoneira), var(--escuro-cantoneira)) bottom left / 1.5px 16% no-repeat;
+}
+
+/* Na mão, o naipe ocupa o canto de cima e o papel, o de baixo: fica só o filete. */
+[data-tom='escuro'][data-tamanho='hand']::after {
+  content: none;
+}
+
+/* A prensa: o valor e o naipe com uma sombra curta, sem desfoque (nada de filtro novo nos campos). */
+[data-tom='escuro'] [data-valor] {
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.7);
+}
+
+/* O anel da escolhida segue de ouro com o contorno de tinta (a tinta da carta escura é clara). */
+[data-tom='escuro'][class~='anel-ouro'] {
+  box-shadow:
+    0 0 0 3px #f5c238,
+    0 0 0 5px #17120f;
+}
+
+/* A seta da carta da frente fica fora da carta, sobre o pano: segue em papel. */
 [data-tom='escuro'] > [data-frente] {
   border-right-color: #f1f0ea;
 }
 
 /*
- * A face da quadra no escuro: o `QUAD_FACE` misturaria 45% de ouro com a tinta, um oliva onde o vermelho teria 2,2:1. Com 15%, o vermelho
- * tem 4,7:1 e o papel 12,6:1; as marcas da quadra (`QuadMarks`) seguem em ouro.
+ * A face da quadra no escuro: 15% de ouro sobre o fundo (com os 45% do `QUAD_FACE`, o vermelho cairia a 2,2:1); as marcas da quadra
+ * (`QuadMarks`) seguem em ouro.
  */
 [data-tom='escuro'][data-quad='true'] {
-  background-color: color-mix(in oklab, var(--color-ouro) 15%, #17120f);
+  background-color: color-mix(in oklab, var(--color-ouro) 15%, var(--escuro-fundo));
+  background-image: radial-gradient(ellipse 85% 70% at 50% 38%, color-mix(in oklab, var(--color-ouro) 22%, var(--escuro-luz)), transparent 75%);
 }
 
 /*
@@ -1539,4 +1625,20 @@ li[data-joga]::after {
   to {
     transform: scale(0.9);
   }
+}
+
+/* TEMPORÁRIO (fotos das direções): a versão reprovada, para comparar. */
+[data-tom='escuro'][data-antes] {
+  --color-papel: #17120f;
+  --color-tinta: #f1f0ea;
+  --color-vermelho: #ef6a5c;
+  border-color: #f1f0ea;
+  background-image: none;
+}
+[data-tom='escuro'][data-antes]::before,
+[data-tom='escuro'][data-antes]::after {
+  content: none;
+}
+[data-tom='escuro'][data-antes] [data-valor] {
+  text-shadow: none;
 }

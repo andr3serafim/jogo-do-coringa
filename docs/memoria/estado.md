@@ -19,9 +19,16 @@
   - **Feito e commitado** (testes relacionados verdes no pre-commit): o Cordel Escuro (`0c2175a`), os carimbos do Equipar (`daa453f`), o
     favicon (`9c930f5`, smoke verde), a carta presa quase transparente (`811c872`, reproduzida e conferida no dev server). O diário
     2026-11-23 (1) tem os detalhes.
-  - **Próximo passo exato:** o `pnpm check` completo (rodando), o `pnpm e2e`, o push da branch e o PR para a `main`. A limpeza da memória
-    vem depois, só documentos.
-  - **Espera o autor:** confirmar se a carta presa era o que ele viu (ele não disse o momento); o merge do PR; o deploy (dele).
+  - **Ajustes da revisão** (`85b0d7a`): o alvo do esmaecer só na carta que entrou; a quadra escura legível; o seletor de deck em 2 × 2; o
+    `CLAUDE.md`. A branch está no GitHub (o pre-push com o `pnpm check` verde); **ainda sem PR e sem `pnpm e2e`**.
+  - **O Cordel Escuro reprovado** ("muito amador", `decisoes.md` 2026-11-23 (3)). Três direções, só em CSS no `styles.css`
+    (`[data-tom='escuro']` é a A; `[data-variante='b']` e `'c'` são as outras; `[data-antes]` reproduz a reprovada), todas com grão,
+    luz de lamparina, filete e cantoneiras (fora da mão: `data-tamanho='hand'`). O jogo não liga `data-variante` nem `data-antes`: hoje
+    a tela mostra a A. Pranchas e scripts em `docs/superpowers/specs/2026-11-23-cordel-escuro-direcoes/` (o `direcoes.mjs` precisa do dev
+    server e de `packages/web/public/tmp-especiais.json`, a fixture `especiais` com `looks`, que **não vai para o git**). Recomendada: a A.
+  - **Próximo passo exato:** com a escolha dele, apagar as outras direções e o `[data-antes]` do CSS, o verso do Cordel Escuro na mesma
+    paleta, os testes, o `pnpm e2e`, o PR. Apagar o `public/tmp-especiais.json`. A limpeza da memória vem depois, só documentos.
+  - **Espera o autor:** a direção do Cordel Escuro (A, B ou C); confirmar se a carta presa era o que ele viu; o merge do PR; o deploy.
 
 - **A abertura sem a logo LUSACAN** (`decisoes.md` 2026-11-19 (6)): só a intro do jogo (as cartas, a virada no Coringa, o título), 3,15 s
   em vez de 5,35 s; com movimento reduzido, o Coringa e o título parados, mudos. Branch `feat/intro-sem-logo`, saída da `main` em
