@@ -6,6 +6,32 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-23 (9): a direção A da cura, o bruto no carimbo e o histórico em verde e vermelho
+
+Diante do protótipo (`docs/superpowers/specs/2026-11-23-cura-direcoes/`), às seis perguntas (1: qual direção; 2: a vida quase cheia, 490
++ 28 brutos que só curam 10; 3: a cura do oponente com a mesma animação; 4: o tempo a mais, ~1,4 s por cura na A; 5: o Reflect também só
+figura; 6: posso corrigir o histórico em branco), ele respondeu:
+
+> 1. A;
+> 2. Exibir o valor bruto da cura (28, como no exemplo) mas curar apenas o valor líquido (10, como no exemplo);
+> 3. sim;
+> 4. sim;
+> 5. sim;
+> 6. sim, mas deixe evitentes partidas vitoriosas (tom verde tipo cs 2) e derrotas (tom vermelho).
+
+**Leitura:**
+- **A · Seiva:** a carta que cai solta a gota que sobe até a ponta da barra, com rastro; na chegada, as faíscas, o brilho no verde, o
+  número que conta e o carimbo "+N" logo abaixo da barra, com a conta embaixo; os K acendem junto.
+- **O carimbo mostra o bruto** (a conta da regra, "+28 · 7♥ × 4"); a barra e o número sobem só o que entrou (o líquido, +10). O motor não
+  muda: o bruto sai de `defenseHealOf` (e da conta do Roubo), o líquido é o `Healed.amount`.
+- **A cura do oponente** tem a mesma animação, espelhada no lado dele. **O tempo:** a cura sai do teto de decisão e ganha folga no relógio.
+- **O Reflect** também vira só figura, como as placas.
+- **O histórico:** consertar o texto em branco (e as outras telas do menu com o mesmo defeito) e marcar o resultado: vitória em verde,
+  derrota em vermelho, no tom do histórico de partidas do CS2.
+- **[I]** O empate e a partida sem resultado ficam neutras (o papel de hoje); ele não falou delas.
+
+---
+
 ## 2026-11-23 (8): as respostas sobre a cura, as placas e os visitantes
 
 Às quatro perguntas (1: o que faltou na cura, a carta virando vida ou o "+N" maior; 2: as placas só com a figura (a) ou a figura maior com
