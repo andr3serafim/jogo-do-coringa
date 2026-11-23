@@ -18,15 +18,17 @@
     o spec com 7 de 7).
   - **No GitHub, PR #7** (`https://github.com/andr3serafim/jogo-do-coringa/pull/7`), com o `pnpm check` verde no pre-push; o `check` e o
     `e2e` da CI rodando.
-  - **Próximo passo exato:** com as duas CI verdes e o "sim" dele, o merge por fast-forward e apagar a `feat/ajustes-producao`.
+  - **Na `main`** ("Sim, merge", `decisoes.md` 2026-11-23 (6)), por fast-forward até este commit, com o `check` e o `e2e` verdes em
+    `808e4de` (no push e no PR; os commits depois são só de memória). A `feat/ajustes-producao` foi apagada, local e remota.
+  - **Próximo passo exato:** nenhum de código. O próximo trabalho vem do autor.
   - **Espera o autor:** confirmar se a carta presa era o que ele viu (ele não disse o momento; o outro suspeito é o `opacity-60` da mão
-    travada durante as batidas e o `pending`); o arquivamento do `decisoes.md`; o merge; o deploy.
+    travada durante as batidas e o `pending`); o arquivamento do `decisoes.md`; o deploy (leva este bloco e os PRs #3 a #6).
 
 ## No ar e na `main`
 
 - **No ar** em `https://jogodocoringa.com.br`: `5f5821f` (o deploy de 2026-11-18, os menus no Folheto). O `/api/health` devolve a versão.
-- **Na `main` e ainda não no ar** (o deploy, `pnpm deploy:server`, é dele): o "Aprender jogando" sem a linha (PR #3), o Coringa do Início
-  menor no notebook (PR #4), a mesa no Feltro (PR #5), a abertura sem a logo LUSACAN (PR #6). Este bloco entra junto quando mesclado.
+- **Na `main` e ainda não no ar** (o deploy, `pnpm deploy:server`, é dele): o bloco de 2026-11-23 (PR #7), o "Aprender jogando" sem a linha (PR #3), o Coringa do Início
+  menor no notebook (PR #4), a mesa no Feltro (PR #5), a abertura sem a logo LUSACAN (PR #6).
 - **Online depois do deploy:** o `cordel-escuro` só vale na sala depois do deploy; antes, o servidor o normaliza para o Cordel, sem erro.
 
 ## Pendências abertas (fora deste bloco)

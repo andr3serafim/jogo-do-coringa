@@ -6,6 +6,19 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-23 (6): o merge do PR #7
+
+À pergunta "Faço o merge do PR #7 quando as duas CI ficarem verdes?", ele respondeu:
+
+> Sim, merge
+
+**Leitura:**
+- O merge do PR #7 na `main` por fast-forward, com o `check` e o `e2e` verdes no código (`808e4de`, no push e no PR); os commits depois
+  são só de memória. O deploy segue dele.
+- **[I]** O arquivamento do `decisoes.md` e a confirmação da carta presa seguem em aberto (ele não respondeu a esses dois).
+
+---
+
 ## 2026-11-23 (5): a carta escura aprovada, com o #e53935
 
 Depois das fotos da segunda versão, à pergunta "Aprova a carta escura e qual vermelho fica?" (o `#e53935`, 3,4:1, ou o `#ff5a4e`,

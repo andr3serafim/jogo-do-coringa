@@ -24,6 +24,9 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   SVG de `feTurbulence` em data URI, como o `--grao-carimbo`.
 - **Armadilha (de novo):** crases dentro de `node -e "…"` no shell; desta vez quase rodou um `pnpm e2e\`. Para texto com crases, use o
   Edit ou um arquivo no scratchpad.
+- **Fecho:** o `pnpm e2e` local deu 128 verdes e 2 falhas do `looks.spec.ts` (o nome "Cordel" casava "Cordel Escuro"; `808e4de`, com
+  `exact: true`). A memória limpa (`b405887`: o `estado.md` de 37 a 10 KB; o diário de 2026-11-03 a 2026-11-13 no `arquivo/`). PR #7, com
+  as duas CI verdes em `808e4de`, mesclado por fast-forward com o "sim" dele (`decisoes.md` 2026-11-23 (6)). Sem deploy (é dele).
 
 ---
 
