@@ -17,10 +17,11 @@
   `6382a33`, no checkout principal. Design: `docs/superpowers/specs/2026-11-23-ajustes-producao-design.md`.
   - **O design aprovado** ("Aprovo, pode seguir"); o plano em `docs/superpowers/plans/2026-11-23-ajustes-producao.md`.
   - **Feito e commitado** (testes relacionados verdes no pre-commit): o Cordel Escuro (`0c2175a`), os carimbos do Equipar (`daa453f`), o
-    favicon (`9c930f5`, smoke verde). Conferidos no dev server a 1440 × 900 e 390 × 844.
-  - **Próximo passo exato:** a Task 5 do plano (reproduzir a mão apagada), depois o `pnpm check`, o `pnpm e2e`, o diário, o push e o PR.
-    A limpeza da memória vem depois, só documentos.
-  - **Espera o autor:** quando as especiais apareceram apagadas (na vez dele, na reação, depois de uma batida).
+    favicon (`9c930f5`, smoke verde), a carta presa quase transparente (`811c872`, reproduzida e conferida no dev server). O diário
+    2026-11-23 (1) tem os detalhes.
+  - **Próximo passo exato:** o `pnpm check` completo (rodando), o `pnpm e2e`, o push da branch e o PR para a `main`. A limpeza da memória
+    vem depois, só documentos.
+  - **Espera o autor:** confirmar se a carta presa era o que ele viu (ele não disse o momento); o merge do PR; o deploy (dele).
 
 - **A abertura sem a logo LUSACAN** (`decisoes.md` 2026-11-19 (6)): só a intro do jogo (as cartas, a virada no Coringa, o título), 3,15 s
   em vez de 5,35 s; com movimento reduzido, o Coringa e o título parados, mudos. Branch `feat/intro-sem-logo`, saída da `main` em

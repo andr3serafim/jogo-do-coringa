@@ -5,6 +5,36 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-23 (1): o Cordel Escuro, os carimbos do Equipar, o favicon e a carta presa quase transparente
+
+- **Pedido:** `decisoes.md` 2026-11-23 (1) (cinco tarefas) e (2) (o Cordel escuro é um deck novo; o bot no oposto). Branch
+  `feat/ajustes-producao`, saída da `main` em `6382a33`. Design: `docs/superpowers/specs/2026-11-23-ajustes-producao-design.md`; plano:
+  `docs/superpowers/plans/2026-11-23-ajustes-producao.md`.
+- **Cordel Escuro** (`0c2175a`): `cordel-escuro` no `DECK_IDS` (o segundo da lista), `isCordelDeck` no protocolo (a trava do Bufão nos
+  dois). A carta ganha `data-tom="escuro"` (`useCardTone`, fora do Selvagem e da arte) e o CSS troca `--color-papel` ↔ `--color-tinta`
+  só dentro dela, com o vermelho `#ef6a5c` (6,1:1 sobre a tinta); a seta da frente segue em papel. Verso: listras finas de papel na
+  tinta, borda de papel (o `BACK_CLASS` e o `.momento-verso`). O `botLook` dá o Cordel oposto; o treino padrão passa a gravar `looks`
+  (o bot é escuro, e o replay precisa saber). O `LOOK_LOCK_NOTE` virou "Os decks Cordel jogam com o Coringa Bufão."
+- **Ruling:** as cores do tom vêm literais no `[data-tom='escuro']` (um `var()` de si mesmo seria ciclo). Seis testes da G1 antiga
+  ("o treino padrão fica como hoje") foram reescritos para a decisão nova, não apagados.
+- **Carimbos do Equipar** (`daa453f`): o `DestinationStamp` (64 × 56; 76 × 64 no PC; `.carimbo-destino`), a figura (a troca leva o
+  `SwapIcon` no canto; o descarte, o `DiscardIcon`) e a palavra (`DESTINATION_SHORT`; na troca, `leavingShort`, "sai 9♠"); o nome inteiro
+  no `aria-label` e no `title`. As cartas por pôr se sobrepõem como as da mão (a mesma conta de `--hand-w`) e o painel quebra linha: os
+  carimbos descem em vez de encolher (no celular com 3 destinos; no PC só com 5 cartas e 3 destinos, o máximo do motor).
+- **Favicon** (`9c930f5`): `public/favicon.svg` (os traçados do `Coringa.tsx`, chapéu em ouro, num quadrado de tinta) e o
+  `apple-touch-icon.png` 180 px (quadrado cheio), tirado do SVG pelo Chromium do Playwright num script do scratchpad (não versionado). O
+  smoke confere os dois links e os arquivos no `dist`.
+- **A mão apagada** (`811c872`): reproduzida no treino (semente `bug1`, Equipar rápido duas rodadas): a K comprada ficou em 0,02 de
+  opacidade, sem animação, escura sobre a barra e com o cadeado. A causa: o `animate` do esmaecer de entrada da `Card` (e do `CardBack`)
+  só existia com `enter` não nulo; um `state` no meio da batida da compra troca a linha do tempo e o Motion parava a carta. O alvo fica
+  sempre. Teste novo `card-enter.test.tsx` (falha sem o conserto). **[I]** É a leitura mais provável do relato dele; ele não disse em
+  que momento viu.
+- **Armadilha:** no shell, crases dentro de `node -e "…"` executam (de novo): três trechos do `EquipPanel` saíram vazios e foram
+  consertados à mão. Para código com template literal, use o Edit.
+- **Ficou:** o `pnpm check` completo, o `pnpm e2e`, o push e o PR; a limpeza da memória (bloco à parte, só documentos).
+
+---
+
 ## 2026-11-19 (3): a abertura sem a logo LUSACAN
 
 - **Pedido:** `decisoes.md` 2026-11-19 (6) ("remova lusacan productions da intro, deixe apenas a parte do jogo do coringa"). Branch
