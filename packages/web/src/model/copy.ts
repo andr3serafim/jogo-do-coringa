@@ -659,7 +659,16 @@ export function durationText(ms: number): string {
 }
 
 /** O título do painel de fim termina em exclamação quando tem resultado ("Duda venceu!"); sem resultado, não. */
-export const resultShouts = (outcome: Outcome): boolean => outcome.result !== null;
+/**
+ * A palavra do carimbo do fim (a Faixa de feira, decisoes.md 2026-11-24 (11) e (13)), do seu ponto de vista: "Vitória!", "Derrota", "Empate"
+ * (só nas partidas velhas) ou "Sem resultado". É desenho: o nome do diálogo é o `resultTitle`.
+ */
+export function resultStamp(outcome: Pick<Outcome, 'result'>, me: PlayerId): string {
+  const { result } = outcome;
+  if (result === null) return 'Sem resultado';
+  if (result.kind !== 'WIN') return 'Empate';
+  return result.winner === me ? 'Vitória!' : 'Derrota';
+}
 
 /** "Você venceu", "Duda venceu" ou "Partida sem resultado". */
 export function resultTitle(outcome: Outcome, me: PlayerId, names: OutcomeNames): string {

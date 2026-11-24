@@ -1,6 +1,6 @@
 # O fim de partida na Faixa de feira — spec
 
-> **Estado:** rascunho para o autor. Origem: `docs/memoria/decisoes.md` 2026-11-24 (6), (10) e (11). O protótipo aprovado é
+> **Estado:** aprovada pelo autor em 2026-11-24 (`decisoes.md` 2026-11-24 (13)), com P1 (a), P2 e P3 como escritas. Origem: `docs/memoria/decisoes.md` 2026-11-24 (6), (10) e (11). O protótipo aprovado é
 > `docs/superpowers/specs/2026-11-24-fim-direcoes/prototipo.html?dir=b2` (fotos `b2-*.png`). **[I]** marca o que ele não disse com essas
 > palavras.
 
@@ -44,8 +44,8 @@ JavaScript inicial só se passar do orçamento (o smoke confere os 200 KB).
 
 ## 5. Perguntas ao autor
 
-- **P1. O Coringa do medalhão com a raça Egípcia:** (a) sempre o Bufão, como no protótipo; (b) o retrato da sua raça, sem a expressão
+- **P1. Respondida: sempre o Bufão.** O Coringa do medalhão com a raça Egípcia: (a) sempre o Bufão, como no protótipo; (b) o retrato da sua raça, sem a expressão
   (o Egípcio é arte pintada, sem a boca feliz/triste).
-- **P2. O empate (das partidas velhas) e a "partida sem resultado"** (os dois saíram da sala): **[I]** medalhão com fundo de papel, o
+- **P2. Respondida: como escrito.** O empate (das partidas velhas) e a "partida sem resultado" (os dois saíram da sala): medalhão com fundo de papel, o
   Coringa sério e a palavra em ouro ("EMPATE" / "SEM RESULTADO").
-- **P3. No online, quando o oponente vence:** o medalhão mostra o **seu** Coringa triste (como no treino) e a frase diz "Duda venceu".
+- **P3. Respondida: como escrito.** No online, quando o oponente vence: o medalhão mostra o **seu** Coringa triste (como no treino) e a frase diz "Duda venceu".

@@ -13,9 +13,10 @@
   - **C, `feat/sem-cordel-escuro`** (saída da `main` em `51e9f4b`): o Cordel Escuro sai (`decisoes.md` 2026-11-24 (10)); feito em
     `d2aa89d` (o `cordel-escuro` guardado vira o Cordel no `normalizeLook`; o bot volta ao Cordel; os testes voltam ao que eram antes do
     `0c2175a`). **Próximo passo:** push (o `pnpm check`), PR, CI e o "sim" do merge.
-  - **D, o fim de partida na Faixa de feira** (aprovada em 2026-11-24 (11); o protótipo `docs/superpowers/specs/2026-11-24-fim-direcoes/
-    prototipo.html?dir=b2`): a spec `docs/superpowers/specs/2026-11-24-fim-de-partida-faixa-design.md` está escrita e espera o "sim" e as
-    perguntas P1 a P3; vai numa branch própria, saída da `main` depois do C.
+  - **D, `feat/fim-faixa`** (saída da ponta do C; depois do squash do #11: `git rebase --onto main feat/sem-cordel-escuro feat/fim-faixa`):
+    a spec `docs/superpowers/specs/2026-11-24-fim-de-partida-faixa-design.md` aprovada (2026-11-24 (13)); o `EndPanel` na Faixa de feira, o
+    `ResultMedal.tsx` (o Coringa feliz, triste ou sério), a `Modal` com `framed={false}`, o `resultStamp` no `copy.ts`; fotos do painel
+    implementado em `2026-11-24-fim-direcoes/implementado-*.png`. **Próximo passo:** `pnpm e2e`, advisor, push, PR e o "sim" do merge.
 - **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele), que leva o PR #8; apagar a branch `feat/cura-historico-visitantes`
   (mesclada).
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`.

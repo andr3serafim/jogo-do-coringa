@@ -16,12 +16,15 @@ export interface ModalProps {
   /** O id do texto que descreve o diálogo (lido junto com o título ao abrir). */
   describedBy?: string;
   className?: string;
+  /** Sem a moldura de papel (a borda, o fundo e o respiro): quem usa desenha a própria (a Faixa de feira do fim de partida). */
+  framed?: boolean;
   children: ReactNode;
 }
 
-const BASE = 'm-auto max-h-[85dvh] select-text overflow-y-auto border-4 border-tinta bg-papel p-5 text-tinta backdrop:bg-tinta/70';
+const BASE = 'm-auto max-h-[85dvh] select-text overflow-y-auto backdrop:bg-tinta/70';
+const FRAME = 'border-4 border-tinta bg-papel p-5 text-tinta';
 
-export function Modal({ open, onClose, labelledBy, describedBy, className = 'w-[min(92vw,34rem)]', children }: ModalProps) {
+export function Modal({ open, onClose, labelledBy, describedBy, className = 'w-[min(92vw,34rem)]', framed = true, children }: ModalProps) {
   const ref = useRef<HTMLDialogElement>(null);
   /**
    * Quantos `close()` nossos ainda esperam o evento `close` correspondente. No navegador esse evento vem numa tarefa
@@ -79,7 +82,7 @@ export function Modal({ open, onClose, labelledBy, describedBy, className = 'w-[
       aria-describedby={describedBy}
       onClose={onNativeClose}
       onKeyDown={onKeyDown}
-      className={`${BASE} ${className}`}
+      className={`${BASE} ${framed ? FRAME : 'border-0 bg-transparent p-0'} ${className}`}
     >
       {open ? children : null}
     </dialog>
