@@ -187,7 +187,7 @@ describe('as aparências da mesa, memoizadas pelo conteúdo', () => {
     expect(result.current).toEqual({ mine: DEFAULT_LOOK, owners: { p1: DEFAULT_LOOK, p2: DEFAULT_LOOK }, recorded: undefined });
   });
 
-  it('o treino: a sua da preferência e a do bot; com o Cordel, o bot no Cordel Escuro, gravado (decisoes.md 2026-11-23 (2))', () => {
+  it('o treino como antes: a sua da preferência e a do bot; o Cordel não grava', () => {
     const { result, rerender } = hook({ mode: 'training', preferred: BESTIARIO_EGIPCIO, seats: undefined, me: 'p1', opponent: 'p2' });
     expect(result.current).toEqual({
       mine: BESTIARIO_EGIPCIO,
@@ -198,7 +198,7 @@ describe('as aparências da mesa, memoizadas pelo conteúdo', () => {
     rerender({ mode: 'training', preferred: { ...BESTIARIO_EGIPCIO }, seats: undefined, me: 'p1', opponent: 'p2' });
     expect(result.current).toBe(first);
     rerender({ mode: 'training', preferred: DEFAULT_LOOK, seats: undefined, me: 'p1', opponent: 'p2' });
-    expect(result.current!.recorded).toEqual({ me: DEFAULT_LOOK, opponent: { deck: 'cordel-escuro', race: 'bufao' } });
+    expect(result.current!.recorded).toBeUndefined();
   });
 
   it('o tutorial, e a mesa sem estado ainda: nenhuma', () => {

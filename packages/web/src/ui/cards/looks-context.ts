@@ -44,14 +44,6 @@ export function usePortrait(): string | null {
   return look.race === 'bufao' ? null : (portraits[look.race] ?? null);
 }
 
-/**
- * O tom da carta de cordel no lugar onde ela está (decisoes.md 2026-11-23 (2)): `'escuro'` no deck Cordel Escuro, para a numérica e as
- * especiais do Bufão (o deck escuro só anda com ele); o Selvagem segue dourado. `undefined` = a carta de papel claro de hoje.
- */
-export function useCardTone(card: Card): 'escuro' | undefined {
-  const { look } = useContext(LooksContext);
-  return look.deck === 'cordel-escuro' && card.kind !== 'WILD' ? 'escuro' : undefined;
-}
 
 /** A arte desta carta no lugar onde ela está; `null` = a face de cordel (sem provedor, sem pacote, ou carta de cordel). */
 export function useCardArt(card: Card): CardArt | null {

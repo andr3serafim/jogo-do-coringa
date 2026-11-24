@@ -1198,61 +1198,7 @@ li[data-joga]::after {
   background: repeating-linear-gradient(45deg, var(--verso-celestial-1) 0 3px, var(--verso-celestial-2) 3px 6px);
 }
 
-.momento-verso[data-verso-deck='cordel-escuro'] {
-  border-color: #141414;
-  background: repeating-linear-gradient(45deg, #2a2a2a 0 3px, #3d3d3d 3px 6px);
-}
 
-/*
- * O deck Cordel Escuro (decisoes.md 2026-11-23 (2) a (4)): a carta de cordel de hoje, com o mesmo valor e o mesmo naipe, do mesmo tamanho e
- * no mesmo lugar; só a cor e o acabamento mudam. As variáveis do `@theme` são trocadas só dentro da carta, com cores literais (um `var()` de
- * si mesmo seria ciclo):
- * - o fundo `#2a2a2a` não é liso: tem o grão do papel tingido (desenho de código, como o `--grao-carimbo`) e uma luz suave no meio, que
- *   escurece para as bordas;
- * - a borda é a tinta mais funda, como o contorno de tinta da carta clara, nunca um traço branco;
- * - o vermelho `#e53935` (3,4:1 sobre o fundo) ganha corpo no valor: um degradê de tinta, mais claro no alto. O naipe (desenho, 3:1) fica
- *   na cor cheia. Nada de filtro nem de sombra desfocada (a Devastação no celular).
- */
-[data-tom='escuro'] {
-  --color-papel: #2a2a2a;
-  --color-tinta: #f1f0ea;
-  --color-vermelho: #e53935;
-  border-color: #141414;
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .92 0 0 0 0 .92 0 0 0 0 .9 0 0 0 .14 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"),
-    radial-gradient(ellipse 90% 75% at 50% 42%, #323232, #2a2a2a 60%, #222 100%);
-}
-
-/* O valor vermelho com corpo: o degradê recortado no próprio texto (o tamanho e o lugar não mudam). */
-[data-tom='escuro'] [data-valor].text-vermelho {
-  background-image: linear-gradient(180deg, #ef5350 15%, #e53935 55%, #c62828 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* O anel da escolhida segue de ouro com o contorno de tinta (a tinta da carta escura é clara). */
-[data-tom='escuro'][class~='anel-ouro'] {
-  box-shadow:
-    0 0 0 3px #f5c238,
-    0 0 0 5px #17120f;
-}
-
-/* A seta da carta da frente fica fora da carta, sobre o pano: segue em papel. */
-[data-tom='escuro'] > [data-frente] {
-  border-right-color: #f1f0ea;
-}
-
-/* O brilho que passa na quadra: no papel, a faixa branca é sutil; no escuro viraria um risco. Aqui é um reflexo de ouro, mais fraco. */
-[data-tom='escuro'] [data-brilho-quadra] {
-  background-image: linear-gradient(115deg, transparent 42%, rgb(245 194 56 / 0.3) 50%, transparent 58%);
-}
-
-/* A face da quadra no escuro: um toque de ouro no fundo (com os 45% do `QUAD_FACE`, o vermelho sumiria); as marcas da quadra seguem em ouro. */
-[data-tom='escuro'][data-quad='true'] {
-  background-color: color-mix(in oklab, var(--color-ouro) 12%, #2a2a2a);
-  background-image: radial-gradient(ellipse 90% 75% at 50% 42%, color-mix(in oklab, var(--color-ouro) 18%, #2a2a2a), transparent 70%);
-}
 
 /*
  * O monte e a lápide do cemitério, no centro da faixa de tinta (bloco D dos pontos do playtest, ponto 14; spec do playtest §6.2). O monte

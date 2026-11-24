@@ -19,7 +19,7 @@ const ALL_FILES = Object.values(
 
 describe('o catálogo das aparências (spec dos decks §2.3 e §4.4)', () => {
   it('os rótulos dos decks e das raças', () => {
-    expect(DECK_LABEL).toEqual({ cordel: 'Cordel', 'cordel-escuro': 'Cordel Escuro', bestiario: 'Bestiário', celestial: 'Celestial' });
+    expect(DECK_LABEL).toEqual({ cordel: 'Cordel', bestiario: 'Bestiário', celestial: 'Celestial' });
     expect(RACE_LABEL).toEqual({ bufao: 'Bufão', egipcio: 'Egípcio' });
   });
 

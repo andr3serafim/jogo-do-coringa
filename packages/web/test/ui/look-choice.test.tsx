@@ -38,7 +38,6 @@ describe('o seletor da aparência', () => {
     render(<Harness />);
     expect(deck().getAllByRole('radio').map((radio) => radio.closest('label')?.textContent)).toEqual([
       'Cordel',
-      'Cordel Escuro',
       'Bestiário',
       'Celestial',
     ]);
@@ -62,10 +61,10 @@ describe('o seletor da aparência', () => {
     render(<Harness onChange={onChange} />);
     deck().getByRole('radio', { name: 'Cordel' }).focus();
     await user.keyboard('{ArrowRight}');
-    expect(deck().getByRole('radio', { name: 'Cordel Escuro' })).toBeChecked();
-    expect(onChange).toHaveBeenLastCalledWith({ deck: 'cordel-escuro', race: 'bufao' });
-    await user.keyboard('{ArrowRight}');
+    expect(deck().getByRole('radio', { name: 'Bestiário' })).toBeChecked();
     expect(onChange).toHaveBeenLastCalledWith({ deck: 'bestiario', race: 'bufao' });
+    await user.keyboard('{ArrowRight}');
+    expect(onChange).toHaveBeenLastCalledWith({ deck: 'celestial', race: 'bufao' });
   });
 
   it('o espaço marca a opção focada', async () => {
@@ -79,12 +78,6 @@ describe('o seletor da aparência', () => {
 
   it('com o Cordel, o Egípcio fica desligado e uma linha diz por quê', () => {
     render(<Harness />);
-    expect(race().getByRole('radio', { name: 'Egípcio' })).toBeDisabled();
-    expect(screen.getByText(LOOK_LOCK_NOTE)).toBeInTheDocument();
-  });
-
-  it('com o Cordel Escuro, a mesma trava (decisoes.md 2026-11-23 (2))', () => {
-    render(<Harness initial={{ deck: 'cordel-escuro', race: 'bufao' }} />);
     expect(race().getByRole('radio', { name: 'Egípcio' })).toBeDisabled();
     expect(screen.getByText(LOOK_LOCK_NOTE)).toBeInTheDocument();
   });

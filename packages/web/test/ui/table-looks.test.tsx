@@ -110,8 +110,8 @@ describe('o treino com Bestiário + Bufão', () => {
   });
 });
 
-describe('o treino padrão: o bot no Cordel Escuro (decisoes.md 2026-11-23 (2))', () => {
-  it('nenhum img de carta, os versos do bot no Cordel Escuro, as cartas dele escuras e as suas claras, o Coringa nos dois retratos, e nenhum pacote pedido', async () => {
+describe('o treino padrão fica como hoje', () => {
+  it('nenhum img de carta, os versos de listras sem deck, o Coringa nos dois retratos, e nenhum pacote pedido', async () => {
     const calls = { bestiario: 0, celestial: 0, egipcio: 0 };
     resetPacks({
       bestiario: () => (calls.bestiario++, Promise.resolve({ urls: bestiario })),
@@ -122,9 +122,7 @@ describe('o treino padrão: o bot no Cordel Escuro (decisoes.md 2026-11-23 (2))'
     await act(async () => vi.dynamicImportSettled());
     expect(m.container.querySelectorAll('img')).toHaveLength(0);
     expect(backs().length).toBeGreaterThan(0);
-    for (const back of backs()) expect(back).toHaveAttribute('data-verso-deck', 'cordel-escuro');
-    expect(theirField().querySelector('[data-card-id]')).toHaveAttribute('data-tom', 'escuro');
-    expect(myField().querySelector('[data-card-id]')).not.toHaveAttribute('data-tom');
+    for (const back of backs()) expect(back).not.toHaveAttribute('data-verso-deck');
     expect(portraitOf('voce').querySelector('svg')).not.toBeNull();
     expect(portraitOf('oponente').querySelector('svg')).not.toBeNull();
     expect(calls).toEqual({ bestiario: 0, celestial: 0, egipcio: 0 });
@@ -132,7 +130,7 @@ describe('o treino padrão: o bot no Cordel Escuro (decisoes.md 2026-11-23 (2))'
 });
 
 describe('a troca no menu (G2): o bot acompanha a sua', () => {
-  it('de Bestiário para Celestial, o lado do bot passa ao Bestiário, sem remontar a mesa nem tocar batida; no Cordel, o bot no Cordel Escuro', async () => {
+  it('de Bestiário para Celestial, o lado do bot passa ao Bestiário, sem remontar a mesa nem tocar batida; no Cordel, tudo em cordel', async () => {
     await allPacks();
     const m = mount(MINE, { training: 'medio', prefs: { look: BESTIARIO_EGIPCIO } });
     const table = screen.getByRole('main', { name: 'Mesa' });
@@ -151,7 +149,7 @@ describe('a troca no menu (G2): o bot acompanha a sua', () => {
 
     await m.user.click(menu.getByRole('radio', { name: 'Cordel' }));
     expect(m.container.querySelectorAll('[data-card-id] img')).toHaveLength(0);
-    for (const back of backs()) expect(back).toHaveAttribute('data-verso-deck', 'cordel-escuro');
+    for (const back of backs()) expect(back).not.toHaveAttribute('data-verso-deck');
     expect(portraitImage('oponente')).toBeNull();
   });
 });
@@ -190,13 +188,12 @@ describe('o momento da especial do bot (G6)', () => {
     expect(layer.querySelector('[data-momento-verso]')).toHaveAttribute('data-verso-deck', 'celestial');
   });
 
-  it('no padrão, a carta grande é de cordel escuro (a do bot) e o verso tem o deck dele', () => {
+  it('no padrão, a carta grande é de cordel e o verso não tem deck', () => {
     const m = mount(THEIRS, { training: 'medio' });
     emit(m, withJ, [botBuff]);
     const layer = m.container.querySelector('[data-momento]')!;
     expect(layer.querySelector('img')).toBeNull();
-    expect(layer.querySelector('[data-tom="escuro"]')).not.toBeNull();
-    expect(layer.querySelector('[data-momento-verso]')).toHaveAttribute('data-verso-deck', 'cordel-escuro');
+    expect(layer.querySelector('[data-momento-verso]')).not.toHaveAttribute('data-verso-deck');
   });
 });
 

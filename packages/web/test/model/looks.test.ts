@@ -31,7 +31,6 @@ describe('a faixa da numérica (spec dos decks §2.2)', () => {
 describe('a arte de cada carta numa aparência', () => {
   it('a aparência padrão é toda de cordel', () => {
     for (const card of [num(2), num(7), num(10), K, J, Q, A, WILD]) expect(artOf(card, DEFAULT_LOOK)).toBeNull();
-    for (const card of [num(2), num(7), K, WILD]) expect(artOf(card, { deck: 'cordel-escuro', race: 'bufao' })).toBeNull();
   });
 
   it('o deck veste só as numéricas, com o valor em dois dígitos', () => {
@@ -57,7 +56,6 @@ describe('a arte de cada carta numa aparência', () => {
 describe('os pacotes de uma aparência', () => {
   it('nenhum no padrão; o deck e a raça fantasy, sem repetir', () => {
     expect(packsOf(DEFAULT_LOOK)).toEqual([]);
-    expect(packsOf({ deck: 'cordel-escuro', race: 'bufao' })).toEqual([]);
     expect(packsOf(BESTIARIO_BUFAO)).toEqual(['bestiario']);
     expect(packsOf(BESTIARIO_EGIPCIO)).toEqual(['bestiario', 'egipcio']);
     expect(packsOf(CELESTIAL_EGIPCIO)).toEqual(['celestial', 'egipcio']);
@@ -80,11 +78,10 @@ describe('a aura por faixa (spec dos decks §4.1)', () => {
   });
 });
 
-describe('a aparência do bot no treino (fatia 2, G1; o oposto do Cordel, decisoes.md 2026-11-23 (2))', () => {
+describe('a aparência do bot no treino (fatia 2, G1)', () => {
   it.each([
-    [{ deck: 'cordel', race: 'bufao' }, { deck: 'cordel-escuro', race: 'bufao' }],
-    [{ deck: 'cordel', race: 'egipcio' }, { deck: 'cordel-escuro', race: 'bufao' }],
-    [{ deck: 'cordel-escuro', race: 'bufao' }, { deck: 'cordel', race: 'bufao' }],
+    [{ deck: 'cordel', race: 'bufao' }, { deck: 'cordel', race: 'bufao' }],
+    [{ deck: 'cordel', race: 'egipcio' }, { deck: 'cordel', race: 'bufao' }],
     [{ deck: 'bestiario', race: 'bufao' }, { deck: 'celestial', race: 'egipcio' }],
     [{ deck: 'bestiario', race: 'egipcio' }, { deck: 'celestial', race: 'egipcio' }],
     [{ deck: 'celestial', race: 'bufao' }, { deck: 'bestiario', race: 'egipcio' }],
