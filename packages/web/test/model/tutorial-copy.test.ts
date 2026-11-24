@@ -20,6 +20,12 @@ describe('hintParagraphs', () => {
     for (const id of IDS) expect(hintParagraphs(id).join(' ')).not.toMatch(/travamento|Pressão|sem ninguém perder vida/);
   });
 
+  it('a dica do Reflect diz a regra 7: volta menos a Defesa base dele, os K quebram e os Q ficam', () => {
+    const [reflect] = hintParagraphs('reflect');
+    expect(reflect).toContain('menos a Defesa base dele; ele perde os K (os Q ficam)');
+    expect(reflect).not.toMatch(/K e Q/);
+  });
+
   it('a dica 1 diz que você escolhe a ordem das numéricas (Equipar livre, E2 do sub-projeto 5)', () => {
     const [equip] = hintParagraphs('equip');
     expect(equip).toContain('na ordem que quiser');

@@ -218,7 +218,7 @@ export function threatPreviewText(p: AttackPreview, opponent: string, lives: Liv
   switch (p.outcome) {
     case 'NO_ATTACK':
       return 'sem ataque';
-    // Com Reflect o motor usa metade da DEF base de quem ataca, e não a sua Defesa.
+    // Com Reflect o motor usa a DEF base de quem ataca (sem os Q, regra 7), e não a sua Defesa.
     case 'REFLECTED':
       return `${p.attack} × ${p.defense} · ${
         p.reflected > 0
@@ -327,7 +327,7 @@ export function attackDeclaredText(p: AttackPreview, opponent: string, lives: Li
   switch (p.outcome) {
     case 'NO_ATTACK':
       return `${head} sem cartas no Ataque`;
-    // Com Reflect a conta não é contra a sua Defesa: o motor usa metade da DEF base de quem ataca.
+    // Com Reflect a conta não é contra a sua Defesa: o motor usa a DEF base de quem ataca (sem os Q, regra 7).
     case 'REFLECTED':
       return `${head} ${p.attack} → ${
         p.reflected > 0
