@@ -158,7 +158,7 @@ function Zones({ player, name, view, self }: { player: PublicPlayer; name: strin
   // Cada marca é só a figura (decisoes.md 2026-11-23 (8)): o medalhão com a figura de antes (decisoes.md 2026-11-01 (1)); o nome e a linha do
   // que ela faz, do lado de quem a vê, ficam no nome acessível e na dica (`MarkFigure`).
   const plates: ReactNode[] = [];
-  const icon = 'size-[21px] pc:size-[26px]';
+  const icon = 'size-4 pc:size-[22px]';
   const mark = (kind: MarkKind, markName: string, art: ReactNode, count?: number) => (
     <li key={kind} data-placa-estado={kind}>
       <MarkFigure kind={kind} id={`${player.id}-${kind}`} name={markName} does={plateLine(kind, self, view)} icon={art} count={count} />

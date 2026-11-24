@@ -355,16 +355,11 @@ const RECIPES: Record<Cue, (voices: Voices) => void> = {
     tone({ wave: 'sine', from: 180, to: 90, at: s(RES.landAt), length: 0.16, peak: 0.3 });
     noise({ filter: 'bandpass', from: 1800, q: 1.2, at: s(RES.landAt), length: 0.05, peak: 0.18 });
   },
-  // A cura (decisoes.md 2026-11-23 (10); spec da cura §4.5), no compasso da batida (`HEAL_MOTION`): o brilho curto quando a carta acende, o
-  // glissando suave e o sopro que sobem com a gota, e na chegada à barra o arpejo de mi maior (que a separa da quadra, em dó, e da
-  // Ressurreição) e dois brilhos agudos que somem enquanto a barra enche. Baixa (≤ 0,14 por voz): a cura é frequente.
-  cura: ({ tone, noise }) => {
-    const drop = s(HEAL_MOTION.dropAt);
+  // A cura (decisoes.md 2026-11-23 (10) e (11); spec da cura §4.5): só quando a vida enche, na chegada da gota à barra (`HEAL_MOTION`;
+  // a gota voa muda): o arpejo de mi maior (que a separa da quadra, em dó, e da Ressurreição) e dois brilhos agudos que somem enquanto a
+  // barra enche. Baixa (≤ 0,14 por voz): a cura é frequente.
+  cura: ({ tone }) => {
     const arrive = s(HEAL_MOTION.arriveAt);
-    const flight = s(HEAL_MOTION.flightMs);
-    tone({ wave: 'sine', from: 1568, length: 0.12, peak: 0.08 });
-    tone({ wave: 'sine', from: 440, to: 880, at: drop, attack: flight * 0.5, length: flight, peak: 0.07 });
-    noise({ filter: 'bandpass', from: 600, to: 1800, q: 1.4, at: drop, attack: flight * 0.6, length: flight, peak: 0.05 });
     [659, 831, 988].forEach((hz, i) => tone({ wave: 'triangle', from: hz, at: arrive + i * 0.05, length: 0.45 - i * 0.05, peak: 0.13 }));
     tone({ wave: 'sine', from: 1976, at: arrive, length: 0.35, peak: 0.06 });
     tone({ wave: 'sine', from: 2637, at: arrive + 0.06, length: 0.3, peak: 0.05 });

@@ -485,11 +485,12 @@ describe('a pista da cura (spec da cura §4.5)', () => {
     for (const gain of gains) expect(Math.max(...gain.gain.scheduled)).toBeLessThanOrEqual(0.14);
   });
 
-  it('o arpejo maior chega com a gota, no instante da chegada', () => {
+  it('só soa quando a vida enche (decisoes.md 2026-11-23 (11)): o arpejo na chegada da gota, nada antes e nenhum sopro', () => {
     const { play } = setup();
-    const tones = play('cura').filter((node): node is FakeOscillator => node instanceof FakeOscillator);
+    const nodes = play('cura');
+    const tones = nodes.filter((node): node is FakeOscillator => node instanceof FakeOscillator);
     const starts = tones.map((tone) => tone.startedAt! - NOW);
-    expect(starts.some((at) => Math.abs(at - HEAL_MOTION.arriveAt / 1000) < 1e-6)).toBe(true);
-    expect(Math.min(...starts)).toBeCloseTo(0, 6);
+    expect(Math.min(...starts)).toBeCloseTo(HEAL_MOTION.arriveAt / 1000, 6);
+    expect(nodes.some((node) => node instanceof FakeBufferSource)).toBe(false);
   });
 });

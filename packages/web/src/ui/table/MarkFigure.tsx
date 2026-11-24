@@ -12,9 +12,13 @@ import { currentTip, openTip, useOpenTip } from './mark-tip.ts';
 
 export type MarkKind = 'cura' | 'res' | 'defesa' | 'ataque' | 'reflect';
 
-/** O disco do medalhão, na cor da marca: as fortes (os Absolutos) no ouro. */
+/**
+ * O disco do medalhão, na cor da marca: as fortes (os Absolutos) no ouro. Do tamanho do disco de ouro do ataque de quem lidera
+ * (`decisoes.md` 2026-11-23 (11); 24 px no celular, o mínimo de alvo de toque, e 32 px no PC); a cura leva o acabamento dele em verde
+ * (`.marca-cura`, no `styles.css`).
+ */
 const DISK: Record<MarkKind, string> = {
-  cura: 'bg-cura',
+  cura: 'marca-cura',
   res: 'bg-tinta',
   defesa: 'bg-ouro',
   ataque: 'bg-ouro',
@@ -88,7 +92,7 @@ export function MarkFigure({ kind, id, name, does, icon, count }: MarkFigureProp
       data-marca={kind}
       aria-label={`${name}: ${does}`}
       aria-expanded={open}
-      className={`marca-medalhao relative grid size-9 shrink-0 cursor-help place-items-center rounded-full border-2 border-tinta pc:size-11 ${DISK[kind]}`}
+      className={`marca-medalhao relative grid size-6 shrink-0 cursor-help place-items-center rounded-full border-2 border-tinta pc:size-8 ${DISK[kind]}`}
       onPointerEnter={(event) => {
         if (event.pointerType !== 'mouse') return;
         how.current = 'hover';
@@ -138,7 +142,7 @@ export function MarkFigure({ kind, id, name, does, icon, count }: MarkFigureProp
         <span
           aria-hidden="true"
           data-selo
-          className="absolute -bottom-1 -right-1.5 grid size-[18px] place-items-center rounded-full border-[1.5px] border-tinta bg-ouro font-texto text-[11px] font-extrabold leading-none tabular-nums text-tinta"
+          className="absolute -bottom-1.5 -right-2 grid size-[15px] place-items-center rounded-full border-[1.5px] border-tinta bg-ouro font-texto text-[10px] font-extrabold leading-none tabular-nums text-tinta"
         >
           {count}
         </span>

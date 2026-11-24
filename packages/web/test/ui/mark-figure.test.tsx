@@ -38,6 +38,15 @@ describe('<MarkFigure />', () => {
     expect(tip()).toBeNull();
   });
 
+  it('o medalhão tem o tamanho do disco de ouro do ataque (decisoes.md 2026-11-23 (11)), e a cura o acabamento dele, em verde', () => {
+    render(<Two />);
+    for (const button of [cura(), reflect()]) {
+      expect(button).toHaveClass('size-6', 'pc:size-8');
+      expect(button).not.toHaveClass('size-9');
+    }
+    expect(cura()).toHaveClass('marca-cura');
+  });
+
   it('passar o mouse abre a dica com o nome e a linha; sair fecha', () => {
     render(<Two />);
     fireEvent.pointerEnter(cura(), { pointerType: 'mouse' });

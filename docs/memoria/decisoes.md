@@ -6,6 +6,27 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-23 (11): o som só no enchimento da vida e a figura da cura do tamanho do ícone de ataque
+
+Depois de jogar o PR #8 no computador, com uma foto do campo (o disco de ouro das espadas, de quem lidera o ataque, ao lado do medalhão
+verde da cura, bem maior), ele pediu:
+
+> 1. o som que deve persistir é apenas o da cura em si, quando enche a vida, o som da animação da cura saindo da mesa e indo pra barra de
+> vida deve ser removida.
+> 2. visando manter um certo padrão visual o ícone de cura passiva ta muito grande, deixe ele to tamanho do ícone de ataque, com o mesmo
+> visual só que mantendo o coração, cores e animações.
+
+**Leitura:**
+- A pista `cura` perde o brilho do começo e o glissando com o sopro da gota; fica o arpejo e os brilhos agudos da chegada (quando a vida
+  enche), no mesmo instante de antes (`HEAL_MOTION.arriveAt` depois do começo da batida).
+- O medalhão da cura passa ao tamanho do disco de ouro do ataque (22 px no celular, 32 px no PC) e ao mesmo acabamento (o degradê radial, a
+  borda de tinta e o anel), no verde da cura, com o coração e os gestos de antes.
+- **[I]** As outras marcas da lista (as Ressurreições, os Absolutos) e o Reflect usam o mesmo medalhão: elas acompanham o tamanho novo,
+  para a lista não ficar com dois tamanhos; o acabamento novo é só o da cura.
+- **[I]** No celular o medalhão fica com 24 px, e não 22: é o mínimo de alvo de toque (WCAG 2.5.8).
+
+---
+
 ## 2026-11-23 (10): a spec da cura aprovada, com som de cura
 
 Diante da spec `docs/superpowers/specs/2026-11-23-cura-placas-historico-design.md` (oito escolhas minhas numeradas, a 4 sendo "sem som

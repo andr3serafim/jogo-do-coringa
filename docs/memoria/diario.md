@@ -58,6 +58,9 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   batida e a fechava com o mouse em cima — custo: uma dica que fica no ar se um contêiner que não a contém rolar por baixo dela.
 - **Ruling (T8):** o botão da figura leva `aria-expanded` (o plano pedia); a dica é `aria-hidden`, e o nome do botão já diz tudo — custo:
   o leitor de tela anuncia "expandido" sem conteúdo novo (fica como menor adiado).
+- **Ajustes do autor depois de jogar** (`decisoes.md` 2026-11-23 (11)): a pista `cura` ficou só com o arpejo e os brilhos da chegada (a
+  gota voa muda); o medalhão das marcas passou a 24/32 px (o disco de ouro do ataque, com o mínimo de toque no celular), a cura com o
+  acabamento dele em verde (`.marca-cura`), o ícone `size-4 pc:size-[22px]` e o selo da Ressurreição a 15 px. Fotos novas em `final/marcas-*`.
 - **Fechamento (T9):** `CLAUDE.md` (a cura passiva e as marcas) e o `LEIAME.md` das direções (`953a61f`). `pnpm e2e` completo: 132 verdes,
   4 pulados, 1 falha da T8 (o `resurrection.spec.ts` procurava o texto da placa velha; agora o botão pelo nome acessível, sem afrouxar),
   que passou depois de trocada (junto com o `replay.spec.ts`, 9 verdes). Revisão final do advisor, sobre as costuras (folga, vida, carimbo,

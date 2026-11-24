@@ -789,6 +789,19 @@ li[data-joga]::after {
   animation: gesto-cura 3s ease-in-out infinite;
 }
 
+/* O medalhão da cura passiva com o acabamento do disco de ouro do ataque (`.lider-total`), no verde da cura (decisoes.md 2026-11-23 (11)). */
+.marca-cura {
+  background: radial-gradient(
+    circle at 40% 35%,
+    color-mix(in oklab, var(--color-cura) 35%, white),
+    var(--color-cura) 60%,
+    color-mix(in oklab, var(--color-cura) 80%, var(--color-tinta))
+  );
+  box-shadow:
+    0 0 0 2px var(--color-cura),
+    0 0 10px 3px color-mix(in oklab, var(--color-cura) 55%, transparent);
+}
+
 @keyframes gesto-cura-mais {
   0%,
   82% {
