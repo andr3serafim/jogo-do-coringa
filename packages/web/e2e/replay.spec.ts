@@ -5,7 +5,6 @@
 //
 // A semente fixa do treino (`e2e2631-1`, Médio) faz a partida ser sempre a mesma; o número de passos do replay depende só de quando a
 // desistência cai, e por isso o teste a faz num ponto fixo (rodada 3, depois de o Bot escolher a ordem) e lê o total do contador.
-import { readFileSync } from 'node:fs';
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import {
   actionBar,
@@ -23,10 +22,11 @@ import {
   roundHeading,
   table,
 } from './helpers.ts';
+import { fixtureText } from './fixtures.ts';
 
 const TRAINING = '/treino?semente=e2e2631-1&nivel=medio';
 /** Uma entrada de "partidas anteriores" com replay (a mesma do `layout.spec.ts`). */
-const FIXTURE = readFileSync(new URL('./fixtures/especiais.json', import.meta.url), 'utf8');
+const FIXTURE = fixtureText('especiais');
 
 /** As linhas do histórico (no PC a coluna está à vista; no celular é uma gaveta fechada, mas as linhas seguem no DOM). */
 const historyLines = (page: Page): Locator =>

@@ -1,4 +1,4 @@
-// A lista local das partidas terminadas (spec do polimento §4.1): as últimas 20 deste navegador, do treino e online, da mais
+// A lista local das partidas terminadas (spec do polimento §4.1; decisoes.md 2026-11-24 (7)): as últimas 10 deste navegador, dos últimos 30 dias, do treino e online, da mais
 // nova para a mais velha, cada uma com o replay quando houver; a tela `/partidas` apaga uma ou todas. Núcleo puro: o
 // `KeyValueStore` e o relógio (`now`) entram por parâmetro, e nada aqui lança. O que está guardado pode estar estragado, ser de
 // outra versão ou não caber, e a tela segue.
@@ -9,7 +9,9 @@ import type { TrainingLevel } from './local-room.ts';
 import type { KeyValueStore } from './storage.ts';
 
 export const PAST_GAMES_KEY = 'coringa:partidas';
-export const MAX_PAST_GAMES = 20;
+export const MAX_PAST_GAMES = 10;
+/** Passando disto desde o fim da partida (`date`), ela some: a leitura não a mostra e a gravação seguinte a tira do armazenamento. */
+export const MAX_PAST_GAME_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 /** Teto do JSON da lista inteira, em caracteres; passando, saem os replays das mais velhas (a linha fica). */
 export const MAX_PAST_GAMES_CHARS = 1_000_000;
 /** A mesma `key` dentro desta janela é a mesma partida (a volta do `hello` com a sala terminada manda o replay de novo). */
@@ -146,8 +148,8 @@ function readRaw(store: KeyValueStore): string | null | undefined {
   }
 }
 
-/** As partidas de um texto cru: JSON estragado vira `[]`; entrada ruim sai e as boas ficam. */
-function parseList(text: string | null | undefined): PastGame[] {
+/** As partidas de um texto cru: JSON estragado vira `[]`; entrada ruim sai e as boas ficam, e as com mais de 30 dias em `now` também saem. */
+function parseList(text: string | null | undefined, now: number): PastGame[] {
   let parsed: unknown;
   try {
     parsed = text === null || text === undefined ? null : JSON.parse(text);
@@ -158,19 +160,19 @@ function parseList(text: string | null | undefined): PastGame[] {
   const games: PastGame[] = [];
   for (const item of parsed) {
     const game = parsePastGame(item);
-    if (game !== null) games.push(game);
+    if (game !== null && now - game.date <= MAX_PAST_GAME_AGE_MS) games.push(game);
     if (games.length === MAX_PAST_GAMES) break;
   }
   return games;
 }
 
 /** As partidas guardadas, da mais nova para a mais velha. Armazenamento ou JSON estragado vira `[]`; entrada ruim sai e as boas ficam. */
-export function loadPastGames(store: KeyValueStore): PastGame[] {
-  return parseList(readRaw(store));
+export function loadPastGames(store: KeyValueStore, now: number): PastGame[] {
+  return parseList(readRaw(store), now);
 }
 
-export function findPastGame(store: KeyValueStore, id: string): PastGame | null {
-  return loadPastGames(store).find((game) => game.id === id) ?? null;
+export function findPastGame(store: KeyValueStore, id: string, now: number): PastGame | null {
+  return loadPastGames(store, now).find((game) => game.id === id) ?? null;
 }
 
 // --- Gravação ---
@@ -234,7 +236,7 @@ function restoreRaw(store: KeyValueStore, text: string | null | undefined): void
 export function recordPastGame(store: KeyValueStore, entry: Omit<PastGame, 'id'>, now: number): PastGame | null {
   try {
     const raw = readRaw(store);
-    const old = parseList(raw);
+    const old = parseList(raw, now);
     if (entry.key !== undefined) {
       const same = old.find((game) => game.key === entry.key && now - game.date <= DEDUPE_WINDOW_MS);
       if (same !== undefined) return same;
@@ -280,10 +282,10 @@ export function recordPastGame(store: KeyValueStore, entry: Omit<PastGame, 'id'>
  * leitura trouxe no começo é regravado para a memória do `safeStore` voltar a ser igual ao disco: `restoreRaw`) ou se algo
  * lançou. Nunca lança.
  */
-export function attachReplay(store: KeyValueStore, id: string, replay: Replay): PastGame | null {
+export function attachReplay(store: KeyValueStore, id: string, replay: Replay, now: number): PastGame | null {
   try {
     const raw = readRaw(store);
-    const games = parseList(raw);
+    const games = parseList(raw, now);
     const index = games.findIndex((game) => game.id === id);
     if (index < 0) return null;
     const current = games[index]!;
@@ -337,10 +339,10 @@ function removeList(store: KeyValueStore): boolean {
  * memória do `safeStore` não fica com uma lista sem a partida que o disco ainda tem, e um recarregar mostra o mesmo que a tela.
  * Nunca lança.
  */
-export function deletePastGame(store: KeyValueStore, id: string): boolean {
+export function deletePastGame(store: KeyValueStore, id: string, now: number): boolean {
   try {
     const raw = readRaw(store);
-    const games = parseList(raw);
+    const games = parseList(raw, now);
     const left = games.filter((game) => game.id !== id);
     if (left.length === games.length) return true;
     if (left.length === 0) return removeList(store);

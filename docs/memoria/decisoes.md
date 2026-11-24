@@ -6,6 +6,119 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-24 (7): as partidas salvas, 10 no máximo e 30 dias
+
+Ele pediu "Armazenamento de jogos salvos deve ter um limite, apenas 10 e depois de 30 dias é apagada. não sei como fica o custo de
+armazenamento no cloudflare." Explicado que as partidas salvas moram no navegador de cada jogador (`localStorage`, `coringa:partidas`,
+hoje até 20, sem prazo), sem custo na Cloudflare (o Durable Object da sala é apagado 30 min depois que todos saem, ou 24 h depois de
+criado), à pergunta "no máximo 10 (ao entrar a 11ª, a mais velha some sozinha, sem aviso) e cada uma some 30 dias depois do fim da
+partida, inclusive as já guardadas hoje?", ele respondeu:
+
+> Sim, assim
+
+**Leitura:** `MAX_PAST_GAMES` 10; a entrada com mais de 30 dias (pela `date`, o fim da partida) sai na leitura e na gravação; vale para
+as que já estão guardadas.
+
+---
+
+## 2026-11-24 (6): o fim de partida redesenhado, com arte de vitória e de derrota
+
+Ele pediu "Redesenhar por completo o modal de fim de partida e arte para 'bot ganhou' e arte para 'você ganhou' no modo treinamento". Às
+perguntas de onde vale e do estilo da arte, escolheu:
+
+> Treino e online (Recomendado)
+
+> Xilogravura em SVG (Recomendado)
+
+**Leitura:** um modal só, no treino e no online (no online, a arte de derrota diz o nome do oponente). A arte é desenho original em
+SVG, no traço de cordel; antes do código, três direções em foto do jogo, e só a escolhida vira código.
+
+---
+
+## 2026-11-24 (5): três direções novas para o Cordel Escuro
+
+Ele pediu "Refatorar cartas cardel tema dark ou diferente do claro padrão, não estou gostando; (crie 3 direções novas )". À pergunta do
+que incomoda, respondeu:
+
+> não gostei que tem degradê, a tonalidade do escura da carta contrastando com o vermelho não ficou legal também.
+
+**Leitura:** três direções novas em foto do jogo, em cor chapada (sem degradê), com outra combinação de fundo e vermelho. "Ou diferente
+do claro padrão" abre direção que não seja escura. Só a escolhida vira código.
+
+---
+
+## 2026-11-24 (4): o Reflect novo
+
+À pergunta se o Reflect contra quem tem 4 Q (já sem escudo) volta ao normal, ele respondeu:
+
+> Estou achando o reflect muito roubado e injusto. Ele quebrar todos os K e Q deixa o jogo desequilibrado. Nova regra:
+> * Reflect retorna o dano bruto, sem subtrair pela minha defesa.
+> * Os buffs Q são DESATIVADOS durante o ataque e valor do ataque que volta é subtraído pela sua defesa sem os buffs. Os K quebram e o
+> oponente leva o dano.
+
+E, diante do exemplo (ATK 28; a Defesa dele 5, 4, 3 = 12, com 2 Q e 2 K; hoje ele leva 28 − ⌊12 ÷ 2⌋ = 22 e perde os 2 K e os 2 Q; a
+leitura nova: ele leva 28 − 12 = 16, os Q não multiplicam e não quebram), à pergunta "E os K dele?":
+
+> Todos quebram + dano
+
+**Leitura (substitui o 10.1, item 3, das regras):**
+- Quem atacou leva de volta **ATK − DEF base dele** (a soma da Fileira de Defesa mais a quadra, sem os Q), no mínimo 0. Sem o ÷ 2.
+- Os Q dele **ficam**. **Todos** os K dele quebram, e ele leva o dano mesmo assim.
+- **[I]** Contra quem está no escudo dos 4 Q (fase 1, 2026-11-24 (3)), o Reflect segue anulado (ele está imune a dano). Reflect contra
+  Reflect, a Devastação refletida e a iniciativa não mudam.
+
+---
+
+## 2026-11-24 (3): a Defesa Absoluta em duas fases
+
+Ele pediu "Mudança de regra: Defesa absoluta deve durar enquanto os 4 Q ficarem equipados - player não perde o Q quando turno acaba; 4 J
+(ataque absoluto) deve manter como está." Diante do achado (sob a Defesa Absoluta nada tira um Q, e sem a saída no fim do turno ela
+ficaria eterna; dois jogadores com 4 Q e sem 4 J nunca terminariam), respondeu:
+
+> 4xQ -> Defesa absoluta: Player fica imune a qualquer dano ou jogada à cartas especiais por um turno (manter todos os efeitos atuais por
+> um turno), a partir dos próximos turnos a quarta carta Q se mantem na defesa aplicando o efeito da defesa x5, mas o Q se torna
+> vulnerável as cartas especiais do oponente, a invulnerabilidade acaba. As cartas de defesa não vão para o cemitério enquanto durar os
+> 4 Q equipados.
+
+E às perguntas seguintes: o escudo acaba "Como hoje (Recomendado)" (no fim do primeiro turno do oponente que termina com ataque); na
+fase 2, "Só o ataque não tira" (a Devastação e o Roubo funcionam; só a carta da frente depois de um ataque fica); e, se ele volta a ter
+4 Q depois de perder um, "Sim, escudo de novo".
+
+**Leitura (substitui o 11.1 das regras):**
+- **Fase 1, o escudo:** o 4º Q liga a Defesa Absoluta de hoje, com todos os efeitos (dano 0, só o Ataque Absoluto fura; imune a
+  Armadilha, Sacrifício, Roubo e Devastação; o Reflect contra ele é anulado). Acaba no fim do primeiro turno do oponente que termina com
+  ataque, **sem tirar o Q**.
+- **Fase 2, enquanto houver 4 Q:** DEF × 5, sem imunidade nenhuma (os Q podem sair por Armadilha e Sacrifício; o Reflect novo não tira
+  Q, 2026-11-24 (4)); depois de um ataque, a carta da frente da Defesa **não sai**. A Devastação, o Roubo e a troca do
+  Equipar tiram cartas da Defesa normalmente.
+- Todo 4º Q que entra liga o escudo de novo.
+- O Ataque Absoluto (4 J) não muda.
+- **[I]** Quando quem tem 4 Q reflete um ataque, a carta da frente da Defesa dele também fica (é carta saindo depois de ataque).
+
+---
+
+## 2026-11-24 (2): cinco tarefas depois dos testes
+
+Ele escreveu:
+
+> Segue tasks a implementar após testes feitos por mim:
+> [ ] Aumentar o limite do E2E na CI de 15 para 20 min;
+> [ ] Mudança de regra: Defesa absoluta deve durar enquanto os 4 Q ficarem equipados - player não perde o Q quando turno acaba; 4 J
+> (ataque absoluto) deve manter como está.
+> [ ] Refatorar cartas cardel tema dark ou diferente do claro padrão, não estou gostando; (crie 3 direções novas )
+> [ ] Redesenhar por completo o modal de fim de partida e arte para "bot ganhou" e arte para "você ganhou" no modo treinamento;
+> [ ] Armazenamento de jogos salvos deve ter um limite, apenas 10 e depois de 30 dias é apagada. não sei como fica o custo de
+> armazenamento no cloudflare.
+>
+> 1. Evite regressões; 2. Evite inferencias, me pergunte o que for necessário; 3. Complexidades desnecessárias; 4. Advisor deve revisar
+> specs, planos ou implementações;
+
+**Leitura:** o limite sobe só no job `e2e`. O advisor revisa as specs, os planos e as implementações. **[I]** A divisão do trabalho é
+de quem registrou, não dele: quatro PRs, um por vez: (A) a CI e as partidas salvas; (B) as regras, com spec revisada pelo advisor e
+aprovada por ele antes do código; (C) o Cordel Escuro e (D) o fim de partida, cada um com três direções em foto antes do código.
+
+---
+
 ## 2026-11-24 (1): o sim para o merge do PR #8
 
 Diante da pergunta "Fazer o merge do PR #8 depois que a CI passar?", depois dos ajustes de 2026-11-23 (11), ele respondeu:

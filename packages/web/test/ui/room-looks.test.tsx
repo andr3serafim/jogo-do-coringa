@@ -241,7 +241,7 @@ describe('a partida online guardada (H5)', () => {
         }),
       ),
     );
-    return loadPastGames(store);
+    return loadPastGames(store, Date.now());
   }
 
   it('leva as aparências dos assentos do fim, vistas de quem guardou', () => {

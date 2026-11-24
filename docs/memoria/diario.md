@@ -5,6 +5,27 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-24 (1): as cinco tarefas depois dos testes; o PR A (a CI e as partidas salvas)
+
+- **Pedido:** `decisoes.md` 2026-11-24 (2) a (7), com três rodadas de perguntas (a regra dos 4 Q em duas fases, o Reflect novo, o
+  rearme do escudo, o que incomoda no Cordel Escuro, onde vale o fim de partida, o estilo da arte, as partidas salvas).
+- **Achados:** sob a Defesa Absoluta nada tira um Q (por isso a regra pedida, sem a saída no fim do turno, deixaria a Defesa eterna); as
+  partidas salvas moram no `localStorage` de cada jogador, sem custo na Cloudflare (o Durable Object da sala sai 30 min depois que todos
+  saem, ou 24 h depois de criado: `idleExpiry` e `hardExpiry`, `room-core.ts:114`); o replay re-simula os passos no motor de agora (a
+  mudança de regra mexe nas fixtures do E2E).
+- **PR A, `feat/ci-salvos`** (`fae2708`): o job `e2e` com `timeout-minutes: 20` (o `check` fica em 15); `MAX_PAST_GAMES` 10 e
+  `MAX_PAST_GAME_AGE_MS` 30 dias; o `e2e/fixtures.ts`.
+- **Ruling:** a leitura só esconde a vencida; ela sai do disco na gravação seguinte (gravar uma partida, anexar o replay ou apagar
+  uma) — custo: a vencida ocupa o `localStorage` até lá, invisível; ler sem efeito colateral mantém o `useState(() => load…)` puro.
+- **Ruling:** `now` obrigatório em `loadPastGames`, `findPastGame`, `attachReplay` e `deletePastGame` (o núcleo não lê o relógio) —
+  custo: as telas passam `Date.now()`.
+- **Ruling:** as fixtures do E2E entram com a data de agora (`fixtureText`, `fixtureGames`); a de 2026-10-30 sumiria da lista em
+  2026-11-29 — custo: nenhum, nenhum E2E confere a data.
+- **Ruling:** os testes do teto de 1 MB usam replays de 120 mil caracteres (com 10 partidas, os de 60 mil não passavam do teto).
+- **Armadilha:** um `cat > arquivo` sem heredoc no Bash espera a entrada e trava o comando: grave scripts com a ferramenta de escrita.
+
+---
+
 ## 2026-11-23 (3): a cura que se vê, as placas e o histórico: spec, plano e tarefas 1 a 3
 
 - **Pedido:** `decisoes.md` 2026-11-23 (7) a (10). Branch `feat/cura-historico-visitantes`, saída da `main` em `14adfff`. Protótipo das

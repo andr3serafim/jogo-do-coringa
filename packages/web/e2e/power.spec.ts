@@ -6,12 +6,12 @@
 //   tem a cura passiva (2 K); no 99 (rodada 21) os seus 4 J estão armados (nível 3) e a sua sequência é 3; no 111 (rodada 24), 5; no 161 (rodada 34),
 //   10, com a cura passiva nos seus K; no 174 (rodada 37), os seus 3 K (a brasa);
 // - `exodia-devastacao.json`: o Bot segura a iniciativa por 10 rodadas até o passo 236 (rodada 47) e a perde no 237 (rodada 48).
-import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { failOnConsoleErrors, replayControl, replayCounter } from './helpers.ts';
+import { fixtureText } from './fixtures.ts';
 
-const SPECIALS = readFileSync(new URL('./fixtures/especiais.json', import.meta.url), 'utf8');
-const SLICE_3 = readFileSync(new URL('./fixtures/exodia-devastacao.json', import.meta.url), 'utf8');
+const SPECIALS = fixtureText('especiais');
+const SLICE_3 = fixtureText('exodia-devastacao');
 
 /** Abre o replay parado no passo `step` (a rodada `round` é o atalho até perto dele). */
 async function openAt(page: Page, game: { id: string; fixture: string }, round: number, step: number): Promise<void> {

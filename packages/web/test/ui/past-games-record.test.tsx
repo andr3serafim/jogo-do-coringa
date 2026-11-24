@@ -129,7 +129,7 @@ function countingStore(): KeyValueStore & { sets: number } {
   return store;
 }
 
-const rows = (m: Pick<Mounted, 'store'>) => (m.store === null ? [] : loadPastGames(m.store));
+const rows = (m: Pick<Mounted, 'store'>) => (m.store === null ? [] : loadPastGames(m.store, Date.now()));
 const reviewButton = () => screen.queryByRole('button', { name: 'Rever a partida' });
 
 describe('a mesa grava a partida terminada', () => {
@@ -249,11 +249,11 @@ describe('a mesa grava a partida terminada', () => {
     finish(m, { result: win('p2', 'EXODIA'), replay: replayOf('treino-exodia') });
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(loadPastGames(store)).toHaveLength(1);
+    expect(loadPastGames(store, Date.now())).toHaveLength(1);
     // A cena da Exódia é longa (sub-projeto 6 §7.3): 5,8 s.
     advance(6_000);
     expect(screen.getByRole('dialog', { name: 'Duda venceu' })).toBeInTheDocument();
-    expect(loadPastGames(store)).toHaveLength(1);
+    expect(loadPastGames(store, Date.now())).toHaveLength(1);
   });
 
   it('sem `store` não grava nada, e o painel de fim aparece do mesmo jeito', () => {
@@ -466,8 +466,8 @@ describe('online: o replay chega depois do FINISHED', () => {
       m.connection.emit({ type: 'replay', replay: { t: 'replay', gameNo: 1, replay } });
     });
 
-    expect(loadPastGames(store)).toHaveLength(1);
-    expect(loadPastGames(store)[0]).toMatchObject({ id, replay });
+    expect(loadPastGames(store, Date.now())).toHaveLength(1);
+    expect(loadPastGames(store, Date.now())[0]).toMatchObject({ id, replay });
     expect(store.sets).toBe(2);
     expect(commitsAtAttach).toBe(before + 1);
     await user.click(screen.getByRole('button', { name: 'Rever a partida' }));
@@ -544,12 +544,12 @@ describe('online: o replay chega depois do FINISHED', () => {
     expect(result.current).not.toHaveProperty('replay');
 
     rerender({ snap: { ...snapshot, replay: { t: 'replay', gameNo: 2, replay: replayOf('outra') } } });
-    expect(loadPastGames(store)[0]).not.toHaveProperty('replay');
+    expect(loadPastGames(store, Date.now())[0]).not.toHaveProperty('replay');
     expect(result.current).not.toHaveProperty('replay');
 
     // Com o `gameNo` da partida gravada, entra.
     rerender({ snap: { ...snapshot, replay: { t: 'replay', gameNo: 1, replay: replayOf('certa') } } });
-    expect(loadPastGames(store)[0]!.replay?.name).toBe('certa');
+    expect(loadPastGames(store, Date.now())[0]!.replay?.name).toBe('certa');
     expect(result.current?.replay?.name).toBe('certa');
   });
 
@@ -620,18 +620,18 @@ describe('a sala que termina e fecha em seguida (4000)', () => {
     const replay = replayOf('expirou');
 
     act(() => connection.emitRoom(abandoned()));
-    expect(loadPastGames(store)).toHaveLength(1);
-    expect(loadPastGames(store)[0]).not.toHaveProperty('replay');
+    expect(loadPastGames(store, Date.now())).toHaveLength(1);
+    expect(loadPastGames(store, Date.now())[0]).not.toHaveProperty('replay');
 
     act(() => connection.emit({ type: 'replay', replay: { t: 'replay', gameNo: 1, replay } }));
-    expect(loadPastGames(store)[0]!.replay).toEqual(replay);
+    expect(loadPastGames(store, Date.now())[0]!.replay).toEqual(replay);
 
     act(() => connection.emitClosed(4000, true));
     // A mesa saiu e a tela de parada entrou; a partida continua na lista, com o replay, para o "Rever".
     expect(screen.getByRole('heading', { name: 'Essa sala não existe mais' })).toBeInTheDocument();
     expect(screen.queryByRole('main', { name: 'Mesa' })).not.toBeInTheDocument();
-    expect(loadPastGames(store)).toHaveLength(1);
-    expect(loadPastGames(store)[0]).toMatchObject({
+    expect(loadPastGames(store, Date.now())).toHaveLength(1);
+    expect(loadPastGames(store, Date.now())[0]).toMatchObject({
       key: `sala:${CODE}:1`,
       outcome: { gameNo: 1, result: null, cause: 'ABANDONED' },
       replay,

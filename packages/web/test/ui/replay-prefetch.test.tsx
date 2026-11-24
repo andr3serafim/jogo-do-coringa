@@ -21,7 +21,7 @@ function storedGame(extra: Partial<Omit<PastGame, 'id'>> = {}) {
   const game = recordPastGame(
     store,
     {
-      date: 1_000,
+      date: Date.now(),
       mode: { kind: 'training', level: 'medio' },
       seat: 'p1',
       names: { me: 'Ana', opponent: 'Duda' },
@@ -32,7 +32,7 @@ function storedGame(extra: Partial<Omit<PastGame, 'id'>> = {}) {
       replay: realReplay('ui-1'),
       ...extra,
     },
-    1_000,
+    Date.now(),
   )!;
   return { store, game };
 }

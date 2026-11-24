@@ -26,8 +26,9 @@
 // A medida é da CPU 4× mais lenta: quadros por segundo, p95 e maior intervalo em ms, o pico de `[data-particula]` vivas e a `chegada`, o maior intervalo
 // nos 300 ms depois do toque no "Próximo passo" (o quadro em que o passo chega à mesa). Os 5 primeiros quadros ficam de fora. As fotos saem antes, sem o
 // acelerador, para o tempo delas não entrar na conta.
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
+import { fixtureText } from './fixtures.ts';
 import { replayControl, replayCounter } from './helpers.ts';
 
 function required(name: string): string {
@@ -80,7 +81,7 @@ function fixtureWith(gameLooks: { me: MeasuredLook; opponent: MeasuredLook } | n
 const TRACE_CATEGORIES = ['devtools.timeline', 'disabled-by-default-devtools.timeline', 'disabled-by-default-devtools.timeline.frame', 'v8.execute', 'disabled-by-default-v8.cpu_profiler', 'disabled-by-default-devtools.timeline.invalidationTracking'];
 /** Depois do toque, a janela em que o passo chega à mesa. */
 const ARRIVAL_WINDOW_MS = 300;
-const fixture = readFileSync(new URL(`./fixtures/${fixtureName}.json`, import.meta.url), 'utf8');
+const fixture = fixtureText(fixtureName);
 const gameId = (JSON.parse(fixture) as Array<{ id: string }>)[0]!.id;
 mkdirSync(out, { recursive: true });
 

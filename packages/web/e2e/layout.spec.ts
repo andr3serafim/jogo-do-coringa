@@ -6,11 +6,11 @@
 // simulador (semente `layout-1188`, config padrão das regras de 2026-10-31), escolhida por juntar tudo isso no passo 99: no seu campo
 // a Guarda, 4 J (Ataque Absoluto armado) e 3 Q; no do Bot, uma Ressurreição. Com o Reflect reativo (F2), a zona do Reflect só existe
 // na janela de reação e nenhuma partida a junta com o resto: ela saiu da conta. O replay abre direto em `/partidas/especiais`.
-import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { failOnConsoleErrors, replayControl, replayCounter } from './helpers.ts';
+import { fixtureText } from './fixtures.ts';
 
-const FIXTURE = readFileSync(new URL('./fixtures/especiais.json', import.meta.url), 'utf8');
+const FIXTURE = fixtureText('especiais');
 const STEP = 99;
 
 interface Box {

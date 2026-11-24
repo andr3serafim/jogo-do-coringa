@@ -6,13 +6,18 @@
 
 ## Agora
 
-- **Nada em curso.** O bloco da cura (`decisoes.md` 2026-11-23 (7) a (11)) foi mesclado na `main` em 2026-11-24 pelo PR #8 (squash
-  `eddfeb3`), com o "sim" do autor depois de jogar. O que foi feito, as `Ruling:` e as armadilhas estão no `diario.md` 2026-11-23 (3); o
-  menor adiado: o `aria-expanded` da figura das marcas com a dica `aria-hidden`.
-- **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele), que agora leva também o PR #8; apagar a branch
-  `feat/cura-historico-visitantes` (mesclada).
-- **Achado da CI do PR #8:** o job `e2e` do disparo de push passou do `timeout-minutes: 15` (`.github/workflows/check.yml`) e foi
-  cancelado; o do PR, no mesmo commit, passou em 11 min 44 s. O E2E está perto do teto: se repetir, subir o teto (decisão do autor).
+- **Em curso: as cinco tarefas de 2026-11-24** (`decisoes.md` 2026-11-24 (2) a (7)). Quatro PRs, um por vez:
+  - **A, `feat/ci-salvos`** (esta branch, saída da `main` em `364084b`): o `timeout-minutes` do job `e2e` em 20; as partidas salvas
+    com `MAX_PAST_GAMES` 10 e `MAX_PAST_GAME_AGE_MS` 30 dias (`now` obrigatório em `loadPastGames`, `findPastGame`, `attachReplay` e
+    `deletePastGame`; a leitura esconde, toda gravação poda); o `e2e/fixtures.ts` carimba a data de agora nas fixtures (sem isso elas,
+    de 2026-10-30, sumiriam da lista em 2026-11-29). **Próximo passo:** `pnpm check`, push, PR, CI verde, e pedir o "sim" do merge.
+  - **B, as regras** (a Defesa Absoluta em duas fases e o Reflect novo, 2026-11-24 (3) e (4)): spec primeiro, revisada pelo advisor e
+    aprovada pelo autor antes do código. `RULES_VERSION` 7; recomendar `STATE_SCHEMA` 7; regravar o golden; o portão do Difícil com
+    `--recomecar`; a fase 2 precisa de figura na mesa (escolha dele).
+  - **C, o Cordel Escuro** (2026-11-24 (5)) e **D, o fim de partida** (2026-11-24 (6)): três direções em foto do jogo cada, antes do
+    código.
+- **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele), que leva o PR #8; apagar a branch `feat/cura-historico-visitantes`
+  (mesclada).
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`.
 
 ## No ar e na `main`

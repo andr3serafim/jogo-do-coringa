@@ -4,11 +4,11 @@
 //
 // A partida vem de `fixtures/especiais.json` (semente `layout-1188`, treino Médio, regras 4): do passo 10 para o 11 (rodada 3) o Bot joga um
 // J e, do 11 para o 12, outro J no mesmo turno; do 51 para o 52 (rodada 13), um K na Guarda; do 109 para o 110 (rodada 23), uma Armadilha.
-import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { equipPanel, expectNoHorizontalScroll, failOnConsoleErrors, replayControl, replayCounter } from './helpers.ts';
+import { fixtureText } from './fixtures.ts';
 
-const SPECIALS = readFileSync(new URL('./fixtures/especiais.json', import.meta.url), 'utf8');
+const SPECIALS = fixtureText('especiais');
 
 /** Abre o replay parado no passo `step` (a rodada `round` é o atalho até perto dele). */
 async function openAt(page: Page, round: number, step: number): Promise<void> {

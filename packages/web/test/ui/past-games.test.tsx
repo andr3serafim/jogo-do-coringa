@@ -4,7 +4,7 @@ import { RULES_VERSION, type PlayerId } from '@coringa/engine';
 import type { Outcome } from '@coringa/protocol';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { loadPastGames, PAST_GAMES_KEY, recordPastGame, type PastGame, type StoredOutcome } from '../../src/model/past-games.ts';
 import { safeStore } from '../../src/model/storage.ts';
 import PastGames from '../../src/ui/screens/PastGames.tsx';
@@ -13,6 +13,13 @@ import { memoryStore, seriousViolations } from './support.tsx';
 
 beforeEach(() => {
   window.history.replaceState(null, '', '/partidas');
+  // As datas das partidas são de outubro de 2026, e a lista esconde as com mais de 30 dias: o relógio fica no dia seguinte a elas.
+  vi.useFakeTimers({ toFake: ['Date'] });
+  vi.setSystemTime(new Date(2026, 9, 26, 12, 0));
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 const REPLAY = realReplay('lista-1');
@@ -114,11 +121,11 @@ describe('<PastGames />: a lista', () => {
     expect(screen.getByRole('button', { name: 'Rever' })).toHaveAccessibleDescription(/25\/10, 14:30.*Duda/);
   });
 
-  it('uma partida de 20 mostra as 20, sem quebrar', () => {
-    const { store } = stored(...Array.from({ length: 20 }, (_, i) => entry({ names: { me: 'Ana', opponent: `Bot${i}` } })));
+  it('a lista cheia (10) mostra as 10, sem quebrar', () => {
+    const { store } = stored(...Array.from({ length: 10 }, (_, i) => entry({ names: { me: 'Ana', opponent: `Bot${i}` } })));
     render(<PastGames store={store} />);
-    expect(rows()).toHaveLength(20);
-    expect(rows()[0]).toHaveTextContent('contra Bot19');
+    expect(rows()).toHaveLength(10);
+    expect(rows()[0]).toHaveTextContent('contra Bot9');
   });
 
   it('um apelido vazio (entrada estragada) vira "Oponente"', () => {
@@ -207,7 +214,7 @@ describe('<PastGames />: apagar', () => {
     await userEvent.click(within(confirm).getByRole('button', { name: 'Cancelar' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(rows()).toHaveLength(1);
-    expect(loadPastGames(store)).toHaveLength(1);
+    expect(loadPastGames(store, Date.now())).toHaveLength(1);
     expect(button).toHaveFocus();
   });
 
@@ -217,7 +224,7 @@ describe('<PastGames />: apagar', () => {
     await userEvent.click(deleteIn(rows()[0]!));
     await userEvent.keyboard('{Escape}');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(loadPastGames(store)).toHaveLength(1);
+    expect(loadPastGames(store, Date.now())).toHaveLength(1);
   });
 
   it('confirmar apaga só aquela partida, avisa e leva o foco ao "Apagar" da linha que tomou o lugar dela', async () => {
@@ -229,7 +236,7 @@ describe('<PastGames />: apagar', () => {
     await userEvent.click(within(dialog('Apagar esta partida?')).getByRole('button', { name: 'Apagar' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(opponents()).toEqual(['contra C', 'contra A']);
-    expect(loadPastGames(store).map((game) => game.names.opponent)).toEqual(['C', 'A']);
+    expect(loadPastGames(store, Date.now()).map((game) => game.names.opponent)).toEqual(['C', 'A']);
     expect(screen.getByRole('status')).toHaveTextContent('Partida apagada.');
     expect(deleteIn(rows()[1]!)).toHaveFocus();
   });
@@ -312,7 +319,7 @@ describe('<PastGames />: apagar', () => {
     expect(rows()).toHaveLength(2);
     expect(screen.getByRole('status')).toHaveTextContent('O navegador não deixou apagar. Tente de novo.');
     // O que a tela mostra é o que um recarregar mostraria.
-    expect(loadPastGames(safeStore(raw).store)).toHaveLength(2);
+    expect(loadPastGames(safeStore(raw).store, Date.now())).toHaveLength(2);
   });
 
   it('abrir uma confirmação nova tira o aviso da anterior', async () => {

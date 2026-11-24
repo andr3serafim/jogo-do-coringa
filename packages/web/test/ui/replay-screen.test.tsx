@@ -60,8 +60,9 @@ const FINAL = (() => {
 
 type Entry = Omit<PastGame, 'id'>;
 
+// A data é a do relógio do teste (falso ou de verdade): a lista esconde as partidas com mais de 30 dias, e uma data fixa venceria.
 const entry = (extra: Partial<Entry> = {}): Entry => ({
-  date: new Date(2026, 9, 25, 14, 30).getTime(),
+  date: Date.now(),
   mode: { kind: 'training', level: 'medio' },
   seat: 'p1',
   names: { me: 'Ana', opponent: 'Duda' },

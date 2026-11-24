@@ -9,11 +9,11 @@
 // - rodada 1, do passo 1 para o 2: a compra do Equipar da rodada 2.
 //
 // Os cacos e a poeira duram menos de meio segundo: quem os procura é a própria página, a cada quadro (como em `scenes.spec.ts`).
-import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { failOnConsoleErrors, replayControl, replayCounter } from './helpers.ts';
+import { fixtureGames, fixtureText } from './fixtures.ts';
 
-const SPECIALS = readFileSync(new URL('./fixtures/especiais.json', import.meta.url), 'utf8');
+const SPECIALS = fixtureText('especiais');
 const GAME_ID = (JSON.parse(SPECIALS) as Array<{ id: string }>)[0]!.id;
 
 /** Abre o replay parado no passo `step` (a rodada `round` é o atalho até perto dele). */
@@ -121,7 +121,7 @@ for (const viewport of [
 // quadro, por ~800 ms, a partir de ~59 px), o que derrubava a Devastação com arte para 46 quadros/s. O que sobra é um deslize de fração de
 // pixel (a mesa muda de altura em menos de 1 px quando a fileira cai), que não é da rolagem: o teste olha os deslocamentos de 2 px ou mais.
 const DEVASTATION = (() => {
-  const games = JSON.parse(readFileSync(new URL('./fixtures/exodia-devastacao.json', import.meta.url), 'utf8')) as Array<Record<string, unknown>>;
+  const games = fixtureGames('exodia-devastacao');
   games[0] = { ...games[0], looks: { me: { deck: 'bestiario', race: 'egipcio' }, opponent: { deck: 'celestial', race: 'egipcio' } } };
   return { id: String(games[0].id), json: JSON.stringify(games) };
 })();

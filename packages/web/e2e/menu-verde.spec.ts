@@ -5,12 +5,14 @@
 import { expect, test } from '@playwright/test';
 import { axe, failOnConsoleErrors } from './helpers.ts';
 
+const HOUR = 60 * 60 * 1000;
+// Datas de agora: a lista esconde as partidas com mais de 30 dias (decisoes.md 2026-11-24 (7)).
 const base = { mode: { kind: 'training', level: 'medio' }, seat: 'p1', names: { me: 'Você', opponent: 'Bot' }, rounds: 30, score: { p1: 0, p2: 0 }, rulesVersion: 6 };
 /** Uma vitória, uma derrota online e um empate, sem replay (só a linha conta aqui). */
 const GAMES = [
-  { ...base, id: 'v1', date: Date.UTC(2026, 10, 23, 15, 10), outcome: { gameNo: 1, cause: 'NORMAL', result: { kind: 'WIN', winner: 'p1', reason: 'HP' } } },
-  { ...base, id: 'd1', date: Date.UTC(2026, 10, 23, 14, 40), mode: { kind: 'online', code: 'K7M2QP' }, names: { me: 'Você', opponent: 'Duda' }, outcome: { gameNo: 1, cause: 'NORMAL', result: { kind: 'WIN', winner: 'p2', reason: 'HP' } } },
-  { ...base, id: 'e1', date: Date.UTC(2026, 10, 22, 21, 5), outcome: { gameNo: 1, cause: 'NORMAL', result: { kind: 'DRAW', reason: 'ANTI_STALL' } } },
+  { ...base, id: 'v1', date: Date.now() - HOUR, outcome: { gameNo: 1, cause: 'NORMAL', result: { kind: 'WIN', winner: 'p1', reason: 'HP' } } },
+  { ...base, id: 'd1', date: Date.now() - 2 * HOUR, mode: { kind: 'online', code: 'K7M2QP' }, names: { me: 'Você', opponent: 'Duda' }, outcome: { gameNo: 1, cause: 'NORMAL', result: { kind: 'WIN', winner: 'p2', reason: 'HP' } } },
+  { ...base, id: 'e1', date: Date.now() - 20 * HOUR, outcome: { gameNo: 1, cause: 'NORMAL', result: { kind: 'DRAW', reason: 'ANTI_STALL' } } },
 ];
 
 test.beforeEach(async ({ page }) => {

@@ -21,14 +21,14 @@
 // O golpe final (bloco B dos pontos do playtest, ponto 15) vem das duas que acabam pela vida: na `especiais.json`, do passo 178 para o 179
 // (rodada 37), o seu golpe comum derruba o Bot (195 de dano; ele fica com -118, e o placar mostra 0); na `absolutos.json`, do 99 para o 100
 // (rodada 21), o golpe comum do Bot derruba você (184).
-import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { failOnConsoleErrors, placar, replayControl, replayCounter } from './helpers.ts';
+import { fixtureText } from './fixtures.ts';
 
-const ABSOLUTES = readFileSync(new URL('./fixtures/absolutos.json', import.meta.url), 'utf8');
-const SLICE_3 = readFileSync(new URL('./fixtures/exodia-devastacao.json', import.meta.url), 'utf8');
-const REFLECT = readFileSync(new URL('./fixtures/reflect.json', import.meta.url), 'utf8');
-const SPECIALS = readFileSync(new URL('./fixtures/especiais.json', import.meta.url), 'utf8');
+const ABSOLUTES = fixtureText('absolutos');
+const SLICE_3 = fixtureText('exodia-devastacao');
+const REFLECT = fixtureText('reflect');
+const SPECIALS = fixtureText('especiais');
 
 /** Abre o replay parado no passo `step` (a rodada `round` é o atalho até perto dele). */
 async function openAt(page: Page, round: number, step: number, game: { id: string; fixture: string } = { id: 'absolutos', fixture: ABSOLUTES }): Promise<void> {
