@@ -6,6 +6,14 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-24 (9): o sim para o merge do PR #9
+
+Diante da pergunta "Faço o merge por squash na main?", com a CI do PR #9 verde, ele respondeu "Sim, merge".
+
+**Leitura:** o PR #9 foi mesclado por squash (`7b7f38e`).
+
+---
+
 ## 2026-11-24 (8): a spec das regras aprovada; salas encerradas e abas recarregadas no deploy
 
 Diante do resumo da spec `docs/superpowers/specs/2026-11-24-defesa-absoluta-reflect-design.md` (as duas fases, o Roubo × 5 na fase 2, o

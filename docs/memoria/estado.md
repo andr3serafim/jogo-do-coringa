@@ -7,16 +7,18 @@
 ## Agora
 
 - **Em curso: as cinco tarefas de 2026-11-24** (`decisoes.md` 2026-11-24 (2) a (7)). Quatro PRs, um por vez:
-  - **A, `feat/ci-salvos`** (esta branch, saída da `main` em `364084b`): o `timeout-minutes` do job `e2e` em 20; as partidas salvas
+  - **A, `feat/ci-salvos`** (**mesclado** por squash em `7b7f38e`, PR #9, `decisoes.md` 2026-11-24 (9)): o `timeout-minutes` do job `e2e` em 20; as partidas salvas
     com `MAX_PAST_GAMES` 10 e `MAX_PAST_GAME_AGE_MS` 30 dias (`now` obrigatório em `loadPastGames`, `findPastGame`, `attachReplay` e
     `deletePastGame`; a leitura esconde, toda gravação poda); o `e2e/fixtures.ts` carimba a data de agora nas fixtures (sem isso elas,
     de 2026-10-30, sumiriam da lista em 2026-11-29). **PR #9 aberto**; a 1ª CI reprovou o `check` (o `replay-screen.test.tsx` com
-    data fixa venceu em UTC; consertado em `219b998`), o `e2e` passou em 11–12 min. Falta a CI verde e o "sim" do merge.
-  - **B, `feat/regras-4q-reflect`** (saída da ponta da `feat/ci-salvos`; depois do squash do #9:
-    `git rebase --onto main feat/ci-salvos feat/regras-4q-reflect`): a spec
+    data fixa venceu em UTC; consertado em `219b998`), o `e2e` passou em 11–12 min.
+  - **B, `feat/regras-4q-reflect`** (rebaseada na `main` depois do #9): a spec
     `docs/superpowers/specs/2026-11-24-defesa-absoluta-reflect-design.md` **aprovada** (`decisoes.md` 2026-11-24 (8)), com
     `STATE_SCHEMA` 7 e `PROTOCOL_VERSION` 2. O plano `docs/superpowers/plans/2026-11-24-defesa-absoluta-reflect.md` (5 tarefas, execução nativa,
-    revisado pelo advisor). **Próximo passo:** a Tarefa 1 (motor + `reflectedDamage` + golden + `RULES_VERSION` 7, num commit só). A P1 (como a fase 2 aparece na mesa, e o nome dela) vai com fotos, junto com C e D.
+    revisado pelo advisor). **Tarefa 1 feita** (`322962e`: motor, `reflectedDamage`, golden, `RULES_VERSION` 7). **Próximo passo:**
+    ver o que a suíte da web quebrou com a regra nova, depois a Tarefa 2 (`STATE_SCHEMA` 7, `PROTOCOL_VERSION` 2, as regras
+    escritas). As 4 fixtures do E2E divergem na regra 7 (exodia-devastacao no passo 272, absolutos no 66, especiais no 99, reflect
+    chega ao fim com outro resultado): Tarefa 5. A P1 (como a fase 2 aparece na mesa, e o nome dela) vai com fotos, junto com C e D.
   - **C, o Cordel Escuro** (2026-11-24 (5)) e **D, o fim de partida** (2026-11-24 (6)): três direções em foto do jogo cada, antes do
     código.
 - **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele), que leva o PR #8; apagar a branch `feat/cura-historico-visitantes`
@@ -58,7 +60,7 @@
   pular` só nos E2E; nenhum flash de tela.
 - **Mesa e cenas:** a última cena só fica com a cortina da cena (`veil === 'scene'`); a poeira é do `Leaving` e sai da página ao fim; só uma
   carta de verdade na lápide; a faixa do PC com ≤ 70 px; a carta que entra esmaecendo só guarda o alvo `opacity: 1` depois de entrar.
-- **Regras:** a chave `stealBuffed` (o Roubo de antes nos replays velhos); `RULES_VERSION` 6, `STATE_SCHEMA` 6.
+- **Regras:** a chave `stealBuffed` (o Roubo de antes nos replays velhos); `RULES_VERSION` 7, `STATE_SCHEMA` 7 (na branch B).
 - **Equipar:** os destinos são carimbos de tamanho fixo (`.carimbo-destino`), com o nome inteiro no `aria-label`; eles descem de linha,
   nunca encolhem.
 - O JavaScript inicial ≤ 200 KB (o smoke).
