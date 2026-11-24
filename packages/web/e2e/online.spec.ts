@@ -93,6 +93,11 @@ test.describe('casca estática', () => {
 test('duas pessoas jogam uma sala: do lobby ao fim, com queda e revanche', async ({ browser }) => {
   const ana = await newPlayer(browser, 'Ana');
   const duda = await newPlayer(browser, 'Duda');
+  // A Duda vê o menu no tema verde (decisoes.md 2026-11-23 (7)): os axe da tela de entrar e da Sala de espera dela conferem o contraste
+  // no verde, sem sala a mais (o limite é de 10 por minuto por IP). Só grava se não houver preferência, para não desfazer o que o teste muda.
+  await duda.page.addInitScript(() => {
+    if (localStorage.getItem('coringa:prefs') === null) localStorage.setItem('coringa:prefs', JSON.stringify({ menuTheme: 'green' }));
+  });
   const players = [ana, duda];
   const opponentOf = (player: Player): Player => (player === ana ? duda : ana);
   const socket: SocketControl = await controlSocket(duda.page);
@@ -118,6 +123,8 @@ test('duas pessoas jogam uma sala: do lobby ao fim, com queda e revanche', async
     expect(link).toMatch(/\/s\/[A-Z0-9]{6}$/);
     await duda.page.goto(link);
     await expect(duda.page.getByRole('heading', { name: /^Entrar na sala [A-Z0-9]{6}$/ })).toBeVisible();
+    // O axe de cada tela da Duda confere o contraste no verde (as linhas do Lobby herdavam o papel do tema).
+    await expect(duda.page.locator('main.menu[data-tema="green"]')).toBeVisible();
     await axe(duda.page);
     await duda.page.getByLabel('Seu apelido').fill(duda.name);
     await duda.page.getByRole('button', { name: 'Entrar', exact: true }).click();
@@ -129,6 +136,7 @@ test('duas pessoas jogam uma sala: do lobby ao fim, com queda e revanche', async
       await expect(player.page.getByText(duda.name).first()).toBeVisible();
     }
     await axe(ana.page);
+    await expect(duda.page.locator('main.menu[data-tema="green"]')).toBeVisible();
     await axe(duda.page);
   });
 

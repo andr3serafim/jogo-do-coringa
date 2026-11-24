@@ -6,6 +6,121 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-23 (11): o som só no enchimento da vida e a figura da cura do tamanho do ícone de ataque
+
+Depois de jogar o PR #8 no computador, com uma foto do campo (o disco de ouro das espadas, de quem lidera o ataque, ao lado do medalhão
+verde da cura, bem maior), ele pediu:
+
+> 1. o som que deve persistir é apenas o da cura em si, quando enche a vida, o som da animação da cura saindo da mesa e indo pra barra de
+> vida deve ser removida.
+> 2. visando manter um certo padrão visual o ícone de cura passiva ta muito grande, deixe ele to tamanho do ícone de ataque, com o mesmo
+> visual só que mantendo o coração, cores e animações.
+
+**Leitura:**
+- A pista `cura` perde o brilho do começo e o glissando com o sopro da gota; fica o arpejo e os brilhos agudos da chegada (quando a vida
+  enche), no mesmo instante de antes (`HEAL_MOTION.arriveAt` depois do começo da batida).
+- O medalhão da cura passa ao tamanho do disco de ouro do ataque (22 px no celular, 32 px no PC) e ao mesmo acabamento (o degradê radial, a
+  borda de tinta e o anel), no verde da cura, com o coração e os gestos de antes.
+- **[I]** As outras marcas da lista (as Ressurreições, os Absolutos) e o Reflect usam o mesmo medalhão: elas acompanham o tamanho novo,
+  para a lista não ficar com dois tamanhos; o acabamento novo é só o da cura.
+- **[I]** No celular o medalhão fica com 24 px, e não 22: é o mínimo de alvo de toque (WCAG 2.5.8).
+
+---
+
+## 2026-11-23 (10): a spec da cura aprovada, com som de cura
+
+Diante da spec `docs/superpowers/specs/2026-11-23-cura-placas-historico-design.md` (oito escolhas minhas numeradas, a 4 sendo "sem som
+novo para a cura"; as perguntas da opção do histórico, com a recomendação da 1 · Faixa, e da vida já cheia, com a recomendação de tocar),
+ele respondeu:
+
+> Ajustes: 4. DEVE haver som de cura;
+> de resto siga com a recomendação. aprovado o restante
+
+**Leitura:**
+- A spec está aprovada, com um ajuste: **a cura tem som** (substitui a escolha 4).
+- As escolhas 1 a 3 e 5 a 8 ficam como escritas.
+- O histórico usa a **opção 1 · Faixa**, com a faixa mais clara que na foto para a palavra passar de 4,5:1.
+- **Com a vida já cheia**, a cura toca inteira (o carimbo com o bruto, a barra parada), e a folga do relógio vale para todo `Healed`.
+- **[I]** O desenho do som é meu, dentro do sintetizador de hoje, e entra na spec; ele ouve na implementação.
+
+---
+
+## 2026-11-23 (9): a direção A da cura, o bruto no carimbo e o histórico em verde e vermelho
+
+Diante do protótipo (`docs/superpowers/specs/2026-11-23-cura-direcoes/`), às seis perguntas (1: qual direção; 2: a vida quase cheia, 490
++ 28 brutos que só curam 10; 3: a cura do oponente com a mesma animação; 4: o tempo a mais, ~1,4 s por cura na A; 5: o Reflect também só
+figura; 6: posso corrigir o histórico em branco), ele respondeu:
+
+> 1. A;
+> 2. Exibir o valor bruto da cura (28, como no exemplo) mas curar apenas o valor líquido (10, como no exemplo);
+> 3. sim;
+> 4. sim;
+> 5. sim;
+> 6. sim, mas deixe evitentes partidas vitoriosas (tom verde tipo cs 2) e derrotas (tom vermelho).
+
+**Leitura:**
+- **A · Seiva:** a carta que cai solta a gota que sobe até a ponta da barra, com rastro; na chegada, as faíscas, o brilho no verde, o
+  número que conta e o carimbo "+N" logo abaixo da barra, com a conta embaixo; os K acendem junto.
+- **O carimbo mostra o bruto** (a conta da regra, "+28 · 7♥ × 4"); a barra e o número sobem só o que entrou (o líquido, +10). O motor não
+  muda: o bruto sai de `defenseHealOf` (e da conta do Roubo), o líquido é o `Healed.amount`.
+- **A cura do oponente** tem a mesma animação, espelhada no lado dele. **O tempo:** a cura sai do teto de decisão e ganha folga no relógio.
+- **O Reflect** também vira só figura, como as placas.
+- **O histórico:** consertar o texto em branco (e as outras telas do menu com o mesmo defeito) e marcar o resultado: vitória em verde,
+  derrota em vermelho, no tom do histórico de partidas do CS2.
+- **[I]** O empate e a partida sem resultado ficam neutras (o papel de hoje); ele não falou delas.
+
+---
+
+## 2026-11-23 (8): as respostas sobre a cura, as placas e os visitantes
+
+Às quatro perguntas (1: o que faltou na cura, a carta virando vida ou o "+N" maior; 2: as placas só com a figura (a) ou a figura maior com
+texto menor (b), e se o Reflect entra; 3: o "+N" junto da barra de vida ou sobre o campo; 4: quem vê os visitantes e o que conta), ele
+respondeu:
+
+> 1. os dois, com mais detalhes visuais mantendo a qualidade e nível alta do game.
+> 2. a;
+> 3. junto da barra de vida.
+> 4. ignore, é possível ver pelo painel da claudflare.
+
+**Leitura:**
+- **Cura:** a carta que sai da Defesa vira vida e vai até a barra, **e** o "+N" verde fica maior e mais visível, junto da barra de vida
+  (no placar), com mais detalhe visual. Vão a ele direções num protótipo, e só a escolhida vira código.
+- **Placas:** só a figura; a explicação (o nome e o que faz) aparece ao tocar ou passar o mouse, e o leitor de tela segue com o texto.
+- **Visitantes:** fora do bloco; ele vê pelo painel da Cloudflare. A CSP fica como está.
+- **[I]** Ele não respondeu se o Reflect (hoje uma marca na zona, não uma placa) entra nas figuras: a pergunta volta com o protótipo. A
+  cura do Roubo (o A) também é cura: a animação que liga a causa à vida vale para ela, com a carta roubada como origem (a confirmar).
+
+---
+
+## 2026-11-23 (7): cinco tarefas novas (histórico, cura passiva, figuras das placas, visitantes)
+
+Ele escreveu:
+
+> Tasks a implementar mantendo o altíssimo nível do projeto que já está em produção.
+> [ ] cards de históricos de partidas estão em branco;
+> [ ] Cura passiva ocorre e eu não sei o por que fui curado. talvez um efeito de cartas que vão para o cemitério virando hp e indo pro
+> coringa quando duplo K está ativado. Pense na melhor animação se houver;
+> [ ] O mesmo para quando tiver ressurreição disponível, cura passiva e outros.. deve haver uma figura representando cada coisa ao invés de
+> um texto simples. A idéia é sempre ter a melhor UX e UI;
+> [ ] Quando cura passiva está ativada, deve haver uma animação de +[valor] verde curando os pontos de vida de uma forma que fique mais
+> visível;
+> [ ] quero visualizar quantidade de visitantes do jogo. quantas pessoas acessaram o jogo online;
+>
+> 1. Evite regressões;
+> 2. Evite inferencias, me pergunte o que for necessário;
+> 3. Complexidades desnecessárias;
+> 4. Advisor deve revisar specs, planos ou implementações;
+
+**Leitura:**
+- Branch `feat/cura-historico-visitantes`, saída da `main` em `14adfff`. O advisor revisa a spec, o plano e a implementação.
+- **O histórico em branco** (achado, sem pergunta): no tema verde do menu, a linha de `/partidas` é `bg-papel` sem cor de texto e herda o
+  `--menu-texto` (papel): texto de papel sobre papel. No rosa (o padrão, o dos E2E) aparece. O Lobby tem o mesmo padrão em duas linhas.
+- **A cura, as placas e o "+N"** (itens 2 a 4) são um desenho só; já existem o "+N" verde no placar, o trecho verde da barra, a placa
+  "Cura passiva", a linha do histórico e a faixa da primeira cura. Nada decidido: as perguntas foram a ele.
+- **Visitantes:** nada decidido; as perguntas (quem vê, o que conta) foram a ele.
+
+---
+
 ## 2026-11-23 (6): o merge do PR #7
 
 À pergunta "Faço o merge do PR #7 quando as duas CI ficarem verdes?", ele respondeu:

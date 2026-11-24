@@ -458,6 +458,52 @@
   animation-delay: calc(0.1s + var(--d, 0) * 0.08s);
 }
 
+/*
+ * A linha da lista de partidas (decisoes.md 2026-11-23 (9) e (10), a opção 1 · Faixa, "tipo CS2"): a vitória e a derrota ganham a faixa de
+ * 10 px na cor, um degradê leve da cor para o papel e a palavra do resultado num tom mais escuro, que passa de 4,5:1 sobre o degradê (o
+ * verde e o vermelho da mesa ficariam abaixo dele ali). O empate e a partida sem resultado ficam no papel.
+ */
+.partida-linha {
+  position: relative;
+}
+
+.partida-linha[data-resultado='vitoria'],
+.partida-linha[data-resultado='derrota'] {
+  padding-left: 22px;
+}
+
+.partida-linha[data-resultado='vitoria']::before,
+.partida-linha[data-resultado='derrota']::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 10px;
+}
+
+.partida-linha[data-resultado='vitoria'] {
+  background: linear-gradient(90deg, color-mix(in oklab, var(--color-cura) 18%, var(--color-papel)) 0%, var(--color-papel) 60%);
+}
+
+.partida-linha[data-resultado='vitoria']::before {
+  background: var(--color-cura);
+}
+
+.partida-linha[data-resultado='vitoria'] > div > p:first-child {
+  color: #1f5c2c;
+}
+
+.partida-linha[data-resultado='derrota'] {
+  background: linear-gradient(90deg, color-mix(in oklab, var(--color-vermelho) 18%, var(--color-papel)) 0%, var(--color-papel) 60%);
+}
+
+.partida-linha[data-resultado='derrota']::before {
+  background: var(--color-vermelho);
+}
+
+.partida-linha[data-resultado='derrota'] > div > p:first-child {
+  color: #9a1f16;
+}
+
 .menu-painel-tit {
   display: flex;
   align-items: center;

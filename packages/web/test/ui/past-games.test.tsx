@@ -5,7 +5,7 @@ import type { Outcome } from '@coringa/protocol';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { loadPastGames, PAST_GAMES_KEY, recordPastGame, type PastGame } from '../../src/model/past-games.ts';
+import { loadPastGames, PAST_GAMES_KEY, recordPastGame, type PastGame, type StoredOutcome } from '../../src/model/past-games.ts';
 import { safeStore } from '../../src/model/storage.ts';
 import PastGames from '../../src/ui/screens/PastGames.tsx';
 import { realReplay } from '../fixtures.ts';
@@ -333,5 +333,15 @@ describe('<PastGames />: apagar', () => {
     await userEvent.click(within(dialog('Apagar esta partida?')).getByRole('button', { name: 'Cancelar' }));
     await userEvent.click(screen.getByRole('button', { name: 'Apagar o histórico' }));
     expect(await seriousViolations(view.container)).toEqual([]);
+  });
+});
+
+describe('<PastGames />: o resultado pela cor (decisoes.md 2026-11-23 (9) e (10))', () => {
+  it('cada linha tem a cor de texto da tinta (no tema verde ela herdava o papel) e o data-resultado do seu assento', () => {
+    const DRAW: StoredOutcome = { gameNo: 1, cause: 'NORMAL', result: { kind: 'DRAW', reason: 'ANTI_STALL' } };
+    const { store } = stored(entry({ outcome: DRAW }), entry({ outcome: WIN('p2') }), entry({ outcome: WIN('p1') }));
+    render(<PastGames store={store} />);
+    expect(rows().map((row) => row.getAttribute('data-resultado'))).toEqual(['vitoria', 'derrota', 'neutro']);
+    for (const row of rows()) expect(row.className).toContain('text-tinta');
   });
 });

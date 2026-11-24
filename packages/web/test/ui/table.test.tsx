@@ -296,13 +296,15 @@ function publicIds(view: PlayerView): string[] {
 describe('mesa: marcas de estado no Coringa (spec §3.1)', () => {
   const region = (name: string) => within(screen.getByRole('region', { name }));
 
-  it('Reflect ativo mostra o texto e as três cartas, que são públicas', () => {
+  it('Reflect ativo: a figura (com o nome e o que faz no nome acessível) e as três cartas, que são públicas', () => {
     mount({ ...DRAFT, opponent: { ...DRAFT.opponent, reflect: true } });
     const theirs = region('Campo de Duda');
-    expect(theirs.getByText('Reflect ativo')).toBeInTheDocument();
+    expect(theirs.getByRole('button', { name: /^Reflect ativo: / })).toBeInTheDocument();
+    // Só a figura: o título e a linha saem da vista.
+    expect(theirs.queryByText('Reflect ativo')).not.toBeInTheDocument();
     const cards = within(theirs.getByRole('list', { name: 'Cartas do Reflect' })).getAllByRole('img');
     expect(cards.map((el) => el.getAttribute('aria-label')?.[0])).toEqual(['K', 'J', 'Q']);
-    expect(region('Seu campo').queryByText('Reflect ativo')).not.toBeInTheDocument();
+    expect(region('Seu campo').queryByRole('button', { name: /^Reflect ativo/ })).not.toBeInTheDocument();
     // O espelho pequeno da zona sai da `view`: só o dono do Reflect o tem (sub-projeto 6 §7.5).
     expect(document.querySelector('[data-espelho-zona="p2"]')).not.toBeNull();
     expect(document.querySelector('[data-espelho-zona="p1"]')).toBeNull();
@@ -310,8 +312,8 @@ describe('mesa: marcas de estado no Coringa (spec §3.1)', () => {
 
   it('Defesa Absoluta', () => {
     mount({ ...DRAFT, self: { ...DRAFT.self, absoluteDefense: true } });
-    expect(region('Seu campo').getByText('Defesa Absoluta')).toBeInTheDocument();
-    expect(region('Campo de Duda').queryByText('Defesa Absoluta')).not.toBeInTheDocument();
+    expect(region('Seu campo').getByRole('button', { name: /^Defesa Absoluta: / })).toBeInTheDocument();
+    expect(region('Campo de Duda').queryByRole('button', { name: /^Defesa Absoluta/ })).not.toBeInTheDocument();
   });
 
   it('Ressurreições disponíveis, com a contagem', () => {
@@ -320,26 +322,26 @@ describe('mesa: marcas de estado no Coringa (spec §3.1)', () => {
       self: { ...DRAFT.self, resurrections: [{ row: 'ATK', value: 7 }, { row: 'DEF', value: 5 }] },
       opponent: { ...DRAFT.opponent, resurrections: [{ row: 'ATK', value: 7 }] },
     });
-    expect(region('Seu campo').getByText('2 Ressurreições disponíveis')).toBeInTheDocument();
-    expect(region('Campo de Duda').getByText('1 Ressurreição disponível')).toBeInTheDocument();
+    expect(region('Seu campo').getByRole('button', { name: /^2 Ressurreições disponíveis: / })).toBeInTheDocument();
+    expect(region('Campo de Duda').getByRole('button', { name: /^1 Ressurreição disponível: / })).toBeInTheDocument();
   });
 
   it('Ataque Absoluto armado com os 4 J', () => {
     mount({ ...DRAFT, self: { ...DRAFT.self, attackBuffs: ['J', 'J', 'J', 'J'] } });
-    expect(region('Seu campo').getByText('Ataque Absoluto armado')).toBeInTheDocument();
-    expect(region('Campo de Duda').queryByText('Ataque Absoluto armado')).not.toBeInTheDocument();
+    expect(region('Seu campo').getByRole('button', { name: /^Ataque Absoluto armado: / })).toBeInTheDocument();
+    expect(region('Campo de Duda').queryByRole('button', { name: /^Ataque Absoluto armado/ })).not.toBeInTheDocument();
   });
 
   it('Cura passiva com 2 K na Guarda; com 1 K, não', () => {
     mount({ ...DRAFT, self: { ...DRAFT.self, guard: ['K', 'K'] } });
-    expect(region('Seu campo').getByText('Cura passiva')).toBeInTheDocument();
-    expect(region('Campo de Duda').queryByText('Cura passiva')).not.toBeInTheDocument();
+    expect(region('Seu campo').getByRole('button', { name: /^Cura passiva: / })).toBeInTheDocument();
+    expect(region('Campo de Duda').queryByRole('button', { name: /^Cura passiva/ })).not.toBeInTheDocument();
   });
 
   it('a Cura passiva também aparece no campo do oponente', () => {
     mount({ ...DRAFT, opponent: { ...DRAFT.opponent, guard: ['K', 'K', 'K'] } });
-    expect(region('Campo de Duda').getByText('Cura passiva')).toBeInTheDocument();
-    expect(region('Seu campo').queryByText('Cura passiva')).not.toBeInTheDocument();
+    expect(region('Campo de Duda').getByRole('button', { name: /^Cura passiva: / })).toBeInTheDocument();
+    expect(region('Seu campo').queryByRole('button', { name: /^Cura passiva/ })).not.toBeInTheDocument();
   });
 
   it('sem nenhuma, o campo não tem lista de marcas de estado', () => {
@@ -406,16 +408,18 @@ describe('mesa: as figuras no lugar do texto (decisoes.md 2026-11-01 (1))', () =
       },
     });
     const list = region('Seu campo').getByRole('list', { name: /Estado do Coringa/ });
-    // Desde o bloco A do playtest (ponto 6), cada marca é uma placa com medalhão: a figura, o nome e a linha do que ela faz.
+    // Desde decisoes.md 2026-11-23 (8), cada marca é só a figura (o medalhão), com o nome e a linha do que ela faz no nome acessível.
     const marks = within(list)
       .getAllByRole('listitem')
-      .map((item) => [item.querySelector('svg[data-arte]')?.getAttribute('data-arte'), item.querySelector('[data-placa-nome]')?.textContent]);
+      .map((item) => [item.querySelector('svg[data-arte]')?.getAttribute('data-arte'), item.querySelector('[data-marca]')?.getAttribute('aria-label')?.split(': ')[0]]);
     expect(marks).toEqual([
       ['defesa-absoluta', 'Defesa Absoluta'],
       ['cura', 'Cura passiva'],
-      ['ressurreicao', 'Ressurreição'],
+      ['ressurreicao', '1 Ressurreição disponível'],
       ['ataque-absoluto', 'Ataque Absoluto armado'],
     ]);
+    // Nenhum texto à vista: só as figuras.
+    expect(list.querySelector('[data-placa-nome], [data-placa-faz]')).toBeNull();
   });
 
   it('o título de cada zona do campo tem figura: Guarda, buffs de Ataque e de Defesa, Reflect', () => {
@@ -504,13 +508,12 @@ describe('mesa: a mão que diz o que joga agora (bloco A do playtest, ponto 2)',
   });
 });
 
-describe('mesa: as placas de estado (bloco A do playtest, ponto 6)', () => {
+describe('mesa: as marcas de estado só com a figura (bloco A do playtest, ponto 6; decisoes.md 2026-11-23 (8))', () => {
   const region = (name: string) => within(screen.getByRole('region', { name }));
-  const plate = (field: string, name: string) =>
-    region(field)
-      .getAllByRole('listitem')
-      .find((item) => item.querySelector('[data-placa-nome]')?.textContent === name)!;
-  const line = (item: Element) => item.querySelector('[data-placa-faz]')?.textContent;
+  /** O medalhão da marca, pelo começo do nome acessível ("nome: linha"). */
+  const plate = (field: string, name: string) => region(field).getByRole('button', { name: new RegExp(`^${name}: `) });
+  /** A linha do que a marca faz: a parte do nome acessível depois de ": ". */
+  const line = (item: Element) => item.getAttribute('aria-label')?.split(': ').slice(1).join(': ');
 
   it('cada placa diz o que a marca faz, do lado de quem a vê', () => {
     const first = mount({
@@ -552,24 +555,30 @@ describe('mesa: as placas de estado (bloco A do playtest, ponto 6)', () => {
     expect(line(plate('Campo de Duda', 'Cura passiva'))).toBe('o seu Ataque Absoluto quebra os K antes da cura');
   });
 
-  it('a Ressurreição mostra o número num selo, e o leitor de tela ouve a frase inteira', () => {
+  it('a Ressurreição mostra o número num selo, e o nome acessível leva o número visível (WCAG 2.5.3) e a linha', () => {
     mount({ ...DRAFT, self: { ...DRAFT.self, resurrections: [{ row: 'ATK', value: 7 }, { row: 'DEF', value: 5 }] } });
-    const item = plate('Seu campo', 'Ressurreições');
+    const item = plate('Seu campo', '2 Ressurreições disponíveis');
     expect(item.querySelector('[data-selo]')).toHaveTextContent('2');
     expect(item.querySelector('[data-selo]')).toHaveAttribute('aria-hidden', 'true');
     expect(line(item)).toBe('traz 1 numérica do cemitério');
-    expect(within(item).getByText('2 Ressurreições disponíveis')).toHaveClass('sr-only');
   });
 
-  it('a zona do Reflect ganha a linha do que faz, e o espelho o brilho lento', () => {
+  it('a zona do Reflect: a figura diz o que ele faz, e o espelho tem o brilho lento', () => {
     mount({ ...DRAFT, opponent: { ...DRAFT.opponent, reflect: true } });
-    expect(region('Campo de Duda').getByText('o seu próximo golpe volta para você')).toBeInTheDocument();
+    expect(line(plate('Campo de Duda', 'Reflect ativo'))).toBe('o seu próximo golpe volta para você');
+    expect(region('Campo de Duda').queryByText('o seu próximo golpe volta para você')).not.toBeInTheDocument();
     expect(document.querySelector('[data-espelho-zona="p2"]')).toHaveAttribute('data-gesto', 'espelho');
   });
 
   it('o Reflect dele contra a sua Defesa Absoluta: segura o golpe e não devolve (decisoes.md 2026-11-04 (1))', () => {
     mount({ ...DRAFT, self: { ...DRAFT.self, absoluteDefense: true }, opponent: { ...DRAFT.opponent, reflect: true } });
-    expect(region('Campo de Duda').getByText('segura o seu próximo golpe, sem devolver')).toBeInTheDocument();
+    expect(line(plate('Campo de Duda', 'Reflect ativo'))).toBe('segura o seu próximo golpe, sem devolver');
+  });
+
+  it('as figuras ficam fora do toque que pula as batidas (data-sem-pulo): a lista das marcas e a do Reflect', () => {
+    mount({ ...DRAFT, self: { ...DRAFT.self, guard: ['K', 'K'] }, opponent: { ...DRAFT.opponent, reflect: true } });
+    expect(region('Seu campo').getByRole('list', { name: /Estado do Coringa/ })).toHaveAttribute('data-sem-pulo');
+    expect(plate('Campo de Duda', 'Reflect ativo').closest('[data-sem-pulo]')).not.toBeNull();
   });
 
   it('os gestos lentos: a cruz da cura e a alma da Ressurreição; com movimento reduzido, nenhum', () => {

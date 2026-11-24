@@ -97,7 +97,19 @@ export function momentsMs(events: readonly GameEvent[], viewer: PlayerId | null,
   return { ms, count };
 }
 
-/** A folga de um passo: as cenas e os momentos que quem vê do lado `viewer` assiste, até o teto. */
+/**
+ * A cura (`decisoes.md` 2026-11-23 (9) e (10)): a carta que cura vira uma gota que sobe até a barra, e o carimbo bate com o bruto. A batida
+ * fica fora do teto de decisão, e por isso dá folga ao relógio, como as cenas. Toca em todo `Healed`, também com a vida já cheia (o líquido
+ * 0): a folga vale para todos.
+ */
+export const HEAL_MS = 1_400;
+
+/** A folga das curas de um passo: `HEAL_MS` por `Healed`. */
+export function healsMs(events: readonly { type: string }[]): number {
+  return events.filter((event) => event.type === 'Healed').length * HEAL_MS;
+}
+
+/** A folga de um passo: as cenas, os momentos que quem vê do lado `viewer` assiste e as curas, até o teto. */
 export function stepAllowanceMs(events: readonly GameEvent[], viewer: PlayerId | null, before = 0): number {
-  return Math.min(SCENE_ALLOWANCE_CAP_MS, sceneAllowanceMs(events) + momentsMs(events, viewer, before).ms);
+  return Math.min(SCENE_ALLOWANCE_CAP_MS, sceneAllowanceMs(events) + momentsMs(events, viewer, before).ms + healsMs(events));
 }

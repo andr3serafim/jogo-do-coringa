@@ -32,6 +32,8 @@ export type Cue =
   | 'reflect-segurado'
   | 'reflect-cancelado'
   | 'ressurreicao'
+  /** A cura que vira vida (decisoes.md 2026-11-23 (10)): o brilho da carta, a subida da gota e o arpejo na chegada à barra. */
+  | 'cura'
   | 'golpe-final'
   /** A da abertura do jogo (`model/intro.ts`): não vem de batida nenhuma, quem a toca é a tela da abertura. */
   | 'abertura-titulo';
@@ -59,6 +61,8 @@ export function cueOf(beat: Beat, me: PlayerId): Cue | null {
   // O momento da especial do oponente (bloco A dos pontos do playtest, ponto 1): a virada da carta no começo. O impacto (o pouso ou a
   // quebra) soa na camada do momento, no instante em que a carta grande chega.
   if (beat.kind === 'moment') return 'momento';
+  // A cura ao vivo (a batida `heal`), dos dois lados e também com a vida cheia; a da reconexão (o "+N" de antes) é muda.
+  if (beat.kind === 'heal') return 'cura';
   switch (event.type) {
     // Sub-projeto 6 §8 (fatia 5): a sua carta voa da mão (o sopro e a batida no pouso); a do Bot e as do Equipar caem no destino e assentam.
     case 'BuffPlayed':

@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="pt-BR">
+<!-- Protótipo descartável da cura passiva e das placas só com a figura (decisoes.md 2026-11-23 (7) e (8)). Vale o que se vê e o
+     ritmo; o código não é para reaproveitar. As fotos são do jogo de verdade: a fixture `especiais`, rodada 29, passo 137 → 138 (o 7♥
+     cai da sua Defesa com 2 K na Guarda e 3 Q: 7 × 4 = +28), tiradas pelo script do scratchpad com os controles do replay escondidos.
+     Por cima delas, só o que anima: a carta que voa, a vida (barra e número) e as peças de cada direção. Arte original do projeto. -->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protótipo da cura</title>
+<style>
+@font-face { font-family: 'Alfa'; src: url('/node_modules/@fontsource/alfa-slab-one/files/alfa-slab-one-latin-400-normal.woff2') format('woff2'), url('../../../../packages/web/node_modules/@fontsource/alfa-slab-one/files/alfa-slab-one-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Archivo'; src: url('/node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2') format('woff2'), url('../../../../packages/web/node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2') format('woff2'); font-weight: 100 900; }
+:root {
+  --color-tinta: #17120f; --color-papel: #f1f0ea; --color-vermelho: #b8261c; --color-ouro: #f5c238; --color-cura: #2a7339;
+  --cura-viva: #3f9a52; --feltro: #a45274; --madeira: #1d120b;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #0b0908; color: var(--color-papel); font-family: 'Archivo', system-ui, sans-serif; }
+.page { max-width: 1480px; margin: 0 auto; padding: 16px 16px 80px; }
+h1, h2 { font-family: 'Alfa', serif; font-weight: 400; letter-spacing: .01em; }
+h1 { font-size: 28px; margin: 4px 0 6px; }
+h2 { font-size: 20px; margin: 28px 0 8px; }
+p { line-height: 1.5; margin: 6px 0; max-width: 900px; }
+.lead { color: #d8d4c8; }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0; }
+.bar .grupo { display: flex; gap: 6px; align-items: center; margin-right: 14px; }
+.bar .rot { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: #b9b3a5; margin-right: 4px; }
+button { font: inherit; font-weight: 800; cursor: pointer; border: 2px solid var(--color-tinta); background: var(--color-papel); color: var(--color-tinta);
+  padding: 8px 14px; box-shadow: 3px 3px 0 var(--color-tinta); min-height: 40px; }
+button[aria-pressed="true"] { background: var(--color-ouro); }
+button.tocar { background: var(--color-cura); color: var(--color-papel); font-family: 'Alfa', serif; font-weight: 400; letter-spacing: .04em; padding: 8px 22px; }
+button:active { translate: 2px 2px; box-shadow: 1px 1px 0 var(--color-tinta); }
+.dir { border: 2px solid #3b2f26; padding: 10px 14px; margin: 10px 0; background: #15100c; max-width: 1200px; }
+.dir b { color: var(--color-ouro); }
+.dir ol { margin: 6px 0 2px 18px; padding: 0; } .dir li { margin: 2px 0; }
+.palco-caixa { position: relative; overflow: hidden; border: 2px solid #3b2f26; background: #000; margin-top: 8px; }
+#palco { position: relative; transform-origin: 0 0; }
+#palco img.base { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#fx { position: absolute; inset: 0; pointer-events: none; }
+.abs { position: absolute; }
+.recorte { position: absolute; background-repeat: no-repeat; }
+/* A réplica da barra de vida (a do jogo: o trilho de feltro escuro com o filete de ouro; o ouro por scaleX). */
+.vida-barra { position: absolute; overflow: hidden; border: 2px solid color-mix(in oklab, var(--color-ouro) 60%, transparent); border-radius: 999px;
+  background: repeating-linear-gradient(135deg, rgb(255 255 255 / .05) 0 2px, transparent 2px 7px), #0f3b28; box-shadow: inset 0 2px 4px rgb(0 0 0 / .5); }
+.vida-barra > div { position: absolute; inset: 0; transform-origin: left center; }
+.vida-barra .verde { background: linear-gradient(180deg, #6cc47c 0%, var(--cura-viva) 45%, var(--color-cura) 100%); }
+.vida-barra .ouro { background: linear-gradient(180deg, #ffe08a 0%, var(--color-ouro) 45%, #c8941c 100%); box-shadow: inset 0 -4px 0 color-mix(in oklab, var(--color-tinta) 18%, transparent); }
+.vida-barra .brilho { background: linear-gradient(100deg, transparent 0 35%, rgb(255 255 255 / .75) 48%, transparent 62% 100%); transform-origin: center; opacity: 0; }
+.vida-num { position: absolute; background: rgb(37 25 17); color: var(--color-papel); font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; display: flex; align-items: center; transform-origin: left center; }
+/* O carimbo do "+N": a fonte de texto (números de jogo sem textura, spec §10.7), contorno de tinta e sombra dura, sem desfoque. */
+.carimbo { position: absolute; display: grid; justify-items: center; border: 3px solid var(--color-tinta); background: var(--color-cura); color: var(--color-papel);
+  box-shadow: 4px 4px 0 var(--color-tinta); font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1; padding: 4px 10px 5px; white-space: nowrap; }
+.carimbo small { display: block; font-weight: 700; font-size: .36em; letter-spacing: .02em; margin-top: 3px; color: #dff1e2; }
+.gota { position: absolute; display: grid; place-items: center; border: 2px solid var(--color-tinta); background: var(--color-cura); color: var(--color-papel);
+  font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1; border-radius: 999px; box-shadow: 2px 2px 0 var(--color-tinta); }
+.anel { position: absolute; border: 3px solid var(--cura-viva); border-radius: 6px; box-shadow: 0 0 0 2px var(--color-papel); }
+.anel-redondo { position: absolute; border: 4px solid var(--cura-viva); border-radius: 999px; }
+.faisca { position: absolute; }
+.faisca::before, .faisca::after { content: ""; position: absolute; background: #8fe09d; border-radius: 1px; }
+.faisca::before { left: 36%; width: 28%; top: 0; height: 100%; }
+.faisca::after { top: 36%; height: 28%; left: 0; width: 100%; }
+.mudo { color: #9d978a; font-size: 13px; }
+/* As placas só com a figura. */
+.placas-demo { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+.feltro { background: radial-gradient(120% 90% at 50% 0%, #b8668a 0%, var(--feltro) 55%, #7e3a57 100%); border: 2px solid #3b2f26; padding: 18px 18px 120px; min-width: 330px; position: relative; }
+.feltro h3 { margin: 0 0 12px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--color-papel); }
+.medalhoes { display: flex; gap: 10px; list-style: none; padding: 0; margin: 0; }
+.medalhao { position: relative; display: grid; place-items: center; border: 2.5px solid var(--color-tinta); border-radius: 999px; box-shadow: 2px 2px 0 var(--color-tinta); cursor: pointer; padding: 0; }
+.medalhao:focus-visible { outline: 3px solid var(--color-ouro); outline-offset: 2px; }
+.m-pc { width: 44px; height: 44px; } .m-pc svg { width: 26px; height: 26px; }
+.m-cel { width: 36px; height: 36px; } .m-cel svg { width: 21px; height: 21px; }
+.bg-cura { background: var(--color-cura); } .bg-tinta { background: var(--color-tinta); } .bg-ouro { background: var(--color-ouro); }
+.selo { position: absolute; bottom: -5px; right: -7px; display: grid; place-items: center; min-width: 19px; height: 19px; padding: 0 3px; border: 2px solid var(--color-tinta);
+  border-radius: 999px; background: var(--color-ouro); color: var(--color-tinta); font-size: 11px; font-weight: 900; font-variant-numeric: tabular-nums; }
+.dica { position: absolute; z-index: 5; top: calc(100% + 10px); left: 50%; translate: -50% 0; width: 230px; background: var(--color-papel); color: var(--color-tinta);
+  border: 2px solid var(--color-tinta); box-shadow: 3px 3px 0 var(--color-tinta); padding: 8px 10px; text-align: left; display: none; }
+.dica::before { content: ''; position: absolute; top: -8px; left: calc(50% - 7px); width: 12px; height: 12px; background: var(--color-papel); border-left: 2px solid var(--color-tinta); border-top: 2px solid var(--color-tinta); rotate: 45deg; }
+.dica strong { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+.dica span { display: block; font-size: 12px; margin-top: 2px; line-height: 1.35; }
+.medalhao:hover .dica, .medalhao:focus-visible .dica, .medalhao[data-aberta] .dica { display: block; }
+@keyframes gesto-cura { 0%, 78%, 100% { scale: 1; } 84% { scale: 1.18; } 90% { scale: .96; } }
+@keyframes gesto-alma { 0%, 70% { opacity: 0; translate: -50% 4px; } 82% { opacity: 1; } 100% { opacity: 0; translate: -50% -10px; } }
+[data-gesto="cura"] { animation: gesto-cura 3s ease-in-out infinite; }
+[data-gesto="alma"] { position: absolute; left: 50%; top: 3px; width: 8px; height: 10px; border: 1px solid var(--color-tinta); background: var(--color-papel); border-radius: 1px; animation: gesto-alma 3.2s ease-out infinite; }
+.antes-recorte { display: block; border: 1px dashed #6b5a4c; }
+@media (prefers-reduced-motion: reduce) { [data-gesto] { animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Cura passiva: três direções</h1>
+  <p class="lead">O mesmo momento do jogo nas três: o Bot ataca, o <b>7♥</b> sai da frente da sua Defesa para o cemitério e, com <b>2 K na Guarda</b>
+    (a cura passiva ligada) e <b>3 Q</b> nos bônus de defesa, você cura <b>7 × (1 + 3) = 28</b>. A foto de fundo é a mesa de verdade; por cima
+    dela só o que anima. Toque <b>TOCAR</b>; a <b>câmera lenta</b> ajuda a ver cada passo.</p>
+
+  <div class="bar" role="toolbar" aria-label="Controles do protótipo">
+    <div class="grupo"><span class="rot">Direção</span>
+      <button data-dir="a" aria-pressed="true">A · Seiva</button>
+      <button data-dir="b" aria-pressed="false">B · Gotas</button>
+      <button data-dir="c" aria-pressed="false">C · Coração</button>
+      <button data-dir="hoje" aria-pressed="false">Hoje</button>
+    </div>
+    <div class="grupo"><span class="rot">Tela</span>
+      <button data-tela="pc" aria-pressed="true">PC</button>
+      <button data-tela="celular" aria-pressed="false">Celular</button>
+    </div>
+    <div class="grupo">
+      <button id="lento" aria-pressed="false">Câmera lenta</button>
+      <button id="reduzido" aria-pressed="false">Movimento reduzido</button>
+    </div>
+    <button class="tocar" id="tocar">TOCAR</button>
+  </div>
+
+  <div class="dir" id="texto-dir"></div>
+  <div class="palco-caixa" id="caixa"><div id="palco"><img class="base" id="img-antes" alt=""><img class="base" id="img-depois" alt=""><div id="fx"></div></div></div>
+  <p class="mudo">Em todas: a carta sai da Defesa e cai no cemitério como hoje (0,4 s). O jogo espera a cura até a barra encher (A ≈ 1,4 s, C ≈ 1,6 s,
+    B ≈ 1,9 s com 3 Q e +0,23 s por Q); o carimbo some sozinho depois, sem segurar a jogada. Com movimento reduzido nada voa: o "+28" e o verde da barra só aparecem.
+    Na cura do <b>Roubo</b> (o A), a origem é a carta roubada, no lugar onde ela entra; o multiplicador é o bônus da fileira de onde ela saiu (os J ou as Q do
+    oponente), então em B as gotas a mais sairiam das cartas dele.</p>
+
+  <h2>Placas só com a figura</h2>
+  <p class="lead">Como você escolheu (a): só o medalhão, maior, com a figura e o gesto de hoje; o nome e o que faz aparecem ao passar o mouse, ao focar
+    pelo teclado ou ao tocar (no celular, tocar abre; tocar fora fecha). O leitor de tela continua lendo o nome e a linha.</p>
+  <div class="placas-demo">
+    <div>
+      <p class="mudo">Hoje (recorte da foto do PC):</p>
+      <canvas id="placa-hoje" class="antes-recorte" width="456" height="103" style="width:228px;height:51.5px"></canvas>
+    </div>
+    <div class="feltro">
+      <h3>PC · 44 px</h3>
+      <ul class="medalhoes" id="med-pc"></ul>
+    </div>
+    <div class="feltro">
+      <h3>Celular · 36 px</h3>
+      <ul class="medalhoes" id="med-cel"></ul>
+    </div>
+  </div>
+</div>
+
+<script>
+// As caixas das peças (CSS px da página), medidas nas fotos (caixas.json). `topo`: a carta de cima do cemitério, medida na foto.
+const TELAS = {
+  pc: { w: 1440, h: 900, front: { x: 38, y: 563.8, w: 56, h: 77.8 }, row: { x: 22, y: 556, w: 808, h: 96 }, grave: { x: 533.4, y: 386, w: 146, h: 60 },
+    topo: { x: 633, y: 396, w: 31, h: 42 }, bar: { x: 110, y: 31.6, w: 310, h: 26 }, hp: { x: 110, y: 61.6, w: 34, h: 28 }, fonteHp: 18,
+    portrait: { x: 10, y: 10, w: 76, h: 76 }, guard: [{ x: 952.4, y: 471, w: 38, h: 54 }, { x: 993.4, y: 471, w: 38, h: 54 }],
+    queens: [{ x: 952.4, y: 603, w: 38, h: 54 }, { x: 993.4, y: 603, w: 38, h: 54 }, { x: 1034.4, y: 603, w: 38, h: 54 }], carimbo: 40, gota: 15, clampX: 470 },
+  celular: { w: 390, h: 844, front: { x: 22, y: 501.6, w: 32.8, h: 45.5 }, row: { x: 14, y: 494, w: 372, h: 62 }, grave: { x: 171.1, y: 378.2, w: 111.7, h: 54 },
+    topo: { x: 248, y: 391, w: 24, h: 34 }, bar: { x: 60, y: 28.8, w: 101, h: 10 }, hp: { x: 60, y: 40.8, w: 24.5, h: 13 }, fonteHp: 13,
+    portrait: { x: 8, y: 12.8, w: 40, h: 40 }, guard: [{ x: 12, y: 574.6, w: 30, h: 42 }, { x: 45, y: 574.6, w: 30, h: 42 }],
+    queens: [{ x: 12, y: 640.6, w: 30, h: 42 }, { x: 45, y: 640.6, w: 30, h: 42 }, { x: 78, y: 640.6, w: 30, h: 42 }], carimbo: 22, gota: 11, clampX: 122 },
+};
+const MAX = 500, ANTES = 426, DEPOIS = 454, VALOR = 7, MULT = 4;
+
+const TEXTOS = {
+  a: `<b>A · Seiva.</b> A carta que cai no cemitério acende em verde e solta uma gota de vida que sobe num arco até a ponta da sua barra,
+      com um rastro curto. Os 2 K da Guarda (o motivo da cura) acendem junto. Na chegada, o trecho verde enche com um brilho que corre por ele,
+      o número da vida conta até 454 e o carimbo <b>+28</b> bate junto da barra, com a conta embaixo (<b>7♥ × 4</b>).`,
+  b: `<b>B · Gotas.</b> A conta vira animação: uma gota <b>+7</b> sai da carta que caiu, e mais uma de cada Q dos bônus de defesa, uma depois da
+      outra. Cada gota que chega enche um pedaço da barra e soma no carimbo (+7, +14, +21, <b>+28</b>). Os K acendem; as Q acendem quando soltam a
+      gota. É a que mais explica o porquê do número.`,
+  c: `<b>C · Coração.</b> A carta no cemitério fica verde e vira o coração da cura (a figura da placa), que voa até o seu Coringa. O retrato
+      solta dois anéis verdes, e o <b>+28</b> sai dele e assenta junto da barra, que enche com o brilho. Os K acendem. É a mais "de jogo", e a que
+      menos mostra a conta.`,
+  hoje: `<b>Hoje.</b> O "+28" pequeno sob o retrato por ~0,6 s, o trecho verde na barra e os K acendendo de leve. Nada liga a carta que caiu à vida.`,
+};
+
+let dir = 'a', tela = 'pc', lento = false, reduzido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const palco = document.getElementById('palco'), fx = document.getElementById('fx');
+const imgAntes = document.getElementById('img-antes'), imgDepois = document.getElementById('img-depois');
+let timers = [], raf = 0;
+
+function T() { return TELAS[tela]; }
+function px(v) { return `${v}px`; }
+function el(cls, box, parent = fx) {
+  const e = document.createElement('div');
+  e.className = cls;
+  if (box) Object.assign(e.style, { left: px(box.x), top: px(box.y), width: px(box.w), height: px(box.h) });
+  parent.appendChild(e);
+  return e;
+}
+/** Um pedaço da foto (antes ou depois) no mesmo lugar dela. */
+function recorte(src, box, pad = 0) {
+  const b = { x: box.x - pad, y: box.y - pad, w: box.w + 2 * pad, h: box.h + 2 * pad };
+  const e = el('recorte', b);
+  Object.assign(e.style, { backgroundImage: `url(${src})`, backgroundSize: `${T().w}px ${T().h}px`, backgroundPosition: `${-b.x}px ${-b.y}px` });
+  return e;
+}
+const centro = (b) => ({ x: b.x + b.w / 2, y: b.y + b.h / 2 });
+const vel = () => (lento ? 3 : 1);
+function at(ms, fn) { timers.push(setTimeout(fn, ms * vel())); }
+function anima(e, frames, ms, extra = {}) { return e.animate(frames, { duration: ms * vel(), fill: 'forwards', easing: 'ease-out', ...extra }); }
+/** Um arco de `a` até `b` (uma curva que sobe), em quadros de translate. */
+function arco(a, b, alto, n = 14) {
+  const out = [];
+  for (let i = 0; i <= n; i++) {
+    const t = i / n, mx = (a.x + b.x) / 2, my = Math.min(a.y, b.y) - alto;
+    const x = (1 - t) ** 2 * a.x + 2 * (1 - t) * t * mx + t * t * b.x;
+    const y = (1 - t) ** 2 * a.y + 2 * (1 - t) * t * my + t * t * b.y;
+    out.push({ x, y, t });
+  }
+  return out;
+}
+/** A ponta da vida na barra, para um valor. */
+function ponta(v) { const b = T().bar; return { x: b.x + 2 + (b.w - 4) * (v / MAX), y: b.y + b.h / 2 }; }
+
+function montar() {
+  cancelar();
+  const t = T();
+  palco.style.width = px(t.w); palco.style.height = px(t.h);
+  imgAntes.src = `${tela}-antes.jpg`; imgDepois.src = `${tela}-depois.jpg`;
+  imgDepois.style.opacity = '0';
+  const caixa = document.getElementById('caixa');
+  const escala = Math.min(1, (caixa.clientWidth - 4) / t.w);
+  palco.style.transform = `scale(${escala})`;
+  caixa.style.height = px(t.h * escala + 4);
+  caixa.style.width = tela === 'celular' ? px(t.w * escala + 4) : '';
+  document.getElementById('texto-dir').innerHTML = TEXTOS[dir];
+}
+function cancelar() {
+  timers.forEach(clearTimeout); timers = []; cancelAnimationFrame(raf);
+  fx.replaceChildren();
+}
+
+/** A réplica da vida (barra e número), por cima da foto de depois. */
+function vidaReplica() {
+  const t = T();
+  const barra = el('vida-barra', t.bar);
+  const verde = el('verde', null, barra), ouro = el('ouro', null, barra), brilho = el('brilho', null, barra);
+  const fundo = el('vida-num', { x: t.hp.x - 2, y: t.hp.y, w: t.hp.w + 4, h: t.hp.h });
+  fundo.style.fontSize = px(t.fonteHp); fundo.style.paddingLeft = '2px';
+  const num = document.createElement('span');
+  num.style.display = 'inline-block'; num.style.transformOrigin = 'left center';
+  fundo.appendChild(num);
+  let mostrado = ANTES, alvo = ANTES;
+  const set = () => {
+    const f = (v) => `scaleX(${v / MAX})`;
+    ouro.style.transform = f(mostrado);
+    verde.style.transform = f(alvo);
+    num.textContent = String(Math.round(mostrado));
+  };
+  set();
+  return {
+    brilho, num,
+    /** O verde vai até `v` na hora; o ouro e o número contam até ele em `ms`. */
+    cura(v, ms, atraso = 0) {
+      alvo = v; set();
+      const de = mostrado, ini = performance.now() + atraso * vel(), dur = ms * vel();
+      const passo = (agora) => {
+        const k = Math.max(0, Math.min(1, (agora - ini) / dur));
+        mostrado = de + (v - de) * (1 - (1 - k) ** 3);
+        set();
+        if (k < 1) raf = requestAnimationFrame(passo);
+      };
+      raf = requestAnimationFrame(passo);
+    },
+    ja(v) { alvo = v; mostrado = v; set(); },
+  };
+}
+
+/** A parte comum: a carta sai da Defesa e cai no cemitério (0,4 s), como hoje. */
+function cartaCai() {
+  const t = T();
+  imgDepois.style.opacity = '1';
+  const linha = recorte(`${tela}-antes.jpg`, t.row);
+  const cemiterio = recorte(`${tela}-antes.jpg`, t.grave, 2);
+  const carta = recorte(`${tela}-antes.jpg`, t.front);
+  carta.style.zIndex = '3';
+  if (reduzido) {
+    anima(linha, [{ opacity: 1 }, { opacity: 0 }], 200);
+    anima(carta, [{ opacity: 1 }, { opacity: 0 }], 200);
+    at(200, () => cemiterio.remove());
+    return;
+  }
+  anima(linha, [{ opacity: 1 }, { opacity: 0 }], 300);
+  const a = centro(t.front), b = centro(t.topo), s = t.topo.w / t.front.w;
+  const pts = arco(a, b, 60, 10);
+  anima(carta, pts.map((p) => ({ transform: `translate(${p.x - a.x}px, ${p.y - a.y}px) rotate(${-14 * Math.sin(Math.PI * p.t)}deg) scale(${1 + (s - 1) * p.t})` })), 400, { easing: 'ease-in-out' });
+  at(400, () => { carta.remove(); cemiterio.remove(); });
+}
+
+/** Os K da Guarda acendem (o motivo da cura). */
+function kAcendem(de, ate) {
+  const t = T();
+  t.guard.forEach((g) => {
+    const anel = el('anel', { x: g.x - 3, y: g.y - 3, w: g.w + 6, h: g.h + 6 });
+    anel.style.opacity = '0';
+    if (reduzido) { at(de, () => (anel.style.opacity = '1')); at(ate, () => anel.remove()); return; }
+    at(de, () => anima(anel, [{ opacity: 0, transform: 'scale(1.15)' }, { opacity: 1, transform: 'scale(1)', offset: 0.2 }, { opacity: 0.55, offset: 0.55 }, { opacity: 1, offset: 0.75 }, { opacity: 0 }], ate - de, { easing: 'linear' }));
+  });
+}
+
+/** O carimbo "+N" junto da barra, ancorado na ponta da vida. */
+function carimbo(texto, conta) {
+  const t = T();
+  const c = el('carimbo');
+  c.style.fontSize = px(t.carimbo); c.style.zIndex = '4';
+  c.innerHTML = `<span>${texto}</span>${conta ? `<small>${conta}</small>` : ''}`;
+  // Junto da barra: centrado na ponta da vida nova, pendurado logo abaixo dela (acima não cabe: o placar começa no topo da tela).
+  const p = ponta(DEPOIS);
+  c.style.left = px(Math.min(p.x, t.clampX)); c.style.top = px(t.bar.y + t.bar.h - 4);
+  c.style.translate = '-50% 0'; c.style.rotate = '-4deg'; c.style.opacity = '0';
+  return c;
+}
+/** As faíscas da chegada: cruzes verdes que saem do ponto e somem (só transform e opacity). */
+function faiscas(p, n = 7, raio) {
+  if (reduzido) return;
+  const r = raio ?? (tela === 'pc' ? 34 : 20), tam = tela === 'pc' ? 11 : 8;
+  for (let i = 0; i < n; i++) {
+    const ang = (i / n) * Math.PI * 2 - Math.PI / 2 + 0.3;
+    const f = el('faisca', { x: p.x - tam / 2, y: p.y - tam / 2, w: tam, h: tam });
+    f.style.zIndex = '6';
+    anima(f, [{ opacity: 1, transform: 'translate(0,0) scale(.4) rotate(0deg)' }, { opacity: 1, transform: `translate(${Math.cos(ang) * r * 0.7}px, ${Math.sin(ang) * r * 0.7}px) scale(1) rotate(45deg)`, offset: 0.45 },
+      { opacity: 0, transform: `translate(${Math.cos(ang) * r}px, ${Math.sin(ang) * r}px) scale(.6) rotate(90deg)` }], 520, { easing: 'cubic-bezier(.2,.7,.3,1)' });
+    at(560, () => f.remove());
+  }
+}
+function bate(c, ms = 360) {
+  if (reduzido) return anima(c, [{ opacity: 0 }, { opacity: 1 }], 200);
+  return anima(c, [{ opacity: 0, transform: 'scale(1.7)' }, { opacity: 1, transform: 'scale(.92)', offset: 0.6 }, { opacity: 1, transform: 'scale(1)' }], ms, { easing: 'cubic-bezier(.2,.9,.3,1.2)' });
+}
+function some(c, de) { at(de, () => anima(c, reduzido ? [{ opacity: 1 }, { opacity: 0 }] : [{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'translateY(-10px) scale(.96)' }], 300)); }
+function brilhoCorre(v) {
+  if (reduzido) return;
+  anima(v.brilho, [{ opacity: 0, transform: 'translateX(-60%)' }, { opacity: 1, offset: 0.2 }, { opacity: 1, offset: 0.8 }, { opacity: 0, transform: 'translateX(60%)' }], 620, { easing: 'ease-in-out' });
+}
+function numPulsa(v) {
+  if (reduzido) return;
+  anima(v.num, [{ transform: 'scale(1)', color: 'var(--color-papel)' }, { transform: 'scale(1.3)', color: '#8fe09d', offset: 0.3 }, { transform: 'scale(1)', color: 'var(--color-papel)' }], 650);
+}
+/** Uma gota (bolinha verde) que voa num arco de `a` até `b`, com rastro opcional. */
+function voa(conteudo, tam, a, b, ms, alto, rastro = 0, fonte) {
+  const pts = arco(a, b, alto);
+  const pecas = [];
+  // O rastro: cruzes pequenas logo atrás da gota (a mesma curva, um instante depois), que encolhem e somem; nada parado na origem.
+  const ESP = 28;
+  for (let i = rastro; i >= 1; i--) {
+    const ft = Math.max(6, tam * (0.42 - i * 0.05));
+    const f = el('faisca', { x: a.x - ft / 2, y: a.y - ft / 2, w: ft, h: ft });
+    f.style.zIndex = '5'; f.style.opacity = '0';
+    pecas.push(f);
+    anima(f, pts.map((p, k) => ({ transform: `translate(${p.x - a.x}px, ${p.y - a.y}px) rotate(${k * 18}deg)`, opacity: k === 0 ? 0 : (0.9 - i * 0.14) * (1 - p.t * 0.5) })), ms, { easing: 'cubic-bezier(.45,0,.35,1)', delay: i * ESP * vel() });
+  }
+  const g = el('gota', { x: a.x - tam / 2, y: a.y - tam / 2, w: tam, h: tam });
+  g.style.zIndex = '6';
+  if (fonte) g.style.fontSize = px(fonte);
+  g.innerHTML = conteudo;
+  pecas.push(g);
+  anima(g, pts.map((p) => ({ transform: `translate(${p.x - a.x}px, ${p.y - a.y}px) scale(${1 + 0.18 * Math.sin(Math.PI * p.t)})` })), ms, { easing: 'cubic-bezier(.45,0,.35,1)' });
+  at(ms, () => g.remove());
+  at(ms + rastro * ESP, () => pecas.forEach((x) => x.remove()));
+}
+const CORACAO = `<svg viewBox="0 0 24 24" width="70%" height="70%" aria-hidden="true"><path d="M12 21.2C6.4 17.2 2.6 13.6 2.6 9.1 2.6 6 5 3.6 7.9 3.6c1.8 0 3.3.9 4.1 2.3.8-1.4 2.3-2.3 4.1-2.3 2.9 0 5.3 2.4 5.3 5.5 0 4.5-3.8 8.1-9.4 12.1Z" fill="var(--color-cura)" stroke="var(--color-papel)" stroke-width="1.6"/><path d="M12 8.6v7.2M8.4 12.2h7.2" stroke="var(--color-papel)" stroke-width="2.4"/></svg>`;
+
+function tocar() {
+  montar();
+  const t = T(), v = vidaReplica();
+  cartaCai();
+  const H = 420; // a cura começa quando a carta pousa
+  if (dir === 'hoje') {
+    at(H, () => {
+      v.cura(DEPOIS, 600);
+      const n = el('carimbo');
+      Object.assign(n.style, { left: px(t.portrait.x), top: px(t.portrait.y + t.portrait.h + 4), fontSize: px(tela === 'pc' ? 30 : 20), padding: '1px 6px', boxShadow: '3px 3px 0 var(--color-tinta)' });
+      n.textContent = `+${DEPOIS - ANTES}`;
+      anima(n, [{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'scale(1)', offset: 0.3 }, { opacity: 1, offset: 0.8 }, { opacity: 0, transform: 'translateY(-8px)' }], 600);
+    });
+    kAcendem(H, H + 600);
+    return;
+  }
+  if (reduzido) {
+    kAcendem(H, H + 2400);
+    const c = carimbo(`+${DEPOIS - ANTES}`, `7♥ × ${MULT}`);
+    at(H, () => { v.ja(DEPOIS); bate(c); });
+    some(c, H + 2400);
+    return;
+  }
+  const topo = centro(t.topo);
+  if (dir === 'a') {
+    kAcendem(H, H + 1900);
+    const halo = el('anel', { x: t.topo.x - 4, y: t.topo.y - 4, w: t.topo.w + 8, h: t.topo.h + 8 });
+    anima(halo, [{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(1.35)' }], 420);
+    const tam = tela === 'pc' ? 30 : 22;
+    at(H + 120, () => voa(CORACAO, tam, topo, ponta(DEPOIS), 640, tela === 'pc' ? 160 : 90, 4));
+    const c = carimbo(`+${DEPOIS - ANTES}`, `7♥ × ${MULT}`);
+    at(H + 760, () => { v.cura(DEPOIS, 520, 80); brilhoCorre(v); numPulsa(v); bate(c); faiscas(ponta(DEPOIS)); });
+    some(c, H + 2300);
+  }
+  if (dir === 'b') {
+    kAcendem(H, H + 2500);
+    const origens = [topo, ...t.queens.map(centro)];
+    const c = carimbo('+7', `7♥ × ${MULT}`);
+    c.querySelector('small').style.visibility = 'hidden';
+    const tam = tela === 'pc' ? 34 : 24;
+    origens.forEach((o, i) => {
+      const sai = H + 60 + i * 230, chega = sai + 560;
+      if (i > 0) {
+        const q = t.queens[i - 1];
+        const anel = el('anel', { x: q.x - 3, y: q.y - 3, w: q.w + 6, h: q.h + 6 });
+        anel.style.borderColor = 'var(--color-papel)'; anel.style.boxShadow = '0 0 0 2px var(--cura-viva)'; anel.style.opacity = '0';
+        at(sai - 120, () => anima(anel, [{ opacity: 0 }, { opacity: 1, offset: 0.3 }, { opacity: 0 }], 600));
+      } else {
+        const halo = el('anel', { x: t.topo.x - 4, y: t.topo.y - 4, w: t.topo.w + 8, h: t.topo.h + 8 });
+        halo.style.opacity = '0';
+        at(sai - 60, () => anima(halo, [{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(1.35)' }], 420));
+      }
+      at(sai, () => voa('+7', tam, o, ponta(ANTES + VALOR * (i + 1)), 560, tela === 'pc' ? 140 : 80, 2, t.gota));
+      at(chega, () => {
+        v.cura(ANTES + VALOR * (i + 1), 220);
+        faiscas(ponta(ANTES + VALOR * (i + 1)), 4, tela === "pc" ? 22 : 14);
+        c.querySelector('span').textContent = `+${VALOR * (i + 1)}`;
+        if (i === 0) bate(c, 300); else anima(c, [{ transform: 'scale(1.18)' }, { transform: 'scale(1)' }], 220);
+        if (i === origens.length - 1) { brilhoCorre(v); numPulsa(v); c.querySelector('small').style.visibility = 'visible'; }
+      });
+    });
+    some(c, H + 60 + 3 * 230 + 560 + 1500);
+  }
+  if (dir === 'c') {
+    kAcendem(H, H + 1900);
+    const verde = el('', { x: t.topo.x, y: t.topo.y, w: t.topo.w, h: t.topo.h });
+    Object.assign(verde.style, { background: 'var(--color-cura)', borderRadius: '3px', opacity: '0', zIndex: '3' });
+    anima(verde, [{ opacity: 0 }, { opacity: 0.9, offset: 0.5 }, { opacity: 0.9, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(.3)' }], 520);
+    const tam = tela === 'pc' ? 40 : 28;
+    const retrato = centro(t.portrait);
+    at(H + 380, () => voa(CORACAO, tam, topo, retrato, 600, tela === 'pc' ? 140 : 80, 3));
+    at(H + 980, () => {
+      [0, 1].forEach((i) => {
+        const r = t.portrait, anel = el('anel-redondo', { x: r.x - 4, y: r.y - 4, w: r.w + 8, h: r.h + 8 });
+        anel.style.opacity = '0';
+        anima(anel, [{ opacity: 0.95, transform: 'scale(.9)' }, { opacity: 0, transform: 'scale(1.55)' }], 620, { delay: i * 170 * vel() });
+        at(620 + 170, () => anel.remove());
+      });
+      faiscas(retrato, 8, tela === "pc" ? 52 : 30);
+      const c = carimbo(`+${DEPOIS - ANTES}`, `7♥ × ${MULT}`);
+      const p = ponta(DEPOIS), dx = retrato.x - Math.min(p.x, t.clampX), dy = retrato.y - (t.bar.y + t.bar.h - 4);
+      anima(c, [{ opacity: 0, transform: `translate(${dx}px, ${dy}px) scale(.4)` }, { opacity: 1, transform: `translate(${dx * 0.4}px, ${dy * 0.4}px) scale(1.25)`, offset: 0.5 }, { opacity: 1, transform: 'translate(0,0) scale(1)' }], 460, { easing: 'cubic-bezier(.2,.8,.3,1.1)' });
+      v.cura(DEPOIS, 520, 200); at(200, () => { brilhoCorre(v); numPulsa(v); });
+      some(c, 1500);
+    });
+  }
+}
+
+function marcar(sel, attr, val) { document.querySelectorAll(sel).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset[attr] === val))); }
+document.querySelectorAll('[data-dir]').forEach((b) => b.addEventListener('click', () => { dir = b.dataset.dir; marcar('[data-dir]', 'dir', dir); montar(); }));
+document.querySelectorAll('[data-tela]').forEach((b) => b.addEventListener('click', () => { tela = b.dataset.tela; marcar('[data-tela]', 'tela', tela); montar(); }));
+document.getElementById('lento').addEventListener('click', (e) => { lento = !lento; e.currentTarget.setAttribute('aria-pressed', String(lento)); });
+const bRed = document.getElementById('reduzido');
+bRed.setAttribute('aria-pressed', String(reduzido));
+bRed.addEventListener('click', () => { reduzido = !reduzido; bRed.setAttribute('aria-pressed', String(reduzido)); });
+document.getElementById('tocar').addEventListener('click', tocar);
+addEventListener('resize', montar);
+montar();
+
+// As placas só com a figura.
+const FIG = {
+  cura: { nome: 'Cura passiva', faz: 'com 2 K depois do golpe, a sua Defesa que cai vira vida', bg: 'bg-cura',
+    svg: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.2C6.4 17.2 2.6 13.6 2.6 9.1 2.6 6 5 3.6 7.9 3.6c1.8 0 3.3.9 4.1 2.3.8-1.4 2.3-2.3 4.1-2.3 2.9 0 5.3 2.4 5.3 5.5 0 4.5-3.8 8.1-9.4 12.1Z" fill="var(--color-cura)" stroke="var(--color-papel)" stroke-width="1.5"/><path d="M12 8.6v7.2M8.4 12.2h7.2" stroke="var(--color-papel)" stroke-width="2.4"/></svg>` },
+  res: { nome: 'Ressurreições', faz: 'traz 1 numérica do cemitério', bg: 'bg-tinta', selo: 2,
+    svg: `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 1.5v4.5M11.5 4.2l2.4 3.6M28.5 4.2l-2.4 3.6" stroke="var(--color-ouro)" stroke-width="2.4"/><g transform="rotate(-8 20 17)"><rect x="13" y="8.5" width="14" height="19" rx="1.5" fill="var(--color-papel)" stroke="var(--color-tinta)" stroke-width="2"/><path d="M17 14.5h6M20 14.5v8.5M17.5 23h5" stroke="var(--color-vermelho)" stroke-width="2"/></g><path d="M7 38.5V27.5c0-4 3-6.5 6.5-6.5h13c3.5 0 6.5 2.5 6.5 6.5v11Z" fill="var(--color-tinta)" stroke="var(--color-papel)" stroke-width="2"/><path d="M16 30.5h8M20 27v8" stroke="var(--color-ouro)" stroke-width="1.8"/></svg>` },
+  defesa: { nome: 'Defesa Absoluta', faz: 'imune até o golpe dele', bg: 'bg-ouro',
+    svg: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.8 20.5 4.8v6.7c0 5.3-3.6 9-8.5 10.9-4.9-1.9-8.5-5.6-8.5-10.9V4.8Z" fill="var(--color-ouro)" stroke="var(--color-tinta)" stroke-width="1.6"/><path d="M7.4 14.2V8.6l2.5 2.2L12 7.2l2.1 3.6 2.5-2.2v5.6Z" fill="var(--color-tinta)"/></svg>` },
+  ataque: { nome: 'Ataque Absoluto armado', faz: 'o seu próximo ataque quebra todos os K', bg: 'bg-ouro',
+    svg: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.6 5.4l3.2 2M21.4 5.4l-3.2 2M2 11.6h3.6M22 11.6h-3.6" stroke="var(--color-vermelho)" stroke-width="2"/><path d="M10.1 15.4V4.8L12 1.2l1.9 3.6v10.6Z" fill="var(--color-papel)" stroke="var(--color-tinta)" stroke-width="1.4"/><path d="M12 18v3.2" stroke="var(--color-vermelho)" stroke-width="2.8"/><rect x="7.2" y="15.4" width="9.6" height="2.8" fill="var(--color-ouro)" stroke="var(--color-tinta)" stroke-width="1.3"/><circle cx="12" cy="22.3" r="1.5" fill="var(--color-ouro)" stroke="var(--color-tinta)" stroke-width="1.1"/></svg>` },
+};
+function medalhoes(id, cls, aberta) {
+  const ul = document.getElementById(id);
+  for (const [k, f] of Object.entries(FIG)) {
+    const li = document.createElement('li');
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = `medalhao ${cls} ${f.bg}`;
+    b.setAttribute('aria-label', `${f.nome}: ${f.faz}`);
+    if (k === aberta) b.dataset.aberta = '';
+    b.innerHTML = `<span ${k === 'cura' ? 'data-gesto="cura"' : ''} style="display:grid;place-items:center">${f.svg}</span>${k === 'res' ? '<span data-gesto="alma"></span>' : ''}${f.selo ? `<span class="selo" aria-hidden="true">${f.selo}</span>` : ''}<span class="dica" aria-hidden="true"><strong>${f.nome}</strong><span>${f.faz}</span></span>`;
+    b.addEventListener('click', (e) => { e.stopPropagation(); const ja = b.hasAttribute('data-aberta'); ul.querySelectorAll('[data-aberta]').forEach((x) => x.removeAttribute('data-aberta')); if (!ja) b.dataset.aberta = ''; });
+    li.appendChild(b); ul.appendChild(li);
+  }
+}
+medalhoes('med-pc', 'm-pc', 'cura');
+medalhoes('med-cel', 'm-cel', null);
+document.addEventListener('click', () => document.querySelectorAll('#med-cel [data-aberta]').forEach((x) => x.removeAttribute('data-aberta')));
+// O recorte da placa de hoje, da foto do PC (x 848, y 668, 228 × 51,5).
+const img = new Image();
+img.onload = () => document.getElementById('placa-hoje').getContext('2d').drawImage(img, 848 * 2, 668 * 2, 456, 103, 0, 0, 456, 103);
+img.src = 'pc-antes.jpg';
+</script>
+</body>
+</html>

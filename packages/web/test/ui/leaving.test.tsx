@@ -197,7 +197,7 @@ describe('quando não há cópia', () => {
   });
 });
 
-describe('a essência da cura passiva (bloco A do playtest, ponto 9)', () => {
+describe('a carta da Defesa que cura (bloco A do playtest, ponto 9)', () => {
   // A minha Defesa perde a carta da frente (o 3) com 2 K na Guarda: ela vai ao cemitério e me cura.
   const HEALER: ViewSpec = { ...THEIRS, self: { ...THEIRS.self, guard: ['K', 'K'], defenseRow: [3, 6, 9, 5] } };
   const front: NumCard = { id: 'x-p1-DEF-0', kind: 'NUM', value: 3, suit: 'copas' };
@@ -206,21 +206,10 @@ describe('a essência da cura passiva (bloco A do playtest, ponto 9)', () => {
   const healed: GameEvent = { type: 'Healed', player: 'p1', amount: 6, source: 'DEFENSE', card: front };
   const essence = (container: HTMLElement) => layer(container).querySelector('[data-essencia]');
 
-  it('sai da carta na batida dela, voa até o seu retrato e some na batida da cura', () => {
+  it('a carta que cai e cura não solta mais a essência até o retrato: a gota é da camada da cura (heal.test.tsx; decisoes.md 2026-11-23 (9))', () => {
     const m = mount(HEALER, { training: 'medio' });
     emit(m, AFTER_HEAL, [removed, healed]);
-    expect(essence(m.container)).not.toBeNull();
-    const flight = calls.find((call) => call.el.hasAttribute('data-essencia'))!;
-    expect(flight.options).toMatchObject({ delay: 0, duration: 300 });
-    advance(299);
-    expect(essence(m.container)).not.toBeNull();
-    advance(1);
-    expect(essence(m.container)).toBeNull();
-  });
-
-  it('com movimento reduzido, nenhuma essência', () => {
-    const m = mount(HEALER, { training: 'medio', prefs: { reduceMotion: true } });
-    emit(m, AFTER_HEAL, [removed, healed]);
+    advance(300);
     expect(essence(m.container)).toBeNull();
   });
 

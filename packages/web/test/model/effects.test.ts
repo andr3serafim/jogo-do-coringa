@@ -1,4 +1,4 @@
-import { applyAction, viewFor, type GameEvent, type NumCard, type SpecialCard } from '@coringa/engine';
+import { applyAction, viewFor, type GameEvent, type NumCard, type PlayerView, type SpecialCard } from '@coringa/engine';
 import { describe, expect, it } from 'vitest';
 import {
   bannerBeatAt,
@@ -410,9 +410,15 @@ describe('effectsOf: o efeito de cada evento (spec §4.2)', () => {
     expect(fx({ type: 'StealDamage', player: 'p1', victim: 'p2', value: 9, damage: 0, blocked: true }).damage).toBeNull();
   });
 
-  it('a cura (do Roubo ou da Defesa) sobe "+N" no Coringa de quem curou', () => {
-    expect(fx({ type: 'Healed', player: 'p1', amount: 9, source: 'STEAL', card: num('n1', 9) }).damage).toEqual({ target: 'p1', amount: 9, heal: true });
-    expect(fx({ type: 'Healed', player: 'p2', amount: 12, source: 'DEFENSE', card: num('n2', 4) }).damage).toEqual({ target: 'p2', amount: 12, heal: true });
+  it('na reconexão, a cura (do Roubo ou da Defesa) sobe "+N" no Coringa de quem curou, como antes', () => {
+    const caught = (event: GameEvent) => effectsOf(buildTimeline([event], { ...LIVE, mode: 'catchUp' })[0]!, view);
+    expect(caught({ type: 'Healed', player: 'p1', amount: 9, source: 'STEAL', card: num('n1', 9) }).damage).toEqual({ target: 'p1', amount: 9, heal: true });
+    expect(caught({ type: 'Healed', player: 'p2', amount: 12, source: 'DEFENSE', card: num('n2', 4) }).damage).toEqual({ target: 'p2', amount: 12, heal: true });
+    expect(caught({ type: 'Healed', player: 'p2', amount: 12, source: 'DEFENSE', card: num('n2', 4) }).heal).toBeNull();
+  });
+
+  it('ao vivo, a batida de cura não sobe o número de dano: é a camada da cura que mostra', () => {
+    expect(fx({ type: 'Healed', player: 'p1', amount: 9, source: 'STEAL', card: num('n1', 9) }).damage).toBeNull();
   });
 
   it('dano zero não sobe número nenhum (o ataque foi barrado)', () => {
@@ -875,5 +881,60 @@ describe('quando o retrato do perdedor racha (decisoes.md 2026-11-07 (3), B2)', 
 
   it('sem o fim nesta linha do tempo (a partida acabou antes), rachado', () => {
     expect(defeatShown(beatsOf(kill('p2')), 0, false)).toBe(true);
+  });
+});
+
+describe('os efeitos da batida de cura (spec 2026-11-23-cura-placas-historico-design.md §4.1)', () => {
+  const seven: NumCard = { id: 'n7', kind: 'NUM', value: 7, suit: 'copas' };
+  const withQueens = scenarioAt({ self: { defenseRow: [4, 4], guard: ['K', 'K'], defenseBuffs: ['Q', 'Q', 'Q'] }, opponent: { attackRow: [9, 9] } }).view;
+  const healOf = (events: GameEvent[], at: PlayerView = withQueens) => {
+    const beats = buildTimeline(events, LIVE);
+    return effectsOf(beats.find((beat) => beat.event.type === 'Healed')!, at).heal;
+  };
+
+  it('a cura passiva: o bruto do motor (valor × (1 + Q)), o líquido do evento, a conta e a origem no cemitério', () => {
+    expect(healOf([{ type: 'Healed', player: 'p1', amount: 10, source: 'DEFENSE', card: seven }])).toEqual({
+      target: 'p1',
+      card: seven,
+      gross: 28,
+      net: 10,
+      caption: '7♥ × 4',
+      origin: { kind: 'graveyard' },
+    });
+  });
+
+  it('com a vida cheia, o bruto segue no carimbo e o líquido é 0', () => {
+    expect(healOf([{ type: 'Healed', player: 'p1', amount: 0, source: 'DEFENSE', card: seven }])).toMatchObject({ gross: 28, net: 0 });
+  });
+
+  it('o Roubo: o bruto é o value do StealDamage, a conta usa o multiplicador dele e a origem é a carta roubada', () => {
+    const steal: GameEvent = { type: 'StealDamage', player: 'p1', victim: 'p2', value: 14, damage: 14, blocked: false };
+    expect(healOf([steal, { type: 'Healed', player: 'p1', amount: 14, source: 'STEAL', card: seven }])).toEqual({
+      target: 'p1',
+      card: seven,
+      gross: 14,
+      net: 14,
+      caption: '7♥ × 2',
+      origin: { kind: 'card', id: 'n7' },
+    });
+  });
+
+  it('sem multiplicador, a conta é só a carta', () => {
+    const plain = scenarioAt({ self: { defenseRow: [4], guard: ['K', 'K'] } }).view;
+    expect(healOf([{ type: 'Healed', player: 'p1', amount: 7, source: 'DEFENSE', card: seven }], plain)!.caption).toBe('7♥');
+  });
+
+  it('a cura do oponente usa o lado dele', () => {
+    const theirs = scenarioAt({ opponent: { defenseRow: [4], guard: ['K', 'K'], defenseBuffs: ['Q'] } }).view;
+    expect(healOf([{ type: 'Healed', player: 'p2', amount: 14, source: 'DEFENSE', card: seven }], theirs)).toMatchObject({ target: 'p2', gross: 14, caption: '7♥ × 2' });
+  });
+
+  it('os K da Guarda acendem na cura passiva (a causa)', () => {
+    const beats = buildTimeline([{ type: 'Healed', player: 'p1', amount: 10, source: 'DEFENSE', card: seven }], LIVE);
+    expect([...effectsOf(beats[0]!, withQueens).cards.values()]).toEqual(['cause', 'cause']);
+  });
+
+  it('fora da batida de cura, nenhum efeito de cura', () => {
+    expect(effectsOf(buildTimeline([{ type: 'TurnStarted', player: 'p1' }], LIVE)[0]!, withQueens).heal).toBeNull();
   });
 });

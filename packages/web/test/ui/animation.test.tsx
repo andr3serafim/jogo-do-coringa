@@ -13,6 +13,7 @@ import { Session } from '../../src/model/session.ts';
 import { DEFAULT_PREFS } from '../../src/model/storage.ts';
 import { BEAT_MS, INVERT_COOLDOWN_MS, INVERT_MIN_HOLD_MS, NO_INVERT, RARE_SCENE_MS, type SceneKind } from '../../src/model/timeline.ts';
 import { AURA_BOIL_MS } from '../../src/ui/anim/aura.ts';
+import { HEAL_MOTION } from '../../src/model/heal-motion.ts';
 import { SCENE_MOMENTS } from '../../src/model/scene-moments.ts';
 import { useAnim, useBoardBusy } from '../../src/ui/anim/context.ts';
 import { HIT_COUNT_MS, Stage } from '../../src/ui/anim/Stage.tsx';
@@ -237,6 +238,16 @@ describe('o retrato de quem perde pela vida (bloco B do playtest, ponto 15; deci
     expect(hp(m.container)).toBe('0');
     advance(RARE_SCENE_MS.FINAL_BLOW);
     expect(cracked(m.container)).toBe(true);
+  });
+
+  it('a chegada de uma cura antes do golpe final não racha o retrato (a marca da chegada é própria, não a do golpe)', () => {
+    const m = mount(THEIRS);
+    const six = { id: 'n-6', kind: 'NUM', value: 6, suit: 'paus' } as const;
+    const healed: GameEvent = { type: 'Healed', player: 'p1', amount: 6, source: 'DEFENSE', card: six };
+    emit(m, HP_OVER, [healed, KILL, END]);
+    advance(HEAL_MOTION.arriveAt + 1);
+    advance(50);
+    expect(cracked(m.container)).toBe(false);
   });
 
   it('com movimento reduzido, a vida e o retrato mudam juntos, no impacto (e não a vida no começo da cena)', () => {
@@ -1253,36 +1264,55 @@ describe('efeitos da batida (spec §4.2)', () => {
     const scaleOf = (selector: string) => Number(/scaleX\(([\d.]+)\)/.exec(meter().querySelector<HTMLElement>(selector)!.style.transform)?.[1]);
     const max = () => Number(meter().getAttribute('aria-valuemax'));
 
-    it('a cura pela Defesa depois de um golpe sem dano: a vida espera a batida da cura e sobe com o "+N" verde', () => {
-      // A mesa parada: a batida do golpe (0 a 300 a declaração, 300 a 900 o golpe), a carta que cai (900 a 1200), a cura (1200 a 1800).
+    // A mesa parada: a declaração (0 a 300), o golpe (300 a 900), a carta que cai (900 a 1200) e a batida da cura (1200 a 2600), com a gota
+    // chegando à barra aos 1200 + HEAL_MOTION.arriveAt (decisoes.md 2026-11-23 (9) e (10)).
+    const ARRIVE = 1_200 + HEAL_MOTION.arriveAt;
+
+    it('a cura pela Defesa depois de um golpe sem dano: a vida espera a gota chegar e sobe, com o verde e o brilho na barra', () => {
       const m = mount(THEIRS);
       const blocked: GameEvent = { type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 40, defense: 50, damage: 0 };
       emit(m, { ...THEIRS, self: { ...THEIRS.self, hp: 193 } }, [ATTACK, blocked, removed, healed]);
       advance(1_150);
       expect(hp()).toBe(187);
+      // A batida da cura já começou, mas a gota ainda voa: a vida espera.
+      advance(ARRIVE - 1_150 - 20);
+      expect(hp()).toBe(187);
       expect(meter().querySelector('[data-cura-barra]')).toBeNull();
-      // A batida da cura começa aos 1200 ms; o `act` à parte deixa a contagem partir antes de o tempo correr.
-      advance(50);
+      expect(meter().querySelector('[data-cura-brilho]')).toBeNull();
+      // Na chegada: o trecho verde vai até a vida nova, o brilho corre por ele e o número pulsa; o ouro conta atrás.
+      advance(20);
       advance(1);
-      advance(300);
-      const heal = m.container.querySelector('[data-cura]');
-      expect(heal).toHaveTextContent('+6');
-      expect(heal!.className).toContain('bg-cura');
-      // O trecho que a cura devolve aparece em verde à frente do ouro, que enche atrás dele.
+      advance(200);
       expect(scaleOf('[data-cura-barra]')).toBeCloseTo(193 / max());
+      expect(meter().querySelector('[data-cura-brilho]')).not.toBeNull();
+      expect(m.container.querySelector('[data-lado="voce"] [data-vida-pulsa]')).not.toBeNull();
       expect(hp()).toBeGreaterThan(187);
-      advance(400);
+      advance(HEAL_MOTION.countMs);
       expect(hp()).toBe(193);
-      expect(meter().querySelector('[data-cura-barra]')).toBeNull();
     });
 
-    it('golpe e cura no mesmo jogador: a vida desce no golpe e sobe na cura', () => {
+    it('golpe e cura no mesmo jogador: a vida desce no golpe e sobe quando a gota chega', () => {
       const m = mount(THEIRS);
       emit(m, { ...THEIRS, self: { ...THEIRS.self, hp: 143 } }, [ATTACK, HIT, removed, healed]);
       advance(1_150);
       expect(hp()).toBe(137);
-      advance(700);
+      advance(ARRIVE - 1_150 - 20);
+      expect(hp()).toBe(137);
+      advance(20);
+      advance(1);
+      advance(HEAL_MOTION.countMs + 50);
       expect(hp()).toBe(143);
+    });
+
+    it('com a vida cheia, a cura toca e a vida não se mexe', () => {
+      const m = mount(THEIRS);
+      const full: GameEvent = { type: 'Healed', player: 'p1', amount: 0, source: 'DEFENSE', card: six };
+      emit(m, THEIRS, [removed, full]);
+      const before = hp();
+      advance(300 + HEAL_MOTION.arriveAt + 1);
+      advance(HEAL_MOTION.countMs);
+      expect(hp()).toBe(before);
+      expect(meter().querySelector('[data-cura-barra]')).toBeNull();
     });
 
     it('um state novo no meio da contagem: a vida segue de onde a conta fecha, sem voltar à de antes', () => {
@@ -1323,7 +1353,7 @@ describe('efeitos da batida (spec §4.2)', () => {
     });
   });
 
-  it('o Roubo: o dano sobe no Coringa de quem foi roubado e a cura, "+N" em verde, no de quem roubou', () => {
+  it('o Roubo: o dano sobe no Coringa de quem foi roubado; a cura de quem roubou é a batida de cura, sem o "+N" de dano sob o retrato', () => {
     const m = mount(MINE);
     const nine = { id: 'n-9', kind: 'NUM', value: 9, suit: 'copas' } as const;
     emit(m, MINE, [
@@ -1333,10 +1363,8 @@ describe('efeitos da batida (spec §4.2)', () => {
     advance(0);
     expect(m.container.querySelector('[data-dano]')).toHaveTextContent('−9');
     advance(BEAT_MS.damage);
-    const heal = m.container.querySelector('[data-cura]');
-    expect(heal).toHaveTextContent('+9');
-    expect(heal!.className).toContain('bg-cura');
-    expect(heal!.className).toContain('tabular-nums');
+    // O número da cura é o carimbo da camada da cura (heal.test.tsx), junto da barra, e não o "+N" sob o retrato.
+    expect(m.container.querySelector('[data-cura]')).toBeNull();
   });
 
   it('a espada troca de retrato na batida da iniciativa, e a moldura de ouro vai junto (sub-projeto 6 §4)', () => {

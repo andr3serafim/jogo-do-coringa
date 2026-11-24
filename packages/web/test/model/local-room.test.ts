@@ -11,7 +11,7 @@ import {
   type PlayerView,
   type Replay,
 } from '@coringa/engine';
-import { MOMENT_TAIL_MS, SPECIAL_MOMENT_MS, momentsMs, sceneAllowanceMs, type ConnectionEvent, type PlayerAction, type ReplayMessage, type RoomMessage, type StateMessage } from '@coringa/protocol';
+import { MOMENT_TAIL_MS, SPECIAL_MOMENT_MS, healsMs, momentsMs, sceneAllowanceMs, type ConnectionEvent, type PlayerAction, type ReplayMessage, type RoomMessage, type StateMessage } from '@coringa/protocol';
 import { BOTS, runHard } from '@coringa/sim/bots';
 import { createRng } from '@coringa/sim/rng';
 import { describe, expect, it, vi } from 'vitest';
@@ -278,7 +278,7 @@ describe('LocalRoom', () => {
         // tem o momento dela, que o jogador vê antes de o Bot jogar de novo (bloco A do playtest, ponto 1): no máximo o inteiro, e o impacto.
         const last = states(events).at(-1)!.events;
         const moment = momentsMs(last, 'p1').ms;
-        expect(timers.delays.at(-1)).toBeLessThanOrEqual(sceneAllowanceMs(last) + moment + (moment > 0 ? MOMENT_TAIL_MS : 0));
+        expect(timers.delays.at(-1)).toBeLessThanOrEqual(sceneAllowanceMs(last) + healsMs(last) + moment + (moment > 0 ? MOMENT_TAIL_MS : 0));
       }
       if (myTurn(view)) await room.act(legalActions(view)[0] as PlayerAction);
       else timers.runNext();
@@ -334,7 +334,8 @@ describe('LocalRoom', () => {
       const last = list.at(-1);
       if (!last || moments.length === 0 || sceneAllowanceMs(last.events) > 0) return null;
       const reaction = last.view.phase.kind === 'REACTION';
-      return moments.reduce((sum, ms) => sum + ms, 0) + (reaction ? MOMENT_TAIL_MS : 600);
+      // A cura do passo também dá folga (decisoes.md 2026-11-23 (10)): o Bot espera ela tocar.
+      return moments.reduce((sum, ms) => sum + ms, 0) + healsMs(last.events) + (reaction ? MOMENT_TAIL_MS : 600);
     };
     const checked: Array<{ delay: number; expected: number }> = [];
     let published: ConnectionEvent[] = [];

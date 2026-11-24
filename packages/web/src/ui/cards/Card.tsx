@@ -460,7 +460,7 @@ function FxOverlay({ fx, ms }: { fx: CardFx; ms: number }) {
   };
   if (fx === 'light') return <m.span {...motion} className="pointer-events-none absolute inset-0 bg-ouro/70" />;
   // Os K da Guarda que causam a cura passiva (bloco A dos pontos do playtest, ponto 9): o halo verde da cura.
-  if (fx === 'cause') return <m.span {...motion} className="pointer-events-none absolute -inset-1 rounded-[8px] border-4 border-cura bg-cura/20" />;
+  if (fx === 'cause') return <m.span {...motion} className="pointer-events-none absolute -inset-1 rounded-[8px] border-4 border-cura bg-cura/35" />;
   return <m.span {...motion} className="pointer-events-none absolute -inset-1 rounded-[8px] border-4 border-ouro" />;
 }
 

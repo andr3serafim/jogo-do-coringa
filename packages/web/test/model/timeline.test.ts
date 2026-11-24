@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { GameEvent, NumCard, SpecialCard } from '@coringa/engine';
-import { SCENE_MS, SPECIAL_MOMENT_MS } from '@coringa/protocol';
+import { HEAL_MS, SCENE_MS, SPECIAL_MOMENT_MS } from '@coringa/protocol';
+import { HEAL_MOTION } from '../../src/model/heal-motion.ts';
 import {
   BEAT_MS,
   CATCH_UP_CAP_MS,
@@ -97,7 +98,7 @@ const SAMPLES: { event: GameEvent; kind: Beat['kind']; scene?: SceneKind; cards?
     cards: ['n1', 'a1'],
   },
   { event: { type: 'StealDamage', player: 'p1', victim: 'p2', value: 7, damage: 7, blocked: false }, kind: 'damage' },
-  { event: { type: 'Healed', player: 'p1', amount: 5, source: 'STEAL', card: num('n1') }, kind: 'damage' },
+  { event: { type: 'Healed', player: 'p1', amount: 5, source: 'STEAL', card: num('n1') }, kind: 'heal' },
   {
     event: { type: 'ReflectTriggered', owner: 'p1', attacker: 'p2', damage: 4 },
     kind: 'scene',
@@ -148,9 +149,15 @@ const ROW_DEVASTATED: GameEvent = { type: 'RowDevastated', player: 'p2', row: 'D
 
 /** A soma das cenas raras, que não contam no teto de decisão. */
 /** O que fica fora do teto de decisão: as cenas raras e a faixa da iniciativa (fora do `catchUp`). */
+/** O que fica fora do teto de decisão: as cenas raras, a faixa da iniciativa e, desde decisoes.md 2026-11-23 (10), a cura ao vivo. */
 const rareMs = (beats: Beat[]): number =>
   beats
-    .filter((b) => (b.scene !== null && b.scene in RARE_SCENE_MS) || (b.event.type === 'InitiativeDecided' && b.durationMs === INITIATIVE_BANNER_MS))
+    .filter(
+      (b) =>
+        (b.scene !== null && b.scene in RARE_SCENE_MS) ||
+        (b.event.type === 'InitiativeDecided' && b.durationMs === INITIATIVE_BANNER_MS) ||
+        b.kind === 'heal',
+    )
     .reduce((sum, b) => sum + b.durationMs, 0);
 
 /** Maior número de trocas dentro de uma janela fechada de 1000 ms. */
@@ -194,7 +201,7 @@ describe('mapeamento evento → batida (spec §4.2)', () => {
       if (cards) expect(beat!.cards).toEqual(cards);
       const rare = scene !== undefined && scene in RARE_SCENE_MS ? RARE_SCENE_MS[scene as keyof typeof RARE_SCENE_MS] : null;
       const held = event.type === 'InitiativeDecided' ? INITIATIVE_BANNER_MS : null;
-      expect(beat!.durationMs).toBe(kind === 'quiet' ? 0 : (rare ?? held ?? BEAT_MS[kind as 'move']));
+      expect(beat!.durationMs).toBe(kind === 'quiet' ? 0 : kind === 'heal' ? HEAL_MS : (rare ?? held ?? BEAT_MS[kind as 'move']));
       expect(beat!.invert !== null).toBe(kind === 'scene' && !NO_INVERT.has(scene!));
     });
   }
@@ -205,8 +212,8 @@ describe('mapeamento evento → batida (spec §4.2)', () => {
     for (const event of quiet) expect(quietOnly([event])).toBe(true);
     for (const { event } of SAMPLES.filter((s) => s.kind !== 'quiet')) expect(quietOnly([event])).toBe(false);
     expect(quietOnly(quiet)).toBe(true);
-    // A cura que não curou nada passa quieta; a que curou tem número.
-    expect(quietOnly([{ type: 'Healed', player: 'p1', amount: 0, source: 'DEFENSE', card: num('n9') }])).toBe(true);
+    // A cura toca também com a vida já cheia (decisoes.md 2026-11-23 (10)): nunca é quieta.
+    expect(quietOnly([{ type: 'Healed', player: 'p1', amount: 0, source: 'DEFENSE', card: num('n9') }])).toBe(false);
     expect(quietOnly([{ type: 'EquipSubmitted', player: 'p1' }, { type: 'DamageDealt', attacker: 'p2', defender: 'p1', attack: 9, defense: 3, damage: 6 }])).toBe(false);
     // Sem evento nenhum não é quieto: é o começo de uma partida (a revanche), que troca a mesa inteira.
     expect(quietOnly([])).toBe(false);
@@ -247,10 +254,13 @@ describe('as cenas raras (U3 do sub-projeto 5)', () => {
     });
   });
 
-  it('a cura que não curou nada (a vida já cheia) passa quieta', () => {
-    const [beat] = buildTimeline([{ type: 'Healed', player: 'p1', amount: 0, source: 'STEAL', card: num('n1') }], LIVE);
-    expect(beat!.kind).toBe('quiet');
-    expect(beat!.durationMs).toBe(0);
+  it('a cura com a vida já cheia toca ao vivo (decisoes.md 2026-11-23 (10)); na reconexão passa quieta, como antes', () => {
+    const zero: GameEvent = { type: 'Healed', player: 'p1', amount: 0, source: 'STEAL', card: num('n1') };
+    const [live] = buildTimeline([zero], LIVE);
+    expect(live!.kind).toBe('heal');
+    expect(live!.durationMs).toBe(HEAL_MS);
+    const [caught] = buildTimeline([zero], { ...LIVE, mode: 'catchUp' });
+    expect(caught!.kind).toBe('quiet');
   });
 
   it('nos Absolutos, a inversão é no impacto do feixe (3,2 s) e na trava do escudo (2,7 s), e acaba antes do fim da cena', () => {
@@ -887,5 +897,52 @@ describe('a cura passiva que ensina (bloco A do playtest, ponto 9)', () => {
   it('sem teachHeal, ou no catchUp, nenhuma', () => {
     expect(buildTimeline([healed(18)], LIVE)[0]!.teach).toBe(false);
     expect(buildTimeline([healed(18)], { ...LIVE, mode: 'catchUp', teachHeal: true })[0]!.teach).toBe(false);
+  });
+});
+
+describe('a batida da cura (spec 2026-11-23-cura-placas-historico-design.md §4)', () => {
+  const seven: NumCard = { id: 'n7', kind: 'NUM', value: 7, suit: 'copas' };
+  const healed = (amount: number, source: 'DEFENSE' | 'STEAL' = 'DEFENSE'): GameEvent => ({ type: 'Healed', player: 'p1', amount, source, card: seven });
+  const removed: GameEvent = { type: 'CardsRemovedFromRow', player: 'p1', row: 'DEF', cards: [seven] };
+  const turn: GameEvent = { type: 'TurnStarted', player: 'p1' };
+
+  it('ao vivo, sem teto: com uma decisão esperando, a cura não encolhe, e marca a chegada da gota', () => {
+    const beats = buildTimeline([removed, healed(28), turn], { ...LIVE, decisionPending: true });
+    const heal = beats.find((beat) => beat.event.type === 'Healed')!;
+    expect(heal.kind).toBe('heal');
+    expect(heal.durationMs).toBe(HEAL_MS);
+    expect(heal.heal).toEqual({ arriveAtMs: heal.startMs + HEAL_MOTION.arriveAt, stealValue: null });
+  });
+
+  it('no Roubo, a batida guarda o value do StealDamage do passo (o bruto, com o bônus do oponente)', () => {
+    const steal: GameEvent = { type: 'StealDamage', player: 'p1', victim: 'p2', value: 14, damage: 14, blocked: false };
+    const heal = buildTimeline([steal, healed(10, 'STEAL')], LIVE).find((beat) => beat.event.type === 'Healed')!;
+    expect(heal.heal).toEqual({ arriveAtMs: heal.startMs + HEAL_MOTION.arriveAt, stealValue: 14 });
+  });
+
+  it('na reconexão a cura fica como antes: batida de dano, com teto e sem a marca da chegada', () => {
+    const [beat] = buildTimeline([healed(28)], { ...LIVE, mode: 'catchUp' });
+    expect(beat!.kind).toBe('damage');
+    expect(beat!.heal).toBeNull();
+  });
+
+  it('as outras batidas não têm cura', () => {
+    expect(buildTimeline([removed, turn], LIVE).every((beat) => beat.heal === null)).toBe(true);
+  });
+
+  it('duas curas no mesmo passo: duas batidas seguidas, a segunda começa no fim da primeira', () => {
+    const beats = buildTimeline([healed(14), healed(6)], LIVE);
+    expect(beats.map((beat) => beat.kind)).toEqual(['heal', 'heal']);
+    expect(beats[1]!.startMs).toBe(beats[0]!.startMs + HEAL_MS);
+  });
+
+  it('a cura com a vida cheia não é a batida que conta os totais', () => {
+    expect(damageBeatIndex(buildTimeline([healed(0), healed(6)], LIVE))).toBe(1);
+  });
+
+  it('a faixa da primeira cura segue na batida de cura ao vivo', () => {
+    const [beat] = buildTimeline([healed(18)], { ...LIVE, teachHeal: true });
+    expect(beat!.kind).toBe('heal');
+    expect(beat!.teach).toBe(true);
   });
 });

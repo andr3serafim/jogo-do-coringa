@@ -5,6 +5,77 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-23 (3): a cura que se vê, as placas e o histórico: spec, plano e tarefas 1 a 3
+
+- **Pedido:** `decisoes.md` 2026-11-23 (7) a (10). Branch `feat/cura-historico-visitantes`, saída da `main` em `14adfff`. Protótipo das
+  direções em `docs/superpowers/specs/2026-11-23-cura-direcoes/` (A · Seiva, a escolhida); spec
+  `docs/superpowers/specs/2026-11-23-cura-placas-historico-design.md` (aprovada, com som); plano
+  `docs/superpowers/plans/2026-11-23-cura-placas-historico.md` (9 tarefas; execução nativa, com o advisor depois das tarefas 3, 6 e 8).
+- **Achados que mudaram o desenho:** com uma decisão esperando, a linha do tempo inteira cabe em 1 s (`DECISION_CAP_MS`): era por isso
+  que a cura quase não aparecia; o motor corta a cura na vida inicial (`Healed.amount` é o líquido); o Roubo cura com o bônus da fileira do
+  **oponente**; no Equipar, outra carta pode cair no cemitério depois da que curou.
+- **Tarefa 1** (`d9448e7`): a linha de `/partidas` e as do Lobby com `text-tinta`; a lista marca o resultado (`data-resultado`,
+  `pastGameResultKind`; a faixa, o degradê e a palavra em `#1f5c2c` / `#9a1f16` no `menu.css`); `e2e/menu-verde.spec.ts` (o axe em `/`,
+  `/jogar`, `/treinar`, `/opcoes`, `/treino` e `/partidas` no verde, e a medição do contraste da palavra sobre o degradê); a Duda do
+  `online.spec.ts` no verde (a tela de entrar e a Sala de espera).
+- **Tarefa 2** (`d723709`): `HEAL_MS = 1_400` e `healsMs` na `stepAllowanceMs` (o servidor, a web e o Bot do treino dão folga a cada
+  `Healed`, também o de vida cheia).
+- **Tarefa 3** (`fcdae83` e o reforço deste commit): `engine/test/heal-gross.test.ts`: num passo com cura da Defesa, as Q de quem curou são
+  as mesmas antes e depois (as 11 de referência e 90 sorteadas).
+- **Ruling (T1):** o E2E do verde não foi visto falhar no código velho; o RED foi o do teste de unidade (`data-resultado`, `text-tinta`).
+  A medição do contraste foi vista falhar com o verde da mesa (3,98:1) — custo: nenhum, o axe e a medição pegam o texto em branco.
+- **Ruling (T1):** o axe não julga texto sobre degradê (fica "incompleto"); a conta do contraste da palavra é feita no E2E, com a cor
+  misturada em oklab lida em pixel — custo: se o degradê mudar de forma, a amostra (o ponto mais escuro) precisa acompanhar.
+- **Ruling (T3):** 90 partidas sorteadas (10 s) em vez de centenas (50 s no `pnpm check`); a conferência compara as Q antes e depois do
+  passo (pega também a Armadilha e o Sacrifício, que não emitem `BuffRemoved`) — custo: um caso raro que só 300 partidas achariam.
+- **Ruling (plano):** os títulos das tarefas viraram "Task N (Tarefa N)" porque o script do ledger só reconhece "Task".
+- **Armadilha:** o `playwright.config.ts` lista os specs de cada projeto (`testMatch`): um spec novo fora da lista não roda (nem avisa).
+- **Tarefas 4 e 5** (`aa00523`): a batida `heal` (sem teto, `HEAL_MS`, também com a vida cheia; a reconexão como antes), o `HealFx` (o
+  bruto, o líquido, a conta, a carta e a origem), a marca própria `healArrived` (a vida conta em `countMs` a partir da chegada), o brilho
+  na barra e o pulso do número. **Tarefa 6** (`0dd7ee5` e o conserto seguinte): a `HealLayer` (`ui/anim/Heal.tsx`).
+- **Ruling (T4/T5):** as duas num commit só: a 4 sozinha deixava 3 testes do placar vermelhos (a batida de cura passa a durar 1,4 s e o
+  "+N" vira o carimbo) — custo: um commit maior para revisar.
+- **Ruling (T6):** a essência antiga do `Leaving` (até o retrato, bloco A do playtest, ponto 9) saiu; a gota da direção A a substitui, e um
+  teste garante que ela não volta — custo: nenhum, a direção A foi escolhida no lugar dela.
+- **Ruling (T6):** a origem da gota é a carta do `Healed` se ela estiver na mesa (o topo do cemitério, ou a roubada na fileira), senão o
+  monte — uma regra só para o Equipar (outra carta por cima) e o Roubo — custo: nenhum.
+- **Ruling (T6):** com movimento reduzido a vida salta no começo da linha do tempo (a regra de antes, `IDLE_LIFE`), e não na chegada como
+  diz a spec §4.2; o carimbo aparece na chegada e fica na ponta da vida já final — custo: a vida muda ~0,8 s antes do carimbo, só com
+  movimento reduzido.
+- **Ruling (T6):** na primeira cura da partida (a faixa que ensina no ar), o carimbo sobe para a ponta da barra, em vez de pender abaixo
+  dela: no celular ele encostava na faixa (foto com a faixa forçada em toda cura, edição local desfeita) — custo: nessa cura ele cobre a
+  ponta da barra por ~2,6 s.
+- **Consertos da revisão (T6):** a saída das faíscas contava a chegada duas vezes; com movimento reduzido, a ponta da vida somava a cura de
+  novo. Os dois com teste visto falhar.
+- **E2E completo depois da T6:** 133 verdes, 4 pulados (a cura mais longa não quebrou nenhum).
+- **Tarefa 7** (`cabdf72`): a pista `cura` (o brilho, o glissando com o sopro, o arpejo de mi maior na chegada), baixa (≤ 0,14), dos dois
+  lados, também com movimento reduzido (o `Stage` não corta o som), muda na reconexão.
+- **Tarefa 8** (`8f86965` e o conserto seguinte): `ui/table/MarkFigure.tsx` e `mark-tip.ts`; o `StatePlate` saiu; o título do Reflect
+  virou a figura dele; o coração da cura em papel; a regra do `data-sem-pulo` no `CLAUDE.md`.
+- **Ruling (T7/T8):** a remoção do `StatePlate.tsx` entrou por engano no commit do som (o `git rm` fica em stage); os dois commits locais,
+  ainda não enviados, foram refeitos com `reset --soft`, cada um compilando sozinho — custo: nenhum.
+- **Ruling (T8):** a dica fecha no rolar só quando o que rolou contém a figura (a página ou o campo): o histórico desce sozinho a cada
+  batida e a fechava com o mouse em cima — custo: uma dica que fica no ar se um contêiner que não a contém rolar por baixo dela.
+- **Ruling (T8):** o botão da figura leva `aria-expanded` (o plano pedia); a dica é `aria-hidden`, e o nome do botão já diz tudo — custo:
+  o leitor de tela anuncia "expandido" sem conteúdo novo (fica como menor adiado).
+- **Ajustes do autor depois de jogar** (`decisoes.md` 2026-11-23 (11)): a pista `cura` ficou só com o arpejo e os brilhos da chegada (a
+  gota voa muda); o medalhão das marcas passou a 24/32 px (o disco de ouro do ataque, com o mínimo de toque no celular), a cura com o
+  acabamento dele em verde (`.marca-cura`), o ícone `size-4 pc:size-[22px]` e o selo da Ressurreição a 15 px. Fotos novas em `final/marcas-*`.
+- **Fechamento (T9):** `CLAUDE.md` (a cura passiva e as marcas) e o `LEIAME.md` das direções (`953a61f`). `pnpm e2e` completo: 132 verdes,
+  4 pulados, 1 falha da T8 (o `resurrection.spec.ts` procurava o texto da placa velha; agora o botão pelo nome acessível, sem afrouxar),
+  que passou depois de trocada (junto com o `replay.spec.ts`, 9 verdes). Revisão final do advisor, sobre as costuras (folga, vida, carimbo,
+  replay, CSS): **conserto** do carimbo que ficava ~1,5 s no ar depois do `resync` do replay (voltar, "Início", a rodada): o `Stage` passa
+  `cut || jump` à `HealLayer` (teste visto falhar).
+- **Ruling (final):** a folga pode passar do teto de 8 s (Ressurreição 4,6 + momento 1,6 + duas curas 2,8 = 9,0); fica assim: o teto é de
+  antes e já corta duas cenas juntas — custo: até ~1 s a menos de decisão nesse passo raro (relógio de 8 a 40 s).
+- **Tarefa 9:** fotos finais em `2026-11-23-cura-direcoes/final/`; a cópia `public/tmp-cura` apagada (o Vite a levaria ao deploy);
+  a medição A/B passou (o estado tem os números). **Armadilha:** com a bateria baixa a máquina estrangula e a medição dá 1 a 2 quadros/s nos
+  dois lados; rode uma sonda (a Devastação, uma vez) antes da A/B.
+- **Armadilha:** um `git rm` fica em stage e entra no próximo commit, mesmo com `git add` de caminhos explícitos; e o pre-commit rápido
+  confere a árvore de trabalho, não o que está em stage: um commit pode não compilar sozinho.
+
+---
+
 ## 2026-11-23 (2): a revisão do bloco e o Cordel Escuro refeito
 
 - **Revisão** (`85b0d7a`): o `animate: { opacity: 1 }` em toda carta animada gravava `opacity` inline também nas que nunca entraram

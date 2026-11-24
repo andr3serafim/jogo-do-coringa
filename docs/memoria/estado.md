@@ -6,23 +6,59 @@
 
 ## Agora
 
-- **Cinco tarefas da produção** (`decisoes.md` 2026-11-23 (1) a (5); o diário 2026-11-23 (1) e (2)). Branch `feat/ajustes-producao`,
-  saída da `main` em `6382a33`, no checkout principal. Design `docs/superpowers/specs/2026-11-23-ajustes-producao-design.md`; plano
-  `docs/superpowers/plans/2026-11-23-ajustes-producao.md`.
-  - **Feito e commitado:** o deck Cordel Escuro (a versão aprovada, `cca2263`: a geometria do claro, fundo `#2a2a2a` com grão e luz,
-    vermelho `#e53935` com degradê no valor; o bot do treino veste o Cordel oposto); os destinos do Equipar em carimbos fixos (`daa453f`);
-    o favicon (`9c930f5`); a carta que ficava presa quase transparente (`811c872` e `85b0d7a`); o seletor de deck em 2 × 2 e o `CLAUDE.md`.
-  - **A limpeza da memória** (o item 3): este `estado.md` enxuto; o diário antigo no `arquivo/`. O `decisoes.md` (125 KB) só se arquiva
-    com o "sim" do autor (a regra é que ele só cresce).
-  - **`pnpm e2e` local:** 128 verdes e 2 falhas do `looks.spec.ts` (o nome "Cordel" casava "Cordel Escuro"), consertadas (`808e4de`;
-    o spec com 7 de 7).
-  - **No GitHub, PR #7** (`https://github.com/andr3serafim/jogo-do-coringa/pull/7`), com o `pnpm check` verde no pre-push; o `check` e o
-    `e2e` da CI rodando.
-  - **Na `main`** ("Sim, merge", `decisoes.md` 2026-11-23 (6)), por fast-forward até este commit, com o `check` e o `e2e` verdes em
-    `808e4de` (no push e no PR; os commits depois são só de memória). A `feat/ajustes-producao` foi apagada, local e remota.
-  - **Próximo passo exato:** nenhum de código. O próximo trabalho vem do autor.
-  - **Espera o autor:** confirmar se a carta presa era o que ele viu (ele não disse o momento; o outro suspeito é o `opacity-60` da mão
-    travada durante as batidas e o `pending`); o arquivamento do `decisoes.md`; o deploy (leva este bloco e os PRs #3 a #6).
+- **Cinco tarefas novas** (`decisoes.md` 2026-11-23 (7)): o histórico em branco, a cura passiva explicada, as placas em figura, o "+N"
+  mais visível e os visitantes. Branch `feat/cura-historico-visitantes`, saída da `main` em `14adfff`, no checkout principal. Nada de
+  código ainda (brainstorming; o advisor revisa spec, plano e implementação).
+  - **Achado do histórico:** no tema verde, a linha de `/partidas` (`PastGames.tsx`, `Row`) é `bg-papel` sem cor de texto e herda o
+    `--menu-texto` (papel). Conserto: `text-tinta` na linha; o mesmo no `Lobby.tsx` (linhas 143 e 157). Um teste que reprove o verde.
+  - **Como a cura aparece hoje** (fixture `especiais`, rodada 29, passo 137→138: o 7♥ cai da sua Defesa, 3 Q, +28): o "+28" pequeno sob o
+    retrato, ~1 s; o trecho verde da barra; os K da Guarda acendem de leve; a linha "Você curou 28 pela Defesa". Nada liga a carta que cai à
+    vida. A cura também vem do Roubo (`Healed.source`).
+  - **Respostas dele** (`decisoes.md` 2026-11-23 (8)): a carta que cai vira vida **e** o "+N" maior, junto da barra; placas só com a
+    figura (o texto ao passar o mouse, focar ou tocar); visitantes fora (painel da Cloudflare). O Reflect nas figuras: sem resposta.
+  - **Protótipo das direções:** `docs/superpowers/specs/2026-11-23-cura-direcoes/` (A · Seiva, B · Gotas, C · Coração, e as placas;
+    `LEIAME.md` diz como abrir: a cópia em `packages/web/public/tmp-cura/`, fora do git pelo `.git/info/exclude`).
+  - **Achados do advisor, conferidos:** a cura para na vida inicial (`heal` em `combat.ts`: `Healed.amount` é o que entrou; o bruto é
+    `defenseHealOf`); o Roubo cura o valor × o bônus da fileira **do oponente** de onde a carta sai (`stealAmount`); com uma decisão
+    esperando, a linha do tempo inteira cabe em 1 s (`DECISION_CAP_MS`), por isso a cura de hoje quase não aparece. Para a cura ter tempo,
+    ela sai do teto como as cenas, com a folga do relógio na tabela do protocolo (`SCENE_MS`, lida pelo servidor e pela web). O
+    `Lobby.tsx:172` (`bg-ouro` sem cor de texto) também sofre no verde.
+  - **Respostas** (`decisoes.md` 2026-11-23 (9)): a direção A; o bruto no carimbo e o líquido na vida; a cura do oponente igual; o tempo
+    aceito; o Reflect também só figura; o histórico consertado, vitória em verde e derrota em vermelho ("tipo CS2").
+  - **Spec escrita** (rascunho): `docs/superpowers/specs/2026-11-23-cura-placas-historico-design.md`; as fotos do histórico em
+    `2026-11-23-cura-direcoes/prancha-historico.png` (1 · Faixa, 2 · Selo).
+  - **Spec aprovada** (`decisoes.md` 2026-11-23 (10)): com som de cura; histórico na opção 1 · Faixa; a cura toca com a vida cheia.
+  - **Plano:** `docs/superpowers/plans/2026-11-23-cura-placas-historico.md` (9 tarefas).
+  - **Execução:** nativa com o advisor depois das tarefas 3, 6 e 8 (escolha do autor). Ledger fora do git em
+    `.superpowers/sdd/2026-11-23-cura-placas-historico/progress.md`; o diário leva as `Ruling:`.
+  - **Feito:** Tarefa 1 (o histórico e o Lobby legíveis no verde; vitória e derrota em cor; `e2e/menu-verde.spec.ts`; a Duda do
+    `online.spec.ts` no verde); Tarefa 2 (`HEAL_MS` = 1.400 e `healsMs` na `stepAllowanceMs`: o servidor, a web e o Bot
+    do treino dão folga a cada `Healed`); Tarefa 3 (`engine/test/heal-gross.test.ts`: as Q de quem cura não mudam depois do
+    `Healed` no mesmo passo, nas 11 de referência e em 90 sorteadas).
+  - **Advisor nas tarefas 1 a 3:** feito; os reforços (a Duda no verde conferida, a medição do contraste, as Q antes e depois) neste
+    commit. O diário 2026-11-23 (3) tem as `Ruling:`.
+  - **Feito:** tarefas 4 e 5 num commit (a batida `heal` sem teto, o `HealFx` com o bruto, a conta e a origem; a vida conta na chegada
+    da gota, pela marca própria `healArrived`; o brilho na barra e o pulso do número). O "+N" sob o retrato some ao vivo: o carimbo é da
+    Tarefa 6.
+  - **Feito:** Tarefa 6 (`ui/anim/Heal.tsx`, a `HealLayer` no `FxLayer`: a origem acende, a gota sobe com o rastro, as faíscas e o carimbo
+    "+28 · 7♥ × 4" sob a barra, que fica 1,2 s além da batida; a essência antiga do `Leaving` saiu). Vista no replay (PC e celular).
+  - **Advisor nas tarefas 4 a 6:** feito (consertos em `67b6de7`). O `pnpm e2e` completo depois da Tarefa 6: 133 verdes, 4 pulados.
+  - **Feito:** Tarefa 7 (`cabdf72`, o som `cura`); Tarefa 8 (`8f86965`, as marcas e o Reflect só com a figura, `MarkFigure` e a dica;
+    o `StatePlate` saiu; a regra do `data-sem-pulo` no `CLAUDE.md`). E2E de layout, celular e treino verdes depois da 8.
+  - **Advisor nas tarefas 7 e 8:** feito (a dica não fecha quando o histórico rola: `b0e8a02`).
+  - **Tarefa 9 em curso:** fotos finais em `docs/superpowers/specs/2026-11-23-cura-direcoes/final/`; a cópia `public/tmp-cura` apagada.
+  - **Medição A/B (CPU 4×, mesma sessão, 2 repetições):** a cura da branch fica igual ou acima da `main` (com arte: 33 a 41 contra 34 a 40
+    quadros/s; Cordel: 40 a 48 contra 39 a 45) e acima da Devastação de hoje com arte no celular (40 a 44). A Devastação não mudou. A primeira
+    rodada saiu inválida (1 a 2 quadros/s nos dois lados: a máquina com 6% de bateria, estrangulada); refeita depois de uma sonda normal.
+  - **Feito:** o `CLAUDE.md`, o `LEIAME.md`, o `pnpm e2e` completo (verde depois da troca do seletor do `resurrection.spec.ts`), a revisão
+    final do advisor (o conserto do carimbo no `resync` do replay; ver o diário 2026-11-23 (3)).
+  - **PR #8 aberto** (https://github.com/andr3serafim/jogo-do-coringa/pull/8), com o Auto-fix ligado. Depois de jogar, o autor pediu dois
+    ajustes (`decisoes.md` 2026-11-23 (11): o som só no enchimento da vida e o medalhão da cura do tamanho do disco do ataque), feitos e
+    enviados no PR.
+  - **Próximo passo exato:** esperar o autor. Já entregue a ele: as pranchas de `final/`, a lista das
+    `Ruling:` do diário 2026-11-23 (3) e o menor adiado (o `aria-expanded`), e pedir que teste no treino antes do merge.
+- **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`; o deploy (leva
+  o PR #7 e os PRs #3 a #6).
 
 ## No ar e na `main`
 
