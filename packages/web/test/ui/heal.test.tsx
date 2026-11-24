@@ -152,6 +152,16 @@ describe('a camada da cura', () => {
     expect(stamps(m.container)).toHaveLength(0);
   });
 
+  it('o `resync` (no replay, voltar, "Início" e a rodada) troca a mesa de uma vez e tira o carimbo, que seria de outro estado', () => {
+    const m = mount(HEALER, { training: 'medio' });
+    emit(m, AFTER, [removed, healed()]);
+    toArrival();
+    advance(HEAL_MOTION.beatMs - HEAL_MOTION.arriveAt + 100);
+    expect(stamps(m.container)).toHaveLength(1);
+    emit(m, HEALER, [], { resync: true });
+    expect(all(m.container, '[data-cura-carimbo], [data-cura-gota], [data-cura-faisca], [data-cura-origem]')).toHaveLength(0);
+  });
+
   it('o pulo tira a gota, as faíscas e o carimbo', async () => {
     const m = mount(HEALER, { training: 'medio' });
     emit(m, AFTER, [removed, healed()]);

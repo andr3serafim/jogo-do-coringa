@@ -412,7 +412,7 @@ export function Stage({ snapshot, reducedMotion, onSettled, online = false, chil
               {children}
               <Leaving run={run} cut={cut} reduced={reducedMotion} />
               {/* A cura que vira vida (spec 2026-11-23-cura-placas-historico-design.md §4.2): a gota, as faíscas e o carimbo. */}
-              <HealLayer beat={beat} fx={anim.fx.heal} cut={cut} reduced={reducedMotion} me={state ? me : null} />
+              <HealLayer beat={beat} fx={anim.fx.heal} cut={cut || jump}reduced={reducedMotion} me={state ? me : null} />
             </FxLayer>
             <BeatOverlay
               scene={scene}

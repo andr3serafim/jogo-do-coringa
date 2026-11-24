@@ -66,6 +66,7 @@ test('a janela da Ressurreição: Guardar passa, e a Ressurreição continua dis
   await keepButton(page).click();
   await expect(windowPanel(page)).toBeHidden();
   await expect.poll(() => roundNumber(page), { timeout: 20_000 }).toBe(5);
-  await expect(page.getByText('1 Ressurreição disponível').first()).toBeVisible();
+  // A marca é só a figura (a `MarkFigure`): o nome mora no nome acessível do botão, "nome: o que faz".
+  await expect(page.getByRole('button', { name: /^1 Ressurreição disponível:/ }).first()).toBeVisible();
   guard.expectClean();
 });

@@ -58,7 +58,14 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   batida e a fechava com o mouse em cima — custo: uma dica que fica no ar se um contêiner que não a contém rolar por baixo dela.
 - **Ruling (T8):** o botão da figura leva `aria-expanded` (o plano pedia); a dica é `aria-hidden`, e o nome do botão já diz tudo — custo:
   o leitor de tela anuncia "expandido" sem conteúdo novo (fica como menor adiado).
-- **Tarefa 9 (em curso):** fotos finais em `2026-11-23-cura-direcoes/final/`; a cópia `public/tmp-cura` apagada (o Vite a levaria ao deploy);
+- **Fechamento (T9):** `CLAUDE.md` (a cura passiva e as marcas) e o `LEIAME.md` das direções (`953a61f`). `pnpm e2e` completo: 132 verdes,
+  4 pulados, 1 falha da T8 (o `resurrection.spec.ts` procurava o texto da placa velha; agora o botão pelo nome acessível, sem afrouxar),
+  que passou depois de trocada (junto com o `replay.spec.ts`, 9 verdes). Revisão final do advisor, sobre as costuras (folga, vida, carimbo,
+  replay, CSS): **conserto** do carimbo que ficava ~1,5 s no ar depois do `resync` do replay (voltar, "Início", a rodada): o `Stage` passa
+  `cut || jump` à `HealLayer` (teste visto falhar).
+- **Ruling (final):** a folga pode passar do teto de 8 s (Ressurreição 4,6 + momento 1,6 + duas curas 2,8 = 9,0); fica assim: o teto é de
+  antes e já corta duas cenas juntas — custo: até ~1 s a menos de decisão nesse passo raro (relógio de 8 a 40 s).
+- **Tarefa 9:** fotos finais em `2026-11-23-cura-direcoes/final/`; a cópia `public/tmp-cura` apagada (o Vite a levaria ao deploy);
   a medição A/B passou (o estado tem os números). **Armadilha:** com a bateria baixa a máquina estrangula e a medição dá 1 a 2 quadros/s nos
   dois lados; rode uma sonda (a Devastação, uma vez) antes da A/B.
 - **Armadilha:** um `git rm` fica em stage e entra no próximo commit, mesmo com `git add` de caminhos explícitos; e o pre-commit rápido
