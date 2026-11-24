@@ -113,9 +113,9 @@ Ele escreveu:
 > 1. Evite regressões; 2. Evite inferencias, me pergunte o que for necessário; 3. Complexidades desnecessárias; 4. Advisor deve revisar
 > specs, planos ou implementações;
 
-**Leitura:** o limite sobe só no job `e2e`. Quatro PRs, um por vez: (A) a CI e as partidas salvas; (B) as regras, com spec revisada
-pelo advisor e aprovada por ele antes do código; (C) o Cordel Escuro e (D) o fim de partida, cada um com três direções em foto antes
-do código. O advisor revisa as specs, os planos e as implementações.
+**Leitura:** o limite sobe só no job `e2e`. O advisor revisa as specs, os planos e as implementações. **[I]** A divisão do trabalho é
+de quem registrou, não dele: quatro PRs, um por vez: (A) a CI e as partidas salvas; (B) as regras, com spec revisada pelo advisor e
+aprovada por ele antes do código; (C) o Cordel Escuro e (D) o fim de partida, cada um com três direções em foto antes do código.
 
 ---
 
