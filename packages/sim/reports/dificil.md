@@ -1,6 +1,6 @@
 # Portão do Difícil
 
-**Veredito: APROVADO.** (a) 72.5% (limiar 58.0%), (b) 73.5% (limiar 65.0%), p95 140 ms (limiar 300 ms).
+**Veredito: APROVADO.** (a) 65.5% (limiar 58.0%), (b) 74.0% (limiar 65.0%), p95 134 ms (limiar 300 ms).
 
 ## Como foi medido
 
@@ -15,19 +15,19 @@
 
 | Medida | Valor | EP | Limiar | Margem | Passa |
 | --- | --- | --- | --- | --- | --- |
-| (a) hard × greedy: pontuação do hard | 72.5% | 3.2% | ≥ 58.0% | 4.6 EP | sim |
-| (b) greedy × easy: pontuação do greedy | 73.5% | 3.1% | ≥ 65.0% | 2.7 EP | sim |
-| (c) p95 do tempo por decisão do hard | 140 ms |  | ≤ 300 ms |  | sim |
+| (a) hard × greedy: pontuação do hard | 65.5% | 3.4% | ≥ 58.0% | 2.2 EP | sim |
+| (b) greedy × easy: pontuação do greedy | 74.0% | 3.1% | ≥ 65.0% | 2.9 EP | sim |
+| (c) p95 do tempo por decisão do hard | 134 ms |  | ≤ 300 ms |  | sim |
 
-- (a) hard: vitórias/derrotas/sem fim 145/55/0; com a iniciativa 76.0% (100 partidas), sem ela 69.0% (100).
-- (b) greedy: vitórias/derrotas/sem fim 147/53/0; com a iniciativa 79.0% (100 partidas), sem ela 68.0% (100).
+- (a) hard: vitórias/derrotas/sem fim 131/69/0; com a iniciativa 68.0% (100 partidas), sem ela 63.0% (100).
+- (b) greedy: vitórias/derrotas/sem fim 148/52/0; com a iniciativa 80.0% (100 partidas), sem ela 68.0% (100).
 
 ### Tempo por decisão do hard
 
 | Decisões com 2 ou mais ações | Nº | p50 | p95 | Máx |
 | --- | --- | --- | --- | --- |
-| todas as fases | 8842 | 78 ms | 140 ms | 229 ms |
-| só as fases com busca (EQUIP, ATTACK_MAIN) | 6718 | 90 ms | 144 ms | 229 ms |
+| todas as fases | 8605 | 75 ms | 134 ms | 204 ms |
+| só as fases com busca (EQUIP, ATTACK_MAIN) | 6525 | 87 ms | 138 ms | 204 ms |
 
 ## Por que estes valores
 

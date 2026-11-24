@@ -44,30 +44,30 @@
       "easyBlunder": 0.7,
       "hardVsGreedy": {
         "games": 200,
-        "rate": 0.725,
-        "se": 0.031573327350787724,
-        "wins": 145,
-        "losses": 55,
+        "rate": 0.655,
+        "se": 0.033613613313656115,
+        "wins": 131,
+        "losses": 69,
         "unfinished": 0,
         "withInitiative": {
           "games": 100,
-          "rate": 0.76
+          "rate": 0.68
         },
         "withoutInitiative": {
           "games": 100,
-          "rate": 0.69
+          "rate": 0.63
         }
       },
       "greedyVsEasy": {
         "games": 200,
-        "rate": 0.735,
-        "se": 0.031206970375222264,
-        "wins": 147,
-        "losses": 53,
+        "rate": 0.74,
+        "se": 0.031016124838541645,
+        "wins": 148,
+        "losses": 52,
         "unfinished": 0,
         "withInitiative": {
           "games": 100,
-          "rate": 0.79
+          "rate": 0.8
         },
         "withoutInitiative": {
           "games": 100,
@@ -75,15 +75,15 @@
         }
       },
       "timing": {
-        "decisions": 8842,
-        "p50Ms": 77.62280000001192,
-        "p95Ms": 139.9900000000016,
-        "maxMs": 228.6898000000001,
+        "decisions": 8605,
+        "p50Ms": 75.09100000000035,
+        "p95Ms": 133.54109999997308,
+        "maxMs": 204.27439999999478,
         "searching": {
-          "decisions": 6718,
-          "p50Ms": 90.23619999998482,
-          "p95Ms": 143.69409999996424,
-          "maxMs": 228.6898000000001
+          "decisions": 6525,
+          "p50Ms": 86.66200000001118,
+          "p95Ms": 138.25339999998687,
+          "maxMs": 204.27439999999478
         }
       },
       "passes": {
@@ -92,7 +92,7 @@
         "p95": true
       },
       "approved": true,
-      "seconds": 609.9624391
+      "seconds": 569.8954703
     }
   ]
 }
