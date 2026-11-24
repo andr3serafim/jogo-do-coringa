@@ -6,6 +6,18 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-24 (8): a spec das regras aprovada; salas encerradas e abas recarregadas no deploy
+
+Diante do resumo da spec `docs/superpowers/specs/2026-11-24-defesa-absoluta-reflect-design.md` (as duas fases, o Roubo × 5 na fase 2, o
+Reflect com o dano menor e os Q que ficam), ele respondeu "Aprovo". À P2 (encerrar as salas abertas no deploy com `STATE_SCHEMA` 7 e
+fazer a aba velha recarregar com `PROTOCOL_VERSION` 2), "Sim, os dois (Recomendado)". À P3 (com 4 Q, quem reflete fica com a carta da
+frente da Defesa), "Fica (Recomendado)".
+
+**Leitura:** a spec está aprovada como escrita; `STATE_SCHEMA` 7 e `PROTOCOL_VERSION` 2 entram; o **[I]** do §1.2 da spec vira regra.
+A P1 (como a fase 2 aparece na mesa, e o nome dela) segue aberta, com fotos.
+
+---
+
 ## 2026-11-24 (7): as partidas salvas, 10 no máximo e 30 dias
 
 Ele pediu "Armazenamento de jogos salvos deve ter um limite, apenas 10 e depois de 30 dias é apagada. não sei como fica o custo de

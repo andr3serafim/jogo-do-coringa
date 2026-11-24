@@ -1,7 +1,7 @@
 # A Defesa Absoluta em duas fases e o Reflect novo — spec
 
-> **Estado:** rascunho para o autor. Origem: `docs/memoria/decisoes.md` 2026-11-24 (3) (a Defesa Absoluta) e (4) (o Reflect). Nada aqui
-> vira código antes do "sim" dele. **[I]** marca o que ele não disse com essas palavras.
+> **Estado:** aprovada pelo autor em 2026-11-24 (`decisoes.md` 2026-11-24 (8)), com a P2 e a P3 respondidas; a P1 segue aberta (fotos).
+> Origem: `decisoes.md` 2026-11-24 (3) (a Defesa Absoluta) e (4) (o Reflect). **[I]** marca o que ele não disse com essas palavras.
 
 ## 1. As regras novas
 
@@ -53,7 +53,7 @@ para quem refletiu), os Ás da mesma janela e o fim do ataque (7.4, passos 5 a 9
 (2) Os Q **ficam**. Os K já quebram todos hoje, e o dano já entra mesmo com K; isso não muda. O Reflect fica mais fraco nas duas pontas.
 
 **Contra quem está no escudo** (fase 1): o Reflect segue anulado (só segura o golpe), porque o escudo é imune a dano. **Na fase 2**,
-o Reflect vale como acima. **[I]** Quando quem tem 4 Q reflete, a carta da frente da Defesa dele também fica (é carta saindo depois de
+o Reflect vale como acima. Quando quem tem 4 Q reflete, a carta da frente da Defesa dele também fica (é carta saindo depois de
 ataque), na fase 1 e na 2.
 
 ## 2. O motor (`packages/engine`)
@@ -80,11 +80,11 @@ ficar zerado: menos código morto; o compilador mostra cada leitura.
   re-simula no motor de agora e pode parar ou dar outro resultado).
 - Golden: `pnpm --filter @coringa/sim record-golden`, `-u` dos snapshots só depois de ler o diff, e o commit diz quais regras mudaram.
 - **Recomendo `STATE_SCHEMA` 6 → 7** (`packages/server/src/core/timers.ts`): uma sala no meio da partida na hora do deploy trocaria o
-  Reflect e a Defesa Absoluta no meio do jogo. Com o 7, as salas abertas no deploy são encerradas. **Pergunta ao autor (P2).**
+  Reflect e a Defesa Absoluta no meio do jogo. Com o 7, as salas abertas no deploy são encerradas. Aprovado (P2).
 - **A aba aberta com a versão velha.** O servidor não confere a `RULES_VERSION`; confere o `PROTOCOL_VERSION` no `hello`, e a web
   recarrega sozinha uma vez quando recebe o 4001 (`RoomGate.tsx`). Sem isso, uma aba aberta antes do deploy mostraria a prévia do
   Reflect com a conta velha (o resultado é o do servidor, mas o número na tela mentiria). **Recomendo subir `PROTOCOL_VERSION` 1 → 2
-  junto** (parte da P2): a aba velha recarrega e pega a interface nova.
+  junto** (parte da P2, aprovado): a aba velha recarrega e pega a interface nova.
 
 ## 4. Os bots e o simulador (`packages/sim`)
 
@@ -148,8 +148,8 @@ exemplo), 10.2 (item 3), 11.1 (as duas fases e o exemplo), 11.2 (passo 5 do exem
 ## 9. Perguntas ao autor
 
 - **P1.** Como a fase 2 aparece na mesa: (a), (b) ou (c) do §5, e o nome dela. Com fotos, depois da aprovação do resto.
-- **P2.** `STATE_SCHEMA` 7 (encerrar as salas abertas no deploy) e `PROTOCOL_VERSION` 2 (a aba velha recarrega): sim ou não.
-- **P3.** Confirmar o **[I]** do §1.2: quem tem 4 Q e reflete também fica com a carta da frente da Defesa.
+- **P2.** `STATE_SCHEMA` 7 e `PROTOCOL_VERSION` 2: **sim, os dois.**
+- **P3.** Quem tem 4 Q e reflete fica com a carta da frente da Defesa: **fica.**
 
 ## 10. Fora daqui
 

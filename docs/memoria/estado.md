@@ -10,12 +10,13 @@
   - **A, `feat/ci-salvos`** (esta branch, saída da `main` em `364084b`): o `timeout-minutes` do job `e2e` em 20; as partidas salvas
     com `MAX_PAST_GAMES` 10 e `MAX_PAST_GAME_AGE_MS` 30 dias (`now` obrigatório em `loadPastGames`, `findPastGame`, `attachReplay` e
     `deletePastGame`; a leitura esconde, toda gravação poda); o `e2e/fixtures.ts` carimba a data de agora nas fixtures (sem isso elas,
-    de 2026-10-30, sumiriam da lista em 2026-11-29). **PR #9 aberto**, CI rodando; falta o "sim" do merge.
+    de 2026-10-30, sumiriam da lista em 2026-11-29). **PR #9 aberto**; a 1ª CI reprovou o `check` (o `replay-screen.test.tsx` com
+    data fixa venceu em UTC; consertado em `219b998`), o `e2e` passou em 11–12 min. Falta a CI verde e o "sim" do merge.
   - **B, `feat/regras-4q-reflect`** (saída da ponta da `feat/ci-salvos`; depois do squash do #9:
     `git rebase --onto main feat/ci-salvos feat/regras-4q-reflect`): a spec
-    `docs/superpowers/specs/2026-11-24-defesa-absoluta-reflect-design.md`, revisada pelo advisor, **esperando o "sim" do autor** e as
-    perguntas P2 (`STATE_SCHEMA` 7 e `PROTOCOL_VERSION` 2) e P3 (a frente de quem reflete com 4 Q fica). A P1 (como a fase 2 aparece)
-    vai com fotos, junto com C e D. Nada de código antes do "sim".
+    `docs/superpowers/specs/2026-11-24-defesa-absoluta-reflect-design.md` **aprovada** (`decisoes.md` 2026-11-24 (8)), com
+    `STATE_SCHEMA` 7 e `PROTOCOL_VERSION` 2. **Próximo passo:** o plano em `docs/superpowers/plans/`, revisado pelo advisor, e o
+    código. A P1 (como a fase 2 aparece na mesa, e o nome dela) vai com fotos, junto com C e D.
   - **C, o Cordel Escuro** (2026-11-24 (5)) e **D, o fim de partida** (2026-11-24 (6)): três direções em foto do jogo cada, antes do
     código.
 - **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele), que leva o PR #8; apagar a branch `feat/cura-historico-visitantes`
