@@ -91,7 +91,7 @@ export function useRecordPastGame(
     if (replay === null || replay.gameNo !== outcome.gameNo || lastAttachedNo.current === outcome.gameNo) return;
     lastAttachedNo.current = outcome.gameNo;
     // Com `null` (a linha sumiu ou o armazenamento recusou) a linha de antes continua: sem replay, e o painel sem "Rever".
-    const next: Recorded = { gameNo: outcome.gameNo, game: attachReplay(store, game.id, replay.replay) ?? game };
+    const next: Recorded = { gameNo: outcome.gameNo, game: attachReplay(store, game.id, replay.replay, Date.now()) ?? game };
     recordedRef.current = next;
     setRecorded(next);
   }, [store, outcome, replay]);

@@ -23,7 +23,7 @@ jobs:
   # Em paralelo ao `check`. Constrói a web, sobe o `wrangler dev` (sem login, telemetria desligada) e roda o Playwright em Chromium.
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6

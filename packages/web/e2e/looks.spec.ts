@@ -2,9 +2,9 @@
 // imagens carregadas de verdade (sob a CSP do `wrangler dev`), a troca no menu, a trava do Cordel e o tutorial sempre em cordel; na fatia 2,
 // o bot com a aparência dele (os versos, o retrato e o campo) e o replay com as aparências gravadas na partida; na fatia 3, a sala online
 // de duas pessoas, cada tela com cada lado na aparência do assento.
-import { readFileSync } from 'node:fs';
 import { expect, test, type Browser, type BrowserContext, type Locator, type Page } from '@playwright/test';
 import { axe, equipByUi, expectNoHorizontalScroll, failOnConsoleErrors, openMenu, roundHeading, table } from './helpers.ts';
+import { fixtureGames } from './fixtures.ts';
 import { RESURRECTION_E2E_SEED } from './seeds.ts';
 
 const TRAINING = `/treino?semente=${RESURRECTION_E2E_SEED}&nivel=medio`;
@@ -187,7 +187,7 @@ test('aparência: no treino, o bot veste a dele (Celestial + Egípcio): os verso
 
 /** A fixture `especiais` com as aparências gravadas na partida (você em Bestiário + Egípcio, o Bot em Celestial + Bufão). */
 const ESPECIAIS = (() => {
-  const games = JSON.parse(readFileSync(new URL('./fixtures/especiais.json', import.meta.url), 'utf8')) as Array<Record<string, unknown>>;
+  const games = fixtureGames('especiais');
   games[0] = { ...games[0], looks: { me: { deck: 'bestiario', race: 'egipcio' }, opponent: { deck: 'celestial', race: 'bufao' } } };
   return { id: String(games[0].id), json: JSON.stringify(games) };
 })();

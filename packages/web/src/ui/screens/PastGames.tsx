@@ -1,4 +1,4 @@
-// A lista local das partidas terminadas (`/partidas`, spec do polimento §4.3): as últimas 20 deste navegador, da mais nova para a
+// A lista local das partidas terminadas (`/partidas`, spec do polimento §4.3): as últimas 10 deste navegador, dos últimos 30 dias, da mais nova para a
 // mais velha, cada uma com a data, contra quem foi, o resultado do ponto de vista do seu assento, o modo e, quando a partida
 // ficou guardada com replay, o botão "Rever". Lê a lista ao abrir (não há partida nova com esta tela aberta) e de novo depois de
 // apagar.
@@ -46,7 +46,7 @@ type Target = { kind: 'all' } | { kind: 'one'; game: PastGame };
 type FocusAfter = { kind: 'row'; index: number } | { kind: 'title' };
 
 export default function PastGames({ store }: PastGamesProps) {
-  const [games, setGames] = useState(() => loadPastGames(store));
+  const [games, setGames] = useState(() => loadPastGames(store, Date.now()));
   const [target, setTarget] = useState<Target | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -71,9 +71,9 @@ export default function PastGames({ store }: PastGamesProps) {
   function confirm() {
     if (target === null) return;
     const index = target.kind === 'one' ? games.findIndex((game) => game.id === target.game.id) : -1;
-    const done = target.kind === 'one' ? deletePastGame(store, target.game.id) : clearPastGames(store);
+    const done = target.kind === 'one' ? deletePastGame(store, target.game.id, Date.now()) : clearPastGames(store);
     // O que ficou guardado de verdade: com o armazenamento recusando, a partida continua aqui como num recarregar.
-    const left = loadPastGames(store);
+    const left = loadPastGames(store, Date.now());
     setGames(left);
     setNotice(done ? (target.kind === 'one' ? PAST_GAME_DELETED_TEXT : PAST_GAMES_CLEARED_TEXT) : DELETE_FAILED_TEXT);
     // Sem apagar, o botão que abriu a confirmação continua na página e o diálogo devolve o foco a ele.

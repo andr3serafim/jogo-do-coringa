@@ -20,6 +20,7 @@ import {
   deletePastGame,
   findPastGame,
   loadPastGames,
+  MAX_PAST_GAME_AGE_MS,
   MAX_PAST_GAMES,
   MAX_PAST_GAMES_CHARS,
   PAST_GAMES_KEY,
@@ -30,6 +31,8 @@ import { safeStore, type KeyValueStore } from '../../src/model/storage.ts';
 
 const SEATS: [PlayerId, PlayerId] = ['p1', 'p2'];
 const HOUR = 60 * 60 * 1000;
+/** O instante das leituras: depois de toda `date` dos testes e a menos de 30 dias de todas. */
+const NOW = 100_000_000;
 
 /** Armazenamento de mentira com cota: um `set` maior que ela lança, como o `setItem` do navegador. */
 interface FakeStore extends KeyValueStore {
@@ -134,14 +137,49 @@ const hasReplay = (games: PastGame[]): boolean[] => games.map((game) => game.rep
 describe('lista de partidas', () => {
   it('a chave e os limites são os da spec', () => {
     expect(PAST_GAMES_KEY).toBe('coringa:partidas');
-    expect(MAX_PAST_GAMES).toBe(20);
+    // decisoes.md 2026-11-24 (7): no máximo 10, e cada uma some 30 dias depois do fim da partida.
+    expect(MAX_PAST_GAMES).toBe(10);
+    expect(MAX_PAST_GAME_AGE_MS).toBe(30 * 24 * HOUR);
     expect(MAX_PAST_GAMES_CHARS).toBe(1_000_000);
     expect(DEDUPE_WINDOW_MS).toBe(24 * HOUR);
   });
 
+  describe('30 dias', () => {
+    const today = 1_792_000_000_000;
+    const aged = (id: string, age: number) => ({ ...rawGame(id), date: today - age });
+
+    it('a leitura esconde a partida com mais de 30 dias (com 30 dias exatos, ela fica)', () => {
+      const store = fakeStore();
+      put(store, [aged('nova', HOUR), aged('limite', MAX_PAST_GAME_AGE_MS), aged('velha', MAX_PAST_GAME_AGE_MS + 1)]);
+      expect(loadPastGames(store, today).map((game) => game.id)).toEqual(['nova', 'limite']);
+      expect(findPastGame(store, 'velha', today)).toBeNull();
+      expect(findPastGame(store, 'limite', today)?.id).toBe('limite');
+    });
+
+    it('a gravação apaga do armazenamento as vencidas', () => {
+      const store = fakeStore();
+      put(store, [aged('nova', HOUR), aged('velha', MAX_PAST_GAME_AGE_MS + 1)]);
+      const saved = recordPastGame(store, entry({ date: today }), today)!;
+      const stored = (JSON.parse(store.data.get(PAST_GAMES_KEY)!) as PastGame[]).map((game) => game.id);
+      expect(stored).toEqual([saved.id, 'nova']);
+    });
+
+    it('o anexo do replay e o apagar de uma também levam as vencidas embora', () => {
+      const store = fakeStore();
+      put(store, [aged('sem-replay', HOUR), aged('outra', 2 * HOUR), aged('velha', MAX_PAST_GAME_AGE_MS + 1)]);
+      expect(attachReplay(store, 'sem-replay', realReplay('anexo'), today)?.replay).toBeDefined();
+      const afterAttach = (JSON.parse(store.data.get(PAST_GAMES_KEY)!) as PastGame[]).map((game) => game.id);
+      expect(afterAttach).toEqual(['sem-replay', 'outra']);
+
+      put(store, [aged('nova', HOUR), aged('outra', 2 * HOUR), aged('velha', MAX_PAST_GAME_AGE_MS + 1)]);
+      expect(deletePastGame(store, 'outra', today)).toBe(true);
+      expect((JSON.parse(store.data.get(PAST_GAMES_KEY)!) as PastGame[]).map((game) => game.id)).toEqual(['nova']);
+    });
+  });
+
   it('grava no topo e lê de volta', () => {
     const store = fakeStore();
-    expect(loadPastGames(store)).toEqual([]);
+    expect(loadPastGames(store, NOW)).toEqual([]);
     const replay = realReplay('topo');
     const first = recordPastGame(store, entry({ date: 1_000, replay }), 1_000);
     const second = recordPastGame(
@@ -159,39 +197,39 @@ describe('lista de partidas', () => {
     expect(second).not.toBeNull();
     expect(first!.id).not.toBe(second!.id);
 
-    const games = loadPastGames(store);
+    const games = loadPastGames(store, NOW);
     expect(games.map((game) => game.id)).toEqual([second!.id, first!.id]);
     // O que volta é o que foi guardado, até o replay, depois de passar pelo JSON.
     expect(games[1]).toEqual(JSON.parse(JSON.stringify(first)));
     expect(games[1]!.replay).toEqual(replay);
     expect(games[0]).toMatchObject({ key: 'sala:ABCD:1', mode: { kind: 'online', code: 'ABCD' }, seat: 'p2' });
     expect(games[0]).not.toHaveProperty('replay');
-    expect(findPastGame(store, second!.id)).toEqual(games[0]);
-    expect(findPastGame(store, first!.id)).toEqual(games[1]);
-    expect(findPastGame(store, 'nao-existe')).toBeNull();
+    expect(findPastGame(store, second!.id, NOW)).toEqual(games[0]);
+    expect(findPastGame(store, first!.id, NOW)).toEqual(games[1]);
+    expect(findPastGame(store, 'nao-existe', NOW)).toBeNull();
   });
 
-  it('guarda no máximo 20', () => {
+  it('guarda no máximo 10', () => {
     const store = fakeStore();
-    for (let i = 0; i < 25; i++) recordPastGame(store, entry({ date: i, rounds: i }), i);
-    const games = loadPastGames(store);
+    for (let i = 0; i < 15; i++) recordPastGame(store, entry({ date: i, rounds: i }), i);
+    const games = loadPastGames(store, NOW);
     expect(games).toHaveLength(MAX_PAST_GAMES);
     // A mais nova primeiro; as 5 mais velhas saíram.
-    expect(games.map((game) => game.rounds)).toEqual(Array.from({ length: 20 }, (_, i) => 24 - i));
+    expect(games.map((game) => game.rounds)).toEqual(Array.from({ length: 10 }, (_, i) => 14 - i));
   });
 
-  it('lê no máximo 20 mesmo que o armazenamento tenha mais', () => {
+  it('lê no máximo 10 mesmo que o armazenamento tenha mais', () => {
     const store = fakeStore();
     put(store, Array.from({ length: 30 }, (_, i) => rawGame(`g${i}`)));
-    const games = loadPastGames(store);
+    const games = loadPastGames(store, NOW);
     expect(games).toHaveLength(MAX_PAST_GAMES);
     expect(games[0]!.id).toBe('g0');
   });
 
   it('passando de 1 MB tira os replays das mais velhas e mantém as linhas', () => {
     const store = fakeStore();
-    const replay = bulky(realReplay('mega'), 60_000);
-    // 20 replays de ~60 mil caracteres passam de 1 MB: a lista cheia não cabe com todos eles.
+    const replay = bulky(realReplay('mega'), 120_000);
+    // 10 replays de ~120 mil caracteres passam de 1 MB: a lista cheia não cabe com todos eles.
     expect(JSON.stringify(replay).length * MAX_PAST_GAMES).toBeGreaterThan(MAX_PAST_GAMES_CHARS);
 
     let last: PastGame | null = null;
@@ -200,9 +238,9 @@ describe('lista de partidas', () => {
     }
     expect(store.data.get(PAST_GAMES_KEY)!.length).toBeLessThanOrEqual(MAX_PAST_GAMES_CHARS);
 
-    const games = loadPastGames(store);
+    const games = loadPastGames(store, NOW);
     // Nenhuma linha se perde, e a ordem segue da mais nova para a mais velha.
-    expect(games.map((game) => game.rounds)).toEqual(Array.from({ length: 20 }, (_, i) => 19 - i));
+    expect(games.map((game) => game.rounds)).toEqual(Array.from({ length: MAX_PAST_GAMES }, (_, i) => MAX_PAST_GAMES - 1 - i));
     // Os replays que sobram são os das mais novas, sem buraco: o que sai é sempre o da mais velha que ainda tinha um.
     const flags = hasReplay(games);
     const kept = flags.filter(Boolean).length;
@@ -231,12 +269,12 @@ describe('lista de partidas', () => {
 
     const exact = build(pad);
     expect(exact.data.get(PAST_GAMES_KEY)!.length).toBe(MAX_PAST_GAMES_CHARS);
-    expect(hasReplay(loadPastGames(exact))).toEqual([true, true, true]);
+    expect(hasReplay(loadPastGames(exact, NOW))).toEqual([true, true, true]);
 
     const over = build(pad + 1);
     expect(over.data.get(PAST_GAMES_KEY)!.length).toBeLessThanOrEqual(MAX_PAST_GAMES_CHARS);
     // Um replay a menos, o da mais velha, e só ele.
-    expect(hasReplay(loadPastGames(over))).toEqual([true, true, false]);
+    expect(hasReplay(loadPastGames(over, NOW))).toEqual([true, true, false]);
   });
 
   it('um replay sozinho maior que o teto também sai, e a linha fica', () => {
@@ -245,7 +283,7 @@ describe('lista de partidas', () => {
     expect(saved).not.toBeNull();
     expect(saved).not.toHaveProperty('replay');
     expect(store.data.get(PAST_GAMES_KEY)!.length).toBeLessThanOrEqual(MAX_PAST_GAMES_CHARS);
-    expect(loadPastGames(store)).toHaveLength(1);
+    expect(loadPastGames(store, NOW)).toHaveLength(1);
   });
 
   it('uma entrada de outra versão das regras é lida normalmente', () => {
@@ -254,7 +292,7 @@ describe('lista de partidas', () => {
     for (const rulesVersion of [RULES_VERSION + 1, 0]) {
       recordPastGame(store, entry({ rulesVersion, replay, rounds: rulesVersion }), rulesVersion);
     }
-    const games = loadPastGames(store);
+    const games = loadPastGames(store, NOW);
     expect(games.map((game) => game.rulesVersion)).toEqual([0, RULES_VERSION + 1]);
     expect(games.every((game) => game.replay !== undefined)).toBe(true);
   });
@@ -267,7 +305,7 @@ describe('lista de partidas', () => {
     // A cota que sobra exatamente para a lista com os replays só das duas mais novas.
     const dry = fakeStore();
     games(dry);
-    const all = loadPastGames(dry);
+    const all = loadPastGames(dry, NOW);
     const quota = JSON.stringify(all.map((game, i) => (i < 2 ? game : { ...game, replay: undefined }))).length;
     expect(JSON.stringify(all).length).toBeGreaterThan(quota);
 
@@ -280,7 +318,7 @@ describe('lista de partidas', () => {
     // Tentou com tudo, depois sem o replay da mais velha, depois sem o das duas mais velhas.
     expect(store.sets).toBe(3);
     expect(saved?.replay).toEqual(replay);
-    const stored = loadPastGames(store);
+    const stored = loadPastGames(store, NOW);
     expect(stored.map((game) => game.rounds)).toEqual([4, 3, 2, 1]);
     expect(hasReplay(stored)).toEqual([true, true, false, false]);
   });
@@ -293,7 +331,7 @@ describe('lista de partidas', () => {
     // A cota que sobra exatamente para os replays das duas mais novas, entre quatro partidas.
     const dry = fakeStore();
     addGames(dry, 1, 4);
-    const quota = JSON.stringify(loadPastGames(dry).map((game, i) => (i < 2 ? game : { ...game, replay: undefined }))).length;
+    const quota = JSON.stringify(loadPastGames(dry, NOW).map((game, i) => (i < 2 ? game : { ...game, replay: undefined }))).length;
 
     // Um `Storage` que recusa o `setItem` da lista acima da cota (o `QuotaExceededError` do navegador).
     const disk = new Map<string, string>();
@@ -325,7 +363,7 @@ describe('lista de partidas', () => {
     expect(disk.get(PAST_GAMES_KEY)!.length).toBeLessThanOrEqual(quota);
     // Sem cópia pendente em memória: quem abre o mesmo Storage (outra aba, a página recarregada) lê o mesmo.
     expect(store.get(PAST_GAMES_KEY)).toBe(disk.get(PAST_GAMES_KEY));
-    expect(loadPastGames(safeStore(raw).store)).toEqual(loadPastGames(store));
+    expect(loadPastGames(safeStore(raw).store, NOW)).toEqual(loadPastGames(store, NOW));
 
     // Cota que nem a lista sem replays cabe: null, sem lançar, e o disco continua com a lista de antes.
     const before = disk.get(PAST_GAMES_KEY);
@@ -349,7 +387,7 @@ describe('lista de partidas', () => {
       // devolver o que o disco tem, não ela.
       expect(disk.get(PAST_GAMES_KEY)).toBe(onDisk);
       expect(store.get(PAST_GAMES_KEY)).toBe(onDisk);
-      expect(loadPastGames(store).map((game) => game.rounds)).toEqual([1]);
+      expect(loadPastGames(store, NOW).map((game) => game.rounds)).toEqual([1]);
 
       // O armazenamento volta a aceitar: a gravação seguinte parte do disco, com o replay da primeira partida.
       control.on = false;
@@ -367,7 +405,7 @@ describe('lista de partidas', () => {
       expect(recordPastGame(store, entry({ date: 1, rounds: 1, replay: realReplay('vazio') }), 1)).toBeNull();
       expect(disk.has(PAST_GAMES_KEY)).toBe(false);
       expect(store.get(PAST_GAMES_KEY)).toBeNull();
-      expect(loadPastGames(store)).toEqual([]);
+      expect(loadPastGames(store, NOW)).toEqual([]);
 
       control.on = false;
       recordPastGame(store, entry({ date: 2, rounds: 2 }), 2);
@@ -382,7 +420,7 @@ describe('lista de partidas', () => {
       // O `set` do `safeStore` relança a recusa do `Storage`: a regravação do texto lido também lança, e a gravação segue sem lançar.
       expect(() => recordPastGame(store, entry({ date: 2, rounds: 2 }), 2)).not.toThrow();
       expect(recordPastGame(store, entry({ date: 2, rounds: 2 }), 2)).toBeNull();
-      expect(loadPastGames(store).map((game) => game.rounds)).toEqual([1]);
+      expect(loadPastGames(store, NOW).map((game) => game.rounds)).toEqual([1]);
     });
   });
 
@@ -394,14 +432,14 @@ describe('lista de partidas', () => {
     refusing.sets = 0;
     expect(recordPastGame(refusing, entry({ replay: realReplay('recusa') }), 1_000)).toBeNull();
     expect(refusing.sets).toBe(2);
-    expect(loadPastGames(refusing)).toEqual([]);
+    expect(loadPastGames(refusing, NOW)).toEqual([]);
 
     // O que já estava guardado fica como estava.
     const store = fakeStore();
     recordPastGame(store, entry({ rounds: 3 }), 1_000);
     store.quota = 0;
     expect(recordPastGame(store, entry({ rounds: 4 }), 2_000)).toBeNull();
-    expect(loadPastGames(store).map((game) => game.rounds)).toEqual([3]);
+    expect(loadPastGames(store, NOW).map((game) => game.rounds)).toEqual([3]);
   });
 
   it('um armazenamento que lança até no get não derruba nada', () => {
@@ -416,8 +454,8 @@ describe('lista de partidas', () => {
         throw new Error('SecurityError');
       },
     };
-    expect(loadPastGames(broken)).toEqual([]);
-    expect(findPastGame(broken, 'x')).toBeNull();
+    expect(loadPastGames(broken, NOW)).toEqual([]);
+    expect(findPastGame(broken, 'x', NOW)).toBeNull();
     expect(recordPastGame(broken, entry(), 1_000)).toBeNull();
   });
 
@@ -449,19 +487,19 @@ describe('lista de partidas', () => {
     const saved = recordPastGame(store, { ...entry({ replay: crooked }), extra: 1 } as Omit<PastGame, 'id'>, 1_000)!;
     expect(saved).not.toHaveProperty('replay');
     expect(saved).not.toHaveProperty('extra');
-    expect(findPastGame(store, saved.id)).toEqual(saved);
+    expect(findPastGame(store, saved.id, NOW)).toEqual(saved);
   });
 
   it('JSON estragado vira lista vazia', () => {
     const store = fakeStore();
     for (const text of ['{nope', '', '[1, 2', 'null', '{"id":"a"}', '"texto"', '42']) {
       store.set(PAST_GAMES_KEY, text);
-      expect(loadPastGames(store), text).toEqual([]);
+      expect(loadPastGames(store, NOW), text).toEqual([]);
     }
     // Gravar por cima do estrago funciona: a lista recomeça com a partida nova.
     store.set(PAST_GAMES_KEY, '{nope');
     expect(recordPastGame(store, entry(), 1_000)).not.toBeNull();
-    expect(loadPastGames(store)).toHaveLength(1);
+    expect(loadPastGames(store, NOW)).toHaveLength(1);
   });
 
   describe('entrada com forma errada', () => {
@@ -526,7 +564,7 @@ describe('lista de partidas', () => {
       for (const [label, item] of bad) {
         put(store, [rawGame('antes'), item, rawGame('depois')]);
         expect(
-          loadPastGames(store).map((game) => game.id),
+          loadPastGames(store, NOW).map((game) => game.id),
           label,
         ).toEqual(['antes', 'depois']);
       }
@@ -535,7 +573,7 @@ describe('lista de partidas', () => {
         store,
         bad.map(([, item]) => item),
       );
-      expect(loadPastGames(store)).toEqual([]);
+      expect(loadPastGames(store, NOW)).toEqual([]);
     });
 
     it('uma entrada boa passa por inteiro, com ou sem key e replay', () => {
@@ -548,7 +586,7 @@ describe('lista de partidas', () => {
       };
       const abandoned = { ...rawGame('abandonada'), outcome: { gameNo: 3, result: null, cause: 'ABANDONED' } };
       put(store, [full, draw, abandoned, rawGame('simples')]);
-      expect(loadPastGames(store)).toEqual([full, draw, abandoned, rawGame('simples')]);
+      expect(loadPastGames(store, NOW)).toEqual([full, draw, abandoned, rawGame('simples')]);
     });
 
     // Foco da revisão 1 da E1: as partidas guardadas até a versão 2 das regras (fim por anti-travamento, empate, placar com
@@ -559,7 +597,7 @@ describe('lista de partidas', () => {
       const won = old('antiga-vitoria', { kind: 'WIN', winner: 'p1', reason: 'ANTI_STALL' });
       const draw = old('antiga-empate', { kind: 'DRAW', reason: 'ANTI_STALL' });
       put(store, [won, draw]);
-      const games = loadPastGames(store);
+      const games = loadPastGames(store, NOW);
       expect(games.map((game) => game.id)).toEqual(['antiga-vitoria', 'antiga-empate']);
       expect(games.map((game) => game.score)).toEqual([{ p1: 1, p2: 0 }, { p1: 1, p2: 0 }]);
       expect(games.map((game) => game.outcome.result)).toEqual([won.outcome.result, draw.outcome.result]);
@@ -596,7 +634,7 @@ describe('lista de partidas', () => {
         const store = fakeStore();
         for (const [label, item] of badReplays) {
           put(store, [item]);
-          const games = loadPastGames(store);
+          const games = loadPastGames(store, NOW);
           expect(
             games.map((game) => game.id),
             label,
@@ -609,7 +647,7 @@ describe('lista de partidas', () => {
       it('um replay inteiro, de partida de verdade, passa', () => {
         const store = fakeStore();
         put(store, [withReplay]);
-        expect(loadPastGames(store)[0]!.replay).toEqual(valid);
+        expect(loadPastGames(store, NOW)[0]!.replay).toEqual(valid);
       });
     });
   });
@@ -634,9 +672,9 @@ describe('lista de partidas', () => {
         const again = recordPastGame(store, online(1, { date: later, names: { me: 'Ana', opponent: 'Outro nome' } }), later);
         expect(again).toEqual(first);
       }
-      expect(loadPastGames(store)).toHaveLength(1);
+      expect(loadPastGames(store, NOW)).toHaveLength(1);
       expect(store.data.get(PAST_GAMES_KEY)).toBe(stored);
-      expect(findPastGame(store, first.id)!.names.opponent).toBe('Bia');
+      expect(findPastGame(store, first.id, NOW)!.names.opponent).toBe('Bia');
     });
 
     it('a mesma sala depois de 24 h é outra partida', () => {
@@ -646,7 +684,7 @@ describe('lista de partidas', () => {
       const later = t0 + DEDUPE_WINDOW_MS + 1;
       const second = recordPastGame(store, online(1, { date: later }), later)!;
       expect(second.id).not.toBe(first.id);
-      expect(loadPastGames(store).map((game) => game.id)).toEqual([second.id, first.id]);
+      expect(loadPastGames(store, NOW).map((game) => game.id)).toEqual([second.id, first.id]);
     });
 
     it('outra partida da mesma sala, ou o treino, nunca é repetida', () => {
@@ -657,23 +695,27 @@ describe('lista de partidas', () => {
       const c = recordPastGame(store, entry(), 1_000)!;
       const d = recordPastGame(store, entry(), 1_000)!;
       expect(new Set([a.id, b.id, c.id, d.id]).size).toBe(4);
-      expect(loadPastGames(store)).toHaveLength(4);
+      expect(loadPastGames(store, NOW)).toHaveLength(4);
     });
   });
 
   it('o id serve na URL', () => {
-    const store = fakeStore();
-    const ids: string[] = [];
-    // Vários no mesmo milissegundo, e um instante de verdade, de hoje.
-    for (const now of [1_000, 1_000, 1_000, 1_000, 1_792_000_000_000, 1_792_000_000_000]) {
-      ids.push(recordPastGame(store, entry(), now)!.id);
-    }
-    expect(new Set(ids).size).toBe(ids.length);
-    for (const id of ids) {
-      expect(id).toMatch(/^[a-z0-9-]+$/);
-      expect(encodeURIComponent(id)).toBe(id);
-      expect(id.length).toBeLessThanOrEqual(16);
-      expect(findPastGame(store, id)?.id).toBe(id);
+    // Vários no mesmo milissegundo, e um instante de verdade, de hoje. Cada instante na sua lista: a gravação de hoje apagaria as
+    // de 1970, com mais de 30 dias.
+    for (const [now, count] of [
+      [1_000, 4],
+      [1_792_000_000_000, 2],
+    ] as const) {
+      const store = fakeStore();
+      const ids: string[] = [];
+      for (let i = 0; i < count; i++) ids.push(recordPastGame(store, entry({ date: now }), now)!.id);
+      expect(new Set(ids).size).toBe(ids.length);
+      for (const id of ids) {
+        expect(id).toMatch(/^[a-z0-9-]+$/);
+        expect(encodeURIComponent(id)).toBe(id);
+        expect(id.length).toBeLessThanOrEqual(16);
+        expect(findPastGame(store, id, now)?.id).toBe(id);
+      }
     }
   });
 });
@@ -684,17 +726,17 @@ describe('attachReplay', () => {
     const replay = realReplay('depois');
     const old = recordPastGame(store, entry({ date: 1, rounds: 1, mode: { kind: 'online', code: 'ABCD' }, key: 'sala:ABCD:1' }), 1)!;
     const other = recordPastGame(store, entry({ date: 2, rounds: 2, replay: realReplay('ja-tinha') }), 2)!;
-    const before = loadPastGames(store);
+    const before = loadPastGames(store, NOW);
 
-    const attached = attachReplay(store, old.id, replay);
+    const attached = attachReplay(store, old.id, replay, NOW);
 
     // A linha volta como ficou, com o replay, e não muda de lugar nem de dados (`date`, `key`, placar...).
     expect(attached).toEqual({ ...old, replay });
-    const after = loadPastGames(store);
+    const after = loadPastGames(store, NOW);
     expect(after.map((game) => game.id)).toEqual([other.id, old.id]);
     expect(after[0]).toEqual(before[0]);
     expect(after[1]).toEqual({ ...before[1]!, replay });
-    expect(findPastGame(store, old.id)).toEqual(attached);
+    expect(findPastGame(store, old.id, NOW)).toEqual(attached);
   });
 
   it('a linha mais nova também recebe o replay, sem tocar nas mais velhas', () => {
@@ -703,8 +745,8 @@ describe('attachReplay', () => {
     const fresh = recordPastGame(store, entry({ date: 2, rounds: 2 }), 2)!;
     const replay = realReplay('nova');
 
-    expect(attachReplay(store, fresh.id, replay)).toEqual({ ...fresh, replay });
-    expect(loadPastGames(store)).toEqual([{ ...fresh, replay }, older]);
+    expect(attachReplay(store, fresh.id, replay, NOW)).toEqual({ ...fresh, replay });
+    expect(loadPastGames(store, NOW)).toEqual([{ ...fresh, replay }, older]);
   });
 
   it('não troca um replay que já existe', () => {
@@ -715,10 +757,10 @@ describe('attachReplay', () => {
     store.sets = 0;
 
     // Devolve a linha como está e não grava.
-    expect(attachReplay(store, row.id, realReplay('segundo'))).toEqual(row);
+    expect(attachReplay(store, row.id, realReplay('segundo'), NOW)).toEqual(row);
     expect(store.sets).toBe(0);
     expect(store.data.get(PAST_GAMES_KEY)).toBe(stored);
-    expect(findPastGame(store, row.id)!.replay).toEqual(first);
+    expect(findPastGame(store, row.id, NOW)!.replay).toEqual(first);
   });
 
   it('id que sumiu devolve null', () => {
@@ -726,12 +768,12 @@ describe('attachReplay', () => {
     const row = recordPastGame(store, entry(), 1_000)!;
     store.sets = 0;
 
-    expect(attachReplay(store, 'nao-existe', realReplay('x'))).toBeNull();
+    expect(attachReplay(store, 'nao-existe', realReplay('x'), NOW)).toBeNull();
     // Sem gravar nada.
     expect(store.sets).toBe(0);
-    expect(loadPastGames(store)).toEqual([row]);
+    expect(loadPastGames(store, NOW)).toEqual([row]);
     // Lista que nunca foi gravada: o mesmo.
-    expect(attachReplay(fakeStore(), row.id, realReplay('x'))).toBeNull();
+    expect(attachReplay(fakeStore(), row.id, realReplay('x'), NOW)).toBeNull();
   });
 
   it('um replay de forma errada não entra, e a linha fica como estava', () => {
@@ -741,27 +783,27 @@ describe('attachReplay', () => {
     store.sets = 0;
 
     const broken = { ...realReplay('quebrado'), steps: 'não são passos' } as unknown as Replay;
-    expect(attachReplay(store, row.id, broken)).toEqual(row);
+    expect(attachReplay(store, row.id, broken, NOW)).toEqual(row);
     expect(store.sets).toBe(0);
     expect(store.data.get(PAST_GAMES_KEY)).toBe(stored);
   });
 
   it('respeita o teto de 1 MB', () => {
     const store = fakeStore();
-    const filler = bulky(realReplay('enchimento'), 60_000);
+    const filler = bulky(realReplay('enchimento'), 120_000);
     for (let i = 0; i < MAX_PAST_GAMES - 1; i++) recordPastGame(store, entry({ date: i, rounds: i, replay: filler }), i);
     const target = recordPastGame(store, entry({ date: 100, rounds: 100 }), 100)!;
     const replay = bulky(realReplay('anexo'), 150_000);
-    const before = hasReplay(loadPastGames(store)).filter(Boolean).length;
+    const before = hasReplay(loadPastGames(store, NOW)).filter(Boolean).length;
     // Sem tirar nada a lista passaria do teto: o anexo só cabe à custa dos replays das mais velhas.
-    const naive = loadPastGames(store).map((game) => (game.id === target.id ? { ...game, replay } : game));
+    const naive = loadPastGames(store, NOW).map((game) => (game.id === target.id ? { ...game, replay } : game));
     expect(JSON.stringify(naive).length).toBeGreaterThan(MAX_PAST_GAMES_CHARS);
 
-    const attached = attachReplay(store, target.id, replay);
+    const attached = attachReplay(store, target.id, replay, NOW);
 
     expect(attached).toEqual({ ...target, replay });
     expect(store.data.get(PAST_GAMES_KEY)!.length).toBeLessThanOrEqual(MAX_PAST_GAMES_CHARS);
-    const games = loadPastGames(store);
+    const games = loadPastGames(store, NOW);
     expect(games).toHaveLength(MAX_PAST_GAMES);
     expect(games[0]).toEqual({ ...target, replay });
     // Nenhuma linha se perde; o que sai é replay, sempre o da mais velha que ainda tinha um.
@@ -780,18 +822,18 @@ describe('attachReplay', () => {
       recordPastGame(store, entry({ date: 1, rounds: 1, replay }), 1);
       recordPastGame(store, entry({ date: 2, rounds: 2, replay }), 2);
       const last = recordPastGame(store, entry({ date: 3, rounds: 3 }), 3)!;
-      attachReplay(store, last.id, { ...replay, name: 'x'.repeat(pad) });
+      attachReplay(store, last.id, { ...replay, name: 'x'.repeat(pad) }, NOW);
       return store;
     };
     const pad = MAX_PAST_GAMES_CHARS - build(0).data.get(PAST_GAMES_KEY)!.length;
 
     const exact = build(pad);
     expect(exact.data.get(PAST_GAMES_KEY)!.length).toBe(MAX_PAST_GAMES_CHARS);
-    expect(hasReplay(loadPastGames(exact))).toEqual([true, true, true]);
+    expect(hasReplay(loadPastGames(exact, NOW))).toEqual([true, true, true]);
 
     const over = build(pad + 1);
     expect(over.data.get(PAST_GAMES_KEY)!.length).toBeLessThanOrEqual(MAX_PAST_GAMES_CHARS);
-    expect(hasReplay(loadPastGames(over))).toEqual([true, true, false]);
+    expect(hasReplay(loadPastGames(over, NOW))).toEqual([true, true, false]);
   });
 
   it('só tira replays das linhas mais velhas que a que recebeu: o de uma mais nova fica', () => {
@@ -801,14 +843,14 @@ describe('attachReplay', () => {
     const target = recordPastGame(store, entry({ date: 2, rounds: 2 }), 2)!;
     const newer = recordPastGame(store, entry({ date: 3, rounds: 3, replay: bulky(realReplay('nova'), 400_000) }), 3)!;
     const replay = bulky(realReplay('anexo'), 400_000);
-    expect(hasReplay(loadPastGames(store))).toEqual([true, false, true]);
+    expect(hasReplay(loadPastGames(store, NOW))).toEqual([true, false, true]);
 
-    const attached = attachReplay(store, target.id, replay);
+    const attached = attachReplay(store, target.id, replay, NOW);
 
     // Para caber, saiu o replay da mais velha; o da mais nova e o do anexo ficam.
     expect(attached).toEqual({ ...target, replay });
     expect(store.data.get(PAST_GAMES_KEY)!.length).toBeLessThanOrEqual(MAX_PAST_GAMES_CHARS);
-    const games = loadPastGames(store);
+    const games = loadPastGames(store, NOW);
     expect(games.map((game) => game.id)).toEqual([newer.id, target.id, older.id]);
     expect(hasReplay(games)).toEqual([true, true, false]);
   });
@@ -820,12 +862,12 @@ describe('attachReplay', () => {
     const stored = store.data.get(PAST_GAMES_KEY);
     store.sets = 0;
 
-    const attached = attachReplay(store, target.id, bulky(realReplay('anexo'), 600_000));
+    const attached = attachReplay(store, target.id, bulky(realReplay('anexo'), 600_000), NOW);
 
     expect(attached).toEqual(target);
     expect(store.sets).toBe(0);
     expect(store.data.get(PAST_GAMES_KEY)).toBe(stored);
-    expect(findPastGame(store, newer.id)!.replay).toBeDefined();
+    expect(findPastGame(store, newer.id, NOW)!.replay).toBeDefined();
   });
 
   it('um replay sozinho maior que o teto não entra: a linha volta como estava e o armazenamento não muda', () => {
@@ -835,14 +877,14 @@ describe('attachReplay', () => {
     const stored = store.data.get(PAST_GAMES_KEY);
     store.sets = 0;
 
-    const attached = attachReplay(store, row.id, bulky(realReplay('gigante'), 1_200_000));
+    const attached = attachReplay(store, row.id, bulky(realReplay('gigante'), 1_200_000), NOW);
 
     expect(attached).toEqual(row);
     expect(attached).not.toHaveProperty('replay');
     // Não tirou o replay das outras à toa: a lista de antes continua inteira.
     expect(store.sets).toBe(0);
     expect(store.data.get(PAST_GAMES_KEY)).toBe(stored);
-    expect(findPastGame(store, keep.id)!.replay).toBeDefined();
+    expect(findPastGame(store, keep.id, NOW)!.replay).toBeDefined();
   });
 
   it('cota estourada tira os replays das mais velhas e tenta de novo', () => {
@@ -851,16 +893,16 @@ describe('attachReplay', () => {
     for (let i = 1; i <= 3; i++) recordPastGame(store, entry({ date: i, rounds: i, replay }), i);
     const target = recordPastGame(store, entry({ date: 4, rounds: 4 }), 4)!;
     // A cota que sobra para o anexo e só o replay da mais nova das três que já tinham.
-    const full = loadPastGames(store).map((game) => (game.id === target.id ? { ...game, replay } : game));
+    const full = loadPastGames(store, NOW).map((game) => (game.id === target.id ? { ...game, replay } : game));
     store.quota = JSON.stringify(full.map((game, i) => (i < 2 ? game : { ...game, replay: undefined }))).length;
     store.sets = 0;
 
-    const attached = attachReplay(store, target.id, replay);
+    const attached = attachReplay(store, target.id, replay, NOW);
 
     expect(attached?.replay).toEqual(replay);
     // Tentou com tudo, depois sem o replay da mais velha, depois sem o das duas mais velhas.
     expect(store.sets).toBe(3);
-    expect(hasReplay(loadPastGames(store))).toEqual([true, true, false, false]);
+    expect(hasReplay(loadPastGames(store, NOW))).toEqual([true, true, false, false]);
   });
 
   it('armazenamento que recusa devolve null sem lançar', () => {
@@ -871,11 +913,11 @@ describe('attachReplay', () => {
     // Nem o replay sozinho cabe na cota: depois de tirar os das outras, desiste.
     store.quota = 10;
 
-    expect(() => attachReplay(store, row.id, realReplay('novo'))).not.toThrow();
-    expect(attachReplay(store, row.id, realReplay('novo'))).toBeNull();
+    expect(() => attachReplay(store, row.id, realReplay('novo'), NOW)).not.toThrow();
+    expect(attachReplay(store, row.id, realReplay('novo'), NOW)).toBeNull();
     // O que estava guardado fica como estava.
     expect(store.data.get(PAST_GAMES_KEY)).toBe(stored);
-    expect(findPastGame(store, keep.id)!.replay).toBeDefined();
+    expect(findPastGame(store, keep.id, NOW)!.replay).toBeDefined();
   });
 
   describe('com o safeStore de verdade e um armazenamento que recusa tudo', () => {
@@ -888,11 +930,11 @@ describe('attachReplay', () => {
       const onDisk = disk.get(PAST_GAMES_KEY)!;
 
       control.on = true;
-      expect(attachReplay(store, target.id, replay)).toBeNull();
+      expect(attachReplay(store, target.id, replay, NOW)).toBeNull();
       // A última tentativa (a linha nova com o replay, a mais velha sem) ficou na memória: a leitura volta ao que o disco tem.
       expect(disk.get(PAST_GAMES_KEY)).toBe(onDisk);
       expect(store.get(PAST_GAMES_KEY)).toBe(onDisk);
-      expect(hasReplay(loadPastGames(store))).toEqual([false, true]);
+      expect(hasReplay(loadPastGames(store, NOW))).toEqual([false, true]);
 
       control.on = false;
       recordPastGame(store, entry({ date: 3, rounds: 3 }), 3);
@@ -908,8 +950,8 @@ describe('attachReplay', () => {
       const row = recordPastGame(store, entry({ date: 1, rounds: 1 }), 1)!;
       const onDisk = disk.get(PAST_GAMES_KEY)!;
       control.on = true;
-      expect(attachReplay(store, 'nao-existe', realReplay('x'))).toBeNull();
-      expect(attachReplay(store, row.id, bulky(realReplay('grande'), MAX_PAST_GAMES_CHARS + 1))?.replay).toBeUndefined();
+      expect(attachReplay(store, 'nao-existe', realReplay('x'), NOW)).toBeNull();
+      expect(attachReplay(store, row.id, bulky(realReplay('grande'), MAX_PAST_GAMES_CHARS + 1), NOW)?.replay).toBeUndefined();
       expect(disk.get(PAST_GAMES_KEY)).toBe(onDisk);
       expect(store.get(PAST_GAMES_KEY)).toBe(onDisk);
     });
@@ -919,7 +961,7 @@ describe('attachReplay', () => {
     const boom = (): never => {
       throw new Error('SecurityError');
     };
-    expect(attachReplay({ get: boom, set: boom, remove: boom }, 'x', realReplay('x'))).toBeNull();
+    expect(attachReplay({ get: boom, set: boom, remove: boom }, 'x', realReplay('x'), NOW)).toBeNull();
   });
 
   it('um replay que não vira JSON devolve null sem lançar', () => {
@@ -927,8 +969,8 @@ describe('attachReplay', () => {
     const row = recordPastGame(store, entry(), 1_000)!;
     const cyclic = { ...realReplay('ciclo') } as Replay & { self?: unknown };
     cyclic.self = cyclic;
-    expect(attachReplay(store, row.id, cyclic)).toBeNull();
-    expect(loadPastGames(store)).toEqual([row]);
+    expect(attachReplay(store, row.id, cyclic, NOW)).toBeNull();
+    expect(loadPastGames(store, NOW)).toEqual([row]);
   });
 
   it('com o safeStore de verdade, a cota do Storage corta replays e o disco fica com a lista completa', () => {
@@ -951,10 +993,10 @@ describe('attachReplay', () => {
     const { store } = safeStore(raw);
     for (let i = 1; i <= 3; i++) recordPastGame(store, entry({ date: i, rounds: i, replay }), i);
     const target = recordPastGame(store, entry({ date: 4, rounds: 4 }), 4)!;
-    const full = loadPastGames(store).map((game) => (game.id === target.id ? { ...game, replay } : game));
+    const full = loadPastGames(store, NOW).map((game) => (game.id === target.id ? { ...game, replay } : game));
     limit = JSON.stringify(full.map((game, i) => (i < 2 ? game : { ...game, replay: undefined }))).length;
 
-    expect(attachReplay(store, target.id, replay)?.replay).toEqual(replay);
+    expect(attachReplay(store, target.id, replay, NOW)?.replay).toEqual(replay);
     const onDisk = JSON.parse(disk.get(PAST_GAMES_KEY)!) as PastGame[];
     expect(onDisk.map((game) => game.rounds)).toEqual([4, 3, 2, 1]);
     expect(hasReplay(onDisk)).toEqual([true, true, false, false]);
@@ -972,19 +1014,19 @@ describe('apagar', () => {
       recordPastGame(store, entry({ date: 2, rounds: 2 }), 2);
       const top = recordPastGame(store, entry({ date: 3, rounds: 3, replay }), 3)!;
 
-      expect(deletePastGame(store, top.id)).toBe(true);
-      const left = loadPastGames(store);
+      expect(deletePastGame(store, top.id, NOW)).toBe(true);
+      const left = loadPastGames(store, NOW);
       expect(left.map((game) => game.rounds)).toEqual([2, 1]);
       expect(hasReplay(left)).toEqual([false, true]);
-      expect(findPastGame(store, top.id)).toBeNull();
+      expect(findPastGame(store, top.id, NOW)).toBeNull();
     });
 
     it('apagar a última que sobrou tira a chave', () => {
       const store = fakeStore();
       const only = recordPastGame(store, entry(), 1)!;
-      expect(deletePastGame(store, only.id)).toBe(true);
+      expect(deletePastGame(store, only.id, NOW)).toBe(true);
       expect(store.get(PAST_GAMES_KEY)).toBeNull();
-      expect(loadPastGames(store)).toEqual([]);
+      expect(loadPastGames(store, NOW)).toEqual([]);
     });
 
     it('id desconhecido não grava nada e devolve true', () => {
@@ -992,7 +1034,7 @@ describe('apagar', () => {
       recordPastGame(store, entry(), 1);
       const before = store.get(PAST_GAMES_KEY);
       store.sets = 0;
-      expect(deletePastGame(store, 'zzz')).toBe(true);
+      expect(deletePastGame(store, 'zzz', NOW)).toBe(true);
       expect(store.sets).toBe(0);
       expect(store.get(PAST_GAMES_KEY)).toBe(before);
     });
@@ -1001,14 +1043,14 @@ describe('apagar', () => {
       const store = fakeStore();
       store.set(PAST_GAMES_KEY, '{estragado');
       store.sets = 0;
-      expect(deletePastGame(store, 'a')).toBe(true);
+      expect(deletePastGame(store, 'a', NOW)).toBe(true);
       expect(store.sets).toBe(0);
     });
 
     it('a entrada com forma errada sai junto na regravação (a leitura já não a mostrava)', () => {
       const store = fakeStore();
       put(store, [rawGame('a'), { id: 'ruim' }, rawGame('b')]);
-      expect(deletePastGame(store, 'a')).toBe(true);
+      expect(deletePastGame(store, 'a', NOW)).toBe(true);
       expect(JSON.parse(store.get(PAST_GAMES_KEY)!)).toEqual([rawGame('b')]);
     });
 
@@ -1020,11 +1062,11 @@ describe('apagar', () => {
       const onDisk = disk.get(PAST_GAMES_KEY);
 
       control.on = true;
-      expect(deletePastGame(store, top.id)).toBe(false);
+      expect(deletePastGame(store, top.id, NOW)).toBe(false);
       // O `set` recusado deixou a lista sem a partida na memória do `safeStore`: a leitura tem de voltar ao que o disco tem.
       expect(disk.get(PAST_GAMES_KEY)).toBe(onDisk);
       expect(store.get(PAST_GAMES_KEY)).toBe(onDisk);
-      expect(loadPastGames(store).map((game) => game.rounds)).toEqual([2, 1]);
+      expect(loadPastGames(store, NOW).map((game) => game.rounds)).toEqual([2, 1]);
     });
 
     it('com o safeStore e o Storage recusando apagar a chave: a última partida continua, e devolve false', () => {
@@ -1032,9 +1074,9 @@ describe('apagar', () => {
       const { store } = safeStore(raw);
       const only = recordPastGame(store, entry(), 1)!;
       control.remove = true;
-      expect(deletePastGame(store, only.id)).toBe(false);
+      expect(deletePastGame(store, only.id, NOW)).toBe(false);
       expect(disk.has(PAST_GAMES_KEY)).toBe(true);
-      expect(loadPastGames(store).map((game) => game.id)).toEqual([only.id]);
+      expect(loadPastGames(store, NOW).map((game) => game.id)).toEqual([only.id]);
     });
 
     it('um armazenamento que lança na leitura não faz lançar', () => {
@@ -1045,7 +1087,7 @@ describe('apagar', () => {
         set: () => undefined,
         remove: () => undefined,
       };
-      expect(() => deletePastGame(store, 'a')).not.toThrow();
+      expect(() => deletePastGame(store, 'a', NOW)).not.toThrow();
     });
   });
 
@@ -1059,7 +1101,7 @@ describe('apagar', () => {
 
       expect(clearPastGames(store)).toBe(true);
       expect(store.get(PAST_GAMES_KEY)).toBeNull();
-      expect(loadPastGames(store)).toEqual([]);
+      expect(loadPastGames(store, NOW)).toEqual([]);
       expect(store.get('coringa:prefs')).toBe('{"sound":false}');
       expect(store.get('coringa:tutorial')).toBe('done');
     });
@@ -1075,7 +1117,7 @@ describe('apagar', () => {
       control.remove = true;
       expect(clearPastGames(store)).toBe(false);
       expect(store.get(PAST_GAMES_KEY)).toBe(disk.get(PAST_GAMES_KEY));
-      expect(loadPastGames(store).map((game) => game.rounds)).toEqual([1]);
+      expect(loadPastGames(store, NOW).map((game) => game.rounds)).toEqual([1]);
     });
 
     it('com o safeStore, o que estava só na memória (escrita recusada antes) sai também', () => {
@@ -1084,10 +1126,10 @@ describe('apagar', () => {
       control.on = true;
       // Uma escrita recusada fora da lista das partidas (o `set` direto, sem o `restoreRaw`) deixa a cópia só na memória.
       expect(() => store.set(PAST_GAMES_KEY, JSON.stringify([rawGame('a')]))).toThrow();
-      expect(loadPastGames(store)).toHaveLength(1);
+      expect(loadPastGames(store, NOW)).toHaveLength(1);
       expect(clearPastGames(store)).toBe(true);
       expect(disk.has(PAST_GAMES_KEY)).toBe(false);
-      expect(loadPastGames(store)).toEqual([]);
+      expect(loadPastGames(store, NOW)).toEqual([]);
     });
 
     it('um armazenamento que lança em tudo não faz lançar, e devolve false', () => {
@@ -1113,15 +1155,15 @@ describe('as aparências na partida guardada (decks e raças, fatia 2, G3)', () 
     const store = fakeStore();
     const game = recordPastGame(store, entry(), 1_000)!;
     expect(game).not.toHaveProperty('looks');
-    expect(loadPastGames(store)[0]).not.toHaveProperty('looks');
+    expect(loadPastGames(store, NOW)[0]).not.toHaveProperty('looks');
   });
 
   it('gravar e ler devolve as aparências dos dois lados', () => {
     const store = fakeStore();
     const game = recordPastGame(store, entry({ looks: LOOKS }), 1_000)!;
     expect(game.looks).toEqual(LOOKS);
-    expect(loadPastGames(store)[0]!.looks).toEqual(LOOKS);
-    expect(findPastGame(store, game.id)!.looks).toEqual(LOOKS);
+    expect(loadPastGames(store, NOW)[0]!.looks).toEqual(LOOKS);
+    expect(findPastGame(store, game.id, NOW)!.looks).toEqual(LOOKS);
   });
 
   it('cada lado passa pelo normalizeLook: o id desconhecido vira o padrão, e o Cordel trava o Bufão', () => {
@@ -1130,7 +1172,7 @@ describe('as aparências na partida guardada (decks e raças, fatia 2, G3)', () 
       { ...rawGame('a'), looks: { me: { deck: 'dragao', race: 'egipcio' }, opponent: { deck: 'cordel', race: 'egipcio' } } },
       { ...rawGame('b'), looks: { me: { deck: 'celestial', race: 'faraonico', extra: 1 } } },
     ]);
-    const [a, b] = loadPastGames(store);
+    const [a, b] = loadPastGames(store, NOW);
     expect(a!.looks).toEqual({ me: { deck: 'cordel', race: 'bufao' }, opponent: { deck: 'cordel', race: 'bufao' } });
     expect(b!.looks).toEqual({ me: { deck: 'celestial', race: 'bufao' }, opponent: { deck: 'cordel', race: 'bufao' } });
   });
@@ -1138,7 +1180,7 @@ describe('as aparências na partida guardada (decks e raças, fatia 2, G3)', () 
   it.each([['x'], [null], [42], [[LOOKS.me, LOOKS.opponent]]])('com looks = %j, a linha vale inteira e fica sem o campo', (looks) => {
     const store = fakeStore();
     put(store, [{ ...rawGame('a'), looks }]);
-    const games = loadPastGames(store);
+    const games = loadPastGames(store, NOW);
     expect(games).toHaveLength(1);
     expect(games[0]).toEqual({ ...rawGame('a') });
     expect(games[0]).not.toHaveProperty('looks');

@@ -702,7 +702,7 @@ describe('/treino: a partida terminada vai para a lista', () => {
     advance(5_000);
     expect(screen.getByRole('dialog', { name: 'Bot venceu' })).toBeInTheDocument();
   }
-  const saved = () => loadPastGames(openStore('local').store);
+  const saved = () => loadPastGames(openStore('local').store, Date.now());
 
   it('grava uma linha com o replay da partida, e "Rever a partida" leva a /partidas/<id>', async () => {
     const { advance, user } = fakeClock();

@@ -31,7 +31,7 @@ export interface ReplayScreenProps {
 type Loaded = { kind: 'text'; text: string } | { kind: 'viewer'; game: PastGame; track: ReplayTrack; prefs: Prefs };
 
 function load(store: KeyValueStore, id: string): Loaded {
-  const game = findPastGame(store, id);
+  const game = findPastGame(store, id, Date.now());
   if (game === null) return { kind: 'text', text: UNKNOWN_GAME_TEXT };
   const { replay } = game;
   // Uma entrada estragada pode guardar um assento que não joga o replay: sem ele a vista não existe.

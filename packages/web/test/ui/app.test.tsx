@@ -91,7 +91,7 @@ describe('<App />: rotas', () => {
       recordPastGame(
         store,
         {
-          date: new Date(2026, 9, 25, 14, 30).getTime(),
+          date: Date.now(),
           mode: { kind: 'training', level: 'medio' },
           seat: 'p1',
           names: { me: 'Ana', opponent: name },
