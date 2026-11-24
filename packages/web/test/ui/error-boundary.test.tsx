@@ -1,3 +1,4 @@
+import { PROTOCOL_VERSION } from '@coringa/protocol';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -48,7 +49,7 @@ describe('fronteira de erro', () => {
     expect(copied).toContain('Sala: ABC234');
     expect(copied).toContain('seq: 17');
     expect(copied).toContain('Época: 5');
-    expect(copied).toContain('Versão: protocolo 1');
+    expect(copied).toContain(`Versão: protocolo ${PROTOCOL_VERSION}`);
     expect(screen.getByRole('status')).toHaveTextContent('Diagnóstico copiado.');
   });
 

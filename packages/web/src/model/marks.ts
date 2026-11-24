@@ -33,11 +33,9 @@ function fieldCards(player: PublicPlayer): Card[] {
  * Os ids das cartas que saíram do SEU campo por jogada ou efeito seu, nos `events` de um `state`:
  * - a carta da frente do seu Ataque (`CardsRemovedFromRow` com `row: 'ATK'`);
  * - o J que o seu Ataque Absoluto gasta: o primeiro `BuffRemoved` seu depois daquela carta, num ataque com `AbsoluteAttack`
- *   seu. O motor anuncia o Absoluto antes de tudo, e contra um Reflect as Q que o dano devolvido quebra saem antes da carta da
- *   frente, e seguem marcadas;
+ *   seu. O motor anuncia o Absoluto antes de tudo;
  * - a carta da sua fileira que o seu próprio Equipar trocou (o `replaced` do seu `CardsPlaced`);
- * - a última da sua Defesa que a sua Ressurreição trocou (ponto 16: o seu `CardsRemovedFromRow` logo antes do seu `Resurrected`);
- * - o Q que a sua Defesa Absoluta gasta ao acabar (o `BuffRemoved` seu logo depois do seu `AbsoluteDefenseEnded`).
+ * - a última da sua Defesa que a sua Ressurreição trocou (ponto 16: o seu `CardsRemovedFromRow` logo antes do seu `Resurrected`).
  *
  * A §10.5 só marca no cemitério o que o oponente destruiu; essas vão para lá por jogada ou efeito seu, e o passe do oponente
  * (que não move a base) as deixaria marcadas até a sua próxima jogada voluntária. Um `state` de `resync` não traz eventos: nele
@@ -47,7 +45,6 @@ export function ownSpentIds(events: readonly GameEvent[], me: PlayerId): string[
   const ids: string[] = [];
   let absolute = false;
   let frontGone = false;
-  let defenseEnded = false;
   /** A última da sua Defesa que saiu agora, à espera de saber se foi a troca da sua Ressurreição (ponto 16). */
   let defenseOut: string[] | null = null;
   for (const event of events) {
@@ -57,24 +54,17 @@ export function ownSpentIds(events: readonly GameEvent[], me: PlayerId): string[
     if (swapped && event.type === 'Healed' && event.player === me) defenseOut = swapped;
     else if (swapped && event.type === 'Resurrected' && event.player === me) ids.push(...swapped);
     if (event.type === 'CardsRemovedFromRow' && event.player === me && event.row === 'DEF') defenseOut = event.cards.map((card) => card.id);
-    // O Q da Defesa Absoluta é o `BuffRemoved` que vem logo depois do fim dela: qualquer outro evento no meio desfaz a ligação.
-    const afterDefenseEnded = defenseEnded;
-    defenseEnded = false;
     if (event.type === 'CardsRemovedFromRow' && event.player === me && event.row === 'ATK') {
       ids.push(...event.cards.map((card) => card.id));
       frontGone = absolute;
     } else if (event.type === 'AbsoluteAttack' && event.player === me) {
       absolute = true;
-    } else if (event.type === 'BuffRemoved' && event.player === me && (frontGone || afterDefenseEnded)) {
-      if (frontGone) {
-        absolute = false;
-        frontGone = false;
-      }
+    } else if (event.type === 'BuffRemoved' && event.player === me && frontGone) {
+      absolute = false;
+      frontGone = false;
       ids.push(...event.cards.map((card) => card.id));
     } else if (event.type === 'CardsPlaced' && event.player === me) {
       for (const placement of event.placements) if (placement.replaced) ids.push(placement.replaced.id);
-    } else if (event.type === 'AbsoluteDefenseEnded' && event.player === me) {
-      defenseEnded = true;
     }
   }
   return ids;

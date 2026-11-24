@@ -140,13 +140,11 @@ describe('ownSpentIds: o que saiu do seu campo por jogada ou efeito seu', () => 
     expect(ownSpentIds([placed('p1', 'n1', 'velha'), placed('p1', 'n2'), placed('p2', 'n3', 'dele')], 'p1')).toEqual(['velha']);
   });
 
-  it('o Q que a sua Defesa Absoluta gasta ao acabar conta; o BuffRemoved que não vem logo depois do fim dela, não', () => {
+  it('o fim do escudo da sua Defesa Absoluta não gasta Q (regra 7): um Q seu que sai depois dele não é seu', () => {
     const queen: SpecialCard = { id: 'q1', kind: 'Q', suit: 'paus' };
     const ended: GameEvent = { type: 'AbsoluteDefenseEnded', player: 'p1' };
     const spent: GameEvent = { type: 'BuffRemoved', player: 'p1', cards: [queen] };
-    expect(ownSpentIds([ended, spent], 'p1')).toEqual(['q1']);
-    expect(ownSpentIds([ended, { type: 'TurnStarted', player: 'p2' }, spent], 'p1')).toEqual([]);
-    expect(ownSpentIds([{ type: 'AbsoluteDefenseEnded', player: 'p2' }, spent], 'p1')).toEqual([]);
+    expect(ownSpentIds([ended, spent], 'p1')).toEqual([]);
   });
 
   it('sem eventos, nada', () => {

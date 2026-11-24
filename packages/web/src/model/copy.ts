@@ -137,7 +137,7 @@ export function noPlayReasonText(card: SpecialCard, reason: NoPlayReason | null,
     case 'NO_GUARD_TARGET':
       return `contra K jogado a Armadilha só mira a Guarda, e a de ${opponent} está vazia`;
     case 'TARGET_PROTECTED':
-      return `${opponent} está sob Defesa Absoluta: nada de Armadilha nem Sacrifício`;
+      return `${opponent} está no escudo da Defesa Absoluta: nada de Armadilha nem Sacrifício`;
     case 'NO_ROLE':
       return `os seus bônus estão no limite e ${opponent} não tem alvo para a Armadilha`;
     case null:
@@ -836,11 +836,11 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
       'J (Bônus de Ataque) e Q (Bônus de Defesa): cada um soma 1 ao multiplicador de ataque ou de defesa. Cabem 4 de cada.',
       'K (Guarda): absorve o dano, como acima. Você pode jogar vários K de uma vez; o oponente ganha uma janela de reação.',
       'Cura passiva (pela Defesa): Com 2 K ou mais na Guarda, cada numérica da sua fileira de Defesa que vai para o cemitério cura você o valor dela × (1 + número de Q), até a vida inicial. As cartas que a Devastação destrói não curam.',
-      'A (Armadilha ou Roubo): como Armadilha, destrói 1 J, Q ou K do campo do oponente, no seu turno ou na janela de reação. Como Roubo, só no seu turno: leva uma numérica de qualquer fileira do oponente para o fim da fileira que você escolher; ele perde de vida o valor dela com o bônus da fileira de onde ela sai (× (1 + J) do Ataque, × (1 + Q) da Defesa, sem a quadra; o K não anula, e o roubo nunca mata) e você cura o mesmo valor, até a vida inicial. Nada disso alcança quem está sob Defesa Absoluta.',
-      'Sacrifício: no seu turno, descarte um J da mão para destruir um J do oponente, ou um Q para destruir um Q. Não funciona contra Defesa Absoluta.',
+      'A (Armadilha ou Roubo): como Armadilha, destrói 1 J, Q ou K do campo do oponente, no seu turno ou na janela de reação. Como Roubo, só no seu turno: leva uma numérica de qualquer fileira do oponente para o fim da fileira que você escolher; ele perde de vida o valor dela com o bônus da fileira de onde ela sai (× (1 + J) do Ataque, × (1 + Q) da Defesa, sem a quadra; o K não anula, e o roubo nunca mata) e você cura o mesmo valor, até a vida inicial. Nada disso alcança quem está no escudo da Defesa Absoluta.',
+      'Sacrifício: no seu turno, descarte um J da mão para destruir um J do oponente, ou um Q para destruir um Q. Não funciona contra o escudo da Defesa Absoluta.',
       'Coringa Selvagem: assume o papel de J, Q ou A, nunca o de K.',
-      'Reflect (K + J + Q da mão): só na janela de reação, contra um ataque ou uma Devastação. Contra o ataque, quem atacou perde todos os K e Q que tiver e leva de volta o próprio ataque, com o multiplicador, menos metade (arredondada para baixo) da Defesa base dele, sem o multiplicador (o dano nunca fica abaixo de 0); você não leva nada. Se ele estiver sob Defesa Absoluta, o Reflect só segura o golpe. Contra a Devastação, ela volta para quem a lançou.',
-      'Devastação (K + A + J, ou K + A + Q, da mão, no seu turno): esvazia a fileira de Ataque do oponente (com o J) ou a de Defesa (com o Q). As numéricas dela vão para o cemitério, os bônus ficam. Só o Reflect responde. Não vale contra fileira vazia nem contra Defesa Absoluta. O Selvagem faz o A, o J ou o Q, nunca o K.',
+      'Reflect (K + J + Q da mão): só na janela de reação, contra um ataque ou uma Devastação. Contra o ataque, quem atacou perde todos os K e leva de volta o próprio ataque, com o multiplicador, menos a Defesa base dele, sem o multiplicador dos Q (o dano nunca fica abaixo de 0); os Q dele ficam, e você não leva nada. Se ele estiver no escudo da Defesa Absoluta, o Reflect só segura o golpe. Contra a Devastação, ela volta para quem a lançou.',
+      'Devastação (K + A + J, ou K + A + Q, da mão, no seu turno): esvazia a fileira de Ataque do oponente (com o J) ou a de Defesa (com o Q). As numéricas dela vão para o cemitério, os bônus ficam. Só o Reflect responde. Não vale contra fileira vazia nem contra o escudo da Defesa Absoluta. O Selvagem faz o A, o J ou o Q, nunca o K.',
     ],
   },
   {
@@ -855,7 +855,7 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
     items: [
       'Quadra: 4 ou mais numéricas do mesmo valor na mesma fileira, seguidas ou não, somam esse valor à fileira e dão 1 Ressurreição. Uma fileira pode ter duas quadras de valores diferentes, e cada uma conta.',
       'Ressurreição: traz 1 numérica do cemitério para o fim de uma fileira. Vale no seu turno e, quando a quadra se forma no Equipar, logo depois da revelação, antes do ataque. Com as duas fileiras cheias, ela entra no lugar da última, que vai ao cemitério; a última que é da quadra não sai. Vale uma vez por quadra e fica disponível enquanto a quadra existir, com garantia de 3 rodadas depois de formada.',
-      'Defesa Absoluta (4 Q): até o oponente atacar, você é imune a dano, a Armadilha e a Sacrifício, e a fileira de Defesa não perde cartas. Só o Ataque Absoluto fura a imunidade a dano: quebra os seus K e causa o dano normal. Depois do primeiro ataque do oponente, ela acaba e 1 Q vai para o cemitério.',
+      'Defesa Absoluta (4 Q): o 4º Q liga o escudo. Até o fim do primeiro turno do oponente que termina com ataque, você é imune a dano, a Armadilha, a Sacrifício, a Roubo e a Devastação; só o Ataque Absoluto fura a imunidade a dano (quebra os seus K e causa o dano normal). Depois do escudo, enquanto você tiver os 4 Q, a DEF segue × 5 e a fileira de Defesa não perde a carta da frente depois dos ataques, mas os Q ficam ao alcance de Armadilha e Sacrifício. Todo 4º Q que entra liga o escudo de novo.',
       'Ataque Absoluto (4 J): multiplicador 5× e quebra todos os K do alvo. Depois do ataque, 1 J vai para o cemitério.',
       'Exódia (4 K na Guarda): vence na hora, depois da janela de reação.',
     ],

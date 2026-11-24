@@ -1061,9 +1061,10 @@ describe('menu aberto quando a partida acaba', () => {
 describe('resumo das regras: o Reflect', () => {
   const reflect = RULES_SECTIONS.flatMap((section) => section.items).find((item) => item.startsWith('Reflect'))!;
 
-  it('diz qual é o dano refletido sem deixar dúvida (spec 1 §1.6): o ataque dele com multiplicador, menos metade da Defesa base sem multiplicador, nunca abaixo de 0', () => {
+  it('diz qual é o dano refletido sem deixar dúvida (regra 7): o ataque dele com multiplicador, menos a Defesa base sem os Q, nunca abaixo de 0', () => {
     expect(reflect).toContain('leva de volta o próprio ataque, com o multiplicador');
-    expect(reflect).toContain('menos metade (arredondada para baixo) da Defesa base dele, sem o multiplicador');
+    expect(reflect).toContain('menos a Defesa base dele, sem o multiplicador dos Q');
+    expect(reflect).not.toContain('metade');
     expect(reflect).toContain('nunca fica abaixo de 0');
     expect(reflect).toContain('você não leva nada');
   });
