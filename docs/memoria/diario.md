@@ -41,6 +41,18 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   da exodia-devastacao — custo: o teste passa a ser do lado do Bot.
 - **Ruling (T5):** o `fluidez` (a Devastação rola os campos) dependia da faixa "outra versão" para a fileira do Bot ficar fora de vista no
   celular; agora o teste põe os campos no fim antes do passo — custo: nenhum, a prova (rolou, e nenhuma carta foi animada) é a mesma.
+- **A dica do tutorial** (`d5c8003`) ainda dizia "perde os K e Q". **PR #10** aberto como rascunho.
+- **As fotos** (fora do git): `docs/superpowers/specs/2026-11-24-cordel-direcoes/` (reprovadas: o Cordel Escuro sai),
+  `2026-11-24-fim-direcoes/` (a B ajustada, `prototipo.html?dir=b2`, aprovada) e `2026-11-24-fortaleza/` (o muro de pedra, aprovado).
+- **A Fortaleza e o transbordo** (`257a61e`): o nível 4 da zona dos Q (o 3 segue sendo o escudo, que os testes já conferiam); durante a
+  cena do começo do escudo a zona fica na muralha (a insígnia ainda não chegou), e só vira Fortaleza na batida do fim do escudo. No PC a
+  coluna dos especiais tinha 228 px fixos e a quarta carta passava 13 px do campo, sob o histórico: agora é
+  `max(228px, 5,9rem + 0,625rem + 4 cartas + 9px)`. `pnpm e2e`: 133 verdes.
+- **Ruling (Fortaleza):** nível 4 e não reordenar (3 Fortaleza, 4 escudo): o 3 do escudo está em testes e E2E — custo: o número do nível
+  não segue a força (o 4 é um estado à parte; o comentário do `zone-level.ts` diz isso).
+- **Ruling (transbordo):** a conta usa 4 cartas (o `buffLimit` padrão; o CSS não lê a config) — custo: com um limite maior a zona
+  sobrepõe as cartas, como já fazia acima de 4.
+- **Armadilha:** a mesa no PC só mostra 4 Q por um turno na regra 6; na 7 eles ficam: conferir larguras com o estado que dura.
 
 ---
 

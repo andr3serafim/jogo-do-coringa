@@ -19,10 +19,8 @@
     (`52db3fd`: `STATE_SCHEMA` 7, `PROTOCOL_VERSION` 2, as regras escritas), a Tarefa 3 (`31c0892`; o portão do Difícil
     **aprovado**, `0d1190e`: (a) 65,5% contra 72,5% na regra 6, margem de 2,2 EP; (b) 74%; p95 134 ms) e a Tarefa 4 (`c0fbb83`, a
     web), a Tarefa 5 (`36f6b3d`, `6290884`: as fixtures continuadas com `continuar-fixture.ts`; `pnpm e2e` verde) e a calibração
-    (`b58c493`: nenhuma partida travada). **PR #10 aberto como rascunho** (não mesclar antes da Fortaleza). **Próximo passo:** a Fortaleza (`decisoes.md` 2026-11-24
-    (10) e (11): um nível próprio na zona dos Q para os 4 Q depois do escudo, o muro de pedra das fotos em
-    `docs/superpowers/specs/2026-11-24-fortaleza/fotos.mjs`; o nome na ajuda, no histórico e na dica) e o conserto do transbordo: no PC
-    (1366 a 1920 px) os 4 J e os 4 Q passam 13 px da borda do campo e ficam sob o histórico. Depois, o "sim" do merge.
+    (`b58c493`: nenhuma partida travada). **PR #10** (rascunho até a Fortaleza): a Fortaleza e o conserto do transbordo feitos (`257a61e`), `pnpm e2e` verde (133).
+    **Próximo passo:** o advisor, o push, o PR pronto e o "sim" do merge.
   - **C, o Cordel Escuro sai** (`decisoes.md` 2026-11-24 (10)): o Cordel volta a ser só o claro; `cordel-escuro` que chegar vira o Cordel.
     Branch própria depois da B.
   - **D, o fim de partida**: a B · Faixa de feira ajustada (`docs/superpowers/specs/2026-11-24-fim-direcoes/b2-*.png`, o protótipo em
