@@ -267,6 +267,16 @@ describe('fim de partida: o resultado e o motivo', () => {
     expect(dialog.querySelector('[data-estouro]')).toBeNull();
   });
 
+  it('com movimento reduzido, o carimbo e o medalhão já nascem no estado final (sem a batida nem o pulo)', () => {
+    mount({ result: win('p1', 'HP'), prefs: { reduceMotion: true } });
+    const band = endDialog('Você venceu').querySelector('[data-faixa]')!;
+    for (const selector of ['[data-carimbo-fim]', '[data-medalhao]']) {
+      const style = band.querySelector<HTMLElement>(selector)!.getAttribute('style') ?? '';
+      expect(style, selector).not.toMatch(/opacity:\s*0[;\s]|opacity:\s*0$/);
+      expect(style, selector).not.toMatch(/scale\((0\.6|1\.6)\)/);
+    }
+  });
+
   it('no online, quando o oponente vence, a frase diz quem venceu, e o motivo segue sendo a descrição do diálogo', () => {
     mount({ result: win('p2', 'HP') });
     const dialog = endDialog('Duda venceu');

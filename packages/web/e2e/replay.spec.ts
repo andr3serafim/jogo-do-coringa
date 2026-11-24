@@ -250,6 +250,20 @@ test('apagar uma partida e o histórico inteiro, com confirmação; recarregar n
   guard.expectClean();
 });
 
+test.describe('celular baixo, 360 × 640: o fim de partida na Faixa de feira', () => {
+  test.use({ viewport: { width: 360, height: 640 }, hasTouch: true, isMobile: true });
+
+  test('a faixa não rola de lado, e o carimbo e a Revanche ficam à vista (a faixa pode rolar por dentro, nunca a página)', async ({ page }) => {
+    const guard = failOnConsoleErrors(page);
+    const end = await concedeTraining(page);
+    await expectNoHorizontalScroll(page);
+    await expect(end.locator('[data-carimbo-fim]')).toBeInViewport({ ratio: 1 });
+    await expect(end.getByRole('button', { name: 'Revanche' })).toBeInViewport({ ratio: 1 });
+    await axe(page);
+    guard.expectClean();
+  });
+});
+
 test.describe('celular em pé, 390 × 844', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 
