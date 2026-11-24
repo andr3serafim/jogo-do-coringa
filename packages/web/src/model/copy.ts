@@ -643,7 +643,7 @@ export const hpChoiceText = (hp: number, isDefault: boolean): string => (isDefau
 export const LOOK_PANEL_LABEL = 'Aparência';
 export const LOOK_DECK_LABEL = 'Deck';
 export const LOOK_RACE_LABEL = 'Coringa';
-export const LOOK_LOCK_NOTE = 'Os decks Cordel jogam com o Coringa Bufão.';
+export const LOOK_LOCK_NOTE = 'O deck Cordel joga com o Coringa Bufão.';
 /** A nota do painel do Início (fatia 3, H4): na sala online, a aparência é a do assento, a que você tinha ao criar ou entrar. */
 export const LOOK_ONLINE_NOTE = 'Na sala online, vale a que você tinha ao entrar.';
 /** No menu da partida online, no lugar do seletor (fatia 3, H3): a aparência da sala é a do assento. */
