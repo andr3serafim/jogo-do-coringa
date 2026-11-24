@@ -58,6 +58,8 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   batida e a fechava com o mouse em cima — custo: uma dica que fica no ar se um contêiner que não a contém rolar por baixo dela.
 - **Ruling (T8):** o botão da figura leva `aria-expanded` (o plano pedia); a dica é `aria-hidden`, e o nome do botão já diz tudo — custo:
   o leitor de tela anuncia "expandido" sem conteúdo novo (fica como menor adiado).
+- **Mesclado** em 2026-11-24: PR #8, squash `eddfeb3` na `main`, com o "sim" do autor. A CI do commit final: `check` verde nos dois
+  disparos; `e2e` verde no do PR (11 min 44 s) e cancelado por tempo no de push (passou dos 15 min do job). O deploy é dele.
 - **Ajustes do autor depois de jogar** (`decisoes.md` 2026-11-23 (11)): a pista `cura` ficou só com o arpejo e os brilhos da chegada (a
   gota voa muda); o medalhão das marcas passou a 24/32 px (o disco de ouro do ataque, com o mínimo de toque no celular), a cura com o
   acabamento dele em verde (`.marca-cura`), o ícone `size-4 pc:size-[22px]` e o selo da Ressurreição a 15 px. Fotos novas em `final/marcas-*`.

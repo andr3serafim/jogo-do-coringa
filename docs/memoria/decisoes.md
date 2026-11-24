@@ -6,6 +6,16 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-24 (1): o sim para o merge do PR #8
+
+Diante da pergunta "Fazer o merge do PR #8 depois que a CI passar?", depois dos ajustes de 2026-11-23 (11), ele respondeu:
+
+> Sim, merge
+
+**Leitura:** o PR #8 foi mesclado por squash (`eddfeb3`). O deploy segue dele.
+
+---
+
 ## 2026-11-23 (11): o som só no enchimento da vida e a figura da cura do tamanho do ícone de ataque
 
 Depois de jogar o PR #8 no computador, com uma foto do campo (o disco de ouro das espadas, de quem lidera o ataque, ao lado do medalhão
