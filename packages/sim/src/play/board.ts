@@ -1,4 +1,4 @@
-import { attackPower, defensePower, type PlayerView, type PublicPlayer } from '@coringa/engine';
+import { attackPower, defensePower, fullDefense, type PlayerView, type PublicPlayer, type RulesConfig } from '@coringa/engine';
 import { cardsText, cardText, type Names } from './text.ts';
 
 const TRIGGER_TEXT = {
@@ -27,8 +27,14 @@ export function phaseText(view: PlayerView): string {
   }
 }
 
-function playerBlock(label: string, p: PublicPlayer, hand: string): string[] {
-  const status = [p.reflect ? 'Reflect na mesa' : '', p.absoluteDefense ? 'Defesa Absoluta' : '', p.resurrectionCount > 0 ? `Ressurreições: ${p.resurrectionCount}` : '']
+/** O escudo da Defesa Absoluta, ou os 4 Q depois dele, que seguram a frente da Defesa (regra 7). */
+function defenseStatus(p: PublicPlayer, config: RulesConfig): string {
+  if (p.absoluteDefense) return 'Defesa Absoluta (escudo)';
+  return fullDefense(p, config) ? `${config.buffLimit} Q: a Defesa não perde a frente` : '';
+}
+
+function playerBlock(label: string, p: PublicPlayer, hand: string, config: RulesConfig): string[] {
+  const status = [p.reflect ? 'Reflect na mesa' : '', defenseStatus(p, config), p.resurrectionCount > 0 ? `Ressurreições: ${p.resurrectionCount}` : '']
     .filter(Boolean)
     .join(' · ');
   return [
@@ -50,8 +56,8 @@ export function renderBoard(view: PlayerView, names: Names): string {
   ].join(' · ');
   return [
     header,
-    ...playerBlock(names.of(view.opponent.id).toUpperCase(), view.opponent, `${view.opponent.handCount} cartas`),
-    ...playerBlock('VOCÊ', view.self, cardsText(view.self.hand)),
+    ...playerBlock(names.of(view.opponent.id).toUpperCase(), view.opponent, `${view.opponent.handCount} cartas`, view.config),
+    ...playerBlock('VOCÊ', view.self, cardsText(view.self.hand), view.config),
     phaseText(view),
   ].join('\n');
 }
