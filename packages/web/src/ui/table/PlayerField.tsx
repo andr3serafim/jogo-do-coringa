@@ -6,7 +6,7 @@ import { absoluteAttackArmed, defenseHealActive, type PlayerView, type PublicPla
 import { useId, type ReactNode } from 'react';
 import { cardDropKey, DROP, type DropKey } from '../../model/drag.ts';
 import { rowKey } from '../../model/effects.ts';
-import { zoneLevel, type ZoneKind } from '../../model/zone-level.ts';
+import { zoneLevel, type ZoneKind, type ZoneLevel } from '../../model/zone-level.ts';
 import { useAnim } from '../anim/context.ts';
 import { CardBack } from '../cards/Card.tsx';
 import { useTableUi } from './context.ts';
@@ -19,7 +19,7 @@ import {
   HealIcon,
   ReflectIcon,
 } from './icons.tsx';
-import { plateLine } from '../../model/copy.ts';
+import { FORTRESS_TEXT, plateLine } from '../../model/copy.ts';
 import { handCountText, resurrectionsText } from './labels.ts';
 import { MarkFigure, type MarkKind } from './MarkFigure.tsx';
 import { ResurrectIcon } from './ResurrectIcon.tsx';
@@ -179,6 +179,10 @@ function Zones({ player, name, view, self }: { player: PublicPlayer; name: strin
   const hold = useLandingHold([...player.guard, ...player.attackBuffs, ...player.defenseBuffs].map((card) => card.id));
   const landed = hold.pending.size === 0 ? player : withoutCards(player, hold.pending);
   const settled = { ...landed, absoluteDefense: anim.insignia(player.id, player.absoluteDefense) };
+  // A Fortaleza (os 4 Q sem o escudo) só depois que o escudo acaba de verdade: durante a cena do começo dele a insígnia ainda não chegou, e
+  // os 4 Q seguem na muralha, como antes do escudo.
+  const queens = zoneLevel('Q', settled, view.config);
+  const queenLevel = queens === 4 && player.absoluteDefense ? 2 : queens;
 
   return (
     <div className="campo-zonas">
@@ -207,7 +211,7 @@ function Zones({ player, name, view, self }: { player: PublicPlayer; name: strin
         cards={player.defenseBuffs}
         wildAs="Q"
         drop={self ? DROP.defenseBuffs : 'targets'}
-        power={{ kind: 'Q', level: zoneLevel('Q', settled, view.config) }}
+        power={{ kind: 'Q', level: queenLevel }}
         pending={hold.pending}
       />
       {player.reflect ? (
@@ -257,7 +261,7 @@ interface ZoneProps {
   /** O arrasto: a chave da zona inteira (a sua), `'targets'` (cada carta é uma zona `carta:<id>`, a do oponente) ou nada (o Reflect). */
   drop?: DropKey | 'targets';
   /** Os bônus em escala (bloco C dos pontos do playtest, ponto 10): o tipo da zona e o nível dela (`zoneLevel`). O Reflect não tem. */
-  power?: { kind: ZoneKind; level: 0 | 1 | 2 | 3 };
+  power?: { kind: ZoneKind; level: ZoneLevel };
   /** As cartas que ainda voam até a zona: a vaga delas fica marcada (`data-pousando`) e não acende antes do pouso. */
   pending?: ReadonlySet<string>;
 }
@@ -293,6 +297,7 @@ function Zone({ label, icon, listLabel, cards, wildAs, count = false, mark, drop
             <span id={labelId} className="text-[10px] font-bold uppercase tracking-[0.12em] pc:text-[11px]">
               {label}
             </span>
+            {power?.kind === 'Q' && level === 4 ? <span className="sr-only">{FORTRESS_TEXT}</span> : null}
             {count && cards.length > 0 ? (
               <span data-numero className="font-texto text-[11px] font-bold tabular-nums">
                 {cards.length}

@@ -206,7 +206,7 @@ export function eventText(e: GameEvent, names: Names): string | null {
       return `DEFESA ABSOLUTA ${de(e.player)}!`;
     case 'AbsoluteDefenseEnded':
       // Regra 7: só o escudo acaba; os 4 Q ficam e seguem segurando a frente da Defesa.
-      return `O escudo da Defesa Absoluta ${de(e.player)} acabou; os 4 Q ficam`;
+      return `O escudo da Defesa Absoluta ${de(e.player)} acabou; os 4 Q ficam na Fortaleza`;
     case 'InitiativeDecided': {
       const other = Object.keys(e.damage).find((id) => id !== e.player);
       const mine = e.damage[e.player] ?? 0;

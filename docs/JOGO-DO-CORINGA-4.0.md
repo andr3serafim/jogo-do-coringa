@@ -199,13 +199,14 @@ com o **Q**, a **de Defesa**.
 - **O escudo.** Começa quando o quarto Q entra. Enquanto dura, o dano dos ataques é **0** (só o Ataque Absoluto fura, 11.2) e você
   fica **imune** a Armadilha, Sacrifício, Roubo e Devastação. Ele acaba no fim do **primeiro turno do oponente que termina com
   ataque**, e **nenhum Q sai**. O turno que termina sem ataque, ou com o ataque anulado por Reflect contra Reflect, não o encerra.
-- **Os 4 Q.** Enquanto você tiver os 4 Q (no escudo ou depois dele), a sua Fileira de Defesa **não perde a carta da frente** depois
+- **A Fortaleza.** Enquanto você tiver os 4 Q (no escudo ou depois dele), a sua Fileira de Defesa **não perde a carta da frente** depois
   dos ataques, nem contra o Ataque Absoluto. Depois do escudo não há imunidade: a DEF segue × 5, o dano entra, e Armadilha,
   Sacrifício, Roubo e Devastação valem (o Roubo da Defesa tira de vida o valor × 5). Com 3 Q isso acaba.
 - Todo quarto Q que entra liga o escudo de novo.
 
 **Exemplo (as duas fases).** Você tem 8 e 6 na Defesa (14) e põe o quarto Q no seu turno: DEF 14 × 5 = 70.
-1. No turno dele, ele ataca com ATK 90: o escudo segura (dano 0), e o 8 fica. No fim desse turno o escudo acaba; os 4 Q ficam.
+1. No turno dele, ele ataca com ATK 90: o escudo segura (dano 0), e o 8 fica. No fim desse turno o escudo acaba; os 4 Q ficam na
+   Fortaleza.
 2. No turno seguinte dele, ele ataca de novo com ATK 90: você perde 90 − 70 = 20 (ou 1 K quebra e segura). O 8 fica.
 3. Ele usa uma Armadilha num Q seu: você fica com 3 Q (DEF 56), e no próximo ataque o 8 sai, como sempre.
 4. No seu turno você põe outro Q: 4 de novo, e o escudo volta.

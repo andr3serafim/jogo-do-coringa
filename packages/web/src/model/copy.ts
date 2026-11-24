@@ -617,6 +617,8 @@ export interface OutcomeNames {
   opponent: string;
 }
 
+/** O nome da Fortaleza para o leitor de tela, na zona dos Q (os 4 Q depois do escudo; decisoes.md 2026-11-24 (10) e (11)). */
+export const FORTRESS_TEXT = 'Fortaleza: a Defesa não perde a carta da frente';
 export const END_EYEBROW = 'Fim da partida';
 /** O nome da faixa em que o painel de fim se recolhe. */
 export const END_RESULT_LABEL = 'Resultado da partida';
@@ -855,7 +857,7 @@ export const RULES_SECTIONS: readonly RulesSection[] = [
     items: [
       'Quadra: 4 ou mais numéricas do mesmo valor na mesma fileira, seguidas ou não, somam esse valor à fileira e dão 1 Ressurreição. Uma fileira pode ter duas quadras de valores diferentes, e cada uma conta.',
       'Ressurreição: traz 1 numérica do cemitério para o fim de uma fileira. Vale no seu turno e, quando a quadra se forma no Equipar, logo depois da revelação, antes do ataque. Com as duas fileiras cheias, ela entra no lugar da última, que vai ao cemitério; a última que é da quadra não sai. Vale uma vez por quadra e fica disponível enquanto a quadra existir, com garantia de 3 rodadas depois de formada.',
-      'Defesa Absoluta (4 Q): o 4º Q liga o escudo. Até o fim do primeiro turno do oponente que termina com ataque, você é imune a dano, a Armadilha, a Sacrifício, a Roubo e a Devastação; só o Ataque Absoluto fura a imunidade a dano (quebra os seus K e causa o dano normal). Depois do escudo, enquanto você tiver os 4 Q, a DEF segue × 5 e a fileira de Defesa não perde a carta da frente depois dos ataques, mas os Q ficam ao alcance de Armadilha e Sacrifício. Todo 4º Q que entra liga o escudo de novo.',
+      'Defesa Absoluta (4 Q): o 4º Q liga o escudo. Até o fim do primeiro turno do oponente que termina com ataque, você é imune a dano, a Armadilha, a Sacrifício, a Roubo e a Devastação; só o Ataque Absoluto fura a imunidade a dano (quebra os seus K e causa o dano normal). Depois do escudo vem a Fortaleza: enquanto você tiver os 4 Q, a DEF segue × 5 e a fileira de Defesa não perde a carta da frente depois dos ataques, mas os Q ficam ao alcance de Armadilha e Sacrifício. Todo 4º Q que entra liga o escudo de novo.',
       'Ataque Absoluto (4 J): multiplicador 5× e quebra todos os K do alvo. Depois do ataque, 1 J vai para o cemitério.',
       'Exódia (4 K na Guarda): vence na hora, depois da janela de reação.',
     ],

@@ -132,7 +132,7 @@ describe('resumo das regras: o Equipar livre (E2 do sub-projeto 5; motor: `order
 describe('resumo das regras: a Defesa Absoluta e o Reflect da regra 7', () => {
   it('a Defesa Absoluta: o escudo, os 4 Q que seguram a frente e o escudo que volta', () => {
     expect(items).toContain(
-      'Defesa Absoluta (4 Q): o 4º Q liga o escudo. Até o fim do primeiro turno do oponente que termina com ataque, você é imune a dano, a Armadilha, a Sacrifício, a Roubo e a Devastação; só o Ataque Absoluto fura a imunidade a dano (quebra os seus K e causa o dano normal). Depois do escudo, enquanto você tiver os 4 Q, a DEF segue × 5 e a fileira de Defesa não perde a carta da frente depois dos ataques, mas os Q ficam ao alcance de Armadilha e Sacrifício. Todo 4º Q que entra liga o escudo de novo.',
+      'Defesa Absoluta (4 Q): o 4º Q liga o escudo. Até o fim do primeiro turno do oponente que termina com ataque, você é imune a dano, a Armadilha, a Sacrifício, a Roubo e a Devastação; só o Ataque Absoluto fura a imunidade a dano (quebra os seus K e causa o dano normal). Depois do escudo vem a Fortaleza: enquanto você tiver os 4 Q, a DEF segue × 5 e a fileira de Defesa não perde a carta da frente depois dos ataques, mas os Q ficam ao alcance de Armadilha e Sacrifício. Todo 4º Q que entra liga o escudo de novo.',
     );
     expect(text).not.toContain('1 Q vai para o cemitério');
   });

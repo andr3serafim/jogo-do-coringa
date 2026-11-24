@@ -735,6 +735,16 @@ describe('mesa: o placar de luta (sub-projeto 6 §3)', () => {
     expect(css).not.toMatch(/\[data-muralha\]/);
   });
 
+  it('a Fortaleza: os 4 Q depois do escudo são o nível 4, com o muro de pedra parado e o nome para o leitor de tela', () => {
+    const { container } = mount({ ...DRAFT, self: { ...DRAFT.self, defenseBuffs: ['Q', 'Q', 'Q', 'Q'], absoluteDefense: false } });
+    const zone = container.querySelector('[data-campo="p1"] [data-poder="Q"]')!;
+    expect(zone).toHaveAttribute('data-nivel', '4');
+    expect(zone.querySelector('[data-poder-camada="Q4"] [data-fortaleza]')).not.toBeNull();
+    // Parado: sem a respiração da muralha.
+    expect(zone.querySelector('[data-muralha-zona]')).toBeNull();
+    expect(zone).toHaveTextContent('Fortaleza: a Defesa não perde a carta da frente');
+  });
+
   it('a aura da iniciativa no retrato de quem a segura há 5 rodadas seguidas, com o selo e o texto do leitor de tela (bloco C, ponto 11)', () => {
     const { container } = mount({ ...DRAFT, initiative: 'self', lastInitiative: { holder: 'self', changed: false, self: 9, opponent: 3, streak: 5 } });
     const mine = container.querySelector('[data-lado="voce"]')!;

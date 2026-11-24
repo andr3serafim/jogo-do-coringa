@@ -142,11 +142,11 @@ describe('askChoice e o jogo offline com AbortSignal', () => {
     // janela do Reflect; na Devastação (F3), o texto que a lista. No Roubo (E3) as jogadas mudaram: o Bot rouba. Os digests novos
     // saem de `node packages/sim/scripts/roteiro-digest.ts`. Na fatia 5 do sub-projeto 6 (2026-11-02) só a saída: "Bônus" no lugar de "Buff". Na janela da
     // Ressurreição (ponto 16) mudaram as jogadas e a saída: o Bot ressuscita nela, e a partida fica mais longa. No Roubo com o buff da fileira (2026-11-16) mudaram as jogadas e a saída: o
-    // roubo vale mais e o K não o anula. Na regra 7 (2026-11-24: a Defesa Absoluta em duas fases e o Reflect novo) mudaram as jogadas e a saída (o fim do escudo e a mesa com os 4 Q).
+    // roubo vale mais e o K não o anula. Na regra 7 (2026-11-24: a Defesa Absoluta em duas fases e o Reflect novo) mudaram as jogadas e a saída (o fim do escudo e a mesa com os 4 Q, a Fortaleza).
     const game = scriptedIo(() => '1');
     const outcome = await playGame({ io: game, seed: 'roteiro', bot: 'greedy', config: makeConfig(), saveDir: null });
     const sha = (text: string) => createHash('sha256').update(text).digest('hex');
-    expect(sha(game.output.join('\n'))).toBe('e289637b969389408625b0762f424a38e929e84155263379958f3a4a8f434d35');
+    expect(sha(game.output.join('\n'))).toBe('00ef11e82fca7e70f27e8a393f71bc5198d4845fae5d8516056a0e57ee192b6a');
     expect(sha(JSON.stringify(outcome.replay.steps))).toBe('aacef4ebaa93ea0391dca04135b8bfc70f958ae94c6d02e4eb0075e730f1bc4b');
     expect(outcome.replay.steps).toHaveLength(142);
   });

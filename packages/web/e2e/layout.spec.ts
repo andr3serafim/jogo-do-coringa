@@ -17,6 +17,7 @@ const STEP = 99;
 interface Box {
   top: number;
   bottom: number;
+  right: number;
 }
 interface ColumnBoxes {
   field: Box;
@@ -29,7 +30,7 @@ function columnBoxes(page: Page): Promise<ColumnBoxes[]> {
   return page.evaluate(() => {
     const box = (el: Element) => {
       const r = el.getBoundingClientRect();
-      return { top: r.top, bottom: r.bottom };
+      return { top: r.top, bottom: r.bottom, right: r.right };
     };
     return [...document.querySelectorAll('.campo')].map((field) => {
       const column = field.querySelector('.campo-zonas');
@@ -84,6 +85,9 @@ for (const viewport of [
         for (const card of zone.cards) {
           expect(card.top, `carta de ${zone.label} dentro da zona`).toBeGreaterThanOrEqual(zone.top - 0.5);
           expect(card.bottom, `carta de ${zone.label} dentro da zona`).toBeLessThanOrEqual(zone.bottom + 0.5);
+          // Os 4 J e os 4 Q cabem na largura do campo (na regra 7 os 4 Q ficam na mesa depois do escudo): antes, a coluna de 228 px
+          // deixava a quarta carta 13 px para fora, sob o histórico.
+          expect(card.right, `carta de ${zone.label} dentro do campo`).toBeLessThanOrEqual(field.right + 0.5);
         }
         floor = zone.bottom;
       }

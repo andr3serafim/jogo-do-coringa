@@ -30,7 +30,7 @@ export function phaseText(view: PlayerView): string {
 /** O escudo da Defesa Absoluta, ou os 4 Q depois dele, que seguram a frente da Defesa (regra 7). */
 function defenseStatus(p: PublicPlayer, config: RulesConfig): string {
   if (p.absoluteDefense) return 'Defesa Absoluta (escudo)';
-  return fullDefense(p, config) ? `${config.buffLimit} Q: a Defesa não perde a frente` : '';
+  return fullDefense(p, config) ? `Fortaleza (${config.buffLimit} Q): a Defesa não perde a frente` : '';
 }
 
 function playerBlock(label: string, p: PublicPlayer, hand: string, config: RulesConfig): string[] {

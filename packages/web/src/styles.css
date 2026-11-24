@@ -411,8 +411,13 @@
   }
 
   @container (min-width: 56rem) {
+    /*
+     * A coluna dos especiais cabe o título da zona (5,9rem), o espaço (0,625rem) e as 4 cartas de um bônus cheio, com os 3 px entre elas
+     * (o limite padrão; com mais, a zona sobrepõe as cartas): com 228 px fixos, a quarta carta passava da borda do campo, sob o histórico
+     * (na regra 7 os 4 Q ficam na mesa depois do escudo).
+     */
     .campo-grade {
-      grid-template-columns: minmax(0, 1fr) 228px;
+      grid-template-columns: minmax(0, 1fr) max(228px, calc(5.9rem + 0.625rem + 4 * var(--mini-w) + 9px));
       column-gap: 1.75rem;
     }
 
