@@ -15,8 +15,8 @@
   - **B, `feat/regras-4q-reflect`** (saída da ponta da `feat/ci-salvos`; depois do squash do #9:
     `git rebase --onto main feat/ci-salvos feat/regras-4q-reflect`): a spec
     `docs/superpowers/specs/2026-11-24-defesa-absoluta-reflect-design.md` **aprovada** (`decisoes.md` 2026-11-24 (8)), com
-    `STATE_SCHEMA` 7 e `PROTOCOL_VERSION` 2. **Próximo passo:** o plano em `docs/superpowers/plans/`, revisado pelo advisor, e o
-    código. A P1 (como a fase 2 aparece na mesa, e o nome dela) vai com fotos, junto com C e D.
+    `STATE_SCHEMA` 7 e `PROTOCOL_VERSION` 2. O plano `docs/superpowers/plans/2026-11-24-defesa-absoluta-reflect.md` (5 tarefas, execução nativa,
+    revisado pelo advisor). **Próximo passo:** a Tarefa 1 (motor + `reflectedDamage` + golden + `RULES_VERSION` 7, num commit só). A P1 (como a fase 2 aparece na mesa, e o nome dela) vai com fotos, junto com C e D.
   - **C, o Cordel Escuro** (2026-11-24 (5)) e **D, o fim de partida** (2026-11-24 (6)): três direções em foto do jogo cada, antes do
     código.
 - **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele), que leva o PR #8; apagar a branch `feat/cura-historico-visitantes`
