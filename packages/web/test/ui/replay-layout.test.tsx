@@ -47,8 +47,9 @@ const REPLAY = realReplay('ui-1');
 
 type Entry = Omit<PastGame, 'id'>;
 
+// Uma data fixa venceria (a lista esconde as partidas com mais de 30 dias): a de agora, lida com o relógio falso, fica no futuro.
 const ENTRY: Entry = {
-  date: new Date(2026, 9, 25, 14, 30).getTime(),
+  date: Date.now(),
   mode: { kind: 'training', level: 'medio' },
   seat: 'p1',
   names: { me: 'Ana', opponent: 'Duda' },
