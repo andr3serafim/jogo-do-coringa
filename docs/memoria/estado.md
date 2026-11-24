@@ -15,10 +15,13 @@
   - **B, `feat/regras-4q-reflect`** (rebaseada na `main` depois do #9): a spec
     `docs/superpowers/specs/2026-11-24-defesa-absoluta-reflect-design.md` **aprovada** (`decisoes.md` 2026-11-24 (8)), com
     `STATE_SCHEMA` 7 e `PROTOCOL_VERSION` 2. O plano `docs/superpowers/plans/2026-11-24-defesa-absoluta-reflect.md` (5 tarefas, execução nativa,
-    revisado pelo advisor). **Tarefa 1 feita** (`322962e`: motor, `reflectedDamage`, golden, `RULES_VERSION` 7). **Próximo passo:**
-    ver o que a suíte da web quebrou com a regra nova, depois a Tarefa 2 (`STATE_SCHEMA` 7, `PROTOCOL_VERSION` 2, as regras
-    escritas). As 4 fixtures do E2E divergem na regra 7 (exodia-devastacao no passo 272, absolutos no 66, especiais no 99, reflect
-    chega ao fim com outro resultado): Tarefa 5. A P1 (como a fase 2 aparece na mesa, e o nome dela) vai com fotos, junto com C e D.
+    revisado pelo advisor). **Feitas:** Tarefa 1 (`eb5aafa`: motor, `reflectedDamage`, golden, `RULES_VERSION` 7), Tarefa 2
+    (`52db3fd`: `STATE_SCHEMA` 7, `PROTOCOL_VERSION` 2, as regras escritas) e o código da Tarefa 3 (`31c0892`). **Rodando:**
+    `pnpm sim:dificil --recomecar` (em background; se a conta cair, rode de novo). **A seguir, sem esperar o portão:** a Tarefa 4
+    (a web: 14 testes falham, todos da conta do Reflect em `copy-lethal*.test.ts`, `action-bar.test.tsx`, `phases.test.tsx`;
+    nenhum depende de fixture) e a Tarefa 5 (as 4 fixtures do E2E divergem na regra 7: exodia-devastacao no passo 272, absolutos
+    no 66, especiais no 99, reflect chega ao fim com outro resultado). Não edite `engine/src` nem `sim/src` com o portão rodando.
+    A P1 (como a fase 2 aparece na mesa, e o nome dela) vai com fotos, junto com C e D.
   - **C, o Cordel Escuro** (2026-11-24 (5)) e **D, o fim de partida** (2026-11-24 (6)): três direções em foto do jogo cada, antes do
     código.
 - **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele), que leva o PR #8; apagar a branch `feat/cura-historico-visitantes`
