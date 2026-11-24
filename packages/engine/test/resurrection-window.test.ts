@@ -116,11 +116,12 @@ describe('a janela da Ressurreição (ponto 16)', () => {
     expect(r.state.phase).toEqual({ kind: 'ORDER_CHOICE', player: P1 });
   });
 
-  it('o replay guardado sem a chave (a fixture das cenas do E2E, com quadras na revelação) reproduz até o fim', () => {
-    const [fixture] = JSON.parse(readFileSync(new URL('../../web/e2e/fixtures/exodia-devastacao.json', import.meta.url), 'utf8')) as Array<{
-      replay: Replay;
-    }>;
-    expect(fixture.replay.config.resurrectOnQuad).toBeUndefined();
-    expect(runReplay(fixture.replay).state.phase.kind).toBe('GAME_OVER');
+  // Os 200 primeiros passos da fixture `exodia-devastacao` do E2E gravada na regra 6, sem a chave (copiados para cá em 2026-11-24: a
+  // partida inteira diverge na regra 7, no passo 272, e a fixture do E2E foi regravada). Têm as quadras na revelação e 5 Ressurreições.
+  it('o replay guardado sem a chave (com quadras na revelação) reproduz, com as Ressurreições dele', () => {
+    const replay = JSON.parse(readFileSync(new URL('./fixtures/legacy-no-resurrect-key.json', import.meta.url), 'utf8')) as Replay;
+    expect(replay.config.resurrectOnQuad).toBeUndefined();
+    const { events } = runReplay(replay);
+    expect(events.filter((event) => event.type === 'Resurrected')).toHaveLength(5);
   });
 });

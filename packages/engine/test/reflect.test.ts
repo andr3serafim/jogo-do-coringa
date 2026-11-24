@@ -20,7 +20,7 @@ function attacked(p1: PlayerSetup, p2: PlayerSetup): GameState {
   return act(s, P2, { type: 'DECLARE_ATTACK' }).state;
 }
 
-/** O exemplo 3 da spec 1: o ataque de P2 vale 46, e a DEF base dele é 14 (⌊14/2⌋ = 7): o Reflect devolve 39. */
+/** O exemplo 3 da spec 1: o ataque de P2 vale 46, e a DEF base dele é 14: o Reflect devolve 46 − 14 = 32 (regra 7, sem o ÷ 2). */
 const EXAMPLE_3: PlayerSetup = { attack: [6, 8, 9], attackBuffs: ['J'], defense: [4, 10], defenseBuffs: ['Q'], guard: 2 };
 
 describe('Reflect reativo (F2)', () => {
@@ -48,12 +48,13 @@ describe('Reflect reativo (F2)', () => {
     const s = attacked({ hand: ['K', 'J', 'Q'], defense: [3, 5] }, EXAMPLE_3);
     const cast = act(s, P1, reflectOf(s, P1)).state;
     const r = act(cast, P2, { type: 'PASS' });
-    expect(r.events).toContainEqual({ type: 'ReflectTriggered', owner: P1, attacker: P2, damage: 39 });
-    expect(player(r.state, P2).hp).toBe(61);
+    expect(r.events).toContainEqual({ type: 'ReflectTriggered', owner: P1, attacker: P2, damage: 32 });
+    expect(player(r.state, P2).hp).toBe(68);
     expect(player(r.state, P1).hp).toBe(100);
-    // Todos os Q e K do atacante quebram.
+    // Todos os K do atacante quebram; os Q ficam (decisoes.md 2026-11-24 (4)).
     expect(player(r.state, P2).guard).toHaveLength(0);
-    expect(player(r.state, P2).defenseBuffs).toHaveLength(0);
+    expect(player(r.state, P2).defenseBuffs).toHaveLength(1);
+    expect(r.events.some((e) => e.type === 'BuffRemoved' && e.player === P2)).toBe(false);
     // Saem a 1ª carta do Ataque do atacante e a 1ª da Defesa do dono.
     expect(values(player(r.state, P2).attackRow)).toEqual([8, 9]);
     expect(values(player(r.state, P1).defenseRow)).toEqual([5]);
@@ -81,6 +82,40 @@ describe('Reflect reativo (F2)', () => {
     expect(values(player(r.state, P2).attackRow)).toEqual([10]);
     expect(values(player(r.state, P1).defenseRow)).toEqual([5]);
   });
+
+  it('o exemplo da regra 7: ATK 28 contra a DEF base 12 volta 16, os 2 K quebram e os 2 Q ficam', () => {
+    const s = attacked(
+      { hand: ['K', 'J', 'Q'] },
+      { attack: [8, 6], attackBuffs: ['J'], defense: [5, 4, 3], defenseBuffs: ['Q', 'Q'], guard: 2 },
+    );
+    const r = act(act(s, P1, reflectOf(s, P1)).state, P2, { type: 'PASS' });
+    expect(r.events).toContainEqual({ type: 'ReflectTriggered', owner: P1, attacker: P2, damage: 16 });
+    expect(player(r.state, P2).hp).toBe(84);
+    expect(player(r.state, P2).guard).toHaveLength(0);
+    expect(player(r.state, P2).defenseBuffs).toHaveLength(2);
+  });
+
+  it('o atacante com 4 Q já sem escudo é refletido como qualquer outro', () => {
+    const s = attacked(
+      { hand: ['K', 'J', 'Q'] },
+      { attack: [10, 10], defense: [5], defenseBuffs: ['Q', 'Q', 'Q', 'Q'], absoluteDefense: false, guard: 1 },
+    );
+    const r = act(act(s, P1, reflectOf(s, P1)).state, P2, { type: 'PASS' });
+    expect(r.events).toContainEqual({ type: 'ReflectTriggered', owner: P1, attacker: P2, damage: 15 });
+    expect(player(r.state, P2).guard).toHaveLength(0);
+    expect(player(r.state, P2).defenseBuffs).toHaveLength(4);
+  });
+
+  for (const absoluteDefense of [true, false]) {
+    it(`quem reflete com 4 Q fica com a carta da frente da Defesa (${absoluteDefense ? 'no escudo' : 'sem escudo'})`, () => {
+      const s = attacked(
+        { hand: ['K', 'J', 'Q'], defense: [3, 5], defenseBuffs: ['Q', 'Q', 'Q', 'Q'], absoluteDefense },
+        { attack: [10] },
+      );
+      const r = act(act(s, P1, reflectOf(s, P1)).state, P2, { type: 'PASS' });
+      expect(values(player(r.state, P1).defenseRow)).toEqual([3, 5]);
+    });
+  }
 
   it('o Selvagem serve como J ou Q do Reflect, mas nunca como K', () => {
     const s = attacked({ hand: ['K', 'W', 'Q'] }, { attack: [5] });

@@ -11,7 +11,7 @@ describe('previewAttack: exemplos da spec 1 §1.13', () => {
   it('exemplo 1: dano direto', () => {
     const p = preview({ p1: { attack: [3, 7, 9], attackBuffs: ['J'] }, p2: { defense: [5, 8] } });
     expect(p).toMatchObject({ outcome: 'DAMAGE', attack: 38, defense: 13, net: 25, damage: 25, reflected: 0, absolute: false });
-    expect(p.breaks).toEqual({ defenderGuard: 0, attackerGuard: 0, attackerQueens: 0 });
+    expect(p.breaks).toEqual({ defenderGuard: 0, attackerGuard: 0 });
   });
 
   it('exemplo 2: o K absorve o golpe', () => {
@@ -22,13 +22,13 @@ describe('previewAttack: exemplos da spec 1 §1.13', () => {
     expect(p.breaks.defenderGuard).toBe(1);
   });
 
-  it('exemplo 3: Reflect devolve o golpe e quebra K e Q do atacante', () => {
+  it('exemplo 3: Reflect devolve ATK − DEF base e quebra os K do atacante (regra 7)', () => {
     const p = preview({
       p1: { attack: [6, 8, 9], attackBuffs: ['J'], defense: [4, 10], defenseBuffs: ['Q'], guard: 2 },
       p2: { reflect: true },
     });
-    expect(p).toMatchObject({ outcome: 'REFLECTED', attack: 46, defense: 7, reflected: 39, damage: 0 });
-    expect(p.breaks).toEqual({ attackerGuard: 2, attackerQueens: 1, defenderGuard: 0 });
+    expect(p).toMatchObject({ outcome: 'REFLECTED', attack: 46, defense: 14, reflected: 32, damage: 0 });
+    expect(p.breaks).toEqual({ attackerGuard: 2, defenderGuard: 0 });
   });
 
   it('exemplo 5: Ataque Absoluto fura a Defesa Absoluta e quebra os K', () => {
@@ -63,7 +63,7 @@ describe('previewAttack: outros desfechos', () => {
       damage: 0,
       reflected: 0,
       absolute: false,
-      breaks: { defenderGuard: 0, attackerGuard: 0, attackerQueens: 0 },
+      breaks: { defenderGuard: 0, attackerGuard: 0 },
     });
   });
 
@@ -75,7 +75,7 @@ describe('previewAttack: outros desfechos', () => {
     expect(p.outcome).toBe('REFLECTED');
     expect(p.reflected).toBe(0);
     expect(p.damage).toBe(0);
-    expect(p.breaks).toEqual({ attackerGuard: 0, attackerQueens: 0, defenderGuard: 0 });
+    expect(p.breaks).toEqual({ attackerGuard: 0, defenderGuard: 0 });
   });
 
   it('ataque que não vence a defesa causa dano 0 e não gasta K', () => {

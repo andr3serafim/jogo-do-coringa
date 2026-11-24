@@ -100,22 +100,22 @@ describe('resolveAttack', () => {
     expect(player(s, P1).attackBuffs).toHaveLength(3);
   });
 
-  it('Reflect: quebra K e Q do atacante e devolve o dano (exemplo 3)', () => {
+  it('Reflect: quebra os K do atacante, deixa os Q e devolve ATK − DEF base (exemplo 3, regra 7)', () => {
     const s = setup({
       p1: { attack: [6, 8, 9], attackBuffs: ['J'], defense: [4, 10], defenseBuffs: ['Q'], guard: 2 },
       p2: { reflect: true, defense: [2, 3] },
     });
     const ev = attackP1(s);
-    expect(ev).toContainEqual({ type: 'ReflectTriggered', owner: P2, attacker: P1, damage: 39 });
-    expect(player(s, P1).hp).toBe(61);
+    expect(ev).toContainEqual({ type: 'ReflectTriggered', owner: P2, attacker: P1, damage: 32 });
+    expect(player(s, P1).hp).toBe(68);
     expect(player(s, P1).guard).toHaveLength(0);
-    expect(player(s, P1).defenseBuffs).toHaveLength(0);
+    expect(player(s, P1).defenseBuffs).toHaveLength(1);
     expect(values(player(s, P1).defenseRow)).toEqual([4, 10]);
     expect(player(s, P2).hp).toBe(100);
     expect(player(s, P2).reflect).toBeNull();
     expect(values(player(s, P1).attackRow)).toEqual([8, 9]);
     expect(values(player(s, P2).defenseRow)).toEqual([3]);
-    expect(player(s, P2).damageThisRound).toBe(39);
+    expect(player(s, P2).damageThisRound).toBe(32);
   });
 
   it('Reflect contra atacante sob Defesa Absoluta: anulado, nada quebra e ninguém leva dano (F2, [I])', () => {

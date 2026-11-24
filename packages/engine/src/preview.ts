@@ -14,7 +14,7 @@ export interface AttackPreview {
   outcome: AttackOutcome;
   /** ATK do atacante (com o multiplicador). */
   attack: number;
-  /** DEF usada na conta; no Reflect, ⌊DEF_base do atacante / 2⌋. */
+  /** DEF usada na conta; no Reflect, a DEF base do atacante (sem os Q; regra 7). */
   defense: number;
   /** max(0, attack − defense). */
   net: number;
@@ -25,7 +25,7 @@ export interface AttackPreview {
   /** Ataque Absoluto (nJ ≥ buffLimit). */
   absolute: boolean;
   /** Quantas cartas quebram em cada pilha. */
-  breaks: { defenderGuard: number; attackerGuard: number; attackerQueens: number };
+  breaks: { defenderGuard: number; attackerGuard: number };
 }
 
 /**
@@ -45,7 +45,7 @@ export function previewBetween(
   defender: CombatSide,
   config: Pick<RulesConfig, 'buffLimit'>,
 ): AttackPreview {
-  const breaks = { defenderGuard: 0, attackerGuard: 0, attackerQueens: 0 };
+  const breaks = { defenderGuard: 0, attackerGuard: 0 };
   if (attacker.attackRow.length === 0) {
     return { outcome: 'NO_ATTACK', attack: 0, defense: 0, net: 0, damage: 0, reflected: 0, absolute: false, breaks };
   }
@@ -53,13 +53,13 @@ export function previewBetween(
   const attack = attackPower(attacker);
 
   if (defender.reflect) {
-    const defense = Math.floor(defenseBase(attacker) / 2);
+    // Regra 7 (decisoes.md 2026-11-24 (4)): volta ATK − DEF base de quem atacou, sem o ÷ 2; os K dele quebram, os Q ficam.
+    const defense = defenseBase(attacker);
     const net = Math.max(0, attack - defense);
     // Contra um atacante sob Defesa Absoluta o Reflect é anulado: segura o golpe (o dono leva 0), mas não devolve dano nem quebra
     // Q e K (autor, 2026-10-30).
     if (attacker.absoluteDefense) return { outcome: 'REFLECTED', attack, defense, net, damage: 0, reflected: 0, absolute, breaks };
     breaks.attackerGuard = attacker.guard.length;
-    breaks.attackerQueens = attacker.defenseBuffs.length;
     return { outcome: 'REFLECTED', attack, defense, net, damage: 0, reflected: net, absolute, breaks };
   }
 
