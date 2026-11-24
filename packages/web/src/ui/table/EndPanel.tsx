@@ -39,7 +39,6 @@ import { useAnim } from '../anim/context.ts';
 import { Button } from '../parts.tsx';
 import { Modal } from './Modal.tsx';
 import { ResultFace, type ResultMood } from './ResultMedal.tsx';
-import { pastGameResultKind } from '../../model/past-games-copy.ts';
 
 export interface EndPanelProps {
   outcome: Outcome;
@@ -92,7 +91,7 @@ export function EndPanel({
 
   const title = resultTitle(outcome, me, names);
   const stamp = resultStamp(outcome, me);
-  const kind = pastGameResultKind(outcome, me);
+  const kind = resultKind(outcome, me);
   const { reduced } = useAnim();
   const reason = reasonText(outcome, me, names);
   const status = rematchStatusText(names.opponent, mineWants, theirsWants, away);
@@ -239,7 +238,16 @@ const MOOD: Record<ResultKind, ResultMood> = { vitoria: 'feliz', derrota: 'trist
 const MEDAL_BG: Record<ResultKind, string> = { vitoria: 'bg-[#e3f4e1]', derrota: 'bg-[#fbe1dc]', neutro: 'bg-papel' };
 /** Verde (9:1 sobre a tinta), vermelho (6:1) e ouro. */
 const STAMP_COLOR: Record<ResultKind, string> = { vitoria: 'text-[#6fd07f]', derrota: 'text-[#ff6b5a]', neutro: 'text-ouro' };
-type ResultKind = ReturnType<typeof pastGameResultKind>;
+type ResultKind = 'vitoria' | 'derrota' | 'neutro';
+
+/**
+ * O resultado do seu ponto de vista (o mesmo do `pastGameResultKind` da lista de partidas, que não entra aqui: o módulo dela traz os textos
+ * da tela `/partidas`, que ficam fora do JavaScript inicial).
+ */
+function resultKind(outcome: Outcome, me: PlayerId): ResultKind {
+  if (outcome.result === null || outcome.result.kind !== 'WIN') return 'neutro';
+  return outcome.result.winner === me ? 'vitoria' : 'derrota';
+}
 
 function CheckIcon() {
   return (

@@ -23,9 +23,9 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   do projeto, a derrota no treino e a vitória numa sala com a Duda desistindo).
 - **Ruling (D):** a `Modal` ganhou `framed={false}` (sem a borda, o fundo e o respiro de papel) para a faixa ocupar a largura — custo:
   uma opção a mais na `Modal`.
-- **Ruling (D):** o medalhão é sempre o Bufão (P1), com as expressões novas desenhadas no traço do `Coringa.tsx`; o `data-resultado` sai
-  do `pastGameResultKind` (o mesmo da lista de partidas) — custo: o `EndPanel` importa o `past-games-copy.ts` (o smoke confere o
-  orçamento).
+- **Ruling (D):** o medalhão é sempre o Bufão (P1), com as expressões novas desenhadas no traço do `Coringa.tsx`; o `data-resultado` sai de
+  uma função própria do `EndPanel` (a mesma conta do `pastGameResultKind`): importar o `past-games-copy.ts` puxava os textos da tela
+  `/partidas` para o JavaScript inicial, e o smoke barrou — custo: três linhas repetidas.
 - **Ruling (D):** o carimbo é `aria-hidden` e o título de leitura fica em `sr-only` com o `resultTitle`; a frase visível "Duda venceu."
   é `aria-hidden` e o motivo segue sendo a descrição do diálogo — custo: nenhum, o nome e a descrição do diálogo são os de antes.
 
