@@ -151,6 +151,9 @@ test.describe('360 × 640, a rolagem dos campos', () => {
         return found !== null && Math.max(Math.abs(Number(found[1])), Math.abs(Number(found[2]))) >= 2;
       };
       const fields = document.querySelector<HTMLElement>('[data-campos]')!;
+      // Os campos começam no fim (a sua mesa), para a cena ter de rolar até a fileira do Bot: sem a faixa "outra versão" das regras
+      // (a fixture é da regra de agora), a mesa cabe mais alta e a fileira dele já podia estar à vista.
+      fields.scrollTop = fields.scrollHeight;
       flags.rolagem = [fields.scrollTop];
       new MutationObserver((records) => {
         for (const record of records) {
