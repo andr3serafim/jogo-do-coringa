@@ -107,11 +107,11 @@ termina sem ataque. É um ataque por turno.
    dano. Com dano 0, a Guarda fica intacta. O Ataque Absoluto muda isso (11.2).
 4. O dano sai da vida. Vida em 0 ou menos **perde na hora**, e o resto do ataque não acontece.
 5. A carta da **frente** da Fileira de Ataque de quem atacou vai para o cemitério.
-6. A carta da **frente** da Fileira de Defesa de quem defendeu vai para o cemitério, a não ser que ele esteja sob Defesa
-   Absoluta (11.1). Se ele tiver a cura passiva (11.3), ela cura.
+6. A carta da **frente** da Fileira de Defesa de quem defendeu vai para o cemitério, a não ser que ele tenha os 4 Q (11.1). Se
+   ele tiver a cura passiva (11.3), ela cura.
 7. Se foi um Ataque Absoluto, 1 J de quem atacou vai para o cemitério.
 8. As quadras dos dois são conferidas de novo: as desfeitas somem, e as novas dão Ressurreição.
-9. Fim do turno. Se o defensor estava sob Defesa Absoluta, ela acaba (11.1).
+9. Fim do turno. Se o defensor estava no escudo da Defesa Absoluta, o escudo acaba, e os Q ficam (11.1).
 
 **Exemplo.** Você tem 7, 5 e 3 no Ataque (15) e 2 J: o ATK é 15 × 3 = 45. Ele tem 6 e 4 na Defesa (10) e 1 Q: a DEF é
 10 × 2 = 20. O dano é 25.
@@ -123,7 +123,7 @@ termina sem ataque. É um ataque por turno.
 8.1. **J (Bônus de Ataque):** no seu turno, vai para os seus Bônus de Ataque e soma 1 ao multiplicador do ATK. Cabem 4.
 
 8.2. **Q (Bônus de Defesa):** no seu turno, vai para os seus Bônus de Defesa e soma 1 ao multiplicador da DEF. Cabem 4. O
-quarto Q liga a Defesa Absoluta (11.1).
+quarto Q liga a Defesa Absoluta (11.1), e cada quarto Q que volta a liga de novo.
 
 8.3. **K (Guarda):** no seu turno, você põe na Guarda **um ou vários K de uma vez**. Cada jogada de K abre a janela de reação
 do oponente (12.1). O K absorve dano (7.4, passo 3), liga a cura passiva com 2 ou mais (11.3) e leva à Exódia com 4 (11.7).
@@ -153,12 +153,13 @@ na Guarda, e você cura 40. A fileira dele fica com o 4 e os 3 J. O mesmo 10 na 
 8.7. **Coringa Selvagem:** faz o papel de **J, Q ou A**, nunca o de K. O papel sai da jogada: nos Bônus de Ataque ele é J, nos
 de Defesa é Q, como Armadilha ou Roubo é A. Dentro de um combo, ele pode fazer o J, o Q ou o A, um papel por carta.
 
-8.8. Nada da seção 8 alcança quem está sob **Defesa Absoluta**: nem Armadilha, nem Roubo, nem Sacrifício (11.1).
+8.8. Nada da seção 8 alcança quem está no **escudo da Defesa Absoluta**: nem Armadilha, nem Roubo, nem Sacrifício (11.1). Depois
+do escudo, tudo alcança, também os Q.
 
 ## 9. Ordem da fila
 
-9.1. Sempre sai **a carta mais antiga** da pilha: a K da Guarda que quebra, o J do Ataque Absoluto, o Q do fim da Defesa
-Absoluta e a numérica da frente da fileira depois do ataque.
+9.1. Sempre sai **a carta mais antiga** da pilha: a K da Guarda que quebra, o J do Ataque Absoluto e a numérica da frente da
+fileira depois do ataque.
 
 9.2. A carta que entra (pelo Equipar, pela Ressurreição ou pelo Roubo) vai para o **fim** da fileira.
 
@@ -168,18 +169,18 @@ Absoluta e a numérica da frente da fileira depois do ataque.
 1. As três cartas ficam na mesa, e quem foi refletido ganha uma resposta: **passar** (o golpe volta) ou lançar **outro
    Reflect**.
 2. **Reflect contra Reflect:** os dois se anulam, as 6 cartas vão para o cemitério e o golpe não acontece. Contra um ataque, o
-   turno acaba sem ataque (e a Defesa Absoluta do outro continua). Contra a Devastação, veja 10.2.
-3. **O ataque refletido:** quem atacou leva de volta **ATK − ⌊DEF base dele ÷ 2⌋**, no mínimo 0. A DEF base é a soma da Fileira
-   de Defesa dele mais o bônus de quadra, **sem** o multiplicador dos Q. Ele também perde **todos** os K da Guarda e **todos**
-   os Q. Quem refletiu não leva nada, e esse dano conta para a iniciativa dele.
+   turno acaba sem ataque (e o escudo da Defesa Absoluta do outro continua). Contra a Devastação, veja 10.2.
+3. **O ataque refletido:** quem atacou leva de volta **ATK − DEF base dele**, no mínimo 0. A DEF base é a soma da Fileira de
+   Defesa dele mais o bônus de quadra, **sem** o multiplicador dos Q. Ele também perde **todos** os K da Guarda (e leva o dano
+   mesmo assim); os Q dele **ficam**. Quem refletiu não leva nada, e esse dano conta para a iniciativa dele.
 4. Depois disso o ataque termina como os outros (7.4, passos 5 a 9). A carta da frente do Ataque de quem atacou sai, e também a
-   da frente da Defesa de quem refletiu (salvo sob Defesa Absoluta). Se era um Ataque Absoluto, 1 J sai.
-5. Se quem atacou está sob **Defesa Absoluta**, o Reflect só segura o golpe: ninguém leva dano e nada quebra.
+   da frente da Defesa de quem refletiu (salvo se ele tiver os 4 Q). Se era um Ataque Absoluto, 1 J sai.
+5. Se quem atacou está no **escudo da Defesa Absoluta**, o Reflect só segura o golpe: ninguém leva dano e nada quebra.
 6. Os Ás que você usou na mesma janela, antes do Reflect, valem.
 
 **Exemplo.** Ele ataca com 8 e 6 (14) e 1 J: ATK 28. A Defesa dele tem 5, 4 e 3 (12), com 2 Q e 1 K. Você responde com
-Reflect. Ele leva 28 − ⌊12 ÷ 2⌋ = 28 − 6 = **22**, perde o K e os 2 Q, e você não perde vida. Depois saem o 8 dele e a carta da
-frente da sua Defesa.
+Reflect. Ele leva 28 − 12 = **16**, perde o K, fica com os 2 Q, e você não perde vida. Depois saem o 8 dele e a carta da frente da
+sua Defesa.
 
 10.2. **Devastação (K + A + J, ou K + A + Q, da mão, no seu turno):** com o **J**, esvazia a **Fileira de Ataque** do oponente;
 com o **Q**, a **de Defesa**.
@@ -187,20 +188,27 @@ com o **Q**, a **de Defesa**.
 2. Se ele passa, as numéricas da fileira vão para o cemitério. Os bônus dele ficam, as quadras dela se desfazem e essas cartas
    **não curam**. Você continua o turno.
 3. Se ele reflete e você passa, a Devastação volta: **você** perde a sua fileira do mesmo tipo. Ela não quebra Q nem K. Se você
-   estiver sob Defesa Absoluta, ninguém perde nada. Você continua o turno.
+   estiver no escudo da Defesa Absoluta, ninguém perde nada. Você continua o turno.
 4. Se ele reflete e você responde com outro Reflect, os dois se anulam, a Devastação não acontece e você continua o turno.
-5. Não vale contra **fileira vazia** nem contra quem está sob **Defesa Absoluta**.
+5. Não vale contra **fileira vazia** nem contra quem está no **escudo da Defesa Absoluta**.
 6. O Selvagem faz o A, o J ou o Q, nunca o K.
 
 ## 11. Estados e combos da mesa
 
-11.1. **Defesa Absoluta (4 Q nos Bônus de Defesa):**
-- Começa quando o quarto Q entra.
-- Enquanto dura, o dano dos ataques é **0** (só o Ataque Absoluto fura, 11.2) e a sua Fileira de Defesa **não perde a carta da
-  frente** depois dos ataques, nem contra o Ataque Absoluto.
-- Você fica **imune** a Armadilha, Sacrifício, Roubo e Devastação.
-- Ela acaba no fim do **primeiro turno do oponente que termina com ataque**, e o Q mais antigo vai para o cemitério. O turno
-  que termina sem ataque, ou com o ataque anulado por Reflect contra Reflect, não a encerra.
+11.1. **Defesa Absoluta (4 Q nos Bônus de Defesa):** tem duas fases.
+- **O escudo.** Começa quando o quarto Q entra. Enquanto dura, o dano dos ataques é **0** (só o Ataque Absoluto fura, 11.2) e você
+  fica **imune** a Armadilha, Sacrifício, Roubo e Devastação. Ele acaba no fim do **primeiro turno do oponente que termina com
+  ataque**, e **nenhum Q sai**. O turno que termina sem ataque, ou com o ataque anulado por Reflect contra Reflect, não o encerra.
+- **Os 4 Q.** Enquanto você tiver os 4 Q (no escudo ou depois dele), a sua Fileira de Defesa **não perde a carta da frente** depois
+  dos ataques, nem contra o Ataque Absoluto. Depois do escudo não há imunidade: a DEF segue × 5, o dano entra, e Armadilha,
+  Sacrifício, Roubo e Devastação valem (o Roubo da Defesa tira de vida o valor × 5). Com 3 Q isso acaba.
+- Todo quarto Q que entra liga o escudo de novo.
+
+**Exemplo (as duas fases).** Você tem 8 e 6 na Defesa (14) e põe o quarto Q no seu turno: DEF 14 × 5 = 70.
+1. No turno dele, ele ataca com ATK 90: o escudo segura (dano 0), e o 8 fica. No fim desse turno o escudo acaba; os 4 Q ficam.
+2. No turno seguinte dele, ele ataca de novo com ATK 90: você perde 90 − 70 = 20 (ou 1 K quebra e segura). O 8 fica.
+3. Ele usa uma Armadilha num Q seu: você fica com 3 Q (DEF 56), e no próximo ataque o 8 sai, como sempre.
+4. No seu turno você põe outro Q: 4 de novo, e o escudo volta.
 
 11.2. **Ataque Absoluto (4 J nos Bônus de Ataque):**
 - O multiplicador é 5×.
@@ -213,7 +221,7 @@ DEF 40.
 2. Ele perde 10 de vida.
 3. O seu 10 sai do Ataque, mas a Defesa dele **fica** inteira.
 4. Você perde 1 J (fica com 3).
-5. No fim do seu turno, a Defesa Absoluta dele acaba e ele perde 1 Q (fica com 3).
+5. No fim do seu turno, o escudo dele acaba; ele fica com os 4 Q, e a Defesa dele segue sem perder a carta da frente.
 
 11.3. **Cura passiva (2 K ou mais na Guarda):** cada numérica da **sua Fileira de Defesa** que vai para o cemitério cura você
 **valor × (1 + número de Q)**, até a vida inicial. Conta quando a carta sai:
@@ -231,6 +239,7 @@ A ordem num ataque (a cura conta os K que **sobram**):
 - Com 2 K: um quebra, sobra 1, e o 6 sai **sem curar**.
 - Com 3 K: um quebra, sobram 2, e o 6 cura 6 × 2 = **12**.
 - Contra o Ataque Absoluto: todos os K quebram, e o 6 não cura.
+- Com 4 Q, o 6 não sai depois do ataque (11.1), então não cura.
 
 11.4. **Quadra:** 4 ou mais numéricas do **mesmo valor** na **mesma fileira**, seguidas ou não.
 - Somam esse valor uma vez à fileira (quatro 7 valem 28 + 7 = 35). A quinta carta igual não soma de novo.
@@ -294,12 +303,12 @@ Roubo, 8.5)
 
 14.2. O Roubo **não abre** janela de reação (`actions/main.ts`, `steal`).
 
-14.3. A Devastação **não vale** contra fileira vazia nem contra Defesa Absoluta (`actions/main.ts`, `devastate`).
+14.3. A Devastação **não vale** contra fileira vazia nem contra o escudo da Defesa Absoluta (`actions/main.ts`, `devastate`).
 
 14.4. Na Devastação, Reflect contra Reflect: ela não acontece e **quem a lançou segue no turno** (`actions/reaction.ts`,
 `cancelReflect`).
 
-14.5. A Devastação refletida contra quem está sob Defesa Absoluta: o Reflect é anulado e **ninguém perde nada**
+14.5. A Devastação refletida contra quem está no escudo da Defesa Absoluta: o Reflect é anulado e **ninguém perde nada**
 (`actions/reaction.ts`, `closeReaction`).
 
 14.6. A carta trocada no Equipar que sai da própria Defesa cura **depois** que as cartas novas entram (`actions/equip.ts`,

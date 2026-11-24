@@ -1,6 +1,6 @@
 /** Constantes do protocolo compartilhadas entre servidor e clientes (spec §4). */
 
-export const PROTOCOL_VERSION = 1;
+export const PROTOCOL_VERSION = 2;
 
 /**
  * As vidas iniciais que a sala pode escolher na criação (sub-projeto 5, R3): o padrão é a do motor (`DEFAULT_CONFIG.hp`, 500). O

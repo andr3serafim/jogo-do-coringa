@@ -24,7 +24,7 @@ export const TIMERS = {
  * 5: a fase `RESURRECTION` e a troca da Ressurreição (ponto 16).
  * 6: a decisão da iniciativa (`lastInitiative`) ganhou a sequência (`streak`; bloco C dos pontos do playtest, ponto 11).
  */
-export const STATE_SCHEMA = 6;
+export const STATE_SCHEMA = 7;
 
 /** Limites por sala (spec §4, §8). */
 export const ROOM_LIMITS = {

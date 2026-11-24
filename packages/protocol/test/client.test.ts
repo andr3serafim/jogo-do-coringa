@@ -4,6 +4,7 @@ import {
   HttpError,
   PING_INTERVAL_MS,
   PONG_TIMEOUT_MS,
+  PROTOCOL_VERSION,
   RoomClient,
   SLOW_RETRY_MS,
   createRoom,
@@ -147,7 +148,7 @@ describe('RoomClient: conexão', () => {
     expect(last().url).toBe('ws://localhost:8787/api/rooms/ABC234/ws');
     last().serverOpen();
     expect(events).toEqual([{ type: 'open' }]);
-    expect(last().messages()[0]).toEqual({ t: 'hello', protocol: 1, token: TOKEN });
+    expect(last().messages()[0]).toEqual({ t: 'hello', protocol: PROTOCOL_VERSION, token: TOKEN });
     expect('lastSeq' in last().messages()[0]).toBe(false);
   });
 
@@ -160,19 +161,19 @@ describe('RoomClient: conexão', () => {
     clock.advance(500);
     expect(FakeWebSocket.instances).toHaveLength(2);
     last().serverOpen();
-    expect(last().messages()[0]).toEqual({ t: 'hello', protocol: 1, token: TOKEN, lastSeq: 9 });
+    expect(last().messages()[0]).toEqual({ t: 'hello', protocol: PROTOCOL_VERSION, token: TOKEN, lastSeq: 9 });
   });
 
   it('com lastSeq nas opções e sem state ainda, o primeiro hello leva lastSeq; um state em memória vale depois', () => {
     const { client, clock, last } = setup({ lastSeq: 9 });
     client.connect();
     last().serverOpen();
-    expect(last().messages()[0]).toEqual({ t: 'hello', protocol: 1, token: TOKEN, lastSeq: 9 });
+    expect(last().messages()[0]).toEqual({ t: 'hello', protocol: PROTOCOL_VERSION, token: TOKEN, lastSeq: 9 });
     last().serverSend(stateMsg(12));
     last().serverClose(1006);
     clock.advance(500);
     last().serverOpen();
-    expect(last().messages()[0]).toEqual({ t: 'hello', protocol: 1, token: TOKEN, lastSeq: 12 });
+    expect(last().messages()[0]).toEqual({ t: 'hello', protocol: PROTOCOL_VERSION, token: TOKEN, lastSeq: 12 });
   });
 
   it('https vira wss, tolera barra final e escapa o código', () => {
@@ -235,7 +236,7 @@ describe('RoomClient: conexão', () => {
 describe('RoomClient: mensagens do servidor', () => {
   it('welcome guarda o playerId; room e error viram eventos', () => {
     const { client, events, last } = connected();
-    last().serverSend({ t: 'welcome', protocol: 1, playerId: 'p2', serverNow: 1_000_000 });
+    last().serverSend({ t: 'welcome', protocol: PROTOCOL_VERSION, playerId: 'p2', serverNow: 1_000_000 });
     expect(client.playerId).toBe('p2');
     const room = { t: 'room', code: 'ABC234', status: 'LOBBY', seats: [], score: { p1: 0, p2: 0 }, gameNo: 0, expiresAt: 1 };
     last().serverSend(room);
@@ -266,7 +267,7 @@ describe('RoomClient: mensagens do servidor', () => {
 
   it('o replay não mexe no room nem no state guardados', () => {
     const { client, last } = connected();
-    last().serverSend({ t: 'welcome', protocol: 1, playerId: 'p2', serverNow: 1_000_000 });
+    last().serverSend({ t: 'welcome', protocol: PROTOCOL_VERSION, playerId: 'p2', serverNow: 1_000_000 });
     const room = { t: 'room', code: 'ABC234', status: 'FINISHED', seats: [], score: { p1: 1, p2: 0 }, gameNo: 1, expiresAt: 1 };
     last().serverSend(room);
     last().serverSend(stateMsg(9));
@@ -594,7 +595,7 @@ describe('RoomClient: relógio do servidor', () => {
   it('o welcome também acerta o relógio e o prazo vencido dá 0', () => {
     const { client, clock, last } = connected();
     clock.time = 5_000;
-    last().serverSend({ t: 'welcome', protocol: 1, playerId: 'p1', serverNow: 9_000 });
+    last().serverSend({ t: 'welcome', protocol: PROTOCOL_VERSION, playerId: 'p1', serverNow: 9_000 });
     expect(client.remainingMs({ kind: 'EQUIP', at: 12_000, players: [] })).toBe(3_000);
     expect(client.remainingMs({ kind: 'EQUIP', at: 8_000, players: [] })).toBe(0);
   });
@@ -659,7 +660,7 @@ describe('RoomClient: reconexão', () => {
     last().serverClose(1006);
     clock.advance(1000);
     last().serverOpen();
-    last().serverSend({ t: 'welcome', protocol: 1, playerId: 'p1', serverNow: clock.time });
+    last().serverSend({ t: 'welcome', protocol: PROTOCOL_VERSION, playerId: 'p1', serverNow: clock.time });
     last().serverClose(1006);
     clock.advance(500);
     expect(clock.scheduled.filter((ms) => ms !== PING_INTERVAL_MS)).toEqual([500, 1000, 500]);
