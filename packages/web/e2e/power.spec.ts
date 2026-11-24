@@ -3,9 +3,10 @@
 //
 // As partidas vêm das fixtures (os valores esperados contados com o motor sobre os `steps`):
 // - `especiais.json` (você é o `p1`): no passo 78 (rodada 17) você lidera o Ataque e a Defesa, os seus 3 Q estão a um do limite (nível 2) e o Bot
-//   tem a cura passiva (2 K); no 99 (rodada 21) os seus 4 J estão armados (nível 3) e a sua sequência é 3; no 111 (rodada 24), 5; no 161 (rodada 34),
-//   10, com a cura passiva nos seus K; no 174 (rodada 37), os seus 3 K (a brasa);
-// - `exodia-devastacao.json`: o Bot segura a iniciativa por 10 rodadas até o passo 236 (rodada 47) e a perde no 237 (rodada 48).
+//   tem a cura passiva (2 K); no 99 (rodada 21) os seus 4 J estão armados (nível 3) e a sua sequência é 3; no 110 (rodada 24), 5; no 160 (rodada 34),
+//   10, com a cura passiva nos seus K (regra 7: a fixture foi continuada a partir do passo 85, e nenhuma continuação tem os seus 3 K);
+// - `exodia-devastacao.json`: o Bot segura a iniciativa por 10 rodadas até o passo 236 (rodada 47) e a perde no 237 (rodada 48); no 618
+//   (rodada 125) os 3 K do Bot (a brasa), antes da Exódia.
 import { expect, test, type Page } from '@playwright/test';
 import { failOnConsoleErrors, replayControl, replayCounter } from './helpers.ts';
 import { fixtureText } from './fixtures.ts';
@@ -92,12 +93,12 @@ for (const viewport of [
       guard.expectClean();
     });
 
-    test('a chama (passo 111) e a super aura (passo 161), com o selo no placar', async ({ page }) => {
+    test('a chama (passo 110) e a super aura (passo 160), com o selo no placar', async ({ page }) => {
       const guard = failOnConsoleErrors(page);
-      await openAt(page, ESPECIAIS, 24, 111);
+      await openAt(page, ESPECIAIS, 24, 110);
       await expect(page.locator('[data-lado="voce"] [data-aura-iniciativa]')).toHaveAttribute('data-aura-iniciativa', '2');
       await expect(page.locator('[data-lado="voce"] [data-selo-sequencia]')).toHaveText('×5');
-      await openAt(page, ESPECIAIS, 34, 161);
+      await openAt(page, ESPECIAIS, 34, 160);
       await expect(page.locator('[data-lado="voce"] [data-aura-iniciativa]')).toHaveAttribute('data-aura-iniciativa', '3');
       await expect(page.locator('[data-lado="voce"] [data-selo-sequencia]')).toHaveText('×10');
       await expectInside(page, '[data-lado="voce"] [data-selo-sequencia]', '[data-placar]');
@@ -106,11 +107,11 @@ for (const viewport of [
       guard.expectClean();
     });
 
-    test('os 3 K (passo 174): a brasa nas cartas, sem texto', async ({ page }) => {
+    test('os 3 K do Bot (passo 618 da Exódia): a brasa nas cartas, sem texto', async ({ page }) => {
       const guard = failOnConsoleErrors(page);
-      await openAt(page, ESPECIAIS, 37, 174);
-      await expect(page.locator(zone('p1', 'K'))).toHaveAttribute('data-nivel', '2');
-      await expect(page.locator(zone('p1', 'K'))).not.toContainText(/Exódia|ameaça/i);
+      await openAt(page, EXODIA, 125, 618);
+      await expect(page.locator(zone('p2', 'K'))).toHaveAttribute('data-nivel', '2');
+      await expect(page.locator(zone('p2', 'K'))).not.toContainText(/Exódia|ameaça/i);
       await expectNoSideScroll(page);
       guard.expectClean();
     });

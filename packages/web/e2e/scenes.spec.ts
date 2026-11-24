@@ -12,7 +12,7 @@
 // Exódia, e a partida acaba.
 //
 // O Reflect vem de `fixtures/reflect.json`, greedy × turtle (semente `fatia4-220`, config padrão das regras de 2026-10-31): do passo 175
-// para o 176 (rodada 37) o Bot joga o Reflect contra o seu ataque; do 176 para o 177, o golpe volta (49 de dano em você); do 358 para o 359
+// para o 176 (rodada 37) o Bot joga o Reflect contra o seu ataque; do 176 para o 177, o golpe volta (21 de dano em você, regra 7); do 358 para o 359
 // (rodada 73), a sua Devastação refletida abre o chão no seu campo.
 //
 // A Ressurreição vem da mesma `exodia-devastacao.json`: do passo 27 para o 28 (rodada 7) a sua, com a quadra de 9 na fileira de destino; do 182 para o 183
@@ -20,7 +20,10 @@
 //
 // O golpe final (bloco B dos pontos do playtest, ponto 15) vem das duas que acabam pela vida: na `especiais.json`, do passo 178 para o 179
 // (rodada 37), o seu golpe comum derruba o Bot (195 de dano; ele fica com -118, e o placar mostra 0); na `absolutos.json`, do 99 para o 100
-// (rodada 21), o golpe comum do Bot derruba você (184).
+// (rodada 21), o golpe comum do Bot derruba você (184). Na regra 7 (2026-11-24) as fixtures foram continuadas com os mesmos bots a partir
+// do primeiro passo que muda (`packages/sim/scripts/continuar-fixture.ts`): o seu golpe final na `especiais` vai do 168 para o 169
+// (rodada 35; 114 de dano, ele fica com -47), o do Bot na `absolutos` do 97 para o 98 (rodada 21; 170 de dano), e a Exódia do 627 para o
+// 628 (rodada 127).
 import { expect, test, type Page } from '@playwright/test';
 import { failOnConsoleErrors, placar, replayControl, replayCounter } from './helpers.ts';
 import { fixtureText } from './fixtures.ts';
@@ -105,7 +108,7 @@ async function tapTable(page: Page): Promise<void> {
 function finalBlowTests(): void {
   test('o seu golpe final: as tarjas sem cortina, a fileira acende, o corte vai ao retrato do Bot, a tela inverte, GOLPE FINAL! e o retrato dele racha', async ({ page }) => {
     const guard = failOnConsoleErrors(page);
-    await openAt(page, 37, 178, SPECIALS_GAME);
+    await openAt(page, 35, 168, SPECIALS_GAME);
     const inverted = await watchInversion(page);
     await replayControl(page, 'Próximo passo').click();
     await expect(page.locator('[data-cena="FINAL_BLOW"]')).toHaveCount(1);
@@ -126,7 +129,7 @@ function finalBlowTests(): void {
 
   test('o golpe final do Bot: DERROTA, o corte vem até o seu retrato, e o toque pula para o seu retrato rachado e a vida 0', async ({ page }) => {
     const guard = failOnConsoleErrors(page);
-    await openAt(page, 21, 99);
+    await openAt(page, 21, 97);
     await replayControl(page, 'Próximo passo').click();
     await expect(page.locator('[data-cena="FINAL_BLOW"]')).toHaveCount(1);
     await expect(page.locator('[data-corte]')).toHaveAttribute('data-alvo', 'voce');
@@ -250,14 +253,14 @@ for (const viewport of [
       await expect(page.locator('[data-carga]')).toHaveCount(1);
       await expectMirrorInView(page);
       expect(await sawReturn, 'o cometa volta dourado').toBe(true);
-      await expect(page.locator('[data-dano]')).toHaveText('−49', { timeout: 2_000 });
+      await expect(page.locator('[data-dano]')).toHaveText('−21', { timeout: 2_000 });
       await expect(page.locator('[data-carimbo="REFLECT_TRIGGERED"]')).toBeVisible();
       await expect(page.locator('[data-cacos]')).toHaveCount(1);
       expect(await page.locator('[data-particula]').count(), 'as partículas ficam no limite').toBeLessThanOrEqual(60);
       await expectNoSideScroll(page);
       await tapTable(page);
       await expect(page.locator('[data-palco]:not([data-ocupado])')).toHaveCount(1, { timeout: 500 });
-      await expect(placar(page).locator('[data-lado="voce"] [data-hp]')).toHaveText(String(before - 49), { timeout: 500 });
+      await expect(placar(page).locator('[data-lado="voce"] [data-hp]')).toHaveText(String(before - 21), { timeout: 500 });
       await expect(page.locator('[data-espelho-zona]')).toHaveCount(0);
       await expect(page.locator('[data-cometa]')).toHaveCount(0);
       guard.expectClean();
@@ -325,7 +328,7 @@ for (const viewport of [
 
     test('a Exódia do Bot: a cena com as tarjas, sem rolar de lado, e o toque pula para o seu retrato rachado', async ({ page }) => {
       const guard = failOnConsoleErrors(page);
-      await openAt(page, 83, 407, SLICE_3_GAME);
+      await openAt(page, 127, 627, SLICE_3_GAME);
       await replayControl(page, 'Próximo passo').click();
       await expect(page.locator('[data-cena="EXODIA"]')).toHaveCount(1);
       await expect(page.locator('[data-faixa-cena="EXODIA"] [data-tarja]')).toHaveCount(2);

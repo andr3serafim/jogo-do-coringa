@@ -78,10 +78,10 @@ toque "Próximo passo" a partir do passo (com `looks` na partida, ela abre com a
 
 | Fixture | Passo (rodada) → o que toca |
 |---|---|
-| `especiais` | 10 e 11 (3): o J do Bot e o segundo J (o momento) · 35 (9): o Roubo · 51 (13): a Guarda · 78 (17): o ouro de quem lidera, os Q no nível 2 · 99 (21): os 4 J armados e a sequência 3 · 109 (23): a Armadilha · 111 (24): a sequência 5 · 137 (29): a sua cura passiva · 161 (34): a sequência 10 · 174 (37): os 3 K · 178→179: o seu golpe final |
-| `absolutos` | rodada 11: o Ataque Absoluto do Bot · rodada 13: a sua Defesa Absoluta · 99→100: a sua derrota |
-| `exodia-devastacao` | 27 (7): a sua Ressurreição · 107 (23) e 182 (37): as do Bot · 210: a Devastação · 236→237 (47–48): a troca de mão depois de 10 rodadas · 407: a Exódia do Bot |
-| `reflect` | 175 e 176 (37): o espelho e o cometa · 176: a linha da zona do Reflect · 358 (73): a Devastação refletida |
+| `especiais` | 10 e 11 (3): o J do Bot e o segundo J (o momento) · 35 (9): o Roubo · 51 (13): a Guarda · 78 (17): o ouro de quem lidera, os Q no nível 2 · 85→86: o fim do seu escudo (os 4 Q ficam) · 99 (21): os 4 J armados, os 4 Q e a sequência 3 · 110 (24): a sequência 5 · 116→117: a sua Armadilha num Q · 160 (34): a sequência 10 · 166→167: a Devastação do Bot · 168→169 (35): o seu golpe final |
+| `absolutos` | rodada 11: o Ataque Absoluto do Bot · rodada 13: a sua Defesa Absoluta · 62→63: o fim do escudo · 97→98: a sua derrota |
+| `exodia-devastacao` | 27 (7): a sua Ressurreição · 107 (23) e 182 (37): as do Bot · 210: a Devastação · 236→237 (47–48): a troca de mão depois de 10 rodadas (e o fim do seu escudo) · 331→332: o seu Reflect · 618 (125): os 3 K do Bot · 627→628 (127): a Exódia do Bot |
+| `reflect` | 175 e 176 (37): o espelho e o cometa (21 de dano volta, regra 7) · 176: a linha da zona do Reflect · 358 (73): a Devastação refletida · 372→373: a sua derrota |
 
 ## Para quem assumir
 
