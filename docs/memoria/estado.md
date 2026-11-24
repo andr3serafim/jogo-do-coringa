@@ -52,7 +52,8 @@
     rodada saiu inválida (1 a 2 quadros/s nos dois lados: a máquina com 6% de bateria, estrangulada); refeita depois de uma sonda normal.
   - **Feito:** o `CLAUDE.md`, o `LEIAME.md`, o `pnpm e2e` completo (verde depois da troca do seletor do `resurrection.spec.ts`), a revisão
     final do advisor (o conserto do carimbo no `resync` do replay; ver o diário 2026-11-23 (3)).
-  - **Próximo passo exato:** abrir o PR para a `main`. Depois, ao autor: as pranchas de `final/`, a lista das
+  - **PR #8 aberto** (https://github.com/andr3serafim/jogo-do-coringa/pull/8), CI rodando.
+  - **Próximo passo exato:** esperar o autor. Já entregue a ele: as pranchas de `final/`, a lista das
     `Ruling:` do diário 2026-11-23 (3) e o menor adiado (o `aria-expanded`), e pedir que teste no treino antes do merge.
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`; o deploy (leva
   o PR #7 e os PRs #3 a #6).
