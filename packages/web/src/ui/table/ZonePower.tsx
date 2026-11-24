@@ -2,23 +2,30 @@
 // - J nível 2 e 3: raios pequenos entre J vizinhos, pelo agendador único da mesa (≤ 3 por segundo somando tudo);
 // - J nível 3: a aura do Ataque Absoluto (as formas da cena, menores), fervendo pelo relógio único da mesa;
 // - Q nível 2: a muralha, um escudo tracejado de papel que respira atrás dos Q;
-// - Q nível 3: o escudo de ouro, parado.
+// - Q nível 3: o escudo de ouro, parado;
+// - Q nível 4: a Fortaleza (os 4 Q depois do escudo, decisoes.md 2026-11-24 (11)): um muro de pedra com ameias atrás e abaixo dos Q, parado.
 // O aceso das cartas, o pulso verde dos K e a brasa dos K são camadas desenhadas no CSS (`styles.css`, só `opacity` anima). Tudo para durante as
 // batidas e as cenas, e com movimento reduzido ficam as cores e as formas paradas, sem raio, fervura nem respiração.
 import { useRef } from 'react';
-import type { ZoneKind } from '../../model/zone-level.ts';
+import type { ZoneKind, ZoneLevel } from '../../model/zone-level.ts';
 import { ATTACK_AURA, auraVariants, BOLT_FADE_MS, BOLT_HOLD_MS } from '../anim/aura.ts';
 import { rng, spawn } from '../anim/particles.ts';
 import { useAuraBoil, useBoltSlot } from '../anim/table-clock.ts';
 
 export interface ZonePowerProps {
   kind: ZoneKind;
-  level: 0 | 1 | 2 | 3;
+  level: ZoneLevel;
   reduced: boolean;
   busy: boolean;
 }
 
 const AURA_FILL = ['var(--color-ouro)', '#ffe79a', 'var(--color-papel)'] as const;
+
+/** O muro da Fortaleza (quadro de 120 × 40; a caixa começa no alto das ameias, em y = 2): o corpo com sete ameias. */
+const FORTRESS_WALL = 'M0 40V9h7V2h9v7h8V2h9v7h8V2h9v7h8V2h9v7h8V2h9v7h8V2h9v7h8V2h9v38z';
+/** As juntas das pedras, em três fiadas. */
+const FORTRESS_JOINTS =
+  'M0 18h120M0 28h120M20 9v9M50 9v9M80 9v9M110 9v9M35 18v10M65 18v10M95 18v10M5 18v10M20 28v12M50 28v12M80 28v12M110 28v12';
 
 export function ZonePower({ kind, level, reduced, busy }: ZonePowerProps) {
   const root = useRef<HTMLDivElement>(null);
@@ -65,7 +72,19 @@ export function ZonePower({ kind, level, reduced, busy }: ZonePowerProps) {
           ))}
         </svg>
       ) : null}
-      {kind === 'Q' && level >= 2 ? (
+      {kind === 'Q' && level === 4 ? (
+        // O muro de papel com ameias e as juntas de tinta, mais largo e mais alto que as cartas (sai por cima e por baixo delas).
+        <svg
+          viewBox="0 2 120 38"
+          preserveAspectRatio="none"
+          data-fortaleza=""
+          className="absolute -left-[3%] -top-[8%] h-[124%] w-[106%] overflow-visible"
+        >
+          <path d={FORTRESS_WALL} fill="var(--color-papel)" stroke="var(--color-tinta)" strokeWidth=".9" strokeLinejoin="round" />
+          <path d={FORTRESS_JOINTS} stroke="var(--color-tinta)" strokeWidth=".6" opacity=".55" fill="none" />
+        </svg>
+      ) : null}
+      {kind === 'Q' && (level === 2 || level === 3) ? (
         <svg
           viewBox="0 0 24 26"
           data-muralha-zona={level === 2 && !reduced ? '' : undefined}

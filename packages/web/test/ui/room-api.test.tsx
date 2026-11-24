@@ -1,6 +1,7 @@
 // A `RoomApi` de verdade, com um WebSocket falso no lugar do do navegador (mesmo padrão do `client.test.ts` do
 // protocolo). O ponto é o `ReopenableClient`: o `wake()` do `RoomClient` não faz nada depois de um fechamento final
 // (4009), e o "Usar aqui" só funciona se a API de verdade reabrir o socket. `FakeConnection.wake()` não prova isso.
+import { PROTOCOL_VERSION } from '@coringa/protocol';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createRoomApi } from '../../src/app/room-api.ts';
 import type { Session } from '../../src/model/session.ts';
@@ -80,7 +81,7 @@ describe('createRoomApi().connect com o cliente de verdade', () => {
     expect(sockets()).toHaveLength(1);
     expect(sockets()[0]!.url).toBe(`ws://localhost:3000/api/rooms/${CODE}/ws`);
     sockets()[0]!.serverOpen();
-    expect(sockets()[0]!.messages()).toEqual([{ t: 'hello', protocol: 1, token: TOKEN, lastSeq: 41 }]);
+    expect(sockets()[0]!.messages()).toEqual([{ t: 'hello', protocol: PROTOCOL_VERSION, token: TOKEN, lastSeq: 41 }]);
     expect(session.snapshot().status).toBe('open');
   });
 
@@ -95,7 +96,7 @@ describe('createRoomApi().connect com o cliente de verdade', () => {
 
     expect(sockets()).toHaveLength(2);
     sockets()[1]!.serverOpen();
-    expect(sockets()[1]!.messages()).toEqual([{ t: 'hello', protocol: 1, token: TOKEN, lastSeq: 41 }]);
+    expect(sockets()[1]!.messages()).toEqual([{ t: 'hello', protocol: PROTOCOL_VERSION, token: TOKEN, lastSeq: 41 }]);
     expect(session.snapshot()).toMatchObject({ status: 'open', stop: null });
   });
 

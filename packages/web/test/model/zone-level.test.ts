@@ -14,11 +14,14 @@ describe('o nível das zonas', () => {
     expect(([['J'], ['J', 'J'], ['J', 'J', 'J'], ['J', 'J', 'J', 'J']] as CardSpec[][]).map((attackBuffs) => levelOf('J', { self: { attackBuffs } }))).toEqual([0, 1, 2, 3]);
   });
 
-  it('os Q: a Defesa Absoluta é o nível 3; sem ela (acabou e saiu 1 Q), conta o que restou', () => {
+  it('os Q: o escudo da Defesa Absoluta é o nível 3; os 4 Q sem ele, a Fortaleza (4); com menos, conta o que há', () => {
     expect(levelOf('Q', { self: { defenseBuffs: ['Q', 'Q'] } })).toBe(1);
     expect(levelOf('Q', { self: { defenseBuffs: ['Q', 'Q', 'Q'] } })).toBe(2);
     expect(levelOf('Q', { self: { defenseBuffs: ['Q', 'Q', 'Q', 'Q'], absoluteDefense: true } })).toBe(3);
     expect(levelOf('Q', { self: { defenseBuffs: ['Q', 'Q', 'Q'], absoluteDefense: false } })).toBe(2);
+    // A Fortaleza (decisoes.md 2026-11-24 (10) e (11)): os 4 Q depois do escudo são o nível 4, à parte do escudo (3).
+    expect(levelOf('Q', { self: { defenseBuffs: ['Q', 'Q', 'Q', 'Q'], absoluteDefense: false } })).toBe(4);
+    expect(levelOf('Q', { self: { defenseBuffs: ['Q', 'Q', 'WILD'] } }, { buffLimit: 3 })).toBe(4);
   });
 
   it('os K: 1, 2 e 3 → nada, a cura passiva e a brasa da ameaça', () => {

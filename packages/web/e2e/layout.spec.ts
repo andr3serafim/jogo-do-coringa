@@ -4,7 +4,8 @@
 //
 // A partida vem de `fixtures/especiais.json`, uma entrada de "partidas anteriores" com o replay de uma partida greedy × greedy do
 // simulador (semente `layout-1188`, config padrão das regras de 2026-10-31), escolhida por juntar tudo isso no passo 99: no seu campo
-// a Guarda, 4 J (Ataque Absoluto armado) e 3 Q; no do Bot, uma Ressurreição. Com o Reflect reativo (F2), a zona do Reflect só existe
+// a Guarda, 4 J (Ataque Absoluto armado) e 4 Q (na regra 7 os Q ficam: a fixture foi continuada a partir do passo 85); no do Bot, uma
+// Ressurreição. Com o Reflect reativo (F2), a zona do Reflect só existe
 // na janela de reação e nenhuma partida a junta com o resto: ela saiu da conta. O replay abre direto em `/partidas/especiais`.
 import { expect, test, type Page } from '@playwright/test';
 import { failOnConsoleErrors, replayControl, replayCounter } from './helpers.ts';
@@ -16,6 +17,7 @@ const STEP = 99;
 interface Box {
   top: number;
   bottom: number;
+  right: number;
 }
 interface ColumnBoxes {
   field: Box;
@@ -28,7 +30,7 @@ function columnBoxes(page: Page): Promise<ColumnBoxes[]> {
   return page.evaluate(() => {
     const box = (el: Element) => {
       const r = el.getBoundingClientRect();
-      return { top: r.top, bottom: r.bottom };
+      return { top: r.top, bottom: r.bottom, right: r.right };
     };
     return [...document.querySelectorAll('.campo')].map((field) => {
       const column = field.querySelector('.campo-zonas');
@@ -83,6 +85,9 @@ for (const viewport of [
         for (const card of zone.cards) {
           expect(card.top, `carta de ${zone.label} dentro da zona`).toBeGreaterThanOrEqual(zone.top - 0.5);
           expect(card.bottom, `carta de ${zone.label} dentro da zona`).toBeLessThanOrEqual(zone.bottom + 0.5);
+          // Os 4 J e os 4 Q cabem na largura do campo (na regra 7 os 4 Q ficam na mesa depois do escudo): antes, a coluna de 228 px
+          // deixava a quarta carta 13 px para fora, sob o histórico.
+          expect(card.right, `carta de ${zone.label} dentro do campo`).toBeLessThanOrEqual(field.right + 0.5);
         }
         floor = zone.bottom;
       }
@@ -95,6 +100,29 @@ for (const viewport of [
       }
       expect(floor, 'a coluna cabe no campo').toBeLessThanOrEqual(field.bottom + 0.5);
     }
+    guard.expectClean();
+  });
+}
+
+// Abaixo de 56rem de contêiner as zonas ficam lado a lado, sem a coluna: nenhuma carta do campo (fileiras e bônus, com os 4 J e os 4 Q do
+// passo 99) passa da borda direita dele, e a página não rola de lado.
+for (const viewport of [
+  { width: 1024, height: 768 },
+  { width: 1100, height: 700 },
+]) {
+  test(`especiais no PC de ${viewport.width} × ${viewport.height}: nenhuma carta passa da borda do campo`, async ({ page }) => {
+    const guard = failOnConsoleErrors(page);
+    await page.setViewportSize(viewport);
+    await openAtStep(page);
+    const overflow = await page.evaluate(() =>
+      [...document.querySelectorAll('.campo')].flatMap((field) => {
+        const right = field.getBoundingClientRect().right;
+        return [...field.querySelectorAll('li')].filter((card) => card.getBoundingClientRect().right > right + 0.5).map((card) => card.textContent);
+      }),
+    );
+    expect(overflow, 'cartas fora do campo').toEqual([]);
+    const { scroll, client } = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, client: document.documentElement.clientWidth }));
+    expect(scroll, 'a página não rola de lado').toBeLessThanOrEqual(client);
     guard.expectClean();
   });
 }

@@ -112,6 +112,15 @@ describe('mesa no terminal', () => {
     }
     expect(board).not.toMatch(/Q[♥♦♠♣]/);
   });
+
+  it('a Defesa Absoluta em duas fases: o escudo e os 4 Q (regra 7)', () => {
+    const shield = renderBoard(viewFor(setup({ p2: { defenseBuffs: ['Q', 'Q', 'Q', 'Q'], absoluteDefense: true } }), P1), names);
+    expect(shield).toContain('Defesa Absoluta (escudo)');
+    const wall = renderBoard(viewFor(setup({ p2: { defenseBuffs: ['Q', 'Q', 'Q', 'Q'] } }), P1), names);
+    expect(wall).toContain('Fortaleza (4 Q): a Defesa não perde a frente');
+    expect(wall).not.toContain('escudo');
+    expect(eventText({ type: 'AbsoluteDefenseEnded', player: P2 }, names)).toBe('O escudo da Defesa Absoluta do Bot acabou; os 4 Q ficam na Fortaleza');
+  });
 });
 
 describe('askChoice', () => {

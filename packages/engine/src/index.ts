@@ -15,6 +15,7 @@ export {
   defenseHealActive,
   defenseHealOf,
   defensePower,
+  fullDefense,
   type AttackSide,
   type DefenseSide,
 } from './combat.ts';

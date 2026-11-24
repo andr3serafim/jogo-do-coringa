@@ -2,30 +2,30 @@
   "name": "greedy-0",
   "result": {
     "kind": "WIN",
-    "winner": "p2",
+    "winner": "p1",
     "reason": "HP"
   },
   "rounds": 39,
   "finalHp": {
-    "p1": -87,
-    "p2": 100
+    "p1": 106,
+    "p2": -60
   },
   "events": {
-    "AbsoluteAttack": 2,
+    "AbsoluteAttack": 1,
     "AttackDeclared": 37,
     "BuffPlayed": 14,
-    "BuffRemoved": 2,
+    "BuffRemoved": 1,
     "CardsDealt": 38,
     "CardsPlaced": 40,
-    "CardsRemovedFromRow": 77,
-    "CardStolen": 16,
+    "CardsRemovedFromRow": 78,
+    "CardStolen": 15,
     "DamageDealt": 37,
     "DeckReshuffled": 1,
     "EquipSubmitted": 40,
     "GameOver": 1,
-    "GuardBroken": 10,
+    "GuardBroken": 9,
     "GuardPlayed": 9,
-    "Healed": 17,
+    "Healed": 15,
     "InitiativeDecided": 18,
     "OrderChosen": 19,
     "QuadBroken": 2,
@@ -35,8 +35,8 @@
     "Resurrected": 2,
     "RoundStarted": 38,
     "Sacrificed": 3,
-    "StealDamage": 16,
-    "TrapUsed": 3,
+    "StealDamage": 15,
+    "TrapUsed": 4,
     "TurnStarted": 37
   }
 }

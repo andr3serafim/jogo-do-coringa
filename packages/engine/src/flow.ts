@@ -95,12 +95,9 @@ export function endTurn(s: GameState, ev: GameEvent[], attacked: boolean): void 
 
 function expireEffects(s: GameState, owner: PlayerState, attacked: boolean, ev: GameEvent[]): void {
   if (owner.absoluteDefense && attacked) {
+    // Acaba o escudo, e os 4 Q ficam (regra 7, decisoes.md 2026-11-24 (3)): seguem segurando a frente da Defesa (`fullDefense`).
     owner.absoluteDefense = false;
-    // O Q mais antigo vai ao cemitério (spec §1.8). Sob Defesa Absoluta os Q não saem por Armadilha, Sacrifício nem Reflect.
-    const consumed = owner.defenseBuffs.length >= s.config.buffLimit ? owner.defenseBuffs.splice(0, 1) : [];
-    toGraveyard(s, consumed);
     ev.push({ type: 'AbsoluteDefenseEnded', player: owner.id });
-    if (consumed.length > 0) ev.push({ type: 'BuffRemoved', player: owner.id, cards: consumed });
   }
 }
 

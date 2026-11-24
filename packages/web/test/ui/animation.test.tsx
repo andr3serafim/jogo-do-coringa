@@ -2185,6 +2185,17 @@ describe('CardsDealt e Reflect (spec §4.2)', () => {
     expect(zone()).toHaveAttribute('data-nivel', '3');
   });
 
+  it('quando o escudo acaba, os 4 Q viram a Fortaleza na batida do fim, e não antes (regra 7)', () => {
+    const shielded: ViewSpec = { ...THEIRS, self: { ...THEIRS.self, defenseBuffs: ['Q', 'Q', 'Q', 'Q'], absoluteDefense: true } };
+    const m = mount(shielded);
+    const zone = () => m.container.querySelector('[data-campo="p1"] [data-poder="Q"]')!;
+    expect(zone()).toHaveAttribute('data-nivel', '3');
+    emit(m, { ...shielded, self: { ...shielded.self, absoluteDefense: false } }, [TURN, { type: 'AbsoluteDefenseEnded', player: 'p1' }]);
+    expect(zone()).toHaveAttribute('data-nivel', '3');
+    advance(5_000);
+    expect(zone()).toHaveAttribute('data-nivel', '4');
+  });
+
   it('a conta da fileira acompanha o total mostrado: não mostra o multiplicador novo com o total velho', () => {
     const m = mount(THEIRS);
     const row = () => screen.getByRole('group', { name: 'Sua fileira de defesa' });

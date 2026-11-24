@@ -585,7 +585,7 @@ describe('janela de reação (spec §3.7)', () => {
       // Com o Reflect a conta não é contra a sua Defesa (é metade da DEF base de quem ataca).
       {
         spec: { ...REACTION, self: { ...DRAFT.self, reflect: true } },
-        text: 'Duda declarou ataque: 84 → seu Reflect devolve 77 de dano a Duda',
+        text: 'Duda declarou ataque: 84 → seu Reflect devolve 70 de dano a Duda',
       },
     ];
     for (const { spec, text } of cases) {
@@ -611,8 +611,8 @@ describe('janela de reação (spec §3.7)', () => {
         text: 'Duda declarou ataque: 84 contra sua Defesa 46 → seu K absorve',
       },
       {
-        spec: { ...REACTION, self: { ...DRAFT.self, reflect: true }, opponent: { ...DRAFT.opponent, hp: 77 } },
-        text: 'Duda declarou ataque: 84 → seu Reflect devolve 77 de dano a Duda · derruba Duda',
+        spec: { ...REACTION, self: { ...DRAFT.self, reflect: true }, opponent: { ...DRAFT.opponent, hp: 70 } },
+        text: 'Duda declarou ataque: 84 → seu Reflect devolve 70 de dano a Duda · derruba Duda',
       },
     ];
     for (const { spec, text } of cases) {

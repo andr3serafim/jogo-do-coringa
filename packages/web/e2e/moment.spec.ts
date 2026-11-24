@@ -3,7 +3,8 @@
 // no PC baixo e no celular em pé. É o que o jsdom não prova: a camada medida, o voo e o layout de verdade.
 //
 // A partida vem de `fixtures/especiais.json` (semente `layout-1188`, treino Médio, regras 4): do passo 10 para o 11 (rodada 3) o Bot joga um
-// J e, do 11 para o 12, outro J no mesmo turno; do 51 para o 52 (rodada 13), um K na Guarda; do 109 para o 110 (rodada 23), uma Armadilha.
+// J e, do 11 para o 12, outro J no mesmo turno; do 51 para o 52 (rodada 13), um K na Guarda; do 105 para o 106 (rodada 23), uma Armadilha com o Selvagem (na regra 7 a fixture
+// foi continuada a partir do passo 85).
 import { expect, test, type Page } from '@playwright/test';
 import { equipPanel, expectNoHorizontalScroll, failOnConsoleErrors, replayControl, replayCounter } from './helpers.ts';
 import { fixtureText } from './fixtures.ts';
@@ -90,7 +91,7 @@ for (const viewport of [
     });
 
     test('um toque na mesa pula o momento: a camada some na hora', async ({ page }) => {
-      await openAt(page, 23, 109);
+      await openAt(page, 23, 105);
       await replayControl(page, 'Próximo passo').click();
       await expect(page.locator('[data-momento]')).toBeVisible();
       await page.locator('[data-palco]').click({ position: { x: 20, y: viewport.height / 2 } });

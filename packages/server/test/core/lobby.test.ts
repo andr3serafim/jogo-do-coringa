@@ -1,4 +1,5 @@
 import { viewFor } from '@coringa/engine';
+import { PROTOCOL_VERSION } from '@coringa/protocol';
 import { describe, expect, it } from 'vitest';
 import { makeStep, startGame } from '../../src/core/game.ts';
 import { RoomCore } from '../../src/core/room-core.ts';
@@ -16,7 +17,7 @@ function socketInfo(socketId: string, seat: 'p1' | 'p2' | null): SocketInfo {
 describe('hello', () => {
   it('hello válido: welcome, room para todos e attach do assento', async () => {
     const { h, p1 } = await Harness.lobby();
-    expect(p1.inbox[0]).toEqual({ t: 'welcome', protocol: 1, playerId: 'p1', serverNow: expect.any(Number) });
+    expect(p1.inbox[0]).toEqual({ t: 'welcome', protocol: PROTOCOL_VERSION, playerId: 'p1', serverNow: expect.any(Number) });
     expect(h.messages(p1, 'room').at(-1)).toMatchObject({
       status: 'LOBBY',
       seats: [
@@ -41,7 +42,7 @@ describe('hello', () => {
     expect(junk.closed?.code).toBe(4003);
 
     const old = h.open();
-    await h.send(old, { t: 'hello', protocol: 2, token: GOOD_TOKEN });
+    await h.send(old, { t: 'hello', protocol: PROTOCOL_VERSION + 1, token: GOOD_TOKEN });
     expect(h.messages(old)).toEqual([{ t: 'error', code: 'PROTOCOL_MISMATCH', message: expect.any(String) }]);
     expect(old.closed?.code).toBe(4001);
 
@@ -414,8 +415,8 @@ describe('alarme', () => {
       await h.core.onMessage(p1.id, 'lixo', h.sockets, h.now),
       await h.core.onMessage(p1.id, new ArrayBuffer(1), h.sockets, h.now),
       await h.core.onMessage(p1.id, raw({ t: 'rematch', want: true }), h.sockets, h.now),
-      await h.core.onMessage('novo', raw({ t: 'hello', protocol: 1, token: tokens.p1 }), [...h.sockets, sock('novo', null)], h.now),
-      await h.core.onMessage('ruim', raw({ t: 'hello', protocol: 1, token: GOOD_TOKEN }), [sock('ruim', null)], h.now),
+      await h.core.onMessage('novo', raw({ t: 'hello', protocol: PROTOCOL_VERSION, token: tokens.p1 }), [...h.sockets, sock('novo', null)], h.now),
+      await h.core.onMessage('ruim', raw({ t: 'hello', protocol: PROTOCOL_VERSION, token: GOOD_TOKEN }), [sock('ruim', null)], h.now),
       await h.core.onMessage(p2.id, raw({ t: 'leave' }), h.sockets, h.now),
     ];
     for (const effects of results) expect(effects.alarm).toBe(expected());

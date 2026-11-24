@@ -30,6 +30,14 @@ export function attackPower(p: AttackSide): number {
   return attackBase(p) * (1 + p.attackBuffs.length);
 }
 
+/**
+ * Os Q do limite (4) na Defesa, com ou sem o escudo da Defesa Absoluta (decisoes.md 2026-11-24 (3)): enquanto durar, a carta da
+ * frente da Defesa não sai depois dos ataques. O escudo (a imunidade) é o `absoluteDefense`, que acaba sem tirar Q.
+ */
+export function fullDefense(p: { defenseBuffs: readonly unknown[] }, config: Pick<RulesConfig, 'buffLimit'>): boolean {
+  return p.defenseBuffs.length >= config.buffLimit;
+}
+
 /** DEF = (soma + bônus) × (1 + nQ). */
 export function defensePower(p: DefenseSide): number {
   return defenseBase(p) * (1 + p.defenseBuffs.length);
@@ -108,12 +116,8 @@ export function resolveAttack(s: GameState, attackerId: PlayerId, ev: GameEvent[
     const reflect = defender.reflect;
     if (!reflect) throw new Error('prévia de Reflect sem Reflect ativo');
     defender.reflect = null;
+    // Os K de quem atacou quebram todos; os Q ficam (regra 7, decisoes.md 2026-11-24 (4)).
     breakGuards(s, attacker, result.breaks.attackerGuard, ev);
-    if (result.breaks.attackerQueens > 0) {
-      const queens = attacker.defenseBuffs.splice(0, result.breaks.attackerQueens);
-      toGraveyard(s, queens);
-      ev.push({ type: 'BuffRemoved', player: attacker.id, cards: queens });
-    }
     toGraveyard(s, [reflect.k, reflect.j, reflect.q]);
     ev.push({ type: 'ReflectTriggered', owner: defender.id, attacker: attacker.id, damage: result.reflected });
     loseHp(s, attacker, result.reflected, defender, ev);
@@ -134,7 +138,8 @@ export function resolveAttack(s: GameState, attackerId: PlayerId, ev: GameEvent[
   const removedAtk = attacker.attackRow.splice(0, 1);
   toGraveyard(s, removedAtk);
   ev.push({ type: 'CardsRemovedFromRow', player: attacker.id, row: 'ATK', cards: removedAtk });
-  if (!defender.absoluteDefense && defender.defenseRow.length > 0) {
+  // Com os 4 Q (no escudo ou depois dele), a frente da Defesa de quem foi atacado, ou de quem refletiu, fica.
+  if (!fullDefense(defender, s.config) && defender.defenseRow.length > 0) {
     const removedDef = defender.defenseRow.splice(0, 1);
     toGraveyard(s, removedDef);
     ev.push({ type: 'CardsRemovedFromRow', player: defender.id, row: 'DEF', cards: removedDef });

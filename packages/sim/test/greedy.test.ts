@@ -3,7 +3,7 @@ import { legalActions, makeConfig, viewFor, type Action, type GameState, type Pl
 // Builder de cenários do motor: monta estados reais sem inventar cartas.
 import { P1, P2, setup, type PlayerSetup } from '@coringa/engine/testing';
 import { GREEDY, greedyBot, prefersFirst } from '../src/bots/greedy.ts';
-import { resurrectionGain } from '../src/bots/eval.ts';
+import { reflectedDamage, resurrectionGain } from '../src/bots/eval.ts';
 import { turtleBot } from '../src/bots/turtle.ts';
 import type { Bot } from '../src/bots/types.ts';
 import { runGame } from '../src/match.ts';
@@ -13,6 +13,16 @@ const decide = (bot: Bot, s: GameState, who: PlayerId = P1): Action => {
   const view = viewFor(s, who);
   return bot(view, legalActions(view), createRng('teste'));
 };
+
+describe('reflectedDamage (regra 7)', () => {
+  it('ATK − DEF base de quem atacou, sem o ÷ 2; 0 no escudo da Defesa Absoluta', () => {
+    // O exemplo da spec: ATK (8 + 6) × 2 = 28; DEF base 5 + 4 + 3 = 12.
+    const s = setup({ p1: { attack: [8, 6], attackBuffs: ['J'], defense: [5, 4, 3], defenseBuffs: ['Q', 'Q'] } });
+    expect(reflectedDamage(viewFor(s, P1).self)).toBe(16);
+    const shielded = setup({ p1: { attack: [8, 6], defenseBuffs: ['Q', 'Q', 'Q', 'Q'], absoluteDefense: true } });
+    expect(reflectedDamage(viewFor(shielded, P1).self)).toBe(0);
+  });
+});
 
 describe('greedy', () => {
   it('só joga ações legais e a partida termina (20 partidas)', () => {

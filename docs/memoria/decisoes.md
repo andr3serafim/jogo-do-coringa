@@ -6,6 +6,64 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-24 (11): a Faixa de feira ajustada aprovada e a Fortaleza no muro de pedra
+
+Diante das fotos da B ajustada (`docs/superpowers/specs/2026-11-24-fim-direcoes/b2-*.png`, com o fundo claro no medalhão) e das duas
+Fortalezas (`docs/superpowers/specs/2026-11-24-fortaleza/`), ele respondeu "Aprovo" e "1 · Muro de pedra".
+
+**Leitura:** o fim de partida é a B ajustada como na foto (o fundo claro é o do medalhão; a faixa segue escura), no treino e no online. A
+Fortaleza é o muro de papel com ameias e juntas de tinta, atrás e abaixo dos Q, parado, um nível próprio na zona dos Q.
+
+---
+
+## 2026-11-24 (10): o Cordel Escuro sai, a Faixa de feira com ajustes e a Fortaleza
+
+Diante das fotos (`docs/superpowers/specs/2026-11-24-cordel-direcoes/` e `2026-11-24-fim-direcoes/`) e das perguntas da fase 2, ele
+respondeu:
+
+> [Cordel] Todas reprovadas. Cordel deve ser apenas tema padrão claro como antes.
+
+> [Fim de partida] B - Faixa de feita aprovada, mas com ajustes: Na vitória o círculo onde fica a arte do coringa deve haver apenas o
+> coringa feliz e maior proporcional ao circulo sem sobrar muito espaço porém sem exagero. o texto VITÓRIA escrito em verde, as bordas
+> do circulo do avatar permanecem douradas e o background verde bem claro. na derrota o rosto do coringa triste com texto DERROTA
+> vermelho, background vermelho bem claro, bordas iguais ao verde.
+
+> [Fase 2] Nível próprio da zona Q
+
+> [Nome] Fortaleza
+
+**Leitura:**
+- **O Cordel Escuro sai do jogo** (substitui 2026-11-23 (2)): o Cordel volta a ser só o claro. **[I]** "Como antes" de 2026-11-23 (2): no
+  treino, contra o Cordel, o bot também veste o Cordel; o id `cordel-escuro` que chegar (preferência guardada, sala online, replay
+  gravado) vira o Cordel, sem erro.
+- **O fim de partida é a B · Faixa de feira**, com: no medalhão, só o Coringa (feliz na vitória, triste na derrota), maior, ocupando o
+  círculo com folga pequena; a borda do medalhão dourada nos dois; a palavra VITÓRIA em verde e DERROTA em vermelho. **[I]** O "background
+  verde/vermelho bem claro" é o fundo do medalhão (a frase fala do círculo); as fotos da versão ajustada confirmam antes do código.
+- **A fase 2 é a Fortaleza**: um nível próprio na zona dos Q (4 Q sem escudo), entre a muralha (3 Q) e o escudo de ouro; a ajuda, o
+  histórico e a dica usam o nome. Fotos de duas variações antes do código.
+
+---
+
+## 2026-11-24 (9): o sim para o merge do PR #9
+
+Diante da pergunta "Faço o merge por squash na main?", com a CI do PR #9 verde, ele respondeu "Sim, merge".
+
+**Leitura:** o PR #9 foi mesclado por squash (`7b7f38e`).
+
+---
+
+## 2026-11-24 (8): a spec das regras aprovada; salas encerradas e abas recarregadas no deploy
+
+Diante do resumo da spec `docs/superpowers/specs/2026-11-24-defesa-absoluta-reflect-design.md` (as duas fases, o Roubo × 5 na fase 2, o
+Reflect com o dano menor e os Q que ficam), ele respondeu "Aprovo". À P2 (encerrar as salas abertas no deploy com `STATE_SCHEMA` 7 e
+fazer a aba velha recarregar com `PROTOCOL_VERSION` 2), "Sim, os dois (Recomendado)". À P3 (com 4 Q, quem reflete fica com a carta da
+frente da Defesa), "Fica (Recomendado)".
+
+**Leitura:** a spec está aprovada como escrita; `STATE_SCHEMA` 7 e `PROTOCOL_VERSION` 2 entram; o **[I]** do §1.2 da spec vira regra.
+A P1 (como a fase 2 aparece na mesa, e o nome dela) segue aberta, com fotos.
+
+---
+
 ## 2026-11-24 (7): as partidas salvas, 10 no máximo e 30 dias
 
 Ele pediu "Armazenamento de jogos salvos deve ter um limite, apenas 10 e depois de 30 dias é apagada. não sei como fica o custo de

@@ -2,6 +2,7 @@ import {
   actingPlayers,
   applyAction,
   createGame,
+  fullDefense,
   legalActions,
   viewFor,
   type GameEvent,
@@ -116,6 +117,7 @@ export function runGame(setup: GameSetup): GameRecord {
   record.attackRounds = attackRoundsUpTo(s.round);
   record.result = s.phase.kind === 'GAME_OVER' ? s.phase.result : null;
   record.capped = record.result === null && s.round > maxRounds;
-  record.absoluteDefenseAtCap = record.capped && s.players.some((p) => p.absoluteDefense);
+  // Regra 7 (2026-11-24): conta os 4 Q em qualquer fase (`fullDefense`), não só o escudo; antes contava só a Defesa Absoluta ligada.
+  record.absoluteDefenseAtCap = record.capped && s.players.some((p) => fullDefense(p, s.config));
   return record;
 }

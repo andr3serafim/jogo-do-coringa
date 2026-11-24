@@ -30,10 +30,10 @@ export function hpDamage(attacker: PublicPlayer, defender: PublicPlayer, buffLim
   return net(attacker, defender);
 }
 
-/** Dano que o atacante levaria batendo num Reflect (spec §1.6). */
+/** Dano que o atacante levaria batendo num Reflect: ATK − DEF base dele (regra 7, sem o ÷ 2); 0 no escudo da Defesa Absoluta. */
 export function reflectedDamage(attacker: PublicPlayer): number {
   if (attacker.attackRow.length === 0 || attacker.absoluteDefense) return 0;
-  return Math.max(0, attackPower(attacker) - Math.floor(defenseBase(attacker) / 2));
+  return Math.max(0, attackPower(attacker) - defenseBase(attacker));
 }
 
 /** Avaliação de mesa: o quanto eu passo da defesa dele menos o quanto ele passa da minha. */

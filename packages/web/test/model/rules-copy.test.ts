@@ -86,9 +86,9 @@ describe('resumo das regras: o fim da partida (o anti-travamento saiu na E1 do s
 describe('resumo das regras: a Defesa Absoluta dura até o ataque (motor: `endTurn` com `attacked`)', () => {
   const item = items.find((i) => i.startsWith('Defesa Absoluta'))!;
 
-  it('diz que dura até o oponente atacar e que o Q sai depois desse ataque', () => {
-    expect(item).toContain('até o oponente atacar');
-    expect(item).toContain('Depois do primeiro ataque do oponente, ela acaba e 1 Q vai para o cemitério.');
+  it('diz que o escudo dura até o fim do turno do oponente com ataque, e que nenhum Q sai (regra 7)', () => {
+    expect(item).toContain('Até o fim do primeiro turno do oponente que termina com ataque');
+    expect(item).not.toContain('cemitério');
   });
 
   it('não promete mais o fim no próximo turno', () => {
@@ -125,5 +125,27 @@ describe('resumo das regras: o Equipar livre (E2 do sub-projeto 5; motor: `order
     expect(equip).toContain('você escolhe a fileira e a ordem de cada uma');
     expect(equip).toContain('a primeira que você põe numa fileira fica na frente da fila');
     expect(equip).not.toMatch(/ordem em que saíram/);
+  });
+});
+
+// A regra 7 (decisoes.md 2026-11-24 (3), (4) e (8)): a Defesa Absoluta em duas fases e o Reflect que devolve ATK − DEF base.
+describe('resumo das regras: a Defesa Absoluta e o Reflect da regra 7', () => {
+  it('a Defesa Absoluta: o escudo, os 4 Q que seguram a frente e o escudo que volta', () => {
+    expect(items).toContain(
+      'Defesa Absoluta (4 Q): o 4º Q liga o escudo. Até o fim do primeiro turno do oponente que termina com ataque, você é imune a dano, a Armadilha, a Sacrifício, a Roubo e a Devastação; só o Ataque Absoluto fura a imunidade a dano (quebra os seus K e causa o dano normal). Depois do escudo vem a Fortaleza: enquanto você tiver os 4 Q, a DEF segue × 5 e a fileira de Defesa não perde a carta da frente depois dos ataques, mas os Q ficam ao alcance de Armadilha e Sacrifício. Todo 4º Q que entra liga o escudo de novo.',
+    );
+    expect(text).not.toContain('1 Q vai para o cemitério');
+  });
+
+  it('o Reflect: ATK menos a Defesa base inteira, os K quebram e os Q ficam', () => {
+    expect(items).toContain(
+      'Reflect (K + J + Q da mão): só na janela de reação, contra um ataque ou uma Devastação. Contra o ataque, quem atacou perde todos os K e leva de volta o próprio ataque, com o multiplicador, menos a Defesa base dele, sem o multiplicador dos Q (o dano nunca fica abaixo de 0); os Q dele ficam, e você não leva nada. Se ele estiver no escudo da Defesa Absoluta, o Reflect só segura o golpe. Contra a Devastação, ela volta para quem a lançou.',
+    );
+  });
+
+  it('a imunidade é só do escudo', () => {
+    expect(text).toContain('Nada disso alcança quem está no escudo da Defesa Absoluta.');
+    expect(text).toContain('Não funciona contra o escudo da Defesa Absoluta.');
+    expect(text).toContain('Não vale contra fileira vazia nem contra o escudo da Defesa Absoluta.');
   });
 });

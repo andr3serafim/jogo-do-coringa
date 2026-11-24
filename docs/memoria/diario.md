@@ -5,6 +5,57 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-24 (2): o PR B, a Defesa Absoluta em duas fases e o Reflect novo (regra 7)
+
+- **Branch `feat/regras-4q-reflect`**, rebaseada na `main` depois do #9. Spec `docs/superpowers/specs/2026-11-24-defesa-absoluta-reflect-design.md`
+  (aprovada, `decisoes.md` 2026-11-24 (8)); plano `docs/superpowers/plans/2026-11-24-defesa-absoluta-reflect.md` (5 tarefas, nativo, advisor
+  depois do motor, do portão e do E2E).
+- **Tarefa 1** (`eb5aafa`): `fullDefense` no `combat.ts`; o escudo (`absoluteDefense`) acaba sem tirar Q; com 4 Q a frente da Defesa fica
+  (também de quem refletiu); o Reflect devolve `ATK − defenseBase`, quebra todos os K e deixa os Q (sai `breaks.attackerQueens`); o
+  `reflectedDamage` dos bots; golden regravado; `RULES_VERSION` 7. **Tarefa 2** (`52db3fd`): `STATE_SCHEMA` 7, `PROTOCOL_VERSION` 2, as
+  regras escritas. **Tarefa 3, código** (`31c0892`): o texto e a mesa do terminal, a métrica `absoluteDefenseAtCap` com `fullDefense`.
+- **Ruling (T1):** motor, bots, golden e versão num commit só: o pre-commit puxa o `golden.test.ts` e o `rules-version.test.ts` a cada
+  mudança em `engine/src`, e o golden joga com bots — custo: um commit grande.
+- **Ruling (T1):** a conferência do golden: em 6 das 8 partidas que mudam, o primeiro passo que diverge vem depois de um Reflect ou do fim
+  do escudo; `greedy-0` e `greedy-1` divergem por uma Armadilha num K (o `6536e9c`, de 2026-11-16, mudou o greedy depois da última
+  gravação, e o golden só reproduz passos, não regrava bots) — custo: nenhum, o desvio era velho.
+- **Ruling (T1):** o `resurrection-window.test.ts` lia a fixture `exodia-devastacao` do E2E até o fim; ela diverge no passo 272. Os 200
+  primeiros passos (5 Ressurreições, o formato sem `resurrectOnQuad`) foram copiados para `engine/test/fixtures/legacy-no-resurrect-key.json`
+  — custo: um arquivo de 13 KB no teste do motor.
+- **Ruling (T2):** o `lobby.test.ts` usava `protocol: 2` como a versão errada; virou `PROTOCOL_VERSION + 1`, e os literais `1`, a constante.
+- **Ruling (T3):** a métrica `cappedWithAbsoluteDefense` mudou de sentido (conta os 4 Q em qualquer fase): o antes e o depois da
+  calibração só comparam o `capped` e a duração. Sem teste próprio (montar uma partida que bate o teto com 4 Q custa mais que a linha).
+- **Tarefa 4 (web), até aqui:** 14 testes da conta do Reflect (`copy-lethal*`, `action-bar`, `phases`) com os números novos (o meu Reflect
+  contra mim volta 129, era 141; o dele, 70, era 77); a ajuda (`RULES_SECTIONS`) e o motivo `TARGET_PROTECTED` falam do escudo; o
+  `ownSpentIds` não liga mais um Q ao fim do escudo.
+- **Armadilha:** crases dentro de `node -e "…"` no Bash viram substituição de comando (um título de teste saiu vazio); scripts com
+  template string vão por arquivo.
+- **Tarefa 4** (`c0fbb83`): a web. **Portão do Difícil** (`0d1190e`): aprovado, mas o (a) caiu de 72,5% para 65,5% (margem 2,2 EP).
+  **Calibração** (`b58c493`): nenhuma partida no teto, duração igual (greedy × greedy, mediana 12, p90 23 → 24).
+- **Tarefa 5** (`36f6b3d` e `6290884`): `packages/sim/scripts/continuar-fixture.ts` guarda os passos da partida antiga e continua com os
+  mesmos bots. absolutos (66 passos + greedy × greedy, golpe final 97→98), reflect (363 + greedy × turtle, o Reflect devolve 21 no
+  176→177), exodia-devastacao (272 + turtle × turtle, Exódia 627→628), especiais (85 + greedy × greedy: o 99 segue com 4 J e a sequência
+  3, a 5 no 110, a 10 no 160, a Armadilha do Bot no 105→106, o golpe final 168→169). `pnpm e2e`: 130 + os 14 consertados.
+- **Ruling (T5):** a especiais guarda só 85 passos (antes do fim do escudo, no 85): com os 99 legais, as continuações não davam a
+  sequência 3 com os 4 J no 99. Em 2000 sementes, nenhuma continuação tem os seus 3 K: o teste da brasa olha os 3 K do Bot no passo 618
+  da exodia-devastacao — custo: o teste passa a ser do lado do Bot.
+- **Ruling (T5):** o `fluidez` (a Devastação rola os campos) dependia da faixa "outra versão" para a fileira do Bot ficar fora de vista no
+  celular; agora o teste põe os campos no fim antes do passo — custo: nenhum, a prova (rolou, e nenhuma carta foi animada) é a mesma.
+- **A dica do tutorial** (`d5c8003`) ainda dizia "perde os K e Q". **PR #10** aberto como rascunho.
+- **As fotos** (fora do git): `docs/superpowers/specs/2026-11-24-cordel-direcoes/` (reprovadas: o Cordel Escuro sai),
+  `2026-11-24-fim-direcoes/` (a B ajustada, `prototipo.html?dir=b2`, aprovada) e `2026-11-24-fortaleza/` (o muro de pedra, aprovado).
+- **A Fortaleza e o transbordo** (`257a61e`): o nível 4 da zona dos Q (o 3 segue sendo o escudo, que os testes já conferiam); durante a
+  cena do começo do escudo a zona fica na muralha (a insígnia ainda não chegou), e só vira Fortaleza na batida do fim do escudo. No PC a
+  coluna dos especiais tinha 228 px fixos e a quarta carta passava 13 px do campo, sob o histórico: agora é
+  `max(228px, 5,9rem + 0,625rem + 4 cartas + 9px)`. `pnpm e2e`: 133 verdes.
+- **Ruling (Fortaleza):** nível 4 e não reordenar (3 Fortaleza, 4 escudo): o 3 do escudo está em testes e E2E — custo: o número do nível
+  não segue a força (o 4 é um estado à parte; o comentário do `zone-level.ts` diz isso).
+- **Ruling (transbordo):** a conta usa 4 cartas (o `buffLimit` padrão; o CSS não lê a config) — custo: com um limite maior a zona
+  sobrepõe as cartas, como já fazia acima de 4.
+- **Armadilha:** a mesa no PC só mostra 4 Q por um turno na regra 6; na 7 eles ficam: conferir larguras com o estado que dura.
+
+---
+
 ## 2026-11-24 (1): as cinco tarefas depois dos testes; o PR A (a CI e as partidas salvas)
 
 - **Pedido:** `decisoes.md` 2026-11-24 (2) a (7), com três rodadas de perguntas (a regra dos 4 Q em duas fases, o Reflect novo, o

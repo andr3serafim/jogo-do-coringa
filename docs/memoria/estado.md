@@ -7,15 +7,26 @@
 ## Agora
 
 - **Em curso: as cinco tarefas de 2026-11-24** (`decisoes.md` 2026-11-24 (2) a (7)). Quatro PRs, um por vez:
-  - **A, `feat/ci-salvos`** (esta branch, saída da `main` em `364084b`): o `timeout-minutes` do job `e2e` em 20; as partidas salvas
+  - **A, `feat/ci-salvos`** (**mesclado** por squash em `7b7f38e`, PR #9, `decisoes.md` 2026-11-24 (9)): o `timeout-minutes` do job `e2e` em 20; as partidas salvas
     com `MAX_PAST_GAMES` 10 e `MAX_PAST_GAME_AGE_MS` 30 dias (`now` obrigatório em `loadPastGames`, `findPastGame`, `attachReplay` e
     `deletePastGame`; a leitura esconde, toda gravação poda); o `e2e/fixtures.ts` carimba a data de agora nas fixtures (sem isso elas,
-    de 2026-10-30, sumiriam da lista em 2026-11-29). **Próximo passo:** `pnpm check`, push, PR, CI verde, e pedir o "sim" do merge.
-  - **B, as regras** (a Defesa Absoluta em duas fases e o Reflect novo, 2026-11-24 (3) e (4)): spec primeiro, revisada pelo advisor e
-    aprovada pelo autor antes do código. `RULES_VERSION` 7; recomendar `STATE_SCHEMA` 7; regravar o golden; o portão do Difícil com
-    `--recomecar`; a fase 2 precisa de figura na mesa (escolha dele).
-  - **C, o Cordel Escuro** (2026-11-24 (5)) e **D, o fim de partida** (2026-11-24 (6)): três direções em foto do jogo cada, antes do
-    código.
+    de 2026-10-30, sumiriam da lista em 2026-11-29). **PR #9 aberto**; a 1ª CI reprovou o `check` (o `replay-screen.test.tsx` com
+    data fixa venceu em UTC; consertado em `219b998`), o `e2e` passou em 11–12 min.
+  - **B, `feat/regras-4q-reflect`** (rebaseada na `main` depois do #9): a spec
+    `docs/superpowers/specs/2026-11-24-defesa-absoluta-reflect-design.md` **aprovada** (`decisoes.md` 2026-11-24 (8)), com
+    `STATE_SCHEMA` 7 e `PROTOCOL_VERSION` 2. O plano `docs/superpowers/plans/2026-11-24-defesa-absoluta-reflect.md` (5 tarefas, execução nativa,
+    revisado pelo advisor). **Feitas:** Tarefa 1 (`eb5aafa`: motor, `reflectedDamage`, golden, `RULES_VERSION` 7), Tarefa 2
+    (`52db3fd`: `STATE_SCHEMA` 7, `PROTOCOL_VERSION` 2, as regras escritas), a Tarefa 3 (`31c0892`; o portão do Difícil
+    **aprovado**, `0d1190e`: (a) 65,5% contra 72,5% na regra 6, margem de 2,2 EP; (b) 74%; p95 134 ms) e a Tarefa 4 (`c0fbb83`, a
+    web), a Tarefa 5 (`36f6b3d`, `6290884`: as fixtures continuadas com `continuar-fixture.ts`; `pnpm e2e` verde) e a calibração
+    (`b58c493`: nenhuma partida travada). **PR #10** (rascunho até a Fortaleza): a Fortaleza e o conserto do transbordo feitos (`257a61e`), `pnpm e2e` verde (133).
+    **Próximo passo:** o advisor, o push, o PR pronto e o "sim" do merge.
+  - **C, o Cordel Escuro sai** (`decisoes.md` 2026-11-24 (10)): o Cordel volta a ser só o claro; `cordel-escuro` que chegar vira o Cordel.
+    Branch própria depois da B.
+  - **D, o fim de partida**: a B · Faixa de feira ajustada (`docs/superpowers/specs/2026-11-24-fim-direcoes/b2-*.png`, o protótipo em
+    `prototipo.html?dir=b2`), aprovada em 2026-11-24 (11). Branch própria; spec curta antes do código.
+  - As fotos que decidiram (C, D, Fortaleza) e os scripts estão no git: `docs/superpowers/specs/2026-11-24-cordel-direcoes/`,
+    `2026-11-24-fim-direcoes/` (o protótipo aprovado: `prototipo.html?dir=b2`) e `2026-11-24-fortaleza/`.
 - **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele), que leva o PR #8; apagar a branch `feat/cura-historico-visitantes`
   (mesclada).
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`.
@@ -55,7 +66,7 @@
   pular` só nos E2E; nenhum flash de tela.
 - **Mesa e cenas:** a última cena só fica com a cortina da cena (`veil === 'scene'`); a poeira é do `Leaving` e sai da página ao fim; só uma
   carta de verdade na lápide; a faixa do PC com ≤ 70 px; a carta que entra esmaecendo só guarda o alvo `opacity: 1` depois de entrar.
-- **Regras:** a chave `stealBuffed` (o Roubo de antes nos replays velhos); `RULES_VERSION` 6, `STATE_SCHEMA` 6.
+- **Regras:** a chave `stealBuffed` (o Roubo de antes nos replays velhos); `RULES_VERSION` 7, `STATE_SCHEMA` 7 (na branch B).
 - **Equipar:** os destinos são carimbos de tamanho fixo (`.carimbo-destino`), com o nome inteiro no `aria-label`; eles descem de linha,
   nunca encolhem.
 - O JavaScript inicial ≤ 200 KB (o smoke).
@@ -67,10 +78,10 @@ toque "Próximo passo" a partir do passo (com `looks` na partida, ela abre com a
 
 | Fixture | Passo (rodada) → o que toca |
 |---|---|
-| `especiais` | 10 e 11 (3): o J do Bot e o segundo J (o momento) · 35 (9): o Roubo · 51 (13): a Guarda · 78 (17): o ouro de quem lidera, os Q no nível 2 · 99 (21): os 4 J armados e a sequência 3 · 109 (23): a Armadilha · 111 (24): a sequência 5 · 137 (29): a sua cura passiva · 161 (34): a sequência 10 · 174 (37): os 3 K · 178→179: o seu golpe final |
-| `absolutos` | rodada 11: o Ataque Absoluto do Bot · rodada 13: a sua Defesa Absoluta · 99→100: a sua derrota |
-| `exodia-devastacao` | 27 (7): a sua Ressurreição · 107 (23) e 182 (37): as do Bot · 210: a Devastação · 236→237 (47–48): a troca de mão depois de 10 rodadas · 407: a Exódia do Bot |
-| `reflect` | 175 e 176 (37): o espelho e o cometa · 176: a linha da zona do Reflect · 358 (73): a Devastação refletida |
+| `especiais` | 10 e 11 (3): o J do Bot e o segundo J (o momento) · 35 (9): o Roubo · 51 (13): a Guarda · 78 (17): o ouro de quem lidera, os Q no nível 2 · 85→86: o fim do seu escudo (os 4 Q ficam) · 90 (19): a Fortaleza · 99 (21): os 4 J armados, os 4 Q e a sequência 3 · 110 (24): a sequência 5 · 116→117: a sua Armadilha num Q · 160 (34): a sequência 10 · 166→167: a Devastação do Bot · 168→169 (35): o seu golpe final |
+| `absolutos` | rodada 11: o Ataque Absoluto do Bot · rodada 13: a sua Defesa Absoluta · 62→63: o fim do escudo · 97→98: a sua derrota |
+| `exodia-devastacao` | 27 (7): a sua Ressurreição · 107 (23) e 182 (37): as do Bot · 210: a Devastação · 236→237 (47–48): a troca de mão depois de 10 rodadas (e o fim do seu escudo) · 331→332: o seu Reflect · 618 (125): os 3 K do Bot · 627→628 (127): a Exódia do Bot |
+| `reflect` | 175 e 176 (37): o espelho e o cometa (21 de dano volta, regra 7) · 176: a linha da zona do Reflect · 358 (73): a Devastação refletida · 372→373: a sua derrota |
 
 ## Para quem assumir
 

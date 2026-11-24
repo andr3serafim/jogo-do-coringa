@@ -198,20 +198,20 @@ describe('os casos que o texto promete, um a um (frase e motor)', () => {
   });
 
   it('o Reflect de Duda que devolve o golpe e zera a SUA vida derruba você, e o vencedor é Duda', () => {
-    // O motor usa metade da DEF base de quem ataca, sem os Q (⌊23/2⌋ = 11), contra o ATK: 114 − 11 = 103 voltam para você.
-    const { state, view } = scenarioAt(mine.spec({ ...ME, hp: 103 }, { ...FOE, reflect: true }));
-    expect(mine.text(view)).toBe('114 × 11 · Reflect de Duda: 103 de dano volta para você · derruba você');
+    // O motor usa a DEF base de quem ataca, sem os Q (23; regra 7, sem o ÷ 2), contra o ATK: 114 − 23 = 91 voltam para você.
+    const { state, view } = scenarioAt(mine.spec({ ...ME, hp: 91 }, { ...FOE, reflect: true }));
+    expect(mine.text(view)).toBe('114 × 23 · Reflect de Duda: 91 de dano volta para você · derruba você');
     expect(playOut(state, mine)).toEqual({ kind: 'WIN', winner: 'p2', reason: 'HP' });
     // Com 1 de vida a mais, sobra vida: nem o texto nem o motor derrubam.
-    const survives = scenarioAt(mine.spec({ ...ME, hp: 104 }, { ...FOE, reflect: true }));
-    expect(mine.text(survives.view)).toBe('114 × 11 · Reflect de Duda: 103 de dano volta para você');
+    const survives = scenarioAt(mine.spec({ ...ME, hp: 92 }, { ...FOE, reflect: true }));
+    expect(mine.text(survives.view)).toBe('114 × 23 · Reflect de Duda: 91 de dano volta para você');
     expect(playOut(survives.state, mine)).toBeNull();
   });
 
   it('o seu Reflect que devolve o bastante derruba Duda, e o vencedor é você', () => {
-    // Duda ataca com 56 contra ⌊(DEF base dele, sem os Q) 14 / 2⌋ = 7: 49 voltam para ele.
-    const { state, view } = scenarioAt(threat.spec({ ...FOE, hp: 49 }, { ...ME, reflect: true }));
-    expect(threat.text(view)).toBe('56 × 7 · seu Reflect devolve 49 de dano a Duda · derruba Duda');
+    // Duda ataca com 56 contra a DEF base dele, sem os Q (14; regra 7): 42 voltam para ele.
+    const { state, view } = scenarioAt(threat.spec({ ...FOE, hp: 42 }, { ...ME, reflect: true }));
+    expect(threat.text(view)).toBe('56 × 14 · seu Reflect devolve 42 de dano a Duda · derruba Duda');
     expect(playOut(state, threat)).toEqual({ kind: 'WIN', winner: 'p1', reason: 'HP' });
   });
 

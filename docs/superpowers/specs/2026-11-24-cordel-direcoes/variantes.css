@@ -1,0 +1,56 @@
+/*
+ * As três direções do Cordel Escuro (decisoes.md 2026-11-24 (5)): cor chapada, sem grão nem degradê, e um fundo que combina com o
+ * vermelho em vez de brigar com ele. O valor e o naipe ficam do tamanho e no lugar de hoje. Só para as fotos: o script injeta esta folha
+ * e põe `data-variante` nas cartas `[data-tom="escuro"]`.
+ * Contraste (WCAG) do vermelho sobre o fundo: A 6,2:1 · B 4,5:1 · C 5,8:1 (o de hoje, #e53935 sobre #2a2a2a: 3,4:1).
+ */
+[data-tom='escuro'][data-variante] {
+  background-image: none !important;
+}
+[data-tom='escuro'][data-variante] [data-valor].text-vermelho {
+  background-image: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  color: var(--color-vermelho) !important;
+}
+
+/* A · Anil: o azul-noite da xilogravura impressa, tinta de papel e o vermelho de coral. */
+[data-tom='escuro'][data-variante='a'] {
+  --color-papel: #1e2a46;
+  --color-tinta: #f2e9d6;
+  --color-vermelho: #ff8a6e;
+  background-color: #1e2a46 !important;
+  border-color: #0e1526 !important;
+}
+
+/* B · Kraft: o papel pardo do folheto de feira (não é escuro: é o meio-tom), tinta funda e vermelho de sangue de boi. */
+[data-tom='escuro'][data-variante='b'] {
+  --color-papel: #c9a57a;
+  --color-tinta: #231710;
+  --color-vermelho: #7e1810;
+  background-color: #c9a57a !important;
+  border-color: #231710 !important;
+}
+
+/* C · Café: o marrom de madeira queimada, tinta de papel e o vermelho de terracota (tudo quente, nada de cinza). */
+[data-tom='escuro'][data-variante='c'] {
+  --color-papel: #2b1f18;
+  --color-tinta: #f3e7d0;
+  --color-vermelho: #f07a5c;
+  background-color: #2b1f18 !important;
+  border-color: #120c08 !important;
+}
+
+/* O verso (a mão do oponente, o monte): as listras em dois tons do fundo de cada direção, com a borda de tinta. */
+[data-verso-deck='cordel-escuro'][data-variante='a'] {
+  border-color: #0e1526 !important;
+  background: repeating-linear-gradient(45deg, #1e2a46 0 2px, #f2e9d6 2px 4px) !important;
+}
+[data-verso-deck='cordel-escuro'][data-variante='b'] {
+  border-color: #231710 !important;
+  background: repeating-linear-gradient(45deg, #7e1810 0 2px, #c9a57a 2px 4px) !important;
+}
+[data-verso-deck='cordel-escuro'][data-variante='c'] {
+  border-color: #120c08 !important;
+  background: repeating-linear-gradient(45deg, #2b1f18 0 2px, #f07a5c 2px 4px) !important;
+}

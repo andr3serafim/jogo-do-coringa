@@ -392,7 +392,7 @@ describe('barra de ação: prévias e o botão principal (spec §3.4)', () => {
       },
       {
         spec: { ...DRAFT, opponent: { ...DRAFT.opponent, reflect: true } },
-        text: '152 × 11 · Reflect de Duda: 141 de dano volta para você',
+        text: '152 × 23 · Reflect de Duda: 129 de dano volta para você',
       },
     ];
     for (const { spec, text } of cases) {
@@ -425,14 +425,14 @@ describe('barra de ação: prévias e o botão principal (spec §3.4)', () => {
   });
 
   it('contra o Reflect de Duda o botão diz "derruba você" quando o que volta alcança a sua vida', () => {
-    const lethal = mount({ ...DRAFT, self: { ...DRAFT.self, hp: 141 }, opponent: { ...DRAFT.opponent, reflect: true } });
+    const lethal = mount({ ...DRAFT, self: { ...DRAFT.self, hp: 129 }, opponent: { ...DRAFT.opponent, reflect: true } });
     expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toHaveAccessibleName(
-      'Atacar 152 × 11 · Reflect de Duda: 141 de dano volta para você · derruba você',
+      'Atacar 152 × 23 · Reflect de Duda: 129 de dano volta para você · derruba você',
     );
     lethal.unmount();
-    mount({ ...DRAFT, self: { ...DRAFT.self, hp: 142 }, opponent: { ...DRAFT.opponent, reflect: true } });
+    mount({ ...DRAFT, self: { ...DRAFT.self, hp: 130 }, opponent: { ...DRAFT.opponent, reflect: true } });
     expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toHaveAccessibleName(
-      'Atacar 152 × 11 · Reflect de Duda: 141 de dano volta para você',
+      'Atacar 152 × 23 · Reflect de Duda: 129 de dano volta para você',
     );
   });
 
@@ -875,7 +875,7 @@ describe('barra de ação: a escolha depende da época e da mão (spec §1.5, pa
     nextState(m, { epoch: 1 }, protectedView);
     expect(handCard('A')).toHaveAttribute('aria-pressed', 'true');
     expect(inBar().queryByRole('list', { name: 'Alvos' })).not.toBeInTheDocument();
-    expect(inBar().getByText(/: Duda está sob Defesa Absoluta: nada de Armadilha nem Sacrifício$/)).toBeInTheDocument();
+    expect(inBar().getByText(/: Duda está no escudo da Defesa Absoluta: nada de Armadilha nem Sacrifício$/)).toBeInTheDocument();
   });
 });
 

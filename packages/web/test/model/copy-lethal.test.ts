@@ -9,7 +9,7 @@ import { viewAt, type SideSpec, type ViewSpec } from '../fixtures.ts';
 
 /**
  * A Peleja: ATK 152 contra DEF 42 com um K na Guarda de Duda; do outro lado, 84 contra a minha DEF 46 com um K na minha Guarda.
- * Sem Guarda o dano é 110 (meu) e 38 (dele); com Reflect, 141 volta para mim e 77 para ele. (Sem a Pressão da mesa, que saiu no
+ * Sem Guarda o dano é 110 (meu) e 38 (dele); com Reflect, 129 volta para mim e 70 para ele (regra 7: ATK − DEF base, sem o ÷ 2). (Sem a Pressão da mesa, que saiu no
  * sub-projeto 5, um J a mais de cada lado mantém as contas: 38 × 4 e 28 × 3.)
  */
 const DRAFT: ViewSpec = {
@@ -111,24 +111,24 @@ describe('o seu ataque: o botão Atacar', () => {
   });
 
   it('contra o Reflect de Duda, o texto de hoje e, se o que volta zera a sua vida, "derruba você"', () => {
-    expect(previewsOf(viewAt(draft({}, { reflect: true }))).mine).toMatchObject({ outcome: 'REFLECTED', reflected: 141 });
-    expect(mine(draft({ hp: 141 }, { reflect: true }))).toBe('152 × 11 · Reflect de Duda: 141 de dano volta para você · derruba você');
-    expect(mine(draft({ hp: 100 }, { reflect: true }))).toBe('152 × 11 · Reflect de Duda: 141 de dano volta para você · derruba você');
+    expect(previewsOf(viewAt(draft({}, { reflect: true }))).mine).toMatchObject({ outcome: 'REFLECTED', reflected: 129 });
+    expect(mine(draft({ hp: 129 }, { reflect: true }))).toBe('152 × 23 · Reflect de Duda: 129 de dano volta para você · derruba você');
+    expect(mine(draft({ hp: 100 }, { reflect: true }))).toBe('152 × 23 · Reflect de Duda: 129 de dano volta para você · derruba você');
   });
 
   it('contra o Reflect de Duda, o que volta e deixa vida sobrando não derruba', () => {
-    expect(mine(draft({ hp: 142 }, { reflect: true }))).toBe('152 × 11 · Reflect de Duda: 141 de dano volta para você');
-    expect(mine(draft({}, { reflect: true }))).toBe('152 × 11 · Reflect de Duda: 141 de dano volta para você');
+    expect(mine(draft({ hp: 130 }, { reflect: true }))).toBe('152 × 23 · Reflect de Duda: 129 de dano volta para você');
+    expect(mine(draft({}, { reflect: true }))).toBe('152 × 23 · Reflect de Duda: 129 de dano volta para você');
   });
 
   it('contra o Reflect, a vida baixa de Duda não conta: o dano nele é 0', () => {
-    expect(mine(draft({ hp: 187 }, { reflect: true, hp: 1 }))).toBe('152 × 11 · Reflect de Duda: 141 de dano volta para você');
+    expect(mine(draft({ hp: 187 }, { reflect: true, hp: 1 }))).toBe('152 × 23 · Reflect de Duda: 129 de dano volta para você');
   });
 
   it('contra o Reflect sem nada que volte (a sua Defesa Absoluta), não derruba', () => {
     const spec = draft({ absoluteDefense: true, hp: 1 }, { reflect: true });
     expect(previewsOf(viewAt(spec)).mine).toMatchObject({ outcome: 'REFLECTED', reflected: 0 });
-    expect(mine(spec)).toBe('152 × 11 · Reflect de Duda: nada volta para você');
+    expect(mine(spec)).toBe('152 × 23 · Reflect de Duda: nada volta para você');
   });
 
   it('sem ataque, sem "derruba"', () => {
@@ -165,20 +165,20 @@ describe('o ataque de Duda contra você: a ameaça', () => {
   });
 
   it('o seu Reflect que devolve o bastante derruba Duda; sem o bastante, não', () => {
-    expect(previewsOf(viewAt(draft({ reflect: true }, {}))).threat).toMatchObject({ outcome: 'REFLECTED', reflected: 77 });
-    expect(threat(draft({ reflect: true }, { hp: 77 }))).toBe('84 × 7 · seu Reflect devolve 77 de dano a Duda · derruba Duda');
-    expect(threat(draft({ reflect: true }, { hp: 50 }))).toBe('84 × 7 · seu Reflect devolve 77 de dano a Duda · derruba Duda');
-    expect(threat(draft({ reflect: true }, { hp: 78 }))).toBe('84 × 7 · seu Reflect devolve 77 de dano a Duda');
+    expect(previewsOf(viewAt(draft({ reflect: true }, {}))).threat).toMatchObject({ outcome: 'REFLECTED', reflected: 70 });
+    expect(threat(draft({ reflect: true }, { hp: 70 }))).toBe('84 × 14 · seu Reflect devolve 70 de dano a Duda · derruba Duda');
+    expect(threat(draft({ reflect: true }, { hp: 50 }))).toBe('84 × 14 · seu Reflect devolve 70 de dano a Duda · derruba Duda');
+    expect(threat(draft({ reflect: true }, { hp: 71 }))).toBe('84 × 14 · seu Reflect devolve 70 de dano a Duda');
   });
 
   it('com o seu Reflect, a sua vida baixa não conta: você não leva nada', () => {
-    expect(threat(draft({ reflect: true, hp: 1 }, { hp: 214 }))).toBe('84 × 7 · seu Reflect devolve 77 de dano a Duda');
+    expect(threat(draft({ reflect: true, hp: 1 }, { hp: 214 }))).toBe('84 × 14 · seu Reflect devolve 70 de dano a Duda');
   });
 
   it('o seu Reflect que anula o ataque (a Defesa Absoluta de Duda) não derruba ninguém', () => {
     const spec = draft({ reflect: true, hp: 1 }, { absoluteDefense: true, hp: 1 });
     expect(previewsOf(viewAt(spec)).threat).toMatchObject({ outcome: 'REFLECTED', reflected: 0 });
-    expect(threat(spec)).toBe('84 × 7 · seu Reflect anula o ataque, dano 0');
+    expect(threat(spec)).toBe('84 × 14 · seu Reflect anula o ataque, dano 0');
   });
 });
 
@@ -202,8 +202,8 @@ describe('o gatilho da janela de reação (o ataque de Duda declarado)', () => {
   });
 
   it('o seu Reflect que devolve o bastante derruba Duda', () => {
-    expect(declared(draft({ reflect: true }, { hp: 77 }))).toBe('Duda declarou ataque: 84 → seu Reflect devolve 77 de dano a Duda · derruba Duda');
-    expect(declared(draft({ reflect: true }, { hp: 78 }))).toBe('Duda declarou ataque: 84 → seu Reflect devolve 77 de dano a Duda');
+    expect(declared(draft({ reflect: true }, { hp: 70 }))).toBe('Duda declarou ataque: 84 → seu Reflect devolve 70 de dano a Duda · derruba Duda');
+    expect(declared(draft({ reflect: true }, { hp: 71 }))).toBe('Duda declarou ataque: 84 → seu Reflect devolve 70 de dano a Duda');
   });
 });
 

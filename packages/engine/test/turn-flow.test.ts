@@ -190,7 +190,8 @@ describe('fim da rodada de Ataque', () => {
   });
 });
 
-// A Defesa Absoluta dura até o oponente atacar de fato (autor, 2026-10-30; spec 1 §1.8).
+// O escudo da Defesa Absoluta dura até o oponente atacar de fato (autor, 2026-10-30; spec 1 §1.8) e acaba sem tirar Q (regra 7,
+// decisoes.md 2026-11-24 (3)).
 describe('Defesa Absoluta até o ataque', () => {
   const absolute: PlayerSetup = { defenseBuffs: ['Q', 'Q', 'Q', 'Q'], absoluteDefense: true };
 
@@ -221,14 +222,14 @@ describe('Defesa Absoluta até o ataque', () => {
     expect(player(s, P2).defenseBuffs).toHaveLength(4);
   });
 
-  it('acaba depois do ataque do oponente e consome 1 Q', () => {
+  it('acaba depois do ataque do oponente, e os 4 Q ficam', () => {
     const r = steps(setup({ p1: { attack: [5] }, p2: { ...absolute } }), [
       [P1, { type: 'DECLARE_ATTACK' }],
       [P2, { type: 'PASS' }],
     ]);
     expect(r.events).toContainEqual({ type: 'AbsoluteDefenseEnded', player: P2 });
     expect(player(r.state, P2).absoluteDefense).toBe(false);
-    expect(player(r.state, P2).defenseBuffs).toHaveLength(3);
+    expect(player(r.state, P2).defenseBuffs).toHaveLength(4);
     expect(player(r.state, P2).hp).toBe(100);
   });
 
@@ -239,7 +240,7 @@ describe('Defesa Absoluta até o ataque', () => {
     ]);
     expect(player(r.state, P2).hp).toBe(95);
     expect(r.events).toContainEqual({ type: 'AbsoluteDefenseEnded', player: P2 });
-    expect(player(r.state, P2).defenseBuffs).toHaveLength(3);
+    expect(player(r.state, P2).defenseBuffs).toHaveLength(4);
   });
 
   it('um ataque devolvido pelo Reflect também a encerra', () => {

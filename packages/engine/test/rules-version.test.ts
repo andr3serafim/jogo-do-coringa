@@ -25,6 +25,7 @@ const RULES_DIGESTS: Record<number, string> = {
   // 6 (decisoes.md 2026-11-16 (1) e (3)): o Roubo vale a carta com o buff da fileira de onde ela sai (× (1 + J) ou × (1 + Q), sem a
   // quadra), e o K não o anula; os bots avaliam o Roubo pela conta nova. Os commits seguintes da mesma branch trocam só este digest.
   6: '33a8ef357f7400f64d052697c20d13b0752dacb9eca51134251ef3dcbb680faa',
+  7: '96b8a308f7188e993b4e5140dc2c82c34cc607caf770305651e03d36dbf4654f',
 };
 
 const GOLDEN_DIR = new URL('./__snapshots__/golden/', import.meta.url);

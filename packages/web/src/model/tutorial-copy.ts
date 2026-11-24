@@ -41,7 +41,7 @@ const HINT_TEXT: Record<HintId, string> = {
   devastation:
     'Devastação: K + A + J da mão esvazia a fileira de Ataque do oponente; K + A + Q, a de Defesa. As numéricas dela vão para o cemitério, e os bônus ficam. Ele só pode responder com um Reflect, que devolve a Devastação para você.',
   reflect:
-    'Reflect é K + J + Q da mão, jogado quando o oponente ataca ou lança uma Devastação. O ataque volta para ele, que perde os K e Q, e você não leva nada; a Devastação volta para quem a lançou. Se ele responder com outro Reflect, os dois se anulam.',
+    'Reflect é K + J + Q da mão, jogado quando o oponente ataca ou lança uma Devastação. O ataque volta para ele, menos a Defesa base dele; ele perde os K (os Q ficam), e você não leva nada; a Devastação volta para quem a lançou. Se ele responder com outro Reflect, os dois se anulam.',
   limit:
     'Sua mão guarda no máximo 4 especiais: a que passaria disso vai direto para o cemitério. Jogue as especiais para abrir espaço.',
   end: END_HINT,
