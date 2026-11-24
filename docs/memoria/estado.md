@@ -19,11 +19,16 @@
     (`52db3fd`: `STATE_SCHEMA` 7, `PROTOCOL_VERSION` 2, as regras escritas), a Tarefa 3 (`31c0892`; o portão do Difícil
     **aprovado**, `0d1190e`: (a) 65,5% contra 72,5% na regra 6, margem de 2,2 EP; (b) 74%; p95 134 ms) e a Tarefa 4 (`c0fbb83`, a
     web), a Tarefa 5 (`36f6b3d`, `6290884`: as fixtures continuadas com `continuar-fixture.ts`; `pnpm e2e` verde) e a calibração
-    (`b58c493`: nenhuma partida travada). **Próximo passo:** o advisor na branch inteira, push e PR para a `main` (o autor dá o "sim" do
-    merge).
-    A P1 (como a fase 2 aparece na mesa, e o nome dela) vai com fotos, junto com C e D.
-  - **C, o Cordel Escuro** (2026-11-24 (5)) e **D, o fim de partida** (2026-11-24 (6)): três direções em foto do jogo cada, antes do
-    código.
+    (`b58c493`: nenhuma partida travada). **PR #10 aberto como rascunho** (não mesclar antes da Fortaleza). **Próximo passo:** a Fortaleza (`decisoes.md` 2026-11-24
+    (10) e (11): um nível próprio na zona dos Q para os 4 Q depois do escudo, o muro de pedra das fotos em
+    `docs/superpowers/specs/2026-11-24-fortaleza/fotos.mjs`; o nome na ajuda, no histórico e na dica) e o conserto do transbordo: no PC
+    (1366 a 1920 px) os 4 J e os 4 Q passam 13 px da borda do campo e ficam sob o histórico. Depois, o "sim" do merge.
+  - **C, o Cordel Escuro sai** (`decisoes.md` 2026-11-24 (10)): o Cordel volta a ser só o claro; `cordel-escuro` que chegar vira o Cordel.
+    Branch própria depois da B.
+  - **D, o fim de partida**: a B · Faixa de feira ajustada (`docs/superpowers/specs/2026-11-24-fim-direcoes/b2-*.png`, o protótipo em
+    `prototipo.html?dir=b2`), aprovada em 2026-11-24 (11). Branch própria; spec curta antes do código.
+  - As fotos das direções (C, D, Fortaleza) ficam fora do git até cada PR: as pastas `docs/superpowers/specs/2026-11-24-*-direcoes/` e
+    `2026-11-24-fortaleza/`.
 - **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele), que leva o PR #8; apagar a branch `feat/cura-historico-visitantes`
   (mesclada).
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`.
