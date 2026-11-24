@@ -16,11 +16,14 @@
     `docs/superpowers/specs/2026-11-24-defesa-absoluta-reflect-design.md` **aprovada** (`decisoes.md` 2026-11-24 (8)), com
     `STATE_SCHEMA` 7 e `PROTOCOL_VERSION` 2. O plano `docs/superpowers/plans/2026-11-24-defesa-absoluta-reflect.md` (5 tarefas, execução nativa,
     revisado pelo advisor). **Feitas:** Tarefa 1 (`eb5aafa`: motor, `reflectedDamage`, golden, `RULES_VERSION` 7), Tarefa 2
-    (`52db3fd`: `STATE_SCHEMA` 7, `PROTOCOL_VERSION` 2, as regras escritas) e o código da Tarefa 3 (`31c0892`). **Rodando:**
-    `pnpm sim:dificil --recomecar` (em background; se a conta cair, rode de novo). **A seguir, sem esperar o portão:** a Tarefa 4
-    (a web: 14 testes falham, todos da conta do Reflect em `copy-lethal*.test.ts`, `action-bar.test.tsx`, `phases.test.tsx`;
-    nenhum depende de fixture) e a Tarefa 5 (as 4 fixtures do E2E divergem na regra 7: exodia-devastacao no passo 272, absolutos
-    no 66, especiais no 99, reflect chega ao fim com outro resultado). Não edite `engine/src` nem `sim/src` com o portão rodando.
+    (`52db3fd`: `STATE_SCHEMA` 7, `PROTOCOL_VERSION` 2, as regras escritas), a Tarefa 3 (`31c0892`; o portão do Difícil
+    **aprovado**, `0d1190e`: (a) 65,5% contra 72,5% na regra 6, margem de 2,2 EP; (b) 74%; p95 134 ms) e a Tarefa 4 (`c0fbb83`, a
+    web). **Rodando:** `pnpm sim:calibrate` (a regra 6, de 2026-11-16, está em `calibracao.md` antes deste commit; comparar só o
+    `capped` e a duração). **Próximo passo:** a Tarefa 5 com `packages/sim/scripts/continuar-fixture.ts` (guarda os passos que a
+    regra 7 aceita e continua a partida com os bots). Atenção: a partida muda já no primeiro `AbsoluteDefenseEnded` ou
+    `ReflectTriggered`, antes do passo recusado; os checkpoints dos specs depois desse passo são recontados no motor. Critérios:
+    absolutos `vence-p2`, especiais `vence-p1`, exodia-devastacao `exodia-p2`, reflect `vence-p2` (e o `RowDevastated` refletido
+    perto do 358). As fixtures passam a `rulesVersion` 7 (a faixa "outra versão" some: conferir os specs que contam com ela).
     A P1 (como a fase 2 aparece na mesa, e o nome dela) vai com fotos, junto com C e D.
   - **C, o Cordel Escuro** (2026-11-24 (5)) e **D, o fim de partida** (2026-11-24 (6)): três direções em foto do jogo cada, antes do
     código.

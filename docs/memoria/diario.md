@@ -5,6 +5,34 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-24 (2): o PR B, a Defesa Absoluta em duas fases e o Reflect novo (regra 7)
+
+- **Branch `feat/regras-4q-reflect`**, rebaseada na `main` depois do #9. Spec `docs/superpowers/specs/2026-11-24-defesa-absoluta-reflect-design.md`
+  (aprovada, `decisoes.md` 2026-11-24 (8)); plano `docs/superpowers/plans/2026-11-24-defesa-absoluta-reflect.md` (5 tarefas, nativo, advisor
+  depois do motor, do portão e do E2E).
+- **Tarefa 1** (`eb5aafa`): `fullDefense` no `combat.ts`; o escudo (`absoluteDefense`) acaba sem tirar Q; com 4 Q a frente da Defesa fica
+  (também de quem refletiu); o Reflect devolve `ATK − defenseBase`, quebra todos os K e deixa os Q (sai `breaks.attackerQueens`); o
+  `reflectedDamage` dos bots; golden regravado; `RULES_VERSION` 7. **Tarefa 2** (`52db3fd`): `STATE_SCHEMA` 7, `PROTOCOL_VERSION` 2, as
+  regras escritas. **Tarefa 3, código** (`31c0892`): o texto e a mesa do terminal, a métrica `absoluteDefenseAtCap` com `fullDefense`.
+- **Ruling (T1):** motor, bots, golden e versão num commit só: o pre-commit puxa o `golden.test.ts` e o `rules-version.test.ts` a cada
+  mudança em `engine/src`, e o golden joga com bots — custo: um commit grande.
+- **Ruling (T1):** a conferência do golden: em 6 das 8 partidas que mudam, o primeiro passo que diverge vem depois de um Reflect ou do fim
+  do escudo; `greedy-0` e `greedy-1` divergem por uma Armadilha num K (o `6536e9c`, de 2026-11-16, mudou o greedy depois da última
+  gravação, e o golden só reproduz passos, não regrava bots) — custo: nenhum, o desvio era velho.
+- **Ruling (T1):** o `resurrection-window.test.ts` lia a fixture `exodia-devastacao` do E2E até o fim; ela diverge no passo 272. Os 200
+  primeiros passos (5 Ressurreições, o formato sem `resurrectOnQuad`) foram copiados para `engine/test/fixtures/legacy-no-resurrect-key.json`
+  — custo: um arquivo de 13 KB no teste do motor.
+- **Ruling (T2):** o `lobby.test.ts` usava `protocol: 2` como a versão errada; virou `PROTOCOL_VERSION + 1`, e os literais `1`, a constante.
+- **Ruling (T3):** a métrica `cappedWithAbsoluteDefense` mudou de sentido (conta os 4 Q em qualquer fase): o antes e o depois da
+  calibração só comparam o `capped` e a duração. Sem teste próprio (montar uma partida que bate o teto com 4 Q custa mais que a linha).
+- **Tarefa 4 (web), até aqui:** 14 testes da conta do Reflect (`copy-lethal*`, `action-bar`, `phases`) com os números novos (o meu Reflect
+  contra mim volta 129, era 141; o dele, 70, era 77); a ajuda (`RULES_SECTIONS`) e o motivo `TARGET_PROTECTED` falam do escudo; o
+  `ownSpentIds` não liga mais um Q ao fim do escudo.
+- **Armadilha:** crases dentro de `node -e "…"` no Bash viram substituição de comando (um título de teste saiu vazio); scripts com
+  template string vão por arquivo.
+
+---
+
 ## 2026-11-24 (1): as cinco tarefas depois dos testes; o PR A (a CI e as partidas salvas)
 
 - **Pedido:** `decisoes.md` 2026-11-24 (2) a (7), com três rodadas de perguntas (a regra dos 4 Q em duas fases, o Reflect novo, o
