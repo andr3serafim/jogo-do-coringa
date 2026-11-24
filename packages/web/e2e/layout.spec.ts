@@ -103,3 +103,26 @@ for (const viewport of [
     guard.expectClean();
   });
 }
+
+// Abaixo de 56rem de contêiner as zonas ficam lado a lado, sem a coluna: nenhuma carta do campo (fileiras e bônus, com os 4 J e os 4 Q do
+// passo 99) passa da borda direita dele, e a página não rola de lado.
+for (const viewport of [
+  { width: 1024, height: 768 },
+  { width: 1100, height: 700 },
+]) {
+  test(`especiais no PC de ${viewport.width} × ${viewport.height}: nenhuma carta passa da borda do campo`, async ({ page }) => {
+    const guard = failOnConsoleErrors(page);
+    await page.setViewportSize(viewport);
+    await openAtStep(page);
+    const overflow = await page.evaluate(() =>
+      [...document.querySelectorAll('.campo')].flatMap((field) => {
+        const right = field.getBoundingClientRect().right;
+        return [...field.querySelectorAll('li')].filter((card) => card.getBoundingClientRect().right > right + 0.5).map((card) => card.textContent);
+      }),
+    );
+    expect(overflow, 'cartas fora do campo').toEqual([]);
+    const { scroll, client } = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, client: document.documentElement.clientWidth }));
+    expect(scroll, 'a página não rola de lado').toBeLessThanOrEqual(client);
+    guard.expectClean();
+  });
+}

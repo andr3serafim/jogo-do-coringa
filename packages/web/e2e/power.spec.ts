@@ -81,6 +81,23 @@ for (const viewport of [
       guard.expectClean();
     });
 
+    test('a Fortaleza (passo 90): os 4 Q depois do escudo no muro de pedra, dentro do campo e abaixo do título da zona', async ({ page }) => {
+      const guard = failOnConsoleErrors(page);
+      await openAt(page, ESPECIAIS, 19, 90);
+      await expect(page.locator(zone('p1', 'Q'))).toHaveAttribute('data-nivel', '4');
+      const wall = `${zone('p1', 'Q')} [data-fortaleza]`;
+      await expect(page.locator(wall)).toHaveCount(1);
+      await page.locator(zone('p1', 'Q')).scrollIntoViewIfNeeded();
+      await expectInside(page, wall, '[data-campo="p1"]');
+      // O muro não sobe por cima do título da zona (no celular o título fica em cima da fileira dos Q; no PC, ao lado).
+      const title = (await page.locator(`${zone('p1', 'Q')} .zona-titulo`).boundingBox())!;
+      const box = (await page.locator(wall).boundingBox())!;
+      const beside = box.x >= title.x + title.width - 1;
+      expect(beside || box.y >= title.y + title.height - 1, 'o muro não cobre o título da zona').toBe(true);
+      await expectNoSideScroll(page);
+      guard.expectClean();
+    });
+
     test('os 4 J armados e a brasa da iniciativa (passo 99): a aura na zona, a sua aura de 3 rodadas e o selo', async ({ page }) => {
       const guard = failOnConsoleErrors(page);
       await openAt(page, ESPECIAIS, 21, 99);

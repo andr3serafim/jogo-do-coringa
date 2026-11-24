@@ -1,6 +1,6 @@
 # A Defesa Absoluta em duas fases e o Reflect novo — spec
 
-> **Estado:** aprovada pelo autor em 2026-11-24 (`decisoes.md` 2026-11-24 (8)), com a P2 e a P3 respondidas; a P1 segue aberta (fotos).
+> **Estado:** aprovada pelo autor em 2026-11-24 (`decisoes.md` 2026-11-24 (8)), com a P2 e a P3 respondidas; a P1 respondida em 2026-11-24 (10) e (11): a Fortaleza.
 > Origem: `decisoes.md` 2026-11-24 (3) (a Defesa Absoluta) e (4) (o Reflect). **[I]** marca o que ele não disse com essas palavras.
 
 ## 1. As regras novas
@@ -147,7 +147,10 @@ exemplo), 10.2 (item 3), 11.1 (as duas fases e o exemplo), 11.2 (passo 5 do exem
 
 ## 9. Perguntas ao autor
 
-- **P1.** Como a fase 2 aparece na mesa: (a), (b) ou (c) do §5, e o nome dela. Com fotos, depois da aprovação do resto.
+- **P1.** **Respondida:** a fase 2 se chama **Fortaleza** e é um nível próprio da zona dos Q (o 4; o 3 segue sendo o escudo): um muro
+  de pedra com ameias atrás e abaixo dos Q, parado (`docs/superpowers/specs/2026-11-24-fortaleza/`). Durante a cena do começo do escudo
+  a zona fica na muralha; vira Fortaleza na batida do fim do escudo. Junto, o conserto da coluna dos especiais no PC: ela cabe o título e
+  as 4 cartas (`max(228px, 5,9rem + 0,625rem + 4 cartas + 9px)`), porque a quarta carta passava da borda do campo.
 - **P2.** `STATE_SCHEMA` 7 e `PROTOCOL_VERSION` 2: **sim, os dois.**
 - **P3.** Quem tem 4 Q e reflete fica com a carta da frente da Defesa: **fica.**
 

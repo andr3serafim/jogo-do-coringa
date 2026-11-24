@@ -21,7 +21,7 @@ export interface ZonePowerProps {
 
 const AURA_FILL = ['var(--color-ouro)', '#ffe79a', 'var(--color-papel)'] as const;
 
-/** O muro da Fortaleza (quadro de 120 × 40): o corpo com sete ameias. */
+/** O muro da Fortaleza (quadro de 120 × 40; a caixa começa no alto das ameias, em y = 2): o corpo com sete ameias. */
 const FORTRESS_WALL = 'M0 40V9h7V2h9v7h8V2h9v7h8V2h9v7h8V2h9v7h8V2h9v7h8V2h9v7h8V2h9v38z';
 /** As juntas das pedras, em três fiadas. */
 const FORTRESS_JOINTS =
@@ -75,10 +75,10 @@ export function ZonePower({ kind, level, reduced, busy }: ZonePowerProps) {
       {kind === 'Q' && level === 4 ? (
         // O muro de papel com ameias e as juntas de tinta, mais largo e mais alto que as cartas (sai por cima e por baixo delas).
         <svg
-          viewBox="0 0 120 40"
+          viewBox="0 2 120 38"
           preserveAspectRatio="none"
           data-fortaleza=""
-          className="absolute -left-[6%] -top-1/4 h-[150%] w-[112%] overflow-visible"
+          className="absolute -left-[3%] -top-[8%] h-[124%] w-[106%] overflow-visible"
         >
           <path d={FORTRESS_WALL} fill="var(--color-papel)" stroke="var(--color-tinta)" strokeWidth=".9" strokeLinejoin="round" />
           <path d={FORTRESS_JOINTS} stroke="var(--color-tinta)" strokeWidth=".6" opacity=".55" fill="none" />
