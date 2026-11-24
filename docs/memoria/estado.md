@@ -18,12 +18,9 @@
     revisado pelo advisor). **Feitas:** Tarefa 1 (`eb5aafa`: motor, `reflectedDamage`, golden, `RULES_VERSION` 7), Tarefa 2
     (`52db3fd`: `STATE_SCHEMA` 7, `PROTOCOL_VERSION` 2, as regras escritas), a Tarefa 3 (`31c0892`; o portão do Difícil
     **aprovado**, `0d1190e`: (a) 65,5% contra 72,5% na regra 6, margem de 2,2 EP; (b) 74%; p95 134 ms) e a Tarefa 4 (`c0fbb83`, a
-    web). **Rodando:** `pnpm sim:calibrate` (a regra 6, de 2026-11-16, está em `calibracao.md` antes deste commit; comparar só o
-    `capped` e a duração). **Próximo passo:** a Tarefa 5 com `packages/sim/scripts/continuar-fixture.ts` (guarda os passos que a
-    regra 7 aceita e continua a partida com os bots). Atenção: a partida muda já no primeiro `AbsoluteDefenseEnded` ou
-    `ReflectTriggered`, antes do passo recusado; os checkpoints dos specs depois desse passo são recontados no motor. Critérios:
-    absolutos `vence-p2`, especiais `vence-p1`, exodia-devastacao `exodia-p2`, reflect `vence-p2` (e o `RowDevastated` refletido
-    perto do 358). As fixtures passam a `rulesVersion` 7 (a faixa "outra versão" some: conferir os specs que contam com ela).
+    web), a Tarefa 5 (`36f6b3d`, `6290884`: as fixtures continuadas com `continuar-fixture.ts`; `pnpm e2e` verde) e a calibração
+    (`b58c493`: nenhuma partida travada). **Próximo passo:** o advisor na branch inteira, push e PR para a `main` (o autor dá o "sim" do
+    merge).
     A P1 (como a fase 2 aparece na mesa, e o nome dela) vai com fotos, junto com C e D.
   - **C, o Cordel Escuro** (2026-11-24 (5)) e **D, o fim de partida** (2026-11-24 (6)): três direções em foto do jogo cada, antes do
     código.

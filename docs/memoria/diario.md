@@ -30,6 +30,17 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   `ownSpentIds` não liga mais um Q ao fim do escudo.
 - **Armadilha:** crases dentro de `node -e "…"` no Bash viram substituição de comando (um título de teste saiu vazio); scripts com
   template string vão por arquivo.
+- **Tarefa 4** (`c0fbb83`): a web. **Portão do Difícil** (`0d1190e`): aprovado, mas o (a) caiu de 72,5% para 65,5% (margem 2,2 EP).
+  **Calibração** (`b58c493`): nenhuma partida no teto, duração igual (greedy × greedy, mediana 12, p90 23 → 24).
+- **Tarefa 5** (`36f6b3d` e `6290884`): `packages/sim/scripts/continuar-fixture.ts` guarda os passos da partida antiga e continua com os
+  mesmos bots. absolutos (66 passos + greedy × greedy, golpe final 97→98), reflect (363 + greedy × turtle, o Reflect devolve 21 no
+  176→177), exodia-devastacao (272 + turtle × turtle, Exódia 627→628), especiais (85 + greedy × greedy: o 99 segue com 4 J e a sequência
+  3, a 5 no 110, a 10 no 160, a Armadilha do Bot no 105→106, o golpe final 168→169). `pnpm e2e`: 130 + os 14 consertados.
+- **Ruling (T5):** a especiais guarda só 85 passos (antes do fim do escudo, no 85): com os 99 legais, as continuações não davam a
+  sequência 3 com os 4 J no 99. Em 2000 sementes, nenhuma continuação tem os seus 3 K: o teste da brasa olha os 3 K do Bot no passo 618
+  da exodia-devastacao — custo: o teste passa a ser do lado do Bot.
+- **Ruling (T5):** o `fluidez` (a Devastação rola os campos) dependia da faixa "outra versão" para a fileira do Bot ficar fora de vista no
+  celular; agora o teste põe os campos no fim antes do passo — custo: nenhum, a prova (rolou, e nenhuma carta foi animada) é a mesma.
 
 ---
 
