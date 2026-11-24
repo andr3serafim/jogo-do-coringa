@@ -9,8 +9,8 @@ e o ritmo; o código não é para reaproveitar.
 - As fotos (`pc-antes.jpg`, `pc-depois.jpg`, `celular-*.jpg`) e as caixas das peças (`caixas.json`): a fixture `especiais`, rodada 29,
   passo 137 → 138 (o 7♥ cai da sua Defesa com 2 K na Guarda e 3 Q: 7 × 4 = +28), com os controles do replay escondidos.
 
-**Como abrir:** com o `pnpm dev:web` rodando, copie a pasta para `packages/web/public/tmp-cura/` (fora do git: está no
-`.git/info/exclude`) e abra `http://localhost:5173/tmp-cura/prototipo.html`. **Apague a cópia depois de ver, e nunca com deploy pendente:**
+**Como abrir:** com o `pnpm dev:web` rodando, copie a pasta para `packages/web/public/tmp-cura/` (antes, ponha a linha
+`packages/web/public/tmp-cura/` no `.git/info/exclude`, para a cópia ficar fora do git; ela foi tirada no fim do trabalho) e abra `http://localhost:5173/tmp-cura/prototipo.html`. **Apague a cópia depois de ver, e nunca com deploy pendente:**
 o Vite copia o `public/` para o `dist`, e o `pnpm deploy:server` publicaria o protótipo. Aberto direto do disco (`file://`), o navegador pode
 recusar as fontes.
 
