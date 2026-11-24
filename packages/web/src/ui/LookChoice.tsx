@@ -35,12 +35,10 @@ interface GroupProps<T extends string> {
 
 function Group<T extends string>({ legend, ids, labels, value, describedBy, disabled, onChange, menu }: GroupProps<T>) {
   const name = useId();
-  // Quatro opções (os decks, desde o Cordel Escuro) ficam em 2 × 2: em fila, a última sobrava sozinha no celular.
-  const pairs = ids.length === 4;
   return (
     <fieldset aria-describedby={describedBy} className="flex flex-col gap-2 border-0 p-0">
       <legend className={menu ? 'menu-legenda' : 'mb-2 font-bold'}>{legend}</legend>
-      <div data-pares={pairs ? '' : undefined} className={menu ? 'menu-opcoes' : pairs ? 'grid grid-cols-2 gap-2' : 'flex flex-wrap gap-2'}>
+      <div className={menu ? 'menu-opcoes' : 'flex flex-wrap gap-2'}>
         {ids.map((id) => (
           <label
             key={id}

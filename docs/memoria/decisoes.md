@@ -6,6 +6,15 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-24 (12): o sim para o merge do PR #10
+
+Diante da pergunta "Faço o merge do PR #10 quando a CI ficar verde?", ele respondeu "Sim, merge".
+
+**Leitura:** com os dois jobs verdes (o `e2e` em ~12 min), o PR #10 foi mesclado por squash (`51e9f4b`). O repositório não permite o
+merge automático do GitHub: o merge foi feito à mão depois da CI.
+
+---
+
 ## 2026-11-24 (11): a Faixa de feira ajustada aprovada e a Fortaleza no muro de pedra
 
 Diante das fotos da B ajustada (`docs/superpowers/specs/2026-11-24-fim-direcoes/b2-*.png`, com o fundo claro no medalhão) e das duas

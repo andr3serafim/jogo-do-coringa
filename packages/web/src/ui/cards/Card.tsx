@@ -18,7 +18,7 @@ import { useDealIn } from '../anim/useDealIn.ts';
 import { ArtFace } from './ArtFace.tsx';
 import { Coringa } from './Coringa.tsx';
 import { BACK_CLASS } from '../../looks/catalog.ts';
-import { useCardArt, useCardTone, useLook } from './looks-context.ts';
+import { useCardArt, useLook } from './looks-context.ts';
 import { isRedSuit, Suit } from './Suit.tsx';
 
 export type CardSize = 'field' | 'mini' | 'hand';
@@ -250,8 +250,6 @@ export function Card({
   useDealIn(self, animated ? anim.dealAt(card.id) : null, DEAL_FLY);
   // A aparência do lugar (decks e raças): com arte, a `ArtFace` no fundo escuro; sem provedor ou sem pacote, a face de cordel de hoje.
   const art = useCardArt(card);
-  // Sem arte, a carta de cordel no tom do lugar: o Cordel Escuro troca o papel e a tinta só dentro dela (o `styles.css`, `[data-tom]`).
-  const tone = useCardTone(card);
   const name = cardLabel(card, as, roleText);
   const waiting = disabled && onSelect !== undefined;
   if (front) name.push('sai primeiro');
@@ -285,7 +283,6 @@ export function Card({
     'aria-label': name.join(', '),
     title: hint ?? cardHint(card, as),
     'data-card-id': ghost ? undefined : card.id,
-    'data-tom': art ? undefined : tone,
     'aria-hidden': ghost ? true : undefined,
     'data-novo': marked ? 'true' : undefined,
     'data-alvo': target ? 'true' : undefined,

@@ -12,19 +12,17 @@ export interface CardMeta {
 
 export const DECK_LABEL: Record<DeckId, string> = {
   cordel: 'Cordel',
-  'cordel-escuro': 'Cordel Escuro',
   bestiario: 'Bestiário',
   celestial: 'Celestial',
 };
 
 /**
  * O verso de cada deck (spec §4.3), nas cartas da mão do oponente: duas cores e uma borda, em classes, sem imagem. O do Cordel é o de hoje
- * (as listras de tinta e papel); o do Cordel Escuro, as mesmas listras em dois tons do fundo dele (#2a2a2a), com a borda de tinta funda; o Bestiário, violeta escuro com fio de ouro; o Celestial, azul com fio de ouro. As cores moram em variáveis
+ * (as listras de tinta e papel); o Bestiário, violeta escuro com fio de ouro; o Celestial, azul com fio de ouro. As cores moram em variáveis
  * do `styles.css` (`--verso-*`), que o verso da carta do momento também usa.
  */
 export const BACK_CLASS: Record<DeckId, string> = {
   cordel: 'border-tinta bg-[repeating-linear-gradient(45deg,var(--color-tinta)_0_2px,var(--color-papel)_2px_4px)]',
-  'cordel-escuro': 'border-[#141414] bg-[repeating-linear-gradient(45deg,#2a2a2a_0_2px,#3d3d3d_2px_4px)]',
   bestiario: 'border-[color:var(--verso-fio)] bg-[repeating-linear-gradient(45deg,var(--verso-bestiario-1)_0_2px,var(--verso-bestiario-2)_2px_4px)]',
   celestial: 'border-[color:var(--verso-fio)] bg-[repeating-linear-gradient(45deg,var(--verso-celestial-1)_0_2px,var(--verso-celestial-2)_2px_4px)]',
 };

@@ -13,7 +13,7 @@ export function tierOf(value: Rank): Tier {
 }
 
 /** Os pacotes de arte: um por deck e por raça fantasy (os dois Cordel e o Bufão são desenho de código, sem pacote). */
-export type PackId = Exclude<DeckId, 'cordel' | 'cordel-escuro'> | Exclude<RaceId, 'bufao'>;
+export type PackId = Exclude<DeckId, 'cordel'> | Exclude<RaceId, 'bufao'>;
 
 /** A chave da arte dentro do pacote: o valor em dois dígitos na numérica, a letra (ou `WILD`) na especial. */
 export type ArtKey = '02' | '03' | '04' | '05' | '06' | '07' | '08' | '09' | '10' | 'K' | 'J' | 'Q' | 'A' | 'WILD';
@@ -21,7 +21,7 @@ export type ArtKey = '02' | '03' | '04' | '05' | '06' | '07' | '08' | '09' | '10
 /** De que pacote e com que chave sai a arte desta carta nesta aparência; `null` = a carta de cordel. */
 export function artOf(card: Card, look: Look): { pack: PackId; key: ArtKey } | null {
   if (card.kind === 'NUM') {
-    return look.deck === 'cordel' || look.deck === 'cordel-escuro' ? null : { pack: look.deck, key: String(card.value).padStart(2, '0') as ArtKey };
+    return look.deck === 'cordel' ? null : { pack: look.deck, key: String(card.value).padStart(2, '0') as ArtKey };
   }
   return look.race === 'bufao' ? null : { pack: look.race, key: card.kind };
 }
@@ -32,7 +32,7 @@ export function artOf(card: Card, look: Look): { pack: PackId; key: ArtKey } | n
  * Calculada da sua a cada desenho (G2): trocar o seu deck troca o dele.
  */
 export function botLook(mine: Look): Look {
-  if (isCordelDeck(mine.deck)) return { deck: mine.deck === 'cordel' ? 'cordel-escuro' : 'cordel', race: 'bufao' };
+  if (isCordelDeck(mine.deck)) return { deck: 'cordel', race: 'bufao' };
   return { deck: mine.deck === 'bestiario' ? 'celestial' : 'bestiario', race: 'egipcio' };
 }
 
@@ -75,7 +75,7 @@ export function recordedLooks(mine: Look, theirs: Look): PastLooks | undefined {
 /** Os pacotes que uma aparência pede, sem repetir (nenhum para o padrão). */
 export function packsOf(look: Look): PackId[] {
   const packs: PackId[] = [];
-  if (look.deck !== 'cordel' && look.deck !== 'cordel-escuro') packs.push(look.deck);
+  if (look.deck !== 'cordel') packs.push(look.deck);
   if (look.race !== 'bufao') packs.push(look.race);
   return packs;
 }

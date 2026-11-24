@@ -4,7 +4,7 @@
  * aparência válida, e id desconhecido não é erro, vira o padrão daquele campo.
  */
 
-export const DECK_IDS = ['cordel', 'cordel-escuro', 'bestiario', 'celestial'] as const;
+export const DECK_IDS = ['cordel', 'bestiario', 'celestial'] as const;
 export const RACE_IDS = ['bufao', 'egipcio'] as const;
 export type DeckId = (typeof DECK_IDS)[number];
 export type RaceId = (typeof RACE_IDS)[number];
@@ -14,9 +14,12 @@ export interface Look {
   race: RaceId;
 }
 
-/** Os dois decks de cordel, sem arte: o de papel claro e o escuro (decisoes.md 2026-11-23 (2)); os dois só andam com o Bufão. */
+/**
+ * O deck de cordel, sem arte, que só anda com o Bufão. O Cordel Escuro saiu do jogo (decisoes.md 2026-11-24 (10)): o id `cordel-escuro`
+ * guardado de antes (preferência, sala, replay) não está mais na lista e o `normalizeLook` o faz o Cordel.
+ */
 export function isCordelDeck(deck: DeckId): boolean {
-  return deck === 'cordel' || deck === 'cordel-escuro';
+  return deck === 'cordel';
 }
 
 /** O baralho de hoje: o deck Cordel com o Coringa Bufão. */
@@ -28,7 +31,7 @@ function pick<T extends string>(ids: readonly T[], value: unknown, fallback: T):
 
 /**
  * Qualquer coisa → uma aparência válida, sempre num objeto novo: o que não é objeto vira o padrão; `deck` ou `race` fora da lista, o
- * padrão daquele campo; campos a mais somem. Depois, a trava (§2.1): os decks de cordel (o claro e o escuro) só andam com a raça `bufao`.
+ * padrão daquele campo; campos a mais somem. Depois, a trava (§2.1): o deck de cordel só anda com a raça `bufao`.
  */
 export function normalizeLook(input: unknown): Look {
   const value = typeof input === 'object' && input !== null && !Array.isArray(input) ? (input as Record<string, unknown>) : {};
