@@ -6,27 +6,16 @@
 
 ## Agora
 
-- **Em curso: as cinco tarefas de 2026-11-24** (`decisoes.md` 2026-11-24 (2) a (7)). Quatro PRs, um por vez:
-  - **A, `feat/ci-salvos`** (**mesclado** por squash em `7b7f38e`, PR #9, `decisoes.md` 2026-11-24 (9)): o `timeout-minutes` do job `e2e` em 20; as partidas salvas
-    com `MAX_PAST_GAMES` 10 e `MAX_PAST_GAME_AGE_MS` 30 dias (`now` obrigatório em `loadPastGames`, `findPastGame`, `attachReplay` e
-    `deletePastGame`; a leitura esconde, toda gravação poda); o `e2e/fixtures.ts` carimba a data de agora nas fixtures (sem isso elas,
-    de 2026-10-30, sumiriam da lista em 2026-11-29). **PR #9 aberto**; a 1ª CI reprovou o `check` (o `replay-screen.test.tsx` com
-    data fixa venceu em UTC; consertado em `219b998`), o `e2e` passou em 11–12 min.
-  - **B, `feat/regras-4q-reflect`** (rebaseada na `main` depois do #9): a spec
-    `docs/superpowers/specs/2026-11-24-defesa-absoluta-reflect-design.md` **aprovada** (`decisoes.md` 2026-11-24 (8)), com
-    `STATE_SCHEMA` 7 e `PROTOCOL_VERSION` 2. O plano `docs/superpowers/plans/2026-11-24-defesa-absoluta-reflect.md` (5 tarefas, execução nativa,
-    revisado pelo advisor). **Feitas:** Tarefa 1 (`eb5aafa`: motor, `reflectedDamage`, golden, `RULES_VERSION` 7), Tarefa 2
-    (`52db3fd`: `STATE_SCHEMA` 7, `PROTOCOL_VERSION` 2, as regras escritas), a Tarefa 3 (`31c0892`; o portão do Difícil
-    **aprovado**, `0d1190e`: (a) 65,5% contra 72,5% na regra 6, margem de 2,2 EP; (b) 74%; p95 134 ms) e a Tarefa 4 (`c0fbb83`, a
-    web), a Tarefa 5 (`36f6b3d`, `6290884`: as fixtures continuadas com `continuar-fixture.ts`; `pnpm e2e` verde) e a calibração
-    (`b58c493`: nenhuma partida travada). **PR #10** (rascunho até a Fortaleza): a Fortaleza e o conserto do transbordo feitos (`257a61e`), `pnpm e2e` verde (133).
-    **Próximo passo:** o advisor, o push, o PR pronto e o "sim" do merge.
-  - **C, o Cordel Escuro sai** (`decisoes.md` 2026-11-24 (10)): o Cordel volta a ser só o claro; `cordel-escuro` que chegar vira o Cordel.
-    Branch própria depois da B.
-  - **D, o fim de partida**: a B · Faixa de feira ajustada (`docs/superpowers/specs/2026-11-24-fim-direcoes/b2-*.png`, o protótipo em
-    `prototipo.html?dir=b2`), aprovada em 2026-11-24 (11). Branch própria; spec curta antes do código.
-  - As fotos que decidiram (C, D, Fortaleza) e os scripts estão no git: `docs/superpowers/specs/2026-11-24-cordel-direcoes/`,
-    `2026-11-24-fim-direcoes/` (o protótipo aprovado: `prototipo.html?dir=b2`) e `2026-11-24-fortaleza/`.
+- **Em curso: as cinco tarefas de 2026-11-24** (`decisoes.md` 2026-11-24 (2) a (12)). O diário (2026-11-24 (1) e (2)) tem o detalhe.
+  - **A** (a CI com 20 min, as partidas salvas com 10 e 30 dias): **mesclado**, PR #9 (`7b7f38e`).
+  - **B** (a Defesa Absoluta em duas fases, a Fortaleza, o Reflect novo, a regra 7; os 4 bônus que cabem no campo no PC): **mesclado**,
+    PR #10 (`51e9f4b`), com o portão do Difícil aprovado e a calibração sem partida travada.
+  - **C, `feat/sem-cordel-escuro`** (saída da `main` em `51e9f4b`): o Cordel Escuro sai (`decisoes.md` 2026-11-24 (10)); feito em
+    `d2aa89d` (o `cordel-escuro` guardado vira o Cordel no `normalizeLook`; o bot volta ao Cordel; os testes voltam ao que eram antes do
+    `0c2175a`). **Próximo passo:** push (o `pnpm check`), PR, CI e o "sim" do merge.
+  - **D, o fim de partida na Faixa de feira** (aprovada em 2026-11-24 (11); o protótipo `docs/superpowers/specs/2026-11-24-fim-direcoes/
+    prototipo.html?dir=b2`): a spec `docs/superpowers/specs/2026-11-24-fim-de-partida-faixa-design.md` está escrita e espera o "sim" e as
+    perguntas P1 a P3; vai numa branch própria, saída da `main` depois do C.
 - **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele), que leva o PR #8; apagar a branch `feat/cura-historico-visitantes`
   (mesclada).
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`.
@@ -36,7 +25,7 @@
 - **No ar** em `https://jogodocoringa.com.br`: `5f5821f` (o deploy de 2026-11-18, os menus no Folheto). O `/api/health` devolve a versão.
 - **Na `main` e ainda não no ar** (o deploy, `pnpm deploy:server`, é dele): a cura passiva, as marcas em figura e o histórico (PR #8), o bloco de 2026-11-23 (PR #7), o "Aprender jogando" sem a linha (PR #3), o Coringa do Início
   menor no notebook (PR #4), a mesa no Feltro (PR #5), a abertura sem a logo LUSACAN (PR #6).
-- **Online depois do deploy:** o `cordel-escuro` só vale na sala depois do deploy; antes, o servidor o normaliza para o Cordel, sem erro.
+- **No deploy da regra 7:** `STATE_SCHEMA` 7 encerra as salas abertas; `PROTOCOL_VERSION` 2 faz a aba velha recarregar uma vez.
 
 ## Pendências abertas (fora deste bloco)
 
@@ -57,7 +46,7 @@
 - **Aparências:** com a preferência padrão, nenhum `img` de carta e o `<Coringa>` no placar; o `LookZone` não põe nó no DOM, há um
   provedor só, e o que chegou mora na loja do `ready.ts` (`useSyncExternalStore`); o `useTableLooks` memoizado pelos textos do deck e da
   raça, nunca pelo `seats`; no online, com o padrão, o POST é `{ nickname }` (mais o `hp`) e o assento não tem `look`; o assento sem
-  `look` é Cordel. O Cordel Escuro tem o valor e o naipe do mesmo tamanho e lugar que o claro, e nada de filtro nem sombra desfocada.
+  `look` é Cordel. O Cordel Escuro saiu (2026-11-24 (10)): `cordel-escuro` guardado vira o Cordel.
 - **Mesa no Feltro:** os materiais são `@utility`; o filete do placar é sombra, não borda (o `expectHudFits`); nada de sombra com desfoque
   grande nem filtro novo nos campos (a Devastação no celular); o rosa do pano com ≥ 4,5 : 1 ao papel; as placas com `text-tinta`.
 - **Menus:** o rosa por padrão sem gravar nada (`menuTheme` ausente); o menu da partida, o fim e a dica com a roupa de antes (`useInMenu()`
@@ -66,7 +55,8 @@
   pular` só nos E2E; nenhum flash de tela.
 - **Mesa e cenas:** a última cena só fica com a cortina da cena (`veil === 'scene'`); a poeira é do `Leaving` e sai da página ao fim; só uma
   carta de verdade na lápide; a faixa do PC com ≤ 70 px; a carta que entra esmaecendo só guarda o alvo `opacity: 1` depois de entrar.
-- **Regras:** a chave `stealBuffed` (o Roubo de antes nos replays velhos); `RULES_VERSION` 7, `STATE_SCHEMA` 7 (na branch B).
+- **Regras:** a chave `stealBuffed` (o Roubo de antes nos replays velhos); `RULES_VERSION` 7, `STATE_SCHEMA` 7, `PROTOCOL_VERSION` 2. A Fortaleza é o nível 4 da zona dos Q (o 3 é o escudo); a coluna dos
+  especiais no PC cabe as 4 cartas de um bônus.
 - **Equipar:** os destinos são carimbos de tamanho fixo (`.carimbo-destino`), com o nome inteiro no `aria-label`; eles descem de linha,
   nunca encolhem.
 - O JavaScript inicial ≤ 200 KB (o smoke).
