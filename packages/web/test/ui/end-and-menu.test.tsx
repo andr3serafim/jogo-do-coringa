@@ -246,17 +246,42 @@ describe('fim de partida: o resultado e o motivo', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('o resultado é grande, com a exclamação só no desenho (o nome do diálogo segue "Você venceu"), e sobre o estouro (U5)', () => {
-    mount({ result: win('p1', 'HP') });
-    const heading = within(endDialog('Você venceu')).getByRole('heading', { name: 'Você venceu' });
-    expect(heading).toHaveTextContent('Você venceu!');
-    expect(heading.className).toContain('font-madeira');
-    expect(heading.closest('[data-resultado]')!.querySelector('[data-estouro]')).not.toBeNull();
+  // A Faixa de feira (decisoes.md 2026-11-24 (11) e (13); spec 2026-11-24-fim-de-partida-faixa-design.md): o carimbo e o medalhão são
+  // desenho; o nome do diálogo e do título seguem o `resultTitle`.
+  it.each([
+    { name: 'vitória', options: { result: win('p1', 'HP') }, title: 'Você venceu', kind: 'vitoria', stamp: 'Vitória!', mood: 'feliz' },
+    { name: 'derrota', options: { result: win('p2', 'HP') }, title: 'Duda venceu', kind: 'derrota', stamp: 'Derrota', mood: 'triste' },
+    { name: 'sem resultado', options: { result: null, cause: 'ABANDONED' as const }, title: 'Partida sem resultado', kind: 'neutro', stamp: 'Sem resultado', mood: 'serio' },
+  ])('a Faixa de feira na $name: o carimbo, o medalhão com o seu Coringa e o título de leitura', ({ options, title, kind, stamp, mood }) => {
+    mount(options);
+    const dialog = endDialog(title);
+    const band = dialog.querySelector('[data-faixa]')!;
+    expect(band).toHaveAttribute('data-resultado', kind);
+    expect(within(dialog).getByRole('heading', { name: title })).toBeInTheDocument();
+    const carimbo = band.querySelector('[data-carimbo-fim]')!;
+    expect(carimbo).toHaveTextContent(stamp);
+    expect(carimbo).toHaveAttribute('aria-hidden', 'true');
+    expect(carimbo.className).toContain('font-madeira');
+    expect(band.querySelector('[data-medalhao]')).toHaveAttribute('data-humor', mood);
+    // O estouro de HQ de antes saiu.
+    expect(dialog.querySelector('[data-estouro]')).toBeNull();
   });
 
-  it('sem resultado, sem exclamação', () => {
-    mount({ result: null, cause: 'ABANDONED' });
-    expect(within(endDialog('Partida sem resultado')).getByRole('heading')).toHaveTextContent(/^Partida sem resultado$/);
+  it('com movimento reduzido, o carimbo e o medalhão já nascem no estado final (sem a batida nem o pulo)', () => {
+    mount({ result: win('p1', 'HP'), prefs: { reduceMotion: true } });
+    const band = endDialog('Você venceu').querySelector('[data-faixa]')!;
+    for (const selector of ['[data-carimbo-fim]', '[data-medalhao]']) {
+      const style = band.querySelector<HTMLElement>(selector)!.getAttribute('style') ?? '';
+      expect(style, selector).not.toMatch(/opacity:\s*0[;\s]|opacity:\s*0$/);
+      expect(style, selector).not.toMatch(/scale\((0\.6|1\.6)\)/);
+    }
+  });
+
+  it('no online, quando o oponente vence, a frase diz quem venceu, e o motivo segue sendo a descrição do diálogo', () => {
+    mount({ result: win('p2', 'HP') });
+    const dialog = endDialog('Duda venceu');
+    expect(within(dialog).getByText(/^Duda venceu.$/)).toBeInTheDocument();
+    expect(dialog).toHaveAccessibleDescription('Sua vida chegou a 0');
   });
 
   it('mostra a duração da partida que o servidor mandou, e nada quando ela não vem', () => {

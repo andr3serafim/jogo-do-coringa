@@ -6,18 +6,17 @@
 
 ## Agora
 
-- **Em curso: as cinco tarefas de 2026-11-24** (`decisoes.md` 2026-11-24 (2) a (12)). O diário (2026-11-24 (1) e (2)) tem o detalhe.
+- **Em curso: as cinco tarefas de 2026-11-24** (`decisoes.md` 2026-11-24 (2) a (13)). O diário (2026-11-24 (1) a (3)) tem o detalhe.
   - **A** (a CI com 20 min, as partidas salvas com 10 e 30 dias): **mesclado**, PR #9 (`7b7f38e`).
   - **B** (a Defesa Absoluta em duas fases, a Fortaleza, o Reflect novo, a regra 7; os 4 bônus que cabem no campo no PC): **mesclado**,
     PR #10 (`51e9f4b`), com o portão do Difícil aprovado e a calibração sem partida travada.
-  - **C, `feat/sem-cordel-escuro`** (saída da `main` em `51e9f4b`): o Cordel Escuro sai (`decisoes.md` 2026-11-24 (10)); feito em
-    `d2aa89d` (o `cordel-escuro` guardado vira o Cordel no `normalizeLook`; o bot volta ao Cordel; os testes voltam ao que eram antes do
-    `0c2175a`). **Próximo passo:** push (o `pnpm check`), PR, CI e o "sim" do merge.
-  - **D, o fim de partida na Faixa de feira** (aprovada em 2026-11-24 (11); o protótipo `docs/superpowers/specs/2026-11-24-fim-direcoes/
-    prototipo.html?dir=b2`): a spec `docs/superpowers/specs/2026-11-24-fim-de-partida-faixa-design.md` está escrita e espera o "sim" e as
-    perguntas P1 a P3; vai numa branch própria, saída da `main` depois do C.
-- **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele), que leva o PR #8; apagar a branch `feat/cura-historico-visitantes`
-  (mesclada).
+  - **C** (o Cordel Escuro sai): **mesclado**, PR #11 (`1ab7975`).
+  - **D, `feat/fim-faixa`** (rebaseada na `main` em `1ab7975`): o fim de partida na Faixa de feira, spec
+    `docs/superpowers/specs/2026-11-24-fim-de-partida-faixa-design.md` aprovada (2026-11-24 (13)); `pnpm check` e os E2E do fim verdes;
+    fotos do painel implementado em `2026-11-24-fim-direcoes/implementado-*.png`. **Próximo passo:** o PR, a CI e o "sim" do merge.
+- **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele), que leva os PRs #8 a #12; no deploy, o `STATE_SCHEMA` 7 encerra as
+  salas abertas e o `PROTOCOL_VERSION` 2 faz as abas velhas recarregarem uma vez. Apagar as branches mescladas
+  (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`, `feat/sem-cordel-escuro`).
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`.
 
 ## No ar e na `main`

@@ -6,6 +6,18 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-24 (13): a spec do fim de partida aprovada; o sim para o merge do PR #11
+
+Diante da spec `docs/superpowers/specs/2026-11-24-fim-de-partida-faixa-design.md` e das perguntas, ele respondeu: o merge do PR #11 "Sim,
+merge"; o medalhão com a raça Egípcia "Sempre o Bufão (Recomendado)"; o empate e a partida sem resultado "Neutro em ouro (Recomendado)";
+o resto da spec "Aprovo".
+
+**Leitura:** a spec está aprovada com a P1 (sempre o Bufão, para qualquer raça), a P2 (fundo de papel, o Coringa sério, a palavra em ouro:
+EMPATE ou SEM RESULTADO) e a P3 como escrita (o seu Coringa triste quando o oponente vence, também no online). O PR #11 é mesclado quando
+a CI ficar verde.
+
+---
+
 ## 2026-11-24 (12): o sim para o merge do PR #10
 
 Diante da pergunta "Faço o merge do PR #10 quando a CI ficar verde?", ele respondeu "Sim, merge".

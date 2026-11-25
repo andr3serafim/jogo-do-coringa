@@ -5,6 +5,32 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-24 (3): o C (o Cordel Escuro sai) e o D (o fim de partida na Faixa de feira)
+
+- **PR #10 mesclado** (`51e9f4b`, `decisoes.md` 2026-11-24 (12)): o repositório não permite o merge automático do GitHub; o merge foi à
+  mão, com os dois jobs verdes.
+- **C, `feat/sem-cordel-escuro`, PR #11** (`d2aa89d`): o `cordel-escuro` sai do `DECK_IDS`; o bot do treino volta ao Cordel; saem o
+  `useCardTone`, o `data-tom="escuro"`, o verso escuro e as regras do `styles.css`; o `CLAUDE.md` acompanha.
+- **Ruling (C):** os testes voltaram por `git apply -R` dos trechos de teste do `0c2175a` e do `808e4de` (o `85b0d7a` só mexia no
+  esmaecer) — custo: nenhum, aplicou limpo.
+- **Ruling (C):** o `isCordelDeck` ficou, com um caso só (`deck === 'cordel'`), para não mexer nos chamadores; o seletor de decks volta à
+  fila (o 2 × 2 era por causa do quarto deck).
+- **Ruling (C):** o `cordel-escuro` guardado (preferência, sala, replay) vira o Cordel no `normalizeLook`, que todas as entradas já usam;
+  um teste do protocolo confere — custo: nenhum aviso ao jogador (a aparência muda sozinha para o Cordel).
+- **D, `feat/fim-faixa`** (`23da9ca`, saída da ponta do C): spec `docs/superpowers/specs/2026-11-24-fim-de-partida-faixa-design.md`
+  aprovada (2026-11-24 (13)). O `EndPanel` vira a faixa; `ui/table/ResultMedal.tsx` (o Coringa feliz, triste ou sério); o `resultStamp`
+  no `copy.ts`; fotos do painel implementado em `2026-11-24-fim-direcoes/implementado-*.png` (por um `.ts` temporário com o Playwright
+  do projeto, a derrota no treino e a vitória numa sala com a Duda desistindo).
+- **Ruling (D):** a `Modal` ganhou `framed={false}` (sem a borda, o fundo e o respiro de papel) para a faixa ocupar a largura — custo:
+  uma opção a mais na `Modal`.
+- **Ruling (D):** o medalhão é sempre o Bufão (P1), com as expressões novas desenhadas no traço do `Coringa.tsx`; o `data-resultado` sai de
+  uma função própria do `EndPanel` (a mesma conta do `pastGameResultKind`): importar o `past-games-copy.ts` puxava os textos da tela
+  `/partidas` para o JavaScript inicial, e o smoke barrou — custo: três linhas repetidas.
+- **Ruling (D):** o carimbo é `aria-hidden` e o título de leitura fica em `sr-only` com o `resultTitle`; a frase visível "Duda venceu."
+  é `aria-hidden` e o motivo segue sendo a descrição do diálogo — custo: nenhum, o nome e a descrição do diálogo são os de antes.
+
+---
+
 ## 2026-11-24 (2): o PR B, a Defesa Absoluta em duas fases e o Reflect novo (regra 7)
 
 - **Branch `feat/regras-4q-reflect`**, rebaseada na `main` depois do #9. Spec `docs/superpowers/specs/2026-11-24-defesa-absoluta-reflect-design.md`
