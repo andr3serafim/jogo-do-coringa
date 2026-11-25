@@ -22,8 +22,14 @@
   lado humano passivo (partidas curtas, sem especiais nem cenas raras): heap depois do GC de 4,5 → ~13 MB e estável, nós e animações vivas
   sobem e descem com a partida. Não reproduz a partida longa dele; faltam do autor: iPhone ou Android, navegador, a aparência (Cordel ou deck
   de arte) e como foi a queda (piscou branco, ou puxou a tela para baixo).
-- **Próximo passo:** as fotos do Equipar sem texto (duas disposições) para o autor; as respostas da (3); então a spec (o advisor revisa), o
-  plano e o código. A (5) e a (6, direção A) já estão decididas.
+- **Equipar sem texto, fotos com o autor:** `2026-11-25-equipar-sem-texto/` (patch em `prototipo.patch`; `?dir=x` cartas em cima e botões
+  `[desfazer][destinos ou ✓][recomeçar]` numa linha embaixo; `?dir=y` tudo numa linha). Medido (`e2e/medir-botoes.tmp.ts`): na Y os botões andam
+  (no PC o Ataque desliza 45 px a cada carta posta; no celular pulam de linha na última); na X ficam parados. Custo da X no PC: ~60 px a mais
+  de altura (a mesa rola ~20 px a 1377 × 768). Recomendação: X. A troca e o descarte (3 destinos, só com as duas fileiras cheias) não saíram
+  em foto; pela conta cabem a 360 px. Para a spec: a dica do tutorial do Equipar ("toque … no destino, Ataque ou Defesa") e os testes que
+  procuram as legendas (`stamp-buttons`, `phases`, `training`, `tutorial`, `card-drag`, `table-drag`, `end-and-menu`; o `equipByUi` do E2E).
+- **Próximo passo:** a escolha do autor (X ou Y) e as perguntas sobre os textos que sobram; as respostas da (3); então a spec (o advisor
+  revisa), o plano e o código. A (5) e a (6, direção A) já estão decididas.
 - **Plano dos PRs:** (1), (2) e (4) mexem no `EquipPanel.tsx`: uma branch, em sequência. (5) e (6) pequenas, à parte. (3) só diagnóstico.
 - **O que espera o autor:** apagar as branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`,
   `feat/sem-cordel-escuro`, `feat/fim-faixa`).
