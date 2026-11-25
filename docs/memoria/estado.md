@@ -1,26 +1,26 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-24.** Só o presente: o histórico dos blocos está no `diario.md` (e no
+> Sobrescrito a cada atualização. **Última: 2026-11-25.** Só o presente: o histórico dos blocos está no `diario.md` (e no
 > `arquivo/`), e o estado longo de antes desta limpeza em `arquivo/estado-ate-2026-11-23.md`. Antes de seguir, confira se não há versão
 > mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Nada em curso.** As cinco tarefas de 2026-11-24 (`decisoes.md` 2026-11-24 (2) a (14); o diário 2026-11-24 (1) a (3)) estão na `main`:
-  a CI com 20 min e as partidas salvas com 10 e 30 dias (PR #9, `7b7f38e`); a Defesa Absoluta em duas fases, a Fortaleza, o Reflect novo e
-  os 4 bônus que cabem no campo no PC (PR #10, `51e9f4b`, regra 7); a saída do Cordel Escuro (PR #11, `1ab7975`); o fim de partida na
-  Faixa de feira (PR #12, `67db244`).
-- **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele), que leva os PRs #8 a #12; no deploy, o `STATE_SCHEMA` 7 encerra as
-  salas abertas e o `PROTOCOL_VERSION` 2 faz as abas velhas recarregarem uma vez. Apagar as branches mescladas
-  (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`, `feat/sem-cordel-escuro`, `feat/fim-faixa`).
+- **Em curso: as seis tarefas de 2026-11-25** (`decisoes.md` 2026-11-25 (1) e (2)), na branch `feat/ajustes-2026-11-25` (saída da `main`
+  `9ba36c1`). Nada de código ainda. As tarefas: (1) o Confirmar e o Passar no carimbo quadrado; (2) o painel do Equipar centrado, os selos
+  sem legenda; (3) o treino que recarregou no celular contra o Difícil (diagnóstico); (4) a mão e as numéricas do Equipar com o canto
+  sempre à vista, sem ordenar; (5) a abertura sem título, onda, aura e faíscas, mais curta; (6) os botões de nível com identidade.
+- **Próximo passo:** o diagnóstico da (3) (memória numa partida longa contra o Difícil) e as fotos das direções das (1), (2), (4) e (6)
+  para o autor escolher; depois a spec (o advisor revisa), o plano e o código. A (5) já está decidida e não precisa de foto.
+- **Plano dos PRs:** (1), (2) e (4) mexem no `EquipPanel.tsx`: uma branch, em sequência. (5) e (6) pequenas, à parte. (3) só diagnóstico.
+- **O que espera o autor:** apagar as branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`,
+  `feat/sem-cordel-escuro`, `feat/fim-faixa`).
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`.
 
 ## No ar e na `main`
 
-- **No ar** em `https://jogodocoringa.com.br`: `5f5821f` (o deploy de 2026-11-18, os menus no Folheto). O `/api/health` devolve a versão.
-- **Na `main` e ainda não no ar** (o deploy, `pnpm deploy:server`, é dele): as cinco tarefas de 2026-11-24 (PRs #9 a #12), a cura passiva, as marcas em figura e o histórico (PR #8), o bloco de 2026-11-23 (PR #7), o "Aprender jogando" sem a linha (PR #3), o Coringa do Início
-  menor no notebook (PR #4), a mesa no Feltro (PR #5), a abertura sem a logo LUSACAN (PR #6).
-- **No deploy da regra 7:** `STATE_SCHEMA` 7 encerra as salas abertas; `PROTOCOL_VERSION` 2 faz a aba velha recarregar uma vez.
+- **No ar** em `https://jogodocoringa.com.br`: `9ba36c1` (o `/api/health` em 2026-11-25): a `main` inteira, com a regra 7, o
+  `STATE_SCHEMA` 7 e o `PROTOCOL_VERSION` 2.
 
 ## Pendências abertas (fora deste bloco)
 

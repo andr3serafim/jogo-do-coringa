@@ -6,6 +6,62 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-25 (2): as respostas sobre as seis tarefas
+
+Diante das perguntas por tarefa (1a carimbo quadrado ou selo redondo; 1b onde fica o Confirmar com a lista da montagem; 1c se o Atacar e o
+Encerrar turno mudam; 2 o alcance e o sentido de "centralizar"; 3 em que tela caiu, aparelho, troca de app, se a partida está em `/partidas`;
+4 compactar sempre ou só sem espaço, e ordenar; 5 as faíscas, o som e a duração; 6 liberdade), ele respondeu:
+
+> 1. a) quadrado. b) siga recomendação do advisor. c) siga recomendação do advisor.
+> 2. a) só no equipar. os textos desfazer e recomeçar dos botões podem ser removidos. b) centralizar referente ao painel inteiro, não deve
+>    ter gap vazio muito grande.
+> 3. a) caiu durante o jogo com bot no difícil. b) celular. c) não, estava apenas jogando. d) não porque não foi finalizada.
+> 4. a) só quando não cabe. b) não, as cartas numéricas não devem ser ordenadas nem as especiais.
+> 5. a) sim. b)mantém. c) ok;
+> 6. siga as recomendações do advisor.
+
+**Leitura:**
+- **1 (substitui o tamanho do Confirmar e do Passar do bloco D do playtest, ponto 5):** o Confirmar e o Passar viram o carimbo quadrado de
+  tamanho fixo do destino do Equipar (figura em cima, palavra embaixo). **[I]** (a recomendação a que ele remete) O Confirmar em ouro, com um
+  visto, ao lado da lista da montagem, no lugar onde ficavam os destinos; o Passar em papel. O Atacar e o Encerrar turno ficam como estão.
+- **2:** só o painel do Equipar. O Desfazer e o Recomeçar perdem a legenda (só o selo; o nome fica no `aria-label`). O conteúdo do painel
+  (cartas, destinos, selos) fica centrado no painel inteiro, na horizontal e na vertical, sem vão grande entre os grupos. **[I]** O "gap"
+  é o vão de hoje entre as cartas (à esquerda) e os destinos colados na borda direita, no PC.
+- **3:** caiu no meio da partida contra o Difícil, no celular, sem trocar de app; a partida não terminou (não está em `/partidas`). **[I]**
+  A página recarregou sozinha (o treino só mostra a escolha do nível ao abrir `/treino` do zero; nenhuma saída da mesa leva até ela): a
+  suspeita é memória (a aba derrubada pelo navegador do celular). Diagnóstico antes de código.
+- **4:** a sobreposição só quando as cartas não cabem; nenhuma ordenação (nem numéricas nem especiais). **[I]** O conserto é a disposição:
+  o canto com o valor de cada carta sempre à vista, a escolhida sobe sem tapar a vizinha (hoje, com 4 numéricas, uma some atrás dela).
+- **5 (substitui parte de 2026-11-16 (5)):** saem o título "Jogo do Coringa", o anel dourado (a onda), a aura radial e as faíscas; o som
+  `abertura-titulo` fica; a abertura encurta (proposta: ~2,3 s). A versão curta (movimento reduzido) vira só o Coringa parado.
+- **6:** os botões Fácil, Médio e Difícil ganham cor, arte e identidade de cada nível, nos dois temas do menu (rosa e verde), com contraste
+  ≥ 4,5 : 1, arte original e o nome acessível de hoje (nível e linha). Direções em fotos antes do código.
+
+---
+
+## 2026-11-25 (1): seis tarefas da interface
+
+Ele pediu, com três prints (o Desfazer/Recomeçar com Ataque/Defesa no PC, uma mão de cartas reais 10-J-Q-K sobrepostas, e o Confirmar
+de largura cheia no PC):
+
+> [ ] Botão confirmar enorme, deve seguir o mesmo padrão dos outros com ícone - arte, estilo próprio e tamanho. o mesmo para o botão
+> 'passar' - print em anexo.
+> [ ] Botões de ação devem estar centralizados vertical e horizontalmente - print em anexo.
+> [ ] Ontem eu estava jogando online (treino com bot) e a partida estava demorando, acho que já estava 8~11 min, e repentinamente o jogo foi
+> "encerrado" e fui redirecionado para /treino;
+> [ ] Visando otimizar espaço da mão em dispositivos com tela menor, a disposição das cartas deve ser otimizada e mais organizada, tanto
+> cartas numéricas quanto especiais - print em anexo.
+> [ ] Remover o texto "Jogo do Coringa", efeito de circulo dourado e background radial dourado de fundo na intro do jogo;
+> [ ] Na tela /treino os botões Fácil, Médio e Difícil devem ser visualmente correspondentes, com cor, arte e identidade coerente com a
+> dificuldade. Lhe dou liberdade criativa.
+
+> 1. Evite regressões; 2. Evite inferencias, me pergunte o que for necessário; 3. Complexidades desnecessárias; 4. Advisor deve revisar
+> specs, planos ou implementações;
+
+**Leitura:** as respostas às perguntas estão em 2026-11-25 (2). O advisor revisa spec, plano e implementação de cada tarefa.
+
+---
+
 ## 2026-11-24 (14): o sim para o merge do PR #12
 
 Diante da pergunta "Faço o merge do PR #12 quando a CI ficar verde?", ele respondeu "Sim, merge".
