@@ -6,6 +6,14 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-24 (14): o sim para o merge do PR #12
+
+Diante da pergunta "Faço o merge do PR #12 quando a CI ficar verde?", ele respondeu "Sim, merge".
+
+**Leitura:** com os dois jobs verdes, o PR #12 foi mesclado por squash (`67db244`). As cinco tarefas de 2026-11-24 estão na `main`.
+
+---
+
 ## 2026-11-24 (13): a spec do fim de partida aprovada; o sim para o merge do PR #11
 
 Diante da spec `docs/superpowers/specs/2026-11-24-fim-de-partida-faixa-design.md` e das perguntas, ele respondeu: o merge do PR #11 "Sim,

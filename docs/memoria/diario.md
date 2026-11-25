@@ -7,6 +7,11 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ## 2026-11-24 (3): o C (o Cordel Escuro sai) e o D (o fim de partida na Faixa de feira)
 
+- **Fecho:** PR #11 mesclado (`1ab7975`, depois de a CI pegar a linha da trava no plural, consertada em `1f98016`) e PR #12 mesclado
+  (`67db244`). A primeira versão do D reprovou no smoke (o `past-games-copy.ts` no inicial); o E2E local com troca de branch no meio deu
+  uma falha falsa no `mobile.spec` (rodar de novo com a árvore parada passou).
+- **Armadilha:** não troque de branch com o `pnpm e2e` rodando: o Playwright lê os specs aos poucos e o resultado não vale.
+
 - **PR #10 mesclado** (`51e9f4b`, `decisoes.md` 2026-11-24 (12)): o repositório não permite o merge automático do GitHub; o merge foi à
   mão, com os dois jobs verdes.
 - **C, `feat/sem-cordel-escuro`, PR #11** (`d2aa89d`): o `cordel-escuro` sai do `DECK_IDS`; o bot do treino volta ao Cordel; saem o
