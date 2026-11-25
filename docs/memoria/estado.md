@@ -10,8 +10,19 @@
   `9ba36c1`). Nada de código ainda. As tarefas: (1) o Confirmar e o Passar no carimbo quadrado; (2) o painel do Equipar centrado, os selos
   sem legenda; (3) o treino que recarregou no celular contra o Difícil (diagnóstico); (4) a mão e as numéricas do Equipar com o canto
   sempre à vista, sem ordenar; (5) a abertura sem título, onda, aura e faíscas, mais curta; (6) os botões de nível com identidade.
-- **Próximo passo:** o diagnóstico da (3) (memória numa partida longa contra o Difícil) e as fotos das direções das (1), (2), (4) e (6)
-  para o autor escolher; depois a spec (o advisor revisa), o plano e o código. A (5) já está decidida e não precisa de foto.
+- **Fotos das direções, com o autor para escolher** (fora do git, como as anteriores): `docs/superpowers/specs/2026-11-25-equipar-direcoes/`
+  (A duas linhas centradas, B uma linha só; `passar-carimbo.png` é de um HTML estático, aproximado; `mao-360-*.png`) e
+  `docs/superpowers/specs/2026-11-25-niveis-direcoes/` (A papel com faixa de cor e o rosto do Coringa: feliz, sério, bravo; B a face na cor do
+  nível com 1, 2 e 3 naipes). Recomendação levada: A no Equipar; A nos níveis.
+- **A árvore tem código de PROTÓTIPO sem commit** (`?dir=` no `EquipPanel` e no `Training`, `data-dir` no `menu.css`, o humor `bravo`): não
+  commitar assim. A cópia está em `2026-11-25-equipar-direcoes/prototipo.patch`. Os roteiros das fotos são `packages/web/e2e/*.tmp.ts` (apagar
+  no fim). Depois da escolha: um desenho só, sem `?dir`.
+- **(3) medição:** `e2e/memoria.tmp.ts` (Chromium 375 × 812, sem acelerar a CPU, `vite preview` na 4174), 13 min de treino contra o Difícil com o
+  lado humano passivo (partidas curtas, sem especiais nem cenas raras): heap depois do GC de 4,5 → ~13 MB e estável, nós e animações vivas
+  sobem e descem com a partida. Não reproduz a partida longa dele; faltam do autor: iPhone ou Android, navegador, a aparência (Cordel ou deck
+  de arte) e como foi a queda (piscou branco, ou puxou a tela para baixo).
+- **Próximo passo:** as escolhas do autor (Equipar e níveis) e as respostas da (3); então a spec (o advisor revisa), o plano e o código. A (5)
+  já está decidida.
 - **Plano dos PRs:** (1), (2) e (4) mexem no `EquipPanel.tsx`: uma branch, em sequência. (5) e (6) pequenas, à parte. (3) só diagnóstico.
 - **O que espera o autor:** apagar as branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`,
   `feat/sem-cordel-escuro`, `feat/fim-faixa`).
