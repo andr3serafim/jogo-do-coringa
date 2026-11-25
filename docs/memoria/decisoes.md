@@ -6,6 +6,30 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-25 (3): as direções do Equipar reprovadas; os níveis na A
+
+Diante das fotos (`docs/superpowers/specs/2026-11-25-equipar-direcoes/` e `2026-11-25-niveis-direcoes/`), ele respondeu:
+
+> Direções para o Equipar foram todas reprovadas.
+> Direção A aprovada para os níveis.
+>
+> Em relação ao equipar:
+> Remover textos! sou contra esse monte de textos! Os textos: "Faltam 3 cartas, desfazer, recomeçar, Tudo no lugar: confira a montagem e
+> confirme, 4 -> fileira de ataque... , passar, confirmar, " tudo isso deve ser removido, no caso dos botões manter apenas ícone intuitivo.
+>
+> Os botões devem ser perfeitamente dispostos e devidamente centralizados. a UI deve ser intuitiva e organizada.
+
+**Leitura:**
+- **Níveis:** a direção A (papel, faixa de cor à esquerda, o rosto do Coringa no medalhão: feliz no Fácil, sério no Médio, bravo no Difícil).
+- **Equipar (substitui a leitura da (1) e da (2) de 2026-11-25 (2) no que diz de texto e de disposição):** saem da vista o "Faltam N cartas",
+  as legendas Desfazer e Recomeçar, o "Tudo no lugar…", a lista da montagem ("4♣ → Fileira de Ataque") e as palavras dos botões Confirmar e
+  Passar; os botões ficam só com o ícone. **[I]** "No caso dos botões, apenas ícone" vale também para os destinos (ATAQUE, DEFESA): as fotos
+  novas os mostram só com a figura, para ele confirmar. **[I]** Os textos saem da vista, não do leitor de tela: o nome de cada botão fica no
+  `aria-label` (e na dica do mouse), e o "Faltam N cartas" numa região viva `sr-only`.
+- Os botões ficam alinhados e centrados no painel; novas direções em fotos antes do código.
+
+---
+
 ## 2026-11-25 (2): as respostas sobre as seis tarefas
 
 Diante das perguntas por tarefa (1a carimbo quadrado ou selo redondo; 1b onde fica o Confirmar com a lista da montagem; 1c se o Atacar e o
