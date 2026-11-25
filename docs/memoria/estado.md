@@ -6,31 +6,27 @@
 
 ## Agora
 
-- **Em curso: as seis tarefas de 2026-11-25** (`decisoes.md` 2026-11-25 (1) e (2)), na branch `feat/ajustes-2026-11-25` (saída da `main`
-  `9ba36c1`). Nada de código ainda. As tarefas: (1) o Confirmar e o Passar no carimbo quadrado; (2) o painel do Equipar centrado, os selos
-  sem legenda; (3) o treino que recarregou no celular contra o Difícil (diagnóstico); (4) a mão e as numéricas do Equipar com o canto
-  sempre à vista, sem ordenar; (5) a abertura sem título, onda, aura e faíscas, mais curta; (6) os botões de nível com identidade.
-- **Fotos das direções, com o autor para escolher** (fora do git, como as anteriores): `docs/superpowers/specs/2026-11-25-equipar-direcoes/`
-  (A duas linhas centradas, B uma linha só; `passar-carimbo.png` é de um HTML estático, aproximado; `mao-360-*.png`) e
-  `docs/superpowers/specs/2026-11-25-niveis-direcoes/` (A papel com faixa de cor e o rosto do Coringa: feliz, sério, bravo; B a face na cor do
-  nível com 1, 2 e 3 naipes). **Níveis: A aprovada. Equipar: as duas reprovadas** (`decisoes.md` 2026-11-25 (3)): sem textos, só ícones,
-  centrado; novas direções em `docs/superpowers/specs/2026-11-25-equipar-sem-texto/`.
-- **A árvore tem código de PROTÓTIPO sem commit** (`?dir=` no `EquipPanel` e no `Training`, `data-dir` no `menu.css`, o humor `bravo`): não
-  commitar assim. A cópia está em `2026-11-25-equipar-direcoes/prototipo.patch`. Os roteiros das fotos são `packages/web/e2e/*.tmp.ts` (apagar
-  no fim). Depois da escolha: um desenho só, sem `?dir`.
-- **(3) medição:** `e2e/memoria.tmp.ts` (Chromium 375 × 812, sem acelerar a CPU, `vite preview` na 4174), 13 min de treino contra o Difícil com o
-  lado humano passivo (partidas curtas, sem especiais nem cenas raras): heap depois do GC de 4,5 → ~13 MB e estável, nós e animações vivas
-  sobem e descem com a partida. Não reproduz a partida longa dele; faltam do autor: iPhone ou Android, navegador, a aparência (Cordel ou deck
-  de arte) e como foi a queda (piscou branco, ou puxou a tela para baixo).
-- **Equipar sem texto, fotos com o autor:** `2026-11-25-equipar-sem-texto/` (patch em `prototipo.patch`; `?dir=x` cartas em cima e botões
-  `[desfazer][destinos ou ✓][recomeçar]` numa linha embaixo; `?dir=y` tudo numa linha). Medido (`e2e/medir-botoes.tmp.ts`): na Y os botões andam
-  (no PC o Ataque desliza 45 px a cada carta posta; no celular pulam de linha na última); na X ficam parados. Custo da X no PC: ~60 px a mais
-  de altura (a mesa rola ~20 px a 1377 × 768). Recomendação: X. A troca e o descarte (3 destinos, só com as duas fileiras cheias) não saíram
-  em foto; pela conta cabem a 360 px. Para a spec: a dica do tutorial do Equipar ("toque … no destino, Ataque ou Defesa") e os testes que
-  procuram as legendas (`stamp-buttons`, `phases`, `training`, `tutorial`, `card-drag`, `table-drag`, `end-and-menu`; o `equipByUi` do E2E).
-- **Próximo passo:** a escolha do autor (X ou Y) e as perguntas sobre os textos que sobram; as respostas da (3); então a spec (o advisor
-  revisa), o plano e o código. A (5) e a (6, direção A) já estão decididas.
-- **Plano dos PRs:** (1), (2) e (4) mexem no `EquipPanel.tsx`: uma branch, em sequência. (5) e (6) pequenas, à parte. (3) só diagnóstico.
+- **Em curso: as seis tarefas de 2026-11-25** (`decisoes.md` 2026-11-25 (1) a (4)), na branch `feat/ajustes-2026-11-25` (saída da `main`
+  `9ba36c1`; só commits de memória até aqui). Decidido: (5) a abertura sem título, onda, aura e faíscas, mais curta, som mantido; (6) os
+  níveis na direção A (papel, faixa de cor, rosto do Coringa feliz/sério/bravo); o Equipar na **Y** (PC uma linha, celular duas), sem texto
+  à vista (o sentido no leitor de tela), destinos só com a figura, Confirmar e Passar com ícone e palavra, os textos que sobravam viram arte.
+- **Com o autor agora:** as fotos `docs/superpowers/specs/2026-11-25-equipar-y/` (o jogo na Y em 375, 360 e PC; `mostruario.png` com as
+  artes no lugar dos textos e as 3 opções de ícone do Passar: mão espalmada, setas de pular, carta que desliza). As pastas anteriores
+  (`-equipar-direcoes`, `-equipar-sem-texto`, `-niveis-direcoes`) são histórico das escolhas. Tudo fora do git.
+- **A árvore tem código de PROTÓTIPO sem commit:** a Y e as artes no `EquipPanel.tsx` e no novo `EquipArt.tsx` (não versionado), os ícones
+  novos no `icons.tsx`, a mão vazia no `Hand.tsx`, o Passar com `?passar=1|2|3` no `ReactionPanel.tsx`, os níveis com `?dir=a|b` no
+  `Training.tsx` e no `menu.css`, o humor `bravo` no `ResultMedal.tsx`. Cópia: `2026-11-25-equipar-y/prototipo.patch` + `EquipArt.tsx` e
+  `mostruario.tmp.tsx` ali. Os roteiros `packages/web/e2e/*.tmp.ts`, o `mostruario.tmp.html` e o `src/mostruario.tmp.tsx` saem no fim. Não
+  commitar o protótipo assim: depois da escolha do Passar, um desenho só, sem `?dir`/`?passar`, com spec, plano e testes.
+- **(3) a queda:** iPhone, deck de arte, sem piscar, no meio da partida (2026-11-25 (4)). Hipótese: o iOS mata a aba por memória.
+  Medido no Chromium (não é Safari): 13 min com Cordel e partidas curtas, heap ~13 MB estável (`e2e/memoria.tmp.ts`); com 390 × 844 @3× e o
+  processo inteiro (`e2e/memoria2.tmp.ts`, Cordel × `bestiario:egipcio`), ver o resultado no `diario.md`. As artes são 24 WebP de 416 × 582
+  (~1 MB cada decodificada).
+- **Para a spec do Equipar:** a dica do tutorial ("toque … no destino, Ataque ou Defesa"); os testes que procuram as legendas e os textos
+  (`stamp-buttons`, `phases`, `training`, `tutorial`, `card-drag`, `table-drag`, `end-and-menu`; o `equipByUi` e o `NO_PENDING`/"Sua mão está
+  vazia" do E2E); na Y os botões deslizam no PC a cada carta posta (o autor escolheu sabendo).
+- **Próximo passo:** a escolha do ícone do Passar e o aval das artes; então a spec (o advisor revisa), o plano e o código, em PRs: Equipar +
+  Passar + mão; abertura; níveis. A (3) segue no diagnóstico.
 - **O que espera o autor:** apagar as branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`,
   `feat/sem-cordel-escuro`, `feat/fim-faixa`).
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`.
