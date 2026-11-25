@@ -20,7 +20,7 @@
   commitar o protótipo assim: depois da escolha do Passar, um desenho só, sem `?dir`/`?passar`, com spec, plano e testes.
 - **(3) a queda:** iPhone, deck de arte, sem piscar, no meio da partida (2026-11-25 (4)). Hipótese: o iOS mata a aba por memória.
   Medido no Chromium (não é Safari): 13 min com Cordel e partidas curtas, heap ~13 MB estável (`e2e/memoria.tmp.ts`); com 390 × 844 @3× e o
-  processo inteiro (`e2e/memoria2.tmp.ts`, Cordel × `bestiario:egipcio`), ver o resultado no `diario.md`. As artes são 24 WebP de 416 × 582
+  processo inteiro (`e2e/memoria2.tmp.ts`, 8 min cada, sem outro Chromium junto): o processo da aba com Cordel 186 → 234 MB, com `bestiario:egipcio` 247 → 304 MB (41 imagens na mesa); a arte soma ~70 MB e os dois crescem ~50 MB em 8 min (não é a imagem que acumula). As artes são 24 WebP de 416 × 582
   (~1 MB cada decodificada).
 - **Para a spec do Equipar:** a dica do tutorial ("toque … no destino, Ataque ou Defesa"); os testes que procuram as legendas e os textos
   (`stamp-buttons`, `phases`, `training`, `tutorial`, `card-drag`, `table-drag`, `end-and-menu`; o `equipByUi` e o `NO_PENDING`/"Sua mão está
