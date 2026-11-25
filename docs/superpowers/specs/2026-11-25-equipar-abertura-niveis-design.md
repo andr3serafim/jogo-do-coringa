@@ -10,8 +10,10 @@ O autor joga no celular e achou o Equipar poluído: muito texto ("Faltam 3 carta
 Confirmar de largura cheia e os botões encostados na borda. Ele quer o painel limpo, só com figuras que se entendem, tudo centrado e alinhado.
 A abertura tem elementos de que ele não gosta (o título, o anel e a aura de ouro). Os botões de nível são iguais entre si.
 
-Não-objetivos: mexer na barra da fase de ataque (o Atacar e o Encerrar turno ficam como estão), na largura da mão no PC (fica como hoje,
-2026-11-25 (7)), na ordem das cartas (nenhuma ordenação, 2026-11-25 (2)) e em regras do motor.
+Não-objetivos: mexer na barra da fase de ataque (o Atacar, o Encerrar turno e as linhas de estado ficam como estão), na largura da mão no PC
+(fica como hoje, 2026-11-25 (7)), na ordem das cartas (nenhuma ordenação, 2026-11-25 (2)), em regras do motor e no Equipar do replay
+(`ReplayEquip.tsx`, só de leitura, com o rótulo e o "Você não recebeu numéricas": outra tela, fica como está). **[Proposta]** os textos vizinhos
+do Equipar que ele não listou ficam: o "pronto" no campo do oponente e o "Equipar · os dois montam" na faixa central (pergunta ao autor).
 
 Anti-objetivos: perder informação para quem usa leitor de tela; botões menores que 44 px; regressão nos E2E, no smoke (JavaScript inicial
 ≤ 200 KB, a abertura fora do inicial) e na regra de fotossensibilidade.
@@ -34,6 +36,17 @@ Anti-objetivos: perder informação para quem usa leitor de tela; botões menore
   quando não cabe. O conteúdo fica centrado no espaço que a mão deixa (a mão segue com `clamp(360px, 50%, 600px)`).
 - **Celular e tablet:** sempre duas linhas centradas: as cartas em cima, `[↶] [destinos] [↻]` embaixo. Nunca junta numa linha (na última
   carta, a medida do protótipo mostrou os botões pulando para a linha das cartas: isso não pode acontecer).
+- **Altura no celular baixo** (medida no protótipo, a faixa de baixo do Equipar):
+
+  | | Hoje | Y |
+  |---|---|---|
+  | 375 × 667, faltam 4 | 236 px | 271 px (+35) |
+  | 375 × 667, tudo posto | 289 px | 156 px (−133) |
+  | 360 × 640, faltam 4 | 235 px | 270 px (+35) |
+  | 360 × 640, tudo posto | 302 px | 156 px (−146) |
+
+  Com cartas por pôr, o campo perde 35 px (os destinos descem para a linha de baixo); com tudo posto, ganha ~140 px (sai a lista da montagem).
+  O campo rola por dentro como hoje.
 - Alvos de toque ≥ 44 px; o destino e o Confirmar com 56 × 56 no celular e 64 × 64 no PC (o Confirmar e o Passar, mais largos pela palavra).
 - O foco segue como hoje: depois de cada escolha, o primeiro destino; com tudo posto, o Confirmar (`data-foco`).
 
@@ -59,6 +72,10 @@ Anti-objetivos: perder informação para quem usa leitor de tela; botões menore
 | "Você não recebeu numéricas nesta rodada" (+ "Esperando X montar…") | a carta tracejada riscada (+ a ampulheta) | `role="status"` com os textos `sr-only` |
 | "Você já confirmou; esperando X" / "Esperando X montar…" | o visto de ouro + a ampulheta (enviando: + os pontos) | `role="status"` com o texto `sr-only` |
 | "Sua mão está vazia" (`Hand.tsx`) | três cartas lisas em leque, apagadas, na cor do texto do lugar | `role="img"` com `aria-label` |
+
+O disco recusado leva `data-sem-pulo` (o toque nele é só da dica, não termina as batidas do `Stage`), como as figuras das marcas; o Esc
+fecha a dica e é engolido por ela (não pula a cena nem abre o menu); fecha também ao tocar fora, rolar e redimensionar, e some com o próximo
+estado. A lista de quem usa `data-sem-pulo` no `CLAUDE.md` ganha o disco.
 
 O selo da quadra e o aviso recusado flutuam sobre o painel (fora do fluxo, sem empurrar nada) e não podem cobrir uma carta nem um botão:
 conferir com fotos no celular e no PC durante a implementação. Os desenhos novos moram no `icons.tsx` (no traço das figuras da mesa) e as
