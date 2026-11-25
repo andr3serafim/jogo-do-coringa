@@ -6,6 +6,17 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-25 (7): a mão no PC como hoje
+
+Diante das fotos `docs/superpowers/specs/2026-11-25-equipar-y/mao-hoje-*.png` e `mao-junta-*.png` (no PC, no Equipar: a mão reservando metade
+da faixa, como hoje, ou só do tamanho das cartas, com mão, numéricas e botões num bloco centrado), e da pergunta "Qual fica: a mão como hoje
+ou aproximada?", ele respondeu "Como hoje".
+
+**Leitura:** a mão no PC segue reservando `clamp(360px, 50%, 600px)`; o painel do Equipar centra o conteúdo dele no espaço que sobra. O vão
+entre a mão e o painel fica. Segue aberta a retomada do treino depois de recarregar.
+
+---
+
 ## 2026-11-25 (6): as artes no lugar dos textos aprovadas
 
 Diante da pergunta "As artes no lugar dos textos estão aprovadas?" (o mostruário `docs/superpowers/specs/2026-11-25-equipar-y/mostruario.png`:

@@ -27,7 +27,8 @@
   vazia" do E2E); na Y os botões deslizam no PC a cada carta posta (o autor escolheu sabendo).
 - **Passar:** as setas de pular (`PassSkipIcon`, 2026-11-25 (5)).
 - **Artes aprovadas** (2026-11-25 (6)).
-- **Próximo passo:** o vão entre a mão e o painel no PC e a retomada do treino depois de recarregar (perguntas abertas); então a spec (o advisor revisa), o plano e o código, em PRs: Equipar +
+- **Mão no PC como hoje** (2026-11-25 (7)).
+- **Próximo passo:** a spec das tarefas 1, 2, 4, 5 e 6 (`docs/superpowers/specs/2026-11-25-equipar-abertura-niveis-design.md`), o advisor revisa, o autor aprova; a retomada do treino (tarefa 3) segue como pergunta aberta; então a spec (o advisor revisa), o plano e o código, em PRs: Equipar +
   Passar + mão; abertura; níveis. A (3) segue no diagnóstico.
 - **O que espera o autor:** apagar as branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`,
   `feat/sem-cordel-escuro`, `feat/fim-faixa`).
