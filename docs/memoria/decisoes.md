@@ -6,6 +6,35 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-25 (4): o Equipar na Y, artes no lugar dos textos; a queda foi no iPhone com deck de arte
+
+Diante das fotos do Equipar sem texto (`docs/superpowers/specs/2026-11-25-equipar-sem-texto/`, X e Y, com a medida de que na Y os botões
+andam a cada carta posta) e das perguntas (1 destinos só com a figura; 2 os textos que sobram: a "Sua mão está vazia", b a linha da quadra,
+c "Enviando…" e os avisos de recusa, d a espera depois de Confirmar e "Você não recebeu numéricas", e o "9♠" da troca; 3 o ícone do Passar;
+4 a queda), ele respondeu:
+
+> 1. ok;
+> 2. sim, todos substituídos por artes coerentes e correspondentes ao sentido que transmitem;
+> 3. não e também não gostei;
+> 4. foi em iphone, deck de arte, a tela não piscou nem nada, durante o jogo normal a tela voltou para /treino;
+>
+> Y: tudo numa linha no PC. No celular fica igual à X. tudo devidamente alinha sem gaps. pode manter textos confirmar e passar nos botões
+> junto com ícones.
+
+**Leitura:**
+- **Disposição Y:** no PC, cartas e botões numa linha só, centrada, sem vão; no celular, sempre duas linhas (cartas em cima, botões embaixo),
+  sem pular para uma linha na última carta. Ele escolheu sabendo que no PC os botões deslizam a cada carta posta.
+- **Destinos só com a figura** (espada, escudo; troca e descarte com a figura deles).
+- **Confirmar e Passar com ícone e palavra** (substitui o "só ícone" de 2026-11-25 (3) para esses dois).
+- **Os textos a–e viram arte** que diga a mesma coisa. **[I]** O sentido continua para o leitor de tela (`aria-label`, região viva `sr-only`)
+  e, onde o texto explica um motivo (aviso de recusa), na dica do mouse. Artes em fotos antes do código.
+- **O ícone do Passar (a seta em arco) sai:** opções novas em foto.
+- **(3):** iPhone (Safari ou outro navegador no iOS, que usa o mesmo motor), deck de arte, sem piscar, no meio do jogo: a página recarregou
+  sozinha. **[I]** O mais provável é o iOS matar o processo da aba por memória (as imagens decodificadas do deck de arte não aparecem no heap do
+  JavaScript); diagnóstico antes de consertar.
+
+---
+
 ## 2026-11-25 (3): as direções do Equipar reprovadas; os níveis na A
 
 Diante das fotos (`docs/superpowers/specs/2026-11-25-equipar-direcoes/` e `2026-11-25-niveis-direcoes/`), ele respondeu:
