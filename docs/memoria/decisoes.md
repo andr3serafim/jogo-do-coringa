@@ -6,6 +6,17 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-25 (6): as artes no lugar dos textos aprovadas
+
+Diante da pergunta "As artes no lugar dos textos estão aprovadas?" (o mostruário `docs/superpowers/specs/2026-11-25-equipar-y/mostruario.png`:
+a mão vazia, sem numéricas, a espera, enviando, a jogada recusada, a quadra, a troca com a carta que sai), ele respondeu "Aprovadas".
+
+**Leitura:** as artes entram como estão no mostruário. **[I]** O motivo da jogada recusada abre ao tocar no disco (como as marcas do Coringa,
+`MarkFigure`), porque a dica do mouse não existe no iPhone. Seguem abertas: o vão entre a mão e o painel no PC e a retomada do treino depois
+de recarregar.
+
+---
+
 ## 2026-11-25 (5): o Passar com as setas de pular
 
 Diante do mostruário (`docs/superpowers/specs/2026-11-25-equipar-y/mostruario.png`, as três opções: 1 a mão espalmada, 2 as setas de pular,
