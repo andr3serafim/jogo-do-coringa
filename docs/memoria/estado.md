@@ -6,23 +6,19 @@
 
 ## Agora
 
-- **Em curso: as cinco tarefas de 2026-11-24** (`decisoes.md` 2026-11-24 (2) a (13)). O diário (2026-11-24 (1) a (3)) tem o detalhe.
-  - **A** (a CI com 20 min, as partidas salvas com 10 e 30 dias): **mesclado**, PR #9 (`7b7f38e`).
-  - **B** (a Defesa Absoluta em duas fases, a Fortaleza, o Reflect novo, a regra 7; os 4 bônus que cabem no campo no PC): **mesclado**,
-    PR #10 (`51e9f4b`), com o portão do Difícil aprovado e a calibração sem partida travada.
-  - **C** (o Cordel Escuro sai): **mesclado**, PR #11 (`1ab7975`).
-  - **D, `feat/fim-faixa`** (rebaseada na `main` em `1ab7975`): o fim de partida na Faixa de feira, spec
-    `docs/superpowers/specs/2026-11-24-fim-de-partida-faixa-design.md` aprovada (2026-11-24 (13)); `pnpm check` e os E2E do fim verdes;
-    fotos do painel implementado em `2026-11-24-fim-direcoes/implementado-*.png`. **Próximo passo:** o PR, a CI e o "sim" do merge.
+- **Nada em curso.** As cinco tarefas de 2026-11-24 (`decisoes.md` 2026-11-24 (2) a (14); o diário 2026-11-24 (1) a (3)) estão na `main`:
+  a CI com 20 min e as partidas salvas com 10 e 30 dias (PR #9, `7b7f38e`); a Defesa Absoluta em duas fases, a Fortaleza, o Reflect novo e
+  os 4 bônus que cabem no campo no PC (PR #10, `51e9f4b`, regra 7); a saída do Cordel Escuro (PR #11, `1ab7975`); o fim de partida na
+  Faixa de feira (PR #12, `67db244`).
 - **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele), que leva os PRs #8 a #12; no deploy, o `STATE_SCHEMA` 7 encerra as
   salas abertas e o `PROTOCOL_VERSION` 2 faz as abas velhas recarregarem uma vez. Apagar as branches mescladas
-  (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`, `feat/sem-cordel-escuro`).
+  (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`, `feat/sem-cordel-escuro`, `feat/fim-faixa`).
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`.
 
 ## No ar e na `main`
 
 - **No ar** em `https://jogodocoringa.com.br`: `5f5821f` (o deploy de 2026-11-18, os menus no Folheto). O `/api/health` devolve a versão.
-- **Na `main` e ainda não no ar** (o deploy, `pnpm deploy:server`, é dele): a cura passiva, as marcas em figura e o histórico (PR #8), o bloco de 2026-11-23 (PR #7), o "Aprender jogando" sem a linha (PR #3), o Coringa do Início
+- **Na `main` e ainda não no ar** (o deploy, `pnpm deploy:server`, é dele): as cinco tarefas de 2026-11-24 (PRs #9 a #12), a cura passiva, as marcas em figura e o histórico (PR #8), o bloco de 2026-11-23 (PR #7), o "Aprender jogando" sem a linha (PR #3), o Coringa do Início
   menor no notebook (PR #4), a mesa no Feltro (PR #5), a abertura sem a logo LUSACAN (PR #6).
 - **No deploy da regra 7:** `STATE_SCHEMA` 7 encerra as salas abertas; `PROTOCOL_VERSION` 2 faz a aba velha recarregar uma vez.
 
