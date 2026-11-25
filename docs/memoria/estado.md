@@ -25,7 +25,8 @@
 - **Para a spec do Equipar:** a dica do tutorial ("toque … no destino, Ataque ou Defesa"); os testes que procuram as legendas e os textos
   (`stamp-buttons`, `phases`, `training`, `tutorial`, `card-drag`, `table-drag`, `end-and-menu`; o `equipByUi` e o `NO_PENDING`/"Sua mão está
   vazia" do E2E); na Y os botões deslizam no PC a cada carta posta (o autor escolheu sabendo).
-- **Próximo passo:** a escolha do ícone do Passar e o aval das artes; então a spec (o advisor revisa), o plano e o código, em PRs: Equipar +
+- **Passar:** as setas de pular (`PassSkipIcon`, 2026-11-25 (5)).
+- **Próximo passo:** o aval das artes, o vão entre a mão e o painel no PC e a retomada do treino depois de recarregar (perguntas abertas); então a spec (o advisor revisa), o plano e o código, em PRs: Equipar +
   Passar + mão; abertura; níveis. A (3) segue no diagnóstico.
 - **O que espera o autor:** apagar as branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`,
   `feat/sem-cordel-escuro`, `feat/fim-faixa`).

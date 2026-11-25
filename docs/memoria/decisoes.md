@@ -6,6 +6,17 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-25 (5): o Passar com as setas de pular
+
+Diante do mostruário (`docs/superpowers/specs/2026-11-25-equipar-y/mostruario.png`, as três opções: 1 a mão espalmada, 2 as setas de pular,
+3 a carta que desliza) e da pergunta "Qual ícone fica no Passar?", ele respondeu "2 · setas de pular".
+
+**Leitura:** o Passar é o carimbo de papel com as duas setas de tinta e a barra de ouro (`PassSkipIcon`) e a palavra PASSAR embaixo. Saem a
+seta em arco (2026-11-25 (2)) e as opções 1 e 3. Seguem abertas: o aval das artes no lugar dos textos, o vão entre a mão e o painel no PC e o
+treino que retoma a partida depois de recarregar.
+
+---
+
 ## 2026-11-25 (4): o Equipar na Y, artes no lugar dos textos; a queda foi no iPhone com deck de arte
 
 Diante das fotos do Equipar sem texto (`docs/superpowers/specs/2026-11-25-equipar-sem-texto/`, X e Y, com a medida de que na Y os botões
