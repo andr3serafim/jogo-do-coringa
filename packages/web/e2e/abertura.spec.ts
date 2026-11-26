@@ -45,7 +45,7 @@ async function expectMenuWorks(page: Page): Promise<void> {
   await expect(page).toHaveURL(/\/partidas$/);
 }
 
-test('a abertura toca inteira ao abrir no início: as cartas, o título, de 3 a 4,5 s, e termina no menu, sem erro no console', async ({ page }) => {
+test('a abertura toca inteira ao abrir no início: as cartas e o Coringa, de 2 a 3,5 s, e termina no menu, sem erro no console', async ({ page }) => {
   const guard = failOnConsoleErrors(page);
   await watchIntro(page);
   await page.goto('/');
@@ -94,7 +94,7 @@ test('com o áudio bloqueado pelo navegador, a abertura roda muda até o menu, s
   await expect(overlay(page)).toHaveCount(0, { timeout: 10_000 });
   // A abertura tentou ligar o som (um contexto, sem gesto) e seguiu sem ele.
   expect(await page.evaluate(() => (window as unknown as { __contextos: AudioContext[] }).__contextos.length)).toBe(1);
-  expect(await introLasted(page)).toBeGreaterThanOrEqual(3000);
+  expect(await introLasted(page)).toBeGreaterThanOrEqual(2000);
   await expectMenuWorks(page);
   guard.expectClean();
 });
