@@ -19,6 +19,8 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 - **Achado do advisor, levado ao autor:** com `fadeAt` 1900 o Coringa pousado fica ~0,2 s parado, não os ~0,6 s da spec (a conta media da
   virada do maço, não do pouso), e a chamada do som (na virada) cai ~390 ms antes do pulo. O teste agora mede do pouso (≥ 200 ms). As opções
   (a) 1,9/2,35 e (b) ~2,2/2,65, e o som no pouso, vão no PR.
+- **PR #15 aberto.** O autor escolheu (b) (`decisoes.md` 2026-11-26 (3)): `fadeAt` 2200 e `total` 2650; o teste do tempo parado mede do
+  pouso e pede ≥ 500 ms (foi RED com 1900).
 - **Armadilha:** o grep do plano não pegou o literal `toBeGreaterThanOrEqual(3000)` do teste do áudio bloqueado no `abertura.spec`: a
   duração mora em literais dos E2E também. Procure os números, não só os nomes.
 - **Armadilha (de novo):** crases dentro de `node -e "…"` foram executadas pelo shell (só "command not found"). Roteiros com template string:

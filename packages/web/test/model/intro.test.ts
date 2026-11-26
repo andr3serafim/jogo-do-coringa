@@ -8,9 +8,9 @@ import { INTRO, INTRO_REDUCED, SKIP_FADE_MS, introPlan, skipsIntro, type IntroKe
 const key = (name: string, mods: Partial<IntroKey> = {}): IntroKey => ({ key: name, ctrlKey: false, metaKey: false, altKey: false, ...mods });
 
 describe('a abertura: os tempos', () => {
-  it('é só a intro do jogo, mais curta sem o título (2026-11-25 (2)): de 2 a 2,6 segundos', () => {
+  it('é só a intro do jogo, mais curta sem o título (2026-11-25 (2)): de 2 a 2,7 segundos (2026-11-26 (3): acaba em 2,65 s)', () => {
     expect(INTRO.total).toBeGreaterThanOrEqual(2000);
-    expect(INTRO.total).toBeLessThanOrEqual(2600);
+    expect(INTRO.total).toBeLessThanOrEqual(2700);
   });
 
   it('a primeira carta sobe logo, com um respiro curto depois da capa escura', () => {
@@ -44,8 +44,8 @@ describe('a abertura: os tempos', () => {
     expect(INTRO.revealAt).toBe(INTRO.coringaInAt + 240);
   });
 
-  it('o Coringa pousado fica parado antes do esmaecer (hoje ~0,2 s; a duração está com o autor, 2026-11-26)', () => {
-    expect(INTRO.fadeAt - INTRO.revealAt).toBeGreaterThanOrEqual(200);
+  it('o Coringa pousado fica parado antes do esmaecer pelo menos meio segundo (2026-11-26 (3))', () => {
+    expect(INTRO.fadeAt - INTRO.revealAt).toBeGreaterThanOrEqual(500);
   });
 
   it('o aviso de pular entra aos 0,5 s, nas duas versões', () => {

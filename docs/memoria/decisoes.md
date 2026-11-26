@@ -6,6 +6,17 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-26 (3): a abertura com o Coringa meio segundo parado
+
+Diante do PR #15 (a abertura sem título; o Coringa pousa em 1,69 s e esmaecer em 1,9 s o deixava ~0,2 s parado) e da pergunta "Qual duração
+fica na abertura: (a) 1,9/2,35 s ou (b) ~2,2/2,65 s?", ele respondeu "(b) 2,2 / 2,65 s". A outra pergunta da mesma mensagem (a chamada do
+som na virada do maço ou no pouso do Coringa) ficou sem resposta.
+
+**Leitura:** a abertura esmaece em 2,2 s e acaba em 2,65 s (substitui o 1,9/2,35 de 2026-11-26 (1)); o Coringa fica ~0,5 s parado. **[I]** O
+som segue como a spec aprovada (a chamada na virada, `flipAt`) até ele responder.
+
+---
+
 ## 2026-11-26 (2): a execução nativa e o sim para o merge do PR #14
 
 Diante da pergunta "Qual execução: nativa ou por subagentes?", ele respondeu "Nativa". Diante de "Faço o merge do PR #14 quando a CI ficar

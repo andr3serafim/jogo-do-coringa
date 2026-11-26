@@ -12,11 +12,10 @@
   abertura sem título (`feat/abertura-sem-titulo`, da `main` depois do PR 1); **PR 3** os níveis na direção A (`feat/niveis-identidade`, depois
   do PR 2).
 - **PR 1 mesclado:** #14, `35d9239` (o Equipar sem texto, o Passar quadrado, a mão vazia; o diário 2026-11-26 (1)). Fotos em `docs/superpowers/specs/2026-11-26-pr1-fotos/` (fora do git).
-- **PR 2 (a abertura sem título)** na `feat/abertura-sem-titulo`: feito (Tarefa 6; o diário 2026-11-26 (2)); fotos em
-  `docs/superpowers/specs/2026-11-26-pr2-abertura/` (fora do git; 700, 1200, 1700 e 1900 ms). **Pergunta ao autor no PR:** o Coringa pousa
-  em 1690 ms e a abertura esmaece em 1900, então ele fica parado ~0,2 s (a spec dizia ~0,6 s, contando da virada do maço): (a) manter
-  1,9/2,35 s ou (b) esmaecer em ~2,2 e acabar em ~2,65 s (~0,5 s parado); e se a chamada do som cai no pouso (junto do pulo) em vez da
-  virada. **Próximo passo:** o `pnpm e2e` verde, o push e o PR 2; merge com o sim dele; depois o PR 3 (os níveis), da `main` depois do PR 2.
+- **PR 2 aberto: #15** (a abertura sem título, `feat/abertura-sem-titulo`; o diário 2026-11-26 (2)). Com a escolha (b) do autor
+  (`decisoes.md` 2026-11-26 (3)): esmaece em 2,2 s e acaba em 2,65 s, o Coringa ~0,5 s parado. Ainda sem resposta: a chamada do som na
+  virada do maço (hoje, como a spec) ou no pouso do Coringa. **Próximo passo:** a CI do #15 verde e o sim para o merge; depois o PR 3 (os
+  níveis, Tarefa 7), da `main` depois do #15.
 - **Aberta com o autor:** retomar o treino depois de recarregar (tarefa 3: iPhone, deck de arte). Medido no Chromium (não reproduz o iOS):
   sem vazamento claro; o deck de arte soma ~70 a 80 MB ao processo da aba (detalhe no diário 2026-11-26 (1)).
 - **O que espera o autor:** apagar as branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`,

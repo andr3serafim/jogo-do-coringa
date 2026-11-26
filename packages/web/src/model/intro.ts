@@ -28,9 +28,9 @@ export const INTRO = {
   /** O Coringa pousa (a entrada de 240 ms do CSS) e dá o pulo. */
   revealAt: 1690,
   /** A abertura começa a esmaecer para o menu. */
-  fadeAt: 1900,
+  fadeAt: 2200,
   /** O menu. */
-  total: 2350,
+  total: 2650,
 } as const;
 
 /** A versão curta, com movimento reduzido (o sistema ou o menu do jogo): o Coringa parado, um esmaecer na entrada e outro na saída, sem som. */
