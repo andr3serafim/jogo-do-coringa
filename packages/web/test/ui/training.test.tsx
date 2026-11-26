@@ -219,6 +219,24 @@ describe('/treino: a escolha do nível', () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
+  it('cada nível tem a sua identidade (decisoes.md 2026-11-25 (3)): a faixa da cor e o rosto do Coringa, feliz, sério e bravo', async () => {
+    await choose();
+    const expected = [
+      ['Fácil', 'facil', 'feliz'],
+      ['Médio', 'medio', 'serio'],
+      ['Difícil', 'dificil', 'bravo'],
+    ] as const;
+    for (const [name, level, mood] of expected) {
+      const button = levelButton(name);
+      expect(button).toHaveAttribute('data-nivel', level);
+      expect(button).toHaveClass('carimbo', 'carimbo-papel', 'menu-nivel');
+      const medal = button.querySelector('.menu-nivel-medalha');
+      expect(medal).toHaveAttribute('aria-hidden', 'true');
+      expect(medal).toHaveAttribute('data-humor', mood);
+      expect(medal!.querySelector('svg')).not.toBeNull();
+    }
+  });
+
   it('o último nível escolhido (coringa:nivel) vem focado; um valor que não é nível volta ao Médio', async () => {
     const saved = memoryStore();
     saved.set('coringa:nivel', 'dificil');

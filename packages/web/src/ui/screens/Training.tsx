@@ -30,6 +30,7 @@ import { requestLook } from '../cards/LooksProvider.tsx';
 import { HpChoice } from '../HpChoice.tsx';
 import { Button, Screen, Title } from '../parts.tsx';
 import { PlayTable } from '../table/PlayTable.tsx';
+import { ResultFace, type ResultMood } from '../table/ResultMedal.tsx';
 import {
   defaultReload,
   goHome,
@@ -153,7 +154,13 @@ interface LevelChoiceProps {
   onChoose: (level: TrainingLevel, hp: number) => void;
 }
 
-/** A escolha do nível (spec da fatia 1, §3.3): um botão grande por nível, com o nome e uma linha, e o inicial já focado. */
+/** O rosto do Coringa de cada nível (decisoes.md 2026-11-25 (3)): feliz no Fácil, sério no Médio, bravo no Difícil. */
+const LEVEL_MOOD: Record<TrainingLevel, ResultMood> = { facil: 'feliz', medio: 'serio', dificil: 'bravo' };
+
+/**
+ * A escolha do nível (spec da fatia 1, §3.3): um botão grande por nível, com o nome e uma linha, e o inicial já focado. Cada um tem a sua
+ * identidade (decisoes.md 2026-11-25 (3), direção A): o carimbo de papel com a faixa da cor do nível e o rosto do Coringa num medalhão.
+ */
 function LevelChoice({ levels, initial, initialHp, onChoose }: LevelChoiceProps) {
   const [hp, setHp] = useState(initialHp);
   return (
@@ -169,11 +176,17 @@ function LevelChoice({ levels, initial, initialHp, onChoose }: LevelChoiceProps)
             // O nome do botão é o texto visível inteiro, nível e linha (WCAG 2.5.3: o axe barra um nome que não o contenha).
             autoFocus={level === initial}
             onClick={() => onChoose(level, hp)}
-            className="carimbo carimbo-grande carimbo-ouro menu-carimbo menu-nivel"
+            data-nivel={level}
+            className="carimbo carimbo-grande carimbo-papel menu-carimbo menu-nivel"
           >
-            <span className="menu-nivel-nome">{LEVEL_NAME[level]}</span>
-            {/* Entre itens de flex o espaço some (o layout não muda), mas separa as palavras do nome acessível: "Fácil Joga…", e não "FácilJoga…". */}{' '}
-            <span className="menu-nivel-linha">{LEVEL_LINE[level]}</span>
+            <span aria-hidden="true" data-humor={LEVEL_MOOD[level]} className="menu-nivel-medalha">
+              <ResultFace mood={LEVEL_MOOD[level]} />
+            </span>
+            <span className="menu-nivel-texto">
+              <span className="menu-nivel-nome">{LEVEL_NAME[level]}</span>
+              {/* Entre itens de flex o espaço some (o layout não muda), mas separa as palavras do nome acessível: "Fácil Joga…", e não "FácilJoga…". */}{' '}
+              <span className="menu-nivel-linha">{LEVEL_LINE[level]}</span>
+            </span>
           </button>
         ))}
       </div>
