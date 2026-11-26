@@ -14,8 +14,7 @@
 - **PR 1:** Tarefas 0 a 5 feitas (o código, os testes, o E2E, as fotos e a revisão do advisor). Fotos do jogo em
   `docs/superpowers/specs/2026-11-26-pr1-fotos/` (fora do git; 360, 375 e PC: faltam 4, faltam 3, Confirmar, rodada 2, o Passar numa reação,
   a quadra no rascunho a 360 e no PC). O diário 2026-11-26 (1) tem as decisões tomadas no caminho.
-- **Próximo passo:** o `pnpm e2e` verde (rodando), o push e o PR 1 para a `main`, os dois jobs da CI verdes; merge só com o sim do autor.
-  Depois, o PR 2 (a Tarefa 6 do plano).
+- **PR 1 aberto: #14** (https://github.com/andr3serafim/jogo-do-coringa/pull/14); `pnpm check` e `pnpm e2e` locais verdes (web 3042; E2E 139). **Próximo passo:** a CI verde e o sim do autor para o merge; depois o PR 2 (Tarefa 6, a abertura), da `main` atualizada.
 - **Aberta com o autor:** retomar o treino depois de recarregar (tarefa 3: iPhone, deck de arte). Medido no Chromium (não reproduz o iOS):
   sem vazamento claro; o deck de arte soma ~70 a 80 MB ao processo da aba (detalhe no diário 2026-11-26 (1)).
 - **O que espera o autor:** apagar as branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`,
