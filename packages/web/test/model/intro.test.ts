@@ -1,4 +1,5 @@
-// A abertura do jogo (decisoes.md 2026-11-16 (5); sem a logo LUSACAN desde 2026-11-19 (6)): os tempos, as pistas de som e o que pula. O
+// A abertura do jogo (decisoes.md 2026-11-16 (5); sem a logo LUSACAN desde 2026-11-19 (6); sem o título, a aura, o anel e as faíscas desde
+// 2026-11-25 (2)): os tempos, as pistas de som e o que pula. O
 // que a pessoa vê (a ordem das cenas, o aviso, o esmaecer) sai destes números: o CSS da abertura só lê as variáveis que o componente
 // monta a partir daqui.
 import { describe, expect, it } from 'vitest';
@@ -7,9 +8,9 @@ import { INTRO, INTRO_REDUCED, SKIP_FADE_MS, introPlan, skipsIntro, type IntroKe
 const key = (name: string, mods: Partial<IntroKey> = {}): IntroKey => ({ key: name, ctrlKey: false, metaKey: false, altKey: false, ...mods });
 
 describe('a abertura: os tempos', () => {
-  it('é só a intro do jogo: de 3 a 4 segundos', () => {
-    expect(INTRO.total).toBeGreaterThanOrEqual(3000);
-    expect(INTRO.total).toBeLessThanOrEqual(4000);
+  it('é só a intro do jogo, mais curta sem o título (2026-11-25 (2)): de 2 a 2,6 segundos', () => {
+    expect(INTRO.total).toBeGreaterThanOrEqual(2000);
+    expect(INTRO.total).toBeLessThanOrEqual(2600);
   });
 
   it('a primeira carta sobe logo, com um respiro curto depois da capa escura', () => {
@@ -17,10 +18,17 @@ describe('a abertura: os tempos', () => {
     expect(INTRO.themeAt).toBeLessThanOrEqual(300);
   });
 
-  it('as cenas vêm em ordem: as cartas, a junção, a virada, o título, o menu', () => {
-    const order = [0, INTRO.themeAt, INTRO.gatherAt, INTRO.flipAt, INTRO.titleCueAt, INTRO.titleAt, INTRO.fadeAt, INTRO.total];
+  it('as cenas vêm em ordem: as cartas, a junção, a virada no Coringa, o menu', () => {
+    const order = [0, INTRO.themeAt, INTRO.gatherAt, INTRO.flipAt, INTRO.fadeAt, INTRO.total];
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     expect(new Set(order).size).toBe(order.length);
+  });
+
+  it('a pista do som começa na junção (ou depois) e antes da virada, onde cai a chamada', () => {
+    expect(INTRO.revealCueAt).toBeGreaterThanOrEqual(INTRO.gatherAt);
+    expect(INTRO.revealCueAt).toBeLessThan(INTRO.flipAt);
+    expect(INTRO).not.toHaveProperty('titleAt');
+    expect(INTRO).not.toHaveProperty('titleCueAt');
   });
 
   it('as quatro cartas sobem uma depois da outra, cada vez mais depressa, e todas pousam antes de se juntarem', () => {
@@ -31,8 +39,8 @@ describe('a abertura: os tempos', () => {
     expect(INTRO.themeAt + INTRO.cardDelays[3]! + INTRO.cardRiseMs).toBeLessThanOrEqual(INTRO.gatherAt);
   });
 
-  it('o título carimbado fica parado pelo menos meio segundo antes do esmaecer', () => {
-    expect(INTRO.fadeAt - INTRO.titleAt).toBeGreaterThanOrEqual(500);
+  it('o Coringa virado fica parado pelo menos meio segundo antes do esmaecer', () => {
+    expect(INTRO.fadeAt - INTRO.flipAt).toBeGreaterThanOrEqual(500);
   });
 
   it('o aviso de pular entra aos 0,5 s, nas duas versões', () => {
@@ -45,7 +53,7 @@ describe('a abertura: os tempos', () => {
     expect(INTRO_REDUCED.total - INTRO_REDUCED.fadeAt).toBeGreaterThanOrEqual(300);
   });
 
-  it('com movimento reduzido é curta: o Coringa e o título parados e o esmaecer, em menos de 2 s', () => {
+  it('com movimento reduzido é curta: o Coringa parado e o esmaecer, em menos de 2 s', () => {
     expect(INTRO_REDUCED.total).toBeLessThan(2000);
     expect(INTRO_REDUCED.fadeAt).toBeGreaterThan(INTRO_REDUCED.hintAt);
   });
@@ -57,13 +65,13 @@ describe('a abertura: os tempos', () => {
 });
 
 describe('a abertura: o plano de cada versão', () => {
-  it('a completa toca a chamada do título, no instante dela', () => {
+  it('a completa toca a chamada, com a pista começando antes da virada', () => {
     expect(introPlan(false)).toEqual({
       variant: 'completa',
       hintAt: INTRO.hintAt,
       fadeAt: INTRO.fadeAt,
       total: INTRO.total,
-      cues: [{ at: INTRO.titleCueAt, cue: 'abertura-titulo' }],
+      cues: [{ at: INTRO.revealCueAt, cue: 'abertura-titulo' }],
     });
   });
 

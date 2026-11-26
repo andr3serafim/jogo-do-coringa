@@ -1,10 +1,11 @@
 /*
- * A abertura do jogo (decisoes.md 2026-11-16 (5); sem a logo LUSACAN desde 2026-11-19 (6)): a intro do jogo, até o menu. Uma camada de tinta
+ * A abertura do jogo (decisoes.md 2026-11-16 (5); sem a logo LUSACAN desde 2026-11-19 (6); sem o título, a aura, o anel e as faíscas desde
+ * 2026-11-25 (2)): a intro do jogo, até o menu. Uma camada de tinta
  * por cima do Início. Todo instante vem do modelo (`model/intro.ts`), pelas variáveis `--t-*` e `--d-*` que o `Intro.tsx` põe na
- * camada: aqui só fica quanto cada gesto dura e como ele se move. Só `transform` e `opacity` se animam (e o brilho que passa no título).
+ * camada: aqui só fica quanto cada gesto dura e como ele se move. Só `transform` e `opacity` se animam.
  *
- * Fotossensibilidade (spec §10.4): nada pisca na tela inteira. O brilho é local (a aura, as faíscas), e a passagem do escuro
- * para o menu é um esmaecer só. Com movimento reduzido (`data-abertura='curta'`), só o Coringa e o título, parados, com um esmaecer.
+ * Fotossensibilidade (spec §10.4): nada pisca na tela inteira, e a passagem do escuro para o menu é um esmaecer só. Com movimento reduzido
+ * (`data-abertura='curta'`), só o Coringa, parado, com um esmaecer.
  */
 .abertura {
   position: fixed;
@@ -68,7 +69,7 @@ html:has(.abertura) {
   }
 }
 
-/* --- A versão curta: o Coringa e o título parados, com um esmaecer na entrada (e o da saída, de toda a camada). --- */
+/* --- A versão curta: o Coringa parado, com um esmaecer na entrada (e o da saída, de toda a camada). --- */
 
 [data-abertura='curta'] .abertura-tema {
   animation: abertura-surge 300ms ease-out both;
@@ -85,11 +86,7 @@ html:has(.abertura) {
   animation: none;
 }
 
-[data-abertura='curta'] .abertura-titulo {
-  animation: none;
-}
-
-/* --- A intro do jogo: as quatro cartas sobem em leque, juntam-se, o maço vira no Coringa e o título é carimbado. --- */
+/* --- A intro do jogo: as quatro cartas sobem em leque, juntam-se e o maço vira no Coringa. --- */
 
 .abertura-tema {
   display: flex;
@@ -174,13 +171,13 @@ html:has(.abertura) {
   }
 }
 
-/* O Coringa: a outra metade da virada do maço, um pouco maior, com o filete de ouro; no carimbo do título ele dá um pulo. */
+/* O Coringa: a outra metade da virada do maço, um pouco maior, com o filete de ouro; quando termina de virar, dá um pulo. */
 .abertura-coringa {
   outline-color: var(--color-ouro);
   outline-width: 3px;
   animation:
     abertura-vira-entra 240ms cubic-bezier(0.2, 1.3, 0.4, 1) calc(var(--t-vira) + 150ms) both,
-    abertura-pulo 420ms ease-out var(--t-titulo) forwards;
+    abertura-pulo 420ms ease-out calc(var(--t-vira) + 390ms) forwards;
 }
 
 .abertura-coringa-arte {
@@ -209,143 +206,3 @@ html:has(.abertura) {
   }
 }
 
-/* A aura de ouro: cresce enquanto as cartas se juntam e pulsa no carimbo. */
-.abertura-aura {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: calc(var(--carta-h) * 3.4);
-  height: calc(var(--carta-h) * 3.4);
-  margin: calc(var(--carta-h) * -1.7) 0 0 calc(var(--carta-h) * -1.7);
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--color-ouro) 62%, transparent) 0%,
-    color-mix(in srgb, var(--color-ouro) 22%, transparent) 38%,
-    transparent 68%
-  );
-  opacity: 0;
-  animation:
-    abertura-aura calc(var(--t-titulo) - var(--t-junta)) cubic-bezier(0.5, 0, 0.9, 0.5) var(--t-junta) forwards,
-    abertura-aura-pulso 1100ms ease-out var(--t-titulo) forwards;
-}
-
-@keyframes abertura-aura {
-  from {
-    opacity: 0;
-    transform: scale(0.15);
-  }
-  to {
-    opacity: 0.85;
-    transform: scale(1);
-  }
-}
-
-@keyframes abertura-aura-pulso {
-  from {
-    opacity: 0.85;
-    transform: scale(1);
-  }
-  25% {
-    opacity: 1;
-    transform: scale(1.35);
-  }
-  to {
-    opacity: 0.7;
-    transform: scale(1.15);
-  }
-}
-
-/* A onda e as faíscas do carimbo: saem do Coringa quando o título bate. */
-.abertura-onda {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: calc(var(--carta-h) * 1.2);
-  height: calc(var(--carta-h) * 1.2);
-  margin: calc(var(--carta-h) * -0.6) 0 0 calc(var(--carta-h) * -0.6);
-  border: 3px solid var(--color-ouro);
-  border-radius: 50%;
-  opacity: 0;
-  animation: abertura-onda 650ms cubic-bezier(0.1, 0.6, 0.3, 1) var(--t-titulo) forwards;
-}
-
-@keyframes abertura-onda {
-  from {
-    opacity: 0.9;
-    transform: scale(0.4);
-  }
-  to {
-    opacity: 0;
-    transform: scale(3.4);
-  }
-}
-
-.abertura-faisca {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: calc(var(--carta-h) * 0.07);
-  height: calc(var(--carta-h) * 0.07);
-  margin: calc(var(--carta-h) * -0.035) 0 0 calc(var(--carta-h) * -0.035);
-  background: var(--color-ouro);
-  opacity: 0;
-  animation: abertura-faisca 620ms cubic-bezier(0.1, 0.7, 0.3, 1) var(--t-titulo) forwards;
-}
-
-@keyframes abertura-faisca {
-  from {
-    opacity: 1;
-    transform: rotate(var(--a)) translateY(calc(var(--carta-h) * -0.62)) rotate(45deg) scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: rotate(var(--a)) translateY(calc(var(--carta-h) * -1.9)) rotate(45deg) scale(0.3);
-  }
-}
-
-/* O título: o tipo de madeira, em ouro, carimbado; um brilho passa por ele em seguida. */
-.abertura-titulo {
-  margin: 0;
-  padding: 0 16px;
-  font-family: var(--font-madeira);
-  font-size: clamp(30px, min(9vw, 9.5vh), 72px);
-  line-height: 1.05;
-  text-align: center;
-  text-wrap: balance;
-  color: var(--color-ouro);
-  background: linear-gradient(
-      100deg,
-      var(--color-ouro) 42%,
-      color-mix(in srgb, var(--color-ouro) 30%, var(--color-papel)) 50%,
-      var(--color-ouro) 58%
-    )
-    100% 0 / 260% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 4px 0 var(--color-madeira));
-  animation:
-    abertura-carimbo 220ms cubic-bezier(0.2, 1.5, 0.4, 1) var(--t-titulo) both,
-    abertura-brilho 900ms ease-in-out calc(var(--t-titulo) + 260ms) forwards;
-}
-
-@keyframes abertura-carimbo {
-  from {
-    opacity: 0;
-    transform: scale(1.8);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes abertura-brilho {
-  from {
-    background-position: 100% 0;
-  }
-  to {
-    background-position: 0% 0;
-  }
-}

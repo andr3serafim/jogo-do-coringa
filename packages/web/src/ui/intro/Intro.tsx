@@ -1,13 +1,13 @@
-// A abertura do jogo (decisoes.md 2026-11-16 (5); sem a logo LUSACAN desde 2026-11-19 (6)): a intro do jogo (as cartas dos quatro naipes
-// sobem, juntam-se, o maço vira no Coringa e o título é carimbado), até o menu. É uma camada por cima do Início, que já está montado por
+// A abertura do jogo (decisoes.md 2026-11-16 (5); sem a logo LUSACAN desde 2026-11-19 (6); sem o título, a aura, o anel e as faíscas desde
+// 2026-11-25 (2)): a intro do jogo (as cartas dos quatro naipes sobem, juntam-se e o maço vira no Coringa), até o menu. É uma camada por cima do Início, que já está montado por
 // baixo (inerte): nada do menu espera a abertura para carregar.
 //
 // Os instantes moram no modelo (`model/intro.ts`). O CSS (`intro.css`) faz os gestos e os lê pelas variáveis que esta camada entrega.
 // Daqui também saem o som nos instantes dele, o fim e o pulo. Clique, toque e "qualquer tecla" pulam (`skipsIntro`).
-// Com movimento reduzido, é a versão curta: o Coringa e o título parados, e um esmaecer.
+// Com movimento reduzido, é a versão curta: o Coringa parado, e um esmaecer.
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { Suit as SuitName } from '@coringa/engine';
-import { INTRO_SKIP_HINT, INTRO_SKIP_HINT_TOUCH, INTRO_TITLE } from '../../model/copy.ts';
+import { INTRO_SKIP_HINT, INTRO_SKIP_HINT_TOUCH } from '../../model/copy.ts';
 import { INTRO, SKIP_FADE_MS, introPlan, skipsIntro } from '../../model/intro.ts';
 import { Coringa } from '../cards/Coringa.tsx';
 import { Suit, isRedSuit } from '../cards/Suit.tsx';
@@ -16,8 +16,6 @@ import './intro.css';
 
 /** As quatro cartas que sobem, na ordem do leque (preto e vermelho alternados). */
 const SUITS: readonly SuitName[] = ['espadas', 'copas', 'ouros', 'paus'];
-/** As faíscas do carimbo do título: o ângulo de cada uma, em graus. */
-const SPARKS = [0, 45, 90, 135, 180, 225, 270, 315];
 
 const ms = (value: number): string => `${value}ms`;
 
@@ -100,7 +98,6 @@ export function Intro({ reduced, onDone }: IntroProps) {
         '--d-sobe': ms(INTRO.cardRiseMs),
         '--t-junta': ms(INTRO.gatherAt),
         '--t-vira': ms(INTRO.flipAt),
-        '--t-titulo': ms(INTRO.titleAt),
       }
     : {};
   const style = cssVars({
@@ -117,8 +114,6 @@ export function Intro({ reduced, onDone }: IntroProps) {
         <div className="abertura-palco">
           {full ? (
             <>
-              <div className="abertura-aura" />
-              <div className="abertura-onda" />
               {SUITS.map((suit, index) => (
                 <div
                   key={suit}
@@ -134,9 +129,7 @@ export function Intro({ reduced, onDone }: IntroProps) {
           <div className="abertura-coringa">
             <Coringa className="abertura-coringa-arte" />
           </div>
-          {full ? SPARKS.map((angle) => <span key={angle} className="abertura-faisca" style={cssVars({ '--a': `${angle}deg` })} />) : null}
         </div>
-        <p className="abertura-titulo">{INTRO_TITLE}</p>
       </div>
       <button ref={skipButton} type="button" className="abertura-aviso">
         {hint}

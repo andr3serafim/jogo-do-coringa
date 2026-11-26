@@ -57,13 +57,14 @@ test('a abertura toca inteira ao abrir no início: as cartas, o título, de 3 a 
   await expect(page.locator('[inert] h1')).toHaveCount(1);
   // O aviso é discreto e entra depois de meio segundo.
   await expect(page.getByRole('button', { name: 'Pressione qualquer tecla para pular' })).toHaveCSS('opacity', '0.72');
-  // O título é carimbado (a opacidade cheia) antes de o menu chegar.
-  await expect(page.locator('.abertura-titulo')).toHaveCSS('opacity', '1');
+  // O maço vira no Coringa; sem o título, a aura, o anel e as faíscas (decisoes.md 2026-11-25 (2)).
+  await expect(page.locator('.abertura-coringa')).toBeVisible();
+  await expect(page.locator('.abertura-titulo, .abertura-aura, .abertura-onda, .abertura-faisca')).toHaveCount(0);
 
   await expect(overlay(page)).toHaveCount(0, { timeout: 10_000 });
   const lasted = await introLasted(page);
-  expect(lasted).toBeGreaterThanOrEqual(3000);
-  expect(lasted).toBeLessThanOrEqual(4500);
+  expect(lasted).toBeGreaterThanOrEqual(2000);
+  expect(lasted).toBeLessThanOrEqual(3500);
 
   await expectMenuWorks(page);
   guard.expectClean();
@@ -144,12 +145,12 @@ test.describe('pular', () => {
 test.describe('com movimento reduzido', () => {
   test.use({ reducedMotion: 'reduce' });
 
-  test('é a versão curta: o Coringa e o título parados e o esmaecer, em menos de 2,5 s, e o menu', async ({ page }) => {
+  test('é a versão curta: o Coringa parado e o esmaecer, em menos de 2,5 s, e o menu', async ({ page }) => {
     const guard = failOnConsoleErrors(page);
     await watchIntro(page);
     await page.goto('/');
     await expect(overlay(page)).toHaveAttribute('data-abertura', 'curta');
-    await expect(page.locator('.abertura-titulo')).toBeVisible();
+    await expect(page.locator('.abertura-titulo')).toHaveCount(0);
     await expect(page.locator('.abertura-coringa')).toBeVisible();
     await expect(page.locator('.abertura-carta')).toHaveCount(0);
     await expect(overlay(page)).toHaveCount(0, { timeout: 5000 });
