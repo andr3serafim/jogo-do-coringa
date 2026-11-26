@@ -6,6 +6,19 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-26 (1): a spec do Equipar, da abertura e dos níveis aprovada
+
+Diante da spec `docs/superpowers/specs/2026-11-25-equipar-abertura-niveis-design.md` e da pergunta "A spec está aprovada?", com seis perguntas
+curtas na mesma mensagem (1 os textos vizinhos "pronto" e "Equipar · os dois montam" ficam; 2 o som cai na virada do Coringa; 3 esmaecer em
+1,9 s e fim em 2,35 s; 4 a dica do tutorial com "a espada (Ataque) ou o escudo (Defesa)"; 5 o motivo da recusa abre ao tocar no disco; 6 o
+treino retomar a partida depois de recarregar), ele respondeu "Aprovo".
+
+**Leitura:** a spec está aprovada como escrita. **[I]** As propostas marcadas nela valem como escritas (1 a 5: os textos vizinhos ficam, o som
+na virada, 1,9 s e 2,35 s, a dica do tutorial, a dica do disco no toque); ele pode ajustá-las no PR. A 6 (retomar o treino) não está na spec
+e segue aberta. Próximo: o plano, que o advisor revisa.
+
+---
+
 ## 2026-11-25 (7): a mão no PC como hoje
 
 Diante das fotos `docs/superpowers/specs/2026-11-25-equipar-y/mao-hoje-*.png` e `mao-junta-*.png` (no PC, no Equipar: a mão reservando metade
