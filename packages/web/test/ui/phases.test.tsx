@@ -353,6 +353,8 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
     await choose(m, 'Fileira de Ataque');
     expect(inEquip().getByText('forma quadra de 7: +7 e 1 Ressurreição')).toHaveClass('sr-only');
     expect(equipPanel().querySelector('[data-quadra-nova]')).toHaveTextContent('+7');
+    // Acima do painel, fora das cartas: a 360 px, no canto do painel, o selo tapava o índice da carta da direita (foto da Tarefa 5).
+    expect(equipPanel().querySelector('[data-quadra-nova]')!.parentElement).toHaveClass('bottom-full');
     expect(screen.getByRole('group', { name: 'Sua fileira de ataque' }).querySelector('[data-quadra]')).toHaveTextContent('+7');
     await m.user.click(inEquip().getByRole('button', { name: 'Desfazer' }));
     expect(screen.queryByText(/forma quadra/)).not.toBeInTheDocument();

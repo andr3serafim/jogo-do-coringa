@@ -339,8 +339,9 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
           <Seal label={RESET_LABEL} icon={<ResetIcon />} disabled={disabled || draft.length === 0} onClick={onReset} />
         </div>
 
-        {/* O que flutua sobre o painel, sem empurrar nada: a quadra que o rascunho forma (região viva) e o envio ou a recusa. */}
-        <div aria-live="polite" className="pointer-events-none absolute -top-1 right-0 flex flex-col items-end gap-1">
+        {/* O que flutua, sem empurrar nada: a quadra que o rascunho forma (região viva), acima do painel, fora das cartas (no canto dele, a
+            360 px, tapava o índice da carta da direita), e o envio ou a recusa. */}
+        <div aria-live="polite" className="pointer-events-none absolute bottom-full right-0 z-10 mb-2 flex flex-col items-end gap-1">
           {board.newQuads.map((quad) => (
             <QuadBadge key={`${quad.row}:${quad.value}`} value={quad.value} />
           ))}
