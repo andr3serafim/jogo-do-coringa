@@ -6,28 +6,27 @@
 
 ## Agora
 
-- **Em curso: as tarefas de 2026-11-25** (`decisoes.md` 2026-11-25 (1) a (7) e 2026-11-26 (1)), spec
-  `docs/superpowers/specs/2026-11-25-equipar-abertura-niveis-design.md` e plano `docs/superpowers/plans/2026-11-26-equipar-abertura-niveis.md`,
-  execução nativa. Três PRs em sequência: **PR 1** (Equipar sem texto, Passar quadrado, mão vazia) na `feat/ajustes-2026-11-25`; **PR 2** a
-  abertura sem título (`feat/abertura-sem-titulo`, da `main` depois do PR 1); **PR 3** os níveis na direção A (`feat/niveis-identidade`, depois
-  do PR 2).
-- **PR 1 mesclado:** #14, `35d9239` (o Equipar sem texto, o Passar quadrado, a mão vazia; o diário 2026-11-26 (1)). Fotos em `docs/superpowers/specs/2026-11-26-pr1-fotos/` (fora do git).
-- **PR 2 mesclado:** #15, `0e22f94` (a abertura sem título, aura, anel e faíscas; esmaece em 2,2 s e acaba em 2,65 s; a chamada do som no pouso do Coringa; o diário 2026-11-26 (2)).
-- **PR 3 (os níveis na direção A)** na `feat/niveis-identidade`: feito (`9718709`; o diário 2026-11-26 (3)); fotos em
-  `docs/superpowers/specs/2026-11-26-pr3-niveis/` (fora do git; rosa e verde, celular e PC). **Próximo passo:** o `pnpm e2e` verde, o push e o
-  PR 3; merge com o sim do autor. Com ele, o plano `2026-11-26-equipar-abertura-niveis` termina.
-- **Aberta com o autor:** retomar o treino depois de recarregar (tarefa 3: iPhone, deck de arte). Medido no Chromium (não reproduz o iOS):
-  sem vazamento claro; o deck de arte soma ~70 a 80 MB ao processo da aba (detalhe no diário 2026-11-26 (1)).
-- **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele): o site ainda está em `9ba36c1`, sem os PRs #14, #15 e o dos níveis (o
-  iPhone da tarefa 3 caiu nessa versão). Apagar as branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`,
-  `feat/regras-4q-reflect`, `feat/sem-cordel-escuro`, `feat/fim-faixa`, `feat/ajustes-2026-11-25`, `feat/abertura-sem-titulo`) e, se quiser, as
-  pastas de fotos soltas `docs/superpowers/specs/2026-11-25-*` e `2026-11-26-*` (não versionadas).
+- **Nada em curso.** O plano `docs/superpowers/plans/2026-11-26-equipar-abertura-niveis.md` terminou (`decisoes.md` 2026-11-25 (1) a
+  2026-11-26 (6); o diário 2026-11-26 (1) a (3)), em três PRs na `main`: o Equipar sem texto, o Passar quadrado e a mão vazia (#14,
+  `35d9239`); a abertura sem título, aura, anel e faíscas, com o Coringa ~0,5 s parado e a chamada do som no pouso (#15, `0e22f94`); os
+  níveis do treino na direção A (#16, `20c999b`). Fotos de cada um em `docs/superpowers/specs/2026-11-26-pr{1-fotos,2-abertura,3-niveis}/`
+  (fora do git).
+- **Aberta com o autor (tarefa 3):** retomar o treino depois de recarregar (a queda foi no iPhone, com deck de arte, no meio de uma partida
+  longa contra o Difícil). Medido no Chromium (não reproduz o iOS): sem vazamento claro; o deck de arte soma ~70 a 80 MB ao processo da aba
+  (o diário 2026-11-26 (1)). Sem resposta até aqui.
+- **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele): o site está em `9ba36c1`, sem os PRs #14, #15 e #16. Apagar as
+  branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`, `feat/sem-cordel-escuro`,
+  `feat/fim-faixa`, `feat/ajustes-2026-11-25`, `feat/abertura-sem-titulo`, `feat/niveis-identidade`) e, se quiser, as pastas de fotos
+  soltas `docs/superpowers/specs/2026-11-25-*` e `2026-11-26-*` (não versionadas).
+- **Menores adiados do plano** (o diário 2026-11-26 (1)): a dica do tutorial com dois parênteses seguidos ("…o escudo (Defesa) (ou
+  arraste…)"); o motivo da jogada recusada lido duas vezes pelo leitor de tela.
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`.
 
 ## No ar e na `main`
 
-- **No ar** em `https://jogodocoringa.com.br`: `9ba36c1` (o `/api/health` em 2026-11-25): a `main` inteira, com a regra 7, o
-  `STATE_SCHEMA` 7 e o `PROTOCOL_VERSION` 2.
+- **No ar** em `https://jogodocoringa.com.br`: `9ba36c1` (o `/api/health` em 2026-11-25): a regra 7, o `STATE_SCHEMA` 7 e o
+  `PROTOCOL_VERSION` 2.
+- **Na `main` e ainda não no ar:** os PRs #14, #15 e #16 (`20c999b`).
 
 ## Pendências abertas (fora deste bloco)
 

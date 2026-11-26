@@ -12,6 +12,8 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 - **PR 3, `feat/niveis-identidade`:** `9718709` (o humor `bravo` no `ResultMedal`; o `LevelChoice` com `data-nivel`, o medalhão
   `aria-hidden` com `data-humor` e o nome e a linha numa coluna; o `menu.css` com a faixa de 14 px na cor do nível e o medalhão de 58 px).
   Fotos em `docs/superpowers/specs/2026-11-26-pr3-niveis/`. Sem decisões novas no caminho: é a direção A do protótipo, um desenho só.
+- **PR #16 mesclado** (`20c999b`, `decisoes.md` 2026-11-26 (6)), com os quatro jobs verdes no último commit. O plano terminou; o ledger
+  (`.superpowers/sdd/2026-11-26-equipar-abertura-niveis/`) saiu, e as decisões tomadas no caminho ficam nas entradas (1) a (3).
 - **O que fica:** o deploy é do autor (o site segue em `9ba36c1`); a tarefa 3 (retomar o treino depois de recarregar) espera a resposta dele.
 
 : o PR #14 mesclado; o PR 2 (a abertura sem título)
