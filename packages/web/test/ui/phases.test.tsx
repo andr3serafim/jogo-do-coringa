@@ -355,6 +355,9 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
     expect(equipPanel().querySelector('[data-quadra-nova]')).toHaveTextContent('+7');
     // Acima do painel, fora das cartas: a 360 px, no canto do painel, o selo tapava o índice da carta da direita (foto da Tarefa 5).
     expect(equipPanel().querySelector('[data-quadra-nova]')!.parentElement).toHaveClass('bottom-full');
+    // No PC, à esquerda das cartas, no vão entre a mão e o painel (acima, cobria o canto do campo; à direita, o histórico).
+    expect(equipPanel().querySelector('[data-quadra-nova]')!.parentElement).toHaveClass('pc:right-full', 'pc:bottom-auto');
+    expect(equipPanel().querySelector('[data-disposicao]')).toHaveClass('pc:w-fit', 'pc:max-w-full');
     expect(screen.getByRole('group', { name: 'Sua fileira de ataque' }).querySelector('[data-quadra]')).toHaveTextContent('+7');
     await m.user.click(inEquip().getByRole('button', { name: 'Desfazer' }));
     expect(screen.queryByText(/forma quadra/)).not.toBeInTheDocument();

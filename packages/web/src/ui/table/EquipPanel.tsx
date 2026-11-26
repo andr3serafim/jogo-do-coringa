@@ -280,7 +280,7 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
         </ol>
       ) : null}
 
-      <div data-disposicao className="relative flex flex-col items-center gap-3 pc:flex-row pc:justify-center pc:gap-5">
+      <div data-disposicao className="relative flex flex-col items-center gap-3 pc:mx-auto pc:w-fit pc:max-w-full pc:flex-row pc:justify-center pc:gap-5">
         {complete ? null : (
           // A largura natural das cartas (sem vão), até o painel inteiro; elas só se sobrepõem quando não cabem. O espaço de cima é o da carta
           // escolhida, que sobe como na mão.
@@ -340,8 +340,8 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
         </div>
 
         {/* O que flutua, sem empurrar nada: a quadra que o rascunho forma (região viva), acima do painel, fora das cartas (no canto dele, a
-            360 px, tapava o índice da carta da direita), e o envio ou a recusa. */}
-        <div aria-live="polite" className="pointer-events-none absolute bottom-full right-0 z-10 mb-2 flex flex-col items-end gap-1">
+            360 px, tapava o índice da carta da direita); no PC, à esquerda das cartas, no vão entre a mão e o painel (à direita, cobria o histórico). E o envio ou a recusa. */}
+        <div aria-live="polite" className="pointer-events-none absolute bottom-full right-0 z-10 mb-2 flex flex-col items-end gap-1 pc:bottom-auto pc:right-full pc:top-1/2 pc:mb-0 pc:mr-4 pc:-translate-y-1/2">
           {board.newQuads.map((quad) => (
             <QuadBadge key={`${quad.row}:${quad.value}`} value={quad.value} />
           ))}
