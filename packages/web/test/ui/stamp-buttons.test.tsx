@@ -145,7 +145,9 @@ describe('carimbos: os outros', () => {
     }
     fireEvent.click(within(inEquip().getByRole('list', { name: 'Destinos' })).getAllByRole('button')[0]!);
     const confirm = inEquip().getByRole('button', { name: 'Confirmar' });
-    expect(classes(confirm)).toEqual(expect.arrayContaining(['carimbo', 'carimbo-ouro', 'carimbo-grande']));
+    // Do tamanho dos destinos, com o visto e a palavra (decisoes.md 2026-11-25 (4)); não é mais o carimbo grande de largura cheia.
+    expect(classes(confirm)).toEqual(expect.arrayContaining(['carimbo', 'carimbo-ouro', 'carimbo-destino', 'carimbo-icone-palavra']));
+    expect(classes(confirm)).not.toContain('carimbo-grande');
     expect(inEquip().getByRole('button', { name: 'Desfazer' })).toBeEnabled();
   });
 

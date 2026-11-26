@@ -6,6 +6,10 @@
 // (quem desenha é a `Table`, com `draftBoard`), e o painel diz a quadra que o rascunho forma. Desfazer volta um passo,
 // Recomeçar volta ao início, e Confirmar só aparece com todas as cartas posicionadas.
 //
+// Sem texto à vista (decisoes.md 2026-11-25 (3) a (6); spec 2026-11-25-equipar-abertura-niveis §3): os botões são figuras (o nome no
+// `aria-label`), o que era texto é arte (`EquipArt.tsx`) e o texto segue para o leitor de tela (`sr-only`). A disposição é a Y: no PC,
+// cartas e botões numa linha centrada; no celular, sempre duas (as cartas em cima, os botões embaixo).
+//
 // Nenhuma regra mora aqui: o rascunho e a regra de estouro são da sessão (`equipChoose`, `equipConfirm`) e do modelo
 // (`equip.ts`). O painel é só vista: as jogadas chegam por props.
 //
@@ -18,18 +22,13 @@ import { DESTINATION_TEXT } from '@coringa/sim/text';
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import {
   CONFIRM_LABEL,
-  DESTINATION_SHORT,
   equipConfirmedText,
   equipLeftText,
   EQUIP_READY_TEXT,
-  equipQuadText,
   equipWaitingText,
-  leavingShort,
   leavingText,
-  NO_PENDING_TEXT,
   placedText,
   RESET_LABEL,
-  SENDING_TEXT,
   UNDO_LABEL,
 } from '../../model/copy.ts';
 import { equipDropZones, type DropKey } from '../../model/drag.ts';
@@ -38,9 +37,10 @@ import type { Notice, SessionSnapshot } from '../../model/session.ts';
 import { useAnim } from '../anim/context.ts';
 import { useDealIn } from '../anim/useDealIn.ts';
 import { Card } from '../cards/Card.tsx';
-import { NoticeLine, PRIMARY, PRIMARY_TITLE, ResetIcon, Seal, TwoLine, UndoIcon } from './controls.tsx';
+import { ResetIcon, Seal, UndoIcon } from './controls.tsx';
 import { DragGhost } from './DragGhost.tsx';
-import { AttackIcon, DefenseIcon, DiscardIcon, SwapIcon } from './icons.tsx';
+import { ConfirmedArt, MiniCard, NoCardsArt, QuadBadge, RejectedNotice, SendingDots } from './EquipArt.tsx';
+import { AttackIcon, ConfirmIcon, DefenseIcon, DiscardIcon, SwapIcon } from './icons.tsx';
 import type { TableNames } from './labels.ts';
 import { useCardDrag } from './useCardDrag.ts';
 
@@ -68,7 +68,7 @@ export interface EquipPanelProps {
 
 /** A figura do destino (decisoes.md 2026-11-01 (1) e 2026-11-23 (1)): a fileira; na troca, a fileira com o disco da troca; o descarte, a lápide. */
 function DestinationIcon({ destination }: { destination: Destination }) {
-  const figure = 'size-6 pc:size-7';
+  const figure = 'size-8 pc:size-9';
   if (destination === 'DISCARD') return <DiscardIcon className={figure} />;
   const row = destination === 'ATK' || destination === 'REPLACE_LAST_ATK' ? <AttackIcon className={figure} /> : <DefenseIcon className={figure} />;
   if (destination === 'ATK' || destination === 'DEF') return row;
@@ -88,9 +88,8 @@ function leavingCard(view: PlayerView, chosen: EquipPick[], destination: Destina
 }
 
 /**
- * Um destino do Equipar (decisoes.md 2026-11-23 (1)): um carimbo de tamanho fixo, a figura e uma palavra (na troca, a carta que sai). O
- * tamanho não depende de quantas cartas faltam: no PC, a lista das cartas é que quebra linha. O nome inteiro de hoje (o do terminal, com a
- * carta que sai) fica no `aria-label` e na dica.
+ * Um destino do Equipar (decisoes.md 2026-11-23 (1) e 2026-11-25 (4)): um carimbo quadrado de tamanho fixo, só com a figura (na troca, a carta
+ * que sai, pequena, no canto). O nome inteiro (o do terminal, com a carta que sai) fica no `aria-label` e na dica.
  */
 function DestinationStamp({
   view,
@@ -121,9 +120,7 @@ function DestinationStamp({
       className="carimbo carimbo-papel carimbo-destino disabled:cursor-wait disabled:opacity-60"
     >
       <DestinationIcon destination={destination} />
-      <span aria-hidden="true" data-numero={leaving ? '' : undefined} className={leaving ? 'font-texto tabular-nums normal-case tracking-normal' : undefined}>
-        {leaving ? leavingShort(leaving) : DESTINATION_SHORT[destination]}
-      </span>
+      {leaving ? <MiniCard card={leaving} /> : null}
     </button>
   );
 }
@@ -143,28 +140,21 @@ export function EquipPanel(props: EquipPanelProps) {
   if (total === 0) {
     return (
       <Panel panelRef={panelRef}>
-        <p role="status" className="text-sm font-bold leading-snug">
-          {NO_PENDING_TEXT}
-        </p>
-        {view.opponent.equipSubmitted ? null : <p className="text-sm leading-snug">{equipWaitingText(opponent)}</p>}
+        <NoCardsArt waiting={!view.opponent.equipSubmitted} waitingText={equipWaitingText(opponent)} />
       </Panel>
     );
   }
   if (confirmed === 'earlier') {
     return (
       <Panel panelRef={panelRef}>
-        <p role="status" className="text-sm font-bold leading-snug">
-          {equipConfirmedText(opponent)}
-        </p>
+        <ConfirmedArt text={equipConfirmedText(opponent)} sending={false} />
       </Panel>
     );
   }
   if (confirmed === 'thisPage') {
     return (
       <Panel panelRef={panelRef}>
-        <p role="status" className="text-sm font-bold leading-snug">
-          {props.pending ? SENDING_TEXT : equipWaitingText(opponent)}
-        </p>
+        <ConfirmedArt text={equipWaitingText(opponent)} sending={props.pending} />
       </Panel>
     );
   }
@@ -215,8 +205,8 @@ function PendingCard({
     <li
       ref={item}
       data-entra={enter === null ? undefined : String(enter)}
-      // A escolhida fica por cima das vizinhas que a cobririam.
-      className={`relative flex-none ${selected ? 'z-[1]' : ''}`}
+      // A escolhida só sobe (decisoes.md 2026-11-25 (2)): a da direita segue por cima, e o canto com o valor de cada uma fica à vista.
+      className="relative flex-none"
       style={
         index > 0
           ? { marginLeft: `clamp(calc(var(--hand-w) * -0.6), calc((100% - ${count} * var(--hand-w)) / ${count - 1}), 8px)` }
@@ -271,34 +261,36 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
     panelRef.current?.querySelector<HTMLElement>('[data-foco]:not(:disabled)')?.focus();
   }, [draft.length, panelRef]);
 
+  const width = `calc(${remaining.length} * var(--hand-w) + ${Math.max(0, remaining.length - 1)} * 8px)`;
+  const rejected = notice !== null && (notice.kind === 'rate' || notice.kind === 'rule') ? notice.text : null;
+
   return (
     <Panel panelRef={panelRef}>
-      {/* O cabeçalho leva o Desfazer e o Recomeçar: a altura do painel é curta no celular, e a mesa rola por cima dele. */}
-      <div className="flex items-center justify-between gap-2">
-        <p data-numero className="font-texto text-base font-extrabold leading-tight tabular-nums">
-          {complete ? EQUIP_READY_TEXT : equipLeftText(remaining.length)}
-        </p>
-        <div className="flex flex-none gap-2">
-          <Seal label={UNDO_LABEL} icon={<UndoIcon />} disabled={disabled || draft.length === 0} onClick={onUndo} />
-          <Seal label={RESET_LABEL} icon={<ResetIcon />} disabled={disabled || draft.length === 0} onClick={onReset} />
-        </div>
-      </div>
-
+      {/* Para o leitor de tela: quantas faltam e, com tudo posto, a montagem (à vista, as cartas já estão nas fileiras como rascunho). */}
+      <p aria-live="polite" className="sr-only">
+        {complete ? EQUIP_READY_TEXT : equipLeftText(remaining.length)}
+      </p>
       {complete ? (
-        <ol role="list" aria-label="Sua montagem" data-step="resumo" className="flex list-none flex-col gap-1 p-0 text-sm">
+        <ol role="list" aria-label="Sua montagem" data-step="resumo" className="sr-only">
           {draft.map((pick, i) => (
-            <li key={pick.cardId} data-numero className="font-texto tabular-nums">
+            <li key={pick.cardId}>
               {placedText(cards.find((c) => c.id === pick.cardId)!, destinationLabel(view, draft.slice(0, i), pick.destination))}
             </li>
           ))}
         </ol>
-      ) : (
-        // Os destinos são carimbos de tamanho fixo (decisoes.md 2026-11-23 (1)): nunca encolhem. As cartas ficam com o espaço que sobra e
-        // se sobrepõem como as da mão quando falta largura. Os carimbos ficam ao lado das cartas quando cabem e descem para a linha de
-        // baixo quando não (no celular com 3 destinos; no PC só com 5 cartas e 3 destinos).
-        <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
-          {/* O espaço de cima é o da carta escolhida, que sobe como na mão. */}
-          <ul role="list" aria-label="Suas numéricas" data-step="cartas" className="flex min-w-0 flex-auto list-none p-0 pt-3.5">
+      ) : null}
+
+      <div data-disposicao className="relative flex flex-col items-center gap-3 pc:flex-row pc:justify-center pc:gap-5">
+        {complete ? null : (
+          // A largura natural das cartas (sem vão), até o painel inteiro; elas só se sobrepõem quando não cabem. O espaço de cima é o da carta
+          // escolhida, que sobe como na mão.
+          <ul
+            role="list"
+            aria-label="Suas numéricas"
+            data-step="cartas"
+            className="flex min-w-0 max-w-full flex-[0_1_auto] list-none justify-center p-0 pt-3.5"
+            style={{ width }}
+          >
             {remaining.map((card, index) => (
               <PendingCard
                 key={card.id}
@@ -314,55 +306,49 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
               />
             ))}
           </ul>
-          <ul
-            role="list"
-            aria-label="Destinos"
-            data-step="destinos"
-            className="flex flex-none list-none gap-2 p-0 pt-3.5"
-          >
-            {options.map((destination, i) => (
-              <li key={destination} className="flex-none">
-                <DestinationStamp
-                  view={view}
-                  draft={draft}
-                  destination={destination}
-                  first={i === 0}
-                  disabled={disabled}
-                  onClick={() => onChoose(destination, selected?.id)}
-                />
-              </li>
-            ))}
-          </ul>
+        )}
+        <div className="flex flex-none items-center justify-center gap-4">
+          <Seal label={UNDO_LABEL} icon={<UndoIcon />} disabled={disabled || draft.length === 0} onClick={onUndo} />
+          {complete ? (
+            <button
+              type="button"
+              data-foco=""
+              disabled={disabled}
+              onClick={onConfirm}
+              className="carimbo carimbo-ouro carimbo-destino carimbo-icone-palavra disabled:cursor-wait disabled:opacity-60"
+            >
+              <ConfirmIcon className="size-7 pc:size-8" />
+              <span>{CONFIRM_LABEL}</span>
+            </button>
+          ) : (
+            <ul role="list" aria-label="Destinos" data-step="destinos" className="flex flex-none list-none items-center gap-3 p-0">
+              {options.map((destination, i) => (
+                <li key={destination} className="flex-none">
+                  <DestinationStamp
+                    view={view}
+                    draft={draft}
+                    destination={destination}
+                    first={i === 0}
+                    disabled={disabled}
+                    onClick={() => onChoose(destination, selected?.id)}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+          <Seal label={RESET_LABEL} icon={<ResetIcon />} disabled={disabled || draft.length === 0} onClick={onReset} />
         </div>
-      )}
 
-      {/* Região viva fixa: o efeito da escolha na quadra é lido quando muda. */}
-      <div aria-live="polite" className="text-sm font-bold leading-snug text-ouro">
-        {board.newQuads.map((quad) => (
-          <p key={`${quad.row}:${quad.value}`} data-numero data-quadra-nova className="font-texto tabular-nums">
-            {equipQuadText(quad.value)}
-          </p>
-        ))}
+        {/* O que flutua sobre o painel, sem empurrar nada: a quadra que o rascunho forma (região viva) e o envio ou a recusa. */}
+        <div aria-live="polite" className="pointer-events-none absolute -top-1 right-0 flex flex-col items-end gap-1">
+          {board.newQuads.map((quad) => (
+            <QuadBadge key={`${quad.row}:${quad.value}`} value={quad.value} />
+          ))}
+        </div>
+        {pending || rejected !== null ? (
+          <div className="absolute -top-1 left-0">{pending ? <SendingDots /> : <RejectedNotice text={rejected!} />}</div>
+        ) : null}
       </div>
-
-      {pending ? (
-        <p role="status" className="text-sm font-bold leading-snug">
-          {SENDING_TEXT}
-        </p>
-      ) : (
-        <NoticeLine notice={notice} />
-      )}
-
-      {complete ? (
-        <TwoLine
-          title={CONFIRM_LABEL}
-          titleClass={PRIMARY_TITLE}
-          data-foco=""
-          disabled={disabled}
-          onClick={onConfirm}
-          className={`${PRIMARY} w-full pc:w-auto pc:min-w-[220px]`}
-        />
-      ) : null}
     </Panel>
   );
 }

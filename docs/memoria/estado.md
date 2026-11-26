@@ -29,7 +29,8 @@
 - **Artes aprovadas** (2026-11-25 (6)).
 - **Mão no PC como hoje** (2026-11-25 (7)).
 - **Spec aprovada** (2026-11-26 (1)) e **plano** em `docs/superpowers/plans/2026-11-26-equipar-abertura-niveis.md` (revisado pelo advisor).
-- **Próximo passo:** o autor escolhe a execução (subagentes ou nativa); então a Tarefa 0 (árvore limpa: o protótipo sai, cópia no patch) e a Tarefa 1. Aberta: retomar o treino depois de recarregar (tarefa 3).
+- **Execução nativa** (o autor, 2026-11-26). PR 1 em curso na `feat/ajustes-2026-11-25`: Tarefas 0 a 3 feitas (figuras e selo sem legenda; artes e dica da recusa no toque; o painel na Y). Ledger em `.superpowers/sdd/2026-11-26-equipar-abertura-niveis/progress.md` (fora do git).
+- **Próximo passo:** a Tarefa 4 do plano (o Passar quadrado, a mão vazia em figura, a dica do tutorial), depois a 5 (E2E, fotos, advisor, PR). Aberta: retomar o treino depois de recarregar (tarefa 3).
 - **O que espera o autor:** apagar as branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`,
   `feat/sem-cordel-escuro`, `feat/fim-faixa`).
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`.

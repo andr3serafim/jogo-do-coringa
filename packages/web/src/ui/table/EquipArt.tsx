@@ -17,6 +17,7 @@ export function MiniCard({ card }: { card: Card }) {
   return (
     <span
       aria-hidden="true"
+      data-carta-sai=""
       className={`absolute -right-2 -top-2 flex h-6 w-[18px] flex-col items-center justify-center rounded-[2px] border-2 border-tinta bg-papel font-texto text-[10px] font-extrabold leading-none tabular-nums shadow-[1px_1px_0_var(--color-tinta)] ${isRedSuit(card.suit) ? 'text-vermelho' : 'text-tinta'}`}
     >
       {card.value}
@@ -93,10 +94,8 @@ export function RejectedNotice({ text }: { text: string }) {
 export function NoCardsArt({ waiting, waitingText }: { waiting: boolean; waitingText: string }) {
   return (
     <div role="status" className="flex items-center justify-center gap-4 py-2">
-      <span className="sr-only">
-        {NO_PENDING_TEXT}
-        {waiting ? `. ${waitingText}` : ''}
-      </span>
+      <span className="sr-only">{NO_PENDING_TEXT}</span>
+      {waiting ? <span className="sr-only">{waitingText}</span> : null}
       <NoCardsIcon className="size-12 text-papel" />
       {waiting ? <WaitingIcon className="size-10" /> : null}
     </div>
