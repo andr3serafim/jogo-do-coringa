@@ -98,6 +98,8 @@ export function Intro({ reduced, onDone }: IntroProps) {
         '--d-sobe': ms(INTRO.cardRiseMs),
         '--t-junta': ms(INTRO.gatherAt),
         '--t-vira': ms(INTRO.flipAt),
+        '--t-entra': ms(INTRO.coringaInAt),
+        '--t-pousa': ms(INTRO.revealAt),
       }
     : {};
   const style = cssVars({

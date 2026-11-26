@@ -68,6 +68,8 @@ describe('<Intro />: a versão completa', () => {
     expect(time('--t-tema')).toBe(`${INTRO.themeAt}ms`);
     expect(time('--t-junta')).toBe(`${INTRO.gatherAt}ms`);
     expect(time('--t-vira')).toBe(`${INTRO.flipAt}ms`);
+    expect(time('--t-entra')).toBe(`${INTRO.coringaInAt}ms`);
+    expect(time('--t-pousa')).toBe(`${INTRO.revealAt}ms`);
     expect(time('--t-titulo')).toBe('');
     expect(time('--t-some')).toBe(`${INTRO.fadeAt}ms`);
     expect(time('--d-some')).toBe(`${INTRO.total - INTRO.fadeAt}ms`);

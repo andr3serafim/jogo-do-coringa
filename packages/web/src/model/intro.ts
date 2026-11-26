@@ -23,6 +23,10 @@ export const INTRO = {
   revealCueAt: 1000,
   /** O maço vira e mostra o Coringa (a chamada do som). */
   flipAt: 1300,
+  /** O Coringa entra, quando o maço termina de sair (o gesto de 150 ms do CSS). */
+  coringaInAt: 1450,
+  /** O Coringa pousa (a entrada de 240 ms do CSS) e dá o pulo. */
+  revealAt: 1690,
   /** A abertura começa a esmaecer para o menu. */
   fadeAt: 1900,
   /** O menu. */

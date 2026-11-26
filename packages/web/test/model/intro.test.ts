@@ -39,8 +39,13 @@ describe('a abertura: os tempos', () => {
     expect(INTRO.themeAt + INTRO.cardDelays[3]! + INTRO.cardRiseMs).toBeLessThanOrEqual(INTRO.gatherAt);
   });
 
-  it('o Coringa virado fica parado pelo menos meio segundo antes do esmaecer', () => {
-    expect(INTRO.fadeAt - INTRO.flipAt).toBeGreaterThanOrEqual(500);
+  it('o Coringa entra quando o maço termina de sair (150 ms) e pousa 240 ms depois, os gestos do CSS', () => {
+    expect(INTRO.coringaInAt).toBe(INTRO.flipAt + 150);
+    expect(INTRO.revealAt).toBe(INTRO.coringaInAt + 240);
+  });
+
+  it('o Coringa pousado fica parado antes do esmaecer (hoje ~0,2 s; a duração está com o autor, 2026-11-26)', () => {
+    expect(INTRO.fadeAt - INTRO.revealAt).toBeGreaterThanOrEqual(200);
   });
 
   it('o aviso de pular entra aos 0,5 s, nas duas versões', () => {
