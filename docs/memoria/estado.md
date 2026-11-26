@@ -13,11 +13,15 @@
   do PR 2).
 - **PR 1 mesclado:** #14, `35d9239` (o Equipar sem texto, o Passar quadrado, a mão vazia; o diário 2026-11-26 (1)). Fotos em `docs/superpowers/specs/2026-11-26-pr1-fotos/` (fora do git).
 - **PR 2 mesclado:** #15, `0e22f94` (a abertura sem título, aura, anel e faíscas; esmaece em 2,2 s e acaba em 2,65 s; a chamada do som no pouso do Coringa; o diário 2026-11-26 (2)).
-- **Em curso: o PR 3** (os níveis na direção A, Tarefa 7 do plano) na `feat/niveis-identidade`, saída da `main` `0e22f94`. **Próximo passo:** a Tarefa 7 (TDD: o humor `bravo` no `ResultMedal.tsx`, o `LevelChoice` do `Training.tsx` e o `menu.css`; fotos nos dois temas; advisor; PR).
+- **PR 3 (os níveis na direção A)** na `feat/niveis-identidade`: feito (`9718709`; o diário 2026-11-26 (3)); fotos em
+  `docs/superpowers/specs/2026-11-26-pr3-niveis/` (fora do git; rosa e verde, celular e PC). **Próximo passo:** o `pnpm e2e` verde, o push e o
+  PR 3; merge com o sim do autor. Com ele, o plano `2026-11-26-equipar-abertura-niveis` termina.
 - **Aberta com o autor:** retomar o treino depois de recarregar (tarefa 3: iPhone, deck de arte). Medido no Chromium (não reproduz o iOS):
   sem vazamento claro; o deck de arte soma ~70 a 80 MB ao processo da aba (detalhe no diário 2026-11-26 (1)).
-- **O que espera o autor:** apagar as branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`,
-  `feat/sem-cordel-escuro`, `feat/fim-faixa`).
+- **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele): o site ainda está em `9ba36c1`, sem os PRs #14, #15 e o dos níveis (o
+  iPhone da tarefa 3 caiu nessa versão). Apagar as branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`,
+  `feat/regras-4q-reflect`, `feat/sem-cordel-escuro`, `feat/fim-faixa`, `feat/ajustes-2026-11-25`, `feat/abertura-sem-titulo`) e, se quiser, as
+  pastas de fotos soltas `docs/superpowers/specs/2026-11-25-*` e `2026-11-26-*` (não versionadas).
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`.
 
 ## No ar e na `main`
@@ -61,6 +65,8 @@
   (`.carimbo-icone-palavra`); os selos sem legenda; o "Faltam", a montagem e as esperas em `sr-only`; a Y (`data-disposicao`: `flex-col`,
   `pc:flex-row`); a numérica escolhida sem `z-*`; o selo da quadra fora do painel (acima no celular, à esquerda das cartas no PC); o disco da
   recusa com `data-sem-pulo` e a dica no toque (`useMarkTip`).
+- **Níveis do treino (2026-11-25 (3)):** o nome acessível segue "nível + linha"; o medalhão é `aria-hidden`, com `data-humor` (feliz, sério,
+  bravo); a cor sai do `data-nivel` no `menu.css` (`--nivel-cor`, `--nivel-claro`).
 - O JavaScript inicial ≤ 200 KB (o smoke).
 
 ## Para ver sem esperar no treino
