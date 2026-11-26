@@ -5,7 +5,38 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
-## 2026-11-24 (3): o C (o Cordel Escuro sai) e o D (o fim de partida na Faixa de feira)
+## 2026-11-26 (1): as seis tarefas de 2026-11-25; o PR 1 (o Equipar sem texto)
+
+- **Pedido:** `decisoes.md` 2026-11-25 (1) a (7) e 2026-11-26 (1). Fotos das direções (fora do git): `2026-11-25-equipar-direcoes/` (A e B,
+  reprovadas), `-equipar-sem-texto/` (X e Y), `-equipar-y/` (a Y, o mostruário das artes, a mão aproximada × como hoje), `-niveis-direcoes/`
+  (A aprovada). Spec e plano aprovados; execução nativa.
+- **Tarefa 3 (a queda no treino), medido:** sem caminho no código que leve à escolha de nível no meio da partida (só abrir `/treino` do zero);
+  logo, a página recarregou. No Chromium a 390 × 844 @3×, 8 min cada, o processo da aba: Cordel 186 → 234 MB, `bestiario:egipcio` 247 → 304 MB
+  (41 imagens); depois de ~100 s sobe ~3 MB/min com ruído, sem vazamento claro; o heap do JavaScript ~13 a 24 MB. As artes: 24 WebP de
+  416 × 582. Não reproduz o iOS. A proteção (retomar o treino) espera o autor.
+- **PR 1, `feat/ajustes-2026-11-25`:** `62733a2` (figuras novas, selo sem legenda, `.carimbo-destino` 56/64), `ae37661` (`EquipArt.tsx`;
+  o `useMarkTip` extraído da `MarkFigure`, sem mudar o comportamento), `4c2eab2` (o painel na Y; saem `DESTINATION_SHORT` e `leavingShort`),
+  `00e3065` (o Passar, a mão vazia, a dica do tutorial), `3712012` (o E2E do tutorial com a dica nova; o `CLAUDE.md`), `9f0e604` e
+  `3eb38de` (o selo da quadra fora do painel).
+- **Ruling:** os scripts do skill procuram "Task N" e o plano diz "Tarefa N": segui à mão, com a BASE de cada tarefa no ledger — custo:
+  nenhum.
+- **Ruling:** o catálogo das animações sem fim (`phases.test`, "nunca pisca") ganha `ponto-enviando` (12) — a animação nova da spec,
+  parada no movimento reduzido — custo: nenhum.
+- **Ruling:** a dica do disco da recusa usa o cartão em portal da `MarkFigure` (`MarkTipCard`, fixo à tela), e não um `absolute` no
+  painel — os campos rolam por dentro e cortariam a dica — custo: nenhum.
+- **Ruling:** `NoCardsArt` com os dois textos em nós `sr-only` separados (os testes acham cada frase); a carta pequena da troca com
+  `data-carta-sai`; o `PassButton` como um `<button>` direto (o `SquareStamp` do protótipo não voltou) — custo: nenhum.
+- **Ruling:** o selo da quadra no canto do painel tapava, a 360 px, o índice da numérica da direita. No celular ele fica acima do painel
+  (`bottom-full`) e cobre, enquanto a quadra do rascunho existir, a legenda de uma especial da mão (travada no Equipar); no PC fica à esquerda
+  das cartas (acima cobria o canto do campo; à direita, o histórico) — custo: o rótulo de uma carta encoberto por instantes no celular.
+- **Menores adiados:** a dica do tutorial fica "…o escudo (Defesa) (ou arraste…)", dois parênteses seguidos (texto aprovado); o motivo da
+  recusa é lido duas vezes pelo leitor de tela (o status e o nome do botão).
+- **Armadilha:** `node -e "…"` com crases dentro de um template de JavaScript executou as crases no shell de novo (só "command not found"):
+  roteiros com template string vão por arquivo (Write) e `node`.
+- **Armadilha:** a foto de uma janela de reação sai com o véu da cena; espere `[data-palco]:not([data-ocupado])` antes da foto. O Passar
+  manual aparece com `coringa:prefs = { "autoPass": false }`.
+
+: o C (o Cordel Escuro sai) e o D (o fim de partida na Faixa de feira)
 
 - **Fecho:** PR #11 mesclado (`1ab7975`, depois de a CI pegar a linha da trava no plural, consertada em `1f98016`) e PR #12 mesclado
   (`67db244`). A primeira versão do D reprovou no smoke (o `past-games-copy.ts` no inicial); o E2E local com troca de branch no meio deu

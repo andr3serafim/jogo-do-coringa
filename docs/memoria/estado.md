@@ -1,36 +1,23 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-25.** Só o presente: o histórico dos blocos está no `diario.md` (e no
+> Sobrescrito a cada atualização. **Última: 2026-11-26.** Só o presente: o histórico dos blocos está no `diario.md` (e no
 > `arquivo/`), e o estado longo de antes desta limpeza em `arquivo/estado-ate-2026-11-23.md`. Antes de seguir, confira se não há versão
 > mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Em curso: as seis tarefas de 2026-11-25** (`decisoes.md` 2026-11-25 (1) a (4)), na branch `feat/ajustes-2026-11-25` (saída da `main`
-  `9ba36c1`; só commits de memória até aqui). Decidido: (5) a abertura sem título, onda, aura e faíscas, mais curta, som mantido; (6) os
-  níveis na direção A (papel, faixa de cor, rosto do Coringa feliz/sério/bravo); o Equipar na **Y** (PC uma linha, celular duas), sem texto
-  à vista (o sentido no leitor de tela), destinos só com a figura, Confirmar e Passar com ícone e palavra, os textos que sobravam viram arte.
-- **Com o autor agora:** as fotos `docs/superpowers/specs/2026-11-25-equipar-y/` (o jogo na Y em 375, 360 e PC; `mostruario.png` com as
-  artes no lugar dos textos e as 3 opções de ícone do Passar: mão espalmada, setas de pular, carta que desliza). As pastas anteriores
-  (`-equipar-direcoes`, `-equipar-sem-texto`, `-niveis-direcoes`) são histórico das escolhas. Tudo fora do git.
-- **A árvore tem código de PROTÓTIPO sem commit:** a Y e as artes no `EquipPanel.tsx` e no novo `EquipArt.tsx` (não versionado), os ícones
-  novos no `icons.tsx`, a mão vazia no `Hand.tsx`, o Passar com `?passar=1|2|3` no `ReactionPanel.tsx`, os níveis com `?dir=a|b` no
-  `Training.tsx` e no `menu.css`, o humor `bravo` no `ResultMedal.tsx`. Cópia: `2026-11-25-equipar-y/prototipo.patch` + `EquipArt.tsx` e
-  `mostruario.tmp.tsx` ali. Os roteiros `packages/web/e2e/*.tmp.ts`, o `mostruario.tmp.html` e o `src/mostruario.tmp.tsx` saem no fim. Não
-  commitar o protótipo assim: depois da escolha do Passar, um desenho só, sem `?dir`/`?passar`, com spec, plano e testes.
-- **(3) a queda:** iPhone, deck de arte, sem piscar, no meio da partida (2026-11-25 (4)). Hipótese: o iOS mata a aba por memória.
-  Medido no Chromium (não é Safari): 13 min com Cordel e partidas curtas, heap ~13 MB estável (`e2e/memoria.tmp.ts`); com 390 × 844 @3× e o
-  processo inteiro (`e2e/memoria2.tmp.ts`, 8 min cada, sem outro Chromium junto): o processo da aba com Cordel 186 → 234 MB, com `bestiario:egipcio` 247 → 304 MB (41 imagens na mesa); a arte soma ~70 a 80 MB; depois do aquecimento (~100 s) os dois sobem devagar e com ruído (~3 MB/min: Cordel 208 → 234, arte 284 → 304), sem vazamento claro. Não reproduz o iOS; a proteção que resolve qualquer causa é retomar o treino depois de recarregar (pergunta aberta ao autor). As artes são 24 WebP de 416 × 582
-  (~1 MB cada decodificada).
-- **Para a spec do Equipar:** a dica do tutorial ("toque … no destino, Ataque ou Defesa"); os testes que procuram as legendas e os textos
-  (`stamp-buttons`, `phases`, `training`, `tutorial`, `card-drag`, `table-drag`, `end-and-menu`; o `equipByUi` e o `NO_PENDING`/"Sua mão está
-  vazia" do E2E); na Y os botões deslizam no PC a cada carta posta (o autor escolheu sabendo).
-- **Passar:** as setas de pular (`PassSkipIcon`, 2026-11-25 (5)).
-- **Artes aprovadas** (2026-11-25 (6)).
-- **Mão no PC como hoje** (2026-11-25 (7)).
-- **Spec aprovada** (2026-11-26 (1)) e **plano** em `docs/superpowers/plans/2026-11-26-equipar-abertura-niveis.md` (revisado pelo advisor).
-- **Execução nativa** (o autor, 2026-11-26). PR 1 em curso na `feat/ajustes-2026-11-25`: Tarefas 0 a 4 feitas (figuras e selo sem legenda; artes e dica da recusa no toque; o painel na Y; o Passar quadrado, a mão vazia, a dica do tutorial). Web: 3042 testes verdes. Ledger em `.superpowers/sdd/2026-11-26-equipar-abertura-niveis/progress.md` (fora do git).
-- **Próximo passo:** a Tarefa 5 (o `pnpm e2e` rodando agora; depois fotos, advisor, PR 1). Aberta: retomar o treino depois de recarregar (tarefa 3).
+- **Em curso: as tarefas de 2026-11-25** (`decisoes.md` 2026-11-25 (1) a (7) e 2026-11-26 (1)), spec
+  `docs/superpowers/specs/2026-11-25-equipar-abertura-niveis-design.md` e plano `docs/superpowers/plans/2026-11-26-equipar-abertura-niveis.md`,
+  execução nativa. Três PRs em sequência: **PR 1** (Equipar sem texto, Passar quadrado, mão vazia) na `feat/ajustes-2026-11-25`; **PR 2** a
+  abertura sem título (`feat/abertura-sem-titulo`, da `main` depois do PR 1); **PR 3** os níveis na direção A (`feat/niveis-identidade`, depois
+  do PR 2).
+- **PR 1:** Tarefas 0 a 5 feitas (o código, os testes, o E2E, as fotos e a revisão do advisor). Fotos do jogo em
+  `docs/superpowers/specs/2026-11-26-pr1-fotos/` (fora do git; 360, 375 e PC: faltam 4, faltam 3, Confirmar, rodada 2, o Passar numa reação,
+  a quadra no rascunho a 360 e no PC). O diário 2026-11-26 (1) tem as decisões tomadas no caminho.
+- **Próximo passo:** o `pnpm e2e` verde (rodando), o push e o PR 1 para a `main`, os dois jobs da CI verdes; merge só com o sim do autor.
+  Depois, o PR 2 (a Tarefa 6 do plano).
+- **Aberta com o autor:** retomar o treino depois de recarregar (tarefa 3: iPhone, deck de arte). Medido no Chromium (não reproduz o iOS):
+  sem vazamento claro; o deck de arte soma ~70 a 80 MB ao processo da aba (detalhe no diário 2026-11-26 (1)).
 - **O que espera o autor:** apagar as branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`,
   `feat/sem-cordel-escuro`, `feat/fim-faixa`).
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`.
@@ -70,8 +57,11 @@
   carta de verdade na lápide; a faixa do PC com ≤ 70 px; a carta que entra esmaecendo só guarda o alvo `opacity: 1` depois de entrar.
 - **Regras:** a chave `stealBuffed` (o Roubo de antes nos replays velhos); `RULES_VERSION` 7, `STATE_SCHEMA` 7, `PROTOCOL_VERSION` 2. A Fortaleza é o nível 4 da zona dos Q (o 3 é o escudo); a coluna dos
   especiais no PC cabe as 4 cartas de um bônus.
-- **Equipar:** os destinos são carimbos de tamanho fixo (`.carimbo-destino`), com o nome inteiro no `aria-label`; eles descem de linha,
-  nunca encolhem.
+- **Equipar (2026-11-25 (3) a (6)):** sem texto à vista; os destinos no `.carimbo-destino` quadrado (56/64 px), só a figura, o nome inteiro no
+  `aria-label` (a troca com a carta pequena `data-carta-sai`); o Confirmar e o Passar pequenos, com a figura e a palavra
+  (`.carimbo-icone-palavra`); os selos sem legenda; o "Faltam", a montagem e as esperas em `sr-only`; a Y (`data-disposicao`: `flex-col`,
+  `pc:flex-row`); a numérica escolhida sem `z-*`; o selo da quadra fora do painel (acima no celular, à esquerda das cartas no PC); o disco da
+  recusa com `data-sem-pulo` e a dica no toque (`useMarkTip`).
 - O JavaScript inicial ≤ 200 KB (o smoke).
 
 ## Para ver sem esperar no treino
