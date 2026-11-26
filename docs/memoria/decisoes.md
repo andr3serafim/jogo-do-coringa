@@ -6,6 +6,15 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-26 (6): o sim para o merge do PR #16
+
+Diante da pergunta "Faço o merge do PR #16 quando a CI ficar verde?", ele respondeu "Sim, merge".
+
+**Leitura:** com os quatro jobs verdes no último commit (`54a7c9e`), o PR #16 foi mesclado por squash (`20c999b`). O plano
+`2026-11-26-equipar-abertura-niveis` terminou (PRs #14, #15 e #16).
+
+---
+
 ## 2026-11-26 (5): o sim para o merge do PR #15
 
 Diante da pergunta "Faço o merge do PR #15 quando a CI ficar verde?", ele respondeu "Sim, merge".
