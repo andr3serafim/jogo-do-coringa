@@ -116,7 +116,9 @@ describe('carimbos: os outros', () => {
   it('Passar é de papel, e as respostas da janela são carimbos pequenos', () => {
     mount({ ...DRAFT, phase: 'ATTACK' });
     const pass = inBar().getByRole('button', { name: 'Passar' });
-    expect(classes(pass)).toEqual(expect.arrayContaining(['carimbo', 'carimbo-papel', 'carimbo-grande']));
+    // O carimbo quadrado do tamanho dos destinos (decisoes.md 2026-11-25 (4) e (5)), não mais o grande de largura cheia.
+    expect(classes(pass)).toEqual(expect.arrayContaining(['carimbo', 'carimbo-papel', 'carimbo-destino', 'carimbo-icone-palavra']));
+    expect(classes(pass)).not.toContain('carimbo-grande');
     expect(classes(pass)).not.toContain('carimbo-ouro');
   });
 

@@ -202,6 +202,13 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
     }
   });
 
+  it('a mão vazia é a figura das três cartas apagadas, com o texto para o leitor (decisoes.md 2026-11-25 (4))', () => {
+    mount({ ...EQUIP, self: { ...EQUIP.self, hand: [] } });
+    const empty = screen.getByRole('img', { name: 'Sua mão está vazia' });
+    expect(empty.querySelector('[data-arte="mao-vazia"]')).not.toBeNull();
+    expect(empty.textContent).toBe('');
+  });
+
   it('a numérica escolhida só sobe: a da direita segue por cima, e o canto de cada uma fica à vista', async () => {
     const m = mount(EQUIP);
     const items = () => within(inEquip().getByRole('list', { name: 'Suas numéricas' })).getAllByRole('listitem');
@@ -682,6 +689,18 @@ describe('janela de reação (spec §3.7)', () => {
     );
     expect(inBar().getByText('Duda lançou um Reflect')).toBeInTheDocument();
     expect(inBar().getByRole('button', { name: 'Passar' })).toBeInTheDocument();
+  });
+
+  it('o Passar é o carimbo quadrado de papel com as setas de pular e a palavra (decisoes.md 2026-11-25 (5))', () => {
+    mount(
+      { ...DRAFT, self: { ...DRAFT.self, hand: ['K', 'J', 'Q'] }, phase: 'REFLECT_PLAYED', opponent: { ...DRAFT.opponent, reflect: true } },
+      { state: withClock },
+    );
+    const pass = inBar().getByRole('button', { name: 'Passar' });
+    expect(pass).toHaveClass('carimbo', 'carimbo-papel', 'carimbo-destino', 'carimbo-icone-palavra');
+    expect(pass).not.toHaveClass('carimbo-grande');
+    expect(pass.querySelector('[data-arte="passar"]')).not.toBeNull();
+    expect(pass).toHaveTextContent('Passar');
   });
 
   it('o gatilho da Devastação diz qual fileira você perde (F3)', () => {

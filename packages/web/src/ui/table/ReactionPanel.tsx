@@ -5,7 +5,7 @@
 import type { AttackPreview, GameEvent, PlayerView } from '@coringa/engine';
 import { attackDeclaredText, devastationCastText, guardPlayedText, PASS_LABEL, reflectPlayedText } from '../../model/copy.ts';
 import { livesOf } from '../../model/preview.ts';
-import { PAPER_BIG, PRIMARY_TITLE, TwoLine } from './controls.tsx';
+import { PassSkipIcon } from './icons.tsx';
 import type { TableNames } from './labels.ts';
 
 /** Quantos K o oponente pôs na Guarda neste `state`; `null` quando os eventos não vieram (recarga, resync). */
@@ -46,15 +46,20 @@ export function ReactionNotice({ view, names, threat, events }: ReactionNoticePr
   );
 }
 
-/** O botão principal da janela, longe da mão como o Atacar: um carimbo grande de papel (bloco D do playtest, ponto 5). */
+/**
+ * O Passar da janela (decisoes.md 2026-11-25 (4) e (5)): o carimbo quadrado de papel, do tamanho dos destinos do Equipar, com as setas de
+ * pular e a palavra. Fica onde estava na barra, longe da mão.
+ */
 export function PassButton({ disabled, onPass }: { disabled: boolean; onPass: () => void }) {
   return (
-    <TwoLine
-      title={PASS_LABEL}
-      titleClass={PRIMARY_TITLE}
+    <button
+      type="button"
       disabled={disabled}
       onClick={onPass}
-      className={`${PAPER_BIG} flex-1 pc:min-w-[300px] pc:flex-none`}
-    />
+      className="carimbo carimbo-papel carimbo-destino carimbo-icone-palavra disabled:cursor-wait disabled:opacity-60"
+    >
+      <PassSkipIcon className="size-7 pc:size-8" />
+      <span>{PASS_LABEL}</span>
+    </button>
   );
 }
