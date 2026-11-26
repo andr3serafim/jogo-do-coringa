@@ -11,10 +11,8 @@
   execução nativa. Três PRs em sequência: **PR 1** (Equipar sem texto, Passar quadrado, mão vazia) na `feat/ajustes-2026-11-25`; **PR 2** a
   abertura sem título (`feat/abertura-sem-titulo`, da `main` depois do PR 1); **PR 3** os níveis na direção A (`feat/niveis-identidade`, depois
   do PR 2).
-- **PR 1:** Tarefas 0 a 5 feitas (o código, os testes, o E2E, as fotos e a revisão do advisor). Fotos do jogo em
-  `docs/superpowers/specs/2026-11-26-pr1-fotos/` (fora do git; 360, 375 e PC: faltam 4, faltam 3, Confirmar, rodada 2, o Passar numa reação,
-  a quadra no rascunho a 360 e no PC). O diário 2026-11-26 (1) tem as decisões tomadas no caminho.
-- **PR 1 aberto: #14** (https://github.com/andr3serafim/jogo-do-coringa/pull/14); `pnpm check` e `pnpm e2e` locais verdes (web 3042; E2E 139). **Próximo passo:** a CI verde e o sim do autor para o merge; depois o PR 2 (Tarefa 6, a abertura), da `main` atualizada.
+- **PR 1 mesclado:** #14, `35d9239` (o Equipar sem texto, o Passar quadrado, a mão vazia; o diário 2026-11-26 (1)). Fotos em `docs/superpowers/specs/2026-11-26-pr1-fotos/` (fora do git).
+- **Em curso: o PR 2** (a abertura sem título, Tarefa 6 do plano) na `feat/abertura-sem-titulo`, saída da `main` `35d9239`. **Próximo passo:** a Tarefa 6 (TDD: `model/intro.ts`, `synth.ts`, `Intro.tsx`, `intro.css`, `copy.ts`, os testes e o `CLAUDE.md`); depois o PR 3 (os níveis), da `main` depois do PR 2.
 - **Aberta com o autor:** retomar o treino depois de recarregar (tarefa 3: iPhone, deck de arte). Medido no Chromium (não reproduz o iOS):
   sem vazamento claro; o deck de arte soma ~70 a 80 MB ao processo da aba (detalhe no diário 2026-11-26 (1)).
 - **O que espera o autor:** apagar as branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`,

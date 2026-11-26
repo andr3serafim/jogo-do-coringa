@@ -6,6 +6,17 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-26 (2): a execução nativa e o sim para o merge do PR #14
+
+Diante da pergunta "Qual execução: nativa ou por subagentes?", ele respondeu "Nativa". Diante de "Faço o merge do PR #14 quando a CI ficar
+verde?", "Sim, merge"; o GitHub recusou o merge automático (o repositório não o permite), e ele mandou "CI verde, mescla" e "E2E verde,
+mescla" quando os jobs terminaram.
+
+**Leitura:** o plano segue na execução nativa (eu implemento, o advisor revisa cada PR). Com os quatro jobs verdes, o PR #14 foi mesclado por
+squash (`35d9239`). O PR 2 (a abertura) sai da `main` atualizada na `feat/abertura-sem-titulo`.
+
+---
+
 ## 2026-11-26 (1): a spec do Equipar, da abertura e dos níveis aprovada
 
 Diante da spec `docs/superpowers/specs/2026-11-25-equipar-abertura-niveis-design.md` e da pergunta "A spec está aprovada?", com seis perguntas
