@@ -116,7 +116,9 @@ describe('carimbos: os outros', () => {
   it('Passar é de papel, e as respostas da janela são carimbos pequenos', () => {
     mount({ ...DRAFT, phase: 'ATTACK' });
     const pass = inBar().getByRole('button', { name: 'Passar' });
-    expect(classes(pass)).toEqual(expect.arrayContaining(['carimbo', 'carimbo-papel', 'carimbo-grande']));
+    // O carimbo quadrado do tamanho dos destinos (decisoes.md 2026-11-25 (4) e (5)), não mais o grande de largura cheia.
+    expect(classes(pass)).toEqual(expect.arrayContaining(['carimbo', 'carimbo-papel', 'carimbo-destino', 'carimbo-icone-palavra']));
+    expect(classes(pass)).not.toContain('carimbo-grande');
     expect(classes(pass)).not.toContain('carimbo-ouro');
   });
 
@@ -131,19 +133,23 @@ describe('carimbos: os outros', () => {
     }
   });
 
-  it('no Equipar: o Confirmar é de ouro, e o Desfazer e o Recomeçar são selos redondos com desenho e legenda', () => {
+  it('no Equipar: o Confirmar é de ouro, e o Desfazer e o Recomeçar são selos redondos só com o desenho', () => {
     mount(EQUIP);
     for (const name of ['Desfazer', 'Recomeçar']) {
       const seal = inEquip().getByRole('button', { name });
       expect(classes(seal)).toEqual(expect.arrayContaining(['carimbo-selo', 'min-h-11', 'min-w-11']));
-      // O texto visível é a legenda (o nome do botão); o desenho é só desenho.
-      expect(seal.textContent).toBe(name);
+      // Sem legenda (decisoes.md 2026-11-25 (3)): o nome fica no `aria-label` e na dica do mouse; o desenho é só desenho.
+      expect(seal.textContent).toBe('');
+      expect(seal).toHaveAttribute('title', name);
+      expect(seal.querySelector('.carimbo-selo-legenda')).toBeNull();
       expect(seal.querySelector('[data-selo] svg[aria-hidden="true"]')).not.toBeNull();
       expect(seal).toBeDisabled();
     }
     fireEvent.click(within(inEquip().getByRole('list', { name: 'Destinos' })).getAllByRole('button')[0]!);
     const confirm = inEquip().getByRole('button', { name: 'Confirmar' });
-    expect(classes(confirm)).toEqual(expect.arrayContaining(['carimbo', 'carimbo-ouro', 'carimbo-grande']));
+    // Do tamanho dos destinos, com o visto e a palavra (decisoes.md 2026-11-25 (4)); não é mais o carimbo grande de largura cheia.
+    expect(classes(confirm)).toEqual(expect.arrayContaining(['carimbo', 'carimbo-ouro', 'carimbo-destino', 'carimbo-icone-palavra']));
+    expect(classes(confirm)).not.toContain('carimbo-grande');
     expect(inEquip().getByRole('button', { name: 'Desfazer' })).toBeEnabled();
   });
 

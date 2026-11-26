@@ -1,26 +1,30 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-24.** Só o presente: o histórico dos blocos está no `diario.md` (e no
+> Sobrescrito a cada atualização. **Última: 2026-11-26.** Só o presente: o histórico dos blocos está no `diario.md` (e no
 > `arquivo/`), e o estado longo de antes desta limpeza em `arquivo/estado-ate-2026-11-23.md`. Antes de seguir, confira se não há versão
 > mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Nada em curso.** As cinco tarefas de 2026-11-24 (`decisoes.md` 2026-11-24 (2) a (14); o diário 2026-11-24 (1) a (3)) estão na `main`:
-  a CI com 20 min e as partidas salvas com 10 e 30 dias (PR #9, `7b7f38e`); a Defesa Absoluta em duas fases, a Fortaleza, o Reflect novo e
-  os 4 bônus que cabem no campo no PC (PR #10, `51e9f4b`, regra 7); a saída do Cordel Escuro (PR #11, `1ab7975`); o fim de partida na
-  Faixa de feira (PR #12, `67db244`).
-- **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele), que leva os PRs #8 a #12; no deploy, o `STATE_SCHEMA` 7 encerra as
-  salas abertas e o `PROTOCOL_VERSION` 2 faz as abas velhas recarregarem uma vez. Apagar as branches mescladas
-  (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`, `feat/sem-cordel-escuro`, `feat/fim-faixa`).
+- **Em curso: as tarefas de 2026-11-25** (`decisoes.md` 2026-11-25 (1) a (7) e 2026-11-26 (1)), spec
+  `docs/superpowers/specs/2026-11-25-equipar-abertura-niveis-design.md` e plano `docs/superpowers/plans/2026-11-26-equipar-abertura-niveis.md`,
+  execução nativa. Três PRs em sequência: **PR 1** (Equipar sem texto, Passar quadrado, mão vazia) na `feat/ajustes-2026-11-25`; **PR 2** a
+  abertura sem título (`feat/abertura-sem-titulo`, da `main` depois do PR 1); **PR 3** os níveis na direção A (`feat/niveis-identidade`, depois
+  do PR 2).
+- **PR 1:** Tarefas 0 a 5 feitas (o código, os testes, o E2E, as fotos e a revisão do advisor). Fotos do jogo em
+  `docs/superpowers/specs/2026-11-26-pr1-fotos/` (fora do git; 360, 375 e PC: faltam 4, faltam 3, Confirmar, rodada 2, o Passar numa reação,
+  a quadra no rascunho a 360 e no PC). O diário 2026-11-26 (1) tem as decisões tomadas no caminho.
+- **PR 1 aberto: #14** (https://github.com/andr3serafim/jogo-do-coringa/pull/14); `pnpm check` e `pnpm e2e` locais verdes (web 3042; E2E 139). **Próximo passo:** a CI verde e o sim do autor para o merge; depois o PR 2 (Tarefa 6, a abertura), da `main` atualizada.
+- **Aberta com o autor:** retomar o treino depois de recarregar (tarefa 3: iPhone, deck de arte). Medido no Chromium (não reproduz o iOS):
+  sem vazamento claro; o deck de arte soma ~70 a 80 MB ao processo da aba (detalhe no diário 2026-11-26 (1)).
+- **O que espera o autor:** apagar as branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`,
+  `feat/sem-cordel-escuro`, `feat/fim-faixa`).
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`.
 
 ## No ar e na `main`
 
-- **No ar** em `https://jogodocoringa.com.br`: `5f5821f` (o deploy de 2026-11-18, os menus no Folheto). O `/api/health` devolve a versão.
-- **Na `main` e ainda não no ar** (o deploy, `pnpm deploy:server`, é dele): as cinco tarefas de 2026-11-24 (PRs #9 a #12), a cura passiva, as marcas em figura e o histórico (PR #8), o bloco de 2026-11-23 (PR #7), o "Aprender jogando" sem a linha (PR #3), o Coringa do Início
-  menor no notebook (PR #4), a mesa no Feltro (PR #5), a abertura sem a logo LUSACAN (PR #6).
-- **No deploy da regra 7:** `STATE_SCHEMA` 7 encerra as salas abertas; `PROTOCOL_VERSION` 2 faz a aba velha recarregar uma vez.
+- **No ar** em `https://jogodocoringa.com.br`: `9ba36c1` (o `/api/health` em 2026-11-25): a `main` inteira, com a regra 7, o
+  `STATE_SCHEMA` 7 e o `PROTOCOL_VERSION` 2.
 
 ## Pendências abertas (fora deste bloco)
 
@@ -52,8 +56,11 @@
   carta de verdade na lápide; a faixa do PC com ≤ 70 px; a carta que entra esmaecendo só guarda o alvo `opacity: 1` depois de entrar.
 - **Regras:** a chave `stealBuffed` (o Roubo de antes nos replays velhos); `RULES_VERSION` 7, `STATE_SCHEMA` 7, `PROTOCOL_VERSION` 2. A Fortaleza é o nível 4 da zona dos Q (o 3 é o escudo); a coluna dos
   especiais no PC cabe as 4 cartas de um bônus.
-- **Equipar:** os destinos são carimbos de tamanho fixo (`.carimbo-destino`), com o nome inteiro no `aria-label`; eles descem de linha,
-  nunca encolhem.
+- **Equipar (2026-11-25 (3) a (6)):** sem texto à vista; os destinos no `.carimbo-destino` quadrado (56/64 px), só a figura, o nome inteiro no
+  `aria-label` (a troca com a carta pequena `data-carta-sai`); o Confirmar e o Passar pequenos, com a figura e a palavra
+  (`.carimbo-icone-palavra`); os selos sem legenda; o "Faltam", a montagem e as esperas em `sr-only`; a Y (`data-disposicao`: `flex-col`,
+  `pc:flex-row`); a numérica escolhida sem `z-*`; o selo da quadra fora do painel (acima no celular, à esquerda das cartas no PC); o disco da
+  recusa com `data-sem-pulo` e a dica no toque (`useMarkTip`).
 - O JavaScript inicial ≤ 200 KB (o smoke).
 
 ## Para ver sem esperar no treino

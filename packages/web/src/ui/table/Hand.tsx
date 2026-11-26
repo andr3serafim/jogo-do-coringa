@@ -26,7 +26,7 @@ import type { DropKey } from '../../model/drag.ts';
 import { useAnim } from '../anim/context.ts';
 import { useTableUi } from './context.ts';
 import { DragGhost } from './DragGhost.tsx';
-import { LockIcon } from './icons.tsx';
+import { EmptyHandIcon, LockIcon } from './icons.tsx';
 import { HAND_ROLE } from './labels.ts';
 import { TableCard } from './TableCard.tsx';
 import { useCardDrag } from './useCardDrag.ts';
@@ -53,7 +53,12 @@ function pointerSpot(event: PointerEvent<HTMLElement>): { x: number; y: number }
 export function Hand({ cards }: { cards: SpecialCard[] }) {
   const { selectedCardId, hintZone, onSelectCard, handNote } = useTableUi();
   if (cards.length === 0) {
-    return <p className="px-3 pb-2 pt-[18px] text-center text-sm font-bold pc:text-papel">Sua mão está vazia</p>;
+    // A mão vazia é figura (decisoes.md 2026-11-25 (4)): três cartas apagadas em leque; o texto fica para o leitor de tela.
+    return (
+      <div role="img" aria-label="Sua mão está vazia" className="flex justify-center px-3 pb-2 pt-3 text-tinta/60 pc:text-papel/50">
+        <EmptyHandIcon className="size-14 pc:size-16" />
+      </div>
+    );
   }
   const count = cards.length;
   return (

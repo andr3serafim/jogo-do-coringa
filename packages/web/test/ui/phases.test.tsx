@@ -174,10 +174,53 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
     expect(buttons.map((b) => b.getAttribute('aria-label'))).toEqual(['Fileira de Ataque', 'Fileira de Defesa']);
   });
 
-  it('cada destino é um carimbo de tamanho fixo, com a figura e uma palavra; o nome inteiro na dica (decisoes.md 2026-11-23 (1))', () => {
+  it('sem texto à vista (decisoes.md 2026-11-25 (3)): "Faltam" e a montagem só para o leitor de tela', async () => {
+    const m = mount(EQUIP);
+    expect(inEquip().getByText('Faltam 3 cartas')).toHaveClass('sr-only');
+    await choose(m, 'Fileira de Ataque', 'Fileira de Ataque', 'Fileira de Defesa');
+    expect(inEquip().getByText('Tudo no lugar: confira a montagem e confirme.')).toHaveClass('sr-only');
+    expect(inEquip().getByRole('list', { name: 'Sua montagem' })).toHaveClass('sr-only');
+  });
+
+  it('o Confirmar é o carimbo de ouro com o visto e a palavra, do tamanho dos destinos', async () => {
+    const m = mount(EQUIP);
+    await choose(m, 'Fileira de Ataque', 'Fileira de Ataque', 'Fileira de Defesa');
+    const confirm = inEquip().getByRole('button', { name: 'Confirmar' });
+    expect(confirm).toHaveClass('carimbo', 'carimbo-ouro', 'carimbo-destino', 'carimbo-icone-palavra');
+    expect(confirm).not.toHaveClass('w-full');
+    expect(confirm.querySelector('[data-arte="confirmar"]')).not.toBeNull();
+    expect(confirm).toHaveTextContent('Confirmar');
+  });
+
+  it('a Y (decisoes.md 2026-11-25 (4)): no celular sempre duas linhas, no PC uma, com 3 cartas e com 1', async () => {
+    const m = mount(EQUIP);
+    const row = () => inEquip().getByRole('list', { name: 'Destinos' }).closest('[data-disposicao]')!;
+    for (const left of [3, 1]) {
+      if (left === 1) await choose(m, 'Fileira de Ataque', 'Fileira de Ataque');
+      expect(row()).toHaveClass('flex-col', 'pc:flex-row');
+      expect(row().className.split(' ').filter((c) => c === 'flex-row' || c === 'flex-wrap')).toEqual([]);
+    }
+  });
+
+  it('a mão vazia é a figura das três cartas apagadas, com o texto para o leitor (decisoes.md 2026-11-25 (4))', () => {
+    mount({ ...EQUIP, self: { ...EQUIP.self, hand: [] } });
+    const empty = screen.getByRole('img', { name: 'Sua mão está vazia' });
+    expect(empty.querySelector('[data-arte="mao-vazia"]')).not.toBeNull();
+    expect(empty.textContent).toBe('');
+  });
+
+  it('a numérica escolhida só sobe: a da direita segue por cima, e o canto de cada uma fica à vista', async () => {
+    const m = mount(EQUIP);
+    const items = () => within(inEquip().getByRole('list', { name: 'Suas numéricas' })).getAllByRole('listitem');
+    await m.user.click(pendingCard(m.view.self.pending[1]!.id));
+    expect(items()[1]!.querySelector('[aria-pressed="true"]')).not.toBeNull();
+    for (const li of items()) expect(li.className).not.toMatch(/(^|\s)z-/);
+  });
+
+  it('cada destino é um carimbo de tamanho fixo, só com a figura; o nome inteiro no leitor e na dica (decisoes.md 2026-11-25 (4))', () => {
     mount(EQUIP);
     const buttons = within(inEquip().getByRole('list', { name: 'Destinos' })).getAllByRole('button');
-    expect(buttons.map((b) => b.textContent)).toEqual(['Ataque', 'Defesa']);
+    expect(buttons.map((b) => b.textContent)).toEqual(['', '']);
     expect(buttons.map((b) => b.getAttribute('data-destino'))).toEqual(['ATK', 'DEF']);
     expect(buttons.map((b) => b.getAttribute('title'))).toEqual(['Fileira de Ataque', 'Fileira de Defesa']);
     for (const b of buttons) expect(b).toHaveClass('carimbo-destino');
@@ -247,8 +290,9 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
       'Trocar a última carta da Defesa (sai 8♠)',
       'Descartar no cemitério',
     ]);
-    // No carimbo, só a carta que sai (a figura da fileira e a da troca dizem o resto) e a palavra do descarte.
-    expect(buttons.map((b) => b.textContent)).toEqual(['sai 6♠', 'sai 8♠', 'Descartar']);
+    // No carimbo, só as figuras e, na troca, a carta pequena que sai (só desenho; o nome diz "sai 6♠").
+    expect(buttons.map((b) => b.textContent)).toEqual(['6', '8', '']);
+    expect(buttons.map((b) => b.querySelector('[data-carta-sai]')?.getAttribute('aria-hidden') ?? null)).toEqual(['true', 'true', null]);
     expect(buttons.map((b) => [...b.querySelectorAll('svg[data-arte]')].map((svg) => svg.getAttribute('data-arte')))).toEqual([
       ['ataque', 'troca'],
       ['defesa', 'troca'],
@@ -307,7 +351,13 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
     const m = mount({ ...EQUIP, self: { ...EQUIP.self, attackRow: [7, 7, 7, 2] } });
     expect(screen.queryByText(/forma quadra/)).not.toBeInTheDocument();
     await choose(m, 'Fileira de Ataque');
-    expect(inEquip().getByText('forma quadra de 7: +7 e 1 Ressurreição')).toBeInTheDocument();
+    expect(inEquip().getByText('forma quadra de 7: +7 e 1 Ressurreição')).toHaveClass('sr-only');
+    expect(equipPanel().querySelector('[data-quadra-nova]')).toHaveTextContent('+7');
+    // Acima do painel, fora das cartas: a 360 px, no canto do painel, o selo tapava o índice da carta da direita (foto da Tarefa 5).
+    expect(equipPanel().querySelector('[data-quadra-nova]')!.parentElement).toHaveClass('bottom-full');
+    // No PC, à esquerda das cartas, no vão entre a mão e o painel (acima, cobria o canto do campo; à direita, o histórico).
+    expect(equipPanel().querySelector('[data-quadra-nova]')!.parentElement).toHaveClass('pc:right-full', 'pc:bottom-auto');
+    expect(equipPanel().querySelector('[data-disposicao]')).toHaveClass('pc:w-fit', 'pc:max-w-full');
     expect(screen.getByRole('group', { name: 'Sua fileira de ataque' }).querySelector('[data-quadra]')).toHaveTextContent('+7');
     await m.user.click(inEquip().getByRole('button', { name: 'Desfazer' }));
     expect(screen.queryByText(/forma quadra/)).not.toBeInTheDocument();
@@ -646,6 +696,18 @@ describe('janela de reação (spec §3.7)', () => {
     expect(inBar().getByRole('button', { name: 'Passar' })).toBeInTheDocument();
   });
 
+  it('o Passar é o carimbo quadrado de papel com as setas de pular e a palavra (decisoes.md 2026-11-25 (5))', () => {
+    mount(
+      { ...DRAFT, self: { ...DRAFT.self, hand: ['K', 'J', 'Q'] }, phase: 'REFLECT_PLAYED', opponent: { ...DRAFT.opponent, reflect: true } },
+      { state: withClock },
+    );
+    const pass = inBar().getByRole('button', { name: 'Passar' });
+    expect(pass).toHaveClass('carimbo', 'carimbo-papel', 'carimbo-destino', 'carimbo-icone-palavra');
+    expect(pass).not.toHaveClass('carimbo-grande');
+    expect(pass.querySelector('[data-arte="passar"]')).not.toBeNull();
+    expect(pass).toHaveTextContent('Passar');
+  });
+
   it('o gatilho da Devastação diz qual fileira você perde (F3)', () => {
     const devastation = { player: 'p2', row: 'DEF' as const, k: { id: 'dk', kind: 'K' as const, suit: 'paus' as const }, a: { id: 'da', kind: 'A' as const, suit: 'paus' as const }, x: { id: 'dq', kind: 'Q' as const, suit: 'paus' as const } };
     mount(
@@ -807,8 +869,9 @@ describe('relógio (spec §3.8, §10.3)', () => {
     // Bloco C do playtest, ponto 10: o pulso verde dos K da cura passiva, a brasa dos K da ameaça e a muralha que respira atrás dos Q.
     // Ponto 13: o brilho que passa pelo ouro de quem lidera.
     // Bloco D, ponto 5: a faísca que corre a borda do carimbo do Atacar com o Ataque Absoluto armado.
-    expect(endless.sort()).toEqual(['brasa-k', 'brilho-lider', 'brilho-quadra', 'faisca-carimbo', 'gesto-alma', 'gesto-cura', 'gesto-cura-mais', 'gesto-espelho', 'muralha', 'pulso-k', 'respira']);
-    expect(css.match(/\binfinite\b/g)).toHaveLength(11);
+    // 2026-11-25 (4): os três pontos do "Enviando" do Equipar (parados com movimento reduzido).
+    expect(endless.sort()).toEqual(['brasa-k', 'brilho-lider', 'brilho-quadra', 'faisca-carimbo', 'gesto-alma', 'gesto-cura', 'gesto-cura-mais', 'gesto-espelho', 'muralha', 'ponto-enviando', 'pulso-k', 'respira']);
+    expect(css.match(/\binfinite\b/g)).toHaveLength(12);
     expect(css).not.toMatch(/animation-iteration-count/);
   });
 

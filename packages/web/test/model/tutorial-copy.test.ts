@@ -20,6 +20,11 @@ describe('hintParagraphs', () => {
     for (const id of IDS) expect(hintParagraphs(id).join(' ')).not.toMatch(/travamento|Pressão|sem ninguém perder vida/);
   });
 
+  it('a dica do Equipar nomeia as figuras dos destinos, que perderam a palavra (decisoes.md 2026-11-25 (4))', () => {
+    const [equip] = hintParagraphs('equip');
+    expect(equip).toContain('no destino, a espada (Ataque) ou o escudo (Defesa)');
+  });
+
   it('a dica do Reflect diz a regra 7: volta menos a Defesa base dele, os K quebram e os Q ficam', () => {
     const [reflect] = hintParagraphs('reflect');
     expect(reflect).toContain('menos a Defesa base dele; ele perde os K (os Q ficam)');

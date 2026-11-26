@@ -28,12 +28,14 @@ export const ATTACK_TITLE = 'carimbo-atacar-titulo font-madeira text-2xl upperca
 /** A prévia do Atacar numa tira lisa de papel: número de jogo, na fonte de texto e sem o grão (spec §10.7). */
 export const STRIP = 'carimbo-tira font-texto text-xs font-extrabold tabular-nums pc:text-[13px]';
 
-/** O selo redondo (Desfazer, Recomeçar): o desenho gira no toque, e a legenda embaixo é o nome do botão. */
+/**
+ * O selo redondo (Desfazer, Recomeçar): o desenho gira no toque. Sem legenda (decisoes.md 2026-11-25 (3)): o nome fica no `aria-label` e
+ * na dica do mouse.
+ */
 export function Seal({ label, icon, ...rest }: Omit<ComponentPropsWithoutRef<'button'>, 'children'> & { label: string; icon: ReactNode }) {
   return (
-    <button type="button" className={`carimbo-selo min-h-11 min-w-11 ${OFF}`} {...rest}>
+    <button type="button" aria-label={label} title={label} className={`carimbo-selo min-h-11 min-w-11 ${OFF}`} {...rest}>
       <span data-selo>{icon}</span>
-      <span className="carimbo-selo-legenda">{label}</span>
     </button>
   );
 }

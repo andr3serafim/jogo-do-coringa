@@ -5,10 +5,10 @@
 // contorno de tinta e sombra dura) abre ao passar o mouse, ao focar pelo teclado e ao tocar; uma por vez (`mark-tip.ts`); fecha ao tocar
 // fora, no Esc (que ela marca, para não pular a cena nem abrir o menu), ao rolar e ao redimensionar. Ela desenha no `body`, presa à tela
 // (os campos rolam por dentro e cortariam uma dica presa a eles), e fica escondida do leitor de tela: o nome do botão já diz tudo.
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
+import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { useAnim } from '../anim/context.ts';
-import { currentTip, openTip, useOpenTip } from './mark-tip.ts';
+import { useMarkTip } from './useMarkTip.ts';
 
 export type MarkKind = 'cura' | 'res' | 'defesa' | 'ataque' | 'reflect';
 
@@ -40,50 +40,8 @@ export interface MarkFigureProps {
 
 export function MarkFigure({ kind, id, name, does, icon, count }: MarkFigureProps) {
   const { reduced } = useAnim();
-  const open = useOpenTip() === id;
   const button = useRef<HTMLButtonElement>(null);
-  /** Como a dica abriu: o mouse que passou a fecha ao sair; o toque e o foco, não. */
-  const how = useRef<'hover' | 'focus' | 'tap' | null>(null);
-  /** O foco que veio de um toque ou clique (o clique decide sozinho, e o foco não abre de novo). */
-  const pressed = useRef(false);
-
-  // A figura que sai com a dica aberta a fecha.
-  useEffect(
-    () => () => {
-      if (currentTip() === id) openTip(null);
-    },
-    [id],
-  );
-
-  useEffect(() => {
-    if (!open) return;
-    const outside = (event: PointerEvent) => {
-      if (!button.current?.contains(event.target as Node)) openTip(null);
-    };
-    const escape = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      openTip(null);
-    };
-    const close = () => openTip(null);
-    // Só o rolar que mexe a figura (a página, ou o campo que a contém) solta a dica dela; o histórico, que desce sozinho a cada batida,
-    // não a fecha.
-    const scrolled = (event: Event) => {
-      const target = event.target;
-      if (target === document || (target instanceof Node && button.current !== null && target.contains(button.current))) openTip(null);
-    };
-    // Na captura: o Esc chega aqui antes dos ouvintes da mesa (o pulo das batidas, o menu), que ignoram o evento já marcado.
-    document.addEventListener('pointerdown', outside, true);
-    document.addEventListener('keydown', escape, true);
-    document.addEventListener('scroll', scrolled, true);
-    window.addEventListener('resize', close);
-    return () => {
-      document.removeEventListener('pointerdown', outside, true);
-      document.removeEventListener('keydown', escape, true);
-      document.removeEventListener('scroll', scrolled, true);
-      window.removeEventListener('resize', close);
-    };
-  }, [open]);
+  const { open, handlers } = useMarkTip(id, button);
 
   return (
     <button
@@ -93,39 +51,7 @@ export function MarkFigure({ kind, id, name, does, icon, count }: MarkFigureProp
       aria-label={`${name}: ${does}`}
       aria-expanded={open}
       className={`marca-medalhao relative grid size-6 shrink-0 cursor-help place-items-center rounded-full border-2 border-tinta pc:size-8 ${DISK[kind]}`}
-      onPointerEnter={(event) => {
-        if (event.pointerType !== 'mouse') return;
-        how.current = 'hover';
-        openTip(id);
-      }}
-      onPointerLeave={(event) => {
-        if (event.pointerType === 'mouse' && how.current === 'hover' && currentTip() === id) openTip(null);
-      }}
-      onPointerDown={() => {
-        pressed.current = true;
-      }}
-      onFocus={() => {
-        if (!pressed.current) {
-          how.current = 'focus';
-          openTip(id);
-        }
-        pressed.current = false;
-      }}
-      onBlur={() => {
-        if (how.current === 'focus' && currentTip() === id) openTip(null);
-      }}
-      onClick={() => {
-        // A dica que o mouse abriu fica no clique (agora presa); senão, o toque alterna.
-        if (open && how.current === 'hover') {
-          how.current = 'tap';
-          return;
-        }
-        if (open) openTip(null);
-        else {
-          how.current = 'tap';
-          openTip(id);
-        }
-      }}
+      {...handlers}
     >
       <span aria-hidden="true" data-gesto={!reduced && kind === 'cura' ? 'cura' : undefined} className="grid place-items-center">
         {icon}
@@ -147,7 +73,7 @@ export function MarkFigure({ kind, id, name, does, icon, count }: MarkFigureProp
           {count}
         </span>
       ) : null}
-      {open ? createPortal(<Tip anchor={button} name={name} does={does} />, document.body) : null}
+      {open ? createPortal(<MarkTipCard anchor={button} name={name} does={does} />, document.body) : null}
     </button>
   );
 }
@@ -155,8 +81,11 @@ export function MarkFigure({ kind, id, name, does, icon, count }: MarkFigureProp
 /** A distância da dica à figura e à borda da tela. */
 const GAP = 8;
 
-/** O cartão da dica, preso à tela pela caixa da figura: embaixo dela, ou em cima perto do pé da tela, sem sair pelos lados. */
-function Tip({ anchor, name, does }: { anchor: RefObject<HTMLButtonElement | null>; name: string; does: string }) {
+/**
+ * O cartão da dica, preso à tela pela caixa da figura: embaixo dela, ou em cima perto do pé da tela, sem sair pelos lados. Sem `name`, só a
+ * linha (o motivo da jogada recusada no Equipar).
+ */
+export function MarkTipCard({ anchor, name, does }: { anchor: RefObject<HTMLElement | null>; name?: string; does: string }) {
   const card = useRef<HTMLDivElement>(null);
   const [place, setPlace] = useState<{ left: number; top: number } | null>(null);
   useLayoutEffect(() => {
@@ -176,8 +105,8 @@ function Tip({ anchor, name, does }: { anchor: RefObject<HTMLButtonElement | nul
       className="marca-dica pointer-events-none fixed z-50 w-max max-w-[15rem] border-2 border-tinta bg-papel px-2.5 py-1.5 text-tinta shadow-[3px_3px_0_var(--color-tinta)]"
       style={place ? { left: place.left, top: place.top } : { left: 0, top: 0, visibility: 'hidden' }}
     >
-      <span className="block text-xs font-bold uppercase tracking-[0.04em]">{name}</span>
-      <span className="mt-0.5 block font-texto text-xs leading-snug">{does}</span>
+      {name ? <span className="block text-xs font-bold uppercase tracking-[0.04em]">{name}</span> : null}
+      <span className={`${name ? 'mt-0.5 ' : ''}block font-texto text-xs leading-snug`}>{does}</span>
     </div>
   );
 }

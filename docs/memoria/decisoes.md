@@ -6,6 +6,161 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-26 (1): a spec do Equipar, da abertura e dos níveis aprovada
+
+Diante da spec `docs/superpowers/specs/2026-11-25-equipar-abertura-niveis-design.md` e da pergunta "A spec está aprovada?", com seis perguntas
+curtas na mesma mensagem (1 os textos vizinhos "pronto" e "Equipar · os dois montam" ficam; 2 o som cai na virada do Coringa; 3 esmaecer em
+1,9 s e fim em 2,35 s; 4 a dica do tutorial com "a espada (Ataque) ou o escudo (Defesa)"; 5 o motivo da recusa abre ao tocar no disco; 6 o
+treino retomar a partida depois de recarregar), ele respondeu "Aprovo".
+
+**Leitura:** a spec está aprovada como escrita. **[I]** As propostas marcadas nela valem como escritas (1 a 5: os textos vizinhos ficam, o som
+na virada, 1,9 s e 2,35 s, a dica do tutorial, a dica do disco no toque); ele pode ajustá-las no PR. A 6 (retomar o treino) não está na spec
+e segue aberta. Próximo: o plano, que o advisor revisa.
+
+---
+
+## 2026-11-25 (7): a mão no PC como hoje
+
+Diante das fotos `docs/superpowers/specs/2026-11-25-equipar-y/mao-hoje-*.png` e `mao-junta-*.png` (no PC, no Equipar: a mão reservando metade
+da faixa, como hoje, ou só do tamanho das cartas, com mão, numéricas e botões num bloco centrado), e da pergunta "Qual fica: a mão como hoje
+ou aproximada?", ele respondeu "Como hoje".
+
+**Leitura:** a mão no PC segue reservando `clamp(360px, 50%, 600px)`; o painel do Equipar centra o conteúdo dele no espaço que sobra. O vão
+entre a mão e o painel fica. Segue aberta a retomada do treino depois de recarregar.
+
+---
+
+## 2026-11-25 (6): as artes no lugar dos textos aprovadas
+
+Diante da pergunta "As artes no lugar dos textos estão aprovadas?" (o mostruário `docs/superpowers/specs/2026-11-25-equipar-y/mostruario.png`:
+a mão vazia, sem numéricas, a espera, enviando, a jogada recusada, a quadra, a troca com a carta que sai), ele respondeu "Aprovadas".
+
+**Leitura:** as artes entram como estão no mostruário. **[I]** O motivo da jogada recusada abre ao tocar no disco (como as marcas do Coringa,
+`MarkFigure`), porque a dica do mouse não existe no iPhone. Seguem abertas: o vão entre a mão e o painel no PC e a retomada do treino depois
+de recarregar.
+
+---
+
+## 2026-11-25 (5): o Passar com as setas de pular
+
+Diante do mostruário (`docs/superpowers/specs/2026-11-25-equipar-y/mostruario.png`, as três opções: 1 a mão espalmada, 2 as setas de pular,
+3 a carta que desliza) e da pergunta "Qual ícone fica no Passar?", ele respondeu "2 · setas de pular".
+
+**Leitura:** o Passar é o carimbo de papel com as duas setas de tinta e a barra de ouro (`PassSkipIcon`) e a palavra PASSAR embaixo. Saem a
+seta em arco (2026-11-25 (2)) e as opções 1 e 3. Seguem abertas: o aval das artes no lugar dos textos, o vão entre a mão e o painel no PC e o
+treino que retoma a partida depois de recarregar.
+
+---
+
+## 2026-11-25 (4): o Equipar na Y, artes no lugar dos textos; a queda foi no iPhone com deck de arte
+
+Diante das fotos do Equipar sem texto (`docs/superpowers/specs/2026-11-25-equipar-sem-texto/`, X e Y, com a medida de que na Y os botões
+andam a cada carta posta) e das perguntas (1 destinos só com a figura; 2 os textos que sobram: a "Sua mão está vazia", b a linha da quadra,
+c "Enviando…" e os avisos de recusa, d a espera depois de Confirmar e "Você não recebeu numéricas", e o "9♠" da troca; 3 o ícone do Passar;
+4 a queda), ele respondeu:
+
+> 1. ok;
+> 2. sim, todos substituídos por artes coerentes e correspondentes ao sentido que transmitem;
+> 3. não e também não gostei;
+> 4. foi em iphone, deck de arte, a tela não piscou nem nada, durante o jogo normal a tela voltou para /treino;
+>
+> Y: tudo numa linha no PC. No celular fica igual à X. tudo devidamente alinha sem gaps. pode manter textos confirmar e passar nos botões
+> junto com ícones.
+
+**Leitura:**
+- **Disposição Y:** no PC, cartas e botões numa linha só, centrada, sem vão; no celular, sempre duas linhas (cartas em cima, botões embaixo),
+  sem pular para uma linha na última carta. Ele escolheu sabendo que no PC os botões deslizam a cada carta posta.
+- **Destinos só com a figura** (espada, escudo; troca e descarte com a figura deles).
+- **Confirmar e Passar com ícone e palavra** (substitui o "só ícone" de 2026-11-25 (3) para esses dois).
+- **Os textos a–e viram arte** que diga a mesma coisa. **[I]** O sentido continua para o leitor de tela (`aria-label`, região viva `sr-only`)
+  e, onde o texto explica um motivo (aviso de recusa), na dica do mouse. Artes em fotos antes do código.
+- **O ícone do Passar (a seta em arco) sai:** opções novas em foto.
+- **(3):** iPhone (Safari ou outro navegador no iOS, que usa o mesmo motor), deck de arte, sem piscar, no meio do jogo: a página recarregou
+  sozinha. **[I]** O mais provável é o iOS matar o processo da aba por memória (as imagens decodificadas do deck de arte não aparecem no heap do
+  JavaScript); diagnóstico antes de consertar.
+
+---
+
+## 2026-11-25 (3): as direções do Equipar reprovadas; os níveis na A
+
+Diante das fotos (`docs/superpowers/specs/2026-11-25-equipar-direcoes/` e `2026-11-25-niveis-direcoes/`), ele respondeu:
+
+> Direções para o Equipar foram todas reprovadas.
+> Direção A aprovada para os níveis.
+>
+> Em relação ao equipar:
+> Remover textos! sou contra esse monte de textos! Os textos: "Faltam 3 cartas, desfazer, recomeçar, Tudo no lugar: confira a montagem e
+> confirme, 4 -> fileira de ataque... , passar, confirmar, " tudo isso deve ser removido, no caso dos botões manter apenas ícone intuitivo.
+>
+> Os botões devem ser perfeitamente dispostos e devidamente centralizados. a UI deve ser intuitiva e organizada.
+
+**Leitura:**
+- **Níveis:** a direção A (papel, faixa de cor à esquerda, o rosto do Coringa no medalhão: feliz no Fácil, sério no Médio, bravo no Difícil).
+- **Equipar (substitui a leitura da (1) e da (2) de 2026-11-25 (2) no que diz de texto e de disposição):** saem da vista o "Faltam N cartas",
+  as legendas Desfazer e Recomeçar, o "Tudo no lugar…", a lista da montagem ("4♣ → Fileira de Ataque") e as palavras dos botões Confirmar e
+  Passar; os botões ficam só com o ícone. **[I]** "No caso dos botões, apenas ícone" vale também para os destinos (ATAQUE, DEFESA): as fotos
+  novas os mostram só com a figura, para ele confirmar. **[I]** Os textos saem da vista, não do leitor de tela: o nome de cada botão fica no
+  `aria-label` (e na dica do mouse), e o "Faltam N cartas" numa região viva `sr-only`.
+- Os botões ficam alinhados e centrados no painel; novas direções em fotos antes do código.
+
+---
+
+## 2026-11-25 (2): as respostas sobre as seis tarefas
+
+Diante das perguntas por tarefa (1a carimbo quadrado ou selo redondo; 1b onde fica o Confirmar com a lista da montagem; 1c se o Atacar e o
+Encerrar turno mudam; 2 o alcance e o sentido de "centralizar"; 3 em que tela caiu, aparelho, troca de app, se a partida está em `/partidas`;
+4 compactar sempre ou só sem espaço, e ordenar; 5 as faíscas, o som e a duração; 6 liberdade), ele respondeu:
+
+> 1. a) quadrado. b) siga recomendação do advisor. c) siga recomendação do advisor.
+> 2. a) só no equipar. os textos desfazer e recomeçar dos botões podem ser removidos. b) centralizar referente ao painel inteiro, não deve
+>    ter gap vazio muito grande.
+> 3. a) caiu durante o jogo com bot no difícil. b) celular. c) não, estava apenas jogando. d) não porque não foi finalizada.
+> 4. a) só quando não cabe. b) não, as cartas numéricas não devem ser ordenadas nem as especiais.
+> 5. a) sim. b)mantém. c) ok;
+> 6. siga as recomendações do advisor.
+
+**Leitura:**
+- **1 (substitui o tamanho do Confirmar e do Passar do bloco D do playtest, ponto 5):** o Confirmar e o Passar viram o carimbo quadrado de
+  tamanho fixo do destino do Equipar (figura em cima, palavra embaixo). **[I]** (a recomendação a que ele remete) O Confirmar em ouro, com um
+  visto, ao lado da lista da montagem, no lugar onde ficavam os destinos; o Passar em papel. O Atacar e o Encerrar turno ficam como estão.
+- **2:** só o painel do Equipar. O Desfazer e o Recomeçar perdem a legenda (só o selo; o nome fica no `aria-label`). O conteúdo do painel
+  (cartas, destinos, selos) fica centrado no painel inteiro, na horizontal e na vertical, sem vão grande entre os grupos. **[I]** O "gap"
+  é o vão de hoje entre as cartas (à esquerda) e os destinos colados na borda direita, no PC.
+- **3:** caiu no meio da partida contra o Difícil, no celular, sem trocar de app; a partida não terminou (não está em `/partidas`). **[I]**
+  A página recarregou sozinha (o treino só mostra a escolha do nível ao abrir `/treino` do zero; nenhuma saída da mesa leva até ela): a
+  suspeita é memória (a aba derrubada pelo navegador do celular). Diagnóstico antes de código.
+- **4:** a sobreposição só quando as cartas não cabem; nenhuma ordenação (nem numéricas nem especiais). **[I]** O conserto é a disposição:
+  o canto com o valor de cada carta sempre à vista, a escolhida sobe sem tapar a vizinha (hoje, com 4 numéricas, uma some atrás dela).
+- **5 (substitui parte de 2026-11-16 (5)):** saem o título "Jogo do Coringa", o anel dourado (a onda), a aura radial e as faíscas; o som
+  `abertura-titulo` fica; a abertura encurta (proposta: ~2,3 s). A versão curta (movimento reduzido) vira só o Coringa parado.
+- **6:** os botões Fácil, Médio e Difícil ganham cor, arte e identidade de cada nível, nos dois temas do menu (rosa e verde), com contraste
+  ≥ 4,5 : 1, arte original e o nome acessível de hoje (nível e linha). Direções em fotos antes do código.
+
+---
+
+## 2026-11-25 (1): seis tarefas da interface
+
+Ele pediu, com três prints (o Desfazer/Recomeçar com Ataque/Defesa no PC, uma mão de cartas reais 10-J-Q-K sobrepostas, e o Confirmar
+de largura cheia no PC):
+
+> [ ] Botão confirmar enorme, deve seguir o mesmo padrão dos outros com ícone - arte, estilo próprio e tamanho. o mesmo para o botão
+> 'passar' - print em anexo.
+> [ ] Botões de ação devem estar centralizados vertical e horizontalmente - print em anexo.
+> [ ] Ontem eu estava jogando online (treino com bot) e a partida estava demorando, acho que já estava 8~11 min, e repentinamente o jogo foi
+> "encerrado" e fui redirecionado para /treino;
+> [ ] Visando otimizar espaço da mão em dispositivos com tela menor, a disposição das cartas deve ser otimizada e mais organizada, tanto
+> cartas numéricas quanto especiais - print em anexo.
+> [ ] Remover o texto "Jogo do Coringa", efeito de circulo dourado e background radial dourado de fundo na intro do jogo;
+> [ ] Na tela /treino os botões Fácil, Médio e Difícil devem ser visualmente correspondentes, com cor, arte e identidade coerente com a
+> dificuldade. Lhe dou liberdade criativa.
+
+> 1. Evite regressões; 2. Evite inferencias, me pergunte o que for necessário; 3. Complexidades desnecessárias; 4. Advisor deve revisar
+> specs, planos ou implementações;
+
+**Leitura:** as respostas às perguntas estão em 2026-11-25 (2). O advisor revisa spec, plano e implementação de cada tarefa.
+
+---
+
 ## 2026-11-24 (14): o sim para o merge do PR #12
 
 Diante da pergunta "Faço o merge do PR #12 quando a CI ficar verde?", ele respondeu "Sim, merge".
