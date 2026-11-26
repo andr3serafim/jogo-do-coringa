@@ -131,13 +131,15 @@ describe('carimbos: os outros', () => {
     }
   });
 
-  it('no Equipar: o Confirmar é de ouro, e o Desfazer e o Recomeçar são selos redondos com desenho e legenda', () => {
+  it('no Equipar: o Confirmar é de ouro, e o Desfazer e o Recomeçar são selos redondos só com o desenho', () => {
     mount(EQUIP);
     for (const name of ['Desfazer', 'Recomeçar']) {
       const seal = inEquip().getByRole('button', { name });
       expect(classes(seal)).toEqual(expect.arrayContaining(['carimbo-selo', 'min-h-11', 'min-w-11']));
-      // O texto visível é a legenda (o nome do botão); o desenho é só desenho.
-      expect(seal.textContent).toBe(name);
+      // Sem legenda (decisoes.md 2026-11-25 (3)): o nome fica no `aria-label` e na dica do mouse; o desenho é só desenho.
+      expect(seal.textContent).toBe('');
+      expect(seal).toHaveAttribute('title', name);
+      expect(seal.querySelector('.carimbo-selo-legenda')).toBeNull();
       expect(seal.querySelector('[data-selo] svg[aria-hidden="true"]')).not.toBeNull();
       expect(seal).toBeDisabled();
     }

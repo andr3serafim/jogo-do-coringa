@@ -807,8 +807,9 @@ describe('relógio (spec §3.8, §10.3)', () => {
     // Bloco C do playtest, ponto 10: o pulso verde dos K da cura passiva, a brasa dos K da ameaça e a muralha que respira atrás dos Q.
     // Ponto 13: o brilho que passa pelo ouro de quem lidera.
     // Bloco D, ponto 5: a faísca que corre a borda do carimbo do Atacar com o Ataque Absoluto armado.
-    expect(endless.sort()).toEqual(['brasa-k', 'brilho-lider', 'brilho-quadra', 'faisca-carimbo', 'gesto-alma', 'gesto-cura', 'gesto-cura-mais', 'gesto-espelho', 'muralha', 'pulso-k', 'respira']);
-    expect(css.match(/\binfinite\b/g)).toHaveLength(11);
+    // 2026-11-25 (4): os três pontos do "Enviando" do Equipar (parados com movimento reduzido).
+    expect(endless.sort()).toEqual(['brasa-k', 'brilho-lider', 'brilho-quadra', 'faisca-carimbo', 'gesto-alma', 'gesto-cura', 'gesto-cura-mais', 'gesto-espelho', 'muralha', 'ponto-enviando', 'pulso-k', 'respira']);
+    expect(css.match(/\binfinite\b/g)).toHaveLength(12);
     expect(css).not.toMatch(/animation-iteration-count/);
   });
 

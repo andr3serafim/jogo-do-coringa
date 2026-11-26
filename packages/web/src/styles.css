@@ -1405,16 +1405,17 @@ li[data-joga]::after {
   }
 
   /*
-   * O destino do Equipar (decisoes.md 2026-11-23 (1)): um carimbo de papel de tamanho fixo, a figura em cima e uma palavra embaixo. O
-   * tamanho não muda com quantas cartas faltam pôr; o nome inteiro fica no `aria-label`.
+   * O destino do Equipar (decisoes.md 2026-11-23 (1) e 2026-11-25 (4)): um carimbo quadrado de tamanho fixo, só com a figura. O tamanho não
+   * muda com quantas cartas faltam pôr; o nome inteiro fica no `aria-label`. O Confirmar e o Passar levam a palavra embaixo da figura
+   * (`.carimbo-icone-palavra`): a mesma altura, a largura da palavra.
    */
   .carimbo-destino {
     display: inline-flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
-    width: 64px;
+    gap: 1px;
+    width: 56px;
     height: 56px;
     padding: 2px;
     font-size: 10px;
@@ -1427,10 +1428,49 @@ li[data-joga]::after {
 
   @media (width >= theme(--breakpoint-pc)) {
     .carimbo-destino {
-      width: 76px;
+      width: 64px;
       height: 64px;
       font-size: 11px;
     }
+  }
+
+  .carimbo-destino.carimbo-icone-palavra {
+    width: auto;
+    min-width: 56px;
+    padding-inline: 10px;
+  }
+
+  @media (width >= theme(--breakpoint-pc)) {
+    .carimbo-destino.carimbo-icone-palavra {
+      min-width: 64px;
+    }
+  }
+
+  /* Enviando (o Equipar): os três pontos pulsam um depois do outro; parados com movimento reduzido. */
+  .ponto-enviando {
+    animation: ponto-enviando 900ms ease-in-out infinite;
+  }
+
+  @keyframes ponto-enviando {
+    0%,
+    100% {
+      opacity: 0.35;
+      scale: 0.8;
+    }
+    50% {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ponto-enviando {
+      animation: none;
+    }
+  }
+
+  [data-movimento-reduzido] .ponto-enviando {
+    animation: none;
   }
 
   .carimbo:active:not(:disabled) {
@@ -1525,7 +1565,7 @@ li[data-joga]::after {
     animation: faisca-carimbo 2.8s linear infinite;
   }
 
-  /* Os selos redondos (Desfazer, Recomeçar): o disco afunda e o desenho gira no toque; a legenda embaixo é o nome do botão. */
+  /* Os selos redondos (Desfazer, Recomeçar): o disco afunda e o desenho gira no toque; sem legenda (o nome no `aria-label`). */
   .carimbo-selo {
     display: inline-flex;
     flex-direction: column;
@@ -1567,14 +1607,6 @@ li[data-joga]::after {
 
   .carimbo-selo:active:not(:disabled) > [data-selo] > svg {
     rotate: -60deg;
-  }
-
-  .carimbo-selo-legenda {
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    line-height: 1;
-    text-transform: uppercase;
   }
 
   @media (width >= theme(--breakpoint-pc)) {

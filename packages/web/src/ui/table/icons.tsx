@@ -177,6 +177,86 @@ export function SwapIcon({ className }: ArtProps) {
   );
 }
 
+/** O Confirmar do Equipar (decisoes.md 2026-11-25 (2)): o visto de tinta, grosso, com contorno de papel. */
+export function ConfirmIcon({ className }: ArtProps) {
+  return (
+    <Art name="confirmar" className={className}>
+      <path d="M3.6 12.6 9.4 18.4 20.6 5.8" stroke="var(--color-papel)" strokeWidth="6.4" strokeLinejoin="round" />
+      <path d="M3.6 12.6 9.4 18.4 20.6 5.8" stroke="var(--color-tinta)" strokeWidth="3.6" strokeLinejoin="round" />
+    </Art>
+  );
+}
+
+/** O Passar (decisoes.md 2026-11-25 (5)): as duas setas de tinta para a frente e a barra de ouro, pular a vez. */
+export function PassSkipIcon({ className }: ArtProps) {
+  return (
+    <Art name="passar" className={className}>
+      <path d="M3 5l8 7-8 7ZM12 5l8 7-8 7Z" fill="var(--color-tinta)" stroke="var(--color-papel)" strokeWidth="1.2" strokeLinejoin="round" />
+      <path d="M21 4.6v14.8" stroke="var(--color-ouro)" strokeWidth="2.4" />
+    </Art>
+  );
+}
+
+/** A mão vazia (decisoes.md 2026-11-25 (4) e (6)): três cartas lisas em leque, apagadas, na cor do texto do lugar. */
+export function EmptyHandIcon({ className }: ArtProps) {
+  return (
+    <Art name="mao-vazia" className={className}>
+      {[-16, 0, 16].map((angle) => (
+        <rect
+          key={angle}
+          x="8.2"
+          y="4.6"
+          width="7.6"
+          height="11"
+          rx="1"
+          transform={`rotate(${angle} 12 21)`}
+          fill="currentColor"
+          fillOpacity="0.14"
+          stroke="currentColor"
+          strokeWidth="1.3"
+        />
+      ))}
+    </Art>
+  );
+}
+
+/** Nenhuma numérica para montar: a carta tracejada com o risco vermelho. */
+export function NoCardsIcon({ className }: ArtProps) {
+  return (
+    <Art name="sem-numericas" className={className}>
+      <rect x="6" y="3" width="12" height="18" rx="1.4" stroke="currentColor" strokeWidth="1.4" strokeDasharray="2.2 1.6" />
+      <path d="M4 20 20 4" stroke="var(--color-vermelho)" strokeWidth="2.4" />
+    </Art>
+  );
+}
+
+/** A espera pelo outro (ele ainda monta): a ampulheta de tinta com a areia de ouro, contorno de papel. */
+export function WaitingIcon({ className }: ArtProps) {
+  return (
+    <Art name="espera" className={className}>
+      <path d="M6 2.6h12M6 21.4h12" stroke="var(--color-papel)" strokeWidth="4" />
+      <path d="M6 2.6h12M6 21.4h12" stroke="var(--color-tinta)" strokeWidth="2.2" />
+      <path
+        d="M7.4 3.6c0 5 4.6 5.6 4.6 8.4S7.4 15.4 7.4 20.4h9.2c0-5-4.6-5.6-4.6-8.4s4.6-3.4 4.6-8.4Z"
+        fill="var(--color-papel)"
+        stroke="var(--color-tinta)"
+        strokeWidth="1.6"
+      />
+      <path d="M9.6 19.4c.6-2.6 2.4-3.4 2.4-3.4s1.8.8 2.4 3.4ZM10.4 7.4h3.2c-.4 1.4-1.6 2-1.6 2s-1.2-.6-1.6-2Z" fill="var(--color-ouro)" />
+    </Art>
+  );
+}
+
+/** A jogada recusada: o disco vermelho com o X de papel. */
+export function RejectedIcon({ className }: ArtProps) {
+  return (
+    <Art name="recusada" className={className}>
+      <circle cx="12" cy="12" r="10" fill="var(--color-vermelho)" stroke="var(--color-tinta)" strokeWidth="1.6" />
+      <path d="M8 8l8 8M16 8l-8 8" stroke="var(--color-papel)" strokeWidth="2.6" />
+    </Art>
+  );
+}
+
 /** O descarte no cemitério: a lápide de tinta (a mesma da Ressurreição), com a cruz de ouro. */
 export function DiscardIcon({ className }: ArtProps) {
   return (
