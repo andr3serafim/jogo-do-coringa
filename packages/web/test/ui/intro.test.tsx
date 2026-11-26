@@ -45,13 +45,14 @@ afterEach(() => {
 });
 
 describe('<Intro />: a versão completa', () => {
-  it('mostra as quatro cartas dos naipes, o Coringa e o título, sem a logo da produtora', () => {
+  it('mostra as quatro cartas dos naipes e o Coringa; sem a logo, o título, a aura, o anel e as faíscas (2026-11-25 (2))', () => {
     const { overlay } = mount();
     expect(overlay).toHaveAttribute('data-abertura', 'completa');
     expect(screen.queryByRole('img', { name: /LUSACAN/ })).toBeNull();
     expect([...overlay.querySelectorAll('[data-naipe]')].map((card) => card.getAttribute('data-naipe'))).toEqual(['espadas', 'copas', 'ouros', 'paus']);
     expect(overlay.querySelector('.abertura-coringa svg')).not.toBeNull();
-    expect(overlay.querySelector('.abertura-titulo')).toHaveTextContent('Jogo do Coringa');
+    for (const gone of ['.abertura-titulo', '.abertura-aura', '.abertura-onda', '.abertura-faisca']) expect(overlay.querySelector(gone)).toBeNull();
+    expect(overlay).not.toHaveTextContent('Jogo do Coringa');
   });
 
   it('a cena do jogo é enfeite: o leitor de tela não a lê (o título de verdade é o do menu)', () => {
@@ -67,7 +68,9 @@ describe('<Intro />: a versão completa', () => {
     expect(time('--t-tema')).toBe(`${INTRO.themeAt}ms`);
     expect(time('--t-junta')).toBe(`${INTRO.gatherAt}ms`);
     expect(time('--t-vira')).toBe(`${INTRO.flipAt}ms`);
-    expect(time('--t-titulo')).toBe(`${INTRO.titleAt}ms`);
+    expect(time('--t-entra')).toBe(`${INTRO.coringaInAt}ms`);
+    expect(time('--t-pousa')).toBe(`${INTRO.revealAt}ms`);
+    expect(time('--t-titulo')).toBe('');
     expect(time('--t-some')).toBe(`${INTRO.fadeAt}ms`);
     expect(time('--d-some')).toBe(`${INTRO.total - INTRO.fadeAt}ms`);
     expect(time('--d-sobe')).toBe(`${INTRO.cardRiseMs}ms`);
@@ -85,9 +88,9 @@ describe('<Intro />: a versão completa', () => {
     expect(onDone).toHaveBeenCalledTimes(1);
   });
 
-  it('toca a chamada do título no instante dela, e nada antes', () => {
+  it('toca a pista da chamada no instante dela (a chamada cai na virada), e nada antes', () => {
     const { sound } = mount();
-    wait(INTRO.titleCueAt - 1);
+    wait(INTRO.revealCueAt - 1);
     expect(sound.played).toEqual([]);
     wait(1);
     expect(sound.played).toEqual(['abertura-titulo']);
@@ -146,7 +149,7 @@ describe('<Intro />: pular', () => {
 
   it('depois do pulo, nenhum som da abertura toca mais', () => {
     const { overlay, sound, onDone } = mount();
-    wait(INTRO.titleCueAt);
+    wait(INTRO.revealCueAt);
     fireEvent.click(overlay);
     wait(INTRO.total);
     expect(sound.played).toEqual(['abertura-titulo']);
@@ -183,11 +186,11 @@ describe('<Intro />: pular', () => {
 });
 
 describe('<Intro />: com movimento reduzido', () => {
-  it('é a versão curta: o Coringa e o título parados, sem as cartas que sobem nem o carimbo', () => {
+  it('é a versão curta: o Coringa parado, sem as cartas que sobem, sem o título nem as faíscas', () => {
     const { overlay } = mount({ reduced: true });
     expect(overlay).toHaveAttribute('data-abertura', 'curta');
     expect(overlay.querySelector('.abertura-coringa svg')).not.toBeNull();
-    expect(overlay.querySelector('.abertura-titulo')).toHaveTextContent('Jogo do Coringa');
+    expect(overlay.querySelector('.abertura-titulo')).toBeNull();
     expect(overlay.querySelector('[data-naipe]')).toBeNull();
     expect(overlay.querySelector('.abertura-faisca')).toBeNull();
     expect(overlay.style.getPropertyValue('--t-titulo')).toBe('');

@@ -1,4 +1,5 @@
-// A abertura do jogo (decisoes.md 2026-11-16 (5); sem a logo LUSACAN desde 2026-11-19 (6)): a intro do jogo, até o menu. Puro: só os
+// A abertura do jogo (decisoes.md 2026-11-16 (5); sem a logo LUSACAN desde 2026-11-19 (6); sem o título, a aura, o anel e as faíscas desde
+// 2026-11-25 (2)): a intro do jogo, até o menu. Puro: só os
 // tempos, as pistas de som e a regra do que pula. O componente (`ui/intro/Intro.tsx`) entrega estes números ao CSS como variáveis, e o
 // sintetizador os usa para pôr o impacto no instante certo: quem muda o ritmo da abertura muda aqui, e só aqui.
 import type { Cue } from './sound.ts';
@@ -18,19 +19,21 @@ export const INTRO = {
   cardRiseMs: 420,
   /** As cartas se juntam no centro, e a aura cresce. */
   gatherAt: 1000,
-  /** O maço vira e mostra o Coringa. */
+  /** O maço vira e mostra o Coringa (a chamada do som). */
   flipAt: 1300,
-  /** A pista do título: a subida começa aqui e a chamada cai em `titleAt`. */
-  titleCueAt: 1450,
-  /** O título é carimbado. */
-  titleAt: 1750,
+  /** O Coringa entra, quando o maço termina de sair (o gesto de 150 ms do CSS). */
+  coringaInAt: 1450,
+  /** O Coringa pousa (a entrada de 240 ms do CSS) e dá o pulo; a chamada do som cai aqui (2026-11-26 (4)). */
+  revealAt: 1690,
+  /** A pista da chamada: a subida começa aqui, 300 ms antes do pouso. */
+  revealCueAt: 1390,
   /** A abertura começa a esmaecer para o menu. */
-  fadeAt: 2700,
+  fadeAt: 2200,
   /** O menu. */
-  total: 3150,
+  total: 2650,
 } as const;
 
-/** A versão curta, com movimento reduzido (o sistema ou o menu do jogo): o Coringa e o título parados, um esmaecer na entrada e outro na saída, sem som. */
+/** A versão curta, com movimento reduzido (o sistema ou o menu do jogo): o Coringa parado, um esmaecer na entrada e outro na saída, sem som. */
 export const INTRO_REDUCED = {
   hintAt: 500,
   fadeAt: 1400,
@@ -66,7 +69,7 @@ export function introPlan(reduced: boolean): IntroPlan {
     hintAt: INTRO.hintAt,
     fadeAt: INTRO.fadeAt,
     total: INTRO.total,
-    cues: [{ at: INTRO.titleCueAt, cue: 'abertura-titulo' }],
+    cues: [{ at: INTRO.revealCueAt, cue: 'abertura-titulo' }],
   };
 }
 

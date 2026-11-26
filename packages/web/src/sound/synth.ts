@@ -374,10 +374,10 @@ const RECIPES: Record<Cue, (voices: Voices) => void> = {
     tone({ wave: 'sine', from: 160, to: 70, at: s(FIN.thudAt), length: 0.18, peak: 0.35 });
     noise({ filter: 'lowpass', from: 900, at: s(FIN.thudAt), length: 0.08, peak: 0.25 });
   },
-  // O título da abertura: a subida que puxa o carimbo e, na batida dele, o baque e a chamada (quinta e oitava abertas, em Ré, com um
-  // brilho que chega um instante depois).
+  // A chamada da abertura (o nome da pista é de quando havia o título; decisoes.md 2026-11-25 (2) e 2026-11-26 (4)): a subida e, quando o
+  // Coringa pousa (junto do pulo dele), o baque e a chamada (quinta e oitava abertas, em Ré, com um brilho que chega um instante depois).
   'abertura-titulo': ({ tone, noise }) => {
-    const hit = s(INTRO.titleAt - INTRO.titleCueAt);
+    const hit = s(INTRO.revealAt - INTRO.revealCueAt);
     noise({ filter: 'bandpass', from: 700, to: 3400, q: 1.2, attack: hit * 0.85, length: hit + 0.04, peak: 0.22 });
     tone({ wave: 'sine', from: 98, to: 44, at: hit, length: 0.5, peak: 0.48 });
     noise({ filter: 'lowpass', from: 3000, to: 240, at: hit, length: 0.3, peak: 0.3 });
