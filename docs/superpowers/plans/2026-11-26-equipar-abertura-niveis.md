@@ -38,11 +38,24 @@ desenhos (os caminhos SVG dos ícones), não para a estrutura.
 4. **Leitor de tela perde o que sumiu da vista:** "Faltam N cartas", a montagem, a quadra, "Enviando…", "Você não recebeu numéricas…",
    "Esperando X montar…", "Sua mão está vazia" seguem no DOM acessível. Testes nas Tarefas 2, 3 e 4 (`getByText` acha o `sr-only`;
    `getByRole('img', { name })` na mão vazia).
-5. **A troca perde a carta que sai:** o destino de troca segue com "sai 9♠" no nome acessível e mostra a carta pequena. Teste na Tarefa 3.
+5. **O selo da quadra tapa o canto de uma carta:** a 360 px, com 3 ou 4 numéricas por pôr, o `QuadBadge` no canto do contêiner pode cair
+   sobre o índice da carta da direita (o que a tarefa 4 conserta). Conferido na foto da Tarefa 5 (360 px, o selo à vista, 3–4 cartas); se
+   tapar, o selo sobe para fora do painel (`bottom-full`, como a dica do alvo da `ActionBar`).
+6. **A troca perde a carta que sai:** o destino de troca segue com "sai 9♠" no nome acessível e mostra a carta pequena. Teste na Tarefa 3.
 
 ---
 
 ## PR 1 — o Equipar e o Passar (branch `feat/ajustes-2026-11-25`, já com a spec)
+
+### Tarefa 0: árvore limpa antes de começar
+
+O protótipo das fotos (dos três PRs) está sem commit na árvore. Ele já está salvo em `docs/superpowers/specs/2026-11-25-equipar-y/prototipo.patch`
+e `EquipArt.tsx.txt` (fora do git).
+
+- [ ] **Step 1:** `git checkout -- packages`; apagar `packages/web/src/ui/table/EquipArt.tsx`, `packages/web/e2e/*.tmp.ts`,
+  `packages/web/mostruario.tmp.html` e `packages/web/src/mostruario.tmp.tsx`.
+- [ ] **Step 2:** `git status --short` mostra só `.claude/` e as pastas de fotos em `docs/superpowers/specs/2026-11-25-*`. Daqui em diante,
+  cada tarefa copia do patch só os caminhos SVG de que precisa.
 
 ### Tarefa 1: as figuras novas e o selo sem legenda
 
@@ -50,15 +63,15 @@ desenhos (os caminhos SVG dos ícones), não para a estrutura.
 - Modify: `packages/web/src/ui/table/icons.tsx` (novas: `ConfirmIcon`, `PassSkipIcon`, `EmptyHandIcon`, `NoCardsIcon`, `WaitingIcon`,
   `RejectedIcon`, no estilo de `Art`; os caminhos SVG vêm do protótipo, com o `EmptyHandIcon` de contornos lisos, `fillOpacity 0.14`)
 - Modify: `packages/web/src/ui/table/controls.tsx` (`Seal` sem a legenda: `aria-label={label}` e `title={label}`)
-- Modify: `packages/web/src/styles.css` (sai `.carimbo-selo-legenda`; entram `.carimbo-icone` 56/64 px quadrado, coluna, `gap 1px`, e
-  `.carimbo-icone-palavra` largura automática, `min-width` 56/64, `padding-inline 10px`, 10/11 px, 800, maiúsculas; `.ponto-enviando` com o
+- Modify: `packages/web/src/styles.css` (sai `.carimbo-selo-legenda`; a `.carimbo-destino` — o carimbo de tamanho fixo que o estado
+  manda não regredir — passa a 56 × 56 no celular e 64 × 64 no PC, só a figura; entra a `.carimbo-icone-palavra` (só Confirmar e Passar) largura automática, `min-width` 56/64, `padding-inline 10px`, 10/11 px, 800, maiúsculas; `.ponto-enviando` com o
   keyframe e o corte no movimento reduzido)
 - Test: `packages/web/test/ui/stamp-buttons.test.tsx`
 
 **Interfaces:**
 - Produces: `ConfirmIcon`, `PassSkipIcon`, `EmptyHandIcon`, `NoCardsIcon`, `WaitingIcon`, `RejectedIcon` — `({ className?: string }) => JSX`,
-  `aria-hidden`, `data-arte` = `confirmar` | `passar` | `mao-vazia` | `sem-numericas` | `espera` | `recusada`. Classes CSS `carimbo-icone`,
-  `carimbo-icone-palavra`, `ponto-enviando`.
+  `aria-hidden`, `data-arte` = `confirmar` | `passar` | `mao-vazia` | `sem-numericas` | `espera` | `recusada`. Classes CSS `carimbo-destino`
+  (56/64 px), `carimbo-icone-palavra`, `ponto-enviando`.
 
 - [ ] **Step 1:** no `stamp-buttons.test.tsx`, o teste "no Equipar: … selos redondos com desenho e legenda" vira "…selos redondos só com o
   desenho": para `Desfazer` e `Recomeçar`, `getByRole('button', { name })` existe, tem `title` igual ao nome e `textContent` vazio (sem
@@ -80,7 +93,9 @@ desenhos (os caminhos SVG dos ícones), não para a estrutura.
 **Interfaces:**
 - Consumes: as figuras da Tarefa 1; `ResurrectIcon`; `Suit`, `isRedSuit`; `equipQuadText`, `NO_PENDING_TEXT`, `SENDING_TEXT` do `copy.ts`.
 - Produces:
-  - `useMarkTip(id: string, button: RefObject<HTMLElement | null>): { open: boolean; handlers: { onPointerEnter; onPointerLeave; onFocus; onBlur; onClick } }`
+  - `useMarkTip(id: string, button: RefObject<HTMLElement | null>)` — a API sai do código de hoje da `MarkFigure` (ela guarda como a dica
+    abriu, mouse, foco ou toque, e olha o `pointerType`), sem simplificar: devolve `open` e os tratadores que a `MarkFigure` põe no botão.
+    O `mark-figure.test.tsx` passa sem mudar uma linha.
   - `MiniCard({ card }: { card: Card })` — a carta pequena (valor + naipe), `aria-hidden`, presa ao canto do carimbo.
   - `QuadBadge({ value }: { value: number })` — `data-quadra-nova`, o leque de 4 cartas com o valor, `+{value}`, a Ressurreição; o texto
     `equipQuadText(value)` em `sr-only`.
@@ -129,10 +144,11 @@ desenhos (os caminhos SVG dos ícones), não para a estrutura.
 - [ ] **Step 2:** `pnpm --filter @coringa/web exec vitest run test/ui/phases.test.tsx` — FAIL.
 - [ ] **Step 3:** implementar no `EquipPanel.tsx`: a Y (`flex flex-col items-center gap-3 pc:flex-row pc:justify-center pc:gap-5`); a lista
   das cartas com `style={{ width: calc(n × --hand-w + (n−1) × 8px) }}`, `max-w-full min-w-0 flex-[0_1_auto]`; os botões
-  `[Desfazer] [destinos | Confirmar] [Recomeçar]`; o `DestinationStamp` só com a figura (`carimbo-icone`, figura 32/36 px) e o `MiniCard` na
-  troca; o Confirmar `carimbo carimbo-ouro carimbo-icone carimbo-icone-palavra` com `ConfirmIcon` e a palavra; o `PendingCard` sem `z-[1]`;
+  `[Desfazer] [destinos | Confirmar] [Recomeçar]`; o `DestinationStamp` só com a figura (`carimbo-destino`, figura 32/36 px) e o `MiniCard` na
+  troca; o Confirmar `carimbo carimbo-ouro carimbo-destino carimbo-icone-palavra` com `ConfirmIcon` e a palavra; o `PendingCard` sem `z-[1]`;
   os estados `NoCardsArt`/`ConfirmedArt`; o `QuadBadge` e o `SendingDots`/`RejectedNotice` flutuando no canto do contêiner, sem empurrar
-  nada. Saem os imports que sobrarem (`DESTINATION_SHORT`, `leavingShort`, `NoticeLine`, `TwoLine`, `PRIMARY*`).
+  nada. Saem os imports que sobrarem e, sem outro uso, os exports `DESTINATION_SHORT` e `leavingShort` do `copy.ts` com os testes deles (os
+  `PRIMARY`, `PRIMARY_TITLE` e `PAPER_BIG` ficam: o Encerrar turno, a ordem e a Ressurreição os usam).
 - [ ] **Step 4:** `pnpm --filter @coringa/web exec vitest run test/ui test/model` — PASS (corrigir os outros testes que citavam a lista
   visível, as legendas ou o Confirmar largo, trocando por nome acessível; nenhum teste apagado sem dizer no commit qual e por quê).
 - [ ] **Step 5:** commit `feat(web): o painel do Equipar na Y, só com figuras`.
@@ -140,7 +156,7 @@ desenhos (os caminhos SVG dos ícones), não para a estrutura.
 ### Tarefa 4: o Passar quadrado, a mão vazia e a dica do tutorial
 
 **Files:**
-- Modify: `packages/web/src/ui/table/ReactionPanel.tsx` (`PassButton`: `carimbo carimbo-papel carimbo-icone carimbo-icone-palavra` com
+- Modify: `packages/web/src/ui/table/ReactionPanel.tsx` (`PassButton`: `carimbo carimbo-papel carimbo-destino carimbo-icone-palavra` com
   `PassSkipIcon` e a palavra `PASS_LABEL`)
 - Modify: `packages/web/src/ui/table/Hand.tsx` (a mão vazia: `role="img"`, `aria-label="Sua mão está vazia"`, `EmptyHandIcon` 56/64 px,
   `text-tinta/60` e `pc:text-papel/50`; sem largura reservada)
@@ -166,14 +182,12 @@ desenhos (os caminhos SVG dos ícones), não para a estrutura.
   trouxer, ler com `textContent`), `e2e/training.spec.ts`, `e2e/mobile.spec.ts`, `e2e/drag.spec.ts`, `e2e/sound.spec.ts` onde citarem o que
   mudou
 - Modify: `CLAUDE.md` (a lista do `data-sem-pulo` ganha o disco do aviso recusado no Equipar)
-- Delete: `packages/web/e2e/*.tmp.ts`, `packages/web/mostruario.tmp.html`, `packages/web/src/mostruario.tmp.tsx` (fora do git; apagar antes
-  do `pnpm check`)
 
 - [ ] **Step 1:** `pnpm check` — PASS.
 - [ ] **Step 2:** `pnpm e2e` (atualizar o `estado.md` antes, regra 2) — PASS; o `mobile.spec` confere os alvos ≥ 44 px no painel.
-- [ ] **Step 3:** fotos do jogo de verdade (celular 360 e 375, PC 1377 × 768): faltam 4, tudo posto, rodada 2 com especiais, a quadra no
-  rascunho e o Passar numa reação (semente `tutorial-2431&nivel=facil` rodada 3, se der). Conferir que o selo da quadra e o disco não cobrem
-  carta nem botão.
+- [ ] **Step 3:** fotos do jogo de verdade (celular 360 e 375, PC 1377 × 768): faltam 4, tudo posto, rodada 2 com especiais; a quadra no
+  rascunho a 360 px com 3–4 cartas por pôr (Review Focus 5); e o Passar numa reação de verdade, com `coringa:prefs = { "autoPass": false }`
+  gravado antes de abrir (assim toda janela de reação mostra o Passar). Conferir que o selo da quadra e o disco não cobrem carta nem botão.
 - [ ] **Step 4:** advisor revisa a implementação; corrigir o que ele achar.
 - [ ] **Step 5:** commit, `diario.md` e `estado.md`, push e PR para a `main` com as fotos descritas; os dois jobs da CI verdes. Merge só com o
   sim do autor.
@@ -194,7 +208,10 @@ desenhos (os caminhos SVG dos ícones), não para a estrutura.
   curta)
 - Modify: `packages/web/src/model/copy.ts` (sai `INTRO_TITLE`)
 - Modify: `CLAUDE.md` (a seção Abertura: "o maço vira no Coringa", sem "o título é carimbado"; 2,35 s no lugar de 3,15 s)
-- Test: `test/model/intro.test.ts`, `test/ui/intro.test.tsx`, `test/model/synth.test.ts`, `e2e/abertura.spec.ts`
+- Test: `test/model/intro.test.ts`, `test/ui/intro.test.tsx`, `test/model/synth.test.ts`, `e2e/abertura.spec.ts`. O nome da pista
+  `abertura-titulo` fica (o `sound.ts` e o `sound-controller.test.ts` não mudam). Os `titleAt` das cenas (`scene-moments.ts`, `Scene.tsx`,
+  `scenes/*`, `animation.test.tsx`, `timeline.test.ts`, `scene-*.test.tsx`) são outra coisa e não mudam. Sai só o `INTRO_TITLE`; o "Jogo do
+  Coringa" do `<title>` e de outros lugares fica.
 
 - [ ] **Step 1:** testes: `INTRO.total` entre 2000 e 2600; a ordem `0 < themeAt < gatherAt ≤ revealCueAt < flipAt < fadeAt < total`;
   `fadeAt − flipAt ≥ 500`; `total − fadeAt ≥ 300`; o plano completo com a pista em `revealCueAt`; no componente, nenhum `.abertura-titulo`,
@@ -208,7 +225,7 @@ desenhos (os caminhos SVG dos ícones), não para a estrutura.
 
 ---
 
-## PR 3 — os níveis (branch `feat/niveis-identidade`, da `main`)
+## PR 3 — os níveis (branch `feat/niveis-identidade`, da `main` depois do PR 2: os três mexem em `docs/memoria/`)
 
 ### Tarefa 7: os botões de nível
 

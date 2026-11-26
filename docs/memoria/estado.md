@@ -28,8 +28,8 @@
 - **Passar:** as setas de pular (`PassSkipIcon`, 2026-11-25 (5)).
 - **Artes aprovadas** (2026-11-25 (6)).
 - **Mão no PC como hoje** (2026-11-25 (7)).
-- **Próximo passo:** a spec das tarefas 1, 2, 4, 5 e 6 (`docs/superpowers/specs/2026-11-25-equipar-abertura-niveis-design.md`), o advisor revisa, o autor aprova; a retomada do treino (tarefa 3) segue como pergunta aberta; então a spec (o advisor revisa), o plano e o código, em PRs: Equipar +
-  Passar + mão; abertura; níveis. A (3) segue no diagnóstico.
+- **Spec aprovada** (2026-11-26 (1)) e **plano** em `docs/superpowers/plans/2026-11-26-equipar-abertura-niveis.md` (revisado pelo advisor).
+- **Próximo passo:** o autor escolhe a execução (subagentes ou nativa); então a Tarefa 0 (árvore limpa: o protótipo sai, cópia no patch) e a Tarefa 1. Aberta: retomar o treino depois de recarregar (tarefa 3).
 - **O que espera o autor:** apagar as branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`,
   `feat/sem-cordel-escuro`, `feat/fim-faixa`).
 - **Do bloco anterior, ainda com o autor:** confirmar se a carta presa era o que ele viu; o arquivamento do `decisoes.md`.
