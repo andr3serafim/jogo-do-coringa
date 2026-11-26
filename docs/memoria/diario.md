@@ -5,7 +5,26 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
-## 2026-11-26 (1): as seis tarefas de 2026-11-25; o PR 1 (o Equipar sem texto)
+## 2026-11-26 (2): o PR #14 mesclado; o PR 2 (a abertura sem título)
+
+- **PR #14 mesclado** (`35d9239`, `decisoes.md` 2026-11-26 (2)): o GitHub recusou o merge automático (o repositório não o permite); o merge
+  foi à mão com os quatro jobs verdes.
+- **PR 2, `feat/abertura-sem-titulo`:** `f9f54e4` (saem o título, a aura, o anel e as faíscas, o `INTRO_TITLE` e os keyframes; esmaece em
+  1,9 s e acaba em 2,35 s; a pista `abertura-titulo` começa em `revealCueAt` 1000 e a chamada cai na virada, `flipAt`), `f112c19` (o
+  `abertura.spec` com a duração nova), `0456f25` (o pouso do Coringa no modelo: `coringaInAt` 1450 e `revealAt` 1690; o CSS lê
+  `--t-entra` e `--t-pousa`).
+- **Ruling:** o pulo do Coringa disparava no carimbo do título (`--t-titulo`); sem a variável, a animação inteira do Coringa ficaria
+  inválida. Ele passa a disparar no pouso (`revealAt`), que agora mora no modelo (o "+390 ms" que eu tinha posto no CSS feria "o ritmo muda
+  no modelo"). — custo: nenhum.
+- **Achado do advisor, levado ao autor:** com `fadeAt` 1900 o Coringa pousado fica ~0,2 s parado, não os ~0,6 s da spec (a conta media da
+  virada do maço, não do pouso), e a chamada do som (na virada) cai ~390 ms antes do pulo. O teste agora mede do pouso (≥ 200 ms). As opções
+  (a) 1,9/2,35 e (b) ~2,2/2,65, e o som no pouso, vão no PR.
+- **Armadilha:** o grep do plano não pegou o literal `toBeGreaterThanOrEqual(3000)` do teste do áudio bloqueado no `abertura.spec`: a
+  duração mora em literais dos E2E também. Procure os números, não só os nomes.
+- **Armadilha (de novo):** crases dentro de `node -e "…"` foram executadas pelo shell (só "command not found"). Roteiros com template string:
+  Write e `node`.
+
+: as seis tarefas de 2026-11-25; o PR 1 (o Equipar sem texto)
 
 - **Pedido:** `decisoes.md` 2026-11-25 (1) a (7) e 2026-11-26 (1). Fotos das direções (fora do git): `2026-11-25-equipar-direcoes/` (A e B,
   reprovadas), `-equipar-sem-texto/` (X e Y), `-equipar-y/` (a Y, o mostruário das artes, a mão aproximada × como hoje), `-niveis-direcoes/`

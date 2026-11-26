@@ -12,7 +12,11 @@
   abertura sem título (`feat/abertura-sem-titulo`, da `main` depois do PR 1); **PR 3** os níveis na direção A (`feat/niveis-identidade`, depois
   do PR 2).
 - **PR 1 mesclado:** #14, `35d9239` (o Equipar sem texto, o Passar quadrado, a mão vazia; o diário 2026-11-26 (1)). Fotos em `docs/superpowers/specs/2026-11-26-pr1-fotos/` (fora do git).
-- **Em curso: o PR 2** (a abertura sem título, Tarefa 6 do plano) na `feat/abertura-sem-titulo`, saída da `main` `35d9239`. **Próximo passo:** a Tarefa 6 (TDD: `model/intro.ts`, `synth.ts`, `Intro.tsx`, `intro.css`, `copy.ts`, os testes e o `CLAUDE.md`); depois o PR 3 (os níveis), da `main` depois do PR 2.
+- **PR 2 (a abertura sem título)** na `feat/abertura-sem-titulo`: feito (Tarefa 6; o diário 2026-11-26 (2)); fotos em
+  `docs/superpowers/specs/2026-11-26-pr2-abertura/` (fora do git; 700, 1200, 1700 e 1900 ms). **Pergunta ao autor no PR:** o Coringa pousa
+  em 1690 ms e a abertura esmaece em 1900, então ele fica parado ~0,2 s (a spec dizia ~0,6 s, contando da virada do maço): (a) manter
+  1,9/2,35 s ou (b) esmaecer em ~2,2 e acabar em ~2,65 s (~0,5 s parado); e se a chamada do som cai no pouso (junto do pulo) em vez da
+  virada. **Próximo passo:** o `pnpm e2e` verde, o push e o PR 2; merge com o sim dele; depois o PR 3 (os níveis), da `main` depois do PR 2.
 - **Aberta com o autor:** retomar o treino depois de recarregar (tarefa 3: iPhone, deck de arte). Medido no Chromium (não reproduz o iOS):
   sem vazamento claro; o deck de arte soma ~70 a 80 MB ao processo da aba (detalhe no diário 2026-11-26 (1)).
 - **O que espera o autor:** apagar as branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`,
@@ -49,7 +53,8 @@
 - **Menus:** o rosa por padrão sem gravar nada (`menuTheme` ausente); o menu da partida, o fim e a dica com a roupa de antes (`useInMenu()`
   falso fora da `MenuScreen`); o CSS do menu fora do `styles.css`.
 - **Abertura:** fora do JavaScript inicial (a marca do smoke é `abertura-palco`); pula com clique e tecla; a marca `coringa:abertura =
-  pular` só nos E2E; nenhum flash de tela.
+  pular` só nos E2E; nenhum flash de tela; sem título, aura, anel e faíscas (2026-11-25 (2)); a versão curta é só o Coringa; todo instante sai
+  do `model/intro.ts` (o CSS só lê `--t-*` e guarda as durações dos gestos).
 - **Mesa e cenas:** a última cena só fica com a cortina da cena (`veil === 'scene'`); a poeira é do `Leaving` e sai da página ao fim; só uma
   carta de verdade na lápide; a faixa do PC com ≤ 70 px; a carta que entra esmaecendo só guarda o alvo `opacity: 1` depois de entrar.
 - **Regras:** a chave `stealBuffed` (o Roubo de antes nos replays velhos); `RULES_VERSION` 7, `STATE_SCHEMA` 7, `PROTOCOL_VERSION` 2. A Fortaleza é o nível 4 da zona dos Q (o 3 é o escudo); a coluna dos
