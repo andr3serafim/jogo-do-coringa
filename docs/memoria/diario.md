@@ -5,7 +5,16 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
-## 2026-11-26 (2): o PR #14 mesclado; o PR 2 (a abertura sem título)
+## 2026-11-26 (3): o PR #15 mesclado; o PR 3 (os níveis)
+
+- **PR #15 mesclado** (`0e22f94`, `decisoes.md` 2026-11-26 (3) a (5)): esmaece em 2,2 s e acaba em 2,65 s; a chamada do som no pouso do
+  Coringa (`revealCueAt` 1390, `revealAt` 1690).
+- **PR 3, `feat/niveis-identidade`:** `9718709` (o humor `bravo` no `ResultMedal`; o `LevelChoice` com `data-nivel`, o medalhão
+  `aria-hidden` com `data-humor` e o nome e a linha numa coluna; o `menu.css` com a faixa de 14 px na cor do nível e o medalhão de 58 px).
+  Fotos em `docs/superpowers/specs/2026-11-26-pr3-niveis/`. Sem decisões novas no caminho: é a direção A do protótipo, um desenho só.
+- **O que fica:** o deploy é do autor (o site segue em `9ba36c1`); a tarefa 3 (retomar o treino depois de recarregar) espera a resposta dele.
+
+: o PR #14 mesclado; o PR 2 (a abertura sem título)
 
 - **PR #14 mesclado** (`35d9239`, `decisoes.md` 2026-11-26 (2)): o GitHub recusou o merge automático (o repositório não o permite); o merge
   foi à mão com os quatro jobs verdes.

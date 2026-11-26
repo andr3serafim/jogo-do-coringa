@@ -1,9 +1,9 @@
 // O medalhão do fim de partida (a Faixa de feira, decisoes.md 2026-11-24 (11) e (13)): o seu Coringa, o da mesa (`Coringa.tsx`: o mesmo
 // chapéu, guizos e gola), maior, ocupando o círculo com folga pequena, em três humores: feliz na vitória, triste na derrota, sério sem
-// vencedor. Sempre o Bufão, para qualquer raça (o retrato pintado não tem as expressões). Desenho original do projeto; decorativo.
+// vencedor. O quarto, bravo, é do Difícil na escolha do nível do treino (decisoes.md 2026-11-25 (3)). Sempre o Bufão, para qualquer raça (o retrato pintado não tem as expressões). Desenho original do projeto; decorativo.
 import { CORINGA_BELLS, CORINGA_COLLAR, CORINGA_HAT, CORINGA_STRIPES } from '../cards/Coringa.tsx';
 
-export type ResultMood = 'feliz' | 'triste' | 'serio';
+export type ResultMood = 'feliz' | 'triste' | 'serio' | 'bravo';
 
 /** Os olhos e a boca de cada humor, no quadro de 64 × 64 do Coringa. */
 const FACES: Record<ResultMood, { eyes: string; mouth: string; open: boolean }> = {
@@ -13,6 +13,8 @@ const FACES: Record<ResultMood, { eyes: string; mouth: string; open: boolean }> 
   triste: { eyes: 'M26 36.5l3 1.5M35 38l3-1.5', mouth: 'M26 47c3.5-4 9.5-4 13 0', open: false },
   // Os olhos de ponto e a boca reta.
   serio: { eyes: 'M27.5 37h1M35.5 37h1', mouth: 'M27 45h10', open: false },
+  // As sobrancelhas em V sobre os olhos de ponto e o sorriso de lado, de quem já sabe a jogada.
+  bravo: { eyes: 'M25 33.5l5 2.5M39 33.5l-5 2.5M28 38h.5M35.5 38h.5', mouth: 'M26.5 45.5c4 2 8.5 1.5 11-1.5', open: false },
 };
 
 export function ResultFace({ mood }: { mood: ResultMood }) {
