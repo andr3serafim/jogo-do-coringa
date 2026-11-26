@@ -19,14 +19,14 @@ export const INTRO = {
   cardRiseMs: 420,
   /** As cartas se juntam no centro, e a aura cresce. */
   gatherAt: 1000,
-  /** A pista da chamada: a subida começa aqui e a chamada cai na virada (`flipAt`). */
-  revealCueAt: 1000,
   /** O maço vira e mostra o Coringa (a chamada do som). */
   flipAt: 1300,
   /** O Coringa entra, quando o maço termina de sair (o gesto de 150 ms do CSS). */
   coringaInAt: 1450,
-  /** O Coringa pousa (a entrada de 240 ms do CSS) e dá o pulo. */
+  /** O Coringa pousa (a entrada de 240 ms do CSS) e dá o pulo; a chamada do som cai aqui (2026-11-26 (4)). */
   revealAt: 1690,
+  /** A pista da chamada: a subida começa aqui, 300 ms antes do pouso. */
+  revealCueAt: 1390,
   /** A abertura começa a esmaecer para o menu. */
   fadeAt: 2200,
   /** O menu. */

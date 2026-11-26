@@ -6,6 +6,15 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-26 (4): a chamada do som da abertura no pouso do Coringa
+
+Diante da pergunta "A chamada do som fica na virada do maço ou vai para o pouso do Coringa?", ele respondeu "No pouso".
+
+**Leitura:** a chamada (o baque e o acorde) cai quando o Coringa termina de virar (`revealAt`, junto do pulo), como caía no carimbo do título
+antes; a subida da pista começa 300 ms antes. Substitui a chamada na virada (`flipAt`) da spec e de 2026-11-26 (3).
+
+---
+
 ## 2026-11-26 (3): a abertura com o Coringa meio segundo parado
 
 Diante do PR #15 (a abertura sem título; o Coringa pousa em 1,69 s e esmaecer em 1,9 s o deixava ~0,2 s parado) e da pergunta "Qual duração

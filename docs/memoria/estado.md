@@ -13,8 +13,8 @@
   do PR 2).
 - **PR 1 mesclado:** #14, `35d9239` (o Equipar sem texto, o Passar quadrado, a mão vazia; o diário 2026-11-26 (1)). Fotos em `docs/superpowers/specs/2026-11-26-pr1-fotos/` (fora do git).
 - **PR 2 aberto: #15** (a abertura sem título, `feat/abertura-sem-titulo`; o diário 2026-11-26 (2)). Com a escolha (b) do autor
-  (`decisoes.md` 2026-11-26 (3)): esmaece em 2,2 s e acaba em 2,65 s, o Coringa ~0,5 s parado. Ainda sem resposta: a chamada do som na
-  virada do maço (hoje, como a spec) ou no pouso do Coringa. **Próximo passo:** a CI do #15 verde e o sim para o merge; depois o PR 3 (os
+  (`decisoes.md` 2026-11-26 (3)): esmaece em 2,2 s e acaba em 2,65 s, o Coringa ~0,5 s parado. A chamada do som no pouso do Coringa, junto do pulo
+  (2026-11-26 (4): a pista começa em 1390 ms, a chamada em `revealAt` 1690). **Próximo passo:** a CI do #15 verde e o sim para o merge; depois o PR 3 (os
   níveis, Tarefa 7), da `main` depois do #15.
 - **Aberta com o autor:** retomar o treino depois de recarregar (tarefa 3: iPhone, deck de arte). Medido no Chromium (não reproduz o iOS):
   sem vazamento claro; o deck de arte soma ~70 a 80 MB ao processo da aba (detalhe no diário 2026-11-26 (1)).

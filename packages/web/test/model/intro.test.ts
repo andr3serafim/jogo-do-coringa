@@ -24,9 +24,9 @@ describe('a abertura: os tempos', () => {
     expect(new Set(order).size).toBe(order.length);
   });
 
-  it('a pista do som começa na junção (ou depois) e antes da virada, onde cai a chamada', () => {
-    expect(INTRO.revealCueAt).toBeGreaterThanOrEqual(INTRO.gatherAt);
-    expect(INTRO.revealCueAt).toBeLessThan(INTRO.flipAt);
+  it('a chamada do som cai no pouso do Coringa, junto do pulo (2026-11-26 (4)): a subida começa 300 ms antes, depois da virada', () => {
+    expect(INTRO.revealAt - INTRO.revealCueAt).toBe(300);
+    expect(INTRO.revealCueAt).toBeGreaterThan(INTRO.flipAt);
     expect(INTRO).not.toHaveProperty('titleAt');
     expect(INTRO).not.toHaveProperty('titleCueAt');
   });
