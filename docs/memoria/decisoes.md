@@ -6,6 +6,15 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-26 (5): o sim para o merge do PR #15
+
+Diante da pergunta "Faço o merge do PR #15 quando a CI ficar verde?", ele respondeu "Sim, merge".
+
+**Leitura:** com os quatro jobs verdes no último commit (`150c396`), o PR #15 foi mesclado por squash (`0e22f94`). O PR 3 (os níveis, Tarefa
+7 do plano) sai da `main` atualizada na `feat/niveis-identidade`.
+
+---
+
 ## 2026-11-26 (4): a chamada do som da abertura no pouso do Coringa
 
 Diante da pergunta "A chamada do som fica na virada do maço ou vai para o pouso do Coringa?", ele respondeu "No pouso".

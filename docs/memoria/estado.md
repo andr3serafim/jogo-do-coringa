@@ -12,10 +12,8 @@
   abertura sem título (`feat/abertura-sem-titulo`, da `main` depois do PR 1); **PR 3** os níveis na direção A (`feat/niveis-identidade`, depois
   do PR 2).
 - **PR 1 mesclado:** #14, `35d9239` (o Equipar sem texto, o Passar quadrado, a mão vazia; o diário 2026-11-26 (1)). Fotos em `docs/superpowers/specs/2026-11-26-pr1-fotos/` (fora do git).
-- **PR 2 aberto: #15** (a abertura sem título, `feat/abertura-sem-titulo`; o diário 2026-11-26 (2)). Com a escolha (b) do autor
-  (`decisoes.md` 2026-11-26 (3)): esmaece em 2,2 s e acaba em 2,65 s, o Coringa ~0,5 s parado. A chamada do som no pouso do Coringa, junto do pulo
-  (2026-11-26 (4): a pista começa em 1390 ms, a chamada em `revealAt` 1690). **Próximo passo:** a CI do #15 verde e o sim para o merge; depois o PR 3 (os
-  níveis, Tarefa 7), da `main` depois do #15.
+- **PR 2 mesclado:** #15, `0e22f94` (a abertura sem título, aura, anel e faíscas; esmaece em 2,2 s e acaba em 2,65 s; a chamada do som no pouso do Coringa; o diário 2026-11-26 (2)).
+- **Em curso: o PR 3** (os níveis na direção A, Tarefa 7 do plano) na `feat/niveis-identidade`, saída da `main` `0e22f94`. **Próximo passo:** a Tarefa 7 (TDD: o humor `bravo` no `ResultMedal.tsx`, o `LevelChoice` do `Training.tsx` e o `menu.css`; fotos nos dois temas; advisor; PR).
 - **Aberta com o autor:** retomar o treino depois de recarregar (tarefa 3: iPhone, deck de arte). Medido no Chromium (não reproduz o iOS):
   sem vazamento claro; o deck de arte soma ~70 a 80 MB ao processo da aba (detalhe no diário 2026-11-26 (1)).
 - **O que espera o autor:** apagar as branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`,
