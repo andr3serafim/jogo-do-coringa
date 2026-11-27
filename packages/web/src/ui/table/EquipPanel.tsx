@@ -7,8 +7,10 @@
 // Recomeçar volta ao início, e Confirmar só aparece com todas as cartas posicionadas.
 //
 // Sem texto à vista (decisoes.md 2026-11-25 (3) a (6); spec 2026-11-25-equipar-abertura-niveis §3): os botões são figuras (o nome no
-// `aria-label`), o que era texto é arte (`EquipArt.tsx`) e o texto segue para o leitor de tela (`sr-only`). A disposição é a Y: no PC,
-// cartas e botões numa linha centrada; no celular, sempre duas (as cartas em cima, os botões embaixo).
+// `aria-label`), o que era texto é arte (`EquipArt.tsx`) e o texto segue para o leitor de tela (`sr-only`). No celular, sempre duas linhas
+// (as cartas em cima, os botões embaixo). No PC, uma: as cartas à esquerda e os botões presos à direita, centrados na vertical, numa vaga de
+// largura fixa (os destinos centrados nela, ou o Confirmar do tamanho do Atacar): nada anda quando as cartas saem (decisoes.md 2026-11-26 (7),
+// pontos 1 e 2; substitui a linha centrada da Y).
 //
 // Nenhuma regra mora aqui: o rascunho e a regra de estouro são da sessão (`equipChoose`, `equipConfirm`) e do modelo
 // (`equip.ts`). O painel é só vista: as jogadas chegam por props.
@@ -37,7 +39,7 @@ import type { Notice, SessionSnapshot } from '../../model/session.ts';
 import { useAnim } from '../anim/context.ts';
 import { useDealIn } from '../anim/useDealIn.ts';
 import { Card } from '../cards/Card.tsx';
-import { ResetIcon, Seal, UndoIcon } from './controls.tsx';
+import { MAIN_ICON, MainButton, ResetIcon, Seal, UndoIcon } from './controls.tsx';
 import { DragGhost } from './DragGhost.tsx';
 import { ConfirmedArt, MiniCard, NoCardsArt, QuadBadge, RejectedNotice, SendingDots } from './EquipArt.tsx';
 import { SELECTED_FRONT } from './Hand.tsx';
@@ -282,7 +284,7 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
         </ol>
       ) : null}
 
-      <div data-disposicao className="relative flex flex-col items-center gap-3 pc:mx-auto pc:w-fit pc:max-w-full pc:flex-row pc:justify-center pc:gap-5">
+      <div data-disposicao className="relative flex flex-col items-center gap-3 pc:flex-row pc:gap-5">
         {complete ? null : (
           // A largura natural das cartas (sem vão), até o painel inteiro; elas só se sobrepõem quando não cabem. O espaço de cima é o da carta
           // escolhida, que sobe como na mão.
@@ -309,21 +311,29 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
             ))}
           </ul>
         )}
-        <div className="flex flex-none items-center justify-center gap-4">
+        {/* No celular, com o Confirmar, a linha toma a largura (o Confirmar se estica entre os selos, como o Atacar). */}
+        <div
+          data-botoes-principais
+          className={`flex flex-none items-center justify-center pc:ml-auto pc:w-auto pc:gap-4 ${complete ? 'w-full gap-1.5' : 'gap-4'}`}
+        >
           <Seal label={UNDO_LABEL} icon={<UndoIcon />} disabled={disabled || draft.length === 0} onClick={onUndo} />
           {complete ? (
-            <button
-              type="button"
+            <MainButton
+              tone="ouro"
+              icon={<ConfirmIcon className={MAIN_ICON} />}
+              label={CONFIRM_LABEL}
               data-foco=""
               disabled={disabled}
               onClick={onConfirm}
-              className="carimbo carimbo-ouro carimbo-destino carimbo-icone-palavra disabled:cursor-wait disabled:opacity-60"
-            >
-              <ConfirmIcon className="size-7 pc:size-8" />
-              <span>{CONFIRM_LABEL}</span>
-            </button>
+              className="flex-1 pc:w-[300px] pc:flex-none"
+            />
           ) : (
-            <ul role="list" aria-label="Destinos" data-step="destinos" className="flex flex-none list-none items-center gap-3 p-0">
+            <ul
+              role="list"
+              aria-label="Destinos"
+              data-step="destinos"
+              className="flex flex-none list-none items-center justify-center gap-3 p-0 pc:w-[300px]"
+            >
               {options.map((destination, i) => (
                 <li key={destination} className="flex-none">
                   <DestinationStamp

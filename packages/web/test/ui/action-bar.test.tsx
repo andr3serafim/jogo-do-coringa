@@ -478,7 +478,16 @@ describe('barra de ação: prévias e o botão principal (spec §3.4)', () => {
 
   it('o botão principal tem altura de alvo de toque', () => {
     mount();
-    expect(inBar().getByRole('button', { name: ATTACK_BUTTON }).className).toContain('min-h-14');
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toHaveClass('min-h-[68px]', 'pc:min-h-[72px]', 'pc:min-w-[300px]');
+  });
+
+  it('no PC os botões principais ficam presos à direita, e o Cancelar entra à esquerda do Atacar (decisoes.md 2026-11-26 (7), ponto 1)', async () => {
+    const m = mount();
+    const group = () => inBar().getByRole('button', { name: ATTACK_BUTTON }).closest('[data-botoes-principais]')!;
+    expect(group()).toHaveClass('pc:ml-auto', 'pc:flex-none');
+    expect(screen.getByRole('region', { name: 'Ações' })).toHaveClass('pc:flex-row', 'pc:items-center');
+    await m.user.click(handCard('A'));
+    expect(within(group() as HTMLElement).getByRole('button', { name: 'Cancelar' })).toHaveClass('pc:order-first');
   });
 });
 

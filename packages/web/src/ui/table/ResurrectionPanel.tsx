@@ -40,12 +40,19 @@ export function ResurrectionPanel({ names, deciding, disabled, notice, onResurre
     );
   }
   return (
-    <section ref={panelRef} data-painel tabIndex={-1} aria-label={LABEL} className="flex flex-col gap-2.5 text-papel">
-      <div>
+    <section
+      ref={panelRef}
+      data-painel
+      tabIndex={-1}
+      aria-label={LABEL}
+      className="flex flex-col gap-2.5 text-papel pc:flex-row pc:items-center pc:gap-5"
+    >
+      <div className="pc:min-w-0 pc:flex-1">
         <p className="font-bold leading-snug">{RESURRECTION_WINDOW_TITLE}</p>
         <p className="text-sm leading-snug">{RESURRECTION_WINDOW_TEXT}</p>
       </div>
-      <div className="flex flex-wrap gap-2">
+      {/* No PC, os botões presos à direita, centrados na vertical (decisoes.md 2026-11-26 (7), ponto 1); o aviso fica entre o texto e eles. */}
+      <div data-botoes-principais className="flex flex-wrap gap-2 pc:order-last pc:ml-auto pc:flex-none pc:flex-nowrap">
         <TwoLine
           title={RESURRECT_LABEL}
           titleClass={PRIMARY_TITLE}

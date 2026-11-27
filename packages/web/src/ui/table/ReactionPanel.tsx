@@ -5,6 +5,7 @@
 import type { AttackPreview, GameEvent, PlayerView } from '@coringa/engine';
 import { attackDeclaredText, devastationCastText, guardPlayedText, PASS_LABEL, reflectPlayedText } from '../../model/copy.ts';
 import { livesOf } from '../../model/preview.ts';
+import { MAIN_ICON, MainButton } from './controls.tsx';
 import { PassSkipIcon } from './icons.tsx';
 import type { TableNames } from './labels.ts';
 
@@ -47,19 +48,18 @@ export function ReactionNotice({ view, names, threat, events }: ReactionNoticePr
 }
 
 /**
- * O Passar da janela (decisoes.md 2026-11-25 (4) e (5)): o carimbo quadrado de papel, do tamanho dos destinos do Equipar, com as setas de
- * pular e a palavra. Fica onde estava na barra, longe da mão.
+ * O Passar da janela: o retângulo de papel do tamanho do Atacar (decisoes.md 2026-11-26 (7), ponto 2), com as setas de pular
+ * (2026-11-25 (5)) e a palavra. Fica com os botões principais, presos à direita no PC.
  */
 export function PassButton({ disabled, onPass }: { disabled: boolean; onPass: () => void }) {
   return (
-    <button
-      type="button"
+    <MainButton
+      tone="papel"
+      icon={<PassSkipIcon className={MAIN_ICON} />}
+      label={PASS_LABEL}
       disabled={disabled}
       onClick={onPass}
-      className="carimbo carimbo-papel carimbo-destino carimbo-icone-palavra disabled:cursor-wait disabled:opacity-60"
-    >
-      <PassSkipIcon className="size-7 pc:size-8" />
-      <span>{PASS_LABEL}</span>
-    </button>
+      className="flex-1 pc:flex-none"
+    />
   );
 }

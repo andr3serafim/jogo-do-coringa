@@ -182,12 +182,12 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
     expect(inEquip().getByRole('list', { name: 'Sua montagem' })).toHaveClass('sr-only');
   });
 
-  it('o Confirmar é o carimbo de ouro com o visto e a palavra, do tamanho dos destinos', async () => {
+  it('o Confirmar é o retângulo de ouro do tamanho do Atacar, com o visto e a palavra (decisoes.md 2026-11-26 (7), ponto 2)', async () => {
     const m = mount(EQUIP);
     await choose(m, 'Fileira de Ataque', 'Fileira de Ataque', 'Fileira de Defesa');
     const confirm = inEquip().getByRole('button', { name: 'Confirmar' });
-    expect(confirm).toHaveClass('carimbo', 'carimbo-ouro', 'carimbo-destino', 'carimbo-icone-palavra');
-    expect(confirm).not.toHaveClass('w-full');
+    expect(confirm).toHaveClass('carimbo', 'carimbo-ouro', 'carimbo-grande', 'min-h-[68px]', 'pc:min-h-[72px]', 'pc:min-w-[300px]', 'pc:w-[300px]');
+    expect(confirm).not.toHaveClass('carimbo-destino');
     expect(confirm.querySelector('[data-arte="confirmar"]')).not.toBeNull();
     expect(confirm).toHaveTextContent('Confirmar');
   });
@@ -359,7 +359,9 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
     expect(equipPanel().querySelector('[data-quadra-nova]')!.parentElement).toHaveClass('bottom-full');
     // No PC, à esquerda das cartas, no vão entre a mão e o painel (acima, cobria o canto do campo; à direita, o histórico).
     expect(equipPanel().querySelector('[data-quadra-nova]')!.parentElement).toHaveClass('pc:right-full', 'pc:bottom-auto');
-    expect(equipPanel().querySelector('[data-disposicao]')).toHaveClass('pc:w-fit', 'pc:max-w-full');
+    // Os botões presos à direita, numa vaga de largura fixa: nada anda quando as cartas saem (decisoes.md 2026-11-26 (7), ponto 1).
+    expect(equipPanel().querySelector('[data-botoes-principais]')).toHaveClass('pc:ml-auto');
+    expect(inEquip().getByRole('list', { name: 'Destinos' })).toHaveClass('pc:w-[300px]');
     expect(screen.getByRole('group', { name: 'Sua fileira de ataque' }).querySelector('[data-quadra]')).toHaveTextContent('+7');
     await m.user.click(inEquip().getByRole('button', { name: 'Desfazer' }));
     expect(screen.queryByText(/forma quadra/)).not.toBeInTheDocument();
@@ -697,14 +699,14 @@ describe('janela de reação (spec §3.7)', () => {
     expect(inBar().getByRole('button', { name: 'Passar' })).toBeInTheDocument();
   });
 
-  it('o Passar é o carimbo quadrado de papel com as setas de pular e a palavra (decisoes.md 2026-11-25 (5))', () => {
+  it('o Passar é o retângulo de papel do tamanho do Atacar, com as setas de pular e a palavra (decisoes.md 2026-11-26 (7), ponto 2)', () => {
     mount(
       { ...DRAFT, self: { ...DRAFT.self, hand: ['K', 'J', 'Q'] }, phase: 'REFLECT_PLAYED', opponent: { ...DRAFT.opponent, reflect: true } },
       { state: withClock },
     );
     const pass = inBar().getByRole('button', { name: 'Passar' });
-    expect(pass).toHaveClass('carimbo', 'carimbo-papel', 'carimbo-destino', 'carimbo-icone-palavra');
-    expect(pass).not.toHaveClass('carimbo-grande');
+    expect(pass).toHaveClass('carimbo', 'carimbo-papel', 'carimbo-grande', 'min-h-[68px]', 'pc:min-h-[72px]', 'pc:min-w-[300px]');
+    expect(pass).not.toHaveClass('carimbo-destino');
     expect(pass.querySelector('[data-arte="passar"]')).not.toBeNull();
     expect(pass).toHaveTextContent('Passar');
   });

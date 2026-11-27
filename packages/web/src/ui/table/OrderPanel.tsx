@@ -37,15 +37,16 @@ export function OrderPanel({ view, names, choosing, disabled, notice, onChoose, 
       data-painel
       tabIndex={-1}
       aria-label="Escolha da ordem"
-      className="flex flex-col gap-2.5 text-papel"
+      className="flex flex-col gap-2.5 text-papel pc:flex-row pc:items-center pc:gap-5"
     >
-      <div>
+      <div className="pc:min-w-0 pc:flex-1">
         <p className="sr-only">{ORDER_QUESTION}</p>
         <p data-numero className="font-texto text-xs leading-snug tabular-nums">
           {orderReasonText(view)}
         </p>
       </div>
-      <div className="flex flex-wrap gap-2">
+      {/* No PC, os botões presos à direita, centrados na vertical (decisoes.md 2026-11-26 (7), ponto 1); o aviso fica entre o texto e eles. */}
+      <div data-botoes-principais className="flex flex-wrap gap-2 pc:order-last pc:ml-auto pc:flex-none pc:flex-nowrap">
         <TwoLine
           title={actionText({ type: 'CHOOSE_ORDER', first: true }, view)}
           titleClass={PRIMARY_TITLE}

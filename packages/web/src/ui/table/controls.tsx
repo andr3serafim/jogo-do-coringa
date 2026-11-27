@@ -10,16 +10,25 @@ const OFF = 'disabled:cursor-wait disabled:opacity-60';
 /** O carimbo pequeno, de papel: jogadas, alvos, destinos, Cancelar. Sem o grão: leva prévias e contas (spec §10.7). */
 export const SECONDARY = `carimbo carimbo-papel min-h-11 px-3.5 py-1.5 text-left text-[15px] font-bold ${OFF}`;
 
-const BIG = `carimbo carimbo-grande min-h-14 justify-center px-3.5 py-1.5 text-left ${OFF} pc:min-h-12`;
+/** A face do carimbo grande, sem a altura: o grão, o respiro e o título à esquerda. */
+const FACE = `carimbo carimbo-grande justify-center px-3.5 py-1.5 text-left ${OFF}`;
+
+const BIG = `${FACE} min-h-14 pc:min-h-12`;
 
 /** O carimbo principal da fase: ouro, com o título em tipo de madeira. Mais alto que o pequeno e longe da mão. */
 export const PRIMARY = `${BIG} carimbo-ouro`;
 
-/** O carimbo grande de papel: Passar e Encerrar turno. */
-export const PAPER_BIG = `${BIG} carimbo-papel`;
+/**
+ * O tamanho dos botões principais (decisoes.md 2026-11-26 (7), ponto 2): o Atacar, o Encerrar turno, o Confirmar e o Passar, iguais. A altura
+ * é a do Atacar com a tira; no PC a largura mínima também. Só o Atacar cresce além dela, quando a prévia é longa.
+ */
+export const MAIN_SIZE = 'min-h-[68px] pc:min-h-[72px] pc:min-w-[300px]';
 
-/** O Atacar: o maior e o único vermelho. */
-export const ATTACK = `${BIG} carimbo-atacar`;
+/** O carimbo grande de papel, no tamanho dos principais: Encerrar turno e Passar. */
+export const PAPER_BIG = `${FACE} carimbo-papel ${MAIN_SIZE}`;
+
+/** O Atacar: o único vermelho. */
+export const ATTACK = `${FACE} carimbo-atacar ${MAIN_SIZE}`;
 
 export const PRIMARY_TITLE = 'font-madeira text-[19px] uppercase leading-tight pc:text-[22px]';
 
@@ -27,6 +36,38 @@ export const ATTACK_TITLE = 'carimbo-atacar-titulo font-madeira text-2xl upperca
 
 /** A prévia do Atacar numa tira lisa de papel: número de jogo, na fonte de texto e sem o grão (spec §10.7). */
 export const STRIP = 'carimbo-tira font-texto text-xs font-extrabold tabular-nums pc:text-[13px]';
+
+/**
+ * O título dos botões principais sem a tira (o Confirmar e o Passar): o tipo de madeira do Atacar. No celular, 2 px menor: a 360 px o Confirmar
+ * divide a linha com os dois selos e, com 24 px, empurrava o Recomeçar para fora da tela.
+ */
+export const MAIN_TITLE = 'whitespace-nowrap font-madeira text-[22px] uppercase leading-none pc:text-[26px]';
+
+/** O desenho dos botões principais, à esquerda da palavra (o tamanho da espada do Atacar). */
+export const MAIN_ICON = 'size-9 flex-none pc:size-10';
+
+/**
+ * O Confirmar e o Passar no retângulo do Atacar (decisoes.md 2026-11-26 (7), ponto 2): o desenho à esquerda e a palavra em tipo de madeira;
+ * o Confirmar em ouro, o Passar em papel. O nome acessível é a palavra (o desenho é `aria-hidden`).
+ */
+export function MainButton({
+  tone,
+  icon,
+  label,
+  className = '',
+  ...rest
+}: Omit<ComponentPropsWithoutRef<'button'>, 'children'> & { tone: 'ouro' | 'papel'; icon: ReactNode; label: string }) {
+  return (
+    <button
+      type="button"
+      className={`${tone === 'ouro' ? `${FACE} carimbo-ouro ${MAIN_SIZE}` : PAPER_BIG} flex flex-row items-center gap-2.5 ${className}`}
+      {...rest}
+    >
+      {icon}
+      <span className={MAIN_TITLE}>{label}</span>
+    </button>
+  );
+}
 
 /**
  * O selo redondo (Desfazer, Recomeçar): o desenho gira no toque. Sem legenda (decisoes.md 2026-11-25 (3)): o nome fica no `aria-label` e

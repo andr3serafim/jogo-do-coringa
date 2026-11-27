@@ -125,7 +125,13 @@ export function ActionBar(props: ActionBarProps) {
   const { reduced } = useAnim();
 
   return (
-    <section ref={barRef} data-painel tabIndex={-1} aria-label="Ações" className="relative flex flex-col gap-2.5 text-papel pc:gap-1.5">
+    <section
+      ref={barRef}
+      data-painel
+      tabIndex={-1}
+      aria-label="Ações"
+      className="relative flex flex-col gap-2.5 text-papel pc:flex-row pc:items-center pc:gap-5"
+    >
       {open && targets && pointed && !isRowZone(pointed.zone) ? (
         <div
           role="tooltip"
@@ -137,6 +143,9 @@ export function ActionBar(props: ActionBarProps) {
           </PreviewLine>
         </div>
       ) : null}
+      {/* O que informa e as escolhas da carta: no PC, à esquerda; os botões principais ficam presos à direita (decisoes.md 2026-11-26 (7),
+          ponto 1). Vazio, o bloco some (no celular, o vão da coluna não sobra). */}
+      <div data-barra-info className="flex min-w-0 flex-col gap-2.5 empty:hidden pc:flex-1 pc:gap-1.5">
       {reacting && open ? <ReactionNotice view={view} names={names} threat={previews.threat} events={props.events} /> : null}
 
       <Status {...{ view, names, acting, pending, card, play, cardPlays, notice, passed }} />
@@ -172,9 +181,11 @@ export function ActionBar(props: ActionBarProps) {
 
       {/* Com uma carta escolhida a conversa é sobre ela: os botões próprios (que não usam a escolha) voltam com o Cancelar. */}
       {open && card === null ? <OwnPlays {...props} /> : null}
+      </div>
 
       {open && (plays.finish || canPass || card) ? (
-        <div className="flex gap-2">
+        // No PC o grupo fica na ponta direita, centrado na vertical, e o principal é o último: o Cancelar entra à esquerda dele, e nada o empurra.
+        <div data-botoes-principais className="flex gap-2 pc:ml-auto pc:flex-none">
           {canPass ? <PassButton disabled={disabled} onPass={() => props.onSend({ type: 'PASS' })} /> : null}
           {plays.finish && attacking ? (
             // O Atacar é o maior e o único vermelho, com a espada e a prévia numa tira lisa de papel. A etiqueta e a faísca do Absoluto são
@@ -190,7 +201,7 @@ export function ActionBar(props: ActionBarProps) {
                 data-absoluto={armed ? '' : undefined}
                 disabled={disabled}
                 onClick={() => props.onSend(plays.finish!)}
-                className={`${ATTACK} w-full pc:min-w-[300px]`}
+                className={`${ATTACK} w-full`}
               />
               {armed ? (
                 <span aria-hidden="true" data-etiqueta-absoluto className="carimbo-etiqueta">
@@ -207,14 +218,14 @@ export function ActionBar(props: ActionBarProps) {
               detailClass="text-xs font-semibold pc:text-[13px]"
               disabled={disabled}
               onClick={() => props.onSend(plays.finish!)}
-              className={`${PAPER_BIG} flex-1 pc:min-w-[300px] pc:flex-none`}
+              className={`${PAPER_BIG} flex-1 pc:flex-none`}
             />
           ) : null}
           {card ? (
             <button
               type="button"
               onClick={props.onCancel}
-              className={`${SECONDARY} ${plays.finish || canPass ? 'min-h-14 pc:min-h-12' : ''}`}
+              className={`${SECONDARY} pc:order-first ${plays.finish || canPass ? 'min-h-14 pc:min-h-12' : ''}`}
             >
               {CANCEL_LABEL}
             </button>
