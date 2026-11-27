@@ -225,7 +225,8 @@ test('duas pessoas jogam uma sala: do lobby ao fim, com queda e revanche', async
     socket.release();
     await expect(reconnecting(duda.page)).toHaveCount(0);
     await expect(ana.page.getByRole('status').filter({ hasText: `${duda.name} caiu` })).toHaveCount(0);
-    await expect(history(ana.page).getByText(`${duda.name} voltou`)).toBeVisible();
+    // O histórico é gaveta também no PC (decisoes.md 2026-11-26 (8)): fechada, a nota está na lista (e na região viva), fora da vista.
+    await expect(history(ana.page).getByText(`${duda.name} voltou`)).toBeAttached();
 
     // A mesma partida: a mesa, e o lobby não voltou; a rodada nunca volta atrás e, enquanto é a mesma, a mão de Duda é a de antes.
     await expect(table(duda.page)).toBeVisible();

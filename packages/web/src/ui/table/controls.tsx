@@ -37,7 +37,9 @@ export const ATTACK = `${FACE} carimbo-atacar ${MAIN_SIZE}`;
 export const SPECIAL = `${FACE} carimbo-tinta min-h-[68px] pc:min-h-[72px]`;
 
 /** O título das jogadas especiais: o tipo de madeira do Atacar, em ouro. */
-export const SPECIAL_TITLE = 'font-madeira text-2xl uppercase leading-none text-ouro pc:text-[26px]';
+// No celular, 20 px: o título cabe numa linha a 360 px ("DEVASTAR O ATAQUE" a 24 px quebrava em duas, e duas especiais empilhadas
+// tiravam da janela dos campos a dica do tutorial num celular de 640 px de altura).
+export const SPECIAL_TITLE = 'font-madeira text-xl uppercase leading-none text-ouro pc:text-[26px]';
 
 export const PRIMARY_TITLE = 'font-madeira text-[19px] uppercase leading-tight pc:text-[22px]';
 
