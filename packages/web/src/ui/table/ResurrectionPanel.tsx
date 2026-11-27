@@ -10,7 +10,7 @@ import {
   resurrectionWaitingText,
 } from '../../model/resurrection-copy.ts';
 import type { Notice } from '../../model/session.ts';
-import { NoticeLine, PRIMARY, PRIMARY_TITLE, SECONDARY, TwoLine } from './controls.tsx';
+import { MAIN_ICON, NoticeLine, SECONDARY, SPECIAL, SPECIAL_TITLE, TwoLine } from './controls.tsx';
 import type { TableNames } from './labels.ts';
 import { ResurrectIcon } from './ResurrectIcon.tsx';
 
@@ -55,11 +55,12 @@ export function ResurrectionPanel({ names, deciding, disabled, notice, onResurre
       <div data-botoes-principais className="flex flex-wrap gap-2 pc:order-last pc:ml-auto pc:flex-none pc:flex-nowrap">
         <TwoLine
           title={RESURRECT_LABEL}
-          titleClass={PRIMARY_TITLE}
-          icon={<ResurrectIcon />}
+          titleClass={SPECIAL_TITLE}
+          icon={<ResurrectIcon className={MAIN_ICON} />}
           disabled={disabled}
           onClick={onResurrect}
-          className={`${PRIMARY} flex-1 pc:min-w-[220px] pc:flex-none`}
+          // A tinta das jogadas especiais (decisoes.md 2026-11-27 (1)); o Guardar segue o pequeno de papel.
+          className={`${SPECIAL} flex-1 pc:flex-none`}
         />
         <button type="button" disabled={disabled} onClick={onKeep} className={`${SECONDARY} min-h-14 pc:min-h-12`}>
           {KEEP_RESURRECTION_LABEL}

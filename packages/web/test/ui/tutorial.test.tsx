@@ -579,14 +579,15 @@ describe('/tutorial: o lugar do painel', () => {
     expect(fields).not.toContainElement(screen.getByRole('list', { name: 'Sua mão' }));
   });
 
-  it('PC: o painel vai no alto dos campos, como no celular, e não na gaveta do histórico (decisoes.md 2026-11-26 (8), D1)', async () => {
+  it('PC: o painel vai na faixa por cima do placar, e não nos campos nem na gaveta do histórico (decisoes.md 2026-11-27 (1))', async () => {
     vi.stubGlobal('matchMedia', (query: string) => ({ matches: query === PC_QUERY, addEventListener() {}, removeEventListener() {} }));
     await openTutorial();
     const aside = screen.getByRole('complementary', { name: 'Histórico da partida', hidden: true });
     const panel = hintPanel();
     expect(screen.getAllByRole('region', { name: 'Dica' })).toHaveLength(1);
     expect(aside).not.toContainElement(panel);
-    expect(document.querySelector('[data-campos]')).toContainElement(panel);
+    expect(document.querySelector('[data-campos]')).not.toContainElement(panel);
+    expect(document.querySelector('[data-dica-faixa]')).toContainElement(panel);
   });
 
   it('o painel não tem nenhuma aria-live aninhada na lista do histórico (cada região é uma)', async () => {
