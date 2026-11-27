@@ -33,7 +33,6 @@ import {
   leavesText,
   noPlaysText,
   PASSED_TEXT,
-  PICK_CARD_TEXT,
   reactingText,
   REFLECT_LABEL,
   RESURRECT_LABEL,
@@ -140,7 +139,7 @@ export function ActionBar(props: ActionBarProps) {
       ) : null}
       {reacting && open ? <ReactionNotice view={view} names={names} threat={previews.threat} events={props.events} /> : null}
 
-      <Status {...{ view, names, acting, pending, card, play, cardPlays, plays, notice, passed }} />
+      <Status {...{ view, names, acting, pending, card, play, cardPlays, notice, passed }} />
 
       {open && card && play === null && cardPlays.length > 0 ? (
         <ul role="list" aria-label="Jogadas" data-step="plays" className="flex list-none flex-wrap gap-2 p-1.5">
@@ -247,14 +246,13 @@ interface StatusProps {
   card: SpecialCard | null;
   play: CardPlay | null;
   cardPlays: CardPlay[];
-  plays: TablePlays;
   notice: Notice | null;
   /** Um passe saiu nesta janela. */
   passed: boolean;
 }
 
 /** A linha de cima: o passe automático, "Enviando…", o aviso de uma jogada recusada, ou o que fazer agora. */
-function Status({ view, names, acting, pending, card, play, cardPlays, plays, notice, passed }: StatusProps) {
+function Status({ view, names, acting, pending, card, play, cardPlays, notice, passed }: StatusProps) {
   if (notice?.kind === 'autoPass') {
     return (
       <p role="status" className="text-sm font-bold leading-snug">
@@ -288,7 +286,8 @@ function Status({ view, names, acting, pending, card, play, cardPlays, plays, no
     if (view.phase.kind === 'ATTACK_MAIN') text = waitingText(names.opponent);
     else if (view.phase.kind === 'REACTION') text = reactingText(names.opponent);
   } else if (card === null) {
-    text = plays.byCard.size > 0 ? PICK_CARD_TEXT : null;
+    // Sem "Toque numa carta da mão…" (decisoes.md 2026-11-26 (7), ponto 3): a carta que joga já se mostra (o fio de ouro, a respiração).
+    return null;
   } else if (play?.targets) {
     text = chooseTargetText(play.label, card, names.opponent);
   } else {

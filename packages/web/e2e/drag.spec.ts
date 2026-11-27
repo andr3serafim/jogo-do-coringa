@@ -260,7 +260,7 @@ test('fase principal: o K arrasta até a Guarda; a zona errada e fora de zona n�
   await expect(myGuard(page).locator('[data-card-id]')).toHaveCount(0);
   // O clique que o navegador manda depois do gesto não escolheu a carta (seria um toque a mais).
   expect(await pressed(q)).toBe('false');
-  await expect(actionBar(page)).toContainText('Toque numa carta da mão para ver as jogadas.');
+  await expect(actionBar(page).getByRole('list', { name: 'Jogadas' })).toHaveCount(0);
 
   // O K na Guarda: a zona leva o contorno de "sob o dedo", e a jogada sai (o K sai da mão e entra na Guarda).
   await pickUp(page, k);

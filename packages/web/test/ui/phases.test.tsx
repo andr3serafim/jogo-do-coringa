@@ -209,12 +209,14 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
     expect(empty.textContent).toBe('');
   });
 
-  it('a numérica escolhida só sobe: a da direita segue por cima, e o canto de cada uma fica à vista', async () => {
+  it('a numérica escolhida fica na frente das vizinhas, e só ela (decisoes.md 2026-11-26 (7), ponto 5)', async () => {
     const m = mount(EQUIP);
     const items = () => within(inEquip().getByRole('list', { name: 'Suas numéricas' })).getAllByRole('listitem');
+    // Sem toque, a escolhida é a primeira que falta.
+    expect(items().map((li) => li.classList.contains('z-[15]'))).toEqual(items().map((_, i) => i === 0));
     await m.user.click(pendingCard(m.view.self.pending[1]!.id));
     expect(items()[1]!.querySelector('[aria-pressed="true"]')).not.toBeNull();
-    for (const li of items()) expect(li.className).not.toMatch(/(^|\s)z-/);
+    expect(items().map((li) => li.classList.contains('z-[15]'))).toEqual(items().map((_, i) => i === 1));
   });
 
   it('cada destino é um carimbo de tamanho fixo, só com a figura; o nome inteiro no leitor e na dica (decisoes.md 2026-11-25 (4))', () => {
@@ -525,7 +527,8 @@ describe('Equipar: foco e teclado (spec §7)', () => {
 describe('escolha da ordem (spec §3.6)', () => {
   it('"Atacar primeiro" vem pré-selecionado, sem barra e sem confirmação automática (decisoes.md 2026-11-02 (9), ponto 7)', () => {
     mount(ORDER, { fake: true });
-    expect(within(orderPanel()).getByText('Você tem a iniciativa: atacar primeiro ou em segundo?')).toBeInTheDocument();
+    // A pergunta saiu da vista e segue para o leitor de tela (decisoes.md 2026-11-26 (7), ponto 6).
+    expect(within(orderPanel()).getByText('Você tem a iniciativa: atacar primeiro ou em segundo?')).toHaveClass('sr-only');
     const first = within(orderPanel()).getByRole('button', { name: 'Atacar primeiro' });
     expect(first).toHaveAttribute('data-preselecionada');
     expect(within(orderPanel()).getByRole('button', { name: 'Atacar em segundo' })).not.toHaveAttribute('data-preselecionada');
@@ -533,15 +536,15 @@ describe('escolha da ordem (spec §3.6)', () => {
     expect(orderPanel()).toHaveFocus();
   });
 
-  it('a pergunta diz por que a iniciativa é sua: sorteada, mais dano ou empate na última rodada de Ataque', () => {
+  it('a linha do porquê diz por que a iniciativa é sua: sorteada, mais dano ou empate na última rodada de Ataque', () => {
     const first = mount(ORDER, { fake: true });
-    expect(within(orderPanel()).getByText('Ela foi sorteada no início da partida.')).toBeInTheDocument();
+    expect(within(orderPanel()).getByText('A iniciativa foi sorteada no início da partida.')).not.toHaveClass('sr-only');
     first.unmount();
     const lead = mount({ ...ORDER, lastInitiative: { holder: 'self', changed: true, self: 14, opponent: 9 } }, { fake: true });
     expect(within(orderPanel()).getByText('Você causou mais dano na última rodada de Ataque (14 × 9).')).toBeInTheDocument();
     lead.unmount();
     mount({ ...ORDER, lastInitiative: { holder: 'self', changed: false, self: 0, opponent: 0 } }, { fake: true });
-    expect(within(orderPanel()).getByText('Empate em dano na última rodada de Ataque (0 × 0): ela não mudou.')).toBeInTheDocument();
+    expect(within(orderPanel()).getByText('Empate em dano na última rodada de Ataque (0 × 0): a iniciativa não mudou.')).toBeInTheDocument();
   });
 
   it('sem o jogador, nada sai, por mais que o tempo passe', () => {
@@ -550,15 +553,13 @@ describe('escolha da ordem (spec §3.6)', () => {
     expect(acts(m)).toEqual([]);
   });
 
-  it('com prazo do servidor, o painel diz "Escolha quando quiser, dentro do prazo."', () => {
-    mount(ORDER, { fake: true, state: { deadline: deadline('ORDER', 70_000) } });
-    expect(within(orderPanel()).getByText('Escolha quando quiser, dentro do prazo.')).toBeInTheDocument();
-  });
-
-  it('sem prazo (treino e tutorial) o painel não fala em prazo: "Escolha quando quiser."', () => {
+  it('sem "Escolha quando quiser", com ou sem prazo (decisoes.md 2026-11-26 (7), ponto 6): o prazo é o relógio do placar', () => {
+    const online = mount(ORDER, { fake: true, state: { deadline: deadline('ORDER', 70_000) } });
+    expect(within(orderPanel()).queryByText(/Escolha quando quiser/)).not.toBeInTheDocument();
+    online.unmount();
     const m = mount(ORDER, { fake: true });
     expect(m.session.snapshot().state?.deadline).toBeNull();
-    expect(within(orderPanel()).getByText('Escolha quando quiser.')).toBeInTheDocument();
+    expect(within(orderPanel()).queryByText(/Escolha quando quiser/)).not.toBeInTheDocument();
     expect(within(orderPanel()).queryByText(/prazo/)).not.toBeInTheDocument();
   });
 

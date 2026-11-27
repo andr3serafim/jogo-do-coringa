@@ -33,6 +33,12 @@ import { useCardDrag } from './useCardDrag.ts';
 
 const NO_ZONES: ReadonlySet<DropKey> = new Set();
 
+/**
+ * A carta escolhida, quando as cartas se sobrepõem, fica na frente das vizinhas (decisoes.md 2026-11-26 (7), ponto 5): acima do cadeado
+ * delas (`z-10`) e abaixo do balão do motivo (`z-20`). Vale também para as numéricas do Equipar.
+ */
+export const SELECTED_FRONT = 'z-[15]';
+
 /** A carta de origem, no ar. */
 const DRAGGED_OPACITY = 0.4;
 
@@ -160,7 +166,7 @@ function HandCard({ card, index, count, selected }: HandCardProps) {
     // Durante as batidas a respiração pausa onde está (os controles estão travados, e a mesa fica com o golpe): com a CPU 4× mais
     // lenta, as cartas respirando no meio do golpe custavam ~7 quadros por segundo.
     <li
-      className="relative flex-none"
+      className={`relative flex-none ${selected ? SELECTED_FRONT : ''}`}
       style={style}
       data-respira={reduced || idle ? undefined : ''}
       data-respira-pausa={!reduced && !idle && busy ? '' : undefined}

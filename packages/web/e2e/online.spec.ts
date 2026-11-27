@@ -183,7 +183,8 @@ test('duas pessoas jogam uma sala: do lobby ao fim, com queda e revanche', async
     // O outro só vê quem escolhe.
     await expect(orderPanel(waiting.page)).toContainText(`${chooser.name} está escolhendo a ordem`);
     await expect(orderPanel(chooser.page).locator('[data-auto-barra]')).toHaveCount(0);
-    await expect(orderPanel(chooser.page)).toContainText('Escolha quando quiser, dentro do prazo.');
+    // Sem "Escolha quando quiser" (decisoes.md 2026-11-26 (7), ponto 6): o prazo é o relógio do placar.
+    await expect(orderPanel(chooser.page)).not.toContainText('Escolha quando quiser');
     await first(chooser).click();
     await expect(first(chooser)).toBeHidden({ timeout: 15_000 });
     await expect(orderPanel(chooser.page)).toBeHidden();

@@ -106,7 +106,6 @@ export const CANCEL_REFLECT_LABEL = 'Anular o Reflect';
 export const devastateLabel = (row: RowName): string => (row === 'ATK' ? 'Devastar o Ataque' : 'Devastar a Defesa');
 export const RESURRECT_LABEL = 'Ressuscitar';
 
-export const PICK_CARD_TEXT = 'Toque numa carta da mão para ver as jogadas.';
 export const chooseCardText = (card: SpecialCard): string => `${cardText(card)}: escolha a jogada`;
 /**
  * Por que a carta não tem jogada agora (B2 do sub-projeto 5). O motivo é do motor (`noPlayReason`); aqui só o texto. O limite
@@ -297,10 +296,8 @@ export const placedText = (card: Card, destination: string): string => `${cardTe
 // ---------------------------------------------------------------------------------------------
 // Escolha da ordem (spec §3.6)
 
+/** Só para o leitor de tela (decisoes.md 2026-11-26 (7), ponto 6): à vista ficam os dois botões e a linha do porquê. */
 export const ORDER_QUESTION = 'Você tem a iniciativa: atacar primeiro ou em segundo?';
-export const ORDER_MANUAL_TEXT = 'Escolha quando quiser, dentro do prazo.';
-/** Sem relógio (treino e tutorial) não há prazo a que se referir. */
-export const ORDER_MANUAL_NO_CLOCK_TEXT = 'Escolha quando quiser.';
 export const orderWaitingText = (opponent: string): string => `${opponent} está escolhendo a ordem…`;
 
 // ---------------------------------------------------------------------------------------------

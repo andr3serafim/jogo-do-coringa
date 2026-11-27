@@ -55,7 +55,7 @@ describe('7. sem a ordem automática', () => {
     const order = screen.getByRole('region', { name: 'Escolha da ordem' });
     expect(order.querySelector('[data-auto-barra]')).toBeNull();
     expect(within(order).queryByText(/sai sozinho/)).not.toBeInTheDocument();
-    expect(within(order).getByText('Escolha quando quiser.')).toBeInTheDocument();
+    expect(within(order).queryByText(/Escolha quando quiser/)).not.toBeInTheDocument();
     advance(10_000);
     expect(m.connection.sent).toEqual([]);
   });

@@ -462,7 +462,8 @@ describe('/tutorial: a ordem é sempre sua escolha', () => {
     const order = screen.getByRole('region', { name: 'Escolha da ordem' });
     expect(order.querySelector('[data-auto-barra]')).toBeNull();
     expect(within(order).queryByText(/sai sozinho/)).not.toBeInTheDocument();
-    expect(within(order).getByText('Escolha quando quiser.')).toBeInTheDocument();
+    expect(within(order).queryByText(/Escolha quando quiser/)).not.toBeInTheDocument();
+    expect(within(order).getByRole('button', { name: 'Atacar primeiro' })).toBeInTheDocument();
     expect(within(order).queryByText(/prazo/)).not.toBeInTheDocument();
 
     clock.advance(60_000);

@@ -1,10 +1,11 @@
-// A escolha da ordem (spec §3.6), no lugar da barra de ação. Quem tem a iniciativa vê "atacar primeiro ou em segundo?", com "Atacar
-// primeiro" pré-selecionado, e escolhe quando quiser: a ordem não sai mais sozinha (decisoes.md 2026-11-02 (9), ponto 7). Online vale o
-// prazo do servidor, e a frase o diz; no treino e no tutorial não há prazo. O outro jogador vê "Duda está escolhendo a ordem…".
+// A escolha da ordem (spec §3.6), no lugar da barra de ação. Quem tem a iniciativa vê a linha do porquê e os dois botões, com "Atacar
+// primeiro" pré-selecionado, e escolhe quando quiser: a ordem não sai mais sozinha (decisoes.md 2026-11-02 (9), ponto 7). A pergunta e o
+// "Escolha quando quiser" saíram da vista (decisoes.md 2026-11-26 (7), ponto 6): a pergunta segue para o leitor de tela; online, o prazo
+// é o relógio do placar. O outro jogador vê "Duda está escolhendo a ordem…".
 import type { PlayerView } from '@coringa/engine';
 import { actionText } from '@coringa/sim/text';
 import type { RefObject } from 'react';
-import { ORDER_MANUAL_NO_CLOCK_TEXT, ORDER_MANUAL_TEXT, ORDER_QUESTION, orderWaitingText } from '../../model/copy.ts';
+import { ORDER_QUESTION, orderWaitingText } from '../../model/copy.ts';
 import type { Notice } from '../../model/session.ts';
 import { NoticeLine, PRIMARY, PRIMARY_TITLE, SECONDARY, TwoLine } from './controls.tsx';
 import { orderReasonText, type TableNames } from './labels.ts';
@@ -14,8 +15,6 @@ export interface OrderPanelProps {
   names: TableNames;
   /** É a sua vez de escolher (a lista legal tem `CHOOSE_ORDER`). */
   choosing: boolean;
-  /** O estado tem prazo do servidor. Sem ele (treino e tutorial), a frase da escolha manual não fala em prazo. */
-  hasDeadline: boolean;
   /** Controles desligados: jogada em voo, reconexão ou prazo esgotado. */
   disabled: boolean;
   /** O aviso de uma jogada recusada (devagar, regra do motor). */
@@ -24,7 +23,7 @@ export interface OrderPanelProps {
   panelRef: RefObject<HTMLElement | null>;
 }
 
-export function OrderPanel({ view, names, choosing, hasDeadline, disabled, notice, onChoose, panelRef }: OrderPanelProps) {
+export function OrderPanel({ view, names, choosing, disabled, notice, onChoose, panelRef }: OrderPanelProps) {
   if (!choosing) {
     return (
       <section aria-label="Escolha da ordem" className="flex flex-col gap-2 text-papel">
@@ -41,7 +40,7 @@ export function OrderPanel({ view, names, choosing, hasDeadline, disabled, notic
       className="flex flex-col gap-2.5 text-papel"
     >
       <div>
-        <p className="text-sm leading-snug">{ORDER_QUESTION}</p>
+        <p className="sr-only">{ORDER_QUESTION}</p>
         <p data-numero className="font-texto text-xs leading-snug tabular-nums">
           {orderReasonText(view)}
         </p>
@@ -60,7 +59,6 @@ export function OrderPanel({ view, names, choosing, hasDeadline, disabled, notic
         </button>
       </div>
       <NoticeLine notice={notice} />
-      <p className="text-xs leading-snug">{hasDeadline ? ORDER_MANUAL_TEXT : ORDER_MANUAL_NO_CLOCK_TEXT}</p>
     </section>
   );
 }

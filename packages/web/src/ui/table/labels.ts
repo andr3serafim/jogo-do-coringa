@@ -111,14 +111,14 @@ export function lastInitiativeDamage(view: PlayerView): [number, number] {
   return [last.damage[last.player] ?? 0, last.damage[other] ?? 0];
 }
 
-/** Sob a pergunta da ordem (só quem tem a iniciativa a vê): por que ela é sua. */
+/** Acima dos botões da ordem (só quem tem a iniciativa a vê): por que ela é sua. */
 export function orderReasonText(view: PlayerView): string {
   const last = view.lastInitiative;
-  if (last === null) return 'Ela foi sorteada no início da partida.';
+  if (last === null) return 'A iniciativa foi sorteada no início da partida.';
   const [holder, other] = lastInitiativeDamage(view);
   return last.changed || holder !== other
     ? `Você causou mais dano na última rodada de Ataque (${holder} × ${other}).`
-    : `Empate em dano na última rodada de Ataque (${holder} × ${other}): ela não mudou.`;
+    : `Empate em dano na última rodada de Ataque (${holder} × ${other}): a iniciativa não mudou.`;
 }
 
 /** O nome acessível do botão do histórico, com a contagem do que é novo. */

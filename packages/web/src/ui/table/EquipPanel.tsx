@@ -40,6 +40,7 @@ import { Card } from '../cards/Card.tsx';
 import { ResetIcon, Seal, UndoIcon } from './controls.tsx';
 import { DragGhost } from './DragGhost.tsx';
 import { ConfirmedArt, MiniCard, NoCardsArt, QuadBadge, RejectedNotice, SendingDots } from './EquipArt.tsx';
+import { SELECTED_FRONT } from './Hand.tsx';
 import { AttackIcon, ConfirmIcon, DefenseIcon, DiscardIcon, SwapIcon } from './icons.tsx';
 import type { TableNames } from './labels.ts';
 import { useCardDrag } from './useCardDrag.ts';
@@ -205,8 +206,9 @@ function PendingCard({
     <li
       ref={item}
       data-entra={enter === null ? undefined : String(enter)}
-      // A escolhida só sobe (decisoes.md 2026-11-25 (2)): a da direita segue por cima, e o canto com o valor de cada uma fica à vista.
-      className="relative flex-none"
+      // Sem espaço, a escolhida sobe e fica na frente das vizinhas, inteira à vista (decisoes.md 2026-11-26 (7), ponto 5; substitui "só sobe",
+      // de 2026-11-25 (2)). O `SELECTED_FRONT` é o mesmo da mão de especiais.
+      className={`relative flex-none ${selected ? SELECTED_FRONT : ''}`}
       style={
         index > 0
           ? { marginLeft: `clamp(calc(var(--hand-w) * -0.6), calc((100% - ${count} * var(--hand-w)) / ${count - 1}), 8px)` }

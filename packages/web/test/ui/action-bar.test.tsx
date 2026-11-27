@@ -151,12 +151,21 @@ describe('barra de ação: tocar uma carta lista as jogadas (spec §3.4)', () =>
     expect(acts(m)).toEqual([]);
   });
 
-  it('a barra diz o que fazer com a carta escolhida', async () => {
+  it('a barra diz o que fazer com a carta escolhida, e nada antes dela (decisoes.md 2026-11-26 (7), ponto 3)', async () => {
     const m = mount();
-    expect(inBar().getByText(/Toque numa carta da mão/)).toBeInTheDocument();
+    expect(inBar().queryByText(/Toque numa carta/)).not.toBeInTheDocument();
     const a = handCards(m.view, 'A')[0]!;
     await m.user.click(handCard('A'));
     expect(inBar().getByText(`${cardText(a)}: escolha a jogada`)).toBeInTheDocument();
+  });
+
+  it('a carta escolhida da mão fica na frente das vizinhas, e só ela (decisoes.md 2026-11-26 (7), ponto 5)', async () => {
+    const m = mount();
+    const items = () => handList().getAllByRole('listitem');
+    expect(m.view.self.hand.length).toBeGreaterThan(1);
+    expect(items().some((li) => li.classList.contains('z-[15]'))).toBe(false);
+    await m.user.click(handCard('A'));
+    expect(items().filter((li) => li.classList.contains('z-[15]'))).toEqual([handCard('A').closest('li')]);
   });
 
   it('tocar de novo a carta escolhida desfaz a escolha', async () => {

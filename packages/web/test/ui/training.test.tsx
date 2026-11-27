@@ -467,7 +467,7 @@ describe('/treino: o que o §2.6 exclui (passe automático e envio antecipado do
 });
 
 describe('/treino: a ordem não sai sozinha (decisoes.md 2026-11-02 (9), ponto 7)', () => {
-  it('com a iniciativa na rodada 3 (a semente do tutorial), o painel fica sem barra, diz "Escolha quando quiser." e espera o jogador', async () => {
+  it('com a iniciativa na rodada 3 (a semente do tutorial), o painel fica sem barra, sem "Escolha quando quiser" (decisoes.md 2026-11-26 (7)), e espera o jogador', async () => {
     const { advance, user } = fakeClock();
     window.history.replaceState(null, '', `/treino?semente=${TUTORIAL_SEED}&nivel=facil`);
     render(<App api={fakeApi()} />);
@@ -479,7 +479,8 @@ describe('/treino: a ordem não sai sozinha (decisoes.md 2026-11-02 (9), ponto 7
     const order = screen.getByRole('region', { name: 'Escolha da ordem' });
     expect(order.querySelector('[data-auto-barra]')).toBeNull();
     expect(within(order).queryByText(/sai sozinho/)).not.toBeInTheDocument();
-    expect(within(order).getByText('Escolha quando quiser.')).toBeInTheDocument();
+    expect(within(order).queryByText(/Escolha quando quiser/)).not.toBeInTheDocument();
+    expect(within(order).getByRole('button', { name: 'Atacar primeiro' })).toBeInTheDocument();
     expect(within(order).queryByText(/prazo/)).not.toBeInTheDocument();
     advance(60_000);
     expect(screen.getByRole('region', { name: 'Escolha da ordem' })).toBeInTheDocument();
