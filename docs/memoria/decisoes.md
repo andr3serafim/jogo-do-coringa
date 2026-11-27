@@ -6,6 +6,16 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-27 (4): o advisor no lugar dele, e push e merge aprovados nesta sessão
+
+Ele escreveu: "vou me ausentar, prossiga vou deixar o advisor no meu lugar para aprovaçoes. dou permissão total para aprovar todas as decisões
+do advisor. aprovado todos os push, merge até finalizar esta sessão para eu fazer o deploy".
+
+**Leitura:** até o fim desta sessão, as decisões que dependeriam dele passam pelo advisor, e push e merge estão aprovados (o PR #18, com a CI
+verde). O deploy continua dele. A aprovação vale só para esta sessão; a próxima volta à regra de sempre (merge só com o "sim" dele).
+
+---
+
 ## 2026-11-27 (3): a moldura nas laterais da mesa
 
 Ele pediu, enquanto as três colunas eram feitas: "Coloque uma moldura de mesa proporcional nas laterias ta da mesa estou achando tudo muito
