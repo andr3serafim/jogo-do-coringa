@@ -6,6 +6,28 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-27 (2): a faixa de baixo em três colunas
+
+Ele escreveu "Estou insatisfeito com o resultado. siga a orientação em anexo", com dois prints riscados: na vez de atacar, setas da mão e
+do Atacar para o centro da faixa; no Equipar, a faixa dividida em 1 (cartas), 2 (o vão) e 3 (destinos), setas do Desfazer e do Recomeçar
+para os destinos, e "RED" no destino de Ataque e "BLUE" no de Defesa. Diante das perguntas, respondeu:
+
+- A disposição: "35% | 35% | 30% -> especiais | numéricas | botões de ação, sempre centralizados vertical e horizontalmente na sua coluna a
+  medida que entra ou sai cartas, com exceção dos botões de ação desfazer, equipar ataque, equipar defesa, recomeçar. botão deve conter texto
+  + imagem novamente, equipar ataque e equipar defesa."
+- RED/BLUE: "Só marcar a cor do desenho".
+- A exceção: "Ficam parados"; o texto dos destinos: "EQUIPAR ATAQUE e EQUIPAR DEFESA".
+
+**Leitura (substitui os botões presos à direita de 2026-11-26 (7), ponto 1, e a vaga fixa de 300 px):**
+- No PC a faixa de baixo é uma grade de três colunas, 35% | 35% | 30%: a mão de especiais, as numéricas do Equipar (e, fora dele, o que
+  informa: a jogada da carta, os alvos, o porquê da ordem) e os botões. Cada conteúdo centrado na sua coluna, na vertical e na horizontal.
+- O Desfazer, os destinos e o Recomeçar ficam colados (as setas vermelhas) e centrados como grupo na coluna 3; não andam quando as cartas
+  entram ou saem.
+- Os destinos de fileira voltam a ter texto e desenho: "Equipar ataque" e "Equipar defesa", com a espada marcada de vermelho e o escudo de
+  azul (cor nova). **[I]** A troca e o descarte seguem só com a figura (ele nomeou só os dois).
+
+---
+
 ## 2026-11-27 (1): a dica do tutorial no PC, a janela da Ressurreição e as duas leituras
 
 Diante das fotos (`d-atacar-pc.png`, `e-gaveta-pc.png` e `e-tutorial-1378.png`, a dica no alto dos campos cortando a sua Defesa) e das
