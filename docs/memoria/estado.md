@@ -1,16 +1,18 @@
 # Estado do projeto
 
-> Sobrescrito a cada atualização. **Última: 2026-11-26.** Só o presente: o histórico dos blocos está no `diario.md` (e no
+> Sobrescrito a cada atualização. **Última: 2026-11-27.** Só o presente: o histórico dos blocos está no `diario.md` (e no
 > `arquivo/`), e o estado longo de antes desta limpeza em `arquivo/estado-ate-2026-11-23.md`. Antes de seguir, confira se não há versão
 > mais nova em outra branch (regra 1 da seção "Memória compartilhada" do `CLAUDE.md`).
 
 ## Agora
 
-- **Feito, em PR: os ajustes rápidos de 2026-11-26 (7) e (8)**, na `feat/ajustes-2026-11-26` (o diário 2026-11-26 (4) e (5)): os sete
-  itens implementados (`3675e22`, `9833fa0`, `5a709d3`). Medido no navegador: com K, A e Q na mão, as numéricas lado a lado antes do
-  grupo de botões a 1378 e a 1024 px; o Atacar parado na ponta direita com ou sem carta escolhida. Depois dos achados do advisor: a mão cheia (`0d61307`), a dica do tutorial no PC numa faixa sobre o placar e o Ressuscitar da
-  janela em tinta (`debb17f`; `decisoes.md` 2026-11-27 (1)). **Próximo passo exato:** o PR para a `main`, com os jobs `check` e `e2e` da CI
-  verdes, e o "sim" do autor para o merge (nunca sem ele). O E2E não rodou local nesta sessão: vale o job `e2e` da CI.
+- **Nada em curso.** Os ajustes depois dos testes (`decisoes.md` 2026-11-26 (7) e (8), 2026-11-27 (1) a (5); o diário 2026-11-26 (4) e (5)
+  e 2026-11-27 (1) a (4)) estão na `main` pelo PR #18 (`c1c1798`), com os jobs `check` e `e2e` verdes e o E2E local inteiro (139). O merge
+  foi meu, com a aprovação dele para esta sessão (2026-11-27 (4)); **a próxima sessão volta à regra de sempre: merge só com o "sim" dele.**
+- **Limites conhecidos, para ele olhar no playtest:** abaixo de 1280 px o Confirmar entre os selos quebra a linha (o Desfazer em cima, o
+  Recomeçar embaixo); na coluna dos botões (30%) as especiais ficam acima do Atacar (lado a lado não cabem); no celular e no tablet as especiais
+  em retângulo ocupam mais altura (o título com 20 px no celular); a 1024 px com 4 especiais a mão sobrepõe as cartas; a moldura encolhe nas
+  telas mais estreitas e some a 1280 ou menos; a faixa da dica no PC tem 2 a 3 linhas de texto, não 1.
 - **Do plano anterior:** o plano `docs/superpowers/plans/2026-11-26-equipar-abertura-niveis.md` terminou (`decisoes.md` 2026-11-25 (1) a
   2026-11-26 (6); o diário 2026-11-26 (1) a (3)), em três PRs na `main`: o Equipar sem texto, o Passar quadrado e a mão vazia (#14,
   `35d9239`); a abertura sem título, aura, anel e faíscas, com o Coringa ~0,5 s parado e a chamada do som no pouso (#15, `0e22f94`); os
@@ -19,9 +21,10 @@
 - **Aberta com o autor (tarefa 3):** retomar o treino depois de recarregar (a queda foi no iPhone, com deck de arte, no meio de uma partida
   longa contra o Difícil). Medido no Chromium (não reproduz o iOS): sem vazamento claro; o deck de arte soma ~70 a 80 MB ao processo da aba
   (o diário 2026-11-26 (1)). Sem resposta até aqui.
-- **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele): o site está em `9ba36c1`, sem os PRs #14, #15 e #16. Apagar as
+- **O que espera o autor:** o deploy (`pnpm deploy:server`, só ele): o site está em `9ba36c1`, sem os PRs #14, #15, #16 e #18. Apagar as
   branches mescladas (`feat/cura-historico-visitantes`, `feat/ci-salvos`, `feat/regras-4q-reflect`, `feat/sem-cordel-escuro`,
-  `feat/fim-faixa`, `feat/ajustes-2026-11-25`, `feat/abertura-sem-titulo`, `feat/niveis-identidade`) e, se quiser, as pastas de fotos
+  `feat/fim-faixa`, `feat/ajustes-2026-11-25`, `feat/abertura-sem-titulo`, `feat/niveis-identidade`, `feat/ajustes-2026-11-26`,
+  `docs/memoria-2026-11-27`) e, se quiser, as pastas de fotos
   soltas `docs/superpowers/specs/2026-11-25-*` e `2026-11-26-*` (não versionadas).
 - **Menores adiados do plano** (o diário 2026-11-26 (1)): a dica do tutorial com dois parênteses seguidos ("…o escudo (Defesa) (ou
   arraste…)"); o motivo da jogada recusada lido duas vezes pelo leitor de tela.
@@ -31,7 +34,7 @@
 
 - **No ar** em `https://jogodocoringa.com.br`: `9ba36c1` (o `/api/health` em 2026-11-25): a regra 7, o `STATE_SCHEMA` 7 e o
   `PROTOCOL_VERSION` 2.
-- **Na `main` e ainda não no ar:** os PRs #14, #15 e #16 (`20c999b`).
+- **Na `main` e ainda não no ar:** os PRs #14, #15, #16 e #18 (`c1c1798`).
 
 ## Pendências abertas (fora deste bloco)
 

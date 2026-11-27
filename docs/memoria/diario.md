@@ -5,6 +5,13 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-27 (4): o PR #18 mesclado
+
+- **Merge** por squash (`c1c1798`), com os quatro jobs verdes na ponta `1d4dd66` e o E2E local inteiro (139 passaram, 4 pulados),
+  aprovado por ele para esta sessão (`decisoes.md` 2026-11-27 (4)). O deploy é dele.
+- **Os limites conhecidos** foram para o `estado.md` (a quebra do Confirmar abaixo de 1280 px, as especiais acima do Atacar na coluna de 30%,
+  a altura das especiais no celular, a mão sobreposta a 1024 com 4 especiais, a moldura que encolhe, a faixa da dica com 2 a 3 linhas).
+
 ## 2026-11-27 (3): a moldura limitada, os E2E e o merge
 
 - **E2E da CI (rodada `bf97577`):** `online.spec` esperava "Duda voltou" à vista no histórico do PC (agora gaveta: `toBeAttached`);
