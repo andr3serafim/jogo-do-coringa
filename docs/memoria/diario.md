@@ -5,6 +5,19 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-27 (3): a moldura limitada, os E2E e o merge
+
+- **E2E da CI (rodada `bf97577`):** `online.spec` esperava "Duda voltou" à vista no histórico do PC (agora gaveta: `toBeAttached`);
+  `tutorial.spec` a 360 × 640: com dois Devastar e o Atacar empilhados, a dica 5 saía da janela dos campos (168 px para 179): o título das
+  especiais com 20 px no celular (cabe numa linha; 216 px). `ae14f12`.
+- **E2E local (`CI=true pnpm e2e`):** 138 passaram e 1 falhou: o `training.spec` pedia o destino por `/Defesa/` e o nome agora é
+  "Equipar defesa" (`/defesa/i`).
+- **Achado do advisor:** a moldura de 7% apertava a coluna dos botões (o Confirmar quebrava até a 1440). `decisoes.md` 2026-11-27 (5): a
+  moldura limitada e o vão de 4 px; medido (`colunas.mjs`, 1024 a 1920): os quatro botões numa linha em todas; o Confirmar numa linha a
+  partir de 1280.
+- **Conferido no código:** a cena (`BeatOverlay`, `z-50`) e a camada de efeitos (`z-40`) são irmãs da mesa no palco; a faixa da dica
+  (`z-20`, dentro do `main` `isolate`) fica abaixo delas.
+
 ## 2026-11-27 (2): as três colunas e a moldura (`decisoes.md` 2026-11-27 (2) e (3))
 
 - **Pedido:** "Estou insatisfeito com o resultado", com os prints riscados; as respostas viraram a grade de três colunas no PC.

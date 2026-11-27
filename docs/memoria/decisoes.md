@@ -6,6 +6,18 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-27 (5): a moldura limitada pela coluna dos botões (aprovada pelo advisor, sob 2026-11-27 (4))
+
+Medido: com a moldura de 7% (2026-11-27 (3)), a coluna dos botões ficava estreita demais; o Confirmar entre os selos quebrava a linha até a
+1378 e a 1440 px, e os quatro botões do Equipar quebravam a 1024 e a 1100. O advisor, no lugar do autor, aprovou:
+
+**Leitura:** a moldura segue proporcional, mas nunca mais larga do que a coluna dos botões aguenta: `min(7vw, max(0px, (100vw − 1280px) / 2))`
+de cada lado. **[I]** Os números: ~49 px a 1378, ~80 a 1440, os 7% inteiros (~134 px) a 1920 e nenhuma moldura a 1280 ou menos; o vão entre os
+selos e o Confirmar no PC caiu de 6 para 4 px (sobrava 1 px). Pode ser desfeito. Abaixo de 1280 px o Confirmar entre os selos quebra a linha
+(limite conhecido, já mostrado a ele).
+
+---
+
 ## 2026-11-27 (4): o advisor no lugar dele, e push e merge aprovados nesta sessão
 
 Ele escreveu: "vou me ausentar, prossiga vou deixar o advisor no meu lugar para aprovaçoes. dou permissão total para aprovar todas as decisões

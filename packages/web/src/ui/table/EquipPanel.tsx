@@ -332,7 +332,7 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
             na coluna dos botões; numa tela estreita demais para o Confirmar entre os selos, a linha quebra. */}
         <div
           data-botoes-principais
-          className={`flex flex-none items-center justify-center pc:col-start-2 pc:w-auto pc:flex-wrap pc:justify-self-center ${complete ? 'w-full gap-1.5' : 'gap-4 pc:gap-3'}`}
+          className={`flex flex-none items-center justify-center pc:col-start-2 pc:w-auto pc:flex-wrap pc:justify-self-center ${complete ? 'w-full gap-1.5 pc:gap-1' : 'gap-4 pc:gap-3'}`}
         >
           <Seal label={UNDO_LABEL} icon={<UndoIcon />} disabled={disabled || draft.length === 0} onClick={onUndo} />
           {complete ? (
