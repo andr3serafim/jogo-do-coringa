@@ -8,8 +8,9 @@
 
 - **Feito, em PR: os ajustes rápidos de 2026-11-26 (7) e (8)**, na `feat/ajustes-2026-11-26` (o diário 2026-11-26 (4) e (5)): os sete
   itens implementados (`3675e22`, `9833fa0`, `5a709d3`). Medido no navegador: com K, A e Q na mão, as numéricas lado a lado antes do
-  grupo de botões a 1378 e a 1024 px; o Atacar parado na ponta direita com ou sem carta escolhida. **Antes do PR (achados do advisor, medidos):** a mão cheia a 1024 px empurrava as numéricas: consertado em `0d61307` (a barra com `pc:min-w-[640px]`, a coluna com `min-w-0`). **Aberto, com o autor:** no tutorial do PC a dica no alto dos campos corta a sua última fileira (~44 px a 1378 × 800; `e-tutorial-1378.png`), e no PC nada rola de volta: ele escolhe o lugar da dica no PC. Também com ele: o Ressuscitar da janela da Ressurreição (`ResurrectionPanel`, ainda pequeno e de ouro) e os dois **[I]** de 2026-11-26 (8). **Depois:** o PR com a CI
-  (`check` e `e2e`) verde e o "sim" do autor para o merge (nunca sem ele). O E2E local não rodou nesta sessão: vale o job `e2e` da CI.
+  grupo de botões a 1378 e a 1024 px; o Atacar parado na ponta direita com ou sem carta escolhida. Depois dos achados do advisor: a mão cheia (`0d61307`), a dica do tutorial no PC numa faixa sobre o placar e o Ressuscitar da
+  janela em tinta (`debb17f`; `decisoes.md` 2026-11-27 (1)). **Próximo passo exato:** o PR para a `main`, com os jobs `check` e `e2e` da CI
+  verdes, e o "sim" do autor para o merge (nunca sem ele). O E2E não rodou local nesta sessão: vale o job `e2e` da CI.
 - **Do plano anterior:** o plano `docs/superpowers/plans/2026-11-26-equipar-abertura-niveis.md` terminou (`decisoes.md` 2026-11-25 (1) a
   2026-11-26 (6); o diário 2026-11-26 (1) a (3)), em três PRs na `main`: o Equipar sem texto, o Passar quadrado e a mão vazia (#14,
   `35d9239`); a abertura sem título, aura, anel e faíscas, com o Coringa ~0,5 s parado e a chamada do som no pouso (#15, `0e22f94`); os
@@ -71,8 +72,8 @@
   sem `z-*` (sem espaço, a escolhida fica na frente).
 - **Botões principais e histórico (2026-11-26 (7) e (8)):** o grupo `data-botoes-principais` preso à direita no PC (`pc:ml-auto`), em
   toda fase; o Atacar, o Encerrar turno, o Confirmar e o Passar com o `MAIN_SIZE`; as especiais em `.carimbo-tinta` à esquerda do Atacar;
-  no PC o histórico é gaveta (nada de coluna), a mão tem o tamanho das cartas (nunca metade da faixa: as numéricas caem sobre o Desfazer) e
-  a dica do tutorial mora nos campos; a escolhida na frente (`SELECTED_FRONT`).
+  no PC o histórico é gaveta (nada de coluna), a mão tem o tamanho das cartas (nunca metade da faixa: as numéricas caem sobre o Desfazer), a
+  barra guarda `pc:min-w-[640px]` e a dica do tutorial é a faixa sobre o placar (nos campos, corta a sua Defesa); a escolhida na frente (`SELECTED_FRONT`).
 - **Níveis do treino (2026-11-25 (3)):** o nome acessível segue "nível + linha"; o medalhão é `aria-hidden`, com `data-humor` (feliz, sério,
   bravo); a cor sai do `data-nivel` no `menu.css` (`--nivel-cor`, `--nivel-claro`).
 - O JavaScript inicial ≤ 200 KB (o smoke).

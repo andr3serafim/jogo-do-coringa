@@ -5,6 +5,18 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-27 (1): a mão cheia, a dica do tutorial no PC e a Ressurreição em tinta
+
+- **Achados do advisor, medidos (`mao-cheia.mjs`, `conferir.mjs`):** (1) com 4 especiais na mão a 1024 px, a mão do tamanho das cartas
+  tomava a largura (a barra era `flex-1`, base 0) e as numéricas ficavam abaixo do mínimo; (2) no tutorial do PC, a dica no alto dos campos
+  cortava a sua última fileira (~44 px a 1378 × 800), e no PC nada rola de volta; (3) a gaveta real no PC: 400 px pela direita, o foco no
+  Fechar e de volta ao botão no Esc (certo); (4) o tablet (960 × 700): as especiais em retângulo ocupam ~30 px a mais (os campos rolam).
+- **`0d61307`:** a barra com `pc:min-w-[640px]` e a coluna da mesa com `min-w-0` (sem ela, a largura definida da mão alargava a mesa além
+  da tela, com os retratos do placar cortados). Medido: a 1024 a mão cede para 308 px; a última numérica termina antes do grupo.
+- **`debb17f`** (`decisoes.md` 2026-11-27 (1)): no PC a dica é a faixa por cima do placar (`data-dica-faixa`, `absolute`, `z-20`, o
+  `HintPanel` em linha no PC); medido: a última fileira à vista a 1378 e a 1024. O Ressuscitar da janela da Ressurreição em `SPECIAL`.
+- **E2E:** o `tutorial.spec` procura a dica na página (não nos campos nem no histórico).
+
 ## 2026-11-26 (5): a D1 e as especiais de tinta (`decisoes.md` 2026-11-26 (8))
 
 - **Achado do advisor (bloqueio):** as medições dos itens 1 e 2 usaram a semente `quatro8`, de mão vazia, o único caso em que a mão não
@@ -47,8 +59,9 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
   palavra na faixa do meio, largura toda e a mão como hoje; D3 a aba na borda direita, mesa em 1100 px e mão do tamanho das cartas), todas com
   o histórico numa gaveta por cima da mesa (`7-d1-aberta.png`); item 4 nas identidades A (tinta e título ouro) e B (uma cor por jogada) e nos
   lugares linha, empilhadas e à esquerda. O protótipo (`src/proto.ts`) foi apagado e os arquivos voltaram por `git checkout`.
-- **Achados levados ao autor:** a vaga fixa de 300 px deixa um vão entre os selos e os dois destinos; as especiais empilhadas fazem a faixa
-  de baixo crescer e cortam o seu campo; no celular, os retângulos grandes das especiais ocupam muita altura.
+- **Achados:** a vaga fixa de 300 px deixa um vão entre os selos e os dois destinos; as especiais empilhadas fazem a faixa de baixo crescer e
+  cortam o seu campo; no celular, os retângulos grandes das especiais ocupam muita altura. **Correção (2026-11-27):** só o segundo foi levado
+  ao autor nas perguntas; o primeiro e o terceiro foram ditos na mensagem final do bloco.
 - **Armadilha (de novo):** crases dentro de `node -e "…"` foram executadas pelo shell e apagaram trechos de dois arquivos (refeitos pelo
   Edit). Roteiros com crase: Write e `node arquivo.mjs`. E o grep dos textos tirados tem de varrer `test/` inteiro: dois testes
   (`training`, `tutorial`) escaparam do primeiro grep e só o pre-commit os pegou.
