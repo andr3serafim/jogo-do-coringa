@@ -5,6 +5,36 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-26 (4): ajustes rápidos depois dos testes (`decisoes.md` 2026-11-26 (7))
+
+- **Branch `feat/ajustes-2026-11-26`:** `f3191f3` (a decisão), `3675e22` (itens 3 e 6, e a escolhida na frente do item 5), `9833fa0` (itens
+  1 e 2).
+- **Itens 3 e 6:** sai o `PICK_CARD_TEXT`; o `ORDER_QUESTION` fica `sr-only`; saem o `ORDER_MANUAL_TEXT`, o `ORDER_MANUAL_NO_CLOCK_TEXT` e a
+  prop `hasDeadline` do `OrderPanel`; "A iniciativa foi sorteada…" e "…: a iniciativa não mudou." (esta é leitura minha: a pergunta ao autor
+  descreveu por engano uma frase que não existe).
+- **Item 5:** `SELECTED_FRONT` (`z-[15]`, no `Hand.tsx`) na `<li>` da escolhida, na mão de especiais e no Equipar: acima do cadeado das
+  vizinhas (`z-10`), abaixo do balão do motivo (`z-20`). A 360 px, 4 numéricas já cabem lado a lado (foto `a-escolhida-celular.png`).
+- **Itens 1 e 2:** no `controls.tsx`, a `FACE` (o carimbo grande sem a altura), o `MAIN_SIZE` (`min-h-[68px] pc:min-h-[72px]
+  pc:min-w-[300px]`) no Atacar, no Encerrar turno, no Confirmar e no Passar, e o `MainButton` (desenho à esquerda e a palavra em tipo de
+  madeira). No PC, a barra, a ordem, a Ressurreição e o Equipar separam o que informa (à esquerda) do grupo `data-botoes-principais`
+  (`pc:ml-auto`); o Cancelar entra à esquerda do Atacar (`pc:order-first`); no Equipar, a vaga de 300 px guarda os destinos centrados ou o
+  Confirmar. Medido a 1378 px: o Recomeçar fica em x = 1032 em todos os passos; o Atacar e o Confirmar com 300 × 72.
+- **Ruling:** a 360 px, o Confirmar entre os selos estourava a linha (369 px em 336) e empurrava o Recomeçar para fora da tela; o título dos
+  principais sem tira tem 22 px no celular (o Atacar segue com 24) e o vão entre os selos e o Confirmar é de 6 px — custo: 2 px a menos no
+  título do Confirmar e do Passar no celular.
+- **Fotos dos itens 4 e 7** (fora do git, `docs/superpowers/specs/2026-11-26-ajustes-fotos/`, roteiro `direcoes.mjs`, semente literal `null`):
+  item 7 em três direções (D1 o botão no campo do oponente, como no celular, mesa na largura toda e mão do tamanho das cartas; D2 o botão com a
+  palavra na faixa do meio, largura toda e a mão como hoje; D3 a aba na borda direita, mesa em 1100 px e mão do tamanho das cartas), todas com
+  o histórico numa gaveta por cima da mesa (`7-d1-aberta.png`); item 4 nas identidades A (tinta e título ouro) e B (uma cor por jogada) e nos
+  lugares linha, empilhadas e à esquerda. O protótipo (`src/proto.ts`) foi apagado e os arquivos voltaram por `git checkout`.
+- **Achados levados ao autor:** a vaga fixa de 300 px deixa um vão entre os selos e os dois destinos; as especiais empilhadas fazem a faixa
+  de baixo crescer e cortam o seu campo; no celular, os retângulos grandes das especiais ocupam muita altura.
+- **Armadilha (de novo):** crases dentro de `node -e "…"` foram executadas pelo shell e apagaram trechos de dois arquivos (refeitos pelo
+  Edit). Roteiros com crase: Write e `node arquivo.mjs`. E o grep dos textos tirados tem de varrer `test/` inteiro: dois testes
+  (`training`, `tutorial`) escaparam do primeiro grep e só o pre-commit os pegou.
+
+---
+
 ## 2026-11-26 (3): o PR #15 mesclado; o PR 3 (os níveis)
 
 - **PR #15 mesclado** (`0e22f94`, `decisoes.md` 2026-11-26 (3) a (5)): esmaece em 2,2 s e acaba em 2,65 s; a chamada do som no pouso do
