@@ -22,7 +22,7 @@ export const PRIMARY = `${BIG} carimbo-ouro`;
  * O tamanho dos botões principais (decisoes.md 2026-11-26 (7), ponto 2): o Atacar, o Encerrar turno, o Confirmar e o Passar, iguais. A altura
  * é a do Atacar com a tira; no PC a largura mínima também. Só o Atacar cresce além dela, quando a prévia é longa.
  */
-export const MAIN_SIZE = 'min-h-[68px] pc:min-h-[72px] pc:min-w-[300px]';
+export const MAIN_SIZE = 'min-h-[68px] pc:min-h-[72px] pc:min-w-[260px]';
 
 /** O carimbo grande de papel, no tamanho dos principais: Encerrar turno e Passar. */
 export const PAPER_BIG = `${FACE} carimbo-papel ${MAIN_SIZE}`;

@@ -289,16 +289,16 @@ function TableView({
             </LookZone>
             </LeadProvider>
           </m.div>
-          <div className="flex flex-none flex-col pb-[env(safe-area-inset-bottom)] pc:flex-1 pc:flex-row pc:items-center pc:gap-7 pc:px-6 pc:pb-0 pc:text-papel">
+          {/* No PC, três colunas (decisoes.md 2026-11-27 (2)): 35% a mão de especiais; os outros 65% são da barra ou do painel da fase, que se
+              dividem em 35 | 30 (as numéricas ou o que informa, e os botões). Cada conteúdo centrado na sua coluna. */}
+          <div className="flex flex-none flex-col pb-[env(safe-area-inset-bottom)] pc:grid pc:flex-1 pc:grid-cols-[35fr_65fr] pc:content-center pc:items-center pc:px-6 pc:pb-0 pc:text-papel">
             <Hand cards={view.self.hand} />
             {actionBar ? (
               <div
                 data-dica={BAR_ZONES.has(hintZone) ? hintZone : undefined}
                 // Os pingos do carimbo (bloco D do playtest, ponto 5): um ouvinte só, aqui, para todos os carimbos da barra e dos painéis.
                 onPointerUp={reduced ? undefined : stampInk}
-                // No PC a barra guarda 640 px (o grupo de botões do Equipar, 440, e quatro numéricas sobrepostas, ~180): com a mão cheia, é a
-                // mão que encolhe e sobrepõe as cartas, e as numéricas nunca caem sobre o Desfazer (decisoes.md 2026-11-26 (7), ponto 1).
-                className="madeira-escura px-3 pb-3.5 pt-2.5 text-papel pc:min-w-[640px] pc:flex-1 pc:bg-none pc:px-0 pc:pb-0 pc:pt-0"
+                className="madeira-escura px-3 pb-3.5 pt-2.5 text-papel pc:min-w-0 pc:bg-none pc:px-0 pc:pb-0 pc:pt-0"
               >
                 {actionBar}
               </div>

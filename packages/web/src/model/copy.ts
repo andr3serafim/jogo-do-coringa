@@ -272,6 +272,9 @@ export const BACK_LABEL = 'Voltar';
 export const UNDO_LABEL = 'Desfazer';
 export const RESET_LABEL = 'Recomeçar';
 export const CONFIRM_LABEL = 'Confirmar';
+/** Os destinos de fileira do Equipar, com o desenho (decisoes.md 2026-11-27 (2)). */
+export const EQUIP_ATTACK_LABEL = 'Equipar ataque';
+export const EQUIP_DEFENSE_LABEL = 'Equipar defesa';
 
 /** Quantas numéricas faltam pôr (E2: todas à vista, em qualquer ordem): "Faltam 3 cartas", "Falta 1 carta". */
 export const equipLeftText = (left: number): string => (left === 1 ? 'Falta 1 carta' : `Faltam ${left} cartas`);

@@ -130,7 +130,7 @@ export function ActionBar(props: ActionBarProps) {
       data-painel
       tabIndex={-1}
       aria-label="Ações"
-      className="relative flex flex-col gap-2.5 text-papel pc:flex-row pc:items-center pc:gap-5"
+      className="relative flex flex-col gap-2.5 text-papel pc:grid pc:grid-cols-[35fr_30fr] pc:items-center pc:gap-0"
     >
       {open && targets && pointed && !isRowZone(pointed.zone) ? (
         <div
@@ -143,9 +143,9 @@ export function ActionBar(props: ActionBarProps) {
           </PreviewLine>
         </div>
       ) : null}
-      {/* O que informa e as escolhas da carta: no PC, à esquerda; os botões principais ficam presos à direita (decisoes.md 2026-11-26 (7),
-          ponto 1). Vazio, o bloco some (no celular, o vão da coluna não sobra). */}
-      <div data-barra-info className="flex min-w-0 flex-col gap-2.5 empty:hidden pc:flex-1 pc:gap-1.5">
+      {/* O que informa e as escolhas da carta: no PC, centrado na coluna do meio da faixa de baixo (35 | 35 | 30, decisoes.md 2026-11-27 (2));
+          os botões, na última. Vazio, o bloco some (no celular, o vão da coluna não sobra). */}
+      <div data-barra-info className="flex min-w-0 flex-col gap-2.5 empty:hidden pc:items-center pc:gap-1.5 pc:px-3 pc:text-center">
       {reacting && open ? <ReactionNotice view={view} names={names} threat={previews.threat} events={props.events} /> : null}
 
       <Status {...{ view, names, acting, pending, card, play, cardPlays, notice, passed }} />
@@ -182,11 +182,11 @@ export function ActionBar(props: ActionBarProps) {
       </div>
 
       {open ? (
-        // No PC o grupo fica na ponta direita, centrado na vertical, e o principal é o último: as jogadas especiais e o Cancelar entram à
-        // esquerda dele, e nada o empurra (decisoes.md 2026-11-26 (7) e (8)). No celular as especiais ficam acima do Atacar.
+        // No PC o grupo fica centrado na coluna dos botões (decisoes.md 2026-11-27 (2)), e o principal é o último: o Cancelar entra à esquerda
+        // dele; as jogadas especiais, acima, quando não cabem na linha (decisoes.md 2026-11-26 (8)). No celular as especiais ficam acima do Atacar.
         <div
           data-botoes-principais
-          className="flex flex-col gap-2 empty:hidden pc:ml-auto pc:min-w-0 pc:flex-[0_1_auto] pc:flex-row pc:items-center"
+          className="flex flex-col gap-2 empty:hidden pc:col-start-2 pc:min-w-0 pc:flex-row pc:flex-wrap pc:items-center pc:justify-center pc:justify-self-center"
         >
           {/* Com uma carta escolhida a conversa é sobre ela: as jogadas próprias (que não usam a escolha) voltam com o Cancelar. */}
           {card === null ? <OwnPlays {...props} /> : null}
@@ -448,7 +448,7 @@ function OwnPlays({ view, plays, disabled, onSend, onResurrect }: ActionBarProps
   }
   if (items.length === 0) return null;
   return (
-    <div role="group" aria-label="Outras jogadas" className="flex flex-col gap-2 pc:min-w-0 pc:flex-[0_1_auto] pc:flex-row pc:flex-wrap pc:justify-end">
+    <div role="group" aria-label="Outras jogadas" className="flex flex-col gap-2 pc:max-w-full pc:flex-row pc:flex-wrap pc:justify-center">
       {items}
     </div>
   );

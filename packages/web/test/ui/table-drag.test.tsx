@@ -748,17 +748,17 @@ describe('arrastar o Equipar', () => {
 describe('os botões e o teclado seguem iguais (WCAG 2.5.7): Equipar', () => {
   it('toque: o botão do destino escolhe', async () => {
     const m = mount(EQUIP);
-    await m.user.click(inEquip().getByRole('button', { name: 'Fileira de Defesa' }));
+    await m.user.click(inEquip().getByRole('button', { name: 'Equipar defesa' }));
     expect(m.session.snapshot().equipDraft.map((p) => p.destination)).toEqual(['DEF']);
     expect(inEquip().getByText('Faltam 2 cartas')).toBeInTheDocument();
   });
 
   it('teclado: Enter no destino escolhe, e o foco vai ao primeiro destino da carta seguinte', async () => {
     const m = mount(EQUIP);
-    inEquip().getByRole('button', { name: 'Fileira de Ataque' }).focus();
+    inEquip().getByRole('button', { name: 'Equipar ataque' }).focus();
     await m.user.keyboard('{Enter}');
     expect(m.session.snapshot().equipDraft.map((p) => p.destination)).toEqual(['ATK']);
-    expect(inEquip().getByRole('button', { name: 'Fileira de Ataque' })).toHaveFocus();
+    expect(inEquip().getByRole('button', { name: 'Equipar ataque' })).toHaveFocus();
     await m.user.keyboard('{Enter}');
     expect(m.session.snapshot().equipDraft.map((p) => p.destination)).toEqual(['ATK', 'ATK']);
   });
@@ -766,7 +766,7 @@ describe('os botões e o teclado seguem iguais (WCAG 2.5.7): Equipar', () => {
   it('o arrasto e o botão se misturam: uma carta por cada caminho', async () => {
     const m = mount(EQUIP);
     dragTo(equipCard(), zone(DROP.defenseRow));
-    await m.user.click(inEquip().getByRole('button', { name: 'Fileira de Ataque' }));
+    await m.user.click(inEquip().getByRole('button', { name: 'Equipar ataque' }));
     dragTo(equipCard(), zone(DROP.attackRow));
     expect(m.session.snapshot().equipDraft.map((p) => p.destination)).toEqual(['DEF', 'ATK', 'ATK']);
   });

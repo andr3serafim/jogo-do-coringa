@@ -62,7 +62,7 @@ describe('carimbos: o Atacar', () => {
   it('é o carimbo vermelho, com a espada, o título em tipo de madeira e a prévia numa tira lisa de papel', () => {
     mount();
     const attack = inBar().getByRole('button', { name: ATTACK_BUTTON });
-    expect(classes(attack)).toEqual(expect.arrayContaining(['carimbo', 'carimbo-atacar', 'min-h-[68px]', 'pc:min-h-[72px]', 'pc:min-w-[300px]']));
+    expect(classes(attack)).toEqual(expect.arrayContaining(['carimbo', 'carimbo-atacar', 'min-h-[68px]', 'pc:min-h-[72px]', 'pc:min-w-[260px]']));
     expect(attack.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
     const strip = attack.querySelector('[data-tira]')!;
     expect(strip.textContent).toMatch(/dano \d+/);
@@ -109,7 +109,7 @@ describe('carimbos: os outros', () => {
   it('Encerrar turno é de papel (o Atacar é o único vermelho)', () => {
     mount({ ...DRAFT, self: { ...DRAFT.self, attackRow: [] } });
     const end = inBar().getByRole('button', { name: END_TURN_BUTTON });
-    expect(classes(end)).toEqual(expect.arrayContaining(['carimbo', 'carimbo-papel', 'carimbo-grande', 'min-h-[68px]', 'pc:min-h-[72px]', 'pc:min-w-[300px]']));
+    expect(classes(end)).toEqual(expect.arrayContaining(['carimbo', 'carimbo-papel', 'carimbo-grande', 'min-h-[68px]', 'pc:min-h-[72px]', 'pc:min-w-[260px]']));
     expect(classes(end)).not.toContain('carimbo-atacar');
   });
 
@@ -117,7 +117,7 @@ describe('carimbos: os outros', () => {
     mount({ ...DRAFT, phase: 'ATTACK' });
     const pass = inBar().getByRole('button', { name: 'Passar' });
     // O retângulo do Atacar, do mesmo tamanho (decisoes.md 2026-11-26 (7), ponto 2), de papel.
-    expect(classes(pass)).toEqual(expect.arrayContaining(['carimbo', 'carimbo-papel', 'carimbo-grande', 'min-h-[68px]', 'pc:min-h-[72px]', 'pc:min-w-[300px]']));
+    expect(classes(pass)).toEqual(expect.arrayContaining(['carimbo', 'carimbo-papel', 'carimbo-grande', 'min-h-[68px]', 'pc:min-h-[72px]', 'pc:min-w-[260px]']));
     expect(classes(pass)).not.toContain('carimbo-destino');
     expect(classes(pass)).not.toContain('carimbo-ouro');
   });
@@ -148,7 +148,7 @@ describe('carimbos: os outros', () => {
     fireEvent.click(within(inEquip().getByRole('list', { name: 'Destinos' })).getAllByRole('button')[0]!);
     const confirm = inEquip().getByRole('button', { name: 'Confirmar' });
     // O retângulo do Atacar, do mesmo tamanho, com o visto e a palavra (decisoes.md 2026-11-26 (7), ponto 2).
-    expect(classes(confirm)).toEqual(expect.arrayContaining(['carimbo', 'carimbo-ouro', 'carimbo-grande', 'min-h-[68px]', 'pc:min-h-[72px]', 'pc:min-w-[300px]']));
+    expect(classes(confirm)).toEqual(expect.arrayContaining(['carimbo', 'carimbo-ouro', 'carimbo-grande', 'min-h-[68px]', 'pc:min-h-[72px]', 'pc:min-w-[260px]']));
     expect(classes(confirm)).not.toContain('carimbo-destino');
     expect(inEquip().getByRole('button', { name: 'Desfazer' })).toBeEnabled();
   });

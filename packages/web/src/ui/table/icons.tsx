@@ -17,11 +17,11 @@ function Art({ name, className = 'size-4', children }: ArtProps & { name: string
   );
 }
 
-/** Uma espada de pé, com a ponta no alto: lâmina de papel, guarda e pomo de ouro, punho vermelho. */
-function Sword() {
+/** Uma espada de pé, com a ponta no alto: lâmina de papel (ou vermelha, no destino), guarda e pomo de ouro, punho vermelho. */
+function Sword({ blade = 'var(--color-papel)' }: { blade?: string }) {
   return (
     <>
-      <path d="M10.1 15.4V4.8L12 1.2l1.9 3.6v10.6Z" fill="var(--color-papel)" stroke="var(--color-tinta)" strokeWidth="1.4" />
+      <path d="M10.1 15.4V4.8L12 1.2l1.9 3.6v10.6Z" fill={blade} stroke="var(--color-tinta)" strokeWidth="1.4" />
       <path d="M12 18v3.2" stroke="var(--color-vermelho)" strokeWidth="2.8" />
       <rect x="7.2" y="15.4" width="9.6" height="2.8" fill="var(--color-ouro)" stroke="var(--color-tinta)" strokeWidth="1.3" />
       <circle cx="12" cy="22.3" r="1.5" fill="var(--color-ouro)" stroke="var(--color-tinta)" strokeWidth="1.1" />
@@ -36,28 +36,29 @@ function Plus() {
   return <path d="M19 2.5v7M15.5 6h7" stroke="var(--color-vermelho)" strokeWidth="2.4" />;
 }
 
-/** O Ataque: duas espadas cruzadas. */
-export function AttackIcon({ className }: ArtProps) {
+/** O Ataque: duas espadas cruzadas. Com `marked` (o destino "Equipar ataque", decisoes.md 2026-11-27 (2)), as lâminas são vermelhas. */
+export function AttackIcon({ className, marked = false }: ArtProps & { marked?: boolean }) {
+  const blade = marked ? 'var(--color-vermelho)' : undefined;
   return (
     <Art name="ataque" className={className}>
       {/* As lâminas se cruzam no terço de cima, longe das guardas; o par desce até o meio da caixa. */}
       <g transform="translate(0 2.4)">
         <g transform="rotate(-42 12 9.5)">
-          <Sword />
+          <Sword blade={blade} />
         </g>
         <g transform="rotate(42 12 9.5)">
-          <Sword />
+          <Sword blade={blade} />
         </g>
       </g>
     </Art>
   );
 }
 
-/** A Defesa: o escudo de tinta com a cruz de ouro. */
-export function DefenseIcon({ className }: ArtProps) {
+/** A Defesa: o escudo de tinta com a cruz de ouro. Com `marked` (o destino "Equipar defesa", decisoes.md 2026-11-27 (2)), o escudo é azul. */
+export function DefenseIcon({ className, marked = false }: ArtProps & { marked?: boolean }) {
   return (
     <Art name="defesa" className={className}>
-      <path d={SHIELD} fill="var(--color-tinta)" stroke="var(--color-papel)" strokeWidth="1.6" />
+      <path d={SHIELD} fill={marked ? 'var(--color-azul)' : 'var(--color-tinta)'} stroke="var(--color-papel)" strokeWidth="1.6" />
       <path d="M12 5.2v14M7 10.4h10" stroke="var(--color-ouro)" strokeWidth="2.2" />
     </Art>
   );

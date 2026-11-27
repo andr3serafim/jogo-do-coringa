@@ -65,7 +65,7 @@ describe('a janela da Ressurreição (ponto 16)', () => {
     mount(WINDOW);
     expect(within(panel()).getByRole('button', { name: /Ressuscitar/ })).toHaveClass('carimbo-tinta', 'carimbo-grande', 'min-h-[68px]');
     expect(within(panel()).getByRole('button', { name: 'Guardar' })).toHaveClass('carimbo-papel');
-    expect(panel().querySelector('[data-botoes-principais]')).toHaveClass('pc:ml-auto');
+    expect(panel().querySelector('[data-botoes-principais]')).toHaveClass('pc:col-start-2');
   });
 
   it('Guardar manda PASS', async () => {

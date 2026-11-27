@@ -187,7 +187,7 @@ test('Equipar: o botão do destino segue valendo, e as duas formas se misturam (
   await expect(table(page)).toBeVisible();
   const panel = equipPanel(page);
   await expect(panel.getByText('Falta 1 carta')).toBeVisible();
-  await panel.getByRole('list', { name: 'Destinos' }).getByRole('button', { name: 'Fileira de Ataque' }).click();
+  await panel.getByRole('list', { name: 'Destinos' }).getByRole('button', { name: 'Equipar ataque' }).click();
   await expect(myRow(page, 'ATK').locator('[data-rascunho]')).toHaveCount(1);
   await panel.getByRole('button', { name: 'Desfazer' }).click();
   await expect(panel.getByText('Falta 1 carta')).toBeVisible();

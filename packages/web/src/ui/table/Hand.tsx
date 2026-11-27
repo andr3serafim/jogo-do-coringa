@@ -68,12 +68,12 @@ export function Hand({ cards }: { cards: SpecialCard[] }) {
   }
   const count = cards.length;
   return (
-    // No PC a mão tem o tamanho das cartas, lado a lado (decisoes.md 2026-11-26 (8), D1; substitui a metade da faixa de 2026-11-25 (7)):
-    // a sobra vai para as numéricas e a barra. Sem espaço, ela encolhe e as cartas se sobrepõem, antes de os botões principais cederem.
+    // No PC a mão tem o tamanho das cartas, centrada na primeira das três colunas da faixa de baixo (35%, decisoes.md 2026-11-27 (2)); sem
+    // espaço na coluna, ela encolhe e as cartas se sobrepõem.
     <div
       data-mao
       style={{ ['--mao-natural' as string]: `calc(${count} * var(--hand-w) + ${count - 1} * 10px)` }}
-      className="relative w-full pc:w-[var(--mao-natural)] pc:min-w-0 pc:flex-[0_1_auto]"
+      className="relative w-full pc:w-[var(--mao-natural)] pc:min-w-0 pc:max-w-full pc:justify-self-center"
     >
       {/* O balão do motivo (B2) fica por cima do seu campo, sem empurrar a mão nem pegar o toque de nada embaixo dele. */}
       {handNote ? (
@@ -90,7 +90,7 @@ export function Hand({ cards }: { cards: SpecialCard[] }) {
         aria-label="Sua mão"
         // O contorno da dica do tutorial (`styles.css`, `[data-dica]`) fica folgado: o convite a olhar a mão, sem tapar nenhuma carta.
         data-dica={hintZone === 'hand' ? 'hand' : undefined}
-        className="flex w-full list-none justify-center px-3 pb-2 pt-[18px] pc:justify-start pc:px-0 pc:pb-0 pc:pt-3.5"
+        className="flex w-full list-none justify-center px-3 pb-2 pt-[18px] pc:px-0 pc:pb-0 pc:pt-3.5"
       >
         {cards.map((card, index) => (
           <HandCard
