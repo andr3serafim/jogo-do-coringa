@@ -8,7 +8,7 @@
 
 - **Feito, em PR: os ajustes rápidos de 2026-11-26 (7) e (8)**, na `feat/ajustes-2026-11-26` (o diário 2026-11-26 (4) e (5)): os sete
   itens implementados (`3675e22`, `9833fa0`, `5a709d3`). Medido no navegador: com K, A e Q na mão, as numéricas lado a lado antes do
-  grupo de botões a 1378 e a 1024 px; o Atacar parado na ponta direita com ou sem carta escolhida. **Próximo passo exato:** o PR com a CI
+  grupo de botões a 1378 e a 1024 px; o Atacar parado na ponta direita com ou sem carta escolhida. **Antes do PR (achados do advisor, medidos):** a mão cheia a 1024 px empurrava as numéricas: consertado em `0d61307` (a barra com `pc:min-w-[640px]`, a coluna com `min-w-0`). **Aberto, com o autor:** no tutorial do PC a dica no alto dos campos corta a sua última fileira (~44 px a 1378 × 800; `e-tutorial-1378.png`), e no PC nada rola de volta: ele escolhe o lugar da dica no PC. Também com ele: o Ressuscitar da janela da Ressurreição (`ResurrectionPanel`, ainda pequeno e de ouro) e os dois **[I]** de 2026-11-26 (8). **Depois:** o PR com a CI
   (`check` e `e2e`) verde e o "sim" do autor para o merge (nunca sem ele). O E2E local não rodou nesta sessão: vale o job `e2e` da CI.
 - **Do plano anterior:** o plano `docs/superpowers/plans/2026-11-26-equipar-abertura-niveis.md` terminou (`decisoes.md` 2026-11-25 (1) a
   2026-11-26 (6); o diário 2026-11-26 (1) a (3)), em três PRs na `main`: o Equipar sem texto, o Passar quadrado e a mão vazia (#14,
