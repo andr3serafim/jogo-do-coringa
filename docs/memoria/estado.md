@@ -6,14 +6,10 @@
 
 ## Agora
 
-- **Em curso: os ajustes rápidos de 2026-11-26 (7)**, na `feat/ajustes-2026-11-26` (só no worktree principal, sem push ainda). Feitos e
-  commitados: os itens 3, 6 e a escolhida na frente (`3675e22`); os itens 1 e 2 (`9833fa0`: `MAIN_SIZE`, `MainButton` no `controls.tsx`, os
-  grupos `data-botoes-principais` com `pc:ml-auto`, a vaga de 300 px no Equipar). Medido: no PC o Recomeçar fica parado (x = 1032 a 1378 px) a
-  cada carta posta; o Atacar e o Confirmar têm 300 × 72 (68 de altura no celular). **NÃO MESCLAR antes da escolha do item 7:** com especiais na mão e a coluna do histórico, os itens 1 e 2 regridem no
-  PC (a mão reserva 526 px a 1378 e as numéricas ficam com 58 px, por cima do Desfazer; a 1024, com 0 px; foto `c-aperto-ajuste1-1378.png`).
-  Medido com o protótipo: D1 e D3 (mão do tamanho das cartas) cabem a 1378 e a 1024; D2 (mão como hoje) invade a 1024. Ao implementar: a mão e
-  as numéricas encolhem (sobrepõem) antes de o grupo de botões ceder (`flex-none` nele), para o caso de 5 especiais e 4 numéricas a 1024.
-  **Próximo passo exato:** esperar o autor escolher nas fotos (pasta `docs/superpowers/specs/2026-11-26-ajustes-fotos/`, fora do git; `diario.md` 2026-11-26 (4)): item 7 (D1, D2 ou D3: lugar do botão, uso do espaço e largura da mão) e item 4 (identidade A ou B; lugar linha, empilhadas ou à esquerda). Depois: implementar o escolhido (o protótipo some; refazer de verdade, com testes), `pnpm check`, `pnpm e2e` e o PR. Ao tirar a coluna do histórico no PC: a dica do tutorial (`top={pc ? …}`), o `MenuButton` com `max-pc:hidden` e a região "Linhas do histórico" focável no PC; a gaveta fechada segue na árvore de acessibilidade (o padrão `sr-only`).
+- **Feito, em PR: os ajustes rápidos de 2026-11-26 (7) e (8)**, na `feat/ajustes-2026-11-26` (o diário 2026-11-26 (4) e (5)): os sete
+  itens implementados (`3675e22`, `9833fa0`, `5a709d3`). Medido no navegador: com K, A e Q na mão, as numéricas lado a lado antes do
+  grupo de botões a 1378 e a 1024 px; o Atacar parado na ponta direita com ou sem carta escolhida. **Próximo passo exato:** o PR com a CI
+  (`check` e `e2e`) verde e o "sim" do autor para o merge (nunca sem ele). O E2E local não rodou nesta sessão: vale o job `e2e` da CI.
 - **Do plano anterior:** o plano `docs/superpowers/plans/2026-11-26-equipar-abertura-niveis.md` terminou (`decisoes.md` 2026-11-25 (1) a
   2026-11-26 (6); o diário 2026-11-26 (1) a (3)), em três PRs na `main`: o Equipar sem texto, o Passar quadrado e a mão vazia (#14,
   `35d9239`); a abertura sem título, aura, anel e faíscas, com o Coringa ~0,5 s parado e a chamada do som no pouso (#15, `0e22f94`); os
@@ -73,6 +69,10 @@
   disco da recusa com `data-sem-pulo` e a dica no toque (`useMarkTip`). **Substituídos por 2026-11-26 (7)** (não "conserte" de volta): o
   Confirmar e o Passar pequenos (viram o retângulo do Atacar), a Y centrada no PC (os botões ficam presos à direita) e a numérica escolhida
   sem `z-*` (sem espaço, a escolhida fica na frente).
+- **Botões principais e histórico (2026-11-26 (7) e (8)):** o grupo `data-botoes-principais` preso à direita no PC (`pc:ml-auto`), em
+  toda fase; o Atacar, o Encerrar turno, o Confirmar e o Passar com o `MAIN_SIZE`; as especiais em `.carimbo-tinta` à esquerda do Atacar;
+  no PC o histórico é gaveta (nada de coluna), a mão tem o tamanho das cartas (nunca metade da faixa: as numéricas caem sobre o Desfazer) e
+  a dica do tutorial mora nos campos; a escolhida na frente (`SELECTED_FRONT`).
 - **Níveis do treino (2026-11-25 (3)):** o nome acessível segue "nível + linha"; o medalhão é `aria-hidden`, com `data-humor` (feliz, sério,
   bravo); a cor sai do `data-nivel` no `menu.css` (`--nivel-cor`, `--nivel-claro`).
 - O JavaScript inicial ≤ 200 KB (o smoke).

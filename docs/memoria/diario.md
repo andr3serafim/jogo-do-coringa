@@ -5,6 +5,26 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-26 (5): a D1 e as especiais de tinta (`decisoes.md` 2026-11-26 (8))
+
+- **Achado do advisor (bloqueio):** as medições dos itens 1 e 2 usaram a semente `quatro8`, de mão vazia, o único caso em que a mão não
+  reservava metade da faixa. Com especiais na mão e a coluna do histórico, as numéricas caíam sobre o Desfazer (58 px a 1378, 0 px a 1024;
+  `c-aperto-ajuste1-1378.png`). O PR não podia sair sem o item 7; as fotos levaram a medida, e D2 (mão como hoje) foi mostrada como a que
+  invade a 1024.
+- **`5a709d3`:** a D1 (o histórico em gaveta também no PC, pela direita: `CLOSED` vira `sr-only` em toda tela, a folha do PC com
+  `pc:right-0 pc:inset-y-0 pc:w-[400px]`; saem as props `top` e `tool` do `HistoryPanel`; o botão e o menu no campo do oponente; a dica
+  do tutorial nos campos; a mesa com `pc:flex-[0_1_1600px]`; a mão com `--mao-natural` e `pc:flex-[0_1_auto]`) e o item 4 (`SPECIAL`,
+  `SPECIAL_TITLE`, `.carimbo-tinta`, `DevastateIcon` e `CancelReflectIcon`; as especiais saem da área de informação para o grupo
+  `data-botoes-principais`, num `flex-wrap` à esquerda do Atacar no PC e acima dele no celular).
+- **Ruling:** o teto de 1600 px para a mesa (as fotos eram a 1378; sem teto, numa tela de 2560 a mesa esticaria) — marcado **[I]** na decisão.
+- **Ruling:** sem espaço, as especiais quebram em linhas à esquerda do Atacar, e o título delas quebra (a 1024 px, "DEVASTAR A / DEFESA") —
+  o Atacar nunca sai da ponta direita (x = 700 a 1024, x = 1054 a 1378, com ou sem carta escolhida). Marcado **[I]** na decisão.
+- **Medido no navegador (`aperto.mjs`, `ate-atacar-d.mjs`):** a 1378 e a 1024, com K + A (semente `null`) e com J (`ajuste1`), a última
+  numérica termina antes do grupo de botões. Fotos `d-atacar-*.png`.
+- **E2E tocados:** o `tutorial.spec` procura a dica nos campos (não mais no histórico); o comentário do `training.spec`. O E2E não rodou
+  local nesta sessão (vale a CI).
+- **Armadilha:** um heredoc grande com aspas e crases foi recusado pelo shell; roteiros longos vão pelo Write.
+
 ## 2026-11-26 (4): ajustes rápidos depois dos testes (`decisoes.md` 2026-11-26 (7))
 
 - **Branch `feat/ajustes-2026-11-26`:** `f3191f3` (a decisão), `3675e22` (itens 3 e 6, e a escolhida na frente do item 5), `9833fa0` (itens
