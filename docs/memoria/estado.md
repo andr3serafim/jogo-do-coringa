@@ -6,14 +6,15 @@
 
 ## Agora
 
-- **Em curso: os ajustes rápidos de 2026-11-26 (7)**, na `feat/ajustes-2026-11-26` (só no worktree principal). **Próximo passo exato:**
-  (A) implementar e commitar o item 3 (sai o `PICK_CARD_TEXT` da barra), o 6 (saem da vista a pergunta e o "Escolha quando quiser"; a
-  pergunta fica `sr-only`; "A iniciativa foi sorteada…" e "…: a iniciativa não mudou.") e a escolhida na frente (item 5: `z-*` na `<li>` do
-  `HandCard` e do `PendingCard`); (B) fotos, por um protótipo atrás de uma marca que nunca vai para o git, numa pasta
-  `docs/superpowers/specs/2026-11-26-ajustes-*` (fora do git): item 7 (2 ou 3 mesas inteiras no PC, cada uma com o lugar do botão do
-  histórico, como abre, o uso do espaço e a largura da mão, todas já com os itens 1 e 2), item 4 (2 identidades no mesmo lugar e 3 lugares
-  com a mesma identidade, na fase de Ataque de verdade, com os textos reais), item 5 (a 360 px com 4 numéricas). Uma pergunta por decisão.
-  (C) implementar o escolhido.
+- **Em curso: os ajustes rápidos de 2026-11-26 (7)**, na `feat/ajustes-2026-11-26` (só no worktree principal, sem push ainda). Feitos e
+  commitados: os itens 3, 6 e a escolhida na frente (`3675e22`); os itens 1 e 2 (`9833fa0`: `MAIN_SIZE`, `MainButton` no `controls.tsx`, os
+  grupos `data-botoes-principais` com `pc:ml-auto`, a vaga de 300 px no Equipar). Medido: no PC o Recomeçar fica parado (x = 1032 a 1378 px) a
+  cada carta posta; o Atacar e o Confirmar têm 300 × 72 (68 de altura no celular). **Próximo passo exato:** (B) fotos, por um protótipo que
+  nunca vai para o git, na pasta `docs/superpowers/specs/2026-11-26-ajustes-fotos/` (fora do git; os roteiros `fase-a.mjs`, `fase-b.mjs` e
+  `ate-atacar.mjs` já estão lá): item 7 (2 ou 3 mesas inteiras no PC, cada uma com o lugar do botão do histórico, como abre, o uso do espaço e
+  a largura da mão) e item 4 (2 identidades no mesmo lugar e 3 lugares com a mesma identidade, na fase de Ataque, com os textos reais). Uma
+  pergunta por decisão. (C) implementar o escolhido; `pnpm check`, `pnpm e2e`, PR. O "celular" do item 5 já está em foto
+  (`a-escolhida-celular.png`: 4 numéricas cabem lado a lado a 360 px).
 - **Do plano anterior:** o plano `docs/superpowers/plans/2026-11-26-equipar-abertura-niveis.md` terminou (`decisoes.md` 2026-11-25 (1) a
   2026-11-26 (6); o diário 2026-11-26 (1) a (3)), em três PRs na `main`: o Equipar sem texto, o Passar quadrado e a mão vazia (#14,
   `35d9239`); a abertura sem título, aura, anel e faíscas, com o Coringa ~0,5 s parado e a chamada do som no pouso (#15, `0e22f94`); os
