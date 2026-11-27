@@ -100,7 +100,7 @@ test('axe em cada estado da mesa: mão, janela de reação com o Reflect, cemit�
   await expect(table(page)).toBeVisible();
   // As numéricas da rodada 1 vão para a Defesa: o ataque do Bot na rodada 3 gasta uma delas, que vai ao cemitério por mão dele, e é
   // isso que acende o chip "novo" no cemitério (o que sai do seu campo por ataque seu, o Ataque Absoluto incluído, não fica marcado).
-  await equipByUi(page, /Defesa/);
+  await equipByUi(page, /defesa/i);
   await expect(roundHeading(page)).toHaveText('Rodada 2');
   await equipByUi(page);
   await expect(roundHeading(page)).toHaveText('Rodada 3');
@@ -252,7 +252,7 @@ test.describe('largura de tablet, ~960 px', () => {
     const guard = failOnConsoleErrors(page);
     await page.goto(TRAINING);
     await expect(table(page)).toBeVisible();
-    // Abaixo de 1024 px o histórico é uma gaveta e o menu mora no cabeçalho do campo do oponente (não na coluna do histórico).
+    // O histórico é uma gaveta e o menu mora no cabeçalho do campo do oponente (em toda tela desde decisoes.md 2026-11-26 (8)).
     await expect(history(page).getByRole('button', { name: 'Menu da partida' })).toBeHidden();
     const button = menuButton(page);
     await expect(button).toHaveCount(1);

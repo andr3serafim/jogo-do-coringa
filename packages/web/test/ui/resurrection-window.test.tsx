@@ -61,6 +61,13 @@ describe('a janela da Ressurreição (ponto 16)', () => {
     expect(panel()).toHaveFocus();
   });
 
+  it('o Ressuscitar é o retângulo de tinta das especiais, e o Guardar segue o pequeno de papel (decisoes.md 2026-11-27 (1))', () => {
+    mount(WINDOW);
+    expect(within(panel()).getByRole('button', { name: /Ressuscitar/ })).toHaveClass('carimbo-tinta', 'carimbo-grande', 'min-h-[68px]');
+    expect(within(panel()).getByRole('button', { name: 'Guardar' })).toHaveClass('carimbo-papel');
+    expect(panel().querySelector('[data-botoes-principais]')).toHaveClass('pc:col-start-2');
+  });
+
   it('Guardar manda PASS', async () => {
     const m = mount(WINDOW);
     await m.user.click(within(panel()).getByRole('button', { name: 'Guardar' }));

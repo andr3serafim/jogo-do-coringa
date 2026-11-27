@@ -10,7 +10,7 @@ import {
   resurrectionWaitingText,
 } from '../../model/resurrection-copy.ts';
 import type { Notice } from '../../model/session.ts';
-import { NoticeLine, PRIMARY, PRIMARY_TITLE, SECONDARY, TwoLine } from './controls.tsx';
+import { MAIN_ICON, NoticeLine, SECONDARY, SPECIAL, SPECIAL_TITLE, TwoLine } from './controls.tsx';
 import type { TableNames } from './labels.ts';
 import { ResurrectIcon } from './ResurrectIcon.tsx';
 
@@ -40,19 +40,27 @@ export function ResurrectionPanel({ names, deciding, disabled, notice, onResurre
     );
   }
   return (
-    <section ref={panelRef} data-painel tabIndex={-1} aria-label={LABEL} className="flex flex-col gap-2.5 text-papel">
-      <div>
+    <section
+      ref={panelRef}
+      data-painel
+      tabIndex={-1}
+      aria-label={LABEL}
+      className="flex flex-col gap-2.5 text-papel pc:grid pc:grid-cols-[35fr_30fr] pc:items-center pc:gap-0"
+    >
+      <div className="pc:min-w-0 pc:px-3 pc:text-center">
         <p className="font-bold leading-snug">{RESURRECTION_WINDOW_TITLE}</p>
         <p className="text-sm leading-snug">{RESURRECTION_WINDOW_TEXT}</p>
       </div>
-      <div className="flex flex-wrap gap-2">
+      {/* No PC, o texto centrado na coluna do meio e os botões na dos botões (decisoes.md 2026-11-27 (2)); o aviso fica sob o texto. */}
+      <div data-botoes-principais className="flex flex-wrap gap-2 pc:col-start-2 pc:row-start-1 pc:justify-center pc:justify-self-center">
         <TwoLine
           title={RESURRECT_LABEL}
-          titleClass={PRIMARY_TITLE}
-          icon={<ResurrectIcon />}
+          titleClass={SPECIAL_TITLE}
+          icon={<ResurrectIcon className={MAIN_ICON} />}
           disabled={disabled}
           onClick={onResurrect}
-          className={`${PRIMARY} flex-1 pc:min-w-[220px] pc:flex-none`}
+          // A tinta das jogadas especiais (decisoes.md 2026-11-27 (1)); o Guardar segue o pequeno de papel.
+          className={`${SPECIAL} flex-1 pc:flex-none`}
         />
         <button type="button" disabled={disabled} onClick={onKeep} className={`${SECONDARY} min-h-14 pc:min-h-12`}>
           {KEEP_RESURRECTION_LABEL}

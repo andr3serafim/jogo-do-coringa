@@ -85,14 +85,15 @@ describe('a dica na mesa: o lugar do painel', () => {
     );
   });
 
-  it('PC: logo abaixo do cabeçalho da coluna do histórico, e fora dos campos', () => {
+  it('PC: a faixa por cima do placar, fora dos campos e da gaveta do histórico (decisoes.md 2026-11-27 (1))', () => {
     asPc();
     mount({ hint: { zone: null, panel } });
-    const aside = screen.getByRole('complementary', { name: 'Histórico da partida' });
     expect(screen.getAllByRole('region', { name: 'Dica' })).toHaveLength(1);
-    expect(aside).toContainElement(screen.getByRole('region', { name: 'Dica' }));
+    const strip = document.querySelector('[data-dica-faixa]')!;
+    expect(strip).toHaveClass('absolute', 'top-0');
+    expect(strip).toContainElement(screen.getByRole('region', { name: 'Dica' }));
     expect(document.querySelector('[data-campos]')).not.toContainElement(screen.getByRole('region', { name: 'Dica' }));
-    expect(within(aside).getByRole('heading', { name: 'Histórico' }).parentElement?.nextElementSibling).toBe(
+    expect(screen.getByRole('complementary', { name: 'Histórico da partida', hidden: true })).not.toContainElement(
       screen.getByRole('region', { name: 'Dica' }),
     );
   });

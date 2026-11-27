@@ -5,6 +5,97 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-27 (3): a moldura limitada, os E2E e o merge
+
+- **E2E da CI (rodada `bf97577`):** `online.spec` esperava "Duda voltou" à vista no histórico do PC (agora gaveta: `toBeAttached`);
+  `tutorial.spec` a 360 × 640: com dois Devastar e o Atacar empilhados, a dica 5 saía da janela dos campos (168 px para 179): o título das
+  especiais com 20 px no celular (cabe numa linha; 216 px). `ae14f12`.
+- **E2E local (`CI=true pnpm e2e`):** 138 passaram e 1 falhou: o `training.spec` pedia o destino por `/Defesa/` e o nome agora é
+  "Equipar defesa" (`/defesa/i`).
+- **Achado do advisor:** a moldura de 7% apertava a coluna dos botões (o Confirmar quebrava até a 1440). `decisoes.md` 2026-11-27 (5): a
+  moldura limitada e o vão de 4 px; medido (`colunas.mjs`, 1024 a 1920): os quatro botões numa linha em todas; o Confirmar numa linha a
+  partir de 1280.
+- **Conferido no código:** a cena (`BeatOverlay`, `z-50`) e a camada de efeitos (`z-40`) são irmãs da mesa no palco; a faixa da dica
+  (`z-20`, dentro do `main` `isolate`) fica abaixo delas.
+
+## 2026-11-27 (2): as três colunas e a moldura (`decisoes.md` 2026-11-27 (2) e (3))
+
+- **Pedido:** "Estou insatisfeito com o resultado", com os prints riscados; as respostas viraram a grade de três colunas no PC.
+- **`e59ada5`:** a faixa de baixo em `pc:grid-cols-[35fr_65fr]`; a barra, o Equipar (o `data-disposicao` com `pc:col-span-2`, porque o
+  `Panel` também é grade), a ordem e a Ressurreição em `pc:grid-cols-[35fr_30fr]`, os botões em `pc:col-start-2`; a mão
+  `pc:justify-self-center`; sai a `pc:min-w-[640px]` da barra (as colunas fixas resolvem a mão cheia). Os destinos de fileira com a palavra
+  (`.carimbo-destino-palavra`, 72/76 px) e o desenho marcado (`AttackIcon`/`DefenseIcon` com `marked`; `--color-azul`); o nome acessível é
+  a palavra (o `title` guarda o nome do terminal). `MAIN_SIZE` com `pc:min-w-[260px]`.
+- **A moldura:** `pc:px-[7vw]` no `main` e `pc:border-x-[6px] pc:border-madeira` na coluna da mesa.
+- **Medido (`colunas.mjs`):** a 1378, 1280 e 1024 px, o centro da mão, das numéricas e dos botões coincide com o da sua coluna (±1 px);
+  os botões do Equipar ficam parados a cada carta posta e só mudam quando o Confirmar entra. **A 1024 px o Confirmar entre os selos não cabe
+  na coluna de 30%** e a linha quebra (o Desfazer em cima, o Recomeçar embaixo): levado ao autor. Na vez de atacar, o Devastar e o Atacar
+  empilham na coluna dos botões (lado a lado não cabem em 30%).
+- **Conferido:** a faixa da dica (`z-20`, dentro do `main` `isolate`) fica abaixo da cena (`z-50`, fora do `main`).
+
+## 2026-11-27 (1): a mão cheia, a dica do tutorial no PC e a Ressurreição em tinta
+
+- **Achados do advisor, medidos (`mao-cheia.mjs`, `conferir.mjs`):** (1) com 4 especiais na mão a 1024 px, a mão do tamanho das cartas
+  tomava a largura (a barra era `flex-1`, base 0) e as numéricas ficavam abaixo do mínimo; (2) no tutorial do PC, a dica no alto dos campos
+  cortava a sua última fileira (~44 px a 1378 × 800), e no PC nada rola de volta; (3) a gaveta real no PC: 400 px pela direita, o foco no
+  Fechar e de volta ao botão no Esc (certo); (4) o tablet (960 × 700): as especiais em retângulo ocupam ~30 px a mais (os campos rolam).
+- **`0d61307`:** a barra com `pc:min-w-[640px]` e a coluna da mesa com `min-w-0` (sem ela, a largura definida da mão alargava a mesa além
+  da tela, com os retratos do placar cortados). Medido: a 1024 a mão cede para 308 px; a última numérica termina antes do grupo.
+- **`debb17f`** (`decisoes.md` 2026-11-27 (1)): no PC a dica é a faixa por cima do placar (`data-dica-faixa`, `absolute`, `z-20`, o
+  `HintPanel` em linha no PC); medido: a última fileira à vista a 1378 e a 1024. O Ressuscitar da janela da Ressurreição em `SPECIAL`.
+- **E2E:** o `tutorial.spec` procura a dica na página (não nos campos nem no histórico).
+
+## 2026-11-26 (5): a D1 e as especiais de tinta (`decisoes.md` 2026-11-26 (8))
+
+- **Achado do advisor (bloqueio):** as medições dos itens 1 e 2 usaram a semente `quatro8`, de mão vazia, o único caso em que a mão não
+  reservava metade da faixa. Com especiais na mão e a coluna do histórico, as numéricas caíam sobre o Desfazer (58 px a 1378, 0 px a 1024;
+  `c-aperto-ajuste1-1378.png`). O PR não podia sair sem o item 7; as fotos levaram a medida, e D2 (mão como hoje) foi mostrada como a que
+  invade a 1024.
+- **`5a709d3`:** a D1 (o histórico em gaveta também no PC, pela direita: `CLOSED` vira `sr-only` em toda tela, a folha do PC com
+  `pc:right-0 pc:inset-y-0 pc:w-[400px]`; saem as props `top` e `tool` do `HistoryPanel`; o botão e o menu no campo do oponente; a dica
+  do tutorial nos campos; a mesa com `pc:flex-[0_1_1600px]`; a mão com `--mao-natural` e `pc:flex-[0_1_auto]`) e o item 4 (`SPECIAL`,
+  `SPECIAL_TITLE`, `.carimbo-tinta`, `DevastateIcon` e `CancelReflectIcon`; as especiais saem da área de informação para o grupo
+  `data-botoes-principais`, num `flex-wrap` à esquerda do Atacar no PC e acima dele no celular).
+- **Ruling:** o teto de 1600 px para a mesa (as fotos eram a 1378; sem teto, numa tela de 2560 a mesa esticaria) — marcado **[I]** na decisão.
+- **Ruling:** sem espaço, as especiais quebram em linhas à esquerda do Atacar, e o título delas quebra (a 1024 px, "DEVASTAR A / DEFESA") —
+  o Atacar nunca sai da ponta direita (x = 700 a 1024, x = 1054 a 1378, com ou sem carta escolhida). Marcado **[I]** na decisão.
+- **Medido no navegador (`aperto.mjs`, `ate-atacar-d.mjs`):** a 1378 e a 1024, com K + A (semente `null`) e com J (`ajuste1`), a última
+  numérica termina antes do grupo de botões. Fotos `d-atacar-*.png`.
+- **E2E tocados:** o `tutorial.spec` procura a dica nos campos (não mais no histórico); o comentário do `training.spec`. O E2E não rodou
+  local nesta sessão (vale a CI).
+- **Armadilha:** um heredoc grande com aspas e crases foi recusado pelo shell; roteiros longos vão pelo Write.
+
+## 2026-11-26 (4): ajustes rápidos depois dos testes (`decisoes.md` 2026-11-26 (7))
+
+- **Branch `feat/ajustes-2026-11-26`:** `f3191f3` (a decisão), `3675e22` (itens 3 e 6, e a escolhida na frente do item 5), `9833fa0` (itens
+  1 e 2).
+- **Itens 3 e 6:** sai o `PICK_CARD_TEXT`; o `ORDER_QUESTION` fica `sr-only`; saem o `ORDER_MANUAL_TEXT`, o `ORDER_MANUAL_NO_CLOCK_TEXT` e a
+  prop `hasDeadline` do `OrderPanel`; "A iniciativa foi sorteada…" e "…: a iniciativa não mudou." (esta é leitura minha: a pergunta ao autor
+  descreveu por engano uma frase que não existe).
+- **Item 5:** `SELECTED_FRONT` (`z-[15]`, no `Hand.tsx`) na `<li>` da escolhida, na mão de especiais e no Equipar: acima do cadeado das
+  vizinhas (`z-10`), abaixo do balão do motivo (`z-20`). A 360 px, 4 numéricas já cabem lado a lado (foto `a-escolhida-celular.png`).
+- **Itens 1 e 2:** no `controls.tsx`, a `FACE` (o carimbo grande sem a altura), o `MAIN_SIZE` (`min-h-[68px] pc:min-h-[72px]
+  pc:min-w-[300px]`) no Atacar, no Encerrar turno, no Confirmar e no Passar, e o `MainButton` (desenho à esquerda e a palavra em tipo de
+  madeira). No PC, a barra, a ordem, a Ressurreição e o Equipar separam o que informa (à esquerda) do grupo `data-botoes-principais`
+  (`pc:ml-auto`); o Cancelar entra à esquerda do Atacar (`pc:order-first`); no Equipar, a vaga de 300 px guarda os destinos centrados ou o
+  Confirmar. Medido a 1378 px: o Recomeçar fica em x = 1032 em todos os passos; o Atacar e o Confirmar com 300 × 72.
+- **Ruling:** a 360 px, o Confirmar entre os selos estourava a linha (369 px em 336) e empurrava o Recomeçar para fora da tela; o título dos
+  principais sem tira tem 22 px no celular (o Atacar segue com 24) e o vão entre os selos e o Confirmar é de 6 px — custo: 2 px a menos no
+  título do Confirmar e do Passar no celular.
+- **Fotos dos itens 4 e 7** (fora do git, `docs/superpowers/specs/2026-11-26-ajustes-fotos/`, roteiro `direcoes.mjs`, semente literal `null`):
+  item 7 em três direções (D1 o botão no campo do oponente, como no celular, mesa na largura toda e mão do tamanho das cartas; D2 o botão com a
+  palavra na faixa do meio, largura toda e a mão como hoje; D3 a aba na borda direita, mesa em 1100 px e mão do tamanho das cartas), todas com
+  o histórico numa gaveta por cima da mesa (`7-d1-aberta.png`); item 4 nas identidades A (tinta e título ouro) e B (uma cor por jogada) e nos
+  lugares linha, empilhadas e à esquerda. O protótipo (`src/proto.ts`) foi apagado e os arquivos voltaram por `git checkout`.
+- **Achados:** a vaga fixa de 300 px deixa um vão entre os selos e os dois destinos; as especiais empilhadas fazem a faixa de baixo crescer e
+  cortam o seu campo; no celular, os retângulos grandes das especiais ocupam muita altura. **Correção (2026-11-27):** só o segundo foi levado
+  ao autor nas perguntas; o primeiro e o terceiro foram ditos na mensagem final do bloco.
+- **Armadilha (de novo):** crases dentro de `node -e "…"` foram executadas pelo shell e apagaram trechos de dois arquivos (refeitos pelo
+  Edit). Roteiros com crase: Write e `node arquivo.mjs`. E o grep dos textos tirados tem de varrer `test/` inteiro: dois testes
+  (`training`, `tutorial`) escaparam do primeiro grep e só o pre-commit os pegou.
+
+---
+
 ## 2026-11-26 (3): o PR #15 mesclado; o PR 3 (os níveis)
 
 - **PR #15 mesclado** (`0e22f94`, `decisoes.md` 2026-11-26 (3) a (5)): esmaece em 2,2 s e acaba em 2,65 s; a chamada do som no pouso do

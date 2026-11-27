@@ -6,7 +6,12 @@
 
 ## Agora
 
-- **Nada em curso.** O plano `docs/superpowers/plans/2026-11-26-equipar-abertura-niveis.md` terminou (`decisoes.md` 2026-11-25 (1) a
+- **Feito, em PR: os ajustes rápidos de 2026-11-26 (7) e (8)**, na `feat/ajustes-2026-11-26` (o diário 2026-11-26 (4) e (5)): os sete
+  itens implementados (`3675e22`, `9833fa0`, `5a709d3`). Medido no navegador: com K, A e Q na mão, as numéricas lado a lado antes do
+  grupo de botões a 1378 e a 1024 px; o Atacar parado na ponta direita com ou sem carta escolhida. Depois dos achados do advisor: a mão cheia (`0d61307`), a dica do tutorial no PC numa faixa sobre o placar e o Ressuscitar da
+  janela em tinta (`debb17f`; `decisoes.md` 2026-11-27 (1)). **Próximo passo exato:** o PR para a `main`, com os jobs `check` e `e2e` da CI
+  verdes, e o "sim" do autor para o merge (nunca sem ele). O E2E não rodou local nesta sessão: vale o job `e2e` da CI.
+- **Do plano anterior:** o plano `docs/superpowers/plans/2026-11-26-equipar-abertura-niveis.md` terminou (`decisoes.md` 2026-11-25 (1) a
   2026-11-26 (6); o diário 2026-11-26 (1) a (3)), em três PRs na `main`: o Equipar sem texto, o Passar quadrado e a mão vazia (#14,
   `35d9239`); a abertura sem título, aura, anel e faíscas, com o Coringa ~0,5 s parado e a chamada do som no pouso (#15, `0e22f94`); os
   níveis do treino na direção A (#16, `20c999b`). Fotos de cada um em `docs/superpowers/specs/2026-11-26-pr{1-fotos,2-abertura,3-niveis}/`
@@ -60,10 +65,15 @@
 - **Regras:** a chave `stealBuffed` (o Roubo de antes nos replays velhos); `RULES_VERSION` 7, `STATE_SCHEMA` 7, `PROTOCOL_VERSION` 2. A Fortaleza é o nível 4 da zona dos Q (o 3 é o escudo); a coluna dos
   especiais no PC cabe as 4 cartas de um bônus.
 - **Equipar (2026-11-25 (3) a (6)):** sem texto à vista; os destinos no `.carimbo-destino` quadrado (56/64 px), só a figura, o nome inteiro no
-  `aria-label` (a troca com a carta pequena `data-carta-sai`); o Confirmar e o Passar pequenos, com a figura e a palavra
-  (`.carimbo-icone-palavra`); os selos sem legenda; o "Faltam", a montagem e as esperas em `sr-only`; a Y (`data-disposicao`: `flex-col`,
-  `pc:flex-row`); a numérica escolhida sem `z-*`; o selo da quadra fora do painel (acima no celular, à esquerda das cartas no PC); o disco da
-  recusa com `data-sem-pulo` e a dica no toque (`useMarkTip`).
+  `aria-label` (a troca com a carta pequena `data-carta-sai`); os selos sem legenda; o "Faltam", a montagem e as esperas em `sr-only`; no
+  celular, duas linhas (`data-disposicao`: `flex-col`); o selo da quadra fora do painel (acima no celular, à esquerda das cartas no PC); o
+  disco da recusa com `data-sem-pulo` e a dica no toque (`useMarkTip`). **Substituídos por 2026-11-26 (7)** (não "conserte" de volta): o
+  Confirmar e o Passar pequenos (viram o retângulo do Atacar), a Y centrada no PC (os botões ficam presos à direita) e a numérica escolhida
+  sem `z-*` (sem espaço, a escolhida fica na frente).
+- **Botões principais e histórico (2026-11-26 (7) e (8)):** no PC a faixa de baixo em três colunas (35 | 35 | 30: especiais | numéricas ou informação | botões, cada um centrado na sua; 2026-11-27 (2)),
+  com a moldura de 7vw dos lados (2026-11-27 (3)); o Atacar, o Encerrar turno, o Confirmar e o Passar com o `MAIN_SIZE`; as especiais em `.carimbo-tinta` à esquerda do Atacar;
+  no PC o histórico é gaveta (nada de coluna), a mão tem o tamanho das cartas (nunca metade da faixa: as numéricas caem sobre o Desfazer), a
+  dica do tutorial é a faixa sobre o placar (nos campos, corta a sua Defesa); a escolhida na frente (`SELECTED_FRONT`).
 - **Níveis do treino (2026-11-25 (3)):** o nome acessível segue "nível + linha"; o medalhão é `aria-hidden`, com `data-humor` (feliz, sério,
   bravo); a cor sai do `data-nivel` no `menu.css` (`--nivel-cor`, `--nivel-claro`).
 - O JavaScript inicial ≤ 200 KB (o smoke).

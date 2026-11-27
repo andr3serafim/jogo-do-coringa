@@ -6,6 +6,156 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-27 (5): a moldura limitada pela coluna dos botões (aprovada pelo advisor, sob 2026-11-27 (4))
+
+Medido: com a moldura de 7% (2026-11-27 (3)), a coluna dos botões ficava estreita demais; o Confirmar entre os selos quebrava a linha até a
+1378 e a 1440 px, e os quatro botões do Equipar quebravam a 1024 e a 1100. O advisor, no lugar do autor, aprovou:
+
+**Leitura:** a moldura segue proporcional, mas nunca mais larga do que a coluna dos botões aguenta: `min(7vw, max(0px, (100vw − 1280px) / 2))`
+de cada lado. **[I]** Os números: ~49 px a 1378, ~80 a 1440, os 7% inteiros (~134 px) a 1920 e nenhuma moldura a 1280 ou menos; o vão entre os
+selos e o Confirmar no PC caiu de 6 para 4 px (sobrava 1 px). Pode ser desfeito. Abaixo de 1280 px o Confirmar entre os selos quebra a linha
+(limite conhecido, já mostrado a ele).
+
+---
+
+## 2026-11-27 (4): o advisor no lugar dele, e push e merge aprovados nesta sessão
+
+Ele escreveu: "vou me ausentar, prossiga vou deixar o advisor no meu lugar para aprovaçoes. dou permissão total para aprovar todas as decisões
+do advisor. aprovado todos os push, merge até finalizar esta sessão para eu fazer o deploy".
+
+**Leitura:** até o fim desta sessão, as decisões que dependeriam dele passam pelo advisor, e push e merge estão aprovados (o PR #18, com a CI
+verde). O deploy continua dele. A aprovação vale só para esta sessão; a próxima volta à regra de sempre (merge só com o "sim" dele).
+
+---
+
+## 2026-11-27 (3): a moldura nas laterais da mesa
+
+Ele pediu, enquanto as três colunas eram feitas: "Coloque uma moldura de mesa proporcional nas laterias ta da mesa estou achando tudo muito
+grande e distante."
+
+**Leitura:** no PC a mesa ganha uma moldura de cada lado, proporcional à tela. **[I]** 7% da largura (`pc:px-[7vw]`, ~96 px a 1378) de madeira
+escura por fora e um filete de madeira (6 px, com o contorno de tinta) na borda da mesa; o teto de 1600 px segue. O valor sai nas fotos para
+ele ajustar.
+
+---
+
+## 2026-11-27 (2): a faixa de baixo em três colunas
+
+Ele escreveu "Estou insatisfeito com o resultado. siga a orientação em anexo", com dois prints riscados: na vez de atacar, setas da mão e
+do Atacar para o centro da faixa; no Equipar, a faixa dividida em 1 (cartas), 2 (o vão) e 3 (destinos), setas do Desfazer e do Recomeçar
+para os destinos, e "RED" no destino de Ataque e "BLUE" no de Defesa. Diante das perguntas, respondeu:
+
+- A disposição: "35% | 35% | 30% -> especiais | numéricas | botões de ação, sempre centralizados vertical e horizontalmente na sua coluna a
+  medida que entra ou sai cartas, com exceção dos botões de ação desfazer, equipar ataque, equipar defesa, recomeçar. botão deve conter texto
+  + imagem novamente, equipar ataque e equipar defesa."
+- RED/BLUE: "Só marcar a cor do desenho".
+- A exceção: "Ficam parados"; o texto dos destinos: "EQUIPAR ATAQUE e EQUIPAR DEFESA".
+
+**Leitura (substitui os botões presos à direita de 2026-11-26 (7), ponto 1, e a vaga fixa de 300 px):**
+- No PC a faixa de baixo é uma grade de três colunas, 35% | 35% | 30%: a mão de especiais, as numéricas do Equipar (e, fora dele, o que
+  informa: a jogada da carta, os alvos, o porquê da ordem) e os botões. Cada conteúdo centrado na sua coluna, na vertical e na horizontal.
+- O Desfazer, os destinos e o Recomeçar ficam colados (as setas vermelhas) e centrados como grupo na coluna 3; não andam quando as cartas
+  entram ou saem.
+- Os destinos de fileira voltam a ter texto e desenho: "Equipar ataque" e "Equipar defesa", com a espada marcada de vermelho e o escudo de
+  azul (cor nova). **[I]** A troca e o descarte seguem só com a figura (ele nomeou só os dois).
+
+---
+
+## 2026-11-27 (1): a dica do tutorial no PC, a janela da Ressurreição e as duas leituras
+
+Diante das fotos (`d-atacar-pc.png`, `e-gaveta-pc.png` e `e-tutorial-1378.png`, a dica no alto dos campos cortando a sua Defesa) e das
+perguntas, ele respondeu:
+
+- Onde a dica fica no PC: "Faixa fina sobre o placar".
+- O Ressuscitar da janela da Ressurreição com a tinta das especiais: "Sim, tinta como as especiais".
+- O teto de 1600 px e as especiais quebrando em linhas à esquerda do Atacar: "Ficam as duas".
+
+**Leitura:**
+- **A dica no PC (substitui "no alto dos campos em toda tela" de 2026-11-26 (8)):** uma faixa por cima do placar de vida (texto, Entendi e
+  Pular numa linha), que não empurra nada e tapa as barras de vida enquanto aberta. No celular e no tablet fica no alto dos campos.
+- **A janela da Ressurreição:** o Ressuscitar dela vira o retângulo de tinta das especiais; o "Guardar" segue o pequeno de papel.
+- **As leituras** de 2026-11-26 (8) (o teto de 1600 px; as especiais quebrando à esquerda do Atacar) deixam de ser **[I]**.
+
+---
+
+## 2026-11-26 (8): as fotos dos itens 4 e 7
+
+Diante das fotos (`docs/superpowers/specs/2026-11-26-ajustes-fotos/`: `c-aperto-ajuste1-1378.png`, a branch com as numéricas sobre o
+Desfazer; `7-d1-campo`, `7-d2-faixa`, `7-d3-aba`, `7-d1-aberta`; `4-a-linha`, `4-b-linha`, `4-a-empilhadas`, `4-a-esquerda`, `4-a-celular`,
+`4-b-celular`) e das perguntas, ele respondeu:
+
+- Item 7: "D1: no campo do oponente".
+- Item 4, identidade: "A: tinta com título ouro"; lugar: "Na linha, à esquerda do Atacar".
+- A frase de empate "…: a iniciativa não mudou.": "Sim, assim".
+
+**Leitura:**
+- **Item 7 (D1; substitui a coluna do histórico no PC e a mão de 2026-11-25 (7)):** no PC o histórico vira a gaveta da direita, por cima da
+  mesa, que o botão do campo do oponente abre (o mesmo do celular, ao lado do menu, que também sai da coluna). A mesa ocupa a largura toda; a
+  mão de especiais tem o tamanho das cartas. A dica do tutorial vai para o alto dos campos, como no celular; sala e placar ficam na gaveta.
+  **[I]** Um teto de 1600 px para a mesa em telas muito largas (as fotos eram a 1378).
+- **Item 4 (A, na linha):** Devastar, Reflect, Anular o Reflect e Ressuscitar no retângulo do Atacar, em tinta, com o título em tipo de madeira
+  ouro, o desenho de cada jogada à esquerda e o detalhe na tira de papel; no PC, na linha dos botões, à esquerda do Atacar; no celular, acima
+  dele (`4-a-celular.png`). **[I]** Quando a linha não cabe (telas estreitas, muitas especiais), as especiais se empilham à esquerda do Atacar,
+  que não sai da ponta direita.
+- **6:** a frase de empate fica "Empate em dano na última rodada de Ataque (…): a iniciativa não mudou." (tira o **[I]** de 2026-11-26 (7)).
+
+---
+
+## 2026-11-26 (7): ajustes rápidos depois dos testes
+
+Ele pediu, com cinco prints (o Equipar no PC com os botões no meio da faixa; o Confirmar quadrado; três numéricas sobrepostas com a
+escolhida tapada; a escolha da ordem; a Ressurreição e o Atacar):
+
+> 1. botões de ação devem ficar fixos e centralizados verticalmente no canto direito respeitando o padding do pai. (anexo). comportamento
+>    não esperado: a medida que vou equipando as cartas numéricas o conjunto de botões de ação vão se deslocando para a esquerda. isso é
+>    inadmissível ter passado pelo advisor, fica aqui minha indignação.
+> 2. botão de confirmar e passar devem ser retângulos do mesmo tamanho e padrão do botão de atacar.
+> 3. remover o texto "Toque numa carta da mão para ver as jogadas." acima do botão acatar.
+> 4. o botão devastar defesa deve seguir o padrão de ter uma identidade mais forte e mais presença como ocorre com botão atacar. O mesmo
+>    para todos as possíveis jogadas especiais, incluindo ressurreição no qual o botão está fora do padrão.
+> 5. a exibição das cartas numéricas na mão está errada. a carta selecionada fica com uma parte escondida. e outra coisa, em desktop as
+>    cartas devem ficar lado a lado pois há espaço, o padrão de cartas organizadas em mão é apenas pra quando não tiver espaço em tela o
+>    suficiente.
+> 6. remover texto "atacar primeiro ou segundo?". e remover "escolha quando quiser".
+> 7. ocultar a barra de histórico mas deixando um botão de ação para exibir sempre que o player quiser. o botão deve ser intuitivo e
+>    visível. com o espaço ganho em na mesa, otimizar disposição de todos os elementos.
+>
+> 1. Evite regressões; 2. Evite inferencias, me pergunte o que for necessário; 3. Evite Complexidades desnecessárias; 4. Advisor deve
+> revisar specs, planos ou implementações;
+
+Diante das perguntas, ele respondeu:
+
+- Item 1 (fases e telas): "Todas as fases, só no PC".
+- Item 2 (cores): "Confirmar ouro, Passar papel".
+- Item 4 (identidade): "Fotos de 2 direções antes"; (lugar em relação ao Atacar): "Fotos de 3 direções para eu decidir".
+- Item 7 (o botão do histórico e como abre): "Fotos de direções antes"; (o que a mesa faz com o espaço): "Fotos de direções antes".
+- Item 5 (sem espaço, a escolhida): "Na frente, numéricas e especiais".
+- Item 6 (a linha do porquê): "Fica a linha do porquê"; trocar o "Ela" por "A iniciativa": "Sim".
+- A mão de especiais no PC deixar de reservar metade da faixa: "Decido nas fotos do item 7".
+
+**Leitura:**
+- **1 (substitui a disposição Y no PC de 2026-11-25 (4), que centrava cartas e botões num bloco só):** no PC, em todas as fases (Equipar,
+  Atacar ou Encerrar turno, Passar, a ordem), o grupo de botões fica preso à direita da faixa de baixo, dentro do respiro dela, centrado na
+  vertical, e não anda quando as cartas saem. O celular fica como está.
+- **2 (substitui o carimbo quadrado do Confirmar e do Passar de 2026-11-25 (2) e (4)):** o retângulo do Atacar, do mesmo tamanho, com o
+  ícone à esquerda e a palavra em tipo de madeira; o Confirmar em ouro, o Passar em papel. O vermelho segue só do Atacar.
+- **3:** sai o "Toque numa carta da mão para ver as jogadas.".
+- **4:** fotos de duas identidades e de três lugares antes do código.
+- **5 (substitui "a escolhida sobe sem tapar a vizinha" de 2026-11-25 (2)):** sem espaço, a carta escolhida fica na frente das vizinhas,
+  no Equipar e na mão de especiais. Com espaço, todas lado a lado, sem sobrepor.
+- **6:** saem da vista a pergunta da iniciativa e o "Escolha quando quiser" (com e sem prazo); fica a linha do porquê, com "A iniciativa
+  foi sorteada no início da partida." no lugar do "Ela foi…". **[I]** A pergunta descrevia por engano a segunda frase como "A iniciativa
+  ficou com quem causou mais dano…", que não existe: as reais são "Você causou mais dano…" (sem "Ela", fica igual) e "Empate em dano…: ela não
+  mudou.", que vira "…: a iniciativa não mudou." (leitura minha, a confirmar com ele). **[I]** A pergunta segue para o leitor de tela
+  (`sr-only`), como os textos do Equipar.
+- **7:** fotos do lugar do botão, de como o histórico abre e do uso do espaço antes do código. **[I]** No PC a dica do tutorial e o botão do
+  menu moram hoje na coluna do histórico: as fotos dizem para onde vão.
+- **Acoplamento (medido a 1378 px):** com a mão reservando 526 px, o painel do Equipar tem 498 px; o grupo fixo com o Confirmar do tamanho do
+  Atacar ocupa ~420 px e sobram ~58 px para as numéricas. Os itens 1, 2 e o "lado a lado" do 5 dependem da disposição escolhida nas fotos
+  do item 7.
+
+---
+
 ## 2026-11-26 (6): o sim para o merge do PR #16
 
 Diante da pergunta "Faço o merge do PR #16 quando a CI ficar verde?", ele respondeu "Sim, merge".

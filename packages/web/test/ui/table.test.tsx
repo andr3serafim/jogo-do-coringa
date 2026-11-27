@@ -1176,13 +1176,14 @@ describe('mesa: histórico (spec §3.1, §7, §10.5)', () => {
   it('fechada, a gaveta sai da vista mas continua na árvore (a região ao vivo anuncia); aberta, vira uma folha', async () => {
     const user = userEvent.setup();
     withHistory(null);
-    expect(panel().className).toContain('max-pc:sr-only');
-    expect(panel().className).not.toContain('max-pc:fixed');
+    // Em toda tela (no PC também, decisoes.md 2026-11-26 (8), D1): fechada, sr-only; aberta, a folha (no PC, pela direita).
+    expect(panel()).toHaveClass('sr-only');
+    expect(panel()).not.toHaveClass('fixed');
     expect(within(panel()).getByRole('list')).toHaveAttribute('aria-live', 'polite');
     expect(within(panel()).getByRole('button', { name: 'Fechar o histórico', hidden: true })).toHaveAttribute('tabindex', '-1');
     await user.click(screen.getByRole('button', { name: 'Histórico' }));
-    expect(panel().className).toContain('max-pc:fixed');
-    expect(panel().className).not.toContain('max-pc:sr-only');
+    expect(panel()).toHaveClass('fixed', 'pc:right-0', 'pc:inset-y-0');
+    expect(panel()).not.toHaveClass('sr-only');
     expect(within(panel()).getByRole('button', { name: 'Fechar o histórico' })).toHaveFocus();
   });
 
@@ -1193,15 +1194,15 @@ describe('mesa: histórico (spec §3.1, §7, §10.5)', () => {
       vi.unstubAllGlobals();
     });
 
-    it('gaveta fechada (celular e tablet): sem rolagem e fora do Tab, para não sobrar parada invisível; aberta: focável', async () => {
+    it('gaveta fechada: sem rolagem e fora do Tab, para não sobrar parada invisível; aberta: focável', async () => {
       const user = userEvent.setup();
       withHistory(null);
       expect(lines()).not.toHaveAttribute('tabindex');
-      expect(lines().className).toContain('max-pc:overflow-hidden');
+      expect(lines()).toHaveClass('overflow-hidden');
       await user.click(screen.getByRole('button', { name: 'Histórico' }));
       expect(lines()).toHaveAttribute('tabindex', '0');
       expect(lines().className).toContain('overflow-y-auto');
-      expect(lines().className).not.toContain('max-pc:overflow-hidden');
+      expect(lines()).not.toHaveClass('overflow-hidden');
     });
 
     it('a media query do PC é o ponto `pc` do tema (styles.css), sem número solto', () => {
@@ -1211,14 +1212,14 @@ describe('mesa: histórico (spec §3.1, §7, §10.5)', () => {
       expect(PC_QUERY).toBe(`(min-width: ${px}px)`);
     });
 
-    it('no PC a coluna está sempre à vista: a lista é focável mesmo com a gaveta "fechada"', () => {
+    it('no PC também é gaveta (decisoes.md 2026-11-26 (8), D1): fechada, a lista fica fora do Tab', () => {
       vi.stubGlobal('matchMedia', (query: string) => ({
         matches: query === '(min-width: 1024px)',
         addEventListener: () => undefined,
         removeEventListener: () => undefined,
       }));
       withHistory(null);
-      expect(lines()).toHaveAttribute('tabindex', '0');
+      expect(lines()).not.toHaveAttribute('tabindex');
     });
   });
 

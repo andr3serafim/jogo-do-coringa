@@ -1,7 +1,7 @@
 // O painel da dica do tutorial (spec do polimento, §5): a dica do momento, com "Entendi" (marca vista) e "Pular o tutorial". Não é
 // modal e não prende o foco: são botões comuns, na ordem do documento, e nada leva o foco para cá (nem `autoFocus`). Quem o põe no
-// lugar (no alto da coluna do histórico no PC, no fluxo acima dos campos no celular e no tablet) é a `Table`, sem `z-index` nem
-// posição fixa: fica abaixo das camadas da cena e da faixa e nunca cobre a mão nem a barra.
+// lugar é a `Table`: no PC, a faixa por cima do placar (decisoes.md 2026-11-27 (1)), numa linha (o texto, depois Entendi e Pular); no
+// celular e no tablet, no fluxo acima dos campos, sem `z-index` nem posição fixa. Nunca cobre a mão nem a barra.
 //
 // A região viva (`polite`) fica sempre montada, como a dos anúncios da faixa: uma região criada já preenchida pode não ser lida. Ela
 // nasce VAZIA (o primeiro desenho não traz dica nenhuma) e a dica entra no desenho seguinte, já com a região na página; sem dica
@@ -89,10 +89,10 @@ export function HintPanel({ hint, onGotIt, onSkip }: HintPanelProps) {
           ? 'sr-only'
           : // No celular baixo (abaixo de 700 px de altura) o painel aperta: o placar do topo (sub-projeto 6 §3) tira 64 px da janela
             // dos campos, e a dica mais longa tem de caber nela inteira.
-            'flex flex-col gap-2 border-4 border-tinta bg-papel p-3 text-tinta max-pc:mx-3 max-pc:mb-1 max-pc:mt-2 max-pc:[@media(height<700px)]:mt-1 max-pc:[@media(height<700px)]:gap-1 max-pc:[@media(height<700px)]:p-2'
+            'flex flex-col gap-2 border-4 border-tinta bg-papel p-3 text-tinta max-pc:mx-3 max-pc:mb-1 max-pc:mt-2 max-pc:[@media(height<700px)]:mt-1 max-pc:[@media(height<700px)]:gap-1 max-pc:[@media(height<700px)]:p-2 pc:flex-row pc:items-center pc:gap-6 pc:border-x-0 pc:border-t-0 pc:px-6 pc:py-2.5'
       }
     >
-      <div aria-live="polite" aria-atomic="true" className="flex flex-col gap-2 max-pc:[@media(height<700px)]:gap-1">
+      <div aria-live="polite" aria-atomic="true" className="flex flex-col gap-2 max-pc:[@media(height<700px)]:gap-1 pc:min-w-0 pc:flex-1 pc:gap-1">
         {shown === null ? null : (
           <>
             <p aria-hidden="true" className="font-madeira text-sm uppercase leading-none tracking-wide">
@@ -107,7 +107,7 @@ export function HintPanel({ hint, onGotIt, onSkip }: HintPanelProps) {
         )}
       </div>
       {shown === null ? null : (
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pc:flex-none pc:flex-nowrap">
           <Button onClick={onGotIt}>{HINT_GOT_IT_LABEL}</Button>
           <button type="button" onClick={onSkip} className="min-h-11 px-1 text-sm font-bold underline">
             {HINT_SKIP_LABEL}

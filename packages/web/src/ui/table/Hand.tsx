@@ -33,6 +33,12 @@ import { useCardDrag } from './useCardDrag.ts';
 
 const NO_ZONES: ReadonlySet<DropKey> = new Set();
 
+/**
+ * A carta escolhida, quando as cartas se sobrepõem, fica na frente das vizinhas (decisoes.md 2026-11-26 (7), ponto 5): acima do cadeado
+ * delas (`z-10`) e abaixo do balão do motivo (`z-20`). Vale também para as numéricas do Equipar.
+ */
+export const SELECTED_FRONT = 'z-[15]';
+
 /** A carta de origem, no ar. */
 const DRAGGED_OPACITY = 0.4;
 
@@ -62,7 +68,13 @@ export function Hand({ cards }: { cards: SpecialCard[] }) {
   }
   const count = cards.length;
   return (
-    <div className="relative w-full pc:w-[clamp(360px,50%,600px)] pc:flex-none">
+    // No PC a mão tem o tamanho das cartas, centrada na primeira das três colunas da faixa de baixo (35%, decisoes.md 2026-11-27 (2)); sem
+    // espaço na coluna, ela encolhe e as cartas se sobrepõem.
+    <div
+      data-mao
+      style={{ ['--mao-natural' as string]: `calc(${count} * var(--hand-w) + ${count - 1} * 10px)` }}
+      className="relative w-full pc:w-[var(--mao-natural)] pc:min-w-0 pc:max-w-full pc:justify-self-center"
+    >
       {/* O balão do motivo (B2) fica por cima do seu campo, sem empurrar a mão nem pegar o toque de nada embaixo dele. */}
       {handNote ? (
         <p
@@ -78,7 +90,7 @@ export function Hand({ cards }: { cards: SpecialCard[] }) {
         aria-label="Sua mão"
         // O contorno da dica do tutorial (`styles.css`, `[data-dica]`) fica folgado: o convite a olhar a mão, sem tapar nenhuma carta.
         data-dica={hintZone === 'hand' ? 'hand' : undefined}
-        className="flex w-full list-none justify-center px-3 pb-2 pt-[18px] pc:justify-start pc:px-0 pc:pb-0 pc:pt-3.5"
+        className="flex w-full list-none justify-center px-3 pb-2 pt-[18px] pc:px-0 pc:pb-0 pc:pt-3.5"
       >
         {cards.map((card, index) => (
           <HandCard
@@ -160,7 +172,7 @@ function HandCard({ card, index, count, selected }: HandCardProps) {
     // Durante as batidas a respiração pausa onde está (os controles estão travados, e a mesa fica com o golpe): com a CPU 4× mais
     // lenta, as cartas respirando no meio do golpe custavam ~7 quadros por segundo.
     <li
-      className="relative flex-none"
+      className={`relative flex-none ${selected ? SELECTED_FRONT : ''}`}
       style={style}
       data-respira={reduced || idle ? undefined : ''}
       data-respira-pausa={!reduced && !idle && busy ? '' : undefined}

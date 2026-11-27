@@ -1,10 +1,8 @@
 // A mesa da Peleja desenhada a partir da `view` do último `state` (spec §3.1, §3.2, §3.3, §10): o placar de luta no topo
 // (sub-projeto 6 §3: os Coringas, as vidas e o relógio); o oponente na capa verde, em cima; a faixa central de tinta; você na
-// capa rosa, embaixo, com a mão; e a coluna do histórico no
-// PC. É só vista: as interações chegam por props (`onSelectCard`, `onSelectTarget`, `onSeen`, `onOpenGraveyard`,
+// capa rosa, embaixo, com a mão; e o histórico numa gaveta (no PC, pela direita, por cima da mesa: decisoes.md 2026-11-26 (8), D1). É só vista: as interações chegam por props (`onSelectCard`, `onSelectTarget`, `onSeen`, `onOpenGraveyard`,
 // `onOpenMenu`) e a barra de ação entra pelo `actionBar`. Quem liga isso à sessão é a `PlayTable`. A textura de xilogravura vai só nos títulos e no grão do papel, por baixo
-// do conteúdo (spec §10.7). No tutorial, o `hint` traz o painel da dica (no alto da coluna do histórico no PC, no alto dos campos no
-// celular e no tablet) e a zona de que ela fala, que ganha o contorno parado (`data-dica`, desenhado em `styles.css`).
+// do conteúdo (spec §10.7). No tutorial, o `hint` traz o painel da dica (no PC, a faixa por cima do placar; no celular e no tablet, no alto dos campos) e a zona de que ela fala, que ganha o contorno parado (`data-dica`, desenhado em `styles.css`).
 import type { PlayerId } from '@coringa/engine';
 import type { Deadline, StateMessage } from '@coringa/protocol';
 import * as m from 'motion/react-m';
@@ -19,7 +17,6 @@ import type { HintZone } from '../../model/tutorial.ts';
 import { useAnim } from '../anim/context.ts';
 import { loadScenes } from '../anim/scenes-loader.ts';
 import { LookZone } from '../cards/LooksProvider.tsx';
-import { useMediaQuery } from '../useMediaQuery.ts';
 import { Banners } from './Banners.tsx';
 import { CenterBand } from './CenterBand.tsx';
 import { TableUiContext, type HandDrag, type TableUi } from './context.ts';
@@ -32,6 +29,7 @@ import { LeadProvider } from './lead-store.ts';
 import { stampInk } from './stamp-ink.ts';
 import { PlayerField } from './PlayerField.tsx';
 import { useClock } from './useClock.ts';
+import { useMediaQuery } from '../useMediaQuery.ts';
 
 /** A dica do tutorial: o painel (a tela o monta) e a zona de que ela fala, que ganha o contorno parado (`null`: sem contorno). */
 export interface TableHint {
@@ -39,8 +37,8 @@ export interface TableHint {
   panel: ReactNode;
   /**
    * O painel mostra uma dica que acabou de chegar: a situação dela ainda vale e ela tomou o painel na época (`state.epoch`) em curso.
-   * Uma que ficou lá de épocas anteriores (ninguém a marcou, e a situação voltou a valer) não conta. No celular e no tablet o painel
-   * mora no alto dos campos, que rolam: a rolagem da vez de atacar (`PlayTable`) espera a dica recém-chegada fechar, para o texto
+   * Uma que ficou lá de épocas anteriores (ninguém a marcou, e a situação voltou a valer) não conta. O painel mora no alto dos
+   * campos, que rolam: a rolagem da vez de atacar (`PlayTable`) espera a dica recém-chegada fechar, para o texto
    * não sair da vista justo quando chega.
    */
   open?: boolean;
@@ -83,9 +81,9 @@ export interface TableProps {
   /** O tutorial (um treino guiado): a faixa central diz "Tutorial, sem relógio", e não o nível do bot. */
   tutorial?: true;
   /**
-   * A dica do tutorial. O painel vai no alto da coluna do histórico no PC e, no celular e no tablet, no fluxo acima dos campos
-   * (dentro do contêiner que rola: empurra os campos, nunca é camada sobre a mão ou a barra, nem tem z-index); um só, nunca
-   * os dois. A zona ganha o contorno parado, sem animação.
+   * A dica do tutorial. No PC, a faixa por cima do placar (decisoes.md 2026-11-27 (1)): não empurra nada, e no PC os campos não rolam
+   * (empurrados, cortavam a sua Defesa). No celular e no tablet, no fluxo acima dos campos, dentro do contêiner que rola: empurra os
+   * campos e nunca é camada sobre a mão ou a barra. Um lugar só, nunca os dois. A zona ganha o contorno parado, sem animação.
    */
   hint?: TableHint;
   /** O título da mesa (só para leitor de tela): com a ref, ele fica focável por código, e a tela leva o foco a ele ao abrir. */
@@ -131,8 +129,8 @@ function TableView({
   const panelId = useId();
   const [historyOpen, setHistoryOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
-  const pc = useMediaQuery(PC_QUERY);
   const { reduced } = useAnim();
+  const pc = useMediaQuery(PC_QUERY);
   const hintZone = hint?.zone ?? null;
 
   // Abrir a gaveta conta como ver as linhas (spec §10.5, "quando você toca, foca…"): o contador do botão só conta as que chegam
@@ -209,7 +207,7 @@ function TableView({
     <TableUiContext value={ui}>
       <main
         aria-label="Mesa"
-        className="relative isolate flex h-dvh flex-col overflow-y-auto overflow-x-hidden overscroll-none feltro-voce pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] text-tinta pc:flex-row pc:justify-center pc:madeira-escura"
+        className="relative isolate flex h-dvh flex-col overflow-y-auto overflow-x-hidden overscroll-none feltro-voce pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] text-tinta pc:flex-row pc:justify-center pc:madeira-escura pc:px-[min(7vw,max(0px,calc((100vw-1280px)/2)))]"
       >
         <svg width="0" height="0" aria-hidden="true" focusable="false" className="absolute">
           <defs>
@@ -228,13 +226,23 @@ function TableView({
           Mesa da partida
         </h1>
 
-        <div className="flex min-h-0 flex-1 flex-col pc:flex-[0_1_1100px]">
+        {/* A mesa toma a largura (o histórico é gaveta: decisoes.md 2026-11-26 (8), D1), até 1600 px, dentro da moldura (decisoes.md 2026-11-27
+            (3) e (5)): no PC, até 7% da tela de madeira escura de cada lado, e só o que sobra acima de 1280 px (a coluna dos botões, 30%,
+            precisa de ~366 px para o Confirmar entre os selos); e o filete de madeira na borda da mesa. */}
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col pc:flex-[0_1_1600px] pc:border-x-[6px] pc:border-madeira pc:shadow-[0_0_0_2px_var(--color-tinta)]">
           <Banners snapshot={snapshot} remainingMs={remainingMs} />
           {/* O placar de luta fica sempre à vista, fora da rolagem dos campos (sub-projeto 6 §3). */}
-          <FightHud view={view} names={names} face={face} deadline={state.deadline} />
+          <div className="relative flex-none">
+            <FightHud view={view} names={names} face={face} deadline={state.deadline} />
+            {/* A dica do tutorial no PC: a faixa por cima do placar (tapa as barras de vida enquanto aberta). */}
+            {pc && hint ? (
+              <div data-dica-faixa className="absolute inset-x-0 top-0 z-20">
+                {hint.panel}
+              </div>
+            ) : null}
+          </div>
           {/* Em telas baixas os campos e a faixa rolam por dentro; a mão e a barra de ação ficam sempre à vista, e a sua vez (o foco
-              no painel de baixo) não rola nada. No PC eles não crescem além do que pedem (a sobra fica com a mão, centrada), e a
-              coluna do histórico, com o menu, nunca rola junto. O `layoutScroll` diz ao Motion que este contêiner rola: sem ele, a rolagem
+              no painel de baixo) não rola nada. No PC eles não crescem além do que pedem (a sobra fica com a mão e a barra). O `layoutScroll` diz ao Motion que este contêiner rola: sem ele, a rolagem
               (a da cena até a fileira atingida, a da sua vez de atacar) parecia mudança de lugar de toda carta, e o Motion animava cada
               uma de volta, pela thread principal, a cada quadro (o conserto da Devastação no celular, 2026-11-14). */}
           <m.div
@@ -263,7 +271,7 @@ function TableView({
                     onToggle={() => (historyOpen ? closeHistory() : setHistoryOpen(true))}
                     buttonRef={toggleRef}
                   />
-                  {onOpenMenu ? <MenuButton onClick={onOpenMenu} tone="papel" className="pc:hidden" /> : null}
+                  {onOpenMenu ? <MenuButton onClick={onOpenMenu} tone="papel" /> : null}
                 </div>
               }
             />
@@ -283,14 +291,16 @@ function TableView({
             </LookZone>
             </LeadProvider>
           </m.div>
-          <div className="flex flex-none flex-col pb-[env(safe-area-inset-bottom)] pc:flex-1 pc:flex-row pc:items-center pc:gap-7 pc:px-6 pc:pb-0 pc:text-papel">
+          {/* No PC, três colunas (decisoes.md 2026-11-27 (2)): 35% a mão de especiais; os outros 65% são da barra ou do painel da fase, que se
+              dividem em 35 | 30 (as numéricas ou o que informa, e os botões). Cada conteúdo centrado na sua coluna. */}
+          <div className="flex flex-none flex-col pb-[env(safe-area-inset-bottom)] pc:grid pc:flex-1 pc:grid-cols-[35fr_65fr] pc:content-center pc:items-center pc:px-6 pc:pb-0 pc:text-papel">
             <Hand cards={view.self.hand} />
             {actionBar ? (
               <div
                 data-dica={BAR_ZONES.has(hintZone) ? hintZone : undefined}
                 // Os pingos do carimbo (bloco D do playtest, ponto 5): um ouvinte só, aqui, para todos os carimbos da barra e dos painéis.
                 onPointerUp={reduced ? undefined : stampInk}
-                className="madeira-escura px-3 pb-3.5 pt-2.5 text-papel pc:min-w-0 pc:flex-1 pc:bg-none pc:px-0 pc:pb-0 pc:pt-0"
+                className="madeira-escura px-3 pb-3.5 pt-2.5 text-papel pc:min-w-0 pc:bg-none pc:px-0 pc:pb-0 pc:pt-0"
               >
                 {actionBar}
               </div>
@@ -303,9 +313,7 @@ function TableView({
           open={historyOpen}
           onClose={closeHistory}
           lines={history.lines}
-          tool={onOpenMenu ? <MenuButton onClick={onOpenMenu} tone="papel" className="max-pc:hidden" /> : undefined}
           baseSeq={marksBaseSeq}
-          top={pc ? hint?.panel : undefined}
           footer={room ? <RoomFooter room={room} me={me} names={names} /> : null}
         />
       </main>

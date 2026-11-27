@@ -171,34 +171,38 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
     expect(cards.map((c) => c.getAttribute('aria-pressed'))).toEqual(['true', 'false', 'false']);
     expect(cards[0]).toHaveAccessibleName(new RegExp(`^7 de ${m.view.self.pending[0]!.suit}`));
     const buttons = within(inEquip().getByRole('list', { name: 'Destinos' })).getAllByRole('button');
-    expect(buttons.map((b) => b.getAttribute('aria-label'))).toEqual(['Fileira de Ataque', 'Fileira de Defesa']);
+    // O nome é a palavra à vista (WCAG 2.5.3); o nome do terminal fica na dica do mouse (decisoes.md 2026-11-27 (2)).
+    expect(buttons.map((b) => b.textContent)).toEqual(['Equipar ataque', 'Equipar defesa']);
+    expect(buttons.map((b) => b.getAttribute('title'))).toEqual(['Fileira de Ataque', 'Fileira de Defesa']);
   });
 
   it('sem texto à vista (decisoes.md 2026-11-25 (3)): "Faltam" e a montagem só para o leitor de tela', async () => {
     const m = mount(EQUIP);
     expect(inEquip().getByText('Faltam 3 cartas')).toHaveClass('sr-only');
-    await choose(m, 'Fileira de Ataque', 'Fileira de Ataque', 'Fileira de Defesa');
+    await choose(m, 'Equipar ataque', 'Equipar ataque', 'Equipar defesa');
     expect(inEquip().getByText('Tudo no lugar: confira a montagem e confirme.')).toHaveClass('sr-only');
     expect(inEquip().getByRole('list', { name: 'Sua montagem' })).toHaveClass('sr-only');
   });
 
-  it('o Confirmar é o carimbo de ouro com o visto e a palavra, do tamanho dos destinos', async () => {
+  it('o Confirmar é o retângulo de ouro do tamanho do Atacar, com o visto e a palavra (decisoes.md 2026-11-26 (7), ponto 2)', async () => {
     const m = mount(EQUIP);
-    await choose(m, 'Fileira de Ataque', 'Fileira de Ataque', 'Fileira de Defesa');
+    await choose(m, 'Equipar ataque', 'Equipar ataque', 'Equipar defesa');
     const confirm = inEquip().getByRole('button', { name: 'Confirmar' });
-    expect(confirm).toHaveClass('carimbo', 'carimbo-ouro', 'carimbo-destino', 'carimbo-icone-palavra');
-    expect(confirm).not.toHaveClass('w-full');
+    expect(confirm).toHaveClass('carimbo', 'carimbo-ouro', 'carimbo-grande', 'min-h-[68px]', 'pc:min-h-[72px]', 'pc:min-w-[260px]');
+    expect(confirm).not.toHaveClass('carimbo-destino');
     expect(confirm.querySelector('[data-arte="confirmar"]')).not.toBeNull();
     expect(confirm).toHaveTextContent('Confirmar');
   });
 
-  it('a Y (decisoes.md 2026-11-25 (4)): no celular sempre duas linhas, no PC uma, com 3 cartas e com 1', async () => {
+  it('no celular sempre duas linhas; no PC, as colunas das numéricas e dos botões (decisoes.md 2026-11-27 (2)), com 3 cartas e com 1', async () => {
     const m = mount(EQUIP);
     const row = () => inEquip().getByRole('list', { name: 'Destinos' }).closest('[data-disposicao]')!;
     for (const left of [3, 1]) {
-      if (left === 1) await choose(m, 'Fileira de Ataque', 'Fileira de Ataque');
-      expect(row()).toHaveClass('flex-col', 'pc:flex-row');
+      if (left === 1) await choose(m, 'Equipar ataque', 'Equipar ataque');
+      expect(row()).toHaveClass('flex-col', 'pc:grid', 'pc:grid-cols-[35fr_30fr]', 'pc:col-span-2');
       expect(row().className.split(' ').filter((c) => c === 'flex-row' || c === 'flex-wrap')).toEqual([]);
+      expect(inEquip().getByRole('list', { name: 'Suas numéricas' })).toHaveClass('pc:justify-self-center');
+      expect(row().querySelector('[data-botoes-principais]')).toHaveClass('pc:col-start-2', 'pc:justify-self-center');
     }
   });
 
@@ -209,21 +213,23 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
     expect(empty.textContent).toBe('');
   });
 
-  it('a numérica escolhida só sobe: a da direita segue por cima, e o canto de cada uma fica à vista', async () => {
+  it('a numérica escolhida fica na frente das vizinhas, e só ela (decisoes.md 2026-11-26 (7), ponto 5)', async () => {
     const m = mount(EQUIP);
     const items = () => within(inEquip().getByRole('list', { name: 'Suas numéricas' })).getAllByRole('listitem');
+    // Sem toque, a escolhida é a primeira que falta.
+    expect(items().map((li) => li.classList.contains('z-[15]'))).toEqual(items().map((_, i) => i === 0));
     await m.user.click(pendingCard(m.view.self.pending[1]!.id));
     expect(items()[1]!.querySelector('[aria-pressed="true"]')).not.toBeNull();
-    for (const li of items()) expect(li.className).not.toMatch(/(^|\s)z-/);
+    expect(items().map((li) => li.classList.contains('z-[15]'))).toEqual(items().map((_, i) => i === 1));
   });
 
-  it('cada destino é um carimbo de tamanho fixo, só com a figura; o nome inteiro no leitor e na dica (decisoes.md 2026-11-25 (4))', () => {
+  it('os destinos de fileira têm o desenho e a palavra (decisoes.md 2026-11-27 (2)); o nome do terminal na dica', () => {
     mount(EQUIP);
     const buttons = within(inEquip().getByRole('list', { name: 'Destinos' })).getAllByRole('button');
-    expect(buttons.map((b) => b.textContent)).toEqual(['', '']);
+    expect(buttons.map((b) => b.textContent)).toEqual(['Equipar ataque', 'Equipar defesa']);
     expect(buttons.map((b) => b.getAttribute('data-destino'))).toEqual(['ATK', 'DEF']);
     expect(buttons.map((b) => b.getAttribute('title'))).toEqual(['Fileira de Ataque', 'Fileira de Defesa']);
-    for (const b of buttons) expect(b).toHaveClass('carimbo-destino');
+    for (const b of buttons) expect(b).toHaveClass('carimbo-destino', 'carimbo-destino-palavra');
   });
 
   it('os destinos de fileira trazem a figura dela (espadas, escudo), escondida do leitor de tela', () => {
@@ -231,14 +237,17 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
     const buttons = within(inEquip().getByRole('list', { name: 'Destinos' })).getAllByRole('button');
     expect(buttons.map((b) => b.querySelector('svg[data-arte]')?.getAttribute('data-arte'))).toEqual(['ataque', 'defesa']);
     expect(buttons.map((b) => b.querySelector('svg')?.getAttribute('aria-hidden'))).toEqual(['true', 'true']);
-    expect(buttons[0]).toHaveAccessibleName('Fileira de Ataque');
+    expect(buttons[0]).toHaveAccessibleName('Equipar ataque');
+    // A cor marcada só no desenho: a lâmina vermelha, o escudo azul.
+    expect(buttons[0]!.querySelector('svg[data-arte="ataque"] path')).toHaveAttribute('fill', 'var(--color-vermelho)');
+    expect(buttons[1]!.querySelector('svg[data-arte="defesa"] path')).toHaveAttribute('fill', 'var(--color-azul)');
   });
 
   it('escolher Ataque, Ataque, Defesa e Confirmar manda EQUIP com esses destinos', async () => {
     const m = mount(EQUIP);
-    await choose(m, 'Fileira de Ataque');
+    await choose(m, 'Equipar ataque');
     expect(inEquip().getByText('Faltam 2 cartas')).toBeInTheDocument();
-    await choose(m, 'Fileira de Ataque', 'Fileira de Defesa');
+    await choose(m, 'Equipar ataque', 'Equipar defesa');
     await m.user.click(inEquip().getByRole('button', { name: 'Confirmar' }));
     expect(sentAction(m)).toEqual({ type: 'EQUIP', destinations: ['ATK', 'ATK', 'DEF'], order: m.view.self.pending.map((c) => c.id) });
     // Jogada voluntária: sem `auto`.
@@ -248,9 +257,9 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
   it('Confirmar só aparece com todas as cartas posicionadas', async () => {
     const m = mount(EQUIP);
     expect(inEquip().queryByRole('button', { name: 'Confirmar' })).not.toBeInTheDocument();
-    await choose(m, 'Fileira de Ataque', 'Fileira de Defesa');
+    await choose(m, 'Equipar ataque', 'Equipar defesa');
     expect(inEquip().queryByRole('button', { name: 'Confirmar' })).not.toBeInTheDocument();
-    await choose(m, 'Fileira de Defesa');
+    await choose(m, 'Equipar defesa');
     expect(inEquip().getByRole('button', { name: 'Confirmar' })).toBeEnabled();
     // Sem cartas nem destinos para escolher, e sem o "Faltam".
     expect(inEquip().queryByRole('list', { name: 'Destinos' })).not.toBeInTheDocument();
@@ -260,12 +269,12 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
 
   it('Desfazer volta um passo, Recomeçar volta ao início', async () => {
     const m = mount(EQUIP);
-    await choose(m, 'Fileira de Ataque', 'Fileira de Defesa');
+    await choose(m, 'Equipar ataque', 'Equipar defesa');
     expect(inEquip().getByText('Falta 1 carta')).toBeInTheDocument();
     await m.user.click(inEquip().getByRole('button', { name: 'Desfazer' }));
     expect(inEquip().getByText('Faltam 2 cartas')).toBeInTheDocument();
     expect(m.session.snapshot().equipDraft.map((p) => p.destination)).toEqual(['ATK']);
-    await choose(m, 'Fileira de Defesa');
+    await choose(m, 'Equipar defesa');
     await m.user.click(inEquip().getByRole('button', { name: 'Recomeçar' }));
     expect(inEquip().getByText('Faltam 3 cartas')).toBeInTheDocument();
     expect(m.session.snapshot().equipDraft).toEqual([]);
@@ -276,7 +285,7 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
     const m = mount(EQUIP);
     expect(inEquip().getByRole('button', { name: 'Desfazer' })).toBeDisabled();
     expect(inEquip().getByRole('button', { name: 'Recomeçar' })).toBeDisabled();
-    await choose(m, 'Fileira de Ataque');
+    await choose(m, 'Equipar ataque');
     expect(inEquip().getByRole('button', { name: 'Desfazer' })).toBeEnabled();
     expect(inEquip().getByRole('button', { name: 'Recomeçar' })).toBeEnabled();
   });
@@ -316,15 +325,15 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
     mount({ ...EQUIP, self: { ...EQUIP.self, attackRow: [8, 4, 10, 7, 9, 2, 6] } });
     const labels = within(inEquip().getByRole('list', { name: 'Destinos' }))
       .getAllByRole('button')
-      .map((b) => b.getAttribute('aria-label'));
-    expect(labels).toEqual(['Fileira de Defesa']);
+      .map((b) => b.textContent);
+    expect(labels).toEqual(['Equipar defesa']);
   });
 
   it('o rascunho aparece translúcido na fileira, e o total acompanha o motor', async () => {
     const m = mount(EQUIP);
     const group = () => screen.getByRole('group', { name: 'Sua fileira de ataque' });
     expect(group().querySelectorAll('[data-rascunho]')).toHaveLength(0);
-    await choose(m, 'Fileira de Ataque');
+    await choose(m, 'Equipar ataque');
     const drafts = group().querySelectorAll('[data-rascunho]');
     expect(drafts).toHaveLength(1);
     expect(drafts[0]).toHaveAttribute('data-card-id', m.view.self.pending[0]!.id);
@@ -350,14 +359,16 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
   it('a quadra que o rascunho forma: "forma quadra de 7: +7 e 1 Ressurreição"', async () => {
     const m = mount({ ...EQUIP, self: { ...EQUIP.self, attackRow: [7, 7, 7, 2] } });
     expect(screen.queryByText(/forma quadra/)).not.toBeInTheDocument();
-    await choose(m, 'Fileira de Ataque');
+    await choose(m, 'Equipar ataque');
     expect(inEquip().getByText('forma quadra de 7: +7 e 1 Ressurreição')).toHaveClass('sr-only');
     expect(equipPanel().querySelector('[data-quadra-nova]')).toHaveTextContent('+7');
     // Acima do painel, fora das cartas: a 360 px, no canto do painel, o selo tapava o índice da carta da direita (foto da Tarefa 5).
     expect(equipPanel().querySelector('[data-quadra-nova]')!.parentElement).toHaveClass('bottom-full');
     // No PC, à esquerda das cartas, no vão entre a mão e o painel (acima, cobria o canto do campo; à direita, o histórico).
     expect(equipPanel().querySelector('[data-quadra-nova]')!.parentElement).toHaveClass('pc:right-full', 'pc:bottom-auto');
-    expect(equipPanel().querySelector('[data-disposicao]')).toHaveClass('pc:w-fit', 'pc:max-w-full');
+    // Os botões presos à direita, numa vaga de largura fixa: nada anda quando as cartas saem (decisoes.md 2026-11-26 (7), ponto 1).
+    // Os botões colados, centrados na coluna dos botões (decisoes.md 2026-11-27 (2)).
+    expect(equipPanel().querySelector('[data-botoes-principais]')).toHaveClass('pc:col-start-2', 'pc:justify-self-center');
     expect(screen.getByRole('group', { name: 'Sua fileira de ataque' }).querySelector('[data-quadra]')).toHaveTextContent('+7');
     await m.user.click(inEquip().getByRole('button', { name: 'Desfazer' }));
     expect(screen.queryByText(/forma quadra/)).not.toBeInTheDocument();
@@ -365,7 +376,7 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
 
   it('depois de confirmar: "Esperando Duda montar…", sem destinos nem botões, e o rascunho continua à vista', async () => {
     const m = mount(EQUIP);
-    await choose(m, 'Fileira de Ataque', 'Fileira de Ataque', 'Fileira de Defesa');
+    await choose(m, 'Equipar ataque', 'Equipar ataque', 'Equipar defesa');
     await m.user.click(inEquip().getByRole('button', { name: 'Confirmar' }));
     expect(inEquip().getByText('Esperando Duda montar…')).toBeInTheDocument();
     expect(inEquip().queryAllByRole('button')).toHaveLength(0);
@@ -430,7 +441,7 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
 
   it('com a jogada em voo: "Enviando…", e só depois do ack "Esperando Duda montar…"', async () => {
     const m = mount(EQUIP);
-    await choose(m, 'Fileira de Ataque', 'Fileira de Ataque', 'Fileira de Defesa');
+    await choose(m, 'Equipar ataque', 'Equipar ataque', 'Equipar defesa');
     let resolve!: () => void;
     m.connection.acks = [new Promise((r) => (resolve = () => r({ ok: true })))];
     await m.user.click(inEquip().getByRole('button', { name: 'Confirmar' }));
@@ -452,15 +463,15 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
     expect(pendingCard(third!.id)).toHaveAttribute('aria-pressed', 'true');
     expect(pendingCard(first!.id)).toHaveAttribute('aria-pressed', 'false');
     // O toque na carta leva o foco ao primeiro destino, o passo seguinte.
-    expect(dest('Fileira de Ataque')).toHaveFocus();
-    await choose(m, 'Fileira de Ataque');
+    expect(dest('Equipar ataque')).toHaveFocus();
+    await choose(m, 'Equipar ataque');
     expect(m.session.snapshot().equipDraft).toEqual([{ cardId: third!.id, destination: 'ATK' }]);
     expect(inEquip().getByText('Faltam 2 cartas')).toBeInTheDocument();
     // A carta posta sai da lista e entra no Ataque como rascunho; a primeira que falta volta a ser a escolhida.
     expect(inEquip().queryByRole('button', { name: new RegExp(`^3 de ${third!.suit}`) })).not.toBeInTheDocument();
     expect(document.querySelector(`[data-card-id="${third!.id}"][data-rascunho]`)).not.toBeNull();
     expect(pendingCard(first!.id)).toHaveAttribute('aria-pressed', 'true');
-    await choose(m, 'Fileira de Defesa', 'Fileira de Defesa');
+    await choose(m, 'Equipar defesa', 'Equipar defesa');
     await m.user.click(inEquip().getByRole('button', { name: 'Confirmar' }));
     expect(sentAction(m)).toEqual({ type: 'EQUIP', destinations: ['ATK', 'DEF', 'DEF'], order: [third!.id, first!.id, second!.id] });
   });
@@ -469,7 +480,7 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
     const m = mount(EQUIP);
     const third = m.view.self.pending[2]!;
     await m.user.click(pendingCard(third.id));
-    await choose(m, 'Fileira de Defesa');
+    await choose(m, 'Equipar defesa');
     await m.user.click(inEquip().getByRole('button', { name: 'Desfazer' }));
     expect(m.session.snapshot().equipDraft).toEqual([]);
     expect(within(inEquip().getByRole('list', { name: 'Suas numéricas' })).getAllByRole('button')).toHaveLength(3);
@@ -478,7 +489,7 @@ describe('Equipar (spec §3.5; livre desde a E2 do sub-projeto 5)', () => {
 
   it('uma confirmação recusada devolve o rascunho para confirmar de novo', async () => {
     const m = mount(EQUIP);
-    await choose(m, 'Fileira de Ataque', 'Fileira de Ataque', 'Fileira de Defesa');
+    await choose(m, 'Equipar ataque', 'Equipar ataque', 'Equipar defesa');
     m.connection.acks = [{ ok: false, code: 'INVALID_DESTINATIONS', message: 'montagem recusada' }];
     await m.user.click(inEquip().getByRole('button', { name: 'Confirmar' }));
     expect(await screen.findByText('montagem recusada')).toBeInTheDocument();
@@ -496,13 +507,13 @@ describe('Equipar: foco e teclado (spec §7)', () => {
 
   it('depois de cada escolha o foco vai ao primeiro destino da carta seguinte, e à Confirmar no fim', async () => {
     const m = mount(EQUIP);
-    await choose(m, 'Fileira de Ataque');
-    expect(dest('Fileira de Ataque')).toHaveFocus();
-    await choose(m, 'Fileira de Ataque', 'Fileira de Defesa');
+    await choose(m, 'Equipar ataque');
+    expect(dest('Equipar ataque')).toHaveFocus();
+    await choose(m, 'Equipar ataque', 'Equipar defesa');
     expect(inEquip().getByRole('button', { name: 'Confirmar' })).toHaveFocus();
     // O Ataque encheu com as duas primeiras (5 + 2 = 7): a terceira carta só tem a Defesa.
     await m.user.click(inEquip().getByRole('button', { name: 'Desfazer' }));
-    expect(dest('Fileira de Defesa')).toHaveFocus();
+    expect(dest('Equipar defesa')).toHaveFocus();
   });
 
   it('a montagem inteira só pelo teclado: a primeira tecla escolhe a carta, a segunda o destino', async () => {
@@ -510,7 +521,7 @@ describe('Equipar: foco e teclado (spec §7)', () => {
     await m.user.tab();
     expect(pendingCard(m.view.self.pending[0]!.id)).toHaveFocus();
     await m.user.keyboard('{Enter}');
-    expect(dest('Fileira de Ataque')).toHaveFocus();
+    expect(dest('Equipar ataque')).toHaveFocus();
     await m.user.keyboard('{Enter}');
     expect(inEquip().getByText('Faltam 2 cartas')).toBeInTheDocument();
     await m.user.keyboard('{Enter}{Enter}');
@@ -525,7 +536,8 @@ describe('Equipar: foco e teclado (spec §7)', () => {
 describe('escolha da ordem (spec §3.6)', () => {
   it('"Atacar primeiro" vem pré-selecionado, sem barra e sem confirmação automática (decisoes.md 2026-11-02 (9), ponto 7)', () => {
     mount(ORDER, { fake: true });
-    expect(within(orderPanel()).getByText('Você tem a iniciativa: atacar primeiro ou em segundo?')).toBeInTheDocument();
+    // A pergunta saiu da vista e segue para o leitor de tela (decisoes.md 2026-11-26 (7), ponto 6).
+    expect(within(orderPanel()).getByText('Você tem a iniciativa: atacar primeiro ou em segundo?')).toHaveClass('sr-only');
     const first = within(orderPanel()).getByRole('button', { name: 'Atacar primeiro' });
     expect(first).toHaveAttribute('data-preselecionada');
     expect(within(orderPanel()).getByRole('button', { name: 'Atacar em segundo' })).not.toHaveAttribute('data-preselecionada');
@@ -533,15 +545,15 @@ describe('escolha da ordem (spec §3.6)', () => {
     expect(orderPanel()).toHaveFocus();
   });
 
-  it('a pergunta diz por que a iniciativa é sua: sorteada, mais dano ou empate na última rodada de Ataque', () => {
+  it('a linha do porquê diz por que a iniciativa é sua: sorteada, mais dano ou empate na última rodada de Ataque', () => {
     const first = mount(ORDER, { fake: true });
-    expect(within(orderPanel()).getByText('Ela foi sorteada no início da partida.')).toBeInTheDocument();
+    expect(within(orderPanel()).getByText('A iniciativa foi sorteada no início da partida.')).not.toHaveClass('sr-only');
     first.unmount();
     const lead = mount({ ...ORDER, lastInitiative: { holder: 'self', changed: true, self: 14, opponent: 9 } }, { fake: true });
     expect(within(orderPanel()).getByText('Você causou mais dano na última rodada de Ataque (14 × 9).')).toBeInTheDocument();
     lead.unmount();
     mount({ ...ORDER, lastInitiative: { holder: 'self', changed: false, self: 0, opponent: 0 } }, { fake: true });
-    expect(within(orderPanel()).getByText('Empate em dano na última rodada de Ataque (0 × 0): ela não mudou.')).toBeInTheDocument();
+    expect(within(orderPanel()).getByText('Empate em dano na última rodada de Ataque (0 × 0): a iniciativa não mudou.')).toBeInTheDocument();
   });
 
   it('sem o jogador, nada sai, por mais que o tempo passe', () => {
@@ -550,15 +562,13 @@ describe('escolha da ordem (spec §3.6)', () => {
     expect(acts(m)).toEqual([]);
   });
 
-  it('com prazo do servidor, o painel diz "Escolha quando quiser, dentro do prazo."', () => {
-    mount(ORDER, { fake: true, state: { deadline: deadline('ORDER', 70_000) } });
-    expect(within(orderPanel()).getByText('Escolha quando quiser, dentro do prazo.')).toBeInTheDocument();
-  });
-
-  it('sem prazo (treino e tutorial) o painel não fala em prazo: "Escolha quando quiser."', () => {
+  it('sem "Escolha quando quiser", com ou sem prazo (decisoes.md 2026-11-26 (7), ponto 6): o prazo é o relógio do placar', () => {
+    const online = mount(ORDER, { fake: true, state: { deadline: deadline('ORDER', 70_000) } });
+    expect(within(orderPanel()).queryByText(/Escolha quando quiser/)).not.toBeInTheDocument();
+    online.unmount();
     const m = mount(ORDER, { fake: true });
     expect(m.session.snapshot().state?.deadline).toBeNull();
-    expect(within(orderPanel()).getByText('Escolha quando quiser.')).toBeInTheDocument();
+    expect(within(orderPanel()).queryByText(/Escolha quando quiser/)).not.toBeInTheDocument();
     expect(within(orderPanel()).queryByText(/prazo/)).not.toBeInTheDocument();
   });
 
@@ -696,14 +706,14 @@ describe('janela de reação (spec §3.7)', () => {
     expect(inBar().getByRole('button', { name: 'Passar' })).toBeInTheDocument();
   });
 
-  it('o Passar é o carimbo quadrado de papel com as setas de pular e a palavra (decisoes.md 2026-11-25 (5))', () => {
+  it('o Passar é o retângulo de papel do tamanho do Atacar, com as setas de pular e a palavra (decisoes.md 2026-11-26 (7), ponto 2)', () => {
     mount(
       { ...DRAFT, self: { ...DRAFT.self, hand: ['K', 'J', 'Q'] }, phase: 'REFLECT_PLAYED', opponent: { ...DRAFT.opponent, reflect: true } },
       { state: withClock },
     );
     const pass = inBar().getByRole('button', { name: 'Passar' });
-    expect(pass).toHaveClass('carimbo', 'carimbo-papel', 'carimbo-destino', 'carimbo-icone-palavra');
-    expect(pass).not.toHaveClass('carimbo-grande');
+    expect(pass).toHaveClass('carimbo', 'carimbo-papel', 'carimbo-grande', 'min-h-[68px]', 'pc:min-h-[72px]', 'pc:min-w-[260px]');
+    expect(pass).not.toHaveClass('carimbo-destino');
     expect(pass.querySelector('[data-arte="passar"]')).not.toBeNull();
     expect(pass).toHaveTextContent('Passar');
   });
@@ -1081,7 +1091,7 @@ describe('avisos (spec §3.9, §6.2)', () => {
     reaction.unmount();
     const equip = mount(EQUIP);
     act(() => equip.connection.emitClosed(1006, false));
-    expect(dest('Fileira de Ataque')).toBeDisabled();
+    expect(dest('Equipar ataque')).toBeDisabled();
   });
 
   it('o Atacar e o Passar não mandam nada com a conexão fora', async () => {
@@ -1244,9 +1254,9 @@ describe('acessibilidade (axe) das fases', () => {
   it('Equipar: escolhendo, com o rascunho, e esperando', async () => {
     const m = mount({ ...EQUIP, self: { ...EQUIP.self, attackRow: [7, 7, 7, 2] } });
     expect(await seriousViolations(m.container)).toEqual([]);
-    await choose(m, 'Fileira de Ataque');
+    await choose(m, 'Equipar ataque');
     expect(await seriousViolations(m.container)).toEqual([]);
-    await choose(m, 'Fileira de Defesa', 'Fileira de Defesa');
+    await choose(m, 'Equipar defesa', 'Equipar defesa');
     expect(await seriousViolations(m.container)).toEqual([]);
     await m.user.click(inEquip().getByRole('button', { name: 'Confirmar' }));
     expect(await seriousViolations(m.container)).toEqual([]);

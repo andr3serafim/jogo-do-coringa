@@ -7,8 +7,10 @@
 // Recomeçar volta ao início, e Confirmar só aparece com todas as cartas posicionadas.
 //
 // Sem texto à vista (decisoes.md 2026-11-25 (3) a (6); spec 2026-11-25-equipar-abertura-niveis §3): os botões são figuras (o nome no
-// `aria-label`), o que era texto é arte (`EquipArt.tsx`) e o texto segue para o leitor de tela (`sr-only`). A disposição é a Y: no PC,
-// cartas e botões numa linha centrada; no celular, sempre duas (as cartas em cima, os botões embaixo).
+// `aria-label`), o que era texto é arte (`EquipArt.tsx`) e o texto segue para o leitor de tela (`sr-only`). Os destinos de fileira voltam a
+// ter a palavra ("Equipar ataque", "Equipar defesa") sob o desenho, com a espada vermelha e o escudo azul (decisoes.md 2026-11-27 (2)). No
+// celular, sempre duas linhas (as cartas em cima, os botões embaixo). No PC, as duas últimas das três colunas da faixa de baixo (35 | 35 | 30):
+// as cartas centradas na do meio, os botões (Desfazer, os destinos, Recomeçar, colados) centrados na dos botões, parados quando as cartas saem.
 //
 // Nenhuma regra mora aqui: o rascunho e a regra de estouro são da sessão (`equipChoose`, `equipConfirm`) e do modelo
 // (`equip.ts`). O painel é só vista: as jogadas chegam por props.
@@ -22,6 +24,8 @@ import { DESTINATION_TEXT } from '@coringa/sim/text';
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import {
   CONFIRM_LABEL,
+  EQUIP_ATTACK_LABEL,
+  EQUIP_DEFENSE_LABEL,
   equipConfirmedText,
   equipLeftText,
   EQUIP_READY_TEXT,
@@ -37,9 +41,10 @@ import type { Notice, SessionSnapshot } from '../../model/session.ts';
 import { useAnim } from '../anim/context.ts';
 import { useDealIn } from '../anim/useDealIn.ts';
 import { Card } from '../cards/Card.tsx';
-import { ResetIcon, Seal, UndoIcon } from './controls.tsx';
+import { MAIN_ICON, MainButton, ResetIcon, Seal, UndoIcon } from './controls.tsx';
 import { DragGhost } from './DragGhost.tsx';
 import { ConfirmedArt, MiniCard, NoCardsArt, QuadBadge, RejectedNotice, SendingDots } from './EquipArt.tsx';
+import { SELECTED_FRONT } from './Hand.tsx';
 import { AttackIcon, ConfirmIcon, DefenseIcon, DiscardIcon, SwapIcon } from './icons.tsx';
 import type { TableNames } from './labels.ts';
 import { useCardDrag } from './useCardDrag.ts';
@@ -70,8 +75,10 @@ export interface EquipPanelProps {
 function DestinationIcon({ destination }: { destination: Destination }) {
   const figure = 'size-8 pc:size-9';
   if (destination === 'DISCARD') return <DiscardIcon className={figure} />;
-  const row = destination === 'ATK' || destination === 'REPLACE_LAST_ATK' ? <AttackIcon className={figure} /> : <DefenseIcon className={figure} />;
-  if (destination === 'ATK' || destination === 'DEF') return row;
+  // Nos destinos com a palavra, o desenho leva a cor marcada: a espada vermelha, o escudo azul (decisoes.md 2026-11-27 (2)).
+  if (destination === 'ATK') return <AttackIcon className={figure} marked />;
+  if (destination === 'DEF') return <DefenseIcon className={figure} marked />;
+  const row = destination === 'REPLACE_LAST_ATK' ? <AttackIcon className={figure} /> : <DefenseIcon className={figure} />;
   return (
     <span className="relative">
       {row}
@@ -87,9 +94,13 @@ function leavingCard(view: PlayerView, chosen: EquipPick[], destination: Destina
   return (destination === 'REPLACE_LAST_ATK' ? board.attackRow : board.defenseRow).at(-1);
 }
 
+/** A palavra dos destinos de fileira (decisoes.md 2026-11-27 (2)); a troca e o descarte seguem só com a figura. */
+const DESTINATION_WORD: Partial<Record<Destination, string>> = { ATK: EQUIP_ATTACK_LABEL, DEF: EQUIP_DEFENSE_LABEL };
+
 /**
- * Um destino do Equipar (decisoes.md 2026-11-23 (1) e 2026-11-25 (4)): um carimbo quadrado de tamanho fixo, só com a figura (na troca, a carta
- * que sai, pequena, no canto). O nome inteiro (o do terminal, com a carta que sai) fica no `aria-label` e na dica.
+ * Um destino do Equipar (decisoes.md 2026-11-23 (1) e 2026-11-25 (4)): um carimbo de papel com a figura (na troca, a carta que sai, pequena, no
+ * canto). Os de fileira levam a palavra embaixo, e ela é o nome do botão (WCAG 2.5.3); os outros, só a figura, com o nome inteiro no
+ * `aria-label`. O nome do terminal (com a carta que sai) fica sempre na dica do mouse.
  */
 function DestinationStamp({
   view,
@@ -108,18 +119,20 @@ function DestinationStamp({
 }) {
   const label = destinationLabel(view, draft, destination);
   const leaving = leavingCard(view, draft, destination);
+  const word = DESTINATION_WORD[destination];
   return (
     <button
       type="button"
       data-foco={first ? '' : undefined}
       data-destino={destination}
-      aria-label={label}
+      aria-label={word ? undefined : label}
       title={label}
       disabled={disabled}
       onClick={onClick}
-      className="carimbo carimbo-papel carimbo-destino disabled:cursor-wait disabled:opacity-60"
+      className={`carimbo carimbo-papel carimbo-destino ${word ? 'carimbo-destino-palavra' : ''} disabled:cursor-wait disabled:opacity-60`}
     >
       <DestinationIcon destination={destination} />
+      {word ? <span>{word}</span> : null}
       {leaving ? <MiniCard card={leaving} /> : null}
     </button>
   );
@@ -161,9 +174,16 @@ export function EquipPanel(props: EquipPanelProps) {
   return <Choosing {...props} />;
 }
 
+/** Só a arte (sem numéricas, montagem enviada): no PC, na coluna do meio da faixa de baixo. */
 function Panel({ panelRef, children }: { panelRef: RefObject<HTMLElement | null>; children: ReactNode }) {
   return (
-    <section ref={panelRef} data-painel tabIndex={-1} aria-label="Equipar" className="flex flex-col gap-2 text-papel">
+    <section
+      ref={panelRef}
+      data-painel
+      tabIndex={-1}
+      aria-label="Equipar"
+      className="flex flex-col gap-2 text-papel pc:grid pc:grid-cols-[35fr_30fr] pc:items-center"
+    >
       {children}
     </section>
   );
@@ -205,8 +225,9 @@ function PendingCard({
     <li
       ref={item}
       data-entra={enter === null ? undefined : String(enter)}
-      // A escolhida só sobe (decisoes.md 2026-11-25 (2)): a da direita segue por cima, e o canto com o valor de cada uma fica à vista.
-      className="relative flex-none"
+      // Sem espaço, a escolhida sobe e fica na frente das vizinhas, inteira à vista (decisoes.md 2026-11-26 (7), ponto 5; substitui "só sobe",
+      // de 2026-11-25 (2)). O `SELECTED_FRONT` é o mesmo da mão de especiais.
+      className={`relative flex-none ${selected ? SELECTED_FRONT : ''}`}
       style={
         index > 0
           ? { marginLeft: `clamp(calc(var(--hand-w) * -0.6), calc((100% - ${count} * var(--hand-w)) / ${count - 1}), 8px)` }
@@ -280,7 +301,7 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
         </ol>
       ) : null}
 
-      <div data-disposicao className="relative flex flex-col items-center gap-3 pc:mx-auto pc:w-fit pc:max-w-full pc:flex-row pc:justify-center pc:gap-5">
+      <div data-disposicao className="relative flex flex-col items-center gap-3 pc:col-span-2 pc:grid pc:grid-cols-[35fr_30fr] pc:gap-0">
         {complete ? null : (
           // A largura natural das cartas (sem vão), até o painel inteiro; elas só se sobrepõem quando não cabem. O espaço de cima é o da carta
           // escolhida, que sobe como na mão.
@@ -288,7 +309,7 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
             role="list"
             aria-label="Suas numéricas"
             data-step="cartas"
-            className="flex min-w-0 max-w-full flex-[0_1_auto] list-none justify-center p-0 pt-3.5"
+            className="flex min-w-0 max-w-full flex-[0_1_auto] list-none justify-center p-0 pt-3.5 pc:justify-self-center"
             style={{ width }}
           >
             {remaining.map((card, index) => (
@@ -307,21 +328,30 @@ function Choosing({ view, legal, draft, pending, notice, disabled, onChoose, onU
             ))}
           </ul>
         )}
-        <div className="flex flex-none items-center justify-center gap-4">
+        {/* No celular, com o Confirmar, a linha toma a largura (o Confirmar se estica entre os selos, como o Atacar). No PC, colados e centrados
+            na coluna dos botões; numa tela estreita demais para o Confirmar entre os selos, a linha quebra. */}
+        <div
+          data-botoes-principais
+          className={`flex flex-none items-center justify-center pc:col-start-2 pc:w-auto pc:flex-wrap pc:justify-self-center ${complete ? 'w-full gap-1.5 pc:gap-1' : 'gap-4 pc:gap-3'}`}
+        >
           <Seal label={UNDO_LABEL} icon={<UndoIcon />} disabled={disabled || draft.length === 0} onClick={onUndo} />
           {complete ? (
-            <button
-              type="button"
+            <MainButton
+              tone="ouro"
+              icon={<ConfirmIcon className={MAIN_ICON} />}
+              label={CONFIRM_LABEL}
               data-foco=""
               disabled={disabled}
               onClick={onConfirm}
-              className="carimbo carimbo-ouro carimbo-destino carimbo-icone-palavra disabled:cursor-wait disabled:opacity-60"
-            >
-              <ConfirmIcon className="size-7 pc:size-8" />
-              <span>{CONFIRM_LABEL}</span>
-            </button>
+              className="flex-1 pc:flex-none"
+            />
           ) : (
-            <ul role="list" aria-label="Destinos" data-step="destinos" className="flex flex-none list-none items-center gap-3 p-0">
+            <ul
+              role="list"
+              aria-label="Destinos"
+              data-step="destinos"
+              className="flex flex-none list-none items-center justify-center gap-3 p-0"
+            >
               {options.map((destination, i) => (
                 <li key={destination} className="flex-none">
                   <DestinationStamp

@@ -33,7 +33,6 @@ import {
   leavesText,
   noPlaysText,
   PASSED_TEXT,
-  PICK_CARD_TEXT,
   reactingText,
   REFLECT_LABEL,
   RESURRECT_LABEL,
@@ -48,8 +47,8 @@ import { previewsOf, previewsWithout, type Previews } from '../../model/preview.
 import type { CardPlay, Target, TablePlays } from '../../model/plays.ts';
 import type { Notice } from '../../model/session.ts';
 import { useAnim } from '../anim/context.ts';
-import { ATTACK, ATTACK_TITLE, PAPER_BIG, PRIMARY_TITLE, SECONDARY, STRIP, TwoLine } from './controls.tsx';
-import { AttackIcon } from './icons.tsx';
+import { ATTACK, ATTACK_TITLE, MAIN_ICON, PAPER_BIG, PRIMARY_TITLE, SECONDARY, SPECIAL, SPECIAL_TITLE, STRIP, TwoLine } from './controls.tsx';
+import { AttackIcon, CancelReflectIcon, DevastateIcon, ReflectIcon } from './icons.tsx';
 import { resurrectDetailText, type TableNames } from './labels.ts';
 import { PassButton, ReactionNotice } from './ReactionPanel.tsx';
 import { ResurrectIcon } from './ResurrectIcon.tsx';
@@ -126,7 +125,13 @@ export function ActionBar(props: ActionBarProps) {
   const { reduced } = useAnim();
 
   return (
-    <section ref={barRef} data-painel tabIndex={-1} aria-label="Ações" className="relative flex flex-col gap-2.5 text-papel pc:gap-1.5">
+    <section
+      ref={barRef}
+      data-painel
+      tabIndex={-1}
+      aria-label="Ações"
+      className="relative flex flex-col gap-2.5 text-papel pc:grid pc:grid-cols-[35fr_30fr] pc:items-center pc:gap-0"
+    >
       {open && targets && pointed && !isRowZone(pointed.zone) ? (
         <div
           role="tooltip"
@@ -138,9 +143,12 @@ export function ActionBar(props: ActionBarProps) {
           </PreviewLine>
         </div>
       ) : null}
+      {/* O que informa e as escolhas da carta: no PC, centrado na coluna do meio da faixa de baixo (35 | 35 | 30, decisoes.md 2026-11-27 (2));
+          os botões, na última. Vazio, o bloco some (no celular, o vão da coluna não sobra). */}
+      <div data-barra-info className="flex min-w-0 flex-col gap-2.5 empty:hidden pc:items-center pc:gap-1.5 pc:px-3 pc:text-center">
       {reacting && open ? <ReactionNotice view={view} names={names} threat={previews.threat} events={props.events} /> : null}
 
-      <Status {...{ view, names, acting, pending, card, play, cardPlays, plays, notice, passed }} />
+      <Status {...{ view, names, acting, pending, card, play, cardPlays, notice, passed }} />
 
       {open && card && play === null && cardPlays.length > 0 ? (
         <ul role="list" aria-label="Jogadas" data-step="plays" className="flex list-none flex-wrap gap-2 p-1.5">
@@ -171,54 +179,64 @@ export function ActionBar(props: ActionBarProps) {
 
       {/* Sem a ameaça do oponente: quem joga observa a mesa e pensa a estratégia (decisoes.md 2026-11-02 (9), ponto 4). */}
 
-      {/* Com uma carta escolhida a conversa é sobre ela: os botões próprios (que não usam a escolha) voltam com o Cancelar. */}
-      {open && card === null ? <OwnPlays {...props} /> : null}
+      </div>
 
-      {open && (plays.finish || canPass || card) ? (
-        <div className="flex gap-2">
-          {canPass ? <PassButton disabled={disabled} onPass={() => props.onSend({ type: 'PASS' })} /> : null}
-          {plays.finish && attacking ? (
-            // O Atacar é o maior e o único vermelho, com a espada e a prévia numa tira lisa de papel. A etiqueta e a faísca do Absoluto são
-            // irmãs do botão, só desenho: o nome dele já diz "Ataque Absoluto" na prévia (WCAG 2.5.3, rótulo no nome).
-            <div className="relative flex flex-1 pc:flex-none">
-              <TwoLine
-                title={ATTACK_LABEL}
-                detail={attackPreviewText(previews.mine, opponent, previews.lives)}
-                titleClass={ATTACK_TITLE}
-                detailClass={STRIP}
-                strip
-                icon={<AttackIcon className="size-9 pc:size-10" />}
-                data-absoluto={armed ? '' : undefined}
-                disabled={disabled}
-                onClick={() => props.onSend(plays.finish!)}
-                className={`${ATTACK} w-full pc:min-w-[300px]`}
-              />
-              {armed ? (
-                <span aria-hidden="true" data-etiqueta-absoluto className="carimbo-etiqueta">
-                  {ABSOLUTE_ATTACK_TAG}
-                </span>
+      {open ? (
+        // No PC o grupo fica centrado na coluna dos botões (decisoes.md 2026-11-27 (2)), e o principal é o último: o Cancelar entra à esquerda
+        // dele; as jogadas especiais, acima, quando não cabem na linha (decisoes.md 2026-11-26 (8)). No celular as especiais ficam acima do Atacar.
+        <div
+          data-botoes-principais
+          className="flex flex-col gap-2 empty:hidden pc:col-start-2 pc:min-w-0 pc:flex-row pc:flex-wrap pc:items-center pc:justify-center pc:justify-self-center"
+        >
+          {/* Com uma carta escolhida a conversa é sobre ela: as jogadas próprias (que não usam a escolha) voltam com o Cancelar. */}
+          {card === null ? <OwnPlays {...props} /> : null}
+          {plays.finish || canPass || card ? (
+            <div className="flex gap-2 pc:flex-none">
+              {canPass ? <PassButton disabled={disabled} onPass={() => props.onSend({ type: 'PASS' })} /> : null}
+              {plays.finish && attacking ? (
+                // O Atacar é o maior e o único vermelho, com a espada e a prévia numa tira lisa de papel. A etiqueta e a faísca do Absoluto são
+                // irmãs do botão, só desenho: o nome dele já diz "Ataque Absoluto" na prévia (WCAG 2.5.3, rótulo no nome).
+                <div className="relative flex flex-1 pc:flex-none">
+                  <TwoLine
+                    title={ATTACK_LABEL}
+                    detail={attackPreviewText(previews.mine, opponent, previews.lives)}
+                    titleClass={ATTACK_TITLE}
+                    detailClass={STRIP}
+                    strip
+                    icon={<AttackIcon className="size-9 pc:size-10" />}
+                    data-absoluto={armed ? '' : undefined}
+                    disabled={disabled}
+                    onClick={() => props.onSend(plays.finish!)}
+                    className={`${ATTACK} w-full`}
+                  />
+                  {armed ? (
+                    <span aria-hidden="true" data-etiqueta-absoluto className="carimbo-etiqueta">
+                      {ABSOLUTE_ATTACK_TAG}
+                    </span>
+                  ) : null}
+                  {armed && !reduced && !disabled ? <span aria-hidden="true" data-faisca className="carimbo-faisca" /> : null}
+                </div>
+              ) : plays.finish ? (
+                <TwoLine
+                  title={END_TURN_LABEL}
+                  detail={EMPTY_ATTACK_TEXT}
+                  titleClass={PRIMARY_TITLE}
+                  detailClass="text-xs font-semibold pc:text-[13px]"
+                  disabled={disabled}
+                  onClick={() => props.onSend(plays.finish!)}
+                  className={`${PAPER_BIG} flex-1 pc:flex-none`}
+                />
               ) : null}
-              {armed && !reduced && !disabled ? <span aria-hidden="true" data-faisca className="carimbo-faisca" /> : null}
+              {card ? (
+                <button
+                  type="button"
+                  onClick={props.onCancel}
+                  className={`${SECONDARY} pc:order-first ${plays.finish || canPass ? 'min-h-14 pc:min-h-12' : ''}`}
+                >
+                  {CANCEL_LABEL}
+                </button>
+              ) : null}
             </div>
-          ) : plays.finish ? (
-            <TwoLine
-              title={END_TURN_LABEL}
-              detail={EMPTY_ATTACK_TEXT}
-              titleClass={PRIMARY_TITLE}
-              detailClass="text-xs font-semibold pc:text-[13px]"
-              disabled={disabled}
-              onClick={() => props.onSend(plays.finish!)}
-              className={`${PAPER_BIG} flex-1 pc:min-w-[300px] pc:flex-none`}
-            />
-          ) : null}
-          {card ? (
-            <button
-              type="button"
-              onClick={props.onCancel}
-              className={`${SECONDARY} ${plays.finish || canPass ? 'min-h-14 pc:min-h-12' : ''}`}
-            >
-              {CANCEL_LABEL}
-            </button>
           ) : null}
         </div>
       ) : null}
@@ -247,14 +265,13 @@ interface StatusProps {
   card: SpecialCard | null;
   play: CardPlay | null;
   cardPlays: CardPlay[];
-  plays: TablePlays;
   notice: Notice | null;
   /** Um passe saiu nesta janela. */
   passed: boolean;
 }
 
 /** A linha de cima: o passe automático, "Enviando…", o aviso de uma jogada recusada, ou o que fazer agora. */
-function Status({ view, names, acting, pending, card, play, cardPlays, plays, notice, passed }: StatusProps) {
+function Status({ view, names, acting, pending, card, play, cardPlays, notice, passed }: StatusProps) {
   if (notice?.kind === 'autoPass') {
     return (
       <p role="status" className="text-sm font-bold leading-snug">
@@ -288,7 +305,8 @@ function Status({ view, names, acting, pending, card, play, cardPlays, plays, no
     if (view.phase.kind === 'ATTACK_MAIN') text = waitingText(names.opponent);
     else if (view.phase.kind === 'REACTION') text = reactingText(names.opponent);
   } else if (card === null) {
-    text = plays.byCard.size > 0 ? PICK_CARD_TEXT : null;
+    // Sem "Toque numa carta da mão…" (decisoes.md 2026-11-26 (7), ponto 3): a carta que joga já se mostra (o fio de ouro, a respiração).
+    return null;
   } else if (play?.targets) {
     text = chooseTargetText(play.label, card, names.opponent);
   } else {
@@ -380,22 +398,28 @@ function TargetList({ view, names, targets, before, disabled, marked, described,
   );
 }
 
-/** Reflect, Anular o Reflect, Devastação e Ressuscitar: as jogadas de várias cartas, quando são possíveis. */
+/**
+ * Reflect, Anular o Reflect, Devastação e Ressuscitar: as jogadas de várias cartas, quando são possíveis. Cada uma é o retângulo de tinta do
+ * Atacar, com o desenho dela, o título em ouro e o detalhe na tira (decisoes.md 2026-11-26 (8), item 4). No PC, na linha à esquerda do
+ * Atacar; sem espaço, quebram em linhas, ainda à esquerda dele.
+ */
 function OwnPlays({ view, plays, disabled, onSend, onResurrect }: ActionBarProps) {
   const own = ownCardsById(view);
   const items: ReactNode[] = [];
-  const add = (key: string, title: string, detail: string, onClick: () => void, icon?: ReactNode) =>
+  const add = (key: string, title: string, detail: string, onClick: () => void, icon: ReactNode) =>
     items.push(
       <TwoLine
         key={key}
         title={title}
         detail={detail}
-        titleClass="text-[15px] font-bold leading-tight"
-        detailClass="text-xs font-normal leading-tight"
+        titleClass={SPECIAL_TITLE}
+        detailClass={STRIP}
+        strip
         disabled={disabled}
         onClick={onClick}
         icon={icon}
-        className={`${SECONDARY} gap-0.5`}
+        data-especial={key}
+        className={`${SPECIAL} w-full pc:w-auto`}
       />,
     );
 
@@ -403,26 +427,28 @@ function OwnPlays({ view, plays, disabled, onSend, onResurrect }: ActionBarProps
   // Uma carta que não está na mão nem no campo não pode ser descrita: sem a lista de quem sai, o botão não aparece.
   if (reflect?.type === 'REFLECT') {
     const cards = pickCards(own, [reflect.kId, reflect.jId, reflect.qId]);
-    if (cards) add('reflect', REFLECT_LABEL, leavesText(cards, 'hand'), () => onSend(reflect));
+    if (cards) add('reflect', REFLECT_LABEL, leavesText(cards, 'hand'), () => onSend(reflect), <ReflectIcon className={MAIN_ICON} />);
   }
   if (cancelReflect?.type === 'CANCEL_REFLECT') {
     const cards = pickCards(own, [cancelReflect.kId, cancelReflect.jId, cancelReflect.qId]);
-    if (cards) add('cancel', CANCEL_REFLECT_LABEL, leavesText(cards, 'hand'), () => onSend(cancelReflect));
+    if (cards) add('cancel', CANCEL_REFLECT_LABEL, leavesText(cards, 'hand'), () => onSend(cancelReflect), <CancelReflectIcon className={MAIN_ICON} />);
   }
   for (const devastate of plays.devastate) {
     if (devastate.type !== 'DEVASTATE') continue;
     const cards = pickCards(own, [devastate.kId, devastate.aId, devastate.xId]);
-    if (cards) add(`devastate-${devastate.row}`, devastateLabel(devastate.row), leavesText(cards, 'hand'), () => onSend(devastate));
+    if (cards) {
+      add(`devastate-${devastate.row}`, devastateLabel(devastate.row), leavesText(cards, 'hand'), () => onSend(devastate), <DevastateIcon className={MAIN_ICON} />);
+    }
   }
   // Com as duas fileiras protegidas pela quadra (ponto 16) não há jogada, mas o botão fica: o cemitério diz por quê.
   if (plays.resurrect.length > 0 || plays.resurrectBlocked.length === 2) {
     // A arte da Ressurreição (U2): a carta que sobe da lápide; a linha de baixo diz de onde ela vem e o que há para trazer.
     const numerics = view.graveyard.filter((card) => card.kind === 'NUM').length;
-    add('resurrect', RESURRECT_LABEL, resurrectDetailText(view.self.resurrectionCount, numerics), onResurrect, <ResurrectIcon />);
+    add('resurrect', RESURRECT_LABEL, resurrectDetailText(view.self.resurrectionCount, numerics), onResurrect, <ResurrectIcon className={MAIN_ICON} />);
   }
   if (items.length === 0) return null;
   return (
-    <div role="group" aria-label="Outras jogadas" className="flex flex-wrap gap-2 p-1.5">
+    <div role="group" aria-label="Outras jogadas" className="flex flex-col gap-2 pc:max-w-full pc:flex-row pc:flex-wrap pc:justify-center">
       {items}
     </div>
   );

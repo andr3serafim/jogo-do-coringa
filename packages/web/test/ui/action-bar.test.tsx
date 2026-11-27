@@ -151,12 +151,21 @@ describe('barra de ação: tocar uma carta lista as jogadas (spec §3.4)', () =>
     expect(acts(m)).toEqual([]);
   });
 
-  it('a barra diz o que fazer com a carta escolhida', async () => {
+  it('a barra diz o que fazer com a carta escolhida, e nada antes dela (decisoes.md 2026-11-26 (7), ponto 3)', async () => {
     const m = mount();
-    expect(inBar().getByText(/Toque numa carta da mão/)).toBeInTheDocument();
+    expect(inBar().queryByText(/Toque numa carta/)).not.toBeInTheDocument();
     const a = handCards(m.view, 'A')[0]!;
     await m.user.click(handCard('A'));
     expect(inBar().getByText(`${cardText(a)}: escolha a jogada`)).toBeInTheDocument();
+  });
+
+  it('a carta escolhida da mão fica na frente das vizinhas, e só ela (decisoes.md 2026-11-26 (7), ponto 5)', async () => {
+    const m = mount();
+    const items = () => handList().getAllByRole('listitem');
+    expect(m.view.self.hand.length).toBeGreaterThan(1);
+    expect(items().some((li) => li.classList.contains('z-[15]'))).toBe(false);
+    await m.user.click(handCard('A'));
+    expect(items().filter((li) => li.classList.contains('z-[15]'))).toEqual([handCard('A').closest('li')]);
   });
 
   it('tocar de novo a carta escolhida desfaz a escolha', async () => {
@@ -469,7 +478,16 @@ describe('barra de ação: prévias e o botão principal (spec §3.4)', () => {
 
   it('o botão principal tem altura de alvo de toque', () => {
     mount();
-    expect(inBar().getByRole('button', { name: ATTACK_BUTTON }).className).toContain('min-h-14');
+    expect(inBar().getByRole('button', { name: ATTACK_BUTTON })).toHaveClass('min-h-[68px]', 'pc:min-h-[72px]', 'pc:min-w-[260px]');
+  });
+
+  it('no PC os botões ficam na coluna deles, e o Cancelar entra à esquerda do Atacar (decisoes.md 2026-11-27 (2))', async () => {
+    const m = mount();
+    const group = () => inBar().getByRole('button', { name: ATTACK_BUTTON }).closest('[data-botoes-principais]')!;
+    expect(group()).toHaveClass('pc:col-start-2', 'pc:justify-self-center');
+    expect(screen.getByRole('region', { name: 'Ações' })).toHaveClass('pc:grid', 'pc:grid-cols-[35fr_30fr]', 'pc:items-center');
+    await m.user.click(handCard('A'));
+    expect(within(group() as HTMLElement).getByRole('button', { name: 'Cancelar' })).toHaveClass('pc:order-first');
   });
 });
 
@@ -525,7 +543,23 @@ describe('barra de ação: botões próprios (spec §3.4)', () => {
 
   it('os botões próprios têm altura de alvo de toque', () => {
     mount(withHand(['K', 'J', 'Q'], { phase: 'ATTACK' }));
-    expect(inBar().getByRole('button', { name: startsWith('Lançar Reflect') }).className).toContain('min-h-11');
+    expect(inBar().getByRole('button', { name: startsWith('Lançar Reflect') })).toHaveClass('min-h-[68px]', 'pc:min-h-[72px]');
+  });
+
+  it('as especiais são o retângulo de tinta do Atacar, no grupo dos principais (decisoes.md 2026-11-26 (8), item 4)', () => {
+    mount(withHand(['K', 'J', 'Q'], { phase: 'ATTACK' }));
+    const reflect = inBar().getByRole('button', { name: startsWith('Lançar Reflect') });
+    expect(reflect).toHaveClass('carimbo', 'carimbo-grande', 'carimbo-tinta');
+    expect(reflect).not.toHaveClass('carimbo-papel');
+    expect(reflect.querySelector('svg[data-arte="reflect"]')).toHaveAttribute('aria-hidden', 'true');
+    expect(reflect.querySelector('[data-tira]')).toHaveClass('carimbo-tira');
+    expect(within(reflect).getByText('Lançar Reflect')).toHaveClass('font-madeira', 'text-ouro');
+    // No grupo dos botões principais (no PC, à esquerda do Passar ou do Atacar; no celular, acima), e não na área de informação.
+    const group = reflect.closest('[data-botoes-principais]') as HTMLElement;
+    expect(group).not.toBeNull();
+    expect(reflect.closest('[data-barra-info]')).toBeNull();
+    const pass = within(group).getByRole('button', { name: 'Passar' });
+    expect(reflect.compareDocumentPosition(pass) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });
 
