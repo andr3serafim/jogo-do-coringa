@@ -154,6 +154,42 @@ export function ReflectIcon({ className }: ArtProps) {
   );
 }
 
+/** O Anular o Reflect: o espelho com o risco vermelho por cima (decisoes.md 2026-11-26 (8), item 4). */
+export function CancelReflectIcon({ className }: ArtProps) {
+  return (
+    <Art name="anular-reflect" className={className}>
+      <path d="M10.6 16.6h2.8v6.2h-2.8Z" fill="var(--color-ouro)" stroke="var(--color-tinta)" strokeWidth="1.2" />
+      <ellipse cx="12" cy="9.2" rx="7" ry="7.8" fill="var(--color-ouro)" stroke="var(--color-tinta)" strokeWidth="1.4" />
+      <ellipse cx="12" cy="9.2" rx="4.7" ry="5.5" fill="var(--color-papel)" stroke="var(--color-tinta)" strokeWidth="1.1" />
+      <path d="M3.4 20.6 20.6 2.6" stroke="var(--color-papel)" strokeWidth="5" />
+      <path d="M3.4 20.6 20.6 2.6" stroke="var(--color-vermelho)" strokeWidth="2.8" />
+    </Art>
+  );
+}
+
+/** A Devastação (decisoes.md 2026-11-26 (8), item 4): três cartas de papel em leque e o raio de ouro que as racha. */
+export function DevastateIcon({ className }: ArtProps) {
+  return (
+    <Art name="devastar" className={className}>
+      {[2.4, 8.8, 15.2].map((x, i) => (
+        <rect
+          key={x}
+          x={x}
+          y={5 + (i % 2) * 1.8}
+          width="6.2"
+          height="9.2"
+          rx="0.7"
+          fill="var(--color-papel)"
+          stroke="var(--color-tinta)"
+          strokeWidth="1.3"
+          transform={`rotate(${(i - 1) * 8} ${x + 3.1} 10)`}
+        />
+      ))}
+      <path d="M13.2 1.2 9 10.8h4.2l-3 12 8.4-14.4h-4.8l3-7.2Z" fill="var(--color-ouro)" stroke="var(--color-tinta)" strokeWidth="1.3" strokeLinejoin="round" />
+    </Art>
+  );
+}
+
 /** O cadeado da carta da mão que não joga agora (bloco A dos pontos do playtest, ponto 2): corpo de tinta, arco de papel, buraco de ouro. */
 export function LockIcon({ className }: ArtProps) {
   return (

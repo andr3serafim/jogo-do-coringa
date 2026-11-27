@@ -579,23 +579,20 @@ describe('/tutorial: o lugar do painel', () => {
     expect(fields).not.toContainElement(screen.getByRole('list', { name: 'Sua mão' }));
   });
 
-  it('PC: o painel vai no alto da coluna do histórico (abaixo do cabeçalho, acima da lista), e não nos campos', async () => {
+  it('PC: o painel vai no alto dos campos, como no celular, e não na gaveta do histórico (decisoes.md 2026-11-26 (8), D1)', async () => {
     vi.stubGlobal('matchMedia', (query: string) => ({ matches: query === PC_QUERY, addEventListener() {}, removeEventListener() {} }));
     await openTutorial();
-    const aside = screen.getByRole('complementary', { name: 'Histórico da partida' });
+    const aside = screen.getByRole('complementary', { name: 'Histórico da partida', hidden: true });
     const panel = hintPanel();
     expect(screen.getAllByRole('region', { name: 'Dica' })).toHaveLength(1);
-    expect(aside).toContainElement(panel);
-    expect(document.querySelector('[data-campos]')).not.toContainElement(panel);
-    const children = [...aside.children];
-    expect(children.indexOf(panel)).toBe(1);
-    expect(children[2]).toBe(screen.getByRole('region', { name: 'Linhas do histórico' }));
+    expect(aside).not.toContainElement(panel);
+    expect(document.querySelector('[data-campos]')).toContainElement(panel);
   });
 
   it('o painel não tem nenhuma aria-live aninhada na lista do histórico (cada região é uma)', async () => {
     vi.stubGlobal('matchMedia', (query: string) => ({ matches: query === PC_QUERY, addEventListener() {}, removeEventListener() {} }));
     await openTutorial();
-    const lists = within(screen.getByRole('region', { name: 'Linhas do histórico' }));
+    const lists = within(screen.getByRole('region', { name: 'Linhas do histórico', hidden: true }));
     expect(lists.queryByRole('region', { name: 'Dica' })).not.toBeInTheDocument();
   });
 });

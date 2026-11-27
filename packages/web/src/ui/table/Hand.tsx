@@ -68,7 +68,13 @@ export function Hand({ cards }: { cards: SpecialCard[] }) {
   }
   const count = cards.length;
   return (
-    <div className="relative w-full pc:w-[clamp(360px,50%,600px)] pc:flex-none">
+    // No PC a mão tem o tamanho das cartas, lado a lado (decisoes.md 2026-11-26 (8), D1; substitui a metade da faixa de 2026-11-25 (7)):
+    // a sobra vai para as numéricas e a barra. Sem espaço, ela encolhe e as cartas se sobrepõem, antes de os botões principais cederem.
+    <div
+      data-mao
+      style={{ ['--mao-natural' as string]: `calc(${count} * var(--hand-w) + ${count - 1} * 10px)` }}
+      className="relative w-full pc:w-[var(--mao-natural)] pc:min-w-0 pc:flex-[0_1_auto]"
+    >
       {/* O balão do motivo (B2) fica por cima do seu campo, sem empurrar a mão nem pegar o toque de nada embaixo dele. */}
       {handNote ? (
         <p

@@ -484,7 +484,7 @@ describe('barra de ação: prévias e o botão principal (spec §3.4)', () => {
   it('no PC os botões principais ficam presos à direita, e o Cancelar entra à esquerda do Atacar (decisoes.md 2026-11-26 (7), ponto 1)', async () => {
     const m = mount();
     const group = () => inBar().getByRole('button', { name: ATTACK_BUTTON }).closest('[data-botoes-principais]')!;
-    expect(group()).toHaveClass('pc:ml-auto', 'pc:flex-none');
+    expect(group()).toHaveClass('pc:ml-auto', 'pc:flex-row');
     expect(screen.getByRole('region', { name: 'Ações' })).toHaveClass('pc:flex-row', 'pc:items-center');
     await m.user.click(handCard('A'));
     expect(within(group() as HTMLElement).getByRole('button', { name: 'Cancelar' })).toHaveClass('pc:order-first');
@@ -543,7 +543,23 @@ describe('barra de ação: botões próprios (spec §3.4)', () => {
 
   it('os botões próprios têm altura de alvo de toque', () => {
     mount(withHand(['K', 'J', 'Q'], { phase: 'ATTACK' }));
-    expect(inBar().getByRole('button', { name: startsWith('Lançar Reflect') }).className).toContain('min-h-11');
+    expect(inBar().getByRole('button', { name: startsWith('Lançar Reflect') })).toHaveClass('min-h-[68px]', 'pc:min-h-[72px]');
+  });
+
+  it('as especiais são o retângulo de tinta do Atacar, no grupo dos principais (decisoes.md 2026-11-26 (8), item 4)', () => {
+    mount(withHand(['K', 'J', 'Q'], { phase: 'ATTACK' }));
+    const reflect = inBar().getByRole('button', { name: startsWith('Lançar Reflect') });
+    expect(reflect).toHaveClass('carimbo', 'carimbo-grande', 'carimbo-tinta');
+    expect(reflect).not.toHaveClass('carimbo-papel');
+    expect(reflect.querySelector('svg[data-arte="reflect"]')).toHaveAttribute('aria-hidden', 'true');
+    expect(reflect.querySelector('[data-tira]')).toHaveClass('carimbo-tira');
+    expect(within(reflect).getByText('Lançar Reflect')).toHaveClass('font-madeira', 'text-ouro');
+    // No grupo dos botões principais (no PC, à esquerda do Passar ou do Atacar; no celular, acima), e não na área de informação.
+    const group = reflect.closest('[data-botoes-principais]') as HTMLElement;
+    expect(group).not.toBeNull();
+    expect(reflect.closest('[data-barra-info]')).toBeNull();
+    const pass = within(group).getByRole('button', { name: 'Passar' });
+    expect(reflect.compareDocumentPosition(pass) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });
 

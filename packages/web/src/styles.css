@@ -1398,6 +1398,12 @@ li[data-joga]::after {
     color: var(--color-papel);
   }
 
+  /* As jogadas especiais (decisoes.md 2026-11-26 (8), item 4): a família de tinta, com o título em ouro (o vermelho segue só do Atacar). */
+  .carimbo-tinta {
+    --carimbo-face: var(--color-tinta);
+    color: var(--color-papel);
+  }
+
   .carimbo-grande {
     --carimbo-sombra: 4px;
     background-image: var(--grao-carimbo);

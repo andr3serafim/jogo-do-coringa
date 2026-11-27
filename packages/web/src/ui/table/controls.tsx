@@ -30,6 +30,15 @@ export const PAPER_BIG = `${FACE} carimbo-papel ${MAIN_SIZE}`;
 /** O Atacar: o único vermelho. */
 export const ATTACK = `${FACE} carimbo-atacar ${MAIN_SIZE}`;
 
+/**
+ * As jogadas especiais (Devastar, Reflect, Anular o Reflect, Ressuscitar; decisoes.md 2026-11-26 (8), item 4): o retângulo do Atacar, em
+ * tinta, com o título em ouro e o detalhe na tira de papel. Só a largura mínima cede: numa linha apertada o título quebra.
+ */
+export const SPECIAL = `${FACE} carimbo-tinta min-h-[68px] pc:min-h-[72px]`;
+
+/** O título das jogadas especiais: o tipo de madeira do Atacar, em ouro. */
+export const SPECIAL_TITLE = 'font-madeira text-2xl uppercase leading-none text-ouro pc:text-[26px]';
+
 export const PRIMARY_TITLE = 'font-madeira text-[19px] uppercase leading-tight pc:text-[22px]';
 
 export const ATTACK_TITLE = 'carimbo-atacar-titulo font-madeira text-2xl uppercase leading-none pc:text-[26px]';

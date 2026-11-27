@@ -97,8 +97,10 @@ test('tutorial: a dica do Equipar, a seguinte quando a situação muda, e "Pular
   await openTutorial(page);
   expect(await stored(page), 'nada guardado antes de acabar ou pular').toBeNull();
 
-  // A dica 1: no PC mora no alto da coluna do histórico, com os dois botões e o contorno na barra do Equipar.
-  await expect(history(page).getByRole('region', { name: 'Dica' })).toBeVisible();
+  // A dica 1: no alto dos campos (no PC também, desde que o histórico virou gaveta: decisoes.md 2026-11-26 (8)), com os dois botões e o
+  // contorno na barra do Equipar.
+  await expect(page.locator('[data-campos]').getByRole('region', { name: 'Dica' })).toBeVisible();
+  await expect(history(page).getByRole('region', { name: 'Dica' })).toHaveCount(0);
   await expect(gotIt(page)).toBeVisible();
   await expect(skip(page)).toBeVisible();
   await expect(outlined(page)).toHaveCount(1);

@@ -1,10 +1,10 @@
 // O histórico da partida (spec §3.1, §7 e §10.5): uma região `aria-live="polite"` com os textos de
-// `@coringa/sim/text`. No PC é uma coluna ao lado da mesa; no celular e no tablet (< 1024 px) é uma gaveta que o botão
-// do cabeçalho abre, com a contagem do que é novo. A árvore é uma só: fechada, a gaveta fica fora da vista mas dentro
+// `@coringa/sim/text`. Em toda tela é uma gaveta que o botão do campo do oponente abre, com a contagem do que é novo: no celular e
+// no tablet (< 1024 px) sobe de baixo; no PC entra pela direita, por cima da mesa (decisoes.md 2026-11-26 (8), D1; antes era uma coluna
+// sempre à vista). A árvore é uma só: fechada, a gaveta fica fora da vista mas dentro
 // da árvore de acessibilidade (`sr-only`), porque uma região `display: none` não anuncia nada ao leitor de tela.
 import { useEffect, useRef, type KeyboardEvent, type ReactNode, type RefObject } from 'react';
 import type { HistoryLine } from '../../model/history.ts';
-import { useMediaQuery } from '../useMediaQuery.ts';
 import { historyButtonName } from './labels.ts';
 
 export interface HistoryButtonProps {
@@ -16,7 +16,7 @@ export interface HistoryButtonProps {
   buttonRef: RefObject<HTMLButtonElement | null>;
 }
 
-/** O botão do cabeçalho do celular e do tablet. */
+/** O botão do histórico, no campo do oponente, ao lado do menu (em toda tela). */
 export function HistoryButton({ panelId, open, count, onToggle, buttonRef }: HistoryButtonProps) {
   return (
     <button
@@ -26,7 +26,7 @@ export function HistoryButton({ panelId, open, count, onToggle, buttonRef }: His
       aria-controls={panelId}
       aria-label={historyButtonName(count)}
       onClick={onToggle}
-      className="relative grid size-11 place-items-center border-2 border-papel/60 bg-transparent pc:hidden"
+      className="relative grid size-11 place-items-center border-2 border-papel/60 bg-transparent"
     >
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="size-5">
         <path d="M4 7h16M4 12h16M4 17h10" className="stroke-papel" strokeWidth="2.4" strokeLinecap="round" fill="none" />
@@ -51,31 +51,26 @@ export interface HistoryPanelProps {
   lines: readonly HistoryLine[];
   /** As linhas com `seq` maior levam "novo"; `null` sem base de marcas. */
   baseSeq: number | null;
-  /** Sala e placar, ao pé da coluna. */
+  /** Sala e placar, ao pé da gaveta. */
   footer?: ReactNode;
-  /** O painel da dica do tutorial (só no PC, onde o histórico é uma coluna): logo abaixo do cabeçalho, acima da lista. */
-  top?: ReactNode;
-  /** Ferramenta do cabeçalho (o botão do menu no PC, onde o histórico é uma coluna). */
-  tool?: ReactNode;
 }
 
 /** Até onde do fim da lista ainda conta como "no fim". */
 const NEAR_END_PX = 24;
 
 /**
- * O ponto `pc` do tema (`--breakpoint-pc` em `styles.css`): a partir dele o histórico é uma coluna sempre à vista. O Tailwind inlina o
+ * O ponto `pc` do tema (`--breakpoint-pc` em `styles.css`): a partir dele a gaveta do histórico entra pela direita. O Tailwind inlina o
  * valor nas media queries (não deixa a variável no CSS final), então o número é repetido aqui, e um teste confere que é o mesmo.
  */
 export const PC_QUERY = '(min-width: 1024px)';
 
-const CLOSED = 'max-pc:sr-only';
+const CLOSED = 'sr-only';
 const OPEN =
-  'max-pc:fixed max-pc:inset-x-0 max-pc:bottom-0 max-pc:z-40 max-pc:max-h-[70dvh] max-pc:border-t-4 max-pc:border-ouro max-pc:pb-[max(1rem,env(safe-area-inset-bottom))]';
+  'fixed inset-x-0 bottom-0 z-40 max-h-[70dvh] border-t-4 border-ouro pb-[max(1rem,env(safe-area-inset-bottom))] pc:inset-x-auto pc:inset-y-0 pc:right-0 pc:max-h-none pc:w-[400px] pc:max-w-[90vw] pc:border-l-4 pc:border-t-0 pc:px-6 pc:py-[22px]';
 
-export function HistoryPanel({ id, open, onClose, lines, baseSeq, footer, top, tool }: HistoryPanelProps) {
+export function HistoryPanel({ id, open, onClose, lines, baseSeq, footer }: HistoryPanelProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const pc = useMediaQuery(PC_QUERY);
 
   /** A lista está no fim (ou perto): só então uma linha nova a puxa para baixo. Quem lê o que ficou para cima não é interrompido. */
   const atEnd = useRef(true);
@@ -117,39 +112,37 @@ export function HistoryPanel({ id, open, onClose, lines, baseSeq, footer, top, t
           aria-hidden="true"
           tabIndex={-1}
           onClick={onClose}
-          className="fixed inset-0 z-30 cursor-default bg-tinta/50 pc:hidden"
+          className="fixed inset-0 z-30 cursor-default bg-tinta/50"
         />
       ) : null}
       <aside
         id={id}
         aria-label="Histórico da partida"
         onKeyDown={onKeyDown}
-        className={`flex min-h-0 flex-col gap-3.5 madeira-escura p-4 text-papel pc:h-full pc:min-w-[260px] pc:max-w-[420px] pc:flex-1 pc:border-l-2 pc:border-ouro/40 pc:px-6 pc:py-[22px] ${open ? OPEN : CLOSED}`}
+        className={`flex min-h-0 flex-col gap-3.5 madeira-escura p-4 text-papel ${open ? OPEN : CLOSED}`}
       >
         <div className="flex items-center justify-between">
           <h2 className="textura font-madeira text-[22px] uppercase">Histórico</h2>
-          {tool}
           <button
             type="button"
             ref={closeRef}
             aria-label="Fechar o histórico"
             tabIndex={open ? 0 : -1}
             onClick={onClose}
-            className="min-h-11 border-2 border-papel/60 bg-transparent px-4 font-bold text-papel pc:hidden"
+            className="min-h-11 border-2 border-papel/60 bg-transparent px-4 font-bold text-papel"
           >
             Fechar
           </button>
         </div>
-        {top}
-        {/* A lista rola, então o teclado precisa chegar nela (axe: scrollable-region-focusable). Gaveta fechada (celular e tablet) é só
+        {/* A lista rola, então o teclado precisa chegar nela (axe: scrollable-region-focusable). Gaveta fechada é só
             texto para o leitor de tela: sem rolagem e fora do Tab, para não sobrar parada invisível. */}
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          tabIndex={open || pc ? 0 : undefined}
+          tabIndex={open ? 0 : undefined}
           role="region"
           aria-label="Linhas do histórico"
-          className={`min-h-0 flex-1 select-text pr-1 ${open ? 'overflow-y-auto' : 'max-pc:overflow-hidden pc:overflow-y-auto'}`}
+          className={`min-h-0 flex-1 select-text pr-1 ${open ? 'overflow-y-auto' : 'overflow-hidden'}`}
         >
           <ol role="list" aria-live="polite" className="flex list-none flex-col gap-[7px] text-sm leading-[1.35] pc:text-[14px]">
             {lines.map((line, index) => (
