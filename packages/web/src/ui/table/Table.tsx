@@ -225,7 +225,7 @@ function TableView({
         </h1>
 
         {/* A mesa toma a largura (o histórico é gaveta: decisoes.md 2026-11-26 (8), D1), até 1600 px em telas muito largas. */}
-        <div className="flex min-h-0 flex-1 flex-col pc:flex-[0_1_1600px]">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col pc:flex-[0_1_1600px]">
           <Banners snapshot={snapshot} remainingMs={remainingMs} />
           {/* O placar de luta fica sempre à vista, fora da rolagem dos campos (sub-projeto 6 §3). */}
           <FightHud view={view} names={names} face={face} deadline={state.deadline} />
@@ -286,7 +286,9 @@ function TableView({
                 data-dica={BAR_ZONES.has(hintZone) ? hintZone : undefined}
                 // Os pingos do carimbo (bloco D do playtest, ponto 5): um ouvinte só, aqui, para todos os carimbos da barra e dos painéis.
                 onPointerUp={reduced ? undefined : stampInk}
-                className="madeira-escura px-3 pb-3.5 pt-2.5 text-papel pc:min-w-0 pc:flex-1 pc:bg-none pc:px-0 pc:pb-0 pc:pt-0"
+                // No PC a barra guarda 640 px (o grupo de botões do Equipar, 440, e quatro numéricas sobrepostas, ~180): com a mão cheia, é a
+                // mão que encolhe e sobrepõe as cartas, e as numéricas nunca caem sobre o Desfazer (decisoes.md 2026-11-26 (7), ponto 1).
+                className="madeira-escura px-3 pb-3.5 pt-2.5 text-papel pc:min-w-[640px] pc:flex-1 pc:bg-none pc:px-0 pc:pb-0 pc:pt-0"
               >
                 {actionBar}
               </div>
