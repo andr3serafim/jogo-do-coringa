@@ -6,6 +6,23 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-27 (1): a dica do tutorial no PC, a janela da Ressurreição e as duas leituras
+
+Diante das fotos (`d-atacar-pc.png`, `e-gaveta-pc.png` e `e-tutorial-1378.png`, a dica no alto dos campos cortando a sua Defesa) e das
+perguntas, ele respondeu:
+
+- Onde a dica fica no PC: "Faixa fina sobre o placar".
+- O Ressuscitar da janela da Ressurreição com a tinta das especiais: "Sim, tinta como as especiais".
+- O teto de 1600 px e as especiais quebrando em linhas à esquerda do Atacar: "Ficam as duas".
+
+**Leitura:**
+- **A dica no PC (substitui "no alto dos campos em toda tela" de 2026-11-26 (8)):** uma faixa por cima do placar de vida (texto, Entendi e
+  Pular numa linha), que não empurra nada e tapa as barras de vida enquanto aberta. No celular e no tablet fica no alto dos campos.
+- **A janela da Ressurreição:** o Ressuscitar dela vira o retângulo de tinta das especiais; o "Guardar" segue o pequeno de papel.
+- **As leituras** de 2026-11-26 (8) (o teto de 1600 px; as especiais quebrando à esquerda do Atacar) deixam de ser **[I]**.
+
+---
+
 ## 2026-11-26 (8): as fotos dos itens 4 e 7
 
 Diante das fotos (`docs/superpowers/specs/2026-11-26-ajustes-fotos/`: `c-aperto-ajuste1-1378.png`, a branch com as numéricas sobre o
