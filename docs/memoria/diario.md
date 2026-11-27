@@ -5,6 +5,21 @@ armadilhas. O estado de agora fica em `estado.md`; as decisões do autor, em `de
 
 ---
 
+## 2026-11-27 (2): as três colunas e a moldura (`decisoes.md` 2026-11-27 (2) e (3))
+
+- **Pedido:** "Estou insatisfeito com o resultado", com os prints riscados; as respostas viraram a grade de três colunas no PC.
+- **`e59ada5`:** a faixa de baixo em `pc:grid-cols-[35fr_65fr]`; a barra, o Equipar (o `data-disposicao` com `pc:col-span-2`, porque o
+  `Panel` também é grade), a ordem e a Ressurreição em `pc:grid-cols-[35fr_30fr]`, os botões em `pc:col-start-2`; a mão
+  `pc:justify-self-center`; sai a `pc:min-w-[640px]` da barra (as colunas fixas resolvem a mão cheia). Os destinos de fileira com a palavra
+  (`.carimbo-destino-palavra`, 72/76 px) e o desenho marcado (`AttackIcon`/`DefenseIcon` com `marked`; `--color-azul`); o nome acessível é
+  a palavra (o `title` guarda o nome do terminal). `MAIN_SIZE` com `pc:min-w-[260px]`.
+- **A moldura:** `pc:px-[7vw]` no `main` e `pc:border-x-[6px] pc:border-madeira` na coluna da mesa.
+- **Medido (`colunas.mjs`):** a 1378, 1280 e 1024 px, o centro da mão, das numéricas e dos botões coincide com o da sua coluna (±1 px);
+  os botões do Equipar ficam parados a cada carta posta e só mudam quando o Confirmar entra. **A 1024 px o Confirmar entre os selos não cabe
+  na coluna de 30%** e a linha quebra (o Desfazer em cima, o Recomeçar embaixo): levado ao autor. Na vez de atacar, o Devastar e o Atacar
+  empilham na coluna dos botões (lado a lado não cabem em 30%).
+- **Conferido:** a faixa da dica (`z-20`, dentro do `main` `isolate`) fica abaixo da cena (`z-50`, fora do `main`).
+
 ## 2026-11-27 (1): a mão cheia, a dica do tutorial no PC e a Ressurreição em tinta
 
 - **Achados do advisor, medidos (`mao-cheia.mjs`, `conferir.mjs`):** (1) com 4 especiais na mão a 1024 px, a mão do tamanho das cartas

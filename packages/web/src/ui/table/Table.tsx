@@ -207,7 +207,7 @@ function TableView({
     <TableUiContext value={ui}>
       <main
         aria-label="Mesa"
-        className="relative isolate flex h-dvh flex-col overflow-y-auto overflow-x-hidden overscroll-none feltro-voce pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] text-tinta pc:flex-row pc:justify-center pc:madeira-escura"
+        className="relative isolate flex h-dvh flex-col overflow-y-auto overflow-x-hidden overscroll-none feltro-voce pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] text-tinta pc:flex-row pc:justify-center pc:madeira-escura pc:px-[7vw]"
       >
         <svg width="0" height="0" aria-hidden="true" focusable="false" className="absolute">
           <defs>
@@ -226,8 +226,9 @@ function TableView({
           Mesa da partida
         </h1>
 
-        {/* A mesa toma a largura (o histórico é gaveta: decisoes.md 2026-11-26 (8), D1), até 1600 px em telas muito largas. */}
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col pc:flex-[0_1_1600px]">
+        {/* A mesa toma a largura (o histórico é gaveta: decisoes.md 2026-11-26 (8), D1), até 1600 px, dentro da moldura (decisoes.md 2026-11-27
+            (3)): no PC, 7% da tela de madeira escura de cada lado e o filete de madeira na borda da mesa. */}
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col pc:flex-[0_1_1600px] pc:border-x-[6px] pc:border-madeira pc:shadow-[0_0_0_2px_var(--color-tinta)]">
           <Banners snapshot={snapshot} remainingMs={remainingMs} />
           {/* O placar de luta fica sempre à vista, fora da rolagem dos campos (sub-projeto 6 §3). */}
           <div className="relative flex-none">

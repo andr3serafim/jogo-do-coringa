@@ -70,10 +70,10 @@
   disco da recusa com `data-sem-pulo` e a dica no toque (`useMarkTip`). **Substituídos por 2026-11-26 (7)** (não "conserte" de volta): o
   Confirmar e o Passar pequenos (viram o retângulo do Atacar), a Y centrada no PC (os botões ficam presos à direita) e a numérica escolhida
   sem `z-*` (sem espaço, a escolhida fica na frente).
-- **Botões principais e histórico (2026-11-26 (7) e (8)):** o grupo `data-botoes-principais` preso à direita no PC (`pc:ml-auto`), em
-  toda fase; o Atacar, o Encerrar turno, o Confirmar e o Passar com o `MAIN_SIZE`; as especiais em `.carimbo-tinta` à esquerda do Atacar;
+- **Botões principais e histórico (2026-11-26 (7) e (8)):** no PC a faixa de baixo em três colunas (35 | 35 | 30: especiais | numéricas ou informação | botões, cada um centrado na sua; 2026-11-27 (2)),
+  com a moldura de 7vw dos lados (2026-11-27 (3)); o Atacar, o Encerrar turno, o Confirmar e o Passar com o `MAIN_SIZE`; as especiais em `.carimbo-tinta` à esquerda do Atacar;
   no PC o histórico é gaveta (nada de coluna), a mão tem o tamanho das cartas (nunca metade da faixa: as numéricas caem sobre o Desfazer), a
-  barra guarda `pc:min-w-[640px]` e a dica do tutorial é a faixa sobre o placar (nos campos, corta a sua Defesa); a escolhida na frente (`SELECTED_FRONT`).
+  dica do tutorial é a faixa sobre o placar (nos campos, corta a sua Defesa); a escolhida na frente (`SELECTED_FRONT`).
 - **Níveis do treino (2026-11-25 (3)):** o nome acessível segue "nível + linha"; o medalhão é `aria-hidden`, com `data-humor` (feliz, sério,
   bravo); a cor sai do `data-nivel` no `menu.css` (`--nivel-cor`, `--nivel-claro`).
 - O JavaScript inicial ≤ 200 KB (o smoke).

@@ -6,6 +6,17 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-27 (3): a moldura nas laterais da mesa
+
+Ele pediu, enquanto as três colunas eram feitas: "Coloque uma moldura de mesa proporcional nas laterias ta da mesa estou achando tudo muito
+grande e distante."
+
+**Leitura:** no PC a mesa ganha uma moldura de cada lado, proporcional à tela. **[I]** 7% da largura (`pc:px-[7vw]`, ~96 px a 1378) de madeira
+escura por fora e um filete de madeira (6 px, com o contorno de tinta) na borda da mesa; o teto de 1600 px segue. O valor sai nas fotos para
+ele ajustar.
+
+---
+
 ## 2026-11-27 (2): a faixa de baixo em três colunas
 
 Ele escreveu "Estou insatisfeito com o resultado. siga a orientação em anexo", com dois prints riscados: na vez de atacar, setas da mão e
