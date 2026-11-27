@@ -6,6 +6,29 @@ outra diz qual. As specs (`docs/superpowers/specs/`) guardam a regra já escrita
 
 ---
 
+## 2026-11-26 (8): as fotos dos itens 4 e 7
+
+Diante das fotos (`docs/superpowers/specs/2026-11-26-ajustes-fotos/`: `c-aperto-ajuste1-1378.png`, a branch com as numéricas sobre o
+Desfazer; `7-d1-campo`, `7-d2-faixa`, `7-d3-aba`, `7-d1-aberta`; `4-a-linha`, `4-b-linha`, `4-a-empilhadas`, `4-a-esquerda`, `4-a-celular`,
+`4-b-celular`) e das perguntas, ele respondeu:
+
+- Item 7: "D1: no campo do oponente".
+- Item 4, identidade: "A: tinta com título ouro"; lugar: "Na linha, à esquerda do Atacar".
+- A frase de empate "…: a iniciativa não mudou.": "Sim, assim".
+
+**Leitura:**
+- **Item 7 (D1; substitui a coluna do histórico no PC e a mão de 2026-11-25 (7)):** no PC o histórico vira a gaveta da direita, por cima da
+  mesa, que o botão do campo do oponente abre (o mesmo do celular, ao lado do menu, que também sai da coluna). A mesa ocupa a largura toda; a
+  mão de especiais tem o tamanho das cartas. A dica do tutorial vai para o alto dos campos, como no celular; sala e placar ficam na gaveta.
+  **[I]** Um teto de 1600 px para a mesa em telas muito largas (as fotos eram a 1378).
+- **Item 4 (A, na linha):** Devastar, Reflect, Anular o Reflect e Ressuscitar no retângulo do Atacar, em tinta, com o título em tipo de madeira
+  ouro, o desenho de cada jogada à esquerda e o detalhe na tira de papel; no PC, na linha dos botões, à esquerda do Atacar; no celular, acima
+  dele (`4-a-celular.png`). **[I]** Quando a linha não cabe (telas estreitas, muitas especiais), as especiais se empilham à esquerda do Atacar,
+  que não sai da ponta direita.
+- **6:** a frase de empate fica "Empate em dano na última rodada de Ataque (…): a iniciativa não mudou." (tira o **[I]** de 2026-11-26 (7)).
+
+---
+
 ## 2026-11-26 (7): ajustes rápidos depois dos testes
 
 Ele pediu, com cinco prints (o Equipar no PC com os botões no meio da faixa; o Confirmar quadrado; três numéricas sobrepostas com a
